@@ -19,8 +19,6 @@ if __name__ == '__main__':
           url='',
           license='GPL',
  
-
-n
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  
