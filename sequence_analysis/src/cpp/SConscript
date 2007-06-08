@@ -1,0 +1,29 @@
+# -*-python-*-
+
+import os
+bn = os.path.basename
+
+Import( "env" )
+
+lib_env = env.Copy()
+
+# Import / Export symbols for windows dll
+if lib_env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    lib_env.AppendUnique(LINKFLAGS=LINKFLAGS)
+    
+
+includes= lib_env.ALEAGlob('*.h')
+sources = lib_env.ALEAGlob('*.cpp')
+
+lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
+
+inc = lib_env.ALEAIncludes( "sequence_analysis", includes )
+
+lib = lib_env.ALEALibrary( "vpsequence", 
+                           sources, 
+                           )
+

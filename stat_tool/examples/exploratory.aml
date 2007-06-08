@@ -1,0 +1,529 @@
+EchoOn()
+
+#########################################################################
+#########################################################################
+#
+#  Frequency distributions
+#
+#  Objective: Analyzing the number of nodes of growth units in selected architectural
+#             position considering the respective roles of preformation and neoformation,
+#
+#  Methods: comparison tests, one-way variance analysis,
+#           estimation of finite mixture of distributions.
+#
+#  Wild cherry tree: number of nodes per growth unit (GU)
+#
+#  Data: Dominique Fournier
+#
+#  meri1.his: order 1,
+#  meri1.his: order 2,
+#  meri1.his: order 3, GU 1,
+#  meri1.his: order 3, GU 2,
+#  meri5.his: short shoots.
+#
+#
+#  Poplar: number of nodes per growth unit
+#
+#  Data: Yves Caraglio and Herve Rey
+#
+#  peup1.his: order 2,
+#  peup2.his: order 3,
+#  peup3.his: order 4,
+#  peup4.his: order 5,
+#  peup5.his: order 3, GU 4,
+#  peup6.his: order 3, acrotony.
+#
+#########################################################################
+
+meri1 = Histogram("Sample/Histogram/meri1.his")
+meri2 = Histogram("Sample/Histogram/meri2.his")
+meri3 = Histogram("Sample/Histogram/meri3.his")
+meri4 = Histogram("Sample/Histogram/meri4.his")
+meri5 = Histogram("Sample/Histogram/meri5.his")
+
+# Plot(meri1, meri2, meri3, meri4, meri5)
+
+Compare(meri1, meri2, meri3, meri4, meri5, "N")
+
+ComparisonTest("F", meri1, meri2)
+ComparisonTest("T", meri1, meri2)
+ComparisonTest("W", meri1, meri2)
+
+ComparisonTest("F", meri1, meri3)
+ComparisonTest("T", meri1, meri3)
+ComparisonTest("W", meri1, meri3)
+
+# estimation of a mixture of two distributions assuming a first sub-population of GUs
+# made only of a preformed part and a second sub-population made of both a preformed part
+# and a neoformed part
+
+mixt1 = Estimate(meri2, "MIXTURE", "B", "B")
+
+meri = Merge(meri1, meri2, meri3, meri4, meri5)
+
+# model selection approach: estimation of both the mixture parameters and
+# the number of components 
+
+mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  NbComponent->"Estimated")
+# mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
+# Plot(ExtractDistribution(mixt2, "Mixture"))
+# Display(mixt2)
+
+peup1 = Histogram("Sample/Histogram/peup1.his")
+peup2 = Histogram("Sample/Histogram/peup2.his")
+peup3 = Histogram("Sample/Histogram/peup3.his")
+peup4 = Histogram("Sample/Histogram/peup4.his")
+peup5 = Histogram("Sample/Histogram/peup5.his")
+peup6 = Histogram("Sample/Histogram/peup6.his")
+
+mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", NbComponent->"Estimated")
+
+peup = Merge(peup1, peup2, peup3, peup4, peup5, peup6)
+
+mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent->"Estimated")
+# mixt11 = Estimate(peup, "MIXTURE", "B", "NB")
+
+
+#########################################################################
+#########################################################################
+#
+#  Multivariate samples
+#
+#  Objective: investigating the relations between different variables
+#             measured on annual shoots,
+#
+#  Methods: contingency table, one-way variance analysis,
+#           linear/nonparametric regression, estimation of
+#           finite mixture of distributions, clustering methods.
+#
+#########################################################################
+#
+#  beech annual shoots
+#
+#  Data: Eric Nicolini
+#
+#  VARIABLE 1 : orientation (0: horizontal, 1: oblique, 2: vertical, 3: pruned 3, 4: absent)
+#  VARIABLE 2 : number of cycles
+#  VARIABLE 3 : apex death (1: monocyclic alive, 2: monocyclic dead, 3: polycyclic alive,
+#               4: polycyclic spring dead, 5: polycyclic summer dead,
+#               6: polycyclic spring-summer dead)
+#  VARIABLE 4 : number of nodes
+#  VARIABLE 5 : length of the annual shoot (cm)
+#
+#########################################################################
+
+vec1 = Vectors(Sequences("Sample/Sequences/hetre.seq"))
+
+# Plot(ExtractHistogram(ValueSelect(vec1, 1, 0), 4), ExtractHistogram(ValueSelect(vec1, 1, 1), 4), ExtractHistogram(ValueSelect(vec1, 1, 2), 4), ExtractHistogram(ValueSelect(vec1, 1, 3), 4), ExtractHistogram(ValueSelect(vec1, 1, 4), 4))
+
+VarianceAnalysis(vec1, 2, 4, "N")
+# Plot(ExtractHistogram(ValueSelect(vec1, 2, 1), 4), ExtractHistogram(ValueSelect(vec1, 2, 2), 4))
+
+mixt10 = Estimate(ExtractHistogram(vec1, 4), "MIXTURE", "B", "B", "B", "B", NbComponent->"Estimated")
+
+# Plot(Estimate(ExtractHistogram(ValueSelect(vec1, 2, 1), 4), "NP"), ExtractDistribution(mixt10, "Component", 1))
+# Plot(Estimate(ExtractHistogram(ValueSelect(vec1, 2, 2, 3), 4), "NP"), ExtractDistribution(mixt10, "Component", 2))
+
+# Plot(ExtractHistogram(ValueSelect(vec1, 2, 1), 5), ExtractHistogram(ValueSelect(vec1, 2, 2), 5))
+
+# Plot(ExtractHistogram(ValueSelect(vec1, 3, 1), 4), ExtractHistogram(ValueSelect(vec1, 3, 2), 4))
+# Plot(ExtractHistogram(ValueSelect(vec1, 3, 3), 4), ExtractHistogram(ValueSelect(vec1, 3, 4, 6), 4))
+
+regress1 = Regression(vec1,"Linear", 4, 5)
+# Display(regress1)
+# Plot(regress1)
+
+regress2 = Regression(vec1, "NearestNeighbours", 4, 5, 0.1)
+# regress2 = Regression(vec1, "NearestNeighbours", 4, 5, 0.2)
+
+matrix1 = Compare(Transcode(vec1, 3, [1, 0, 1, 0, 0, 0]), VectorDistance("S", "O", "S", "N", "N"))
+
+
+#########################################################################
+#
+#  Oak trunk annual shoots
+#
+#  Data: Patrick Heuret
+#
+#  VARIABLE 1 : year of growth (95, 96, 97) (index parameter of sequences)
+#  VARIABLE 2 : length of the annual shoot (cm)
+#  VARIABLE 3 : diameter of the annual shoot (1/10 de mm)
+#  VARIABLE 4 : number of cycles
+#  VARIABLE 5 : number of nodes
+#  VARIABLE 6 : number de branches
+#
+#########################################################################
+
+seq0 = Sequences("Sample/Sequences/chene_sessile_15pa.seq")
+# Plot(seq0, ViewPoint->"Data")
+
+# change of unit for the variable diameter of the annual shoot
+
+marginal3 = ExtractHistogram(seq0, "Value", 3)
+# Plot(Cluster(marginal3, "Information", 0.75))
+# Plot(Cluster(marginal3, "Information", 0.61))
+# Plot(Cluster(marginal3, "Step", 10))
+
+vec10 = Vectors(seq0)
+
+# plot of the average sequence
+# Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
+
+vec95 = ValueSelect(vec10, 1, 95)
+vec96 = ValueSelect(vec10, 1, 96)
+vec97 = ValueSelect(vec10, 1, 97)
+
+VarianceAnalysis(vec10, 1, 2, "N")
+Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2), "N")
+# Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2))
+
+ContingencyTable(vec10, 1, 4)
+
+# one-way variance analysis based on ranks
+
+VarianceAnalysis(vec10, 1, 4, "O")
+Compare(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), ExtractHistogram(vec97, 4), "O")
+# Plot(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), ExtractHistogram(vec97, 4))
+
+# Plot(ExtractHistogram(vec95, 5), ExtractHistogram(vec96, 5), ExtractHistogram(vec97, 5))
+# Plot(ExtractHistogram(vec95, 6), ExtractHistogram(vec96, 6), ExtractHistogram(vec97, 6))
+
+vec11 = ValueSelect(vec10, 4, 1)
+vec12 = ValueSelect(vec10, 4, 2)
+vec13 = ValueSelect(vec10, 4, 3, 4)
+
+# Plot(ExtractHistogram(vec11, 2), ExtractHistogram(vec12, 2), ExtractHistogram(vec13, 2))
+# Plot(ExtractHistogram(vec11, 5), ExtractHistogram(vec12, 5), ExtractHistogram(vec13, 5))
+
+mixt20 = Estimate(ExtractHistogram(vec10, 2), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent->"Estimated")
+# Display(mixt20)
+# Plot(mixt20)
+# Plot(ExtractDistribution(mixt20, "Mixture"))
+
+mixt21 = Estimate(ExtractHistogram(vec10, 5), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent->"Estimated")
+
+vec9596 = ValueSelect(vec10, 1, 95, 96)
+# Plot(ExtractHistogram(ValueSelect(vec9596, 4, 1), 6), ExtractHistogram(ValueSelect(vec9596, 4, 2), 6), ExtractHistogram(ValueSelect(vec9596, 4, 3, 4), 6))
+
+regress10 = Regression(vec10, "Linear", 5, 2)
+# Display(regress10)
+# Plot(regress10)
+
+# nonparametric regression (loess smoother)
+
+regress11 = Regression(vec10, "NearestNeighbours",  5, 2, 0.3)
+
+regress12 = Regression(vec9596, "Linear", 5, 6)
+regress13 = Regression(vec9596, "NearestNeighbours", 5, 6, 0.5)
+
+vec15 = SelectVariable(vec10, [1, 3, 6], Mode->Reject)
+
+# computation of a distance matrix using a standardization procedure
+
+matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
+
+# clustering using a partitioning method
+
+# Display(Clustering(matrix10, "Partition", 2))
+
+vec151 = SelectIndividual(vec10,  [69, 48, 41, 44, 32, 47, 81, 95, 11, 36, 75, 108, 56, 83, 38, 98, 113, 134, 110, 101, 77, 35, 74, 80, 50, 24, 89, 128, 5, 45, 8, 116, 119, 132, 61, 78, 53, 29, 131, 65, 90, 96, 104, 20, 86, 66, 42, 68, 125, 14, 23, 54, 33, 26, 71, 129, 102, 51, 70, 111, 138, 19, 127, 62, 117, 137, 2, 28, 17])
+vec152 = SelectIndividual(vec10, [100, 13, 133, 105, 72, 9, 93, 109, 30, 115, 63, 7, 55, 37, 15, 114, 106, 46, 73, 18, 3, 87, 58, 43, 60, 76, 52, 6, 39, 31, 12, 99, 121, 123, 22, 79, 94, 88, 21, 97, 25, 40, 57, 136, 67, 49, 10, 4, 120, 92, 27, 91, 64, 124, 16, 130, 84, 107, 126, 103, 122, 112, 59, 1, 82, 34, 135, 118, 85])
+# Plot(ExtractHistogram(vec151, 4), ExtractHistogram(vec152, 4))
+
+matrix11 = Compare(vec15, VectorDistance("N", "O", "N"))
+
+vec16 = SelectVariable(vec9596, [1, 3], Mode->Reject)
+matrix12 = Compare(vec16, VectorDistance("N", "N", "N", "N"))
+matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
+
+
+#########################################################################
+#########################################################################
+#
+#  Sequence samples
+#
+#########################################################################
+#
+#  Objective: identifying repeated patterns in branching sequences
+#             whose index parameter is the node rank,
+#
+#  Methods: extraction of characteristic distributions
+#           (intensity, recurrence time distributions),
+#           computation of sample autocorrelation functions,
+#           estimation of the order of a Markov chain.
+#
+#  Data: Daniel Barthelemy
+#
+#  Cypress dupreziana: order 2 axes in selected positions (20, 40, 60 et 80 nodes from the apex)
+#
+#  VARIABLE 1 : number of offspring shoots per node.
+#
+#########################################################################
+
+seq19 = Sequences("Sample/Sequences/dupreziana_20a2.seq")
+seq20 = RemoveRun(seq19, 0, "End")
+histo201 = ExtractHistogram(seq20, "Recurrence", 1)
+histo202 = ExtractHistogram(seq20, "Recurrence", 2)
+
+seq38 = Sequences("Sample/Sequences/dupreziana_40a2.seq")
+seq39 = RemoveRun(seq38, 2, 0, "End")
+seq40 = SegmentationExtract(seq39, 1, 2)
+histo401 = ExtractHistogram(seq40, "Recurrence", 1)
+histo402 = ExtractHistogram(seq40, "Recurrence", 2)
+
+seq58 = Sequences("Sample/Sequences/dupreziana_60a2.seq")
+seq59 = RemoveRun(seq58, 2, 0, "End")
+seq60 =  LengthSelect(SegmentationExtract(seq59, 1, 2), 1, Mode->Reject)
+histo601 = ExtractHistogram(seq60, "Recurrence", 1)
+histo602 = ExtractHistogram(seq60, "Recurrence", 2)
+
+seq78 = Sequences("Sample/Sequences/dupreziana_80a2.seq")
+seq79 = RemoveRun(seq78, 2, 0, "End")
+seq80 = SegmentationExtract(seq79, 1, 2)
+histo801 = ExtractHistogram(seq80, "Recurrence", 1)
+histo802 = ExtractHistogram(seq80, "Recurrence", 2)
+
+# Plot(histo201, histo401, histo601, histo801)
+# Plot(histo202, histo402, histo602, histo802)
+# Plot(ExtractHistogram(seq20, "Length"), ExtractHistogram(seq40, "Length"), ExtractHistogram(seq60, "Length"), ExtractHistogram(seq80, "Length"))
+
+seq10 = Merge(seq20, seq40, seq60, seq80)
+# Display(seq10, ViewPoint->"Data")
+# Plot(seq10, "Intensity")
+# Plot(seq10, "Recurrence")
+# Plot(seq10, "Sojourn")
+
+# plot of a sample Spearman (rank based) autocorrelation function
+
+# Plot(ComputeCorrelation(seq10, Type->"Spearman", MaxLag->15, Normalization->"Exact"))
+
+seq11 = Transcode(seq10, [0, 1, 0])
+seq12 = Transcode(seq10, [0, 0, 1])
+acf1 = Merge(ComputeCorrelation(seq11, MaxLag->15, Normalization->"Exact"),\
+             ComputeCorrelation(seq12, MaxLag->15, Normalization->"Exact"))
+# Plot(acf1)
+# Display(acf1)
+
+acf2 = Merge(ComputeCorrelation(seq11, Type->"Spearman", MaxLag->15, Normalization->"Exact"),\
+             ComputeCorrelation(seq12, Type->"Spearman", MaxLag->15, Normalization->"Exact"))
+acf3 = Merge(ComputeCorrelation(seq11, Type->"Kendall", MaxLag->15),\
+             ComputeCorrelation(seq12, Type->"Kendall", MaxLag->15))
+
+# model selection approach: estimation of both the parameters (initial probabilities and
+# transition probabilities) and the order (memory length) of a Markov chain
+
+mc10 = Estimate(seq10, MARKOV, MaxOrder->4)
+# Plot(mc10, "Intensity")
+# Plot(mc10, "Recurrence")
+
+
+#########################################################################
+#
+#  Objective: analyzing jointly the phyllotaxis and the number of offspring shoots
+#             in sequences whose index parameter is the node rank,
+#
+#  Methods: extraction of characteristic distributions
+#           (intensity, recurrence time and sojourn time distributions),
+#           sequence alignment.
+#
+#  Cypress dupreziana: order 1 axes
+#
+#  Data: Daniel Barthelemy
+#
+#  VARIABLE 1 : phyllotaxis (number of leaves per node),
+#  VARIABLE 2 : number of offspring shoots per node.
+#
+#########################################################################
+
+seq1 = Sequences("Sample/Sequences/dupreziana_a1.seq")
+# Display(seq1, ViewPoint->"Data", Format->"Line")
+
+vec20 = MergeVariable(ExtractVectors(seq1, "NbOccurrence", 1, 3), ExtractVectors(seq1, "Length"))
+# Display(vec20)
+# Plot(vec20, 1)
+
+seq2 = Shift(seq1, 1, -3)
+
+seq3 = SegmentationExtract(seq1, 1, 3)
+seq4 = SegmentationExtract(seq1, 1, 4)
+# Plot(ExtractHistogram(seq3, "Recurrence", 1), ExtractHistogram(seq4, "Recurrence", 1))
+# Plot(ExtractHistogram(seq3, "Sojourn", 1), ExtractHistogram(seq4, "Sojourn", 1))
+# Plot(ExtractHistogram(seq3, "Recurrence", 2), ExtractHistogram(seq4, "Recurrence", 2))
+# Plot(ExtractHistogram(seq3, "Sojourn", 2), ExtractHistogram(seq4, "Sojourn", 2))
+
+# Plot(ExtractHistogram(seq4, "Recurrence", 2), ExtractHistogram(seq4, "Recurrence", 3), ExtractHistogram(seq4, "Recurrence", 4))
+
+matrix20 = Compare(seq1, VectorDistance("N", "N"))
+# Plot(matrix20)
+Display(Clustering(matrix20, "Partition", 2))
+Clustering(matrix20, "Hierarchy")
+
+matrix21 = Compare(seq1, VectorDistance("O", "O"))
+# Plot(matrix21)
+Display(Clustering(matrix21, "Partition", 2))
+Clustering(matrix21, "Hierarchy")
+
+seq11 = SelectIndividual(seq2, [18, 9, 10, 31, 6, 14, 29, 16, 1, 12, 5, 7, 25, 22, 17, 30, 13, 4, 21, 27, 20, 24])
+seq12 = SelectIndividual(seq2, [28, 19, 32, 23, 26, 11, 3, 15, 8, 33, 2])
+# Plot(ExtractHistogram(seq11, "FirstOccurrence", 1, 0), ExtractHistogram(seq12, "FirstOccurrence", 1, 0))
+
+ComparisonTest(W, ExtractHistogram(seq11, "Length"), ExtractHistogram(seq12, "Length"))
+# Plot(ExtractHistogram(seq11, "Length"), ExtractHistogram(seq12, "Length"))
+
+# Plot(seq2, "Intensity", 1)
+
+# Plot(seq2, "Intensity", 2)
+seq5 = RemoveRun(seq2, 2, 0, "End")
+# Plot(seq5, "Intensity", 2)
+
+
+#########################################################################
+#
+#  Objective: identifying branching and axillary flowering zones and repeated patterns
+#             in sequences whose index parameter is the node rank,
+#
+#  Methods: extraction of characteristic distributions (intensity,
+#           sojourn time distributions), sequence alignment,
+#           clustering methods (either partitioning or hierarchical methods).
+#
+#  1st annual shoot of apple tree trunks
+#
+#  Data: Evelyne Costes
+#
+#  VARIABLE 1 : type of axillary production (0: latent bud, 1: one-year-delayed short shoot,
+#               2: one-year-delayed long shoot, 3: one-year-delayed flowering shoot,
+#               4: immediate shoot).
+#
+#########################################################################
+
+seq20 = Sequences("Sample/Sequences/belren1.seq")
+seq21 = Sequences("Sample/Sequences/elstar1.seq")
+seq22 = Sequences("Sample/Sequences/fuji1.seq")
+seq23 = Sequences("Sample/Sequences/gala1.seq")
+seq24 = Sequences("Sample/Sequences/granny1.seq")
+seq25 = Sequences("Sample/Sequences/reinet1.seq")
+
+# Display(seq25, ViewPoint->"Data")
+# Plot(seq25, "Intensity")
+# Plot(seq25, "Sojourn")
+
+seq26 = Reverse(seq25)
+# Plot(seq26, "Intensity")
+# Plot(seq26, "FirstOccurrence")
+
+# Sojourn time (run length) distributions
+
+seq30 = Merge(seq20, seq21, seq22, seq23, seq24, seq25)
+# Plot(seq30, "Sojourn")
+# Plot(ExtractHistogram(seq30, "Sojourn", 1), ExtractHistogram(seq30, "Sojourn", 2), ExtractHistogram(seq30, "Sojourn", 3),  ExtractHistogram(seq30, "Sojourn", 4))
+
+mc30 = Estimate(seq30, "MARKOV", MaxOrder->4)
+# Plot(mc30, "Sojourn")
+# Display(Estimate(seq30, "MARKOV"))
+
+seq31 = Cluster(seq30, "Limit", [1, 4])
+mc31 = Estimate(seq31, "MARKOV", Order->2)
+# Plot(mc31, "Sojourn")
+# Display(Estimate(seq31, "MARKOV"))
+
+# comparison of sequences by dynamic programming algorithms
+
+seq32 = Merge(seq20, seq25)
+matrix30 = Compare(seq32)
+matrix31 = Compare(seq32, VectorDistance("S"))
+matrix32 = Compare(seq32, VectorDistance("S"), Transposition->True)
+matrix33 = Compare(seq32, VectorDistance("Model/align1.a"), Transposition->True)
+
+Display(Clustering(matrix33, "Partition", 2))
+Clustering(matrix33, "Hierarchy")
+
+Compare(seq25, TestSequence->9, RefSequence->1)
+Compare(seq25, VectorDistance("S"), TestSequence->9, RefSequence->1)
+Compare(seq25, VectorDistance("S"), TestSequence->9, RefSequence->1, Transposition->True)
+
+
+#########################################################################
+#
+#  Objective: analyzing the apical growth and the branching of Corsican pines,
+#
+#  Methods: extraction of trends and residuals by linear filtering
+#           (differencing and weighted moving average), computation of
+#           sample autocorrelation functions.
+#
+#  75-year-old Corsican pines (66 years measured).
+#
+#  Data: Celine Meredieu and Yves Caraglio
+#
+#  VARIABLE 1 : year of growth (explicit index parameter),
+#  VARIABLE 2 : length of the annual shoot (mm),
+#  VARIABLE 3 : number of  branches per annual shoot / tier.
+#
+#########################################################################
+
+seq66 = Sequences("Sample/Sequences/laricio_date66.seq")
+# Plot(seq66, ViewPoint->"Data")
+# Plot(Cumulate(seq66), ViewPoint->"Data")
+
+vec66 = Vectors(seq66)
+regress66_1 = Regression(vec66, "MovingAverage", 1, 2, [1])
+# Plot(regress66_1)
+regress66_2 = Regression(vec66, "MovingAverage", 1, 3, [1])
+
+regress66_23 = Regression(vec66, "NearestNeighbours", 2, 3, 0.3)
+# Display(regress66_23)
+# Plot(regress66_23)
+
+vec70 =  Vectors(SelectIndividual(seq66, [1, 2, 3]))
+regress70_1 = Regression(vec70, "MovingAverage", 1, 2, [1])
+# Plot(regress70_1)
+regress70_2 = Regression(vec70, "MovingAverage", 1, 3, [1])
+
+vec71 =  Vectors(SelectIndividual(seq66, [4, 5, 6]))
+regress71_1 = Regression(vec71, "MovingAverage", 1, 2, [1])
+# Plot(regress71_1)
+regress71_2 = Regression(vec71, "MovingAverage", 1, 3, [1])
+
+matrix66 = Compare(SelectVariable(seq66, 1, Mode->Reject), VectorDistance("N", "N"))
+Display(Clustering(matrix66, "Partition", 3))
+Clustering(matrix66, "Hierarchy")
+
+# extraction of trends (slowly varying component) and residuals (rapidly varying component)
+# by symmetric smoothing filters and computation of sample autocorrelation functions from residuals
+
+seq67 = Difference(seq66)
+# acf11 = Merge(ComputeCorrelation(seq67, 2, MaxLag->10),\
+#               ComputeCorrelation(seq67, 3, MaxLag->10))
+acf11 = Merge(ComputeCorrelation(seq67, 2, MaxLag->10, Normalization->"Exact"),\
+              ComputeCorrelation(seq67, 3, MaxLag->10, Normalization->"Exact"))
+ComputeWhiteNoiseCorrelation(acf11, 1)
+# Plot(acf11)
+
+# symmetric smoothing filters of half-width 3
+
+filter1 = Convolution(Distribution("B", 0, 3, 0.2), Distribution("B", 0, 3, 0.8))
+filter2 = Convolution(Distribution("B", 0, 2, 0.2), Distribution("B", 0, 2, 0.5), Distribution("B", 0, 2, 0.8))
+filter3 = Convolution(Distribution("U", 0, 2), Distribution("U", 0, 2), Distribution("U", 0, 2))
+filter4 = Convolution(Distribution("U", 0, 3), Distribution("U", 0, 3))
+# Plot(filter1, filter2, Distribution("B", 0, 6, 0.5), filter3, filter4, Distribution("U", 0, 6))
+
+seq68 = MovingAverage(seq66, Distribution("B", 0, 6, 0.5), BeginEnd->True)
+
+seq69 = MovingAverage(VariableScaling(seq66, 3, 100), Distribution("B", 0, 6, 0.5), BeginEnd->True, Output->"Residual")
+# acf12 = Merge(ComputeCorrelation(seq69, 2, MaxLag->10),\
+#               ComputeCorrelation(seq69, 3, MaxLag->10))
+acf12 = Merge(ComputeCorrelation(seq69, 2, MaxLag->10, Normalization->"Exact"),\
+              ComputeCorrelation(seq69, 3, MaxLag->10, Normalization->"Exact"))
+ComputeWhiteNoiseCorrelation(acf12, Distribution("B", 0, 6, 0.5))
+# Plot(acf12)
+
+seq70 = MovingAverage(seq66, [1, 1, 1], BeginEnd->True)
+seq71 = MovingAverage(VariableScaling(seq66, 3, 100), [1, 1, 1], BeginEnd->True, Output->"Residual")
+# acf13 = Merge(ComputeCorrelation(seq71, 2, MaxLag->10),\
+#               ComputeCorrelation(seq71, 3, MaxLag->10))
+acf13 = Merge(ComputeCorrelation(seq71, 2, MaxLag->10, Normalization->"Exact"),\
+              ComputeCorrelation(seq71, 3, MaxLag->10, Normalization->"Exact"))
+ComputeWhiteNoiseCorrelation(acf13, [1, 1, 1])
+# Plot(acf13)
+
+seq80 = Sequences("Sample/Sequences/laricio_position66.seq")
+# Plot(Cumulate(seq80), ViewPoint->"Data")

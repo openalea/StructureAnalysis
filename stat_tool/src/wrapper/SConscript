@@ -1,0 +1,15 @@
+# -*-python-*-
+
+import os
+
+Import("env")
+
+py_dir = '../stat_tool'
+
+# Build wrappers as shared libraries
+#sources = Split("""""")
+
+lib = ["vpstat_tool"]
+env.AppendUnique(LIBS=lib)
+
+#env.ALEAWrapper(py_dir, "cstat_tool", ["cstat_tool.cpp"])

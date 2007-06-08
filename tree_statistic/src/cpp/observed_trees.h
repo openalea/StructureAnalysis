@@ -1,0 +1,798 @@
+/* -*-c++-*-
+ *  ----------------------------------------------------------------------------
+ *
+ *       AMAPmod: Exploring and Modeling Plant Architecture
+ *
+ *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *
+ *       $Source$
+ *       $Id: observed_trees.h 3193 2007-05-29 10:03:19Z dufourko $
+ *
+ *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *
+ *  ----------------------------------------------------------------------------
+ *
+ *                      GNU General Public Licence
+ *
+ *       This program is free software; you can redistribute it and/or
+ *       modify it under the terms of the GNU General Public License as
+ *       published by the Free Software Foundation; either version 2 of
+ *       the License, or (at your option) any later version.
+ *
+ *       This program is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE. See the
+ *       GNU General Public License for more details.
+ *
+ *       You should have received a copy of the GNU General Public
+ *       License along with this program; see the file COPYING. If not,
+ *       write to the Free Software Foundation, Inc., 59
+ *       Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  ----------------------------------------------------------------------------
+ */
+
+#ifndef OBSERVED_TREES_H
+#define OBSERVED_TREES_H
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/stat_label.h"
+#include "stat_tool/curves.h"    // definition of Curves class for Sequences
+#include "stat_tool/markovian.h" // definition of constants
+#include "sequence_analysis/sequences.h" // definition of constants
+
+#include "int_fl_containers.h"
+#include "generic_tree.h"
+#include "tree_labels.h"
+#include <iostream>
+#include <sstream>
+#include <cstdlib>
+#include <float.h>
+
+extern char* label(const char*);
+extern int* identifier_select(int nb_pattern , int* pattern_identifier,
+                              int selected_nb_pattern, int* selected_identifier,
+                              bool keep);
+extern int* select_variable(int nb_variable, int selected_nb_variable,
+                            int* selected_variable, bool keep);
+
+namespace Stat_trees
+{
+/*! \file observed_trees.h
+    \brief Purpose :
+              provide a specialization of the class Generic_tree for
+                 the Int_fl_container and
+              the class "Observed_trees" used for the representation of a
+                 set of oriented trees and
+              the class "Tree_characteristics", which is a set
+                 of histograms corresponding to the empirical distributions
+                 of several characteristic quantities for one random variable
+*/
+
+/*--------------------------------------------------------------*
+ *
+ *  Constants :
+ */
+/// maximal number of simulated trees
+const int NB_TREES= 100000;
+/// maximal size of simulated trees
+const int MAX_SIZE= 100000;
+/// maximal cumulated size of simulated trees
+const int CUMUL_SIZE= 100000;
+/// maximal number of children for simulated trees
+const int MAX_CHILDREN= 10;
+/// maximal number of children for simulated trees
+const int CUMUL_NB_CHILDREN= 1000000;
+/// maximal tree size for the counting distribution to be computed
+const int COUNTING_MAX_SIZE= 500;
+/// maximal number of viewable trees (Gnuplot output)
+const int PLOT_NB_TREES= 200;
+/// maximal number of identified trees (Gnuplot output)
+const int PLOT_TITLE_NB_TREES= 15;
+
+/*--------------------------------------------------------------*
+ *
+ *  Type definitions
+ */
+
+/// nature of the characteristic quantities for trees
+enum {
+  FIRST_OCCURRENCE_ROOT ,
+  FIRST_OCCURRENCE_LEAVES ,
+  SOJOURN_SIZE ,
+  NB_ZONES ,
+  NB_OCCURRENCES ,
+  OBSERVATION
+};
+
+/*--------------------------------------------------------------*
+ *
+ *  Class definitions :
+ */
+
+template<typename Generic_Int_fl_container> class Int_fl_tree;
+typedef Int_fl_tree<One_int_container> One_int_tree;
+typedef One_int_tree** pt_One_int_tree_array;
+class Tree_characteristics;
+class Hidden_markov_out_tree;
+
+/**
+   \class Int_fl_tree
+   \brief specialization of the Generic_tree class for
+          handling attributes with floating and integer types
+*/
+
+template<class Generic_Int_fl_container>
+class Int_fl_tree : public Generic_tree<Generic_Int_fl_container>
+{  // specialization of the Generic_tree class for
+   // the Int_fl_container
+
+protected :
+
+    int _nb_integral;
+    int _nb_float;
+
+    void copy(const Int_fl_tree<Generic_Int_fl_container>& tree);
+
+public :
+
+    typedef Generic_tree<Generic_Int_fl_container> tree_type;
+    typedef typename tree_type::value value;
+
+    typedef typename tree_type::key key;
+    typedef typename tree_type::vertices_size_type vertices_size_type;
+    typedef typename tree_type::children_iterator children_iterator;
+    typedef typename tree_type::vertex_iterator vertex_iterator;
+
+    typedef typename generic_visitor<tree_type>::vertex_array vertex_array;
+
+    typedef Distribution** pt_Distribution_array;
+
+    Int_fl_tree(key root= 0,
+                int n= 1,
+                const value& default_value= value());
+    Int_fl_tree(int inb_integral,
+                int inb_float,
+                key root,
+                int n);
+    Int_fl_tree(const Int_fl_tree& tree);
+    Int_fl_tree(Unlabelled_tree& utree, const value& default_value= value());
+    Int_fl_tree(const Generic_tree<Generic_Int_fl_container>& tree);
+    Int_fl_tree(int inb_integral,
+                int inb_float,
+                Unlabelled_tree& utree);
+    ~Int_fl_tree();
+    Int_fl_tree<Generic_Int_fl_container>&
+       operator=(const Int_fl_tree<Generic_Int_fl_container>& tree);
+
+    key add_vertex(const value& data= value());
+
+    One_int_tree* select_int_variable(int variable);
+    // selection of one single integral variable
+
+    Generic_Int_fl_container* get_min_value(); // const
+    Generic_Int_fl_container* get_max_value(); // const
+
+    void iid_simulation(pt_Distribution_array distrib);
+    // random determination of the integral labels;
+
+    int get_nb_int() const;
+    int get_nb_float() const;
+};
+
+/**
+   \class Observed_trees
+   \brief set of tree-structured data for handling attributes
+          with floating and integer types
+*/
+
+template <typename Generic_Int_fl_container>
+class Observed_trees : public STAT_interface
+{  // set of tree-structured data assumed to be the realizations
+   // of a common mixed multidimensional tree process
+   // (nb_integral of integer type, nb_float of float type)
+
+
+   // friend classes
+   // friend class Tree_characteristics;
+   friend class Hidden_markov_tree;
+   friend class Hidden_markov_out_tree;
+
+   // template <typename Type> friend
+   //    Observed_trees<Type>* observed_trees_ascii_read(Format_error& error,
+   //                                                     const char * path);
+   template <typename Type> friend
+      std::ostream& operator<<(std::ostream& os, const Observed_trees<Type>& otrees);
+
+public :
+
+   typedef Int_fl_tree<Generic_Int_fl_container> tree_type;
+   typedef typename tree_type::value value;
+
+   typedef typename tree_type::key key;
+   typedef typename tree_type::vertices_size_type vertices_size_type;
+   typedef typename tree_type::children_iterator children_iterator;
+   typedef typename tree_type::vertex_iterator vertex_iterator;
+
+   typedef Tree_characteristics* Tree_characteristics_array;
+   typedef Tree_characteristics** pt_Tree_characteristics_array;
+   typedef tree_type** pt_tree_type_array;
+   typedef Observed_trees<Generic_Int_fl_container> observed_trees;
+   typedef observed_trees** pt_observed_trees_array;
+
+   typedef int* int_array;
+   typedef double* double_array;
+
+protected :
+
+   /// number of variables of integer type
+   /// these variables come before that of floating type;
+   int _nb_integral;
+   /// number of variables of floating type;
+   /// these variables come after that of integer type;
+   int _nb_float;
+   /// type of each of those variables
+   /// (INT_VALUE / REAL_VALUE/ TIME / POSITION / NB_INTERNODE )
+   /// ending with the floating variables
+   int_array _type;
+   /// minimal value of each variable
+   Generic_Int_fl_container _min_value;
+   /// maximal value of each variable
+   Generic_Int_fl_container _max_value;
+   /// maximal size of the trees
+   unsigned int _max_size;
+   /// maximal depth of the trees
+   unsigned int _max_depth;
+   /// number of observed trees
+   int _nb_trees;
+   // ? int *identifier;                // identifier of each tree
+
+   // [quantities for which the characteristic distributions are invariant
+   // - if any - to determine]
+   // [histograms of those quantities]
+   /// histogram of the tree size
+   Histogram *hsize;
+   /// histogram of the number of children
+   Histogram *hnb_children;
+
+   /// observed trees
+   pt_tree_type_array trees;
+
+   /// histogram of the characteristic quantities
+   /// for each discrete variable
+   pt_Tree_characteristics_array characteristics;
+
+   Observed_trees(int inb_integral, int inb_float, int_array itype,
+                  int inb_trees, bool init_flag= true);
+
+   void remove();
+   // deallocator
+   void copy(const Observed_trees<Generic_Int_fl_container>& otrees);
+   // copy operator
+   void init(int inb_integral, int inb_float, int_array itype,
+             int inb_trees, bool init_flag);
+
+   void cluster(const Observed_trees& otrees, int ivariable, int step);
+   void transcode(const Observed_trees& otrees, int ivariable,
+                  int min_symbol, int max_symbol, int_array symbol);
+   void select_variable(const Observed_trees& otrees, int_array variable);
+
+    // ostream& ascii_print(ostream& os, Generic_tree<double>** real_tree_sequence, char format);
+//    // Generic_tree<double>** real_tree_sequence : supposedly to be revised
+//    bool ascii_print(Format_error &error, const char* path, Generic_tree<double>** real_tree_sequence, char format);
+//    // idem
+//    int scaling_coefficient(int variable,  Generic_tree<double>** real_tree_sequence);
+//    // idem
+   /** Gnuplot output of \e self in the case of no other characteristic
+       than the marginal histogram*/
+   bool plot_print(const char * prefix, const char * title,
+                   int variable, int nb_variable) const;
+
+   void min_max_value_computation();
+   void max_size_computation();
+   void max_depth_computation();
+   int max_nb_children_computation(); // const
+   std::ostream& ascii_write(std::ostream& os, bool exhaustive, bool comment_flag) const;
+   std::ostream& ascii_print(std::ostream& os, char format, bool comment_flag,
+                             int line_nb_character= LINE_NB_CHARACTER) const;
+//    bool plot_print(const char *path, int ilength) const;
+
+   // [computation of quantities for which the characteristic distributions are invariant]
+   // [computation of their histograms]
+
+   // void state_variable_init(int istate_variable);
+
+   int cumul_size_computation() const;
+   void build_size_histogram();
+   int cumul_nb_children_computation() const;
+   void build_nb_children_histogram();
+
+   void build_characteristics(int variable);
+   void build_characteristics();
+   // computation of the characteristic quantity histograms for each discrete variable
+   // except the observation histograms
+
+public :
+
+   Observed_trees(int inb_integral= 1, int inb_float= 0, int inb_trees= 0);
+   Observed_trees(const Observed_trees& otrees);
+   Observed_trees(int inb_trees,
+                  int const * itype,
+                  pt_tree_type_array otrees,
+                  bool histogram_flag= true);
+   Observed_trees(int inb_integral,
+                  int inb_float,
+                  const Histogram& ihsize,
+                  const Histogram& ihnb_children,
+                  bool no_child_flag= false,
+                  bool init_flag= true);
+   Observed_trees(const Observed_trees& otrees, int inb_trees, int_array index);
+   virtual ~Observed_trees();
+   observed_trees& operator=(const observed_trees& otrees);
+
+   Distribution_data* extract(Format_error& error, int variable) const;
+
+   /** Extract the histogram of characteristic distribution from \e self*/
+   Distribution_data* extract(Format_error& error, int type,
+                              int variable, int value) const;
+   Sequences* extract_sequences(Format_error& error, bool all_paths= true) const;
+    // Distributions of the tree-characteristics
+    // ?    Vectors* extract_vectors(Format_error &error, int type, int variable = I_DEFAULT,
+    //                         int value = I_DEFAULT) const;
+
+    // ? Tops* tops(Format_error &error) const;
+
+    // ? bool check(Format_error &error, const char *pattern_label);
+
+   Observed_trees* merge(Format_error& error, int nb_sample,
+                         const pt_observed_trees_array otrees) const;
+   Observed_trees* shift(Format_error& error, int variable, double shift_param) const;
+   Observed_trees* shift(Format_error& error, int variable, int shift_param) const;
+
+   /** Cluster the values of a variable of \e self (using a given step)*/
+   Observed_trees* cluster(Format_error& error, int variable, int step) const;
+   Observed_trees* transcode(Format_error& error, int variable, int_array symbol) const;
+
+   /** Cluster the values of a variable of \e self (using given classes and limits)*/
+   Observed_trees* cluster(Format_error& error, int variable, int nb_class,
+                           int_array ilimit) const;
+//    Observed_trees* cluster(Format_error& error, int variable, int nb_class,
+//                            double_array dlimit) const;
+   Observed_trees* value_select(Format_error& error, int variable, int imin_value,
+                                int imax_value, bool keep= true) const;
+   Observed_trees* value_select(Format_error& error, int variable, double dmin_value,
+                                double dmax_value, bool keep= true) const;
+   Observed_trees* select_individual(Format_error& error, int inb_trees,
+                                     int_array iidentifier, bool keep= true) const;
+   Observed_trees* select_variable(Format_error& error, int inb_variable,
+                                   int_array ivariable, bool keep= true) const;
+   Observed_trees* merge_variable(Format_error& error, int nb_sample,
+                                  const pt_observed_trees_array otrees,
+                                  int ref_sample= I_DEFAULT) const;
+   Observed_trees* size_select(Format_error& error, int imin_size, int imax_size,
+                               bool keep= true) const;
+
+   Observed_trees* select_subtrees(Format_error& error, int iindex,
+                                   int itree= I_DEFAULT, bool keep= true) const;
+   // would be more interesting with true vertex and tree identifiers
+
+//     Sequences* extract_sequences(int* tree_list) const;
+//     // extraction of all possible (for instance discrete) sequences from the list of trees tree_list
+//     // starting from tree root
+
+   /** Extraction of homogeneous trees */
+   Observed_trees* segmentation_extract(Format_error& error, int variable,
+                                        int nb_value, int *ivalue,
+                                        bool keep = true) const;
+
+//     // ? Observed_trees* cumulate(Format_error &error, int variable = I_DEFAULT) const;
+   /** First-order differentiation for trees */
+   Observed_trees* difference(Format_error &error, int variable= I_DEFAULT) const;
+//     // Observed_trees* moving_average(Format_error &error, ostream& os, int nb_point, double *filter,
+//     //                          int variable = I_DEFAULT, bool begin_end = false,
+//     //                          int output = TREND, const char *path = 0, char format = 's') const;
+//     // Observed_trees* moving_average(Format_error &error, ostream& os, const Distribution &dist,
+//     //                         int variable = I_DEFAULT, bool begin_end = false,
+//     //                         int output = TREND, const char *path = 0, char format = 's') const;
+//     // somewhat tricky in the case of oriented trees : postponed or cancelled
+
+//     Observed_trees* transform_position(Format_error &error, int step) const;
+//     // Discretization of a variable with type POSITION
+
+//     // Observed_trees* scaling(Format_error &error, int variable, int scaling_coeff) const;
+//     // not most useful, unless we want to use 'moving_average' in the case of a discrete
+//     // variables taking a small number of values
+
+//     // Observed_trees* cross(Format_error &error) const;
+
+    std::ostream& line_write(std::ostream& os) const;
+
+    virtual ostream& ascii_data_write(ostream& os, char format= 'c', bool exhaustive= false) const;
+    virtual bool ascii_data_write(Format_error& error, const char * path,
+                                  char format= 'c', bool exhaustive= false) const;
+    bool plot_data_write(Format_error& error, const char * prefix,
+                         const char * title= NULL) const;
+
+    std::ostream& ascii_write(std::ostream& os, bool exhaustive= false) const;
+    bool ascii_write(Format_error& error, const char * path,
+                     bool exhaustive= false) const;
+    bool spreadsheet_write(Format_error& error, const char * path) const;
+
+    /** Gnuplot output of \e self*/
+    bool plot_write(Format_error& error, const char * prefix,
+                    const char * title= NULL) const;
+
+    std::ostream& ascii_write_size_histogram(std::ostream& os,
+                                             bool exhaustive,
+                                             bool file_flag) const;
+
+    std::ostream& ascii_write_nb_children_histogram(std::ostream& os,
+                                                    bool exhaustive,
+                                                    bool file_flag) const;
+
+    double mean_computation(int variable) const;
+    double variance_computation(int variable, double mean) const;
+    // double mean_absolute_deviation_computation(int variable, double mean) const;
+    // double mean_absolute_difference_computation(int variable) const;
+    double skewness_computation(int variable, double mean, double variance) const;
+    double kurtosis_computation(int variable, double mean, double variance) const;
+   // computation of statistical indicators associated with each variable
+
+   // Correlation* correlation_computation(Format_error &error, int variable1, int variable2,
+   //                                     int itype = PEARSON, int max_lag = I_DEFAULT,
+   //                                      int normalization = APPROXIMATED) const;
+   // Correlation* partial_autocorrelation_computation(Format_error &error, int variable,
+   //                                                 int itype = PEARSON, int max_lag = I_DEFAULT) const;
+   // is this relevant for tree-structured data ? Postponed or cancelled
+
+   double iid_information_computation() const;
+
+   // access to the class members
+
+   // int get_nb_variable() const;
+   int get_nb_int() const;
+   int get_nb_float() const;
+   int get_type(int variable) const;
+
+   int get_min_int_value(int variable) const;
+   double get_min_fl_value(int variable) const;
+
+   int get_max_int_value(int variable) const;
+   double get_max_fl_value(int variable) const;
+
+   int get_max_size() const;
+   int get_max_depth() const;
+
+   /**Return the size of a given tree of \e self */
+   unsigned int get_size(int index) const;
+
+   pt_One_int_tree_array get_identifier_trees();
+   One_int_tree* get_identifier_tree(int index);
+
+   Distribution_data* extract_size() const;
+   Distribution_data* extract_nb_children() const;
+   // access to the histograms of topological indicators
+
+   /** Return the maximal value for each variable of \e self*/
+   Generic_Int_fl_container get_max_value() const;
+   /** Return the minimal value for each variable of \e self*/
+   Generic_Int_fl_container get_min_value() const;
+   /** return the number of values of a variable with finite values*/
+   int get_nb_values(int variable) const;
+   Histogram* get_marginal(int variable) const;
+   int get_nb_trees() const;
+    // ? int get_identifier(int itree) const { return identifier[itree]; }
+
+    // [access to the quantities for which the characteristic distributions are invariant]
+    // [access to their histograms]
+
+   Tree_characteristics_array* get_characteristics() const;
+   Tree_characteristics* get_characteristics(int variable) const;
+   // access to the characteristic quantity distributions
+   // for the observed variables
+
+   // ? Tree_curves* get_index_value(int variable) const;
+   // ? Tree_curves** get_index_value() const;
+   // ? Curves* get_depth_value(int variable) const;
+   // ? Curves** get_depth_value() const;
+   Histogram* get_first_occurrence_root(int variable, int value) const;
+   Histogram* get_first_occurrence_leaves(int variable, int value) const;
+   Histogram* get_sojourn_size(int variable, int value) const;
+   Histogram* get_nb_zones(int variable, int value) const;
+   Histogram* get_nb_occurrence(int variable, int value) const;
+
+   pt_tree_type_array get_trees() const;
+   tree_type* get_tree(int itree) const;
+   // access to the observed trees
+
+//     // model identification and selection
+
+//     // plain hidden Markov out tree models
+
+//     Hidden_markov_out_tree* out_tree_estimation(Format_error &error, ostream& os,
+//                                                             const Hidden_markov_tree &ihmarkov,
+//                                                             bool counting_flag = true,
+//                                                             int state_trees = NO_COMPUTATION,
+//                                                             int nb_iter = I_DEFAULT,
+//                                                             bool characteristic_flag = true) const;
+//     Hidden_markov_out_tree* out_tree_estimation(Format_error &error, ostream& os, int nb_state,
+//                                                             int left_right, int order = 1,
+//                                                             bool counting_flag = true,
+//                                                             int state_trees = NO_COMPUTATION,
+//                                                             double self_transition = D_DEFAULT,
+//                                                             int nb_iter = I_DEFAULT) const;
+//     Hidden_markov_out_tree* nb_state_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                      const Hidden_markov_tree &ihmarkov,
+//                                                                      int state, int max_nb_state,
+//                                                                      int penalty_type = AICc,
+//                                                                      bool counting_flag = true,
+//                                                                      int state_trees = NO_COMPUTATION,
+//                                                                      double self_transition = D_DEFAULT) const;
+//     Hidden_markov_out_tree* nb_state_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                      int min_nb_state, int max_nb_state,
+//                                                                      int penalty_type = AICc, int order = 1,
+//                                                                      bool counting_flag = true,
+//                                                                      int state_trees = NO_COMPUTATION,
+//                                                                      double self_transition = D_DEFAULT) const;
+//     Hidden_markov_out_tree* viterbi_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                     const Hidden_markov_tree &ihmarkov,
+//                                                                     bool counting_flag = true,
+//                                                                     int nb_iter = I_DEFAULT) const;
+//     Hidden_markov_out_tree* viterbi_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                     int nb_state,
+//                                                                     int order = 1, bool counting_flag = true,
+//                                                                     double self_transition = D_DEFAULT,
+//                                                                     int nb_iter = I_DEFAULT) const;
+//     // general hidden Markov out tree models
+
+//     Hidden_markov_general_out_tree* general_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                 const Hidden_markov_tree &ihmarkov,
+//                                                                 bool counting_flag = true,
+//                                                                 int state_trees = NO_COMPUTATION,
+//                                                                 int nb_iter = I_DEFAULT,
+//                                                             bool characteristic_flag = true) const;
+//     Hidden_markov_general_out_tree* general_out_tree_estimation(Format_error &error, ostream& os, int nb_state,
+//                                                                 int left_right, int order = 1,
+//                                                                 bool counting_flag = true,
+//                                                                 int state_trees = NO_COMPUTATION,
+//                                                                 double self_transition = D_DEFAULT,
+//                                                                 int nb_iter = I_DEFAULT) const;
+//     Hidden_markov_general_out_tree* nb_state_general_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                          const Hidden_markov_tree &ihmarkov,
+//                                                                          int state, int max_nb_state,
+//                                                                          int penalty_type = AICc,
+//                                                                          bool counting_flag = true,
+//                                                                          int state_trees = NO_COMPUTATION,
+//                                                                          double self_transition = D_DEFAULT) const;
+//     Hidden_markov_general_out_tree* nb_state_general_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                          int min_nb_state, int max_nb_state,
+//                                                                          int penalty_type = AICc, int order = 1,
+//                                                                          bool counting_flag = true,
+//                                                                          int state_trees = NO_COMPUTATION,
+//                                                                          double self_transition = D_DEFAULT) const;
+//     Hidden_markov_general_out_tree* viterbi_general_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                         const Hidden_markov_tree &ihmarkov,
+//                                                                         bool counting_flag = true,
+//                                                                         int nb_iter = I_DEFAULT) const;
+//     Hidden_markov_general_out_tree* viterbi_general_out_tree_estimation(Format_error &error, ostream& os,
+//                                                                         int nb_state,
+//                                                                         int order = 1, bool counting_flag = true,
+//                                                                         double self_transition = D_DEFAULT,
+//                                                                         int nb_iter = I_DEFAULT) const;
+
+//     // hidden Markov in tree models
+
+//     Hidden_markov_in_tree* in_tree_estimation(Format_error &error, ostream& os,
+//                                               const Hidden_markov_tree &ihmarkov,
+//                                               bool counting_flag = true,
+//                                               int state_trees = NO_COMPUTATION,
+//                                               int nb_iter = I_DEFAULT,
+//                                               bool characteristic_flag = true) const;
+//     Hidden_markov_in_tree* in_tree_estimation(Format_error &error, ostream& os, int nb_state,
+//                                               int left_right, int order = 1,
+//                                               bool counting_flag = true,
+//                                               int state_trees = NO_COMPUTATION,
+//                                               double self_transition = D_DEFAULT,
+//                                               int nb_iter = I_DEFAULT) const;
+//     Hidden_markov_in_tree* nb_state_in_tree_estimation(Format_error &error, ostream& os,
+//                                                        const Hidden_markov_tree &ihmarkov,
+//                                                        int state, int max_nb_state,
+//                                                        int penalty_type = AICc,
+//                                                        bool counting_flag = true,
+//                                                        int state_trees = NO_COMPUTATION,
+//                                                        double self_transition = D_DEFAULT) const;
+//     Hidden_markov_in_tree* nb_state_in_tree_estimation(Format_error &error, ostream& os,
+//                                                        int min_nb_state, int max_nb_state,
+//                                                        int penalty_type = AICc, int order = 1,
+//                                                        bool counting_flag = true,
+//                                                        int state_trees = NO_COMPUTATION,
+//                                                        double self_transition = D_DEFAULT) const;
+//     Hidden_markov_in_tree* viterbi_in_tree_estimation(Format_error &error, ostream& os,
+//                                                       const Hidden_markov_tree &ihmarkov,
+//                                                       bool counting_flag = true,
+//                                                       int nb_iter = I_DEFAULT) const;
+//     Hidden_markov_in_tree* viterbi_in_tree_estimation(Format_error &error, ostream& os,
+//                                                       int nb_state,
+//                                                       int order = 1, bool counting_flag = true,
+//                                                       double self_transition = D_DEFAULT,
+//                                                       int nb_iter = I_DEFAULT) const;
+};
+
+/**
+   \class Tree_characteristics
+   \brief set of histograms for the distribution of characteristic quantities
+          for tree-structured processes
+*/
+
+class Tree_characteristics
+{  //  set of histograms for characteristic
+   //  quantity distributions
+
+   // friend classes
+
+   // friend class Observed_trees<Int_fl_container>;
+   // supposedly working on Windows compilers ?
+
+   template <typename Generic_Int_fl_container> friend class Observed_trees;
+   friend class Observed_int_trees;
+   friend class Hidden_markov_tree;
+   // friend class Hidden_markov_out_tree;
+   friend class Hidden_markov_tree_data;
+   friend class Nonparametric_tree_process;
+
+public :
+
+   typedef Histogram** ptHistogram_array;
+
+protected :
+
+   /// index of the variable. 0 means a state variable
+   int _variable;
+   /// minimal value of the variable
+   int _min_value;
+   /// maximal value of the variable
+   int _max_value;
+   /// number of trees used for the histograms
+   int _nb_trees;
+   /// histogram of the (marginal) observation distribution
+   Histogram *marginal;
+   // ?  Tree_curves *index_value;   // empirical probability of each value, as
+   // a function of the index
+   // ? Curves * depth_value;  empirical probability of each value, as
+   // a function of the tree depth
+   /// histogram of the path length before the first occurrence
+   /// of a given value, starting from the root
+   ptHistogram_array first_occurrence_root;
+   /// histogram of the path length before the first occurrence
+   /// of a given value, starting from all the terminal vertices
+   ptHistogram_array  first_occurrence_leaves;
+   /// histogram of the sizes of the homogeneous zones
+   /// for a given value of the variable
+   ptHistogram_array sojourn_size;
+   /// histogram of the number of homogeneous zones in the tree
+   /// for a given value of the variable
+   ptHistogram_array nb_zones;
+   /// histogram of the number of occurrences for a given value
+   // of the variable in the whole tree
+   ptHistogram_array nb_occurrences;
+
+   // Histogram2D *children_pairs; // 2D histogram of the pairs of children of vertices
+
+   // ?  void init(bool initial_run_flag = false);
+   // ?   void copy_characteristics(int variable , const Discrete_sequences &seq ,
+   //                             int cvariable , bool initial_run_flag = false);
+   // ?   void copy(const Tree_characteristics &tchar , int param = DEFAULT);
+   // ?   void add_variable(const Tree_characteristics &tchar , int variable = 0);
+   void remove_characteristic(ptHistogram_array c, int inb_values);
+
+   void remove();
+   void copy(const Tree_characteristics& t_char);
+
+   void init_characteristic(ptHistogram_array c, int inb_values, int imax_val);
+   void init(int imax_size, int imax_depth);
+   // allocation of the histograms
+
+   // ? void build_index_value();
+   // ? void build_depth_value();
+   Histogram* get_characteristic(int value, ptHistogram_array h) const;
+
+   void build_marginal_histogram(One_int_tree* otrees1);
+   void build_first_occurrence_root_histogram(One_int_tree* otrees1, int imax_depth);
+   void build_first_occurrence_leaves_histogram(One_int_tree* otrees1, int imax_depth);
+   void build_zone_histograms(One_int_tree* otrees1, int imax_size);
+   void build_nb_occurrences_histogram(One_int_tree* otrees1, int imax_size);
+// template <typename Generic_Int_fl_container>
+// void build_children_pairs_histogram(One_int_tree** otrees1);
+
+   void ascii_write_characteristic(ptHistogram_array c,
+                                   int inb_values,
+                                   std::ostream& os,
+                                   std::string c1,
+                                   std::string c2,
+                                   bool exhaustive,
+                                   bool file_flag) const;
+
+   std::ostream& ascii_print(std::ostream& os, int type, const Histogram& hsize,
+                             bool exhaustive, bool comment_flag) const;
+   std::ostream& spreadsheet_print(std::ostream& os, int type, const Histogram& hsize) const;
+
+  /** Gnuplot output of \e self*/
+   bool plot_print(const char * prefix, const char * title, int variable,
+                   int nb_variables, int type, const Histogram& hsize) const;
+
+public :
+
+   Tree_characteristics();
+   Tree_characteristics(int imin_value,
+                        int imax_value,
+                        int imax_size,
+                        int imax_depth,
+                        int inb_trees,
+                        One_int_tree* otrees1,
+                        int ivariable= I_DEFAULT);
+   Tree_characteristics(const Tree_characteristics& t_char);
+   ~Tree_characteristics();
+   Tree_characteristics&  operator=(const Tree_characteristics &t_char);
+
+   void  build_characteristics(int imin_value,
+                               int imax_value,
+                               int imax_size,
+                               int imax_depth,
+                               int inb_trees,
+                               One_int_tree* otrees1,
+                               int ivariable= I_DEFAULT);
+   // construction of the histograms
+
+   // access to class members
+
+   int get_variable() const;
+   int get_nb_values() const;
+   // ? Tree_curves* get_index_value() const
+   //  { return index_value; }
+   // ? Curves* get_depth_value() const
+   //  { return depth_value; }
+   Histogram* get_marginal() const;
+   Histogram* get_first_occurrence_root(int value) const;
+   Histogram* get_first_occurrence_leaves(int value) const;
+   Histogram* get_sojourn_size(int value) const;
+   Histogram* get_nb_zones(int value) const;
+   Histogram* get_nb_occurrences(int value) const;
+
+   int get_nb_value_first_occurrence_root(int value) const;
+   int get_nb_value_sojourn_size(int value) const;
+
+   std::ostream& ascii_write_marginal(std::ostream& os,
+                                      bool exhaustive,
+                                      bool file_flag) const;
+
+   std::ostream& ascii_write_first_occurrence_root(std::ostream& os,
+                                                   bool exhaustive,
+                                                   bool file_flag) const;
+
+   std::ostream& ascii_write_first_occurrence_leaves(std::ostream& os,
+                                                     bool exhaustive,
+                                                     bool file_flag) const;
+
+   std::ostream& ascii_write_sojourn_size(std::ostream& os,
+                                          bool exhaustive,
+                                          bool file_flag) const;
+
+   std::ostream& ascii_write_nb_zones(std::ostream& os,
+                                      bool exhaustive,
+                                      bool file_flag) const;
+
+   std::ostream& ascii_write_nb_occurrences(std::ostream& os,
+                                            bool exhaustive,
+                                            bool file_flag) const;
+
+};
+
+typedef Int_fl_tree<Int_fl_container> Default_tree;
+typedef Observed_trees<Int_fl_container> Trees;
+
+#include "observed_trees.hpp"
+}; // end namespace
+
+#endif

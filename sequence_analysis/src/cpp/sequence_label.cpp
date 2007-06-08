@@ -1,0 +1,381 @@
+/* -*-c++-*-
+ *  ----------------------------------------------------------------------------
+ *
+ *       AMAPmod: Exploring and Modeling Plant Architecture
+ *
+ *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *
+ *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *
+ *       $Source$
+ *       $Id$
+ *
+ *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *
+ *  ----------------------------------------------------------------------------
+ *
+ *                      GNU General Public Licence
+ *
+ *       This program is free software; you can redistribute it and/or
+ *       modify it under the terms of the GNU General Public License as
+ *       published by the Free Software Foundation; either version 2 of
+ *       the License, or (at your option) any later version.
+ *
+ *       This program is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS For A PARTICULAR PURPOSE. See the
+ *       GNU General Public License for more details.
+ *
+ *       You should have received a copy of the GNU General Public
+ *       License along with this program; see the file COPYING. If not,
+ *       write to the Free Software Foundation, Inc., 59
+ *       Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  ----------------------------------------------------------------------------
+ */
+
+
+
+/****************************************************************
+ *
+ *  Mots cles (format des fichiers) :
+ */
+
+
+const char *SEQ_word[] = {
+  "MARKOV_CHAIN" ,
+  "EQUILIBRIUM_MARKOV_CHAIN" ,
+  "NON-HOMOGENEOUS_MARKOV_CHAIN" ,
+  "SEMI-MARKOV_CHAIN" ,
+  "EQUILIBRIUM_SEMI-MARKOV_CHAIN" ,
+  "HIDDEN_MARKOV_CHAIN" ,
+  "EQUILIBRIUM_HIDDEN_MARKOV_CHAIN" ,
+  "HIDDEN_SEMI-MARKOV_CHAIN" ,
+  "EQUILIBRIUM_HIDDEN_SEMI-MARKOV_CHAIN" ,
+
+  "HOMOGENEOUS" ,
+  "NON-HOMOGENEOUS" ,
+
+  "OCCUPANCY_DISTRIBUTION" ,
+
+  "TOP_PARAMETERS" ,
+  "AXILLARY_PROBABILITY" ,
+  "RHYTHM_RATIO"
+};
+
+
+
+/****************************************************************
+ *
+ *  Labels :
+ */
+
+
+const char *SEQ_label[] = {
+  "log-likelihood of the state sequence" ,
+  "log-likelihood of the state sequences" ,
+  "log-likelihood of the observed sequences" ,
+  "information of the sequences in the iid case" ,
+
+  "smoothed" ,
+  "observed" ,
+  "theoretical" ,
+  "smoothed observed probabilities" ,
+
+  "ordinary renewal process" ,
+  "equilibrium renewal process" ,
+  "time between 2 observation" ,
+  "inter-event" ,
+  "backward" ,
+  "forward" ,
+  "recurrence time" ,
+  "length-biased" ,
+  "inter-event time within the observation period" ,
+  "inter-event time censored on both ends" ,
+  "inter-event time censored on one end" ,
+  "complete inter-event time" ,
+  "time up to event" ,
+  "number of event" ,
+  "during" ,
+  "time unit" ,
+  "mixture of number of event distributions" ,
+  "no-event probability" ,
+  "event probability" ,
+
+  "Markov chain" ,
+  "non-homogeneous Markov chain" ,
+  "semi-Markov chain" ,
+  "hidden Markov chain" ,
+  "hidden semi-Markov chain" ,
+
+  "maximum order" ,
+  "memory tree" ,
+  "transition tree" ,
+  "memory transition matrix" ,
+  "non-terminal" ,
+  "terminal" ,
+  "completion" ,
+  "completed" ,
+  "confidence intervals for transition probabilities" ,
+  "free transient parameter" ,
+  "free transient parameters" ,
+  "recommended maximum order" ,
+  "initial counts" ,
+  "transition counts" ,
+  "log-likelihoods" ,
+  "count" ,
+  "delta" ,
+
+  "non-homogeneous" ,
+  "self-transition" ,
+  "asymptote" ,
+
+  "probability of no-occurrence of state" ,
+  "probability of no-occurrence of output" ,
+  "time up to the first occurrence of state" ,
+  "time up to the first occurrence of output" ,
+  "probability of leaving state" ,
+  "probability of leaving output" ,
+  "absorption probability of state" ,
+  "absorption probability of output" ,
+  "biased" ,
+  "occupancy" ,
+  "sojourn time" ,
+  "initial run" ,
+  "final run" ,
+  "mixture of " ,
+  "number of runs of state" ,
+  "number of runs of output" ,
+  "number of occurrences of state" ,
+  "number of occurrences of output" ,
+  "per sequence" ,
+  "per length" ,
+
+  "state probabilities" ,
+  "posterior state probabilities" ,
+  "posterior in state probabilities" ,
+  "posterior out state probabilities" ,
+//  "Gini index" ,
+  "conditional entropy" ,
+  "marginal entropy" ,
+  "sum of marginal entropies" ,
+  "partial state sequence entropy" ,
+  "state sequence entropy" ,
+  "upper bound" ,
+  "number of state sequences" ,
+  "maximum posterior state probabilities" ,
+  "maximum posterior in state probabilities" ,
+  "maximum posterior out state probabilities" ,
+
+  "correlation function" ,
+  "partial" ,
+  "auto" ,
+  "cross-" ,
+  "Pearson" ,
+  "Spearman" ,
+  "Kendall" ,
+  "rank" ,
+  "lag" ,
+  "maximum lag" ,
+  "white noise" ,
+  "randomness 95% confidence limit" ,
+  "pair frequency" ,
+
+  "index" ,
+
+  "simulated" ,
+  "sequence" ,
+  "sequences" ,
+  "length" ,
+  "sequence length" ,
+  "cumulated length" ,
+  "shift" ,
+  "time" ,
+  "time interval" ,
+  "position interval" ,
+  "time up to the first occurrence of value" ,
+  "number of runs of value" ,
+  "number of occurrences of value" ,
+
+  "alignment length" ,
+  "aligned on" ,
+  "maximum gap length" ,
+  "alignment coding" ,
+  "consensus" ,
+
+  "optimal" ,
+  "change point" ,
+  "segment" ,
+  "segments" ,
+  "segment standardized mean absolute difference" ,
+  "segment standardized mean square difference" ,
+  "number of segments" ,
+  "posterior probability" ,
+  "penalty" ,
+  "number of segmentations" ,
+  "segmentation log-likelihood" ,
+  "log-likelihood of all the possible segmentations" ,
+  "posterior change-point probabilities" ,
+  "posterior segment probabilities" ,
+  "change-point entropy" ,
+//  "normalized change-point entropy" ,
+  "segment entropy" ,
+  "maximum change-point likelihood" ,
+  "maximum segment likelihood" ,
+  "maximum posterior change-point probabilities" ,
+  "maximum posterior segment probabilities" ,
+  "segment mean" ,
+  "segment variance" ,
+  "segment square deviation" ,
+  "ambiguity" ,
+
+  "top" ,
+  "tops" ,
+  "number of internode"
+};
+
+
+
+/****************************************************************
+ *
+ *  Messages d'erreur pour l'analyse des fichiers :
+ */
+
+
+const char *SEQ_parsing[] = {
+  "time data not ordered" ,
+  "time data too large" ,
+  "number of event data not ordered" ,
+
+  "bad state" ,
+  "bad number of memories" ,
+
+  "bad variable type" ,
+  "time index not ordered" ,
+  "position not ordered" ,
+  "position not allowed" ,
+  "bad maximum sequence length: should be greater than 1"
+};
+
+
+
+/****************************************************************
+ *
+ *  Messages d'erreur de traitement :
+ */
+
+
+const char *SEQ_error[] = {
+  "only time interval censored on both ends: choose a longer observation period" ,
+  "incompatible renewal data" ,
+  "maximum number of events too small: choose a longer observation period" ,
+  "average number of events too small: choose a longer observation period" ,
+  "time unit too large" ,
+  "number of complete intervals too small" ,
+  "complete time interval: bad minimum value" ,
+  "forward recurrence time interval: bad minimum value" ,
+  "no event observation period: bad minimum value" ,
+  "bad inter-event mean computation method" ,
+  "initial inter-event distribution support incompatible with data" ,
+
+  "bad time between two observation dates" ,
+  "bad scaling coefficient" ,
+  "bad minimum time" ,
+  "bad maximum time" ,
+  "bad minimum number of events" ,
+  "bad maximum number of events" ,
+  "empty renewal data structure" ,
+  "time between two observation dates too short" ,
+  "time between two observation dates too long" ,
+
+  "bad number of states" ,
+  "missing state" ,
+  "bad order" ,
+  "bad minimum order" ,
+  "bad maximum order" ,
+  "bad input Markov chain order" ,
+  "non-homogeneous input Markov chain: should be homogeneous" ,
+  "bad weight values: should sum to 1" ,
+  "weight values incompatible with transition probabilities of the input Markov chain" ,
+  "too many parameters" ,
+  "overlap of values observed in the different states" ,
+  "bad model type" ,
+  "bad number of values per variable" ,
+  "bad number of output processes" ,
+  "bad output process index" ,
+  "bad number of outputs" ,
+  "bad self-transition probability" ,
+  "bad state index" ,
+  "bad state type" ,
+  "bad minimum number of states" ,
+  "bad maximum number of states" ,
+  "bad minimum number of state sequences" ,
+  "bad number of state sequences" ,
+  "average state occupancy too short" ,
+  "bad number of sequences" ,
+  "bad sequence identifier" ,
+  "bad sequence identifiers" ,
+  "bad reference sequence identifier" ,
+  "bad test sequence identifier" ,
+  "bad sequence length" ,
+  "sequence length too short" ,
+  "sequence length too long" ,
+  "cumulated sequence length too long" ,
+  "failure in the computation of the optimal state sequences" ,
+
+  "bad variable type" ,
+  "variable 1: bad variable type" ,
+  "only a single variable: two variables or more are required" ,
+  "bad minimum value: should be positive" ,
+  "bad date order" ,
+  "bad begin index" ,
+  "bad end index" ,
+  "bad minimum sequence length" ,
+  "bad maximum sequence length" ,
+  "not present" ,
+  "always present" ,
+  "bad maximum run length" ,
+  "bad minimum index" ,
+  "bad maximum index" ,
+  "bad number of selected values" ,
+  "unequal index intervals: should be equal" ,
+  "bad position transform step" ,
+  "bad length" ,
+  "bad value" ,
+  "bad correlation coefficient type" ,
+  "bad frequency" ,
+  "bad maximum lag" ,
+  "incompatible with other correlation functions" ,
+  "bad differencing order" ,
+  "initial run histograms already built" ,
+  "too high number of possible words" ,
+  "bad minimum frequency: should be positive" ,
+
+  "state sequences not in the data" ,
+  "characteristics not computed" ,
+  "non-existing characteristic distribution" ,
+  "non-existing forward sojourn time distribution" ,
+
+  "too many alignment" ,
+  "bad insertion/deletion factor: should be greater than 0.5" ,
+  "bad transposition factor: should be between 0 and 2" ,
+
+  "forbidden output" ,
+  "bad number of segments" ,
+  "bad maximum number of segments" ,
+  "segmentation failure" ,
+  "bad number of segmentations" ,
+
+  "bad position" ,
+  "bad number of internodes" ,
+  "bad top identifier" ,
+  "bad main axe number of internodes: should be greater than the last position" ,
+  "bad minimum position" ,
+  "bad maximum position" ,
+  "bad neighborhood" ,
+  "not enough neighbors" ,
+  "equality of growth probabilities not possible" ,
+  "bad number of tops" ,
+  "bad number of trials" ,
+  "bad number of axillary shoots per node"
+};

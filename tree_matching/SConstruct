@@ -1,0 +1,56 @@
+# -*-python-*-
+
+from openalea.sconsx import config, environ
+import os
+
+Config = config.Config
+ALEAConfig = config.ALEAConfig
+ALEAEnvironment = config.ALEAEnvironment
+
+pj = os.path.join
+
+name = 'tree_matching'
+
+SConsignFile()
+
+options = Options('options.py', ARGUMENTS)
+
+# Dependencies
+wrapper_tools = ['boost_python', 'alea']
+#plantgl_tools = ['opengl', 'qhull', 'qt4']
+cpp_tools = ['alea']
+
+wrapper_conf= ALEAConfig(name, wrapper_tools)
+cpp_conf = ALEAConfig(name, cpp_tools)
+opt_conf = ALEAConfig(name, wrapper_tools)
+
+# Set all the common options for the package
+# TODO: Have a configure stage.
+# Fill the options from file option.py or cmd line args.
+opt_conf.UpdateOptions(options)
+
+opt_env = Environment(options=options)
+opt_conf.Update(opt_env)
+
+# Generate Help available with the cmd scons -h
+Help(options.GenerateHelpText(opt_env))
+
+
+# Set build directory
+prefix = opt_env['build_prefix']
+BuildDir(prefix, '.')
+
+
+cpp_env = ALEAEnvironment(cpp_conf, 'options.py', ARGUMENTS)
+cpp_env.Append(CPPPATH='$build_includedir')
+cpp_env.AppendUnique(CPPPATH=[pj(cpp_env['openalea_includes'],'plantgl')])
+
+wrapper_env = ALEAEnvironment(wrapper_conf, 'options.py', ARGUMENTS)
+wrapper_env.Append(CPPPATH='$build_includedir')
+
+# Build stage
+SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
+#SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
+
+
+Default("build")

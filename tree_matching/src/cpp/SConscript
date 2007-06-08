@@ -1,0 +1,121 @@
+# -*-python-*-
+
+import os
+bn = os.path.basename
+pj = os.path.join
+
+Import( "env" )
+
+lib_env = env.Copy()
+
+# Export Symbols on Windows
+if lib_env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    lib_env.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+
+# Install headers
+includes = lib_env.ALEAGlob("*.h")
+includes_ordered = lib_env.ALEAGlob("*.h", dir="Ordered")
+includes_pordered = lib_env.ALEAGlob("*.h", dir="POrdered")
+includes_unordered = lib_env.ALEAGlob("*.h", dir="Unordered")
+
+lib_env.ALEAIncludes("tree_matching", includes)
+lib_env.ALEAIncludes("tree_matching/Ordered", includes_ordered)
+lib_env.ALEAIncludes("tree_matching/POrdered", includes_pordered)
+lib_env.ALEAIncludes("tree_matching/Unordered", includes_unordered)
+
+
+#Sources
+
+# sources = lib_env.ALEAGlob('*.cpp')
+# sources += lib_env.ALEAGlob('*.cpp',dir='*')
+
+
+RELATION   = "relation.cpp sequence.cpp"
+COSTS      = "nodecost.cpp wnodecost.cpp mnodecost.cpp  wnodecostnonconst.cpp tlnodecost.cpp melodyNodeCost.cpp"
+GRAPH      = "treenode.cpp treegraph.cpp supergraph.cpp"
+HEAP       = "item.cpp heap.cpp"
+FUNCTION   = "amlnodefunction.cpp"
+TABLE      = "indexmanager.cpp distancetable.cpp mdtable.cpp mitable.cpp \
+		choicetable.cpp emchoicetable.cpp emdtable.cpp inttable.cpp mctable.cpp"
+MATCHING   = "MSPreComputing.cpp MSLocalMatching.cpp MSForestMatching.cpp \
+		MSTreeMatching.cpp MSPreComputing2.cpp MSLocalSimilarity.cpp \
+		MSForestSimilarity.cpp MSTreeSimilarity.cpp MSLPreComputing.cpp \
+		MSLLocalSimilarity.cpp MSLForestSimilarity.cpp MSLTreeSimilarity.cpp matchpath.cpp localmatchpath.cpp matching.cpp  matching_GPOSDE.cpp  matching_sequence.cpp \
+		self_similar_matching.cpp self_similar_complex_matching.cpp \
+		matching2.cpp matching3.cpp matching4.cpp \
+		matching_with_complex.cpp extmatching.cpp local_matching.cpp \
+		ferraro_hanna.cpp \
+		FerraroOuangraoua.cpp FerraroOuangraoua1.cpp FerraroOuangraoua2.cpp \
+		selkow.cpp JiangWangZhangMetric2.cpp TichitFerraro.cpp TichitFerraro1.cpp"
+UNORDERED_MATCHING = "Unordered/matching_unordered.cpp  \
+		Unordered/matching_uminco.cpp \
+		Unordered/matching_ulcs.cpp \
+		Unordered/matching_ulcs_minco.cpp \
+		Unordered/local_matching_u.cpp \
+		Unordered/end_space_free_matching_u.cpp "
+SELF_SIMILAR_MATCHING = "end_space_free_matching.cpp"
+ORDERED_MATCHING = "Ordered/matching_GOSDE_lca.cpp  Ordered/matching_O.cpp \
+		Ordered/matching_GOSSE.cpp  Ordered/matching_LOSSE.cpp "
+
+PORDERED_MATCHING  =  """
+POrdered/matching_PO.cpp 
+POrdered/matching_PO_local.cpp 
+POrdered/matching_PO_end_space.cpp
+"""
+
+TREEMATCH  =   "treematch.cpp self_similar_treematch.cpp matching_extract.cpp \
+		treematchext.cpp "
+UNORDERED_TREEMATCH  =  "unordered_treematch.cpp "
+ORDERED_TREEMATCH  =  "ordered_treematch.cpp "
+PORDERED_TREEMATCH  =  "pordered_treematch.cpp "
+QUOT_MATCHING = "multiscale_matching_trees.cpp multiscale_matching_forests.cpp  multiscale_matching_lists.cpp"
+UNORDERED_QUOT_MATCHING = "Unordered/multiscale_matching_u_trees.cpp \
+		Unordered/multiscale_matching_u_forests.cpp \
+		Unordered/multiscale_matching_u_lists.cpp"
+
+ORDERED_QUOT_MATCHING = """
+Ordered/MS_O_PreComputing.cpp 
+Ordered/MS_O_LocalMatching.cpp 
+Ordered/MS_O_ForestMatching.cpp
+Ordered/MS_O_TreeMatching.cpp Ordered/MS_O_PreComputing2.cpp Ordered/MS_O_LocalSimilarity.cpp
+Ordered/MS_O_ForestSimilarity.cpp Ordered/MS_O_TreeSimilarity.cpp Ordered/MSL_O_PreComputing.cpp
+Ordered/MSL_O_LocalSimilarity.cpp Ordered/MSL_O_ForestSimilarity.cpp Ordered/MSL_O_TreeSimilarity.cpp
+Ordered/matching_GOMDE.cpp  Ordered/matching_GOMSE.cpp  Ordered/matching_LOMSE.cpp
+Ordered/matching_GOQDE.cpp
+"""
+
+PORDERED_QUOT_MATCHING = ""
+sources= ["definitions.cpp"]
+
+def append_src(src,target=sources):
+   target.extend(Split(src))
+
+append_src(RELATION)
+append_src(COSTS)
+append_src(GRAPH)
+append_src(HEAP)
+append_src(FUNCTION)
+append_src(TABLE)
+append_src(MATCHING) 
+append_src(UNORDERED_MATCHING) 
+append_src(ORDERED_MATCHING) 
+append_src(PORDERED_MATCHING) 
+append_src(SELF_SIMILAR_MATCHING)
+append_src(TREEMATCH)
+append_src(UNORDERED_TREEMATCH)
+append_src(ORDERED_TREEMATCH)
+append_src(PORDERED_TREEMATCH)
+append_src(QUOT_MATCHING) #a enlever a terme
+append_src(UNORDERED_QUOT_MATCHING)
+append_src(ORDERED_QUOT_MATCHING)
+append_src(PORDERED_QUOT_MATCHING)
+
+
+lib_env.Append(LIBS=["vpamlobj","vptool","vpstat_tool", "vpmtg"])
+
+lib = lib_env.ALEALibrary( "vptree_matching", sources)

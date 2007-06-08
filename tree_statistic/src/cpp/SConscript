@@ -1,0 +1,47 @@
+# -*-python-*-
+Import("env")
+
+
+# Export/Import Symbols for windows
+if env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    env.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+
+# Select and install the headers
+
+includes = env.ALEAGlob("*.h")
+includes += env.ALEAGlob("*.hpp")
+
+env.ALEAIncludes("tree_statistic", includes)
+
+
+
+env.Append(CPPDEFINES= ['MESSAGE'])
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
+
+# Build shared libraries
+
+#sources = env.ALEAGlob("*.cpp")
+sources= Split("""
+base_int_fl_containers.cpp
+int_fl_containers.cpp
+generic_tree.cpp
+generic_typed_edge_tree.cpp
+int_trees.cpp
+typed_edge_trees.cpp
+tree_labels.cpp
+hidden_markov_tree.cpp
+hidden_markov_out_tree.cpp
+hmt_algorithms.cpp
+""")
+
+target = "vptree_statistic"
+
+
+# Build the library
+lib = env.ALEALibrary(target, sources)
+
