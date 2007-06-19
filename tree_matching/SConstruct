@@ -43,7 +43,6 @@ BuildDir(prefix, '.')
 
 cpp_env = ALEAEnvironment(cpp_conf, 'options.py', ARGUMENTS)
 cpp_env.Append(CPPPATH='$build_includedir')
-cpp_env.AppendUnique(CPPPATH=[pj(cpp_env['openalea_includes'],'plantgl')])
 
 wrapper_env = ALEAEnvironment(wrapper_conf, 'options.py', ARGUMENTS)
 wrapper_env.Append(CPPPATH='$build_includedir')
