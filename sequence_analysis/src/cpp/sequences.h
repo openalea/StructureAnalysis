@@ -208,6 +208,8 @@ class Variable_order_markov;
 class Variable_order_markov_data;
 class Variable_order_markov_iterator;
 class Vectors;
+// Added by f. chaubert for extension purpose
+class Switching_sequence;
 
 class Nonparametric_sequence_process : public Nonparametric_process {  // processus d'observation non-parametrique
                                                                        // pour des sequences
@@ -705,6 +707,8 @@ class Sequence_characteristics {  // caracteristiques des sequences pour une var
     friend class Semi_markov;
     friend class Semi_markov_data;
     friend class Markovian_sequences;
+    // Added by f. chaubert for extension purpose
+    friend class Switching_sequence;
 
 private :
 
