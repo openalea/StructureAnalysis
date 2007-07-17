@@ -94,6 +94,8 @@ enum {
   BINOMIAL ,
   POISSON ,
   NEGATIVE_BINOMIAL ,
+  //added by f. chaubert
+  MULTINOMIAL ,
   UNIFORM
 };
 
