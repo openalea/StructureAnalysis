@@ -36,10 +36,10 @@ prefix = opt_env['build_prefix']
 BuildDir(prefix, '.')
 
 
-cpp_env = ALEAEnvironment(cpp_conf, 'options.py', ARGUMENTS)
+cpp_env = ALEAEnvironment(cpp_conf, options=options)
 cpp_env.Append(CPPPATH='$build_includedir')
 
-wrapper_env = ALEAEnvironment(wrapper_conf, 'options.py', ARGUMENTS)
+wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
 
 wrapper_env.Append(CPPPATH='$build_includedir')
 
