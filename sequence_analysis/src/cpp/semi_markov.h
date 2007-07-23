@@ -277,6 +277,7 @@ private :
     Chain_data *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences
     double hidden_likelihood;  // vraisemblance de toutes les sequences possibles
+    double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
 
     void copy(const Semi_markov_data &seq , bool model_flag = true);
 
@@ -321,6 +322,7 @@ public :
     Chain_data* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
     double get_hidden_likelihood() const { return hidden_likelihood; }
+    double get_posterior_probability(int index) const { return posterior_probability[index]; }
 };
 
 

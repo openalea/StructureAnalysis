@@ -1397,7 +1397,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
       if (segmentation_likelihood[i] != D_INF) {
         penalized_likelihood[0][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] * log((double)length[index]);
-
         if (penalized_likelihood[0][i] > max_likelihood[0]) {
           max_likelihood[0] = penalized_likelihood[0][i];
 //          nb_segment = i;
@@ -3110,10 +3109,10 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
 {
   bool **active_cell;
   register int i , j , k , m , n;
-  int offset , max_nb_value , brank , previous_rank , nb_cell , *frequency , *nb_segmentation ,
-      *rank , *psegment , **psequence , ***optimal_length , ***optimal_rank;
-  double sum , factorial_sum , sum_square , buff , segmentation_likelihood , *factorial ,
-         *sequence_mean , *residual , *contrast , **mean , **variance , ***forward;
+  int offset , max_nb_value , brank , previous_rank , nb_cell , *frequency , *rank ,
+      *psegment , **psequence , ***optimal_length , ***optimal_rank;
+  double sum , factorial_sum , sum_square , buff , segmentation_likelihood , *nb_segmentation ,
+         *factorial , *sequence_mean , *residual , *contrast , **mean , **variance , ***forward;
   long double likelihood_cumul;
 
 
@@ -3164,7 +3163,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
     }
   }
 
-  nb_segmentation = new int[nb_segment];
+  nb_segmentation = new double[nb_segment];
   rank = new int[length[index] + 1];
 
   optimal_length = new int**[length[index]];
@@ -3339,7 +3338,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
           for (k = i - 1;k >= 0;k--) {
             buff = sequence[index][j][i] - sequence[index][j][k];
             sum += buff * buff;
-            mean_square_diff[k] += sum;
+            mean_square_diff[k] = sum;
 
             if ((mean_square_diff[k] / (i - k + 1) < residual[k] - DOUBLE_ERROR) ||
                 (mean_square_diff[k] / (i - k + 1) > residual[k] + DOUBLE_ERROR)) {
@@ -3464,7 +3463,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
         }
       }
 
-      for (k = nb_segmentation[j];k < inb_segmentation;k++) {
+      for (k = (int)nb_segmentation[j];k < inb_segmentation;k++) {
         forward[i][j][k] = D_INF;
       }
     }

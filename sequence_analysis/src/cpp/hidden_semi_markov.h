@@ -101,7 +101,8 @@ private :
                                   int output = SSTATE , const char *title = 0) const;
 
     void log_computation();
-    double viterbi(const Semi_markov_data &seq , int index = I_DEFAULT) const;
+    double viterbi(const Semi_markov_data &seq , double *posterior_probability = 0 ,
+                   int index = I_DEFAULT) const;
     double generalized_viterbi(const Semi_markov_data &seq , int index , std::ostream &os ,
                                double seq_likelihood , char format , int inb_state_sequence) const;
     double viterbi_forward_backward(const Semi_markov_data &seq , int index ,
@@ -141,7 +142,8 @@ public :
     void saveGuts(RWvostream&) const;
     void saveGuts(RWFile&) const; */
 
-    double likelihood_computation(const Markovian_sequences &seq , int index = I_DEFAULT) const;
+    double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = 0 ,
+                                  int index = I_DEFAULT) const;
 
     bool state_profile_ascii_write(Format_error &error , std::ostream &os , int identifier ,
                                    int output = SSTATE , int state_sequence = GENERALIZED_VITERBI ,

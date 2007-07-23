@@ -72,17 +72,20 @@ extern char* label(const char *file_name);
  *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov cachee
  *  par l'algorithme forward.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence.
+ *  arguments : reference sur un objet Markovian_sequences, pointeur sur
+ *              les probabilites a posteriori des sequences d'etats
+ *              les plus probables, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_semi_markov::likelihood_computation(const Markovian_sequences &seq , int index) const
+double Hidden_semi_markov::likelihood_computation(const Markovian_sequences &seq ,
+                                                  double *posterior_probability , int index) const
 
 {
   register int i , j , k , m;
   int nb_value , length , **poutput;
-  double likelihood = 0. , obs_product , **observation , *norm , *state_norm ,
-         *forward1 , **state_in;
+  double likelihood = 0. , seq_likelihood , obs_product , **observation ,
+         *norm , *state_norm , *forward1 , **state_in;
   Parametric *occupancy;
 
 
@@ -135,6 +138,7 @@ double Hidden_semi_markov::likelihood_computation(const Markovian_sequences &seq
         for (j = 0;j < seq.nb_variable;j++) {
           poutput[j] = seq.sequence[i][j];
         }
+        seq_likelihood = 0.;
 
         for (j = 0;j < seq.length[i];j++) {
           norm[j] = 0.;
@@ -199,11 +203,11 @@ double Hidden_semi_markov::likelihood_computation(const Markovian_sequences &seq
               }
             }
 
-            likelihood += log(norm[j]);
+            seq_likelihood += log(norm[j]);
           }
 
           else {
-            likelihood = D_INF;
+            seq_likelihood = D_INF;
             break;
           }
 
@@ -280,7 +284,15 @@ double Hidden_semi_markov::likelihood_computation(const Markovian_sequences &seq
           }
         }
 
-        if (likelihood == D_INF) {
+        if (seq_likelihood != D_INF) {
+          likelihood += seq_likelihood;
+          if (posterior_probability) {
+            posterior_probability[i] = exp(posterior_probability[i] - seq_likelihood);
+          }
+        }
+
+        else {
+          likelihood = D_INF;
           break;
         }
       }
@@ -1398,7 +1410,8 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
         hsmarkov->create_cumul();
         hsmarkov->log_computation();
 
-        seq->likelihood = hsmarkov->viterbi(*seq);
+        seq->posterior_probability = new double[seq->nb_sequence];
+        seq->likelihood = hsmarkov->viterbi(*seq , seq->posterior_probability);
 
         hsmarkov->remove_cumul();
 
@@ -1480,7 +1493,17 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 
       // calcul de la vraisemblance et des lois caracteristiques du modele
 
-      seq->hidden_likelihood = hsmarkov->likelihood_computation(*this);
+      seq->hidden_likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
+
+#     ifdef MESSAGE
+      if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+        for (i = 0;i < seq->nb_sequence;i++) {
+          os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+             << seq->posterior_probability[i] << endl;
+        }
+      }
+#     endif
 
       hsmarkov->component_computation();
       hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
@@ -2574,7 +2597,8 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
         hsmarkov->create_cumul();
         hsmarkov->log_computation();
 
-        seq->likelihood = hsmarkov->viterbi(*seq);
+        seq->posterior_probability = new double[seq->nb_sequence];
+        seq->likelihood = hsmarkov->viterbi(*seq , seq->posterior_probability);
 
         hsmarkov->remove_cumul();
 
@@ -2656,7 +2680,17 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
       // calcul de la vraisemblance et des lois caracteristiques du modele
 
-      seq->hidden_likelihood = hsmarkov->likelihood_computation(*this);
+      seq->hidden_likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
+
+#     ifdef MESSAGE
+      if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+        for (i = 0;i < seq->nb_sequence;i++) {
+          os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+             << seq->posterior_probability[i] << endl;
+        }
+      }
+#     endif
 
       hsmarkov->component_computation();
       hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
@@ -4951,13 +4985,16 @@ void Hidden_semi_markov::log_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des sequences d'etats optimales par l'algorithme de Viterbi.
+ *  Calcul des sequences d'etats les plus probables par l'algorithme de Viterbi.
  *
- *  arguments : reference sur un objet Semi_markov_data, indice de la sequence.
+ *  arguments : reference sur un objet Semi_markov_data,
+ *              pointeur sur les probabilites a posteriori des sequences d'etats
+ *              les plus probables, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_semi_markov::viterbi(const Semi_markov_data &seq , int index) const
+double Hidden_semi_markov::viterbi(const Semi_markov_data &seq ,
+                                   double *posterior_probability , int index) const
 
 {
   register int i , j , k , m;
@@ -5180,9 +5217,16 @@ double Hidden_semi_markov::viterbi(const Semi_markov_data &seq , int index) cons
 
       if (forward_max != D_INF) {
         likelihood += forward_max;
+        if (posterior_probability) {
+          posterior_probability[i] = forward_max;
+        }
       }
+
       else {
         likelihood = D_INF;
+        if (posterior_probability) {
+          posterior_probability[i] = 0.;
+        }
         break;
       }
 
@@ -7265,10 +7309,10 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
       for (j = 0;j < nb_model;j++) {
         switch (algorithm) {
         case FORWARD :
-          likelihood[i][j] = hsmarkov[j]->likelihood_computation(*this , i);
+          likelihood[i][j] = hsmarkov[j]->likelihood_computation(*this , 0 , i);
           break;
         case VITERBI :
-          likelihood[i][j] = hsmarkov[j]->viterbi(*seq , i);
+          likelihood[i][j] = hsmarkov[j]->viterbi(*seq , 0 , i);
           break;
         }
       }
@@ -7540,7 +7584,7 @@ Distance_matrix* Hidden_semi_markov::divergence_computation(Format_error &error 
 
       ref_likelihood = 0.;
       for (j = 0;j < seq->nb_sequence;j++) {
-        likelihood[j][i] = hsmarkov[i]->likelihood_computation(*seq , j);
+        likelihood[j][i] = hsmarkov[i]->likelihood_computation(*seq , 0 , j);
         ref_likelihood += likelihood[j][i];
       }
 
@@ -7550,7 +7594,7 @@ Distance_matrix* Hidden_semi_markov::divergence_computation(Format_error &error 
         if (j != i) {
           target_likelihood = 0.;
           for (k = 0;k < seq->nb_sequence;k++) {
-            likelihood[k][j] = hsmarkov[j]->likelihood_computation(*seq , k);
+            likelihood[k][j] = hsmarkov[j]->likelihood_computation(*seq , 0 , k);
             if (target_likelihood != D_INF) {
               if (likelihood[k][j] != D_INF) {
                 target_likelihood += likelihood[k][j];

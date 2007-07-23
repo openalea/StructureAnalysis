@@ -877,7 +877,7 @@ Function* Self_transition::monomolecular_regression() const
   function->parameter[2] = 0.;
   norm = 0;
   for (i = 1;i < length;i++) {
-    if ((*pfrequency > 0)  && ((*ppoint - function->parameter[0]) / function->parameter[1] > 0.)) {
+    if ((*pfrequency > 0) && ((*ppoint - function->parameter[0]) / function->parameter[1] > 0.)) {
       function->parameter[2] -= *pfrequency * log((*ppoint - function->parameter[0]) / function->parameter[1]) / i;
       norm += *pfrequency;
     }
@@ -1024,7 +1024,7 @@ Function* Self_transition::logistic_regression() const
   function->parameter[2] = 0.;
   norm = 0;
   for (i = 1;i < length;i++) {
-    if ((*pfrequency > 0)  && ((function->parameter[0] / *ppoint - 1.) / function->parameter[1] > 0.)) {
+    if ((*pfrequency > 0) && ((function->parameter[0] / *ppoint - 1.) / function->parameter[1] > 0.)) {
       function->parameter[2] -= *pfrequency * log((function->parameter[0] / *ppoint - 1.) / function->parameter[1]) / i;
       norm += *pfrequency;
     }

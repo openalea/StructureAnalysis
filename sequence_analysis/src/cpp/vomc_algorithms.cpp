@@ -785,16 +785,18 @@ void Variable_order_markov_data::build_transition_count(const Variable_order_mar
  *
  *  arguments : reference sur un objet Variable_order_markov,
  *              flag pour estimer les probabilites de transition sur
- *              les memoires non-terminales, flag estimateur de Laplace.
+ *              les memoires non-terminales, estimateur (maximum de vraisemblance,
+ *              Laplace, Laplace adaptatif), coefficient estimateur de Laplace.
  *
  *--------------------------------------------------------------*/
 
 void Variable_order_chain_data::estimation(Variable_order_markov &markov ,
-                                           bool non_terminal , bool laplace) const
+                                           bool non_terminal , int estimator ,
+                                           double laplace_coeff) const
 
 {
   register int i , j;
-  int sum;
+  int sum , nb_parameter;
 
 
   // estimation des probabilites initiales
@@ -820,9 +822,19 @@ void Variable_order_chain_data::estimation(Variable_order_markov &markov ,
         sum += transition[i][j];
       }
 
-      switch (laplace) {
+      if ((estimator == ADAPTATIVE_LAPLACE) || (estimator == UNIFORM_SUBSET) ||
+          (estimator == UNIFORM_CARDINALITY)) {
+        nb_parameter = 0;
+        for (j = 0;j < nb_state;j++) {
+          if (transition[i][j] > 0) {
+            nb_parameter++;
+          }
+        }
+      }
 
-      case false : {
+      switch (estimator) {
+
+      case MAXIMUM_LIKELIHOOD : {
         if (sum > 0) {
           for (j = 0;j < nb_state;j++) {
             markov.transition[i][j] = (double)transition[i][j] / (double)sum;
@@ -841,10 +853,79 @@ void Variable_order_chain_data::estimation(Variable_order_markov &markov ,
         break;
       }
 
-      case true : {
+      // estimateur de Laplace
+
+      case LAPLACE : {
         for (j = 0;j < nb_state;j++) {
-          markov.transition[i][j] = (double)(transition[i][j] + LAPLACE_COEFF) /
-                                    (double)(sum + nb_state * LAPLACE_COEFF);
+          markov.transition[i][j] = (double)(transition[i][j] + laplace_coeff) /
+                                    (double)(sum + nb_state * laplace_coeff);
+        }
+        break;
+      }
+
+      // estimateur de Laplace adaptatif (Vert, 2001)
+
+      case ADAPTATIVE_LAPLACE : {
+        if (sum > 0) {
+          for (j = 0;j < nb_state;j++) {
+            markov.transition[i][j] = ((double)transition[i][j] + (double)nb_parameter / (double)nb_state) /
+                                      (double)(sum + nb_parameter);
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_state;j++) {
+            markov.transition[i][j] = 1 / (double)nb_state;
+          }
+        }
+        break;
+      }
+
+      // estimateur de Ristad 1 (1995)
+
+      case UNIFORM_SUBSET : {
+        for (j = 0;j < nb_state;j++) {
+          if (transition[i][j] > 0) {
+/*            markov.transition[i][j] = ((double)(transition[i][j] + 1) * (double)(sum + 1 - nb_parameter)) /
+                                      ((double)(sum + nb_parameter) * (double)(sum + 1 - nb_parameter) +
+                                       nb_parameter * (nb_state - nb_parameter)); */
+            markov.transition[i][j] = ((double)transition[i][j] * (double)(sum + nb_parameter) *
+                                       (double)(sum + 1 - nb_parameter)) / ((double)sum * ((double)(sum + nb_parameter) *
+                                        (double)(sum + 1 - nb_parameter) + nb_parameter * (nb_state - nb_parameter)));
+          }
+
+          else {
+            markov.transition[i][j] = ((double)nb_parameter) / ((double)(sum + nb_parameter) *
+                                       (double)(sum + 1 - nb_parameter) + nb_parameter * (nb_state - nb_parameter));
+          }
+        }
+        break;
+      }
+
+      // estimateur de Ristad 2 (1995)
+
+      case UNIFORM_CARDINALITY : {
+        if (nb_parameter == nb_state) {
+          for (j = 0;j < nb_state;j++) {
+//            markov.transition[i][j] = (double)(transition[i][j] + 1) / (double)(sum + nb_state);
+            markov.transition[i][j] = (double)transition[i][j] / (double)sum;
+          }
+        }
+
+        else {
+          for (j = 0;j < nb_state;j++) {
+            if (transition[i][j] > 0) {
+/*              markov.transition[i][j] = ((double)(transition[i][j] + 1) * (double)(sum + 1 - nb_parameter)) /
+                                        ((double)(sum * sum + sum + 2 * nb_parameter)); */
+              markov.transition[i][j] = ((double)transition[i][j] * ((double)sum * (double)(sum + 1) +
+                                          nb_parameter * (1 - nb_parameter))) /
+                                        ((double)sum * (double)(sum * sum + sum + 2 * nb_parameter));
+            }
+            else {
+              markov.transition[i][j] = (double)(nb_parameter * (nb_parameter + 1)) /
+                                        ((nb_state - nb_parameter) * (double)(sum * sum + sum + 2 * nb_parameter));
+            }
+          }
         }
         break;
       }
@@ -868,46 +949,40 @@ void Variable_order_chain_data::estimation(Variable_order_markov &markov ,
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une chaine de Markov d'ordre 0
- *  a partir des comptages des etats initiaux et des transitions.
+ *  Estimation des parametres d'une chaine de Markov d'ordre 0.
  *
- *  arguments : reference sur un objet Variable_order_markov.
+ *  argument : reference sur un objet Variable_order_markov.
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_chain_data::order0_estimation(Variable_order_markov &markov) const
+void Variable_order_markov_data::order0_estimation(Variable_order_markov &markov) const
 
 {
   register int i , j;
-  int sum;
+//  int sum;
 
 
-  // estimation des probabilites initiales
+/*  sum = 0;
+  for (i = 0;i < chain_data->nb_state;i++) {
+    sum += chain_data->initial[i] + chain_data->transition[0][i];
+  } */
 
-  if (markov.type == 'o') {
-    sum = 0;
-    for (i = 0;i < nb_state;i++) {
-      sum += initial[i];
-    }
-
-    for (i = 0;i < nb_state;i++) {
-      markov.initial[i] = (double)initial[i] / (double)sum;
-    }
-  }
-
-  // estimation des probabilites de transition
-
-  sum = 0;
-  for (i = 0;i < nb_state;i++) {
-    sum += transition[0][i];
-  }
-
-  for (i = 0;i < nb_state;i++) {
-    markov.transition[1][i] = (double)transition[0][i] / (double)sum;
-    for (j = 1;j < nb_state;j++) {
-      markov.transition[j + 1][i] = markov.transition[1][i];
+  for (i = 0;i < chain_data->nb_state;i++) {
+    markov.initial[i] = (double)marginal[0]->frequency[i] / (double)marginal[0]->nb_element;
+//    markov.initial[i] = (double)(chain_data->initial[i] + chain_data->transition[0][i]) / (double)sum;
+    for (j = 0;j <= chain_data->nb_state;j++) {
+      markov.transition[j][i] = markov.initial[i];
     }
   }
+
+# ifdef DEBUG
+  cout << "\n";
+  for (i = 0;i < chain_data->nb_state;i++) {
+    cout << STAT_label[STATL_STATE] << " " << i << ": " << markov.initial[i] << " | "
+         << (double)(chain_data->initial[i] + chain_data->transition[0][i]) / (double)cumul_length << endl;
+  }
+# endif
+
 }
 
 
@@ -919,9 +994,11 @@ void Variable_order_chain_data::order0_estimation(Variable_order_markov &markov)
  *  arguments : reference sur un objet Format_error, stream,
  *              type de processus ('o' : ordinaire, 'e' : en equilibre),
  *              ordres minimum et maximum de la chaine de Markov,
- *              algorithme (LOCAL_BIC/CONTEXT), seuil pour l'elagage des memoires,
- *              type de prise en compte de la taille de l'echantillon,
- *              type d'estimation des probabilites de transition initiale (cas ordinaire),
+ *              algorithme (CTM_BIC/CTM_KT/LOCAL_BIC/CONTEXT), seuil pour l'elagage
+ *              des memoires, estimateur (maximum de vraisemblance, Laplace,
+ *              Laplace adaptatif), type d'estimation des probabilites de transition
+ *              initiale (cas ordinaire), type de prise en compte de la taille
+ *              de l'echantillon (pour algorithme LOCAL_BIC ou CONTEXT),
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
@@ -930,15 +1007,15 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
                                                                              ostream &os , char type ,
                                                                              int min_order , int max_order ,
                                                                              int algorithm , double threshold ,
-                                                                             bool global_sample ,
-                                                                             bool global_initial_transition ,
-                                                                             bool counting_flag) const
+                                                                             int estimator , bool global_initial_transition ,
+                                                                             bool global_sample , bool counting_flag) const
 
 {
-  bool status = true , order0;
+  bool status = true , order0 , *active_memory , *selected_memory;
   register int i , j , k;
-  int nb_row , diff_nb_parameter , state , *nb_parameter , *sample_size;
-  double diff_likelihood , max_likelihood;
+  int sample_size , length_nb_sequence , nb_row , state , *memory_count , *nb_parameter ,
+      *diff_nb_parameter;
+  double num , denom , max_likelihood , *memory_likelihood , *diff_likelihood;
   Variable_order_markov *markov , *completed_markov;
   Variable_order_chain_data *chain_data;
   Variable_order_markov_data *seq;
@@ -1008,9 +1085,31 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
   if (status) {
 
 #   ifdef MESSAGE
+    length_nb_sequence = nb_sequence;
+
+    sample_size = cumul_length;
+    os << "\n" << STAT_label[STATL_SAMPLE_SIZE] << ":";
+    for (i = 0;i <= (int)round(log((double)cumul_length) / log((double)marginal[0]->nb_value));i++) {
+      os << " " << sample_size;
+      sample_size -= length_nb_sequence;
+      length_nb_sequence -= hlength->frequency[i + 1];
+    }
+    os << endl;
+
     os << SEQ_label[SEQL_RECOMMENDED_MAX_ORDER] << ": "
        << (int)round(log((double)cumul_length) / log((double)marginal[0]->nb_value)) << endl;
 #   endif
+
+/*    if ((algorithm == CONTEXT) && (threshold == CONTEXT_THRESHOLD)) {
+      Test test(CHI2);
+      test.df1 = marginal[0]->nb_value - 1;
+      test.critical_probability = 0.05;
+      test.chi2_value_computation();
+
+      threshold = test.value;
+
+      os << "\n" << SEQ_label[SEQL_PRUNING_THRESHOLD] << ": " << threshold << endl;
+    } */
 
     markov = new Variable_order_markov(type , marginal[0]->nb_value , max_order , true);
 
@@ -1018,15 +1117,62 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 
     chain_data = new Variable_order_chain_data(markov->type , markov->nb_state , markov->nb_row);
     transition_count_computation(*chain_data , *markov , false , true);
-    chain_data->estimation(*markov , true , true);
+    chain_data->estimation(*markov , true , estimator);
 
+    memory_count = new int[markov->nb_row];
+    memory_likelihood = new double[markov->nb_row];
     nb_parameter = new int[markov->nb_row];
-    sample_size = new int[markov->nb_row];
+    diff_likelihood = new double[markov->nb_row];
+    diff_nb_parameter = new int[markov->nb_row];
+
+    for (i = 0;i < markov->nb_row;i++) {
+      memory_count[i] = 0;
+      for (j = 0;j < markov->nb_state;j++) {
+        memory_count[i] += chain_data->transition[i][j];
+      }
+    }
+
+    // estimateur de type BIC
+
+    if (algorithm != CTM_KT) {
+      for (i = 0;i < markov->nb_row;i++) {
+        memory_likelihood[i] = 0.;
+        if (memory_count[i] > 0) {
+          for (j = 0;j < markov->nb_state;j++) {
+            if (chain_data->transition[i][j] > 0) {
+              memory_likelihood[i] += chain_data->transition[i][j] * log(markov->transition[i][j]);
+            }
+          }
+        }
+      }
+    }
+
+    // estimateur de Krichevsky-Trofimov
+
+    else {
+      for (i = 0;i < markov->nb_row;i++) {
+        memory_likelihood[i] = 0.;
+        if (memory_count[i] > 0) {
+          denom = memory_count[i] - 1. + (double)markov->nb_state / 2.;
+          for (j = 0;j < markov->nb_state;j++) {
+            if (chain_data->transition[i][j] > 0) {
+              num = chain_data->transition[i][j] - 0.5;
+              for (k = 0;k < chain_data->transition[i][j];k++) {
+                memory_likelihood[i] += log(num) - log(denom);
+                num--;
+                denom--;
+              }
+            }
+          }
+        }
+      }
+    }
 
     for (i = 0;i < markov->nb_row;i++) {
       nb_parameter[i] = -1;
       for (j = 0;j < markov->nb_state;j++) {
         if (chain_data->transition[i][j] > 0) {
+//        if (markov->transition[i][j] > 0.) {
           nb_parameter[i]++;
         }
       }
@@ -1034,97 +1180,208 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
       if (nb_parameter[i] == -1) {
         nb_parameter[i] = 0;
       }
-    }
-
-    for (i = 0;i < markov->nb_row;i++) {
-      sample_size[i] = 0;
-      for (j = 0;j < markov->nb_state;j++) {
-        sample_size[i] += chain_data->transition[i][j];
+      else if ((algorithm == CTM_BIC) || (algorithm == LOCAL_BIC)) {
+        memory_likelihood[i] = 2 * memory_likelihood[i] -
+                               nb_parameter[i] * log((double)memory_count[0]);
       }
     }
 
 #   ifdef DEBUG
-    {
-      double likelihood;
-
-      for (i = 0;i < markov->nb_row;i++) {
-        likelihood = 0.;
-
-        for (j = 0;j < markov->nb_state;j++) {
-          if (chain_data->transition[i][j] > 0) {
-            if (markov->transition[i][j] > 0.) {
-              likelihood += chain_data->transition[i][j] * log(markov->transition[i][j]);
-            }
-            else {
-              likelihood = D_INF;
-              break;
-            }
-          }
-        }
-
-        for (j = markov->max_order - 1;j >= markov->order[i];j--) {
-          cout << "  ";
-        }
-        for (j = markov->order[i] - 1;j >= 0;j--) {
-          cout << markov->state[i][j] << " ";
-        }
-        cout << "   ";
-        for (j = 0;j < markov->nb_state;j++) {
-          cout << chain_data->transition[i][j] << "  ";
-        }
-        cout << " | ";
-        for (j = 0;j < markov->nb_state;j++) {
-          cout << markov->transition[i][j] << "  ";
-        }
-        cout << "   " << likelihood << "    " << nb_parameter[i] << endl;
+    for (i = 0;i < markov->nb_row;i++) {
+      for (j = markov->max_order - 1;j >= markov->order[i];j--) {
+        cout << "  ";
       }
+      for (j = markov->order[i] - 1;j >= 0;j--) {
+        cout << markov->state[i][j] << " ";
+      }
+      cout << "   ";
+      for (j = 0;j < markov->nb_state;j++) {
+        cout << chain_data->transition[i][j] << "  ";
+      }
+      cout << " | ";
+      for (j = 0;j < markov->nb_state;j++) {
+        cout << markov->transition[i][j] << "  ";
+      }
+      cout << "   " << memory_likelihood[i] << "    " << nb_parameter[i] << endl;
     }
 #   endif
 
     // elagage de l'arborescence
 
-    order0 = false;
-    nb_row = markov->nb_row;
-
 #   ifdef MESSAGE
+    if ((algorithm == CONTEXT) && (global_sample)) {
+      os << "\n" << SEQ_label[SEQL_PRUNING_THRESHOLD] << ": "
+         << threshold * log((double)memory_count[0]) << endl;
+    }
+
     os << "\n";
 #   endif
 
-    for (i = markov->nb_row - 1;i >= 0;i--) {
-      if ((markov->memory_type[i] == NON_TERMINAL) && (markov->order[i] >= min_order)) {
-        for (j = 0;j < markov->nb_state;j++) {
-          if (markov->memory_type[markov->child[i][j]] != TERMINAL) {
-            break;
+    if ((algorithm == CTM_BIC) || (algorithm == CTM_KT)) {
+      active_memory = new bool[markov->nb_row];
+      for (i = 0;i < markov->nb_row;i++) {
+        active_memory[i] = false;
+      }
+
+      selected_memory = new bool[markov->nb_row];
+      selected_memory[0] = true;
+      for (i = 1;i < markov->nb_row;i++) {
+        if (markov->order[i] <= min_order) {
+          selected_memory[i] = true;
+        }
+        else {
+          selected_memory[i] = false;
+        }
+      }
+
+      // calcul du BIC ou de l'estimateur de Krichevsky-Trofimov maximum de chaque sous-arborescence
+
+      for (i = markov->nb_row - 1;i >= 0;i--) {
+        if ((markov->memory_type[i] == NON_TERMINAL) && (nb_parameter[i] > 0) &&
+            (memory_count[i] >= MEMORY_MIN_COUNT)) {
+          max_likelihood = 0.;
+          diff_nb_parameter[i] = -nb_parameter[i];
+          for (j = 0;j < markov->nb_state;j++) {
+            max_likelihood += memory_likelihood[markov->child[i][j]];
+            diff_nb_parameter[i] += nb_parameter[markov->child[i][j]];
+          }
+
+          diff_likelihood[i] = max_likelihood - memory_likelihood[i];
+
+          if (max_likelihood > memory_likelihood[i]) {
+            memory_likelihood[i] = max_likelihood;
+            active_memory[i] = true;
           }
         }
 
-        if (j == markov->nb_state) {
-          if ((nb_parameter[i] > 0) && (sample_size[i] >= MEMORY_MIN_FREQUENCY)) {
-            switch (algorithm) {
-            case LOCAL_BIC :
-              diff_likelihood = 0.;
-              diff_nb_parameter = -nb_parameter[i];
-              break;
-            case CONTEXT :
-              max_likelihood = D_INF;
+#       ifdef MESSAGE
+        else {
+          diff_likelihood[i] = 0.;
+          diff_nb_parameter[i] = 0;
+        }
+#       endif
+
+      }
+
+      // construction par chainage de l'arborescence des memoires
+
+      nb_row = 1;
+      for (i = 0;i < markov->nb_row;i++) {
+        if ((markov->order[i] >= min_order) && (active_memory[i]) && (selected_memory[i]) &&
+            (diff_nb_parameter[i] >= 0) && (diff_likelihood[i] >= threshold)) {
+//            (diff_likelihood[i] >= threshold)) {
+          markov->memory_type[i] = NON_TERMINAL;
+          for (j = 0;j < markov->nb_state;j++) {
+            selected_memory[markov->child[i][j]] = true;
+            markov->memory_type[markov->child[i][j]] = TERMINAL;
+          }
+          nb_row += markov->nb_state;
+        }
+      }
+
+      if (nb_row == 1) {
+        order0 = true;
+        for (i = 0;i < markov->nb_state;i++) {
+          selected_memory[markov->child[0][i]] = true;
+          markov->memory_type[markov->child[0][i]] = TERMINAL;
+        }
+        nb_row += markov->nb_state;
+      }
+
+      else {
+        order0 = false;
+      }
+
+#     ifdef MESSAGE
+      for (i = 0;i < markov->nb_row;i++) {
+        if ((nb_parameter[i] > 0) && (memory_count[i] >= MEMORY_MIN_COUNT)) {
+          for (j = markov->max_order - 1;j >= markov->order[i];j--) {
+            os << "  ";
+          }
+          for (j = markov->order[i] - 1;j >= 0;j--) {
+            os << markov->state[i][j] << " ";
+          }
+
+          os << "   " << diff_likelihood[i] << "   " << diff_nb_parameter[i] << " | " << memory_count[i]
+             << " | " << active_memory[i] << "   " << selected_memory[i] << endl;
+        }
+      }
+#     endif
+
+      for (i = markov->nb_row - 1;i >= 0;i--) {
+        switch (selected_memory[i]) {
+
+        case false : {
+          markov->memory_type[i] = -1;
+          delete [] markov->state[i];
+          markov->state[i] = 0;
+          if (markov->child[i]) {
+            delete [] markov->child[i];
+            markov->child[i] = 0;
+          }
+          break;
+        }
+
+        case true : {
+          if ((markov->memory_type[i] == TERMINAL) && (markov->child[i])) {
+            delete [] markov->child[i];
+            markov->child[i] = 0;
+          }
+          break;
+        }
+        }
+      }
+    }
+
+    else {
+      order0 = false;
+      nb_row = markov->nb_row;
+
+      for (i = markov->nb_row - 1;i >= 0;i--) {
+        if ((markov->memory_type[i] == NON_TERMINAL) && (markov->order[i] >= min_order)) {
+          for (j = 0;j < markov->nb_state;j++) {
+            if (markov->memory_type[markov->child[i][j]] != TERMINAL) {
               break;
             }
+          }
 
-            for (j = 0;j < markov->nb_state;j++) {
-//              if (nb_parameter[markov->child[i][j]] > 0) {
+          if (j == markov->nb_state) {
+            if ((nb_parameter[i] > 0) && (memory_count[i] >= MEMORY_MIN_COUNT)) {
+/*              if (algorithm == LOCAL_BIC) {
+                if ((nb_parameter[i] > 0) && (memory_count[i] >= MEMORY_MIN_COUNT)) {
+                  diff_likelihood[i] = -memory_likelihood[i];
+                  diff_nb_parameter[i] = -nb_parameter[i];
+                  for (j = 0;j < markov->nb_state;j++) {
+                    diff_likelihood[i] += memory_likelihood[markov->child[i][j]];
+                    diff_nb_parameter[i] += nb_parameter[markov->child[i][j]];
+                  }
+                }
+              } */
+
+              switch (algorithm) {
+              case LOCAL_BIC :
+                diff_likelihood[i] = 0.;
+                diff_nb_parameter[i] = -nb_parameter[i];
+                break;
+              case CONTEXT :
+                max_likelihood = D_INF;
+                break;
+              }
+
+              for (j = 0;j < markov->nb_state;j++) {
                 if (algorithm == CONTEXT) {
-                  diff_likelihood = 0.;
+                  diff_likelihood[i] = 0.;
                 }
                 for (k = 0;k < markov->nb_state;k++) {
                   if (chain_data->transition[markov->child[i][j]][k] > 0) {
-                    diff_likelihood += chain_data->transition[markov->child[i][j]][k] *
-                                       log(markov->transition[markov->child[i][j]][k] /
-                                           markov->transition[i][k]);
+                    diff_likelihood[i] += chain_data->transition[markov->child[i][j]][k] *
+                                          log(markov->transition[markov->child[i][j]][k] /
+                                              markov->transition[i][k]);
                   }
                 }
 
-                if ((algorithm == CONTEXT) && (diff_likelihood > max_likelihood)) {
-                  max_likelihood = diff_likelihood;
+                if ((algorithm == CONTEXT) && (diff_likelihood[i] > max_likelihood)) {
+                  max_likelihood = diff_likelihood[i];
 
 #                 ifdef MESSAGE
                   state = j;
@@ -1133,17 +1390,16 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
                 }
 
                 if (algorithm == LOCAL_BIC) {
-                  diff_nb_parameter += nb_parameter[markov->child[i][j]];
+                  diff_nb_parameter[i] += nb_parameter[markov->child[i][j]];
                 }
-//              }
-            }
+              }
 
-            if (algorithm == LOCAL_BIC) {
-              diff_likelihood = 2 * diff_likelihood - diff_nb_parameter *
-                                log((double)sample_size[global_sample ? 0 : i]);
-            }
+              if (algorithm == LOCAL_BIC) {
+                diff_likelihood[i] = 2 * diff_likelihood[i] - diff_nb_parameter[i] *
+                                     log((double)memory_count[global_sample ? 0 : i]);
+              }
 
-#           ifdef MESSAGE
+#             ifdef MESSAGE
 //            if (diff_likelihood >= threshold) {
               for (j = markov->max_order - 1;j >= markov->order[i];j--) {
                 os << "  ";
@@ -1153,39 +1409,49 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
               }
 
               switch (algorithm) {
-              case LOCAL_BIC :
-                os << "   " << diff_likelihood << "   " << diff_nb_parameter << "   " << sample_size[i] << endl;
+
+              case LOCAL_BIC : {
+                os << "   " << diff_likelihood[i] << "   " << diff_nb_parameter[i]
+                   << "   " << memory_count[i] << endl;
                 break;
-              case CONTEXT :
-                os << "   " << max_likelihood << "   " << state << endl;
+              }
+
+              case CONTEXT : {
+                os << "   " << 2 * max_likelihood << "   " << state;
+                if (!global_sample) {
+                  os << "   " << threshold * log((double)memory_count[i]);
+                }
+                os << endl;
                 break;
+              }
               }
 //            }
-#           endif
+#             endif
 
-          }
-
-          if ((nb_parameter[i] == 0) || (sample_size[i] < MEMORY_MIN_FREQUENCY) ||
-              ((algorithm == LOCAL_BIC) && ((diff_nb_parameter < 0) || (diff_likelihood < threshold))) ||
-              ((algorithm == CONTEXT) &&
-               (2 * max_likelihood < threshold * markov->nb_state * log((double)sample_size[global_sample ? 0 : i])))) {
-//               (2 * max_likelihood < (threshold * markov->nb_state + 9) * log((double)sample_size[global_sample ? 0 : i])))) {
-            if (i > 0) {
-              markov->memory_type[i] = TERMINAL;
-
-              for (j = 0;j < markov->nb_state;j++) {
-                markov->memory_type[markov->child[i][j]] = -1;
-                delete [] markov->state[markov->child[i][j]];
-                markov->state[markov->child[i][j]] = 0;
-              }
-              delete [] markov->child[i];
-              markov->child[i] = 0;
-
-              nb_row -= markov->nb_state;
             }
 
-            else {
-              order0 = true;
+            if ((nb_parameter[i] == 0) || (memory_count[i] < MEMORY_MIN_COUNT) ||
+                ((algorithm == LOCAL_BIC) && ((diff_nb_parameter[i] < 0) || (diff_likelihood[i] < threshold))) ||
+                ((algorithm == CONTEXT) &&
+                 (2 * max_likelihood < threshold * log((double)memory_count[global_sample ? 0 : i])))) {
+//                 (2 * max_likelihood < threshold))) {
+              if (i > 0) {
+                markov->memory_type[i] = TERMINAL;
+
+                for (j = 0;j < markov->nb_state;j++) {
+                  markov->memory_type[markov->child[i][j]] = -1;
+                  delete [] markov->state[markov->child[i][j]];
+                  markov->state[markov->child[i][j]] = 0;
+                }
+                delete [] markov->child[i];
+                markov->child[i] = 0;
+
+                nb_row -= markov->nb_state;
+              }
+
+              else {
+                order0 = true;
+              }
             }
           }
         }
@@ -1250,8 +1516,16 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 
     delete chain_data;
 
+    delete [] memory_count;
+    delete [] memory_likelihood;
     delete [] nb_parameter;
-    delete [] sample_size;
+    delete [] diff_likelihood;
+    delete [] diff_nb_parameter;
+
+    if ((algorithm == CTM_BIC) || (algorithm == CTM_KT)) {
+      delete [] active_memory;
+      delete [] selected_memory;
+    }
 
     completed_markov = new Variable_order_markov(*markov , nb_variable - 1 ,
                                                  (nb_variable == 2 ? marginal[1]->nb_value : 0));
@@ -1285,7 +1559,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 
     case true : {
       seq->build_transition_count(*completed_markov , true , true);
-      seq->chain_data->order0_estimation(*completed_markov);
+      seq->order0_estimation(*completed_markov);
       break;
     }
     }
@@ -1550,17 +1824,20 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool begin) const
 
 {
+  bool *bic_memory , *kt_memory;
   register int i , j , k;
-  int buff , max_transition_sum , row , initial_sum , child_nb_parameter , *transition_sum ,
-      *nb_parameter , width[3];
+  int buff , max_memory_count , row , initial_count , *memory_count , *nb_parameter ,
+      *diff_nb_parameter , width[3];
   long old_adjust;
-  double standard_normal_value , half_confidence_interval , initial_likelihood ,
-         child_likelihood , *transition_likelihood , **confidence_limit;
+  double standard_normal_value , half_confidence_interval , diff , child_likelihood ,
+         child_krichevsky_trofimov , num , denom , *initial_likelihood , *memory_likelihood ,
+         *max_likelihood , *krichevsky_trofimov , *max_krichevsky_trofimov , **confidence_limit ,
+         **transition_likelihood , **diff_likelihood;
 
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  transition_sum = new int[nb_row];
+  memory_count = new int[nb_row];
 
   switch (begin) {
 
@@ -1571,37 +1848,34 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   }
 
   case true : {
-    initial_sum = 0;
+    initial_count = 0;
     for (i = 0;i < nb_state;i++) {
-      initial_sum += markov_data->chain_data->initial[i];
+      initial_count += markov_data->chain_data->initial[i];
     }
-    width[0] = column_width(initial_sum);
+    width[0] = column_width(initial_count);
 
-    max_transition_sum = 0;
+    max_memory_count = 0;
     break;
   }
   }
 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
-    transition_sum[i] = 0;
+    memory_count[i] = 0;
     for (j = 0;j < nb_state;j++) {
-      transition_sum[i] += markov_data->chain_data->transition[i][j];
+      memory_count[i] += markov_data->chain_data->transition[i][j];
     }
 
-    if ((begin) && (transition_sum[i] > max_transition_sum)) {
-      max_transition_sum = transition_sum[i];
+    if ((begin) && (memory_count[i] > max_memory_count)) {
+      max_memory_count = memory_count[i];
       row = i;
     }
   }
 
-  buff = column_width(transition_sum[row]);
+  buff = column_width(memory_count[row]);
   if (buff > width[0]) {
     width[0] = buff;
   }
   width[0] += ASCII_SPACE;
-
-  transition_likelihood = new double[nb_row];
-  nb_parameter = new int[nb_row];
 
   if (begin) {
     os << "\n" << SEQ_label[SEQL_INITIAL_COUNTS] << endl;
@@ -1624,7 +1898,7 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
     for (i = 0;i < nb_state;i++) {
       os << setw(width[0]) << markov_data->chain_data->initial[i];
     }
-    os << "  " << setw(width[0]) << initial_sum << endl;
+    os << "  " << setw(width[0]) << initial_count << endl;
   }
 
   os << "\n" << SEQ_label[SEQL_TRANSITION_COUNTS] << endl;
@@ -1653,7 +1927,7 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
         for (k = 0;k < nb_state;k++) {
           os << setw(width[0]) << markov_data->chain_data->transition[j][k];
         }
-        os << "  " << setw(width[0]) << transition_sum[j] << endl;
+        os << "  " << setw(width[0]) << memory_count[j] << endl;
       }
     }
   }
@@ -1709,7 +1983,7 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   for (i = (begin ? 1 : 0);i <= max_order;i++) {
     os << "\n";
     for (j = 0;j < nb_row;j++) {
-      if ((order[j] == i) && (transition_sum[j] > 0)) {
+      if ((order[j] == i) && (memory_count[j] > 0)) {
         for (k = max_order - 1;k >= order[j];k--) {
           os << "  ";
         }
@@ -1730,7 +2004,7 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
 
   confidence_limit = new double*[nb_row];
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
-    if (transition_sum[i] > 0) {
+    if (memory_count[i] > 0) {
       confidence_limit[i] = new double[nb_state * 2];
     }
   }
@@ -1738,10 +2012,10 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   standard_normal_value = standard_normal_value_computation(0.025);
 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
-    if (transition_sum[i] > 0) {
+    if (memory_count[i] > 0) {
       for (j = 0;j < nb_state;j++) {
         half_confidence_interval = standard_normal_value *
-                                   sqrt(transition[i][j] * (1. - transition[i][j]) / transition_sum[i]);
+                                   sqrt(transition[i][j] * (1. - transition[i][j]) / memory_count[i]);
         confidence_limit[i][2 * j] = MAX(transition[i][j] - half_confidence_interval , 0.);
         confidence_limit[i][2 * j + 1] = MIN(transition[i][j] + half_confidence_interval , 1.);
       }
@@ -1752,7 +2026,7 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
 
   width[1] = 0;
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
-    if (transition_sum[i] > 0) {
+    if (memory_count[i] > 0) {
       buff = column_width(2 * nb_state , confidence_limit[i]);
       if (buff > width[1]) {
         width[1] = buff;
@@ -1777,7 +2051,7 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   for (i = (begin ? 1 : 0);i <= max_order;i++) {
     os << "\n";
     for (j = 0;j < nb_row;j++) {
-      if ((order[j] == i) && (transition_sum[j] > 0)) {
+      if ((order[j] == i) && (memory_count[j] > 0)) {
         for (k = max_order - 1;k >= order[j];k--) {
           os << "  ";
         }
@@ -1790,21 +2064,179 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
           os << setw(width[1]) << confidence_limit[j][2 * k]
              << setw(width[1]) << confidence_limit[j][2 * k + 1];
         }
-        os << "  " << setw(width[0]) << transition_sum[j] << endl;
+        os << "  " << setw(width[0]) << memory_count[j] << endl;
+      }
+    }
+  }
+
+  // calcul des vraisemblances
+
+  if (begin) {
+    initial_likelihood = new double[nb_state + 1];
+
+    initial_likelihood[nb_state] = 0.;
+    for (i = 0;i < nb_state;i++) {
+      if (markov_data->chain_data->initial[i] > 0) {
+        initial_likelihood[i] = markov_data->chain_data->initial[i] * log(initial[i]);
+        initial_likelihood[nb_state] += initial_likelihood[i];
+      }
+      else {
+        initial_likelihood[i] = 0.;
+      }
+    }
+  }
+
+  transition_likelihood = new double*[nb_row];
+  memory_likelihood = new double[nb_row];
+  krichevsky_trofimov = new double[nb_row];
+  nb_parameter = new int[nb_row];
+
+  diff_likelihood = new double*[2];
+  diff_likelihood[0] = new double[nb_row];
+  diff_likelihood[1] = new double[nb_row];
+
+  max_likelihood = new double[nb_row];
+  bic_memory = new bool[nb_row];
+  max_krichevsky_trofimov = new double[nb_row];
+  kt_memory = new bool[nb_row];
+  diff_nb_parameter = new int[nb_row];
+
+  if (begin) {
+    memory_likelihood[0] = 0.;
+    krichevsky_trofimov[0] = 0.;
+    nb_parameter[0] = 0;
+
+    diff_likelihood[0][0] = 0;
+    diff_likelihood[1][0] = 0;
+    max_likelihood[0] = 0;
+    max_krichevsky_trofimov[0] = 0;
+  }
+
+  for (i = (begin ? 1 : 0);i < nb_row;i++) {
+    transition_likelihood[i] = new double[nb_state];
+
+    memory_likelihood[i] = 0.;
+    nb_parameter[i] = 0;
+    for (j = 0;j < nb_state;j++) {
+      if (markov_data->chain_data->transition[i][j] > 0) {
+        nb_parameter[i]++;
+        transition_likelihood[i][j] = markov_data->chain_data->transition[i][j] * log(transition[i][j]);
+        memory_likelihood[i] += transition_likelihood[i][j];
+      }
+      else {
+        transition_likelihood[i][j] = 0.;
+      }
+    }
+
+    if (nb_parameter[i] > 0) {
+      nb_parameter[i]--;
+    }
+
+    // estimateur de Krichevsky-Trofimov
+
+    krichevsky_trofimov[i] = 0.;
+//    krichevsky_trofimov[i] = 1.;
+    if (memory_count[i] > 0) {
+      denom = memory_count[i] - 1. + (double)nb_state / 2.;
+      for (j = 0;j < nb_state;j++) {
+        if (markov_data->chain_data->transition[i][j] > 0) {
+          num = markov_data->chain_data->transition[i][j] - 0.5;
+          for (k = 0;k < markov_data->chain_data->transition[i][j];k++) {
+//          krichevsky_trofimov[i] *= num / denom;
+            krichevsky_trofimov[i] += log(num) - log(denom);
+            num--;
+            denom--;
+          }
+        }
+      }
+    }
+  }
+
+  for (i = nb_row - 1;i >= (begin ? 1 : 0);i--) {
+    max_likelihood[i] = 2 * memory_likelihood[i] - nb_parameter[i] * log((double)memory_count[0]);
+    max_krichevsky_trofimov[i] = krichevsky_trofimov[i];
+
+    if (order[i] == max_order) {
+      diff_likelihood[0][i] = 0.;
+      diff_likelihood[1][i] = 0.;
+    }
+
+    else {
+      diff = -memory_likelihood[i];
+      child_likelihood = 0.;
+      child_krichevsky_trofimov = 0.;
+      diff_nb_parameter[i] = -nb_parameter[i];
+      for (j = 0;j < nb_state;j++) {
+        diff += memory_likelihood[child[i][j]];
+        child_likelihood += max_likelihood[child[i][j]];
+        child_krichevsky_trofimov += max_krichevsky_trofimov[child[i][j]];
+        diff_nb_parameter[i] += nb_parameter[child[i][j]];
+      }
+      diff_likelihood[0][i] = 2 * diff - diff_nb_parameter[i] * log((double)memory_count[0]);
+      diff_likelihood[1][i] = 2 * diff - diff_nb_parameter[i] * log((double)memory_count[i]);
+
+      if (child_likelihood > max_likelihood[i]) {
+        max_likelihood[i] = child_likelihood;
+        bic_memory[i] = true;
+      }
+      else {
+        bic_memory[i] = false;
+      }
+
+      if (child_krichevsky_trofimov > max_krichevsky_trofimov[i]) {
+        max_krichevsky_trofimov[i] = child_krichevsky_trofimov;
+        kt_memory[i] = true;
+      }
+      else {
+        kt_memory[i] = false;
       }
     }
   }
 
   // calcul des largeurs des colonnes
 
-  for (i = 0;i < nb_state;i++) {
-    transition_likelihood[i] = markov_data->chain_data->transition[row][i] * log(transition[row][i]);
+  if (begin) {
+    width[1] = column_width(nb_state + 1 , initial_likelihood);
   }
-  for (i = 1;i < nb_state;i++) {
-    transition_likelihood[i] += transition_likelihood[i - 1];
+  else {
+    width[1] = 0;
   }
-  width[1] = column_width(nb_state , transition_likelihood) + ASCII_SPACE;
-  width[2] = column_width(nb_state * (nb_state - 1)) + ASCII_SPACE;
+
+  for (i = (begin ? 1 : 0);i < nb_row;i++) {
+    buff = column_width(nb_state , transition_likelihood[i]);
+    if (buff > width[1]) {
+      width[1] = buff;
+    }
+  }
+
+  buff = column_width(nb_row , memory_likelihood);
+  if (buff > width[1]) {
+    width[1] = buff;
+  }
+  buff = column_width(nb_row , krichevsky_trofimov);
+  if (buff > width[1]) {
+    width[1] = buff;
+  }
+
+  buff = column_width(nb_row , diff_likelihood[0]);
+  if (buff > width[1]) {
+    width[1] = buff;
+  }
+  buff = column_width(nb_row , diff_likelihood[1]);
+  if (buff > width[1]) {
+    width[1] = buff;
+  }
+  buff = column_width(nb_row , max_likelihood);
+  if (buff > width[1]) {
+    width[1] = buff;
+  }
+  buff = column_width(nb_row , max_krichevsky_trofimov);
+  if (buff > width[1]) {
+    width[1] = buff;
+  }
+  width[1] += ASCII_SPACE;
+
+  width[2] = column_width(nb_state - 1) + ASCII_SPACE;
 
   os << "\n\n" << SEQ_label[SEQL_LIKELIHOODS] << endl;
 
@@ -1824,17 +2256,10 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
     }
     os << "  ";
 
-    initial_likelihood = 0.;
     for (i = 0;i < nb_state;i++) {
-      if (markov_data->chain_data->initial[i] > 0) {
-        initial_likelihood += markov_data->chain_data->initial[i] * log(initial[i]);
-        os << setw(width[1]) << markov_data->chain_data->initial[i] * log(initial[i]);
-      }
-      else {
-        os << setw(width[1]) << 0.;
-      }
+      os << setw(width[1]) << initial_likelihood[i];
     }
-    os << "  " << setw(width[1]) << initial_likelihood << "\n\n";
+    os << "  " << setw(width[1]) << initial_likelihood[nb_state] << "\n\n";
   }
 
   for (i = 0;i < max_order;i++) {
@@ -1849,18 +2274,18 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
      << "    " << SEQ_label[SEQL_COUNT]
      << "    " << STAT_label[STATL_FREE_PARAMETERS];
   if (!begin) {
+/*    os << "    " << STAT_criterion_word[BIC] << "    " << STAT_criterion_word[BICc]
+       << "    " << SEQ_label[SEQL_KRICHEVSKY_TROFIMOV]; */
+
     os << "    " << SEQ_label[SEQL_DELTA] << " " << STAT_label[STATL_FREE_PARAMETERS]
        << "    " << SEQ_label[SEQL_DELTA] << " " << STAT_criterion_word[BIC]
-       << "    " << SEQ_label[SEQL_DELTA] << " " << STAT_criterion_word[BICc];
+       << "    " << SEQ_label[SEQL_DELTA] << " " << STAT_criterion_word[BICc]
+       << "    " << SEQ_label[SEQL_DELTA] << " " << STAT_criterion_word[BIC]
+       << "    " << SEQ_label[SEQL_DELTA] << " " << SEQ_label[SEQL_KRICHEVSKY_TROFIMOV];
   }
   os << endl;
 
   for (i = (begin ? 1 : 0);i <= max_order;i++) {
-    if (!begin) {
-      child_likelihood = 0.;
-      child_nb_parameter = 0;
-    }
-
     os << "\n";
     for (j = 0;j < nb_row;j++) {
       if (order[j] == i) {
@@ -1872,47 +2297,40 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
         }
         os << "  ";
 
-        transition_likelihood[j] = 0.;
-        nb_parameter[j] = 0;
         for (k = 0;k < nb_state;k++) {
-          if (markov_data->chain_data->transition[j][k] > 0) {
-            nb_parameter[j]++;
-            transition_likelihood[j] += markov_data->chain_data->transition[j][k] * log(transition[j][k]);
-            os << setw(width[1]) << markov_data->chain_data->transition[j][k] * log(transition[j][k]);
-          }
-          else {
-            os << setw(width[1]) << 0.;
-          }
+          os << setw(width[1]) << transition_likelihood[j][k];
         }
 
-        if (nb_parameter[j] > 0) {
-          nb_parameter[j]--;
-        }
-
-        if (!begin) {
-          child_likelihood += transition_likelihood[j];
-          child_nb_parameter += nb_parameter[j];
-        }
-
-        os << "  " << setw(width[1]) << transition_likelihood[j]
-           << "  " << setw(width[0]) << transition_sum[j]
+        os << "  " << setw(width[1]) << memory_likelihood[j]
+           << "  " << setw(width[0]) << memory_count[j]
            << "  " << setw(width[2]) << nb_parameter[j];
 
-        if ((!begin) && (i > 0) && (state[j][order[j] - 1] == nb_state - 1)) {
-          os << "  " << setw(width[2]) << child_nb_parameter - nb_parameter[parent[j]]
-             << "  " << setw(width[1]) << 2 * (child_likelihood - transition_likelihood[parent[j]]) -
-             (child_nb_parameter - nb_parameter[parent[j]]) * log((double)transition_sum[0]);
+/*        if (!begin) {
+          os << "  " << setw(width[1]) << 2 * memory_likelihood[j] -
+             nb_parameter[j] * log((double)memory_count[0]);
 
-          if (transition_sum[parent[j]] > 0) {
-            os << "  " << setw(width[1]) << 2 * (child_likelihood - transition_likelihood[parent[j]]) -
-               (child_nb_parameter - nb_parameter[parent[j]]) * log((double)transition_sum[parent[j]]);
+          if (memory_count[parent[j]] > 0) {
+            os << "  " << setw(width[1]) << 2 * memory_likelihood[j] -
+               nb_parameter[j] * log((double)memory_count[parent[j]]);
           }
           else {
             os << "  " << setw(width[1]) << 0;
           }
 
-          child_likelihood = 0.;
-          child_nb_parameter = 0;
+          os << "  " << setw(width[1]) << krichevsky_trofimov[j];
+        } */
+
+        if ((!begin) && (order[j] < max_order)) {
+          os << "  " << setw(width[2]) << diff_nb_parameter[j]
+             << "  " << setw(width[1]) << diff_likelihood[0][j];
+          if (memory_count[j] > 0) {
+            os << setw(width[1]) << diff_likelihood[1][j];
+          }
+          else {
+            os << setw(width[1]) << 0;
+          }
+          os << "  " << setw(width[1]) << max_likelihood[j] << "  " << bic_memory[j]
+             << setw(width[1]) << max_krichevsky_trofimov[j] << "  " << kt_memory[j];
         }
 
         os << endl;
@@ -1921,15 +2339,36 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   }
 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
-    if (transition_sum[i] > 0) {
+    if (memory_count[i] > 0) {
       delete [] confidence_limit[i];
     }
   }
   delete [] confidence_limit;
 
-  delete [] transition_sum;
+  delete [] memory_count;
+
+  if (begin) {
+    delete [] initial_likelihood;
+  }
+
+  for (i = (begin ? 1 : 0);i < nb_row;i++) {
+    delete [] transition_likelihood[i];
+  }
   delete [] transition_likelihood;
+
+  delete [] memory_likelihood;
+  delete [] krichevsky_trofimov;
   delete [] nb_parameter;
+
+  delete [] diff_likelihood[0];
+  delete [] diff_likelihood[1];
+  delete [] diff_likelihood;
+
+  delete [] max_likelihood;
+  delete [] bic_memory;
+  delete [] max_krichevsky_trofimov;
+  delete [] kt_memory;
+  delete [] diff_nb_parameter;
 
   os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
@@ -1942,12 +2381,14 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
  *  Comptage des transitions pour differents ordres.
  *
  *  arguments : indice de la variable, ordre maximum, flag pour prendre en compte
- *              le debut de la sequence, flag estimateur de Laplace.
+ *              le debut de la sequence, estimateur (maximum de vraisemblance,
+ *              Laplace, Laplace adaptatif), path.
  *
  *--------------------------------------------------------------*/
 
 bool Markovian_sequences::transition_count(Format_error &error , ostream &os ,
-                                           int max_order , bool begin , bool laplace) const
+                                           int max_order , bool begin , int estimator ,
+                                           const char *path) const
 
 {
   bool status = true;
@@ -1992,11 +2433,25 @@ bool Markovian_sequences::transition_count(Format_error &error , ostream &os ,
     seq = markov->markov_data;
     seq->state_variable_init();
     seq->build_transition_count(*markov , begin , !begin);
-    seq->chain_data->estimation(*markov , true , laplace);
+    seq->chain_data->estimation(*markov , true , estimator);
 
 #   ifdef MESSAGE
     markov->transition_count_ascii_write(os , begin);
 #   endif
+
+    if (path) {
+      ofstream out_file(path);
+
+      if (!out_file) {
+        status = false;
+        error.update(STAT_error[STATR_FILE_NAME]);
+      }
+
+      else {
+        status = true;
+        markov->transition_count_ascii_write(out_file , begin);
+      }
+    }
 
     delete markov;
   }

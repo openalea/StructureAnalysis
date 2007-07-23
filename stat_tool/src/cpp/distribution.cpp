@@ -2148,7 +2148,7 @@ void Distribution::offset_computation()
   pmass = mass;
   offset = 0;
 
-  while ((*pmass++ == 0.)  && (offset < nb_value - 1)) {
+  while ((*pmass++ == 0.) && (offset < nb_value - 1)) {
     offset++;
   }
 }

@@ -54,6 +54,7 @@ using namespace std;
 
 extern int* select_variable(int nb_variable , int selected_nb_variable ,
                             int *selected_variable , bool keep);
+
 extern int column_width(int value);
 extern char* label(const char *file_name);
 
@@ -2644,8 +2645,9 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
 {
   bool status = true , *selected_word;
   register int i , j , k;
-  int nb_word , max_nb_word , value , max_frequency , width , *power , *frequency ,
-      *word_value , *psequence , *index , **word;
+  int nb_state , nb_word , max_nb_word , value , max_frequency , total_frequency , width ,
+      *power , *frequency , *word_value , *psequence , *index , **word;
+  double *probability;
   long old_adjust;
 
 
@@ -2658,14 +2660,38 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
 
   else {
     variable--;
+    nb_state = marginal[variable]->nb_value - marginal[variable]->offset;
  
-    if ((marginal[variable]->nb_value < 2) || (marginal[variable]->nb_value > NB_STATE)) {
+    if ((nb_state < 2) || (nb_state > NB_STATE)) {
       status = false;
       error.update(SEQ_error[SEQR_NB_STATE]);
     }
-    else if (pow((double)marginal[variable]->nb_value , word_length) > MAX_NB_WORD) {
-      status = false;
-      error.update(SEQ_error[SEQR_MAX_NB_WORD]);
+
+    else {
+      if (pow((double)nb_state , word_length) > MAX_NB_WORD) {
+        status = false;
+        error.update(SEQ_error[SEQR_MAX_NB_WORD]);
+      }
+
+      if ((begin_state != I_DEFAULT) && ((begin_state < marginal[variable]->offset) ||
+           (begin_state >= marginal[variable]->nb_value) || (marginal[variable]->frequency[begin_state] == 0))) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                      << STAT_label[STATL_STATE] << " " << begin_state << " "
+                      << SEQ_error[SEQR_NOT_PRESENT];
+        error.update((error_message.str()).c_str());
+      }
+
+      if ((end_state != I_DEFAULT) && ((end_state < marginal[variable]->offset) ||
+           (end_state >= marginal[variable]->nb_value) || (marginal[variable]->frequency[end_state] == 0))) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                      << STAT_label[STATL_STATE] << " " << end_state << " "
+                      << SEQ_error[SEQR_NOT_PRESENT];
+        error.update((error_message.str()).c_str());
+      }
     }
   }
 
@@ -2743,8 +2769,11 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
 
     index = new int[nb_word];
     selected_word = new bool[nb_word];
+    probability = new double[nb_word];
 
+    total_frequency = 0;
     for (i = 0;i < nb_word;i++) {
+      total_frequency += frequency[i];
       selected_word[i] = false;
     }
 
@@ -2761,6 +2790,7 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
       }
 
       selected_word[index[i]] = true;
+      probability[index[i]] = (double)frequency[index[i]] / (double)total_frequency;
 
       if (i == 0) {
         width = column_width(max_frequency);
@@ -2775,7 +2805,14 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
       for (k = 0;k < word_length;k++) {
         os << word[index[j]][k] << " ";
       }
-      os << "   " << setw(width) << frequency[index[j]] << endl;
+      os << "   " << setw(width) << frequency[index[j]]
+         << "   " << probability[index[j]];
+
+      if (j == 0) {
+        os << "   (" << nb_word << " " << SEQ_label[SEQL_WORDS] << ", "
+           << total_frequency << ")";
+      }
+      os << endl;
     }
 
     os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
@@ -2785,6 +2822,7 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
     delete [] word_value;
     delete [] index;
     delete [] selected_word;
+    delete [] probability;
 
     for (i = 0;i < nb_word;i++) {
       delete [] word[i];

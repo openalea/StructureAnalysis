@@ -83,8 +83,18 @@ enum {
 };
 
 enum {
-  CONTEXT ,
-  LOCAL_BIC
+  CTM_BIC ,                            // algorithme Context Tree Maximizing/BIC
+  CTM_KT ,                             // algorithme Context Tree Maximizing/Krichevsky-Trofimov
+  LOCAL_BIC ,                          // algorithme d'elagage recursif/BIC 
+  CONTEXT                              // algorithme Context
+};
+
+enum {
+  MAXIMUM_LIKELIHOOD ,
+  LAPLACE ,
+  ADAPTATIVE_LAPLACE ,
+  UNIFORM_SUBSET ,
+  UNIFORM_CARDINALITY
 };
 
 const double MAX_NB_WORD = 1.e7;       // nombre maximum de mots
@@ -96,8 +106,10 @@ const int STATIONARY_PROBABILITY_LENGTH = 10000;  // longueur maximum pour le ca
 const double LEAVE_INCREMENT = 1.e-6;  // seuil pour stopper le calcul de la probabilite
                                        // de quitter un etat/observation sans possibilite d'y revenir
 
+const double CTM_BIC_THRESHOLD = 6.;   // seuil pour elaguer les memoires
+const double CTM_KT_THRESHOLD = 12.;   // seuil pour elaguer les memoires
 const double LOCAL_BIC_THRESHOLD = 10.;  // seuil pour elaguer les memoires
-const double CONTEXT_THRESHOLD = 1.5;  // seuil pour elaguer les memoires
+const double CONTEXT_THRESHOLD = 5.;  // seuil pour elaguer les memoires
 
 const double OCCUPANCY_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
                                              // pour borner une loi d'occupation d'un etat
@@ -106,6 +118,9 @@ const double OCCUPANCY_MEAN = 10.;     // temps moyen d'occupation d'un etat
 const int MIN_NB_STATE_SEQUENCE = 1;   // nombre de sequences d'etats 1ere iteration de SEM
 const int MAX_NB_STATE_SEQUENCE = 10;  // nombre de sequences d'etats maximum pour SEM
 const double NB_STATE_SEQUENCE_PARAMETER = 1.;  // parametre nombre de sequences d'etats pour SEM
+
+const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300; // nombre maximum de sequences pour la sortie des probabilites
+                                                   // a posteriori des sequences d'etats les plus probables
 
 const int NB_STATE_SEQUENCE = 10;      // nombre de sequences d'etats calculees
 
@@ -906,7 +921,8 @@ public :
     bool transition_count_0(Format_error &error , std::ostream &os , int max_order ,
                             bool begin = false , const char *path = 0 , char format = 'a') const;
     bool transition_count(Format_error &error , std::ostream &os , int max_order ,
-                          bool begin = false , bool laplace = false) const;
+                          bool begin = false , int estimator = LAPLACE ,
+                          const char *path = 0) const;
     bool word_count(Format_error &error , std::ostream &os , int variable , int word_length ,
                     int begin_state = I_DEFAULT , int end_state = I_DEFAULT ,
                     int min_frequency = 1) const;
@@ -947,11 +963,12 @@ public :
                                                             int max_order = ORDER ,
                                                             int algorithm = LOCAL_BIC ,
                                                             double threshold = LOCAL_BIC_THRESHOLD ,
-                                                            bool global_sample = true ,
+                                                            int estimator = LAPLACE ,
                                                             bool global_initial_transition = true ,
+                                                            bool global_sample = true ,
                                                             bool counting_flag = true) const;
     Variable_order_markov* variable_order_markov_estimation(Format_error &error ,
-                                                            const Variable_order_markov &imarkov,
+                                                            const Variable_order_markov &imarkov ,
                                                             bool global_initial_transition = true ,
                                                             bool counting_flag = true) const;
     Variable_order_markov* variable_order_markov_estimation(Format_error &error ,

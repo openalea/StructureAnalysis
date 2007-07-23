@@ -1885,8 +1885,11 @@ Semi_markov_data::Semi_markov_data()
 {
   semi_markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -1906,8 +1909,11 @@ Semi_markov_data::Semi_markov_data(int inb_variable , const Histogram &ihlength 
 {
   semi_markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -1938,6 +1944,8 @@ Semi_markov_data::Semi_markov_data(int inb_sequence , int *ilength , int ***iseq
   // calcul de la vraisemblance
 
   likelihood = semi_markov->likelihood_computation(*this);
+
+  posterior_probability = 0;
 }
 
 
@@ -1956,8 +1964,11 @@ Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , bool initial
 {
   semi_markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -1976,8 +1987,11 @@ Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , int variable
 {
   semi_markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -1997,8 +2011,11 @@ Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , int variable
 {
   semi_markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -2014,6 +2031,9 @@ Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , int variable
 void Semi_markov_data::copy(const Semi_markov_data &seq , bool model_flag)
 
 {
+  register int i;
+
+
   if ((model_flag) && (seq.semi_markov)) {
     semi_markov = new Semi_markov(*(seq.semi_markov) , false);
   }
@@ -2030,6 +2050,16 @@ void Semi_markov_data::copy(const Semi_markov_data &seq , bool model_flag)
 
   likelihood = seq.likelihood;
   hidden_likelihood = seq.hidden_likelihood;
+
+  if (seq.posterior_probability) {
+    posterior_probability = new double[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      posterior_probability[i] = seq.posterior_probability[i];
+    }
+  }
+  else {
+    posterior_probability = 0;
+  }
 }
 
 
@@ -2044,6 +2074,8 @@ Semi_markov_data::~Semi_markov_data()
 {
   delete semi_markov;
   delete chain_data;
+
+  delete [] posterior_probability;
 }
 
 

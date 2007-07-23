@@ -71,17 +71,19 @@ extern char* label(const char *file_name);
  *  Calcul de la vraisemblance de sequences pour une chaine de Markov
  *  d'ordre variable cachee par l'algorithme forward.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence.
+ *  arguments : reference sur un objet Markovian_sequences, pointeur sur
+ *              les probabilites a posteriori des sequences d'etats
+ *              les plus probables, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
 double Hidden_variable_order_markov::likelihood_computation(const Markovian_sequences &seq ,
-                                                            int index) const
+                                                            double *posterior_probability , int index) const
 
 {
   register int i , j , k , m;
   int nb_value , **poutput;
-  double likelihood = 0. , *forward , *auxiliary , norm;
+  double likelihood = 0. , seq_likelihood , *forward , *auxiliary , norm;
 
 
   // verification de la compatibilite entre le modele et les donnees
@@ -120,6 +122,8 @@ double Hidden_variable_order_markov::likelihood_computation(const Markovian_sequ
         for (j = 0;j < seq.nb_variable;j++) {
           poutput[j] = seq.sequence[i][j];
         }
+        seq_likelihood = 0.;
+
         norm = 0.;
 
         switch (type) {
@@ -177,12 +181,11 @@ double Hidden_variable_order_markov::likelihood_computation(const Markovian_sequ
           for (j = 1;j < nb_row;j++) {
             forward[j] /= norm;
           }
-
-          likelihood += log(norm);
+          seq_likelihood += log(norm);
         }
 
         else {
-          likelihood = D_INF;
+          seq_likelihood = D_INF;
           break;
         }
 
@@ -214,16 +217,24 @@ double Hidden_variable_order_markov::likelihood_computation(const Markovian_sequ
             for (k = 1;k < nb_row;k++) {
               forward[k] = auxiliary[k] / norm;
             }
-            likelihood += log(norm);
+            seq_likelihood += log(norm);
           }
 
           else {
-            likelihood = D_INF;
+            seq_likelihood = D_INF;
             break;
           }
         }
 
-        if (likelihood == D_INF) {
+        if (seq_likelihood != D_INF) {
+          likelihood += seq_likelihood;
+          if (posterior_probability) {
+            posterior_probability[i] = exp(posterior_probability[i] - seq_likelihood);
+          }
+        }
+
+        else {
+          likelihood = D_INF;
           break;
         }
       }
@@ -803,7 +814,8 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         hmarkov->create_cumul();
         hmarkov->log_computation();
 
-        seq->likelihood = hmarkov->viterbi(*seq);
+        seq->posterior_probability = new double[seq->nb_sequence];
+        seq->likelihood = hmarkov->viterbi(*seq , seq->posterior_probability);
 
         hmarkov->remove_cumul();
 
@@ -859,12 +871,22 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
       // calcul de la vraisemblance et des lois caracteristiques du modele
 
-      seq->hidden_likelihood = hmarkov->likelihood_computation(*this);
+      seq->hidden_likelihood = hmarkov->likelihood_computation(*this , seq->posterior_probability);
 
 #     ifdef DEBUG
 //      cout << *hmarkov;
       cout << "iteration " << iter << "  "
            << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << seq->hidden_likelihood << endl;
+#     endif
+
+#     ifdef MESSAGE
+      if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+        for (i = 0;i < seq->nb_sequence;i++) {
+          os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+             << seq->posterior_probability[i] << endl;
+        }
+      }
 #     endif
 
       hmarkov->component_computation();
@@ -1435,7 +1457,8 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         hmarkov->create_cumul();
         hmarkov->log_computation();
 
-        seq->likelihood = hmarkov->viterbi(*seq);
+        seq->posterior_probability = new double[seq->nb_sequence];
+        seq->likelihood = hmarkov->viterbi(*seq , seq->posterior_probability);
 
         hmarkov->remove_cumul();
 
@@ -1491,12 +1514,22 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
       // calcul de la vraisemblance et des lois caracteristiques du modele
 
-      seq->hidden_likelihood = hmarkov->likelihood_computation(*this);
+      seq->hidden_likelihood = hmarkov->likelihood_computation(*this , seq->posterior_probability);
 
 #     ifdef DEBUG
 //      cout << *hmarkov;
       cout << "iteration " << iter << "  "
            << SEQ_label[SEQL_OBSERVED_SEQUENCES_LIKELIHOOD] << ": " << seq->hidden_likelihood << endl;
+#     endif
+
+#     ifdef MESSAGE
+      if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
+        for (i = 0;i < seq->nb_sequence;i++) {
+          os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
+             << seq->posterior_probability[i] << endl;
+        }
+      }
 #     endif
 
       hmarkov->component_computation();
@@ -3238,15 +3271,16 @@ void Hidden_variable_order_markov::log_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des sequences d'etats optimale par l'algorithme de Viterbi.
+ *  Calcul des sequences d'etats les plus probables par l'algorithme de Viterbi.
  *
  *  arguments : reference sur un objet Variable_order_markov_data,
- *              indice de la sequence.
+ *              pointeur sur les probabilites a posteriori des sequences d'etats
+ *              les plus probables, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
 double Hidden_variable_order_markov::viterbi(const Variable_order_markov_data &seq ,
-                                             int index) const
+                                             double *posterior_probability , int index) const
 
 {
   register int i , j , k , m;
@@ -3415,9 +3449,16 @@ double Hidden_variable_order_markov::viterbi(const Variable_order_markov_data &s
       if (forward_max != D_INF) {
         likelihood += forward_max;
         *pstate = state[memory][0];
+        if (posterior_probability) {
+          posterior_probability[i] = forward_max;
+        }
       }
+
       else {
         likelihood = D_INF;
+        if (posterior_probability) {
+          posterior_probability[i] = 0.;
+        }
         break;
       }
 
@@ -4420,10 +4461,10 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
       for (j = 0;j < nb_model;j++) {
         switch (algorithm) {
         case FORWARD :
-          likelihood[i][j] = ihmarkov[j]->likelihood_computation(*this , i);
+          likelihood[i][j] = ihmarkov[j]->likelihood_computation(*this , 0 , i);
           break;
         case VITERBI :
-          likelihood[i][j] = hmarkov[j]->viterbi(*seq , i);
+          likelihood[i][j] = hmarkov[j]->viterbi(*seq , 0 , i);
           break;
         }
       }
@@ -4698,7 +4739,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
 
       ref_likelihood = 0.;
       for (j = 0;j < seq->nb_sequence;j++) {
-        likelihood[j][i] = hmarkov[i]->likelihood_computation(*seq , j);
+        likelihood[j][i] = hmarkov[i]->likelihood_computation(*seq , 0 , j);
         ref_likelihood += likelihood[j][i];
       }
 
@@ -4708,7 +4749,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
         if (j != i) {
           target_likelihood = 0.;
           for (k = 0;k < seq->nb_sequence;k++) {
-            likelihood[k][j] = hmarkov[j]->likelihood_computation(*seq , k);
+            likelihood[k][j] = hmarkov[j]->likelihood_computation(*seq , 0 , k);
             if (target_likelihood != D_INF) {
               if (likelihood[k][j] != D_INF) {
                 target_likelihood += likelihood[k][j];

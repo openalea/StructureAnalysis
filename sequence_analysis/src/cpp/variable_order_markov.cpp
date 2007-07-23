@@ -3188,7 +3188,7 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
 
 {
   register int i , j;
-  int buff , variable , max_transition_sum , *transition_sum , width[2];
+  int buff , variable , max_memory_count , *memory_count , width[2];
   double standard_normal_value , half_confidence_interval;
   long old_adjust;
   Histogram **observation = 0;
@@ -3234,7 +3234,8 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
     if (!hidden) {
       width[0] = 0;
       for (i = 1;i < nb_row;i++) {
-        if (memory_type[i] == TERMINAL) {
+        if((memory_type[i] == TERMINAL) || ((type == 'o') &&
+            (memory_type[i] == NON_TERMINAL))) {
           buff = column_width(nb_state , transition[i]);
           if (buff > width[0]) {
             width[0] = buff;
@@ -3244,22 +3245,23 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
       width[0]++;
     }
 
-    transition_sum = new int[nb_row];
-    max_transition_sum = 0;
+    memory_count = new int[nb_row];
+    max_memory_count = 0;
     for (i = 1;i < nb_row;i++) {
 //      if (memory_type[i] == TERMINAL) {
-      if ((memory_type[i] == TERMINAL) || (hidden)) {
-        transition_sum[i] = 0;
+      if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
+           (memory_type[i] == NON_TERMINAL)) || (hidden)) {
+        memory_count[i] = 0;
         for (j = 0;j < nb_state;j++) {
-          transition_sum[i] += seq->chain_data->transition[i][j];
+          memory_count[i] += seq->chain_data->transition[i][j];
         }
 
-        if (transition_sum[i] > max_transition_sum) {
-          max_transition_sum = transition_sum[i];
+        if (memory_count[i] > max_memory_count) {
+          max_memory_count = memory_count[i];
         }
       }
     }
-    width[1] = column_width(max_transition_sum) + ASCII_SPACE;
+    width[1] = column_width(max_memory_count) + ASCII_SPACE;
 
     os << "\n";
     if (file_flag) {
@@ -3277,24 +3279,28 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
     os << "\n";
     for (i = 1;i < nb_row;i++) {
 //      if (memory_type[i] == TERMINAL) {
-      if ((memory_type[i] == TERMINAL) || (hidden)) {
-        if (transition_sum[i] > 0.) {
+      if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
+           (memory_type[i] == NON_TERMINAL)) || (hidden)) {
+        if (memory_count[i] > 0.) {
           if (file_flag) {
             os << "# ";
           }
 
           switch (hidden) {
+
           case false : {
-            for (j = 0;j < nb_state;j++) {
-              if (transition_sum[i] > 0) {
+            if (memory_type[i] == TERMINAL) {
+              for (j = 0;j < nb_state;j++) {
                 half_confidence_interval = standard_normal_value *
-                                           sqrt(transition[i][j] * (1. - transition[i][j]) / transition_sum[i]);
+                                           sqrt(transition[i][j] * (1. - transition[i][j]) / memory_count[i]);
                 os << setw(width[0]) << MAX(transition[i][j] - half_confidence_interval , 0.)
                    << setw(width[0]) << MIN(transition[i][j] + half_confidence_interval , 1.)
                    << "| ";
               }
+            }
 
-              else {
+            else {
+              for (j = 0;j < nb_state;j++) {
                 os << setw(width[0]) << " "
                    << setw(width[0]) << " "
                    << "| ";
@@ -3312,7 +3318,7 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
           }
           }
 
-          os << setw(width[1]) << transition_sum[i] << "  ";
+          os << setw(width[1]) << memory_count[i] << "  ";
 
           for (j = max_order - 1;j >= order[i];j--) {
             os << "  ";
@@ -3326,7 +3332,7 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
       }
     }
 
-    delete [] transition_sum;
+    delete [] memory_count;
   }
 
   if ((seq) && (seq->type[0] == STATE)) {
@@ -3522,6 +3528,15 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << "): "
          << 2 * (likelihood - nb_parameter) << endl;
 
+      if ((type == 'o') && (nb_transient_parameter > 0)) {
+        if (file_flag) {
+          os << "# ";
+        }
+        os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
+           << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << "): "
+           << 2 * (likelihood - nb_transient_parameter - nb_parameter) << endl;
+      }
+
       if (nb_parameter < seq->cumul_length - 1) {
         os << "\n";
         if (file_flag) {
@@ -3530,7 +3545,18 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
         os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
            << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << "): "
            << 2 * (likelihood - (double)(nb_parameter * seq->cumul_length) /
-             (double)(seq->cumul_length - nb_parameter - 1)) << endl;
+               (double)(seq->cumul_length - nb_parameter - 1)) << endl;
+      }
+
+      if ((type == 'o') && (nb_transient_parameter > 0) &&
+          (nb_transient_parameter + nb_parameter < seq->cumul_length - 1)) {
+        if (file_flag) {
+          os << "# ";
+        }
+        os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
+           << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << "): "
+           << 2 * (likelihood - (double)((nb_transient_parameter + nb_parameter) * seq->cumul_length) /
+               (double)(seq->cumul_length - nb_transient_parameter - nb_parameter - 1)) << endl;
       }
 
       os << "\n";
@@ -3541,11 +3567,20 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << "): "
          << 2 * likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
 
+      if ((type == 'o') && (nb_transient_parameter > 0)) {
+        if (file_flag) {
+          os << "# ";
+        }
+        os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
+           << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << "): "
+           << 2 * likelihood - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+      }
+
       os << "\n";
       if (file_flag) {
         os << "# ";
       }
-      os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+      os << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << " " << STAT_label[STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << "): "
          << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
@@ -3923,19 +3958,36 @@ ostream& Variable_order_markov::spreadsheet_write(ostream &os ,
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << ")\t"
          << 2 * (likelihood - nb_parameter) << endl;
+      if ((type == 'o') && (nb_transient_parameter > 0)) {
+        os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
+           << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AIC] << ")\t"
+           << 2 * (likelihood - nb_transient_parameter - nb_parameter) << endl;
+      }
 
       if (nb_parameter < seq->cumul_length - 1) {
         os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
            << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << ")\t"
            << 2 * (likelihood - (double)(nb_parameter * seq->cumul_length) /
-              (double)(seq->cumul_length - nb_parameter - 1)) << endl;
+               (double)(seq->cumul_length - nb_parameter - 1)) << endl;
+      }
+      if ((type == 'o') && (nb_transient_parameter > 0) &&
+          (nb_transient_parameter + nb_parameter < seq->cumul_length - 1)) {
+        os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
+           << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[AICc] << ")\t"
+           << 2 * (likelihood - (double)((nb_transient_parameter + nb_parameter) * seq->cumul_length) /
+               (double)(seq->cumul_length - nb_transient_parameter - nb_parameter - 1)) << endl;
       }
 
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << ")\t"
          << 2 * likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
+      if ((type == 'o') && (nb_transient_parameter > 0)) {
+        os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
+           << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << ")\t"
+           << 2 * likelihood - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+      }
 
-      os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
+      os << "\n" << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << ")\t"
          << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
@@ -4102,17 +4154,45 @@ int Variable_order_markov::nb_parameter_computation(double min_probability) cons
   int nb_parameter = 0;
 
 
-  for (i = 1;i < nb_row;i++) {
-    if (memory_type[i] == TERMINAL) {
-//    if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
-//         (memory_type[i] == NON_TERMINAL))) {
-      for (j = 0;j < nb_state;j++) {
-        if (transition[i][j] > min_probability) {
+  // cas particulier ordre 0
+
+  if (max_order == 1) {
+    for (i = 0;i < nb_state - 1;i++) {
+      for (j = 2;j <= nb_state;j++) {
+        if (transition[j][i] != transition[1][i]) {
+          break;
+        }
+      }
+
+      if (j <= nb_state) {
+        break;
+      }
+    }
+
+    if (i == nb_state - 1) {
+      for (i = 0;i < nb_state;i++) {
+        if (transition[0][i] > min_probability) {
           nb_parameter++;
         }
       }
 
       nb_parameter--;
+    }
+  }
+
+  if (nb_parameter == 0) {
+    for (i = 1;i < nb_row;i++) {
+      if (memory_type[i] == TERMINAL) {
+//      if ((memory_type[i] == TERMINAL) || ((type == 'o') &&
+//           (memory_type[i] == NON_TERMINAL))) {
+        for (j = 0;j < nb_state;j++) {
+          if (transition[i][j] > min_probability) {
+            nb_parameter++;
+          }
+        }
+
+        nb_parameter--;
+      }
     }
   }
 
@@ -4324,8 +4404,11 @@ Variable_order_markov_data::Variable_order_markov_data()
 {
   markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -4345,8 +4428,11 @@ Variable_order_markov_data::Variable_order_markov_data(int inb_variable , const 
 {
   markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -4377,6 +4463,8 @@ Variable_order_markov_data::Variable_order_markov_data(int inb_sequence , int *i
   // calcul de la vraisemblance
 
   likelihood = markov->likelihood_computation(*this);
+
+  posterior_probability = 0;
 }
 
 
@@ -4397,8 +4485,11 @@ Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences
 {
   markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -4418,8 +4509,11 @@ Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences
 {
   markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -4440,8 +4534,11 @@ Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences
 {
   markov = 0;
   chain_data = 0;
+
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+
+  posterior_probability = 0;
 }
 
 
@@ -4458,6 +4555,9 @@ void Variable_order_markov_data::copy(const Variable_order_markov_data &seq ,
                                       bool model_flag)
 
 {
+  register int i;
+
+
   if ((model_flag) && (seq.markov)) {
     markov = new Variable_order_markov(*(seq.markov) , false);
   }
@@ -4474,6 +4574,16 @@ void Variable_order_markov_data::copy(const Variable_order_markov_data &seq ,
 
   likelihood = seq.likelihood;
   hidden_likelihood = seq.hidden_likelihood;
+
+  if (seq.posterior_probability) {
+    posterior_probability = new double[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      posterior_probability[i] = seq.posterior_probability[i];
+    }
+  }
+  else {
+    posterior_probability = 0;
+  }
 }
 
 
@@ -4488,6 +4598,8 @@ Variable_order_markov_data::~Variable_order_markov_data()
 {
   delete markov;
   delete chain_data;
+
+  delete [] posterior_probability;
 }
 
 

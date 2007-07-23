@@ -1792,10 +1792,10 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
 
 {
   register int i , j , k , m;
-  int buff , width , initial_sum , child_nb_parameter , *pfrequency , **transition_sum ,
+  int buff , width , initial_count , child_nb_parameter , *pfrequency , **memory_count ,
       **nb_parameter , state_index[ORDER];
   long old_adjust;
-  double initial_likelihood , child_likelihood , **transition_likelihood;
+  double initial_likelihood , child_likelihood , **memory_likelihood;
   Distribution *marginal_dist;
   Histogram *marginal_histo;
   Chain **chain;
@@ -1812,16 +1812,16 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
 
   marginal_histo = new Histogram(pchain_data[1]->nb_state);
 
-  transition_sum = new int*[max_order + 1];
-  transition_sum[0] = new int[1];
+  memory_count = new int*[max_order + 1];
+  memory_count[0] = new int[1];
   for (i = 1;i <= max_order;i++) {
-    transition_sum[i] = new int[pchain_data[i]->nb_row];
+    memory_count[i] = new int[pchain_data[i]->nb_row];
   }
 
-  transition_likelihood = new double*[max_order + 1];
-  transition_likelihood[0] = new double[1];
+  memory_likelihood = new double*[max_order + 1];
+  memory_likelihood[0] = new double[1];
   for (i = 1;i <= max_order;i++) {
-    transition_likelihood[i] = new double[pchain_data[i]->nb_row];
+    memory_likelihood[i] = new double[pchain_data[i]->nb_row];
   }
 
   nb_parameter = new int*[max_order + 1];
@@ -1870,12 +1870,12 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
     }
     os << "  ";
 
-    initial_sum = 0;
+    initial_count = 0;
     for (i = 0;i < pchain_data[1]->nb_state;i++) {
-      initial_sum += pchain_data[1]->initial[i];
+      initial_count += pchain_data[1]->initial[i];
       os << setw(width) << pchain_data[1]->initial[i];
     }
-    os << "  " << setw(width) << initial_sum << endl;
+    os << "  " << setw(width) << initial_count << endl;
   }
 
   os << "\n" << SEQ_label[SEQL_TRANSITION_COUNTS] << endl;
@@ -1901,7 +1901,7 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
   }
   os << "  " << setw(width) << marginal_histo->nb_element << endl;
 
-  transition_sum[0][0] = marginal_histo->nb_element;
+  memory_count[0][0] = marginal_histo->nb_element;
 
   for (i = 1;i <= max_order;i++) {
     os << "\n";
@@ -1918,12 +1918,12 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
       }
       os << "  ";
 
-      transition_sum[i][j] = 0;
+      memory_count[i][j] = 0;
       for (k = 0;k < pchain_data[i]->nb_state;k++) {
-        transition_sum[i][j] += pchain_data[i]->transition[j][k];
+        memory_count[i][j] += pchain_data[i]->transition[j][k];
         os << setw(width) << pchain_data[i]->transition[j][k];
       }
-      os << "  " << setw(width) << transition_sum[i][j] << endl;
+      os << "  " << setw(width) << memory_count[i][j] << endl;
 
       // mise a jour des indices des etats
 
@@ -2103,19 +2103,19 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
   }
   os << "  ";
 
-  transition_likelihood[0][0] = 0.;
+  memory_likelihood[0][0] = 0.;
   nb_parameter[0][0] = 0;
   for (i = 0;i < marginal_dist->nb_value;i++) {
     if (marginal_histo->frequency[i] > 0) {
       nb_parameter[0][0]++;
-      transition_likelihood[0][0] += marginal_dist->mass[i];
+      memory_likelihood[0][0] += marginal_dist->mass[i];
     }
     os << setw(width) << marginal_dist->mass[i];
   }
   if (nb_parameter[0][0] > 0) {
     nb_parameter[0][0]--;
   }
-  os << "  " << setw(width) << transition_likelihood[0][0]
+  os << "  " << setw(width) << memory_likelihood[0][0]
      << "  " << setw(width) << nb_parameter[0][0] << endl;
 
   for (i = 1;i <= max_order;i++) {
@@ -2137,12 +2137,12 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
       }
       os << "  ";
 
-      transition_likelihood[i][j] = 0.;
+      memory_likelihood[i][j] = 0.;
       nb_parameter[i][j] = 0;
       for (k = 0;k < chain[i]->nb_state;k++) {
         if (pchain_data[i]->transition[j][k] > 0) {
           nb_parameter[i][j]++;
-          transition_likelihood[i][j] += pchain_data[i]->transition[j][k] * log(chain[i]->transition[j][k]);
+          memory_likelihood[i][j] += pchain_data[i]->transition[j][k] * log(chain[i]->transition[j][k]);
           os << setw(width) << pchain_data[i]->transition[j][k] * log(chain[i]->transition[j][k]);
         }
         else {
@@ -2153,10 +2153,10 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
         nb_parameter[i][j]--;
       }
 
-      child_likelihood += transition_likelihood[i][j];
+      child_likelihood += memory_likelihood[i][j];
       child_nb_parameter += nb_parameter[i][j];
 
-      os << "  " << setw(width) << transition_likelihood[i][j]
+      os << "  " << setw(width) << memory_likelihood[i][j]
          << "  " << setw(width) << nb_parameter[i][j];
 
       // mise a jour des indices des etats
@@ -2171,12 +2171,12 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
 
           if (k == 0) {
             os << "  " << setw(width) << child_nb_parameter - nb_parameter[i - 1][m]
-               << "  " << setw(width) << 2 * (child_likelihood - transition_likelihood[i - 1][m]) -
+               << "  " << setw(width) << 2 * (child_likelihood - memory_likelihood[i - 1][m]) -
                (child_nb_parameter - nb_parameter[i - 1][m]) * log((double)marginal_histo->nb_element);
 
-            if (transition_sum[i - 1][m] > 0) {
-              os << "  " << setw(width) << 2 * (child_likelihood - transition_likelihood[i - 1][m]) -
-                 (child_nb_parameter - nb_parameter[i - 1][m]) * log((double)transition_sum[i - 1][m]);
+            if (memory_count[i - 1][m] > 0) {
+              os << "  " << setw(width) << 2 * (child_likelihood - memory_likelihood[i - 1][m]) -
+                 (child_nb_parameter - nb_parameter[i - 1][m]) * log((double)memory_count[i - 1][m]);
             }
             else {
               os << "  " << setw(width) << 0;
@@ -2204,14 +2204,14 @@ ostream& Chain_data::transition_count_ascii_write(ostream &os , int max_order ,
   delete marginal_histo;
 
   for (i = 0;i <= max_order;i++) {
-    delete [] transition_sum[i];
+    delete [] memory_count[i];
   }
-  delete [] transition_sum;
+  delete [] memory_count;
 
   for (i = 0;i <= max_order;i++) {
-    delete [] transition_likelihood[i];
+    delete [] memory_likelihood[i];
   }
-  delete [] transition_likelihood;
+  delete [] memory_likelihood;
 
   for (i = 0;i <= max_order;i++) {
     delete [] nb_parameter[i];
@@ -2275,9 +2275,9 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
 {
   register int i , j , k , m;
   bool status;
-  int initial_sum , child_nb_parameter , *pfrequency , **transition_sum , **nb_parameter ,
+  int initial_count , child_nb_parameter , *pfrequency , **memory_count , **nb_parameter ,
       state_index[ORDER];
-  double initial_likelihood , child_likelihood , **transition_likelihood;
+  double initial_likelihood , child_likelihood , **memory_likelihood;
   Distribution *marginal_dist;
   Histogram *marginal_histo;
   Chain **chain;
@@ -2303,10 +2303,10 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
 
     marginal_histo = new Histogram(pchain_data[1]->nb_state);
 
-    transition_sum = new int*[max_order + 1];
-    transition_sum[0] = new int[1];
+    memory_count = new int*[max_order + 1];
+    memory_count[0] = new int[1];
     for (i = 1;i <= max_order;i++) {
-      transition_sum[i] = new int[pchain_data[i]->nb_row];
+      memory_count[i] = new int[pchain_data[i]->nb_row];
     }
 
     nb_parameter = new int*[max_order + 1];
@@ -2315,10 +2315,10 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
       nb_parameter[i] = new int[pchain_data[i]->nb_row];
     }
 
-    transition_likelihood = new double*[max_order + 1];
-    transition_likelihood[0] = new double[1];
+    memory_likelihood = new double*[max_order + 1];
+    memory_likelihood[0] = new double[1];
     for (i = 1;i <= max_order;i++) {
-      transition_likelihood[i] = new double[pchain_data[i]->nb_row];
+      memory_likelihood[i] = new double[pchain_data[i]->nb_row];
     }
 
     pfrequency = marginal_histo->frequency;
@@ -2348,12 +2348,12 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
       }
       out_file << endl;
 
-      initial_sum = 0;
+      initial_count = 0;
       for (i = 0;i < pchain_data[1]->nb_state;i++) {
-        initial_sum += pchain_data[1]->initial[i];
+        initial_count += pchain_data[1]->initial[i];
         out_file << "\t" << pchain_data[1]->initial[i];
       }
-      out_file << "\t" << initial_sum << endl;
+      out_file << "\t" << initial_count << endl;
     }
 
     out_file << "\n" << SEQ_label[SEQL_TRANSITION_COUNTS] << endl;
@@ -2369,7 +2369,7 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
     }
     out_file << "\t" << marginal_histo->nb_element << endl;
 
-    transition_sum[0][0] = marginal_histo->nb_element;
+    memory_count[0][0] = marginal_histo->nb_element;
 
     for (i = 1;i <= max_order;i++) {
       out_file << "\n";
@@ -2382,12 +2382,12 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
           out_file << state_index[k] << " ";
         }
 
-        transition_sum[i][j] = 0;
+        memory_count[i][j] = 0;
         for (k = 0;k < pchain_data[i]->nb_state;k++) {
-          transition_sum[i][j] += pchain_data[i]->transition[j][k];
+          memory_count[i][j] += pchain_data[i]->transition[j][k];
           out_file << "\t" << pchain_data[i]->transition[j][k];
         }
-        out_file << "\t" << transition_sum[i][j] << endl;
+        out_file << "\t" << memory_count[i][j] << endl;
 
         // mise a jour des indices des etats
 
@@ -2498,12 +2498,12 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
              << "\t" << SEQ_label[SEQL_DELTA] << " " << STAT_criterion_word[BIC]
              << "\t" << SEQ_label[SEQL_DELTA] << " " << STAT_criterion_word[BICc] << endl;
 
-    transition_likelihood[0][0] = 0.;
+    memory_likelihood[0][0] = 0.;
     nb_parameter[0][0] = 0;
     for (i = 0;i < marginal_dist->nb_value;i++) {
       if (marginal_histo->frequency[i] > 0) {
         nb_parameter[0][0]++;
-        transition_likelihood[0][0] += marginal_histo->frequency[i] * log((double)marginal_dist->mass[i]);
+        memory_likelihood[0][0] += marginal_histo->frequency[i] * log((double)marginal_dist->mass[i]);
         out_file << "\t" << marginal_histo->frequency[i] * log((double)marginal_dist->mass[i]);
       }
       else {
@@ -2513,7 +2513,7 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
     if (nb_parameter[0][0] > 0) {
       nb_parameter[0][0]--;
     }
-    out_file << "\t" << transition_likelihood[0][0] << "\t" << nb_parameter[0][0] << endl;
+    out_file << "\t" << memory_likelihood[0][0] << "\t" << nb_parameter[0][0] << endl;
 
     for (i = 1;i <= max_order;i++) {
       out_file << "\n";
@@ -2530,12 +2530,12 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
           out_file << state_index[k] << " ";
         }
 
-        transition_likelihood[i][j] = 0.;
+        memory_likelihood[i][j] = 0.;
         nb_parameter[i][j] = 0;
         for (k = 0;k < chain[i]->nb_state;k++) {
           if (pchain_data[i]->transition[j][k] > 0) {
             nb_parameter[i][j]++;
-            transition_likelihood[i][j] += pchain_data[i]->transition[j][k] * log((double)chain[i]->transition[j][k]);
+            memory_likelihood[i][j] += pchain_data[i]->transition[j][k] * log((double)chain[i]->transition[j][k]);
             out_file << "\t" << pchain_data[i]->transition[j][k] * log((double)chain[i]->transition[j][k]);
           }
           else {
@@ -2546,10 +2546,10 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
           nb_parameter[i][j]--;
         }
 
-        child_likelihood += transition_likelihood[i][j];
+        child_likelihood += memory_likelihood[i][j];
         child_nb_parameter += nb_parameter[i][j];
 
-        out_file << "\t" << transition_likelihood[i][j] << "\t" << nb_parameter[i][j];
+        out_file << "\t" << memory_likelihood[i][j] << "\t" << nb_parameter[i][j];
 
         // mise a jour des indices des etats
 
@@ -2563,14 +2563,14 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
 
             if (k == 0) {
               out_file << "\t" << child_nb_parameter - nb_parameter[i - 1][m]
-                       << "\t" << 2 * (child_likelihood - transition_likelihood[i - 1][m]) -
+                       << "\t" << 2 * (child_likelihood - memory_likelihood[i - 1][m]) -
                        (child_nb_parameter - nb_parameter[i - 1][m]) *
                        log((double)marginal_histo->nb_element);
 
-              if (transition_sum[i - 1][m] > 0) {
-                out_file << "\t" << 2 * (child_likelihood - transition_likelihood[i - 1][m]) -
+              if (memory_count[i - 1][m] > 0) {
+                out_file << "\t" << 2 * (child_likelihood - memory_likelihood[i - 1][m]) -
                          (child_nb_parameter - nb_parameter[i - 1][m]) *
-                         log((double)transition_sum[i - 1][m]);
+                         log((double)memory_count[i - 1][m]);
               }
               else {
                 out_file << "\t" << 0;
@@ -2598,14 +2598,14 @@ bool Chain_data::transition_count_spreadsheet_write(Format_error &error , const 
     delete marginal_histo;
 
     for (i = 0;i <= max_order;i++) {
-      delete [] transition_sum[i];
+      delete [] memory_count[i];
     }
-    delete [] transition_sum;
+    delete [] memory_count;
 
     for (i = 0;i <= max_order;i++) {
-      delete [] transition_likelihood[i];
+      delete [] memory_likelihood[i];
     }
-    delete [] transition_likelihood;
+    delete [] memory_likelihood;
 
     for (i = 0;i <= max_order;i++) {
       delete [] nb_parameter[i];

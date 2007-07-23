@@ -49,7 +49,7 @@
 
 const int MAX_LAG = 100;               // decalage maximum pour le calcul des coefficients
                                        // d'autocorrelation
-const int MEMORY_MIN_FREQUENCY = 5;    // effectif minimum pour comparer
+const int MEMORY_MIN_COUNT = 10;       // effectif minimum pour comparer
                                        // une memoire a ses fils
 const double LAPLACE_COEFF = 1.;       // coefficient pour l'estimateur de Laplace
 
@@ -320,8 +320,8 @@ public :
     :Chain_data(type , inb_state , inb_row , init_flag) {}
 
     void estimation(Variable_order_markov &markov , bool non_terminal = false ,
-                    bool laplace = false) const;
-    void order0_estimation(Variable_order_markov &markov) const;
+                    int estimator = MAXIMUM_LIKELIHOOD ,
+                    double laplace_coeff = LAPLACE_COEFF) const;
 };
 
 
@@ -342,6 +342,7 @@ private :
     Variable_order_chain_data *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences
     double hidden_likelihood;  // vraisemblance de toutes les sequences possibles
+    double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
 
     void copy(const Variable_order_markov_data &seq , bool model_flag = true);
     void observation_histogram_correction(Histogram **corrected_observation ,
@@ -379,6 +380,7 @@ public :
 
     void build_transition_count(const Variable_order_markov &markov ,
                                 bool begin = true , bool non_terminal = false);
+    void order0_estimation(Variable_order_markov &markov) const;
 
     // acces membres de la classe
 
@@ -386,6 +388,7 @@ public :
     Variable_order_chain_data* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
     double get_hidden_likelihood() const { return hidden_likelihood; }
+    double get_posterior_probability(int index) const { return posterior_probability[index]; }
 };
 
 
