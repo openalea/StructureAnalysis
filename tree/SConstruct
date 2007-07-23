@@ -14,9 +14,9 @@ name = 'tree'
 SConsignFile()
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
-wrapper_conf = ALEAConfig(name,['boost_python', 'alea'])
-cpp_conf = ALEAConfig(name, ['alea'])
-opt_conf = ALEAConfig(name, ['boost_python', 'alea'])
+#wrapper_conf = ALEAConfig(name,['boost_python', 'alea'])
+cpp_conf = ALEAConfig(name, ['alea','install'])
+opt_conf = ALEAConfig(name, ['boost_python', 'alea','install'])
 
 # Set all the common options for the package
 # Fill the options from file option.py or cmd line args.
@@ -33,11 +33,10 @@ Help(options.GenerateHelpText(opt_env))
 prefix = opt_env['build_prefix']
 BuildDir(prefix, '.')
 
-cpp_env = ALEAEnvironment(cpp_conf, 'options.py', ARGUMENTS)
+cpp_env = ALEAEnvironment(cpp_conf, options=options)
 
-wrapper_env = ALEAEnvironment(wrapper_conf, 'options.py', ARGUMENTS)
-
-wrapper_env.Append(CPPPATH='$build_includedir')
+#wrapper_env = ALEAEnvironment(wrapper_conf,  options=options)
+#wrapper_env.Append(CPPPATH='$build_includedir')
 
 # Build stage
 SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})

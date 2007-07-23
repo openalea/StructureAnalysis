@@ -17,7 +17,7 @@ options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
 wrapper_conf = ALEAConfig(name,['boost_python', 'alea', 'install'])
 cpp_conf = ALEAConfig(name, ['alea', 'install'])
-opt_conf = ALEAConfig(name, ['boost_python', 'alea','install'])
+opt_conf = ALEAConfig(name, ['boost_python', 'alea', 'install'])
 
 # Set all the common options for the package
 # TODO: Have a configure stage.
@@ -39,13 +39,12 @@ BuildDir(prefix, '.')
 cpp_env = ALEAEnvironment(cpp_conf, options=options)
 cpp_env.Append(CPPPATH='$build_includedir')
 
-wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
-
-wrapper_env.Append(CPPPATH='$build_includedir')
+#wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
+#wrapper_env.Append(CPPPATH='$build_includedir')
 
 # Build stage
 SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
-SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
+#SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
 
 Default("build")
 

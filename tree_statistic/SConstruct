@@ -15,9 +15,9 @@ SConsignFile()
 
 options = Options(['../options.py','options.py'], ARGUMENTS)
 
-wrapper_conf = ALEAConfig(name,['boost_python', 'alea'])
-cpp_conf = ALEAConfig(name, ['alea'])
-opt_conf = ALEAConfig(name, ['boost_python', 'alea'])
+wrapper_conf = ALEAConfig(name,['boost_python', 'alea','install'])
+cpp_conf = ALEAConfig(name, ['alea','install'])
+opt_conf = ALEAConfig(name, ['boost_python', 'alea','install'])
 
 # Set all the common options for the package
 # TODO: Have a configure stage.
@@ -36,11 +36,10 @@ prefix = opt_env['build_prefix']
 BuildDir(prefix, '.')
 
 
-cpp_env = ALEAEnvironment(cpp_conf, 'options.py', ARGUMENTS)
+cpp_env = ALEAEnvironment(cpp_conf, options=options)
 cpp_env.Append(CPPPATH='$build_includedir')
 
-wrapper_env = ALEAEnvironment(wrapper_conf, 'options.py', ARGUMENTS)
-
+wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
 wrapper_env.Append(CPPPATH='$build_includedir')
 
 # Build stage
