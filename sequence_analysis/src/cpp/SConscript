@@ -19,6 +19,16 @@ if lib_env['compiler'] == 'mingw':
 includes= lib_env.ALEAGlob('*.h')
 sources = lib_env.ALEAGlob('*.cpp')
 
+# files to exclude from sources
+excludes = Split( """
+""")
+
+for f in excludes: 
+    for cpp in sources:
+	if f in cpp:
+            sources.remove(cpp)
+	    break
+
 lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 
 inc = lib_env.ALEAIncludes( "sequence_analysis", includes )
