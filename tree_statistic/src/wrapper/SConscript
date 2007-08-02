@@ -23,8 +23,8 @@ env.AppendUnique(LIBS=LIBS)
 
 env.ALEAWrapper("../stat_tool", "cstat_tool", ["cstat_tool.cpp"])
 
-env.ALEAWrapper(py_dir, "ctree", ["trees/ctree.cpp"])
-env.ALEAWrapper(py_dir, "ctrees", ["trees/ctrees.cpp"])
-env.ALEAWrapper(py_dir, "int_fl_containers", ["int_fl_containers/int_fl_containers.cpp"])
-env.ALEAWrapper(py_dir, "chmt", ["hmt/chmt.cpp"])
+env.ALEAWrapper(py_dir+'/trees', "ctree", ["trees/ctree.cpp"])
+env.ALEAWrapper(py_dir+'/trees', "ctrees", ["trees/ctrees.cpp"])
+env.ALEAWrapper(py_dir+'/trees', "int_fl_containers", ["int_fl_containers/int_fl_containers.cpp"])
+env.ALEAWrapper(py_dir+'/hmt', "chmt", ["hmt/chmt.cpp"])
 
