@@ -5,12 +5,12 @@
  *
  *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
  *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/typed_edge_trees.tcc,v $
  *       $Id: typed_edge_trees.hpp 3186 2007-05-25 15:10:30Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.f
  *
  *  ----------------------------------------------------------------------------
  *
@@ -33,6 +33,7 @@
  *
  *  ----------------------------------------------------------------------------
  */
+
 #ifndef TYPED_EDGE_TREES_TCC
 #define TYPED_EDGE_TREES_TCC
 
@@ -206,7 +207,7 @@ template<class Generic_Int_fl_container>
 Typed_edge_one_int_tree* Typed_edge_int_fl_tree<Generic_Int_fl_container>::select_int_variable(int variable)
 {
 
-   typedef typename  Typed_edge_int_fl_tree<Generic_Int_fl_container>::vertex_iterator gvertex_iterator;
+   typedef typename Typed_edge_int_fl_tree<Generic_Int_fl_container>::vertex_iterator gvertex_iterator;
    typedef Typed_edge_one_int_tree::value value;
 
    Unlabelled_typed_edge_tree* utree;
@@ -660,7 +661,7 @@ Typed_edge_trees<Generic_Int_fl_container>::operator=(const Typed_edge_trees<Gen
 
 template<typename Generic_Int_fl_container>
 Distribution_data* Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error,
-                                                                     int variable) const
+                                                                       int variable) const
 {
   bool status= true;
   Distribution_data *histo= NULL;
@@ -810,6 +811,75 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error, int typ
    return histo;
 }
 
+/*****************************************************************
+ *
+ *  Extract all vectors from Typed_edge_trees
+ *  (keeping only integer variables)
+ *
+ **/
+
+template<typename Generic_Int_fl_container> Vectors*
+Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) const
+{
+   bool status= true;
+   int var, t, vector_id= 0;
+   unsigned int s, size= 0;
+   ostringstream error_message;
+   value val;
+   vertex_iterator it, end;
+   int **ivectors= NULL;
+   Vectors *res= NULL;
+
+   error.init();
+
+   if (_nb_integral == 0)
+   {
+      status= false;
+      error_message << STAT_TREES_error[STATR_NB_INT_OUTPUT_PROCESS] << " ";
+
+      error.correction_update((error_message.str()).c_str(), _nb_integral);
+      error_message.str("");
+   }
+   if (status)
+   {
+      if (trees == NULL)
+      {
+         status= false;
+         error.update(STAT_error[STATR_EMPTY_SAMPLE]);
+      }
+   }
+   if (status)
+   {
+      for (t= 0; t < _nb_trees; t++)
+         size+= trees[t]->get_size();
+
+      ivectors= new int*[size];
+      for (t= 0; t < _nb_trees; t++)
+      {
+         tie(it, end)= trees[t]->vertices();
+         while(it < end)
+         {
+            ivectors[vector_id]= new int[_nb_integral];
+            val= trees[t]->get(*it);
+            for (var= 0; var < _nb_integral; var++)
+               ivectors[vector_id][var]= val.Int(var);
+            vector_id++;
+            it++;
+         }
+      }
+      res= new Vectors(_nb_integral, size, ivectors);
+
+      for (s= 0; s < size; s++)
+      {
+         delete [] ivectors[s];
+         ivectors[s]= NULL;
+      }
+
+      delete[] ivectors;
+      ivectors= NULL;
+   }
+   return res;
+}
 
 /*****************************************************************
  *
@@ -820,24 +890,24 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error, int typ
  **/
 
 template<typename Generic_Int_fl_container> Sequences*
-Typed_edge_trees<Generic_Int_fl_container>::extract_sequences(Format_error& error,
-                                                              bool all_paths) const
+Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
+                                                            bool all_paths) const
 {
-   // only the case all_paths == True is implemented
    typedef typename generic_visitor<tree_type>::vertex_array vertex_array;
 
-   Sequences* res= NULL;
+   bool status= true, cut;
+   int var, nb_sequences= 0, t, s, pos, sequence_id= 0;
+   key current_leaf, current_vertex, parent_vertex;
+   value val;
    int *itype= NULL, *ilength= NULL;
    int ***isequence= NULL; // isequence[identifier][variable][index]
    int *iidentifier= NULL;
-   int var, nb_sequences= 0, t, s, pos, sequence_id= 0;
-   bool status= true;
    ostringstream error_message;
    std::vector<vertex_array> leaf_set;
+   std::vector<key> branched_vertices;
    vertex_array leaves;
    generic_visitor<tree_type> visitor;
-   key current_leaf, current_vertex;
-   value val;
+   Sequences *res= NULL;
 
    error.init();
 
@@ -884,18 +954,51 @@ Typed_edge_trees<Generic_Int_fl_container>::extract_sequences(Format_error& erro
          {
             current_leaf= leaf_set[t].back();
             leaf_set[t].pop_back();
-            ilength[sequence_id]= trees[t]->get_depth(current_leaf)+1;
-            iidentifier[sequence_id]= sequence_id;
-            for (var= 0; var < _nb_integral; var++)
-               isequence[sequence_id][var]= new int[ilength[sequence_id]];
 
             current_vertex= current_leaf;
-            for (pos= ilength[sequence_id]-1; pos > -1; pos--)
+
+            if (all_paths)
             {
-               val= trees[t]->get(current_vertex);
+               ilength[sequence_id]= trees[t]->get_depth(current_leaf)+1;
+               iidentifier[sequence_id]= sequence_id;
                for (var= 0; var < _nb_integral; var++)
-                  isequence[sequence_id][var][pos]= val.Int(var);
-               current_vertex= trees[t]->parent(current_vertex);
+                  isequence[sequence_id][var]= new int[ilength[sequence_id]];
+
+               for (pos= ilength[sequence_id]-1; pos > -1; pos--)
+               {
+                  val= trees[t]->get(current_vertex);
+                  for (var= 0; var < _nb_integral; var++)
+                     isequence[sequence_id][var][pos]= val.Int(var);
+                  current_vertex= trees[t]->parent(current_vertex);
+               }
+            }
+            else
+            {
+               branched_vertices.resize(0);
+               branched_vertices.push_back(current_vertex);
+               cut= false;
+               while (!(trees[t]->is_root(current_vertex) || cut))
+               {
+                  parent_vertex= trees[t]->parent(current_vertex);
+                  cut= !trees[t]->edge_type(parent_vertex, current_vertex);
+                  if (!cut)
+                  {
+                     current_vertex= parent_vertex;
+                     branched_vertices.push_back(current_vertex);
+                  }
+               }
+               ilength[sequence_id]= branched_vertices.size();
+               iidentifier[sequence_id]= sequence_id;
+               for (var= 0; var < _nb_integral; var++)
+                  isequence[sequence_id][var]= new int[ilength[sequence_id]];
+
+               for (pos= 0; pos < ilength[sequence_id]; pos++)
+               {
+                  current_vertex= branched_vertices[pos];
+                  val= trees[t]->get(current_vertex);
+                  for (var= 0; var < _nb_integral; var++)
+                     isequence[sequence_id][var][pos]= val.Int(var);
+               }
             }
             sequence_id++;
          }

@@ -5,12 +5,12 @@
  *
  *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
  *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/generic_typed_edge_tree.h,v $
  *       $Id: generic_typed_edge_tree.h 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.f
  *
  *  ----------------------------------------------------------------------------
  *

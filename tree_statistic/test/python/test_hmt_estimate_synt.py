@@ -75,6 +75,8 @@ else:
 # Extract the state trees
 print "Computation of the state trees"
 S=T.ComputeStateTrees(H, "Viterbi")
+# Copy the state trees
+CPS=hmt.HiddenMarkovTreeData(S)
 S.Display(Detail=1)
 HISTO=S.ExtractHistogram("Value", 1)
 print "Marginal distribution for variable 1:"
@@ -93,3 +95,8 @@ print "Parameter estimation from the simulated trees" + \
 EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20, 
               ForceParametric=[True])
 EH.Display()
+# Re-estimate on segmented tree
+print "Estimate an HMT on state tree: "
+SS=S.SelectVariable([0])
+EH2=SS.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20)
+EH2.Display()

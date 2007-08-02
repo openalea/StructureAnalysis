@@ -1629,8 +1629,9 @@ class Trees:
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"
 
-    def ExtractSequences(self):
-        """Extract Sequences from the Trees."""
+    def BuildSequences(self, maximal_sequences=True):
+        """Extract Sequences from the Trees, 
+        cutting or not sequences after branching"""
         import os
         # print the sequences into a file
         prefix="seqtmp"
@@ -1647,7 +1648,7 @@ class Trees:
                 import random
                 prefix+=str(random.randint(1,9))                
         try:
-            self.__ctrees.ExtractSequences(file_name, True)
+            self.__ctrees.BuildSequences(file_name, maximal_sequences)
         except RuntimeError, error:
             os.remove(file_name)
             raise FormatError, error
@@ -1656,7 +1657,35 @@ class Trees:
             res= amlPy.Sequences(file_name)
             os.remove(file_name)            
             return res
-                
+
+    def BuildVectors(self):
+        """Extract Vectors from the Trees."""
+        import os
+        # print the vectors into a file
+        prefix="vectmp"
+        file_created=False
+        while not file_created:
+            try:
+                cfile=open(prefix+'.vec','r')
+            except IOError:
+                # file does not exist
+                file_name= prefix+".vec"
+                file_created=True
+            else:
+                cfile.close()
+                import random
+                prefix+=str(random.randint(1,9))                
+        try:
+            self.__ctrees.BuildVectors(file_name)
+        except RuntimeError, error:
+            os.remove(file_name)
+            raise FormatError, error
+        else:
+            import amlPy
+            res= amlPy.Vectors(file_name)
+            os.remove(file_name)            
+            return res
+
     def Merge(self, tree_list):
         """Merge Trees objects (contained in a list) with self.
 

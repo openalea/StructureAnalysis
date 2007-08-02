@@ -986,7 +986,7 @@ BOOST_PYTHON_MODULE(ctree)
                          "Preorder(self) -> iterator \n\n"
                          "Get an iterator on the tree vertices, using a preorder traversing.")
         .def("Inorder", &Tree_wrapper_vertex_iterator_inorder<Default_tree>,
-                        "Inorder(self) -> iterator \n\n"
+                        "Preorder(self) -> iterator \n\n"
                         "Get an iterator on the tree vertices, using an inorder traversing.")
         .def("Postorder", &Tree_wrapper_vertex_iterator_postorder<Default_tree>,
                          "Postorder(self) -> iterator \n\n"
@@ -1148,4 +1148,3 @@ BOOST_PYTHON_MODULE(ctree)
                                   return_value_policy< manage_new_object >());
 
 }
-

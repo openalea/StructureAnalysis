@@ -1,0 +1,85 @@
+_min_value == 2, _max_value == 5 _max_depth == 3, _max_size == 11
+Histogram for the first occurrence of each value, starting from root node : 
+Histogram for the first occurrence of each value, starting from leaf nodes : 
+Observed_trees has 10 trees of maximal size 11 and maximal depth 3
+Simulated random labels : 
+4
+|-3
+| |-5
+|   
+|-4
+| |-4
+| |-4
+| |-2
+|   
+|-5
+  |-4
+  |-2
+  |-2
+    
+
+5
+
+3
+
+2
+
+5
+|-4
+|-5
+| |-5
+| | |-2
+| | |-5
+| |   
+| |-3
+|   
+|-3
+  |-3
+  |-5
+  |-5
+    
+
+4
+|-5
+|-3
+
+2
+
+2
+|-5
+
+5
+|-5
+| |-4
+| | |-5
+| |   
+| |-4
+| |-3
+|   
+|-4
+| |-4
+|   
+|-3
+  |-2
+  |-3
+    
+
+5
+|-3
+| |-5
+|   |-5
+|     
+|-5
+|-4
+  |-3
+  | |-2
+  | |-5
+  |   
+  |-2
+  |-5
+    
+
+Number of integral variables == 1
+Number of float variables == 0
+Min value == 2
+Max value == 5

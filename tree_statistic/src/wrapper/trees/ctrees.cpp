@@ -7,6 +7,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/distribution.h"
+#include "stat_tool/vectors.h"
 
 #include "sequence_analysis/sequences.h"
 
@@ -354,8 +355,8 @@ std::string Trees_wrapper_ascii_write(const Trees& reftree,
    return res;
 }
 
-void Trees_wrapper_extract_sequences(const Trees& reftree, const char* prefix,
-                                     bool all_paths= true)
+void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
+                                   bool all_paths= true)
 {
    ostringstream error_message;
    bool status= true;
@@ -363,7 +364,7 @@ void Trees_wrapper_extract_sequences(const Trees& reftree, const char* prefix,
    Sequences* seq= NULL;
 
 
-   seq= reftree.extract_sequences(error, all_paths);
+   seq= reftree.build_sequences(error, all_paths);
    if (seq == NULL)
       status= false;
 
@@ -372,6 +373,32 @@ void Trees_wrapper_extract_sequences(const Trees& reftree, const char* prefix,
       status= seq->ascii_data_write(error, prefix);
       delete seq;
       seq= NULL;
+   }
+   if (!status)
+   {
+      error_message << error;
+      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+}
+
+void Trees_wrapper_build_vectors(const Trees& reftree, const char* prefix)
+{
+   ostringstream error_message;
+   bool status= true;
+   Format_error error;
+   Vectors* vec= NULL;
+
+
+   vec= reftree.build_vectors(error);
+   if (vec == NULL)
+      status= false;
+
+   if (status)
+   {
+      status= vec->ascii_data_write(error, prefix);
+      delete vec;
+      vec= NULL;
    }
    if (!status)
    {
@@ -1046,11 +1073,14 @@ BOOST_PYTHON_MODULE(ctrees)
                            "Difference(self, variable) -> CTrees \n\n"
                            "First-order differentiation of Trees.")
         .def("Display", &Trees_wrapper_ascii_write)
-        .def("ExtractSequences", &Trees_wrapper_extract_sequences,
-                                 // Trees_extract_sequences_overloads_2_3(),
-                                 "ExtractSequences(self) -> void \n\n"
-                                 "Extract sequences from trees and print them"
-                                 "into a file.")
+        .def("BuildSequences", &Trees_wrapper_build_sequences,
+                               "BuildSequences(self) -> void \n\n"
+                               "Build sequences from trees and print them"
+                               "into a file.")
+        .def("BuildVectors", &Trees_wrapper_build_vectors,
+                             "BuildVectors(self) -> void \n\n"
+                             "Build vectors from trees and print them"
+                             "into a file.")
         .def("ExtractSizeHistogram", &Trees::extract_size,
                                      return_value_policy< manage_new_object >(),
                                      "ExtractSizeHistogram(self) -> Histogram \n\n"
@@ -1140,4 +1170,3 @@ BOOST_PYTHON_MODULE(ctrees)
     ;
 
 }
-

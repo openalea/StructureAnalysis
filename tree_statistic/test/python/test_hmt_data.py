@@ -50,3 +50,8 @@ print "Observation histogram for variable 1 and state 1:"
 OBS2=T2.ExtractHistogram("Observation", 1, 1)
 OBS2.Display()
 # OBS2.Plot()
+# Copy constructor of HiddenMarkovTreeData
+CPT2=hmt.HiddenMarkovTreeData(T2)
+OBS3=CPT2.ExtractHistogram("Observation", 1, 1)
+
+

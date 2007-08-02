@@ -2,15 +2,15 @@
 """
 
 
-import trees, ctree, stat_tool, int_fl_containers
+import trees, trees.trees, ctree, stat_tool, int_fl_containers
 
-I_DEFAULT_TREE_SIZE=trees.I_DEFAULT_TREE_SIZE
-I_DEFAULT_TREE_DEPTH=trees.I_DEFAULT_TREE_DEPTH
-# VariableType=trees.VariableType
+I_DEFAULT_TREE_SIZE=trees.trees.I_DEFAULT_TREE_SIZE
+I_DEFAULT_TREE_DEPTH=trees.trees.I_DEFAULT_TREE_DEPTH
+# VariableType=trees.trees.VariableType
 
-TreeValue=trees.TreeValue
+TreeValue=trees.trees.TreeValue
     
-class Tree(trees.Tree):
+class Tree(trees.trees.Tree):
     """An implementation of trees with enhanced functionalities."""
     
     def __init__(self, arg, arg2=None, root=None):
@@ -26,9 +26,9 @@ class Tree(trees.Tree):
         - a Tree object
         Examples: T=Tree([0], 0, 0)
                   U=Tree([0, 1.], TreeStructure(T))""" 
-        if issubclass(arg.__class__, trees.Tree):
+        if issubclass(arg.__class__, trees.trees.Tree):
             #arg is supposed to be a Tree...            
-            trees.Tree.__init__(self, arg)
+            trees.trees.Tree.__init__(self, arg)
             # self.__types=arg.Types()
         else:
             #... or a list of values
@@ -37,9 +37,9 @@ class Tree(trees.Tree):
             if issubclass(arg2.__class__, ctree.CTree):
                 # arg2 is supposed to be a CTree...
                 self.__ctree=ctree.CTree(arg2)
-            elif issubclass(arg2.__class__, trees.TreeStructure):
+            elif issubclass(arg2.__class__, trees.trees.TreeStructure):
                 # ... or a tree structure
-                trees.Tree.__init__(self, arg, arg2)
+                trees.trees.Tree.__init__(self, arg, arg2)
             else:
                 #... or the number of vertices
                 if arg2 is None:
@@ -107,7 +107,7 @@ class Tree(trees.Tree):
         """Return tree depth or the depth of a given vertex,
         referred to by its identifier (vid)."""
         if vid is None:
-            return trees.Tree.Depth(self)
+            return trees.trees.Tree.Depth(self)
         else:
             self.__valid_vid(vid)
             return self.__ctree.Depth(vid)
@@ -171,7 +171,7 @@ class Tree(trees.Tree):
         """Get an iterator on the tree vertices."""
         return self.__ctree.Vertices()  
     
-class TreeStructure(trees.TreeStructure):
+class TreeStructure(trees.trees.TreeStructure):
     """An implementation of tree structures with enhanced functionalities."""
     
     def __init__(self, arg=None, arg2=I_DEFAULT_TREE_SIZE, 
@@ -184,16 +184,16 @@ class TreeStructure(trees.TreeStructure):
         - a Tree or a TreeStructure object;
         - a distribution and values for the maximal size and depth.""" 
         if arg is None:
-            trees.TreeStructure.__init__(self)
+            trees.trees.TreeStructure.__init__(self)
         elif issubclass(arg.__class__, Tree):
             # arg is supposed to be a tree... 
-            trees.TreeStructure.__init__(self, arg)
+            trees.trees.TreeStructure.__init__(self, arg)
         elif issubclass(arg.__class__, TreeStructure):
             #... or a tree structure
-            trees.TreeStructure.__init__(self, arg)
+            trees.trees.TreeStructure.__init__(self, arg)
         elif issubclass(arg.__class__, stat_tool.Distribution):
             #... or a Distribution
-            trees.TreeStructure.__init__(self, arg, arg2, arg3)
+            trees.trees.TreeStructure.__init__(self, arg, arg2, arg3)
         else:
             #... or the number of vertices
             self.__tree=ctree.TreeStructure(arg, arg2)
@@ -227,7 +227,7 @@ class TreeStructure(trees.TreeStructure):
         """Return tree depth or the depth of a given vertex,
         referred to by its identifier (vid)."""
         if vid is None:
-            return trees.TreeStructure.Depth(self)
+            return trees.trees.TreeStructure.Depth(self)
         else:
             self.__valid_vid(vid)
             return self.__ctree.Depth(vid)

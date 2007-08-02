@@ -1,0 +1,357 @@
+HIDDEN_SEMI-MARKOV_CHAIN
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.4  0.3  0.3  
+
+TRANSITION_PROBABILITIES
+0    0.5  0.5  
+0    0    1    
+0    0    1    
+
+transient class: state 0
+transient class: state 1
+recurrent class: state 2 (absorbing state)
+
+probability of no-occurrence of state 0: 0.6
+
+time up to the first occurrence of state 0 distribution
+mean: 0   variance: 0   standard deviation: 0
+
+probability of no-occurrence of state 1: 0.499996
+
+time up to the first occurrence of state 1 distribution
+mean: 3.89405   variance: 53.8937   standard deviation: 7.34124
+
+time up to the first occurrence of state 2 distribution
+mean: 8.92682   variance: 124.468   standard deviation: 11.1565
+
+probability of leaving state 0: 0.1
+
+state 0 recurrence time distribution
+mean: 1   variance: 0   standard deviation: 0
+
+probability of leaving state 1: 0.1
+
+state 1 recurrence time distribution
+mean: 1   variance: 0   standard deviation: 0
+
+state 2 recurrence time distribution
+mean: 1   variance: 0   standard deviation: 0
+
+STATE 0 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1   PROBABILITY : 0.1
+mean: 9.99898   variance: 89.8879   standard deviation: 9.48092
+
+STATE 1 OCCUPANCY_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 1   PARAMETER : 1   PROBABILITY : 0.1
+mean: 9.99898   variance: 89.8879   standard deviation: 9.48092
+
+absorption probability of state 2: 1
+
+number of runs of state 0 per length 20 sequence distribution
+mean: 0.4   variance: 0.24   standard deviation: 0.489898
+coefficient of skewness: 0.408248   coefficient of kurtosis: -1.83333
+
+number of runs of state 1 per length 20 sequence distribution
+mean: 0.472983   variance: 0.24927   standard deviation: 0.49927
+coefficient of skewness: 0.108226   coefficient of kurtosis: -1.98829
+
+number of runs of state 2 per length 20 sequence distribution
+mean: 0.848404   variance: 0.128614   standard deviation: 0.358628
+coefficient of skewness: -1.94298   coefficient of kurtosis: 1.77518
+
+number of occurrences of state 0 per length 20 sequence distribution
+mean: 3.51369   variance: 34.9619   standard deviation: 5.91286
+coefficient of skewness: 1.69808   coefficient of kurtosis: 1.66896
+
+number of occurrences of state 1 per length 20 sequence distribution
+mean: 3.85178   variance: 33.4919   standard deviation: 5.78722
+coefficient of skewness: 1.51372   coefficient of kurtosis: 1.17594
+
+number of occurrences of state 2 per length 20 sequence distribution
+mean: 12.6345   variance: 55.4495   standard deviation: 7.44644
+coefficient of skewness: -0.59609   coefficient of kurtosis: -1.14719
+
+state probabilities
+0.175685  0.192589  0.631727  
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
+mean: 90   variance: 81   standard deviation: 9
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
+mean: 450   variance: 225   standard deviation: 15
+
+STATE 2 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
+mean: 810   variance: 81   standard deviation: 9
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 15   PROBABILITY : 0.1
+mean: 1.5   variance: 1.35   standard deviation: 1.1619
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 15   PROBABILITY : 0.5
+mean: 7.5   variance: 3.75   standard deviation: 1.93649
+
+STATE 2 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 15   PROBABILITY : 0.9
+mean: 13.5   variance: 1.35   standard deviation: 1.1619
+
+HIDDEN_MARKOV_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.2  0.8  
+
+TRANSITION_PROBABILITIES
+0.8  0.2  
+0.3  0.7  
+
+recurrent class: states 0 1
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
+mean: 90   variance: 81   standard deviation: 9
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
+mean: 450   variance: 225   standard deviation: 15
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
+mean: 270   variance: 189   standard deviation: 13.7477
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
+mean: 810   variance: 81   standard deviation: 9
+
+HIDDEN_MARKOV_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.2  0.8  
+
+TRANSITION_PROBABILITIES
+0.8  0.2  
+0.3  0.7  
+
+recurrent class: states 0 1
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
+mean: 90   variance: 81   standard deviation: 9
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
+mean: 450   variance: 225   standard deviation: 15
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
+mean: 270   variance: 189   standard deviation: 13.7477
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
+mean: 810   variance: 81   standard deviation: 9
+
+Simulated trees : 
+(463, 822)
+|-(105, 271)
+| |-(82, 276)
+| | |-(444, 796)
+| | |-(89, 249)
+| |   
+| |-(107, 288)
+|   
+|-(441, 811)
+  |-(461, 810)
+  |-(451, 794)
+    
+(472, 823)
+|-(441, 816)
+| |-(444, 815)
+| | |-(89, 286)
+| | |-(443, 803)
+| |   
+| |-(444, 814)
+|   
+|-(453, 814)
+  |-(448, 823)
+  |-(463, 814)
+    
+(449, 803)
+|-(471, 801)
+| |-(455, 809)
+| | |-(441, 817)
+| | |-(448, 803)
+| |   
+| |-(85, 272)
+|   
+|-(436, 822)
+  |-(80, 270)
+  |-(482, 823)
+    
+(446, 816)
+|-(442, 803)
+| |-(440, 801)
+| | |-(433, 817)
+| | |-(96, 250)
+| |   
+| |-(426, 811)
+|   
+|-(84, 281)
+  |-(94, 296)
+  |-(96, 252)
+    
+(90, 251)
+|-(83, 269)
+| |-(453, 816)
+| | |-(81, 331)
+| | |-(101, 254)
+| |   
+| |-(426, 820)
+|   
+|-(67, 290)
+  |-(82, 257)
+  |-(102, 283)
+    
+
+Simulated hidden trees : 
+1
+|-0
+| |-0
+| | |-1
+| | |-0
+| |   
+| |-0
+|   
+|-1
+  |-1
+  |-1
+    
+1
+|-1
+| |-1
+| | |-0
+| | |-1
+| |   
+| |-1
+|   
+|-1
+  |-1
+  |-1
+    
+1
+|-1
+| |-1
+| | |-1
+| | |-1
+| |   
+| |-0
+|   
+|-1
+  |-0
+  |-1
+    
+1
+|-1
+| |-1
+| | |-1
+| | |-0
+| |   
+| |-1
+|   
+|-0
+  |-0
+  |-0
+    
+0
+|-0
+| |-1
+| | |-0
+| | |-0
+| |   
+| |-1
+|   
+|-0
+  |-0
+  |-0
+    
+
+Marginal distributions for tree number 1 : 
+state 0 : 
+0.2
+|-0.4
+| |-0.5
+| | |-0.55
+| | |-0.55
+| |   
+| |-0.5
+|   
+|-0.4
+  |-0.5
+  |-0.5
+    
+state 1 : 
+0.8
+|-0.6
+| |-0.5
+| | |-0.45
+| | |-0.45
+| |   
+| |-0.5
+|   
+|-0.6
+  |-0.5
+  |-0.5
+    
+Output conditional distributions for tree number 1 : 
+state 0 : 
+0
+|-0.000317786
+| |-0.00080657
+| | |-0
+| | |-0.000401901
+| |   
+| |-9.23239e-05
+|   
+|-0
+  |-0
+  |-0
+    
+state 1 : 
+0.000341526
+|-0
+| |-0
+| | |-0.000320423
+| | |-0
+| |   
+| |-0
+|   
+|-0.000982498
+  |-0.00090012
+  |-0.000243089
+    

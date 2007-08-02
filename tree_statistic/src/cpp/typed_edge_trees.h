@@ -5,12 +5,12 @@
  *
  *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
  *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/typed_edge_trees.h,v $
  *       $Id: typed_edge_trees.h 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.fr
  *
  *  ----------------------------------------------------------------------------
  *
@@ -338,7 +338,12 @@ public :
    /** Extract the histogram of characteristic distribution from \e self*/
    Distribution_data* extract(Format_error& error, int type,
                               int variable, int value) const;
-   Sequences* extract_sequences(Format_error& error, bool all_paths= true) const;
+   /** Extract all vertex values from \e self*/
+   Vectors* build_vectors(Format_error& error) const;
+   // should be a constructor of Vectors ?
+   /** Extract all sequences from \e self along paths*/
+   Sequences* build_sequences(Format_error& error, bool all_paths= true) const;
+
     // Distributions of the tree-characteristics
     // ?    Vectors* extract_vectors(Format_error &error, int type, int variable = I_DEFAULT,
     //                         int value = I_DEFAULT) const;

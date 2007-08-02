@@ -1,11 +1,12 @@
 """Hidden Markov tree models
 """
 import string
-import stat_tool, ctree, ctrees, chmt, trees
+import stat_tool, ctree, ctrees, chmt, trees.trees
 
 VariableType=stat_tool.VariableType
 FormatError=stat_tool.FormatError
 CharacteristicType=ctree.Characteristic
+EntropyAlgorithm=chmt.EntropyAlgorithm
 
 class HiddenMarkovTree:
     """An implementation of the hidden Markov out-trees with conditionally 
@@ -47,7 +48,8 @@ class HiddenMarkovTree:
             raise TypeError, msg
 
     def Display(self, ViewPoint=None, Detail=None, TreeId=None, 
-                NbStateTrees=2, StateTrees="GeneralizedViterbi"):
+                NbStateTrees=2, StateTrees="GeneralizedViterbi",
+                Entropy="UPWARD"):
         """Display HiddenMarkovTree object.
         
         Usage: Display()
@@ -88,9 +90,22 @@ class HiddenMarkovTree:
                     msg='bad type for argument "NbStateTrees": '\
                         +str(type(NbStateTrees))
                     raise TypeError, msg
+                if (type(Entropy)!=str):
+                    msg='bad type for argument "Entropy": '\
+                        +str(type(Entropy))
+                    raise TypeError, msg
+                elif (Entropy.upper()=="UPWARD"):
+                    entropy_algo=EntropyAlgorithm.UPWARD
+                elif (Entropy.upper()=="DOWNWARD"):
+                    entropy_algo=EntropyAlgorithm.DOWNWARD
+                else:
+                    msg="Bad value for 'Entropy' argument:"+str(Entropy) \
+                    +" - expecting 'UPWARD' or 'DOWNWARD'"
+                    raise ValueError, msg    
                 try:
                     ## chmt_data=self.__chmt.ExtractData()
-                    res=self.__chmt.StateProfile(0, NbStateTrees, TreeId)
+                    res=self.__chmt.StateProfile(0, NbStateTrees, 
+                                                 TreeId, entropy_algo)
                 except RuntimeError, error:
                     raise FormatError, error
                 else:
@@ -175,15 +190,23 @@ class HiddenMarkovTree:
         else:
             return Distribution(cdistribution_data)
 
-    def ExtractPlot(self, TreeId, ViewPoint):
+    def ExtractPlot(self, TreeId, ViewPoint, Entropy="UPWARD"):
         """Extract a tree with state or entropy profile.
         
         Usage:  ExtractPlot(TreeId, ViewPoint="StateProfile")"""
         if (TreeId is None):
             raise TypeError, "Argument 'TreeId' is mandatory in "+\
                     'ExtractPlot(TreeId, ViewPoint="StateProfile")'
+        if (type(Entropy)!=str):
+            msg='bad type for argument "Entropy": '\
+                +str(type(Entropy))
+            raise TypeError, msg
+        elif (Entropy.upper()=="UPWARD"):
+            entropy_algo=EntropyAlgorithm.UPWARD
+        elif (Entropy.upper()=="DOWNWARD"):
+            entropy_algo=EntropyAlgorithm.DOWNWARD                    
         try:
-            res=self.__chmt.StateProfile(0, 2, TreeId)
+            res=self.__chmt.StateProfile(0, 2, TreeId, entropy_algo)
         except RuntimeError, error:
             raise FormatError, error
         else:
@@ -234,7 +257,7 @@ class HiddenMarkovTree:
         return self.__chmt.NbStates()
     
     def Plot(self, ViewPoint="Observation", variable=0, Title="", 
-             TreeId=0, EndVertex=None):
+             TreeId=0, EndVertex=None, Entropy="UPWARD"):
         """Graphical output using Gnuplot.py.        
         
         Usage:  Plot(ViewPoint="StateProfile", TreeId=0, EndVertex=10)
@@ -334,6 +357,18 @@ class HiddenMarkovTree:
                 msg="bad type for vertex identifier: " + \
                          str(type(EndVertex))
                 raise TypeError, msg
+            if (type(Entropy)!=str):
+                msg='bad type for argument "Entropy": '\
+                    +str(type(Entropy))
+                raise TypeError, msg
+            elif (Entropy.upper()=="UPWARD"):
+                entropy_algo=EntropyAlgorithm.UPWARD
+            elif (Entropy.upper()=="DOWNWARD"):
+                entropy_algo=EntropyAlgorithm.DOWNWARD
+            else:
+                msg="Bad value for 'Entropy' argument:"+str(Entropy) \
+                +" - expecting 'UPWARD' or 'DOWNWARD'"
+                raise ValueError, msg    
             ref_file_id=""
             file_id=ref_file_id
             prefix="ftmp"
@@ -358,7 +393,8 @@ class HiddenMarkovTree:
                 self.__chmt.StateProfilePlot(os.getcwd()+os.sep+prefix, 
                                              Title,
                                              TreeId,
-                                             EndVertex)
+                                             EndVertex,
+                                             entropy_algo)
                 # build the list of the created files: 
                 for char in [str(c) for c in range(2)]+[""]:
                     filename=prefix+char
@@ -520,7 +556,7 @@ class HiddenMarkovTree:
         return res
 
 
-class HiddenMarkovTreeData(trees.Trees):
+class HiddenMarkovTreeData(trees.trees.Trees):
     """A set of trees associated with one hidden markov tree model."""
 
     def __init__(self, trees_object, markov=None, aliasing=False, 
@@ -534,8 +570,9 @@ class HiddenMarkovTreeData(trees.Trees):
         # and the attribute types should have the possibility to be specified
         if issubclass(trees_object.__class__, HiddenMarkovTreeData):
             # trees_object is supposed to be a HiddenMarkovTreeData object...
-            trees.Trees(self, trees_object, attribute_names=attribute_names)
-            self.__ctrees=chmt.CHmt_data(arg.__chmtd)
+            trees.Trees.__init__(self, trees_object, 
+                                 attribute_names=attribute_names)
+            self.__ctrees=chmt.CHmt_data(trees_object._ctrees(), True)
         elif issubclass(trees_object.__class__, chmt.CHmt_data):
             # ...or a CHmt_data object...
             trees.Trees.__init__(self, trees_object,
@@ -543,7 +580,7 @@ class HiddenMarkovTreeData(trees.Trees):
             if aliasing:
                 self.__ctrees=trees_object
             else:
-                self.__ctrees=chmt.CHmt_data(trees_object)
+                self.__ctrees=chmt.CHmt_data(trees_object, True)
         elif issubclass(trees_object.__class__, HiddenMarkovTree):
             # above line is weird: class must be Trees...
             # ... or a Trees object...
@@ -718,10 +755,13 @@ class HiddenMarkovTreeData(trees.Trees):
                    self.__ctrees.NbValues(0)
                 self.__plot=stat_tool._PlotManager(file_list, prefix+file_id, 
                                                     nb_windows)
-                                                     
+                                                    
+    def _ctrees(self):
+        return self.__ctrees
+
     def _state_marginal_distribution(self):
         # compute the (empirical) marginal distribution of the hidden states
-        s=ctrees.CTrees.Display(self._ctrees(), False)
+        s=ctrees.CTrees.Display(trees.Trees._ctrees(self), False)
         i=s.find("state histogram - sample size", 0)
         msg="Could not find the (empirical) marginal distribution" \
             " of the hidden states"

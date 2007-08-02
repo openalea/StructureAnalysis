@@ -1,0 +1,18 @@
+_min_value == 2, _max_value == 5 _max_depth == 3, _max_size == 11
+Checking the assignement operator of 'Tree_characteristics' : 
+Histogram for the marginal distribution is : 
+histogram - sample size: 53
+mean: 3.79245   variance: 1.32148   standard deviation: 1.14956
+coefficient of skewness: -0.364938   coefficient of kurtosis: -1.34693
+mean absolute deviation: 1.00534   coefficient of concentration: 0.165399
+information: -71.2892 (-1.34508)
+
+   | histogram | cumulative histogram function
+0   0         0
+1   0         0
+2  10  0.188679
+3  11  0.396226
+4  12  0.622642
+5  20         1
+Histogram for the number of occurrences for each value : 
+Histogram for the number of zones for each value : 

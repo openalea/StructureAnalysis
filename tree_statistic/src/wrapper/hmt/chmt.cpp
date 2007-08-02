@@ -240,9 +240,10 @@ CiHmot_wrapper_simulate_trees(const Hidden_markov_out_tree& hmt,
 }
 
 list CiHmot_wrapper_state_profile(const Hidden_markov_out_tree& hmt,
-                                  int algorithm,
+                                  int viterbi_algorithm,
                                   int nb_state_trees,
-                                  int index)
+                                  int index,
+                                  int entropy_algorithm= Stat_trees::UPWARD)
 {
    bool status= false;
    unsigned int cpt_msg= 0;
@@ -266,7 +267,8 @@ list CiHmot_wrapper_state_profile(const Hidden_markov_out_tree& hmt,
    {
       status= hmt.state_profile(error, *markov_data, index, smoothed, nstate_trees,
                                 viterbi_upward_downward, generalized_restoration,
-                                messages, algorithm, nb_state_trees);
+                                messages, viterbi_algorithm, nb_state_trees,
+                                entropy_algorithm);
 
       if (!status)
       // if ((smoothed == NULL) || (viterbi_upward_downward == NULL)
@@ -416,13 +418,15 @@ void CiHmot_wrapper_plot_write(const Hidden_markov_out_tree& hmt,
 void CiHmot_wrapper_state_profile_plot_write(const Hidden_markov_out_tree& hmt,
                                              const char* prefix,
                                              const char* title,
-                                             int identifier, int vertex)
+                                             int identifier, int vertex,
+                                             int entropy_algorithm)
 {
    bool status= true;
    ostringstream error_message;
    Format_error error;
 
-   status= hmt.state_profile_plot_write(error, prefix, identifier, vertex, title);
+   status= hmt.state_profile_plot_write(error, prefix, identifier, vertex,
+                                        title, entropy_algorithm);
    if (not status)
    {
       error_message << error;
@@ -648,7 +652,7 @@ BOOST_PYTHON_MODULE(chmt)
                          return_value_policy< manage_new_object >())
         .def("SpreadsheetWrite", &CiHmot_wrapper_spreadsheet_write1)
         .def("StateProfile", &CiHmot_wrapper_state_profile,
-                             "StateProfile(self, int, int, int) -> list \n\n"
+                             "StateProfile(self, int, int, int, int) -> list \n\n"
                              "return trees object and strings"
                              "for the state tree analysis\n")
         .def("StateProfilePlot", &CiHmot_wrapper_state_profile_plot_write,
@@ -688,7 +692,11 @@ BOOST_PYTHON_MODULE(chmt)
     def("HmtAsciiRead", Hmt_wrapper_ascii_read1,
                         return_value_policy< manage_new_object >());
 
+    enum_<UniqueInt<2> >("EntropyAlgorithm")
+        .value("UPWARD", Stat_trees::UPWARD)
+        .value("DOWNWARD", Stat_trees::DOWNWARD)
+        .export_values()
+    ;
      // def("NB_TREES", NB_TREES_);
 
 }
-

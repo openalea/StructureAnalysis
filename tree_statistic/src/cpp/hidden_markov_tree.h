@@ -8,7 +8,7 @@
  *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
  *
  *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/hidden_markov_tree.h,v $
- *       $Id: hidden_markov_tree.h 3186 2007-05-25 15:10:30Z dufourko $
+ *       $Id: hidden_markov_tree.h 2722 2007-02-16 14:17:56Z jbdurand $
  *
  *       Forum for AMAPmod developers: amldevlp@cirad.fr
  *
@@ -343,21 +343,32 @@ protected :
                                   std::deque<int>*& vd,
                                   int index= I_DEFAULT, std::ostream* os= NULL,
                                   char format= 'a',
-                                  int vertex= I_DEFAULT) const;
+                                  int vertex= I_DEFAULT,
+                                  int entropy_algo=UPWARD) const;
 
    /** Compute the entropy of partial state processes */
    double partial_entropy_computation(const Hidden_markov_tree_data& trees,
                                       int t,
+                                      double_array_3d output_cond_prob,
+                                      double_array_3d marginal_prob,
+                                      double_array_3d upward_parent_prob,
                                       double_array_3d downward_prob,
                                       double_array_3d state_entropy,
+                                      double_array_3d conditional_entropy,
+                                      double_array_4d conditional_prob,
                                       double*& partial_entropy,
                                       int entropy_algo= UPWARD) const;
 
    /** Compute the entropy of partial state processes by a downward algorithm*/
    virtual double downward_partial_entropy_computation(const Hidden_markov_tree_data& trees,
                                                        int t,
+                                                       double_array_3d output_cond_prob,
+                                                       double_array_3d marginal_prob,
+                                                       double_array_3d upward_parent_prob,
                                                        double_array_3d downward_prob,
                                                        double_array_3d state_entropy,
+                                                       double_array_3d conditional_entropy,
+                                                       double_array_4d conditional_prob,
                                                        double*& partial_entropy) const;
 
    /** Compute the entropy of partial state processes by an upward algorithm*/
@@ -373,18 +384,12 @@ protected :
                                         double_array_3d upward_prob,
                                         double_array_3d upward_parent_prob,
                                         double_array_3d downward_prob,
-                                        double_array_2d& conditional_entropy,
+                                        double_array_2d& expected_conditional_entropy,
+                                        double_array_3d& conditional_entropy,
+                                        double_array_4d& conditional_prob,
+                                        double_array_3d& state_entropy,
                                         int index= I_DEFAULT,
                                         int entropy_algo= UPWARD) const;
-
-   /** Compute the conditional entropy by a downward algorithm*/
-   virtual void downward_conditional_entropy_computation(const Hidden_markov_tree_data& trees,
-                                                         double_array_3d marginal_prob,
-                                                         double_array_3d upward_prob,
-                                                         double_array_3d upward_parent_prob,
-                                                         double_array_3d downward_prob,
-                                                         double_array_2d& conditional_entropy,
-                                                         int index= I_DEFAULT) const;
 
    /** Compute the conditional entropy by an upward algorithm*/
    virtual void upward_conditional_entropy_computation(const Hidden_markov_tree_data& trees,
@@ -394,6 +399,18 @@ protected :
                                                        double_array_3d downward_prob,
                                                        double_array_2d& conditional_entropy,
                                                        int index= I_DEFAULT) const;
+
+   /** Compute the conditional entropy by a downward algorithm*/
+   virtual void downward_conditional_entropy_computation(const Hidden_markov_tree_data& trees,
+                                                         double_array_3d marginal_prob,
+                                                         double_array_3d downward_prob,
+                                                         double_array_3d upward_prob,
+                                                         double_array_3d upward_parent_prob,
+                                                         double_array_2d& expected_conditional_entropy,
+                                                         double_array_3d& conditional_entropy,
+                                                         double_array_4d& conditional_prob,
+                                                         double_array_3d& state_entropy,
+                                                         int index= I_DEFAULT) const;
 
    /**Compute the smoothed probabilities and return the likelihood */
    virtual double smoothed_probabilities(const Hidden_markov_tree_data& trees,
@@ -504,13 +521,13 @@ public :
                                               const Hidden_markov_tree_data& trees,
                                               int identifier, int vertex,
                                               const char *title= NULL,
-                                              int algorithm= UPWARD) const;
+                                              int entropy_algo= UPWARD) const;
 
    /** Write Gnuplot output of state and entropy profiles */
    bool state_profile_plot_write(Format_error &error, const char *prefix,
                                  int identifier, int vertex,
                                  const char *title= NULL,
-                                 int algorithm= UPWARD) const;
+                                 int entropy_algo= UPWARD) const;
 
 
    // virtual functions common to all hidden_markov_trees ?
@@ -673,6 +690,14 @@ public :
 
    Distribution_data* extract(Format_error& error, int type,
                               int variable, int value) const;
+
+   /*
+   Return mixture distribution with histogram for a given variable
+   Distribution_data* extract_marginal(Format_error& error, int variable) const;
+
+   Print mixture distribution with histogram for a given variable
+   bool marginal_ascii_write(Format_error& error, int variable,
+                             const char *path, bool exhaustive= true) const; */
 
    Hidden_markov_tree_data* merge(Format_error& error,
                                   const pt_hmtd_vector& otrees) const;

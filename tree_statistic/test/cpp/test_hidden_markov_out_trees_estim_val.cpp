@@ -1,0 +1,111 @@
+/****************************************************************
+ *
+ *  Test of the estimation algorithms for hidden Markov
+ *  out-trees as defined in hidden_markov_out_tree.h:
+ *  checking the returned values
+ */
+
+#include "TREE/tree_simple.h"
+#include "TREE/tree_traits.h"
+#include "TREE/basic_visitors.h"
+#include "stat_tools.h"
+#include "curves.h"
+#include "markovian.h"
+#include "sequences.h"
+#include "semi_markov.h"
+#include "hidden_semi_markov.h"
+#include "int_fl_containers.h"
+#include "generic_typed_edge_tree.h"
+#include "typed_edge_trees.h"
+#include "int_trees.h"
+#include "hidden_markov_tree.h"
+#include "hidden_markov_out_tree.h"
+
+using namespace Stat_trees;
+
+int main(void)
+{
+   typedef Hidden_markov_tree_data::tree_type tree_type;
+   typedef Hidden_markov_tree_data::value value;
+   typedef Hidden_markov_tree_data::vertex_iterator vertex_iterator;
+   typedef Stat_trees::Hidden_markov_tree::double_array_3d double_array_3d;
+   typedef generic_visitor<tree_type> visitor;
+   typedef visitor::vertex_array vertex_array;
+
+   Hidden_markov_out_tree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL;
+   Hidden_markov_tree_data *hmtd;
+   // tree_type **ptrees;
+   tree_type ctree;
+   value default_value;
+   visitor v;
+   vertex_iterator it, end;
+   vertex_array va;
+   Format_error error;
+   // const char * hsmcpath= "./laricio_3.hsc";
+   // const char * hmtpath= "./hmt.hmt";
+   const char * hmotpath= "./hmot.hmt";
+   const char * hmotinitpath= "./hmot_init.hmt";
+   const int nb_children_max= 2, nb_trees= 50, size= 40,
+             nb_iterations= 10;
+   register int nb_states= 0; //t, u, j, i,
+   // double_array_3d upward_prob= NULL, upward_parent_prob= NULL,
+   //        downward_prob= NULL, *downward_pair_prob= NULL;
+   //        state_marginal= NULL, output_cond= NULL,
+   // double **sum_state_marginal= NULL;
+   // double likelihood;
+
+   // read and print a hidden Markov out tree
+   hmot= hidden_markov_out_tree_ascii_read(error, hmotpath);
+
+   // Copy constructor of a hidden Markov out tree
+   if (hmot != NULL)
+   {
+      cout << "Read a hidden Markov tree from file " << hmotpath << endl;
+      hmot2= new Hidden_markov_out_tree(*hmot, false, false);
+
+      hmot2->ascii_write(cout, false);
+      cout << endl;
+
+      cout << "Simulate trees from this hidden Markov tree" << endl;
+      hmtd= hmot->simulation(error, size, nb_trees, nb_children_max);
+      cout << error;
+
+      cout << "Initialization HMT: " << endl;
+      hmot_init= hidden_markov_out_tree_ascii_read(error, hmotinitpath);
+      cout << error;
+      if (hmot_init != NULL)
+         hmot_init->ascii_write(cout, false);
+
+      hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_init,
+                                                     true, VITERBI,
+                                                     nb_iterations, true);
+      cout << error;
+
+      if (hmot2 != NULL)
+      {
+         cout << endl << "Estimated HMT using above initialization:" << endl;
+         hmot2->ascii_write(cout, false);
+         nb_states= hmot2->get_nb_state();
+         delete hmot2;
+         hmot2=NULL;
+      }
+
+      hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', nb_states,
+                                                     false, true, VITERBI,
+                                                     0.7, nb_iterations);
+      cout << error;
+      cout << endl;
+
+      if (hmot2 != NULL)
+      {
+         cout << endl << "Estimated HMT using initial self-transitions:" << endl;
+         hmot2->ascii_write(cout, false);
+         delete hmot2;
+         hmot2=NULL;
+      }
+
+      delete hmot;
+      delete hmtd;
+   }
+   return 0;
+}

@@ -357,7 +357,7 @@ void Histogram_wrapper_plot_write_survival(const Distribution_data& histo,
 
 
 // Module ======================================================================
-BOOST_PYTHON_MODULE(cstat_tools)
+BOOST_PYTHON_MODULE(cstat_tool)
 {
     class_< Distribution, boost::noncopyable, Distribution_Wrapper >("Distribution", init< optional< int > >())
     // class_< Distribution>("Distribution", init< optional< int > >())

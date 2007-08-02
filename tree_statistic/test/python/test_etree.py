@@ -1,23 +1,21 @@
 # a test for the class etrees.Tree: constructor and basic methods
-import os, sys
-AMLLIBDIR=os.getenv("HOME")+"/devlp/AMAPmod/build-linux/lib"
-sys.path.append(AMLLIBDIR)
-map(lambda x:sys.path.append(os.getenv("AMAPDIR")+"/STAT_TREES/Python/"+x),
-    ["Int_fl_containers/", "Trees/", "Hmt/"])
-sys.path.append(os.getenv("AMAPDIR")+"/STAT/Python/")
-import etrees, trees, stat_tools
+import sys, os
+AMLLIBDIR=os.getenv("HOME")+"/devlp/vplants/tree_statistic/src/"
+sys.path.append(AMLLIBDIR+"tree_statistic")
+sys.path.append(AMLLIBDIR+"stat_tool")
+import trees.etrees, trees.trees, stat_tool
 inf_bound=0
 sup_bound=3
 probability= 0.6
-ident=stat_tools.DistributionIdentifier.UNIFORM
-parameter=stat_tools.D_DEFAULT
-distrib= stat_tools.Parametric(ident, inf_bound, sup_bound, 
+ident=stat_tool.DistributionIdentifier.UNIFORM
+parameter=stat_tool.D_DEFAULT
+distrib= stat_tool.Parametric(ident, inf_bound, sup_bound, 
                                parameter, probability)
 print distrib
 max_depth= 3
 max_size= 8
 n=5
-T=etrees.Tree([0], 0, 0)
+T=trees.etrees.Tree([0], 0, 0)
 v=range(n)
 for i in range(n):
     v[i]=T.AddVertex([i+1])
@@ -86,32 +84,39 @@ print ST
 ST=T.SelectSubTree(1, False)
 print "Prune subtree rooted at vertex 2 from T:"
 print ST
+# extract sequences
+import amlPy, trees
+TS=trees.Trees([T])
+S1=TS.BuildSequences(True)
+S2=TS.BuildSequences(False)
+amlPy.Display(S1, ViewPoint="Data")
+amlPy.Display(S2, ViewPoint="Data")
 # W=T creates an alias
-W=etrees.Tree(T)
+W=trees.etrees.Tree(T)
 W.Put(W.Root(), [100])
 print "A (non-alias) copy of T with modified root attribute:"
 print W
-C=etrees.TreeStructure(0, 1)
-print "A default tree structure", C
-v=range(n)
-for i in range(n):
-    v[i]=C.AddVertex()
-C.AddEdge(v[0], v[1])
-C.AddEdge(v[0], v[2], '<')
-C.AddEdge(v[1], v[3])
-C.AddEdge(v[1], v[4], '<')
-print "A tree structure build manually:"
-C.Display()
-print "... with depth", C.Depth(), " and size ", C.Size(), "."
-C=etrees.TreeStructure(T)
-print "Extracting a structure from T:"
-print C
+##C=trees.etrees.TreeStructure(0, 1)
+##print "A default tree structure", C
+##v=range(n)
+##for i in range(n):
+##    v[i]=C.AddVertex()
+##C.AddEdge(v[0], v[1])
+##C.AddEdge(v[0], v[2], '<')
+##C.AddEdge(v[1], v[3])
+##C.AddEdge(v[1], v[4], '<')
+##print "A tree structure build manually:"
+##C.Display()
+##print "... with depth", C.Depth(), " and size ", C.Size(), "."
+##C=trees.etrees.TreeStructure(T)
+##print "Extracting a structure from T:"
+##print C
 print "A random tree structure R:"
-R=etrees.TreeStructure(distrib, max_size, max_depth)
+R=trees.etrees.TreeStructure(distrib, max_size, max_depth)
 print R
 print "(size, depth) = (", R.Size(), ", ", R.Depth(), ")."
 print "Copying this structure to T:"
-T=etrees.Tree([1.0, 0], R)
+T=trees.etrees.Tree([1.0, 0], R)
 print T
 print "Random simulation of the attributes of T:"
 distrib_list=[]
@@ -122,7 +127,7 @@ print T
 print "Conversion from etrees to tree"
 PT=trees.Tree(T)
 print PT
-T=etrees.Tree(PT)
+T=trees.etrees.Tree(PT)
 print T
 # S()
 try:

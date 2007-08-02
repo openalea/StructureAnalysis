@@ -5,12 +5,12 @@
  *
  *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
  *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/typed_edge_trees.cpp,v $
  *       $Id: typed_edge_trees.cpp 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.fr
  *
  *  ----------------------------------------------------------------------------
  *
@@ -1655,3 +1655,4 @@ void Tree_characteristics::build_nb_occurrences_histogram(Typed_edge_one_int_tre
    delete [] nb_occurrences_t;
    nb_occurrences_t= NULL;
 }
+
