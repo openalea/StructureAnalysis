@@ -16,8 +16,8 @@ SConsignFile()
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
 #wrapper_conf = ALEAConfig(name,['boost_python', 'alea'])
-cpp_conf = ALEAConfig(name, ['alea', 'qt4','opengl','install'])
-opt_conf = ALEAConfig(name, ['boost_python', 'alea', 'qt4','opengl','install'])
+cpp_conf = ALEAConfig(name, ['alea', 'qt4','opengl','readline','install'])
+opt_conf = ALEAConfig(name, ['boost_python', 'alea', 'qt4','opengl','readline','install'])
 
 # Set all the common options for the package
 # TODO: Have a configure stage.
