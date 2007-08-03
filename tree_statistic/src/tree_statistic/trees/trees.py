@@ -2,7 +2,10 @@
 """
 
 import string
-import cstat_tool, stat_tool, int_fl_containers, ctree, ctrees
+import openalea.stat_tool
+import int_fl_containers, ctree, ctrees
+
+stat_tool=openalea.stat_tool
 
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
@@ -34,7 +37,7 @@ class TreeValue:
             raise TypeError, msg
         for index in range(len(list_of_values)):
             o=list_of_values[index]
-            if issubclass(o.__class__, cstat_tool.VariableType):
+            if issubclass(o.__class__, stat_tool.VariableType):
                 self.__types.append(o)
                 if (o==VariableType.REAL_VALUE):
                     val=0.
@@ -165,7 +168,7 @@ class Tree:
         else:
             if not hasattr(arg, "__getitem__"):
                 raise TypeError, "argument 1 must have a __getitem__ method"
-            if issubclass(arg[0].__class__, cstat_tool.VariableType):
+            if issubclass(arg[0].__class__, stat_tool.VariableType):
                 #... or a list of types
                 self.__types=list(arg)
                 default_value=TreeValue(arg)
@@ -278,7 +281,7 @@ class Tree:
         types=res.Types()
         ftypes=[]
         for t in range(len(types)):
-            if types[t]==cstat_tool.VariableType.REAL_VALUE:
+            if types[t]==stat_tool.VariableType.REAL_VALUE:
                 ftypes+=[t]
         try:
             while 1:
@@ -426,7 +429,7 @@ class Tree:
         smoothed=[]
         rounded=[]
         for index in range(len(self.__attributes)):
-            if (self.Type(index)==cstat_tool.VariableType.REAL_VALUE):
+            if (self.Type(index)==stat_tool.VariableType.REAL_VALUE):
                 if (self.__attributes[index].find("State ")!=-1):
                     smoothed.append(index)
                 elif (self.__attributes[index].find("Entropy")!=-1):
@@ -437,7 +440,7 @@ class Tree:
             header="vid: ["
         else:
             header="[ "
-        if self.Type(0)==cstat_tool.VariableType.STATE:
+        if self.Type(0)==stat_tool.VariableType.STATE:
             # print the State nature of the 1st variable
             header+=" Optimal State ]"
             comma=False
@@ -467,7 +470,7 @@ class Tree:
                 header+=self.__attributes[index+1]
             header+=" ]"
 ##        header is already completed by case 
-##        (self.Type(0)==cstat_tool.VariableType.STATE) and (len(smoothed) > 0)
+##        (self.Type(0)==stat_tool.VariableType.STATE) and (len(smoothed) > 0)
 ##        above
 ##        else: 
 ##            # Same principle for smoothed probabilities,
@@ -526,7 +529,7 @@ class Tree:
             if attributes:
                 stream+=': '
         if attributes:
-            if self.Type(0)==cstat_tool.VariableType.STATE:
+            if self.Type(0)==stat_tool.VariableType.STATE:
                 # A state variable must be written separately
                 complete_value=self.Get(key).Values()
                 stream+=str([complete_value[0]])
@@ -997,7 +1000,8 @@ class Trees:
             nbmtg=0     # number of MTG ComponentRoots
             nbtrees=0   # number of trees
             no_scale=(scale is None)
-            import amlPy
+            import openalea.amlPy
+            amlPy=openalea.amlPy
             mode=False
             if not amlPy.getmode():
             # conversion from AML object to Python
@@ -1322,7 +1326,7 @@ class Trees:
             else:
                 cclustered=self.__ctrees.Cluster(cvariable, limit)
         except RuntimeError, error:
-            # raise cstat_tool.Format_error, str(cerror)
+            # raise stat_tool.Format_error, str(cerror)
             replaced=str(error) # self.__replacestr(str(cerror), "variable")
             raise FormatError, replaced
         clustered=Trees(cclustered, self.__types, self.__attributes)
@@ -1338,8 +1342,10 @@ class Trees:
                 ("Viterbi" or "ForwardBackward").
         Argument characteristics controls the computation of the characteristic
                 distributions."""
-        import chmt, hmt
-        from stat_tool import RestorationAlgorithm
+        import openalea.tree_statistic.hmt, openalea.tree_statistic.hmt.chmt
+        hmt=openalea.tree_statistic.hmt
+        chmt=openalea.tree_statistic.hmt.chmt
+        RestorationAlgorithm=stat_tool.RestorationAlgorithm
         if not issubclass(model.__class__, hmt.HiddenMarkovTree):
             msg='bad type for argument "hmt": HiddenMarkovTree expected'
             raise TypeError, msg
@@ -1369,7 +1375,7 @@ class Trees:
     def Difference(self, variable=None):
         """First-order differentiation of trees."""
         if (variable is None):
-            cvariable=cstat_tool.I_DEFAULT()
+            cvariable=stat_tool.I_DEFAULT()
         else:
             cvariable=self._valid_cvariable(variable)+1
         try:
@@ -1425,8 +1431,10 @@ class Trees:
                           InitialSelfTransition, NbIteration, StateTrees, 
                           Counting, ForceParametric)
                 Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Counting)"""
-        import chmt, hmt
-        from stat_tool import RestorationAlgorithm
+        import openalea.tree_statistic.hmt, openalea.tree_statistic.hmt.chmt
+        hmt=openalea.tree_statistic.hmt
+        chmt=openalea.tree_statistic.hmt.chmt
+        RestorationAlgorithm=stat_tool.RestorationAlgorithm
         chmt_data=chmt.CHmt_data(self._ctrees())
         if type(model_name)==str:
             if model_name.upper()=="HIDDEN_MARKOV_TREE":
@@ -1653,7 +1661,8 @@ class Trees:
             os.remove(file_name)
             raise FormatError, error
         else:
-            import amlPy
+            import openalea.amlPy
+            amlPy=openalea.amlPy
             res= amlPy.Sequences(file_name)
             os.remove(file_name)            
             return res
@@ -1681,7 +1690,8 @@ class Trees:
             os.remove(file_name)
             raise FormatError, error
         else:
-            import amlPy
+            import openalea.amlPy
+            amlPy=openalea.amlPy
             res= amlPy.Vectors(file_name)
             os.remove(file_name)            
             return res
@@ -1691,7 +1701,7 @@ class Trees:
 
         If the argument is a list of Trees objects and if the variables of
         each Trees object are compatible, return a Trees object."""
-        #cerror=cstat_tool.Format_error()
+        #cerror=stat_tool.Format_error()
         ctree_list=[]
         for t in range(len(tree_list)):
             if issubclass(tree_list[t].__class__, Trees):
@@ -1702,7 +1712,7 @@ class Trees:
             # cmerged=self.__ctrees.Merge(cerror, ctree_list)
             cmerged=self.__ctrees.Merge(ctree_list)
         except RuntimeError, error:
-            # raise cstat_tool.Format_error, str(cerror)
+            # raise stat_tool.Format_error, str(cerror)
             replaced=self.__replacestr(str(error), "variable")
             # replaced=self.__replacestr(str(cerror), "variable")
             raise FormatError, replaced
@@ -1840,7 +1850,8 @@ class Trees:
             # create the temporary MTG file
             self.Save(mtgfile_name, False, list(self.__attributes))
     
-            import amlPy
+            import openalea.amlPy
+            amlPy=openalea.amlPy
             
             mode=False
             if not amlPy.getmode():
@@ -1903,7 +1914,7 @@ class Trees:
                 for var in range(self.NbVariables()):
                     cvariable_type=self.__types[var]
                     cvariable_name=self.__attributes[var]
-                    if (cvariable_type == cstat_tool.VariableType.STATE):
+                    if (cvariable_type == stat_tool.VariableType.STATE):
                         # current variable is a state variable
                         default_colorfunc= \
                             lambda x: amlPy.Feature(x, cvariable_name)+2
@@ -2079,7 +2090,7 @@ class Trees:
                         attributes.append(self.__attributes[variable])
                 cselected=self.__ctrees.SelectVariable(cvariables, keep)
         except RuntimeError, error:
-            # raise cstat_tool.Format_error, str(cerror)
+            # raise stat_tool.Format_error, str(cerror)
             replaced=str(error) # self.__replacestr(str(cerror), "variable")
             raise FormatError, replaced
         selected=Trees(cselected, types, attributes)
@@ -2151,7 +2162,7 @@ class Trees:
             csegmentation=self.__ctrees.SegmentationExtract(cvariable, 
                                                             values, keep)
         except RuntimeError, error:
-            # raise cstat_tool.Format_error, str(cerror)
+            # raise stat_tool.Format_error, str(cerror)
             replaced=self.__replacestr(str(error), "variable") # str(error)
             raise FormatError, replaced
         segmentation=Trees(csegmentation, types, attributes)
@@ -2286,12 +2297,10 @@ class Trees:
 
     def _ctrees(self):
         return self.__ctrees
-##
-##    def _tmap(self):
-##        return self.__tmap
-##
-##    def _tmapi(self):
-##        return self.__tmapi
+
+    def _ctrees_display(self):
+        return self.__ctrees.Display(False)
+    
     def _copy_vid_conversion(self, dest):
         # copy the dictionnaries corresponding to the tree -> MTG
         # and MTG -> tree vid conversion

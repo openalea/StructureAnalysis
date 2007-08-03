@@ -1,17 +1,16 @@
 # a test for the class hmt.Hmt: constructor and basic methods
 import sys, os
-AMLLIBDIR=os.getenv("HOME")+"/devlp/AMAPmod/build-linux/lib"
-sys.path.append(AMLLIBDIR)
-map(lambda x:sys.path.append(os.getenv("AMAPDIR")+"/STAT_TREES/Python/"+x),
-    ["Int_fl_containers/", "Trees/", "Hmt/"])
-sys.path.append(os.getenv("AMAPDIR")+"/STAT/Python/")
-import stat_tools, trees, hmt
+import openalea.stat_tool
+import openalea.tree_statistic.trees, openalea.tree_statistic.hmt
+stat_tool=openalea.stat_tool
+trees=openalea.tree_statistic.trees
+hmt=openalea.tree_statistic.hmt
 inf_bound=1
 sup_bound=3
 probability= 0.6
-ident=stat_tools.DistributionIdentifier.UNIFORM
-parameter=stat_tools.D_DEFAULT
-distrib= stat_tools.Parametric(ident, inf_bound, sup_bound, parameter, probability)
+ident=stat_tool.DistributionIdentifier.UNIFORM
+parameter=stat_tool.D_DEFAULT
+distrib= stat_tool.Parametric(ident, inf_bound, sup_bound, parameter, probability)
 # Distribution used for the number of children and the tree attributes
 print distrib
 max_depth=3

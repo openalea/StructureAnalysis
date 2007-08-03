@@ -1,9 +1,8 @@
 # a test for the class trees.trees.Trees: constructor and basic methods
 import sys, os
-AMLLIBDIR=os.getenv("HOME")+"/devlp/vplants/tree_statistic/src/"
-sys.path.append(AMLLIBDIR+"tree_statistic")
-sys.path.append(AMLLIBDIR+"stat_tool")
-import stat_tool, trees.trees
+import openalea.stat_tool, openalea.tree_statistic.trees
+stat_tool=openalea.stat_tool
+trees=openalea.tree_statistic.trees
 inf_bound=1
 sup_bound=3
 probability= 0.6
@@ -14,10 +13,10 @@ print distrib
 max_depth=3
 max_size=20
 n=5
-D=trees.trees.TreeStructure()
+D=trees.TreeStructure()
 print "Default tree structure: ", D
 print "A random tree structure R:"
-R=trees.trees.TreeStructure(distrib)
+R=trees.TreeStructure(distrib)
 print R
 print "(size, depth) = (", R.Size(), ", ", R.Depth(), ")."
 R.Simulate(distrib, max_size, max_depth)
@@ -46,7 +45,7 @@ else:
     print "Failed to raise exception for bad vertex identifier type"
 # TreeStructure to Tree
 print "Copy the entire structure to a tree T:"
-T=trees.trees.Tree([1.0, 0], R)
+T=trees.Tree([1.0, 0], R)
 T.Display(False)
 print "Root of T:", T.Root()
 print "Size of T:", T.Size()
@@ -74,7 +73,7 @@ else:
     print "Failed to raise exception for bad vertex identifier type"
 # Tree to TreeStructure
 print "Extracting the structure from T:"
-R=trees.trees.TreeStructure(T)
+R=trees.TreeStructure(T)
 print R
 print "Display the vertex identifiers of the structure:"
 R.Display()
@@ -157,9 +156,10 @@ else:
     print "Failed ro raise exception for bad attribute name"
 # reading a Tree from a MTG
 print "Read tree from MTG file 'sample_mtg.txt':"
-import amlPy
+import openalea.amlPy
+amlPy=openalea.amlPy
 amlPy.setmode(1)
-MT=trees.trees.Tree("sample_mtg.txt")
+MT=trees.Tree("sample_mtg.txt")
 print MT.Display()
 MT.Save("sample_mtg_save.txt", True)
 # reading a Tree from a MTG with filter and custom attributes
@@ -169,9 +169,10 @@ f=lambda x: amlPy.Feature(x, "length")*amlPy.Feature(x, "fruits")
 # filter=lambda x: x != 2
 filter=lambda x: x < 6
 attributes=["anything"]
-MT=trees.trees.Tree("sample_mtg.txt", filter, attributes, [f], scale=1)
+MT=trees.Tree("sample_mtg.txt", filter, attributes, [f], scale=1)
 print MT.Display()
-import amlPy
+import openalea.amlPy
+amlPy=openalea.amlPy
 MSTG=amlPy.MTG("sample_mtg.txt")
 DR=amlPy.DressingData("dressing.drf")
 def Longueur(x):
@@ -184,7 +185,7 @@ amlPy.Plot(P)
 # checking exceptions
 # invalid file name
 try:
-    MT=trees.trees.Tree("no_ $uch file.t\/t")
+    MT=trees.Tree("no_ $uch file.t\/t")
 except IOError, e:
     print e
 else:
@@ -192,28 +193,28 @@ else:
     raise e
 # inconsistent attribute number
 try:
-    MT=trees.trees.Tree("sample_mtg.txt", filter, [], [f], scale=1)
+    MT=trees.Tree("sample_mtg.txt", filter, [], [f], scale=1)
 except ValueError, v:
     print v
 else:
     print "Failed to raise exception for inconsistent attribute number"
 # bad attribute name
 try:
-    MT=trees.trees.Tree("sample_mtg.txt", filter, [f], [f], scale=1)
+    MT=trees.Tree("sample_mtg.txt", filter, [f], [f], scale=1)
 except TypeError, t:
     print t
 else:
     print "Failed to raise exception for bad attribute name"
 # bad attribute function
 try:
-    MT=trees.trees.Tree("sample_mtg.txt", filter, attributes, attributes, scale=1)
+    MT=trees.Tree("sample_mtg.txt", filter, attributes, attributes, scale=1)
 except TypeError, t:
     print t
 else:
     print "Failed to raise exception for bad attribute function"
 # bad attribute type
 try:
-    MT=trees.trees.Tree("sample_mtg.txt", filter, attributes, 
+    MT=trees.Tree("sample_mtg.txt", filter, attributes, 
     [lambda x: amlPy.Descendants(x)], scale=1)
 except TypeError, t:
     print t
@@ -221,21 +222,21 @@ else:
     print "Failed to raise exception for bad attribute type"
 # bad attribute name
 try:
-    MT=trees.trees.Tree("sample_mtg.txt", filter, [f], [f], scale=1)
+    MT=trees.Tree("sample_mtg.txt", filter, [f], [f], scale=1)
 except TypeError, t:
     print t
 else:
     print "Failed to raise exception for bad attribute name"
 # bad filtering function
 try:
-    MT=trees.trees.Tree("sample_mtg.txt", attributes, attributes, [f], scale=1)
+    MT=trees.Tree("sample_mtg.txt", attributes, attributes, [f], scale=1)
 except TypeError, t:
     print t
 else:
     print "Failed to raise exception for bad attribute function"
 # filtering function does not filter descendants
 try:
-    MT=trees.trees.Tree("sample_mtg.txt", lambda x: x != 2, attributes, [f], scale=1)
+    MT=trees.Tree("sample_mtg.txt", lambda x: x != 2, attributes, [f], scale=1)
 except IndexError, i:
     print i
 else:
@@ -243,14 +244,14 @@ else:
 # reading a forest MTG
 print "Read a forest MTG"
 try:
-    MT=trees.trees.Tree("sample_mtg_forest.txt")
-except trees.trees.Tree, BT:
+    MT=trees.Tree("sample_mtg_forest.txt")
+except trees.Tree, BT:
     MT=BT
     print MT.Display()
 else:
     print "Failed to raise exception for reading a forest MTG"
 # copy constructor of Tree
 print "A copy of tree T:"
-T2=trees.trees.Tree(MT)
+T2=trees.Tree(MT)
 print T2
 print "Attribute names of copied tree", T2.Attributes()

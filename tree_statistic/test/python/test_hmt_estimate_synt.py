@@ -1,17 +1,15 @@
 # a test for the class hmt.Hmt: estimation - syntax
-import sys, os
-AMLLIBDIR=os.getenv("HOME")+"/devlp/AMAPmod/build-linux/lib"
-sys.path.append(AMLLIBDIR)
-map(lambda x:sys.path.append(os.getenv("AMAPDIR")+"/STAT_TREES/Python/"+x),
-    ["Int_fl_containers/", "Trees/", "Hmt/"])
-sys.path.append(os.getenv("AMAPDIR")+"/STAT_TOOL/Python/")
-import stat_tools, trees, hmt
+import openalea.stat_tool
+import openalea.tree_statistic.trees, openalea.tree_statistic.hmt
+stat_tool=openalea.stat_tool
+trees=openalea.tree_statistic.trees
+hmt=openalea.tree_statistic.hmt
 inf_bound=1
 sup_bound=3
 probability= 0.6
-ident=stat_tools.DistributionIdentifier.UNIFORM
-parameter=stat_tools.D_DEFAULT
-distrib= stat_tools.Parametric(ident, inf_bound, sup_bound, parameter, probability)
+ident=stat_tool.DistributionIdentifier.UNIFORM
+parameter=stat_tool.D_DEFAULT
+distrib= stat_tool.Parametric(ident, inf_bound, sup_bound, parameter, probability)
 # Distribution used for the number of children and the tree attributes
 file_name="hmot_np_2s.hmt"
 # read a HMT from a file
@@ -42,7 +40,7 @@ print "Parameter estimation using a initial HMT "+ \
 "with bad number of output processes:"
 try:
     EH=T.Estimate("HIDDEN_MARKOV_TREE", H2O, 20)
-except stat_tools.FormatError, f:
+except stat_tool.FormatError, f:
     print f
 else:
     print "Failed to raise exception for bad number of output processes"
@@ -57,7 +55,7 @@ EH.Display()
 print "Extract the data part of the initial (file) HMT"
 try:
     HMTD=H.ExtractData()
-except stat_tools.FormatError, f:
+except stat_tool.FormatError, f:
     print f
 else:
     print "Failed to raise exception for no data part in HiddenMarkovTree"

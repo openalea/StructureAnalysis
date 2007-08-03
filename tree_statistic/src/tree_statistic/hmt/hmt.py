@@ -1,11 +1,16 @@
 """Hidden Markov tree models
 """
 import string
-import stat_tool, ctree, ctrees, chmt, trees.trees
+import openalea.stat_tool, openalea.tree_statistic.trees
+import chmt
+
+stat_tool=openalea.stat_tool
+trees=openalea.tree_statistic.trees
+# ctree=openalea.tree_statistic.trees.ctree
 
 VariableType=stat_tool.VariableType
 FormatError=stat_tool.FormatError
-CharacteristicType=ctree.Characteristic
+CharacteristicType=trees.CharacteristicType
 EntropyAlgorithm=chmt.EntropyAlgorithm
 
 class HiddenMarkovTree:
@@ -556,7 +561,7 @@ class HiddenMarkovTree:
         return res
 
 
-class HiddenMarkovTreeData(trees.trees.Trees):
+class HiddenMarkovTreeData(trees.Trees):
     """A set of trees associated with one hidden markov tree model."""
 
     def __init__(self, trees_object, markov=None, aliasing=False, 
@@ -761,7 +766,7 @@ class HiddenMarkovTreeData(trees.trees.Trees):
 
     def _state_marginal_distribution(self):
         # compute the (empirical) marginal distribution of the hidden states
-        s=ctrees.CTrees.Display(trees.Trees._ctrees(self), False)
+        s=trees.Trees._ctrees_display(self)
         i=s.find("state histogram - sample size", 0)
         msg="Could not find the (empirical) marginal distribution" \
             " of the hidden states"
