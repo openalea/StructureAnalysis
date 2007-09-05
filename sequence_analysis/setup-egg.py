@@ -49,8 +49,8 @@ if __name__ == '__main__':
           
 
           # Dependencies
-          setup_requires = setup_requires + ['openalea.deploy'],
-          install_requires = install_requires,
+          setup_requires = setup_requires + ['openalea.deploy', 'vplants.stat_tool'],
+          install_requires = install_requires + ['vplants.stat_tool'],
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
 

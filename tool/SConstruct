@@ -35,7 +35,6 @@ Help(options.GenerateHelpText(opt_env))
 prefix = opt_env['build_prefix']
 BuildDir(prefix, '.')
 
-
 cpp_env = ALEAEnvironment(cpp_conf, options=options)
 cpp_env.Append(CPPPATH='$build_includedir')
 

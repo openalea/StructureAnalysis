@@ -16,9 +16,11 @@ SConsignFile()
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
 # Dependencies
-wrapper_tools = ['boost_python', 'alea']
-#plantgl_tools = ['opengl', 'qhull', 'qt4']
-cpp_tools = ['alea','install']
+common_tools = ['vplants.mtg', 'PlantGL', 'vplants.tool',
+                'vplants.amlobj', 'vplants.stat_tool',]
+
+wrapper_tools = ['boost_python', 'alea'] + common_tools
+cpp_tools = ['alea','install'] + common_tools
 
 #wrapper_conf= ALEAConfig(name, wrapper_tools)
 cpp_conf = ALEAConfig(name, cpp_tools)

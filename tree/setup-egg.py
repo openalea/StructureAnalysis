@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import os, sys
 from os.path import join as pj
  
-packagename = 'stat_tool'
+packagename = 'tree'
 namespace = 'openalea'
 build_prefix = "build-scons"
 
@@ -10,9 +10,9 @@ build_prefix = "build-scons"
 scons_parameters=["build_prefix="+build_prefix]
 
 
-# platform dependencies
+# dependencies
 if("win" in sys.platform):
-    install_requires = ["boostpython"]
+    install_requires = []
     setup_requires = install_requires + []
 else:
     install_requires = []
@@ -22,13 +22,13 @@ else:
 
 if __name__ == '__main__':
     
-    setup(name='VPlants.Stat_Tool',
+    setup(name='VPlants.Tree',
           version='0.1',
-          author='Y. Guedon, JB. Durand',
-          description='statistics',
-          url='',
+          author='C. Pradal',
+          description='Tree structure header',
+          url='http://openalea.gforge.inria.fr',
           license='GPL',
-          
+ 
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  
@@ -48,10 +48,7 @@ if __name__ == '__main__':
           
 
           # Dependencies
-          setup_requires = setup_requires + ['openalea.deploy', 'vplants.tool'],
-          install_requires = install_requires + ['vplants.tool'],
+          setup_requires = setup_requires + ['openalea.deploy'],
+          install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
-
-
-    
