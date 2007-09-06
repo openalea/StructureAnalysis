@@ -1,15 +1,30 @@
 # -*-python-*-
 
 import os
+bn = os.path.basename
 
-Import("env")
+Import( "env" )
 
-py_dir = '../stat_tool'
+lib_env = env.Copy()
 
-# Build wrappers as shared libraries
-#sources = Split("""""")
 
-lib = ["vpstat_tool"]
-env.AppendUnique(LIBS=lib)
+# Import/Export symbols for windows
+if lib_env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    lib_env.AppendUnique(LINKFLAGS=LINKFLAGS)
 
-#env.ALEAWrapper(py_dir, "cstat_tool", ["cstat_tool.cpp"])
+
+includes= lib_env.ALEAGlob('*.h')
+sources = lib_env.ALEAGlob('*.cpp')
+
+
+
+# Add defines to export symbols on Windows
+lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
+lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
+
+env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
+

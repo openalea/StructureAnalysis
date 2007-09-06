@@ -43,7 +43,7 @@ wrapper_env.Append(CPPPATH='$build_includedir')
 
 # Build stage
 SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
-#SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
+SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
 
 Default("build")
 
