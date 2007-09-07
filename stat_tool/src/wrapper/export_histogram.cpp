@@ -21,6 +21,8 @@
 
 #include "export_histogram.h"
 
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/distribution.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -29,6 +31,19 @@ using namespace boost::python;
 // Boost.Python Wrapper export function
 void class_histogram()
 {
+
+  // _Histogram
+  class_<Histogram>("_Histogram", init<const Histogram&>());
+
+  // _Distribution_data
+  class_<Distribution_data, bases<Histogram> >("_Distribution_data", init< const Histogram& >())
+    .def(init< optional< int > >())
+    .def(init< const Distribution& >())
+    .def(init< const Distribution_data& >())
+    .def(init< int, int* >())
+    .def(init< int, const Histogram** >())
+    .def(init< const Histogram&, char, int >());
+
 
 }
 

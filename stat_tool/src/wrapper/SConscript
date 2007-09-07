@@ -26,5 +26,5 @@ sources = lib_env.ALEAGlob('*.cpp')
 lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 
-env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
+lib_env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
 
