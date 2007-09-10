@@ -31,16 +31,21 @@ if __name__ == '__main__':
           
           # Define where to execute scons
           scons_scripts=['SConstruct'],
-          # Scons parameters  
+          # Scons parameters  v
           scons_parameters=scons_parameters,
-        
+
+          namespace_packages=['openalea'],
+          create_namespaces=True,
+
           # Packages
-          #packages=
-          #package_dir=
-      
+          packages=['openalea.stat_tool'],
+          package_dir={'openalea.stat_tool' : 'src/stat_tool',
+                       '' : 'build/lib', # hack to use develop command
+                       },
+          
           # Add package platform libraries if any
           include_package_data=True,
-          package_data = {'' : ['*.pyd'],},
+          package_data = {'' : ['*.pyd', '*.so'],},
           
           zip_safe = False,
 
