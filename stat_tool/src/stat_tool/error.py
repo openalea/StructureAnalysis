@@ -14,11 +14,14 @@
 #
 
 __doc__="""
-Main interface
+Error classes
 """
 
 __license__= "GPL2.0"
 __revision__=" $Id: sceneobject.py 559 2007-05-25 12:25:30Z dufourko $ "
 
 
-from histogram import Histogram
+class StatToolError(Exception):
+    pass
+
+
