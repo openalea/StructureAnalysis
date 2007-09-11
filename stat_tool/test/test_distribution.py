@@ -1,4 +1,4 @@
-from openalea.stat_tool.histogram import *
+from openalea.stat_tool import *
 
 def test_fromnothing():
 

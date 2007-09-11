@@ -19,10 +19,11 @@
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
-#include "export_distribtion.h"
+#include "export_distribution.h"
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
+
 
 #include <boost/python.hpp>
 // definition of boost::python::len
@@ -101,9 +102,25 @@ Distribution_data* distribution_data_wrapper_init(list int_list)
 
 
 
+
 // Boost.Python Wrapper export function
 void class_distribution()
 {
+
+  
+  // _Parametric Model
+  class_< Parametric_model >("_Parametric_model",  init< optional< int, int, int, int, double, double > >())
+    .def(init< int, int, int, double, double, optional< double > >())
+    .def(init< const Histogram& >())
+    .def(init< const Distribution& >())
+    .def(init< const Parametric& >())
+    //.def(init< const Distribution&, const Histogram& >())
+    //.def(init< const Parametric&,  const Histogram& >())
+    .def(init< const Parametric_model&, optional< bool > > ())
+    .def("extract_data", &Parametric_model::extract_data, return_value_policy< manage_new_object >())
+    .def(self_ns::str(self))
+    ;
+
 
   // _Distribution_data
   class_<Distribution_data, bases<Histogram> >("_Distribution_data", init< const Histogram& >())
@@ -111,7 +128,8 @@ void class_distribution()
     .def(init< const Distribution& >())
     .def(init< const Distribution_data& >())
     .def(init< const Histogram&, char, int >())
-    .def("__init__", make_constructor(distribution_data_wrapper_init));
+    .def("__init__", make_constructor(distribution_data_wrapper_init))
+    ;
 
 
   //standalone functions
