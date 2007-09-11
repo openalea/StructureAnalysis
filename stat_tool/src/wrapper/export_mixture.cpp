@@ -1,4 +1,4 @@
- /*------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------
  *                                                                              
  *        VPlants.Stat_Tool : VPlants Statistics module
  *                                                                              
@@ -19,10 +19,27 @@
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_DISTRIBUTION__
-#define __CLASS_DISTRIBUTION__
+#include "export_mixture.h"
+
+#include "stat_tool/stat_tools.h"
+
+#include <boost/python.hpp>
+
+using namespace boost::python;
+
+
+// Wrappers
+
+
+
+
+// Overloads
+
+
+
 
 // Boost.Python Wrapper export function
-void class_distribution();
+void class_mixture()
+{
 
-#endif
+}

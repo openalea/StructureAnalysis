@@ -19,10 +19,10 @@
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_DISTRIBUTION__
-#define __CLASS_DISTRIBUTION__
+#ifndef __CLASS_STAT_TOOL_WBASE__
+#define __CLASS_STAT_TOOL_WBASE__
 
 // Boost.Python Wrapper export function
-void class_distribution();
+void class_base();
 
 #endif

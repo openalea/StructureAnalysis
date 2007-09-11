@@ -23,8 +23,9 @@
 
 /* WRAPPER Boost.python for stat_tool class */
 
+#include "export_base.h"
 #include "export_distribution.h"
-#include "export_histogram.h"
+#include "export_mixture.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -33,6 +34,7 @@ using namespace boost::python;
 // Define python module "_stat_tool"
 BOOST_PYTHON_MODULE(_stat_tool)
 {
+  class_base();
   class_distribution();
-  class_histogram();
+  class_mixture();
 }

@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+ /*------------------------------------------------------------------------------
  *                                                                              
  *        VPlants.Stat_Tool : VPlants Statistics module
  *                                                                              
@@ -19,10 +19,10 @@
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_HISTOGRAM__
-#define __CLASS_HISTOGRAM__
+#ifndef __CLASS_MIXTURE__
+#define __CLASS_MIXTURE__
 
 // Boost.Python Wrapper export function
-void class_histogram();
+void class_mixture();
 
 #endif
