@@ -28,8 +28,23 @@ from _stat_tool import _Distribution_data, _histogram_ascii_read
 from error import StatToolError
 
 
+class StatModel(object):
+    """ Interface of Stat_Tool classes """
 
-class Histogram(object):
+    def display(self, **args):
+        raise NotImplementedError()
+
+
+    def plot(self, **args):
+        raise NotImplementedError()
+
+
+    def save(self, filename, **args):
+        raise NotImplementedError()
+
+
+
+class DistributionData(StatModel):
     """ Histogram class """
 
     def __init__(self, arg):
@@ -51,6 +66,10 @@ class Histogram(object):
             raise StatToolError("Bad Argument %s", arg)
 
 
+    def __str__(self):
+        return str(self.__wrapped)
+
+
     def from_file(self, filename):
         """ Build histogram from file """
 
@@ -58,30 +77,48 @@ class Histogram(object):
         self.__wrapped = _histogram_ascii_read(ferror, filename)
 
         if(not self.__wrapped):
-            raise StatToolError("Bad Argument %s", filename)
-            
+            raise StatToolError(ferror)
 
 
     def from_list(self, array):
-        """ Build histogram from a list of int """
+        """
+        Build histogram from a list of int
+        Raise a TypeError Exception if list if badly constructed
+        """
 
         self.__wrapped = _Distribution_data(array)
 
+        if(not self.__wrapped):
+            raise StatToolError("Bad Argument %s"%(str(array),))
 
-    def plot(self):
+
+    def plot(self, **args):
         """ Plot function """
         pass
 
 
-    def display(self):
+    def display(self, **args):
         """ Display function """
-        pass
+
+        try:
+            survival = args['ViewPoint'] is "Survival"
+        except:
+            survival = False
+
+            
+        if(survival):
+            self.__wrapped.ascii
+        
 
 
-    def save(self, filename):
+    def save(self, filename, **args):
         """ File output """
         pass
         
-    
+
+
+class ParametricModel(StatModel):
+    """ Parametric model """
+    pass
 
     

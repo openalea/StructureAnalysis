@@ -657,7 +657,7 @@ public :
                double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
     Parametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
     Parametric(const Distribution &dist , double scale);
-    Parametric(const Parametric &dist , double scale);
+    //Parametric(const Parametric &dist , double scale); //not implemented
     Parametric(const Histogram &histo);
     Parametric(const Parametric &dist , char transform = 'c' ,
                int ialloc_nb_value = I_DEFAULT);
@@ -897,17 +897,18 @@ public :
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
-                                 const Histogram &forward , const Histogram *no_event ,
-                                 const Parametric &iinter_event , int estimator = LIKELIHOOD ,
-                                 int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
-                                 double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
-                                 int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
-                                 const Histogram &forward , const Histogram *no_event ,
-                                 int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-                                 int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-                                 int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+  // not implemented
+//     Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
+//                                  const Histogram &forward , const Histogram *no_event ,
+//                                  const Parametric &iinter_event , int estimator = LIKELIHOOD ,
+//                                  int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
+//                                  double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
+//                                  int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
+//     Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
+//                                  const Histogram &forward , const Histogram *no_event ,
+//                                  int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
+//                                  int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+//                                  int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
     // acces membres de la classe
 

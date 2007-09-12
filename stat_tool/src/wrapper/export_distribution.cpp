@@ -129,6 +129,7 @@ void class_distribution()
     .def(init< const Distribution_data& >())
     .def(init< const Histogram&, char, int >())
     .def("__init__", make_constructor(distribution_data_wrapper_init))
+    .def(self_ns::str(self))
     ;
 
 

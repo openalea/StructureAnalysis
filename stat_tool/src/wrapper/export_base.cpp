@@ -70,7 +70,6 @@ void class_base()
 {
   // _Format_error
   class_< Format_error >("_Format_error", init< optional< int > >())
-
     .def("init", &Format_error::init)
     .def("update", &Format_error::update, Format_error_update_overloads_1_3())
     .def("correction_update", (void (Format_error::*)(const char*, const char*, int, int) )
@@ -79,7 +78,7 @@ void class_base()
 	 &Format_error::correction_update, Format_error_correction_update_overloads_2_4())
     .def("get_nb_error", &Format_error::get_nb_error)
     .def("get_max_nb_error", &Format_error::get_max_nb_error)
-        .def(self_ns::str(self))
+    .def(self_ns::str(self))
     ;
 
   // Distribution base class
@@ -111,28 +110,29 @@ void class_base()
     .def( self != self )
     ;
 
-    // Parametric base class
-    class_< Parametric, bases< Distribution > >
-      ("_Parametric", init< optional< int, int, int, int, double, double > >())
-        .def(init< int, int, int, double, double, optional< double > >())
-        .def(init< const Distribution&, optional< int > >())
-        .def(init< const Distribution&, double >())
-        .def(init< const Parametric&, double >())
-        .def(init< const Histogram& >())
-        .def(init< const Parametric&, optional< char, int > >())
-        .def("parametric_mean_computation", &Parametric::parametric_mean_computation)
-        .def("parametric_variance_computation", &Parametric::parametric_variance_computation)
-        .def("parametric_skewness_computation", &Parametric::parametric_skewness_computation)
-        .def("parametric_kurtosis_computation", &Parametric::parametric_kurtosis_computation)
-        .def("computation", &Parametric::computation, computation_overloads_0_2())
-        .def("simulation", &Parametric::simulation)
-        .def_readonly("ident", &Parametric::ident)
-        .def_readonly("inf_bound", &Parametric::inf_bound)
-        .def_readonly("sup_bound", &Parametric::sup_bound)
-        .def_readonly("parameter", &Parametric::parameter)
-        .def_readonly("probability", &Parametric::probability)
-        .def(self_ns::str(self))
-      ;
+
+  // Parametric base class
+  class_< Parametric, bases< Distribution > >
+    ("_Parametric", init< optional< int, int, int, int, double, double > >())
+    .def(init< int, int, int, double, double, optional< double > >())
+    .def(init< const Distribution&, optional< int > >())
+    .def(init< const Distribution&, double >())
+    //.def(init< const Parametric&, double >())
+    .def(init< const Histogram& >())
+    .def(init< const Parametric&, optional< char, int > >())
+    .def("parametric_mean_computation", &Parametric::parametric_mean_computation)
+    .def("parametric_variance_computation", &Parametric::parametric_variance_computation)
+    .def("parametric_skewness_computation", &Parametric::parametric_skewness_computation)
+    .def("parametric_kurtosis_computation", &Parametric::parametric_kurtosis_computation)
+    .def("computation", &Parametric::computation, computation_overloads_0_2())
+    .def("simulation", &Parametric::simulation)
+    .def_readonly("ident", &Parametric::ident)
+    .def_readonly("inf_bound", &Parametric::inf_bound)
+    .def_readonly("sup_bound", &Parametric::sup_bound)
+    .def_readonly("parameter", &Parametric::parameter)
+    .def_readonly("probability", &Parametric::probability)
+    .def(self_ns::str(self))
+    ;
 
 
   
@@ -236,13 +236,13 @@ void class_base()
 	 return_value_policy< manage_new_object >(), 
 	 compound_estimation_overloads_4_10())
 
-    .def("estimation", 
-	 (Parametric_model* (Histogram::*)(Format_error&, std::basic_ostream<char,std::char_traits<char> >&, const Histogram&, const Histogram&, const Histogram*, const Parametric&, int, int, int, double, int, int, double) const)&Histogram::estimation, 
-	 return_value_policy< manage_new_object >(), estimation_overloads_6_13())
+//     .def("estimation", 
+// 	 (Parametric_model* (Histogram::*)(Format_error&, std::basic_ostream<char,std::char_traits<char> >&, const Histogram&, const Histogram&, const Histogram*, const Parametric&, int, int, int, double, int, int, double) const)&Histogram::estimation, 
+// 	 return_value_policy< manage_new_object >(), estimation_overloads_6_13())
 
-    .def("estimation", 
-	 (Parametric_model* (Histogram::*)(Format_error&, std::basic_ostream<char,std::char_traits<char> >&, const Histogram&, const Histogram&, const Histogram*, int, int, int, double, int, int) const)&Histogram::estimation, 
-	 return_value_policy< manage_new_object >(), estimation_overloads_5_11())
+//     .def("estimation", 
+// 	 (Parametric_model* (Histogram::*)(Format_error&, std::basic_ostream<char,std::char_traits<char> >&, const Histogram&, const Histogram&, const Histogram*, int, int, int, double, int, int) const)&Histogram::estimation, 
+// 	 return_value_policy< manage_new_object >(), estimation_overloads_5_11())
     ;
 
 }

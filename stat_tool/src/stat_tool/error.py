@@ -22,6 +22,7 @@ __revision__=" $Id: sceneobject.py 559 2007-05-25 12:25:30Z dufourko $ "
 
 
 class StatToolError(Exception):
-    pass
+    def __init__(self, arg):
+        Exception.__init__(self, str(arg))
 
 
