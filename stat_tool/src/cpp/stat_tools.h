@@ -657,7 +657,7 @@ public :
                double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
     Parametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
     Parametric(const Distribution &dist , double scale);
-    //Parametric(const Parametric &dist , double scale); //not implemented
+    Parametric(const Parametric &dist , double scale); // !! not implemented
     Parametric(const Histogram &histo);
     Parametric(const Parametric &dist , char transform = 'c' ,
                int ialloc_nb_value = I_DEFAULT);
