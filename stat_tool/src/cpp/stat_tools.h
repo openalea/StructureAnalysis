@@ -898,17 +898,17 @@ public :
                                   int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
   // not implemented
-//     Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
-//                                  const Histogram &forward , const Histogram *no_event ,
-//                                  const Parametric &iinter_event , int estimator = LIKELIHOOD ,
-//                                  int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
-//                                  double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
-//                                  int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
-//     Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
-//                                  const Histogram &forward , const Histogram *no_event ,
-//                                  int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-//                                  int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-//                                  int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
+                                 const Histogram &forward , const Histogram *no_event ,
+                                 const Parametric &iinter_event , int estimator = LIKELIHOOD ,
+                                 int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
+                                 double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
+                                 int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
+    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
+                                 const Histogram &forward , const Histogram *no_event ,
+                                 int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
+                                 int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                                 int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
     // acces membres de la classe
 

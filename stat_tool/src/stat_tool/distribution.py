@@ -69,6 +69,9 @@ class DistributionData(StatModel):
     def __str__(self):
         return str(self.__wrapped)
 
+    def get_wrapped(self):
+        return self.__wrapped
+
 
     def from_file(self, filename):
         """ Build histogram from file """
