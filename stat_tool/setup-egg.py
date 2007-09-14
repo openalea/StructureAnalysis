@@ -40,7 +40,7 @@ if __name__ == '__main__':
           # Packages
           packages=['openalea.stat_tool'],
           package_dir={'openalea.stat_tool' : 'src/stat_tool',
-                       '' : 'build/lib', # hack to use develop command
+                       #'' : 'build/lib', # hack to use develop command
                        },
           
           # Add package platform libraries if any
