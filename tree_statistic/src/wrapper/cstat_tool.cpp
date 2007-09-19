@@ -447,7 +447,7 @@ BOOST_PYTHON_MODULE(cstat_tool)
         .def(self_ns::str(self))
     ;
 
-    class_< Parametric, bases< Distribution > , boost::noncopyable, Parametric_Wrapper >("Parametric", init< const Forward& >())
+    class_< Parametric, bases< Distribution > , boost::noncopyable, Parametric_Wrapper >("_Parametric", init< const Forward& >())
         .def(init< optional< int, int, int, int, double, double > >())
         .def(init< int, int, int, double, double, optional< double > >())
         .def(init< const Distribution&, optional< int > >())

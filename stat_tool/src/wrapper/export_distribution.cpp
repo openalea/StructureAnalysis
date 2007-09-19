@@ -96,6 +96,33 @@ Distribution_data* distribution_data_wrapper_init(list int_list)
 }
 
 
+std::string dist_data_ascii_write(const Distribution_data& d,
+			      bool exhaustive)
+{
+   std::stringstream s;
+   std::string res;
+   Format_error error;
+
+   d.ascii_write(s, exhaustive);
+   res= s.str();
+
+   return res;
+}
+
+
+std::string dist_data_survival_ascii_write(const Distribution_data& d)
+{
+   std::stringstream s;
+   std::string res;
+   Format_error error;
+
+   d.survival_ascii_write(s);
+   res= s.str();
+
+   return res;
+}
+
+
 
 // Overloads
 
@@ -130,6 +157,17 @@ void class_distribution()
     .def(init< const Histogram&, char, int >())
     .def("__init__", make_constructor(distribution_data_wrapper_init))
     .def(self_ns::str(self))
+    //output
+    .def("ascii_write", 
+	 (bool (Distribution_data::*)(Format_error&, const char*) const) &Histogram::ascii_write)
+    .def("ascii_write", &dist_data_ascii_write)
+    .def("survival_ascii_write", 
+	 (bool (Distribution_data::*)(Format_error&, const char*) const) &Distribution_data::survival_ascii_write)
+    .def("survival_ascii_write", &dist_data_survival_ascii_write)
+    .def("spreadsheet_write", &Distribution_data::spreadsheet_write)
+    .def("survival_spreadsheet_write", 
+	 &Distribution_data::survival_spreadsheet_write)
+
     ;
 
 

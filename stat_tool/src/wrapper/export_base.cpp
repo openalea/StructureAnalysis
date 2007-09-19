@@ -39,18 +39,18 @@ using namespace boost::python;
 
 
 
-template <class U, class T, ostream & (T::*func)(ostream &, bool) const >
-std::string ostream_converter(T &obj, bool exhaustive)
-{  
-   std::stringstream s;
-   std::string res;
-   Format_error error;
+// template <class U, class T, ostream & (T::*func)(ostream &, bool) const >
+// std::string ostream_converter(T &obj, bool exhaustive)
+// {  
+//    std::stringstream s;
+//    std::string res;
+//    Format_error error;
 
-   obj.*func(s, exhaustive);
-   res= s.str();
+//    obj.*func(s, exhaustive);
+//    res= s.str();
 
-   return res;
-}
+//    return res;
+// }
 
 
 
@@ -159,20 +159,6 @@ void class_base()
     .def( self == self )
     .def( self != self )
     .def(self_ns::str(self))
-
-  //   //Output
-//     .def("ascii_write", 
-// 	 (bool (Histogram::*)(Format_error&, const char*) const)&Histogram::ascii_write)
-//     .def("ascii_write", &ostream_converter<Histogram, Histogram::ascii_write>)
-//     .def("survival_spreadsheet_write", 
-// 	 &Histogram::survival_spreadsheet_write)
-//     .def("survival_spreadsheet_write", 
-// 	 &Histogram::survival_spreadsheet_write)
-//     .def("survival_plot_write", 
-// 	 &Histogram::survival_plot_write, 
-// 	 survival_plot_write_overloads_2_3())
-    
-
 
     .def("shift", (Distribution_data* (Histogram::*)(Format_error&, int) const)&Histogram::shift, 
 	 return_value_policy< manage_new_object >())
