@@ -12,22 +12,21 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # platform dependencies
-if("win" in sys.platform):
-    install_requires = ["boostpython"]
-    setup_requires = install_requires + []
-else:
-    install_requires = []
-    setup_requires = []
+install_requires = ['vplants.stat_tool']
+setup_requires = install_requires + ['openalea.deploy']
 
+if("win" in sys.platform):
+    install_requires += ["boostpython"]
+    setup_requires += ["boostpython"]
 
 
 if __name__ == '__main__':
     
     setup(name='VPlants.Sequence_analysis',
           version='0.1',
-          author='',
+          author='Yann Guedon',
           description='sequence analysis library',
-          url='',
+          url='http://www-sop.inria.fr/virtualplants/',
           license='GPL',
           
           # Define where to execute scons
@@ -50,8 +49,8 @@ if __name__ == '__main__':
           
 
           # Dependencies
-          setup_requires = setup_requires + ['openalea.deploy', 'vplants.stat_tool'],
-          install_requires = install_requires + ['vplants.stat_tool'],
+          setup_requires = setup_requires, 
+          install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
 
