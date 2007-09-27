@@ -10,7 +10,7 @@ build_prefix = "build-scons"
 scons_parameters=["build_prefix="+build_prefix]
 
 # platform dependencies
-install_requires = ['vplants.mtg', 'vplants.stat_tool']
+install_requires = ['vplants.aml','vplants.tree']
 setup_requires = install_requires + ['openalea.deploy']
 
 if __name__ == '__main__':
