@@ -2617,7 +2617,7 @@ Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int 
           status = false;
           ostringstream error_message;
           error_message << cluster_pattern[i][j] << ": " << STAT_error[STATR_BAD] << " "
-                        << label << " " << STAT_error[STATR_IDENTIFIER];
+                        << label << " " << STAT_label[STATL_IDENTIFIER];
           error.update((error_message.str()).c_str());
         }
 

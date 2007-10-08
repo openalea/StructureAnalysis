@@ -60,7 +60,7 @@ const static double b_term[5] = {0.0 , 0.0518 , -0.0460 , -2.756 , -14.05};
  *
  *  Constructeur de la classe Test.
  *
- *  arguments : identificateur, unilateral / bilateral.
+ *  arguments : identificateur, unilateral/bilateral.
  *
  *--------------------------------------------------------------*/
 
@@ -80,7 +80,7 @@ Test::Test(int iident , bool ione_side)
  *
  *  Constructeur de la classe Test.
  *
- *  arguments : identificateur, unilateral / bilateral, nombres de degres de liberte ,
+ *  arguments : identificateur, unilateral/bilateral, nombres de degres de liberte ,
  *              valeur.
  *
  *--------------------------------------------------------------*/
@@ -101,7 +101,7 @@ Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue)
  *
  *  Constructeur de la classe Test.
  *
- *  arguments : identificateur, unilateral / bilateral, nombres de degres de liberte,
+ *  arguments : identificateur, unilateral/bilateral, nombres de degres de liberte,
  *              valeur, probabilite critique.
  *
  *--------------------------------------------------------------*/
@@ -825,16 +825,18 @@ void Test::t_critical_probability_computation()
  *  la probabilite critique (d'apres Handbook of Mathemetical Functions
  *  (M. Abramowitz & I.A. Stegum)).
  *
+ *  arguments : unilateral/bilateral, nombres de degres de liberte, probabilite critique.
+ *
  *--------------------------------------------------------------*/
 
-void Test::t_value_computation()
+double t_value_computation(bool one_side , int df , double critical_probability)
 
 {
   register int i;
-  double normal_var , var[10];
+  double normal_var , value , var[10];
 
 
-  if ((df1 > 0) && (critical_probability > 0.)) {
+  if ((df > 0) && (critical_probability > 0.)) {
     normal_var = ::standard_normal_value_computation(one_side ? critical_probability : critical_probability / 2.);
 
     // (formule 26.7.5)
@@ -844,15 +846,31 @@ void Test::t_value_computation()
       var[i] = var[i - 1] * var[1];
     }
 
-    value = var[1] + (var[3] + var[1]) / (4 * (double)df1) +
-            (5 * var[5] + 16 * var[3] + 3 * var[1]) / (96 * (double)df1 * (double)df1) +
+    value = var[1] + (var[3] + var[1]) / (4 * (double)df) +
+            (5 * var[5] + 16 * var[3] + 3 * var[1]) / (96 * (double)df * (double)df) +
             (3 * var[7] + 19 * var[5] + 17 * var[3] - 15 * var[1]) /
-            (384 * (double)df1 * (double)df1 * (double)df1) +
+            (384 * (double)df * (double)df * (double)df) +
             (79 * var[9] + 776 * var[7] + 1482 * var[5] - 1920 * var[3] - 945 * var[1]) /
-            (92160 * (double)df1 * (double)df1 * (double)df1 * (double)df1);
+            (92160 * (double)df * (double)df * (double)df * (double)df);
   }
 
   else {
     value = -D_INF;
   }
+
+  return value;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la valeur prise par une variable t a partir de
+ *  la probabilite critique.
+ *
+ *--------------------------------------------------------------*/
+
+void Test::t_value_computation()
+
+{
+  value = ::t_value_computation(one_side , df1 , critical_probability);
 }

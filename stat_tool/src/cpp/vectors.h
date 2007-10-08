@@ -49,11 +49,11 @@
 
 const int VECTOR_NB_VARIABLE = 50;     // nombre maximum de variables
 const int DISTANCE_NB_VECTOR = 2000;   // nombre maximum de vecteurs pour le calcul
-                                       // de la matrice des distances
+                                       // d'une matrice des distances
 const int CONTINGENCY_NB_VALUE = 100;  // nombre maximum de valeurs pour le calcul
-                                       // du tableau de contingence
+                                       // d'un tableau de contingence
 const int DISPLAY_CONTINGENCY_NB_VALUE = 20;  // nombre maximum de valeurs pour l'affichage
-                                              // du tableau de contingence
+                                              // d'un tableau de contingence
 const int VARIANCE_ANALYSIS_NB_VALUE = 100;  // nombre maximum de niveaux pour l'analyse de variance
 const int DISPLAY_CONDITIONAL_NB_VALUE = 100;  // nombre maximum de valeurs pour l'affichage
                                                // des lois conditionnelles
@@ -93,21 +93,26 @@ class Vectors : public STAT_interface {  // vecteurs
 
 protected :
 
+    int nb_vector;          // nombre de vecteurs
+    int *identifier;        // identificateurs des vecteurs
     int nb_variable;        // nombre de variables
-    int *min_value;         // valeurs minimums
-    int *max_value;         // valeurs maximums
+    int *type;              // type de chaque variable (INT_VALUE/REAL_VALUE)
+    double *min_value;      // valeurs minimums
+    double *max_value;      // valeurs maximums
     Histogram **marginal;   // lois marginales empiriques
     double *mean;           // vecteur moyenne
     double **covariance;    // matrice de variance-covariance
-    int nb_vector;          // nombre de vecteurs
-    int *identifier;        // identificateurs des vecteurs
-    int **vector;           // vecteurs
+    int **int_vector;       // vecteurs, variables entieres
+    double **real_vector;   // vecteurs, variables reelles
 
-    void init(int inb_variable , int inb_vector , int *iidentifier , bool init_flag = true);
+    void init(int inb_vector , int *iidentifier , int inb_variable , int *itype , bool init_flag);
     void copy(const Vectors &vec);
     void remove();
 
+    void build_real_vector(int variable = I_DEFAULT);
+
     void transcode(const Vectors &vec , int variable , int min_symbol , int max_symbol , int *symbol);
+    void cluster(const Vectors &vec , int variable , int nb_class , double *limit);
     void select_variable(const Vectors &vec , int *variable);
     Vectors* select_variable(int explanatory_variable , int response_variable) const;
 
@@ -129,9 +134,9 @@ protected :
     double** spearman_rank_correlation_computation() const;
     double** kendall_rank_correlation_computation() const;
 
-    std::ostream& rank_correlation_ascii_write(std::ostream &os , int type ,
+    std::ostream& rank_correlation_ascii_write(std::ostream &os , int correlation_type ,
                                                double **correlation) const;
-    bool rank_correlation_ascii_write(Format_error &error , const char *path , int type ,
+    bool rank_correlation_ascii_write(Format_error &error , const char *path , int correlation_type ,
                                       double **correlation) const;
 
     double spearman_rank_single_correlation_computation() const;
@@ -152,17 +157,19 @@ protected :
 
     std::ostream& variance_analysis_ascii_write(std::ostream &os , int type , const Vectors **value_vec ,
                                                 bool exhaustive = false) const;
-    bool variance_analysis_ascii_write(Format_error &error , const char *path , int type ,
+    bool variance_analysis_ascii_write(Format_error &error , const char *path , int response_type ,
                                        const Vectors **value_vec , bool exhaustive = false) const;
     bool variance_analysis_spreadsheet_write(Format_error &error , const char *path ,
-                                             int type , const Vectors **value_vec) const;
+                                             int response_type , const Vectors **value_vec) const;
 
 public :
 
     Vectors();
-    Vectors (int inb_variable , int inb_vector , int *iidentifier = 0 , bool init_flag = true)
-    { init(inb_variable , inb_vector , iidentifier , init_flag); }
-    Vectors(int inb_variable , int inb_vector , int **ivector , int *iidentifier = 0);
+    Vectors (int inb_vector , int *iidentifier , int inb_variable , int *itype ,
+             bool init_flag = false)
+    { init(inb_vector , iidentifier , inb_variable , itype , init_flag); }
+    Vectors(int inb_vector , int *iidentifier , int inb_variable , int **iint_vector);
+    Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);
     Vectors(const Vectors &vec , int inb_vector , int *index);
     Vectors(const Vectors &vec)
     { copy(vec); }
@@ -175,12 +182,20 @@ public :
 
     Vectors* merge(Format_error &error, int nb_sample , const Vectors **ivec) const;
     Vectors* shift(Format_error &error , int variable , int shift_param) const;
+    Vectors* shift(Format_error &error , int variable , double shift_param) const;
     Vectors* cluster(Format_error &error , int variable , int step) const;
     Vectors* transcode(Format_error &error , int variable , int *symbol) const;
     Vectors* cluster(Format_error &error , int variable , int inb_value ,
                      int *ilimit) const;
+    Vectors* cluster(Format_error &error , int variable , int nb_class ,
+                     double *ilimit) const;
+    Vectors* scaling(Format_error &error , int variable , int scaling_coeff) const;
+    Vectors* round(Format_error &error , int variable = I_DEFAULT) const;
+
     Vectors* value_select(Format_error &error , int variable , int imin_value ,
                           int imax_value , bool keep = true) const;
+    Vectors* value_select(Format_error &error , int variable , double imin_value ,
+                          double imax_value , bool keep = true) const;
 
     Vectors* select_individual(Format_error &error , int inb_vector , int *iidentifier ,
                                bool keep = true) const;
@@ -214,14 +229,14 @@ public :
     double skewness_computation(int variable) const;
     double kurtosis_computation(int variable) const;
 
-    bool rank_correlation_computation(Format_error &error , std::ostream &os , int type ,
-                                      const char *path = 0) const;
+    bool rank_correlation_computation(Format_error &error , std::ostream &os ,
+                                      int correlation_type , const char *path = 0) const;
     Distance_matrix* comparison(Format_error &error , const Vector_distance &ivector_dist);
     bool contingency_table(Format_error &error , std::ostream &os , int variable1 , int variable2 ,
                            const char *path = 0 , char format = 'a') const;
 
     bool variance_analysis(Format_error &error , std::ostream &os , int class_variable ,
-                           int response_variable , int type , const char *path = 0 ,
+                           int response_variable , int response_type , const char *path = 0 ,
                            char format = 'a') const;
 
     Regression* linear_regression(Format_error &error , int explanatory_variable ,
@@ -237,17 +252,20 @@ public :
 
     // acces membres de la classe
 
+    int get_nb_vector() const { return nb_vector; }
+    int get_identifier(int ivec) const { return identifier[ivec]; }
     int get_nb_variable() const { return nb_variable; }
-    int get_min_value(int variable) const { return min_value[variable]; }
-    int get_max_value(int variable) const { return max_value[variable]; }
+    int get_type(int variable) const { return type[variable]; }
+    double get_min_value(int variable) const { return min_value[variable]; }
+    double get_max_value(int variable) const { return max_value[variable]; }
     Histogram* get_marginal(int variable) const { return marginal[variable]; }
     double get_mean(int variable) const { return mean[variable]; }
     double get_covariance(int variable1, int variable2) const
     { return covariance[variable1][variable2]; }
-    int get_nb_vector() const { return nb_vector; }
-    int get_identifier(int ivec) const { return identifier[ivec]; }
-    int get_vector(int ivec , int variable) const
-    { return vector[ivec][variable]; }
+    int get_int_vector(int ivec , int variable) const
+    { return int_vector[ivec][variable]; }
+    double get_real__vector(int ivec , int variable) const
+    { return real_vector[ivec][variable]; }
 };
 
 

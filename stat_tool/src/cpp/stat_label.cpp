@@ -66,7 +66,6 @@ const char *STAT_word[] = {
   "PERIOD" ,
 
   "STATES" ,
-  "ORDER" ,
   "INITIAL_PROBABILITIES" ,
   "TRANSITION_PROBABILITIES" ,
 
@@ -103,7 +102,7 @@ const char *STAT_distribution_letter[] = {
 };
 
 
-const char *STAT_variable_word[] = {
+const char *STAT_variable_type_word[] = {
   "SYMBOLIC" ,
   "ORDINAL" ,
   "NUMERIC" ,
@@ -111,7 +110,7 @@ const char *STAT_variable_word[] = {
 };
 
 
-const char *STAT_variable_letter[] = {
+const char *STAT_variable_type_letter[] = {
   "S" ,
   "O" ,
   "N" ,
@@ -142,15 +141,13 @@ const char *STAT_function_word[] = {
 };
 
 
-const char *STAT_sequence_word[] = {
-  "VALUE" ,
-  " " ,
+const char *STAT_variable_word[] = {
+  "INT" ,
+  "REAL" ,
   "STATE" ,
-  "TIME" ,
-  "TIME_INTERVAL" ,
-  "POSITION" ,
-  "POSITION_INTERVAL" ,
-  "NB_INTERNODE"
+  "VALUE" ,         // pour compatibilite ascendante
+  "NB_INTERNODE" ,
+  "AUXILIARY"
 };
 
 
@@ -181,6 +178,8 @@ const char *STAT_label[] = {
   "information" ,
   "coefficient of concentration" ,
   "smoothness" ,
+
+  "mean confidence interval" ,
 
   "one-sided" ,
   "two-sided" ,
@@ -328,7 +327,6 @@ const char *STAT_label[] = {
   "transient" ,
   "recurrent" ,
   "absorbing" ,
-  "order" ,
   "memory" ,
   "stationary probabilities" ,
 
@@ -372,6 +370,7 @@ const char *STAT_parsing[] = {
 
   "bad number of variables" ,
   "bad variable index" ,
+  "bad variable type" ,
 
   "bad number of symbols" ,
   "bad local distance" ,
@@ -436,6 +435,7 @@ const char *STAT_error[] = {
   "bad clustering step" ,
   "bad number of classes" ,
   "bad shift value" ,
+  "bad rounded value" ,
   "smaller than" ,
   "greater than" ,
   "not allowed" ,
@@ -445,15 +445,17 @@ const char *STAT_error[] = {
   "bad cluster limit" ,
   "bad information ratio: should be between 0 and 1" ,
   "null reference information: variance should be strictly positive" ,
+  "bad scaling coefficient" ,
   "bad minimum value" ,
   "bad maximum value" ,
   "empty histogram" ,
 
   "marginal histogram not built" ,
+  "bad" ,
   "bad number of vectors" ,
-  "bad vector identifier" ,
   "bad number of variables" ,
   "bad number of selected variables" ,
+  "bad variable type" ,
   "bad variable index" ,
   "bad variable indices: should be different" ,
   "already used" ,
@@ -481,8 +483,6 @@ const char *STAT_error[] = {
   "bad pattern type" ,
   "bad prototype identifier" ,
   "bad number of" ,
-  "bad" ,
-  "identifier" ,
 
   "initial probability equal to 0: should be stricly positive" ,
 

@@ -162,7 +162,8 @@ void Chain::init(bool left_right , double self_transition)
 
 /*--------------------------------------------------------------*
  *
- *  Construction de la matrice des transitions possibles entre etats.
+ *  Construction de la matrice des transitions possibles entre etats
+ *  d'une chaine de Markov d'ordre 1.
  *
  *--------------------------------------------------------------*/
 
@@ -170,10 +171,10 @@ bool** Chain::logic_transition_computation() const
 
 {
   bool **logic_transition;
-  register int i , j , k;
-  int power = nb_row / nb_state;
-  double sum , **ptransition;
+  register int i , j;
 
+
+  // calcul de la matrice des transitions possibles entre etats
 
   logic_transition = new bool*[nb_state];
 
@@ -184,23 +185,8 @@ bool** Chain::logic_transition_computation() const
       if (j == i) {
         logic_transition[i][j] = false;
       }
-
       else {
-
-        // ordre 1
-
-//        logic_transition[i][j] = (transition[i][j] == 0. ? false : true);
-
-        // ordre fixe
-
-        ptransition = transition + i * power;
-        sum = 0.;
-        for (k = 0;k < power;k++) {
-          sum += *(*ptransition + j);
-          ptransition++;
-        }
-
-        logic_transition[i][j] = (sum == 0. ? false : true);
+        logic_transition[i][j] = (transition[i][j] == 0. ? false : true);
       }
     }
   }
@@ -469,7 +455,7 @@ void Chain::graph_accessibility_computation(bool **ilogic_transition)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de l'accessibilite des etats d'une chaine de Markov.
+ *  Calcul de l'accessibilite des etats d'une chaine de Markov d'ordre 1.
  *
  *--------------------------------------------------------------*/
 
@@ -479,9 +465,9 @@ void Chain::probability_accessibility_computation()
   if (!accessibility) {
     bool stop;
     register int i , j , k;
-    int power = nb_row / nb_state , length;
+    int length;
     double sum , *state_seq , *pstate_seq , *states , *pstates ,
-           **ptransition , **order1_transition;
+           **ptransition , **uniform_transition;
 
 
     // creation de la matrice d'accessibilite
@@ -500,35 +486,27 @@ void Chain::probability_accessibility_computation()
 
     // calcul de la matrice des transitions possibles entre etats
 
-    order1_transition = new double*[nb_state];
+    uniform_transition = new double*[nb_state];
     for (i = 0;i < nb_state;i++) {
-      order1_transition[i] = new double[nb_state];
+      uniform_transition[i] = new double[nb_state];
 
-      // ordre fixe
+      // cas etat non-absorbant
 
-      for (j = 0;j < nb_state;j++) {
-        ptransition = transition + i * power;
-        sum = 0.;
-        for (k = 0;k < power;k++) {
-          sum += *(*ptransition + j);
-          ptransition++;
+      if (transition[i][i] < 1.) {
+        for (j = 0;j < i;j++) {
+          uniform_transition[i][j] = 1. / (double)(nb_state - 1);
         }
-
-        if (j == i) {
-          order1_transition[i][j] = (sum < power ? 0. : 1.);
-        }
-        else {
-          order1_transition[i][j] = (sum == 0. ? 0. : 1.);
+        uniform_transition[i][i] = 0.;
+        for (j = i + 1;j < nb_state;j++) {
+          uniform_transition[i][j] = 1. / (double)(nb_state - 1);
         }
       }
 
-      if (order1_transition[i][i] == 0.) {
-        sum = 0.;
+      // cas etat absorbant
+
+      else {
         for (j = 0;j < nb_state;j++) {
-          sum += order1_transition[i][j];
-        }
-        for (j = 0;j < nb_state;j++) {
-          order1_transition[i][j] /= sum;
+          uniform_transition[i][j] = transition[i][j];
         }
       }
     }
@@ -539,7 +517,7 @@ void Chain::probability_accessibility_computation()
     pstate_seq = new double[nb_state];
 
     for (i = 0;i < nb_state;i++) {
-      if (order1_transition[i][i] == 0.) {
+      if (uniform_transition[i][i] == 0.) {
         pstates = pstate_seq;
         for (j = 0;j < nb_state;j++) {
           *pstates++ = 0.;
@@ -560,7 +538,7 @@ void Chain::probability_accessibility_computation()
             pstates = pstate_seq;
             *states = 0.;
             for (k = 0;k < nb_state;k++) {
-              *states += order1_transition[k][j] * *pstates++;
+              *states += uniform_transition[k][j] * *pstates++;
             }
 
             if (*states > 0.) {
@@ -612,9 +590,9 @@ void Chain::probability_accessibility_computation()
 #   endif
 
     for (i = 0;i < nb_state;i++) {
-      delete [] order1_transition[i];
+      delete [] uniform_transition[i];
     }
-    delete [] order1_transition;
+    delete [] uniform_transition;
 
     delete [] state_seq;
     delete [] pstate_seq;
@@ -985,7 +963,7 @@ void Chain::chi2_fit(const Chain_data &chain_data , Test &test) const
 
 /*--------------------------------------------------------------*
  *
- *  Estimation des parametres d'une chaine de Markov a partir
+ *  Estimation des parametres d'une chaine de Markov d'ordre 1 a partir
  *  des etats initiaux et des transitions.
  *
  *  argument : reference sur un objet Chain.
@@ -996,7 +974,7 @@ void Chain_data::estimation(Chain &chain) const
 
 {
   register int i , j;
-  int sum , power = nb_row / nb_state , state;
+  int sum;
 
 
   // estimation des probabilites initiales
@@ -1014,7 +992,7 @@ void Chain_data::estimation(Chain &chain) const
 
   // estimation des probabilites de transition
 
-  for (i = 0;i < nb_row;i++) {
+  for (i = 0;i < nb_state;i++) {
     sum = 0;
     for (j = 0;j < nb_state;j++) {
       sum += transition[i][j];
@@ -1027,13 +1005,11 @@ void Chain_data::estimation(Chain &chain) const
     }
 
     else {
-      state = i / power;
-
-      for (j = 0;j < state;j++) {
+      for (j = 0;j < i;j++) {
         chain.transition[i][j] = 0.;
       }
-      chain.transition[i][state] = 1.;
-      for (j = state + 1;j < nb_state;j++) {
+      chain.transition[i][i] = 1.;
+      for (j = i + 1;j < nb_state;j++) {
         chain.transition[i][j] = 0.;
       }
     }

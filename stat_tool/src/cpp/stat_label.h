@@ -71,7 +71,6 @@ enum {
   STATW_PERIOD ,
 
   STATW_STATES ,
-  STATW_ORDER ,
   STATW_INITIAL_PROBABILITIES ,
   STATW_TRANSITION_PROBABILITIES ,
 
@@ -93,12 +92,12 @@ enum {
 extern const char *STAT_word[];
 extern const char *STAT_distribution_word[];
 extern const char *STAT_distribution_letter[];
-extern const char *STAT_variable_word[];
-extern const char *STAT_variable_letter[];
+extern const char *STAT_variable_type_word[];
+extern const char *STAT_variable_type_letter[];
 extern const char *STAT_distance_word[];
 extern const char *STAT_criterion_word[];
 extern const char *STAT_function_word[];
-extern const char *STAT_sequence_word[];
+extern const char *STAT_variable_word[];
 
 
 
@@ -128,6 +127,8 @@ enum {
   STATL_INFORMATION ,
   STATL_CONCENTRATION_COEFF ,
   STATL_SMOOTHNESS ,
+
+  STATL_MEAN_CONFIDENCE_INTERVAL ,
 
   STATL_ONE_SIDED ,
   STATL_TWO_SIDED ,
@@ -275,7 +276,6 @@ enum {
   STATL_TRANSIENT ,
   STATL_RECURRENT ,
   STATL_ABSORBING ,
-  STATL_ORDER ,
   STATL_MEMORY ,
   STATL_STATIONARY_PROBABILITIES ,
 
@@ -322,6 +322,7 @@ enum {
 
   STATP_NB_VARIABLE ,
   STATP_VARIABLE_INDEX ,
+  STATP_VARIABLE_TYPE ,
 
   STATP_NB_SYMBOL ,
   STATP_LOCAL_DISTANCE ,
@@ -389,6 +390,7 @@ enum {
   STATR_CLUSTERING_STEP ,
   STATR_NB_CLASS ,
   STATR_SHIFT_VALUE ,
+  STATR_ROUNDED_VALUE ,
   STATR_SMALLER_THAN ,
   STATR_GREATER_THAN ,
   STATR_NOT_ALLOWED ,
@@ -398,15 +400,17 @@ enum {
   STATR_CLUSTER_LIMIT ,
   STATR_INFORMATION_RATIO ,
   STATR_NULL_INFORMATION ,
+  STATR_SCALING_COEFF ,
   STATR_MIN_VALUE ,
   STATR_MAX_VALUE ,
   STATR_EMPTY_HISTOGRAM ,
 
   STATR_MARGINAL_HISTOGRAM ,
+  STATR_BAD ,
   STATR_NB_VECTOR ,
-  STATR_VECTOR_IDENTIFIER ,
   STATR_NB_VARIABLE ,
   STATR_NB_SELECTED_VARIABLE ,
+  STATR_VARIABLE_TYPE ,
   STATR_VARIABLE_INDEX ,
   STATR_VARIABLE_INDICES ,
   STATR_ALREADY_USED ,
@@ -434,8 +438,6 @@ enum {
   STATR_PATTERN_TYPE ,
   STATR_PROTOTYPE_IDENTIFIER ,
   STATR_NUMBER ,
-  STATR_BAD ,
-  STATR_IDENTIFIER ,
 
   STATR_NULL_INITIAL_PROBABILITY ,
 

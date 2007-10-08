@@ -602,7 +602,7 @@ Vector_distance* vector_distance_ascii_read(Format_error &error , const char *pa
             case 3 : {
               if ((variable >= 0) && (variable < nb_variable)) {
                 for (j = SYMBOLIC;j <= CIRCULAR;j++) {
-                  if (token == STAT_variable_word[j]) {
+                  if (token == STAT_variable_type_word[j]) {
                     variable_type[variable] = j;
                     break;
                   }
@@ -912,7 +912,8 @@ ostream& Vector_distance::ascii_write(ostream &os , bool exhaustive) const
   }
 
   for (i = 0;i < nb_variable;i++) {
-    os << "\n" << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : " << STAT_variable_word[variable_type[i]];
+    os << "\n" << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
+       << STAT_variable_type_word[variable_type[i]];
     if (nb_variable > 1) {
       os << "   " << STAT_word[STATW_WEIGHT] << " : " << weight[i];
     }

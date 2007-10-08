@@ -108,7 +108,7 @@ double** Vectors::spearman_rank_correlation_computation() const
 
         rank_diff = 0.;
         for (k = 0;k < nb_vector;k++) {
-          rank_diff += (rank[i][vector[k][i]] - rank_mean) * (rank[j][vector[k][j]] - rank_mean);
+          rank_diff += (rank[i][int_vector[k][i]] - rank_mean) * (rank[j][int_vector[k][j]] - rank_mean);
         }
 
         correlation[i][j] = 12. * rank_diff /
@@ -191,8 +191,8 @@ double** Vectors::kendall_rank_correlation_computation() const
       }
 
       for (j = 0;j < nb_vector;j++) {
-        index[cumul_frequency[vector[j][i]] + current_frequency[vector[j][i]]] = j;
-        current_frequency[vector[j][i]]++;
+        index[cumul_frequency[int_vector[j][i]] + current_frequency[int_vector[j][i]]] = j;
+        current_frequency[int_vector[j][i]]++;
       }
 
       for (j = i + 1;j < nb_variable;j++) {
@@ -238,8 +238,8 @@ double** Vectors::kendall_rank_correlation_computation() const
           // calcul des signes des differences de rangs
 
           for (k = 0;k < nb_vector;k++) {
-            for (m = cumul_frequency[vector[index[k]][i]];m < nb_vector;m++) {
-              diff = vector[index[m]][j] - vector[index[k]][j];
+            for (m = cumul_frequency[int_vector[index[k]][i]];m < nb_vector;m++) {
+              diff = int_vector[index[m]][j] - int_vector[index[k]][j];
               if (diff > 0) {
                 rank_diff_sign++;
               }
@@ -277,7 +277,8 @@ double** Vectors::kendall_rank_correlation_computation() const
  *
  *--------------------------------------------------------------*/
 
-ostream& Vectors::rank_correlation_ascii_write(ostream &os , int type , double **correlation) const
+ostream& Vectors::rank_correlation_ascii_write(ostream &os , int correlation_type ,
+                                               double **correlation) const
 
 {
   register int i , j;
@@ -303,7 +304,7 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , int type , double *
 
   // ecriture de la matrice des coefficients de correlation
 
-  switch (type) {
+  switch (correlation_type) {
   case SPEARMAN :
     os << STAT_label[STATL_SPEARMAN_RANK_CORRELATION_MATRIX] << endl;
     break;
@@ -326,7 +327,7 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , int type , double *
 
   // test du caractere significatif des coefficients de correlation
 
-  switch (type) {
+  switch (correlation_type) {
   case SPEARMAN :
     test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
     break;
@@ -359,7 +360,7 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , int type , double *
     os << ": " << test->value << "   " << STAT_label[STATL_REFERENCE] << " "
        << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << test->critical_probability << endl;
 
-    switch (type) {
+    switch (correlation_type) {
     case SPEARMAN :
       os << STAT_label[STATL_SPEARMAN_LIMIT_RANK_CORRELATION_COEFF] << ": "
          << test->value / sqrt(test->value * test->value + nb_vector - 2) << endl;
@@ -389,7 +390,7 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , int type , double *
  *--------------------------------------------------------------*/
 
 bool Vectors::rank_correlation_ascii_write(Format_error &error , const char *path ,
-                                           int type , double **correlation) const
+                                           int correlation_type , double **correlation) const
 
 {
   bool status;
@@ -405,7 +406,7 @@ bool Vectors::rank_correlation_ascii_write(Format_error &error , const char *pat
 
   else {
     status = true;
-    rank_correlation_ascii_write(out_file , type , correlation);
+    rank_correlation_ascii_write(out_file , correlation_type , correlation);
   }
 
   return status;
@@ -422,8 +423,8 @@ bool Vectors::rank_correlation_ascii_write(Format_error &error , const char *pat
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::rank_correlation_computation(Format_error &error , ostream &os , int type ,
-                                           const char *path) const
+bool Vectors::rank_correlation_computation(Format_error &error , ostream &os ,
+                                           int correlation_type , const char *path) const
 
 {
   bool status = true;
@@ -441,7 +442,15 @@ bool Vectors::rank_correlation_computation(Format_error &error , ostream &os , i
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if (!marginal[i]) {
+    if (type[i] != INT_VALUE) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+    }
+
+    else if (!marginal[i]) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
@@ -452,7 +461,7 @@ bool Vectors::rank_correlation_computation(Format_error &error , ostream &os , i
   }
 
   if (status) {
-    switch (type) {
+    switch (correlation_type) {
     case SPEARMAN :
       correlation = spearman_rank_correlation_computation();
       break;
@@ -462,11 +471,11 @@ bool Vectors::rank_correlation_computation(Format_error &error , ostream &os , i
     }
 
 #   ifdef MESSAGE
-    rank_correlation_ascii_write(os , type , correlation);
+    rank_correlation_ascii_write(os , correlation_type , correlation);
 #   endif
 
     if (path) {
-      status = rank_correlation_ascii_write(error , path , type , correlation);
+      status = rank_correlation_ascii_write(error , path , correlation_type , correlation);
     }
 
     for (i = 0;i < nb_variable;i++) {
@@ -520,7 +529,7 @@ double Vectors::spearman_rank_single_correlation_computation() const
 
   correlation = 0.;
   for (i = 0;i < nb_vector;i++) {
-    correlation += (rank[0][vector[i][0]] - rank_mean) * (rank[1][vector[i][1]] - rank_mean);
+    correlation += (rank[0][int_vector[i][0]] - rank_mean) * (rank[1][int_vector[i][1]] - rank_mean);
   }
 
   correlation = 12. * correlation / sqrt((main_term - correction[0]) * (main_term - correction[1]));
@@ -622,15 +631,15 @@ double Vectors::kendall_rank_single_correlation_computation() const
     }
 
     for (i = 0;i < nb_vector;i++) {
-      index[cumul_frequency[vector[i][0]] + current_frequency[vector[i][0]]] = i;
-      current_frequency[vector[i][0]]++;
+      index[cumul_frequency[int_vector[i][0]] + current_frequency[int_vector[i][0]]] = i;
+      current_frequency[int_vector[i][0]]++;
     }
 
     // calcul des signes des differences de rangs
 
     for (i = 0;i < nb_vector;i++) {
-      for (j = cumul_frequency[vector[index[i]][0]];j < nb_vector;j++) {
-        diff = vector[index[j]][1] - vector[index[i]][1];
+      for (j = cumul_frequency[int_vector[index[i]][0]];j < nb_vector;j++) {
+        diff = int_vector[index[j]][1] - int_vector[index[i]][1];
         if (diff > 0) {
           correlation++;
         }
@@ -778,7 +787,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
 
           case SYMBOLIC : {
             if (!(vector_dist->symbol_distance[k])) {
-              if (vector[i][k] == vector[j][k]) {
+              if (int_vector[i][k] == int_vector[j][k]) {
                 ldistance = 0.;
               }
               else {
@@ -787,27 +796,32 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
             }
 
             else {
-              ldistance = vector_dist->symbol_distance[k][vector[i][k]][vector[j][k]];
+              ldistance = vector_dist->symbol_distance[k][int_vector[i][k]][int_vector[j][k]];
             }
             break;
           }
 
           case ORDINAL : {
-            ldistance = rank[k][vector[i][k]] - rank[k][vector[j][k]];
+            ldistance = rank[k][int_vector[i][k]] - rank[k][int_vector[j][k]];
             break;
           }
 
           case NUMERIC : {
-            ldistance = vector[i][k] - vector[j][k];
+            if (type[k] == INT_VALUE) {
+              ldistance = int_vector[i][k] - int_vector[j][k];
+            }
+            else {
+              ldistance = real_vector[i][k] - real_vector[j][k];
+            }
             break;
           }
 
           case CIRCULAR : {
-            if (vector[i][k] <= vector[j][k]) {
-              ldistance = MIN(vector[j][k] - vector[i][k] , vector[i][k] + vector_dist->period[k] - vector[j][k]);
+            if (int_vector[i][k] <= int_vector[j][k]) {
+              ldistance = MIN(int_vector[j][k] - int_vector[i][k] , int_vector[i][k] + vector_dist->period[k] - int_vector[j][k]);
             }
             else {
-              ldistance = MIN(vector[i][k] - vector[j][k] , vector[j][k] + vector_dist->period[k] - vector[i][k]);
+              ldistance = MIN(int_vector[i][k] - int_vector[j][k] , int_vector[j][k] + vector_dist->period[k] - int_vector[i][k]);
             }
             break;
           }
@@ -890,7 +904,7 @@ int** Vectors::joint_frequency_computation(int variable1 , int variable2) const
     }
 
     for (i = 0;i < nb_vector;i++) {
-      frequency[vector[i][variable1]][vector[i][variable2]]++;
+      frequency[int_vector[i][variable1]][int_vector[i][variable2]]++;
     }
   }
 
@@ -1186,7 +1200,16 @@ bool Vectors::contingency_table(Format_error &error , ostream &os , int variable
   else {
     variable1--;
 
-    if ((!marginal[variable1]) || (marginal[variable1]->nb_value - marginal[variable1]->offset > CONTINGENCY_NB_VALUE)) {
+    if (type[variable1] != INT_VALUE) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable1 + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+    }
+
+    else if ((!marginal[variable1]) ||
+             (marginal[variable1]->nb_value - marginal[variable1]->offset > CONTINGENCY_NB_VALUE)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable1 + 1 << ": "
@@ -1206,7 +1229,16 @@ bool Vectors::contingency_table(Format_error &error , ostream &os , int variable
   else {
     variable2--;
 
-    if ((!marginal[variable2]) || (marginal[variable2]->nb_value - marginal[variable2]->offset > CONTINGENCY_NB_VALUE)) {
+    if (type[variable2] != INT_VALUE) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable2 + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+    }
+
+    else if ((!marginal[variable2]) ||
+             (marginal[variable2]->nb_value - marginal[variable2]->offset > CONTINGENCY_NB_VALUE)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable2 + 1 << ": "
@@ -1678,7 +1710,7 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis_ascii_write(Format_error &error , const char *path , int type ,
+bool Vectors::variance_analysis_ascii_write(Format_error &error , const char *path , int response_type ,
                                             const Vectors **value_vec , bool exhaustive) const
 
 {
@@ -1695,7 +1727,7 @@ bool Vectors::variance_analysis_ascii_write(Format_error &error , const char *pa
 
   else {
     status = true;
-    variance_analysis_ascii_write(out_file , type , value_vec , exhaustive);
+    variance_analysis_ascii_write(out_file , response_type , value_vec , exhaustive);
   }
 
   return status;
@@ -1714,7 +1746,7 @@ bool Vectors::variance_analysis_ascii_write(Format_error &error , const char *pa
  *--------------------------------------------------------------*/
 
 bool Vectors::variance_analysis_spreadsheet_write(Format_error &error , const char *path ,
-                                                  int type , const Vectors **value_vec) const
+                                                  int response_type , const Vectors **value_vec) const
 
 {
   bool status;
@@ -1861,7 +1893,7 @@ bool Vectors::variance_analysis_spreadsheet_write(Format_error &error , const ch
       delete [] cumul;
     }
 
-    switch (type) {
+    switch (response_type) {
 
     case ORDINAL : {
       int nb_histo;
@@ -1956,7 +1988,7 @@ bool Vectors::variance_analysis_spreadsheet_write(Format_error &error , const ch
  *--------------------------------------------------------------*/
 
 bool Vectors::variance_analysis(Format_error &error , ostream &os , int class_variable ,
-                                int response_variable , int type , const char *path , char format) const
+                                int response_variable , int response_type , const char *path , char format) const
 
 {
   bool status = true;
@@ -1984,7 +2016,16 @@ bool Vectors::variance_analysis(Format_error &error , ostream &os , int class_va
   else {
     class_variable--;
 
-    if ((!marginal[class_variable]) || (marginal[class_variable]->nb_value - marginal[class_variable]->offset > VARIANCE_ANALYSIS_NB_VALUE)) {
+    if (type[class_variable] != INT_VALUE) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << class_variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+    }
+
+    else if ((!marginal[class_variable]) ||
+             (marginal[class_variable]->nb_value - marginal[class_variable]->offset > VARIANCE_ANALYSIS_NB_VALUE)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << class_variable + 1 << ": "
@@ -2004,11 +2045,21 @@ bool Vectors::variance_analysis(Format_error &error , ostream &os , int class_va
   else {
     response_variable--;
 
-    if ((type == ORDINAL) && (!marginal[response_variable])) {
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << response_variable + 1 << " "
-                    << STAT_error[STATR_SHIFTED_SCALED];
-      error.update((error_message.str()).c_str());
+    if (response_type == ORDINAL) {
+      if (type[response_variable] != INT_VALUE) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << response_variable + 1 << ": "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+      }
+
+      else if (!marginal[response_variable]) {
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << response_variable + 1 << " "
+                      << STAT_error[STATR_SHIFTED_SCALED];
+        error.update((error_message.str()).c_str());
+      }
     }
   }
 
@@ -2028,7 +2079,7 @@ bool Vectors::variance_analysis(Format_error &error , ostream &os , int class_va
     }
 
     for (i = 0;i < nb_vector;i++) {
-      index[vec->vector[i][0]][(value_nb_vector[vec->vector[i][0]])++] = i;
+      index[vec->int_vector[i][0]][(value_nb_vector[vec->int_vector[i][0]])++] = i;
     }
 
     value_vec = new const Vectors*[vec->marginal[0]->nb_value];
@@ -2040,16 +2091,18 @@ bool Vectors::variance_analysis(Format_error &error , ostream &os , int class_va
     delete [] value_nb_vector;
 
 #   ifdef MESSAGE
-    vec->variance_analysis_ascii_write(os , type , value_vec, false);
+    vec->variance_analysis_ascii_write(os , response_type , value_vec, false);
 #   endif
 
     if (path) {
       switch (format) {
       case 'a' :
-        status = vec->variance_analysis_ascii_write(error , path , type , value_vec , true);
+        status = vec->variance_analysis_ascii_write(error , path , response_type ,
+                                                    value_vec , true);
         break;
       case 's' :
-        status = vec->variance_analysis_spreadsheet_write(error , path , type , value_vec);
+        status = vec->variance_analysis_spreadsheet_write(error , path , response_type ,
+                                                          value_vec);
         break;
       }
     }

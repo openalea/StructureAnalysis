@@ -78,6 +78,7 @@ protected :
     double residual_df;     // degres de liberte residus
     int nb_parameter;       // nombre de parametres
     double *parameter;      // parametres
+//    double step;            // pas pour representer la fonction de regression
     double *point;          // points
 
     void copy(const Regression_kernel&);
@@ -102,6 +103,7 @@ protected :
 public :
 
     Regression_kernel();
+//    Regression_kernel(int iident , double imin_value , double imax_value , double istep == 1);
     Regression_kernel(int iident , int imin_value , int imax_value);
     Regression_kernel(const Regression_kernel &regression) { copy(regression); }
     ~Regression_kernel();
@@ -116,6 +118,7 @@ public :
     double get_residual_df() const { return residual_df; }
     int get_nb_parameter() const { return nb_parameter; }
     double get_parameter(int index) const { return parameter[index]; }
+//    double get_step() const { return step; }
     double get_point(int index) const { return point[index]; }
 };
 

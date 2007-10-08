@@ -1210,7 +1210,7 @@ Distance_matrix* Distance_matrix::select_individual(Format_error &error , int in
         status = false;
         ostringstream error_message;
         error_message << iidentifier[i] << ": " << STAT_error[STATR_BAD] << " "
-                      << label << " " << STAT_error[STATR_IDENTIFIER];
+                      << label << " " << STAT_label[STATL_IDENTIFIER];
         error.update((error_message.str()).c_str());
       }
 

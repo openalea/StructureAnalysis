@@ -96,12 +96,10 @@ class Chain_data;
 
 class Chain {           // chaine de Markov
 
-/*    friend class Chain_data;
-    friend class Markov;
-    friend class Markov_iterator; */
+//    friend class Chain_data;
 
-    friend Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
-                                char type , bool order_flag , int &order);
+    friend Chain* chain_parsing(Format_error &error , ifstream &in_file ,
+                                int &line , char type);
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
 
@@ -129,12 +127,8 @@ public :
     void copy(const Chain&);
     void remove();
 
-    Chain(const Chain &chain , int order , int state);
-
-    std::ostream& ascii_print(std::ostream &os , bool file_flag = false ,
-                              bool order_flag = false , int order = 1) const;
-    std::ostream& spreadsheet_print(std::ostream &os , bool order_flag = false ,
-                                    int order = 1) const;
+    std::ostream& ascii_print(std::ostream &os , bool file_flag = false) const;
+    std::ostream& spreadsheet_print(std::ostream &os) const;
 
 /*    RWspace binaryStoreSize() const;
     void restoreGuts(RWvistream&);
@@ -190,8 +184,7 @@ public :
 };
 
 
-Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
-                     char type , bool order_flag , int &order);
+Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line , char type);
 
 
 
@@ -200,11 +193,11 @@ class Chain_data : public Chain_reestimation<int> {  // structure de donnees cor
 
 /*    friend class Chain;
     friend class Markovian_sequences;
-    friend class Markov;
-    friend class Markov_data;
     friend class Variable_order_markov;
     friend class Variable_order_markov_data;
-    friend class Semi_markov_data; */
+    friend class Semi_markov_data;
+    friend class Non_homogeneous_markov;
+    friend class Non_homogeneous_markov_data; */
 
 // protected :
 public :
@@ -217,18 +210,10 @@ public :
 
     int nb_parameter_computation() const;
 
-    std::ostream& transition_count_ascii_write(std::ostream &os , int max_order ,
-                                               const Chain_data **chain_data , bool begin) const;
-    bool transition_count_ascii_write(Format_error &error , const char *path , int max_order ,
-                                      const Chain_data **chain_data , bool begin) const;
-    bool transition_count_spreadsheet_write(Format_error &error , const char *path , int max_order ,
-                                            const Chain_data **chain_data , bool begin) const;
-
 // public :
 
     Chain_data(char itype , int inb_state , int inb_row , bool init_flag = false)
     :Chain_reestimation<int>(itype , inb_state , inb_row , init_flag) {}
-    Chain_data(const Chain_data &chain_data , int order1 , int order2);
     Chain_data(const Chain_data &chain_data);
 
     void estimation(Chain &chain) const;
@@ -302,9 +287,13 @@ class Parametric_process {  // processus d'observation parametrique
 
 /*    friend class Markovian_sequences;
     friend class Semi_markov;
-    friend class Semi_markov_iterator;
     friend class Semi_markov_data;
-    friend class Hidden_semi_markov; */
+    friend class Semi_markov_iterator;
+    friend class Hidden_semi_markov;
+    friend class Variable_order_markov;
+    friend class Variable_order_markov_data;
+    friend class Variable_order_markov_iterator;
+    friend class Hidden_variable_order_markov; */
 
     friend Parametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
                                                    int &line , int nb_state ,

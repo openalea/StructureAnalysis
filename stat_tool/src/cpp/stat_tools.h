@@ -74,7 +74,7 @@ const int ERROR_LENGTH = 200;
 const int I_DEFAULT = -1;              // int par defaut
 const double D_DEFAULT = -1.;          // double par defaut
 const double D_INF = -1.e37;           // plus petit nombre flottant
-const double DOUBLE_ERROR = 1.e-6;     // arrondi sur une somme de doubles
+const double DOUBLE_ERROR = 1.e-6;     // erreur sur une somme de doubles
 
 enum {
   STANDARD_NORMAL ,
@@ -94,9 +94,8 @@ enum {
   BINOMIAL ,
   POISSON ,
   NEGATIVE_BINOMIAL ,
-  //added by f. chaubert
-  MULTINOMIAL ,
-  UNIFORM
+  UNIFORM ,
+  MULTINOMIAL                          // ajout par Florence Chaubert
 };
 
 enum {
@@ -169,11 +168,9 @@ enum {
   INT_VALUE ,                          // observation entiere
   REAL_VALUE ,                         // observation reelle
   STATE ,                              // etat
-  TIME ,                               // temps
-  TIME_INTERVAL ,                      // intervalle de temps
-  POSITION ,                           // position
-  POSITION_INTERVAL ,                  // intervalle inter-position
-  NB_INTERNODE                         // nombre d'entrenoeuds axe porte
+  OLD_INT_VALUE ,                      // pour compatibilite ascendante
+  NB_INTERNODE ,                       // nombre d'entrenoeuds axe porte
+  AUXILIARY                            // variable auxiliaire (lissage/moyenne par segment)
 };
 
 const int MAX_INF_BOUND = 10000;       // borne inferieure maximum
@@ -625,24 +622,24 @@ public :
                                        char mode);
     void uniform_computation();
 
-    double renewal_likelihood_computation(const Forward &forward_dist , const Histogram &within ,
+    double renewal_likelihood_computation(const Forward &forward_dist , const Histogram &within ,  // sequence_analysis
                                           const Histogram &backward , const Histogram &forward ,
                                           const Histogram *no_event) const;
-    void expectation_step(const Histogram &within ,const Histogram &backward ,
+    void expectation_step(const Histogram &within ,const Histogram &backward ,  // sequence_analysis
                           const Histogram &forward , const Histogram *no_event ,
                           Reestimation<double> *inter_event_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter) const;
 
     void reestimation(const Reestimation<double> *reestim , int nb_estim = 1);
 
-    double state_occupancy_likelihood_computation(const Histogram &sojourn_time ,
+    double state_occupancy_likelihood_computation(const Histogram &sojourn_time ,  // sequence_analysis
                                                   const Histogram &final_run) const;
-    double state_occupancy_likelihood_computation(const Forward &forward , const Histogram &sojourn_time ,
+    double state_occupancy_likelihood_computation(const Forward &forward , const Histogram &sojourn_time ,  // sequence_analysis
                                                   const Histogram &final_run , const Histogram &initial_run ,
                                                   const Histogram &single_run) const;
-    void expectation_step(const Histogram &sojourn_time , const Histogram &final_run ,
+    void expectation_step(const Histogram &sojourn_time , const Histogram &final_run ,  // sequence_analysis
                           Reestimation<double> *occupancy_reestim , int iter) const;
-    void expectation_step(const Histogram &sojourn_time ,const Histogram &final_run ,
+    void expectation_step(const Histogram &sojourn_time ,const Histogram &final_run ,  // sequence_analysis
                           const Histogram &initial_run , const Histogram &single_run ,
                           Reestimation<double> *occupancy_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter ,
@@ -837,7 +834,7 @@ public :
     Distribution_data* value_select(Format_error &error , int min_value ,
                                     int max_value , bool keep = true) const;
 
-    Time_events* build_time_events(Format_error &error , int itime) const;  // A REVOIR
+    Time_events* build_time_events(Format_error &error , int itime) const;  // sequence_analysis
 
     bool ascii_write(Format_error &error , const char *path) const;
 
@@ -897,14 +894,13 @@ public :
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
-  // not implemented
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
+    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,  // sequence_analysis
                                  const Histogram &forward , const Histogram *no_event ,
                                  const Parametric &iinter_event , int estimator = LIKELIHOOD ,
                                  int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
                                  double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
                                  int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,
+    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,  // sequence_analysis
                                  const Histogram &forward , const Histogram *no_event ,
                                  int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
                                  int mean_computation = COMPUTED , double weight = D_DEFAULT ,

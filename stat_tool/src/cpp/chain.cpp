@@ -391,12 +391,11 @@ Chain& Chain::operator=(const Chain &chain)
  *
  *  arguments : reference sur un objet Format_error, stream,
  *              reference sur l'indice de la ligne lue, type du processus
- *              ('o' : ordinaire, 'e' : en equilibre), flag ordre, ordre.
+ *              ('o' : ordinaire, 'e' : en equilibre).
  *
  *--------------------------------------------------------------*/
 
-Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
-                     char type , bool order_flag , int &order)
+Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line , char type)
 
 {
   RWLocaleSnapshot locale("en");
@@ -414,7 +413,6 @@ Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
 
   // analyse lignes definissant le nombre d'etats et l'ordre
 
-  read_line = 0;
   while (buffer.readLine(in_file , false)) {
     line++;
 
@@ -431,71 +429,37 @@ Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
     RWCTokenizer next(buffer);
 
     while (!((token = next()).isNull())) {
+      switch (i) {
 
-      // test mot cle STATES / ORDER
+      // test valeur nombre d'etats
 
-      if (i == 1 - read_line) {
-        switch (read_line) {
-
-        case 0 : {
-          if (token != STAT_word[STATW_STATES]) {
-            status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATES] , line , i + 1);
+      case 0 : {
+        lstatus = locale.stringToNum(token , &value);
+        if (lstatus) {
+          if ((value < 2) || (value > NB_STATE)) {
+            lstatus = false;
           }
-          break;
+          else {
+            nb_state = value;
+          }
         }
 
-        case 1 : {
-          if (token != STAT_word[STATW_ORDER]) {
-            status = false;
-            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_ORDER] , line , i + 1);
-          }
-          break;
+        if (!lstatus) {
+          status = false;
+          error.update(STAT_parsing[STATP_NB_STATE] , line , i + 1);
         }
-        }
+        break;
       }
 
-      // test valeur nombre d'etats / ordre
+      // test mot cle STATES
 
-      if (i == read_line) {
-        switch (read_line) {
-
-        case 0 : {
-          lstatus = locale.stringToNum(token , &value);
-          if (lstatus) {
-            if ((value < 2) || (value > NB_STATE)) {
-              lstatus = false;
-            }
-            else {
-              nb_state = value;
-            }
-          }
-
-          if (!lstatus) {
-            status = false;
-            error.update(STAT_parsing[STATP_NB_STATE] , line , i + 1);
-          }
-          break;
+      case 1 : {
+        if (token != STAT_word[STATW_STATES]) {
+          status = false;
+          error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_STATES] , line , i + 1);
         }
-
-        case 1 : {
-          lstatus = locale.stringToNum(token , &value);
-          if (lstatus) {
-            if ((value < 1) || (value > ORDER)) {
-              lstatus = false;
-            }
-            else {
-              order = value;
-            }
-          }
-
-          if (!lstatus) {
-            status = false;
-            error.update(STAT_parsing[STATP_ORDER] , line , i + 1);
-          }
-          break;
-        }
-        }
+        break;
+      }
       }
 
       i++;
@@ -506,12 +470,7 @@ Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
         status = false;
         error.update(STAT_parsing[STATP_FORMAT] , line);
       }
-
-      read_line++;
-      if (((order_flag) && (read_line == 2)) ||
-          ((!order_flag) && (read_line == 1))) {
-        break;
-      }
+      break;
     }
   }
 
@@ -521,7 +480,7 @@ Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
   }
 
   if (status) {
-    chain = new Chain(type , nb_state , (int)pow((double)nb_state , order) , false);
+    chain = new Chain(type , nb_state , nb_state , false);
 
     // analyse probabilites initiales / probabilites de transition
 
@@ -672,28 +631,25 @@ Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line ,
  *
  *  Ecriture d'un objet Chain.
  *
- *  arguments : stream, flag fichier, flag ordre, ordre.
+ *  arguments : stream, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Chain::ascii_print(ostream &os , bool file_flag , bool order_flag , int order) const
+ostream& Chain::ascii_print(ostream &os , bool file_flag) const
 
 {
   register int i , j;
-  int buff , width , state_index[ORDER];
+  int buff , width;
   long old_adjust;
 
 
   old_adjust = os.setf(ios::left , ios::adjustfield);
 
   os << "\n" << nb_state << " " << STAT_word[STATW_STATES] << endl;
-  if (order_flag) {
-    os << STAT_word[STATW_ORDER] << " " << order << endl;
-  }
 
   // calcul des largeurs des colonnes
 
-  width = column_width((type == 'o' ? nb_state : nb_row) , initial);
+  width = column_width(nb_state , initial);
   for (i = 0;i < nb_row;i++) {
     buff = column_width(nb_state , transition[i]);
     if (buff > width) {
@@ -723,54 +679,17 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag , bool order_flag , int
   if ((type == 'e') && (file_flag)) {
     os << "# ";
   }
-  for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+  for (i = 0;i < nb_state;i++) {
     os << setw(width) << initial[i];
   }
   os << endl;
 
-  if (order > 1) {
-    for (i = 0;i < order;i++) {
-      state_index[i] = 0;
-    }
-  }
-
-  os << "\n" << STAT_word[STATW_TRANSITION_PROBABILITIES];
-  if (order > 1) {
-    os << "      ";
-    if (file_flag) {
-      os << "# ";
-    }
-    os << STAT_label[STATL_MEMORY];
-  }
-  os << endl;
+  os << "\n" << STAT_word[STATW_TRANSITION_PROBABILITIES] << endl;
 
   for (i = 0;i < nb_row;i++) {
     for (j = 0;j < nb_state;j++) {
       os << setw(width) << transition[i][j];
     }
-
-    if (order > 1) {
-      os << "    ";
-      if (file_flag) {
-        os << "# ";
-      }
-      for (j = 0;j < order;j++) {
-        os << state_index[j] << " ";
-      }
-
-      // mise a jour des indices des etats
-
-      for (j = 0;j < order;j++) {
-        if (state_index[j] < nb_state - 1) {
-          state_index[j]++;
-          break;
-        }
-        else {
-          state_index[j] = 0;
-        }
-      }
-    }
-
     os << endl;
   }
 
@@ -812,21 +731,17 @@ ostream& Chain::ascii_print(ostream &os , bool file_flag , bool order_flag , int
  *
  *  Ecriture d'un objet Chain au format tableur.
  *
- *  arguments : stream, flag ordre, ordre.
+ *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Chain::spreadsheet_print(ostream &os , bool order_flag , int order) const
+ostream& Chain::spreadsheet_print(ostream &os) const
 
 {
   register int i , j;
-  int state_index[ORDER];
 
 
   os << "\n" << nb_state << "\t" << STAT_word[STATW_STATES] << endl;
-  if (order_flag) {
-    os << STAT_word[STATW_ORDER] << "\t" << order << endl;
-  }
 
   switch (type) {
   case 'o' :
@@ -837,47 +752,17 @@ ostream& Chain::spreadsheet_print(ostream &os , bool order_flag , int order) con
     break;
   }
 
-  for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
+  for (i = 0;i < nb_state;i++) {
     os << initial[i] << "\t";
   }
   os << endl;
 
-  if (order > 1) {
-    for (i = 0;i < order;i++) {
-      state_index[i] = 0;
-    }
-  }
-
-  os << "\n" << STAT_word[STATW_TRANSITION_PROBABILITIES];
-  if (order > 1) {
-    os << "\t\t" << STAT_label[STATL_MEMORY];
-  }
-  os << endl;
+  os << "\n" << STAT_word[STATW_TRANSITION_PROBABILITIES] << endl;
 
   for (i = 0;i < nb_row;i++) {
     for (j = 0;j < nb_state;j++) {
       os << transition[i][j] << "\t";
     }
-
-    if (order > 1) {
-      os << "\t";
-      for (j = 0;j < order;j++) {
-        os << state_index[j] << " ";
-      }
-
-      // mise a jour des indices des etats
-
-      for (j = 0;j < order;j++) {
-        if (state_index[j] < nb_state - 1) {
-          state_index[j]++;
-          break;
-        }
-        else {
-          state_index[j] = 0;
-        }
-      }
-    }
-
     os << endl;
   }
 
@@ -1200,59 +1085,6 @@ void Chain::log_computation()
 
     for (i = 0;i < nb_row;i++) {
       ::log_computation(nb_state , transition[i] , cumul_transition[i]);
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Constructeur de la classe Chain_data.
- *
- *  arguments : reference sur un objet Chain_data, ordres.
- *
- *--------------------------------------------------------------*/
-
-Chain_data::Chain_data(const Chain_data &chain_data , int order1 , int order2)
-
-{
-  register int i , j , k;
-  int power , *pinitial , *cinitial , *ptransition , **ctransition;
-
-
-  nb_state = chain_data.nb_state;
-
-  nb_row = chain_data.nb_row;
-
-  power = 1;
-  for (i = order2;i < order1;i++) {
-    power *= nb_state;
-  }
-  nb_row /= power;
-
-  initial = new int[nb_state];
-
-  pinitial = initial;
-  cinitial = chain_data.initial;
-  for (i = 0;i < nb_state;i++) {
-    *pinitial++ = *cinitial++;
-  }
-
-  transition = new int*[nb_row];
-
-  for (i = 0;i < nb_row;i++) {
-    transition[i] = new int[nb_state];
-
-    ptransition = transition[i];
-    for (j = 0;j < nb_state;j++) {
-      ctransition = chain_data.transition + i * power;
-      *ptransition = 0;
-      for (k = 0;k < power;k++) {
-        *ptransition += *(*ctransition + j);
-        ctransition++;
-      }
-
-      ptransition++;
     }
   }
 }

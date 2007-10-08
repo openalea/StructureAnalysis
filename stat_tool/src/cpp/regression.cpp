@@ -50,7 +50,9 @@
 
 using namespace std;
 
+
 extern int column_width(int value);
+extern int column_width(int min_value , int max_value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
 
@@ -75,6 +77,7 @@ Regression_kernel::Regression_kernel()
 
   nb_parameter = 0;
   parameter = 0;
+//  step = 1.;
   point = 0;
 }
 
@@ -87,6 +90,8 @@ Regression_kernel::Regression_kernel()
  *
  *--------------------------------------------------------------*/
 
+// Regression_kernel::Regression_kernel(int iident , double imin_value ,
+//                                      double imax_value , double istep)
 Regression_kernel::Regression_kernel(int iident , int imin_value , int imax_value)
 
 {
@@ -126,6 +131,9 @@ Regression_kernel::Regression_kernel(int iident , int imin_value , int imax_valu
     parameter = 0;
   }
 
+//  step = istep;
+
+//  point = new double[(int)((max_value - min_value) * step) + 1];
   point = new double[max_value - min_value + 1];
 }
 
@@ -164,6 +172,10 @@ void Regression_kernel::copy(const Regression_kernel &regression)
     parameter = 0;
   }
 
+//  step = regression.step;
+
+//  point = new double[(int)((max_value - min_value) * step) + 1];
+//  for (i = 0;i <= (int)((max_value - min_value) * step);i++) {
   point = new double[max_value - min_value + 1];
   for (i = 0;i <= max_value - min_value;i++) {
     point[i] = regression.point[i];
@@ -317,12 +329,7 @@ ostream& Regression_kernel::ascii_print(ostream &os) const
   double *ppoint;
 
 
-  width[0] = column_width(min_value);
-  buff = column_width(max_value);
-  if (buff > width[0]) {
-    width[0] = buff;
-  }
-
+  width[0] = column_width(min_value , max_value);
   width[1] = column_width(max_value - min_value + 1 , point) + ASCII_SPACE;
 
   os << "\n" << STAT_label[STATL_EXPLANATORY_VARIABLE] << " | " << STAT_label[STATL_RESPONSE_VARIABLE] << endl;
@@ -607,7 +614,7 @@ double Regression_kernel::min_computation() const
   ppoint = point;
   min = *ppoint++;
 
-  for (i = min_value + 1;i <= max_value;i++) {
+  for (i = (int)min_value + 1;i <= (int)max_value;i++) {
     if (*ppoint < min) {
       min = *ppoint;
     }
@@ -634,7 +641,7 @@ double Regression_kernel::max_computation() const
   ppoint = point;
   max = *ppoint++;
 
-  for (i = min_value + 1;i <= max_value;i++) {
+  for (i = (int)min_value + 1;i <= (int)max_value;i++) {
     if (*ppoint > max) {
       max = *ppoint;
     }
@@ -671,7 +678,7 @@ Regression::Regression()
  *--------------------------------------------------------------*/
 
 Regression::Regression(int iident , int explanatory_variable , int response_variable , const Vectors &vec)
-:Regression_kernel(iident , vec.min_value[explanatory_variable] , vec.max_value[explanatory_variable])
+  :Regression_kernel(iident , (int)vec.min_value[explanatory_variable] , (int)vec.max_value[explanatory_variable])
 
 {
   register int i;
@@ -1010,7 +1017,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
     presponse = estimated_response;
     for (i = 0;i < nb_vector;i++) {
-      *presponse++ = point[vectors->vector[i][0] - min_value];
+      *presponse++ = point[vectors->int_vector[i][0] - min_value];
     }
 
     // calcul des residus reduits
@@ -1025,16 +1032,20 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
     // calcul des largeurs des colonnes
 
-    width[0] = column_width(vectors->min_value[0]);
-    buff = column_width(vectors->max_value[0]);
-    if (buff > width[0]) {
-      width[0] = buff;
+    width[0] = column_width((int)vectors->min_value[0] , (int)vectors->max_value[0]);
+
+    if (vectors->type[1] == INT_VALUE) {
+      width[1] = column_width((int)vectors->min_value[1] , (int)vectors->max_value[1]);
     }
 
-    width[1] = column_width(vectors->min_value[1]);
-    buff = column_width(vectors->max_value[1]);
-    if (buff > width[1]) {
-      width[1] = buff;
+    else {
+      width[1] = 0;
+      for (i = 0;i < nb_vector;i++) {
+        buff = column_width(1 , vectors->real_vector[i] + 1);
+        if (buff > width[1]) {
+          width[1] = buff;
+        }
+      }
     }
     width[1] += ASCII_SPACE;
 
@@ -1053,8 +1064,13 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     pstandard_residual = standard_residual;
 
     for (i = 0;i < nb_vector;i++) {
-      os << setw(width[0]) << vectors->vector[i][0];
-      os << setw(width[1]) << vectors->vector[i][1];
+      os << setw(width[0]) << vectors->int_vector[i][0];
+      if (vectors->type[1] == INT_VALUE) {
+        os << setw(width[1]) << vectors->int_vector[i][1];
+      }
+      else {
+        os << setw(width[1]) << vectors->real_vector[i][1];
+      }
       os << setw(width[2]) << *presponse++;
       os << setw(width[3]) << *presidual++;
       os << setw(width[4]) << *pstandard_residual++;
@@ -1295,8 +1311,14 @@ bool Regression::spreadsheet_write(Format_error &error , const char *path) const
 
     presidual = residual;
     for (i = 0;i < nb_vector;i++) {
-      out_file << vectors->vector[i][0] << "\t" << vectors->vector[i][1] << "\t"
-               << point[vectors->vector[i][0] - min_value] << "\t" << *presidual << "\t"
+      out_file << vectors->int_vector[i][0] << "\t";
+      if (vectors->type[1] == INT_VALUE) {
+        out_file << vectors->int_vector[i][1] << "\t";
+      }
+      else {
+        out_file << vectors->real_vector[i][1] << "\t";
+      }
+      out_file << point[vectors->int_vector[i][0] - min_value] << "\t" << *presidual << "\t"
                << *presidual++ / residual_standard_deviation << "\t\t" << vectors->identifier[i] << endl;
     }
   }
@@ -1367,8 +1389,8 @@ bool Regression::plot_write(Format_error &error , const char *prefix ,
 
     // ecriture du fichier de commandes et du fichier d'impression
 
-    min_response = MIN(min_computation() , (double)(vectors->min_value[1]));
-    max_response = MAX(max_computation() , (double)(vectors->max_value[1]));
+    min_response = MIN(min_computation() , vectors->min_value[1]);
+    max_response = MAX(max_computation() , vectors->max_value[1]);
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1627,7 +1649,7 @@ double Regression::regression_square_sum_computation() const
 
   regression_square_sum = 0.;
   for (i = 0;i < nb_vector;i++) {
-    diff = point[vectors->vector[i][0] - min_value] - vectors->mean[1];
+    diff = point[vectors->int_vector[i][0] - min_value] - vectors->mean[1];
     regression_square_sum += diff * diff;
   }
 
@@ -1649,8 +1671,17 @@ void Regression::residual_computation()
 
 
   presidual = residual;
-  for (i = 0;i < nb_vector;i++) {
-    *presidual++ = vectors->vector[i][1] - point[vectors->vector[i][0] - min_value];
+
+  if (vectors->type[1] == INT_VALUE) {
+    for (i = 0;i < nb_vector;i++) {
+      *presidual++ = vectors->int_vector[i][1] - point[vectors->int_vector[i][0] - min_value];
+    }
+  }
+
+  else {
+    for (i = 0;i < nb_vector;i++) {
+      *presidual++ = vectors->real_vector[i][1] - point[vectors->int_vector[i][0] - min_value];
+    }
   }
 }
 
@@ -1775,6 +1806,14 @@ Regression* Vectors::linear_regression(Format_error &error , int explanatory_var
                   << STAT_error[STATR_VARIABLE_INDEX];
     error.update((error_message.str()).c_str());
   }
+  else if (type[explanatory_variable] != INT_VALUE) {
+    status = false;
+    ostringstream error_message;
+    error_message << STAT_label[STATL_VARIABLE] << " " << explanatory_variable << ": "
+                  << STAT_error[STATR_VARIABLE_TYPE];
+    error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+  }
+
   if ((response_variable < 1) || (response_variable > nb_variable)) {
     status = false;
     ostringstream error_message;
@@ -1854,6 +1893,14 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
 
   else {
     explanatory_variable--;
+
+    if (type[explanatory_variable] != INT_VALUE) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << explanatory_variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+    }
 
     if (!marginal[explanatory_variable]) {
       status = false;
@@ -1938,20 +1985,20 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
       }
 
       for (j = 0;j < nb_vector;j++) {
-        if (vec->vector[index[j]][0] == min) {
+        if (vec->int_vector[index[j]][0] == min) {
           min_index = j;
           break;
         }
       }
       for (j = nb_vector - 1;j >= 0;j--) {
-        if (vec->vector[index[j]][0] == max) {
+        if (vec->int_vector[index[j]][0] == max) {
           max_index = j;
           break;
         }
       }
 
       for (j = min_index;j < nb_vector;j++) {
-        if (vec->vector[index[j]][0] == i) {
+        if (vec->int_vector[index[j]][0] == i) {
           value_index = j;
           break;
         }
@@ -1965,10 +2012,20 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
         local_mean[1] = 0.;
         norm = 0.;
 
-        for (j = min_index;j <= max_index;j++) {
-          weight[j] = filter[vec->vector[index[j]][0] - (i - nb_point)];
-          local_mean[1] += weight[j] * vec->vector[index[j]][1];
-          norm += weight[j];
+        if (vec->type[1] == INT_VALUE) {
+          for (j = min_index;j <= max_index;j++) {
+            weight[j] = filter[vec->int_vector[index[j]][0] - (i - nb_point)];
+            local_mean[1] += weight[j] * vec->int_vector[index[j]][1];
+            norm += weight[j];
+          }
+        }
+
+        else {
+          for (j = min_index;j <= max_index;j++) {
+            weight[j] = filter[vec->int_vector[index[j]][0] - (i - nb_point)];
+            local_mean[1] += weight[j] * vec->real_vector[index[j]][1];
+            norm += weight[j];
+          }
         }
 
 #       ifdef DEBUG
@@ -1995,25 +2052,50 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
         local_mean[1] = 0.;
         norm = 0.;
 
-        for (j = min_index;j <= max_index;j++) {
-          weight[j] = filter[vec->vector[index[j]][0] - (i - nb_point)];
-          local_mean[0] += weight[j] * vec->vector[index[j]][0];
-          local_mean[1] += weight[j] * vec->vector[index[j]][1];
-          norm += weight[j];
+        if (vec->type[1] == INT_VALUE) {
+          for (j = min_index;j <= max_index;j++) {
+            weight[j] = filter[vec->int_vector[index[j]][0] - (i - nb_point)];
+            local_mean[0] += weight[j] * vec->int_vector[index[j]][0];
+            local_mean[1] += weight[j] * vec->int_vector[index[j]][1];
+            norm += weight[j];
+          }
         }
+
+        else {
+          for (j = min_index;j <= max_index;j++) {
+            weight[j] = filter[vec->int_vector[index[j]][0] - (i - nb_point)];
+            local_mean[0] += weight[j] * vec->int_vector[index[j]][0];
+            local_mean[1] += weight[j] * vec->real_vector[index[j]][1];
+            norm += weight[j];
+          }
+        }
+
         local_mean[0] /= norm;
         local_mean[1] /= norm;
 
         local_variance = 0.;
         local_covariance = 0.;
 
-        for (j = min_index;j <= max_index;j++) {
-          diff = vec->vector[index[j]][0] - local_mean[0];
-          local_variance += weight[j] * diff * diff;
+        if (vec->type[1] == INT_VALUE) {
+          for (j = min_index;j <= max_index;j++) {
+            diff = vec->int_vector[index[j]][0] - local_mean[0];
+            local_variance += weight[j] * diff * diff;
 
-          local_covariance += weight[j] * (vec->vector[index[j]][0] - local_mean[0]) *
-                              (vec->vector[index[j]][1] - local_mean[1]);
+            local_covariance += weight[j] * (vec->int_vector[index[j]][0] - local_mean[0]) *
+                                (vec->int_vector[index[j]][1] - local_mean[1]);
+          }
         }
+
+        else {
+          for (j = min_index;j <= max_index;j++) {
+            diff = vec->int_vector[index[j]][0] - local_mean[0];
+            local_variance += weight[j] * diff * diff;
+
+            local_covariance += weight[j] * (vec->int_vector[index[j]][0] - local_mean[0]) *
+                                (vec->real_vector[index[j]][1] - local_mean[1]);
+          }
+        }
+
         local_variance /= norm;
         local_covariance /= norm;
 
@@ -2029,7 +2111,7 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
         for (j = 0;j < vec->marginal[0]->frequency[i];j++) {
           for (k = min_index;k <= max_index;k++) {
             smoother_matrix[value_index + j][k] = weight[k] / norm * (1. + (i - local_mean[0]) *
-                                                   (vec->vector[index[k]][0] - local_mean[0]) / local_variance);
+                                                   (vec->int_vector[index[k]][0] - local_mean[0]) / local_variance);
           }
         }
         break;
@@ -2160,6 +2242,14 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
                   << STAT_error[STATR_VARIABLE_INDEX];
     error.update((error_message.str()).c_str());
   }
+  else if (type[explanatory_variable] != INT_VALUE) {
+    status = false;
+    ostringstream error_message;
+    error_message << STAT_label[STATL_VARIABLE] << " " << explanatory_variable << ": "
+                  << STAT_error[STATR_VARIABLE_TYPE];
+    error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+  }
+
   if ((response_variable < 1) || (response_variable > nb_variable)) {
     status = false;
     ostringstream error_message;
@@ -2175,7 +2265,7 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
     regression = new Regression(STAT_NONPARAMETRIC , explanatory_variable , response_variable , *this);
     vec = regression->vectors;
 
-    nb_neighbor = MAX((int)round(nb_vector * span) , 2);
+    nb_neighbor = MAX((int)::round(nb_vector * span) , 2);
     if (weighting) {
       nb_neighbor++;
     }
@@ -2219,12 +2309,12 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
 
         if (min_index == I_DEFAULT) {
           min_index = 0;
-          while (vec->vector[index[min_index]][0] < i) {
+          while (vec->int_vector[index[min_index]][0] < i) {
             min_index++;
           }
 
-          if ((vec->vector[index[min_index]][0] > i) &&
-              (i - vec->vector[index[min_index - 1]][0] < vec->vector[index[min_index]][0] - i)) {
+          if ((vec->int_vector[index[min_index]][0] > i) &&
+              (i - vec->int_vector[index[min_index - 1]][0] < vec->int_vector[index[min_index]][0] - i)) {
             min_index--;
             greater = false;
           }
@@ -2234,14 +2324,14 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
           max_index = min_index;
 
           frequency = 0;
-          if (vec->vector[index[min_index]][0] == i) {
+          if (vec->int_vector[index[min_index]][0] == i) {
             value_index = min_index;
             j = min_index;
             do {
               j++;
               frequency++;
             }
-            while ((j < nb_vector) && (vec->vector[index[j]][0] == i));
+            while ((j < nb_vector) && (vec->int_vector[index[j]][0] == i));
           }
         }
 
@@ -2254,7 +2344,7 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
             greater = false;
             min_index--;
           }
-          else if (i - vec->vector[index[min_index - 1]][0] < vec->vector[index[max_index + 1]][0] - i) {
+          else if (i - vec->int_vector[index[min_index - 1]][0] < vec->int_vector[index[max_index + 1]][0] - i) {
             greater = false;
             min_index--;
           }
@@ -2267,33 +2357,33 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
         // recherche des vecteurs prenant la valeur la plus proche courante
 
         if (!greater) {
-          value = vec->vector[index[min_index]][0];
+          value = vec->int_vector[index[min_index]][0];
           do {
             min_index--;
           }
-          while ((min_index >= 0) && (vec->vector[index[min_index]][0] == value));
+          while ((min_index >= 0) && (vec->int_vector[index[min_index]][0] == value));
           min_index++;
         }
 
         else {
-          value = vec->vector[index[max_index]][0];
+          value = vec->int_vector[index[max_index]][0];
           do {
             max_index++;
           }
-          while ((max_index < nb_vector) && (vec->vector[index[max_index]][0] == value));
+          while ((max_index < nb_vector) && (vec->int_vector[index[max_index]][0] == value));
           max_index--;
         }
       }
       while ((max_index - min_index + 1 < nb_neighbor) ||
-             (vec->vector[index[max_index]][0] - vec->vector[index[min_index]][0] < NEIGHBORHOOD) ||
-             (i - vec->vector[index[min_index]][0] == vec->vector[index[max_index]][0] - i));
+             (vec->int_vector[index[max_index]][0] - vec->int_vector[index[min_index]][0] < NEIGHBORHOOD) ||
+             (i - vec->int_vector[index[min_index]][0] == vec->int_vector[index[max_index]][0] - i));
 
       if (weighting) {
         if (!greater) {
-          max_deviation = i - vec->vector[index[min_index]][0];
+          max_deviation = i - vec->int_vector[index[min_index]][0];
         }
         else {
-          max_deviation = vec->vector[index[max_index]][0] - i;
+          max_deviation = vec->int_vector[index[max_index]][0] - i;
         }
       }
 
@@ -2303,33 +2393,66 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
       local_mean[1] = 0.;
       norm = 0.;
 
-      for (j = min_index;j <= max_index;j++) {
-        if (weighting) {
-          var = (double)(abs(vec->vector[index[j]][0] - i)) / (double)max_deviation;
-          var = 1. - var * var * var;
-          weight[j] = var * var * var;
-        }
-        else {
-          weight[j] = 1.;
-        }
-        norm += weight[j];
+      if (vec->type[1] == INT_VALUE) {
+        for (j = min_index;j <= max_index;j++) {
+          if (weighting) {
+            var = (double)(abs(vec->int_vector[index[j]][0] - i)) / (double)max_deviation;
+            var = 1. - var * var * var;
+            weight[j] = var * var * var;
+          }
+          else {
+            weight[j] = 1.;
+          }
+          norm += weight[j];
 
-        local_mean[0] += weight[j] * vec->vector[index[j]][0];
-        local_mean[1] += weight[j] * vec->vector[index[j]][1];
+          local_mean[0] += weight[j] * vec->int_vector[index[j]][0];
+          local_mean[1] += weight[j] * vec->int_vector[index[j]][1];
+        }
       }
+
+      else {
+        for (j = min_index;j <= max_index;j++) {
+          if (weighting) {
+            var = (double)(abs(vec->int_vector[index[j]][0] - i)) / (double)max_deviation;
+            var = 1. - var * var * var;
+            weight[j] = var * var * var;
+          }
+          else {
+            weight[j] = 1.;
+          }
+          norm += weight[j];
+
+          local_mean[0] += weight[j] * vec->int_vector[index[j]][0];
+          local_mean[1] += weight[j] * vec->real_vector[index[j]][1];
+        }
+      }
+
       local_mean[0] /= norm;
       local_mean[1] /= norm;
 
       local_variance = 0.;
       local_covariance = 0.;
 
-      for (j = min_index;j <= max_index;j++) {
-        diff = vec->vector[index[j]][0] - local_mean[0];
-        local_variance += weight[j] * diff * diff;
+      if (vec->type[1] == INT_VALUE) {
+        for (j = min_index;j <= max_index;j++) {
+          diff = vec->int_vector[index[j]][0] - local_mean[0];
+          local_variance += weight[j] * diff * diff;
 
-        local_covariance += weight[j] * (vec->vector[index[j]][0] - local_mean[0]) *
-                            (vec->vector[index[j]][1] - local_mean[1]);
+          local_covariance += weight[j] * (vec->int_vector[index[j]][0] - local_mean[0]) *
+                              (vec->int_vector[index[j]][1] - local_mean[1]);
+        }
       }
+
+      else {
+        for (j = min_index;j <= max_index;j++) {
+          diff = vec->int_vector[index[j]][0] - local_mean[0];
+          local_variance += weight[j] * diff * diff;
+
+          local_covariance += weight[j] * (vec->int_vector[index[j]][0] - local_mean[0]) *
+                              (vec->real_vector[index[j]][1] - local_mean[1]);
+        }
+      }
+
       local_variance /= norm;
       local_covariance /= norm;
 
@@ -2352,7 +2475,7 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
       for (j = 0;j < frequency;j++) {
         for (k = min_index;k <= max_index;k++) {
           smoother_matrix[value_index + j][k] = weight[k] / norm * (1. + (i - local_mean[0]) *
-                                                 (vec->vector[index[k]][0] - local_mean[0]) / local_variance);
+                                                 (vec->int_vector[index[k]][0] - local_mean[0]) / local_variance);
         }
       }
     }
@@ -2375,7 +2498,7 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
 #     ifdef DEBUG
 /*      cout << "\nmatrice de lissage" << endl;
       for (i = 0;i < nb_vector;i++) {
-        cout << vec->vector[index[i]][0] << " ";
+        cout << vec->int_vector[index[i]][0] << " ";
       }
       cout << "\n\n";
       for (i = 0;i < nb_vector;i++) {

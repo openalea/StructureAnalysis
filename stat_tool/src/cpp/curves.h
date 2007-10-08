@@ -99,7 +99,7 @@ public :
     int plot_length_computation() const;
     bool plot_print(const char *path , int ilength = I_DEFAULT ,
                     const Curves *curves_0 = 0 , const Curves *curves_1 = 0) const;
-    bool plot_print_0(const char *path , double *standard_residual = 0) const;
+    bool plot_print_standard_residual(const char *path , double *standard_residual = 0) const;  // sequence_analysis
 
 /*    RWspace binaryStoreSize() const;
     void restoreGuts(RWvistream&);
