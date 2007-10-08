@@ -244,7 +244,7 @@ double Semi_markov::likelihood_computation(const Markovian_sequences &seq , int 
 
     for (i = 0;i < seq.nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
-        pstate = seq.sequence[i][0];
+        pstate = seq.int_sequence[i][0];
 
         proba = initial[*pstate];
         if (proba > 0.) {
@@ -257,7 +257,7 @@ double Semi_markov::likelihood_computation(const Markovian_sequences &seq , int 
 
         if (nb_output_process > 0) {
           for (j = 0;j < nb_output_process;j++) {
-            poutput[j] = seq.sequence[i][j + 1];
+            poutput[j] = seq.int_sequence[i][j + 1];
           }
         }
 
@@ -590,7 +590,7 @@ void Markovian_sequences::transition_count_computation(const Chain_data &chain_d
   // extraction des etats initiaux et des transitions
 
   for (i = 0;i < nb_sequence;i++) {
-    pstate = sequence[i][0];
+    pstate = int_sequence[i][0];
     (chain_data.initial[*pstate])++;
 
     for (j = 1;j < length[i];j++) {
@@ -965,7 +965,7 @@ void Parametric::expectation_step(const Histogram &sojourn_time , const Histogra
  *--------------------------------------------------------------*/
 
 Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , ostream &os ,
-                                                         char type , int estimator , bool counting_flag ,
+                                                         char model_type , int estimator , bool counting_flag ,
                                                          int nb_iter , int mean_computation) const
 
 {
@@ -986,18 +986,27 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
   smarkov = 0;
   error.init();
 
-  if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
     status = false;
-    error.update(SEQ_error[SEQR_NB_STATE]);
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
   }
 
-  else if (!characteristics[0]) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] == 0) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
-        error.update((error_message.str()).c_str());
+  else {
+    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+      status = false;
+      error.update(SEQ_error[SEQR_NB_STATE]);
+    }
+
+    else if (!characteristics[0]) {
+      for (i = 0;i < marginal[0]->nb_value;i++) {
+        if (marginal[0]->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
       }
     }
   }
@@ -1008,22 +1017,34 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
       error.correction_update(STAT_error[STATR_NB_VARIABLE] , "1 or 2");
     }
 
-    if (test_hidden(1)) {
+    if ((type[1] != INT_VALUE) && (type[1] != STATE)) {
       status = false;
-      ostringstream error_message;
+      ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                    << SEQ_error[SEQR_OVERLAP];
-      error.update((error_message.str()).c_str());
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-    if (!characteristics[1]) {
-      for (i = 0;i < marginal[1]->nb_value;i++) {
-        if (marginal[1]->frequency[i] == 0) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                        << STAT_error[STATR_MISSING_VALUE] << " " << i;
-          error.update((error_message.str()).c_str());
+    else {
+      if (test_hidden(1)) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                      << SEQ_error[SEQR_OVERLAP];
+        error.update((error_message.str()).c_str());
+      }
+
+      if (!characteristics[1]) {
+        for (i = 0;i < marginal[1]->nb_value;i++) {
+          if (marginal[1]->frequency[i] == 0) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                          << STAT_error[STATR_MISSING_VALUE] << " " << i;
+            error.update((error_message.str()).c_str());
+          }
         }
       }
     }
@@ -1034,7 +1055,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
       counting_flag = false;
     }
 
-    if (type == 'e') {
+    if (model_type == 'e') {
 
       // creation des histogrammes des temps de sejour censures
 
@@ -1062,8 +1083,8 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
       nb_value[0] = marginal[1]->nb_value;
     }
 
-    smarkov = new Semi_markov(type , marginal[0]->nb_value , nb_variable - 1 , nb_value);
-    smarkov->semi_markov_data = new Semi_markov_data(*this , (type == 'e' ? true : false));
+    smarkov = new Semi_markov(model_type , marginal[0]->nb_value , nb_variable - 1 , nb_value);
+    smarkov->semi_markov_data = new Semi_markov_data(*this , 'c' , (model_type == 'e' ? true : false));
 
     seq = smarkov->semi_markov_data;
     seq->state_variable_init();
@@ -1071,7 +1092,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
     for (i = 0;i < smarkov->nb_state;i++) {
       if ((seq->characteristics[0]->sojourn_time[i]->nb_element > 0) ||
-          ((type == 'e') && (initial_run[i]->nb_element > 0))) {
+          ((model_type == 'e') && (initial_run[i]->nb_element > 0))) {
         seq->chain_data->transition[i][i] = 0;
       }
     }
@@ -1081,7 +1102,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
     seq->chain_data->estimation(*smarkov);
     smarkov->component_computation();
 
-    if ((type == 'e') && (smarkov->nb_component > 1)) {
+    if ((model_type == 'e') && (smarkov->nb_component > 1)) {
       delete smarkov;
       smarkov = 0;
       error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
@@ -1108,7 +1129,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
       for (i = 0;i < smarkov->nb_state;i++) {
         if ((seq->characteristics[0]->sojourn_time[i]->nb_element == 0) &&
-            ((type == 'o') || (initial_run[i]->nb_element == 0)))  {
+            ((model_type == 'o') || (initial_run[i]->nb_element == 0))) {
           smarkov->state_subtype[i] = MARKOVIAN;
           smarkov->nonparametric_process[0]->absorption[i] = 1.;
         }
@@ -1116,11 +1137,11 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
         else {
           smarkov->nonparametric_process[0]->absorption[i] = 0.;
 
-          if ((type == 'e') && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
+          if ((model_type == 'e') && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
             occupancy = 0;
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (type == 'e') && 
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (model_type == 'e') && 
                    ((initial_run[i]->nb_element > 0) || (single_run[i]->nb_element > 0))) {
 
             //  initialisation de la loi d'occupation de l'etat
@@ -1300,10 +1321,10 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
             }
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (((type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0) &&
-                     (seq->characteristics[0]->final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)) || ((type == 'e') &&
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (((model_type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0) &&
+                     (seq->characteristics[0]->final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)) || ((model_type == 'e') &&
                      (final_run[i]->nb_element > 0) && (final_run[i]->nb_value > seq->characteristics[0]->sojourn_time[i]->nb_value)))) {
-            switch (type) {
+            switch (model_type) {
             case 'o' :
               pfinal_run = seq->characteristics[0]->final_run[i];
               break;
@@ -1438,9 +1459,9 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
             }
           }
 
-          else if ((estimator != PARTIAL_LIKELIHOOD) && (((type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0)) ||
-                    ((type == 'e') && (final_run[i]->nb_element > 0)))) {
-            seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation((type == 'o' ? seq->characteristics[0]->final_run[i] : final_run[i]) ,
+          else if ((estimator != PARTIAL_LIKELIHOOD) && (((model_type == 'o') && (seq->characteristics[0]->final_run[i]->nb_element > 0)) ||
+                    ((model_type == 'e') && (final_run[i]->nb_element > 0)))) {
+            seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation((model_type == 'o' ? seq->characteristics[0]->final_run[i] : final_run[i]) ,
                                                                                  occupancy_reestim , occupancy_survivor ,
                                                                                  censored_occupancy_survivor);
 
@@ -1487,7 +1508,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
       }
     }
 
-    if (type == 'e') {
+    if (model_type == 'e') {
       for (i = 0;i < marginal[0]->nb_value;i++) {
         delete initial_run[i];
       }
@@ -1505,7 +1526,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
     }
 
     if (smarkov) {
-      if (type == 'e') {
+      if (model_type == 'e') {
         for (i = 0;i < smarkov->nb_state;i++) {
           smarkov->initial[i] = 1. / (double)smarkov->nb_state;
         }
@@ -1568,7 +1589,14 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
 
   error.init();
 
-  if (!characteristics[0]) {
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
+    status = false;
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+  }
+
+  else if (!characteristics[0]) {
     for (i = 0;i < marginal[0]->nb_value;i++) {
       if (marginal[0]->frequency[i] == 0) {
         status = false;
@@ -1585,22 +1613,34 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
       error.correction_update(STAT_error[STATR_NB_VARIABLE] , "1 or 2");
     }
 
-    if (test_hidden(1)) {
+    if ((type[1] != INT_VALUE) && (type[1] != STATE)) {
       status = false;
-      ostringstream error_message;
+      ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                    << SEQ_error[SEQR_OVERLAP];
-      error.update((error_message.str()).c_str());
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-    else if (!characteristics[1]) {
-      for (i = 0;i < marginal[1]->nb_value;i++) {
-        if (marginal[1]->frequency[i] == 0) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                        << STAT_error[STATR_MISSING_VALUE] << " " << i;
-          error.update((error_message.str()).c_str());
+    else {
+      if (test_hidden(1)) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                      << SEQ_error[SEQR_OVERLAP];
+        error.update((error_message.str()).c_str());
+      }
+
+      if (!characteristics[1]) {
+        for (i = 0;i < marginal[1]->nb_value;i++) {
+          if (marginal[1]->frequency[i] == 0) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                          << STAT_error[STATR_MISSING_VALUE] << " " << i;
+            error.update((error_message.str()).c_str());
+          }
         }
       }
     }
@@ -1725,7 +1765,7 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
 
     // initialisations
 
-    seq = new Semi_markov_data(nb_output_process + 1 , hlength , false);
+    seq = new Semi_markov_data(hlength , nb_output_process + 1);
     seq->type[0] = STATE;
 
     seq->semi_markov = new Semi_markov(*this , false);
@@ -1739,11 +1779,11 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
     }
 
     for (i = 0;i < seq->nb_sequence;i++) {
-      pstate = seq->sequence[i][0];
+      pstate = seq->int_sequence[i][0];
       *pstate = cumul_method(smarkov->nb_state , smarkov->cumul_initial);
 
       for (j = 0;j < smarkov->nb_output_process;j++) {
-        poutput[j] = seq->sequence[i][j + 1];
+        poutput[j] = seq->int_sequence[i][j + 1];
       }
 
       j = 0;

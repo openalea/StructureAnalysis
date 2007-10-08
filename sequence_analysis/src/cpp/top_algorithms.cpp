@@ -64,8 +64,8 @@ void Tops::max_position_computation()
 
 
     for (i = 0;i < nb_sequence;i++) {
-      if (sequence[i][0][length[i] - 1] > max_position) {
-        max_position = sequence[i][0][length[i] - 1];
+      if (index_parameter[i][length[i] - 1] > max_position) {
+        max_position = index_parameter[i][length[i] - 1];
       }
     }
   }
@@ -89,8 +89,8 @@ int Tops::min_position_computation() const
     min_position = max_position;
 
     for (i = 0;i < nb_sequence;i++) {
-      if (sequence[i][0][0] < min_position) {
-        min_position = sequence[i][0][0];
+      if (index_parameter[i][0] < min_position) {
+        min_position = index_parameter[i][0];
       }
     }
   }
@@ -117,8 +117,8 @@ void Tops::build_nb_internode_histogram()
 
   max_nb_internode = 0;
   for (i = 0;i < nb_sequence;i++) {
-    if (sequence[i][0][length[i]] > max_nb_internode) {
-      max_nb_internode = sequence[i][0][length[i]];
+    if (index_parameter[i][length[i]] > max_nb_internode) {
+      max_nb_internode = index_parameter[i][length[i]];
     }
   }
 
@@ -136,10 +136,10 @@ void Tops::build_nb_internode_histogram()
   }
 
   for (i = 0;i < nb_sequence;i++) {
-    (nb_internode->frequency[sequence[i][0][length[i]]])++;
+    (nb_internode->frequency[index_parameter[i][length[i]]])++;
 
-    pposition = sequence[i][0];
-    plength = sequence[i][1];
+    pposition = index_parameter[i];
+    plength = int_sequence[i][0];
 
     for (j = 0;j < length[i];j++) {
       if (*plength > bmax_length[*pposition]) {
@@ -163,8 +163,8 @@ void Tops::build_nb_internode_histogram()
   // constitution des histogrammes du nombre d'entrenoeuds des axes portes
 
   for (i = 0;i < nb_sequence;i++) {
-    pposition = sequence[i][0];
-    plength = sequence[i][1];
+    pposition = index_parameter[i];
+    plength = int_sequence[i][0];
     for (j = 0;j < length[i];j++) {
       (axillary_nb_internode[*pposition++]->frequency[*plength++])++;
     }
@@ -308,7 +308,7 @@ Top_parameters* Tops::estimation(Format_error &error , int imin_position , int i
     nb_neighbor = 0;
 
     for (i = 0;i < nb_sequence;i++) {
-      pposition = sequence[i][0];
+      pposition = index_parameter[i];
 
       for (j = 0;j < length[i] - 1;j++) {
         if (*pposition >= imin_position) {
@@ -355,8 +355,8 @@ Top_parameters* Tops::estimation(Format_error &error , int imin_position , int i
     variance = 0.;
 
     for (i = 0;i < nb_sequence;i++) {
-      pposition = sequence[i][0];
-      plength = sequence[i][1];
+      pposition = index_parameter[i];
+      plength = int_sequence[i][0];
 
       for (j = 0;j < length[i];j++) {
         if (*pposition >= imin_position) {
@@ -523,8 +523,8 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
     for (i = 0;i < nb_top;i++) {
       nb_trial_value = nb_trial.simulation();
 
-      pposition = tops->sequence[i][0];
-      plength = tops->sequence[i][1];
+      pposition = tops->index_parameter[i];
+      plength = tops->int_sequence[i][0];
       j = 0;
       k = 0;
       nb_position[i] = 0;
@@ -572,9 +572,9 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
     delete tops->hlength;
     tops->build_length_histogram();
 
-    tops->min_value_computation(1);
-    tops->max_value_computation(1);
-    tops->build_marginal_histogram(1);
+    tops->min_value_computation(0);
+    tops->max_value_computation(0);
+    tops->build_marginal_histogram(0);
 
     tops->build_nb_internode_histogram();
     parameters->axillary_nb_internode_computation(tops->max_position);

@@ -45,22 +45,34 @@
 const char *SEQ_word[] = {
   "MARKOV_CHAIN" ,
   "EQUILIBRIUM_MARKOV_CHAIN" ,
-  "NON-HOMOGENEOUS_MARKOV_CHAIN" ,
-  "SEMI-MARKOV_CHAIN" ,
-  "EQUILIBRIUM_SEMI-MARKOV_CHAIN" ,
   "HIDDEN_MARKOV_CHAIN" ,
   "EQUILIBRIUM_HIDDEN_MARKOV_CHAIN" ,
+
+  "SEMI-MARKOV_CHAIN" ,
+  "EQUILIBRIUM_SEMI-MARKOV_CHAIN" ,
   "HIDDEN_SEMI-MARKOV_CHAIN" ,
   "EQUILIBRIUM_HIDDEN_SEMI-MARKOV_CHAIN" ,
 
+  "NONHOMOGENEOUS_MARKOV_CHAIN" ,
   "HOMOGENEOUS" ,
-  "NON-HOMOGENEOUS" ,
+  "NONHOMOGENEOUS" ,
 
   "OCCUPANCY_DISTRIBUTION" ,
+
+  "INDEX_PARAMETER" ,
 
   "TOP_PARAMETERS" ,
   "AXILLARY_PROBABILITY" ,
   "RHYTHM_RATIO"
+};
+
+
+const char *SEQ_index_parameter_word[] = {
+  " " ,
+  "TIME" ,
+  "TIME_INTERVAL" ,
+  "POSITION" ,
+  "POSITION_INTERVAL"
 };
 
 
@@ -103,9 +115,8 @@ const char *SEQ_label[] = {
   "event probability" ,
 
   "Markov chain" ,
-  "non-homogeneous Markov chain" ,
-  "semi-Markov chain" ,
   "hidden Markov chain" ,
+  "semi-Markov chain" ,
   "hidden semi-Markov chain" ,
 
   "maximum order" ,
@@ -128,7 +139,6 @@ const char *SEQ_label[] = {
   "delta" ,
   "Krichevsky-Trofimov" ,
 
-  "non-homogeneous" ,
   "self-transition" ,
   "asymptote" ,
 
@@ -156,10 +166,10 @@ const char *SEQ_label[] = {
 
   "state probabilities" ,
   "posterior state sequence probability" ,
+  "state begin" ,
   "posterior state probabilities" ,
   "posterior in state probabilities" ,
   "posterior out state probabilities" ,
-//  "Gini index" ,
   "conditional entropy" ,
   "marginal entropy" ,
   "sum of marginal entropies" ,
@@ -190,13 +200,17 @@ const char *SEQ_label[] = {
   "simulated" ,
   "sequence" ,
   "sequences" ,
+  "index parameter" ,
+  "minimum index parameter" ,
+  "maximum index parameter" ,
+  "time" ,
+  "time interval" ,
+  "position" ,
+  "position interval" ,
   "length" ,
   "sequence length" ,
   "cumulated length" ,
   "shift" ,
-  "time" ,
-  "time interval" ,
-  "position interval" ,
   "time up to the first occurrence of value" ,
   "number of runs of value" ,
   "number of occurrences of value" ,
@@ -209,10 +223,9 @@ const char *SEQ_label[] = {
 
   "optimal" ,
   "change point" ,
+  "change points" ,
   "segment" ,
   "segments" ,
-  "segment standardized mean absolute difference" ,
-  "segment standardized mean square difference" ,
   "number of segments" ,
   "posterior probability" ,
   "penalty" ,
@@ -230,7 +243,7 @@ const char *SEQ_label[] = {
   "maximum posterior segment probabilities" ,
   "segment mean" ,
   "segment variance" ,
-  "segment square deviation" ,
+  "segment standard deviation" ,
   "ambiguity" ,
 
   "top" ,
@@ -254,7 +267,6 @@ const char *SEQ_parsing[] = {
   "bad state" ,
   "bad number of memories" ,
 
-  "bad variable type" ,
   "time index not ordered" ,
   "position not ordered" ,
   "position not allowed" ,
@@ -283,7 +295,6 @@ const char *SEQ_error[] = {
   "initial inter-event distribution support incompatible with data" ,
 
   "bad time between two observation dates" ,
-  "bad scaling coefficient" ,
   "bad minimum time" ,
   "bad maximum time" ,
   "bad minimum number of events" ,
@@ -297,10 +308,6 @@ const char *SEQ_error[] = {
   "bad order" ,
   "bad minimum order" ,
   "bad maximum order" ,
-  "bad input Markov chain order" ,
-  "non-homogeneous input Markov chain: should be homogeneous" ,
-  "bad weight values: should sum to 1" ,
-  "weight values incompatible with transition probabilities of the input Markov chain" ,
   "too many parameters" ,
   "overlap of values observed in the different states" ,
   "bad model type" ,
@@ -308,11 +315,6 @@ const char *SEQ_error[] = {
   "bad number of output processes" ,
   "bad output process index" ,
   "bad number of outputs" ,
-  "bad self-transition probability" ,
-  "bad state index" ,
-  "bad state type" ,
-  "bad minimum number of states" ,
-  "bad maximum number of states" ,
   "bad minimum number of state sequences" ,
   "bad number of state sequences" ,
   "average state occupancy too short" ,
@@ -327,22 +329,21 @@ const char *SEQ_error[] = {
   "cumulated sequence length too long" ,
   "failure in the computation of the optimal state sequences" ,
 
-  "bad variable type" ,
-  "variable 1: bad variable type" ,
-  "only a single variable: two variables or more are required" ,
+  "bad index parameter type" ,
+  "bad index parameter" ,
   "bad minimum value: should be positive" ,
   "bad date order" ,
-  "bad begin index" ,
-  "bad end index" ,
+  "bad begin index parameter" ,
+  "bad end index parameter" ,
   "bad minimum sequence length" ,
   "bad maximum sequence length" ,
   "not present" ,
-  "always present" ,
   "bad maximum run length" ,
-  "bad minimum index" ,
-  "bad maximum index" ,
+  "bad minimum index parameter" ,
+  "bad maximum index parameter" ,
   "bad number of selected values" ,
   "unequal index intervals: should be equal" ,
+  "bad number of sequences: should be > 1" ,
   "bad position transform step" ,
   "bad length" ,
   "bad value" ,
@@ -367,6 +368,7 @@ const char *SEQ_error[] = {
   "forbidden output" ,
   "bad number of segments" ,
   "bad maximum number of segments" ,
+  "bad change point" ,
   "segmentation failure" ,
   "bad number of segmentations" ,
 

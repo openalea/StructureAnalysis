@@ -136,7 +136,7 @@ double Hidden_semi_markov::likelihood_computation(const Markovian_sequences &seq
     for (i = 0;i < seq.nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
         for (j = 0;j < seq.nb_variable;j++) {
-          poutput[j] = seq.sequence[i][j];
+          poutput[j] = seq.int_sequence[i][j];
         }
         seq_likelihood = 0.;
 
@@ -367,7 +367,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]->nb_value > 1) {
+    if (max_value[i] > min_value[i]) {
       status = true;
       break;
     }
@@ -375,6 +375,18 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 
   if (!status) {
     error.update(SEQ_error[SEQR_VARIABLE_NB_VALUE]);
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
   }
 
   if (ihsmarkov.nb_output_process != nb_variable) {
@@ -607,7 +619,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < nb_variable;j++) {
-          poutput[j] = sequence[i][j];
+          poutput[j] = int_sequence[i][j];
         }
 
         // recurrence "forward"
@@ -1396,9 +1408,8 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 
     else {
       if (state_sequence) {
-        hsmarkov->semi_markov_data = new Semi_markov_data(*this , 0 , (hsmarkov->type == 'e' ? true : false));
+        hsmarkov->semi_markov_data = new Semi_markov_data(*this , 'a' , (hsmarkov->type == 'e' ? true : false));
         seq = hsmarkov->semi_markov_data;
-        seq->type[0] = STATE;
 
         for (i = 1;i <= hsmarkov->nb_output_process;i++) {
           if ((hsmarkov->parametric_process[i]) && (seq->characteristics[i])) {
@@ -1467,7 +1478,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
           }
         }
 
-        hsmarkov->semi_markov_data = new Semi_markov_data(*this , (hsmarkov->type == 'e' ? true : false));
+        hsmarkov->semi_markov_data = new Semi_markov_data(*this , 'c' , (hsmarkov->type == 'e' ? true : false));
         seq = hsmarkov->semi_markov_data;
         seq->state_variable_init(INT_VALUE);
 
@@ -1495,18 +1506,46 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 
       seq->hidden_likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
 
+      hsmarkov->component_computation();
+      hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
+
 #     ifdef MESSAGE
       if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
+        int *pstate;
+
         os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
         for (i = 0;i < seq->nb_sequence;i++) {
           os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
-             << seq->posterior_probability[i] << endl;
+             << seq->posterior_probability[i];
+
+          if (hsmarkov->nb_component == hsmarkov->nb_state) {
+            os << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
+
+            pstate = seq->int_sequence[i][0] + 1;
+            if (seq->index_parameter) {
+              for (j = 1;j < seq->length[i];j++) {
+                if (*pstate != *(pstate - 1)) {
+                  os << seq->index_parameter[i][j] << ", ";
+                }
+                pstate++;
+              }
+            }
+
+            else {
+              for (j = 1;j < seq->length[i];j++) {
+                if (*pstate != *(pstate - 1)) {
+                  os << j << ", ";
+                }
+                pstate++;
+              }
+            }
+          }
+
+          os << endl;
         }
       }
 #     endif
 
-      hsmarkov->component_computation();
-      hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
     }
   }
 
@@ -1530,7 +1569,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
  *--------------------------------------------------------------*/
 
 Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_error &error , ostream &os ,
-                                                                       char type , int nb_state , bool left_right ,
+                                                                       char model_type , int nb_state , bool left_right ,
                                                                        int estimator , bool counting_flag ,
                                                                        bool state_sequence , double occupancy_mean ,
                                                                        int nb_iter , int mean_computation) const
@@ -1555,12 +1594,24 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
     error.update(SEQ_error[SEQR_OCCUPANCY]);
   }
 
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+  }
+
   if (status) {
     for (i = 0;i < nb_variable;i++) {
       nb_value[i] = marginal[i]->nb_value;
     }
 
-    ihsmarkov = new Hidden_semi_markov(type , nb_state , nb_variable , nb_value);
+    ihsmarkov = new Hidden_semi_markov(model_type , nb_state , nb_variable , nb_value);
 
     // initialisation des parametres de la chaine de Markov
 
@@ -1672,7 +1723,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]->nb_value > 1) {
+    if (max_value[i] > min_value[i]) {
       status = true;
       break;
     }
@@ -1680,6 +1731,18 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
   if (!status) {
     error.update(SEQ_error[SEQR_VARIABLE_NB_VALUE]);
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
   }
 
   if (ihsmarkov.nb_output_process != nb_variable) {
@@ -1838,14 +1901,14 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
       // calcul du nombre de sequences d'etats simulees
 
-      if (min_nb_state_sequence + (int)round(parameter * iter) < max_nb_state_sequence) {
-        nb_state_sequence = min_nb_state_sequence + (int)round(parameter * iter);
+      if (min_nb_state_sequence + (int)::round(parameter * iter) < max_nb_state_sequence) {
+        nb_state_sequence = min_nb_state_sequence + (int)::round(parameter * iter);
       }
       else {
         nb_state_sequence = max_nb_state_sequence;
       }
 
-/*      nb_state_sequence = max_nb_state_sequence - (int)round((max_nb_state_sequence - min_nb_state_sequence) *
+/*      nb_state_sequence = max_nb_state_sequence - (int)::round((max_nb_state_sequence - min_nb_state_sequence) *
                           exp(-parameter * iter)); */
 
       iter++;
@@ -1891,7 +1954,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < nb_variable;j++) {
-          poutput[j] = sequence[i][j];
+          poutput[j] = int_sequence[i][j];
         }
 
         // recurrence "forward"
@@ -2063,7 +2126,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
           k = length[i] - 1;
           pstate = state_seq + k;
           for (m = 0;m < nb_variable;m++) {
-            poutput[m] = sequence[i][m] + k;
+            poutput[m] = int_sequence[i][m] + k;
           }
 
           cumul_computation(hsmarkov->nb_state , forward[k] , cumul_backward);
@@ -2583,9 +2646,8 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
     else {
       if (state_sequence) {
-        hsmarkov->semi_markov_data = new Semi_markov_data(*this , 0 , (hsmarkov->type == 'e' ? true : false));
+        hsmarkov->semi_markov_data = new Semi_markov_data(*this , 'a' , (hsmarkov->type == 'e' ? true : false));
         seq = hsmarkov->semi_markov_data;
-        seq->type[0] = STATE;
 
         for (i = 1;i <= hsmarkov->nb_output_process;i++) {
           if ((hsmarkov->parametric_process[i]) && (seq->characteristics[i])) {
@@ -2654,7 +2716,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
           }
         }
 
-        hsmarkov->semi_markov_data = new Semi_markov_data(*this , (hsmarkov->type == 'e' ? true : false));
+        hsmarkov->semi_markov_data = new Semi_markov_data(*this , 'c' , (hsmarkov->type == 'e' ? true : false));
         seq = hsmarkov->semi_markov_data;
         seq->state_variable_init(INT_VALUE);
 
@@ -2682,18 +2744,44 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
       seq->hidden_likelihood = hsmarkov->likelihood_computation(*this , seq->posterior_probability);
 
+      hsmarkov->component_computation();
+      hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
+
 #     ifdef MESSAGE
       if  ((state_sequence) && (seq->nb_sequence <= POSTERIOR_PROBABILITY_NB_SEQUENCE)) {
         os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY] << endl;
         for (i = 0;i < seq->nb_sequence;i++) {
           os << SEQ_label[SEQL_SEQUENCE] << " " << seq->identifier[i] << ": "
-             << seq->posterior_probability[i] << endl;
+             << seq->posterior_probability[i];
+
+          if (hsmarkov->nb_component == hsmarkov->nb_state) {
+            os << " | " << SEQ_label[SEQL_STATE_BEGIN] << ": ";
+
+            pstate = seq->int_sequence[i][0] + 1;
+            if (seq->index_parameter) {
+              for (j = 1;j < seq->length[i];j++) {
+                if (*pstate != *(pstate - 1)) {
+                  os << seq->index_parameter[i][j] << ", ";
+                }
+                pstate++;
+              }
+            }
+
+            else {
+              for (j = 1;j < seq->length[i];j++) {
+                if (*pstate != *(pstate - 1)) {
+                  os << j << ", ";
+                }
+                pstate++;
+              }
+            }
+          }
+
+          os << endl;
         }
       }
 #     endif
 
-      hsmarkov->component_computation();
-      hsmarkov->characteristic_computation(*seq , counting_flag , I_DEFAULT , false);
     }
   }
 
@@ -2717,7 +2805,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
  *--------------------------------------------------------------*/
 
 Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimation(Format_error &error , ostream &os ,
-                                                                                  char type , int nb_state , bool left_right ,
+                                                                                  char model_type , int nb_state , bool left_right ,
                                                                                   int min_nb_state_sequence ,
                                                                                   int max_nb_state_sequence ,
                                                                                   double parameter , int estimator ,
@@ -2744,12 +2832,24 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
     error.update(SEQ_error[SEQR_OCCUPANCY]);
   }
 
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+  }
+
   if (status) {
     for (i = 0;i < nb_variable;i++) {
       nb_value[i] = marginal[i]->nb_value;
     }
 
-    ihsmarkov = new Hidden_semi_markov(type , nb_state , nb_variable , nb_value);
+    ihsmarkov = new Hidden_semi_markov(model_type , nb_state , nb_variable , nb_value);
 
     // initialisation des parametres de la chaine de Markov
 
@@ -2926,7 +3026,7 @@ double Hidden_semi_markov::forward_backward(const Semi_markov_data &seq , int in
   poutput = new int*[nb_output_process];
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
 
   // recurrence "forward"
@@ -3510,7 +3610,7 @@ double Hidden_semi_markov::forward_backward(const Semi_markov_data &seq , int in
 
     // restauration
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
 
     for (i = 0;i < seq.length[index];i++) {
       backward_max = 0.;
@@ -3641,7 +3741,7 @@ double Hidden_semi_markov::forward_backward(const Semi_markov_data &seq , int in
       // calcul du nombre de sequences d'etats possibles
 
       for (i = 0;i < nb_output_process;i++) {
-        poutput[i] = seq.sequence[index][i + 1];
+        poutput[i] = seq.int_sequence[index][i + 1];
       }
 
       // recurrence "forward"
@@ -4118,7 +4218,7 @@ double Hidden_semi_markov::forward_backward_sampling(const Semi_markov_data &seq
   poutput = new int*[nb_output_process];
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
 
 # ifdef DEBUG
@@ -4291,7 +4391,7 @@ double Hidden_semi_markov::forward_backward_sampling(const Semi_markov_data &seq
 
     for (i = 0;i < nb_state_sequence;i++) {
       j = seq.length[index] - 1;
-      pstate = seq.sequence[index][0] + j;
+      pstate = seq.int_sequence[index][0] + j;
       ::cumul_computation(nb_state , forward1[j] , cumul_backward);
       *pstate = cumul_method(nb_state , cumul_backward);
 
@@ -4402,7 +4502,7 @@ double Hidden_semi_markov::forward_backward_sampling(const Semi_markov_data &seq
       while (j > 0);
 
 #     ifdef DEBUG
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
       for (j = 0;j < seq.length[index];j++) {
         state_sequence_probability[j][*pstate++]++;
       }
@@ -4411,7 +4511,7 @@ double Hidden_semi_markov::forward_backward_sampling(const Semi_markov_data &seq
 #     ifdef MESSAGE
       state_seq_likelihood = Semi_markov::likelihood_computation(seq , index);
 
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
 
       switch (format) {
 
@@ -4447,7 +4547,7 @@ double Hidden_semi_markov::forward_backward_sampling(const Semi_markov_data &seq
         }
       }
 
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
       for (j = 0;j < seq.length[index];j++) {
         *pstate++ = I_DEFAULT;
       }
@@ -4545,9 +4645,8 @@ bool Hidden_semi_markov::state_profile_write(Format_error &error , ostream &os ,
   }
 
   if (status) {
-    if (iseq.type[0] == INT_VALUE) {
-      seq = new Semi_markov_data((Markovian_sequences&)iseq , 0);
-      seq->type[0] = STATE;
+    if (iseq.type[0] != STATE) {
+      seq = new Semi_markov_data((Markovian_sequences&)iseq);
     }
     else {
       seq = new Semi_markov_data(iseq , false);
@@ -4722,9 +4821,8 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
     }
 
     else {
-      if (iseq.type[0] == INT_VALUE) {
-        seq = new Semi_markov_data((Markovian_sequences&)iseq , 0);
-        seq->type[0] = STATE;
+      if (iseq.type[0] != STATE) {
+        seq = new Semi_markov_data((Markovian_sequences&)iseq);
       }
       else {
         seq = new Semi_markov_data(iseq , false);
@@ -4786,91 +4884,187 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
           break;
         }
 
-        if (seq->length[index] - 1 < TIC_THRESHOLD) {
-          out_file << "set xtics 0,1" << endl;
-        }
+        if (seq->index_parameter) {
+          if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+            out_file << "set xtics 0,1" << endl;
+          }
 
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
-        for (j = 0;j < nb_state;j++) {
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                     << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
+
+          out_file << "set title \"";
+          if (title) {
+            out_file << title << " - ";
+          }
+          switch (output) {
+          case SSTATE :
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+            break;
+          case IN_STATE :
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
+            break;
+          case OUT_STATE :
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
+            break;
+          }
+
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
+                   << exp(state_seq_likelihood - seq_likelihood) << "] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                     << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
+
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
+
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
+                   << max_marginal_entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << 1 << " : " << nb_state + 2 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
+                   << "\" with linespoints,\\" << endl;
           out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                   << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
-                   << j << "\" with linespoints";
-          if (j < nb_state - 1) {
-            out_file << ",\\";
+                   << 1 << " : " << nb_state + 3 << " title \"" << SEQ_label[SEQL_MARGINAL_ENTROPY]
+                   << "\" with linespoints" << endl;
+
+          if (i == 0) {
+          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
           }
           out_file << endl;
+
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
+
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:" << entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << 1 << " : " << nb_state + 4 << " title \""
+                   << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY] << "\" with linespoints" << endl;
+
+          if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+            out_file << "set xtics autofreq" << endl;
+          }
         }
 
-        if (i == 0) {
-          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-        }
-        out_file << endl;
+        else {
+          if (seq->length[index] - 1 < TIC_THRESHOLD) {
+            out_file << "set xtics 0,1" << endl;
+          }
 
-        out_file << "set title \"";
-        if (title) {
-          out_file << title << " - ";
-        }
-        switch (output) {
-        case SSTATE :
-          out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
-          break;
-        case IN_STATE :
-          out_file << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
-          break;
-        case OUT_STATE :
-          out_file << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
-          break;
-        }
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                     << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
 
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
-                 << exp(state_seq_likelihood - seq_likelihood) << "] ";
-        for (j = 0;j < nb_state;j++) {
-          out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                   << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
-                   << j << "\" with linespoints";
-          if (j < nb_state - 1) {
-            out_file << ",\\";
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
           }
           out_file << endl;
-        }
 
-        if (i == 0) {
+          out_file << "set title \"";
+          if (title) {
+            out_file << title << " - ";
+          }
+          switch (output) {
+          case SSTATE :
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+            break;
+          case IN_STATE :
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
+            break;
+          case OUT_STATE :
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
+            break;
+          }
+
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
+                   << exp(state_seq_likelihood - seq_likelihood) << "] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                     << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
+
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
+
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << max_marginal_entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 1 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
+                   << "\" with linespoints,\\" << endl;
+          out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 2 << " title \"" << SEQ_label[SEQL_MARGINAL_ENTROPY]
+                   << "\" with linespoints" << endl;
+
+          if (i == 0) {
           out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-        }
-        out_file << endl;
+          }
+          out_file << endl;
 
-        out_file << "set title";
-        if (title) {
-          out_file << " \"" << title << "\"";
-        }
-        out_file << "\n\n";
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
 
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << max_marginal_entropy << "] "
-                 << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 1 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
-                 << "\" with linespoints,\\" << endl;
-        out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 2 << " title \"" << SEQ_label[SEQL_MARGINAL_ENTROPY]
-                 << "\" with linespoints" << endl;
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 3 << " title \"" << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY]
+                   << "\" with linespoints" << endl;
 
-        if (i == 0) {
-          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-        }
-        out_file << endl;
-
-        out_file << "set title";
-        if (title) {
-          out_file << " \"" << title << "\"";
-        }
-        out_file << "\n\n";
-
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << entropy << "] "
-                 << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 3 << " title \"" << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY]
-                 << "\" with linespoints" << endl;
-
-        if (seq->length[index] - 1 < TIC_THRESHOLD) {
-          out_file << "set xtics autofreq" << endl;
+          if (seq->length[index] - 1 < TIC_THRESHOLD) {
+            out_file << "set xtics autofreq" << endl;
+          }
         }
 
         if (i == 1) {
@@ -5041,7 +5235,7 @@ double Hidden_semi_markov::viterbi(const Semi_markov_data &seq ,
   for (i = 0;i < seq.nb_sequence;i++) {
     if ((index == I_DEFAULT) || (index == i)) {
       for (j = 0;j < nb_output_process;j++) {
-        poutput[j] = seq.sequence[i][j + 1];
+        poutput[j] = seq.int_sequence[i][j + 1];
       }
 
       // recurrence "forward"
@@ -5205,7 +5399,7 @@ double Hidden_semi_markov::viterbi(const Semi_markov_data &seq ,
 
       // extraction de la vraisemblance du chemin optimal
 
-      pstate = seq.sequence[i][0] + seq.length[i] - 1;
+      pstate = seq.int_sequence[i][0] + seq.length[i] - 1;
       forward_max = D_INF;
 
       for (j = 0;j < nb_state;j++) {
@@ -5386,7 +5580,7 @@ double Hidden_semi_markov::generalized_viterbi(const Semi_markov_data &seq , int
   poutput = new int*[nb_output_process];
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
   nb_state_sequence = 1;
 
@@ -5647,7 +5841,7 @@ double Hidden_semi_markov::generalized_viterbi(const Semi_markov_data &seq , int
   likelihood_cumul = 0.;
 
   for (i = 0;i < nb_state_sequence;i++) {
-    pstate = seq.sequence[index][0] + seq.length[index] - 1;
+    pstate = seq.int_sequence[index][0] + seq.length[index] - 1;
     forward_max = D_INF;
 
     for (j = 0;j < nb_state;j++) {
@@ -5710,7 +5904,7 @@ double Hidden_semi_markov::generalized_viterbi(const Semi_markov_data &seq , int
     likelihood_cumul += exp(forward_max);
 
 #   ifdef DEBUG
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
     for (j = 0;j < seq.length[index];j++) {
 /*      state_sequence_probability[j][*pstate++] += exp(forward_max - seq_likelihood); */
 
@@ -5735,7 +5929,7 @@ double Hidden_semi_markov::generalized_viterbi(const Semi_markov_data &seq , int
       os << "\n";
     }
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
 
     switch (format) {
 
@@ -5747,6 +5941,31 @@ double Hidden_semi_markov::generalized_viterbi(const Semi_markov_data &seq , int
 //      os << "  " << i + 1 << "  " << forward_max << "   (" << exp(forward_max - state_seq_likelihood)
       os << "  " << i + 1 << "  " << forward_max << "   (" << exp(forward_max - seq_likelihood)
          << "  " << likelihood_cumul / exp(seq_likelihood) << "  " << nb_cell << ")" << endl;
+
+      if (nb_component == nb_state) {
+        os << SEQ_label[SEQL_STATE_BEGIN] << ": ";
+
+        pstate = seq.int_sequence[index][0] + 1;
+        if (seq.index_parameter) {
+          for (j = 1;j < seq.length[index];j++) {
+            if (*pstate != *(pstate - 1)) {
+              os << seq.index_parameter[index][j] << ", ";
+            }
+            pstate++;
+          }
+        }
+
+        else {
+          for (j = 1;j < seq.length[index];j++) {
+            if (*pstate != *(pstate - 1)) {
+              os << j << ", ";
+            }
+            pstate++;
+          }
+        }
+
+        os << endl;
+      }
       break;
     }
 
@@ -5784,7 +6003,7 @@ double Hidden_semi_markov::generalized_viterbi(const Semi_markov_data &seq , int
       }
     }
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
     for (j = 0;j < seq.length[index];j++) {
       *pstate++ = I_DEFAULT;
     }
@@ -5964,7 +6183,7 @@ double Hidden_semi_markov::viterbi_forward_backward(const Semi_markov_data &seq 
 # endif
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
 
   // recurrence "forward"
@@ -6326,7 +6545,7 @@ double Hidden_semi_markov::viterbi_forward_backward(const Semi_markov_data &seq 
               for (k = 0;k < nb_state;k++) {
                 if (k != j) {
                   buff = auxiliary[k] + cumul_transition[j][k];
-                  if (buff >  backward_output[i][j]) {
+                  if (buff > backward_output[i][j]) {
                     backward_output[i][j] = buff;
                   }
                 }
@@ -6407,7 +6626,7 @@ double Hidden_semi_markov::viterbi_forward_backward(const Semi_markov_data &seq 
 
     // restauration
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
 
     for (i = 0;i < seq.length[index];i++) {
       backward_max = D_INF;
@@ -6495,7 +6714,7 @@ double Hidden_semi_markov::viterbi_forward_backward(const Semi_markov_data &seq 
     if (format != 'g') {
       double ambiguity = 0.;
 
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
 //      if (output == SSTATE) {
       for (i = 0;i < seq.length[index];i++) {
         for (j = 0;j < nb_state;j++) {
@@ -6696,9 +6915,8 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_viterbi_estimation(F
     hsmarkov->create_cumul();
     hsmarkov->log_computation();
 
-    hsmarkov->semi_markov_data = new Semi_markov_data(*this , 0 , false);
+    hsmarkov->semi_markov_data = new Semi_markov_data(*this , 'a' , false);
     seq = hsmarkov->semi_markov_data;
-    seq->type[0] = STATE;
     seq->max_value[0] = hsmarkov->nb_state - 1;
     seq->marginal[0] = new Histogram(hsmarkov->nb_state);
 
@@ -7171,9 +7389,8 @@ Semi_markov_data* Hidden_semi_markov::state_sequence_computation(Format_error &e
   }
 
   if (status) {
-    seq = new Semi_markov_data(iseq , 0 , (type == 'e' ? true : false));
+    seq = new Semi_markov_data(iseq , 'a' , (type == 'e' ? true : false));
 
-    seq->type[0] = STATE;
     seq->semi_markov = new Semi_markov(*this , false , false);
 
     hsmarkov = new Hidden_semi_markov(*this , false , false);
@@ -7239,16 +7456,14 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
   error.init();
 
   for (i = 0;i < nb_variable;i++) {
-    if (!characteristics[i]) {
-      for (j = 0;j < marginal[i]->nb_value;j++) {
-        if (marginal[i]->frequency[j] == 0) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MISSING_VALUE] << " " << j;
-          error.update((error_message.str()).c_str());
-        }
-      }
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
   }
 
@@ -7299,7 +7514,7 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
         hsmarkov[i]->log_computation();
       }
 
-      seq = new Semi_markov_data(*this , 0);
+      seq = new Semi_markov_data(*this);
     }
 
     // pour chaque sequence, calcul de la vraisemblance (FORWARD) ou de la vraisemblance

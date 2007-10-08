@@ -185,12 +185,15 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
  *
  *  Construction d'un objet Variable_order_markov d'ordre fixe.
  *
- *  arguments : type, nombre d'etats, ordre, flag initialisation.
+ *  arguments : type, nombre d'etats, ordre, flag initialisation,
+ *              nombre de processus d'observation,
+ *              nombre de valeurs observees par processus.
  *
  *--------------------------------------------------------------*/
 
 Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
-                                             int iorder , bool init_flag)
+                                             int iorder , bool init_flag ,
+                                             int inb_output_process , int nb_value)
 :Chain(itype , inb_state , (int)(pow((double)inb_state , iorder + 1) - 1) / (inb_state - 1) , init_flag)
 
 {
@@ -296,9 +299,13 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
 
   build_memory_transition();
 
-  nb_output_process = 0;
-  nonparametric_process = new Nonparametric_sequence_process*[1];
-  nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state);
+  nb_output_process = inb_output_process;
+
+  nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
+  nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state , false);
+  if (nb_output_process == 1) {
+    nonparametric_process[1] = new Nonparametric_sequence_process(nb_state , nb_value , true);
+  }
 
   parametric_process = 0;
 }
@@ -564,7 +571,7 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
         cout << markov.state[i][j] << " ";
       }
       if (markov_next[i] != I_DEFAULT) {
-        cout << " ->  ";
+        cout << " -> ";
         for (j = completion->order[markov_next[i]] - 1;j >= 0;j--) {
           cout << completion->state[markov_next[i]][j] << " ";
         }
@@ -578,7 +585,7 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
         cout << completion->state[i][j] << " ";
       }
       if (completion_next[i] != I_DEFAULT) {
-        cout << " ->  ";
+        cout << " -> ";
         for (j = completion->order[completion_next[i]] - 1;j >= 0;j--) {
           cout << completion->state[completion_next[i]][j] << " ";
         }
@@ -1606,7 +1613,7 @@ void Variable_order_markov::build_non_terminal()
  *  Extraction d'une loi.
  *
  *  arguments : reference sur un objet Format_error, type de loi,
- *              variable, valeur (etat dans le cas des lois d'observation).
+ *              variable, etat ou observation.
  *
  *--------------------------------------------------------------*/
 
@@ -4416,14 +4423,14 @@ Variable_order_markov_data::Variable_order_markov_data()
  *
  *  Constructeur de la classe Variable_order_markov_data.
  *
- *  arguments : nombre de variables, histogramme des longueurs des sequences,
+ *  arguments : histogramme des longueurs des sequences, nombre de variables,
  *              flag initialisation.
  *
  *--------------------------------------------------------------*/
 
-Variable_order_markov_data::Variable_order_markov_data(int inb_variable , const Histogram &ihlength ,
+Variable_order_markov_data::Variable_order_markov_data(const Histogram &ihlength , int inb_variable ,
                                                        bool init_flag)
-:Markovian_sequences(inb_variable , ihlength , init_flag)
+:Markovian_sequences(ihlength , inb_variable , init_flag)
 
 {
   markov = 0;
@@ -4438,31 +4445,22 @@ Variable_order_markov_data::Variable_order_markov_data(int inb_variable , const 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Variable_order_markov_data.
+ *  Construction d'un objet Variable_order_markov_data a partir
+ *  d'un objet Markovian_sequences avec ajout d'une variable d'etat.
  *
- *  arguments : nombre de sequences, longueurs des sequences, sequences,
- *              pointeur sur un objet Variable_order_markov.
+ *  argument : reference sur un objet Markovian_sequences.
  *
  *--------------------------------------------------------------*/
 
-Variable_order_markov_data::Variable_order_markov_data(int inb_sequence , int *ilength , int ***isequence ,
-                                                       const Variable_order_markov &imarkov)
-:Markovian_sequences(imarkov.nb_output_process + 1 , inb_sequence , ilength , isequence)
+Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences &seq)
+:Markovian_sequences(seq , 'a' , DEFAULT)
 
 {
-  type[0] = STATE;
-  markov = new Variable_order_markov(imarkov , false);
+  markov = 0;
+  chain_data = 0;
 
-  // extraction des caracteristiques des sequences simulees
-
-  build_transition_count(*markov);
-  build_observation_histogram();
-
-  markov->characteristic_computation(*this , true);
-
-  // calcul de la vraisemblance
-
-  likelihood = markov->likelihood_computation(*this);
+  likelihood = D_INF;
+  hidden_likelihood = D_INF;
 
   posterior_probability = 0;
 }
@@ -4473,63 +4471,15 @@ Variable_order_markov_data::Variable_order_markov_data(int inb_sequence , int *i
  *  Construction d'un objet Variable_order_markov_data a partir
  *  d'un objet Markovian_sequences.
  *
- *  arguments : reference sur un objet Markovian_sequences,
+ *  arguments : reference sur un objet Markovian_sequences, type de transformation
+ *              ('c' : copie, 'a' : ajout d'une variable d'etat),
  *              ajout/suppression des histogrammes de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
 Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences &seq ,
-                                                       bool initial_run_flag)
-:Markovian_sequences(seq , 'c' , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
-
-{
-  markov = 0;
-  chain_data = 0;
-
-  likelihood = D_INF;
-  hidden_likelihood = D_INF;
-
-  posterior_probability = 0;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'un objet Variable_order_markov_data a partir
- *  d'un objet Markovian_sequences avec ajout d'une variable.
- *
- *  arguments : reference sur un objet Markovian_sequences, indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences &seq ,
-                                                       int variable)
-:Markovian_sequences(seq , 'a' , variable , DEFAULT)
-
-{
-  markov = 0;
-  chain_data = 0;
-
-  likelihood = D_INF;
-  hidden_likelihood = D_INF;
-
-  posterior_probability = 0;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'un objet Variable_order_markov_data a partir
- *  d'un objet Markovian_sequences avec ajout d'une variable.
- *
- *  arguments : reference sur un objet Markovian_sequences, indice de la variable,
- *              ajout/suppression des histogrammes de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
-
-Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences &seq ,
-                                                       int variable , bool initial_run_flag)
-:Markovian_sequences(seq , 'a' , variable , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
+                                                       char transform , bool initial_run_flag)
+:Markovian_sequences(seq , transform , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
 
 {
   markov = 0;
@@ -4635,7 +4585,7 @@ Variable_order_markov_data& Variable_order_markov_data::operator=(const Variable
  *  Extraction d'un histogramme.
  *
  *  arguments : reference sur un objet Format_error, type d'histogramme,
- *              variable, valeur (etat dans le cas des histogrammes d'observation).
+ *              variable, etat ou observation.
  *
  *--------------------------------------------------------------*/
 
@@ -4787,6 +4737,34 @@ Distribution_data* Variable_order_markov_data::extract(Format_error &error , int
   }
 
   return histo;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Suppression du parametre d'index.
+ *
+ *  argument : reference sur un objet Format_error.
+ *
+ *--------------------------------------------------------------*/
+
+Variable_order_markov_data* Variable_order_markov_data::remove_index_parameter(Format_error &error) const
+
+{
+  Variable_order_markov_data *seq;
+
+
+  error.init();
+
+  if (!index_parameter) {
+    seq = 0;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new Variable_order_markov_data(*this , true , 'r');
+  }
+
+  return seq;
 }
 
 

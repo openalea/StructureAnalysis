@@ -54,7 +54,9 @@
 
 using namespace std;
 
+extern int column_width(int value);
 extern int column_width(int min_value , int max_value);
+extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
 
 
@@ -63,11 +65,11 @@ extern char* label(const char *file_name);
  *
  *  Construction d'un objet Sequences a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet Format_error, path, flag format.
  *
  *--------------------------------------------------------------*/
 
-Sequences* sequences_ascii_read(Format_error &error , const char *path)
+Sequences* sequences_ascii_read(Format_error &error , const char *path , bool old_format)
 
 {
   RWLocaleSnapshot locale("en");
@@ -75,9 +77,11 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
   size_t position;
   bool status , lstatus;
   register int i , j , k , m;
-  int line , read_line , initial_nb_line , max_length , nb_variable = 0 , nb_sequence ,
-      index , line_continue , type[SEQUENCE_NB_VARIABLE] , *length;
-  long value;
+  int line , read_line , offset , initial_nb_line , max_length , nb_variable = 0 ,
+      index_parameter_type = IMPLICIT_TYPE , vector_size , nb_sequence , index , line_continue ,
+      *type , *length;
+  long int_value;
+  double real_value;
   Sequences *seq;
   ifstream in_file(path);
 
@@ -90,12 +94,14 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
   }
 
   else {
-
-    // 1ere passe : analyse de la ligne definissant le nombre de variables
-
     status = true;
-    length = 0;
     line = 0;
+    type = 0;
+    length = 0;
+
+    // 1ere passe : analyse de la ligne definissant le parametre d'index et
+    // de la ligne definissant le nombre de variables
+
     read_line = 0;
 
     while (buffer.readLine(in_file , false)) {
@@ -112,33 +118,71 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
       while (!((token = next()).isNull())) {
         switch (i) {
 
-        // test nombre de variables
-
         case 0 : {
-          lstatus = locale.stringToNum(token , &value);
-          if (lstatus) {
-            if ((value < 1) || (value > SEQUENCE_NB_VARIABLE)) {
-              lstatus = false;
-            }
-            else {
-              nb_variable = value;
-            }
+
+          // test mot cle INDEX_PARAMETER
+
+          if ((!old_format) && (read_line == 0) && (token == SEQ_word[SEQW_INDEX_PARAMETER])) {
+            index_parameter_type--;
           }
 
-          if (!lstatus) {
-            status = false;
-            error.update(STAT_parsing[STATP_NB_VARIABLE] , line , i + 1);
+          // test nombre de variables
+
+          else {
+            lstatus = locale.stringToNum(token , &int_value);
+            if (lstatus) {
+              if ((int_value < 1) || (int_value > SEQUENCE_NB_VARIABLE)) {
+                lstatus = false;
+              }
+              else {
+                nb_variable = int_value;
+              }
+            }
+
+            if (!lstatus) {
+              status = false;
+              error.update(STAT_parsing[STATP_NB_VARIABLE] , line , i + 1);
+            }
           }
           break;
         }
 
-        // test mot cle VARIABLE(S)
-
         case 1 : {
-          if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
+
+          // test separateur
+
+          if ((!old_format) && (read_line == 0) && (index_parameter_type != IMPLICIT_TYPE)) {
+            if (token != ":") {
+              status = false;
+              error.update(STAT_parsing[STATP_SEPARATOR] , line , i + 1);
+            }
+          }
+
+          // test mot cle VARIABLE(S)
+
+          else if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES]) {
             status = false;
             error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
                                     STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] , line , i + 1);
+          }
+          break;
+        }
+
+        // test mot cle correspondant au type du parametre d'index
+
+        case 2 : {
+          if ((!old_format) && (read_line == 0) && (index_parameter_type != IMPLICIT_TYPE)) {
+            for (j = TIME;j <= POSITION_INTERVAL;j++) {
+              if (token == SEQ_index_parameter_word[j]) {
+                index_parameter_type = j;
+                break;
+              }
+            }
+
+            if (j == POSITION_INTERVAL + 1) {
+              status = false;
+              error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
+            }
           }
           break;
         }
@@ -148,13 +192,19 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
       }
 
       if (i > 0) {
-        if (i != 2) {
+        if (((!old_format) && (read_line == 0) && (index_parameter_type != IMPLICIT_TYPE) && (i != 3)) ||
+            (((old_format) || (read_line == 1) || (index_parameter_type == IMPLICIT_TYPE)) && (i != 2))) {
           status = false;
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
 
         read_line++;
-        break;
+//        if (((!old_format) && (index_parameter_type != IMPLICIT_TYPE) && (read_line == 2)) ||
+//            (((old_format) || (index_parameter_type == IMPLICIT_TYPE)) && (read_line == 1)) {
+        if ((((old_format) || (index_parameter_type == IMPLICIT_TYPE)) && (read_line == 1)) ||
+            (read_line == 2)) {
+          break;
+        }
       }
     }
 
@@ -166,11 +216,13 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
     // analyse des lignes definissant le type de chaque variable
 
     if (status) {
+      type = new int[nb_variable];
       for (i = 0;i < nb_variable;i++) {
         type[i] = I_DEFAULT;
       }
 
       read_line = 0;
+      offset = (old_format ? 1 : 0);
 
       while (buffer.readLine(in_file , false)) {
         line++;
@@ -199,8 +251,8 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
           // test index de la variable
 
           case 1 : {
-            lstatus = locale.stringToNum(token , &value);
-            if ((lstatus) && (value != read_line + 1)) {
+            lstatus = locale.stringToNum(token , &int_value);
+            if ((lstatus) && (int_value != read_line + 1)) {
               lstatus = false;
             }
 
@@ -224,27 +276,63 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
           // test mot cle correspondant au type de la variable
 
           case 3 : {
-            for (j = 0;j < SEQUENCE_NB_TYPE;j++) {
-              if (token == STAT_sequence_word[j]) {
-                if ((((j == TIME) || (j == TIME_INTERVAL) || (j == POSITION) || (j == POSITION_INTERVAL)) &&
-                     (read_line != 0)) || ((j == NB_INTERNODE) && ((read_line != 1) ||
-                      ((read_line == 1) && (type[0] != POSITION) && (type[0] != POSITION_INTERVAL))))) {
-                  status = false;
-                  error.update(SEQ_parsing[SEQP_VARIABLE_TYPE] , line , i + 1);
+            if ((old_format) && (read_line == 0)) {
+              for (j = TIME;j <= POSITION_INTERVAL;j++) {
+                if (token == SEQ_index_parameter_word[j]) {
+                  index_parameter_type = j;
+                  break;
                 }
+              }
 
-                else {
-                  if (j == STATE) {
-                    j = INT_VALUE;
+              if (j == POSITION_INTERVAL + 1) {
+//                for (j = INT_VALUE;j <= STATE;j++) {
+                for (j = INT_VALUE;j <= OLD_INT_VALUE;j++) {
+                  if (token == STAT_variable_word[j]) {
+//                    if (j == STATE) {
+                    if ((j == STATE) || (j == OLD_INT_VALUE)) {
+                      j = INT_VALUE;
+                    }
+                    type[read_line] = j;
+                    break;
                   }
-
-                  type[read_line] = j;
                 }
-                break;
+
+//                if (j == STATE + 1) {
+                if (j == OLD_INT_VALUE + 1) {
+                  status = false;
+                  error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
+                }
               }
             }
 
-            if (j == SEQUENCE_NB_TYPE) {
+            else {
+              for (j = INT_VALUE;j <= NB_INTERNODE;j++) {
+                if (token == STAT_variable_word[j]) {
+                  if ((j == NB_INTERNODE) && ((read_line != offset) || ((read_line == offset) &&
+                        (index_parameter_type != POSITION) && (index_parameter_type != POSITION_INTERVAL)))) {
+                    status = false;
+                    error.update(STAT_parsing[STATP_VARIABLE_TYPE] , line , i + 1);
+                  }
+
+                  else {
+//                    if (j == STATE) {
+                    if ((j == STATE) || (j == OLD_INT_VALUE)) {
+                      j = INT_VALUE;
+                    }
+
+                    if ((old_format) && (index_parameter_type != IMPLICIT_TYPE)) {
+                      type[read_line - 1] = j;
+                    }
+                    else {
+                      type[read_line] = j;
+                    }
+                  }
+                  break;
+                }
+              }
+            }
+
+            if (j == NB_INTERNODE + 1) {
               status = false;
               error.update(STAT_parsing[STATP_KEY_WORD] , line , i + 1);
             }
@@ -274,11 +362,11 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
       }
 
       else {
-        if ((((type[0] == TIME) || (type[0] == TIME_INTERVAL)) && (read_line < 2)) ||
-            (((type[0] == POSITION) || (type[0] == POSITION_INTERVAL)) &&
-             ((read_line < 2) || ((read_line > 2) && (type[1] == NB_INTERNODE))))) {
+        if ((((index_parameter_type == TIME) || (index_parameter_type == TIME_INTERVAL)) && (read_line < offset + 1)) ||
+            (((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) &&
+             ((read_line < offset + 1) || ((read_line > offset + 1) && (type[0] == NB_INTERNODE))))) {
           status = false;
-          error.update(SEQ_parsing[SEQP_VARIABLE_TYPE]);
+          error.update(STAT_parsing[STATP_VARIABLE_TYPE]);
         }
       }
 
@@ -286,6 +374,17 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
     }
 
     if (status) {
+      vector_size = nb_variable;
+
+      if (index_parameter_type != IMPLICIT_TYPE) {
+        if (old_format) {
+          nb_variable--;
+        }
+        else {
+          vector_size++;
+        }
+      }
+
       nb_sequence = 0;
       lstatus = true;
 
@@ -325,9 +424,11 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
       in_file.clear();
       in_file.seekg(0 , ios::beg);
 
+      offset = (index_parameter_type == IMPLICIT_TYPE ? 0 : 1);
+
       length = new int[nb_sequence];
       for (i = 0;i < nb_sequence;i++) {
-        if (nb_variable == 1) {
+        if (vector_size == 1) {
           length[i] = 0;
         }
         else {
@@ -350,7 +451,7 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
 
       max_length = 0;
 
-      switch (type[0]) {
+      switch (index_parameter_type) {
       case TIME :
         index = -1;
         break;
@@ -386,7 +487,7 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
             break;
           }
 
-          if ((nb_variable > 1) && (j % (nb_variable + 1) == nb_variable)) {
+          if ((vector_size > 1) && (j % (vector_size + 1) == vector_size)) {
             if (token == "\\") {
               line_continue = true;
               length[i]++;
@@ -405,16 +506,24 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
           }
 
           else {
-            if ((nb_variable == 1) && (token == "\\")) {
+            if ((vector_size == 1) && (token == "\\")) {
               line_continue = true;
             }
 
             else {
-              lstatus = locale.stringToNum(token , &value);
-              if ((lstatus) && ((((type[k] == TIME) || (type[k] == POSITION) ||
-                     (type[k] == POSITION_INTERVAL) || (type[k] == NB_INTERNODE)) && (value < 0)) ||
-                   ((type[k] == TIME_INTERVAL) && (value <= 0)))) {
-                lstatus = false;
+              if (((index_parameter_type != IMPLICIT_TYPE) && (k == 0)) ||
+                  (type[k - offset] != REAL_VALUE)) {
+                lstatus = locale.stringToNum(token , &int_value);
+                if ((lstatus) && (((k == 0) && (((index_parameter_type == TIME) || (index_parameter_type == POSITION) ||
+                        (index_parameter_type == POSITION_INTERVAL)) && (int_value < 0)) ||
+                      ((index_parameter_type == TIME_INTERVAL) && (int_value <= 0)))  ||
+                     ((k == 1) && (type[k - 1] == NB_INTERNODE) && (int_value < 0)))) {
+                  lstatus = false;
+                }
+
+                else {
+                  lstatus = locale.stringToNum(token , &real_value);
+                }
               }
 
               if (!lstatus) {
@@ -422,34 +531,34 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
                 error.update(STAT_parsing[STATP_DATA_TYPE] , line , j + 1);
               }
 
-              else {
-                switch (type[k]) {
+              else if (k == 0) {
+                switch (index_parameter_type) {
 
                 case TIME : {
-                  if (value <= index) {
+                  if (int_value <= index) {
                     status = false;
                     error.update(SEQ_parsing[SEQP_TIME_INDEX_ORDER] , line , j + 1);
                   }
                   else {
-                    index = value;
+                    index = int_value;
                   }
                   break;
                 }
 
                 case POSITION : {
-                  if (value < index) {
+                  if (int_value < index) {
                     status = false;
                     error.update(SEQ_parsing[SEQP_POSITION_ORDER] , line , j + 1);
                   }
                   else {
-                    index = value;
+                    index = int_value;
                   }
                   break;
                 }
                 }
               }
 
-              if (nb_variable == 1) {
+              if (vector_size == 1) {
                 length[i]++;
               }
               else {
@@ -462,16 +571,16 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
         }
 
         if (j > 0) {
-          if (nb_variable > 1) {
-            if (((line_continue) || ((type[0] != POSITION) && (type[0] != POSITION_INTERVAL))) &&
-                (k != nb_variable)) {
+          if (vector_size > 1) {
+            if (((line_continue) || ((index_parameter_type != POSITION) && (index_parameter_type != POSITION_INTERVAL))) &&
+                (k != vector_size)) {
               status = false;
               error.update(STAT_parsing[STATP_FORMAT] , line , j);
             }
           }
 
           if (!line_continue) {
-            if ((type[0] == POSITION) || (type[0] == POSITION_INTERVAL)) {
+            if ((index_parameter_type == POSITION) || (index_parameter_type == POSITION_INTERVAL)) {
               if (k != 1) {
                 status = false;
                 error.update(STAT_parsing[STATP_FORMAT] , line , j);
@@ -484,7 +593,7 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
               }
             }
 
-            switch (type[0]) {
+            switch (index_parameter_type) {
             case TIME :
               index = -1;
               break;
@@ -526,7 +635,8 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
       in_file.clear();
       in_file.seekg(0 , ios::beg);
 
-      seq = new Sequences(nb_variable , type , nb_sequence , 0 , length , false);
+      seq = new Sequences(nb_sequence , 0 , length , index_parameter_type ,
+                          nb_variable , type);
 
       line = 0;
 
@@ -552,7 +662,7 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
         RWCTokenizer next(buffer);
 
         while (!((token = next()).isNull())) {
-          if ((nb_variable > 1) && (m % (nb_variable + 1) == nb_variable)) {
+          if ((vector_size > 1) && (m % (vector_size + 1) == vector_size)) {
             if (token == "\\") {
               line_continue = true;
             }
@@ -561,15 +671,28 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
           }
 
           else {
-            if ((nb_variable == 1) && (token == "\\")) {
+            if ((vector_size == 1) && (token == "\\")) {
               line_continue = true;
             }
 
             else {
-              locale.stringToNum(token , &value);
-              seq->sequence[i][k][j] = value;
+              if (((index_parameter_type != IMPLICIT_TYPE) && (k == 0)) ||
+                  (type[k - offset] != REAL_VALUE)) {
+                locale.stringToNum(token , &int_value);
 
-              if (nb_variable == 1) {
+                if ((index_parameter_type != IMPLICIT_TYPE) && (k == 0)) {
+                  seq->index_parameter[i][j] = int_value;
+                }
+                else {
+                  seq->int_sequence[i][k - offset][j] = int_value;
+                }
+              }
+
+              else {
+                locale.stringToNum(token , seq->real_sequence[i][k - offset] + j);
+              }
+
+              if (vector_size == 1) {
                 j++;
               }
               else {
@@ -587,200 +710,31 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
         }
       }
 
-      if ((seq->type[0] == TIME_INTERVAL) || (seq->type[0] == POSITION_INTERVAL)) {
-        seq->index_computation();
+      if ((seq->index_parameter_type == TIME_INTERVAL) || (seq->index_parameter_type == POSITION_INTERVAL)) {
+        seq->index_parameter_computation();
       }
-      if ((seq->type[0] == TIME) || ((seq->type[0] == POSITION) && (seq->type[1] == INT_VALUE))) {
+
+      if (seq->index_parameter) {
+        seq->build_index_parameter_histogram();
+      }
+      if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
+          (seq->type[0] != NB_INTERNODE))) {
         seq->index_interval_computation();
       }
 
       for (i = 0;i < nb_variable;i++) {
-        if (seq->type[i] != POSITION) {
-          seq->min_value_computation(i);
-          seq->max_value_computation(i);
-          seq->build_marginal_histogram(i);
-        }
+        seq->min_value_computation(i);
+        seq->max_value_computation(i);
+        seq->build_marginal_histogram(i);
       }
     }
 
+    delete [] type;
     delete [] length;
   }
 
   return seq;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'un objet Sequences a partir d'un fichier.
- *
- *  arguments : reference sur un objet Format_error, path.
- *
- *--------------------------------------------------------------*/
-
-/* Sequences* old_sequences_ascii_read(Format_error &error , const char *path)
-
-{
-  RWCString buffer , token;
-  RWCRegexp reg("[0-9]+");
-  size_t position , start , extent;
-  char number[2];
-  bool status;
-  register int i , j , k;
-  int line , nb_sequence , max_length , type[1] , *length;
-  Sequences *seq;
-  ifstream in_file(path);
-
-
-  seq = 0;
-  error.init();
-
-  if (!in_file) {
-    error.update(STAT_error[STATR_FILE_NAME]);
-  }
-
-  else {
-
-    // 1ere passe : recherche du nombre de sequences
-
-    status = true;
-    length = 0;
-    type[0] = INT_VALUE;
-    line = 0;
-    nb_sequence = 0;
-
-    while (buffer.readLine(in_file , false)) {
-      line++;
-
-#     ifdef DEBUG
-      cout << line << "  " << buffer << endl;
-#     endif
-
-      position = buffer.first('#');
-      if (position != RW_NPOS) {
-        buffer.remove(position);
-      }
-      i = 0;
-
-      RWCTokenizer next(buffer);
-
-      while (!((token = next()).isNull())) {
-        i++;
-      }
-
-      if (i > 0) {
-        if (i != 1) {
-          status = false;
-          error.update(STAT_parsing[STATP_FORMAT] , line);
-        }
-        nb_sequence++;
-      }
-    }
-
-    if (nb_sequence == 0) {
-      status = false;
-      error.update(STAT_parsing[STATP_FORMAT]);
-    }
-
-#   ifdef DEBUG
-//    cout << "\nnumber of sequences : " << nb_sequence << endl;
-#   endif
-
-    // 2eme passe : analyse du format des sequences
-
-    if (status) {
-      in_file.close();
-      in_file.open(path , ios::in);
-
-      length = new int[nb_sequence];
-
-      max_length = 0;
-      line = 0;
-      i = 0;
-
-      while (buffer.readLine(in_file , false)) {
-        line++;
-
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
-        }
-        j = 0;
-
-        RWCTokenizer next(buffer);
-
-        while (!((token = next()).isNull())) {
-          if (j == 0) {
-            length[i] = token.length();
-
-            if (length[i] > max_length) {
-              max_length = length[i];
-            }
-
-            start = token.index(reg , &extent);
-            if ((start != 0) || (extent != length[i])) {
-              status = false;
-              error.update(STAT_parsing[STATP_DATA_TYPE] , line);
-            }
-          }
-          j++;
-        }
-
-        if (j > 0) {
-          i++;
-        }
-      }
-
-      if (max_length <= 1) {
-        status = false;
-        error.update(SEQ_parsing[SEQP_MAX_SEQUENCE_LENGTH]);
-      }
-
-    }
-
-    // 3eme passe : copie des sequences
-
-    if (status) {
-      in_file.close();
-      in_file.open(path , ios::in);
-
-      seq = new Sequences(1 , type , nb_sequence , 0 , length , false);
-      i = 0;
-
-      while (buffer.readLine(in_file , false)) {
-        position = buffer.first('#');
-        if (position != RW_NPOS) {
-          buffer.remove(position);
-        }
-        j = 0;
-
-        RWCTokenizer next(buffer);
-
-        while (!((token = next()).isNull())) {
-          if (j == 0) {
-            for (k = 0;k < length[i];k++) {
-              number[0] = token[k];
-              istrstream(number) >> seq->sequence[i][0][k];
-            }
-          }
-          j++;
-        }
-
-        if (j > 0) {
-          i++;
-        }
-      }
-
-      seq->min_value_computation(0);
-      seq->max_value_computation(0);
-      seq->build_marginal_histogram(0);
-    }
-
-    delete [] length;
-  }
-
-  return seq;
-} */
 
 
 /*--------------------------------------------------------------*
@@ -794,8 +748,8 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path)
 ostream& Sequences::line_write(ostream &os) const
 
 {
-  os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << "   "
-     << nb_sequence << " " << SEQ_label[nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << "   "
+  os << nb_sequence << " " << SEQ_label[nb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << "   "
+     << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << "   "
      << SEQ_label[nb_sequence == 1 ? SEQL_LENGTH : SEQL_CUMUL_LENGTH] << ": " << cumul_length;
 
   return os;
@@ -817,13 +771,72 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
   double mean , variance;
 
 
+  if (index_parameter) {
+    os << SEQ_word[SEQW_INDEX_PARAMETER] << " : "
+       << SEQ_index_parameter_word[index_parameter_type];
+  }
+
+  if (hindex_parameter) {
+    os << "   ";
+    if (comment_flag) {
+      os << "# ";
+    }
+    os << "(" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << ": " << hindex_parameter->offset << ", "
+       << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << ": " << hindex_parameter->nb_value - 1 << ")" << endl;
+
+    os << "\n";
+    if (comment_flag) {
+      os << "# ";
+    }
+    os << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+       << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    hindex_parameter->ascii_characteristic_print(os , false , comment_flag);
+
+    if (exhaustive) {
+      os << "\n";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << "   | " << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+         << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      hindex_parameter->ascii_print(os , comment_flag);
+    }
+  }
+
+  else {
+    os << endl;
+  }
+
+  if (index_interval) {
+    os << "\n";
+    if (comment_flag) {
+      os << "# ";
+    }
+    os << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+       << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    index_interval->ascii_characteristic_print(os , false , comment_flag);
+
+    if (exhaustive) {
+      os << "\n";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << "   | " << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+         << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      index_interval->ascii_print(os , comment_flag);
+    }
+  }
+
+  if (index_parameter) {
+    os << "\n";
+  }
   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
 
   for (i = 0;i < nb_variable;i++) {
     os << "\n" << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
-       << STAT_sequence_word[type[i]];
+       << STAT_variable_word[type[i]];
 
-    if (type[i] != POSITION) {
+    if (type[i] != AUXILIARY) {
       os << "   ";
       if (comment_flag) {
         os << "# ";
@@ -831,14 +844,13 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << min_value[i] << ", "
          << STAT_label[STATL_MAX_VALUE] << ": " << max_value[i] << ")" << endl;
 
-      os << "\n";
-      if (comment_flag) {
-        os << "# ";
-      }
-      os << (type[i] == TIME ? SEQ_label[SEQL_TIME] : STAT_label[STATL_VALUE]) << " "
-         << STAT_label[STATL_HISTOGRAM] << " - ";
-
       if (marginal[i]) {
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+
         marginal[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
 
         if ((marginal[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
@@ -846,13 +858,16 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
           if (comment_flag) {
             os << "# ";
           }
-          os << "   | " << (type[i] == TIME ? SEQ_label[SEQL_TIME] : STAT_label[STATL_VALUE]) << " "
-             << STAT_label[STATL_HISTOGRAM] << endl;
+          os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
           marginal[i]->ascii_print(os , comment_flag);
         }
       }
 
-      else if (type[i] == INT_VALUE) {
+      else {
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
         os << STAT_label[STATL_SAMPLE_SIZE] << ": " << cumul_length << endl;
 
         mean = mean_computation(i);
@@ -874,25 +889,9 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
         }
       }
     }
-  }
 
-  if (index_interval) {
-    os << "\n";
-    if (comment_flag) {
-      os << "# ";
-    }
-    os << (type[0] == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-       << " " << STAT_label[STATL_HISTOGRAM] << " - ";
-    index_interval->ascii_characteristic_print(os , false , comment_flag);
-
-    if (exhaustive) {
-      os << "\n";
-      if (comment_flag) {
-        os << "# ";
-      }
-      os << "   | " << (type[0] == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-         << " " << STAT_label[STATL_HISTOGRAM] << endl;
-      index_interval->ascii_print(os , comment_flag);
+    else {
+      os << endl;
     }
   }
 
@@ -992,10 +991,18 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
     for (i = 0;i < nb_sequence;i++) {
       os << "\n";
 
-#ifdef DEBUG
+#     ifdef DEBUG
       for (j = 0;j < length[i];j++) {
+        if (index_parameter) {
+          os << index_parameter[i][j] << " ";
+        }
         for (k = 0;k < nb_variable;k++) {
-          os << sequence[i][k][j] << " ";
+          if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+            os << int_sequence[i][k][j] << " ";
+          }
+          else {
+            os << real_sequence[i][k][j] << " ";
+          }
         }
 
         if (j < length[i] - 1) {
@@ -1004,18 +1011,27 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
           }
 
           else {
-            if (nb_variable > 1) {
+            if ((index_parameter) || (nb_variable > 1)) {
               os << "| ";
             }
           }
         }
       }
-#else
+
+#     else
       std::ostringstream sos;
 
       for (j = 0;j < length[i];j++) {
+        if (index_parameter) {
+          sos << index_parameter[i][j] << " ";
+        }
         for (k = 0;k < nb_variable;k++) {
-          sos << sequence[i][k][j] << " ";
+          if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+            sos << int_sequence[i][k][j] << " ";
+          }
+          else {
+            sos << real_sequence[i][k][j] << " ";
+          }
         }
 
         if (j < length[i] - 1) {
@@ -1025,17 +1041,17 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
           }
 
           else {
-            if (nb_variable > 1) {
+            if ((index_parameter) || (nb_variable > 1)) {
               sos << "| ";
             }
           }
         }
       }
       os << sos.str();
-#endif
+#     endif
 
-      if (type[0] == POSITION) {
-        os << "| " << sequence[i][0][length[i]];
+      if (index_parameter_type == POSITION) {
+        os << "| " << index_parameter[i][length[i]];
       }
 
       os << "   ";
@@ -1054,11 +1070,28 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
 
     old_adjust = os.setf(ios::right , ios::adjustfield);
 
-    width = 0;
+    if (index_parameter) {
+      width = column_width(hindex_parameter->nb_value - 1);
+    }
+    else {
+      width = 0;
+    }
+
     for (i = 0;i < nb_variable;i++) {
-      buff = column_width(min_value[i] , max_value[i]);
-      if (buff > width) {
-        width = buff;
+      if ((type[i] != REAL_VALUE) && (type[i] != AUXILIARY)) {
+        buff = column_width((int)min_value[i] , (int)max_value[i]);
+        if (buff > width) {
+          width = buff;
+        }
+      }
+
+      else {
+        for (j = 0;j < nb_sequence;j++) {
+          buff = column_width(length[j] , real_sequence[j][i]);
+          if (buff > width) {
+            width = buff;
+          }
+        }
       }
     }
 
@@ -1067,18 +1100,37 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       start = 0;
 
       for (j = 0;j < length[i];j++) {
-        os << setw(j == start ? width : width + 1) << sequence[i][0][j];
+        os << setw(j == start ? width : width + 1);
+        if (index_parameter) {
+          os << index_parameter[i][j];
+        }
+        else if (type[0] != REAL_VALUE) {
+          os << int_sequence[i][0][j];
+        }
+        else {
+          os << real_sequence[i][0][j];
+        }
 
         if (j < length[i] - 1) {
           if ((j - start) * (width + 1) > 1000) {
 //          if ((j - start) * (width + 1) > line_nb_character) {
             os << " \\" << endl;
 
-            for (k = 1;k < nb_variable;k++) {
-              os << setw(width) << sequence[i][k][start];
-              for (m = start + 1;m <= j;m++) {
-                os << setw(width + 1) << sequence[i][k][m];
+            for (k = (index_parameter ? 0 : 1);k < nb_variable;k++) {
+              if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+                os << setw(width) << int_sequence[i][k][start];
+                for (m = start + 1;m <= j;m++) {
+                  os << setw(width + 1) << int_sequence[i][k][m];
+                }
               }
+
+              else {
+                os << setw(width) << real_sequence[i][k][start];
+                for (m = start + 1;m <= j;m++) {
+                  os << setw(width + 1) << real_sequence[i][k][m];
+                }
+              }
+
               os << " \\" << endl;
             }
             start = j + 1;
@@ -1086,15 +1138,25 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         }
 
         else {
-          if (type[0] == POSITION) {
-            os << setw(width + 1) << sequence[i][0][length[i]];
+          if (index_parameter_type == POSITION) {
+            os << setw(width + 1) << index_parameter[i][length[i]];
           }
 
-          for (k = 1;k < nb_variable;k++) {
-            os << endl;
-            os << setw(width) << sequence[i][k][start];
-            for (m = start + 1;m <= j;m++) {
-              os << setw(width + 1) << sequence[i][k][m];
+          for (k = (index_parameter ? 0 : 1);k < nb_variable;k++) {
+            if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+              os << endl;
+              os << setw(width) << int_sequence[i][k][start];
+              for (m = start + 1;m <= j;m++) {
+                os << setw(width + 1) << int_sequence[i][k][m];
+              }
+            }
+
+            else {
+              os << endl;
+              os << setw(width) << real_sequence[i][k][start];
+              for (m = start + 1;m <= j;m++) {
+                os << setw(width + 1) << real_sequence[i][k][m];
+              }
             }
           }
         }
@@ -1115,19 +1177,39 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
     os << "[";
     for (i = 0;i < nb_sequence;i++) {
 
-#ifdef DEBUG
+#     ifdef DEBUG
       os << "[";
       for (j = 0;j < length[i];j++) {
-        if (nb_variable == 1) {
-          os << sequence[i][0][j];
+        if ((!index_parameter) && (nb_variable == 1)) {
+          if (type[0] != REAL_VALUE) {
+            os << int_sequence[i][0][j];
+          }
+          else {
+            os << real_sequence[i][0][j];
+          }
         }
 
         else {
           os << "[";
-          for (k = 0;k < nb_variable - 1;k++) {
-            os << sequence[i][k][j] << ",";
+          if (index_parameter) {
+            os << index_parameter[i][j] << ",";
           }
-          os << sequence[i][nb_variable - 1][j] << "]";
+
+          for (k = 0;k < nb_variable - 1;k++) {
+            if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+              os << int_sequence[i][k][j] << ",";
+            }
+            else {
+              os << real_sequence[i][k][j] << ",";
+            }
+          }
+
+          if ((type[nb_variable - 1] != REAL_VALUE) && (type[nb_variable - 1] != AUXILIARY)) {
+            os << int_sequence[i][nb_variable - 1][j] << "]";
+          }
+          else {
+            os << real_sequence[i][nb_variable - 1][j] << "]";
+          }
         }
 
         if (j < length[i] - 1) {
@@ -1138,21 +1220,42 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
           }
         }
       }
-#else
+
+#     else
       std::ostringstream sos;
 
       sos << "[";
       for (j = 0;j < length[i];j++) {
-        if (nb_variable == 1) {
-          sos << sequence[i][0][j];
+        if ((!index_parameter) && (nb_variable == 1)) {
+          if (type[0] == REAL_VALUE) {
+            sos << int_sequence[i][0][j];
+          }
+          else {
+            sos << real_sequence[i][0][j];
+          }
         }
 
         else {
           sos << "[";
-          for (k = 0;k < nb_variable - 1;k++) {
-            sos << sequence[i][k][j] << ",";
+          if (index_parameter) {
+            sos << index_parameter[i][j] << ",";
           }
-          sos << sequence[i][nb_variable - 1][j] << "]";
+
+          for (k = 0;k < nb_variable - 1;k++) {
+            if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+              sos << int_sequence[i][k][j] << ",";
+            }
+            else {
+              sos << real_sequence[i][k][j] << ",";
+            }
+          }
+
+          if ((type[nb_variable - 1] != REAL_VALUE) && (type[nb_variable - 1] != AUXILIARY)) {
+            sos << int_sequence[i][nb_variable - 1][j] << "]";
+          }
+          else {
+            sos << real_sequence[i][nb_variable - 1][j] << "]";
+          }
         }
 
         if (j < length[i] - 1) {
@@ -1165,10 +1268,10 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         }
       }
       os << sos.str();
-#endif
+#     endif
 
-      if (type[0] == POSITION) {
-        os << ",[" << sequence[i][0][length[i]];
+      if (index_parameter_type == POSITION) {
+        os << ",[" << index_parameter[i][length[i]];
         for (j = 1;j < nb_variable;j++) {
           os << "," << I_DEFAULT;
         }
@@ -1271,29 +1374,61 @@ bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
   else {
     status = true;
 
+    if (index_parameter) {
+      out_file << SEQ_word[SEQW_INDEX_PARAMETER] << "\t"
+               << SEQ_index_parameter_word[index_parameter_type];
+    }
+
+    if (hindex_parameter) {
+      out_file << "\t\t" << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << hindex_parameter->offset
+               << "\t\t" << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << hindex_parameter->nb_value - 1 << endl;
+
+      out_file << "\n" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+               << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      hindex_parameter->spreadsheet_characteristic_print(out_file);
+
+      out_file << "\n\t" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+               << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      hindex_parameter->spreadsheet_print(out_file);
+    }
+
+    else {
+      out_file << endl;
+    }
+
+    if (index_interval) {
+      out_file << "\n" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+               << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      index_interval->spreadsheet_characteristic_print(out_file);
+
+      out_file << "\n\t" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+               << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      index_interval->spreadsheet_print(out_file);
+    }
+
+    if (index_parameter) {
+      out_file << "\n";
+    }
     out_file << nb_variable << "\t" << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
 
     for (i = 0;i < nb_variable;i++) {
       out_file << "\n" << STAT_word[STATW_VARIABLE] << "\t" << i + 1 << "\t"
-               << STAT_sequence_word[type[i]];
+               << STAT_variable_word[type[i]];
 
-      if (type[i] != POSITION) {
+      if (type[i] != AUXILIARY) {
         out_file << "\t\t" << STAT_label[STATL_MIN_VALUE] << "\t" << min_value[i]
                  << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
 
-        out_file << "\n" << (type[i] == TIME ? SEQ_label[SEQL_TIME] : STAT_label[STATL_VALUE]) << " "
-                 << STAT_label[STATL_HISTOGRAM] << "\t";
-
         if (marginal[i]) {
+          out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
           marginal[i]->spreadsheet_characteristic_print(out_file);
 
-          out_file << "\n\t" << (type[i] == TIME ? SEQ_label[SEQL_TIME] : STAT_label[STATL_VALUE]) << " "
-                   << STAT_label[STATL_HISTOGRAM] << endl;
+          out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
           marginal[i]->spreadsheet_print(out_file);
         }
 
-        else if (type[i] == INT_VALUE) {
-          out_file << STAT_label[STATL_SAMPLE_SIZE] << "\t" << cumul_length << endl;
+        else {
+          out_file << "\n" << STAT_label[STATL_SAMPLE_SIZE] << "\t" << cumul_length << endl;
 
           mean = mean_computation(i);
           variance = variance_computation(i , mean);
@@ -1308,16 +1443,10 @@ bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
           }
         }
       }
-    }
 
-    if (index_interval) {
-      out_file << "\n" << (type[0] == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-               << " " << STAT_label[STATL_HISTOGRAM] << "\t";
-      index_interval->spreadsheet_characteristic_print(out_file);
-
-      out_file << "\n\t" << (type[0] == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-               << " " << STAT_label[STATL_HISTOGRAM] << endl;
-      index_interval->spreadsheet_print(out_file);
+      else {
+        out_file << endl;
+      }
     }
 
     out_file << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
@@ -1359,17 +1488,21 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
 
   data_file_name << prefix << ".dat";
 
-  phisto = new const Histogram*[nb_variable + 1];
+  phisto = new const Histogram*[nb_variable + 2];
 
   nb_histo = 0;
-  for (i = 0;i < nb_variable;i++) {
-    if ((type[i] != POSITION) && (marginal[i])) {
-      phisto[nb_histo++] = marginal[i];
-    }
-  }
 
+  if (hindex_parameter) {
+    phisto[nb_histo++] = hindex_parameter;
+  }
   if (index_interval) {
     phisto[nb_histo++] = index_interval;
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if (marginal[i]) {
+      phisto[nb_histo++] = marginal[i];
+    }
   }
 
   status = hlength->plot_print((data_file_name.str()).c_str() , nb_histo , phisto);
@@ -1412,34 +1545,32 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
       }
       out_file << "\n\n";
 
-      for (k = 0;k < nb_variable;k++) {
-        if ((type[k] != POSITION) && (marginal[k])) {
-          if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
-            out_file << "set xtics 0,1" << endl;
-          }
-          if ((int)(marginal[k]->max * YSCALE) + 1 < TIC_THRESHOLD) {
-            out_file << "set ytics 0,1" << endl;
-          }
-
-          out_file << "plot [0:" << MAX(marginal[k]->nb_value - 1 , 1) << "] [0:"
-                   << (int)(marginal[k]->max * YSCALE) + 1 << "] \""
-                   << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
-                   << STAT_label[STATL_VARIABLE] << " " << k + 1 << " - "
-                   << (type[k] == TIME ? SEQ_label[SEQL_TIME] : STAT_label[STATL_VALUE]) << " "
-                   << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
-
-          if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
-            out_file << "set xtics autofreq" << endl;
-          }
-          if ((int)(marginal[k]->max * YSCALE) + 1 < TIC_THRESHOLD) {
-            out_file << "set ytics autofreq" << endl;
-          }
-
-          if (i == 0) {
-            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-          }
-          out_file << endl;
+      if (hindex_parameter) {
+        if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+          out_file << "set xtics 0,1" << endl;
         }
+        if ((int)(hindex_parameter->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          out_file << "set ytics 0,1" << endl;
+        }
+
+        out_file << "plot [" << hindex_parameter->offset << ":"
+                 << hindex_parameter->nb_value - 1 << "] [0:"
+                 << (int)(hindex_parameter->max * YSCALE) + 1 << "] \""
+                 << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
+                 << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+                 << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+
+        if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+          out_file << "set xtics autofreq" << endl;
+        }
+        if ((int)(hindex_parameter->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          out_file << "set ytics autofreq" << endl;
+        }
+
+        if (i == 0) {
+          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+        }
+        out_file << endl;
       }
 
       if (index_interval) {
@@ -1453,7 +1584,7 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
         out_file << "plot [0:" << index_interval->nb_value - 1 << "] [0:"
                  << (int)(index_interval->max * YSCALE) + 1 << "] \""
                  << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
-                 << (type[0] == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+                 << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
                  << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
 
         if (index_interval->nb_value - 1 < TIC_THRESHOLD) {
@@ -1467,6 +1598,36 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
           out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
         }
         out_file << endl;
+      }
+
+      for (k = 0;k < nb_variable;k++) {
+        if (marginal[k]) {
+          if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
+            out_file << "set xtics 0,1" << endl;
+          }
+          if ((int)(marginal[k]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+            out_file << "set ytics 0,1" << endl;
+          }
+
+          out_file << "plot [0:" << MAX(marginal[k]->nb_value - 1 , 1) << "] [0:"
+                   << (int)(marginal[k]->max * YSCALE) + 1 << "] \""
+                   << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
+                   << STAT_label[STATL_VARIABLE] << " " << k + 1 << " - "
+                   << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
+                   << "\" with impulses" << endl;
+
+          if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
+            out_file << "set xtics autofreq" << endl;
+          }
+          if ((int)(marginal[k]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+            out_file << "set ytics autofreq" << endl;
+          }
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
+        }
       }
 
       if (hlength->nb_value - 1 < TIC_THRESHOLD) {
@@ -1533,8 +1694,16 @@ bool Sequences::plot_print(const char *path , int ilength) const
 
     for (i = 0;i < ilength;i++) {
       for (j = 0;j < length_nb_sequence;j++) {
+        if (index_parameter) {
+          out_file << index_parameter[index[j]][i] << " ";
+        }
         for (k = 0;k < nb_variable;k++) {
-          out_file << sequence[index[j]][k][i] << " ";
+          if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+            out_file << int_sequence[index[j]][k][i] << " ";
+          }
+          else {
+            out_file << real_sequence[index[j]][k][i] << " ";
+          }
         }
       }
       out_file << endl;
@@ -1562,7 +1731,7 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
 {
   bool status;
   register int i , j , k;
-  int min_index , max_index , *pfrequency , *length_nb_sequence;
+  int min_index_parameter , max_index_parameter , *pfrequency , *length_nb_sequence;
   ostringstream *data_file_name;
 
 
@@ -1597,20 +1766,9 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
 
       length_nb_sequence = new int[hlength->nb_value];
 
-      if ((type[0] == TIME) || (type[0] == POSITION)) {
-        max_index = 0;
-        for (i = 0;i < nb_sequence;i++) {
-          if (sequence[i][0][length[i] - 1] > max_index) {
-            max_index = sequence[i][0][length[i] - 1];
-          }
-        }
-
-        min_index = max_index;
-        for (i = 0;i < nb_sequence;i++) {
-          if (sequence[i][0][0] < min_index) {
-            min_index = sequence[i][0][0];
-          }
-        }
+      if (index_parameter) {
+        min_index_parameter = hindex_parameter->offset;
+        max_index_parameter = max_index_parameter_computation(true);
       }
 
       // ecriture du fichier de commandes et du fichier d'impression
@@ -1637,7 +1795,7 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
 
         out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n";
 
-        for (j = ((type[0] == TIME) || (type[0] == POSITION) ? 1 : 0);j < nb_variable;j++) {
+        for (j = 0;j < nb_variable;j++) {
           for (k = 0;k < hlength->nb_value;k++) {
             length_nb_sequence[k] = 0;
           }
@@ -1645,36 +1803,50 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
           out_file << "set title \"";
           if (title) {
             out_file << title;
-            if (nb_variable > ((type[0] == TIME) || (type[0] == POSITION) ? 2 : 1)) {
+            if (nb_variable > 1) {
               out_file << " - ";
             }
           }
 
-          if ((type[0] == TIME) || (type[0] == POSITION)) {
-            if (nb_variable > 2) {
-              out_file << STAT_label[STATL_VARIABLE] << " " << j;
-            }
-            out_file << "\"\n\n";
+          if (nb_variable > 1) {
+            out_file << STAT_label[STATL_VARIABLE] << " " << j + 1;
+          }
+          out_file << "\"\n\n";
 
-            if (max_index - min_index < TIC_THRESHOLD) {
+          if (index_parameter) {
+            if (max_index_parameter - min_index_parameter < TIC_THRESHOLD) {
               out_file << "set xtics 0,1" << endl;
             }
             if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
               out_file << "set ytics " << MIN(min_value[j] , 0) << ",1" << endl;
             }
 
-            out_file << "plot [" << min_index << ":" << max_index << "] ["
+            out_file << "plot [" << min_index_parameter << ":" << max_index_parameter << "] ["
                      << MIN(min_value[j] , 0) << ":" << MAX(max_value[j] , min_value[j] + 1) << "] ";
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
-                       << length_nb_sequence[length[k]] * nb_variable + 1 << " : "
-                       << length_nb_sequence[length[k]] * nb_variable + j + 1;
+                       << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
+                       << length_nb_sequence[length[k]] * (nb_variable + 1) + j + 2;
               if (nb_sequence <= PLOT_TITLE_NB_SEQUENCE) {
                 out_file << " title \"" << identifier[k] << "\" with linespoints";
               }
               else {
                 out_file << " notitle with linespoints";
               }
+
+              if (type[j + 1] == AUXILIARY) {
+                out_file << ",\\" << endl;
+                out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
+                         << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
+                         << length_nb_sequence[length[k]] * (nb_variable + 1) + j + 3;
+                if (nb_sequence <= PLOT_TITLE_NB_SEQUENCE) {
+                  out_file << " title \"" << identifier[k] << "\" with linespoints";
+                }
+                else {
+                  out_file << " notitle with linespoints";
+                }
+              }
+
               if (k < nb_sequence - 1) {
                 out_file << ",\\";
               }
@@ -1682,7 +1854,7 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
               length_nb_sequence[length[k]]++;
             }
 
-            if (max_index - min_index < TIC_THRESHOLD) {
+            if (max_index_parameter - min_index_parameter < TIC_THRESHOLD) {
               out_file << "set xtics autofreq" << endl;
             }
             if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
@@ -1691,11 +1863,6 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
           }
 
           else {
-            if (nb_variable > 1) {
-              out_file << STAT_label[STATL_VARIABLE] << " " << j + 1;
-            }
-            out_file << "\"\n\n";
-
             if (max_length - 1 < TIC_THRESHOLD) {
               out_file << "set xtics 0,1" << endl;
             }
@@ -1714,6 +1881,19 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
               else {
                 out_file << " notitle with linespoints";
               }
+
+              if (type[j + 1] == AUXILIARY) {
+                out_file << ",\\" << endl;
+                out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
+                         << length_nb_sequence[length[k]] * nb_variable + j + 2;
+                if (nb_sequence <= PLOT_TITLE_NB_SEQUENCE) {
+                  out_file << " title \"" << identifier[k] << "\" with linespoints";
+                }
+                else {
+                  out_file << " notitle with linespoints";
+                }
+              }
+
               if (k < nb_sequence - 1) {
                 out_file << ",\\";
               }
@@ -1729,7 +1909,12 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
             }
           }
 
-          if ((i == 0) && (j < nb_variable - 1)) {
+          if (type[j + 1] == AUXILIARY) {
+            j++;
+          }
+
+          if ((i == 0) && (((type[nb_variable - 1] != AUXILIARY) && (j < nb_variable - 1)) ||
+               ((type[nb_variable - 1] == AUXILIARY) && (j < nb_variable - 2)))) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
           }
           out_file << endl;
@@ -1861,11 +2046,11 @@ void Sequences::restoreGuts(RWvistream &is)
 
   sequence = new int**[nb_sequence];
   for (i = 0;i < nb_sequence;i++) {
-    sequence[i] = new int*[nb_variable];
+    int_sequence[i] = new int*[nb_variable];
     for (j = 0;j < nb_variable;j++) {
       blength = (type[j] == POSITION ? length[i] + 1 : length[i]);
-      sequence[i][j] = new int[blength];
-      psequence = sequence[i][j];
+      int_sequence[i][j] = new int[blength];
+      psequence = int_sequence[i][j];
       for (k = 0;k < blength;k++) {
         is >> *psequence++;
       }
@@ -1931,11 +2116,11 @@ void Sequences::restoreGuts(RWFile &file)
 
   sequence = new int**[nb_sequence];
   for (i = 0;i < nb_sequence;i++) {
-    sequence[i] = new int*[nb_variable];
+    int_sequence[i] = new int*[nb_variable];
     for (j = 0;j < nb_variable;j++) {
       blength = (type[j] == POSITION ? length[i] + 1 : length[i]);
-      sequence[i][j] = new int[blength];
-      file.Read(sequence[i][j] , blength);
+      int_sequence[i][j] = new int[blength];
+      file.Read(int_sequence[i][j] , blength);
     }
   }
 }
@@ -1994,7 +2179,7 @@ void Sequences::saveGuts(RWvostream &os) const
 
   for (i = 0;i < nb_sequence;i++) {
     for (j = 0;j < nb_variable;j++) {
-      psequence = sequence[i][j];
+      psequence = int_sequence[i][j];
       for (k = 0;k < (type[j] == POSITION ? length[i] + 1 : length[i]);k++) {
         os << *psequence++;
       }
@@ -2046,7 +2231,7 @@ void Sequences::saveGuts(RWFile &file) const
 
   for (i = 0;i < nb_sequence;i++) {
     for (j = 0;j < nb_variable;j++) {
-      file.Write(sequence[i][j] , (type[j] == POSITION ? length[i] + 1 : length[i]));
+      file.Write(int_sequence[i][j] , (type[j] == POSITION ? length[i] + 1 : length[i]));
     }
   }
 } */

@@ -386,7 +386,7 @@ Semi_markov& Semi_markov::operator=(const Semi_markov &smarkov)
  *  Extraction d'une loi.
  *
  *  arguments : reference sur un objet Format_error, type de loi,
- *              variable, valeur (etat dans le cas des lois d'observation).
+ *              variable, etat ou observation.
  *
  *--------------------------------------------------------------*/
 
@@ -706,7 +706,7 @@ Semi_markov* semi_markov_ascii_read(Format_error &error , const char *path , int
   char type = 'v';
   bool status;
   register int i;
-  int line , order = 1;
+  int line;
   const Chain *chain;
   const Nonparametric_sequence_process *occupancy;
   const Nonparametric_process *observation;
@@ -786,7 +786,7 @@ Semi_markov* semi_markov_ascii_read(Format_error &error , const char *path , int
 
       // analyse du format et lecture de la chaine de Markov
 
-      chain = chain_parsing(error , in_file , line , type , false , order);
+      chain = chain_parsing(error , in_file , line , type);
 
       if (chain) {
 
@@ -1897,14 +1897,14 @@ Semi_markov_data::Semi_markov_data()
  *
  *  Constructeur de la classe Semi_markov_data.
  *
- *  arguments : nombre de variables, histogramme des longueurs des sequences,
+ *  arguments : histogramme des longueurs des sequences, nombre de variables,
  *              flag initialisation.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_data::Semi_markov_data(int inb_variable , const Histogram &ihlength ,
+Semi_markov_data::Semi_markov_data(const Histogram &ihlength , int inb_variable ,
                                    bool init_flag)
-:Markovian_sequences(inb_variable , ihlength , init_flag)
+:Markovian_sequences(ihlength , inb_variable , init_flag)
 
 {
   semi_markov = 0;
@@ -1919,31 +1919,22 @@ Semi_markov_data::Semi_markov_data(int inb_variable , const Histogram &ihlength 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Semi_markov_data.
+ *  Construction d'un objet Semi_markov_data a partir d'un objet Markovian_sequences
+ *  avec ajout d'une variable d'etat.
  *
- *  arguments : nombre de sequences, longueurs des sequences, sequences,
- *              pointeur sur un objet Semi_markov.
+ *  argument : reference sur un objet Markovian_sequences.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_data::Semi_markov_data(int inb_sequence , int *ilength , int ***isequence ,
-                                   const Semi_markov &ismarkov)
-:Markovian_sequences(ismarkov.nb_output_process + 1 , inb_sequence , ilength , isequence)
+Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq)
+:Markovian_sequences(seq , 'a' , DEFAULT)
 
 {
-  type[0] = STATE;
-  semi_markov = new Semi_markov(ismarkov , false);
+  semi_markov = 0;
+  chain_data = 0;
 
-  // extraction des caracteristiques des sequences simulees
-
-  build_transition_count(semi_markov);
-  build_observation_histogram();
-
-  semi_markov->characteristic_computation(*this , true);
-
-  // calcul de la vraisemblance
-
-  likelihood = semi_markov->likelihood_computation(*this);
+  likelihood = D_INF;
+  hidden_likelihood = D_INF;
 
   posterior_probability = 0;
 }
@@ -1953,60 +1944,15 @@ Semi_markov_data::Semi_markov_data(int inb_sequence , int *ilength , int ***iseq
  *
  *  Construction d'un objet Semi_markov_data a partir d'un objet Markovian_sequences.
  *
- *  arguments : reference sur un objet Markovian_sequences,
+ *  arguments : reference sur un objet Markovian_sequences, type de transformation
+ *              ('c' : copie, 'a' : ajout d'une variable d'etat),
  *              ajout/suppression des histogrammes de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , bool initial_run_flag)
-:Markovian_sequences(seq , 'c' , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
-
-{
-  semi_markov = 0;
-  chain_data = 0;
-
-  likelihood = D_INF;
-  hidden_likelihood = D_INF;
-
-  posterior_probability = 0;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'un objet Semi_markov_data a partir d'un objet Markovian_sequences
- *  avec ajout d'une variable.
- *
- *  arguments : reference sur un objet Markovian_sequences, indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , int variable)
-:Markovian_sequences(seq , 'a' , variable , DEFAULT)
-
-{
-  semi_markov = 0;
-  chain_data = 0;
-
-  likelihood = D_INF;
-  hidden_likelihood = D_INF;
-
-  posterior_probability = 0;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Construction d'un objet Semi_markov_data a partir d'un objet Markovian_sequences
- *  avec ajout d'une variable.
- *
- *  arguments : reference sur un objet Markovian_sequences, indice de la variable,
- *              ajout/suppression des histogrammes de temps de sejour initial.
- *
- *--------------------------------------------------------------*/
-
-Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , int variable , bool initial_run_flag)
-:Markovian_sequences(seq , 'a' , variable , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
+Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , char transform ,
+                                   bool initial_run_flag)
+:Markovian_sequences(seq , transform , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
 
 {
   semi_markov = 0;
@@ -2111,7 +2057,7 @@ Semi_markov_data& Semi_markov_data::operator=(const Semi_markov_data &seq)
  *  Extraction d'un histogramme.
  *
  *  arguments : reference sur un objet Format_error, type d'histogramme,
- *              variable, valeur.
+ *              variable, etat ou observation.
  *
  *--------------------------------------------------------------*/
 
@@ -2302,6 +2248,34 @@ Distribution_data* Semi_markov_data::extract(Format_error &error , int type ,
   }
 
   return histo;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Suppression du parametre d'index.
+ *
+ *  argument : reference sur un objet Format_error.
+ *
+ *--------------------------------------------------------------*/
+
+Semi_markov_data* Semi_markov_data::remove_index_parameter(Format_error &error) const
+
+{
+  Semi_markov_data *seq;
+
+
+  error.init();
+
+  if (!index_parameter) {
+    seq = 0;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+  else {
+    seq = new Semi_markov_data(*this , true , 'r');
+  }
+
+  return seq;
 }
 
 

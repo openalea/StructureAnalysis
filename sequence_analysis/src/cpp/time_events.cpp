@@ -629,7 +629,7 @@ Time_events* Time_events::time_scaling(Format_error &error , int scaling_coeff) 
 
   if (scaling_coeff < 1) {
     status = false;
-    error.update(SEQ_error[SEQR_SCALING_COEFF]);
+    error.update(STAT_error[STATR_SCALING_COEFF]);
   }
   if ((htime->nb_value - 1) * scaling_coeff > MAX_TIME) {
     status = false;
@@ -1924,7 +1924,7 @@ double Time_events::min_inter_event_computation() const
   pnb_event = nb_event;
   min_ratio = time[nb_class - 1];
 
-  for (i = 0;i <  nb_class;i++) {
+  for (i = 0;i < nb_class;i++) {
     if (*pnb_event > 0) {
       ratio = (double)*ptime / (double)*pnb_event;
       if (ratio < min_ratio) {
@@ -2465,7 +2465,7 @@ Renewal_data* Renewal_data::merge(Format_error &error , int nb_sample , const Re
 
   for (i = 0;i < nb_sample;i++) {
     if ((itimev[i]->type != type) || ((itimev[i]->inter_event) && (!inter_event)) ||
-        ((!(itimev[i]->inter_event)) && (inter_event)))  {
+        ((!(itimev[i]->inter_event)) && (inter_event))) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_SAMPLE] << " " << i + 2 << ": "

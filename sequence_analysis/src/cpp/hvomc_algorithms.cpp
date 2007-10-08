@@ -120,7 +120,7 @@ double Hidden_variable_order_markov::likelihood_computation(const Markovian_sequ
     for (i = 0;i < seq.nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
         for (j = 0;j < seq.nb_variable;j++) {
-          poutput[j] = seq.sequence[i][j];
+          poutput[j] = seq.int_sequence[i][j];
         }
         seq_likelihood = 0.;
 
@@ -288,7 +288,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]->nb_value > 1) {
+    if (max_value[i] > min_value[i]) {
       status = true;
       break;
     }
@@ -296,6 +296,18 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
   if (!status) {
     error.update(SEQ_error[SEQR_VARIABLE_NB_VALUE]);
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
   }
 
   if (ihmarkov.nb_output_process != nb_variable) {
@@ -424,7 +436,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         // recurrence "forward"
 
         for (j = 0;j < nb_variable;j++) {
-          poutput[j] = sequence[i][j];
+          poutput[j] = int_sequence[i][j];
         }
         norm = 0.;
 
@@ -800,9 +812,8 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     else {
       if (state_sequence) {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , 0 , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new Variable_order_markov_data(*this , 'a' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
-        seq->type[0] = STATE;
 
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
           if ((hmarkov->parametric_process[i]) && (seq->characteristics[i])) {
@@ -845,7 +856,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
       }
 
       else {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new Variable_order_markov_data(*this , 'c' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
         seq->state_variable_init(INT_VALUE);
 
@@ -942,7 +953,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
   status = false;
   for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]->nb_value > 1) {
+    if (max_value[i] > min_value[i]) {
       status = true;
       break;
     }
@@ -950,6 +961,18 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
   if (!status) {
     error.update(SEQ_error[SEQR_VARIABLE_NB_VALUE]);
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
   }
 
   if (ihmarkov.nb_output_process != nb_variable) {
@@ -1054,8 +1077,8 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
       // calcul du nombre de sequences d'etats simulees
 
-      if (min_nb_state_sequence + (int)round(parameter * iter) < max_nb_state_sequence) {
-        nb_state_sequence = min_nb_state_sequence + (int)round(parameter * iter);
+      if (min_nb_state_sequence + (int)::round(parameter * iter) < max_nb_state_sequence) {
+        nb_state_sequence = min_nb_state_sequence + (int)::round(parameter * iter);
       }
       else {
         nb_state_sequence = max_nb_state_sequence;
@@ -1084,7 +1107,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         // recurrence "forward"
 
         for (j = 0;j < nb_variable;j++) {
-          poutput[j] = sequence[i][j];
+          poutput[j] = int_sequence[i][j];
         }
         norm = 0.;
 
@@ -1201,7 +1224,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
           k = length[i] - 1;
           pstate = state_seq + k;
           for (m = 0;m < nb_variable;m++) {
-            poutput[m] = sequence[i][m] + k;
+            poutput[m] = int_sequence[i][m] + k;
           }
 
           cumul_computation(hmarkov->nb_row - 1 , forward[k] + 1 , cumul_backward);
@@ -1443,9 +1466,8 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     else {
       if  (state_sequence) {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , 0 , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new Variable_order_markov_data(*this , 'a' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
-        seq->type[0] = STATE;
 
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
           if ((hmarkov->parametric_process[i]) && (seq->characteristics[i])) {
@@ -1488,7 +1510,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
       }
 
       else {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new Variable_order_markov_data(*this , 'c' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
         seq->state_variable_init(INT_VALUE);
 
@@ -1568,14 +1590,19 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_state ,
 
   width = new int[nb_variable + 8];
 
-  for (i = 0;i <  nb_variable;i++) {
-    width[i] = column_width(max_value[i]);
+  for (i = 0;i < nb_variable;i++) {
+    width[i] = column_width((int)max_value[i]);
     if (i > 0) {
       width[i] += ASCII_SPACE;
     }
   }
 
-  width[nb_variable] = column_width(max_length) + ASCII_SPACE;
+  if (index_parameter) {
+    width[nb_variable] = column_width(hindex_parameter->nb_value - 1) + ASCII_SPACE;
+  }
+  else {
+    width[nb_variable] = column_width(max_length) + ASCII_SPACE;
+  }
 
   width[nb_variable + 1] = 0;
   for (i = 0;i < length[index];i++) {
@@ -1601,7 +1628,12 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_state ,
   for (i = 1;i < nb_variable;i++) {
     os << " | " << STAT_label[STATL_VARIABLE] << " " << i;
   }
-  os << " | " << SEQ_label[SEQL_INDEX];
+  if (index_parameter_type == TIME) {
+    os << " | " << SEQ_label[SEQL_TIME];
+  }
+  else {
+    os << " | " << SEQ_label[SEQL_INDEX];
+  }
   for (i = 0;i < nb_state;i++) {
     os << " | " << STAT_label[STATL_STATE] << " " << i;
   }
@@ -1611,9 +1643,9 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_state ,
   for (i = 0;i < length[index];i++) {
     os.setf(ios::right , ios::adjustfield);
     for (j = 0;j < nb_variable;j++) {
-      os << setw(width[j]) << sequence[index][j][i];
+      os << setw(width[j]) << int_sequence[index][j][i];
     }
-    os << setw(width[nb_variable]) << i << "  ";
+    os << setw(width[nb_variable]) << (index_parameter ? index_parameter[index][i] : i) << "  ";
 
     os.setf(ios::left , ios::adjustfield);
     for (j = 0;j < nb_state;j++) {
@@ -1672,7 +1704,12 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
   for (i = 1;i < nb_variable;i++) {
     os << "\t" << STAT_label[STATL_VARIABLE] << " " << i;
   }
-  os << "\t" << SEQ_label[SEQL_INDEX];
+  if (index_parameter_type == TIME) {
+    os << "\t" << SEQ_label[SEQL_TIME];
+  }
+  else {
+    os << "\t" << SEQ_label[SEQL_INDEX];
+  }
   for (i = 0;i < nb_state;i++) {
     os << "\t" << STAT_label[STATL_STATE] << " " << i;
   }
@@ -1681,9 +1718,9 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
 
   for (i = 0;i < length[index];i++) {
     for (j = 0;j < nb_variable;j++) {
-      os << sequence[index][j][i] << "\t";
+      os << int_sequence[index][j][i] << "\t";
     }
-    os << i;
+    os << (index_parameter ? index_parameter[index][i] : i);
     for (j = 0;j < nb_state;j++) {
       os << "\t" << profiles[i][j];
     }
@@ -1728,6 +1765,10 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_state ,
 
 
   for (i = 0;i < length[index];i++) {
+    if (index_parameter) {
+      os << index_parameter[index][i] << " ";
+    }
+
     for (j = 0;j < nb_state;j++) {
       os << profiles[i][j] << " ";
     }
@@ -1825,7 +1866,7 @@ double Hidden_variable_order_markov::forward_backward(const Variable_order_marko
   poutput = new int*[nb_output_process];
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
 
   // recurrence "forward"
@@ -2246,7 +2287,7 @@ double Hidden_variable_order_markov::forward_backward(const Variable_order_marko
 
     // restauration
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
 
     for (i = 0;i < seq.length[index];i++) {
       for (j = 0;j < nb_state;j++) {
@@ -2365,7 +2406,7 @@ double Hidden_variable_order_markov::forward_backward(const Variable_order_marko
       // calcul du nombre de sequences d'etats possibles
 
       for (i = 0;i < nb_output_process;i++) {
-        poutput[i] = seq.sequence[index][i + 1];
+        poutput[i] = seq.int_sequence[index][i + 1];
       }
 
       // recurrence "forward"
@@ -2585,7 +2626,7 @@ double Hidden_variable_order_markov::forward_backward_sampling(const Variable_or
   poutput = new int*[nb_output_process];
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
 
 # ifdef DEBUG
@@ -2719,7 +2760,7 @@ double Hidden_variable_order_markov::forward_backward_sampling(const Variable_or
 
     for (i = 0;i < nb_state_sequence;i++) {
       j = seq.length[index] - 1;
-      pstate = seq.sequence[index][0] + j;
+      pstate = seq.int_sequence[index][0] + j;
       ::cumul_computation(nb_row - 1 , forward[j] + 1 , cumul_backward);
       memory = 1 + cumul_method(nb_row - 1 , cumul_backward);
       *pstate = state[memory][0];
@@ -2746,7 +2787,7 @@ double Hidden_variable_order_markov::forward_backward_sampling(const Variable_or
       }
 
 #     ifdef DEBUG
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
       for (j = 0;j < seq.length[index];j++) {
         state_sequence_probability[j][*pstate++]++;
       }
@@ -2755,7 +2796,7 @@ double Hidden_variable_order_markov::forward_backward_sampling(const Variable_or
 #     ifdef MESSAGE
       state_seq_likelihood = Variable_order_markov::likelihood_computation(seq , index);
 
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
 
       switch (format) {
 
@@ -2791,7 +2832,7 @@ double Hidden_variable_order_markov::forward_backward_sampling(const Variable_or
         }
       }
 
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
       for (j = 0;j < seq.length[index];j++) {
         *pstate++ = I_DEFAULT;
       }
@@ -2880,9 +2921,8 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ost
   }
 
   if (status) {
-    if (iseq.type[0] == INT_VALUE) {
-      seq = new Variable_order_markov_data((Markovian_sequences&)iseq , 0);
-      seq->type[0] = STATE;
+    if (iseq.type[0] != STATE) {
+      seq = new Variable_order_markov_data((Markovian_sequences&)iseq);
     }
     else {
       seq = new Variable_order_markov_data(iseq , false);
@@ -3051,9 +3091,8 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
     }
 
     else {
-      if (iseq.type[0] == INT_VALUE) {
-        seq = new Variable_order_markov_data((Markovian_sequences&)iseq , 0);
-        seq->type[0] = STATE;
+      if (iseq.type[0] != STATE) {
+        seq = new Variable_order_markov_data((Markovian_sequences&)iseq);
       }
       else {
         seq = new Variable_order_markov_data(iseq , false);
@@ -3105,87 +3144,179 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
         }
         out_file << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
 
-        if (seq->length[index] - 1 < TIC_THRESHOLD) {
-          out_file << "set xtics 0,1" << endl;
-        }
+        if (seq->index_parameter) {
+          if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+            out_file << "set xtics 0,1" << endl;
+          }
 
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
-        for (j = 0;j < nb_state;j++) {
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                     << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
+
+          out_file << "set title \"";
+          if (title) {
+            out_file << title << " - ";
+          }
+          out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
+                   << exp(state_seq_likelihood - seq_likelihood) << "] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                     << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
+
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
+
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
+                   << max_marginal_entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << 1 << " : " << nb_state + 2 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
+                   << "\" with linespoints,\\" << endl;
           out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                   << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
-                   << j << "\" with linespoints";
-          if (j < nb_state - 1) {
-            out_file << ",\\";
+                   << 1 << " : " << nb_state + 3 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
+                   << "\" with linespoints,\\" << endl;
+          out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << 1 << " : " << nb_state + 4 << " title \"" << SEQ_label[SEQL_MARGINAL_ENTROPY]
+                   << "\" with linespoints" << endl;
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
           }
           out_file << endl;
+
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
+
+          out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                   << seq->index_parameter[index][seq->length[index] - 1] << "] [0:" << entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << 1 << " : " << nb_state + 5 << " title \""
+                   << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY] << "\" with linespoints,\\" << endl;
+          out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << 1 << " : " << nb_state + 6 << " title \""
+                   << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY] << "\" with linespoints" << endl;
+
+          if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+            out_file << "set xtics autofreq" << endl;
+          }
         }
 
-        if (i == 0) {
-          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-        }
-        out_file << endl;
+        else {
+          if (seq->length[index] - 1 < TIC_THRESHOLD) {
+            out_file << "set xtics 0,1" << endl;
+          }
 
-        out_file << "set title \"";
-        if (title) {
-          out_file << title << " - ";
-        }
-        out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                     << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
 
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
-                 << exp(state_seq_likelihood - seq_likelihood) << "] ";
-        for (j = 0;j < nb_state;j++) {
-          out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                   << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
-                   << j << "\" with linespoints";
-          if (j < nb_state - 1) {
-            out_file << ",\\";
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
           }
           out_file << endl;
-        }
 
-        if (i == 0) {
-          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-        }
-        out_file << endl;
+          out_file << "set title \"";
+          if (title) {
+            out_file << title << " - ";
+          }
+          out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
 
-        out_file << "set title";
-        if (title) {
-          out_file << " \"" << title << "\"";
-        }
-        out_file << "\n\n";
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
+                   << exp(state_seq_likelihood - seq_likelihood) << "] ";
+          for (j = 0;j < nb_state;j++) {
+            out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                     << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
+                     << j << "\" with linespoints";
+            if (j < nb_state - 1) {
+              out_file << ",\\";
+            }
+            out_file << endl;
+          }
 
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << max_marginal_entropy << "] "
-                 << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 1 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
-                 << "\" with linespoints,\\" << endl;
-        out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 2 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
-                 << "\" with linespoints,\\" << endl;
-        out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 3 << " title \"" << SEQ_label[SEQL_MARGINAL_ENTROPY]
-                 << "\" with linespoints" << endl;
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
 
-        if (i == 0) {
-          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-        }
-        out_file << endl;
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
 
-        out_file << "set title";
-        if (title) {
-          out_file << " \"" << title << "\"";
-        }
-        out_file << "\n\n";
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << max_marginal_entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 1 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
+                   << "\" with linespoints,\\" << endl;
+          out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 2 << " title \"" << SEQ_label[SEQL_CONDITIONAL_ENTROPY]
+                   << "\" with linespoints,\\" << endl;
+          out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 3 << " title \"" << SEQ_label[SEQL_MARGINAL_ENTROPY]
+                   << "\" with linespoints" << endl;
 
-        out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << entropy << "] "
-                 << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 4 << " title \"" << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY]
-                 << "\" with linespoints,\\" << endl;
-        out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                 << nb_state + 5 << " title \"" << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY]
-                 << "\" with linespoints" << endl;
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
 
-        if (seq->length[index] - 1 < TIC_THRESHOLD) {
-          out_file << "set xtics autofreq" << endl;
+          out_file << "set title";
+          if (title) {
+            out_file << " \"" << title << "\"";
+          }
+          out_file << "\n\n";
+
+          out_file << "plot [0:" << seq->length[index] - 1 << "] [0:" << entropy << "] "
+                   << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 4 << " title \"" << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY]
+                   << "\" with linespoints,\\" << endl;
+          out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+                   << nb_state + 5 << " title \"" << SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY]
+                   << "\" with linespoints" << endl;
+
+          if (seq->length[index] - 1 < TIC_THRESHOLD) {
+            out_file << "set xtics autofreq" << endl;
+          }
         }
 
         if (i == 1) {
@@ -3305,7 +3436,7 @@ double Hidden_variable_order_markov::viterbi(const Variable_order_markov_data &s
   for (i = 0;i < seq.nb_sequence;i++) {
     if ((index == I_DEFAULT) || (index == i)) {
       for (j = 0;j < nb_output_process;j++) {
-        poutput[j] = seq.sequence[i][j + 1];
+        poutput[j] = seq.int_sequence[i][j + 1];
       }
 
       // recurrence "forward"
@@ -3436,7 +3567,7 @@ double Hidden_variable_order_markov::viterbi(const Variable_order_markov_data &s
 
       // extraction de la vraisemblance du chemin optimal
 
-      pstate = seq.sequence[i][0] + seq.length[i] - 1;
+      pstate = seq.int_sequence[i][0] + seq.length[i] - 1;
       forward_max = D_INF;
 
       for (j = 1;j < nb_row;j++) {
@@ -3472,7 +3603,7 @@ double Hidden_variable_order_markov::viterbi(const Variable_order_markov_data &s
 #     ifdef DEBUG
       cout << "\n";
       for (j = seq.length[i] - 1;j >= 0;j--) {
-        cout << seq.sequence[i][0][j] << " ";
+        cout << seq.int_sequence[i][0][j] << " ";
       }
       cout << endl;
 #     endif
@@ -3564,7 +3695,7 @@ double Hidden_variable_order_markov::generalized_viterbi(const Variable_order_ma
   poutput = new int*[nb_output_process];
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
 
 # ifdef DEBUG
@@ -3721,7 +3852,7 @@ double Hidden_variable_order_markov::generalized_viterbi(const Variable_order_ma
   likelihood_cumul = 0.;
 
   for (i = 0;i < nb_state_sequence;i++) {
-    pstate = seq.sequence[index][0] + seq.length[index] - 1;
+    pstate = seq.int_sequence[index][0] + seq.length[index] - 1;
     forward_max = D_INF;
 
     for (j = 1;j < nb_row;j++) {
@@ -3769,7 +3900,7 @@ double Hidden_variable_order_markov::generalized_viterbi(const Variable_order_ma
     likelihood_cumul += exp(forward_max);
 
 #   ifdef DEBUG
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
     for (j = 0;j < seq.length[index];j++) {
 /*      state_sequence_probability[j][*pstate++] += exp(forward_max - seq_likelihood); */
 
@@ -3794,7 +3925,7 @@ double Hidden_variable_order_markov::generalized_viterbi(const Variable_order_ma
       os << "\n";
     }
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
 
     switch (format) {
 
@@ -3843,7 +3974,7 @@ double Hidden_variable_order_markov::generalized_viterbi(const Variable_order_ma
       }
     }
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
     for (j = 0;j < seq.length[index];j++) {
       *pstate++ = I_DEFAULT;
     }
@@ -3956,7 +4087,7 @@ double Hidden_variable_order_markov::viterbi_forward_backward(const Variable_ord
 # endif
 
   for (i = 0;i < nb_output_process;i++) {
-    poutput[i] = seq.sequence[index][i + 1];
+    poutput[i] = seq.int_sequence[index][i + 1];
   }
 
   // recurrence "forward"
@@ -4135,7 +4266,7 @@ double Hidden_variable_order_markov::viterbi_forward_backward(const Variable_ord
 
     // restauration
 
-    pstate = seq.sequence[index][0];
+    pstate = seq.int_sequence[index][0];
 
     for (i = 0;i < seq.length[index];i++) {
       backward_max = D_INF;
@@ -4219,7 +4350,7 @@ double Hidden_variable_order_markov::viterbi_forward_backward(const Variable_ord
     if (format != 'g') {
       double ambiguity = 0.;
 
-      pstate = seq.sequence[index][0];
+      pstate = seq.int_sequence[index][0];
       for (i = 0;i < seq.length[index];i++) {
         for (j = 0;j < nb_state;j++) {
           if (j != *pstate) {
@@ -4326,9 +4457,8 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
   }
 
   if (status) {
-    seq = new Variable_order_markov_data(iseq , 0 , (type == 'e' ? true : false));
+    seq = new Variable_order_markov_data(iseq , 'a' , (type == 'e' ? true : false));
 
-    seq->type[0] = STATE;
     seq->markov = new Variable_order_markov(*this , false);
 
     hmarkov = new Hidden_variable_order_markov(*this , false);
@@ -4394,16 +4524,14 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
   error.init();
 
   for (i = 0;i < nb_variable;i++) {
-    if (!characteristics[i]) {
-      for (j = 0;j < marginal[i]->nb_value;j++) {
-        if (marginal[i]->frequency[j] == 0) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MISSING_VALUE] << " " << j;
-          error.update((error_message.str()).c_str());
-        }
-      }
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
   }
 
@@ -4451,7 +4579,7 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
         hmarkov[i]->log_computation();
       }
 
-      seq = new Variable_order_markov_data(*this , 0);
+      seq = new Variable_order_markov_data(*this);
     }
 
     // pour chaque sequence, calcul de la vraisemblance (FORWARD) ou de la vraisemblance

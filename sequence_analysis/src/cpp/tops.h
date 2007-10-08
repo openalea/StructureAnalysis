@@ -158,7 +158,7 @@ class Tops : public Sequences {  // ensemble de cimes
 
     friend class Top_parameters;
 
-    friend Tops* tops_ascii_read(Format_error &error , const char *path);
+    friend Tops* tops_ascii_read(Format_error &error , const char *path , bool old_format);
     friend std::ostream& operator<<(std::ostream &os , const Tops &tops)
     { return tops.ascii_write(os); }
 
@@ -233,7 +233,7 @@ public :
 };
 
 
-Tops* tops_ascii_read(Format_error &error , const char *path);
+Tops* tops_ascii_read(Format_error &error , const char *path , bool old_format = false);
 
 
 

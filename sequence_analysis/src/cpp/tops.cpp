@@ -1099,10 +1099,10 @@ Tops::Tops()
 Tops::Tops(int nb_top , int *iidentifier , int *nb_position , bool init_flag)
 
 {
-  int itype[2] = {POSITION , NB_INTERNODE};
+  int itype[1] = {NB_INTERNODE};
 
 
-  init(2 , itype , nb_top , iidentifier , nb_position , init_flag);
+  init(nb_top , iidentifier , nb_position , POSITION , 1 , itype , init_flag);
 
   top_parameters = 0;
 
@@ -1234,41 +1234,11 @@ Tops::Tops(int nb_sample , const Tops **ptops)
 
 {
   register int i , j , k , m , n;
-  int nb_histo , blength , *psequence , *csequence;
+  int nb_histo , *pposition , *cposition , *plength , *clength;
   const Histogram **phisto;
 
 
   phisto = new const Histogram*[nb_sample];
-
-  nb_variable = 2;
-
-  type = new int[nb_variable];
-  type[0] = POSITION;
-  type[1] = NB_INTERNODE;
-
-  min_value = new int[nb_variable];
-  max_value = new int[nb_variable];
-  min_value[0] = 0;
-  max_value[0] = 0;
-
-  min_value[1] = ptops[0]->min_value[1];
-  max_value[1] = ptops[0]->max_value[1];
-  for (i = 1;i < nb_sample;i++) {
-    if (ptops[i]->min_value[1] < min_value[1]) {
-      min_value[1] = ptops[i]->min_value[1];
-    }
-    if (ptops[i]->max_value[1] > max_value[1]) {
-      max_value[1] = ptops[i]->max_value[1];
-    }
-  }
-
-  marginal = new Histogram*[nb_variable];
-  marginal[0] = 0;
-
-  for (i = 0;i < nb_sample;i++) {
-    phisto[i] = ptops[i]->marginal[1];
-  }
-  marginal[1] = new Histogram(nb_sample , phisto);
 
   // calcul du nombre et de la longueur des cimes
 
@@ -1302,24 +1272,69 @@ Tops::Tops(int nb_sample , const Tops **ptops)
 
   hlength = new Histogram(nb_sample , phisto);
 
+  index_parameter_type = POSITION;
+
+  for (i = 0;i < nb_sample;i++) {
+    phisto[i] = ptops[i]->hindex_parameter;
+  }
+  hindex_parameter = new Histogram(nb_sample , phisto);
+
   index_interval = 0;
+
+  nb_variable = 1;
+
+  type = new int[nb_variable];
+  type[0] = NB_INTERNODE;
+
+  min_value = new double[nb_variable];
+  max_value = new double[nb_variable];
+
+  min_value[0] = ptops[0]->min_value[0];
+  max_value[0] = ptops[0]->max_value[0];
+  for (i = 1;i < nb_sample;i++) {
+    if (ptops[i]->min_value[0] < min_value[0]) {
+      min_value[0] = ptops[i]->min_value[0];
+    }
+    if (ptops[i]->max_value[0] > max_value[0]) {
+      max_value[0] = ptops[i]->max_value[0];
+    }
+  }
+
+  marginal = new Histogram*[nb_variable];
+
+  for (i = 0;i < nb_sample;i++) {
+    phisto[i] = ptops[i]->marginal[0];
+  }
+  marginal[0] = new Histogram(nb_sample , phisto);
 
   // copie des sequences
 
   i = 0;
-  sequence = new int**[nb_sequence];
+  index_parameter = new int*[nb_sequence];
   for (j = 0;j < nb_sample;j++) {
     for (k = 0;k < ptops[j]->nb_sequence;k++) {
-      sequence[i] = new int*[nb_variable];
-      for (m = 0;m < nb_variable;m++) {
-        blength = (type[m] == POSITION ? length[i] + 1 :  length[i]);
-        sequence[i][m] = new int[blength];
+      index_parameter[i] = new int[length[i] + 1];
 
-        psequence = sequence[i][m];
-        csequence = ptops[j]->sequence[k][m];
-        for (n = 0;n < blength;n++) {
-          *psequence++ = *csequence++;
-        }
+      pposition = index_parameter[i];
+      cposition = ptops[j]->index_parameter[k];
+      for (m = 0;m <= length[i];m++) {
+        *pposition++ = *cposition++;
+      }
+      i++;
+    }
+  }
+
+  i = 0;
+  int_sequence = new int**[nb_sequence];
+  for (j = 0;j < nb_sample;j++) {
+    for (k = 0;k < ptops[j]->nb_sequence;k++) {
+      int_sequence[i] = new int*[nb_variable];
+      int_sequence[i][0] = new int[length[i]];
+
+      plength = int_sequence[i][0];
+      clength = ptops[j]->int_sequence[k][0];
+      for (m = 0;m < length[i];m++) {
+        *plength++ = *clength++;
       }
       i++;
     }
@@ -1486,7 +1501,7 @@ Tops* Tops::shift(Format_error &error , int inb_internode) const
   }
   else {
     for (i = 0;i < nb_sequence;i++) {
-      if (sequence[i][0][0] <= inb_internode) {
+      if (index_parameter[i][0] <= inb_internode) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_TOP] << " " << i + 1 << ": "
@@ -1503,22 +1518,22 @@ Tops* Tops::shift(Format_error &error , int inb_internode) const
     tops = new Tops(nb_sequence , identifier , length , false);
 
     for (i = 0;i < tops->nb_sequence;i++) {
-      pposition = tops->sequence[i][0];
-      cposition = sequence[i][0];
+      pposition = tops->index_parameter[i];
+      cposition = index_parameter[i];
       for (j = 0;j <= tops->length[i];j++) {
         *pposition++ = *cposition++ - inb_internode;
       }
 
-      plength = tops->sequence[i][1];
-      clength = sequence[i][1];
+      plength = tops->int_sequence[i][0];
+      clength = int_sequence[i][0];
       for (j = 0;j < tops->length[i];j++) {
         *plength++ = *clength++;
       }
     }
 
-    tops->min_value[1] = min_value[1];
-    tops->max_value[1] = max_value[1];
-    tops->marginal[1] = new Histogram(*(marginal[1]));
+    tops->min_value[0] = min_value[0];
+    tops->max_value[0] = max_value[0];
+    tops->marginal[0] = new Histogram(*marginal[0]);
 
     tops->build_nb_internode_histogram();
   }
@@ -1629,7 +1644,7 @@ Tops* Tops::reverse(Format_error &error) const
   error.init();
 
   for (i = 0;i < nb_sequence;i++) {
-    if (sequence[i][0][length[i]] == sequence[i][0][length[i] - 1]) {
+    if (index_parameter[i][length[i]] == index_parameter[i][length[i] - 1]) {
       status = false;
       ostringstream error_message;
       error_message << SEQ_label[SEQL_TOP] << " " << i + 1 << ": "
@@ -1650,11 +1665,11 @@ Tops* Tops::reverse(Format_error &error) const
  *
  *  Construction d'un objet Tops a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet Format_error, path, flag format.
  *
  *--------------------------------------------------------------*/
 
-Tops* tops_ascii_read(Format_error &error , const char *path)
+Tops* tops_ascii_read(Format_error &error , const char *path , bool old_format)
 
 {
   Sequences *seq;
@@ -1663,7 +1678,7 @@ Tops* tops_ascii_read(Format_error &error , const char *path)
 
   tops = 0;
 
-  seq = sequences_ascii_read(error , path);
+  seq = sequences_ascii_read(error , path , old_format);
 
   if (seq) {
     tops = seq->tops(error);
@@ -1825,14 +1840,14 @@ ostream& Tops::ascii_data_write(ostream &os , char format , bool exhaustive) con
   register int i;
 
 
-  os << nb_variable << " " << STAT_word[STATW_VARIABLES] << endl;
+  os << SEQ_word[SEQW_INDEX_PARAMETER] << " : "
+     << SEQ_index_parameter_word[index_parameter_type];
 
+  os << "\n" << nb_variable << " " << STAT_word[STATW_VARIABLE] << endl;
+
+  os << "\n" << STAT_word[STATW_VARIABLE] << " " << 1 << " : "
+     << STAT_variable_word[type[0]] << endl;
   os << "\n";
-  for (i = 0;i < nb_variable;i++) {
-    os << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
-       << STAT_sequence_word[type[i]] << endl;
-  }
-  os << endl;
 
   ascii_write(os , exhaustive , false);
   ascii_print(os , format , false);
@@ -1871,12 +1886,11 @@ bool Tops::ascii_data_write(Format_error &error , const char *path ,
 
     out_file << nb_variable << " " << STAT_word[STATW_VARIABLES] << endl;
 
+    out_file << "\n" << SEQ_word[SEQW_INDEX_PARAMETER] << " : "
+             << SEQ_index_parameter_word[index_parameter_type]
+             << STAT_word[STATW_VARIABLE] << " " << 1 << " : "
+             << STAT_variable_word[type[0]] << endl;
     out_file << "\n";
-    for (i = 0;i < nb_variable;i++) {
-      out_file << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
-               << STAT_sequence_word[type[i]] << endl;
-    }
-    out_file << endl;
 
     ascii_write(out_file , exhaustive , true);
     ascii_print(out_file , format , true);

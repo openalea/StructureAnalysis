@@ -264,7 +264,7 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
   char type = 'v';
   bool status , lstatus , nonparametric;
   register int i;
-  int line , order = 1 , nb_output_process , index;
+  int line , nb_output_process , index;
   long value;
   const Chain *chain;
   const Nonparametric_sequence_process *occupancy;
@@ -345,7 +345,7 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
 
       // analyse du format et lecture de la chaine de Markov
 
-      chain = chain_parsing(error , in_file , line , type , false , order);
+      chain = chain_parsing(error , in_file , line , type);
 
       if (chain) {
 

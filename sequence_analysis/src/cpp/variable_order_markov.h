@@ -184,6 +184,8 @@ protected :
 
     double likelihood_computation(const Variable_order_chain_data &chain_data) const;
 
+    double likelihood_correction(const Variable_order_markov_data &seq) const;
+
     std::ostream& transition_count_ascii_write(std::ostream &os , bool begin) const;
 
 public :
@@ -192,7 +194,8 @@ public :
     Variable_order_markov(char itype , int inb_state , int inb_row);
     Variable_order_markov(char itype , int inb_state , int inb_row ,
                           int imax_order);
-    Variable_order_markov(char itype , int inb_state , int iorder , bool init_flag);
+    Variable_order_markov(char itype , int inb_state , int iorder , bool init_flag ,
+                          int inb_output_process = 0 , int nb_value = 0);
     Variable_order_markov(const Variable_order_markov &markov ,
                           int inb_output_process , int nb_value);
 /*    Variable_order_markov(const Variable_order_markov &markov ,
@@ -351,20 +354,19 @@ private :
 public :
 
     Variable_order_markov_data();
-    Variable_order_markov_data(int inb_variable , const Histogram &ihlength , bool init_flag);
-    Variable_order_markov_data(int inb_sequence , int *ilength , int ***isequence ,
-                               const Variable_order_markov &imarkov);
-    Variable_order_markov_data(const Markovian_sequences &seq , bool initial_run_flag);
-    Variable_order_markov_data(const Markovian_sequences &seq , int variable);
-    Variable_order_markov_data(const Markovian_sequences &seq , int variable ,
+    Variable_order_markov_data(const Histogram &ihlength , int inb_variable , bool init_flag = false);
+    Variable_order_markov_data(const Markovian_sequences &seq);
+    Variable_order_markov_data(const Markovian_sequences &seq , char transform ,
                                bool initial_run_flag);
-    Variable_order_markov_data(const Variable_order_markov_data &seq , bool model_flag = true)
-    :Markovian_sequences(seq) { copy(seq , model_flag); }
+    Variable_order_markov_data(const Variable_order_markov_data &seq , bool model_flag = true ,
+                               char transform = 'c')
+    :Markovian_sequences(seq , transform) { copy(seq , model_flag); }
     ~Variable_order_markov_data();
     Variable_order_markov_data& operator=(const Variable_order_markov_data &seq);
 
     Distribution_data* extract(Format_error &error , int type ,
                                int variable , int value) const;
+    Variable_order_markov_data* remove_index_parameter(Format_error &error) const;
 
     Correlation* state_autocorrelation_computation(Format_error &error , int istate ,
                                                    int max_lag = MAX_LAG) const;

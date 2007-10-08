@@ -54,6 +54,7 @@ using namespace std;
 
 
 extern int column_width(int value);
+extern int column_width(int min_value , int max_value);
 
 
 
@@ -62,7 +63,7 @@ extern int column_width(int value);
  *  Ecriture de l'alignement de 2 sequences.
  *
  *  arguments : stream, largeur des colonnes, indices des 2 sequences,
- *              pointeur sur l'alignement, indice de l'alignement.
+ *              reference sur l'alignement, indice de l'alignement.
  *
  *--------------------------------------------------------------*/
 
@@ -86,14 +87,19 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
   test_rank = 0;
   alignment_rank = 0;
 
-  os << endl;
+  os << "\n";
   i = 0;
   for (j = 0;j < alignment.length[alignment_index];j++) {
-    if ((alignment.sequence[alignment_index][0][j] != DELETION) &&
-        (alignment.sequence[alignment_index][0][j] != BEGIN_END_DELETION)) {
-      os << setw(width) << sequence[test_index][0][i++];
+    if ((alignment.int_sequence[alignment_index][0][j] != DELETION) &&
+        (alignment.int_sequence[alignment_index][0][j] != BEGIN_END_DELETION)) {
+      if (index_parameter) {
+        os << setw(width) << index_parameter[test_index][i++];
+      }
+      else {
+        os << setw(width) << int_sequence[test_index][0][i++];
+      }
     }
-    else if (alignment.sequence[alignment_index][0][j] == DELETION) {
+    else if (alignment.int_sequence[alignment_index][0][j] == DELETION) {
       os << setw(width) << "-";
     }
     else {
@@ -110,14 +116,14 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
 
       // sequence de test
 
-      for (k = 1;k < nb_variable;k++) {
+      for (k = (index_parameter ? 0 : 1);k < nb_variable;k++) {
         m = test_rank;
         for (n = alignment_rank;n <= j;n++) {
-          if ((alignment.sequence[alignment_index][0][n] != DELETION) &&
-              (alignment.sequence[alignment_index][0][n] != BEGIN_END_DELETION)) {
-            os << setw(width) << sequence[test_index][k][m++];
+          if ((alignment.int_sequence[alignment_index][0][n] != DELETION) &&
+              (alignment.int_sequence[alignment_index][0][n] != BEGIN_END_DELETION)) {
+            os << setw(width) << int_sequence[test_index][k][m++];
           }
-          else if (alignment.sequence[alignment_index][0][n] == DELETION) {
+          else if (alignment.int_sequence[alignment_index][0][n] == DELETION) {
             os << setw(width) << "-";
           }
           else {
@@ -140,7 +146,7 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
       // operations
 
       for (k = alignment_rank;k <= j;k++) {
-        switch (alignment.sequence[alignment_index][0][k]) {
+        switch (alignment.int_sequence[alignment_index][0][k]) {
         case DELETION :
           os << setw(width) << "d";
           break;
@@ -171,14 +177,36 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
       // sequence de reference
 
       os << "\n";
+      if (index_parameter) {
+        k = ref_rank;
+        for (m = alignment_rank;m <= j;m++) {
+          if ((alignment.int_sequence[alignment_index][0][m] != INSERTION) &&
+              (alignment.int_sequence[alignment_index][0][m] != BEGIN_END_INSERTION)) {
+            os << setw(width) << index_parameter[ref_index][k++];
+          }
+          else if (alignment.int_sequence[alignment_index][0][m] == INSERTION) {
+            os << setw(width) << "-";
+          }
+          else {
+            os << setw(width) << " ";
+          }
+          os << " ";
+        }
+
+        if (j < alignment.length[alignment_index] - 1) {
+          os << "\\";
+        }
+        os << endl;
+      }
+
       for (k = 0;k < nb_variable;k++) {
         m = ref_rank;
         for (n = alignment_rank;n <= j;n++) {
-          if ((alignment.sequence[alignment_index][0][n] != INSERTION) &&
-              (alignment.sequence[alignment_index][0][n] != BEGIN_END_INSERTION)) {
-            os << setw(width) << sequence[ref_index][k][m++];
+          if ((alignment.int_sequence[alignment_index][0][n] != INSERTION) &&
+              (alignment.int_sequence[alignment_index][0][n] != BEGIN_END_INSERTION)) {
+            os << setw(width) << int_sequence[ref_index][k][m++];
           }
-          else if (alignment.sequence[alignment_index][0][n] == INSERTION) {
+          else if (alignment.int_sequence[alignment_index][0][n] == INSERTION) {
             os << setw(width) << "-";
           }
           else {
@@ -211,7 +239,7 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
  *  Ecriture de l'alignement de 2 sequences au format tableur.
  *
  *  arguments : stream, indices des 2 sequences,
- *              pointeur sur l'alignement, indice de l'alignement.
+ *              reference sur l'alignement, indice de l'alignement.
  *
  *--------------------------------------------------------------*/
 
@@ -229,15 +257,30 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
 
   // sequence de test
 
-  os << endl;
+  os << "\n";
+  if (index_parameter) {
+    i = 0;
+    for (j = 0;j < alignment.length[alignment_index];j++) {
+      if ((alignment.int_sequence[alignment_index][0][j] != DELETION) &&
+          (alignment.int_sequence[alignment_index][0][j] != BEGIN_END_DELETION)) {
+        os << index_parameter[test_index][i++];
+      }
+      else if (alignment.int_sequence[alignment_index][0][j] == DELETION) {
+        os << "-";
+      }
+      os << "\t";
+    }
+    os << endl;
+  }
+
   for (i = 0;i < nb_variable;i++) {
     j = 0;
     for (k = 0;k < alignment.length[alignment_index];k++) {
-      if ((alignment.sequence[alignment_index][0][k] != DELETION) &&
-          (alignment.sequence[alignment_index][0][k] != BEGIN_END_DELETION)) {
-        os << sequence[test_index][i][j++];
+      if ((alignment.int_sequence[alignment_index][0][k] != DELETION) &&
+          (alignment.int_sequence[alignment_index][0][k] != BEGIN_END_DELETION)) {
+        os << int_sequence[test_index][i][j++];
       }
-      else if (alignment.sequence[alignment_index][0][k] == DELETION) {
+      else if (alignment.int_sequence[alignment_index][0][k] == DELETION) {
         os << "-";
       }
       os << "\t";
@@ -249,7 +292,7 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
   // operations
 
   for (i = 0;i < alignment.length[alignment_index];i++) {
-    switch (alignment.sequence[alignment_index][0][i]) {
+    switch (alignment.int_sequence[alignment_index][0][i]) {
     case DELETION :
       os << "d";
       break;
@@ -276,14 +319,29 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
   // sequence de reference
 
   os << "\n";
+  if (index_parameter) {
+    i = 0;
+    for (j = 0;j < alignment.length[alignment_index];j++) {
+      if ((alignment.int_sequence[alignment_index][0][j] != INSERTION) &&
+          (alignment.int_sequence[alignment_index][0][j] != BEGIN_END_INSERTION)) {
+        os << index_parameter[ref_index][i++];
+      }
+      else if (alignment.int_sequence[alignment_index][0][j] == INSERTION) {
+        os << "-";
+      }
+      os << "\t";
+    }
+    os << endl;
+  }
+
   for (i = 0;i < nb_variable;i++) {
     j = 0;
     for (k = 0;k < alignment.length[alignment_index];k++) {
-      if ((alignment.sequence[alignment_index][0][k] != INSERTION) &&
-          (alignment.sequence[alignment_index][0][k] != BEGIN_END_INSERTION)) {
-        os << sequence[ref_index][i][j++];
+      if ((alignment.int_sequence[alignment_index][0][k] != INSERTION) &&
+          (alignment.int_sequence[alignment_index][0][k] != BEGIN_END_INSERTION)) {
+        os << int_sequence[ref_index][i][j++];
       }
-      else if (alignment.sequence[alignment_index][0][k] == INSERTION) {
+      else if (alignment.int_sequence[alignment_index][0][k] == INSERTION) {
         os << "-";
       }
       os << "\t";
@@ -323,7 +381,7 @@ double Sequences::indel_distance_computation(const Vector_distance &vector_dist 
 
       else {
         ldistance = 0.;
-        for (j = min_value[i];j <= max_value[i];j++) {
+        for (j = (int)min_value[i];j <= (int)max_value[i];j++) {
           if (max_symbol_distance[i][j] > ldistance) {
             ldistance = max_symbol_distance[i][j];
           }
@@ -333,7 +391,7 @@ double Sequences::indel_distance_computation(const Vector_distance &vector_dist 
     }
 
     case ORDINAL : {
-      ldistance = rank[i][max_value[i]] - rank[i][min_value[i]];
+      ldistance = rank[i][(int)max_value[i]] - rank[i][(int)min_value[i]];
       break;
     }
 
@@ -392,26 +450,26 @@ double Sequences::indel_distance_computation(const Vector_distance &vector_dist 
         ldistance = 1.;
       }
       else {
-        ldistance = max_symbol_distance[i][sequence[index][i][position]];
+        ldistance = max_symbol_distance[i][int_sequence[index][i][position]];
       }
       break;
     }
 
     case ORDINAL : {
-      ldistance = MAX(rank[i][sequence[index][i][position]] - rank[i][min_value[i]] ,
-                      rank[i][max_value[i]] - rank[i][sequence[index][i][position]]);
+      ldistance = MAX(rank[i][int_sequence[index][i][position]] - rank[i][(int)min_value[i]] ,
+                      rank[i][(int)max_value[i]] - rank[i][int_sequence[index][i][position]]);
       break;
     }
 
     case NUMERIC : {
-      ldistance = MAX(sequence[index][i][position] - min_value[i] ,
-                      max_value[i] - sequence[index][i][position]);
+      ldistance = MAX(int_sequence[index][i][position] - (int)min_value[i] ,
+                      (int)max_value[i] - int_sequence[index][i][position]);
       break;
     }
 
     case CIRCULAR : {
-      ldistance = MAX(sequence[index][i][position] - min_value[i] ,
-                      max_value[i] - sequence[index][i][position]);
+      ldistance = MAX(int_sequence[index][i][position] - (int)min_value[i] ,
+                      (int)max_value[i] - int_sequence[index][i][position]);
       if (ldistance > vector_dist.period[i] / 2.) {
         ldistance = vector_dist.period[i] / 2.;
       }
@@ -466,34 +524,34 @@ double Sequences::substitution_distance_computation(const Vector_distance &vecto
 
     case SYMBOLIC : {
       if (!vector_dist.symbol_distance[i]) {
-        ldistance = (sequence[ref_index][i][ref_position] == test_seq->sequence[test_index][i][test_position] ? 0. : 1.);
+        ldistance = (int_sequence[ref_index][i][ref_position] == test_seq->int_sequence[test_index][i][test_position] ? 0. : 1.);
       }
       else {
-        ldistance = vector_dist.symbol_distance[i][sequence[ref_index][i][ref_position]][test_seq->sequence[test_index][i][test_position]];
+        ldistance = vector_dist.symbol_distance[i][int_sequence[ref_index][i][ref_position]][test_seq->int_sequence[test_index][i][test_position]];
       }
       break;
     }
 
     case ORDINAL : {
-      ldistance = rank[i][sequence[ref_index][i][ref_position]] - rank[i][test_seq->sequence[test_index][i][test_position]];
+      ldistance = rank[i][int_sequence[ref_index][i][ref_position]] - rank[i][test_seq->int_sequence[test_index][i][test_position]];
       break;
     }
 
     case NUMERIC : {
-      ldistance = sequence[ref_index][i][ref_position] - test_seq->sequence[test_index][i][test_position];
+      ldistance = int_sequence[ref_index][i][ref_position] - test_seq->int_sequence[test_index][i][test_position];
       break;
     }
 
     case CIRCULAR : {
-      if (sequence[ref_index][i][ref_position] <= test_seq->sequence[test_index][i][test_position]) {
-        ldistance = MIN(test_seq->sequence[test_index][i][test_position] - sequence[ref_index][i][ref_position] ,
-                        sequence[ref_index][i][ref_position] + vector_dist.period[i] -
-                        test_seq->sequence[test_index][i][test_position]);
+      if (int_sequence[ref_index][i][ref_position] <= test_seq->int_sequence[test_index][i][test_position]) {
+        ldistance = MIN(test_seq->int_sequence[test_index][i][test_position] - int_sequence[ref_index][i][ref_position] ,
+                        int_sequence[ref_index][i][ref_position] + vector_dist.period[i] -
+                        test_seq->int_sequence[test_index][i][test_position]);
       }
       else {
-        ldistance = MIN(sequence[ref_index][i][ref_position] - test_seq->sequence[test_index][i][test_position] ,
-                        test_seq->sequence[test_index][i][test_position] + vector_dist.period[i] -
-                        sequence[ref_index][i][ref_position]);
+        ldistance = MIN(int_sequence[ref_index][i][ref_position] - test_seq->int_sequence[test_index][i][test_position] ,
+                        test_seq->int_sequence[test_index][i][test_position] + vector_dist.period[i] -
+                        int_sequence[ref_index][i][ref_position]);
       }
       break;
     }
@@ -562,14 +620,20 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
+  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_parameter_type == POSITION)) {
+    status = false;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+
   for (i = 0;i < nb_variable;i++) {
     if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << SEQ_parsing[SEQP_VARIABLE_TYPE];
-      correction_message << STAT_sequence_word[INT_VALUE] << " or "
-                         << STAT_sequence_word[STATE];
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
   }
@@ -730,13 +794,14 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
     }
 #   endif
 
-    width = 0;
+    if (index_parameter) {
+      width = column_width(hindex_parameter->nb_value - 1);
+    }
+    else {
+      width = 0;
+    }
     for (i = 0;i < nb_variable;i++) {
-      var = column_width(min_value[i]);
-      if (var > width) {
-        width = var;
-      }
-      var = column_width(max_value[i]);
+      var = column_width((int)min_value[i] , (int)max_value[i]);
       if (var > width) {
         width = var;
       }
@@ -766,11 +831,11 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
                                       true , transposition_flag);
 
     if (alignment_path) {
-      alignment = new Sequences(1 , nb_alignment);
+      alignment = new Sequences(nb_alignment , 1);
     }
     else {
       ilength = max_length + max_length;
-      alignment = new Sequences(1 , 1 , 0 , &ilength , false);
+      alignment = new Sequences(1 , 0 , &ilength , 1);
     }
 
     // creation des structures de donnees de l'algorithme - calcul des couts d'elision/insertion
@@ -1021,7 +1086,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
 
             alignment->length[alignment_index] = path_length[length[i]][length[j]];
             if (alignment_path) {
-              alignment->sequence[alignment_index][0] = new int[alignment->length[alignment_index]];
+              alignment->int_sequence[alignment_index][0] = new int[alignment->length[alignment_index]];
             }
 
             // backtracking
@@ -1031,7 +1096,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
             substitution_distance = 0.;
             transposition_distance = 0.;
 
-            palignment = alignment->sequence[alignment_index][0] + alignment->length[alignment_index];
+            palignment = alignment->int_sequence[alignment_index][0] + alignment->length[alignment_index];
             k = path_length[length[i]][length[j]];
             pref_position = length[i];
             ptest_position = length[j];
@@ -1095,7 +1160,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
 
             // recherche du nombre d'elisions/insertions successives maximum
 
-            palignment = alignment->sequence[alignment_index][0];
+            palignment = alignment->int_sequence[alignment_index][0];
             max_gap_length = 0;
             gap_length = 0;
 
@@ -1126,7 +1191,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
             // mise a jour des nombre d'elisions, d'insertions, de matchs,
             // de substitutions et de transpositions
 
-            palignment = alignment->sequence[alignment_index][0];
+            palignment = alignment->int_sequence[alignment_index][0];
 
             nb_deletion = 0;
             nb_insertion = 0;
@@ -1272,7 +1337,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
          << mean_local_substitution_distance / nb_local_substitution_distance << endl;
 #   endif
 
-    if ((ref_identifier == I_DEFAULT) || (test_identifier == I_DEFAULT))  {
+    if ((ref_identifier == I_DEFAULT) || (test_identifier == I_DEFAULT)) {
 
       // ecriture des distances, des longueurs des alignements et des nombres d'elisions,
       // d'insertions, de matchs, de substitutions et de transpositions
@@ -1324,13 +1389,13 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
 #     endif
 
       for (i = 0;i < alignment->nb_sequence;i++) {
-        calignment = alignment->sequence[i][0];
+        calignment = alignment->int_sequence[i][0];
         offset = 0;
         while ((*calignment == BEGIN_END_DELETION) || (*calignment == BEGIN_END_INSERTION)) {
           offset++;
           calignment++;
         }
-        palignment = alignment->sequence[i][0];
+        palignment = alignment->int_sequence[i][0];
         for (j = offset;j < alignment->length[i];j++) {
           if ((*calignment == BEGIN_END_DELETION) || (*calignment == BEGIN_END_INSERTION)) {
             break;
@@ -1439,7 +1504,7 @@ double Sequences::substitution_distance_computation(int ref_index , int test_ind
 
 
   for (i = 0;i < nb_variable;i++) {
-    if (sequence[ref_index][i][ref_position] != sequence[test_index][i][test_position]) {
+    if (int_sequence[ref_index][i][ref_position] != int_sequence[test_index][i][test_position]) {
       distance = substitution_distance;
       break;
     }
@@ -1486,14 +1551,20 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
+  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_parameter_type == POSITION)) {
+    status = false;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+
   for (i = 0;i < nb_variable;i++) {
     if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << SEQ_parsing[SEQP_VARIABLE_TYPE];
-      correction_message << STAT_sequence_word[INT_VALUE] << " or "
-                         << STAT_sequence_word[STATE];
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
   }
@@ -1553,13 +1624,14 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
 
     substitution_distance = INDEL_DISTANCE * 2.1;
 
-    width = 0;
+    if (index_parameter) {
+      width = column_width(hindex_parameter->nb_value - 1);
+    }
+    else {
+      width = 0;
+    }
     for (i = 0;i < nb_variable;i++) {
-      var = column_width(min_value[i]);
-      if (var > width) {
-        width = var;
-      }
-      var = column_width(max_value[i]);
+      var = column_width((int)min_value[i] , (int)max_value[i]);
       if (var > width) {
         width = var;
       }
@@ -1588,11 +1660,11 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
                                       SEQ_label[SEQL_SEQUENCE] , identifier , false);
 
     if (alignment_path) {
-      alignment = new Sequences(1 , nb_alignment);
+      alignment = new Sequences(nb_alignment , 1);
     }
     else {
       ilength = max_length + max_length;
-      alignment = new Sequences(1 , 1 , 0 , &ilength , false);
+      alignment = new Sequences(1 , 0 , &ilength , 1);
     }
 
     // creation des structures de donnees de l'algorithme
@@ -1725,7 +1797,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
 
             alignment->length[alignment_index] = path_length[length[i]][length[j]];
             if (alignment_path) {
-              alignment->sequence[alignment_index][0] = new int[alignment->length[alignment_index]];
+              alignment->int_sequence[alignment_index][0] = new int[alignment->length[alignment_index]];
             }
 
             // backtracking
@@ -1733,7 +1805,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
             deletion_distance = 0.;
             insertion_distance = 0.;
 
-            palignment = alignment->sequence[alignment_index][0] + alignment->length[alignment_index];
+            palignment = alignment->int_sequence[alignment_index][0] + alignment->length[alignment_index];
             pref_position = length[i];
             ptest_position = length[j];
 
@@ -1778,7 +1850,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
 
             // recherche du nombre d'elisions/insertions successives maximum
 
-            palignment = alignment->sequence[alignment_index][0];
+            palignment = alignment->int_sequence[alignment_index][0];
             max_gap_length = 0;
             gap_length = 0;
 
@@ -1809,7 +1881,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
 
             // mise a jour des nombre d'elisions, d'insertions et de matchs
 
-            palignment = alignment->sequence[alignment_index][0];
+            palignment = alignment->int_sequence[alignment_index][0];
 
             nb_deletion = 0;
             nb_insertion = 0;
@@ -1919,7 +1991,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
       }
     }
 
-    if ((ref_identifier == I_DEFAULT) || (test_identifier == I_DEFAULT))  {
+    if ((ref_identifier == I_DEFAULT) || (test_identifier == I_DEFAULT)) {
 
       // ecriture des distances, des longueurs des alignements et
       // des nombres d'elisions, d'insertions et de matchs
@@ -1963,13 +2035,13 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
 #     endif
 
       for (i = 0;i < alignment->nb_sequence;i++) {
-        calignment = alignment->sequence[i][0];
+        calignment = alignment->int_sequence[i][0];
         offset = 0;
         while ((*calignment == BEGIN_END_DELETION) || (*calignment == BEGIN_END_INSERTION)) {
           offset++;
           calignment++;
         }
-        palignment = alignment->sequence[i][0];
+        palignment = alignment->int_sequence[i][0];
         for (j = offset;j < alignment->length[i];j++) {
           if ((*calignment == BEGIN_END_DELETION) || (*calignment == BEGIN_END_INSERTION)) {
             break;
@@ -2058,11 +2130,7 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
 
   width = 0;
   for (i = 0;i < nb_variable - 1;i++) {
-    var = column_width(min_value[i]);
-    if (var > width) {
-      width = var;
-    }
-    var = column_width(max_value[i]);
+    var = column_width((int)min_value[i] , (int)max_value[i]);
     if (var > width) {
       width = var;
     }
@@ -2070,11 +2138,11 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
 
   rank = 0;
   for (i = 0;i < max_length;i++) {
-    if ((sequence[0][nb_variable - 1][i] != GAP) &&
-        (sequence[0][nb_variable - 1][i] != BEGIN_END_GAP)) {
-      os << setw(width) << sequence[0][0][i];
+    if ((int_sequence[0][nb_variable - 1][i] != GAP) &&
+        (int_sequence[0][nb_variable - 1][i] != BEGIN_END_GAP)) {
+      os << setw(width) << int_sequence[0][0][i];
     }
-    else if (sequence[0][nb_variable - 1][i] == GAP) {
+    else if (int_sequence[0][nb_variable - 1][i] == GAP) {
       os << setw(width) << "-";
     }
     else {
@@ -2093,11 +2161,11 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
 
       for (j = 1;j < nb_variable - 1;j++) {
         for (k = rank;k <= i;k++) {
-          if ((sequence[0][nb_variable - 1][k] != GAP) &&
-              (sequence[0][nb_variable - 1][k] != BEGIN_END_GAP)) {
-            os << setw(width) << sequence[0][j][k];
+          if ((int_sequence[0][nb_variable - 1][k] != GAP) &&
+              (int_sequence[0][nb_variable - 1][k] != BEGIN_END_GAP)) {
+            os << setw(width) << int_sequence[0][j][k];
           }
-          else if (sequence[0][nb_variable - 1][k] == GAP) {
+          else if (int_sequence[0][nb_variable - 1][k] == GAP) {
             os << setw(width) << "-";
           }
           else {
@@ -2116,11 +2184,11 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
       for (j = 1;j < nb_sequence;j++) {
         for (k = 0;k < nb_variable - 1;k++) {
           for (m = rank;m <= i;m++) {
-            if ((sequence[j][nb_variable - 1][m] != GAP) &&
-                (sequence[j][nb_variable - 1][m] != BEGIN_END_GAP)) {
-              os << setw(width) << sequence[j][k][m];
+            if ((int_sequence[j][nb_variable - 1][m] != GAP) &&
+                (int_sequence[j][nb_variable - 1][m] != BEGIN_END_GAP)) {
+              os << setw(width) << int_sequence[j][k][m];
             }
-            else if (sequence[j][nb_variable - 1][m] == GAP) {
+            else if (int_sequence[j][nb_variable - 1][m] == GAP) {
               os << setw(width) << "-";
             }
             else {
@@ -2146,15 +2214,15 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
       for (j = 0;j < nb_variable - 1;j++) {
         for (k = rank;k <= i;k++) {
           for (m = 0;m < nb_sequence;m++) {
-            if ((sequence[m][nb_variable - 1][k] == GAP) ||
-                (sequence[m][nb_variable - 1][k] == BEGIN_END_GAP) ||
-                (sequence[m][j][k] != sequence[0][j][k])) {
+            if ((int_sequence[m][nb_variable - 1][k] == GAP) ||
+                (int_sequence[m][nb_variable - 1][k] == BEGIN_END_GAP) ||
+                (int_sequence[m][j][k] != int_sequence[0][j][k])) {
               break;
             }
           }
 
           if (m == nb_sequence) {
-            os << setw(width) << sequence[0][j][k];
+            os << setw(width) << int_sequence[0][j][k];
           }
           else {
             os << setw(width) << ".";
@@ -2251,7 +2319,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
     case ADAPTATIVE : {
       for (j = 1;j <= max_length;j++) {
-        if (sequence[i][nb_variable - 1][j - 1] == DATA) {
+        if (int_sequence[i][nb_variable - 1][j - 1] == DATA) {
           ref_local_indel_distance[i][j] = indel_distance_computation(vector_dist , i , j - 1 , rank , max_symbol_distance) * indel_factor;
         }
         else {
@@ -2263,7 +2331,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
     case FIXED : {
       for (j = 1;j <= max_length;j++) {
-        if (sequence[i][nb_variable - 1][j - 1] == DATA) {
+        if (int_sequence[i][nb_variable - 1][j - 1] == DATA) {
           ref_local_indel_distance[i][j] = buff;
         }
         else {
@@ -2285,7 +2353,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
     case ADAPTATIVE : {
       for (j = 1;j <= test_seq.max_length;j++) {
-        if (test_seq.sequence[i][nb_variable - 1][j - 1] == DATA) {
+        if (test_seq.int_sequence[i][nb_variable - 1][j - 1] == DATA) {
           test_local_indel_distance[i][j] = test_seq.indel_distance_computation(vector_dist , i , j - 1 , rank , max_symbol_distance) * indel_factor;
         }
         else {
@@ -2297,7 +2365,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
     case FIXED : {
       for (j = 1;j <= test_seq.max_length;j++) {
-        if (test_seq.sequence[i][nb_variable - 1][j - 1] == DATA) {
+        if (test_seq.int_sequence[i][nb_variable - 1][j - 1] == DATA) {
           test_local_indel_distance[i][j] = buff;
         }
         else {
@@ -2343,7 +2411,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     case false : {
       sum = 0.;
       for (j = 0;j < nb_sequence;j++) {
-        if (sequence[j][nb_variable - 1][i - 1] == DATA) {
+        if (int_sequence[j][nb_variable - 1][i - 1] == DATA) {
           sum += ref_local_indel_distance[j][i];
         }
       }
@@ -2371,7 +2439,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     case false : {
       sum = 0.;
       for (j = 0;j < test_seq.nb_sequence;j++) {
-        if (test_seq.sequence[j][nb_variable - 1][i - 1] == DATA) {
+        if (test_seq.int_sequence[j][nb_variable - 1][i - 1] == DATA) {
           sum += test_local_indel_distance[j][i];
         }
       }
@@ -2401,13 +2469,13 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
 
           // calcul distance locale
 
-          if ((sequence[k][nb_variable - 1][i - 1] == DATA) && (test_seq.sequence[m][nb_variable - 1][j - 1] == GAP)) {
+          if ((int_sequence[k][nb_variable - 1][i - 1] == DATA) && (test_seq.int_sequence[m][nb_variable - 1][j - 1] == GAP)) {
             sum += ref_local_indel_distance[k][i];
           }
-          else if ((sequence[k][nb_variable - 1][i - 1] == GAP) && (test_seq.sequence[m][nb_variable - 1][j - 1] == DATA)) {
+          else if ((int_sequence[k][nb_variable - 1][i - 1] == GAP) && (test_seq.int_sequence[m][nb_variable - 1][j - 1] == DATA)) {
             sum += test_local_indel_distance[m][j];
           }
-          else if ((sequence[k][nb_variable - 1][i - 1] == DATA) && (test_seq.sequence[m][nb_variable - 1][j - 1] == DATA)) {
+          else if ((int_sequence[k][nb_variable - 1][i - 1] == DATA) && (test_seq.int_sequence[m][nb_variable - 1][j - 1] == DATA)) {
             sum += substitution_distance_computation(vector_dist , k , m , i - 1 , j - 1 , rank , &test_seq);
           }
         }
@@ -2425,7 +2493,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
       if ((j < test_seq.max_length) || (!end_free)) {
         sum = 0.;
         for (k = 0;k < nb_sequence;k++) {
-          if (sequence[k][nb_variable - 1][i - 1] == DATA) {
+          if (int_sequence[k][nb_variable - 1][i - 1] == DATA) {
             sum += ref_local_indel_distance[k][i];
           }
         }
@@ -2448,7 +2516,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
       if ((i < max_length) || (!end_free)) {
         sum = 0.;
         for (k = 0;k < test_seq.nb_sequence;k++) {
-          if (test_seq.sequence[k][nb_variable - 1][j - 1] == DATA) {
+          if (test_seq.int_sequence[k][nb_variable - 1][j - 1] == DATA) {
             sum += test_local_indel_distance[k][j];
           }
         }
@@ -2521,7 +2589,8 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
   for (i = 0;i < nb_sequence + test_seq.nb_sequence;i++) {
     ilength[i] = path_length[max_length][test_seq.max_length];
   }
-  seq = new Sequences(nb_variable , nb_sequence + test_seq.nb_sequence , 0 , ilength , false);
+  seq = new Sequences(nb_sequence + test_seq.nb_sequence , 0 , ilength ,
+                      nb_variable , type);
   delete [] ilength;
 
   for (i = 0;i < nb_variable;i++) {
@@ -2544,7 +2613,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     if ((*palignment != INSERTION) && (*palignment != BEGIN_END_INSERTION)) {
       for (j = 0;j < nb_sequence;j++) {
         for (k = 0;k < nb_variable;k++) {
-          seq->sequence[j][k][i] = sequence[j][k][ref_position];
+          seq->int_sequence[j][k][i] = int_sequence[j][k][ref_position];
         }
       }
       ref_position++;
@@ -2553,24 +2622,24 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     else {
       for (j = 0;j < nb_sequence;j++) {
         for (k = 0;k < nb_variable - 1;k++) {
-          seq->sequence[j][k][i] = max_value[k] + 1;
+          seq->int_sequence[j][k][i] = (int)max_value[k] + 1;
         }
 
         switch (*palignment) {
 
         case INSERTION : {
-          if (((i > 0) && (sequence[j][nb_variable - 1][ref_position - 1] == BEGIN_END_GAP)) ||
-              ((i < path_length[max_length][test_seq.max_length] - 1) && (sequence[j][nb_variable - 1][ref_position + 1] == BEGIN_END_GAP))) {
-            seq->sequence[j][nb_variable - 1][i] = BEGIN_END_GAP;
+          if (((i > 0) && (int_sequence[j][nb_variable - 1][ref_position - 1] == BEGIN_END_GAP)) ||
+              ((i < path_length[max_length][test_seq.max_length] - 1) && (int_sequence[j][nb_variable - 1][ref_position + 1] == BEGIN_END_GAP))) {
+            seq->int_sequence[j][nb_variable - 1][i] = BEGIN_END_GAP;
           }
           else {
-            seq->sequence[j][nb_variable - 1][i] = GAP;
+            seq->int_sequence[j][nb_variable - 1][i] = GAP;
           }
           break;
         }
 
         case BEGIN_END_INSERTION : {
-          seq->sequence[j][nb_variable - 1][i] = BEGIN_END_GAP;
+          seq->int_sequence[j][nb_variable - 1][i] = BEGIN_END_GAP;
           break;
         }
         }
@@ -2580,7 +2649,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     if ((*palignment != DELETION) && (*palignment != BEGIN_END_DELETION)) {
       for (j = 0;j < test_seq.nb_sequence;j++) {
         for (k = 0;k < nb_variable;k++) {
-          seq->sequence[j + nb_sequence][k][i] = test_seq.sequence[j][k][test_position];
+          seq->int_sequence[j + nb_sequence][k][i] = test_seq.int_sequence[j][k][test_position];
         }
       }
       test_position++;
@@ -2589,24 +2658,24 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
     else {
       for (j = 0;j < test_seq.nb_sequence;j++) {
         for (k = 0;k < nb_variable - 1;k++) {
-          seq->sequence[j + nb_sequence][k][i] = max_value[k] + 1;
+          seq->int_sequence[j + nb_sequence][k][i] = (int)max_value[k] + 1;
         }
 
         switch (*palignment) {
 
         case DELETION : {
-          if (((i > 0) && (test_seq.sequence[j][nb_variable - 1][test_position - 1] == BEGIN_END_GAP)) ||
-              ((i < path_length[max_length][test_seq.max_length] - 1) && (test_seq.sequence[j][nb_variable - 1][test_position + 1] == BEGIN_END_GAP))) {
-            seq->sequence[j + nb_sequence][nb_variable - 1][i] = BEGIN_END_GAP;
+          if (((i > 0) && (test_seq.int_sequence[j][nb_variable - 1][test_position - 1] == BEGIN_END_GAP)) ||
+              ((i < path_length[max_length][test_seq.max_length] - 1) && (test_seq.int_sequence[j][nb_variable - 1][test_position + 1] == BEGIN_END_GAP))) {
+            seq->int_sequence[j + nb_sequence][nb_variable - 1][i] = BEGIN_END_GAP;
           }
           else {
-            seq->sequence[j + nb_sequence][nb_variable - 1][i] = GAP;
+            seq->int_sequence[j + nb_sequence][nb_variable - 1][i] = GAP;
           }
           break;
         }
 
         case BEGIN_END_DELETION : {
-          seq->sequence[j + nb_sequence][nb_variable - 1][i] = BEGIN_END_GAP;
+          seq->int_sequence[j + nb_sequence][nb_variable - 1][i] = BEGIN_END_GAP;
           break;
         }
         }
@@ -2669,7 +2738,7 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
 {
   bool status;
   register int i , j , k;
-  int *psequence , *csequence , *variable;
+  int *itype , *psequence , *csequence , *variable;
   double **rank , **max_symbol_distance;
   Vector_distance *vector_dist;
   Distance_matrix *dist_matrix;
@@ -2678,162 +2747,179 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
 
 
   seq = 0;
+  error.init();
 
-  // alignement des sequences 2 a 2
-
-  dist_matrix = alignment(error , 0 , ivector_dist , I_DEFAULT , I_DEFAULT ,
-                          begin_free , end_free , indel_cost , indel_factor);
-
-  if (dist_matrix) {
-
-    // construction d'un dendrogramme a partir de la matrice des distances entre sequences
-
-    if (algorithm != DIVISIVE) {
-      dendrogram = dist_matrix->agglomerative_hierarchical_clustering(algorithm);
-    }
-    else {
-      dendrogram = dist_matrix->divisive_hierarchical_clustering();
-    }
-
-#   ifdef MESSAGE
-    cout << *dendrogram << "\n";
-#   endif
-
-    vector_dist = new Vector_distance(ivector_dist);
-
-    // calcul des distance maximum de substitution pour les variables symboliques et
-    // des rangs pour les variables ordinales
-
-    rank = new double*[nb_variable];
-    max_symbol_distance = new double*[nb_variable];
-
-    for (i = 0;i < nb_variable;i++) {
-      if ((vector_dist->variable_type[i] == SYMBOLIC) && (vector_dist->symbol_distance[i])) {
-        max_symbol_distance[i] = vector_dist->max_symbol_distance_computation(i);
-      }
-      else {
-        max_symbol_distance[i] = 0;
-      }
-
-      if (vector_dist->variable_type[i] == ORDINAL) {
-        rank[i] = marginal[i]->rank_computation();
-      }
-      else {
-        rank[i] = 0;
-      }
-
-      // calcul des dispersions pour la standardisation
-
-      if (marginal[i]) {
-        vector_dist->dispersion_computation(i , marginal[i] , rank[i]);
-      }
-
-      else {
-        switch (vector_dist->distance_type) {
-        case ABSOLUTE_VALUE :
-          vector_dist->dispersion[i] = mean_absolute_difference_computation(i);
-          break;
-        case QUADRATIC :
-          vector_dist->dispersion[i] = 2 * variance_computation(i , mean_computation(i));
-          break;
-        }
-
-        if (vector_dist->dispersion[i] == 0.) {
-          vector_dist->dispersion[i] = 1.;
-        }
-      }
-    }
-
-    // construction des groupes initiaux
-
-    clustered_seq = new Sequences*[2 * nb_sequence - 1];
-    for (i = 0;i < nb_sequence;i++) {
-      clustered_seq[i] = new Sequences(nb_variable + 1 , 1 , &identifier[i] , &length[i] , false);
-
-      for (j = 0;j < nb_variable;j++) {
-        clustered_seq[i]->min_value[j] = min_value[j];
-        clustered_seq[i]->max_value[j] = max_value[j];
-
-        psequence = clustered_seq[i]->sequence[0][j];
-        csequence = sequence[i][j];
-        for (k = 0;k < length[i];k++) {
-          *psequence++ = *csequence++;
-        }
-      }
-
-      psequence = clustered_seq[i]->sequence[0][nb_variable];
-      for (j = 0;j < length[i];j++) {
-        *psequence++ = DATA;
-      }
-    }
-
-    // alignement multiple des sequences
-
-    for (i = nb_sequence;i < 2 * nb_sequence - 1;i++) {
-      clustered_seq[i] = clustered_seq[dendrogram->child[i][0]]->multiple_alignment(*(clustered_seq[dendrogram->child[i][1]]) ,
-                                                                                    *vector_dist , rank ,
-                                                                                    max_symbol_distance , begin_free ,
-                                                                                    end_free , indel_cost , indel_factor);
-
-#     ifdef DEBUG
-      if (i < 2 * nb_sequence - 2) {
-        clustered_seq[i]->multiple_alignment_ascii_print(os);
-      }
-#     endif
-
-    }
-
-    // ecriture de l'alignement multiple
-
-#   ifdef MESSAGE
-    clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(os);
-#   endif
-
-    if (path) {
-      status = clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(error , path);
-
-#     ifdef MESSAGE
-      if (!status) {
-        os << error;
-      }
-#     endif
-
-    }
-
-    seq = new Sequences(nb_variable , nb_sequence , clustered_seq[2 * nb_sequence - 2]->identifier ,
-                        clustered_seq[2 * nb_sequence - 2]->length , false);
-
-    variable = new int[nb_variable];
-    for (i = 0;i < nb_variable;i++) {
-      variable[i] = i;
-    }
-    seq->select_variable(*(clustered_seq[2 * nb_sequence - 2]) , variable);
-
-    for (i = 0;i < nb_variable;i++) {
-      (seq->max_value[i])++;
-      seq->build_marginal_histogram(i);
-    }
-
-    delete [] variable;
-
-    for (i = 0;i < 2 * nb_sequence - 1;i++) {
-      delete clustered_seq[i];
-    }
-    delete [] clustered_seq;
-
-    delete dendrogram;
-
-    delete vector_dist;
-
-    for (i = 0;i < nb_variable;i++) {
-      delete [] rank[i];
-      delete [] max_symbol_distance[i];
-    }
-    delete [] rank;
-    delete [] max_symbol_distance;
+  if (index_parameter) {
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
 
-  delete dist_matrix;
+  else {
+
+    // alignement des sequences 2 a 2
+
+    dist_matrix = alignment(error , 0 , ivector_dist , I_DEFAULT , I_DEFAULT ,
+                            begin_free , end_free , indel_cost , indel_factor);
+
+    if (dist_matrix) {
+
+      // construction d'un dendrogramme a partir de la matrice des distances entre sequences
+
+      if (algorithm != DIVISIVE) {
+        dendrogram = dist_matrix->agglomerative_hierarchical_clustering(algorithm);
+      }
+      else {
+        dendrogram = dist_matrix->divisive_hierarchical_clustering();
+      }
+
+#     ifdef MESSAGE
+      cout << *dendrogram << "\n";
+#     endif
+
+      vector_dist = new Vector_distance(ivector_dist);
+
+      // calcul des distance maximum de substitution pour les variables symboliques et
+      // des rangs pour les variables ordinales
+
+      rank = new double*[nb_variable];
+      max_symbol_distance = new double*[nb_variable];
+
+      for (i = 0;i < nb_variable;i++) {
+        if ((vector_dist->variable_type[i] == SYMBOLIC) && (vector_dist->symbol_distance[i])) {
+          max_symbol_distance[i] = vector_dist->max_symbol_distance_computation(i);
+        }
+        else {
+          max_symbol_distance[i] = 0;
+        }
+
+        if (vector_dist->variable_type[i] == ORDINAL) {
+          rank[i] = marginal[i]->rank_computation();
+        }
+        else {
+          rank[i] = 0;
+        }
+
+        // calcul des dispersions pour la standardisation
+
+        if (marginal[i]) {
+          vector_dist->dispersion_computation(i , marginal[i] , rank[i]);
+        }
+
+        else {
+          switch (vector_dist->distance_type) {
+          case ABSOLUTE_VALUE :
+            vector_dist->dispersion[i] = mean_absolute_difference_computation(i);
+            break;
+          case QUADRATIC :
+            vector_dist->dispersion[i] = 2 * variance_computation(i , mean_computation(i));
+            break;
+          }
+
+          if (vector_dist->dispersion[i] == 0.) {
+            vector_dist->dispersion[i] = 1.;
+          }
+        }
+      }
+
+      // construction des groupes initiaux
+
+      itype = new int[nb_variable + 1];
+      for (i = 0;i < nb_variable;i++) {
+        itype[i] = type[i];
+      }
+      itype[nb_variable] = INT_VALUE;
+
+      clustered_seq = new Sequences*[2 * nb_sequence - 1];
+      for (i = 0;i < nb_sequence;i++) {
+        clustered_seq[i] = new Sequences(1 , &identifier[i] , &length[i] ,
+                                         nb_variable + 1 , itype);
+
+        for (j = 0;j < nb_variable;j++) {
+          clustered_seq[i]->min_value[j] = min_value[j];
+          clustered_seq[i]->max_value[j] = max_value[j];
+
+          psequence = clustered_seq[i]->int_sequence[0][j];
+          csequence = int_sequence[i][j];
+          for (k = 0;k < length[i];k++) {
+            *psequence++ = *csequence++;
+          }
+        }
+
+        psequence = clustered_seq[i]->int_sequence[0][nb_variable];
+        for (j = 0;j < length[i];j++) {
+          *psequence++ = DATA;
+        }
+      }
+
+      // alignement multiple des sequences
+
+      for (i = nb_sequence;i < 2 * nb_sequence - 1;i++) {
+        clustered_seq[i] = clustered_seq[dendrogram->child[i][0]]->multiple_alignment(*(clustered_seq[dendrogram->child[i][1]]) ,
+                                                                                      *vector_dist , rank ,
+                                                                                      max_symbol_distance , begin_free ,
+                                                                                      end_free , indel_cost , indel_factor);
+
+#       ifdef DEBUG
+        if (i < 2 * nb_sequence - 2) {
+          clustered_seq[i]->multiple_alignment_ascii_print(os);
+        }
+#       endif
+
+      }
+
+      // ecriture de l'alignement multiple
+
+#     ifdef MESSAGE
+      clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(os);
+#     endif
+
+      if (path) {
+        status = clustered_seq[2 * nb_sequence - 2]->multiple_alignment_ascii_print(error , path);
+
+#       ifdef MESSAGE
+        if (!status) {
+          os << error;
+        }
+#       endif
+
+      }
+
+      seq = new Sequences(nb_sequence , clustered_seq[2 * nb_sequence - 2]->identifier ,
+                          clustered_seq[2 * nb_sequence - 2]->length , nb_variable , itype);
+
+      variable = new int[nb_variable];
+      for (i = 0;i < nb_variable;i++) {
+        variable[i] = i;
+      }
+      seq->select_variable(*(clustered_seq[2 * nb_sequence - 2]) , variable);
+
+      for (i = 0;i < nb_variable;i++) {
+        (seq->max_value[i])++;
+        seq->build_marginal_histogram(i);
+      }
+
+      delete [] variable;
+
+      for (i = 0;i < 2 * nb_sequence - 1;i++) {
+        delete clustered_seq[i];
+      }
+      delete [] clustered_seq;
+
+      delete [] itype;
+
+      delete dendrogram;
+
+      delete vector_dist;
+
+      for (i = 0;i < nb_variable;i++) {
+        delete [] rank[i];
+        delete [] max_symbol_distance[i];
+      }
+      delete [] rank;
+      delete [] max_symbol_distance;
+    }
+
+    delete dist_matrix;
+  }
 
   return seq;
 }

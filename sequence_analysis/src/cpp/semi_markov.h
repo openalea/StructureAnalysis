@@ -284,20 +284,17 @@ private :
 public :
 
     Semi_markov_data();
-    Semi_markov_data(int inb_variable , const Histogram &ihlength , bool init_flag);
-    Semi_markov_data(int inb_sequence , int *ilength , int ***isequence ,
-                     const Semi_markov &ismarkov);
-    Semi_markov_data(const Markovian_sequences &seq , bool initial_run_flag);
-    Semi_markov_data(const Markovian_sequences &seq , int variable);
-    Semi_markov_data(const Markovian_sequences &seq , int variable ,
-                     bool initial_run_flag);
-    Semi_markov_data(const Semi_markov_data &seq , bool model_flag = true)
-    :Markovian_sequences(seq) { copy(seq , model_flag); }
+    Semi_markov_data(const Histogram &ihlength , int inb_variable , bool init_flag = false);
+    Semi_markov_data(const Markovian_sequences &seq);
+    Semi_markov_data(const Markovian_sequences &seq , char transform , bool initial_run_flag);
+    Semi_markov_data(const Semi_markov_data &seq , bool model_flag = true , char transform = 'c')
+    :Markovian_sequences(seq , transform) { copy(seq , model_flag); }
     ~Semi_markov_data();
     Semi_markov_data& operator=(const Semi_markov_data &seq);
 
     Distribution_data* extract(Format_error &error , int type ,
                                int variable , int value) const;
+    Semi_markov_data* remove_index_parameter(Format_error &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(Format_error &error , const char *path ,

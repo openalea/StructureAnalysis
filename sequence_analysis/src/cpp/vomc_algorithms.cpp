@@ -309,7 +309,7 @@ double Variable_order_markov::likelihood_computation(const Markovian_sequences &
         switch (type) {
 
         case 'o' : {
-          pstate = seq.sequence[i][0];
+          pstate = seq.int_sequence[i][0];
           proba = initial[*pstate];
           memory = child[0][*pstate];
           start = 1;
@@ -320,7 +320,7 @@ double Variable_order_markov::likelihood_computation(const Markovian_sequences &
           if (max_order <= seq.length[i]) {
             for (j = 1;j < nb_row;j++) {
               if (!child[j]) {
-                pstate = seq.sequence[i][0] + max_order;
+                pstate = seq.int_sequence[i][0] + max_order;
 
                 for (k = 0;k < order[j];k++) {
                   if (*--pstate != state[j][k]) {
@@ -331,7 +331,7 @@ double Variable_order_markov::likelihood_computation(const Markovian_sequences &
                 if (k == order[j]) {
                   proba = initial[j];
                   memory = j;
-                  pstate = seq.sequence[i][0] + max_order - 1;
+                  pstate = seq.int_sequence[i][0] + max_order - 1;
                   start = max_order;
                   break;
                 }
@@ -359,7 +359,7 @@ double Variable_order_markov::likelihood_computation(const Markovian_sequences &
         }
 
         for (j = 0;j < nb_output_process;j++) {
-          poutput[j] = seq.sequence[i][j + 1] + start - 1;
+          poutput[j] = seq.int_sequence[i][j + 1] + start - 1;
 
           if (nonparametric_process[j + 1]) {
             proba = nonparametric_process[j + 1]->observation[*pstate]->mass[*poutput[j]];
@@ -522,8 +522,8 @@ void Variable_order_markov_data::observation_histogram_correction(Histogram **co
 
 
   for (i = 0;i < nb_sequence;i++) {
-    pstate = sequence[i][0];
-    poutput = sequence[i][variable];
+    pstate = int_sequence[i][0];
+    poutput = int_sequence[i][variable];
     for (j = 0;j < MIN(start , length[i]);j++) {
       (corrected_observation[*pstate++]->frequency[*poutput++])--;
     }
@@ -704,7 +704,7 @@ void Markovian_sequences::transition_count_computation(const Variable_order_chai
     switch (markov.type) {
 
     case 'o' : {
-      pstate = sequence[i][0];
+      pstate = int_sequence[i][0];
       (chain_data.initial[*pstate])++;
       memory = markov.child[0][*pstate];
       start = 1;
@@ -715,7 +715,7 @@ void Markovian_sequences::transition_count_computation(const Variable_order_chai
       if (markov.max_order <= length[i]) {
         for (j = 1;j < chain_data.nb_row;j++) {
           if (!markov.child[j]) {
-            pstate = sequence[i][0] + markov.max_order;
+            pstate = int_sequence[i][0] + markov.max_order;
 
             for (k = 0;k < markov.order[j];k++) {
               if (*--pstate != markov.state[j][k]) {
@@ -726,7 +726,7 @@ void Markovian_sequences::transition_count_computation(const Variable_order_chai
             if (k == markov.order[j]) {
               (chain_data.initial[j])++;
               memory = j;
-              pstate = sequence[i][0] + markov.max_order - 1;
+              pstate = int_sequence[i][0] + markov.max_order - 1;
               start = markov.max_order;
               break;
             }
@@ -1004,7 +1004,7 @@ void Variable_order_markov_data::order0_estimation(Variable_order_markov &markov
  *--------------------------------------------------------------*/
 
 Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(Format_error &error ,
-                                                                             ostream &os , char type ,
+                                                                             ostream &os , char model_type ,
                                                                              int min_order , int max_order ,
                                                                              int algorithm , double threshold ,
                                                                              int estimator , bool global_initial_transition ,
@@ -1024,34 +1024,43 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
   completed_markov = 0;
   error.init();
 
-  if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
     status = false;
-    error.update(SEQ_error[SEQR_NB_STATE]);
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
   }
 
-  else if (!characteristics[0]) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] == 0) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
-        error.update((error_message.str()).c_str());
+  else {
+    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+      status = false;
+      error.update(SEQ_error[SEQR_NB_STATE]);
+    }
+
+    else if (!characteristics[0]) {
+      for (i = 0;i < marginal[0]->nb_value;i++) {
+        if (marginal[0]->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
       }
     }
-  }
 
-  if ((min_order < 0) || (min_order >= max_order)) {
-    status = false;
-    error.update(SEQ_error[SEQR_MIN_ORDER]);
-  }
-  if ((max_order <= min_order) || (max_order > ORDER)) {
-    status = false;
-    error.update(SEQ_error[SEQR_MAX_ORDER]);
-  }
-  else {
-    if ((int)pow((double)marginal[0]->nb_value , max_order + 1) > NB_PARAMETER) {
+    if ((min_order < 0) || (min_order >= max_order)) {
       status = false;
-      error.update(SEQ_error[SEQR_NB_PARAMETER]);
+      error.update(SEQ_error[SEQR_MIN_ORDER]);
+    }
+    if ((max_order <= min_order) || (max_order > ORDER)) {
+      status = false;
+      error.update(SEQ_error[SEQR_MAX_ORDER]);
+    }
+    else {
+      if ((int)pow((double)marginal[0]->nb_value , max_order + 1) > NB_PARAMETER) {
+        status = false;
+        error.update(SEQ_error[SEQR_NB_PARAMETER]);
+      }
     }
   }
 
@@ -1061,22 +1070,34 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
       error.correction_update(STAT_error[STATR_NB_VARIABLE] , "1 or 2");
     }
 
-    if (test_hidden(1)) {
+    if ((type[1] != INT_VALUE) && (type[1] != STATE)) {
       status = false;
-      ostringstream error_message;
+      ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                    << SEQ_error[SEQR_OVERLAP];
-      error.update((error_message.str()).c_str());
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-    if (!characteristics[1]) {
-      for (i = 0;i < marginal[1]->nb_value;i++) {
-        if (marginal[1]->frequency[i] == 0) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                        << STAT_error[STATR_MISSING_VALUE] << " " << i;
-          error.update((error_message.str()).c_str());
+    else {
+      if (test_hidden(1)) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                      << SEQ_error[SEQR_OVERLAP];
+        error.update((error_message.str()).c_str());
+      }
+
+      if (!characteristics[1]) {
+        for (i = 0;i < marginal[1]->nb_value;i++) {
+          if (marginal[1]->frequency[i] == 0) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                          << STAT_error[STATR_MISSING_VALUE] << " " << i;
+            error.update((error_message.str()).c_str());
+          }
         }
       }
     }
@@ -1089,7 +1110,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 
     sample_size = cumul_length;
     os << "\n" << STAT_label[STATL_SAMPLE_SIZE] << ":";
-    for (i = 0;i <= (int)round(log((double)cumul_length) / log((double)marginal[0]->nb_value));i++) {
+    for (i = 0;i <= (int)::round(log((double)cumul_length) / log((double)marginal[0]->nb_value));i++) {
       os << " " << sample_size;
       sample_size -= length_nb_sequence;
       length_nb_sequence -= hlength->frequency[i + 1];
@@ -1097,7 +1118,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
     os << endl;
 
     os << SEQ_label[SEQL_RECOMMENDED_MAX_ORDER] << ": "
-       << (int)round(log((double)cumul_length) / log((double)marginal[0]->nb_value)) << endl;
+       << (int)::round(log((double)cumul_length) / log((double)marginal[0]->nb_value)) << endl;
 #   endif
 
 /*    if ((algorithm == CONTEXT) && (threshold == CONTEXT_THRESHOLD)) {
@@ -1111,7 +1132,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
       os << "\n" << SEQ_label[SEQL_PRUNING_THRESHOLD] << ": " << threshold << endl;
     } */
 
-    markov = new Variable_order_markov(type , marginal[0]->nb_value , max_order , true);
+    markov = new Variable_order_markov(model_type , marginal[0]->nb_value , max_order , true);
 
     // comptage des transitions et calcul du nombre des parametres independants correspondant
 
@@ -1531,7 +1552,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
                                                  (nb_variable == 2 ? marginal[1]->nb_value : 0));
     delete markov;
 
-    completed_markov->markov_data = new Variable_order_markov_data(*this , (completed_markov->type == 'e' ? true : false));
+    completed_markov->markov_data = new Variable_order_markov_data(*this , 'c' , (completed_markov->type == 'e' ? true : false));
 
     seq = completed_markov->markov_data;
     seq->state_variable_init();
@@ -1647,18 +1668,27 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
   markov = 0;
   error.init();
 
-  if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
     status = false;
-    error.update(SEQ_error[SEQR_NB_STATE]);
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
   }
 
-  else if (!characteristics[0]) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] == 0) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
-        error.update((error_message.str()).c_str());
+  else {
+    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+      status = false;
+      error.update(SEQ_error[SEQR_NB_STATE]);
+    }
+
+    else if (!characteristics[0]) {
+      for (i = 0;i < marginal[0]->nb_value;i++) {
+        if (marginal[0]->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
       }
     }
   }
@@ -1669,31 +1699,48 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
       error.correction_update(STAT_error[STATR_NB_VARIABLE] , "1 or 2");
     }
 
-    if (test_hidden(1)) {
+    if ((type[1] != INT_VALUE) && (type[1] != STATE)) {
       status = false;
-      ostringstream error_message;
+      ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                    << SEQ_error[SEQR_OVERLAP];
-      error.update((error_message.str()).c_str());
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-    if (!characteristics[1]) {
-      for (i = 0;i < marginal[1]->nb_value;i++) {
-        if (marginal[1]->frequency[i] == 0) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                        << STAT_error[STATR_MISSING_VALUE] << " " << i;
-          error.update((error_message.str()).c_str());
+    else {
+      if (test_hidden(1)) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                      << SEQ_error[SEQR_OVERLAP];
+        error.update((error_message.str()).c_str());
+      }
+
+      if (!characteristics[1]) {
+        for (i = 0;i < marginal[1]->nb_value;i++) {
+          if (marginal[1]->frequency[i] == 0) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                          << STAT_error[STATR_MISSING_VALUE] << " " << i;
+            error.update((error_message.str()).c_str());
+          }
         }
       }
     }
   }
 
+  if (imarkov.nb_output_process != nb_variable - 1) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+  }
+
   if (status) {
     markov = new Variable_order_markov(imarkov , false);
 
-    markov->markov_data = new Variable_order_markov_data(*this , (markov->type == 'e' ? true : false));
+    markov->markov_data = new Variable_order_markov_data(*this , 'c' , (markov->type == 'e' ? true : false));
 
     seq = markov->markov_data;
     seq->state_variable_init();
@@ -1801,7 +1848,8 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
   }
 
   if (status) {
-    imarkov = new Variable_order_markov(type , marginal[0]->nb_value , order , true);
+    imarkov = new Variable_order_markov(type , marginal[0]->nb_value , order , true ,
+                                        nb_variable - 1 , (nb_variable == 2 ? marginal[1]->nb_value : 0));
     imarkov->build_previous_memory();
 
     markov = variable_order_markov_estimation(error , *imarkov , global_initial_transition ,
@@ -2403,32 +2451,42 @@ bool Markovian_sequences::transition_count(Format_error &error , ostream &os ,
     status = false;
     error.correction_update(STAT_error[STATR_NB_VARIABLE] , 1);
   }
+
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
+    status = false;
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+  }
+
+  else {
+    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+      status = false;
+      error.update(SEQ_error[SEQR_NB_STATE]);
+    }
+
+    else if (!characteristics[0]) {
+      for (i = 0;i < marginal[0]->nb_value;i++) {
+        if (marginal[0]->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+  }
+
   if ((max_order < 1) || (max_order > ORDER)) {
     status = false;
     error.update(SEQ_error[SEQR_ORDER]);
-  }
-
-  if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
-    status = false;
-    error.update(SEQ_error[SEQR_NB_STATE]);
-  }
-
-  else if (!characteristics[0]) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] == 0) {
-        status = false;
-        ostringstream error_message;
-        error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
-        error.update((error_message.str()).c_str());
-      }
-    }
   }
 
   if (status) {
     markov = new Variable_order_markov('o' , marginal[0]->nb_value , max_order , true);
     markov->build_previous_memory();
 
-    markov->markov_data = new Variable_order_markov_data(*this , false);
+    markov->markov_data = new Variable_order_markov_data(*this , 'c' , false);
 
     seq = markov->markov_data;
     seq->state_variable_init();
@@ -2720,7 +2778,14 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
 
   error.init();
 
-  if (!characteristics[0]) {
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
+    status = false;
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+  }
+
+  else if (!characteristics[0]) {
     for (i = 0;i < marginal[0]->nb_value;i++) {
       if (marginal[0]->frequency[i] == 0) {
         status = false;
@@ -2737,22 +2802,34 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
       error.correction_update(STAT_error[STATR_NB_VARIABLE] , "1 or 2");
     }
 
-    if (test_hidden(1)) {
+    if ((type[1] != INT_VALUE) && (type[1] != STATE)) {
       status = false;
-      ostringstream error_message;
+      ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                    << SEQ_error[SEQR_OVERLAP];
-      error.update((error_message.str()).c_str());
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-    else if (!characteristics[1]) {
-      for (i = 0;i < marginal[1]->nb_value;i++) {
-        if (marginal[1]->frequency[i] == 0) {
-          status = false;
-          ostringstream error_message;
-          error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
-                        << STAT_error[STATR_MISSING_VALUE] << " " << i;
-          error.update((error_message.str()).c_str());
+    else {
+      if (test_hidden(1)) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                      << SEQ_error[SEQR_OVERLAP];
+        error.update((error_message.str()).c_str());
+      }
+
+      if (!characteristics[1]) {
+        for (i = 0;i < marginal[1]->nb_value;i++) {
+          if (marginal[1]->frequency[i] == 0) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
+                          << STAT_error[STATR_MISSING_VALUE] << " " << i;
+            error.update((error_message.str()).c_str());
+          }
         }
       }
     }
@@ -2876,7 +2953,7 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
 
     // initialisations
 
-    seq = new Variable_order_markov_data(nb_output_process + 1 , hlength , false);
+    seq = new Variable_order_markov_data(hlength , nb_output_process + 1);
     seq->type[0] = STATE;
 
     seq->markov = new Variable_order_markov(*this , false);
@@ -2890,9 +2967,9 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
     }
 
     for (i = 0;i < seq->nb_sequence;i++) {
-      pstate = seq->sequence[i][0];
+      pstate = seq->int_sequence[i][0];
       for (j = 0;j < markov->nb_output_process;j++) {
-        poutput[j] = seq->sequence[i][j + 1];
+        poutput[j] = seq->int_sequence[i][j + 1];
       }
 
       switch (markov->type) {
@@ -3577,4 +3654,918 @@ int** Variable_order_markov_iterator::simulation(int length , bool initializatio
   simulation(seq , length , initialization);
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Correction de la vraisemblance de sequences pour une chaine de Markov.
+ *
+ *  argument : reference sur un objet Variable_order_markov_data.
+ *
+ *--------------------------------------------------------------*/
+
+double Variable_order_markov::likelihood_correction(const Variable_order_markov_data &seq) const
+
+{
+  register int i;
+  double correction;
+
+
+  correction = 0.;
+
+  for (i = 0;i < nb_state;i++) {
+    if (seq.chain_data->initial[i] > 0) {
+      correction += seq.chain_data->initial[i] * log(initial[i]);
+    }
+  }
+
+  if (nb_output_process > 0) {
+    for (i = 0;i < seq.nb_sequence;i++) {
+      correction += log(nonparametric_process[1]->observation[seq.int_sequence[i][0][0]]->mass[seq.int_sequence[i][1][0]]);
+    }
+  }
+
+  return correction;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Estimation des parametres d'une chaine de Markov a partir
+ *  d'un echantillon de sequences.
+ *
+ *  arguments : reference sur un objet Format_error, stream,
+ *              table de transcodage des symboles, type de penalisation (AIC(c)/BIC),
+ *              ordre de la chaine de Markov, flag sur le calcul des lois de comptage.
+ *
+ *--------------------------------------------------------------*/
+
+Variable_order_markov* Markovian_sequences::lumpability_estimation(Format_error &error , ostream &os ,
+                                                                   int *symbol , int penalty_type ,
+                                                                   int order , bool counting_flag) const
+
+{
+  bool status = true , *presence;
+  register int i;
+  int max_symbol , nb_state[2] , nb_parameter[2];
+  double penalty , max_likelihood , likelihood[2] , penalized_likelihood[2];
+  Variable_order_markov *markov , *lumped_markov;
+  Markovian_sequences *seq;
+
+
+  markov = 0;
+  error.init();
+
+  if (nb_variable > 1) {
+    status = false;
+    error.correction_update(STAT_error[STATR_NB_VARIABLE] , 1);
+  }
+
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
+    status = false;
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+  }
+
+  else {
+    max_symbol = 0;
+    for (i = 0;i < marginal[0]->nb_value;i++) {
+      if ((symbol[i] < 0) || (symbol[i] >= marginal[0]->nb_value - 1)) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_SYMBOL] << " " << symbol[i] << " "
+                      << STAT_error[STATR_NOT_ALLOWED];
+        error.update((error_message.str()).c_str());
+      }
+      else if (symbol[i] > max_symbol) {
+        max_symbol = symbol[i];
+      }
+    }
+
+    if (max_symbol == 0) {
+      status = false;
+      error.update(STAT_error[STATR_NB_SYMBOL]);
+    }
+
+    if (status) {
+      presence = new bool[max_symbol + 1];
+      for (i = 0;i <= max_symbol;i++) {
+        presence[i] = false;
+      }
+
+      for (i = 0;i < marginal[0]->nb_value;i++) {
+        presence[symbol[i]] = true;
+      }
+
+      for (i = 0;i <= max_symbol;i++) {
+        if (!presence[i]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+
+      delete [] presence;
+    }
+  }
+
+  if ((order < 1) || (order > ORDER)) {
+    status = false;
+    error.update(SEQ_error[SEQR_ORDER]);
+  }
+
+  if (status) {
+//    markov = variable_order_markov_estimation(error , type , order , true , false);
+    markov = variable_order_markov_estimation(error , 'o' , order , true , false);
+
+    if (markov) {
+
+      // calcul du terme de compensation
+
+      switch (penalty_type) {
+      case AIC :
+        penalty = 1.;
+        break;
+      case BIC :
+        penalty = 0.5 * log((double)cumul_length);
+        break;
+      }
+
+      nb_state[1] = markov->nb_state;
+      nb_parameter[1] = markov->nb_parameter_computation();
+      likelihood[1] = markov->markov_data->likelihood -
+                      markov->likelihood_correction(*(markov->markov_data));
+
+      if (penalty_type == AICc) {
+        if (nb_parameter[1] < cumul_length - 1) {
+          penalized_likelihood[1] = likelihood[1] - (double)(nb_parameter[1] * cumul_length) /
+                                    (double)(cumul_length - nb_parameter[1] - 1);
+        }
+        else {
+          penalized_likelihood[1] = D_INF;
+        }
+      }
+
+      else {
+        penalized_likelihood[1] = likelihood[1] - nb_parameter[1] * penalty;
+      }
+
+      max_likelihood = penalized_likelihood[1];
+
+      seq = transcode(error , 1 , symbol , true);
+
+//      lumped_markov = seq->variable_order_markov_estimation(error , type , order , true , false);
+      lumped_markov = seq->variable_order_markov_estimation(error , 'o' , order , true , false);
+
+      if (lumped_markov) {
+
+#       ifdef MESSAGE
+        {
+          register int j , k;
+          int nb_output , sum , lumped_nb_parameter , *pstate , *poutput , *pfrequency ,
+              ***observation_data;
+          double lumped_likelihood , lumped_penalized_likelihood;
+
+
+          // 2eme propriete d'aggregation (probabilites d'observation attachees aux transitions)
+
+          observation_data = new int**[seq->marginal[0]->nb_value];
+          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+            observation_data[i] = new int*[seq->marginal[1]->nb_value];
+            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+              observation_data[i][j] = new int[seq->marginal[1]->nb_value];
+            }
+            for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+              pfrequency = observation_data[i][j];
+              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                *pfrequency++ = 0;
+              }
+            }
+          }
+
+          // accumulation des frequences d'observation
+
+          for (i = 0;i < seq->nb_sequence;i++) {
+            pstate = seq->int_sequence[i][0] + 1;
+            poutput = seq->int_sequence[i][1] + 1;
+            for (j = 1;j < seq->length[i];j++) {
+              observation_data[*(pstate - 1)][*pstate][*poutput]++;
+              pstate++;
+              poutput++;
+            }
+          }
+
+          // estimation des probabilites d'observation, calcul de la vraisemblance et
+          // du nombre de parametres independants
+
+          lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
+                                lumped_markov->nonparametric_process[1]->nb_parameter_computation(0.);
+          lumped_likelihood = lumped_markov->likelihood_computation(*(lumped_markov->markov_data->chain_data));
+
+          if (penalty_type == AICc) {
+            if (lumped_nb_parameter < cumul_length - 1) {
+              lumped_penalized_likelihood = lumped_likelihood - (double)(lumped_nb_parameter * cumul_length) /
+                                            (double)(cumul_length - lumped_nb_parameter - 1);
+            }
+            else {
+              lumped_penalized_likelihood = D_INF;
+            }
+          }
+
+          else {
+            lumped_penalized_likelihood = lumped_likelihood - lumped_nb_parameter * penalty;
+          }
+
+          os << "\n" << lumped_markov->nb_state << " " << STAT_label[STATL_STATES]
+             << "   2 * " << SEQ_label[SEQL_MARKOV_CHAIN] << " " << STAT_label[STATL_LIKELIHOOD] << ": "
+             << 2 * lumped_likelihood << "   " << lumped_nb_parameter << " "
+             << STAT_label[lumped_nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
+             << STAT_criterion_word[penalty_type] << "): " << 2 * lumped_penalized_likelihood << endl;
+
+          os << "\n" << STAT_word[STATW_OBSERVATION_PROBABILITIES] << endl;
+
+          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+              nb_output = 0;
+              sum = 0;
+              pfrequency = observation_data[i][j];
+              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                if (*pfrequency > 0) {
+                  nb_output++;
+                  sum += *pfrequency;
+                }
+                pfrequency++;
+              }
+
+              if (nb_output > 1) {
+                os << i << " -> " << j << " : ";
+
+                lumped_nb_parameter += (nb_output - 1);
+
+                pfrequency = observation_data[i][j];
+                for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                  if (*pfrequency > 0) {
+                    os << k << " (" << (double)*pfrequency / (double)sum << ") | ";
+
+                    lumped_likelihood += *pfrequency * log((double)*pfrequency / (double)sum);
+                  }
+                  pfrequency++;
+                }
+
+                os << endl;
+              }
+            }
+          }
+
+          if (penalty_type == AICc) {
+            if (lumped_nb_parameter < cumul_length - 1) {
+              lumped_penalized_likelihood = lumped_likelihood - (double)(lumped_nb_parameter * cumul_length) /
+                                            (double)(cumul_length - lumped_nb_parameter - 1);
+            }
+            else {
+              lumped_penalized_likelihood = D_INF;
+            }
+          }
+
+          else {
+            lumped_penalized_likelihood = lumped_likelihood - lumped_nb_parameter * penalty;
+          }
+
+          os << "\n" << lumped_markov->nb_state << " " << STAT_label[STATL_STATES]
+             << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * lumped_likelihood << "   "
+             << lumped_nb_parameter << " " << STAT_label[lumped_nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
+             << STAT_criterion_word[penalty_type] << "): " << 2 * lumped_penalized_likelihood << endl;
+
+          // 3eme propriete d'aggregation (classique)
+
+          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+              pfrequency = observation_data[i][j];
+              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                *pfrequency++ = 0;
+              }
+            }
+          }
+
+          // accumulation des frequences d'observation
+
+          for (i = 0;i < seq->nb_sequence;i++) {
+            pstate = seq->int_sequence[i][0] + 1;
+            poutput = seq->int_sequence[i][1] + 1;
+            for (j = 1;j < seq->length[i];j++) {
+              observation_data[*pstate][*(poutput - 1)][*poutput]++;
+              pstate++;
+              poutput++;
+            }
+          }
+
+          // estimation des probabilites d'observation, calcul de la vraisemblance et
+          // du nombre de parametres independants
+
+          lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
+                                lumped_markov->nonparametric_process[1]->nb_parameter_computation(0.);
+          lumped_likelihood = lumped_markov->likelihood_computation(*(lumped_markov->markov_data->chain_data));
+
+          os << "\n" << STAT_word[STATW_OBSERVATION_PROBABILITIES] << endl;
+
+          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+              nb_output = 0;
+              sum = 0;
+              pfrequency = observation_data[i][j];
+              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                if (*pfrequency > 0) {
+                  nb_output++;
+                  sum += *pfrequency;
+                }
+                pfrequency++;
+              }
+
+              if (nb_output > 1) {
+                os << j << ", " << i << " : ";
+
+                lumped_nb_parameter += (nb_output - 1);
+
+                pfrequency = observation_data[i][j];
+                for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                  if (*pfrequency > 0) {
+                    os << k << " (" << (double)*pfrequency / (double)sum << ") | ";
+
+                    lumped_likelihood += *pfrequency * log((double)*pfrequency / (double)sum);
+                  }
+                  pfrequency++;
+                }
+
+                os << endl;
+              }
+            }
+          }
+
+          if (penalty_type == AICc) {
+            if (lumped_nb_parameter < cumul_length - 1) {
+              lumped_penalized_likelihood = lumped_likelihood - (double)(lumped_nb_parameter * cumul_length) /
+                                            (double)(cumul_length - lumped_nb_parameter - 1);
+            }
+            else {
+              lumped_penalized_likelihood = D_INF;
+            }
+          }
+
+          else {
+            lumped_penalized_likelihood = lumped_likelihood - lumped_nb_parameter * penalty;
+          }
+
+          os << "\n" << lumped_markov->nb_state << " " << STAT_label[STATL_STATES]
+             << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * lumped_likelihood << "   "
+             << lumped_nb_parameter << " " << STAT_label[lumped_nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+             << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
+             << STAT_criterion_word[penalty_type] << "): " << 2 * lumped_penalized_likelihood << endl;
+
+          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+              delete [] observation_data[i][j];
+            }
+            delete [] observation_data[i];
+          }
+          delete [] observation_data;
+        }
+#       endif
+
+        nb_state[0] = lumped_markov->nb_state;
+        nb_parameter[0] = lumped_markov->nb_parameter_computation();
+        likelihood[0] = lumped_markov->markov_data->likelihood -
+                        lumped_markov->likelihood_correction(*(lumped_markov->markov_data));
+
+        if (penalty_type == AICc) {
+          if (nb_parameter[0] < cumul_length - 1) {
+            penalized_likelihood[0] = likelihood[0] - (double)(nb_parameter[0] * cumul_length) /
+                                      (double)(cumul_length - nb_parameter[0] - 1);
+          }
+          else {
+            penalized_likelihood[0] = D_INF;
+          }
+        }
+
+        else {
+          penalized_likelihood[0] = likelihood[0] - nb_parameter[0] * penalty;
+        }
+
+#       ifdef DEBUG
+        if (penalized_likelihood[0] > max_likelihood) {
+          markov->ascii_write(os);
+        }
+        else {
+          lumped_markov->ascii_write(os);
+        }
+#       endif
+
+        if (penalized_likelihood[0] > max_likelihood) {
+          max_likelihood = penalized_likelihood[0];
+          delete markov;
+          markov = lumped_markov;
+        }
+        else {
+          delete lumped_markov;
+        }
+
+#       ifdef DEBUG
+        lumpability_test(error , symbol , os , order);
+#       endif
+
+#       ifdef MESSAGE
+        {
+/*          double norm = 0. , weight[2];
+
+          for (i = 0;i < 2;i++) {
+            weight[i] = exp(penalized_likelihood[i] - max_likelihood);
+            norm += weight[i];
+          } */
+
+          for (i = 0;i < 2;i++) {
+            os << "\n" << nb_state[i] << " " << STAT_label[STATL_STATES]
+               << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * likelihood[i] << "   "
+               << nb_parameter[i] << " " << STAT_label[nb_parameter[i] == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+               << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
+               << STAT_criterion_word[penalty_type] << "): " << 2 * penalized_likelihood[i] << endl;
+//               << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[i] / norm << endl;
+          }
+        }
+#       endif
+
+      }
+
+      delete seq;
+    }
+
+    // calcul des lois caracteristiques du modele
+
+    markov->component_computation();
+    markov->characteristic_computation(*(markov->markov_data) , counting_flag , I_DEFAULT , false);
+  }
+
+  return markov;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Test d'aggregation d'etats pour une chaine de Markov.
+ *
+ *  arguments : reference sur un objet Format_error, stream,
+ *              table de transcodage des symboles, ordre de la chaine de Markov.
+ *
+ *--------------------------------------------------------------*/
+
+bool Markovian_sequences::lumpability_test(Format_error &error , ostream &os , int *symbol ,
+                                           int order) const
+
+{
+  bool status = true , *presence;
+  register int i , j , k;
+  int max_symbol , df , sum , *ftransition;
+  double value , var1 , var2;
+  Test *test;
+  Variable_order_markov *markov , *lumped_markov;
+  Markovian_sequences *seq;
+
+
+  error.init();
+
+  if (nb_variable > 1) {
+    status = false;
+    error.correction_update(STAT_error[STATR_NB_VARIABLE] , 1);
+  }
+
+  if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
+    status = false;
+    ostringstream correction_message;
+    correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+    error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+  }
+
+  else {
+    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+      status = false;
+      error.update(SEQ_error[SEQR_NB_STATE]);
+    }
+
+    else if (!characteristics[0]) {
+      for (i = 0;i < marginal[0]->nb_value;i++) {
+        if (marginal[0]->frequency[i] == 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+    }
+
+    max_symbol = 0;
+    for (i = 0;i < marginal[0]->nb_value;i++) {
+      if ((symbol[i] < 0) || (symbol[i] >= marginal[0]->nb_value - 1)) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_SYMBOL] << " " << symbol[i] << " "
+                      << STAT_error[STATR_NOT_ALLOWED];
+        error.update((error_message.str()).c_str());
+      }
+      else if (symbol[i] > max_symbol) {
+        max_symbol = symbol[i];
+      }
+    }
+
+    if (max_symbol == 0) {
+      status = false;
+      error.update(STAT_error[STATR_NB_SYMBOL]);
+    }
+
+    if (status) {
+      presence = new bool[max_symbol + 1];
+      for (i = 0;i <= max_symbol;i++) {
+        presence[i] = false;
+      }
+
+      for (i = 0;i < marginal[0]->nb_value;i++) {
+        presence[symbol[i]] = true;
+      }
+
+      for (i = 0;i <= max_symbol;i++) {
+        if (!presence[i]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_error[STATR_MISSING_SYMBOL] << " " << i;
+          error.update((error_message.str()).c_str());
+        }
+      }
+
+      delete [] presence;
+    }
+  }
+
+  if ((order < 1) || (order > ORDER)) {
+    status = false;
+    error.update(SEQ_error[SEQR_ORDER]);
+  }
+
+  if (status) {
+//    markov = variable_order_markov_estimation(error , type , order , true , false);
+    markov = variable_order_markov_estimation(error , 'o' , order , true , false);
+
+    seq = transcode(error , 1 , symbol , true);
+
+//    lumped_markov = seq->variable_order_markov_estimation(error , type , order , true , false);
+    lumped_markov = seq->variable_order_markov_estimation(error , 'o' , order , true , false);
+
+    df = markov->nb_parameter_computation() - lumped_markov->nb_parameter_computation();
+
+    value = 0.;
+
+    for (i = 1;i < markov->nb_row;i++) {
+      if (markov->memory_type[i] == TERMINAL) {
+        ftransition = markov->markov_data->chain_data->transition[i];
+        sum = 0;
+        for (j = 0;j < markov->nb_state;j++) {
+          sum += *ftransition++;
+        }
+
+        if (sum > 0) {
+          for (j = 1;j < lumped_markov->nb_row;j++) {
+            if ((lumped_markov->memory_type[j] == TERMINAL) &&
+                (lumped_markov->order[j] == markov->order[i])) {
+              for (k = 0;k < lumped_markov->order[j];k++) {
+                if (lumped_markov->state[j][k] != symbol[markov->state[i][k]]) {
+                  break;
+                }
+              }
+
+              if (k == lumped_markov->order[j]) {
+                ftransition = markov->markov_data->chain_data->transition[i];
+                for (k = 0;k < markov->nb_state;k++) {
+                  var1 = (double)sum * lumped_markov->nonparametric_process[1]->observation[symbol[k]]->mass[k] *
+                         lumped_markov->transition[j][symbol[k]];
+                  if (var1 > 0.) {
+                    var2 = *ftransition - var1;
+                    value += var2 * var2 / var1;
+                  }
+                  ftransition++;
+                }
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    test = new Test(CHI2 , true , df , I_DEFAULT , value);
+
+    test->chi2_critical_probability_computation();
+
+#   ifdef MESSAGE
+    os << *test;
+#   endif
+
+    delete test;
+
+    value = 2 * (markov->markov_data->likelihood - markov->likelihood_correction(*(markov->markov_data)) -
+            (lumped_markov->markov_data->likelihood - lumped_markov->likelihood_correction(*(lumped_markov->markov_data))));
+
+    test = new Test(CHI2 , true , df , I_DEFAULT , value);
+
+    test->chi2_critical_probability_computation();
+
+#   ifdef MESSAGE
+    os << "\n" << STAT_label[STATL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
+#   endif
+
+    delete test;
+
+#   ifdef MESSAGE
+    {
+      register int k;
+      int nb_output , sum , lumped_nb_parameter , *pstate , *poutput , *pfrequency ,
+          ***observation_data;
+      double lumped_likelihood , *pproba , ***observation_proba;
+
+
+      // 2eme propriete d'aggregation (probabilites d'observation attachees aux transitions)
+
+      observation_data = new int**[seq->marginal[0]->nb_value];
+      observation_proba = new double**[seq->marginal[0]->nb_value];
+      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+        observation_data[i] = new int*[seq->marginal[1]->nb_value];
+        observation_proba[i] = new double*[seq->marginal[1]->nb_value];
+        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+          observation_data[i][j] = new int[seq->marginal[1]->nb_value];
+          observation_proba[i][j] = new double[seq->marginal[1]->nb_value];
+        }
+        for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+          pfrequency = observation_data[i][j];
+          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            *pfrequency++ = 0;
+          }
+        }
+      }
+
+      // accumulation des frequences d'observation
+
+      for (i = 0;i < seq->nb_sequence;i++) {
+        pstate = seq->int_sequence[i][0] + 1;
+        poutput = seq->int_sequence[i][1] + 1;
+        for (j = 1;j < seq->length[i];j++) {
+          observation_data[*(pstate - 1)][*pstate][*poutput]++;
+          pstate++;
+          poutput++;
+        }
+      }
+
+      // estimation des probabilites d'observation, calcul de la vraisemblance et
+      // du nombre de parametres independants
+
+      lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
+                            lumped_markov->nonparametric_process[1]->nb_parameter_computation(0.);
+      lumped_likelihood = lumped_markov->likelihood_computation(*(lumped_markov->markov_data->chain_data));
+
+      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+          nb_output = 0;
+          sum = 0;
+          pfrequency = observation_data[i][j];
+          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            if (*pfrequency > 0) {
+              nb_output++;
+              sum += *pfrequency;
+            }
+            pfrequency++;
+          }
+
+          if (nb_output > 1) {
+            lumped_nb_parameter += (nb_output - 1);
+
+            pfrequency = observation_data[i][j];
+            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              if (*pfrequency > 0) {
+                lumped_likelihood += *pfrequency * log((double)*pfrequency / (double)sum);
+              }
+              pfrequency++;
+            }
+          }
+
+          if (sum > 0) {
+            pproba = observation_proba[i][j];
+            pfrequency = observation_data[i][j];
+            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              *pproba++ = (double)*pfrequency++ / (double)sum;
+            }
+          }
+        }
+      }
+
+      df = markov->nb_parameter_computation() - lumped_nb_parameter;
+
+      value = 0.;
+
+      for (i = 1;i < markov->nb_row;i++) {
+        if (markov->memory_type[i] == TERMINAL) {
+          ftransition = markov->markov_data->chain_data->transition[i];
+          sum = 0;
+          for (j = 0;j < markov->nb_state;j++) {
+            sum += *ftransition++;
+          }
+
+          if (sum > 0) {
+            for (j = 1;j < lumped_markov->nb_row;j++) {
+              if ((lumped_markov->memory_type[j] == TERMINAL) &&
+                  (lumped_markov->order[j] == markov->order[i])) {
+                for (k = 0;k < lumped_markov->order[j];k++) {
+                  if (lumped_markov->state[j][k] != symbol[markov->state[i][k]]) {
+                    break;
+                  }
+                }
+
+                if (k == lumped_markov->order[j]) {
+                  ftransition = markov->markov_data->chain_data->transition[i];
+                  for (k = 0;k < markov->nb_state;k++) {
+                    var1 = (double)sum * observation_proba[symbol[markov->state[i][0]]][symbol[k]][k] *
+                           lumped_markov->transition[j][symbol[k]];
+                    if (var1 > 0.) {
+                      var2 = *ftransition - var1;
+                      value += var2 * var2 / var1;
+                    }
+                    ftransition++;
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      test = new Test(CHI2 , true , df , I_DEFAULT , value);
+
+      test->chi2_critical_probability_computation();
+
+      os << "\n" << *test;
+
+      delete test;
+
+      value = 2 * (markov->markov_data->likelihood - markov->likelihood_correction(*(markov->markov_data)) - lumped_likelihood);
+
+      test = new Test(CHI2 , true , df , I_DEFAULT , value);
+
+      test->chi2_critical_probability_computation();
+
+      os << "\n" << STAT_label[STATL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
+
+      delete test;
+
+      // 3eme propriete d'aggregation (classique)
+
+      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+          pfrequency = observation_data[i][j];
+          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            *pfrequency++ = 0;
+          }
+        }
+      }
+
+      // accumulation des frequences d'observation
+
+      for (i = 0;i < seq->nb_sequence;i++) {
+        pstate = seq->int_sequence[i][0] + 1;
+        poutput = seq->int_sequence[i][1] + 1;
+        for (j = 1;j < seq->length[i];j++) {
+          observation_data[*pstate][*(poutput - 1)][*poutput]++;
+          pstate++;
+          poutput++;
+        }
+      }
+
+      // estimation des probabilites d'observation, calcul de la vraisemblance et
+      // du nombre de parametres independants
+
+      lumped_nb_parameter = lumped_markov->nb_parameter_computation() -
+                            lumped_markov->nonparametric_process[1]->nb_parameter_computation(0.);
+      lumped_likelihood = lumped_markov->likelihood_computation(*(lumped_markov->markov_data->chain_data));
+
+      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+          nb_output = 0;
+          sum = 0;
+          pfrequency = observation_data[i][j];
+          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            if (*pfrequency > 0) {
+              nb_output++;
+              sum += *pfrequency;
+            }
+            pfrequency++;
+          }
+
+          if (nb_output > 1) {
+            lumped_nb_parameter += (nb_output - 1);
+
+            pfrequency = observation_data[i][j];
+            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              if (*pfrequency > 0) {
+                lumped_likelihood += *pfrequency * log((double)*pfrequency / (double)sum);
+              }
+              pfrequency++;
+            }
+          }
+
+          if (sum > 0) {
+            pproba = observation_proba[i][j];
+            pfrequency = observation_data[i][j];
+            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              *pproba++ = (double)*pfrequency++ / (double)sum;
+            }
+          }
+        }
+      }
+
+      df = markov->nb_parameter_computation() - lumped_nb_parameter;
+
+      value = 0.;
+
+      for (i = 1;i < markov->nb_row;i++) {
+        if (markov->memory_type[i] == TERMINAL) {
+          ftransition = markov->markov_data->chain_data->transition[i];
+          sum = 0;
+          for (j = 0;j < markov->nb_state;j++) {
+            sum += *ftransition++;
+          }
+
+          if (sum > 0) {
+            for (j = 1;j < lumped_markov->nb_row;j++) {
+              if ((lumped_markov->memory_type[j] == TERMINAL) &&
+                  (lumped_markov->order[j] == markov->order[i])) {
+                for (k = 0;k < lumped_markov->order[j];k++) {
+                  if (lumped_markov->state[j][k] != symbol[markov->state[i][k]]) {
+                    break;
+                  }
+                }
+
+                if (k == lumped_markov->order[j]) {
+                  ftransition = markov->markov_data->chain_data->transition[i];
+                  for (k = 0;k < markov->nb_state;k++) {
+                    var1 = (double)sum * observation_proba[symbol[k]][markov->state[i][0]][k] *
+                           lumped_markov->transition[j][symbol[k]];
+                    if (var1 > 0.) {
+                      var2 = *ftransition - var1;
+                      value += var2 * var2 / var1;
+                    }
+                    ftransition++;
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      test = new Test(CHI2 , true , df , I_DEFAULT , value);
+
+      test->chi2_critical_probability_computation();
+
+      os << "\n" << *test;
+
+      delete test;
+
+      value = 2 * (markov->markov_data->likelihood - markov->likelihood_correction(*(markov->markov_data)) - lumped_likelihood);
+
+      test = new Test(CHI2 , true , df , I_DEFAULT , value);
+
+      test->chi2_critical_probability_computation();
+
+      os << "\n" << STAT_label[STATL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
+
+      delete test;
+
+      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+          delete [] observation_data[i][j];
+          delete [] observation_proba[i][j];
+        }
+        delete [] observation_data[i];
+        delete [] observation_proba[i];
+      }
+      delete [] observation_data;
+      delete [] observation_proba;
+    }
+#   endif
+
+    delete markov;
+    delete seq;
+    delete lumped_markov;
+  }
+
+  return status;
 }

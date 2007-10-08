@@ -1203,9 +1203,15 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
 {
   if (correl.type == PEARSON) {
     register int i , j , k;
-    int max_lag = correl.length - 1 , *psequence1 , *psequence2 , *pfrequency;
+    int max_lag = correl.length - 1 , *pisequence1 , *pisequence2 , *pfrequency;
+    double *prsequence1 , *prsequence2;
     double mean1 , mean2 , norm , *ppoint;
 
+
+/*    build_real_sequence(variable1);
+    if (variable2 != variable1) {
+      build_real_sequence(variable2);
+    } */
 
     // calcul des moyennes et des variances
 
@@ -1233,11 +1239,48 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
 
       for (j = 0;j < nb_sequence;j++) {
         if (length[j] > i) {
-          psequence1 = sequence[j][variable1];
-          psequence2 = sequence[j][variable2] + i;
+/*          prsequence1 = real_sequence[j][variable1];
+          prsequence2 = real_sequence[j][variable2] + i;
           for (k = 0;k < length[j] - i;k++) {
-            *ppoint += (*psequence1++ - mean1) * (*psequence2++ - mean2);
+            *ppoint += (*prsequence1++ - mean1) * (*prsequence2++ - mean2);
+          } */
+
+          if (type[variable1] != REAL_VALUE) {
+            pisequence1 = int_sequence[j][variable1];
           }
+          else {
+            prsequence1 = real_sequence[j][variable1];
+          }
+
+          if (type[variable2] != REAL_VALUE) {
+            pisequence2 = int_sequence[j][variable2] + i;
+          }
+          else {
+            prsequence2 = real_sequence[j][variable2] + i;
+          }
+
+          if ((type[variable1] != REAL_VALUE) && (type[variable2] != REAL_VALUE)) {
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*pisequence1++ - mean1) * (*pisequence2++ - mean2);
+            }
+          }
+          else if ((type[variable1] != REAL_VALUE) && (type[variable2] == REAL_VALUE)) {
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*pisequence1++ - mean1) * (*prsequence2++ - mean2);
+            }
+          }
+          else if ((type[variable1] == REAL_VALUE) && (type[variable2] != REAL_VALUE)) {
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*prsequence1++ - mean1) * (*pisequence2++ - mean2);
+            }
+          }
+//          else if ((type[variable1] == REAL_VALUE) && (type[variable2] == REAL_VALUE)) {
+          else {
+            for (k = 0;k < length[j] - i;k++) {
+              *ppoint += (*prsequence1++ - mean1) * (*prsequence2++ - mean2);
+            }
+          }
+     
           *pfrequency += length[j] - i;
         }
       }
@@ -1264,11 +1307,13 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
         *pfrequency++ = cumul_length;
       }
     }
+
+//    remove_real_sequence();
   }
 
   else if (correl.type == SPEARMAN) {
     register int i , j , k;
-    int max_lag = correl.length - 1 , *psequence1 , *psequence2 , *pfrequency;
+    int max_lag = correl.length - 1 , *pisequence1 , *pisequence2 , *pfrequency;
     double main_term , correction , norm , rank_mean , *ppoint , *rank[2];
 
 
@@ -1335,10 +1380,10 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
 
       for (j = 0;j < nb_sequence;j++) {
         if (length[j] > i) {
-          psequence1 = sequence[j][variable1];
-          psequence2 = sequence[j][variable2] + i;
+          pisequence1 = int_sequence[j][variable1];
+          pisequence2 = int_sequence[j][variable2] + i;
           for (k = 0;k < length[j] - i;k++) {
-            *ppoint += (rank[0][*psequence1++] - rank_mean) * (rank[1][*psequence2++] - rank_mean);
+            *ppoint += (rank[0][*pisequence1++] - rank_mean) * (rank[1][*pisequence2++] - rank_mean);
           }
           *pfrequency += length[j] - i;
         }
@@ -1374,12 +1419,14 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
 
   else {
     register int i , j , k;
-    int max_lag = correl.length - 1 , nb_vector , *psequence1 , *psequence2 , *pfrequency;
+    int max_lag = correl.length - 1 , nb_vector , *pisequence1 , *pisequence2 , *pfrequency , itype[2];
     double *ppoint;
     Vectors *vec;
 
 
-    vec = new Vectors(2 , cumul_length , 0 , false);
+    itype[0] = INT_VALUE;
+    itype[1] = INT_VALUE;
+    vec = new Vectors(cumul_length , 0 , 2 , itype);
 
     ppoint = correl.point[0];
     pfrequency = correl.frequency;
@@ -1391,11 +1438,11 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
       nb_vector = 0;
       for (j = 0;j < nb_sequence;j++) {
         if (length[j] > i) {
-          psequence1 = sequence[j][variable1];
-          psequence2 = sequence[j][variable2] + i;
+          pisequence1 = int_sequence[j][variable1];
+          pisequence2 = int_sequence[j][variable2] + i;
           for (k = 0;k < length[j] - i;k++) {
-            vec->vector[nb_vector][0] = *psequence1++;
-            vec->vector[nb_vector][1] = *psequence2++;
+            vec->int_vector[nb_vector][0] = *pisequence1++;
+            vec->int_vector[nb_vector][1] = *pisequence2++;
             nb_vector++;
           }
         }
@@ -1468,18 +1515,21 @@ Correlation* Sequences::correlation_computation(Format_error &error , int variab
   else {
     variable1--;
 
-    if ((type[variable1] != INT_VALUE) && (type[variable1] != STATE)) {
+    if ((itype == PEARSON) && (type[variable1] != INT_VALUE) && (type[variable1] != STATE) &&
+        (type[variable1] != REAL_VALUE)) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable1 + 1 << ": "
-                    << SEQ_error[SEQR_VARIABLE_TYPE];
-      correction_message << STAT_sequence_word[INT_VALUE] << " or "
-                         << STAT_sequence_word[STATE];
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
+                         << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-//    else if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal[variable1])) {
-    else if (((itype == SPEARMAN) || (itype == SPEARMAN2) || (itype == KENDALL)) && (!marginal[variable1])) {
+//    if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal[variable1])) {
+    if (((itype == SPEARMAN) || (itype == SPEARMAN2) || (itype == KENDALL)) &&
+        (!marginal[variable1])) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
@@ -1500,18 +1550,21 @@ Correlation* Sequences::correlation_computation(Format_error &error , int variab
   else {
     variable2--;
 
-    if ((type[variable2] != INT_VALUE) && (type[variable2] != STATE)) {
+    if ((itype == PEARSON) && (type[variable2] != INT_VALUE) && (type[variable2] != STATE) &&
+        (type[variable2] != REAL_VALUE)) {
       status = false;
       ostringstream error_message , correction_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable2 + 1 << ": "
-                    << SEQ_error[SEQR_VARIABLE_TYPE];
-      correction_message << STAT_sequence_word[INT_VALUE] << " or "
-                         << STAT_sequence_word[STATE];
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
+                         << STAT_variable_word[REAL_VALUE];
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-//    else if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal[variable2])) {
-    else if (((itype == SPEARMAN) || (itype == SPEARMAN2) || (itype == KENDALL)) && (!marginal[variable2])) {
+//    if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal[variable2])) {
+    if (((itype == SPEARMAN) || (itype == SPEARMAN2) || (itype == KENDALL)) &&
+        (!marginal[variable2])) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
@@ -1734,15 +1787,19 @@ Correlation* Sequences::partial_autocorrelation_computation(Format_error &error 
   else {
     variable--;
 
-    if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
+    if ((itype == PEARSON) && (type[variable] != INT_VALUE) && (type[variable] != STATE) &&
+        (type[variable] != REAL_VALUE)) {
       status = false;
-      ostringstream correction_message;
-      correction_message << STAT_sequence_word[INT_VALUE] << " or "
-                         << STAT_sequence_word[STATE];
-      error.correction_update(SEQ_error[SEQR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
+                         << STAT_variable_word[REAL_VALUE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-    else if ((itype == KENDALL) && (!marginal[variable])) {
+    if ((itype == KENDALL) && (!marginal[variable])) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
