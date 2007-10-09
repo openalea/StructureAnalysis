@@ -902,6 +902,9 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
    int *itype= NULL, *ilength= NULL;
    int ***isequence= NULL; // isequence[identifier][variable][index]
    int *iidentifier= NULL;
+   std::vector<int**> vsequence;
+   std::vector<int> videntifier;
+   std::vector<int> vlength;
    ostringstream error_message;
    std::vector<vertex_array> leaf_set;
    std::vector<key> branched_vertices;
@@ -940,16 +943,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
          visitor.find_leaves(*(trees[t]), trees[t]->root(), leaves);
          leaf_set.push_back(leaves);
          nb_sequences+= leaves.size();
-      }
 
-      isequence= new int**[nb_sequences];
-      ilength= new int[nb_sequences];
-      iidentifier= new int[nb_sequences];
-      for (s= 0; s < nb_sequences; s++)
-         isequence[s]= new int*[_nb_integral];
-
-      for (t= 0; t < _nb_trees; t++)
-      {
          while(!leaf_set[t].empty())
          {
             current_leaf= leaf_set[t].back();
@@ -959,16 +953,17 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
 
             if (all_paths)
             {
-               ilength[sequence_id]= trees[t]->get_depth(current_leaf)+1;
-               iidentifier[sequence_id]= sequence_id;
+               vlength.push_back(trees[t]->get_depth(current_leaf)+1);
+               videntifier.push_back(sequence_id);
+               vsequence.push_back(new int*[_nb_integral]);
                for (var= 0; var < _nb_integral; var++)
-                  isequence[sequence_id][var]= new int[ilength[sequence_id]];
+                  vsequence[sequence_id][var]= new int[vlength[sequence_id]];
 
-               for (pos= ilength[sequence_id]-1; pos > -1; pos--)
+               for (pos= vlength[sequence_id]-1; pos > -1; pos--)
                {
                   val= trees[t]->get(current_vertex);
                   for (var= 0; var < _nb_integral; var++)
-                     isequence[sequence_id][var][pos]= val.Int(var);
+                     vsequence[sequence_id][var][pos]= val.Int(var);
                   current_vertex= trees[t]->parent(current_vertex);
                }
             }
@@ -986,23 +981,42 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
                      current_vertex= parent_vertex;
                      branched_vertices.push_back(current_vertex);
                   }
+                  else
+                     if (trees[t]->get_nb_children(parent_vertex)==1)
+                     // parent_vertex is considered as a leaf vertex
+                     // in the sense of axial trees
+                     {
+                        leaf_set[t].push_back(parent_vertex);
+                        nb_sequences+=1;
+                     }
                }
-               ilength[sequence_id]= branched_vertices.size();
-               iidentifier[sequence_id]= sequence_id;
+               vlength.push_back(branched_vertices.size());
+               videntifier.push_back(sequence_id);
+               vsequence.push_back(new int*[_nb_integral]);
                for (var= 0; var < _nb_integral; var++)
-                  isequence[sequence_id][var]= new int[ilength[sequence_id]];
+                  vsequence[sequence_id][var]= new int[vlength[sequence_id]];
 
-               for (pos= 0; pos < ilength[sequence_id]; pos++)
+               for (pos= vlength[sequence_id]-1; pos > -1; pos--)
                {
                   current_vertex= branched_vertices[pos];
                   val= trees[t]->get(current_vertex);
                   for (var= 0; var < _nb_integral; var++)
-                     isequence[sequence_id][var][pos]= val.Int(var);
+                     vsequence[sequence_id][var][vlength[sequence_id]-1-pos]= val.Int(var);
                }
             }
             sequence_id++;
          }
       }
+      isequence= new int**[nb_sequences];
+      ilength= new int[nb_sequences];
+      iidentifier= new int[nb_sequences];
+      for (s= 0; s < nb_sequences; s++)
+      {
+         isequence[s]= vsequence[s];
+         ilength[s]= vlength[s];
+         iidentifier[s]= videntifier[s];
+      }
+
       res= new Sequences(_nb_integral, itype,  nb_sequences, ilength,
                          isequence, iidentifier);
 
