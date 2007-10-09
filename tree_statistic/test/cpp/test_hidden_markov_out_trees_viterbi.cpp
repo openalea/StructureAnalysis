@@ -4,9 +4,9 @@
  *  out-trees as defined in hidden_markov_out_tree.h
  */
 
-#include "TREE/tree_simple.h"
-#include "TREE/tree_traits.h"
-#include "TREE/basic_visitors.h"
+#include "tree_simple.h"
+#include "tree_traits.h"
+#include "basic_visitors.h"
 #include "stat_tools.h"
 #include "curves.h"
 #include "markovian.h"

@@ -1397,3 +1397,131 @@ cumulative number of children: 31
   |-(19, 11.8616)
     
 
+Build sequences (all possible paths)...
+2 VARIABLES
+
+VARIABLE 1 : VALUE   (minimum value: 0, maximum value: 19)
+
+value histogram - sample size: 67
+mean: 9.04478   variance: 33.1646   standard deviation: 5.75887
+
+VARIABLE 2 : VALUE   (minimum value: 1, maximum value: 20)
+
+value histogram - sample size: 67
+mean: 10.0448   variance: 33.1646   standard deviation: 5.75887
+
+sequence length histogram - sample size: 23
+mean: 2.91304   variance: 0.083004   standard deviation: 0.288104
+
+cumulated length: 67
+
+9 10 | 2 3    (0)
+
+9 10 | 12 13    (1)
+
+9 10 | 19 20 | 10 11    (2)
+
+9 10 | 19 20 | 19 20    (3)
+
+9 10 | 19 20 | 2 3    (4)
+
+9 10 | 19 20 | 3 4    (5)
+
+9 10 | 7 8 | 2 3    (6)
+
+9 10 | 7 8 | 0 1    (7)
+
+5 6 | 10 11 | 7 8    (8)
+
+5 6 | 10 11 | 5 6    (9)
+
+5 6 | 10 11 | 18 19    (10)
+
+5 6 | 1 2 | 4 5    (11)
+
+5 6 | 1 2 | 9 10    (12)
+
+5 6 | 1 2 | 1 2    (13)
+
+5 6 | 16 17 | 17 18    (14)
+
+5 6 | 16 17 | 3 4    (15)
+
+7 8 | 6 7 | 18 19    (16)
+
+7 8 | 17 18 | 16 17    (17)
+
+7 8 | 17 18 | 18 19    (18)
+
+7 8 | 17 18 | 17 18    (19)
+
+7 8 | 3 4 | 11 12    (20)
+
+7 8 | 3 4 | 13 14    (21)
+
+7 8 | 3 4 | 17 18    (22)
+Build sequences (all non redundant paths)...
+2 VARIABLES
+
+VARIABLE 1 : VALUE   (minimum value: 0, maximum value: 19)
+
+value histogram - sample size: 24
+mean: 9.58333   variance: 44.5145   standard deviation: 6.67192
+
+VARIABLE 2 : VALUE   (minimum value: 1, maximum value: 20)
+
+value histogram - sample size: 24
+mean: 10.5833   variance: 44.5145   standard deviation: 6.67192
+
+sequence length histogram - sample size: 24
+mean: 1   variance: 0   standard deviation: 0
+
+cumulated length: 24
+
+2 3    (0)
+
+12 13    (1)
+
+10 11    (2)
+
+19 20    (3)
+
+2 3    (4)
+
+3 4    (5)
+
+2 3    (6)
+
+0 1    (7)
+
+7 8    (8)
+
+5 6    (9)
+
+18 19    (10)
+
+4 5    (11)
+
+9 10    (12)
+
+1 2    (13)
+
+17 18    (14)
+
+3 4    (15)
+
+18 19    (16)
+
+6 7    (17)
+
+16 17    (18)
+
+18 19    (19)
+
+17 18    (20)
+
+11 12    (21)
+
+13 14    (22)
+
+17 18    (23)

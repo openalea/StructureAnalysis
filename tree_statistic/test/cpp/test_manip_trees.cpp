@@ -6,9 +6,9 @@
 
 #include <math.h>
 
-#include "TREE/tree_simple.h"
-#include "TREE/tree_traits.h"
-#include "TREE/basic_visitors.h"
+#include "tree_simple.h"
+#include "tree_traits.h"
+#include "basic_visitors.h"
 #include "stat_tools.h"
 #include "generic_typed_edge_tree.h"
 #include "int_fl_containers.h"
@@ -54,6 +54,7 @@ int main(void)
    vertex_iterator it, end;
    Int_trees *b= NULL;
    rtree_type **ctrees= NULL;
+   Sequences *res_seq= NULL;
    Trees *c= NULL, *d= NULL;
    pt_int_trees_array pota;
    pt_Distribution_array pda;
@@ -572,10 +573,12 @@ int main(void)
       merged= NULL;
    }
 
+   // build tree with float variable
    delete default_base_tree;
    default_base_tree= NULL;
    default_base_tree= new tree_type(1, 1, 0, 1);
    rv.reset(1,1);
+   // v.reset(1,1);
    ctrees= new rtree_type*[cmerged->get_nb_trees()];
    otrees= new tree_type*[cmerged->get_nb_trees()];
    for(t= 0; t < cmerged->get_nb_trees(); t++)
@@ -583,7 +586,7 @@ int main(void)
       otrees[t]= cmerged->get_tree(t);
       tmp_utree= otrees[t]->get_structure();
       ctrees[t]= new rtree_type(*default_base_tree);
-      ctrees[t]->set_structure(*tmp_utree, v);
+      ctrees[t]->set_structure(*tmp_utree, rv);
       // here is the problem
       tie(it, end)= ctrees[t]->vertices();
       while (it < end)
@@ -635,6 +638,7 @@ int main(void)
    delete [] otrees;
    otrees= NULL;
 
+   // selection of variables
    delete [] ivariables;
    ivariables= new int[1];
    ivariables[0]= 1;
@@ -684,7 +688,33 @@ int main(void)
       }
       delete [] otrees;
       otrees= NULL;
+      delete res;
+      res= NULL;
    }
+
+   // build sequences
+   cout << "Build sequences (all possible paths)..." << endl;
+   res_seq= c->build_sequences(error, true);
+   cout << error;
+
+   if (res_seq != NULL)
+   {
+      res_seq->ascii_data_write(cout, 'c', false);
+      delete res_seq;
+      res_seq= NULL;
+   }
+
+   cout << "Build sequences (all non redundant paths)..." << endl;
+   res_seq= c->build_sequences(error, false);
+   cout << error;
+
+   if (res_seq != NULL)
+   {
+      res_seq->ascii_data_write(cout, 'c', false);
+      delete res_seq;
+      res_seq= NULL;
+   }
+
 
    for(t= 0; t < c->get_nb_trees(); t++)
    {

@@ -3,9 +3,9 @@
  *  Test of the generic_tree methods as defined in generic_tree.h
  */
 
-#include "TREE/tree_simple.h"
-#include "TREE/tree_traits.h"
-#include "TREE/basic_visitors.h"
+#include "tree_simple.h"
+#include "tree_traits.h"
+#include "basic_visitors.h"
 #include "stat_tools.h"
 #include "generic_typed_edge_tree.h"
 #include <iostream>

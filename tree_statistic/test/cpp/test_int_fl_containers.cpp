@@ -8,7 +8,7 @@
 #include "int_fl_containers.h"
 
 // #include "Tools/rw_tokenizer.h"
-#include "Tools/rw_cstring.h"
+#include "rw_cstring.h"
 // #include "Tools/rw_locale.h"
 
 using namespace std;

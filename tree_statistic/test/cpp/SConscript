@@ -1,0 +1,72 @@
+import os, commands
+
+# Import global objects
+
+Import("env")
+
+pj = os.path.join
+
+includes=map(lambda x: pj(x,"tree_statistic"), env["CPPPATH"])
+includes+=map(lambda x: pj(x,"tool"), env["CPPPATH"])
+includes+=map(lambda x: pj(x,"tree"), env["CPPPATH"])
+includes+=map(lambda x: pj(x,"stat_tool"), env["CPPPATH"])
+includes+=map(lambda x: pj(x,"sequence_analysis"), env["CPPPATH"])
+# env.ALEAIncludes("tree_statistic", includes)
+
+
+# env.Append(CPPDEFINES= ['MESSAGE'])
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
+
+env.Append(CPPPATH= includes)
+
+#Sources
+
+tests= Split("""
+test_int_fl_containers.cpp
+test_generic_tree.cpp
+test_int_fl_tree.cpp
+test_tree_characteristics.cpp
+test_characteristics_marginal.cpp
+test_characteristics_first_occurrence.cpp
+test_characteristics_zones.cpp
+test_characteristics_occurrences.cpp
+test_int_trees.cpp
+test_manip_trees.cpp
+test_hidden_markov_out_trees.cpp
+test_hidden_markov_out_trees_estim_synt.cpp
+test_hidden_markov_tree_data.cpp
+test_hidden_markov_out_trees_estim_val.cpp
+test_hidden_markov_chain_tree.cpp
+test_hidden_markov_out_trees_viterbi.cpp
+""")
+
+def prog(p):
+  return env.Program(p)
+
+# def check(p):
+#    os.popen(p+" > output_current_test.txt")
+#    res=commands.getoutput("diff output_current_test.txt Outputs/output_"+p+".txt")
+#    if res!='':
+#       print "actual and theoretical outputs differ for ", p, ": \n", res, "\n"
+#    else:
+#       print "actual and theoretical outputs match for ", p, "\n"
+
+
+test_prog=map(prog, tests)
+
+"""
+def rmTests(target, source, env):
+  import os
+  print [ os.remove(str(s)) for s in source]
+  return 1
+
+r= env.AddPostAction(test_prog, rmTests)
+Alias("clean_test",r)
+"""
+
+# print test_prog
+
+# map(check, test_prog)
+
+Alias('test_stat_trees', test_prog)
+Alias('test', 'test_stat_trees')
