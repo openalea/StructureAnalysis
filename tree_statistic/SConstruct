@@ -15,6 +15,8 @@ SConsignFile()
 
 options = Options(['../options.py','options.py'], ARGUMENTS)
 
+options.Add(BoolOption('with_test', 'build test modules', 1))
+
 wrapper_conf = ALEAConfig(name,['boost_python', 'alea','install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
 cpp_conf = ALEAConfig(name, ['alea','install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
 opt_conf = ALEAConfig(name, ['boost_python', 'alea','install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
@@ -38,9 +40,13 @@ BuildDir(prefix, '.')
 
 cpp_env = ALEAEnvironment(cpp_conf, options=options)
 cpp_env.Append(CPPPATH='$build_includedir')
+cpp_env.AppendUnique(LIBS= ["efence"])
+# optional
 
 wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
 wrapper_env.Append(CPPPATH='$build_includedir')
+wrapper_env.AppendUnique(LIBS= ["efence"])
+# optional
 
 # Build stage
 SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
@@ -48,3 +54,6 @@ SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
 
 
 Default("build")
+if cpp_env["with_test"]:
+   SConscript("test/cpp/SConscript", exports={"env": cpp_env})
+
