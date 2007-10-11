@@ -10,8 +10,8 @@
 #include "curves.h"
 #include "markovian.h"
 #include "sequences.h"
-#include "regression.h" // used by markov.h
-#include "markov.h"
+// #include "regression.h" // used by markov.h
+// #include "markov.h"
 #include "semi_markov.h"
 #include "hidden_semi_markov.h"
 #include "int_fl_containers.h"
@@ -52,6 +52,7 @@ int main(void)
    const char * hmcinitpath= "./hmc_init.hmc";
    // const char * hmcinitpath= "./hmc_init.hvom";
    const int nb_trees= 10, size= 100, nb_children_max= 1;
+   int *iidentifier;
    int ***sequences, *length;
    double likelihood, hidden_likelihood,
           check_likelihood, check_hidden_likelihood;
@@ -90,11 +91,13 @@ int main(void)
       cout << endl;
 #     endif
 
+      iidentifier= new int[nb_trees];
       sequences= new int**[nb_trees];
       length= new int[nb_trees];
       nb_integral= hmtd->get_nb_int();
       for(t= 0; t < nb_trees; t++)
       {
+         iidentifier[t]= t;
          sequences[t]= new int*[nb_integral];
          ctree= hmtd->get_tree(t);
          length[t]= ctree->get_size();
@@ -109,7 +112,10 @@ int main(void)
          }
       }
 
-      ms= new Markovian_sequences(nb_integral, nb_trees, length, sequences);
+      seq= new Sequences(nb_trees, iidentifier, length, IMPLICIT_TYPE,
+                         nb_integral, INT_VALUE, sequences);
+      ms= new Markovian_sequences(*seq);
+      delete seq;
 #     ifdef DEBUG
       cout << "Markovian sequences: " << endl;
       ms->ascii_write(cout, false);
@@ -269,6 +275,7 @@ int main(void)
                delete [] sequences[t][var];
             delete [] sequences[t];
          }
+         delete [] iidentifier;
          delete [] sequences;
          delete [] length;
 

@@ -64,152 +64,153 @@ int main(void)
    cout << error;
 
    if (hsmc != NULL)
-      hsmc->ascii_write(cout, false);
-
-   cout << endl;
-
-   w= hsmc->ascii_write(error, swapath);
-   if (!w)
-      cout << error;
-
-   // does not work for the moment
-   /*
-   w= hsmc->spreadsheet_write(error, swspath);
-   if (!w)
-      cout << error; */
-
-
-   // read and print a hidden Markov out tree
-   hmot= Stat_trees::hidden_markov_out_tree_ascii_read(error, hmotpath);
-   // hmot= hidden_markov_out_tree_ascii_read(error, hmtpath);
-   cout << error;
-   cerr << error;
-
-   if (hmot != NULL)
-      hmot->ascii_write(cout, false);
-
-   cout << endl;
-
-   if (hmot != NULL)
    {
-      // Copy constructor of a hidden Markov out tree
-      // without the characteristics
-      hmot2= new Hidden_markov_out_tree(*hmot, false, false);
-
-      hmot2->ascii_write(cout, false);
+      hsmc->ascii_write(cout, false);
       cout << endl;
 
-      delete hmot2;
-      hmot2= NULL;
-      // write a hidden Markov tree into a file :
-      w= hmot->ascii_write(error, wapath);
+      w= hsmc->ascii_write(error, swapath);
       if (!w)
          cout << error;
 
-      w= hmot->spreadsheet_write(error, wspath);
+      // does not work for the moment
+      /*
+      w= hsmc->spreadsheet_write(error, swspath);
       if (!w)
-         cout << error;
+         cout << error; */
 
-      // simulate a hidden Markov out tree
-      hmtd= hmot->simulation(error, nb_trees, size, nb_children_max);
+
+      // read and print a hidden Markov out tree
+      hmot= Stat_trees::hidden_markov_out_tree_ascii_read(error, hmotpath);
+      // hmot= hidden_markov_out_tree_ascii_read(error, hmtpath);
       cout << error;
+      cerr << error;
 
-      // print the simulated trees
+      if (hmot != NULL)
+         hmot->ascii_write(cout, false);
 
-      cout << "Simulated trees : " << endl;
-      for(t= 0; t < nb_trees; t++)
-         (hmtd->get_tree(t))->display(cout, 0);
-
-      cout << endl << "Simulated hidden trees : " << endl;
-      for (t= 0; t < nb_trees; t++)
-         (hmtd->get_state_tree(t))->display(cout, 0);
       cout << endl;
 
-      // compute the state marginal distributions
-      hmot->get_state_marginal_distribution(*hmtd, state_marginal);
-      sum_state_marginal= new double*[nb_trees];
-
-      hmot->get_output_conditional_distribution(*hmtd, output_cond);
-
-      ptrees= new tree_type*[nb_trees];
-      default_value.reset(0, 1);
-      // default_value.Double(0)= .0;
-
-      for(t= 0; t < nb_trees; t++)
-      // should be done for t < nb_trees
+      if (hmot != NULL)
       {
-         if (t == 0)
-            cout << "Marginal distributions for tree number " << t+1  << " : " << endl;
-         ptrees[t]= new tree_type(*((hmtd->get_state_tree(t))->get_structure()),
-                                  default_value);
-         va= v.get_breadthorder(*(ptrees[t]));
-         /* cout << "Tree number " << t+1 << " is supposed to have " << va.size()
-              << " nodes." << endl; */
-         sum_state_marginal[t]= new double[va.size()];
-         sum_state_marginal[t][0]= .0;
-         for(j= 0; j < hmot->get_nb_state(); j++)
+         // Copy constructor of a hidden Markov out tree
+         // without the characteristics
+         hmot2= new Hidden_markov_out_tree(*hmot, false, false);
+
+         hmot2->ascii_write(cout, false);
+         cout << endl;
+
+         delete hmot2;
+         hmot2= NULL;
+         // write a hidden Markov tree into a file :
+         w= hmot->ascii_write(error, wapath);
+         if (!w)
+            cout << error;
+
+         w= hmot->spreadsheet_write(error, wspath);
+         if (!w)
+            cout << error;
+
+         // simulate a hidden Markov out tree
+         hmtd= hmot->simulation(error, nb_trees, size, nb_children_max);
+         cout << error;
+
+         // print the simulated trees
+
+         cout << "Simulated trees : " << endl;
+         for(t= 0; t < nb_trees; t++)
+            (hmtd->get_tree(t))->display(cout, 0);
+
+         cout << endl << "Simulated hidden trees : " << endl;
+         for (t= 0; t < nb_trees; t++)
+            (hmtd->get_state_tree(t))->display(cout, 0);
+         cout << endl;
+
+         // compute the state marginal distributions
+         hmot->get_state_marginal_distribution(*hmtd, state_marginal);
+         sum_state_marginal= new double*[nb_trees];
+
+         hmot->get_output_conditional_distribution(*hmtd, output_cond);
+
+         ptrees= new tree_type*[nb_trees];
+         default_value.reset(0, 1);
+         // default_value.Double(0)= .0;
+
+         for(t= 0; t < nb_trees; t++)
+         // should be done for t < nb_trees
          {
             if (t == 0)
-               cout << "state " << j << " : " << endl;
+               cout << "Marginal distributions for tree number " << t+1  << " : " << endl;
+            ptrees[t]= new tree_type(*((hmtd->get_state_tree(t))->get_structure()),
+                                     default_value);
+            va= v.get_breadthorder(*(ptrees[t]));
+            /* cout << "Tree number " << t+1 << " is supposed to have " << va.size()
+                 << " nodes." << endl; */
+            sum_state_marginal[t]= new double[va.size()];
+            sum_state_marginal[t][0]= .0;
+            for(j= 0; j < hmot->get_nb_state(); j++)
+            {
+               if (t == 0)
+                  cout << "state " << j << " : " << endl;
+               for(u= 0; u < va.size(); u++)
+               {
+                  default_value.Double(0)= state_marginal[t][j][va[u]];
+                  ptrees[t]->put(va[u], default_value);
+               }
+               if (t == 0)
+                  ptrees[t]->display(cout, ptrees[t]->root());
+            }
+            if (t == 0)
+               cout << "Output conditional distributions for tree number " << t+1  << " : " << endl;
+
+            for(j= 0; j < hmot->get_nb_state(); j++)
+            {
+               if (t == 0)
+                  cout << "state " << j << " : " << endl;
+               for(u= 0; u < ptrees[t]->get_size(); u++)
+               {
+                  default_value.Double(0)= output_cond[t][j][u];
+                  ptrees[t]->put(u, default_value);
+               }
+               if (t == 0)
+                  ptrees[t]->display(cout, ptrees[t]->root());
+
+            }
             for(u= 0; u < va.size(); u++)
             {
-               default_value.Double(0)= state_marginal[t][j][va[u]];
-               ptrees[t]->put(va[u], default_value);
+               sum_state_marginal[t][u]= .0;
+               for(j= 0; j < hmot->get_nb_state(); j++)
+                  sum_state_marginal[t][u]+= state_marginal[t][j][u];
             }
-            if (t == 0)
-               ptrees[t]->display(cout, ptrees[t]->root());
          }
-         if (t == 0)
-            cout << "Output conditional distributions for tree number " << t+1  << " : " << endl;
 
-         for(j= 0; j < hmot->get_nb_state(); j++)
+         for(t= 0; t < nb_trees; t++)
          {
-            if (t == 0)
-               cout << "state " << j << " : " << endl;
-            for(u= 0; u < ptrees[t]->get_size(); u++)
-            {
-               default_value.Double(0)= output_cond[t][j][u];
-               ptrees[t]->put(u, default_value);
-            }
-            if (t == 0)
-               ptrees[t]->display(cout, ptrees[t]->root());
-
-         }
-         for(u= 0; u < va.size(); u++)
-         {
-            sum_state_marginal[t][u]= .0;
             for(j= 0; j < hmot->get_nb_state(); j++)
-               sum_state_marginal[t][u]+= state_marginal[t][j][u];
+               delete [] state_marginal[t][j];
+            for(u= 0; u < ptrees[t]->get_size(); u++)
+               if (fabs(sum_state_marginal[t][u] - 1) > DOUBLE_ERROR)
+                  cout << "State marginal distribution for tree " << t <<
+                       " and node " << u << " sums to " << sum_state_marginal[t][u] << endl;
+            delete [] state_marginal[t];
+            delete [] sum_state_marginal[t];
+            delete ptrees[t];
          }
+
+         // Copy constructor of a hidden Markov out tree
+         // with the characteristics
+         hmot2= new Hidden_markov_out_tree(*hmot, true, true);
+
+         /* delete hmt;
+         delete hmt2; */
+         delete [] ptrees;
+         delete [] state_marginal;
+         delete [] sum_state_marginal;
+         delete hsmc;
+         delete hmot2;
       }
 
-      for(t= 0; t < nb_trees; t++)
-      {
-         for(j= 0; j < hmot->get_nb_state(); j++)
-            delete [] state_marginal[t][j];
-         for(u= 0; u < ptrees[t]->get_size(); u++)
-            if (fabs(sum_state_marginal[t][u] - 1) > DOUBLE_ERROR)
-               cout << "State marginal distribution for tree " << t <<
-                    " and node " << u << " sums to " << sum_state_marginal[t][u] << endl;
-         delete [] state_marginal[t];
-         delete [] sum_state_marginal[t];
-         delete ptrees[t];
-      }
-
-      // Copy constructor of a hidden Markov out tree
-      // with the characteristics
-      hmot2= new Hidden_markov_out_tree(*hmot, true, true);
-
-      /* delete hmt;
-      delete hmt2; */
-      delete [] ptrees;
-      delete [] state_marginal;
-      delete [] sum_state_marginal;
-      delete hsmc;
-      delete hmot2;
+      delete hmot;
+      // delete hmtd;
+      return 0;
    }
-
-   delete hmot;
-   // delete hmtd;
-   return 0;
 }

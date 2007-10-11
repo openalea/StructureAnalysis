@@ -284,6 +284,7 @@ int main(void)
             cout << endl << "estimated HMT (" << nb_iterations << " iterations)" << endl;
             cout << *hmot2;
             delete hmot2;
+            hmot2= NULL;
          }
 
          cout << endl;
@@ -325,7 +326,6 @@ int main(void)
          delete [] downward_prob;
          delete [] downward_pair_prob;
          delete [] state_entropy;
-         delete hmot2;
          delete hmtd;
       }
       delete hmot;
