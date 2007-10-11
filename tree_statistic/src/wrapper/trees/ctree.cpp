@@ -740,7 +740,7 @@ public :
             }
             else
             {
-               error_message << SEQ_error[SEQR_VARIABLE_TYPE];
+               error_message << STAT_TREES_error[Stat_trees::STATR_VARIABLE_TYPE];
                PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
                throw_error_already_set();
             }
@@ -800,11 +800,11 @@ public :
                else
                {
                   error_message << STAT_label[STATL_VARIABLE] << " " << index
-                                << " " << SEQ_error[SEQR_VARIABLE_TYPE]
-                                << ": should be " << STAT_sequence_word[INT_VALUE]
-                                << " or " << STAT_sequence_word[STATE]
-                                << " or " << STAT_sequence_word[POSITION]
-                                << " or " << STAT_sequence_word[NB_INTERNODE];
+                                << " " << STAT_TREES_error[Stat_trees::STATR_VARIABLE_TYPE]
+                                << ": should be " << STAT_variable_word[INT_VALUE]
+                                << " or " << STAT_word[STATE]
+                                << " or " << STAT_word[POSITION]
+                                << " or " << STAT_word[NB_INTERNODE];
 
                   PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
                   throw_error_already_set();
@@ -824,8 +824,8 @@ public :
             {
                ostringstream error_message;
                error_message << STAT_label[STATL_VARIABLE] << " " << index
-                             << ": " << SEQ_error[SEQR_VARIABLE_TYPE]
-                             << ": should be " << STAT_sequence_word[REAL_VALUE];
+                             << ": " << STAT_TREES_error[Stat_trees::STATR_VARIABLE_TYPE]
+                             << ": should be " << STAT_variable_word[REAL_VALUE];
                error.update((error_message.str()).c_str());
                // PyErr_SetString(PyExc_IndexError, s.str());
                PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
