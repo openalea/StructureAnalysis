@@ -1,4 +1,5 @@
-import stat_tool
+import openalea.stat_tool
+stat_tool=openalea.stat_tool
 
 inf_bound=0
 sup_bound=3
