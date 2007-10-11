@@ -424,7 +424,7 @@ ostream& Hidden_markov_out_tree::spreadsheet_write(ostream& os, const Hidden_mar
 
    // printing of the Markov tree parameters
 
-   spreadsheet_print(os, _ch_order);
+   spreadsheet_print(os);
 
    if ((otrees != NULL) && (otrees->_type[0] == STATE))
    {

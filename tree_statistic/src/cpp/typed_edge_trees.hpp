@@ -817,7 +817,6 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error, int typ
  *  (keeping only integer variables)
  *
  **/
-
 template<typename Generic_Int_fl_container> Vectors*
 Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) const
 {
@@ -827,7 +826,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) c
    ostringstream error_message;
    value val;
    vertex_iterator it, end;
-   int **ivectors= NULL;
+   int *iidentifier= NULL, **ivectors= NULL;
    Vectors *res= NULL;
 
    error.init();
@@ -854,12 +853,14 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) c
          size+= trees[t]->get_size();
 
       ivectors= new int*[size];
+      iidentifier= new int[size];
       for (t= 0; t < _nb_trees; t++)
       {
          tie(it, end)= trees[t]->vertices();
          while(it < end)
          {
             ivectors[vector_id]= new int[_nb_integral];
+            iidentifier[vector_id]= vector_id;
             val= trees[t]->get(*it);
             for (var= 0; var < _nb_integral; var++)
                ivectors[vector_id][var]= val.Int(var);
@@ -867,7 +868,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) c
             it++;
          }
       }
-      res= new Vectors(_nb_integral, size, ivectors);
+      res= new Vectors(size, iidentifier, _nb_integral, ivectors);
 
       for (s= 0; s < size; s++)
       {
@@ -877,6 +878,8 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) c
 
       delete[] ivectors;
       ivectors= NULL;
+      delete[] iidentifier;
+      iidentifier= NULL;
    }
    return res;
 }
@@ -1017,8 +1020,8 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
          iidentifier[s]= videntifier[s];
       }
 
-      res= new Sequences(_nb_integral, itype,  nb_sequences, ilength,
-                         isequence, iidentifier);
+      res= new Sequences(nb_sequences, iidentifier, ilength, IMPLICIT_TYPE,
+                         _nb_integral, itype[0], isequence);
 
       for (s= 0; s < nb_sequences; s++)
       {

@@ -3002,7 +3002,7 @@ ostream& Hidden_markov_tree::line_write(ostream& os) const
 {
    os << nb_state << " " << STAT_word[STATW_STATES];
 
-   os << "   " << STAT_word[STATW_ORDER] << " " << _ch_order;
+//    os << "   " << SEQ_label[SEQL_MAX_ORDER] << " " << _ch_order;
 
    return os;
 }
@@ -3921,7 +3921,7 @@ ostream& Hidden_markov_tree::ascii_write(ostream& os,
 
    // printing of the Markov tree parameters
 
-   Chain::ascii_print(os, file_flag, ch_order_flag, _ch_order);
+   Chain::ascii_print(os, file_flag);
 
    if ((otrees != NULL) && (otrees->_type[0] == STATE))
    {
@@ -4180,7 +4180,7 @@ ostream& Hidden_markov_tree::spreadsheet_write(ostream& os, const Hidden_markov_
 
    // printing of the Markov tree parameters
 
-   spreadsheet_print(os, _ch_order);
+   spreadsheet_print(os);
 
    if ((otrees != NULL) && (otrees->_type[0] == STATE))
    {
@@ -5442,10 +5442,10 @@ Hidden_markov_tree* Stat_trees::hidden_markov_tree_ascii_read(Format_error& erro
              (tree_ident == STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_OUT_TREE]))
             {
                ch_order= 1;
-               chain= chain_parsing(error, in_file, line, type, false, ch_order);
+               chain= chain_parsing(error, in_file, line, type);
             }
          else
-            chain= chain_parsing(error, in_file, line, type, true, ch_order);
+            chain= chain_parsing(error, in_file, line, type);
 
          if (chain != NULL)
          {
