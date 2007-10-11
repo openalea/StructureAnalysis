@@ -3,7 +3,7 @@ Import( "env" )
 
 lib_env = env.Copy()
 
-lib_env.EnableQt4Modules(['QtCore','QtOpenGL'])
+lib_env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 
 includes = lib_env.ALEAGlob('*.h')
 
