@@ -111,7 +111,7 @@ bool setRegValue(HKEY key,
 	bool result = true;
 
 	// address of name of subkey to open
-	LPTSTR lpSubKey = new WORD[SubKey.size()+1];
+	LPTSTR lpSubKey = new WCHAR[SubKey.size()+1];
 	for(int i = 0 ; i < SubKey.size() ; i++){
 		lpSubKey[i] = SubKey[i];
 	}
@@ -128,7 +128,7 @@ bool setRegValue(HKEY key,
 					  NULL) == ERROR_SUCCESS){
 		
 		// address of name of value to query
-		LPTSTR lpValueName = new WORD[ValueName.size()+1];
+		LPTSTR lpValueName = new WCHAR[ValueName.size()+1];
 		for(int i = 0 ; i < ValueName.size() ; i++){
 			lpValueName[i] = ValueName[i];
 		}
@@ -182,7 +182,7 @@ bool getRegValue(HKEY key,
 	bool result = false;
 
 	// address of name of subkey to open
-	LPTSTR lpSubKey = new WORD[SubKey.size()+1];
+	LPTSTR lpSubKey = new WCHAR[SubKey.size()+1];
 	for(int i = 0 ; i < SubKey.size() ; i++){
 		lpSubKey[i] = SubKey[i];
 	}
@@ -196,7 +196,7 @@ bool getRegValue(HKEY key,
 					phkResult) == ERROR_SUCCESS){
 		
 		// address of name of value to query
-		LPTSTR lpValueName = new WORD[ValueName.size()+1];
+		LPTSTR lpValueName = new WCHAR[ValueName.size()+1];
 		for(int i = 0 ; i < ValueName.size() ; i++){
 			lpValueName[i] = ValueName[i];
 		}

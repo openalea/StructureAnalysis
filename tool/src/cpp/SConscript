@@ -11,7 +11,7 @@ sources= lib_env.ALEAGlob('*.cpp')
 
 # Add defines to export symbols on Windows
 DEFINES= list(lib_env['CPPDEFINES'])
-DEFINES.append('TOOLS_MAKEDLL')
+DEFINES.append('GEOM_MAKEDLL')
 
 inc = lib_env.ALEAIncludes("tool", includes)
 
