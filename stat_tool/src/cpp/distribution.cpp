@@ -1335,7 +1335,7 @@ char* label(const char *file_name)
   }
 
   else {
-    pfile_name = strrchr(file_name , '/');
+    pfile_name = (char*)strrchr(file_name , '/');
     if (pfile_name) {
       pfile_name++;
     }

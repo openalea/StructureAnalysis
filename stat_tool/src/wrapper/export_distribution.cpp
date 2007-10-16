@@ -48,7 +48,7 @@ Distribution_data* distribution_data_wrapper_init(list int_list)
 
    int nb_element= boost::python::len(int_list);
 
-   if (not nb_element)
+   if (! nb_element)
    {
      status= false;
      error_message << "At least one observation is required to initialize Histogram"; // << endl;
@@ -85,7 +85,7 @@ Distribution_data* distribution_data_wrapper_init(list int_list)
    // create new distribution_data object
    histo= new Distribution_data(nb_element, pelement);
    delete [] pelement;
-   if (not histo)
+   if (! histo)
      {
        error_message << "Could not initialize Histogram from argument"; // << endl;
        PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
