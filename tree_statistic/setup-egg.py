@@ -28,11 +28,17 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
         
           # Packages
-          #packages=
-          #package_dir=
+          namespace_packages = [namespace],
+          create_namespaces = True,
+
+          packages=[namespace+".stat_tool", namespace+".tree_statistic",],
+          package_dir={namespace+".stat_tool" : 'src/stat_tool',
+                       namespace+".tree_statistic": 'src/tree_statistic'},
       
           # Add package platform libraries if any
           include_package_data=True,
+          package_data = {'' : ['*.pyd', '*.so'],
+                           namespace+".tree_statistic": ['*/*.pyd', '*/*.so']},
           zip_safe=False,
 
           # Specific options of openalea.deploy

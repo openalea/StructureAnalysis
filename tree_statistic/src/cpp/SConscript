@@ -1,7 +1,6 @@
 # -*-python-*-
 Import("env")
 
-
 # Export/Import Symbols for windows
 if env['compiler'] == 'mingw':
     LINKFLAGS=["-enable-stdcall-fixup",
@@ -19,10 +18,9 @@ includes += env.ALEAGlob("*.hpp")
 env.ALEAIncludes("tree_statistic", includes)
 
 
-
 env.Append(CPPDEFINES= ['MESSAGE'])
 env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
-env.AppendUnique(LIBS=['efence'])
+#env.AppendUnique(LIBS=['efence'])
 # optional
 
 # Build shared libraries
@@ -43,7 +41,6 @@ hmt_algorithms.cpp
 
 target = "vptree_statistic"
 
-
 # Build the library
-lib = env.ALEALibrary(target, sources)
+lib = env.ALEALibrary(target, sources,)
 

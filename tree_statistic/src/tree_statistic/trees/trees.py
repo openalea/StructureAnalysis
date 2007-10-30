@@ -1000,8 +1000,7 @@ class Trees:
             nbmtg=0     # number of MTG ComponentRoots
             nbtrees=0   # number of trees
             no_scale=(scale is None)
-            import openalea.amlPy
-            amlPy=openalea.amlPy
+            import openalea.aml as amlPy
             mode=False
             if not amlPy.getmode():
             # conversion from AML object to Python
