@@ -1,8 +1,7 @@
 # a test for the class trees.trees.Trees: constructor and basic methods
 import sys, os
-import openalea.stat_tool, openalea.tree_statistic.trees
-stat_tool=openalea.stat_tool
-trees=openalea.tree_statistic.trees
+import openalea.stat_tool as stat_tool
+import openalea.tree_statistic.trees as trees
 inf_bound=1
 sup_bound=3
 probability= 0.6
@@ -156,8 +155,7 @@ else:
     print "Failed ro raise exception for bad attribute name"
 # reading a Tree from a MTG
 print "Read tree from MTG file 'sample_mtg.txt':"
-import openalea.amlPy
-amlPy=openalea.amlPy
+import openalea.aml as amlPy
 amlPy.setmode(1)
 MT=trees.Tree("sample_mtg.txt")
 print MT.Display()
@@ -171,8 +169,7 @@ filter=lambda x: x < 6
 attributes=["anything"]
 MT=trees.Tree("sample_mtg.txt", filter, attributes, [f], scale=1)
 print MT.Display()
-import openalea.amlPy
-amlPy=openalea.amlPy
+import openalea.aml as amlPy
 MSTG=amlPy.MTG("sample_mtg.txt")
 DR=amlPy.DressingData("dressing.drf")
 def Longueur(x):
