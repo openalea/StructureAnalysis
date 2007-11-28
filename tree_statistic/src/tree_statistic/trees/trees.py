@@ -1660,7 +1660,7 @@ class Trees:
             os.remove(file_name)
             raise FormatError, error
         else:
-            import openalea.amlPy
+            import openalea.aml as amlPy
             amlPy=openalea.amlPy
             res= amlPy.Sequences(file_name)
             os.remove(file_name)            
@@ -1689,7 +1689,7 @@ class Trees:
             os.remove(file_name)
             raise FormatError, error
         else:
-            import openalea.amlPy
+            import openalea.aml as amlPy
             amlPy=openalea.amlPy
             res= amlPy.Vectors(file_name)
             os.remove(file_name)            
@@ -1849,7 +1849,7 @@ class Trees:
             # create the temporary MTG file
             self.Save(mtgfile_name, False, list(self.__attributes))
     
-            import openalea.amlPy
+            import openalea.aml as amlPy
             amlPy=openalea.amlPy
             
             mode=False
