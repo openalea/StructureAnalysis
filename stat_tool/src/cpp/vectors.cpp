@@ -53,6 +53,8 @@
 #include "vectors.h"
 #include "stat_label.h"
 
+// #include "stat_tool/quantile_computation.h"   probleme compilateur C++ Windows
+
 using namespace std;
 
 
@@ -2806,6 +2808,45 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
            << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation(i) << endl;
       }
     }
+
+#   ifdef DEBUG
+    if (comment_flag) {
+      os << "# ";
+    }
+
+    if (type[i] == INT_VALUE) {
+      int *int_value;
+
+      int_value = new int[nb_vector];
+      for (j = 0;j < nb_vector;j++) {
+        int_value[j] = int_vector[j][i];
+      }
+      os << "quartile: " << quantile_computation(nb_vector , int_value , 0.25 , false) << " | "
+         << "median: " << quantile_computation(nb_vector , int_value , 0.5 , false) << " | "
+         << "quartile: " << quantile_computation(nb_vector , int_value , 0.75 , false) << endl;
+
+      os << "quartile: " << quantile_computation(nb_vector , int_value , 0.25 , true) << " | "
+         << "median: " << quantile_computation(nb_vector , int_value , 0.5 , true) << " | "
+         << "quartile: " << quantile_computation(nb_vector , int_value , 0.75 , true) << endl;
+
+      delete [] int_value;
+    }
+
+    else {
+      double *real_value;
+
+      real_value = new double[nb_vector];
+      for (j = 0;j < nb_vector;j++) {
+        real_value[j] = real_vector[j][i];
+      }
+      os << "quartile: " << quantile_computation(nb_vector , real_value , 0.25 , false) << " | "
+         << "median: " << quantile_computation(nb_vector , real_value , 0.5 , false) << " | "
+         << "quartile: " << quantile_computation(nb_vector , real_value , 0.75 , false) << endl;
+
+      delete [] real_value;
+    }
+#   endif
+
   }
 
   width[0] = column_width(nb_variable);
