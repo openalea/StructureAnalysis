@@ -55,6 +55,7 @@ using namespace std;
 
 extern int column_width(int value);
 extern int column_width(int min_value , int max_value);
+extern int column_width(int nb_value , const double *value , double scale = 1.);
 
 
 
@@ -95,13 +96,21 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
       if (index_parameter) {
         os << setw(width) << index_parameter[test_index][i++];
       }
+
       else {
-        os << setw(width) << int_sequence[test_index][0][i++];
+        if (type[0] != REAL_VALUE) {
+          os << setw(width) << int_sequence[test_index][0][i++];
+        }
+        else {
+          os << setw(width) << real_sequence[test_index][0][i++];
+        }
       }
     }
+
     else if (alignment.int_sequence[alignment_index][0][j] == DELETION) {
       os << setw(width) << "-";
     }
+
     else {
       os << setw(width) << " ";
     }
@@ -121,11 +130,18 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
         for (n = alignment_rank;n <= j;n++) {
           if ((alignment.int_sequence[alignment_index][0][n] != DELETION) &&
               (alignment.int_sequence[alignment_index][0][n] != BEGIN_END_DELETION)) {
-            os << setw(width) << int_sequence[test_index][k][m++];
+            if (type[k] != REAL_VALUE) {
+              os << setw(width) << int_sequence[test_index][k][m++];
+            }
+            else {
+              os << setw(width) << real_sequence[test_index][k][m++];
+            }
           }
+
           else if (alignment.int_sequence[alignment_index][0][n] == DELETION) {
             os << setw(width) << "-";
           }
+
           else {
             os << setw(width) << " ";
           }
@@ -204,11 +220,18 @@ ostream& Sequences::alignment_ascii_print(ostream &os , int width , int ref_inde
         for (n = alignment_rank;n <= j;n++) {
           if ((alignment.int_sequence[alignment_index][0][n] != INSERTION) &&
               (alignment.int_sequence[alignment_index][0][n] != BEGIN_END_INSERTION)) {
-            os << setw(width) << int_sequence[ref_index][k][m++];
+            if (type[k] != REAL_VALUE) {
+              os << setw(width) << int_sequence[ref_index][k][m++];
+            }
+            else {
+              os << setw(width) << real_sequence[ref_index][k][m++];
+            }
           }
+
           else if (alignment.int_sequence[alignment_index][0][n] == INSERTION) {
             os << setw(width) << "-";
           }
+
           else {
             os << setw(width) << " ";
           }
@@ -278,8 +301,14 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
     for (k = 0;k < alignment.length[alignment_index];k++) {
       if ((alignment.int_sequence[alignment_index][0][k] != DELETION) &&
           (alignment.int_sequence[alignment_index][0][k] != BEGIN_END_DELETION)) {
-        os << int_sequence[test_index][i][j++];
+        if (type[i] != REAL_VALUE) {
+          os << int_sequence[test_index][i][j++];
+        }
+        else {
+          os << real_sequence[test_index][i][j++];
+        }
       }
+
       else if (alignment.int_sequence[alignment_index][0][k] == DELETION) {
         os << "-";
       }
@@ -339,8 +368,14 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
     for (k = 0;k < alignment.length[alignment_index];k++) {
       if ((alignment.int_sequence[alignment_index][0][k] != INSERTION) &&
           (alignment.int_sequence[alignment_index][0][k] != BEGIN_END_INSERTION)) {
-        os << int_sequence[ref_index][i][j++];
+        if (type[i] != REAL_VALUE) {
+          os << int_sequence[ref_index][i][j++];
+        }
+        else {
+          os << real_sequence[ref_index][i][j++];
+        }
       }
+
       else if (alignment.int_sequence[alignment_index][0][k] == INSERTION) {
         os << "-";
       }
@@ -462,8 +497,14 @@ double Sequences::indel_distance_computation(const Vector_distance &vector_dist 
     }
 
     case NUMERIC : {
-      ldistance = MAX(int_sequence[index][i][position] - (int)min_value[i] ,
-                      (int)max_value[i] - int_sequence[index][i][position]);
+      if (type[i] != REAL_VALUE) {
+        ldistance = MAX(int_sequence[index][i][position] - (int)min_value[i] ,
+                        (int)max_value[i] - int_sequence[index][i][position]);
+      }
+      else {
+        ldistance = MAX(real_sequence[index][i][position] - min_value[i] ,
+                        max_value[i] - real_sequence[index][i][position]);
+      }
       break;
     }
 
@@ -538,7 +579,12 @@ double Sequences::substitution_distance_computation(const Vector_distance &vecto
     }
 
     case NUMERIC : {
-      ldistance = int_sequence[ref_index][i][ref_position] - test_seq->int_sequence[test_index][i][test_position];
+      if (type[i] != REAL_VALUE) {
+        ldistance = int_sequence[ref_index][i][ref_position] - test_seq->int_sequence[test_index][i][test_position];
+      }
+      else {
+        ldistance = real_sequence[ref_index][i][ref_position] - test_seq->real_sequence[test_index][i][test_position];
+      }
       break;
     }
 
@@ -626,27 +672,25 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
 
-  for (i = 0;i < nb_variable;i++) {
-    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
-      status = false;
-      ostringstream error_message , correction_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << STAT_error[STATR_VARIABLE_TYPE];
-      correction_message << STAT_variable_word[INT_VALUE] << " or "
-                         << STAT_variable_word[STATE];
-      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
-    }
+  if (ivector_dist.nb_variable != nb_variable) {
+    status = false;
+    error.update(STAT_error[STATR_NB_VARIABLE]);
   }
 
-  if (status) {
-    if (ivector_dist.nb_variable != nb_variable) {
-      status = false;
-      error.update(STAT_error[STATR_NB_VARIABLE]);
-    }
+  else {
+    for (i = 0;i < nb_variable;i++) {
+      if (ivector_dist.variable_type[i] != NUMERIC) {
+        if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+          status = false;
+          ostringstream error_message , correction_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_VARIABLE_TYPE];
+          correction_message << STAT_variable_word[INT_VALUE] << " or "
+                             << STAT_variable_word[STATE];
+          error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+        }
 
-    else {
-      for (i = 0;i < nb_variable;i++) {
-        if ((ivector_dist.variable_type[i] != NUMERIC) && (!marginal[i])) {
+        else if (!marginal[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -654,7 +698,8 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
           error.update((error_message.str()).c_str());
         }
 
-        if ((ivector_dist.variable_type[i] == SYMBOLIC) && ((min_value[i] < 0) || (max_value[i] >= NB_SYMBOL) ||
+        if ((ivector_dist.variable_type[i] == SYMBOLIC) &&
+            ((min_value[i] < 0) || (max_value[i] >= NB_SYMBOL) ||
              ((ivector_dist.symbol_distance[i]) && (ivector_dist.nb_value[i] != max_value[i] + 1)))) {
           status = false;
           ostringstream error_message;
@@ -663,13 +708,25 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
           error.update((error_message.str()).c_str());
         }
 
-        if ((ivector_dist.variable_type[i] == CIRCULAR) && (max_value[i] - min_value[i] >= ivector_dist.period[i])) {
+        if ((ivector_dist.variable_type[i] == CIRCULAR) &&
+            (max_value[i] - min_value[i] >= ivector_dist.period[i])) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
                         << STAT_error[STATR_NB_VALUE_PERIOD];
           error.update((error_message.str()).c_str());
         }
+      }
+
+      else if ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE)) {
+        status = false;
+        ostringstream error_message , correction_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        correction_message << STAT_variable_word[INT_VALUE] << " or "
+                           << STAT_variable_word[STATE] << " or "
+                           << STAT_variable_word[REAL_VALUE];
+        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
       }
     }
   }
@@ -800,10 +857,25 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
     else {
       width = 0;
     }
+
     for (i = 0;i < nb_variable;i++) {
-      var = column_width((int)min_value[i] , (int)max_value[i]);
-      if (var > width) {
-        width = var;
+      if (type[i] != REAL_VALUE) {
+        var = column_width((int)min_value[i] , (int)max_value[i]);
+        if (var > width) {
+          width = var;
+        }
+      }
+
+      else {
+        for (j = 0;j < nb_sequence;j++) {
+          if ((ref_identifier == I_DEFAULT) || (ref_identifier == identifier[j]) ||
+              (test_identifier == I_DEFAULT) || (test_identifier == identifier[j])) {
+            var = column_width(length[j] , real_sequence[j][i]);
+            if (var > width) {
+              width = var;
+            }
+          }
+        }
       }
     }
 
@@ -2736,7 +2808,7 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
                                          double indel_factor , int algorithm , const char *path) const
 
 {
-  bool status;
+  bool status = true;
   register int i , j , k;
   int *itype , *psequence , *csequence , *variable;
   double **rank , **max_symbol_distance;
@@ -2750,10 +2822,23 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
   error.init();
 
   if (index_parameter) {
+    status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
 
-  else {
+  for (i = 0;i < nb_variable;i++) {
+    if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+  }
+
+  if (status) {
 
     // alignement des sequences 2 a 2
 
