@@ -640,6 +640,7 @@ public :
                                  char format = 'a') const;
 
     Sequences* recurrence_time_sequences(Format_error &error , int variable , int value) const;
+    Sequences* sojourn_time_sequences(Format_error &error , int variable) const;
 
     Sequences* transform_position(Format_error &error , int step) const;
 
@@ -1073,16 +1074,6 @@ public :
                                                                  bool state_sequence = true ,
                                                                  double occupancy_mean = D_DEFAULT ,
                                                                  int nb_iter = I_DEFAULT) const;
-    Hidden_semi_markov* hidden_semi_markov_viterbi_estimation(Format_error &error , std::ostream &os ,
-                                                              const Hidden_semi_markov &ihsmarkov ,
-                                                              int estimator = COMPLETE_LIKELIHOOD ,
-                                                              bool counting_flag = true ,
-                                                              int nb_iter = I_DEFAULT) const;
-    Hidden_semi_markov* hidden_semi_markov_viterbi_estimation(Format_error &error , std::ostream &os ,
-                                                              int nb_state , int estimator = COMPLETE_LIKELIHOOD ,
-                                                              bool counting_flag = true ,
-                                                              double occupancy_mean = D_DEFAULT ,
-                                                              int nb_iter = I_DEFAULT) const;
 
     bool lumpability_test(Format_error &error , std::ostream &os , int *symbol , int order = 1) const;
 
