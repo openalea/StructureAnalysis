@@ -434,7 +434,7 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
 {
   register int i , j , k;
   int max_nb_value , *frequency , *pisequence , *psegment;
-  double sum , factorial_sum , residual , likelihood , *prsequence;
+  double sum , factorial_sum , diff , residual , likelihood , *prsequence;
 
 
   max_nb_value = 0;
@@ -463,7 +463,6 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
 
       pisequence = int_sequence[index][i];
       for (j = 0;j < length[index];j++) {
-//        frequency[int_sequence[index][i][j]]++;
         frequency[*pisequence++]++;
       }
 
@@ -480,7 +479,6 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
 
       pisequence = int_sequence[index][i];
       for (j = 0;j < length[index];j++) {
-//        sum += int_sequence[index][i][j];
         sum += *pisequence++;
         for (k = 2;k <= int_sequence[index][i][j];k++) {
           factorial_sum += log((double)k);
@@ -494,29 +492,28 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
 
     else {
       residual = 0.;
-      sum = 0.;
 
       if (variable_type[i - 1] == ORDINAL) {
         pisequence = int_sequence[index][i];
-        for (j = 0;j < length[index];j++) {
-//          residual += rank[i][int_sequence[index][i][j]] * rank[i][int_sequence[index][i][j]];
-//          sum += rank[i][int_sequence[index][i][j]];
-          residual += rank[i][*pisequence] * rank[i][*pisequence];
+        sum = rank[i][*pisequence++];
+
+        for (j = 1;j < length[index];j++) {
+          diff = rank[i][*pisequence] - sum / j;
+          residual += ((double)j / (double)(j + 1)) * diff * diff;
           sum += rank[i][*pisequence++];
         }
-        residual -= sum * sum / length[index];
       }
 
       else {
         if (type[i] != REAL_VALUE) {
           pisequence = int_sequence[index][i];
-          for (j = 0;j < length[index];j++) {
-//            residual += int_sequence[index][i][j] * int_sequence[index][i][j];
-//            sum += int_sequence[index][i][j];
-            residual += *pisequence * *pisequence;
+          sum = *pisequence++;
+
+          for (j = 1;j < length[index];j++) {
+            diff = *pisequence - sum / j;
+            residual += ((double)j / (double)(j + 1)) * diff * diff;
             sum += *pisequence++;
           }
-          residual -= sum * sum / length[index];
 
 #         ifdef MESSAGE
           double mean , diff , residual2;
@@ -525,7 +522,6 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
           mean = 0.;
           pisequence = int_sequence[index][i];
           for (j = 0;j < length[index];j++) {
-//          mean += int_sequence[index][i][j];
             mean += *pisequence++;
           }
           mean /= length[index];
@@ -533,19 +529,9 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
           residual2 = 0.;
           pisequence = int_sequence[index][i];
           for (j = 0;j < length[index];j++) {
-//            diff = int_sequence[index][i][j] - mean;
             diff = *pisequence++ - mean;
             residual2 += diff * diff;
           }
-
-/*          residual2 = 0.;
-          for (j = 0;j < length[index];j++) {
-            for (k = j - 1;k >= 0;k--) {
-              diff = int_sequence[index][i][j] - int_sequence[index][i][k];
-              residual2 += diff * diff;
-            }
-          }
-          residual2 /= length[index]; */
 
           if ((residual < residual2 - DOUBLE_ERROR) || (residual > residual2 + DOUBLE_ERROR)) {
             cout << "\nERROR: " << residual << " " << residual2 << endl;
@@ -556,13 +542,13 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
 
         else {
           prsequence = real_sequence[index][i];
-          for (j = 0;j < length[index];j++) {
-//            residual += real_sequence[index][i][j] * real_sequence[index][i][j];
-//            sum += real_sequence[index][i][j];
-            residual += *prsequence * *prsequence;
+          sum = *prsequence++;
+
+          for (j = 1;j < length[index];j++) {
+            diff = *prsequence - sum / j;
+            residual += ((double)j / (double)(j + 1)) * diff * diff;
             sum += *prsequence++;
           }
-          residual -= sum * sum / length[index];
         }
       }
 
@@ -973,7 +959,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
   register int i , j , k , m;
   int index , max_nb_value , nb_parameter , *change_point = 0 , *pindex_param ,
       *frequency , *pisequence , *psegment , inb_segment[1];
-  double sum , factorial_sum , diff , sum_square , residual , segmentation_likelihood ,
+  double sum , factorial_sum , diff , residual , segmentation_likelihood ,
          segment_penalty , penalized_likelihood , *mean , *prsequence , **rank;
   Sequences *iseq , *seq , *oseq;
 
@@ -1168,7 +1154,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       if (type[0] != REAL_VALUE) {
         pisequence = int_sequence[index][0];
         for (i = 0;i < length[index];i++) {
-//          residual += int_sequence[index][0][i] * int_sequence[index][0][i];
           residual += *pisequence * *pisequence;
           pisequence++;
         }
@@ -1177,7 +1162,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       else {
         prsequence = real_sequence[index][0];
         for (i = 0;i < length[index];i++) {
-//          residual += real_sequence[index][0][i] * real_sequence[index][0][i];
           residual += *prsequence * *prsequence;
           prsequence++;
         }
@@ -1191,7 +1175,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         if (type[i] != REAL_VALUE) {
           pisequence = int_sequence[index][i];
           for (j = 0;j < length[index];j++) {
-//            mean[i] += int_sequence[index][i][j];
             mean[i] += *pisequence++;
           }
         }
@@ -1199,7 +1182,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         else {
           prsequence = real_sequence[index][i];
           for (j = 0;j < length[index];j++) {
-//            mean[i] += real_sequence[index][i][j];
             mean[i] += *prsequence++;
           }
         }
@@ -1225,7 +1207,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
           pisequence = int_sequence[index][j] + change_point[i];
           for (k = change_point[i];k < change_point[i + 1];k++) {
-//            frequency[int_sequence[index][j][k]]++;
             frequency[*pisequence++]++;
           }
 
@@ -1243,7 +1224,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
           pisequence = int_sequence[index][j] + change_point[i];
           for (k = change_point[i];k < change_point[i + 1];k++) {
-//            sum += int_sequence[index][j][k];
             sum += *pisequence++;
             for (m = 2;m <= int_sequence[index][j][k];m++) {
               factorial_sum += log((double)m);
@@ -1266,7 +1246,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + change_point[i];
             for (k = change_point[i];k < change_point[i + 1];k++) {
-//              sum += int_sequence[index][j][k];
               sum += *pisequence++;
             }
           }
@@ -1274,7 +1253,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           else {
             prsequence = real_sequence[index][j] + change_point[i];
             for (k = change_point[i];k < change_point[i + 1];k++) {
-//              sum += real_sequence[index][j][k];
               sum += *prsequence++;
             }
           }
@@ -1291,7 +1269,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
             if (type[j] != REAL_VALUE) {
               pisequence = int_sequence[index][j] + change_point[i];
               for (k = change_point[i];k < change_point[i + 1];k++) {
-//                diff = int_sequence[index][j][k] - mean[j];
                 diff = *pisequence++ - mean[j];
                 residual += diff * diff;
               }
@@ -1300,7 +1277,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
             else {
               prsequence = real_sequence[index][j] + change_point[i];
               for (k = change_point[i];k < change_point[i + 1];k++) {
-//                diff = real_sequence[index][j][k] - mean[j];
                 diff = *prsequence++ - mean[j];
                 residual += diff * diff;
               }
@@ -1310,46 +1286,44 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
           case ORDINAL : {
             pisequence = int_sequence[index][j] + change_point[i];
-            sum_square = 0.;
-            sum = 0.;
+            residual = 0.;
+            sum = rank[j][*pisequence++];
 
-            for (k = change_point[i];k < change_point[i + 1];k++) {
-//              sum_square += rank[j][int_sequence[index][j][k]] *
-//                            rank[j][int_sequence[index][j][k]];
-//              sum += rank[j][int_sequence[index][j][k]];
-              sum_square += rank[j][*pisequence] * rank[j][*pisequence];
+            for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+              diff = rank[j][*pisequence] - sum / (k - change_point[i]);
+              residual += ((double)(k - change_point[i]) / (double)(k - change_point[i] + 1)) *
+                          diff * diff;
               sum += rank[j][*pisequence++];
             }
-
-            residual = sum_square - sum * sum / (change_point[i + 1] - change_point[i]);
             break;
           }
 
           case NUMERIC : {
-            sum_square = 0.;
-            sum = 0.;
-
             if (type[j] != REAL_VALUE) {
               pisequence = int_sequence[index][j] + change_point[i];
-              for (k = change_point[i];k < change_point[i + 1];k++) {
-//                sum_square += int_sequence[index][j][k] * int_sequence[index][j][k];
-//                sum += int_sequence[index][j][k];
-                sum_square += *pisequence * *pisequence;
+              residual = 0.;
+              sum = *pisequence++;
+
+              for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+                diff = *pisequence - sum / (k - change_point[i]);
+                residual += ((double)(k - change_point[i]) / (double)(k - change_point[i] + 1)) *
+                            diff * diff;
                 sum += *pisequence++;
               }
             }
 
             else {
               prsequence = real_sequence[index][j] + change_point[i];
-              for (k = change_point[i];k < change_point[i + 1];k++) {
-//                sum_square += real_sequence[index][j][k] * real_sequence[index][j][k];
-//                sum += real_sequence[index][j][k];
-                sum_square += *prsequence * *prsequence;
+              residual = 0.;
+              sum = *prsequence++;
+
+              for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
+                diff = *prsequence - sum / (k - change_point[i]);
+                residual += ((double)(k - change_point[i]) / (double)(k - change_point[i] + 1)) *
+                            diff * diff;
                 sum += *prsequence++;
               }
             }
-
-            residual = sum_square - sum * sum / (change_point[i + 1] - change_point[i]);
             break;
           }
           }
@@ -1469,8 +1443,8 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
   register int i , j , k , m , n , r;
   int max_nb_segment , max_nb_value , *frequency , *pisequence , *psegment , **optimal_length;
   double sequence_sum_square , sum , factorial_sum , diff , sum_square , buff ,
-         segmentation_likelihood , *factorial , *mean , *residual , *prsequence ,
-         *contrast , **forward;
+         segmentation_likelihood , *mean , *residual , *prsequence , *contrast ,
+         **factorial , **forward;
 
 
   max_nb_segment = nb_segment[0];
@@ -1481,14 +1455,18 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
   }
 
   max_nb_value = 0;
-  factorial = 0;
+  factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((variable_type[i - 1] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal[i]->nb_value;
     }
-    if ((variable_type[i - 1] == POISSON_CHANGE) && (!factorial)) {
-      factorial = new double[max_length];
+
+    if (variable_type[i - 1] == POISSON_CHANGE) {
+      factorial[i] = new double[max_length];
+    }
+    else {
+      factorial[i] = 0;
     }
   }
 
@@ -1527,7 +1505,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
       if (type[1] != REAL_VALUE) {
         pisequence = int_sequence[i][1];
         for (j = 0;j < length[i];j++) {
-//          sequence_sum_square += int_sequence[i][1][j] * int_sequence[i][1][j];
           sequence_sum_square += *pisequence * *pisequence;
           pisequence++;
         }
@@ -1536,7 +1513,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
       else {
         prsequence = real_sequence[i][1];
         for (j = 0;j < length[i];j++) {
-//          sequence_sum_square += real_sequence[i][1][j] * real_sequence[i][1][j];
           sequence_sum_square += *prsequence * *prsequence;
           prsequence++;
         }
@@ -1550,7 +1526,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
         if (type[j] != REAL_VALUE) {
           pisequence = int_sequence[i][j];
           for (k = 0;k < length[i];k++) {
-//            mean[j] += int_sequence[i][j][k];
             mean[j] += *pisequence++;
           }
         }
@@ -1558,7 +1533,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
         else {
           prsequence = real_sequence[i][j];
           for (k = 0;k < length[i];k++) {
-//            mean[j] += real_sequence[i][j][k];
             mean[j] += *prsequence++;
           }
         }
@@ -1582,27 +1556,38 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
           for (m = 0;m < marginal[k]->nb_value;m++) {
             frequency[m] = 0;
           }
+          sum = 0.;
 
-//          frequency[int_sequence[i][k][j]]++;
           pisequence = int_sequence[i][k] + j;
           frequency[*pisequence--]++;
           for (m = j - 1;m >= 0;m--) {
-//            frequency[int_sequence[i][k][m]]++;
+            sum += (j - m) * log((double)(j - m) / (double)(j - m + 1)) +
+                   log((double)(frequency[*pisequence] + 1) / (double)(j - m + 1));
+            if (frequency[*pisequence] > 0) {
+              sum -= frequency[*pisequence] *
+                     log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+            }
             frequency[*pisequence--]++;
+
+            if (contrast[m] != D_INF) {
+              contrast[m] += sum;
+            }
+
+/*            frequency[*pisequence--]++;
             if (contrast[m] != D_INF) {
               for (n = 0;n < marginal[k]->nb_value;n++) {
                 if (frequency[n] > 0) {
                   contrast[m] += frequency[n] * log((double)frequency[n] / (double)(j - m + 1));
                 }
               }
-            }
+            } */
           }
         }
 
         else if (variable_type[k - 1] == POISSON_CHANGE) {
-          factorial[j] = 0.;
+          factorial[k][j] = 0.;
           for (m = 2;m <= int_sequence[i][k][j];m++) {
-            factorial[j] += log((double)m);
+            factorial[k][j] += log((double)m);
           }
 
           sum = 0.;
@@ -1610,9 +1595,8 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
 
           pisequence = int_sequence[i][k] + j;
           for (m = j;m >= 0;m--) {
-//            sum += int_sequence[i][k][m];
             sum += *pisequence--;
-            factorial_sum += factorial[m];
+            factorial_sum += factorial[k][m];
             if ((contrast[m] != D_INF) && (sum > 0.)) {
               contrast[m] += sum * (log(sum / (j - m + 1)) - 1) - factorial_sum;
             }
@@ -1625,7 +1609,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
           if (type[k] != REAL_VALUE) {
             pisequence = int_sequence[i][k] + j;
             for (m = j;m >= 0;m--) {
-//              sum += int_sequence[i][k][m];
               sum += *pisequence--;
               contrast[m] = sum * sum / (j - m + 1);
             }
@@ -1634,7 +1617,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
           else {
             prsequence = real_sequence[i][k] + j;
             for (m = j;m >= 0;m--) {
-//              sum += real_sequence[i][k][m];
               sum += *prsequence--;
               contrast[m] = sum * sum / (j - m + 1);
             }
@@ -1650,7 +1632,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
             if (type[k] != REAL_VALUE) {
               pisequence = int_sequence[i][k] + j;
               for (m = j;m >= 0;m--) {
-//                diff = int_sequence[i][k][m] - mean[k];
                 diff = *pisequence-- - mean[k];
                 sum_square += diff * diff;
                 residual[m] = sum_square;
@@ -1659,7 +1640,6 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
             else {
               prsequence = real_sequence[i][k] + j;
               for (m = j;m >= 0;m--) {
-//                diff = real_sequence[i][k][m] - mean[k];
                 diff = *prsequence-- - mean[k];
                 sum_square += diff * diff;
                 residual[m] = sum_square;
@@ -1669,55 +1649,46 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
           }
 
           case ORDINAL : {
-//            sum_square = rank[k][int_sequence[i][k][j]] * rank[k][int_sequence[i][k][j]];
-//            sum = rank[k][int_sequence[i][k][j]];
             pisequence = int_sequence[i][k] + j;
-            sum_square = rank[k][*pisequence] * rank[k][*pisequence];
+            sum_square = 0.;
             sum = rank[k][*pisequence--];
             residual[j] = 0.;
 
             for (m = j - 1;m >= 0;m--) {
-//              sum_square += rank[k][int_sequence[i][k][m]] * rank[k][int_sequence[i][k][m]];
-//              sum += rank[k][int_sequence[i][k][m]];
-              sum_square += rank[k][*pisequence] * rank[k][*pisequence];
+              diff = rank[k][*pisequence] - sum / (j - m);
+              sum_square += ((double)(j - m) / (double)(j - m + 1)) * diff * diff;
               sum += rank[k][*pisequence--];
-              residual[m] = sum_square - sum * sum / (j - m + 1);
+              residual[m] = sum_square;
             }
             break;
           }
 
           case NUMERIC : {
             if (type[k] != REAL_VALUE) {
-//              sum_square = int_sequence[i][k][j] * int_sequence[i][k][j];
-//              sum = int_sequence[i][k][j];
               pisequence = int_sequence[i][k] + j;
-              sum_square = *pisequence * *pisequence;
+              sum_square = 0.;
               sum = *pisequence--;
               residual[j] = 0.;
 
               for (m = j - 1;m >= 0;m--) {
-//                sum_square += int_sequence[i][k][m] * int_sequence[i][k][m];
-//                sum += int_sequence[i][k][m];
-                sum_square += *pisequence * *pisequence;
+                diff = *pisequence - sum / (j - m);
+                sum_square += ((double)(j - m) / (double)(j - m + 1)) * diff * diff;
                 sum += *pisequence--;
-                residual[m] = sum_square - sum * sum / (j - m + 1);
+                residual[m] = sum_square;
               }
             }
 
             else {
-//              sum_square = real_sequence[i][k][j] * real_sequence[i][k][j];
-//              sum = real_sequence[i][k][j];
               prsequence = real_sequence[i][k] + j;
-              sum_square = *prsequence * *prsequence;
+              sum_square = 0.;
               sum = *prsequence--;
               residual[j] = 0.;
 
               for (m = j - 1;m >= 0;m--) {
-//                sum_square += real_sequence[i][k][m] * real_sequence[i][k][m];
-//                sum += real_sequence[i][k][m];
-                sum_square += *prsequence * *prsequence;
+                diff = *prsequence - sum / (j - m);
+                sum_square += ((double)(j - m) / (double)(j - m + 1)) * diff * diff;
                 sum += *prsequence--;
-                residual[m] = sum_square - sum * sum / (j - m + 1);
+                residual[m] = sum_square;
               }
             }
             break;
@@ -1914,7 +1885,12 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
   build_marginal_histogram(0);
 
   delete [] frequency;
+
+  for (i = 1;i < nb_variable;i++) {
+    delete [] factorial[i];
+  }
   delete [] factorial;
+
   delete [] mean;
   delete [] residual;
 
@@ -2672,7 +2648,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
                                    double *isegment_entropy) const
 
 {
-  register int i , j , k , m;
+  register int i , j , k;
   int max_nb_value , *frequency , *pisequence;
   double sum , factorial_sum , diff , sum_square , buff , segment_norm , sequence_norm ,
          rlikelihood , change_point_entropy , segment_entropy , *mean , *residual , *prsequence ,
@@ -2762,7 +2738,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
       if (type[i] != REAL_VALUE) {
         pisequence = int_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          mean[i] += int_sequence[index][i][j];
           mean[i] += *pisequence++;
         }
       }
@@ -2770,7 +2745,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
       else {
         prsequence = real_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          mean[i] += real_sequence[index][i][j];
           mean[i] += *prsequence++;
         }
       }
@@ -2794,20 +2768,31 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
+        sum = 0.;
 
-//        frequency[int_sequence[index][j][i]]++;
         pisequence = int_sequence[index][j] + i;
         frequency[*pisequence--]++;
         for (k = i - 1;k >= 0;k--) {
-//          frequency[int_sequence[index][j][k]]++;
+          sum += (i - k) * log((double)(i - k) / (double)(i - k + 1)) +
+                 log((double)(frequency[*pisequence] + 1) / (double)(i - k + 1));
+          if (frequency[*pisequence] > 0) {
+            sum -= frequency[*pisequence] *
+                   log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+          }
           frequency[*pisequence--]++;
+
+          if (contrast[k] != D_INF) {
+            contrast[k] += sum;
+          }
+
+/*          frequency[*pisequence--]++;
           if (contrast[k] != D_INF) {
             for (m = 0;m < marginal[j]->nb_value;m++) {
               if (frequency[m] > 0) {
                 contrast[k] += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
               }
             }
-          }
+          } */
         }
       }
 
@@ -2822,7 +2807,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
 
         pisequence = int_sequence[index][j] + i;
         for (k = i;k >= 0;k--) {
-//          sum += int_sequence[index][j][k];
           sum += *pisequence--;
           factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
@@ -2840,7 +2824,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = int_sequence[index][j][k] - mean[j];
               diff = *pisequence-- - mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -2850,7 +2833,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
           else {
             prsequence = real_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = real_sequence[index][j][k] - mean[j];
               diff = *prsequence-- - mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -2860,55 +2842,46 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
         }
 
         case ORDINAL : {
-//          sum_square = rank[j][int_sequence[index][j][i]] * rank[j][int_sequence[index][j][i]];
-//          sum = rank[j][int_sequence[index][j][i]];
           pisequence = int_sequence[index][j] + i;
-          sum_square = rank[j][*pisequence] * rank[j][*pisequence];
+          sum_square = 0.;
           sum = rank[j][*pisequence--];
           residual[i] = 0.;
 
           for (k = i - 1;k >= 0;k--) {
-//            sum_square += rank[j][int_sequence[index][j][k]] * rank[j][int_sequence[index][j][k]];
-//            sum += rank[j][int_sequence[index][j][k]];
-            sum_square += rank[j][*pisequence] * rank[j][*pisequence];
+            diff = rank[j][*pisequence] - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
             sum += rank[j][*pisequence--];
-            residual[k] = sum_square - sum * sum / (i - k + 1);
+            residual[k] = sum_square;
           }
           break;
         }
 
         case NUMERIC : {
           if (type[j] != REAL_VALUE) {
-//            sum_square = int_sequence[index][j][i] * int_sequence[index][j][i];
-//            sum = int_sequence[index][j][i];
             pisequence = int_sequence[index][j] + i;
-            sum_square = *pisequence * *pisequence;
+            sum_square = 0.;
             sum = *pisequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += int_sequence[index][j][k] * int_sequence[index][j][k];
-//              sum += int_sequence[index][j][k];
-              sum_square += *pisequence * *pisequence;
+              diff = *pisequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *pisequence--;
-              residual[k] = sum_square - sum * sum / (i - k + 1);
+              residual[k] = sum_square;
             }
           }
 
           else {
-//            sum_square = real_sequence[index][j][i] * real_sequence[index][j][i];
-//            sum = real_sequence[index][j][i];
             prsequence = real_sequence[index][j] + i;
-            sum_square = *prsequence * *prsequence;
+            sum_square = 0.;
             sum = *prsequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += real_sequence[index][j][k] * real_sequence[index][j][k];
-//              sum += real_sequence[index][j][k];
-              sum_square += *prsequence * *prsequence;
+              diff = *prsequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *prsequence--;
-              residual[k] = sum_square - sum * sum / (i - k + 1);
+              residual[k] = sum_square;
             }
           }
           break;
@@ -3069,20 +3042,31 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
           for (k = 0;k < marginal[j]->nb_value;k++) {
             frequency[k] = 0;
           }
+          sum = 0.;
 
-//          frequency[int_sequence[index][j][i]]++;
           pisequence = int_sequence[index][j] + i;
           frequency[*pisequence++]++;
           for (k = i + 1;k < length[index];k++) {
-//            frequency[int_sequence[index][j][k]]++;
+            sum += (k - i) * log((double)(k - i) / (double)(k - i + 1)) +
+                   log((double)(frequency[*pisequence] + 1) / (double)(k - i + 1));
+            if (frequency[*pisequence] > 0) {
+              sum -= frequency[*pisequence] *
+                     log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+            }
             frequency[*pisequence++]++;
+
+            if (contrast[k] != D_INF) {
+              contrast[k] += sum;
+            }
+
+/*            frequency[*pisequence++]++;
             if (contrast[k] != D_INF) {
               for (m = 0;m < marginal[j]->nb_value;m++) {
                 if (frequency[m] > 0) {
                   contrast[k] += frequency[m] * log((double)frequency[m] / (double)(k - i + 1));
                 }
               }
-            }
+            } */
           }
         }
 
@@ -3092,7 +3076,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
 
           pisequence = int_sequence[index][j] + i;
           for (k = i;k < length[index];k++) {
-//            sum += int_sequence[index][j][k];
             sum += *pisequence++;
             factorial_sum += factorial[j][k];
             if ((contrast[k] != D_INF) && (sum > 0.)) {
@@ -3110,7 +3093,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
             if (type[j] != REAL_VALUE) {
               pisequence = int_sequence[index][j] + i;
               for (k = i;k < length[index];k++) {
-//                diff = int_sequence[index][j][k] - mean[j];
                 diff = *pisequence++ - mean[j];
                 sum_square += diff * diff;
                 residual[k] = sum_square;
@@ -3120,7 +3102,6 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
             else {
               prsequence = real_sequence[index][j] + i;
               for (k = i;k < length[index];k++) {
-//                diff = real_sequence[index][j][k] - mean[j];
                 diff = *prsequence++ - mean[j];
                 sum_square += diff * diff;
                 residual[k] = sum_square;
@@ -3130,55 +3111,46 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
           }
 
           case ORDINAL : {
-//            sum_square = rank[j][int_sequence[index][j][i]] * rank[j][int_sequence[index][j][i]];
-//            sum = rank[j][int_sequence[index][j][i]];
             pisequence = int_sequence[index][j] + i;
-            sum_square = rank[j][*pisequence] * rank[j][*pisequence];
+            sum_square = 0.;
             sum = rank[j][*pisequence++];
             residual[i] = 0.;
 
             for (k = i + 1;k < length[index];k++) {
-//              sum_square += rank[j][int_sequence[index][j][k]] * rank[j][int_sequence[index][j][k]];
-//              sum += rank[j][int_sequence[index][j][k]];
-              sum_square += rank[j][*pisequence] * rank[j][*pisequence];
+              diff = rank[j][*pisequence] - sum / (k - i);
+              sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
               sum += rank[j][*pisequence++];
-              residual[k] = sum_square - sum * sum / (k - i + 1);
+              residual[k] = sum_square;
             }
             break;
           }
 
           case NUMERIC : {
             if (type[j] != REAL_VALUE) {
-//              sum_square = int_sequence[index][j][i] * int_sequence[index][j][i];
-//              sum = int_sequence[index][j][i];
               pisequence = int_sequence[index][j] + i;
-              sum_square = *pisequence * *pisequence;
+              sum_square = 0.;
               sum = *pisequence++;
               residual[i] = 0.;
 
               for (k = i + 1;k < length[index];k++) {
-//                sum_square += int_sequence[index][j][k] * int_sequence[index][j][k];
-//                sum += int_sequence[index][j][k];
-                sum_square += *pisequence * *pisequence;
+                diff = *pisequence - sum / (k - i);
+                sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
                 sum += *pisequence++;
-                residual[k] = sum_square - sum * sum / (k - i + 1);
+                residual[k] = sum_square;
               }
             }
 
             else {
-//              sum_square = real_sequence[index][j][i] * real_sequence[index][j][i];
-//              sum = real_sequence[index][j][i];
               prsequence = real_sequence[index][j] + i;
-              sum_square = *prsequence * *prsequence;
+              sum_square = 0.;
               sum = *prsequence++;
               residual[i] = 0.;
 
               for (k = i + 1;k < length[index];k++) {
-//                sum_square += real_sequence[index][j][k] * real_sequence[index][j][k];
-//                sum += real_sequence[index][j][k];
-                sum_square += *prsequence * *prsequence;
+                diff = *prsequence - sum / (k - i);
+                sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
                 sum += *prsequence++;
-                residual[k] = sum_square - sum * sum / (k - i + 1);
+                residual[k] = sum_square;
               }
             }
             break;
@@ -3608,7 +3580,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
                                             int nb_segmentation) const
 
 {
-  register int i , j , k , m , n , r;
+  register int i , j , k , m , n;
   int max_nb_value , segment_length , *frequency , *pisequence , *psegment , **sisequence;
   double sum , factorial_sum , diff , sum_square , segment_norm , sequence_norm ,
          likelihood , segmentation_likelihood , *sequence_mean , *residual , *prsequence ,
@@ -3690,7 +3662,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
       if (type[i] != REAL_VALUE) {
         pisequence = int_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          sequence_mean[i] += int_sequence[index][i][j];
           sequence_mean[i] += *pisequence++;
         }
       }
@@ -3698,7 +3669,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
       else {
         prsequence = real_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          sequence_mean[i] += real_sequence[index][i][j];
           sequence_mean[i] += *prsequence++;
         }
       }
@@ -3722,20 +3692,31 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
+        sum = 0.;
 
-//        frequency[int_sequence[index][j][i]]++;
         pisequence = int_sequence[index][j] + i;
         frequency[*pisequence--]++;
         for (k = i - 1;k >= 0;k--) {
-//          frequency[int_sequence[index][j][k]]++;
+          sum += (i - k) * log((double)(i - k) / (double)(i - k + 1)) +
+                 log((double)(frequency[*pisequence] + 1) / (double)(i - k + 1));
+          if (frequency[*pisequence] > 0) {
+            sum -= frequency[*pisequence] *
+                   log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+          }
           frequency[*pisequence--]++;
+
+          if (contrast[k] != D_INF) {
+            contrast[k] += sum;
+          }
+
+/*          frequency[*pisequence--]++;
           if (contrast[k] != D_INF) {
             for (m = 0;m < marginal[j]->nb_value;m++) {
               if (frequency[m] > 0) {
                 contrast[k] += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
               }
             }
-          }
+          } */
         }
       }
 
@@ -3750,7 +3731,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
 
         pisequence = int_sequence[index][j] + i;
         for (k = i;k >= 0;k--) {
-//          sum += int_sequence[index][j][k];
           sum += *pisequence--;
           factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
@@ -3768,7 +3748,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = int_sequence[index][j][k] - sequence_mean[j];
               diff = *pisequence-- - sequence_mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -3778,7 +3757,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
           else {
             prsequence = real_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = real_sequence[index][j][k] - sequence_mean[j];
               diff = *prsequence-- - sequence_mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -3788,55 +3766,46 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
         }
 
         case ORDINAL : {
-//          sum_square = rank[j][int_sequence[index][j][i]] * rank[j][int_sequence[index][j][i]];
-//          sum = rank[j][int_sequence[index][j][i]];
           pisequence = int_sequence[index][j] + i;
-          sum_square = rank[j][*pisequence] * rank[j][*pisequence];
+          sum_square = 0.;
           sum = rank[j][*pisequence--];
           residual[i] = 0.;
 
           for (k = i - 1;k >= 0;k--) {
-//            sum_square += rank[j][int_sequence[index][j][k]] * rank[j][int_sequence[index][j][k]];
-//            sum += rank[j][int_sequence[index][j][k]];
-            sum_square += rank[j][*pisequence] * rank[j][*pisequence];
+            diff = rank[j][*pisequence] - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
             sum += rank[j][*pisequence--];
-            residual[k] = sum_square - sum * sum / (i - k + 1);
+            residual[k] = sum_square;
           }
           break;
         }
 
         case NUMERIC : {
           if (type[j] != REAL_VALUE) {
-//            sum_square = int_sequence[index][j][i] * int_sequence[index][j][i];
-//            sum = int_sequence[index][j][i];
             pisequence = int_sequence[index][j] + i;
-            sum_square = *pisequence * *pisequence;
+            sum_square = 0.;
             sum = *pisequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += int_sequence[index][j][k] * int_sequence[index][j][k];
-//              sum += int_sequence[index][j][k];
-              sum_square += *pisequence * *pisequence;
+              diff = *pisequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *pisequence--;
-              residual[k] = sum_square - sum * sum / (i - k + 1);
+              residual[k] = sum_square;
             }
           }
 
           else {
-//            sum_square = real_sequence[index][j][i] * real_sequence[index][j][i];
-//            sum = real_sequence[index][j][i];
             prsequence = real_sequence[index][j] + i;
-            sum_square = *prsequence * *prsequence;
+            sum_square = 0.;
             sum = *prsequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += real_sequence[index][j][k] * real_sequence[index][j][k];
-//              sum += real_sequence[index][j][k];
-              sum_square += *prsequence * *prsequence;
+              diff = *prsequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *prsequence--;
-              residual[k] = sum_square - sum * sum / (i - k + 1);
+              residual[k] = sum_square;
             }
           }
           break;
@@ -3955,20 +3924,31 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
             for (n = 0;n < marginal[m]->nb_value;n++) {
               frequency[n] = 0;
             }
+            sum = 0.;
 
-//            frequency[int_sequence[index][m][j]]++;
             pisequence = int_sequence[index][m] + j;
             frequency[*pisequence--]++;
             for (n = j - 1;n >= k;n--) {
-//              frequency[int_sequence[index][m][n]]++;
+              sum += (j - n) * log((double)(j - n) / (double)(j - n + 1)) +
+                     log((double)(frequency[*pisequence] + 1) / (double)(j - n + 1));
+              if (frequency[*pisequence] > 0) {
+                sum -= frequency[*pisequence] *
+                       log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+              }
               frequency[*pisequence--]++;
+
+              if (contrast[n] != D_INF) {
+                contrast[n] += sum;
+              }
+
+/*              frequency[*pisequence--]++;
               if (contrast[n] != D_INF) {
                 for (r = 0;r < marginal[m]->nb_value;r++) {
                   if (frequency[r] > 0) {
                     contrast[n] += frequency[r] * log((double)frequency[r] / (double)(j - n + 1));
                   }
                 }
-              }
+              } */
             }
           }
 
@@ -3978,7 +3958,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
 
             pisequence = int_sequence[index][m] + j;
             for (n = j;n >= k;n--) {
-//              sum += int_sequence[index][m][n];
               sum += *pisequence--;
               factorial_sum += factorial[m][n];
               if ((contrast[n] != D_INF) && (sum > 0.)) {
@@ -3993,10 +3972,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
             case VARIANCE_CHANGE : {
               sum_square = 0.;
 
-              if (type[j] != REAL_VALUE) {
+              if (type[m] != REAL_VALUE) {
                 pisequence = int_sequence[index][m] + j;
                 for (n = j;n >= k;n--) {
-//                  diff = int_sequence[index][m][n] - sequence_mean[m];
                   diff = *pisequence-- - sequence_mean[m];
                   sum_square += diff * diff;
                   residual[n] = sum_square;
@@ -4006,7 +3984,6 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
               else {
                 prsequence = real_sequence[index][m] + j;
                 for (n = j;n >= k;n--) {
-//                  diff = real_sequence[index][m][n] - sequence_mean[m];
                   diff = *prsequence-- - sequence_mean[m];
                   sum_square += diff * diff;
                   residual[n] = sum_square;
@@ -4016,55 +3993,46 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
             }
 
             case ORDINAL : {
-//              sum_square = rank[m][int_sequence[index][m][j]] * rank[m][int_sequence[index][m][j]];
-//              sum = rank[m][int_sequence[index][m][j]];
               pisequence = int_sequence[index][m] + j;
-              sum_square = rank[m][*pisequence] * rank[m][*pisequence];
+              sum_square = 0.;
               sum = rank[m][*pisequence--];
               residual[j] = 0.;
 
               for (n = j - 1;n >= k;n--) {
-//                sum_square += rank[m][int_sequence[index][m][n]] * rank[m][int_sequence[index][m][n]];
-//                sum += rank[m][int_sequence[index][m][n]];
-                sum_square += rank[m][*pisequence] * rank[m][*pisequence];
+                diff = rank[m][*pisequence] - sum / (j - n);
+                sum_square += ((double)(j - n) / (double)(j - n + 1)) * diff * diff;
                 sum += rank[m][*pisequence--];
-                residual[n] = sum_square - sum * sum / (j - n + 1);
+                residual[n] = sum_square;
               }
               break;
             }
 
             case NUMERIC : {
-              if (type[j] != REAL_VALUE) {
-//                sum_square = int_sequence[index][m][j] * int_sequence[index][m][j];
-//                sum = int_sequence[index][m][j];
+              if (type[m] != REAL_VALUE) {
                 pisequence = int_sequence[index][m] + j;
-                sum_square = *pisequence * *pisequence;
+                sum_square = 0.;
                 sum = *pisequence--;
                 residual[j] = 0.;
 
                 for (n = j - 1;n >= k;n--) {
-//                  sum_square += int_sequence[index][m][n] * int_sequence[index][m][n];
-//                  sum += int_sequence[index][m][n];
-                  sum_square += *pisequence * *pisequence;
+                  diff = *pisequence - sum / (j - n);
+                  sum_square += ((double)(j - n) / (double)(j - n + 1)) * diff * diff;
                   sum += *pisequence--;
-                  residual[n] = sum_square - sum * sum / (j - n + 1);
+                  residual[n] = sum_square;
                 }
               }
 
               else {
-//                sum_square = real_sequence[index][m][j] * real_sequence[index][m][j];
-//                sum = real_sequence[index][m][j];
                 prsequence = real_sequence[index][m] + j;
-                sum_square = *prsequence * *prsequence;
+                sum_square = 0.;
                 sum = *prsequence--;
                 residual[j] = 0.;
 
                 for (n = j - 1;n >= k;n--) {
-//                  sum_square += real_sequence[index][m][n] * real_sequence[index][m][n];
-//                  sum += real_sequence[index][m][n];
-                  sum_square += *prsequence * *prsequence;
+                  diff = *prsequence - sum / (j - n);
+                  sum_square += ((double)(j - n) / (double)(j - n + 1)) * diff * diff;
                   sum += *prsequence--;
-                  residual[n] = sum_square - sum * sum / (j - n + 1);
+                  residual[n] = sum_square;
                 }
               }
               break;
@@ -4190,9 +4158,11 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
           os << *psegment++ << " ";
         }
 
+        os << "  #";
         os << "  " << i + 1 << "  " << segmentation_likelihood << "   ("
            << exp(segmentation_likelihood - likelihood) << ")" << endl;
 
+        os << "# ";
         os << (nb_segment == 2 ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_CHANGE_POINTS]) << ": ";
 
         psegment = int_sequence[index][0] + 1;
@@ -4217,6 +4187,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
 
         for (j = 1;j < nb_variable;j++) {
           if ((variable_type[j - 1] == NUMERIC) || (variable_type[j - 1] == VARIANCE_CHANGE)) {
+            os << "# ";
             if (nb_variable > 2) {
               os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
             }
@@ -4228,6 +4199,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
           }
 
           else if (variable_type[j - 1] == POISSON_CHANGE) {
+            os << "# ";
             if (nb_variable > 2) {
               os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
             }
@@ -4365,13 +4337,13 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
   int max_nb_value , brank , previous_rank , nb_cell , *frequency , *pisequence , *rank ,
       *psegment , **sisequence , ***optimal_length , ***optimal_rank;
   double sequence_sum_square , sum , factorial_sum , diff , sum_square , buff ,
-         segmentation_likelihood , *nb_segmentation , *factorial , *sequence_mean , *residual ,
-         *prsequence , *contrast , **srsequence , **mean , **variance , ***forward;
+         segmentation_likelihood , *nb_segmentation , *sequence_mean , *residual , *prsequence ,
+         *contrast , **factorial , **srsequence , **mean , **variance , ***forward;
   long double likelihood_cumul;
 
 
 # ifdef MESSAGE
-  double max_nb_segmentation;
+  double max_nb_segmentation , sum2;
 
   max_nb_segmentation = 1.;
   for (i = 1;i < nb_segment;i++) {
@@ -4384,14 +4356,18 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
   // initialisations
 
   max_nb_value = 0;
-  factorial = 0;
+  factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
     if ((variable_type[i - 1] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal[i]->nb_value;
     }
-    if ((variable_type[i - 1] == POISSON_CHANGE) && (!factorial)) {
-      factorial = new double[length[index]];
+
+    if (variable_type[i - 1] == POISSON_CHANGE) {
+      factorial[i] = new double[length[index]];
+    }
+    else {
+      factorial[i] = 0;
     }
   }
 
@@ -4460,7 +4436,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
   srsequence = new double*[nb_variable];
 
 # ifdef MESSAGE
-//  double mean2 , residual2;
   double **mean_square_diff;
 
 
@@ -4495,7 +4470,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
     if (type[1] != REAL_VALUE) {
       pisequence = int_sequence[index][1];
       for (i = 0;i < length[index];i++) {
-//        sequence_sum_square += int_sequence[index][1][i] * int_sequence[index][1][i];
         sequence_sum_square += *pisequence * *pisequence;
         pisequence++;
       }
@@ -4504,7 +4478,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
     else {
       prsequence = real_sequence[index][1];
       for (i = 0;i < length[index];i++) {
-//        sequence_sum_square += real_sequence[index][1][i] * real_sequence[index][1][i];
         sequence_sum_square += *prsequence * *prsequence;
         prsequence++;
       }
@@ -4518,7 +4491,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
       if (type[i] != REAL_VALUE) {
         pisequence = int_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          sequence_mean[i] += int_sequence[index][i][j];
           sequence_mean[i] += *pisequence++;
         }
       }
@@ -4526,7 +4498,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
       else {
         prsequence = real_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          sequence_mean[i] += real_sequence[index][i][j];
           sequence_mean[i] += *prsequence++;
         }
       }
@@ -4554,27 +4525,43 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
+        sum = 0.;
 
-//        frequency[int_sequence[index][j][i]]++;
         pisequence = int_sequence[index][j] + i;
         frequency[*pisequence--]++;
         for (k = i - 1;k >= 0;k--) {
-//          frequency[int_sequence[index][j][k]]++;
+          sum += (i - k) * log((double)(i - k) / (double)(i - k + 1)) +
+                 log((double)(frequency[*pisequence] + 1) / (double)(i - k + 1));
+          if (frequency[*pisequence] > 0) {
+            sum -= frequency[*pisequence] *
+                   log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+          }
           frequency[*pisequence--]++;
+
           if (contrast[k] != D_INF) {
-            for (m = 0;m < marginal[j]->nb_value;m++) {
-              if (frequency[m] > 0) {
-                contrast[k] += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
-              }
+            contrast[k] += sum;
+          }
+
+#         ifdef MESSAGE
+          sum2 = 0.;
+          for (m = 0;m < marginal[j]->nb_value;m++) {
+            if (frequency[m] > 0) {
+              sum2 += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
             }
           }
+
+          if ((sum2 < sum - DOUBLE_ERROR) || (sum2 > sum + DOUBLE_ERROR)) {
+            cout << "\nERROR: " << i << " " << k << " | " << sum2 << " " << sum << endl;
+          }
+#         endif
+
         }
       }
 
       else if (variable_type[j - 1] == POISSON_CHANGE) {
-        factorial[i] = 0.;
+        factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
-          factorial[i] += log((double)k);
+          factorial[j][i] += log((double)k);
         }
 
         sum = 0.;
@@ -4582,9 +4569,8 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
 
         pisequence = int_sequence[index][j] + i;
         for (k = i;k >= 0;k--) {
-//          sum += int_sequence[index][j][k];
           sum += *pisequence--;
-          factorial_sum += factorial[k];
+          factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
             contrast[k] += sum * (log(sum / (i - k + 1)) - 1) - factorial_sum;
           }
@@ -4597,7 +4583,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
         if (type[j] != REAL_VALUE) {
           pisequence = int_sequence[index][j] + i;
           for (k = i;k >= 0;k--) {
-//            sum += int_sequence[index][j][k];
             sum += *pisequence--;
             contrast[k] = sum * sum / (i - k + 1);
           }
@@ -4606,7 +4591,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
         else {
           prsequence = real_sequence[index][j] + i;
           for (k = i;k >= 0;k--) {
-//            sum += real_sequence[index][j][k];
             sum += *prsequence--;
             contrast[k] = sum * sum / (i - k + 1);
           }
@@ -4622,7 +4606,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = int_sequence[index][j][k] - sequence_mean[j];
               diff = *pisequence-- - sequence_mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -4632,7 +4615,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
           else {
             prsequence = real_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = real_sequence[index][j][k] - sequence_mean[j];
               diff = *prsequence-- - sequence_mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -4642,44 +4624,53 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
         }
 
         case ORDINAL : {
-//          sum_square = irank[j][int_sequence[index][j][i]] * irank[j][int_sequence[index][j][i]];
-//          sum = irank[j][int_sequence[index][j][i]];
           pisequence = int_sequence[index][j] + i;
-          sum_square = irank[j][*pisequence] * irank[j][*pisequence];
+          sum_square = 0.;
           sum = irank[j][*pisequence--];
           residual[i] = 0.;
 
           for (k = i - 1;k >= 0;k--) {
-//            sum_square += irank[j][int_sequence[index][j][k]] * irank[j][int_sequence[index][j][k]];
-//            sum += irank[j][int_sequence[index][j][k]];
-            sum_square += irank[j][*pisequence] * irank[j][*pisequence];
+            diff = irank[j][*pisequence] - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
             sum += irank[j][*pisequence--];
-            residual[k] = sum_square - sum * sum / (i - k + 1);
+            residual[k] = sum_square;
           }
           break;
         }
 
         case NUMERIC : {
           if (type[j] != REAL_VALUE) {
-//            sum_square = int_sequence[index][j][i] * int_sequence[index][j][i];
-//            sum = int_sequence[index][j][i];
             pisequence = int_sequence[index][j] + i;
-            sum_square = *pisequence * *pisequence;
+            sum_square = 0.;
             sum = *pisequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += int_sequence[index][j][k] * int_sequence[index][j][k];
-//              sum += int_sequence[index][j][k];
-              sum_square += *pisequence * *pisequence;
+              diff = *pisequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *pisequence--;
-              residual[k] = sum_square - sum * sum / (i - k + 1);
+              residual[k] = sum_square;
             }
 
 #           ifdef MESSAGE
 //            cout << "\n";
 
-            mean_square_diff[j][i] = 0.;
+            pisequence = int_sequence[index][j] + i;
+            sum_square = *pisequence * *pisequence;
+            sum = *pisequence--;
+
+            for (k = i - 1;k >= 0;k--) {
+              sum_square += *pisequence * *pisequence;
+              sum += *pisequence--;
+
+              if ((sum_square - sum * sum / (i - k + 1) < residual[k] - DOUBLE_ERROR) ||
+                  (sum_square - sum * sum / (i - k + 1) > residual[k] + DOUBLE_ERROR)) {
+                cout << "\nERROR: " << i << " " << k << " | " << sum_square - sum * sum / (i - k + 1)
+                     << " " << residual[k] << endl;
+              }
+            }
+
+/*            mean_square_diff[j][i] = 0.;
             sum = 0.;
 
             for (k = i - 1;k >= 0;k--) {
@@ -4692,39 +4683,22 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
                 cout << "\nERROR: " << i << " " << k << " | " << mean_square_diff[j][k] / (i - k + 1)
                      << " " << residual[k] << endl;
               }
-            }
-
-/*            sum = int_sequence[index][j][i];
-
-            for (k = i - 1;k >= 0;k--) {
-              residual2 = 0.;
-              sum += int_sequence[index][j][k];
-              mean2 = sum / (i - k + 1);
-              for (m = i;m >= k;m--) {
-                diff = int_sequence[index][j][m] - mean2;
-                residual2 += diff * diff;
-              }
-
-              cout << residual2 << " | " << mean_square_diff[j][k] / (i - k + 1) << " | " << residual[k] << endl;
             } */
 #           endif
 
           }
 
           else {
-//            sum_square = real_sequence[index][j][i] * real_sequence[index][j][i];
-//            sum = real_sequence[index][j][i];
             prsequence = real_sequence[index][j] + i;
-            sum_square = *prsequence * *prsequence;
+            sum_square = 0.;
             sum = *prsequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += real_sequence[index][j][k] * real_sequence[index][j][k];
-//              sum += real_sequence[index][j][k];
-              sum_square += *prsequence * *prsequence;
+              diff = *prsequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *prsequence--;
-              residual[k] = sum_square - sum * sum / (i - k + 1);
+              residual[k] = sum_square;
             }
           }
           break;
@@ -5143,7 +5117,12 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
 # endif
 
   delete [] frequency;
+
+  for (i = 1;i < nb_variable;i++) {
+    delete [] factorial[i];
+  }
   delete [] factorial;
+
   delete [] sequence_mean;
   delete [] residual;
 
@@ -5297,7 +5276,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     if (type[1] != REAL_VALUE) {
       pisequence = int_sequence[index][1];
       for (i = 0;i < length[index];i++) {
-//        sequence_sum_square += int_sequence[index][1][i] * int_sequence[index][1][i];
         sequence_sum_square += *pisequence * *pisequence;
         pisequence++;
       }
@@ -5306,7 +5284,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     else {
       prsequence = real_sequence[index][1];
       for (i = 0;i < length[index];i++) {
-//        sequence_sum_square += real_sequence[index][1][i] * real_sequence[index][1][i];
         sequence_sum_square += *prsequence * *prsequence;
         prsequence++;
       }
@@ -5320,7 +5297,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       if (type[i] != REAL_VALUE) {
         pisequence = int_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          sequence_mean[i] += int_sequence[index][i][j];
           sequence_mean[i] += *pisequence++;
         }
       }
@@ -5328,7 +5304,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       else {
         prsequence = real_sequence[index][i];
         for (j = 0;j < length[index];j++) {
-//          sequence_mean[i] += real_sequence[index][i][j];
           sequence_mean[i] += *prsequence++;
         }
       }
@@ -5352,20 +5327,31 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
+        sum = 0.;
 
-//        frequency[int_sequence[index][j][i]]++;
         pisequence = int_sequence[index][j] + i;
         frequency[*pisequence--]++;
         for (k = i - 1;k >= 0;k--) {
-//          frequency[int_sequence[index][j][k]]++;
+          sum += (i - k) * log((double)(i - k) / (double)(i - k + 1)) +
+                 log((double)(frequency[*pisequence] + 1) / (double)(i - k + 1));
+          if (frequency[*pisequence] > 0) {
+            sum -= frequency[*pisequence] *
+                   log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+          }
           frequency[*pisequence--]++;
+
+          if (contrast[k] != D_INF) {
+            contrast[k] += sum;
+          }
+
+/*          frequency[*pisequence--]++;
           if (contrast[k] != D_INF) {
             for (m = 0;m < marginal[j]->nb_value;m++) {
               if (frequency[m] > 0) {
                 contrast[k] += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
               }
             }
-          }
+          } */
         }
       }
 
@@ -5380,7 +5366,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
         pisequence = int_sequence[index][j] + i;
         for (k = i;k >= 0;k--) {
-//          sum += int_sequence[index][j][k];
           sum += *pisequence--;
           factorial_sum += factorial[j][k];
           if ((contrast[k] != D_INF) && (sum > 0.)) {
@@ -5395,7 +5380,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         if (type[j] != REAL_VALUE) {
           pisequence = int_sequence[index][j] + i;
           for (k = i;k >= 0;k--) {
-//            sum += int_sequence[index][j][k];
             sum += *pisequence--;
             contrast[k] = sum * sum / (i - k + 1);
           }
@@ -5404,7 +5388,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         else {
           prsequence = real_sequence[index][j] + i;
           for (k = i;k >= 0;k--) {
-//            sum += real_sequence[index][j][k];
             sum += *prsequence--;
             contrast[k] = sum * sum / (i - k + 1);
           }
@@ -5420,7 +5403,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = int_sequence[index][j][k] - sequence_mean[j];
               diff = *pisequence-- - sequence_mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -5430,7 +5412,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           else {
             prsequence = real_sequence[index][j] + i;
             for (k = i;k >= 0;k--) {
-//              diff = real_sequence[index][j][k] - sequence_mean[j];
               diff = *prsequence-- - sequence_mean[j];
               sum_square += diff * diff;
               residual[k] = sum_square;
@@ -5440,55 +5421,46 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         }
 
         case ORDINAL : {
-//          sum_square = rank[j][int_sequence[index][j][i]] * rank[j][int_sequence[index][j][i]];
-//          sum = rank[j][int_sequence[index][j][i]];
           pisequence = int_sequence[index][j] + i;
-          sum_square = rank[j][*pisequence] * rank[j][*pisequence];
+          sum_square = 0.;
           sum = rank[j][*pisequence--];
           residual[i] = 0.;
 
           for (k = i - 1;k >= 0;k--) {
-//            sum_square += rank[j][int_sequence[index][j][k]] * rank[j][int_sequence[index][j][k]];
-//            sum += rank[j][int_sequence[index][j][k]];
-            sum_square += rank[j][*pisequence] * rank[j][*pisequence];
+            diff = rank[j][*pisequence] - sum / (i - k);
+            sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
             sum += rank[j][*pisequence--];
-            residual[k] = sum_square - sum * sum / (i - k + 1);
+            residual[k] = sum_square;
           }
           break;
         }
 
         case NUMERIC : {
           if (type[j] != REAL_VALUE) {
-//            sum_square = int_sequence[index][j][i] * int_sequence[index][j][i];
-//            sum = int_sequence[index][j][i];
             pisequence = int_sequence[index][j] + i;
-            sum_square = *pisequence * *pisequence;
+            sum_square = 0.;
             sum = *pisequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += int_sequence[index][j][k] * int_sequence[index][j][k];
-//              sum += int_sequence[index][j][k];
-              sum_square += *pisequence * *pisequence;
+              diff = *pisequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *pisequence--;
-              residual[k] = sum_square - sum * sum / (i - k + 1);
+              residual[k] = sum_square;
             }
           }
 
           else {
-//            sum_square = real_sequence[index][j][i] * real_sequence[index][j][i];
-//            sum = real_sequence[index][j][i];
             prsequence = real_sequence[index][j] + i;
-            sum_square = *prsequence * *prsequence;
+            sum_square = 0.;
             sum = *prsequence--;
             residual[i] = 0.;
 
             for (k = i - 1;k >= 0;k--) {
-//              sum_square += real_sequence[index][j][k] * real_sequence[index][j][k];
-//              sum += real_sequence[index][j][k];
-              sum_square += *prsequence * *prsequence;
+              diff = *prsequence - sum / (i - k);
+              sum_square += ((double)(i - k) / (double)(i - k + 1)) * diff * diff;
               sum += *prsequence--;
-              residual[k] = sum_square - sum * sum / (double)(i - k + 1);
+              residual[k] = sum_square;
             }
           }
           break;
@@ -5569,20 +5541,31 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           for (k = 0;k < marginal[j]->nb_value;k++) {
             frequency[k] = 0;
           }
+          sum = 0.;
 
-//          frequency[int_sequence[index][j][i]]++;
           pisequence = int_sequence[index][j] + i;
           frequency[*pisequence++]++;
           for (k = i + 1;k < length[index];k++) {
-//            frequency[int_sequence[index][j][k]]++;
+            sum += (k - i) * log((double)(k - i) / (double)(k - i + 1)) +
+                   log((double)(frequency[*pisequence] + 1) / (double)(k - i + 1));
+            if (frequency[*pisequence] > 0) {
+              sum -= frequency[*pisequence] *
+                     log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+            }
             frequency[*pisequence++]++;
+
+            if (contrast[k] != D_INF) {
+              contrast[k] += sum;
+            }
+
+/*            frequency[*pisequence++]++;
             if (contrast[k] != D_INF) {
               for (m = 0;m < marginal[j]->nb_value;m++) {
                 if (frequency[m] > 0) {
                   contrast[k] += frequency[m] * log((double)frequency[m] / (double)(k - i + 1));
                 }
               }
-            }
+            } */
           }
         }
 
@@ -5592,7 +5575,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
           pisequence = int_sequence[index][j] + i;
           for (k = i;k < length[index];k++) {
-//            sum += int_sequence[index][j][k];
             sum += *pisequence++;
             factorial_sum += factorial[j][k];
             if ((contrast[k] != D_INF) && (sum > 0.)) {
@@ -5607,7 +5589,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             for (k = i;k < length[index];k++) {
-//              sum += int_sequence[index][j][k];
               sum += *pisequence++;
               contrast[k] = sum * sum / (k - i + 1);
             }
@@ -5616,7 +5597,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           else {
             prsequence = real_sequence[index][j] + i;
             for (k = i;k < length[index];k++) {
-//              sum += real_sequence[index][j][k];
               sum += *prsequence++;
               contrast[k] = sum * sum / (k - i + 1);
             }
@@ -5632,7 +5612,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
             if (type[j] != REAL_VALUE) {
               pisequence = int_sequence[index][j] + i;
               for (k = i;k < length[index];k++) {
-//                 diff = int_sequence[index][j][k] - sequence_mean[j];
                 diff = *pisequence++ - sequence_mean[j];
                 sum_square += diff * diff;
                 residual[k] = sum_square;
@@ -5642,7 +5621,6 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
             else {
               prsequence = real_sequence[index][j] + i;
               for (k = i;k < length[index];k++) {
-//                 diff = real_sequence[index][j][k] - sequence_mean[j];
                 diff = *prsequence++ - sequence_mean[j];
                 sum_square += diff * diff;
                 residual[k] = sum_square;
@@ -5652,55 +5630,46 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           }
 
           case ORDINAL : {
-//            sum_square = rank[j][int_sequence[index][j][i]] * rank[j][int_sequence[index][j][i]];
-//            sum = rank[j][int_sequence[index][j][i]];
             pisequence = int_sequence[index][j] + i;
-            sum_square = rank[j][*pisequence] * rank[j][*pisequence];
+            sum_square = 0.;
             sum = rank[j][*pisequence++];
             residual[i] = 0.;
 
             for (k = i + 1;k < length[index];k++) {
-//              sum_square += rank[j][int_sequence[index][j][k]] * rank[j][int_sequence[index][j][k]];
-//              sum += rank[j][int_sequence[index][j][k]];
-              sum_square += rank[j][*pisequence] * rank[j][*pisequence];
+              diff = rank[j][*pisequence] - sum / (k - i);
+              sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
               sum += rank[j][*pisequence++];
-              residual[k] = sum_square - sum * sum / (k - i + 1);
+              residual[k] = sum_square;
             }
             break;
           }
 
           case NUMERIC : {
             if (type[j] != REAL_VALUE) {
-//              sum_square = int_sequence[index][j][i] * int_sequence[index][j][i];
-//              sum = int_sequence[index][j][i];
               pisequence = int_sequence[index][j] + i;
-              sum_square = *pisequence * *pisequence;
+              sum_square = 0.;
               sum = *pisequence++;
               residual[i] = 0.;
 
               for (k = i + 1;k < length[index];k++) {
-//                sum_square += int_sequence[index][j][k] * int_sequence[index][j][k];
-//                sum += int_sequence[index][j][k];
-                sum_square += *pisequence * *pisequence;
+                diff = *pisequence - sum / (k - i);
+                sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
                 sum += *pisequence++;
-                residual[k] = sum_square - sum * sum / (k - i + 1);
+                residual[k] = sum_square;
               }
             }
 
             else {
-//              sum_square = real_sequence[index][j][i] * real_sequence[index][j][i];
-//              sum = real_sequence[index][j][i];
               prsequence = real_sequence[index][j] + i;
-              sum_square = *prsequence * *prsequence;
+              sum_square = 0.;
               sum = *prsequence++;
               residual[i] = 0.;
 
               for (k = i + 1;k < length[index];k++) {
-//                sum_square += real_sequence[index][j][k] * real_sequence[index][j][k];
-//                sum += real_sequence[index][j][k];
-                sum_square += *prsequence * *prsequence;
+                diff = *prsequence - sum / (k - i);
+                sum_square += ((double)(k - i) / (double)(k - i + 1)) * diff * diff;
                 sum += *prsequence++;
-                residual[k] = sum_square - sum * sum / (k - i + 1);
+                residual[k] = sum_square;
               }
             }
             break;
@@ -7069,7 +7038,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         if (seq->type[i] != REAL_VALUE) {
           pisequence = seq->int_sequence[0][i];
           for (j = 0;j < seq->length[0];j++) {
-//            mean[i] += seq->int_sequence[0][i][j];
             mean[i] += *pisequence++;
           }
         }
@@ -7077,7 +7045,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         else {
           prsequence = seq->real_sequence[0][i];
           for (j = 0;j < seq->length[0];j++) {
-//            mean[i] += seq->real_sequence[0][i][j];
             mean[i] += *prsequence++;
           }
         }
@@ -7097,8 +7064,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         for (j = 0;j < seq->marginal[i]->nb_value;j++) {
           frequency[j] = 0;
         }
+        sum = 0.;
 
-//        frequency[seq->int_sequence[0][i][0]]++;
         pisequence = seq->int_sequence[0][i];
         frequency[*pisequence++]++;
 
@@ -7107,8 +7074,23 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
 
         for (j = 1;j < seq->length[0];j++) {
-//          frequency[seq->int_sequence[0][i][j]]++;
+          sum += j * log((double)j / (double)(j + 1)) +
+                 log((double)(frequency[*pisequence] + 1) / (double)(j + 1));
+          if (frequency[*pisequence] > 0) {
+            sum -= frequency[*pisequence] *
+                   log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+          }
           frequency[*pisequence++]++;
+
+          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            begin_frequency[i][j][k] = frequency[k];
+          }
+
+          if (begin_contrast[j] != D_INF) {
+            begin_contrast[j] += sum;
+          }
+
+/*          frequency[*pisequence++]++;
 
           for (k = 0;k < seq->marginal[i]->nb_value;k++) {
             begin_frequency[i][j][k] = frequency[k];
@@ -7120,7 +7102,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
                 begin_contrast[j] += frequency[k] * log((double)frequency[k] / (double)(j + 1));
               }
             }
-          }
+          } */
         }
       }
 
@@ -7135,7 +7117,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             factorial[i][j] += log((double)k);
           }
 
-//          sum += seq->int_sequence[0][i][j];
           sum += *pisequence++;
           factorial_sum += factorial[i][j];
 
@@ -7157,7 +7138,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           if (seq->type[i] != REAL_VALUE) {
             pisequence = seq->int_sequence[0][i];
             for (j = 0;j < seq->length[0];j++) {
-//              diff = seq->int_sequence[0][i][j] - mean[i];
               diff = *pisequence++ - mean[i];
               sum_square += diff * diff;
 
@@ -7170,7 +7150,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           else {
             prsequence = seq->real_sequence[0][i];
             for (j = 0;j < seq->length[0];j++) {
-//              diff = seq->real_sequence[0][i][j] - mean[i];
               diff = *prsequence++ - mean[i];
               sum_square += diff * diff;
 
@@ -7183,10 +7162,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
 
         case ORDINAL : {
-//          sum_square = rank[i][seq->int_sequence[0][i][0]] * rank[i][seq->int_sequence[0][i][0]];
-//          sum = rank[i][seq->int_sequence[0][i][0]];
           pisequence = seq->int_sequence[0][i];
-          sum_square = rank[i][*pisequence] * rank[i][*pisequence];
+          sum_square = 0.;
           sum = rank[i][*pisequence++];
 
           begin_sum_square[i][0] = sum_square;
@@ -7195,25 +7172,22 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           residual[0] = 0.;
 
           for (j = 1;j < seq->length[0];j++) {
-//            sum_square += rank[i][seq->int_sequence[0][i][j]] * rank[i][seq->int_sequence[0][i][j]];
-//            sum += rank[i][seq->int_sequence[0][i][j]];
-            sum_square += rank[i][*pisequence] * rank[i][*pisequence];
+            diff = rank[i][*pisequence] - sum / j;
+            sum_square += ((double)j / (double)(j + 1)) * diff * diff;
             sum += rank[i][*pisequence++];
 
             begin_sum_square[i][j] = sum_square;
             begin_sum[i][j] = sum;
 
-            residual[j] = sum_square - sum * sum / (j + 1);
+            residual[j] = sum_square;
           }
           break;
         }
 
         case NUMERIC : {
           if (seq->type[i] != REAL_VALUE) {
-//            sum_square = seq->int_sequence[0][i][0] * seq->int_sequence[0][i][0];
-//            sum = seq->int_sequence[0][i][0];
             pisequence = seq->int_sequence[0][i];
-            sum_square = *pisequence * *pisequence;
+            sum_square = 0.;
             sum = *pisequence++;
 
             begin_sum_square[i][0] = sum_square;
@@ -7222,23 +7196,20 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             residual[0] = 0.;
 
             for (j = 1;j < seq->length[0];j++) {
-//              sum_square += seq->int_sequence[0][i][j] * seq->int_sequence[0][i][j];
-//              sum += seq->int_sequence[0][i][j];
-              sum_square += *pisequence * *pisequence;
+              diff = *pisequence - sum / j;
+              sum_square += ((double)j / (double)(j + 1)) * diff * diff;
               sum += *pisequence++;
 
               begin_sum_square[i][j] = sum_square;
               begin_sum[i][j] = sum;
 
-              residual[j] = sum_square - sum * sum / (j + 1);
+              residual[j] = sum_square;
             }
           }
 
           else {
-//            sum_square = seq->real_sequence[0][i][0] * seq->real_sequence[0][i][0];
-//            sum = seq->real_sequence[0][i][0];
             prsequence = seq->real_sequence[0][i];
-            sum_square = *prsequence * *prsequence;
+            sum_square = 0.;
             sum = *prsequence++;
 
             begin_sum_square[i][0] = sum_square;
@@ -7247,15 +7218,14 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             residual[0] = 0.;
 
             for (j = 1;j < seq->length[0];j++) {
-//              sum_square += seq->real_sequence[0][i][j] * seq->real_sequence[0][i][j];
-//              sum += seq->real_sequence[0][i][j];
-              sum_square += *prsequence * *prsequence;
+              diff = *prsequence - sum / j;
+              sum_square += ((double)j / (double)(j + 1)) * diff * diff;
               sum += *prsequence++;
 
               begin_sum_square[i][j] = sum_square;
               begin_sum[i][j] = sum;
 
-              residual[j] = sum_square - sum * sum / (j + 1);
+              residual[j] = sum_square;
             }
           }
           break;
@@ -7286,8 +7256,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 /*        for (j = 0;j < seq->marginal[i]->nb_value;j++) {
           frequency[j] = 0;
         }
+        sum = 0.;
 
-//        frequency[seq->int_sequence[0][i][seq->length[0] - 1]]++;
         pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
         frequency[*pisequence--]++;
 
@@ -7296,7 +7266,23 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
 
         for (j = seq->length[0] - 2;j >= 0;j--) {
-//          frequency[seq->int_sequence[0][i][j]]++;
+          sum += (seq->length[0] - j - 1) *
+                 log((double)(seq->length[0] - j - 1) / (double)(seq->length[0] - j)) +
+                 log((double)(frequency[*pisequence] + 1) / (double)(seq->length[0] - j));
+          if (frequency[*pisequence] > 0) {
+            sum -= frequency[*pisequence] *
+                   log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+          }
+          frequency[*pisequence--]++;
+
+          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            end_frequency[i][j][k] = frequency[k];
+          }
+
+          if (end_contrast[j] != D_INF) {
+            end_contrast[j] += sum;
+          }
+
           frequency[*pisequence--]++;
 
           for (k = 0;k < seq->marginal[i]->nb_value;k++) {
@@ -7347,7 +7333,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
         pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
         for (j = seq->length[0] - 1;j >= 0;j--) {
-//          sum += seq->int_sequence[0][i][j];
           sum += *pisequence--;
           factorial_sum += factorial[i][j];
 
@@ -7387,7 +7372,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           if (seq->type[i] != REAL_VALUE) {
             pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
             for (j = seq->length[0] - 1;j >= 0;j--) {
-//              diff = seq->int_sequence[0][i][j] - mean[i];
               diff = *pisequence-- - mean[i];
               sum_square += diff * diff;
 
@@ -7400,7 +7384,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           else {
             prsequence = seq->real_sequence[0][i] + seq->length[0] - 1;
             for (j = seq->length[0] - 1;j >= 0;j--) {
-//              diff = seq->real_sequence[0][i][j] - mean[i];
               diff = *prsequence-- - mean[i];
               sum_square += diff * diff;
 
@@ -7413,11 +7396,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
 
         case ORDINAL : {
-//          sum_square = rank[i][seq->int_sequence[0][i][seq->length[0] - 1]] *
-//                       rank[i][seq->int_sequence[0][i][seq->length[0] - 1]];
-//          sum = rank[i][seq->int_sequence[0][i][seq->length[0] - 1]];
           pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
-          sum_square = rank[i][*pisequence] * rank[i][*pisequence];
+          sum_square = 0.;
           sum = rank[i][*pisequence--];
 
           end_sum_square[i][seq->length[0] - 1] = sum_square;
@@ -7426,26 +7406,22 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           residual[seq->length[0] - 1] = 0.;
 
           for (j = seq->length[0] - 2;j >= 0;j--) {
-//            sum_square += rank[i][seq->int_sequence[0][i][j]] * rank[i][seq->int_sequence[0][i][j]];
-//            sum += rank[i][seq->int_sequence[0][i][j]];
-            sum_square += rank[i][*pisequence] * rank[i][*pisequence];
+            diff = rank[i][*pisequence] - sum / (seq->length[0] - j - 1);
+            sum_square += ((double)(seq->length[0] - j - 1) / (double)(seq->length[0] - j)) * diff * diff;
             sum += rank[i][*pisequence--];
 
             end_sum_square[i][j] = sum_square;
             end_sum[i][j] = sum;
 
-            residual[j] = sum_square - sum * sum / (seq->length[0] - j);
+            residual[j] = sum_square;
           }
           break;
         }
 
         case NUMERIC : {
           if (seq->type[i] != REAL_VALUE) {
-//            sum_square = seq->int_sequence[0][i][seq->length[0] - 1] *
-//                         seq->int_sequence[0][i][seq->length[0] - 1];
-//            sum = seq->int_sequence[0][i][seq->length[0] - 1];
             pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
-            sum_square = *pisequence * *pisequence;
+            sum_square = 0.
             sum = *pisequence--;
 
             end_sum_square[i][seq->length[0] - 1] = sum_square;
@@ -7454,24 +7430,20 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             residual[seq->length[0] - 1] = 0.;
 
             for (j = seq->length[0] - 2;j >= 0;j--) {
-//              sum_square += seq->int_sequence[0][i][j] * seq->int_sequence[0][i][j];
-//              sum += seq->int_sequence[0][i][j];
-              sum_square += *pisequence * *pisequence;
+              diff = *pisequence - sum / (seq->length[0] - j - 1);
+              sum_square += ((double)(seq->length[0] - j - 1) / (double)(seq->length[0] - j)) * diff * diff;
               sum += *pisequence--;
 
               end_sum_square[i][j] = sum_square;
               end_sum[i][j] = sum;
 
-              residual[j] = sum_square - sum * sum / (seq->length[0] - j);
+              residual[j] = sum_square;
             }
           }
 
           else {
-//            sum_square = seq->real_sequence[0][i][seq->length[0] - 1] *
-//                         seq->real_sequence[0][i][seq->length[0] - 1];
-//            sum = seq->real_sequence[0][i][seq->length[0] - 1];
             prsequence = seq->real_sequence[0][i] + seq->length[0] - 1;
-            sum_square = *prsequence * *prsequence;
+            sum_square = 0.;
             sum = *prsequence--;
 
             end_sum_square[i][seq->length[0] - 1] = sum_square;
@@ -7480,15 +7452,14 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             residual[seq->length[0] - 1] = 0.;
 
             for (j = seq->length[0] - 2;j >= 0;j--) {
-//              sum_square += seq->real_sequence[0][i][j] * seq->real_sequence[0][i][j];
-//              sum += seq->real_sequence[0][i][j];
-              sum_square += *prsequence * *prsequence;
+              diff = *prsequence - sum / (seq->length[0] - j - 1);
+              sum_square += ((double)(seq->length[0] - j - 1) / (double)(seq->length[0] - j)) * diff * diff;
               sum += *prsequence--;
 
               end_sum_square[i][j] = sum_square;
               end_sum[i][j] = sum;
 
-              residual[j] = sum_square - sum * sum / (seq->length[0] - j);
+              residual[j] = sum_square;
             }
           }
           break;
@@ -7507,16 +7478,18 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
         else {
           for (j = seq->length[0] - 1;j > 0;j--) {
-            end_sum_square[i][j] = begin_sum_square[i][seq->length[0] - 1] - begin_sum_square[i][j - 1];
             end_sum[i][j] = begin_sum[i][seq->length[0] - 1] - begin_sum[i][j - 1];
+            diff = begin_sum[i][j - 1] / j  - end_sum[i][j] / (seq->length[0] - j);
+            end_sum_square[i][j] = begin_sum_square[i][seq->length[0] - 1] - begin_sum_square[i][j - 1] -
+                                   ((double)(j * (seq->length[0] - j)) / (double)seq->length[0]) * diff * diff;
 
-            residual[j] = end_sum_square[i][j] - end_sum[i][j] * end_sum[i][j] / (seq->length[0] - j);
+            residual[j] = end_sum_square[i][j];
           }
 
           end_sum_square[i][0] = begin_sum_square[i][seq->length[0] - 1];
           end_sum[i][0] = begin_sum[i][seq->length[0] - 1];
 
-          residual[0] = end_sum_square[i][0] - end_sum[i][0] * end_sum[i][0] / seq->length[0];
+          residual[0] = end_sum_square[i][0];
         }
 
         for (j = seq->length[0] - 1;j >= 0;j--) {
@@ -7619,11 +7592,30 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             for (j = 0;j < seq->marginal[i]->nb_value;j++) {
               frequency[j] = begin_frequency[i][begin_change_point - 1][j];
             }
+            sum = 0.;
 
             pisequence = seq->int_sequence[0][i] + begin_change_point;
             for (j = begin_change_point;j < split_change_point;j++) {
-//              frequency[seq->int_sequence[0][i][j]]++;
+              sum += (j - change_point[nb_segment][segment_index - 1]) *
+                     log((double)(j - change_point[nb_segment][segment_index - 1]) /
+                         (double)(j - change_point[nb_segment][segment_index - 1] + 1)) +
+                     log((double)(frequency[*pisequence] + 1) /
+                         (double)(j - change_point[nb_segment][segment_index - 1] + 1));
+              if (frequency[*pisequence] > 0) {
+                sum -= frequency[*pisequence] *
+                       log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+              }
               frequency[*pisequence++]++;
+
+              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+                begin_frequency[i][j][k] = frequency[k];
+              }
+
+              if (begin_contrast[j] != D_INF) {
+                begin_contrast[j] += sum;
+              }
+
+/*              frequency[*pisequence++]++;
 
               for (k = 0;k < seq->marginal[i]->nb_value;k++) {
                 begin_frequency[i][j][k] = frequency[k];
@@ -7636,7 +7628,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
                                                             (double)(j - change_point[nb_segment][segment_index - 1] + 1));
                   }
                 }
-              }
+              } */
             }
           }
 
@@ -7647,8 +7639,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           for (j = 0;j < seq->marginal[i]->nb_value;j++) {
             frequency[j] = 0;
           }
+          sum = 0.;
 
-//          frequency[seq->int_sequence[0][i][split_change_point]]++;
           frequency[*pisequence++]++;
 
           for (j = 0;j < seq->marginal[i]->nb_value;j++) {
@@ -7656,8 +7648,24 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           }
 
           for (j = split_change_point + 1;j < change_point[nb_segment][segment_index + 1];j++) {
-//            frequency[seq->int_sequence[0][i][j]]++;
+            sum += (j - split_change_point) *
+                   log((double)(j - split_change_point) / (double)(j - split_change_point + 1)) +
+                   log((double)(frequency[*pisequence] + 1) / (double)(j - split_change_point + 1));
+            if (frequency[*pisequence] > 0) {
+              sum -= frequency[*pisequence] *
+                     log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+            }
             frequency[*pisequence++]++;
+
+            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              begin_frequency[i][j][k] = frequency[k];
+            }
+
+            if (begin_contrast[j] != D_INF) {
+              begin_contrast[j] += sum;
+            }
+
+/*            frequency[*pisequence++]++;
 
             for (k = 0;k < seq->marginal[i]->nb_value;k++) {
               begin_frequency[i][j][k] = frequency[k];
@@ -7670,7 +7678,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
                                                           (double)(j - split_change_point + 1));
                 }
               }
-            }
+            } */
           }
         }
 
@@ -7681,7 +7689,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
             pisequence = seq->int_sequence[0][i] + begin_change_point;
             for (j = begin_change_point;j < split_change_point;j++) {
-//              sum += seq->int_sequence[0][i][j];
               sum += *pisequence++;
               factorial_sum += factorial[i][j];
 
@@ -7703,7 +7710,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           factorial_sum = 0.;
 
           for (j = split_change_point;j < change_point[nb_segment][segment_index + 1];j++) {
-//            sum += seq->int_sequence[0][i][j];
             sum += *pisequence++;
             factorial_sum += factorial[i][j];
 
@@ -7727,7 +7733,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               if (seq->type[i] != REAL_VALUE) {
                 pisequence = seq->int_sequence[0][i] + begin_change_point;
                 for (j = begin_change_point;j < split_change_point;j++) {
-//                  diff = seq->int_sequence[0][i][j] - mean[i];
                   diff = *pisequence++ - mean[i];
                   sum_square += diff * diff;
 
@@ -7740,7 +7745,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               else {
                 prsequence = seq->real_sequence[0][i] + begin_change_point;
                 for (j = begin_change_point;j < split_change_point;j++) {
-//                  diff = seq->real_sequence[0][i][j] - mean[i];
                   diff = *prsequence++ - mean[i];
                   sum_square += diff * diff;
 
@@ -7764,7 +7768,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
             if (seq->type[i] != REAL_VALUE) {
               for (j = split_change_point;j < change_point[nb_segment][segment_index + 1];j++) {
-//                diff = seq->int_sequence[0][i][j] - mean[i];
                 diff = *pisequence++ - mean[i];
                 sum_square += diff * diff;
 
@@ -7776,7 +7779,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
             else {
               for (j = split_change_point;j < change_point[nb_segment][segment_index + 1];j++) {
-//                diff = seq->real_sequence[0][i][j] - mean[i];
                 diff = *prsequence++ - mean[i];
                 sum_square += diff * diff;
 
@@ -7795,15 +7797,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
               pisequence = seq->int_sequence[0][i] + begin_change_point;
               for (j = begin_change_point;j < split_change_point;j++) {
-//                sum_square += rank[i][seq->int_sequence[0][i][j]] * rank[i][seq->int_sequence[0][i][j]];
-//                sum += rank[i][seq->int_sequence[0][i][j]];
-                sum_square += rank[i][*pisequence] * rank[i][*pisequence];
+                diff = rank[i][*pisequence] - sum / (j - change_point[nb_segment][segment_index - 1]);
+                sum_square += ((double)(j - change_point[nb_segment][segment_index - 1]) /
+                               (double)(j - change_point[nb_segment][segment_index - 1] + 1)) * diff * diff;
                 sum += rank[i][*pisequence++];
  
                 begin_sum_square[i][j] = sum_square;
                 begin_sum[i][j] = sum;
 
-                residual[j] = sum_square - sum * sum / (j - change_point[nb_segment][segment_index - 1] + 1);
+                residual[j] = sum_square;
               }
             }
 
@@ -7811,10 +7813,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               pisequence = seq->int_sequence[0][i] + split_change_point;
             }
 
-//            sum_square = rank[i][seq->int_sequence[0][i][split_change_point]] *
-//                         rank[i][seq->int_sequence[0][i][split_change_point]];
-//            sum = rank[i][seq->int_sequence[0][i][split_change_point]];
-            sum_square = rank[i][*pisequence] * rank[i][*pisequence];
+            sum_square = 0.;
             sum = rank[i][*pisequence++];
 
             begin_sum_square[i][split_change_point] = sum_square;
@@ -7823,15 +7822,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             residual[split_change_point] = 0.;
 
             for (j = split_change_point + 1;j < change_point[nb_segment][segment_index + 1];j++) {
-//              sum_square += rank[i][seq->int_sequence[0][i][j]] * rank[i][seq->int_sequence[0][i][j]];
-//              sum += rank[i][seq->int_sequence[0][i][j]];
-              sum_square += rank[i][*pisequence] * rank[i][*pisequence];
+              diff = rank[i][*pisequence] - sum / (j - split_change_point);
+              sum_square += ((double)(j - split_change_point) /
+                             (double)(j - split_change_point + 1)) * diff * diff;
               sum += rank[i][*pisequence++];
  
               begin_sum_square[i][j] = sum_square;
               begin_sum[i][j] = sum;
 
-              residual[j] = sum_square - sum * sum / (j - split_change_point + 1);
+              residual[j] = sum_square;
             }
             break;
           }
@@ -7844,30 +7843,30 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               pisequence = seq->int_sequence[0][i] + begin_change_point;
               if (seq->type[i] != REAL_VALUE) {
                 for (j = begin_change_point;j < split_change_point;j++) {
-//                  sum_square += seq->int_sequence[0][i][j] * seq->int_sequence[0][i][j];
-//                  sum += seq->int_sequence[0][i][j];
-                  sum_square += *pisequence * *pisequence;
+                  diff = *pisequence - sum / (j - change_point[nb_segment][segment_index - 1]);
+                  sum_square += ((double)(j - change_point[nb_segment][segment_index - 1]) /
+                                 (double)(j - change_point[nb_segment][segment_index - 1] + 1)) * diff * diff;
                   sum += *pisequence++;
 
                   begin_sum_square[i][j] = sum_square;
                   begin_sum[i][j] = sum;
 
-                  residual[j] = sum_square - sum * sum / (j - change_point[nb_segment][segment_index - 1] + 1);
+                  residual[j] = sum_square;
                 }
               }
 
               else {
                 prsequence = seq->real_sequence[0][i] + begin_change_point;
                 for (j = begin_change_point;j < split_change_point;j++) {
-//                  sum_square += seq->real_sequence[0][i][j] * seq->real_sequence[0][i][j];
-//                  sum += seq->real_sequence[0][i][j];
-                  sum_square += *prsequence * *prsequence;
+                  diff = *prsequence - sum / (j - change_point[nb_segment][segment_index - 1]);
+                  sum_square += ((double)(j - change_point[nb_segment][segment_index - 1]) /
+                                 (double)(j - change_point[nb_segment][segment_index - 1] + 1)) * diff * diff;
                   sum += *prsequence++;
 
                   begin_sum_square[i][j] = sum_square;
                   begin_sum[i][j] = sum;
 
-                  residual[j] = sum_square - sum * sum / (j - change_point[nb_segment][segment_index - 1] + 1);
+                  residual[j] = sum_square;
                 }
               }
             }
@@ -7882,10 +7881,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             }
 
             if (seq->type[i] != REAL_VALUE) {
-//              sum_square = seq->int_sequence[0][i][split_change_point] *
-//                           seq->int_sequence[0][i][split_change_point];
-//              sum = seq->int_sequence[0][i][split_change_point];
-              sum_square = *pisequence * *pisequence;
+              sum_square = 0.;
               sum = *pisequence++;
 
               begin_sum_square[i][split_change_point] = sum_square;
@@ -7894,23 +7890,20 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               residual[split_change_point] = 0.;
 
               for (j = split_change_point + 1;j < change_point[nb_segment][segment_index + 1];j++) {
-//                sum_square += seq->int_sequence[0][i][j] * seq->int_sequence[0][i][j];
-//                sum += seq->int_sequence[0][i][j];
-                sum_square += *pisequence * *pisequence;
+                diff = *pisequence - sum / (j - split_change_point);
+                sum_square += ((double)(j - split_change_point) /
+                               (double)(j - split_change_point + 1)) * diff * diff;
                 sum += *pisequence++;
 
                 begin_sum_square[i][j] = sum_square;
                 begin_sum[i][j] = sum;
 
-                residual[j] = sum_square - sum * sum / (j - split_change_point + 1);
+                residual[j] = sum_square;
               }
             }
 
             else {
-//              sum_square = seq->real_sequence[0][i][split_change_point] *
-//                           seq->real_sequence[0][i][split_change_point];
-//              sum = seq->real_sequence[0][i][split_change_point];
-              sum_square = *prsequence * *prsequence;
+              sum_square = 0.;
               sum = *prsequence++;
 
               begin_sum_square[i][split_change_point] = sum_square;
@@ -7919,15 +7912,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               residual[split_change_point] = 0.;
 
               for (j = split_change_point + 1;j < change_point[nb_segment][segment_index + 1];j++) {
-//                sum_square += seq->real_sequence[0][i][j] * seq->real_sequence[0][i][j];
-//                sum += seq->real_sequence[0][i][j];
-                sum_square += *prsequence * *prsequence;
+                diff = *prsequence - sum / (j - split_change_point);
+                sum_square += ((double)(j - split_change_point) /
+                               (double)(j - split_change_point + 1)) * diff * diff;
                 sum += *prsequence++;
 
                 begin_sum_square[i][j] = sum_square;
                 begin_sum[i][j] = sum;
 
-                residual[j] = sum_square - sum * sum / (j - split_change_point + 1);
+                residual[j] = sum_square;
               }
             }
             break;
@@ -7976,10 +7969,29 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             for (j = 0;j < seq->marginal[i]->nb_value;j++) {
               frequency[j] = end_frequency[i][end_change_point][j];
             }
+            sum = 0.;
 
             pisequence = seq->int_sequence[0][i] + end_change_point - 1;
             for (j = end_change_point - 1;j >= split_change_point;j--) {
-//              frequency[seq->int_sequence[0][i][j]]++;
+              sum += (change_point[nb_segment][segment_index + 1] - j - 1) *
+                     log((double)(change_point[nb_segment][segment_index + 1] - j - 1) /
+                         (double)(change_point[nb_segment][segment_index + 1] - j)) +
+                     log((double)(frequency[*pisequence] + 1) /
+                         (double)(change_point[nb_segment][segment_index + 1] - j));
+              if (frequency[*pisequence] > 0) {
+                sum -= frequency[*pisequence] *
+                       log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+              }
+              frequency[*pisequence--]++;
+
+              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+                end_frequency[i][j][k] = frequency[k];
+              }
+
+              if (end_contrast[j] != D_INF) {
+                end_contrast[j] += sum;
+              }
+
               frequency[*pisequence--]++;
 
               for (k = 0;k < seq->marginal[i]->nb_value;k++) {
@@ -8004,8 +8016,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           for (j = 0;j < seq->marginal[i]->nb_value;j++) {
             frequency[j] = 0;
           }
+          sum = 0.;
 
-//          frequency[seq->int_sequence[0][i][split_change_point - 1]]++;
           frequency[*pisequence--]++;
 
           for (j = 0;j < seq->marginal[i]->nb_value;j++) {
@@ -8013,7 +8025,23 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           }
 
           for (j = split_change_point - 2;j >= change_point[nb_segment][segment_index - 1];j--) {
-//            frequency[seq->int_sequence[0][i][j]]++;
+            sum += (split_change_point - j - 1) *
+                   log((double)(split_change_point - j - 1) / (double)(split_change_point - j)) +
+                   log((double)(frequency[*pisequence] + 1) / (double)(split_change_point - j));
+            if (frequency[*pisequence] > 0) {
+              sum -= frequency[*pisequence] *
+                     log((double)frequency[*pisequence] / (double)(frequency[*pisequence] + 1));
+            }
+            frequency[*pisequence--]++;
+
+            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              end_frequency[i][j][k] = frequency[k];
+            }
+
+            if (end_contrast[j] != D_INF) {
+              end_contrast[j] += sum;
+            }
+
             frequency[*pisequence--]++;
 
             for (k = 0;k < seq->marginal[i]->nb_value;k++) {
@@ -8097,7 +8125,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
             pisequence = seq->int_sequence[0][i] + end_change_point - 1;
             for (j = end_change_point - 1;j >= split_change_point;j--) {
-//              sum += seq->int_sequence[0][i][j];
               sum += *pisequence--;
               factorial_sum += factorial[i][j];
 
@@ -8119,7 +8146,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           factorial_sum = 0.;
 
           for (j = split_change_point - 1;j >= change_point[nb_segment][segment_index - 1];j--) {
-//            sum += seq->int_sequence[0][i][j];
             sum += *pisequence--;
             factorial_sum += factorial[i][j];
 
@@ -8184,7 +8210,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               if (seq->type[i] != REAL_VALUE) {
                 pisequence = seq->int_sequence[0][i] + end_change_point - 1;
                 for (j = end_change_point - 1;j >= split_change_point;j--) {
-//                  diff = seq->int_sequence[0][i][j] - mean[i];
                   diff = *pisequence-- - mean[i];
                   sum_square += diff * diff;
 
@@ -8197,7 +8222,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               else {
                 prsequence = seq->real_sequence[0][i] + end_change_point - 1;
                 for (j = end_change_point - 1;j >= split_change_point;j--) {
-//                  diff = seq->real_sequence[0][i][j] - mean[i];
                   diff = *prsequence-- - mean[i];
                   sum_square += diff * diff;
 
@@ -8221,7 +8245,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
             if (seq->type[i] != REAL_VALUE) {
               for (j = split_change_point - 1;j >= change_point[nb_segment][segment_index - 1];j--) {
-//                diff = seq->int_sequence[0][i][j] - mean[i];
                 diff = *pisequence-- - mean[i];
                 sum_square += diff * diff;
 
@@ -8233,7 +8256,6 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
             else {
               for (j = split_change_point - 1;j >= change_point[nb_segment][segment_index - 1];j--) {
-//                diff = seq->real_sequence[0][i][j] - mean[i];
                 diff = *prsequence-- - mean[i];
                 sum_square += diff * diff;
 
@@ -8252,15 +8274,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
 
               pisequence = seq->int_sequence[0][i] + end_change_point - 1;
               for (j = end_change_point - 1;j >= split_change_point;j--) {
-//                sum_square += rank[i][seq->int_sequence[0][i][j]] * rank[i][seq->int_sequence[0][i][j]];
-//                sum += rank[i][seq->int_sequence[0][i][j]];
-                sum_square += rank[i][*pisequence] * rank[i][*pisequence];
+                diff = rank[i][*pisequence] - sum / (change_point[nb_segment][segment_index + 1] - j - 1);
+                sum_square += ((double)(change_point[nb_segment][segment_index + 1] - j - 1) /
+                               (double)(change_point[nb_segment][segment_index + 1] - j)) * diff * diff;
                 sum += rank[i][*pisequence--];
 
                 end_sum_square[i][j] = sum_square;
                 end_sum[i][j] = sum;
 
-                residual[j] = sum_square - sum * sum / (change_point[nb_segment][segment_index + 1] - j);
+                residual[j] = sum_square;
               }
             }
 
@@ -8268,10 +8290,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               pisequence = seq->int_sequence[0][i] + split_change_point - 1;
             }
 
-//            sum_square = rank[i][seq->int_sequence[0][i][split_change_point - 1]] *
-//                         rank[i][seq->int_sequence[0][i][split_change_point - 1]];
-//            sum = rank[i][seq->int_sequence[0][i][split_change_point - 1]];
-            sum_square = rank[i][*pisequence] * rank[i][*pisequence];
+            sum_square = 0.;
             sum = rank[i][*pisequence--];
 
             end_sum_square[i][split_change_point - 1] = sum_square;
@@ -8280,15 +8299,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             residual[split_change_point - 1] = 0.;
 
             for (j = split_change_point - 2;j >= change_point[nb_segment][segment_index - 1];j--) {
-//              sum_square += rank[i][seq->int_sequence[0][i][j]] * rank[i][seq->int_sequence[0][i][j]];
-//              sum += rank[i][seq->int_sequence[0][i][j]];
-              sum_square += rank[i][*pisequence] * rank[i][*pisequence];
+              diff = rank[i][*pisequence] - sum / (split_change_point - j - 1);
+              sum_square += ((double)(split_change_point - j - 1) /
+                             (double)(split_change_point - j)) * diff * diff;
               sum += rank[i][*pisequence--];
 
               end_sum_square[i][j] = sum_square;
               end_sum[i][j] = sum;
 
-              residual[j] = sum_square - sum * sum / (split_change_point - j);
+              residual[j] = sum_square;
             }
             break;
           }
@@ -8301,30 +8320,30 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               if (seq->type[i] != REAL_VALUE) {
                 pisequence = seq->int_sequence[0][i] + end_change_point - 1;
                 for (j = end_change_point - 1;j >= split_change_point;j--) {
-//                  sum_square += seq->int_sequence[0][i][j] * seq->int_sequence[0][i][j];
-//                  sum += seq->int_sequence[0][i][j];
-                  sum_square += *pisequence * *pisequence;
+                  diff = *pisequence - sum / (change_point[nb_segment][segment_index + 1] - j - 1);
+                  sum_square += ((double)(change_point[nb_segment][segment_index + 1] - j - 1) /
+                                 (double)(change_point[nb_segment][segment_index + 1] - j)) * diff * diff;
                   sum += *pisequence--;
 
                   end_sum_square[i][j] = sum_square;
                   end_sum[i][j] = sum;
 
-                  residual[j] = sum_square - sum * sum / (change_point[nb_segment][segment_index + 1] - j);
+                  residual[j] = sum_square;
                 }
               }
 
               else {
                 prsequence = seq->real_sequence[0][i] + end_change_point - 1;
                 for (j = end_change_point - 1;j >= split_change_point;j--) {
-//                  sum_square += seq->real_sequence[0][i][j] * seq->real_sequence[0][i][j];
-//                  sum += seq->real_sequence[0][i][j];
-                  sum_square += *prsequence * *prsequence;
+                  diff = *prsequence - sum / (change_point[nb_segment][segment_index + 1] - j - 1);
+                  sum_square += ((double)(change_point[nb_segment][segment_index + 1] - j - 1) /
+                                 (double)(change_point[nb_segment][segment_index + 1] - j)) * diff * diff;
                   sum += *prsequence--;
 
                   end_sum_square[i][j] = sum_square;
                   end_sum[i][j] = sum;
 
-                  residual[j] = sum_square - sum * sum / (change_point[nb_segment][segment_index + 1] - j);
+                  residual[j] = sum_square;
                 }
               }
             }
@@ -8339,10 +8358,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             }
 
             if (seq->type[i] != REAL_VALUE) {
-//              sum_square = seq->int_sequence[0][i][split_change_point - 1] *
-//                           seq->int_sequence[0][i][split_change_point - 1];
-//              sum = seq->int_sequence[0][i][split_change_point - 1];
-              sum_square = *pisequence * *pisequence;
+              sum_square = 0.;
               sum = *pisequence--;
 
               end_sum_square[i][split_change_point - 1] = sum_square;
@@ -8351,23 +8367,20 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               residual[split_change_point - 1] = 0.;
 
               for (j = split_change_point - 2;j >= change_point[nb_segment][segment_index - 1];j--) {
-//                sum_square += seq->int_sequence[0][i][j] * seq->int_sequence[0][i][j];
-//                sum += seq->int_sequence[0][i][j];
-                sum_square += *pisequence * *pisequence;
+                diff = *pisequence - sum / (split_change_point - j - 1);
+                sum_square += ((double)(split_change_point - j - 1) /
+                               (double)(split_change_point - j)) * diff * diff;
                 sum += *pisequence--;
 
                 end_sum_square[i][j] = sum_square;
                 end_sum[i][j] = sum;
 
-                residual[j] = sum_square - sum * sum / (split_change_point - j);
+                residual[j] = sum_square;
               }
             }
 
             else {
-//              sum_square = seq->real_sequence[0][i][split_change_point - 1] *
-//                           seq->real_sequence[0][i][split_change_point - 1];
-//              sum = seq->real_sequence[0][i][split_change_point - 1];
-              sum_square = *prsequence * *prsequence;
+              sum_square = 0.;
               sum = *prsequence--;
 
               end_sum_square[i][split_change_point - 1] = sum_square;
@@ -8376,15 +8389,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               residual[split_change_point - 1] = 0.;
 
               for (j = split_change_point - 2;j >= change_point[nb_segment][segment_index - 1];j--) {
-//                sum_square += seq->real_sequence[0][i][j] * seq->real_sequence[0][i][j];
-//                sum += seq->real_sequence[0][i][j];
-                sum_square += *prsequence * *prsequence;
+                diff = *prsequence - sum / (split_change_point - j - 1);
+                sum_square += ((double)(split_change_point - j - 1) /
+                               (double)(split_change_point - j)) * diff * diff;
                 sum += *prsequence--;
 
                 end_sum_square[i][j] = sum_square;
                 end_sum[i][j] = sum;
 
-                residual[j] = sum_square - sum * sum / (split_change_point - j);
+                residual[j] = sum_square;
               }
             }
             break;
@@ -8416,32 +8429,40 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           else {
             if (end_change_point > split_change_point) {
               for (j = end_change_point - 1;j > split_change_point;j--) {
-                end_sum_square[i][j] = begin_sum_square[i][change_point[nb_segment][segment_index + 1] - 1] -
-                                       begin_sum_square[i][j - 1];
                 end_sum[i][j] = begin_sum[i][change_point[nb_segment][segment_index + 1] - 1] -
                                 begin_sum[i][j - 1];
+                diff = begin_sum[i][j - 1] / (j - split_change_point) -
+                       end_sum[i][j] / (change_point[nb_segment][segment_index + 1] - j);
+                end_sum_square[i][j] = begin_sum_square[i][change_point[nb_segment][segment_index + 1] - 1] -
+                                       begin_sum_square[i][j - 1] - ((double)((j - split_change_point) *
+                                         (change_point[nb_segment][segment_index + 1] - j)) /
+                                        (double)(change_point[nb_segment][segment_index + 1] - split_change_point)) * diff * diff;
 
-                residual[j] = end_sum_square[i][j] - end_sum[i][j] * end_sum[i][j] / (change_point[nb_segment][segment_index + 1] - j);
+                residual[j] = end_sum_square[i][j];
               }
 
               end_sum_square[i][j] = begin_sum_square[i][change_point[nb_segment][segment_index + 1] - 1];
               end_sum[i][j] = begin_sum[i][change_point[nb_segment][segment_index + 1] - 1];
 
-              residual[j] = end_sum_square[i][j] - end_sum[i][j] * end_sum[i][j] / (change_point[nb_segment][segment_index + 1] - j);
+              residual[j] = end_sum_square[i][j];
             }
 
             for (j = split_change_point - 1;j > change_point[nb_segment][segment_index - 1];j--) {
-              end_sum_square[i][j] = begin_sum_square[i][split_change_point - 1] -
-                                     begin_sum_square[i][j - 1];
               end_sum[i][j] = begin_sum[i][split_change_point - 1] - begin_sum[i][j - 1];
+              diff = begin_sum[i][j - 1] / (j - change_point[nb_segment][segment_index - 1]) -
+                     end_sum[i][j] / (split_change_point - j);
+              end_sum_square[i][j] = begin_sum_square[i][split_change_point - 1] - begin_sum_square[i][j - 1] -
+                                     ((double)((j - change_point[nb_segment][segment_index - 1]) *
+                                       (split_change_point - j)) /
+                                      (double)(split_change_point - change_point[nb_segment][segment_index - 1])) * diff * diff;
 
-              residual[j] = end_sum_square[i][j] - end_sum[i][j] * end_sum[i][j] / (split_change_point - j);
+              residual[j] = end_sum_square[i][j];
             }
 
             end_sum_square[i][j] = begin_sum_square[i][split_change_point - 1];
             end_sum[i][j] = begin_sum[i][split_change_point - 1];
 
-            residual[j] = end_sum_square[i][j] - end_sum[i][j] * end_sum[i][j] / (split_change_point - j);
+            residual[j] = end_sum_square[i][j];
           }
 
           if (end_change_point > split_change_point) {
@@ -8549,12 +8570,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               }
 
               else {
-                sum_square = begin_sum_square[i][change_point[nb_segment][segment_index - 1] - 1] +
-                             begin_sum_square[i][split_change_point - 1];
-                sum = begin_sum[i][change_point[nb_segment][segment_index - 1] - 1] +
-                      begin_sum[i][split_change_point - 1];
-
-                buff = sum_square - sum * sum / (split_change_point - change_point[nb_segment][segment_index - 2]);
+                diff = begin_sum[i][change_point[nb_segment][segment_index - 1] - 1] /
+                       (change_point[nb_segment][segment_index - 1] - change_point[nb_segment][segment_index - 2]) -
+                       begin_sum[i][split_change_point - 1] /
+                       (split_change_point - change_point[nb_segment][segment_index - 1]);
+                buff = begin_sum_square[i][change_point[nb_segment][segment_index - 1] - 1] +
+                       begin_sum_square[i][split_change_point - 1] +
+                       ((double)((change_point[nb_segment][segment_index - 1] - change_point[nb_segment][segment_index - 2]) *
+                         (split_change_point - change_point[nb_segment][segment_index - 1])) /
+                        (double)(split_change_point - change_point[nb_segment][segment_index - 2])) * diff * diff;
               }
 
               if ((merge_contrast != D_INF) && (buff > 0.)) {
@@ -8617,12 +8641,15 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               }
 
               else {
-                sum_square = end_sum_square[i][split_change_point] +
-                             end_sum_square[i][change_point[nb_segment][segment_index]];
-                sum = end_sum[i][split_change_point] +
-                      end_sum[i][change_point[nb_segment][segment_index]];
-
-                buff = sum_square - sum * sum / (change_point[nb_segment][segment_index + 1] - split_change_point);
+                diff = end_sum[i][split_change_point] /
+                      (change_point[nb_segment][segment_index] - split_change_point) -
+                      end_sum[i][change_point[nb_segment][segment_index]] /
+                      (change_point[nb_segment][segment_index + 1] - change_point[nb_segment][segment_index]);
+                buff = end_sum_square[i][split_change_point] +
+                       end_sum_square[i][change_point[nb_segment][segment_index]] +
+                       ((double)((change_point[nb_segment][segment_index] - split_change_point) *
+                         (change_point[nb_segment][segment_index + 1] - change_point[nb_segment][segment_index])) /
+                        (double)(change_point[nb_segment][segment_index + 1] - split_change_point)) * diff * diff;
               }
 
               if ((merge_contrast != D_INF) && (buff > 0.)) {
