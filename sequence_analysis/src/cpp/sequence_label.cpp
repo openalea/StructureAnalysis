@@ -361,6 +361,8 @@ const char *SEQ_error[] = {
   "characteristics not computed" ,
   "non-existing characteristic distribution" ,
   "non-existing forward sojourn time distribution" ,
+  "incompatible with model" ,
+  "sequence incompatible with model" ,
 
   "too many alignment" ,
   "bad insertion/deletion factor: should be greater than 0.5" ,
