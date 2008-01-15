@@ -693,29 +693,41 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
 
   else {
     for (i = 0;i < nb_variable;i++) {
-      if ((ivector_dist.variable_type[i] != NUMERIC) && (!marginal[i])) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_MARGINAL_HISTOGRAM];
-        error.update((error_message.str()).c_str());
-      }
+      if (ivector_dist.variable_type[i] != NUMERIC) {
+        if (type[i] != INT_VALUE) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_VARIABLE_TYPE];
+          error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
+        }
 
-      if ((ivector_dist.variable_type[i] == SYMBOLIC) && ((min_value[i] < 0) || (max_value[i] >= NB_SYMBOL) ||
-           ((ivector_dist.symbol_distance[i]) && (ivector_dist.nb_value[i] != max_value[i] + 1)))) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_NB_SYMBOL];
-        error.update((error_message.str()).c_str());
-      }
+        else if (!marginal[i]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+          error.update((error_message.str()).c_str());
+        }
 
-      if ((ivector_dist.variable_type[i] == CIRCULAR) && (max_value[i] - min_value[i] >= ivector_dist.period[i])) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_NB_VALUE_PERIOD];
-        error.update((error_message.str()).c_str());
+        if ((ivector_dist.variable_type[i] == SYMBOLIC) &&
+            ((min_value[i] < 0) || (max_value[i] >= NB_SYMBOL) ||
+             ((ivector_dist.symbol_distance[i]) && (ivector_dist.nb_value[i] != max_value[i] + 1)))) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_NB_SYMBOL];
+          error.update((error_message.str()).c_str());
+        }
+
+        if ((ivector_dist.variable_type[i] == CIRCULAR) &&
+            (max_value[i] - min_value[i] >= ivector_dist.period[i])) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_NB_VALUE_PERIOD];
+          error.update((error_message.str()).c_str());
+        }
       }
     }
   }
