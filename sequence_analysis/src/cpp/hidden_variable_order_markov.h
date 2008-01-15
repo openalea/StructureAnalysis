@@ -71,29 +71,20 @@ class Hidden_variable_order_markov : public Variable_order_markov {  // chaine d
 
 private :
 
-    double forward_backward(const Variable_order_markov_data &seq , int index ,
+    double forward_backward(const Markovian_sequences &seq , int index ,
                             std::ostream &os , char format , double &max_marginal_entropy ,
                             double &entropy1) const;
-    double forward_backward_sampling(const Variable_order_markov_data &seq , int index ,
+    double forward_backward_sampling(const Markovian_sequences &seq , int index ,
                                      std::ostream &os , char format = 'a' ,
                                      int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
-    bool state_profile_write(Format_error &error , std::ostream &os ,
-                             const Variable_order_markov_data &iseq ,
-                             int identifier = I_DEFAULT , char format = 'a' ,
-                             int state_sequence = GENERALIZED_VITERBI ,
-                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_plot_write(Format_error &error , const char *prefix ,
-                                  const Variable_order_markov_data &iseq ,
-                                  int identifier , const char *title = 0) const;
-
     void log_computation();
-    double viterbi(const Variable_order_markov_data &seq , double *posterior_probability = 0 ,
+    double viterbi(const Markovian_sequences &seq , double *posterior_probability = 0 ,
                    int index = I_DEFAULT) const;
-    double generalized_viterbi(const Variable_order_markov_data &seq , int index ,
+    double generalized_viterbi(const Markovian_sequences &seq , int index ,
                                std::ostream &os , double seq_likelihood , char format ,
                                int inb_state_sequence) const;
-    double viterbi_forward_backward(const Variable_order_markov_data &seq , int index ,
+    double viterbi_forward_backward(const Markovian_sequences &seq , int index ,
                                     std::ostream &os , char format ,
                                     double seq_likelihood = D_INF) const;
 
@@ -119,6 +110,14 @@ public :
     double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = 0 ,
                                   int index = I_DEFAULT) const;
 
+    bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,
+                             int identifier = I_DEFAULT , char format = 'a' ,
+                             int state_sequence = GENERALIZED_VITERBI ,
+                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(Format_error &error , const char *path , const Markovian_sequences &iseq ,
+                             int identifier = I_DEFAULT , char format = 'a' ,
+                             int state_sequence = GENERALIZED_VITERBI ,
+                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_ascii_write(Format_error &error , std::ostream &os , int identifier ,
                                    int state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
@@ -126,6 +125,10 @@ public :
                              int identifier = I_DEFAULT , char format = 'a' ,
                              int state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
+
+    bool state_profile_plot_write(Format_error &error , const char *prefix ,
+                                  const Markovian_sequences &iseq ,
+                                  int identifier , const char *title = 0) const;
     bool state_profile_plot_write(Format_error &error , const char *prefix ,
                                   int identifier , const char *title = 0) const;
 
