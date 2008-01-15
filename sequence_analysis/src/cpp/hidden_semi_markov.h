@@ -85,27 +85,19 @@ private :
     Hidden_semi_markov(char itype , int inb_state , int inb_output_process , int *nb_value)
     :Semi_markov(itype , inb_state , inb_output_process , nb_value) {}
 
-    double forward_backward(const Semi_markov_data &seq , int index , std::ostream &os ,
+    double forward_backward(const Markovian_sequences &seq , int index , std::ostream &os ,
                             int output , char format , double &max_marginal_entropy ,
                             double &entropy1) const;
-    double forward_backward_sampling(const Semi_markov_data &seq , int index ,
+    double forward_backward_sampling(const Markovian_sequences &seq , int index ,
                                      std::ostream &os , char format = 'a' ,
                                      int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
-    bool state_profile_write(Format_error &error , std::ostream &os , const Semi_markov_data &iseq ,
-                             int identifier = I_DEFAULT , int output = SSTATE ,
-                             char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,
-                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_plot_write(Format_error &error , const char *prefix ,
-                                  const Semi_markov_data &iseq , int identifier ,
-                                  int output = SSTATE , const char *title = 0) const;
-
     void log_computation();
-    double viterbi(const Semi_markov_data &seq , double *posterior_probability = 0 ,
+    double viterbi(const Markovian_sequences &seq , double *posterior_probability = 0 ,
                    int index = I_DEFAULT) const;
-    double generalized_viterbi(const Semi_markov_data &seq , int index , std::ostream &os ,
+    double generalized_viterbi(const Markovian_sequences &seq , int index , std::ostream &os ,
                                double seq_likelihood , char format , int inb_state_sequence) const;
-    double viterbi_forward_backward(const Semi_markov_data &seq , int index ,
+    double viterbi_forward_backward(const Markovian_sequences &seq , int index ,
                                     std::ostream &os , int output , char format ,
                                     double seq_likelihood = D_INF) const;
 
@@ -145,6 +137,14 @@ public :
     double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = 0 ,
                                   int index = I_DEFAULT) const;
 
+    bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,
+                             int identifier = I_DEFAULT , int output = SSTATE ,
+                             char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,
+                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(Format_error &error , const char *path , const Markovian_sequences &iseq ,
+                             int identifier = I_DEFAULT , int output = SSTATE ,
+                             char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,
+                             int nb_state_sequence = NB_STATE_SEQUENCE) const;
     bool state_profile_ascii_write(Format_error &error , std::ostream &os , int identifier ,
                                    int output = SSTATE , int state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
@@ -152,10 +152,15 @@ public :
                              int identifier = I_DEFAULT , int output = SSTATE ,
                              char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
+
+    bool state_profile_plot_write(Format_error &error , const char *prefix ,
+                                  const Markovian_sequences &iseq , int identifier ,
+                                  int output = SSTATE , const char *title = 0) const;
     bool state_profile_plot_write(Format_error &error , const char *prefix , int identifier ,
                                   int output = SSTATE , const char *title = 0) const;
 
-    Semi_markov_data* state_sequence_computation(Format_error &error , const Markovian_sequences &seq ,
+    Semi_markov_data* state_sequence_computation(Format_error &error , ostream &os ,
+                                                 const Markovian_sequences &seq ,
                                                  bool characteristic_flag = false) const;
 
     Semi_markov_data* simulation(Format_error &error , const Histogram &hlength ,
