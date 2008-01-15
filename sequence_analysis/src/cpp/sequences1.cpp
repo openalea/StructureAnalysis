@@ -6807,7 +6807,7 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
 /*--------------------------------------------------------------*
  *
  *  Calcul des sequences des temps de retour pour une valeur prise
- *  par une variable.
+ *  par une variable entiere.
  *
  *  arguments : reference sur un objet Format_error, indice de la variable, valeur.
  *
@@ -6818,7 +6818,7 @@ Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variab
 {
   bool status = true;
   register int i , j;
-  int inb_sequence , ilength , previous_index , *pisequence , *rsequence;
+  int inb_sequence , ilength , previous_index , *pisequence , *prsequence;
   Sequences *seq;
 
 
@@ -6862,7 +6862,7 @@ Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variab
   }
 
   if (status) {
-    seq = new Sequences(1 , nb_sequence);
+    seq = new Sequences(nb_sequence , 1);
 
     // calcul des sequences des temps de retour
 
@@ -6876,10 +6876,10 @@ Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variab
         if (*pisequence == value) {
           if (ilength == 0) {
             seq->int_sequence[inb_sequence][0] = new int[length[i]];
-            rsequence = seq->int_sequence[inb_sequence][0];
+            prsequence = seq->int_sequence[inb_sequence][0];
           }
 
-          *rsequence++ = j - previous_index;
+          *prsequence++ = j - previous_index;
           previous_index = j;
           ilength++;
         }
@@ -6902,6 +6902,99 @@ Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variab
     seq->min_value_computation(0);
     seq->max_value_computation(0);
     seq->build_marginal_histogram(0);
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des sequences des temps de sejour par une variable entiere.
+ *
+ *  arguments : reference sur un objet Format_error, indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences* Sequences::sojourn_time_sequences(Format_error &error , int variable) const
+
+{
+  bool status = true;
+  register int i , j;
+  int ilength , run_length , *pisequence , *pstate , *pssequence , itype[2];
+  Sequences *seq;
+
+
+  seq = 0;
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+    }
+
+    else if (!marginal[variable]) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_MARGINAL_HISTOGRAM];
+      error.update((error_message.str()).c_str());
+    }
+  }
+
+  if (status) {
+    itype[0] = type[variable];
+    itype[1] = INT_VALUE;
+
+    seq = new Sequences(nb_sequence , identifier , length , IMPLICIT_TYPE , 2 , itype);
+
+    // calcul des sequences de temps de sejour
+
+    for (i = 0;i < nb_sequence;i++) {
+      pstate = seq->int_sequence[i][0];
+      pssequence = seq->int_sequence[i][1];
+      pisequence = int_sequence[i][variable];
+      run_length = 1;
+      ilength = 0;
+
+      for (j = 0;j < length[i] - 1;j++) {
+        if (*(pisequence + 1) != *pisequence) {
+          *pstate++ = *pisequence;
+          *pssequence++ = run_length;
+          run_length = 0;
+          ilength++;
+        }
+
+        run_length++;
+        pisequence++;
+      }
+
+      *pstate = *pisequence;
+      *pssequence = run_length;
+
+      seq->length[i] = ilength + 1;
+    }
+
+    seq->max_length_computation();
+    seq->cumul_length_computation();
+    delete seq->hlength;
+    seq->build_length_histogram();
+
+    for (i = 0;i < 2;i++) {
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+      seq->build_marginal_histogram(i);
+    }
   }
 
   return seq;
@@ -6953,7 +7046,7 @@ Sequences* Sequences::transform_position(Format_error &error , int step) const
   if (status) {
     ilength = new int[nb_sequence];
     for (i = 0;i < nb_sequence;i++) {
-      ilength[i] = int_sequence[i][0][length[i]] / step + 1 + length[i];
+      ilength[i] = index_parameter[i][length[i]] / step + 1 + length[i];
     }
 
     seq = new Sequences(nb_sequence , identifier , ilength , nb_variable);
