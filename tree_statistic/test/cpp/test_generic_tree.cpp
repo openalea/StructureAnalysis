@@ -3,10 +3,10 @@
  *  Test of the generic_tree methods as defined in generic_tree.h
  */
 
-#include "tree_simple.h"
-#include "tree_traits.h"
-#include "basic_visitors.h"
-#include "stat_tools.h"
+#include "tree/tree_simple.h"
+#include "tree/tree_traits.h"
+#include "tree/basic_visitors.h"
+#include "stat_tool/stat_tools.h"
 #include "generic_typed_edge_tree.h"
 #include <iostream>
 #include <string>

@@ -3,23 +3,21 @@ import os, commands
 # Import global objects
 
 Import("env")
-lib_env = env.Copy()
 
 pj = os.path.join
 
-#includes=map(lambda x: pj(x,"tree_statistic"), env["CPPPATH"])
-#includes+=map(lambda x: pj(x,"tool"), env["CPPPATH"])
-#includes+=map(lambda x: pj(x,"tree"), env["CPPPATH"])
-#includes+=map(lambda x: pj(x,"stat_tool"), env["CPPPATH"])
-#includes+=map(lambda x: pj(x,"sequence_analysis"), env["CPPPATH"])
-
+# includes=map(lambda x: pj(x,"tree_statistic"), env["CPPPATH"])
+# includes+=map(lambda x: pj(x,"tool"), env["CPPPATH"])
+# includes+=map(lambda x: pj(x,"tree"), env["CPPPATH"])
+# includes+=map(lambda x: pj(x,"stat_tool"), env["CPPPATH"])
+# includes+=map(lambda x: pj(x,"sequence_analysis"), env["CPPPATH"])
 # env.ALEAIncludes("tree_statistic", includes)
 
 
 # env.Append(CPPDEFINES= ['MESSAGE'])
-lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
 
-#env.Append(CPPPATH= includes)
+# env.Append(CPPPATH= includes)
 
 #Sources
 
@@ -43,7 +41,7 @@ test_hidden_markov_out_trees_viterbi.cpp
 """)
 
 def prog(p):
-  return lib_env.Program(p)
+  return env.Program(p)
 
 # def check(p):
 #    os.popen(p+" > output_current_test.txt")

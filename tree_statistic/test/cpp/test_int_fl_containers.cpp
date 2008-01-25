@@ -7,9 +7,7 @@
 #include "base_int_fl_containers.h"
 #include "int_fl_containers.h"
 
-// #include "Tools/rw_tokenizer.h"
-#include "rw_cstring.h"
-// #include "Tools/rw_locale.h"
+#include "tool/rw_cstring.h"
 
 using namespace std;
 using namespace Stat_trees;

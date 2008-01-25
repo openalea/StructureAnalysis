@@ -4,14 +4,14 @@
  *  in observed_trees.h
  */
 
-#include "tree_simple.h"
-#include "tree_traits.h"
-#include "basic_visitors.h"
-#include "stat_tools.h"
-#include "distribution.h"
-#include "curves.h"
-#include "markovian.h"
-#include "sequences.h"
+#include "tree/tree_simple.h"
+#include "tree/tree_traits.h"
+#include "tree/basic_visitors.h"
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/markovian.h"
+#include "sequence_analysis/sequences.h"
 #include "int_fl_containers.h"
 #include "typed_edge_trees.h"
 #include "generic_typed_edge_tree.h"
