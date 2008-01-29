@@ -6,6 +6,8 @@ import os, commands
 
 Import("env")
 
+env_test = env.Copy()
+
 pj = os.path.join
 
 # includes=map(lambda x: pj(x,"tree_statistic"), env["CPPPATH"])
@@ -17,7 +19,7 @@ pj = os.path.join
 
 
 # env.Append(CPPDEFINES= ['MESSAGE'])
-env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
+env_test.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
 
 # env.Append(CPPPATH= includes)
 
@@ -43,7 +45,7 @@ test_hidden_markov_out_trees_viterbi.cpp
 """)
 
 def prog(p):
-  return env.Program(p)
+  return env_test.Program(p)
 
 # def check(p):
 #    os.popen(p+" > output_current_test.txt")
