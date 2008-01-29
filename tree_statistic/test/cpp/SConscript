@@ -1,3 +1,5 @@
+# -*-python-*-
+
 import os, commands
 
 # Import global objects
