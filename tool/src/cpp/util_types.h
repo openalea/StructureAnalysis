@@ -85,14 +85,20 @@ const real_t REAL_EPSILON = FLT_EPSILON;
 /// Geom out of range value
 #define GEOM_OUT_OF_RANGE LONG_MAX;
 
+#ifdef _WIN64
+#define __WORDSIZE  64
+#endif
+
 // Basic types redefinition
 
 #ifdef __GNUC__
+#ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
+#endif
 #include <stdint.h>
 #if defined( __MINGW32__ )
 #define __int8_t_defined
-#define __uint32_t_defined
+#define __uint_t_defined
 #endif // __MINGW32__
 #endif
 
@@ -115,10 +121,19 @@ typedef short int16_t;
 
 #endif
 
-#ifndef __uint32_t_defined
+#ifndef __uint_t_defined
 
 /// type uint16_t (unsigned short)
 typedef unsigned short uint16_t;
+
+/// type int32_t (long)
+typedef int int32_t;
+
+/// type uint_t (unsigned long)
+typedef unsigned int uint32_t;
+
+#endif
+
 /// uint16_t min value
 #ifndef UINT16_MIN 
 #define UINT16_MIN USHRT_MIN
@@ -128,7 +143,7 @@ typedef unsigned short uint16_t;
 #define UINT16_MAX USHRT_MAX
 #endif
 /// type int32_t (long)
-typedef long int32_t;
+//typedef long int32_t;
 /// int32_t min value
 #ifndef INT32_MIN 
 #define INT32_MIN LONG_MIN
@@ -137,20 +152,18 @@ typedef long int32_t;
 #ifndef INT32_MAX
 #define INT32_MAX LONG_MAX
 #endif
-/// type uint32_t (unsigned long)
-typedef unsigned long uint32_t;
-/// uint32_t min value
+/// uint_t min value
 #ifndef UINT32_MIN 
 #define UINT32_MIN ULONG_MIN
 #endif
 
-/// uint32_t max value
+/// uint_t max value
 #ifndef UINT32_MAX
 #define UINT32_MAX ULONG_MAX
 #endif
 
-#endif
-
+typedef unsigned int      uint_t;
+typedef int               int_t;
 
 #include <stddef.h>
 
