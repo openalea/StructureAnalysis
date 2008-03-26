@@ -17,7 +17,8 @@ options = Options(['../options.py','options.py'], ARGUMENTS)
 
 options.Add(BoolOption('with_test', 'build test modules', 1))
 
-wrapper_conf = ALEAConfig(name,['boost_python', 'install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
+# dependencies
+wrapper_conf = ALEAConfig(name,['boost_python', 'install','vplants.tool', 'vplants.sequence_analysis','vplants.stat_tool','vplants.tree'])
 cpp_conf = ALEAConfig(name, ['install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
 opt_conf = ALEAConfig(name, ['boost_python', 'install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
 
@@ -54,8 +55,5 @@ wrapper_env.Prepend( CPPPATH = pj( '$build_includedir','tree_statistic' ) )
 SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
 SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
 
-
 Default("build")
-if cpp_env["with_test"]:
-   SConscript("test/cpp/SConscript", exports={"env": cpp_env})
 

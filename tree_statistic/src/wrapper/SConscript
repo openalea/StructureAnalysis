@@ -21,8 +21,6 @@ py_dir = '../tree_statistic'
 LIBS = ['vptool', 'vpstat_tool', 'vpsequence','vptree_statistic']
 env.AppendUnique(LIBS=LIBS)
 
-env.ALEAWrapper("../stat_tool", "cstat_tool", ["cstat_tool.cpp"])
-
 env.ALEAWrapper(py_dir+'/trees', "ctree", ["trees/ctree.cpp"])
 env.ALEAWrapper(py_dir+'/trees', "ctrees", ["trees/ctrees.cpp"])
 env.ALEAWrapper(py_dir+'/int_fl_containers', "int_fl_containers", ["int_fl_containers/int_fl_containers.cpp"])

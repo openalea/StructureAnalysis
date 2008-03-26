@@ -1,14 +1,11 @@
 """Hidden Markov tree models
 """
 import string
-import openalea.stat_tool, openalea.tree_statistic.trees
+import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
+import openalea.sequence_analysis as sequence
 import chmt
 
-stat_tool=openalea.stat_tool
-trees=openalea.tree_statistic.trees
-# ctree=openalea.tree_statistic.trees.ctree
-
-VariableType=stat_tool.VariableType
+VariableType=sequence.VariableType
 FormatError=stat_tool.FormatError
 CharacteristicType=trees.CharacteristicType
 EntropyAlgorithm=chmt.EntropyAlgorithm

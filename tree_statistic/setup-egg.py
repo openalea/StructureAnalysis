@@ -31,9 +31,8 @@ if __name__ == '__main__':
           namespace_packages = [namespace],
           create_namespaces = True,
 
-          packages=[namespace+".stat_tool", namespace+".tree_statistic",],
-          package_dir={namespace+".stat_tool" : 'src/stat_tool',
-                       namespace+".tree_statistic": 'src/tree_statistic'},
+          packages=[namespace+".tree_statistic",],
+          package_dir={namespace+".tree_statistic": 'src/tree_statistic'},
       
           # Add package platform libraries if any
           include_package_data=True,
@@ -50,6 +49,4 @@ if __name__ == '__main__':
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
-
-
     
