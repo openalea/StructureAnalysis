@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os, sys
 from os.path import join as pj
- 
+
 packagename = 'sequence_analysis'
 namespace = 'openalea'
 
@@ -21,23 +21,28 @@ if("win" in sys.platform):
 
 
 if __name__ == '__main__':
-    
+
     setup(name='VPlants.Sequence_analysis',
-          version='0.1',
+          version='2.0.1',
           author='Yann Guedon',
           description='sequence analysis library',
           url='http://www-sop.inria.fr/virtualplants/',
           license='GPL',
-          
+
           # Define where to execute scons
           scons_scripts=['SConstruct'],
-          # Scons parameters  
+          # Scons parameters
           scons_parameters=scons_parameters,
-        
+
+          namespace_packages=['openalea'],
+          create_namespaces=True,
+
           # Packages
-          #packages=
-          #package_dir=
-      
+          packages=['openalea.sequence_analysis'],
+          package_dir={'openalea.sequence_analysis' : 'src/sequence_analysis',
+                       #'' : 'build/lib', # hack to use develop command
+                       },
+
           # Add package platform libraries if any
           include_package_data=True,
           package_data = {'' : ['*.pyd', '*.so'],},
@@ -46,10 +51,10 @@ if __name__ == '__main__':
           # Specific options of openalea.deploy
           lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
           inc_dirs = { 'include' : pj(build_prefix, 'include') },
-          
+
 
           # Dependencies
-          setup_requires = setup_requires, 
+          setup_requires = setup_requires,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )

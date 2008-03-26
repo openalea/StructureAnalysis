@@ -1,0 +1,23 @@
+# -*-python-*-
+
+import os
+
+Import("env")
+
+# Export symbols under windows
+if env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    env.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+
+# Build wrappers as shared libraries
+#sources = Split("""""")
+
+LIBS = ['vptool', 'vpstat_tool', 'vpsequence']
+env.AppendUnique(LIBS=LIBS)
+
+env.ALEAWrapper("../sequence_analysis", "csequence", ["csequence.cpp"])
+
