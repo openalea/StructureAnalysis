@@ -1,30 +1,23 @@
 # -*-python-*-
 
 import os
-bn = os.path.basename
 
-Import( "env" )
+Import("env")
 
-lib_env = env.Copy()
-
-
-# Import/Export symbols for windows
-if lib_env['compiler'] == 'mingw':
+# Export symbols under windows
+if env['compiler'] == 'mingw':
     LINKFLAGS=["-enable-stdcall-fixup",
                "-enable-auto-import",
                "-enable-runtime-pseudo-reloc",
                "-s"]
-    lib_env.AppendUnique(LINKFLAGS=LINKFLAGS)
+    env.AppendUnique(LINKFLAGS=LINKFLAGS)
 
 
-includes= lib_env.ALEAGlob('*.h')
-sources = lib_env.ALEAGlob('*.cpp')
+# Build wrappers as shared libraries
+#sources = Split("""""")
 
+LIBS = ['vptool', 'vpstat_tool']
+env.AppendUnique(LIBS=LIBS)
 
-
-# Add defines to export symbols on Windows
-lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
-lib_env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
-
-lib_env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
+env.ALEAWrapper("../stat_tool", "cstat_tool", ["cstat_tool.cpp"])
 

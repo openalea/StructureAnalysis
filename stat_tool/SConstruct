@@ -15,7 +15,7 @@ SConsignFile()
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
-wrapper_conf = ALEAConfig(name,['boost_python', 'alea', 'vplants.tool'])
+wrapper_conf = ALEAConfig(name,['boost_python', 'alea', 'vplants.tool', 'vplants.stat_tool'])
 cpp_conf = ALEAConfig(name, ['alea','install', 'vplants.tool'])
 opt_conf = ALEAConfig(name, ['boost_python', 'alea','install'])
 
