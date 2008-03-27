@@ -1,10 +1,9 @@
 # a test for the class etrees.Tree: constructor and basic methods
 import sys, os
-import openalea.tree_statistic.trees.etrees, openalea.tree_statistic.trees
-import openalea.stat_tool
-stat_tool=openalea.stat_tool
-trees=openalea.tree_statistic.trees
-etrees=openalea.tree_statistic.trees.etrees
+import openalea.tree_statistic.trees.etrees as etrees
+import openalea.tree_statistic.trees as trees
+import openalea.stat_tool as stat_tool
+
 inf_bound=0
 sup_bound=3
 probability= 0.6
@@ -86,9 +85,7 @@ ST=T.SelectSubTree(1, False)
 print "Prune subtree rooted at vertex 2 from T:"
 print ST
 # extract sequences
-import openalea.amlPy, openalea.tree_statistic.trees
-amlPy=openalea.amlPy
-trees=openalea.tree_statistic.trees
+import openalea.aml as amlPy
 TS=trees.Trees([T])
 S1=TS.BuildSequences(True)
 S2=TS.BuildSequences(False)

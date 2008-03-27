@@ -1,13 +1,8 @@
 import sys
 import os
-AMLLIBDIR=os.getenv("HOME")+"/devlp/AMAPmod/build-linux/lib"
-sys.path.append(AMLLIBDIR)
-map(lambda x:sys.path.append(os.getenv("AMAPDIR")+"/STAT_TREES/Python/"+x),
-    ["Int_fl_containers/", "Trees/", "Hmt/"])
-sys.path.append(os.getenv("AMAPDIR")+"/STAT/Python/")
-import stat_tools
-import int_fl_containers
-import ctree
+import openalea.stat_tool as stat_tool
+import openalea.tree_statistic.int_fl_containers as int_fl_containers
+import openalea.tree_statistic.trees.ctree as ctree
 # TreeValues
 print "Building a TreeValue [2, 1.0, 0]"
 default_value=int_fl_containers.Int_fl_container(1, 0)
@@ -57,9 +52,9 @@ for i in range(5):
 inf_bound=0
 sup_bound=3
 probability= 0.6
-ident=stat_tools.DistributionIdentifier.UNIFORM
-parameter=stat_tools.D_DEFAULT
-distrib= stat_tools.Parametric(ident, inf_bound, sup_bound, parameter, probability)
+ident=stat_tool.DistributionIdentifier.UNIFORM
+parameter=stat_tool.D_DEFAULT
+distrib= stat_tool.Parametric(ident, inf_bound, sup_bound, parameter, probability)
 print distrib
 max_depth= 3
 max_size= 20

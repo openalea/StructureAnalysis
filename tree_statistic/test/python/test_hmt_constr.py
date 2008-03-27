@@ -1,10 +1,7 @@
 # a test for the class hmt.Hmt: constructor and basic methods
 import sys, os
-import openalea.stat_tool
-import openalea.tree_statistic.trees, openalea.tree_statistic.hmt
-stat_tool=openalea.stat_tool
-trees=openalea.tree_statistic.trees
-hmt=openalea.tree_statistic.hmt
+import openalea.stat_tool as stat_tool
+import openalea.tree_statistic.trees as trees, openalea.tree_statistic.hmt as hmt
 inf_bound=1
 sup_bound=3
 probability= 0.6

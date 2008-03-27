@@ -1,13 +1,8 @@
 # a test for the class trees.Trees: constructor and basic methods
 import sys
 import os
-AMLLIBDIR=os.getenv("HOME")+"/devlp/AMAPmod/build-linux/lib"
-sys.path.append(AMLLIBDIR)
-map(lambda x:sys.path.append(os.getenv("AMAPDIR")+"/STAT_TREES/Python/"+x),
-    ["Int_fl_containers/", "Trees/", "Hmt/"])
-sys.path.append(os.getenv("AMAPDIR")+"/STAT/Python/")
-import trees
-import stat_tools
+import openalea.tree_statistic.trees as trees
+import openalea.stat_tool as stat_tools
 inf_bound=1
 sup_bound=3
 probability= 0.6
@@ -99,7 +94,7 @@ print "Read ", T.NbTrees(), " trees."
 print T
 print "Print 1st tree of Trees object:"
 print T.Tree(0).Display()
-import amlPy
+import openalea.aml as amlPy
 amlPy.setmode(1)
 # reading a Tree from a MTG with filter and custom attributes
 print "Read tree from MTG file 'sample_mtg_forest.txt' using a filter", \

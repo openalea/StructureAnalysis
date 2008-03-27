@@ -19,19 +19,18 @@ Variable0	REAL
 Variable1	INT
 
 MTG:
-ENTITY-CODE					Variable0	Variable1	
+ENTITY-CODE				Variable0	Variable1	
 /N0
-	/V0				1.0	6
-		+V1			1.0	5
-			+V4		1.0	5
-			+V5		1.0	10
-		+V2			1.0	6
-		+V3			1.0	4
+	/V0			1.0	5
+		+V1		1.0	0
+			+V3	1.0	7
+			+V4	1.0	9
+			+V5	1.0	3
+		+V2		1.0	2
 /N1
-	/V0				1.0	10
-		+V1			1.0	6
-			+V2		1.0	7
-				+V4	1.0	6
-				+V5	1.0	0
-				+V6	1.0	2
-			+V3		1.0	1
+	/V0			1.0	0
+		+V1		1.0	0
+			+V3	1.0	0
+			+V4	1.0	2
+			+V5	1.0	10
+		+V2		1.0	5

@@ -1,22 +1,16 @@
 # a test for the class trees.Trees: tree manipulation (merge, cluster, etc.)
-import sys
-import os
-AMLLIBDIR=os.getenv("HOME")+"/devlp/AMAPmod/build-linux/lib"
-sys.path.append(AMLLIBDIR)
-map(lambda x:sys.path.append(os.getenv("AMAPDIR")+"/STAT_TREES/Python/"+x),
-    ["Int_fl_containers/", "Trees/", "Hmt/"])
-sys.path.append(os.getenv("AMAPDIR")+"/STAT_TOOL/Python/")
-import trees
-import stat_tools
+import sys, os
+import openalea.stat_tool as stat_tool
+import openalea.tree_statistic.trees as trees
 inf_bound=1
 sup_bound=3
 probability= 0.6
-ident=stat_tools.DistributionIdentifier.UNIFORM
-parameter=stat_tools.D_DEFAULT
-children_distrib= stat_tools.Parametric(ident, inf_bound, sup_bound,
+ident=stat_tool.DistributionIdentifier.UNIFORM
+parameter=stat_tool.D_DEFAULT
+children_distrib= stat_tool.Parametric(ident, inf_bound, sup_bound,
                                         parameter, probability)
 # distribution of the children
-attributes_distrib= stat_tools.Parametric(ident, 0, 10,
+attributes_distrib= stat_tool.Parametric(ident, 0, 10,
                                           parameter, probability)
 # distribution of the attributes
 max_depth=3
@@ -327,7 +321,7 @@ else:
     print "Failed to raise exception for bad number of classes."
 try:
     V=T.Transcode(1, range(0, 5) + range(6,13))
-except stat_tools.FormatError, e:
+except stat_tool.FormatError, e:
     print e
 else:
     print "Failed to raise exception for non-consecutive symbols."

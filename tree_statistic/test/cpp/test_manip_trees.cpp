@@ -692,6 +692,50 @@ int main(void)
       res= NULL;
    }
 
+   delete [] ivariables;
+   ivariables= new int[1];
+   ivariables[0]= 3;
+   res= c->select_variable(error, 1, ivariables, false);
+   cout << error;
+
+   if (res != NULL)
+   {
+      otrees= new tree_type*[res->get_nb_trees()];
+      cout << endl << "Discard 3rd variable" << endl;
+      res->ascii_write(cout, false);
+      for(t= 0; t < res->get_nb_trees(); t++)
+      {
+         otrees[t]= res->get_tree(t);
+         otrees[t]->display(cout, otrees[t]->root());
+         cout << endl;
+         delete otrees[t];
+         otrees[t]= NULL;
+      }
+      delete [] otrees;
+      otrees= NULL;
+      delete res;
+      res= NULL;
+   }
+
+   // test of the Format_error messages
+   // incompatible number of variables for select_variables
+
+   delete [] ivariables;
+   ivariables= new int[4];
+   ivariables[0]= 1;
+   ivariables[1]= 2;
+   ivariables[2]= 3;
+   ivariables[3]= 4;
+   res= c->select_variable(error, 4, ivariables, false);
+   if (error.get_nb_error() > 0)
+      cout << error << endl;
+   else
+   {
+      cout << "Failed to detect error(s)." << endl;
+      delete res;
+      res= NULL;
+   }
+
    // build sequences
    cout << "Build sequences (all possible paths)..." << endl;
    res_seq= c->build_sequences(error, true);
