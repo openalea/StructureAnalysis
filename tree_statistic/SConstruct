@@ -54,6 +54,8 @@ wrapper_env.Prepend( CPPPATH = pj( '$build_includedir','tree_statistic' ) )
 # Build stage
 SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
 SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
+if opt_env['with_test']:
+	SConscript(pj(prefix,"test/cpp/SConscript"), exports={"env":cpp_env})
 
 Default("build")
 
