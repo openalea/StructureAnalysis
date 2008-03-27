@@ -5,11 +5,13 @@
 import trees, ctree
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import openalea.stat_tool as stat_tool
-import opealea.sequence_analysis as sequence
+import openalea.sequence_analysis as sequence
+
+
+VariableType=stat_tool.VariableType
 
 I_DEFAULT_TREE_SIZE=trees.I_DEFAULT_TREE_SIZE
 I_DEFAULT_TREE_DEPTH=trees.I_DEFAULT_TREE_DEPTH
-# VariableType=trees.VariableType
 
 TreeValue=trees.TreeValue
     
@@ -74,7 +76,7 @@ class Tree(trees.Tree):
         if value is None:
             lvalue=[]
             for t in self.__types:
-                if t==sequence.VariableType.REAL_VALUE:
+                if t==VariableType.REAL_VALUE:
                     lvalue.append(0.)
                 else:
                     lvalue.append(0)

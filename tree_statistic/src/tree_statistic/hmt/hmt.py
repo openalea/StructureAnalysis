@@ -2,10 +2,9 @@
 """
 import string
 import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
-import openalea.sequence_analysis as sequence
 import chmt
 
-VariableType=sequence.VariableType
+VariableType=stat_tool.VariableType
 FormatError=stat_tool.FormatError
 CharacteristicType=trees.CharacteristicType
 EntropyAlgorithm=chmt.EntropyAlgorithm

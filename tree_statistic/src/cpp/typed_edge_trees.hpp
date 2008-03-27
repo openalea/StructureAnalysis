@@ -1930,7 +1930,9 @@ Typed_edge_trees<Generic_Int_fl_container>::select_variable(Format_error& error,
    if ((inb_variable < 1) || (inb_variable > (keep ? nb_variable : nb_variable - 1)))
    {
       status= false;
-      error.update(STAT_error[STATR_NB_SELECTED_VARIABLE]);
+      ostringstream error_message;
+      error_message << STAT_error[STATR_NB_SELECTED_VARIABLE] << ": " << inb_variable;
+      error.update((error_message.str()).c_str());
    }
 
    if (status)
@@ -1981,13 +1983,13 @@ Typed_edge_trees<Generic_Int_fl_container>::select_variable(Format_error& error,
          else
             nb_integral++;
       }
-
+      /*
       if ((bnb_variable == 1)
             && ((itype[0] == TIME) || (itype[0] == POSITION)))
       {
          status= false;
          error.update(STAT_error[STATR_NB_SELECTED_VARIABLE]);
-      }
+      }*/
 
       if (status)
       {

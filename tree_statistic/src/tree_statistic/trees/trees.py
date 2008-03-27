@@ -3,14 +3,13 @@
 
 import string
 import openalea.stat_tool as stat_tool
-import openalea.sequence_analysis as sequence
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import ctree, ctrees
 
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_DEPTH=ctree.I_DEFAULT_TREE_DEPTH()
-VariableType=sequence.VariableType
+VariableType=stat_tool.VariableType
 FormatError=stat_tool.FormatError
 CharacteristicType=ctree.Characteristic
 
@@ -37,7 +36,7 @@ class TreeValue:
             raise TypeError, msg
         for index in range(len(list_of_values)):
             o=list_of_values[index]
-            if issubclass(o.__class__, sequence.VariableType):
+            if issubclass(o.__class__, VariableType):
                 self.__types.append(o)
                 if (o==VariableType.REAL_VALUE):
                     val=0.
@@ -168,7 +167,7 @@ class Tree:
         else:
             if not hasattr(arg, "__getitem__"):
                 raise TypeError, "argument 1 must have a __getitem__ method"
-            if issubclass(arg[0].__class__, sequence.VariableType):
+            if issubclass(arg[0].__class__, VariableType):
                 #... or a list of types
                 self.__types=list(arg)
                 default_value=TreeValue(arg)
@@ -281,7 +280,7 @@ class Tree:
         types=res.Types()
         ftypes=[]
         for t in range(len(types)):
-            if types[t]==sequence.VariableType.REAL_VALUE:
+            if types[t]==VariableType.REAL_VALUE:
                 ftypes+=[t]
         try:
             while 1:
@@ -429,7 +428,7 @@ class Tree:
         smoothed=[]
         rounded=[]
         for index in range(len(self.__attributes)):
-            if (self.Type(index)==sequence.VariableType.REAL_VALUE):
+            if (self.Type(index)==VariableType.REAL_VALUE):
                 if (self.__attributes[index].find("State ")!=-1):
                     smoothed.append(index)
                 elif (self.__attributes[index].find("Entropy")!=-1):
@@ -440,7 +439,7 @@ class Tree:
             header="vid: ["
         else:
             header="[ "
-        if self.Type(0)==sequence.VariableType.STATE:
+        if self.Type(0)==VariableType.STATE:
             # print the State nature of the 1st variable
             header+=" Optimal State ]"
             comma=False
@@ -470,7 +469,7 @@ class Tree:
                 header+=self.__attributes[index+1]
             header+=" ]"
 ##        header is already completed by case 
-##        (self.Type(0)==sequence.VariableType.STATE) and (len(smoothed) > 0)
+##        (self.Type(0)==VariableType.STATE) and (len(smoothed) > 0)
 ##        above
 ##        else: 
 ##            # Same principle for smoothed probabilities,
@@ -529,7 +528,7 @@ class Tree:
             if attributes:
                 stream+=': '
         if attributes:
-            if self.Type(0)==sequence.VariableType.STATE:
+            if self.Type(0)==VariableType.STATE:
                 # A state variable must be written separately
                 complete_value=self.Get(key).Values()
                 stream+=str([complete_value[0]])
@@ -1910,7 +1909,7 @@ class Trees:
                 for var in range(self.NbVariables()):
                     cvariable_type=self.__types[var]
                     cvariable_name=self.__attributes[var]
-                    if (cvariable_type == sequence.VariableType.STATE):
+                    if (cvariable_type == VariableType.STATE):
                         # current variable is a state variable
                         default_colorfunc= \
                             lambda x: amlPy.Feature(x, cvariable_name)+2
@@ -2084,6 +2083,7 @@ class Trees:
                     elif not (variable_list.__contains__(variable) or keep):
                         types.append(self.__types[variable])
                         attributes.append(self.__attributes[variable])
+                print cvariables
                 cselected=self.__ctrees.SelectVariable(cvariables, keep)
         except RuntimeError, error:
             # raise stat_tool.Format_error, str(cerror)
