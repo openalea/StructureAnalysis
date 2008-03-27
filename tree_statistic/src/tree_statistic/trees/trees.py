@@ -2083,7 +2083,6 @@ class Trees:
                     elif not (variable_list.__contains__(variable) or keep):
                         types.append(self.__types[variable])
                         attributes.append(self.__attributes[variable])
-                print cvariables
                 cselected=self.__ctrees.SelectVariable(cvariables, keep)
         except RuntimeError, error:
             # raise stat_tool.Format_error, str(cerror)
