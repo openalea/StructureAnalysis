@@ -5,7 +5,7 @@
 import cstat_tool, os
 
 DistributionIdentifier=cstat_tool.DistributionIdentifier
-
+VariableType=cstat_tool.VariableType
 Parametric=cstat_tool._Parametric
 Distribution=cstat_tool.Distribution
 D_DEFAULT=cstat_tool.D_DEFAULT()

@@ -502,5 +502,15 @@ BOOST_PYTHON_MODULE(cstat_tool)
         .value("VITERBI", VITERBI)
         .export_values()
     ;
+
+    enum_<UniqueInt<6, 0> >("VariableType")
+        .value("INT_VALUE", INT_VALUE)
+        .value("REAL_VALUE", REAL_VALUE)
+        .value("STATE", STATE)
+        .value("OLD_INT_VALUE", OLD_INT_VALUE)
+        .value("NB_INTERNODE", NB_INTERNODE)
+        .value("AUXILIARY", AUXILIARY)
+        .export_values()
+    ;
 }
 
