@@ -134,16 +134,4 @@ BOOST_PYTHON_MODULE(csequence)
         .def(self_ns::str(self))
     ;
 
-    enum_<UniqueInt<8, 0> >("VariableType")
-        .value("INT_VALUE", INT_VALUE)
-        .value("REAL_VALUE", REAL_VALUE)
-        .value("STATE", STATE)
-        .value("TIME", TIME)
-        .value("TIME_INTERVAL", TIME_INTERVAL)
-        .value("POSITION", POSITION)
-        .value("POSITION_INTERVAL", POSITION_INTERVAL)
-        .value("NB_INTERNODE", NB_INTERNODE)
-        .export_values()
-    ;
-
 }
