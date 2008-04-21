@@ -304,6 +304,7 @@ const char *SEQ_error[] = {
   "time between two observation dates too short" ,
   "time between two observation dates too long" ,
 
+  "single state component" ,
   "bad number of states" ,
   "missing state" ,
   "bad order" ,
@@ -328,6 +329,7 @@ const char *SEQ_error[] = {
   "sequence length too short" ,
   "sequence length too long" ,
   "cumulated sequence length too long" ,
+  "states not represented" ,
   "failure in the computation of the optimal state sequences" ,
 
   "bad index parameter type" ,
@@ -354,6 +356,7 @@ const char *SEQ_error[] = {
   "incompatible with other correlation functions" ,
   "bad differencing order" ,
   "initial run histograms already built" ,
+  "bad run length" ,
   "too high number of possible words" ,
   "bad minimum frequency: should be positive" ,
 
@@ -374,6 +377,7 @@ const char *SEQ_error[] = {
   "bad change point" ,
   "segmentation failure" ,
   "bad number of segmentations" ,
+  "bad change-point model" ,
 
   "bad position" ,
   "bad number of internodes" ,
