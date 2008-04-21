@@ -1806,7 +1806,7 @@ Regression* Vectors::linear_regression(Format_error &error , int explanatory_var
                   << STAT_error[STATR_VARIABLE_INDEX];
     error.update((error_message.str()).c_str());
   }
-  else if (type[explanatory_variable] != INT_VALUE) {
+  else if (type[explanatory_variable - 1] != INT_VALUE) {
     status = false;
     ostringstream error_message;
     error_message << STAT_label[STATL_VARIABLE] << " " << explanatory_variable << ": "
@@ -2242,7 +2242,7 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
                   << STAT_error[STATR_VARIABLE_INDEX];
     error.update((error_message.str()).c_str());
   }
-  else if (type[explanatory_variable] != INT_VALUE) {
+  else if (type[explanatory_variable - 1] != INT_VALUE) {
     status = false;
     ostringstream error_message;
     error_message << STAT_label[STATL_VARIABLE] << " " << explanatory_variable << ": "
