@@ -974,12 +974,14 @@ bool Sequences::ascii_write(Format_error &error , const char *path ,
  *  Ecriture des sequences.
  *
  *  arguments : stream, format ('c' : column / 'l' : line / 'a' : array),
- *              flag commentaire, nombre de caracteres par ligne.
+ *              flag commentaire, probabilites a posteriori des sequences
+ *              d'etats les plus probables (modeles markoviens caches),
+ *              nombre de caracteres par ligne.
  *
  *--------------------------------------------------------------*/
 
 ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
-                                int line_nb_character) const
+                                double *posterior_probability , int line_nb_character) const
 
 {
   register int i , j , k , m;
@@ -1059,6 +1061,14 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         os << "# ";
       }
       os << "(" << identifier[i] << ")" << endl;
+
+      if (posterior_probability) {
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
+           << ": " << posterior_probability[i] << endl;
+      }
     }
     break;
   }
@@ -1167,6 +1177,14 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
         os << "# ";
       }
       os << "(" << identifier[i] << ")" << endl;
+
+      if (posterior_probability) {
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
+           << ": " << posterior_probability[i] << endl;
+      }
     }
 
     os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
