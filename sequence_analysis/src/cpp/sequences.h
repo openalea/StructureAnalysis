@@ -79,7 +79,9 @@ enum {
   FINAL_RUN ,
   NB_RUN ,
   NB_OCCURRENCE ,
-  LENGTH
+  LENGTH ,
+  SEQUENCE_CUMUL ,
+  SEQUENCE_MEAN
 };
 
 enum {
@@ -102,6 +104,16 @@ enum {
   ADAPTATIVE_LAPLACE ,
   UNIFORM_SUBSET ,
   UNIFORM_CARDINALITY
+};
+
+enum {
+  MULTINOMIAL_CHANGE ,
+  POISSON_CHANGE ,
+  ORDINAL_GAUSSIAN_CHANGE ,
+  GAUSSIAN_CHANGE ,
+  MEAN_CHANGE ,
+  VARIANCE_CHANGE ,
+  MEAN_VARIANCE_CHANGE
 };
 
 const double MAX_NB_WORD = 1.e7;       // nombre maximum de mots
@@ -167,7 +179,7 @@ enum {
   BEGIN_END_GAP
 };
 
-const int NB_ALIGNMENT = 100000;       // nombre maximum d'alignements
+const int NB_ALIGNMENT = 1000000;      // nombre maximum d'alignements
 const int DISPLAY_NB_ALIGNMENT = 30;   // nombre maximum d'alignements
                                        // pour la sortie detaillee ecran
 const int FILE_NB_ALIGNMENT = 300;     // nombre maximum d'alignements
@@ -458,6 +470,7 @@ protected :
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , char format , bool comment_flag ,
+                              double *posterior_probability = 0 ,
                               int line_nb_character = LINE_NB_CHARACTER) const;
     bool plot_print(const char *path , int ilength) const;
 
@@ -509,24 +522,24 @@ protected :
                                      double **profiles , double **mean = 0 ,
                                      double **change_point = 0) const;
 
-    int nb_parameter_computation(int index , int nb_segment , int *variable_type) const;
-    double one_segment_likelihood(int index , int *variable_type , double **rank) const;
-    Sequences* segmentation_output(int *nb_segment , int *variable_type , std::ostream &os ,
+    int nb_parameter_computation(int index , int nb_segment , int *model_type) const;
+    double one_segment_likelihood(int index , int *model_type , double **rank) const;
+    Sequences* segmentation_output(int *nb_segment , int *model_type , std::ostream &os ,
                                    int output = SEQUENCE , int* ichange_point = 0);
-    double segmentation(int *nb_segment , int *variable_type , double **rank ,
+    double segmentation(int *nb_segment , int *model_type , double **rank ,
                         double *isegmentation_likelihood = 0 , int *nb_parameter = 0 ,
                         double *segment_penalty = 0);
-    double forward_backward(int index , int nb_segment , int *variable_type , double **rank ,
+    double forward_backward(int index , int nb_segment , int *model_type , double **rank ,
                             std::ostream *os , int output , char format ,
                             double *ilikelihood = 0 , double *ichange_point_entropy = 0 ,
                             double *isegment_entropy = 0) const;
-    double forward_backward_sampling(int index , int nb_segment , int *variable_type ,
+    double forward_backward_sampling(int index , int nb_segment , int *model_type ,
                                      double **rank , std::ostream &os , char format ,
                                      int nb_segmentation) const;
-    double L_segmentation(int index , int nb_segment , int *variable_type , double **irank ,
+    double L_segmentation(int index , int nb_segment , int *model_type , double **irank ,
                           std::ostream &os , char format , int inb_segmentation ,
                           double likelihood) const;
-    double forward_backward_dynamic_programming(int index , int nb_segment , int *variable_type ,
+    double forward_backward_dynamic_programming(int index , int nb_segment , int *model_type ,
                                                 double **rank , std::ostream &os , int output ,
                                                 char format , double likelihood = D_INF) const;
 
@@ -707,31 +720,31 @@ public :
                                   const char *path = 0) const;
 
     Sequences* segmentation(Format_error &error , std::ostream &os , int iidentifier ,
-                            int nb_segment , int *ichange_point , int *variable_type ,
+                            int nb_segment , int *ichange_point , int *model_type ,
                             int output = SEQUENCE) const;
     Sequences* segmentation(Format_error &error , std::ostream &os , int *nb_segment ,
-                            int *variable_type , int iidentifier = I_DEFAULT ,
+                            int *model_type , int iidentifier = I_DEFAULT ,
                             int output = SEQUENCE) const;
     Sequences* segmentation(Format_error &error , std::ostream &os , int iidentifier ,
-                            int max_nb_segment , int *variable_type) const;
+                            int max_nb_segment , int *model_type) const;
 
     Sequences* hierarchical_segmentation(Format_error &error , std::ostream &os , int iidentifier ,
-                                         int max_nb_segment , int *variable_type) const;
+                                         int max_nb_segment , int *model_type) const;
 
     Sequences* segmentation(Format_error &error , int iidentifier , int nb_segment ,
                             const Vector_distance &ivector_dist , std::ostream &os ,
                             int output = SEGMENT) const;
 
     bool segment_profile_write(Format_error &error , std::ostream &os , int iidentifier ,
-                               int nb_segment , int *variable_type , int output = SEGMENT ,
+                               int nb_segment , int *model_type , int output = SEGMENT ,
                                char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
                                int nb_segmentation = NB_SEGMENTATION) const;
     bool segment_profile_write(Format_error &error , const char *path , int iidentifier ,
-                               int nb_segment , int *variable_type , int output = SEGMENT ,
+                               int nb_segment , int *model_type , int output = SEGMENT ,
                                char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
                                int nb_segmentation = NB_SEGMENTATION) const;
     bool segment_profile_plot_write(Format_error &error , const char *prefix ,
-                                    int iidentifier , int nb_segment , int *variable_type ,
+                                    int iidentifier , int nb_segment , int *model_type ,
                                     int output = SEGMENT , const char *title = 0) const;
 
     // acces membres de la classe
@@ -953,11 +966,14 @@ public :
     Markovian_sequences* remove_variable_1() const;
 
     Markovian_sequences* initial_run_computation(Format_error &error) const;
-    Markovian_sequences* add_absorbing_run(Format_error &error , int length_value = I_DEFAULT) const;
+    Markovian_sequences* add_absorbing_run(Format_error &error , int variable ,
+                                           int sequence_length = I_DEFAULT ,
+                                           int run_length = I_DEFAULT) const;
 
     Markovian_sequences* split(Format_error &error , int step) const;
 
-    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' , bool exhaustive = false) const;
+    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
+                                   bool exhaustive = false) const;
     bool ascii_data_write(Format_error &error , const char *path ,
                           char format = 'c' , bool exhaustive = false) const;
 
@@ -969,7 +985,7 @@ public :
                     const char *title = 0) const;
 
     bool transition_count(Format_error &error , std::ostream &os , int max_order ,
-                          bool begin = false , int estimator = LAPLACE ,
+                          bool begin = false , int estimator = MAXIMUM_LIKELIHOOD ,
                           const char *path = 0) const;
     bool word_count(Format_error &error , std::ostream &os , int variable , int word_length ,
                     int begin_state = I_DEFAULT , int end_state = I_DEFAULT ,
