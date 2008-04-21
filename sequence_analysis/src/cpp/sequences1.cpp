@@ -1583,8 +1583,8 @@ Vectors* Sequences::build_vectors(bool index_variable) const
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de mesures globales (longueur, nombre de series/d'occurrences d'une valeur)
- *  par sequence.
+ *  Extraction de mesures globales (longueur, temps avant la 1ere occurrence
+ *  d'une valeur, nombre de series/d'occurrences d'une valeur) par sequence.
  *
  *  arguments : reference sur un objet Format_error, type, variable, valeur.
  *
@@ -1597,6 +1597,7 @@ Vectors* Sequences::extract_vectors(Format_error &error , int feature_type ,
   bool status = true;
   register int i , j;
   int count , *pisequence , itype[1];
+  double *prsequence;
   Vectors *vec;
 
 
@@ -1612,28 +1613,54 @@ Vectors* Sequences::extract_vectors(Format_error &error , int feature_type ,
     else {
       variable--;
 
-      if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
-        status = false;
-        ostringstream error_message , correction_message;
-        error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
-                      << STAT_error[STATR_VARIABLE_TYPE];
-        correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
-        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      if ((feature_type == SEQUENCE_CUMUL) || (feature_type == SEQUENCE_MEAN)) {
+        if ((type[variable] != INT_VALUE) && (type[variable] != STATE) &&
+            (type[variable] != REAL_VALUE)) {
+          status = false;
+          ostringstream error_message , correction_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                        << STAT_error[STATR_VARIABLE_TYPE];
+          correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE]
+                             << " or " << STAT_variable_word[REAL_VALUE];
+          error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+        }
       }
 
-      if ((value < min_value[variable]) || (value > max_value[variable]) ||
-          ((marginal[variable]) && (marginal[variable]->frequency[value] == 0))) {
-        status = false;
-        ostringstream error_message;
-        error_message << STAT_label[STATL_VALUE] << " " << value << " "
-                      << SEQ_error[SEQR_NOT_PRESENT];
-        error.update((error_message.str()).c_str());
+//      else if ((feature_type == FIRST_OCCURRENCE) || (feature_type == NB_RUN) ||
+//               (feature_type == NB_OCCURRENCE)) {
+      else {
+        if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
+          status = false;
+          ostringstream error_message , correction_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                        << STAT_error[STATR_VARIABLE_TYPE];
+          correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+          error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+        }
+
+        if ((value < min_value[variable]) || (value > max_value[variable]) ||
+            ((marginal[variable]) && (marginal[variable]->frequency[value] == 0))) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VALUE] << " " << value << " "
+                        << SEQ_error[SEQR_NOT_PRESENT];
+          error.update((error_message.str()).c_str());
+        }
       }
     }
   }
 
   if (status) {
-    itype[0] = INT_VALUE;
+    if (feature_type == SEQUENCE_CUMUL) {
+      itype[0] = type[variable];
+    }
+    else if (feature_type == SEQUENCE_MEAN) {
+      itype[0] = REAL_VALUE;
+    }
+    else {
+      itype[0] = INT_VALUE;
+    }
+
     vec = new Vectors(nb_sequence , identifier , 1 , itype);
 
     switch (feature_type) {
@@ -1641,6 +1668,68 @@ Vectors* Sequences::extract_vectors(Format_error &error , int feature_type ,
     case LENGTH : {
       for (i = 0;i < nb_sequence;i++) {
         vec->int_vector[i][0] = length[i];
+      }
+      break;
+    }
+
+    case SEQUENCE_CUMUL : {
+      if (type[variable] != REAL_VALUE) {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->int_vector[i][0] = 0;
+          pisequence = int_sequence[i][variable];
+          for (j = 0;j < length[i];j++) {
+            vec->int_vector[i][0] += *pisequence++;
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->real_vector[i][0] = 0.;
+          prsequence = real_sequence[i][variable];
+          for (j = 0;j < length[i];j++) {
+            vec->real_vector[i][0] += *prsequence++;
+          }
+        }
+      }
+      break;
+    }
+
+    case SEQUENCE_MEAN : {
+      if (type[variable] != REAL_VALUE) {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->real_vector[i][0] = 0.;
+          pisequence = int_sequence[i][variable];
+          for (j = 0;j < length[i];j++) {
+            vec->real_vector[i][0] += *pisequence++;
+          }
+          vec->real_vector[i][0] /= length[i];
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          vec->real_vector[i][0] = 0.;
+          prsequence = real_sequence[i][variable];
+          for (j = 0;j < length[i];j++) {
+            vec->real_vector[i][0] += *prsequence++;
+          }
+          vec->real_vector[i][0] /= length[i];
+        }
+      }
+      break;
+    }
+
+    case FIRST_OCCURRENCE : {
+      for (i = 0;i < nb_sequence;i++) {
+        vec->int_vector[i][0] = -1;
+        pisequence = int_sequence[i][variable];
+        for (j = 0;j < length[i];j++) {
+          if (*pisequence++ == value) {
+            vec->int_vector[i][0] = j;
+            break;
+          }
+        }
       }
       break;
     }
