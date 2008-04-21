@@ -356,11 +356,11 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment 
  *
  *  Calcul du nombre de parametres independants.
  *
- *  arguments : indice de la sequence, nombre de segments, types des variables.
+ *  arguments : indice de la sequence, nombre de segments, types des modeles.
  *
  *--------------------------------------------------------------*/
 
-int Sequences::nb_parameter_computation(int index , int nb_segment , int *variable_type) const
+int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_type) const
 
 {
   bool *used_output;
@@ -374,7 +374,7 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *variab
 //  nb_parameter = 0;
 
   for (i = 1;i < nb_variable;i++) {
-    if (variable_type[i - 1] == SYMBOLIC) {
+    if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
       psegment = int_sequence[index][0] + 1;
       pisequence = int_sequence[index][i];
 
@@ -401,18 +401,26 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *variab
       }
     }
 
-    else if (variable_type[i - 1] == POISSON_CHANGE) {
+    else if ((model_type[i - 1] == POISSON_CHANGE) ||
+             (model_type[i - 1] == MEAN_CHANGE) ||
+             (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       nb_parameter += nb_segment;
     }
 
-    else if ((variable_type[i - 1] == MEAN_CHANGE) ||
-             (variable_type[i - 1] == VARIANCE_CHANGE)) {
+    else if (model_type[i - 1] == VARIANCE_CHANGE) {
       nb_parameter += nb_segment + 1;
     }
 
     else {
       nb_parameter += 2 * nb_segment;
     }
+  }
+
+  if (model_type[0] == MEAN_CHANGE) {
+    nb_parameter++;
+  }
+  else if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+    nb_parameter += nb_segment;
   }
 
   delete [] used_output;
@@ -425,11 +433,11 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *variab
  *
  *  Calcul de la vraisemblance pour un segment.
  *
- *  arguments : indice de la sequence, types des variables, rangs (variables ordinales).
+ *  arguments : indice de la sequence, types des modeles, rangs (variables ordinales).
  *
  *--------------------------------------------------------------*/
 
-double Sequences::one_segment_likelihood(int index , int *variable_type , double **rank) const
+double Sequences::one_segment_likelihood(int index , int *model_type , double **rank) const
 
 {
   register int i , j , k;
@@ -439,7 +447,7 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
 
   max_nb_value = 0;
   for (i = 1;i < nb_variable;i++) {
-    if (variable_type[i - 1] == SYMBOLIC) {
+    if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
       if (marginal[i]->nb_value > max_nb_value) {
         max_nb_value = marginal[i]->nb_value;
       }
@@ -453,10 +461,15 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
     frequency = 0;
   }
 
-  likelihood = 0.;
+  if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == MEAN_VARIANCE_CHANGE)) {
+    residual = 0.;
+  }
+  else {
+    likelihood = 0.;
+  }
 
   for (i = 1;i < nb_variable;i++) {
-    if (variable_type[i - 1] == SYMBOLIC) {
+    if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
       for (j = 0;j < marginal[i]->nb_value;j++) {
         frequency[j] = 0;
       }
@@ -473,7 +486,7 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
       }
     }
 
-    else if (variable_type[i - 1] == POISSON_CHANGE) {
+    else if (model_type[i - 1] == POISSON_CHANGE) {
       sum = 0.;
       factorial_sum = 0.;
 
@@ -491,9 +504,12 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
     }
 
     else {
-      residual = 0.;
+      if ((model_type[i - 1] != MEAN_CHANGE) &&
+          (model_type[i - 1] != MEAN_VARIANCE_CHANGE)) {
+        residual = 0.;
+      }
 
-      if (variable_type[i - 1] == ORDINAL) {
+      if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
         pisequence = int_sequence[index][i];
         sum = rank[i][*pisequence++];
 
@@ -516,25 +532,28 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
           }
 
 #         ifdef MESSAGE
-          double mean , diff , residual2;
+          if ((model_type[i - 1] != MEAN_CHANGE) &&
+              (model_type[i - 1] != MEAN_VARIANCE_CHANGE)) {
+            double mean , diff , residual2;
 
 
-          mean = 0.;
-          pisequence = int_sequence[index][i];
-          for (j = 0;j < length[index];j++) {
-            mean += *pisequence++;
-          }
-          mean /= length[index];
+            mean = 0.;
+            pisequence = int_sequence[index][i];
+            for (j = 0;j < length[index];j++) {
+              mean += *pisequence++;
+            }
+            mean /= length[index];
 
-          residual2 = 0.;
-          pisequence = int_sequence[index][i];
-          for (j = 0;j < length[index];j++) {
-            diff = *pisequence++ - mean;
-            residual2 += diff * diff;
-          }
+            residual2 = 0.;
+            pisequence = int_sequence[index][i];
+            for (j = 0;j < length[index];j++) {
+              diff = *pisequence++ - mean;
+              residual2 += diff * diff;
+            }
 
-          if ((residual < residual2 - DOUBLE_ERROR) || (residual > residual2 + DOUBLE_ERROR)) {
-            cout << "\nERROR: " << residual << " " << residual2 << endl;
+            if ((residual < residual2 - DOUBLE_ERROR) || (residual > residual2 + DOUBLE_ERROR)) {
+              cout << "\nERROR: " << residual << " " << residual2 << endl;
+            }
           }
 #         endif
 
@@ -552,17 +571,34 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
         }
       }
 
-//      if (residual > 0.) {
-      if (residual > sqrt((double)length[index]) * ROUNDOFF_ERROR) {
-        likelihood -= ((double)length[index] / 2.) * (log(residual / length[index]) +
-                      log(2 * M_PI) + 1);
-/*        likelihood -= ((double)length[index] / 2.) * (log(residual / (length[index] - 1)) +
-                      log(2 * M_PI)) - (double)(length[index] - 1) / 2.; */
+      if ((model_type[i - 1] != MEAN_CHANGE) &&
+          (model_type[i - 1] != MEAN_VARIANCE_CHANGE)) {
+//        if (residual > 0.) {
+        if (residual > sqrt((double)length[index]) * ROUNDOFF_ERROR) {
+          likelihood -= ((double)length[index] / 2.) * (log(residual / length[index]) +
+                         log(2 * M_PI) + 1);
+/*          likelihood -= ((double)length[index] / 2.) * (log(residual / (length[index] - 1)) +
+                         log(2 * M_PI)) - (double)(length[index] - 1) / 2.; */
+        }
+        else {
+          likelihood = D_INF;
+          break;
+        }
       }
-      else {
-        likelihood = D_INF;
-        break;
-      }
+    }
+  }
+
+  if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == MEAN_VARIANCE_CHANGE)) {
+//    if (residual > 0.) {
+    if (residual > sqrt((double)((nb_variable - 1) * length[index])) * ROUNDOFF_ERROR) {
+      likelihood = -((double)((nb_variable - 1) * length[index]) / 2.) *
+                    (log(residual / ((nb_variable - 1) * length[index])) + log(2 * M_PI) + 1);
+/*      likelihood = -((double)((nb_variable - 1) * length[index]) / 2.) *
+                    (log(residual / ((nb_variable - 1) * (length[index] - 1))) +
+                     log(2 * M_PI)) - (double)((nb_variable - 1) * (length[index] - 1)) / 2.; */
+    }
+    else {
+      likelihood = D_INF;
     }
   }
 
@@ -581,19 +617,19 @@ double Sequences::one_segment_likelihood(int index , int *variable_type , double
  *
  *  Sortie des segmentations de sequences.
  *
- *  arguments : nombres de segments, types des variables, stream,
+ *  arguments : nombres de segments, types des modeles, stream,
  *              sortie (sequence ou residus), cas 1 sequence : ruptures.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type , ostream &os ,
+Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , ostream &os ,
                                           int output , int* ichange_point)
 
 {
   bool *segment_mean;
   register int i , j , k , m , n;
   int max_nb_segment , *change_point , *psegment , *pisequence;
-  double diff , global_variance , *prsequence , **mean , **variance;
+  double diff , global_variance , *prsequence , *segment_variance , **mean , **variance;
   Sequences *seq;
 
 
@@ -614,8 +650,9 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
 
   mean = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == POISSON_CHANGE) || (variable_type[i - 1] == NUMERIC) ||
-        (variable_type[i - 1] == MEAN_CHANGE) || (variable_type[i - 1] == VARIANCE_CHANGE)) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+        (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean[i] = new double[max_nb_segment];
     }
     else {
@@ -626,13 +663,28 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
   if (nb_sequence == 1) {
     variance = new double*[nb_variable];
     for (i = 1;i < nb_variable;i++) {
-      if ((variable_type[i - 1] == POISSON_CHANGE) || (variable_type[i - 1] == NUMERIC) ||
-          (variable_type[i - 1] == MEAN_CHANGE) || (variable_type[i - 1] == VARIANCE_CHANGE)) {
+      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+          (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
         variance[i] = new double[nb_segment[0]];
       }
       else {
         variance[i] = 0;
       }
+    }
+
+    if (model_type[0] == MEAN_CHANGE) {
+      global_variance = 0.;
+    }
+
+    if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+      segment_variance = new double[nb_segment[0]];
+      for (i = 0;i < nb_segment[0];i++) {
+        segment_variance[i] = 0.;
+      }
+    }
+    else {
+      segment_variance = 0;
     }
   }
 
@@ -641,8 +693,8 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
 
     segment_mean[0] = false;
     for (i = 1;i < nb_variable;i++) {
-      if ((variable_type[i - 1] == POISSON_CHANGE) || (variable_type[i - 1] == NUMERIC) ||
-          (variable_type[i - 1] == MEAN_CHANGE)) {
+      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+          (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
         segment_mean[i] = true;
       }
       else {
@@ -667,8 +719,9 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
     }
 
     for (j = 1;j < nb_variable;j++) {
-      if ((variable_type[j - 1] == POISSON_CHANGE) || (variable_type[j - 1] == NUMERIC) ||
-          (variable_type[j - 1] == MEAN_CHANGE) || (variable_type[j - 1] == VARIANCE_CHANGE)) {
+      if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+          (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+          (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
         if (type[j] != REAL_VALUE) {
           pisequence = int_sequence[i][j];
           for (k = 0;k < nb_segment[i];k++) {
@@ -692,10 +745,6 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
         }
 
         if (nb_sequence == 1) {
-          if (variable_type[j - 1] == MEAN_CHANGE) {
-            global_variance = 0.;
-          }
-
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[i][j];
             for (k = 0;k < nb_segment[i];k++) {
@@ -705,8 +754,11 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
                 variance[j][k] += diff * diff;
               }
 
-              if (variable_type[j - 1] == MEAN_CHANGE) {
+              if (model_type[j - 1] == MEAN_CHANGE) {
                 global_variance += variance[j][k];
+              }
+              if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+                segment_variance[k] += variance[j][k];
               }
 
               variance[j][k] /= (change_point[k + 1] - change_point[k]);
@@ -723,8 +775,11 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
                 variance[j][k] += diff * diff;
               }
 
-              if (variable_type[j - 1] == MEAN_CHANGE) {
+              if (model_type[j - 1] == MEAN_CHANGE) {
                 global_variance += variance[j][k];
+              }
+              if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+                segment_variance[k] += variance[j][k];
               }
 
               variance[j][k] /= (change_point[k + 1] - change_point[k]);
@@ -759,9 +814,18 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
         }
         os << endl;
 
-        if (variable_type[0] == MEAN_CHANGE) {
+        if (model_type[0] == MEAN_CHANGE) {
           os << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": "
-             << sqrt(global_variance / length[i]) << endl;
+             << sqrt(global_variance / ((nb_variable - 1) * length[i])) << endl;
+        }
+
+        else if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+          os << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
+          for (j = 0;j < nb_segment[i];j++) {
+            os << sqrt(segment_variance[j] / ((nb_variable - 1) *
+                        (change_point[j + 1] - change_point[j]))) << ", ";
+          }
+          os << endl;
         }
       }
 
@@ -769,8 +833,8 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
         os << "\n";
       }
       for (j = 1;j < nb_variable;j++) {
-        if ((variable_type[j - 1] == NUMERIC) || (variable_type[j - 1] == MEAN_CHANGE) ||
-            (variable_type[j - 1] == VARIANCE_CHANGE)) {
+        if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == MEAN_CHANGE) ||
+            (model_type[j - 1] == VARIANCE_CHANGE) || (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
           }
@@ -781,7 +845,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
           os << endl;
         }
 
-        else if (variable_type[j - 1] == POISSON_CHANGE) {
+        else if (model_type[j - 1] == POISSON_CHANGE) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
           }
@@ -901,6 +965,8 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
       delete [] variance[i];
     }
     delete [] variance;
+
+    delete [] segment_variance;
   }
 
   if (output == SEQUENCE) {
@@ -945,13 +1011,13 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *variable_type ,
  *  Segmentation d'une sequence.
  *
  *  arguments : reference sur un objet Format_error, stream, identificateur de la sequence,
- *              nombre de segments, ruptures, types des variables,
+ *              nombre de segments, ruptures, types des modeles,
  *              sortie (sequence ou residus).
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iidentifier ,
-                                   int nb_segment , int* ichange_point , int *variable_type ,
+                                   int nb_segment , int* ichange_point , int *model_type ,
                                    int output) const
 
 {
@@ -960,7 +1026,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
   int index , max_nb_value , nb_parameter , *change_point = 0 , *pindex_param ,
       *frequency , *pisequence , *psegment , inb_segment[1];
   double sum , factorial_sum , diff , residual , segmentation_likelihood ,
-         segment_penalty , penalized_likelihood , *mean , *prsequence , **rank;
+         segment_penalty , penalized_likelihood , *mean , *prsequence , *segment_variance , **rank;
   Sequences *iseq , *seq , *oseq;
 
 
@@ -974,16 +1040,8 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if ((i > 0) && (variable_type[i] == MEAN_CHANGE)) {
-      status = false;
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << STAT_error[STATR_VARIABLE_TYPE];
-      error.update((error_message.str()).c_str());
-    }
-
-    if ((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL) ||
-        (variable_type[i] == POISSON_CHANGE)) {
+    if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -1011,7 +1069,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           error.update((error_message.str()).c_str());
         }
 
-        else if (variable_type[i] == SYMBOLIC) {
+        else if (model_type[i] == MULTINOMIAL_CHANGE) {
           if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
@@ -1034,7 +1092,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         }
       }
 
-      if (((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL)) &&
+      if (((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) &&
           ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL))) {
         status = false;
         error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
@@ -1123,7 +1181,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     rank = new double*[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
-      if (variable_type[i] == ORDINAL) {
+      if (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) {
         rank[i] = marginal[i]->rank_computation();
       }
       else {
@@ -1134,7 +1192,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     max_nb_value = 0;
 
     for (i = 0;i < nb_variable;i++) {
-      if ((variable_type[i] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
+      if ((model_type[i] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
         max_nb_value = marginal[i]->nb_value;
       }
     }
@@ -1148,28 +1206,15 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
     mean = new double[nb_variable];
 
-    if (variable_type[0] == MEAN_CHANGE) {
-      residual = 0.;
-
-      if (type[0] != REAL_VALUE) {
-        pisequence = int_sequence[index][0];
-        for (i = 0;i < length[index];i++) {
-          residual += *pisequence * *pisequence;
-          pisequence++;
-        }
-      }
-
-      else {
-        prsequence = real_sequence[index][0];
-        for (i = 0;i < length[index];i++) {
-          residual += *prsequence * *prsequence;
-          prsequence++;
-        }
-      }
+    if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+      segment_variance = new double[nb_segment];
+    }
+    else {
+      segment_variance = 0;
     }
 
     for (i = 0;i < nb_variable;i++) {
-      if (variable_type[i] == VARIANCE_CHANGE) {
+      if (model_type[i] == VARIANCE_CHANGE) {
         mean[i] = 0.;
 
         if (type[i] != REAL_VALUE) {
@@ -1190,16 +1235,23 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       }
     }
 
-    if (variable_type[0] != MEAN_CHANGE) {
+    if (model_type[0] == MEAN_CHANGE) {
+      residual = 0.;
+    }
+    else {
       segmentation_likelihood = 0.;
     }
 
     for (i = 0;i < nb_segment;i++) {
+      if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+        residual = 0.;
+      }
+
       for (j = 0;j < nb_variable;j++) {
 
         // calcul des log-vraisemblances des segments
 
-        if (variable_type[j] == SYMBOLIC) {
+        if (model_type[j] == MULTINOMIAL_CHANGE) {
 
           for (k = 0;k < marginal[j]->nb_value;k++) {
             frequency[k] = 0;
@@ -1218,7 +1270,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           }
         }
 
-        else if (variable_type[j] == POISSON_CHANGE) {
+        else if (model_type[j] == POISSON_CHANGE) {
           sum = 0.;
           factorial_sum = 0.;
 
@@ -1240,30 +1292,8 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           }
         }
 
-        else if (variable_type[j] == MEAN_CHANGE) {
-          sum = 0.;
-
-          if (type[j] != REAL_VALUE) {
-            pisequence = int_sequence[index][j] + change_point[i];
-            for (k = change_point[i];k < change_point[i + 1];k++) {
-              sum += *pisequence++;
-            }
-          }
-
-          else {
-            prsequence = real_sequence[index][j] + change_point[i];
-            for (k = change_point[i];k < change_point[i + 1];k++) {
-              sum += *prsequence++;
-            }
-          }
-
-          residual -= sum * sum / (change_point[i + 1] - change_point[i]);
-        }
-
         else {
-          switch (variable_type[j]) {
-
-          case VARIANCE_CHANGE : {
+          if (model_type[j] == VARIANCE_CHANGE) {
             residual = 0.;
 
             if (type[j] != REAL_VALUE) {
@@ -1281,10 +1311,9 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
                 residual += diff * diff;
               }
             }
-            break;
           }
 
-          case ORDINAL : {
+          else if (model_type[j] == ORDINAL_GAUSSIAN_CHANGE) {
             pisequence = int_sequence[index][j] + change_point[i];
             residual = 0.;
             sum = rank[j][*pisequence++];
@@ -1295,13 +1324,15 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
                           diff * diff;
               sum += rank[j][*pisequence++];
             }
-            break;
           }
 
-          case NUMERIC : {
+          else {
+            if (model_type[j] == GAUSSIAN_CHANGE) {
+              residual = 0.;
+            }
+
             if (type[j] != REAL_VALUE) {
               pisequence = int_sequence[index][j] + change_point[i];
-              residual = 0.;
               sum = *pisequence++;
 
               for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
@@ -1314,7 +1345,6 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
             else {
               prsequence = real_sequence[index][j] + change_point[i];
-              residual = 0.;
               sum = *prsequence++;
 
               for (k = change_point[i] + 1;k < change_point[i + 1];k++) {
@@ -1324,21 +1354,38 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
                 sum += *prsequence++;
               }
             }
-            break;
-          }
           }
 
-//          if (residual > 0.)) {
-          if (residual > sqrt((double)(change_point[i + 1] - change_point[i])) * ROUNDOFF_ERROR) {
-            segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (log(residual /
-                                         (change_point[i + 1] - change_point[i])) + log(2 * M_PI) + 1);
-/*            segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (log(residual /
-                                         (change_point[i + 1] - change_point[i])) + log(2 * M_PI)) + (double)(change_point[i + 1] - change_point[i]) / 2.; */
+          if ((model_type[j] != MEAN_CHANGE) && (model_type[j] != MEAN_VARIANCE_CHANGE)) {
+//            if (residual > 0.) {
+            if (residual > sqrt((double)(change_point[i + 1] - change_point[i])) * ROUNDOFF_ERROR) {
+              segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (log(residual /
+                                           (change_point[i + 1] - change_point[i])) + log(2 * M_PI) + 1);
+/*              segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (log(residual /
+                                           (change_point[i + 1] - change_point[i])) + log(2 * M_PI)) + (double)(change_point[i + 1] - change_point[i]) / 2.; */
+            }
+            else {
+              segmentation_likelihood = D_INF;
+              break;
+            }
           }
-          else {
-            segmentation_likelihood = D_INF;
-            break;
-          }
+        }
+      }
+
+      if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+//        if (residual > 0.) {
+        if (residual > sqrt((double)(nb_variable * (change_point[i + 1] - change_point[i]))) * ROUNDOFF_ERROR) {
+          segmentation_likelihood -= ((double)(nb_variable * (change_point[i + 1] - change_point[i])) / 2.) *
+                                     (log(residual / (nb_variable * (change_point[i + 1] - change_point[i]))) +
+                                      log(2 * M_PI) + 1);
+/*          segmentation_likelihood -= ((double)(nb_variable * (change_point[i + 1] - change_point[i])) / 2.) *
+                                     (log(residual / (nb_variable * (change_point[i + 1] - change_point[i]))) +
+                                      log(2 * M_PI)) + (double)(nb_variable * (change_point[i + 1] - change_point[i])) / 2.; */
+          segment_variance[i] = residual / (nb_variable * (change_point[i + 1] - change_point[i]));
+        }
+        else {
+          segmentation_likelihood = D_INF;
+          break;
         }
       }
 
@@ -1347,13 +1394,14 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       }
     }
 
-    if (variable_type[0] == MEAN_CHANGE) {
-//      if (residual > 0.)) {
-      if (residual > sqrt((double)length[index]) * ROUNDOFF_ERROR) {
-        segmentation_likelihood = -((double)length[index] / 2.) * (log(residual / length[index]) +
-                                    log(2 * M_PI) + 1);
-/*        segmentation_likelihood = -((double)length[index] / 2.) * (log(residual / (length[index] - nb_segment)) +
-                                     log(2 * M_PI)) - (double)(length[index] - nb_segment) / 2.; */
+    if (model_type[0] == MEAN_CHANGE) {
+//      if (residual > 0.) {
+      if (residual > sqrt((double)(nb_variable * length[index])) * ROUNDOFF_ERROR) {
+        segmentation_likelihood = -((double)(nb_variable * length[index]) / 2.) *
+                                    (log(residual / (nb_variable * length[index])) + log(2 * M_PI) + 1);
+/*        segmentation_likelihood = -((double)(nb_variable * length[index]) / 2.) *
+                                    (log(residual / (nb_variable * (length[index] - nb_segment))) + log(2 * M_PI)) -
+                                    (double)(nb_variable * (length[index] - nb_segment)) / 2.; */
       }
     }
 
@@ -1379,9 +1427,10 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         segment_penalty += log((double)(change_point[i + 1] - change_point[i]));
       }
 
-      nb_parameter = seq->nb_parameter_computation(0 , nb_segment , variable_type);
+      nb_parameter = seq->nb_parameter_computation(0 , nb_segment , model_type);
 
-      penalized_likelihood = 2 * segmentation_likelihood - nb_parameter * log((double)seq->length[0]) - segment_penalty;
+      penalized_likelihood = 2 * segmentation_likelihood - nb_parameter *
+                             log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty;
 
       os << "\n" << nb_segment << " " << (nb_segment == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
          << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood << "   "
@@ -1389,9 +1438,16 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
          << penalized_likelihood << endl;
 
-      if (variable_type[0] == MEAN_CHANGE) {
+      if (model_type[0] == MEAN_CHANGE) {
         os << SEQ_label[SEQL_GLOBAL_STANDARD_DEVIATION] << ": "
-           << sqrt(residual / length[index]) << endl;
+           << sqrt(residual / (nb_variable * length[index])) << endl;
+      }
+      else if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+        os << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
+        for (i = 0;i < nb_segment;i++) {
+          os << sqrt(segment_variance[i]) << ", ";
+        }
+        os << endl;
       }
     }
 
@@ -1402,7 +1458,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 #   endif
 
     inb_segment[0] = nb_segment;
-    oseq = seq->segmentation_output(inb_segment , variable_type , os , output , change_point);
+    oseq = seq->segmentation_output(inb_segment , model_type , os , output , change_point);
 
     if (output == SEQUENCE) {
       delete seq;
@@ -1414,7 +1470,9 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     delete [] rank;
 
     delete [] frequency;
+
     delete [] mean;
+    delete [] segment_variance;
   }
 
   delete [] change_point;
@@ -1427,14 +1485,14 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
  *
  *  Segmentation optimale de sequences.
  *
- *  arguments : nombres de segments, rang (variable ordinale), types des variables,
+ *  arguments : nombres de segments, rang (variable ordinale), types des modeles,
  *              cas 1 sequence : pointeurs sur les vraisemblances des segmentations,
  *              sur les nombre de parametres des modeles et sur les penalites
  *              liees aux longueurs de segments.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::segmentation(int *nb_segment , int *variable_type , double **rank ,
+double Sequences::segmentation(int *nb_segment , int *model_type , double **rank ,
                                double *isegmentation_likelihood , int *nb_parameter ,
                                double *segment_penalty)
 
@@ -1442,9 +1500,8 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
   bool *used_output;
   register int i , j , k , m , n , r;
   int max_nb_segment , max_nb_value , *frequency , *pisequence , *psegment , **optimal_length;
-  double sequence_sum_square , sum , factorial_sum , diff , sum_square , buff ,
-         segmentation_likelihood , *mean , *residual , *prsequence , *contrast ,
-         **factorial , **forward;
+  double sum , factorial_sum , diff , sum_square , buff , segmentation_likelihood ,
+         *mean , *residual , *prsequence , *contrast , **factorial , **forward;
 
 
   max_nb_segment = nb_segment[0];
@@ -1458,11 +1515,11 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal[i]->nb_value;
     }
 
-    if (variable_type[i - 1] == POISSON_CHANGE) {
+    if (model_type[i - 1] == POISSON_CHANGE) {
       factorial[i] = new double[max_length];
     }
     else {
@@ -1499,28 +1556,8 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
   segmentation_likelihood = 0.;
 
   for (i = 0;i < nb_sequence;i++) {
-    if (variable_type[0] == MEAN_CHANGE) {
-      sequence_sum_square = 0.;
-
-      if (type[1] != REAL_VALUE) {
-        pisequence = int_sequence[i][1];
-        for (j = 0;j < length[i];j++) {
-          sequence_sum_square += *pisequence * *pisequence;
-          pisequence++;
-        }
-      }
-
-      else {
-        prsequence = real_sequence[i][1];
-        for (j = 0;j < length[i];j++) {
-          sequence_sum_square += *prsequence * *prsequence;
-          prsequence++;
-        }
-      }
-    }
-
     for (j = 1;j < nb_variable;j++) {
-      if (variable_type[j - 1] == VARIANCE_CHANGE) {
+      if (model_type[j - 1] == VARIANCE_CHANGE) {
         mean[j] = 0.;
 
         if (type[j] != REAL_VALUE) {
@@ -1552,7 +1589,7 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
       }
 
       for (k = 1;k < nb_variable;k++) {
-        if (variable_type[k - 1] == SYMBOLIC) {
+        if (model_type[k - 1] == MULTINOMIAL_CHANGE) {
           for (m = 0;m < marginal[k]->nb_value;m++) {
             frequency[m] = 0;
           }
@@ -1584,7 +1621,7 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
           }
         }
 
-        else if (variable_type[k - 1] == POISSON_CHANGE) {
+        else if (model_type[k - 1] == POISSON_CHANGE) {
           factorial[k][j] = 0.;
           for (m = 2;m <= int_sequence[i][k][j];m++) {
             factorial[k][j] += log((double)m);
@@ -1603,30 +1640,8 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
           }
         }
 
-        else if (variable_type[k - 1] == MEAN_CHANGE) {
-          sum = 0.;
-
-          if (type[k] != REAL_VALUE) {
-            pisequence = int_sequence[i][k] + j;
-            for (m = j;m >= 0;m--) {
-              sum += *pisequence--;
-              contrast[m] = sum * sum / (j - m + 1);
-            }
-          }
-
-          else {
-            prsequence = real_sequence[i][k] + j;
-            for (m = j;m >= 0;m--) {
-              sum += *prsequence--;
-              contrast[m] = sum * sum / (j - m + 1);
-            }
-          }
-        }
-
         else {
-          switch (variable_type[k - 1]) {
-
-          case VARIANCE_CHANGE : {
+          if (model_type[k - 1] == VARIANCE_CHANGE) {
             sum_square = 0.;
 
             if (type[k] != REAL_VALUE) {
@@ -1645,10 +1660,9 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
                 residual[m] = sum_square;
               }
             }
-            break;
           }
 
-          case ORDINAL : {
+          else if (model_type[k - 1] == ORDINAL_GAUSSIAN_CHANGE) {
             pisequence = int_sequence[i][k] + j;
             sum_square = 0.;
             sum = rank[k][*pisequence--];
@@ -1660,10 +1674,9 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
               sum += rank[k][*pisequence--];
               residual[m] = sum_square;
             }
-            break;
           }
 
-          case NUMERIC : {
+          else {
             if (type[k] != REAL_VALUE) {
               pisequence = int_sequence[i][k] + j;
               sum_square = 0.;
@@ -1691,21 +1704,50 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
                 residual[m] = sum_square;
               }
             }
-            break;
-          }
           }
 
-          for (m = j;m >= 0;m--) {
-//            if ((contrast[m] != D_INF) && (residual[m] > 0.)) {
-            if ((contrast[m] != D_INF) && (residual[m] > sqrt((double)(j - m + 1)) * ROUNDOFF_ERROR)) {
-              contrast[m] -= ((double)(j - m + 1) / 2.) * (log(residual[m] /
-                               (j - m + 1)) + log(2 * M_PI) + 1);
-/*              contrast[m] -= ((double)(j - m + 1) / 2.) * (log(residual[m] /
-                               (j - m)) + log(2 * M_PI)) + (double)(j - m) / 2.; */
+          if (model_type[k - 1] == MEAN_CHANGE) {
+            for (m = j - 1;m >= 0;m--) {
+              contrast[m] -= residual[m];
             }
-            else {
-              contrast[m] = D_INF;
+          }
+
+          else if (model_type[k - 1] == MEAN_VARIANCE_CHANGE) {
+            for (m = j - 1;m >= 0;m--) {
+              contrast[m] += residual[m];
             }
+          }
+
+          else {
+            for (m = j;m >= 0;m--) {
+//              if ((contrast[m] != D_INF) && (residual[m] > 0.)) {
+              if ((contrast[m] != D_INF) && (residual[m] > sqrt((double)(j - m + 1)) * ROUNDOFF_ERROR)) {
+                contrast[m] -= ((double)(j - m + 1) / 2.) * (log(residual[m] /
+                                 (j - m + 1)) + log(2 * M_PI) + 1);
+/*                contrast[m] -= ((double)(j - m + 1) / 2.) * (log(residual[m] /
+                                 (j - m)) + log(2 * M_PI)) + (double)(j - m) / 2.; */
+              }
+              else {
+                contrast[m] = D_INF;
+              }
+            }
+          }
+        }
+      }
+
+      if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+        contrast[j] = D_INF;
+        for (k = j - 1;k >= 0;k--) {
+//           if (contrast[k] > 0.) {
+          if (contrast[k] > sqrt((double)((nb_variable - 1) * (j - k + 1))) * ROUNDOFF_ERROR) {
+            contrast[k] = -((double)((nb_variable - 1) * (j - k + 1)) / 2.) * (log(contrast[k] /
+                             ((nb_variable - 1) * (j - k + 1))) + log(2 * M_PI) + 1);
+/*            contrast[k] = -((double)((nb_variable - 1) * (j - k + 1)) / 2.) * (log(contrast[k] /
+                             ((nb_variable - 1) * (j - k))) + log(2 * M_PI)) +
+                           (double)((nb_variable - 1) * (j - k)) / 2.; */
+          }
+          else {
+            contrast[k] = D_INF;
           }
         }
       }
@@ -1734,7 +1776,7 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
       }
     }
 
-    if (variable_type[0] != MEAN_CHANGE) {
+    if (model_type[0] != MEAN_CHANGE) {
       if (isegmentation_likelihood) {
         for (j = 0;j < nb_segment[i];j++) {
           isegmentation_likelihood[j] = forward[length[i] - 1][j];
@@ -1753,14 +1795,14 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
     else {
       if (isegmentation_likelihood) {
         for (j = 0;j < nb_segment[i];j++) {
-          if (sequence_sum_square - forward[length[i] - 1][j] > 0.) {
-            isegmentation_likelihood[j] = -((double)length[i] / 2.) *
-                                           (log((sequence_sum_square - forward[length[i] - 1][j]) /
-                                             length[i]) + log(2 * M_PI) + 1);
-/*            isegmentation_likelihood[j] = -(((double)length[i] / 2.) *
-                                            (log((sequence_sum_square - forward[length[i] - 1][j]) /
-                                              (length[i] - nb_segment[i])) + log(2 * M_PI)) +
-                                            (double)(length[i] - nb_segment[i]) / 2.); */
+          if (forward[length[i] - 1][j] < 0.) {
+            isegmentation_likelihood[j] = -((double)((nb_variable - 1) * length[i]) / 2.) *
+                                           (log(-forward[length[i] - 1][j] /
+                                             ((nb_variable - 1) * length[i])) + log(2 * M_PI) + 1);
+/*            isegmentation_likelihood[j] = -(((double)((nb_variable - 1) * length[i]) / 2.) *
+                                            (log(-forward[length[i] - 1][j] /
+                                              ((nb_variable - 1) * (length[i] - nb_segment[i]))) + log(2 * M_PI)) +
+                                            (double)((nb_variable - 1) * (length[i] - nb_segment[i])) / 2.); */
           }
           else {
             isegmentation_likelihood[j] = D_INF;
@@ -1768,14 +1810,14 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
         }
       }
 
-      if (sequence_sum_square - forward[length[i] - 1][nb_segment[i] - 1] > 0.) {
-        segmentation_likelihood -= ((double)length[i] / 2.) *
-                                   (log((sequence_sum_square - forward[length[i] - 1][nb_segment[i] - 1]) /
-                                     length[i]) + log(2 * M_PI) + 1);
-/*        segmentation_likelihood -= (((double)length[i] / 2.) *
-                                    (log((sequence_sum_square - forward[length[i] - 1][nb_segment[i] - 1]) /
-                                      (length[i] - nb_segment[i])) + log(2 * M_PI)) +
-                                    (double)(length[i] - nb_segment[i]) / 2.); */
+      if (forward[length[i] - 1][nb_segment[i] - 1] < 0.) {
+        segmentation_likelihood -= ((double)((nb_variable - 1) * length[i]) / 2.) *
+                                   (log(-forward[length[i] - 1][nb_segment[i] - 1] /
+                                     ((nb_variable - 1) * length[i])) + log(2 * M_PI) + 1);
+/*        segmentation_likelihood -= (((double)((nb_variable - 1) * length[i]) / 2.) *
+                                    (log(-forward[length[i] - 1][nb_segment[i] - 1] /
+                                      ((nb_variable - 1) * (length[i] - nb_segment[i]))) + log(2 * M_PI)) +
+                                    (double)((nb_variable - 1) * (length[i] - nb_segment[i])) / 2.); */
       }
       else {
         segmentation_likelihood = D_INF;
@@ -1828,7 +1870,7 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
         nb_parameter[j] = j;
 
         for (k = 1;k < nb_variable;k++) {
-          if (variable_type[k - 1] == SYMBOLIC) {
+          if (model_type[k - 1] == MULTINOMIAL_CHANGE) {
             m = length[i] - 1;
             pisequence = int_sequence[i][k] + m;
 
@@ -1850,18 +1892,26 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
             }
           }
 
-          else if (variable_type[k - 1] == POISSON_CHANGE) {
+          else if ((model_type[k - 1] == POISSON_CHANGE) ||
+                   (model_type[k - 1] == MEAN_CHANGE) ||
+                   (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
             nb_parameter[j] += j + 1;
           }
 
-          else if ((variable_type[k - 1] == MEAN_CHANGE) ||
-                   (variable_type[k - 1] == VARIANCE_CHANGE)) {
+          else if (model_type[k - 1] == VARIANCE_CHANGE) {
             nb_parameter[j] += j + 2;
           }
 
           else {
             nb_parameter[j] += 2 * (j + 1);
           }
+        }
+
+        if (model_type[0] == MEAN_CHANGE) {
+          nb_parameter[j]++;
+        }
+        else if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+          nb_parameter[j] += j + 1;
         }
       }
     }
@@ -1882,6 +1932,7 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
 
   min_value[0] = 0;
   max_value[0] = max_nb_segment - 1;
+  delete marginal[0];
   build_marginal_histogram(0);
 
   delete [] frequency;
@@ -1919,13 +1970,13 @@ double Sequences::segmentation(int *nb_segment , int *variable_type , double **r
  *  Segmentation optimale de sequences.
  *
  *  arguments : reference sur un objet Format_error, stream, nombres de segments,
- *              types des variables, identificateur de la sequence,
+ *              types des modeles, identificateur de la sequence,
  *              sortie (sequence ou residus).
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_segment ,
-                                   int *variable_type , int iidentifier , int output) const
+                                   int *model_type , int iidentifier , int output) const
 
 {
   bool status = true;
@@ -1945,16 +1996,8 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if ((i > 0) && (variable_type[i] == MEAN_CHANGE)) {
-      status = false;
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << STAT_error[STATR_VARIABLE_TYPE];
-      error.update((error_message.str()).c_str());
-    }
-
-    if ((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL) ||
-        (variable_type[i] == POISSON_CHANGE)) {
+    if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -1982,7 +2025,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
           error.update((error_message.str()).c_str());
         }
 
-        else if (variable_type[i] == SYMBOLIC) {
+        else if (model_type[i] == MULTINOMIAL_CHANGE) {
           if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
@@ -2005,7 +2048,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
         }
       }
 
-      if (((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL)) &&
+      if (((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE)) &&
           ((output == SUBTRACTION_RESIDUAL) || (output == DIVISION_RESIDUAL))) {
         status = false;
         error.update(SEQ_error[SEQR_FORBIDDEN_OUTPUT]);
@@ -2058,7 +2101,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
     rank = new double*[seq->nb_variable];
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == ORDINAL) {
+      if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
         rank[i] = seq->marginal[i]->rank_computation();
       }
       else {
@@ -2072,7 +2115,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
       seq = iseq;
     }
 
-    segmentation_likelihood = seq->segmentation(nb_segment , variable_type , rank);
+    segmentation_likelihood = seq->segmentation(nb_segment , model_type , rank);
 
     for (i = 1;i < seq->nb_variable;i++) {
       delete [] rank[i];
@@ -2095,9 +2138,10 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
         }
         segment_penalty += log((double)(seq->length[0] - i));
 
-        nb_parameter = seq->nb_parameter_computation(0 , nb_segment[0] , variable_type);
+        nb_parameter = seq->nb_parameter_computation(0 , nb_segment[0] , model_type);
 
-        penalized_likelihood = 2 * segmentation_likelihood - nb_parameter * log((double)seq->length[0]) - segment_penalty;
+        penalized_likelihood = 2 * segmentation_likelihood - nb_parameter *
+                               log((double)((seq->nb_variable - 1) * seq->length[0])) - segment_penalty;
 
         os << "\n" << nb_segment[0] << " " << (nb_segment[0] == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
            << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood << "   "
@@ -2107,7 +2151,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
       }
 #     endif
 
-      oseq = seq->segmentation_output(nb_segment , variable_type , os , output);
+      oseq = seq->segmentation_output(nb_segment , model_type , os , output);
 
       if (output == SEQUENCE) {
         delete seq;
@@ -2131,12 +2175,12 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
  *
  *  arguments : reference sur un objet Format_error, stream,
  *              identificateur de la sequence, nombre de segments maximum,
- *              types des variables.
+ *              types des modeles.
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iidentifier ,
-                                   int max_nb_segment , int *variable_type) const
+                                   int max_nb_segment , int *model_type) const
 
 {
   bool status = true;
@@ -2159,16 +2203,8 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if ((i > 0) && (variable_type[i] == MEAN_CHANGE)) {
-      status = false;
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << STAT_error[STATR_VARIABLE_TYPE];
-      error.update((error_message.str()).c_str());
-    }
-
-    if ((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL) ||
-        (variable_type[i] == POISSON_CHANGE)) {
+    if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -2196,7 +2232,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           error.update((error_message.str()).c_str());
         }
 
-        else if (variable_type[i] == SYMBOLIC) {
+        else if (model_type[i] == MULTINOMIAL_CHANGE) {
           if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
@@ -2259,7 +2295,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     rank = new double*[seq->nb_variable];
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == ORDINAL) {
+      if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
         rank[i] = marginal[i - 1]->rank_computation();
       }
       else {
@@ -2277,7 +2313,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       penalized_likelihood[i] = new double[max_nb_segment + 1];
     }
 
-    if (variable_type[0] != MEAN_CHANGE) {
+    if (model_type[0] != MEAN_CHANGE) {
       likelihood = new double[max_nb_segment + 1];
       change_point_entropy = new double[max_nb_segment + 1];
 //      normalized_change_point_entropy = new double[max_nb_segment + 1];
@@ -2286,22 +2322,22 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
     inb_segment[0] = max_nb_segment + 1;
 
-    seq->segmentation(inb_segment , variable_type , rank , segmentation_likelihood + 1 ,
+    seq->segmentation(inb_segment , model_type , rank , segmentation_likelihood + 1 ,
                       nb_parameter + 1 , segment_penalty + 1);
-    if (variable_type[0] != MEAN_CHANGE) {
-      seq->forward_backward(0 , max_nb_segment , variable_type , rank , 0 , SEGMENT , 'a' ,
+    if (model_type[0] != MEAN_CHANGE) {
+      seq->forward_backward(0 , max_nb_segment , model_type , rank , 0 , SEGMENT , 'a' ,
                             likelihood + 1 , change_point_entropy + 1 , segment_entropy + 1);
     }
 
     // calcul des vraisemblances penalisees au sens du BIC, du BIC modifie (Zhang & Siegmund, 2007) et
     // du critere de Lavielle (2005)
 
-//    segmentation_likelihood[1] = seq->one_segment_likelihood(0 , variable_type , rank);
-//    nb_parameter[1] = seq->nb_parameter_computation(0 , 1 , variable_type);
+//    segmentation_likelihood[1] = seq->one_segment_likelihood(0 , model_type , rank);
+//    nb_parameter[1] = seq->nb_parameter_computation(0 , 1 , model_type);
 
     if (segmentation_likelihood[1] != D_INF) {
       penalized_likelihood[0][1] = 2 * segmentation_likelihood[1] - nb_parameter[1] *
-                                   log((double)seq->length[0]);
+                                   log((double)((seq->nb_variable - 1) * seq->length[0]));
       max_likelihood[0] = penalized_likelihood[0][1];
 
       penalized_likelihood[1][1] = penalized_likelihood[0][1] - segment_penalty[1];
@@ -2315,8 +2351,8 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     }
 
 //    inb_segment[0] = 2;
-//    segmentation_likelihood[2] = seq->segmentation(inb_segment , variable_type , rank);
-//    nb_parameter[2] = seq->nb_parameter_computation(0 , 2 , variable_type);
+//    segmentation_likelihood[2] = seq->segmentation(inb_segment , model_type , rank);
+//    nb_parameter[2] = seq->nb_parameter_computation(0 , 2 , model_type);
 
     if ((segmentation_likelihood[1] != D_INF) && (segmentation_likelihood[2] != D_INF)) {
       slope_penalty[1] = (segmentation_likelihood[2] - segmentation_likelihood[1]) /
@@ -2335,12 +2371,12 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
     for (i = 2;i <= max_nb_segment;i++) {
 //      inb_segment[0] = i + 1;
-//      segmentation_likelihood[i + 1] = seq->segmentation(inb_segment , variable_type , rank);
-//      nb_parameter[i + 1] = seq->nb_parameter_computation(0 , i + 1 , variable_type);
+//      segmentation_likelihood[i + 1] = seq->segmentation(inb_segment , model_type , rank);
+//      nb_parameter[i + 1] = seq->nb_parameter_computation(0 , i + 1 , model_type);
 
       if (segmentation_likelihood[i] != D_INF) {
         penalized_likelihood[0][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] *
-                                     log((double)seq->length[0]);
+                                     log((double)((seq->nb_variable - 1) * seq->length[0]));
         if (penalized_likelihood[0][i] > max_likelihood[0]) {
           max_likelihood[0] = penalized_likelihood[0][i];
 //          nb_segment = i;
@@ -2374,7 +2410,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         penalized_likelihood[2][i] = D_INF;
       }
 
-/*      if (variable_type[0] != MEAN_CHANGE) {
+/*      if (model_type[0] != MEAN_CHANGE) {
         normalized_change_point_entropy[i] = change_point_entropy[i] / i;
       } */
     }
@@ -2387,7 +2423,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       double norm , *posterior_probability , **weight , *normalized_likelihood , *curvature;
 
 
-      if (variable_type[0] != MEAN_CHANGE) {
+      if (model_type[0] != MEAN_CHANGE) {
         posterior_probability = new double[max_nb_segment + 1];
 
         likelihood[1] = segmentation_likelihood[1];
@@ -2433,7 +2469,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
       old_adjust = os.flags(ios::adjustfield);
 
-      if (variable_type[0] != MEAN_CHANGE) {
+      if (model_type[0] != MEAN_CHANGE) {
         width[0] = column_width(max_nb_segment) + ASCII_SPACE;
         width[1] = column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
         width[2] = column_width(max_nb_segment , likelihood + 1 , 2.) + ASCII_SPACE;
@@ -2532,6 +2568,31 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
       os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
+#     ifdef DEBUG
+      for (i = 1;i <= max_nb_segment;i++) {
+        penalized_likelihood[1][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] *
+                                     log((double)seq->length[0]) - segment_penalty[i];
+//        penalized_likelihood[1][i] += nb_parameter[i] *
+//                                      log((double)((seq->nb_variable - 2) * seq->length[0]));
+      }
+
+      max_likelihood[1] = penalized_likelihood[1][1];
+      for (i = 2;i <= max_nb_segment;i++) {
+        if (penalized_likelihood[1][i] > max_likelihood[1]) {
+          max_likelihood[1] = penalized_likelihood[1][i];
+        }
+      }
+
+      norm = 0.;
+      for (i = 1;i <= max_nb_segment;i++) {
+        weight[1][i] = exp((penalized_likelihood[1][i] - max_likelihood[1]) / 2);
+        norm += weight[1][i];
+      }
+      for (i = 1;i <= max_nb_segment;i++) {
+        weight[1][i] /= norm;
+      }
+#     endif
+
       for (i = 1;i <= max_nb_segment;i++) {
         os << "\n" << i << " " << (i == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
            << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood[i] << "   "
@@ -2564,7 +2625,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
       os << endl;
 
-      if (variable_type[0] != MEAN_CHANGE) {
+      if (model_type[0] != MEAN_CHANGE) {
         delete [] posterior_probability;
       }
 
@@ -2580,17 +2641,21 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       inb_segment[0] = nb_segment;
 
       if (nb_segment == 1) {
-        seq->one_segment_likelihood(0 , variable_type , rank);
-      }
-      else {
-        seq->segmentation(inb_segment , variable_type , rank);
+        seq->one_segment_likelihood(0 , model_type , rank);
+        seq->min_value[0] = 0;
+        seq->max_value[0] = 0;
+        seq->build_marginal_histogram(0);
       }
 
-      oseq = seq->segmentation_output(inb_segment , variable_type , os);
+      else {
+        seq->segmentation(inb_segment , model_type , rank);
+      }
+
+      oseq = seq->segmentation_output(inb_segment , model_type , os);
 
 #     ifdef MESSAGE
-      if (variable_type[0] != MEAN_CHANGE) {
-        hierarchical_segmentation(error , os , iidentifier , max_nb_segment , variable_type);
+      if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != MEAN_VARIANCE_CHANGE)) {
+        hierarchical_segmentation(error , os , iidentifier , max_nb_segment , model_type);
       }
 #     endif
 
@@ -2618,7 +2683,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     }
     delete [] penalized_likelihood;
 
-    if (variable_type[0] != MEAN_CHANGE) {
+    if (model_type[0] != MEAN_CHANGE) {
       delete [] likelihood;
       delete [] change_point_entropy;
 //      delete [] normalized_change_point_entropy;
@@ -2634,7 +2699,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
  *
  *  Calcul par sommation des profils de segmentation d'une sequence.
  *
- *  arguments : indice de la sequence, nombre de segments, types des variables,
+ *  arguments : indice de la sequence, nombre de segments, types des modeles,
  *              rangs (variables ordinales), stream, type de sortie, format
  *              de fichier ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot),
  *              pointeurs sur les vraisemblances de toutes les segmentations possibles,
@@ -2642,7 +2707,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
  *
  *--------------------------------------------------------------*/
 
-double Sequences::forward_backward(int index , int nb_segment , int *variable_type ,
+double Sequences::forward_backward(int index , int nb_segment , int *model_type ,
                                    double **rank , ostream *os , int output , char format ,
                                    double *ilikelihood , double *ichange_point_entropy ,
                                    double *isegment_entropy) const
@@ -2661,11 +2726,11 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal[i]->nb_value;
     }
 
-    if (variable_type[i - 1] == POISSON_CHANGE) {
+    if (model_type[i - 1] == POISSON_CHANGE) {
       factorial[i] = new double[length[index]];
     }
     else {
@@ -2732,7 +2797,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
   }
 
   for (i = 1;i < nb_variable;i++) {
-    if (variable_type[i - 1] == VARIANCE_CHANGE) {
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
       mean[i] = 0.;
 
       if (type[i] != REAL_VALUE) {
@@ -2764,7 +2829,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
     }
 
     for (j = 1;j < nb_variable;j++) {
-      if (variable_type[j - 1] == SYMBOLIC) {
+      if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
@@ -2796,7 +2861,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
         }
       }
 
-      else if (variable_type[j - 1] == POISSON_CHANGE) {
+      else if (model_type[j - 1] == POISSON_CHANGE) {
         factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
           factorial[j][i] += log((double)k);
@@ -2816,9 +2881,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
       }
 
       else {
-        switch (variable_type[j - 1]) {
-
-        case VARIANCE_CHANGE : {
+        if (model_type[j - 1] == VARIANCE_CHANGE) {
           sum_square = 0.;
 
           if (type[j] != REAL_VALUE) {
@@ -2838,10 +2901,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
               residual[k] = sum_square;
             }
           }
-          break;
         }
 
-        case ORDINAL : {
+        else if (model_type[j - 1] == ORDINAL_GAUSSIAN_CHANGE) {
           pisequence = int_sequence[index][j] + i;
           sum_square = 0.;
           sum = rank[j][*pisequence--];
@@ -2853,10 +2915,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
             sum += rank[j][*pisequence--];
             residual[k] = sum_square;
           }
-          break;
         }
 
-        case NUMERIC : {
+        else {
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             sum_square = 0.;
@@ -2884,21 +2945,44 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
               residual[k] = sum_square;
             }
           }
-          break;
-        }
         }
 
-        for (k = i;k >= 0;k--) {
-//          if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
-          if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                             (i - k + 1)) + log(2 * M_PI) + 1);
-/*            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                             (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+        if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+          for (k = i - 1;k >= 0;k--) {
+            contrast[k] += residual[k];
           }
-          else {
-            contrast[k] = D_INF;
+        }
+
+        else {
+          for (k = i;k >= 0;k--) {
+//            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
+            if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                               (i - k + 1)) + log(2 * M_PI) + 1);
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                               (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+            }
+            else {
+              contrast[k] = D_INF;
+            }
           }
+        }
+      }
+    }
+
+    if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+      contrast[i] = D_INF;
+      for (j = i - 1;j >= 0;j--) {
+//        if (contrast[j] > 0.) {
+        if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
+                         (double)((nb_variable - 1) * (i - j)) / 2.; */
+        }
+        else {
+          contrast[j] = D_INF;
         }
       }
     }
@@ -3038,7 +3122,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
       }
 
       for (j = 1;j < nb_variable;j++) {
-        if (variable_type[j - 1] == SYMBOLIC) {
+        if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
           for (k = 0;k < marginal[j]->nb_value;k++) {
             frequency[k] = 0;
           }
@@ -3070,7 +3154,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
           }
         }
 
-        else if (variable_type[j - 1] == POISSON_CHANGE) {
+        else if (model_type[j - 1] == POISSON_CHANGE) {
           sum = 0.;
           factorial_sum = 0.;
 
@@ -3085,9 +3169,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
         }
 
         else {
-          switch (variable_type[j - 1]) {
-
-          case VARIANCE_CHANGE : {
+          if (model_type[j - 1] == VARIANCE_CHANGE) {
             sum_square = 0.;
 
             if (type[j] != REAL_VALUE) {
@@ -3107,10 +3189,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
                 residual[k] = sum_square;
               }
             }
-            break;
           }
 
-          case ORDINAL : {
+          else if (model_type[j - 1] == ORDINAL_GAUSSIAN_CHANGE) {
             pisequence = int_sequence[index][j] + i;
             sum_square = 0.;
             sum = rank[j][*pisequence++];
@@ -3122,10 +3203,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
               sum += rank[j][*pisequence++];
               residual[k] = sum_square;
             }
-            break;
           }
 
-          case NUMERIC : {
+          else {
             if (type[j] != REAL_VALUE) {
               pisequence = int_sequence[index][j] + i;
               sum_square = 0.;
@@ -3153,21 +3233,44 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
                 residual[k] = sum_square;
               }
             }
-            break;
-          }
           }
  
-          for (k = i;k < length[index];k++) {
-//            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
-            if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(k - i + 1)) * ROUNDOFF_ERROR)) {
-              contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
-                               (k - i + 1)) + log(2 * M_PI) + 1);
-/*              contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
-                               (k - i)) + log(2 * M_PI)) + (double)(k - i) / 2.; */
+          if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+            for (k = i + 1;k < length[index];k++) {
+              contrast[k] += residual[k];
             }
-            else {
-              contrast[k] = D_INF;
+          }
+
+          else {
+            for (k = i;k < length[index];k++) {
+//              if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
+              if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(k - i + 1)) * ROUNDOFF_ERROR)) {
+                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+                                 (k - i + 1)) + log(2 * M_PI) + 1);
+/*                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+                                 (k - i)) + log(2 * M_PI)) + (double)(k - i) / 2.; */
+              }
+              else {
+                contrast[k] = D_INF;
+              }
             }
+          }
+        }
+      }
+
+      if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+        contrast[i] = D_INF;
+        for (j = i + 1;j < length[index];j++) {
+//          if (contrast[j] > 0.) {
+          if (contrast[j] > sqrt((double)((nb_variable - 1) * (j - i + 1))) * ROUNDOFF_ERROR) {
+            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+                             ((nb_variable - 1) * (j - i + 1))) + log(2 * M_PI) + 1);
+/*            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+                             ((nb_variable - 1) * (j - i))) + log(2 * M_PI)) +
+                           (double)((nb_variable - 1) * (j - i)) / 2.; */
+          }
+          else {
+            contrast[j] = D_INF;
           }
         }
       }
@@ -3569,13 +3672,13 @@ double Sequences::forward_backward(int index , int nb_segment , int *variable_ty
  *
  *  Simulation des segmentations d'une sequence.
  *
- *  arguments : indice de la sequence, nombre de segments, types des variables,
+ *  arguments : indice de la sequence, nombre de segments, types des modeles,
  *              rangs (variables ordinales), stream, format de fichier ('a' : ASCII,
  *              's' : Spreadsheet), nombre de segmentation.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::forward_backward_sampling(int index , int nb_segment , int *variable_type ,
+double Sequences::forward_backward_sampling(int index , int nb_segment , int *model_type ,
                                             double **rank , ostream &os , char format ,
                                             int nb_segmentation) const
 
@@ -3592,11 +3695,11 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal[i]->nb_value;
     }
 
-    if (variable_type[i - 1] == POISSON_CHANGE) {
+    if (model_type[i - 1] == POISSON_CHANGE) {
       factorial[i] = new double[length[index]];
     }
     else {
@@ -3629,7 +3732,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
   mean = new double*[nb_variable];
   variance = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == POISSON_CHANGE) || (variable_type[i - 1] == NUMERIC)) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[i - 1] == VARIANCE_CHANGE) || (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean[i] = new double[nb_segment];
       variance[i] = new double[nb_segment];
     }
@@ -3656,7 +3760,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
 # endif
 
   for (i = 1;i < nb_variable;i++) {
-    if (variable_type[i - 1] == VARIANCE_CHANGE) {
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
       sequence_mean[i] = 0.;
 
       if (type[i] != REAL_VALUE) {
@@ -3688,7 +3792,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
     }
 
     for (j = 1;j < nb_variable;j++) {
-      if (variable_type[j - 1] == SYMBOLIC) {
+      if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
@@ -3720,7 +3824,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
         }
       }
 
-      else if (variable_type[j - 1] == POISSON_CHANGE) {
+      else if (model_type[j - 1] == POISSON_CHANGE) {
         factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
           factorial[j][i] += log((double)k);
@@ -3740,9 +3844,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
       }
 
       else {
-        switch (variable_type[j - 1]) {
-
-        case VARIANCE_CHANGE : {
+        if (model_type[j - 1] == VARIANCE_CHANGE) {
           sum_square = 0.;
 
           if (type[j] != REAL_VALUE) {
@@ -3762,10 +3864,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
               residual[k] = sum_square;
             }
           }
-          break;
         }
 
-        case ORDINAL : {
+        else if (model_type[j - 1] == ORDINAL_GAUSSIAN_CHANGE) {
           pisequence = int_sequence[index][j] + i;
           sum_square = 0.;
           sum = rank[j][*pisequence--];
@@ -3777,10 +3878,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
             sum += rank[j][*pisequence--];
             residual[k] = sum_square;
           }
-          break;
         }
 
-        case NUMERIC : {
+        else {
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             sum_square = 0.;
@@ -3808,21 +3908,44 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
               residual[k] = sum_square;
             }
           }
-          break;
-        }
         }
 
-        for (k = i;k >= 0;k--) {
-//          if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
-          if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                            (i - k + 1)) + log(2 * M_PI) + 1);
-/*            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                            (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+        if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+          for (k = i - 1;k >= 0;k--) {
+            contrast[k] += residual[k];
           }
-          else {
-            contrast[k] = D_INF;
+        }
+
+        else {
+          for (k = i;k >= 0;k--) {
+//            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
+            if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                              (i - k + 1)) + log(2 * M_PI) + 1);
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                              (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+            }
+            else {
+              contrast[k] = D_INF;
+            }
           }
+        }
+      }
+    }
+
+    if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+      contrast[i] = D_INF;
+      for (j = i - 1;j >= 0;j--) {
+//        if (contrast[j] > 0.) {
+        if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
+                         (double)((nb_variable - 1) * (i - j)) / 2.; */
+        }
+        else {
+          contrast[j] = D_INF;
         }
       }
     }
@@ -3920,7 +4043,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
         }
 
         for (m = 1;m < nb_variable;m++) {
-          if (variable_type[m - 1] == SYMBOLIC) {
+          if (model_type[m - 1] == MULTINOMIAL_CHANGE) {
             for (n = 0;n < marginal[m]->nb_value;n++) {
               frequency[n] = 0;
             }
@@ -3952,7 +4075,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
             }
           }
 
-          else if (variable_type[m - 1] == POISSON_CHANGE) {
+          else if (model_type[m - 1] == POISSON_CHANGE) {
             sum = 0.;
             factorial_sum = 0.;
 
@@ -3967,9 +4090,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
           }
 
           else {
-            switch (variable_type[m - 1]) {
-
-            case VARIANCE_CHANGE : {
+            if (model_type[m - 1] == VARIANCE_CHANGE) {
               sum_square = 0.;
 
               if (type[m] != REAL_VALUE) {
@@ -3989,10 +4110,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
                   residual[n] = sum_square;
                 }
               }
-              break;
             }
 
-            case ORDINAL : {
+            else if (model_type[m - 1] == ORDINAL_GAUSSIAN_CHANGE) {
               pisequence = int_sequence[index][m] + j;
               sum_square = 0.;
               sum = rank[m][*pisequence--];
@@ -4004,10 +4124,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
                 sum += rank[m][*pisequence--];
                 residual[n] = sum_square;
               }
-              break;
             }
 
-            case NUMERIC : {
+            else {
               if (type[m] != REAL_VALUE) {
                 pisequence = int_sequence[index][m] + j;
                 sum_square = 0.;
@@ -4035,21 +4154,44 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
                   residual[n] = sum_square;
                 }
               }
-              break;
-            }
             }
 
-            for (n = j;n >= k;n--) {
-//              if ((contrast[n] != D_INF) && (residual[n] > 0.)) {
-              if ((contrast[n] != D_INF) && (residual[n] > sqrt((double)(j - n + 1)) * ROUNDOFF_ERROR)) {
-                contrast[n] -= ((double)(j - n + 1) / 2.) * (log(residual[n] /
-                                 (j - n + 1)) + log(2 * M_PI) + 1);
-/*                contrast[n] -= ((double)(j - n + 1) / 2.) * (log(residual[n] /
-                                 (j - n)) + log(2 * M_PI)) + (double)(j - n) / 2.; */
+            if (model_type[m - 1] == MEAN_VARIANCE_CHANGE) {
+              for (n = j - 1;n >= k;n--) {
+                contrast[n] += residual[n];
               }
-              else {
-                contrast[n] = D_INF;
+            }
+
+            else {
+              for (n = j;n >= k;n--) {
+//                if ((contrast[n] != D_INF) && (residual[n] > 0.)) {
+                if ((contrast[n] != D_INF) && (residual[n] > sqrt((double)(j - n + 1)) * ROUNDOFF_ERROR)) {
+                  contrast[n] -= ((double)(j - n + 1) / 2.) * (log(residual[n] /
+                                   (j - n + 1)) + log(2 * M_PI) + 1);
+/*                  contrast[n] -= ((double)(j - n + 1) / 2.) * (log(residual[n] /
+                                   (j - n)) + log(2 * M_PI)) + (double)(j - n) / 2.; */
+                }
+                else {
+                  contrast[n] = D_INF;
+                }
               }
+            }
+          }
+        }
+
+        if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+          contrast[j] = D_INF;
+          for (m = j - 1;m >= k;m--) {
+//            if (contrast[m] > 0.)) {
+            if (contrast[m] > sqrt((double)((nb_variable - 1) * (j - m + 1))) * ROUNDOFF_ERROR) {
+              contrast[m] = -((double)((nb_variable - 1) * (j - m + 1)) / 2.) * (log(contrast[m] /
+                               ((nb_variable - 1) * (j - m + 1))) + log(2 * M_PI) + 1);
+/*              contrast[m] = -((double)((nb_variable - 1) * (j - m + 1)) / 2.) * (log(contrast[m] /
+                               ((nb_variable - 1) * (j - m))) + log(2 * M_PI)) +
+                             (double)((nb_variable - 1) * (j - m)) / 2.; */
+            }
+            else {
+              contrast[m] = D_INF;
             }
           }
         }
@@ -4095,7 +4237,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
         }
 
         for (m = 1;m < nb_variable;m++) {
-          if ((variable_type[m - 1] == POISSON_CHANGE) || (variable_type[m - 1] == NUMERIC)) {
+          if ((model_type[m - 1] == POISSON_CHANGE) || (model_type[m - 1] == GAUSSIAN_CHANGE) ||
+              (model_type[m - 1] == VARIANCE_CHANGE) || (model_type[m - 1] == MEAN_VARIANCE_CHANGE)) {
             mean[m][k] = 0.;
             variance[m][k] = 0.;
 
@@ -4186,19 +4329,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
         os << endl;
 
         for (j = 1;j < nb_variable;j++) {
-          if ((variable_type[j - 1] == NUMERIC) || (variable_type[j - 1] == VARIANCE_CHANGE)) {
-            os << "# ";
-            if (nb_variable > 2) {
-              os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
-            }
-            os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
-            for (k = 0;k < nb_segment;k++) {
-              os << mean[j][k] << " " << sqrt(variance[j][k]) << " | ";
-            }
-            os << endl;
-          }
-
-          else if (variable_type[j - 1] == POISSON_CHANGE) {
+          if (model_type[j - 1] == POISSON_CHANGE) {
             os << "# ";
             if (nb_variable > 2) {
               os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
@@ -4206,6 +4337,19 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
             os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_VARIANCE] << ": ";
             for (k = 0;k < nb_segment;k++) {
               os << mean[j][k] << " " << variance[j][k] << " | ";
+            }
+            os << endl;
+          }
+
+          else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+                   (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+            os << "# ";
+            if (nb_variable > 2) {
+              os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
+            }
+            os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
+            for (k = 0;k < nb_segment;k++) {
+              os << mean[j][k] << " " << sqrt(variance[j][k]) << " | ";
             }
             os << endl;
           }
@@ -4223,24 +4367,25 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
            << exp(segmentation_likelihood - likelihood) << endl;
 
         for (j = 1;j < nb_variable;j++) {
-          if ((variable_type[j - 1] == NUMERIC) || (variable_type[j - 1] == VARIANCE_CHANGE)) {
-            if (nb_variable > 2) {
-              os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
-            }
-            os << SEQ_label[SEQL_SEGMENT_MEAN] << "\t" << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << "\t";
-            for (k = 0;k < nb_segment;k++) {
-              os << mean[j][k] << "\t" << sqrt(variance[j][k]) << "\t";
-            }
-            os << endl;
-          }
-
-          else if (variable_type[j - 1] == POISSON_CHANGE) {
+          if (model_type[j - 1] == POISSON_CHANGE) {
             if (nb_variable > 2) {
               os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
             }
             os << SEQ_label[SEQL_SEGMENT_MEAN] << "\t" << SEQ_label[SEQL_SEGMENT_VARIANCE] << "\t";
             for (k = 0;k < nb_segment;k++) {
               os << mean[j][k] << "\t" << variance[j][k] << "\t";
+            }
+            os << endl;
+          }
+
+          else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+                   (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+            if (nb_variable > 2) {
+              os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
+            }
+            os << SEQ_label[SEQL_SEGMENT_MEAN] << "\t" << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << "\t";
+            for (k = 0;k < nb_segment;k++) {
+              os << mean[j][k] << "\t" << sqrt(variance[j][k]) << "\t";
             }
             os << endl;
           }
@@ -4321,13 +4466,13 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *va
  *
  *  Calcul des L segmentations optimales d'une sequence.
  *
- *  arguments : indice de la sequence, nombre de segments, types des variables,
+ *  arguments : indice de la sequence, nombre de segments, types des modeles,
  *              rangs (variables ordinales), stream, format de fichier ('a' : ASCII,
  *              's' : Spreadsheet), nombre de segmentation, vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::L_segmentation(int index , int nb_segment , int *variable_type ,
+double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
                                  double **irank , ostream &os , char format ,
                                  int inb_segmentation , double likelihood) const
 
@@ -4336,9 +4481,9 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
   register int i , j , k , m , n;
   int max_nb_value , brank , previous_rank , nb_cell , *frequency , *pisequence , *rank ,
       *psegment , **sisequence , ***optimal_length , ***optimal_rank;
-  double sequence_sum_square , sum , factorial_sum , diff , sum_square , buff ,
-         segmentation_likelihood , *nb_segmentation , *sequence_mean , *residual , *prsequence ,
-         *contrast , **factorial , **srsequence , **mean , **variance , ***forward;
+  double sum , factorial_sum , diff , sum_square , buff , segmentation_likelihood ,
+         *nb_segmentation , *sequence_mean , *residual , *prsequence , *contrast ,
+         **factorial , **srsequence , **mean , **variance , ***forward;
   long double likelihood_cumul;
 
 
@@ -4359,11 +4504,11 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal[i]->nb_value;
     }
 
-    if (variable_type[i - 1] == POISSON_CHANGE) {
+    if (model_type[i - 1] == POISSON_CHANGE) {
       factorial[i] = new double[length[index]];
     }
     else {
@@ -4413,8 +4558,9 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
   mean = new double*[nb_variable];
   variance = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == POISSON_CHANGE) || (variable_type[i - 1] == NUMERIC) ||
-        (variable_type[i - 1] == MEAN_CHANGE) || (variable_type[i - 1] == VARIANCE_CHANGE)) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+        (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean[i] = new double[nb_segment];
       variance[i] = new double[nb_segment];
     }
@@ -4441,7 +4587,8 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
 
   mean_square_diff = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == NUMERIC) || (variable_type[i - 1] == MEAN_CHANGE)) {
+    if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == MEAN_CHANGE) ||
+        (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean_square_diff[i] = new double[length[index]];
     }
     else {
@@ -4464,28 +4611,8 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
   }
 # endif
 
-  if (variable_type[0] == MEAN_CHANGE) {
-    sequence_sum_square = 0.;
-
-    if (type[1] != REAL_VALUE) {
-      pisequence = int_sequence[index][1];
-      for (i = 0;i < length[index];i++) {
-        sequence_sum_square += *pisequence * *pisequence;
-        pisequence++;
-      }
-    }
-
-    else {
-      prsequence = real_sequence[index][1];
-      for (i = 0;i < length[index];i++) {
-        sequence_sum_square += *prsequence * *prsequence;
-        prsequence++;
-      }
-    }
-  }
-
   for (i = 1;i < nb_variable;i++) {
-    if (variable_type[i - 1] == VARIANCE_CHANGE) {
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
       sequence_mean[i] = 0.;
 
       if (type[i] != REAL_VALUE) {
@@ -4521,7 +4648,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
     }
 
     for (j = 1;j < nb_variable;j++) {
-      if (variable_type[j - 1] == SYMBOLIC) {
+      if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
@@ -4558,7 +4685,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
         }
       }
 
-      else if (variable_type[j - 1] == POISSON_CHANGE) {
+      else if (model_type[j - 1] == POISSON_CHANGE) {
         factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
           factorial[j][i] += log((double)k);
@@ -4577,30 +4704,8 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
         }
       }
 
-      else if (variable_type[j - 1] == MEAN_CHANGE) {
-        sum = 0.;
-
-        if (type[j] != REAL_VALUE) {
-          pisequence = int_sequence[index][j] + i;
-          for (k = i;k >= 0;k--) {
-            sum += *pisequence--;
-            contrast[k] = sum * sum / (i - k + 1);
-          }
-        }
-
-        else {
-          prsequence = real_sequence[index][j] + i;
-          for (k = i;k >= 0;k--) {
-            sum += *prsequence--;
-            contrast[k] = sum * sum / (i - k + 1);
-          }
-        }
-      }
-
       else {
-        switch (variable_type[j - 1]) {
-
-        case VARIANCE_CHANGE : {
+        if (model_type[j - 1] == VARIANCE_CHANGE) {
           sum_square = 0.;
 
           if (type[j] != REAL_VALUE) {
@@ -4620,10 +4725,9 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
               residual[k] = sum_square;
             }
           }
-          break;
         }
 
-        case ORDINAL : {
+        else if (model_type[j - 1] == ORDINAL_GAUSSIAN_CHANGE) {
           pisequence = int_sequence[index][j] + i;
           sum_square = 0.;
           sum = irank[j][*pisequence--];
@@ -4635,10 +4739,9 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
             sum += irank[j][*pisequence--];
             residual[k] = sum_square;
           }
-          break;
         }
 
-        case NUMERIC : {
+        else {
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             sum_square = 0.;
@@ -4701,21 +4804,50 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
               residual[k] = sum_square;
             }
           }
-          break;
-        }
         }
 
-        for (k = i;k >= 0;k--) {
-//          if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
-          if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                             (i - k + 1)) + log(2 * M_PI) + 1);
-/*            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                             (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+        if (model_type[j - 1] == MEAN_CHANGE) {
+          for (k = i - 1;k >= 0;k--) {
+            contrast[k] -= residual[k];
           }
-          else {
-            contrast[k] = D_INF;
+        }
+
+        else if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+          for (k = i - 1;k >= 0;k--) {
+            contrast[k] += residual[k];
           }
+        }
+
+        else {
+          for (k = i;k >= 0;k--) {
+//            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
+            if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                               (i - k + 1)) + log(2 * M_PI) + 1);
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                               (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+            }
+            else {
+              contrast[k] = D_INF;
+            }
+          }
+        }
+      }
+    }
+
+    if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+      contrast[i] = D_INF;
+      for (j = i - 1;j >= 0;j--) {
+//        if (contrast[j] > 0.) {
+        if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
+                         (double)((nb_variable - 1) * (i - j)) / 2.; */
+        }
+        else {
+          contrast[j] = D_INF;
         }
       }
     }
@@ -4851,8 +4983,9 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
       }
 
       for (m = 1;m < nb_variable;m++) {
-        if ((variable_type[m - 1] == POISSON_CHANGE) || (variable_type[m - 1] == NUMERIC) ||
-            (variable_type[m - 1] == MEAN_CHANGE) || (variable_type[m - 1] == VARIANCE_CHANGE)) {
+        if ((model_type[m - 1] == POISSON_CHANGE) || (model_type[m - 1] == GAUSSIAN_CHANGE) ||
+            (model_type[m - 1] == MEAN_CHANGE) || (model_type[m - 1] == VARIANCE_CHANGE) ||
+            (model_type[m - 1] == MEAN_VARIANCE_CHANGE)) {
           mean[m][k] = 0.;
           variance[m][k] = 0.;
 
@@ -4907,15 +5040,15 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
     cout << endl;
 #   endif
 
-    if (variable_type[0] == MEAN_CHANGE) {
-      if (sequence_sum_square - forward[length[index] - 1][nb_segment - 1][i] > 0.) {
-        forward[length[index] - 1][nb_segment - 1][i] = -((double)length[index] / 2.) *
-                                                         (log((sequence_sum_square - forward[length[index] - 1][nb_segment - 1][i]) /
-                                                           length[index]) + log(2 * M_PI) + 1);
-/*        forward[length[index] - 1][nb_segment - 1][i] = -((double)length[index] / 2.) *
-                                                         (log((sequence_sum_square - forward[length[index] - 1][nb_segment - 1][i]) /
-                                                           (length[index] - nb_segment)) + log(2 * M_PI)) -
-                                                         (double)(length[index] - nb_segment) / 2.; */
+    if (model_type[0] == MEAN_CHANGE) {
+      if (forward[length[index] - 1][nb_segment - 1][i] < 0.) {
+        forward[length[index] - 1][nb_segment - 1][i] = -((double)((nb_variable - 1) * length[index]) / 2.) *
+                                                         (log(-forward[length[index] - 1][nb_segment - 1][i] /
+                                                           ((nb_variable - 1) * length[index])) + log(2 * M_PI) + 1);
+/*        forward[length[index] - 1][nb_segment - 1][i] = -((double)((nb_variable - 1) * length[index]) / 2.) *
+                                                         (log(-forward[length[index] - 1][nb_segment - 1][i] /
+                                                           ((nb_variable - 1) * (length[index] - nb_segment))) + log(2 * M_PI)) -
+                                                         (double)((nb_variable - 1) * (length[index] - nb_segment)) / 2.; */
       }
       else {
         forward[length[index] - 1][nb_segment - 1][i] = D_INF;
@@ -4999,25 +5132,25 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
       os << endl;
 
       for (j = 1;j < nb_variable;j++) {
-        if ((variable_type[j - 1] == NUMERIC) || (variable_type[j - 1] == MEAN_CHANGE) ||
-            (variable_type[j - 1] == VARIANCE_CHANGE)) {
-          if (nb_variable > 2) {
-            os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
-          }
-          os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
-          for (k = 0;k < nb_segment;k++) {
-            os << mean[j][k] << " " << sqrt(variance[j][k]) << " | ";
-          }
-          os << endl;
-        }
-
-        else if (variable_type[j - 1] == POISSON_CHANGE) {
+        if (model_type[j - 1] == POISSON_CHANGE) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
           }
           os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_VARIANCE] << ": ";
           for (k = 0;k < nb_segment;k++) {
             os << mean[j][k] << " " << variance[j][k] << " | ";
+          }
+          os << endl;
+        }
+
+        else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == MEAN_CHANGE) ||
+                 (model_type[j - 1] == VARIANCE_CHANGE) || (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+          if (nb_variable > 2) {
+            os << STAT_label[STATL_VARIABLE] << " " << j << "   ";
+          }
+          os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
+          for (k = 0;k < nb_segment;k++) {
+            os << mean[j][k] << " " << sqrt(variance[j][k]) << " | ";
           }
           os << endl;
         }
@@ -5042,25 +5175,25 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
       os << "\t" << nb_cell << endl;
 
       for (j = 1;j < nb_variable;j++) {
-        if ((variable_type[j - 1] == NUMERIC) || (variable_type[j - 1] == MEAN_CHANGE) ||
-            (variable_type[j - 1] == VARIANCE_CHANGE)) {
-          if (nb_variable > 2) {
-            os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
-          }
-          os << SEQ_label[SEQL_SEGMENT_MEAN] << "\t" << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << "\t";
-          for (k = 0;k < nb_segment;k++) {
-            os << mean[j][k] << "\t" << sqrt(variance[j][k]) << "\t";
-          }
-          os << endl;
-        }
-
-        else if (variable_type[j - 1] == POISSON_CHANGE) {
+        if (model_type[j - 1] == POISSON_CHANGE) {
           if (nb_variable > 2) {
             os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
           }
           os << SEQ_label[SEQL_SEGMENT_MEAN] << "\t" << SEQ_label[SEQL_SEGMENT_VARIANCE] << "\t";
           for (k = 0;k < nb_segment;k++) {
             os << mean[j][k] << "\t" << variance[j][k] << "\t";
+          }
+          os << endl;
+        }
+
+        else if ((model_type[j - 1] == GAUSSIAN_CHANGE) || (model_type[j - 1] == MEAN_CHANGE) ||
+                 (model_type[j - 1] == VARIANCE_CHANGE) || (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+          if (nb_variable > 2) {
+            os << STAT_label[STATL_VARIABLE] << "\t" << j << "\t";
+          }
+          os << SEQ_label[SEQL_SEGMENT_MEAN] << "\t" << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << "\t";
+          for (k = 0;k < nb_segment;k++) {
+            os << mean[j][k] << "\t" << sqrt(variance[j][k]) << "\t";
           }
           os << endl;
         }
@@ -5192,34 +5325,34 @@ double Sequences::L_segmentation(int index , int nb_segment , int *variable_type
  *
  *  Calcul par maximisation des profils de segmentation d'une sequence.
  *
- *  arguments : indice de la sequence, nombre de segments, types des variables,
+ *  arguments : indice de la sequence, nombre de segments, types des modeles,
  *              rangs (variables ordinales), stream, type de sortie, format
  *              de fichier ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot),
  *              vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::forward_backward_dynamic_programming(int index , int nb_segment , int *variable_type ,
+double Sequences::forward_backward_dynamic_programming(int index , int nb_segment , int *model_type ,
                                                        double **rank , ostream &os , int output ,
                                                        char format , double likelihood) const
 
 {
   register int i , j , k , m;
   int max_nb_value , *frequency , *pisequence , *psegment , **optimal_length;
-  double sequence_sum_square , sum , factorial_sum , diff , sum_square , buff ,
-         segmentation_likelihood , backward_max , *sequence_mean , *residual , *prsequence ,
-         *contrast , **factorial , **forward , **backward , **backward_output , **mean;
+  double sum , factorial_sum , diff , sum_square , buff , segmentation_likelihood ,
+         backward_max , *sequence_mean , *residual , *prsequence , *contrast ,
+         **factorial , **forward , **backward , **backward_output , **mean;
 
 
   max_nb_value = 0;
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == SYMBOLIC) && (marginal[i]->nb_value > max_nb_value)) {
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
       max_nb_value = marginal[i]->nb_value;
     }
 
-    if (variable_type[i - 1] == POISSON_CHANGE) {
+    if (model_type[i - 1] == POISSON_CHANGE) {
       factorial[i] = new double[length[index]];
     }
     else {
@@ -5261,8 +5394,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
   mean = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
-    if ((variable_type[i - 1] == POISSON_CHANGE) || (variable_type[i - 1] == NUMERIC) ||
-        (variable_type[i - 1] == MEAN_CHANGE) || (variable_type[i - 1] == VARIANCE_CHANGE)) {
+    if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+        (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+        (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
       mean[i] = new double[length[index]];
     }
     else {
@@ -5270,28 +5404,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     }
   }
 
-  if (variable_type[0] == MEAN_CHANGE) {
-    sequence_sum_square = 0.;
-
-    if (type[1] != REAL_VALUE) {
-      pisequence = int_sequence[index][1];
-      for (i = 0;i < length[index];i++) {
-        sequence_sum_square += *pisequence * *pisequence;
-        pisequence++;
-      }
-    }
-
-    else {
-      prsequence = real_sequence[index][1];
-      for (i = 0;i < length[index];i++) {
-        sequence_sum_square += *prsequence * *prsequence;
-        prsequence++;
-      }
-    }
-  }
-
   for (i = 1;i < nb_variable;i++) {
-    if (variable_type[i - 1] == VARIANCE_CHANGE) {
+    if (model_type[i - 1] == VARIANCE_CHANGE) {
       sequence_mean[i] = 0.;
 
       if (type[i] != REAL_VALUE) {
@@ -5323,7 +5437,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     }
 
     for (j = 1;j < nb_variable;j++) {
-      if (variable_type[j - 1] == SYMBOLIC) {
+      if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
         for (k = 0;k < marginal[j]->nb_value;k++) {
           frequency[k] = 0;
         }
@@ -5355,7 +5469,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         }
       }
 
-      else if (variable_type[j - 1] == POISSON_CHANGE) {
+      else if (model_type[j - 1] == POISSON_CHANGE) {
         factorial[j][i] = 0.;
         for (k = 2;k <= int_sequence[index][j][i];k++) {
           factorial[j][i] += log((double)k);
@@ -5374,30 +5488,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         }
       }
 
-      else if (variable_type[j - 1] == MEAN_CHANGE) {
-        sum = 0.;
-
-        if (type[j] != REAL_VALUE) {
-          pisequence = int_sequence[index][j] + i;
-          for (k = i;k >= 0;k--) {
-            sum += *pisequence--;
-            contrast[k] = sum * sum / (i - k + 1);
-          }
-        }
-
-        else {
-          prsequence = real_sequence[index][j] + i;
-          for (k = i;k >= 0;k--) {
-            sum += *prsequence--;
-            contrast[k] = sum * sum / (i - k + 1);
-          }
-        }
-      }
-
       else {
-        switch (variable_type[j - 1]) {
-
-        case VARIANCE_CHANGE : {
+        if (model_type[j - 1] == VARIANCE_CHANGE) {
           sum_square = 0.;
 
           if (type[j] != REAL_VALUE) {
@@ -5417,10 +5509,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
               residual[k] = sum_square;
             }
           }
-          break;
         }
 
-        case ORDINAL : {
+        else if (model_type[j - 1] == ORDINAL_GAUSSIAN_CHANGE) {
           pisequence = int_sequence[index][j] + i;
           sum_square = 0.;
           sum = rank[j][*pisequence--];
@@ -5432,10 +5523,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
             sum += rank[j][*pisequence--];
             residual[k] = sum_square;
           }
-          break;
         }
 
-        case NUMERIC : {
+        else {
           if (type[j] != REAL_VALUE) {
             pisequence = int_sequence[index][j] + i;
             sum_square = 0.;
@@ -5463,21 +5553,50 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
               residual[k] = sum_square;
             }
           }
-          break;
-        }
         }
 
-        for (k = i;k >= 0;k--) {
-//          if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
-          if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                             (i - k + 1)) + log(2 * M_PI) + 1);
-/*            contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
-                             (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+        if (model_type[j - 1] == MEAN_CHANGE) {
+          for (k = i - 1;k >= 0;k--) {
+            contrast[k] -= residual[k];
           }
-          else {
-            contrast[k] = D_INF;
+        }
+
+        else if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+          for (k = i - 1;k >= 0;k--) {
+            contrast[k] += residual[k];
           }
+        }
+
+        else {
+          for (k = i;k >= 0;k--) {
+//            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
+            if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                               (i - k + 1)) + log(2 * M_PI) + 1);
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+                               (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
+            }
+            else {
+              contrast[k] = D_INF;
+            }
+          }
+        }
+      }
+    }
+
+    if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+      contrast[i] = D_INF;
+      for (j = i - 1;j >= 0;j--) {
+//        if (contrast[j] > 0.) {
+        if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+                           ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
+                         (double)((nb_variable - 1) * (i - j)) / 2.; */
+        }
+        else {
+          contrast[j] = D_INF;
         }
       }
     }
@@ -5537,7 +5656,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       }
 
       for (j = 1;j < nb_variable;j++) {
-        if (variable_type[j - 1] == SYMBOLIC) {
+        if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
           for (k = 0;k < marginal[j]->nb_value;k++) {
             frequency[k] = 0;
           }
@@ -5569,7 +5688,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           }
         }
 
-        else if (variable_type[j - 1] == POISSON_CHANGE) {
+        else if (model_type[j - 1] == POISSON_CHANGE) {
           sum = 0.;
           factorial_sum = 0.;
 
@@ -5583,30 +5702,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           }
         }
 
-        else if (variable_type[j - 1] == MEAN_CHANGE) {
-          sum = 0.;
-
-          if (type[j] != REAL_VALUE) {
-            pisequence = int_sequence[index][j] + i;
-            for (k = i;k < length[index];k++) {
-              sum += *pisequence++;
-              contrast[k] = sum * sum / (k - i + 1);
-            }
-          }
-
-          else {
-            prsequence = real_sequence[index][j] + i;
-            for (k = i;k < length[index];k++) {
-              sum += *prsequence++;
-              contrast[k] = sum * sum / (k - i + 1);
-            }
-          }
-        }
-
         else {
-          switch (variable_type[j - 1]) {
-
-          case VARIANCE_CHANGE : {
+          if (model_type[j - 1] == VARIANCE_CHANGE) {
             sum_square = 0.;
 
             if (type[j] != REAL_VALUE) {
@@ -5626,10 +5723,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
                 residual[k] = sum_square;
               }
             }
-            break;
           }
 
-          case ORDINAL : {
+          else if (model_type[j - 1] == ORDINAL_GAUSSIAN_CHANGE) {
             pisequence = int_sequence[index][j] + i;
             sum_square = 0.;
             sum = rank[j][*pisequence++];
@@ -5641,10 +5737,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
               sum += rank[j][*pisequence++];
               residual[k] = sum_square;
             }
-            break;
           }
 
-          case NUMERIC : {
+          else {
             if (type[j] != REAL_VALUE) {
               pisequence = int_sequence[index][j] + i;
               sum_square = 0.;
@@ -5672,21 +5767,50 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
                 residual[k] = sum_square;
               }
             }
-            break;
-          }
           }
 
-          for (k = i;k < length[index];k++) {
-//            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
-            if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(k - i + 1)) * ROUNDOFF_ERROR)) {
-              contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
-                               (k - i + 1)) + log(2 * M_PI) + 1);
-/*              contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
-                               (k - i)) + log(2 * M_PI)) + (double)(k - i) / 2.; */
+          if (model_type[j - 1] == MEAN_CHANGE) {
+            for (k = i + 1;k < length[index];k++) {
+              contrast[k] -= residual[k];
             }
-            else {
-              contrast[k] = D_INF;
+          }
+
+          else if (model_type[j - 1] == MEAN_VARIANCE_CHANGE) {
+            for (k = i + 1;k < length[index];k++) {
+              contrast[k] += residual[k];
             }
+          }
+
+          else {
+            for (k = i;k < length[index];k++) {
+//              if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
+              if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(k - i + 1)) * ROUNDOFF_ERROR)) {
+                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+                                 (k - i + 1)) + log(2 * M_PI) + 1);
+/*                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+                                 (k - i)) + log(2 * M_PI)) + (double)(k - i) / 2.; */
+              }
+              else {
+                contrast[k] = D_INF;
+              }
+            }
+          }
+        }
+      }
+
+      if (model_type[0] == MEAN_VARIANCE_CHANGE) {
+        contrast[i] = D_INF;
+        for (j = i + 1;j < length[index];j++) {
+//          if (contrast[j] > 0.) {
+          if (contrast[j] > sqrt((double)((nb_variable - 1) * (j - i + 1))) * ROUNDOFF_ERROR) {
+            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+                             ((nb_variable - 1) * (j - i + 1))) + log(2 * M_PI) + 1);
+/*            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+                             ((nb_variable - 1) * (j - i))) + log(2 * M_PI)) +
+                           (double)((nb_variable - 1) * (j - i)) / 2.; */
+          }
+          else {
+            contrast[j] = D_INF;
           }
         }
       }
@@ -5792,8 +5916,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 #   endif
 
     for (i = 1;i < nb_variable;i++) {
-      if ((variable_type[i - 1] == POISSON_CHANGE) || (variable_type[i - 1] == NUMERIC) ||
-          (variable_type[i - 1] == MEAN_CHANGE) || (variable_type[i - 1] == VARIANCE_CHANGE)) {
+      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+          (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
         psegment = int_sequence[index][0] + 1;
 
         if (type[i] != REAL_VALUE) {
@@ -5856,7 +5981,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     } */
 #   endif
 
-    if (variable_type[0] != MEAN_CHANGE) {
+    if (model_type[0] != MEAN_CHANGE) {
       segmentation_likelihood = forward[length[index] - 1][nb_segment - 1];
 
       if (likelihood != D_INF) {
@@ -5887,23 +6012,22 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     }
 
     else {
-      if (sequence_sum_square - forward[length[index] - 1][nb_segment - 1] > 0.) {
-        segmentation_likelihood = -((double)length[index] / 2.) *
-                                   (log((sequence_sum_square - forward[length[index] - 1][nb_segment - 1]) /
-                                     length[index]) + log(2 * M_PI) + 1);
-/*        segmentation_likelihood = -((double)length[index] / 2.) *
-                                   (log((sequence_sum_square - forward[length[index] - 1][nb_segment - 1]) /
-                                     (length[index] - nb_segment)) + log(2 * M_PI)) - (double)(length[index] - nb_segment) / 2.; */
+      if (forward[length[index] - 1][nb_segment - 1] < 0.) {
+        segmentation_likelihood = -((double)((nb_variable - 1) * length[index]) / 2.) *
+                                   (log(-forward[length[index] - 1][nb_segment - 1] /
+                                     ((nb_variable - 1) * length[index])) + log(2 * M_PI) + 1);
+/*        segmentation_likelihood = -((double)((nb_variable - 1) * length[index]) / 2.) *
+                                   (log(-forward[length[index] - 1][nb_segment - 1] /
+                                     ((nb_variable - 1) * (length[index] - nb_segment))) + log(2 * M_PI)) -
+                                   (double)((nb_variable - 1) * (length[index] - nb_segment)) / 2.; */
 
         for (i = 0;i < length[index];i++) {
           for (j = 0;j < nb_segment;j++) {
-            if (sequence_sum_square - backward_output[i][j] > 0.) {
-              backward_output[i][j] = pow((sequence_sum_square - backward_output[i][j]) /
-                                          (sequence_sum_square - forward[length[index] - 1][nb_segment - 1]) ,
-                                          -((double)length[index] / 2.));
-/*              backward_output[i][j] = exp(-((double)length[index] / 2.) *
-                                          log((sequence_sum_square - backward_output[i][j]) /
-                                              (sequence_sum_square - forward[length[index] - 1][nb_segment - 1]))); */
+            if (backward_output[i][j] < 0.) {
+              backward_output[i][j] = pow(backward_output[i][j] / forward[length[index] - 1][nb_segment - 1] ,
+                                          -((double)((nb_variable - 1) * length[index]) / 2.));
+/*              backward_output[i][j] = exp(-((double)((nb_variable - 1) * length[index]) / 2.) *
+                                          log(backward_output[i][j] / forward[length[index] - 1][nb_segment - 1])); */
             }
             else {
               backward_output[i][j] = 0.;
@@ -6082,7 +6206,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
  *  Calcul des L segmentations optimales et des profils de segmentation d'une sequence.
  *
  *  arguments : reference sur un objet Format_error, stream,
- *              identificateur de la sequence, nombre de segments, types des variables,
+ *              identificateur de la sequence, nombre de segments, types des modeles,
  *              type de sortie, format ('a' : ASCII, 's' : Spreadsheet),
  *              methode de calcul des segmentations (algorithme de programmation dynamique ou
  *              algorithme forward-backward de simulation), nombre de segmentations.
@@ -6090,7 +6214,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
  *--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(Format_error &error , ostream &os , int iidentifier ,
-                                      int nb_segment , int *variable_type , int output ,
+                                      int nb_segment , int *model_type , int output ,
                                       char format , int segmentation , int nb_segmentation) const
 
 {
@@ -6110,16 +6234,8 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if ((i > 0) && (variable_type[i] == MEAN_CHANGE)) {
-      status = false;
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << STAT_error[STATR_VARIABLE_TYPE];
-      error.update((error_message.str()).c_str());
-    }
-
-    if ((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL) ||
-        (variable_type[i] == POISSON_CHANGE)) {
+    if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -6147,7 +6263,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
           error.update((error_message.str()).c_str());
         }
 
-        else if (variable_type[i] == SYMBOLIC) {
+        else if (model_type[i] == MULTINOMIAL_CHANGE) {
           if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
@@ -6215,7 +6331,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
     rank = new double*[seq->nb_variable];
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == ORDINAL) {
+      if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
         rank[i] = seq->marginal[i]->rank_computation();
       }
       else {
@@ -6225,11 +6341,11 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
 
     for (i = 0;i < seq->nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
-        if (variable_type[0] != MEAN_CHANGE) {
-          likelihood = seq->forward_backward(i , nb_segment , variable_type , rank , &os ,
+        if (model_type[0] != MEAN_CHANGE) {
+          likelihood = seq->forward_backward(i , nb_segment , model_type , rank , &os ,
                                              output , format);
         }
-        segmentation_likelihood = seq->forward_backward_dynamic_programming(i , nb_segment , variable_type ,
+        segmentation_likelihood = seq->forward_backward_dynamic_programming(i , nb_segment , model_type ,
                                                                             rank , os , output , format ,
                                                                             likelihood);
         if (segmentation_likelihood == D_INF) {
@@ -6240,11 +6356,11 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
         else {
           switch (segmentation) {
           case FORWARD_DYNAMIC_PROGRAMMING :
-            seq->L_segmentation(i , nb_segment , variable_type , rank , os , format ,
+            seq->L_segmentation(i , nb_segment , model_type , rank , os , format ,
                                 nb_segmentation , likelihood);
             break;
           case FORWARD_BACKWARD_SAMPLING :
-            seq->forward_backward_sampling(i , nb_segment , variable_type , rank , os ,
+            seq->forward_backward_sampling(i , nb_segment , model_type , rank , os ,
                                            format , nb_segmentation);
             break;
           }
@@ -6270,7 +6386,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
  *  ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path, identificateur de la sequence,
- *              nombre de segments, types des variables, type de sortie, format de fichier
+ *              nombre de segments, types des modeles, type de sortie, format de fichier
  *              ('a' : ASCII, 's' : Spreadsheet), methode de calcul des segmentations
  *              (algorithme de programmation dynamique ou algorithme forward-backward
  *               de simulation), nombre de segmentations.
@@ -6278,7 +6394,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
  *--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_write(Format_error &error , const char *path ,
-                                      int iidentifier , int nb_segment , int *variable_type ,
+                                      int iidentifier , int nb_segment , int *model_type ,
                                       int output , char format , int segmentation ,
                                       int nb_segmentation) const
 
@@ -6295,7 +6411,7 @@ bool Sequences::segment_profile_write(Format_error &error , const char *path ,
   }
 
   else {
-    status = segment_profile_write(error , out_file , iidentifier , nb_segment , variable_type ,
+    status = segment_profile_write(error , out_file , iidentifier , nb_segment , model_type ,
                                    output , format , segmentation , nb_segmentation);
   }
 
@@ -6309,13 +6425,13 @@ bool Sequences::segment_profile_write(Format_error &error , const char *path ,
  *  des resultats au format Gnuplot.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
- *              identificateur de la sequence, nombre de segments, types des variables,
+ *              identificateur de la sequence, nombre de segments, types des modeles,
  *              type de sortie, titre des figures.
  *
  *--------------------------------------------------------------*/
 
 bool Sequences::segment_profile_plot_write(Format_error &error , const char *prefix ,
-                                           int iidentifier , int nb_segment , int *variable_type ,
+                                           int iidentifier , int nb_segment , int *model_type ,
                                            int output , const char *title) const
 
 {
@@ -6337,16 +6453,8 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if ((i > 0) && (variable_type[i] == MEAN_CHANGE)) {
-      status = false;
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << STAT_error[STATR_VARIABLE_TYPE];
-      error.update((error_message.str()).c_str());
-    }
-
-    if ((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL) ||
-        (variable_type[i] == POISSON_CHANGE)) {
+    if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -6374,7 +6482,7 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
           error.update((error_message.str()).c_str());
         }
 
-        else if (variable_type[i] == SYMBOLIC) {
+        else if (model_type[i] == MULTINOMIAL_CHANGE) {
           if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
@@ -6431,7 +6539,7 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 
     // ecriture des fichiers de donnees
 
-    i = (variable_type[0] == MEAN_CHANGE ? 0 : 1);
+    i = (model_type[0] == MEAN_CHANGE ? 0 : 1);
     data_file_name[i] << prefix << i << ".dat";
     data_out_file = new ofstream((data_file_name[i].str()).c_str());
 
@@ -6448,7 +6556,7 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
       rank = new double*[seq->nb_variable];
 
       for (i = 1;i < seq->nb_variable;i++) {
-        if (variable_type[i - 1] == ORDINAL) {
+        if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
           rank[i] = seq->marginal[i]->rank_computation();
         }
         else {
@@ -6456,8 +6564,8 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
         }
       }
 
-      if (variable_type[0] != MEAN_CHANGE) {
-        likelihood = seq->forward_backward(index , nb_segment , variable_type , rank ,
+      if (model_type[0] != MEAN_CHANGE) {
+        likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
                                            data_out_file , output , 'g');
         data_out_file->close();
         delete data_out_file;
@@ -6470,7 +6578,7 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
       likelihood = D_INF;
 #     endif
 
-      segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , variable_type ,
+      segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
                                                                           rank , *data_out_file ,
                                                                           output , 'g' , likelihood);
       data_out_file->close();
@@ -6508,8 +6616,9 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
           out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n";
 
           for (j = 1;j < seq->nb_variable;j++) {
-            if ((variable_type[j - 1] == POISSON_CHANGE) || (variable_type[j - 1] == NUMERIC) ||
-                (variable_type[j - 1] == MEAN_CHANGE) || (variable_type[j - 1] == VARIANCE_CHANGE)) {
+            if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+                (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+                (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
               out_file << "set title";
               if (title) {
                 out_file << " \"" << title << "\"";
@@ -6526,8 +6635,9 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 
             j = 2;
             for (k = 1;k < seq->nb_variable;k++) {
-              if ((variable_type[k - 1] == POISSON_CHANGE) || (variable_type[k - 1] == NUMERIC) ||
-                  (variable_type[k - 1] == MEAN_CHANGE) || (variable_type[k - 1] == VARIANCE_CHANGE)) {
+              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
+                  (model_type[k - 1] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
+                  (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
                 out_file << "plot [" << seq->index_parameter[index][0] << ":"
                          << seq->index_parameter[index][seq->length[index] - 1] << "] ["
                          << MIN(seq->min_value[k] , 0) << ":"
@@ -6658,8 +6768,9 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 
             j = 1;
             for (k = 1;k < seq->nb_variable;k++) {
-              if ((variable_type[k - 1] == POISSON_CHANGE) || (variable_type[k - 1] == NUMERIC) ||
-                  (variable_type[k - 1] == MEAN_CHANGE) || (variable_type[k - 1] == VARIANCE_CHANGE)) {
+              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
+                  (model_type[k - 1] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
+                  (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
                 out_file << "plot [0:" << seq->length[index] - 1 << "] ["
                          << MIN(seq->min_value[k] , 0) << ":"
                          << MAX(seq->max_value[k] , seq->min_value[k] + 1) << "] "
@@ -6806,12 +6917,12 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
  *
  *  arguments : reference sur un objet Format_error, stream,
  *              identificateur de la sequence, nombre de segments maximum,
- *              types des variables.
+ *              types des modeles.
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &os , int iidentifier ,
-                                                int max_nb_segment , int *variable_type) const
+                                                int max_nb_segment , int *model_type) const
 
 {
   bool status = true;
@@ -6835,17 +6946,14 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
 
-  for (i = 0;i < nb_variable;i++) {
-    if (variable_type[i] == MEAN_CHANGE) {
-      status = false;
-      ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                    << STAT_error[STATR_VARIABLE_TYPE];
-      error.update((error_message.str()).c_str());
-    }
+  if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == MEAN_VARIANCE_CHANGE)) {
+    status = false;
+    error.update(SEQ_error[SEQR_CHANGE_POINT_MODEL]);
+  }
 
-    if ((variable_type[i] == SYMBOLIC) || (variable_type[i] == ORDINAL) ||
-        (variable_type[i] == POISSON_CHANGE)) {
+  for (i = 0;i < nb_variable;i++) {
+    if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE)) {
       if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
         status = false;
         ostringstream error_message , correction_message;
@@ -6873,7 +6981,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           error.update((error_message.str()).c_str());
         }
 
-        else if (variable_type[i] == SYMBOLIC) {
+        else if (model_type[i] == MULTINOMIAL_CHANGE) {
           if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
@@ -6936,7 +7044,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
     rank = new double*[seq->nb_variable];
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == ORDINAL) {
+      if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
         rank[i] = marginal[i - 1]->rank_computation();
       }
       else {
@@ -6957,11 +7065,11 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
     end_sum_square = new double*[seq->nb_variable];
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if ((variable_type[i - 1] == SYMBOLIC) && (seq->marginal[i]->nb_value > max_nb_value)) {
+      if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (seq->marginal[i]->nb_value > max_nb_value)) {
         max_nb_value = seq->marginal[i]->nb_value;
       }
 
-      if (variable_type[i - 1] == SYMBOLIC) {
+      if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
         begin_frequency[i] = new int*[seq->length[0]];
         end_frequency[i] = new int*[seq->length[0]];
         for (j = 0;j < seq->length[0];j++) {
@@ -6981,7 +7089,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         end_frequency[i] = 0;
       }
 
-      if (variable_type[i - 1] == POISSON_CHANGE) {
+      if (model_type[i - 1] == POISSON_CHANGE) {
         begin_factorial_sum[i] = new double[seq->length[0]];
         end_factorial_sum[i] = new double[seq->length[0]];
 
@@ -6995,8 +7103,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         factorial[i] = 0;
       }
 
-      if ((variable_type[i - 1] == ORDINAL) || (variable_type[i - 1] == NUMERIC) ||
-          (variable_type[i - 1] == VARIANCE_CHANGE)){
+      if ((model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+          (model_type[i - 1] == VARIANCE_CHANGE)){
         begin_sum_square[i] = new double[seq->length[0]];
         end_sum_square[i] = new double[seq->length[0]];
       }
@@ -7032,7 +7140,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
     penalized_likelihood = new double[max_nb_segment + 1];
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == VARIANCE_CHANGE) {
+      if (model_type[i - 1] == VARIANCE_CHANGE) {
         mean[i] = 0.;
 
         if (seq->type[i] != REAL_VALUE) {
@@ -7060,7 +7168,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
     }
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == SYMBOLIC) {
+      if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
         for (j = 0;j < seq->marginal[i]->nb_value;j++) {
           frequency[j] = 0;
         }
@@ -7106,7 +7214,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
       }
 
-      else if (variable_type[i - 1] == POISSON_CHANGE) {
+      else if (model_type[i - 1] == POISSON_CHANGE) {
         sum = 0.;
         factorial_sum = 0.;
 
@@ -7130,7 +7238,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       }
 
       else {
-        switch (variable_type[i - 1]) {
+        switch (model_type[i - 1]) {
 
         case VARIANCE_CHANGE : {
           sum_square = 0.;
@@ -7161,7 +7269,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           break;
         }
 
-        case ORDINAL : {
+        case ORDINAL_GAUSSIAN_CHANGE : {
           pisequence = seq->int_sequence[0][i];
           sum_square = 0.;
           sum = rank[i][*pisequence++];
@@ -7184,7 +7292,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           break;
         }
 
-        case NUMERIC : {
+        case GAUSSIAN_CHANGE : {
           if (seq->type[i] != REAL_VALUE) {
             pisequence = seq->int_sequence[0][i];
             sum_square = 0.;
@@ -7252,7 +7360,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
     }
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == SYMBOLIC) {
+      if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
 /*        for (j = 0;j < seq->marginal[i]->nb_value;j++) {
           frequency[j] = 0;
         }
@@ -7327,7 +7435,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
       }
 
-      else if (variable_type[i - 1] == POISSON_CHANGE) {
+      else if (model_type[i - 1] == POISSON_CHANGE) {
 /*        sum = 0.;
         factorial_sum = 0.;
 
@@ -7364,7 +7472,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       }
 
       else {
-/*        switch (variable_type[i - 1]) {
+/*        switch (model_type[i - 1]) {
 
         case VARIANCE_CHANGE : {
           sum_square = 0.;
@@ -7395,7 +7503,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           break;
         }
 
-        case ORDINAL : {
+        case ORDINAL_GAUSSIAN_CHANGE : {
           pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
           sum_square = 0.;
           sum = rank[i][*pisequence--];
@@ -7418,7 +7526,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           break;
         }
 
-        case NUMERIC : {
+        case GAUSSIAN_CHANGE : {
           if (seq->type[i] != REAL_VALUE) {
             pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
             sum_square = 0.
@@ -7466,7 +7574,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
         } */
 
-        if (variable_type[i - 1] == VARIANCE_CHANGE) {
+        if (model_type[i - 1] == VARIANCE_CHANGE) {
           for (j = seq->length[0] - 1;j > 0;j--) {
             end_sum_square[i][j] = begin_sum_square[i][seq->length[0] - 1] - begin_sum_square[i][j - 1];
             residual[j] = end_sum_square[i][j];
@@ -7519,12 +7627,12 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       *psegment++ = 0;
     }
 
-    nb_parameter[nb_segment] = seq->nb_parameter_computation(0 , nb_segment , variable_type);
+    nb_parameter[nb_segment] = seq->nb_parameter_computation(0 , nb_segment , model_type);
 
     penalty[nb_segment] = log((double)seq->length[0]);
 
     penalized_likelihood[nb_segment] = 2 * likelihood[nb_segment] - nb_parameter[nb_segment] *
-                                       log((double)seq->length[0]) - penalty[nb_segment];
+                                       log((double)((seq->nb_variable - 1) * seq->length[0])) - penalty[nb_segment];
 
     // segmentation optimale en 2 segments
 
@@ -7560,10 +7668,10 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
                                             change_point[nb_segment][i]));
       }
 
-      nb_parameter[nb_segment] = seq->nb_parameter_computation(0 , nb_segment , variable_type);
+      nb_parameter[nb_segment] = seq->nb_parameter_computation(0 , nb_segment , model_type);
 
       penalized_likelihood[nb_segment] = 2 * likelihood[nb_segment] - nb_parameter[nb_segment] *
-                                         log((double)seq->length[0]) - penalty[nb_segment];
+                                         log((double)((seq->nb_variable - 1) * seq->length[0])) - penalty[nb_segment];
 
 #     ifdef MESSAGE
       os << "\n" << nb_segment << " " << SEQ_label[SEQL_SEGMENTS] << ":";
@@ -7587,7 +7695,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       }
 
       for (i = 1;i < seq->nb_variable;i++) {
-        if (variable_type[i - 1] == SYMBOLIC) {
+        if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
           if (begin_change_point < split_change_point) {
             for (j = 0;j < seq->marginal[i]->nb_value;j++) {
               frequency[j] = begin_frequency[i][begin_change_point - 1][j];
@@ -7682,7 +7790,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           }
         }
 
-        else if (variable_type[i - 1] == POISSON_CHANGE) {
+        else if (model_type[i - 1] == POISSON_CHANGE) {
           if (begin_change_point < split_change_point) {
             sum = begin_sum[i][begin_change_point - 1];
             factorial_sum = begin_factorial_sum[i][begin_change_point - 1];
@@ -7724,7 +7832,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
 
         else {
-          switch (variable_type[i - 1]) {
+          switch (model_type[i - 1]) {
 
           case VARIANCE_CHANGE : {
             if (begin_change_point < split_change_point) {
@@ -7790,7 +7898,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             break;
           }
 
-          case ORDINAL : {
+          case ORDINAL_GAUSSIAN_CHANGE : {
             if (begin_change_point < split_change_point) {
               sum_square = begin_sum_square[i][begin_change_point - 1];
               sum = begin_sum[i][begin_change_point - 1];
@@ -7835,7 +7943,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             break;
           }
 
-          case NUMERIC : {
+          case GAUSSIAN_CHANGE : {
             if (begin_change_point < split_change_point) {
               sum_square = begin_sum_square[i][begin_change_point - 1];
               sum = begin_sum[i][begin_change_point - 1];
@@ -7964,7 +8072,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       }
 
       for (i = 1;i < seq->nb_variable;i++) {
-        if (variable_type[i - 1] == SYMBOLIC) {
+        if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
 /*          if (end_change_point > split_change_point) {
             for (j = 0;j < seq->marginal[i]->nb_value;j++) {
               frequency[j] = end_frequency[i][end_change_point][j];
@@ -8118,7 +8226,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           }
         }
 
-        else if (variable_type[i - 1] == POISSON_CHANGE) {
+        else if (model_type[i - 1] == POISSON_CHANGE) {
 /*          if (end_change_point > split_change_point) {
             sum = end_sum[i][end_change_point];
             factorial_sum = end_factorial_sum[i][end_change_point];
@@ -8201,7 +8309,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         }
 
         else {
-/*          switch (variable_type[i - 1]) {
+/*          switch (model_type[i - 1]) {
 
           case VARIANCE_CHANGE : {
             if (end_change_point > split_change_point) {
@@ -8267,7 +8375,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             break;
           }
 
-          case ORDINAL : {
+          case ORDINAL_GAUSSIAN_CHANGE : {
             if (end_change_point > split_change_point) {
               sum_square = end_sum_square[i][end_change_point];
               sum = end_sum[i][end_change_point];
@@ -8312,7 +8420,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             break;
           }
 
-          case NUMERIC : {
+          case GAUSSIAN_CHANGE : {
             if (end_change_point > split_change_point) {
               sum_square = end_sum_square[i][end_change_point];
               sum = end_sum[i][end_change_point];
@@ -8404,7 +8512,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           }
           } */
 
-          if (variable_type[i - 1] == VARIANCE_CHANGE) {
+          if (model_type[i - 1] == VARIANCE_CHANGE) {
             if (end_change_point > split_change_point) {
               for (j = end_change_point - 1;j > split_change_point;j--) {
                 end_sum_square[i][j] = begin_sum_square[i][change_point[nb_segment][segment_index + 1] - 1] -
@@ -8535,7 +8643,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           merge_contrast = 0.;
 
           for (i = 1;i < seq->nb_variable;i++) {
-            if (variable_type[i - 1] == SYMBOLIC) {
+            if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
               for (j = 0;j < seq->marginal[i]->nb_value;j++) {
                 frequency[j] = begin_frequency[i][change_point[nb_segment][segment_index - 1] - 1][j] +
                                begin_frequency[i][split_change_point - 1][j];
@@ -8551,7 +8659,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               }
             }
 
-            else if (variable_type[i - 1] == POISSON_CHANGE) {
+            else if (model_type[i - 1] == POISSON_CHANGE) {
               sum = begin_sum[i][change_point[nb_segment][segment_index - 1] - 1] +
                     begin_sum[i][split_change_point - 1];
               factorial_sum = begin_factorial_sum[i][change_point[nb_segment][segment_index - 1] - 1] +
@@ -8564,7 +8672,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             }
 
             else {
-              if (variable_type[i - 1] == VARIANCE_CHANGE) {
+              if (model_type[i - 1] == VARIANCE_CHANGE) {
                 buff = begin_sum_square[i][change_point[nb_segment][segment_index - 1] - 1] +
                        begin_sum_square[i][split_change_point - 1];
               }
@@ -8606,7 +8714,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           merge_contrast = 0.;
 
           for (i = 1;i < seq->nb_variable;i++) {
-            if (variable_type[i - 1] == SYMBOLIC) {
+            if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
               for (j = 0;j < seq->marginal[i]->nb_value;j++) {
                 frequency[j] = end_frequency[i][split_change_point][j] +
                                end_frequency[i][change_point[nb_segment][segment_index]][j];
@@ -8622,7 +8730,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
               }
             }
 
-            else if (variable_type[i - 1] == POISSON_CHANGE) {
+            else if (model_type[i - 1] == POISSON_CHANGE) {
               sum = end_sum[i][split_change_point] +
                     end_sum[i][change_point[nb_segment][segment_index]];
               factorial_sum = end_factorial_sum[i][split_change_point] +
@@ -8635,7 +8743,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
             }
 
             else {
-              if (variable_type[i - 1] == VARIANCE_CHANGE) {
+              if (model_type[i - 1] == VARIANCE_CHANGE) {
                 buff = end_sum_square[i][split_change_point] +
                        end_sum_square[i][change_point[nb_segment][segment_index]];
               }
@@ -8710,10 +8818,10 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
                                               change_point[nb_segment][i]));
         }
 
-        nb_parameter[nb_segment] = seq->nb_parameter_computation(0 , nb_segment , variable_type);
+        nb_parameter[nb_segment] = seq->nb_parameter_computation(0 , nb_segment , model_type);
 
         penalized_likelihood[nb_segment] = 2 * likelihood[nb_segment] - nb_parameter[nb_segment] *
-                                           log((double)seq->length[0]) - penalty[nb_segment];
+                                           log((double)((seq->nb_variable - 1) * seq->length[0])) - penalty[nb_segment];
 
 #       ifdef MESSAGE
         os << nb_segment << " " << SEQ_label[SEQL_SEGMENTS] << ":";
@@ -8819,7 +8927,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
     delete [] frequency;
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if (variable_type[i - 1] == SYMBOLIC) {
+      if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
         for (j = 0;j < seq->length[0];j++) {
           delete [] begin_frequency[i][j];
           delete [] end_frequency[i][j];
