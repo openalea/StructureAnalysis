@@ -373,6 +373,11 @@ public :
     Correlation* output_autocorrelation_computation(Format_error &error , int variable ,
                                                     int output , int max_lag = MAX_LAG) const;
 
+    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
+                                   bool exhaustive = false) const;
+    bool ascii_data_write(Format_error &error , const char *path ,
+                          char format = 'c' , bool exhaustive = false) const;
+
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(Format_error &error , const char *path ,
                      bool exhaustive = false) const;
