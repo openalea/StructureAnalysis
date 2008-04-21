@@ -497,7 +497,7 @@ void Semi_markov::state_no_occurrence_probability(int state , double increment)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la loi du temps avant la premiere occurrence d'un etat
+ *  Calcul de la loi du temps avant la 1ere occurrence d'un etat
  *  pour une semi-chaine de Markov.
  *
  *  arguments : etat, nombre minimum de valeurs,
@@ -1143,7 +1143,7 @@ void Semi_markov::output_no_occurrence_probability(int variable , int output ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la loi du temps avant la premiere occurrence d'une observation
+ *  Calcul de la loi du temps avant la 1ere occurrence d'une observation
  *  pour une semi-chaine de Markov cachee.
  *
  *  arguments : indice du processus d'observation, observation,
