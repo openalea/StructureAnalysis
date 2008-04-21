@@ -229,9 +229,7 @@ Hidden_semi_markov* Hidden_semi_markov::thresholding(double min_probability) con
 
 
   hsmarkov = new Hidden_semi_markov(*this , false , false);
-
   hsmarkov->Chain::thresholding(min_probability);
-  hsmarkov->component_computation();
 
   for (i = 1;i <= nb_output_process;i++) {
     if (nonparametric_process[i]) {
