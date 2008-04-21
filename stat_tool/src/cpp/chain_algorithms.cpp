@@ -796,6 +796,26 @@ void Chain::thresholding(double min_probability)
     }
     while (!stop);
   }
+
+  if (accessibility) {
+    for (i = 0;i < nb_state;i++) {
+      delete [] accessibility[i];
+    }
+    delete [] accessibility;
+  }
+  accessibility = 0;
+
+  delete [] component_nb_state;
+
+  if (component) {
+    for (i = 0;i < nb_component;i++) {
+      delete [] component[i];
+    }
+    delete [] component;
+  }
+  nb_component = 0;
+
+  component_computation();
 }
 
 
