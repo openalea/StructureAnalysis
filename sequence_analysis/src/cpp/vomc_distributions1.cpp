@@ -317,7 +317,7 @@ void Variable_order_markov::state_no_occurrence_probability(int istate , double 
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la loi du temps avant la premiere occurrence d'un etat
+ *  Calcul de la loi du temps avant la 1ere occurrence d'un etat
  *  pour une chaine de Markov d'ordre variable.
  *
  *  arguments : etat, nombre minimum de valeurs,
@@ -979,7 +979,7 @@ void Variable_order_markov::output_no_occurrence_probability(int variable , int 
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la loi du temps avant la premiere occurrence d'une observation
+ *  Calcul de la loi du temps avant la 1ere occurrence d'une observation
  *  pour une chaine de Markov d'ordre variable cachee.
  *
  *  arguments : indice du processus d'observation, observation,
@@ -1487,10 +1487,11 @@ Correlation* Variable_order_markov::state_autocorrelation_computation(Format_err
   correl = 0;
   error.init();
 
-  if (nb_component > 1) {
+/*  if (nb_component > 1) {
     status = false;
     error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
-  }
+  } */
+
   if ((istate < 0) || (istate >= nb_state)) {
     status = false;
     ostringstream error_message;
@@ -1498,6 +1499,17 @@ Correlation* Variable_order_markov::state_autocorrelation_computation(Format_err
                   << SEQ_error[SEQR_NOT_PRESENT];
     error.update((error_message.str()).c_str());
   }
+
+  else {
+    for (i = 0;i < nb_component;i++) {
+      if ((component_nb_state[i] == 1) && (component[i][0] == istate)) {
+        status = false;
+        error.update(SEQ_error[SEQR_SINGLE_STATE_COMPONENT]);
+        break;
+      }
+    }
+  }
+
   if ((max_lag < max_order) || (max_lag > MAX_LAG)) {
     status = false;
     error.update(SEQ_error[SEQR_MAX_LAG]);
@@ -1695,10 +1707,10 @@ Correlation* Variable_order_markov::output_autocorrelation_computation(Format_er
   correl = 0;
   error.init();
 
-  if (nb_component > 1) {
+/*  if (nb_component > 1) {
     status = false;
     error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
-  }
+  } */
 
   if (nb_output_process == 0) {
     status = false;
