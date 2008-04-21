@@ -2054,6 +2054,9 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
     if (memory_count[i] > 0) {
       confidence_limit[i] = new double[nb_state * 2];
+      for (j = 0;j < nb_state * 2;j++) {
+        confidence_limit[i][j] = 0.;
+      }
     }
   }
 
@@ -2062,10 +2065,12 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
     if (memory_count[i] > 0) {
       for (j = 0;j < nb_state;j++) {
-        half_confidence_interval = standard_normal_value *
-                                   sqrt(transition[i][j] * (1. - transition[i][j]) / memory_count[i]);
-        confidence_limit[i][2 * j] = MAX(transition[i][j] - half_confidence_interval , 0.);
-        confidence_limit[i][2 * j + 1] = MIN(transition[i][j] + half_confidence_interval , 1.);
+        if ((transition[i][j] > 0.) && (transition[i][j] < 1.)) {
+          half_confidence_interval = standard_normal_value *
+                                     sqrt(transition[i][j] * (1. - transition[i][j]) / memory_count[i]);
+          confidence_limit[i][2 * j] = MAX(transition[i][j] - half_confidence_interval , 0.);
+          confidence_limit[i][2 * j + 1] = MIN(transition[i][j] + half_confidence_interval , 1.);
+        }
       }
     }
   }
@@ -2109,8 +2114,14 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
         os << "  ";
 
         for (k = 0;k < nb_state;k++) {
-          os << setw(width[1]) << confidence_limit[j][2 * k]
-             << setw(width[1]) << confidence_limit[j][2 * k + 1];
+          if ((transition[j][k] > 0.) && (transition[j][k] < 1.)) {
+            os << setw(width[1]) << confidence_limit[j][2 * k]
+               << setw(width[1]) << confidence_limit[j][2 * k + 1];
+          }
+          else {
+            os << setw(width[1]) << " "
+               << setw(width[1]) << " ";
+          }
         }
         os << "  " << setw(width[0]) << memory_count[j] << endl;
       }
@@ -3025,7 +3036,13 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
     seq->build_observation_histogram();
     seq->build_characteristic();
 
-    if (!divergence_flag) {
+    if ((!(seq->characteristics[0])) || (seq->marginal[0]->nb_value != nb_state)) {
+      delete seq;
+      seq = 0;
+      error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
+    }
+
+    else if (!divergence_flag) {
       markov->characteristic_computation(*seq , counting_flag);
 
       // calcul de la vraisemblance
