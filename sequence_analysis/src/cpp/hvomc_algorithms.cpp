@@ -4022,7 +4022,7 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ost
         seq_likelihood = forward_backward(*seq , i , os , format ,
                                           max_marginal_entropy , entropy);
 
-        if (seq_likelihood != D_INF) {
+        if (seq_likelihood == D_INF) {
           status = false;
 
           if (index == I_DEFAULT) {
@@ -4809,6 +4809,7 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
                                                                      bool divergence_flag) const
 
 {
+  register int i;
   Markovian_sequences *observ_seq;
   Variable_order_markov_data *seq;
 
@@ -4816,8 +4817,13 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
   seq = Variable_order_markov::simulation(error , hlength , counting_flag , divergence_flag);
 
   if ((seq) && (!divergence_flag)) {
+    seq->posterior_probability = new double[seq->nb_sequence];
+    for (i = 0;i < seq->nb_sequence;i++) {
+      seq->posterior_probability[i] = Variable_order_markov::likelihood_computation(*seq , i);
+    }
+
     observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq);
+    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
     delete observ_seq;
   }
 
@@ -4839,6 +4845,7 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
                                                                      bool counting_flag) const
 
 {
+  register int i;
   Markovian_sequences *observ_seq;
   Variable_order_markov_data *seq;
 
@@ -4846,8 +4853,13 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
   seq = Variable_order_markov::simulation(error , nb_sequence , length , counting_flag);
 
   if (seq) {
+    seq->posterior_probability = new double[seq->nb_sequence];
+    for (i = 0;i < seq->nb_sequence;i++) {
+      seq->posterior_probability[i] = Variable_order_markov::likelihood_computation(*seq , i);
+    }
+
     observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq);
+    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
     delete observ_seq;
   }
 
@@ -4870,6 +4882,7 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
                                                                      bool counting_flag) const
 
 {
+  register int i;
   Markovian_sequences *observ_seq;
   Variable_order_markov_data *seq;
 
@@ -4877,8 +4890,13 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
   seq = Variable_order_markov::simulation(error , nb_sequence , iseq , counting_flag);
 
   if (seq) {
+    seq->posterior_probability = new double[seq->nb_sequence];
+    for (i = 0;i < seq->nb_sequence;i++) {
+      seq->posterior_probability[i] = Variable_order_markov::likelihood_computation(*seq , i);
+    }
+
     observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq);
+    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
     delete observ_seq;
   }
 
