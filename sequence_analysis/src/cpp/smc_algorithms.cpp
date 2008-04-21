@@ -1858,7 +1858,13 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
     seq->build_observation_histogram();
     seq->build_characteristic(I_DEFAULT , true , (type == 'e' ? true : false));
 
-    if (!divergence_flag) {
+    if ((!(seq->characteristics[0])) || (seq->marginal[0]->nb_value != nb_state)) {
+      delete seq;
+      seq = 0;
+      error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
+    }
+
+    else if (!divergence_flag) {
       smarkov->characteristic_computation(*seq , counting_flag);
 
       // calcul de la vraisemblance
