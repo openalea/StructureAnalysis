@@ -1609,11 +1609,13 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
  *
  *  Ajout d'une serie de vecteurs absorbants a la fin de chaque sequence.
  *
- *  arguments : reference sur un objet Format_error, longueur.
+ *  arguments : reference sur un objet Format_error, variable, longueur des sequences,
+ *              longueur des series finales absorbantes.
  *
  *--------------------------------------------------------------*/
 
- Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error , int length_value) const
+ Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error , int variable ,
+                                                             int sequence_length , int run_length) const
 
 {
   bool status = true , initial_run_flag;
@@ -1631,20 +1633,51 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
 
-  if ((length_value != I_DEFAULT) && ((length_value <= max_length) ||
-       (length_value > max_length + MAX_ABSORBING_RUN_LENGTH))) {
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+    }
+  }
+
+  if ((sequence_length != I_DEFAULT) && ((sequence_length <= max_length) ||
+       (sequence_length > max_length + MAX_ABSORBING_RUN_LENGTH))) {
     status = false;
     error.update(SEQ_error[SEQR_SEQUENCE_LENGTH]);
   }
 
+  if ((run_length != I_DEFAULT) && ((run_length < 1) ||
+       (run_length > MAX_ABSORBING_RUN_LENGTH))) {
+    status = false;
+    error.update(SEQ_error[SEQR_RUN_LENGTH]);
+  }
+
   if (status) {
-    if (length_value == I_DEFAULT) {
-      length_value = max_length + ABSORBING_RUN_LENGTH;
+    ilength = new int[nb_sequence];
+
+    if (run_length == I_DEFAULT) {
+     if (sequence_length == I_DEFAULT) {
+        sequence_length = max_length + ABSORBING_RUN_LENGTH;
+      }
+
+      for (i = 0;i < nb_sequence;i++) {
+        ilength[i] = sequence_length;
+      }
     }
 
-    ilength = new int[nb_sequence];
-    for (i = 0;i < nb_sequence;i++) {
-      ilength[i] = length_value;
+    else {
+      for (i = 0;i < nb_sequence;i++) {
+        ilength[i] = length[i] + run_length;
+      }
     }
 
     seq = new Markovian_sequences(nb_sequence , identifier , ilength , index_parameter_type ,
@@ -1659,9 +1692,32 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
           for (k = 0;k < length[i];k++) {
             *pisequence++ = *cisequence++;
           }
-          for (k = length[i];k < seq->length[i];k++) {
-            *pisequence++ = marginal[j]->nb_value;
+
+          if (j == variable) {
+            for (k = length[i];k < seq->length[i];k++) {
+              *pisequence++ = marginal[j]->nb_value;
+            }
           }
+          else {
+            for (k = length[i];k < seq->length[i];k++) {
+              *pisequence++ = 0;
+            }
+          }
+
+#         ifdef DEBUG
+
+          // pour les donnees Fuji/Braeburn de successions d'UCs
+
+          if (run_length == 1) {
+            if ((j == 0) || (j == 1)) {
+              pisequence--;
+              *pisequence = *(pisequence - 1);
+            }
+            else if (j > 2) {
+              *--pisequence = 0;
+            }
+          }
+#         endif
         }
 
         else {
@@ -1670,34 +1726,24 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
           for (k = 0;k < length[i];k++) {
             *prsequence++ = *crsequence++;
           }
-
-          if (max_value[j] == (int)max_value[j]) {
-            for (k = length[i];k < seq->length[i];k++) {
-              *prsequence++ = max_value[j] + 1;
-            }
-          }
-          else {
-            for (k = length[i];k < seq->length[i];k++) {
-              *prsequence++ = ceil(max_value[j]);
-            }
+          for (k = length[i];k < seq->length[i];k++) {
+            *prsequence++ = 0.;
           }
         }
       }
     }
 
     for (i = 0;i < seq->nb_variable;i++) {
-      seq->min_value[i] = min_value[i];
-
-      if (max_value[i] == (int)max_value[i]) {
+      if (i == variable) {
+        seq->min_value[i] = min_value[i];
         seq->max_value[i] = max_value[i] + 1;
       }
       else {
-        seq->max_value[i] = ceil(max_value[i]);
+        seq->min_value_computation(i);
+        seq->max_value_computation(i);
       }
 
-      if (marginal[i]) {
-        seq->build_marginal_histogram(i);
-      }
+      seq->build_marginal_histogram(i);
     }
 
     initial_run_flag = false;
@@ -2191,7 +2237,7 @@ void Markovian_sequences::build_index_value(int variable)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes du temps avant la premiere occurrence
+ *  Construction des histogrammes du temps avant la 1ere occurrence
  *  d'une valeur entiere (pour une variable donnee).
  *
  *  argument : indice de la variable.
@@ -2845,7 +2891,7 @@ void Markovian_sequences::build_nb_occurrence_histogram(int variable)
  *
  *  Calcul du nombre de valeurs et de l'histogramme des valeurs,
  *  extraction des probabilites des valeurs en fonction de l'index,
- *  construction des histogrammes du temps avant la premiere occurrence d'une valeur,
+ *  construction des histogrammes du temps avant la 1ere occurrence d'une valeur,
  *  des histogrammes du temps de retour dans une valeur,
  *  des histogrammes du temps de sejour dans une valeur,
  *  des histogrammes du nombre de series d'une valeur par sequence et
@@ -2933,7 +2979,7 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
   register int i , j , k;
   int nb_state , nb_word , max_nb_word , value , max_frequency , total_frequency , width ,
       *power , *frequency , *word_value , *pisequence , *index , **word;
-  double *probability;
+  double nb_word_bound , *probability;
   long old_adjust;
 
 
@@ -2963,7 +3009,16 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
       }
 
       else {
-        if (pow((double)nb_state , word_length) > MAX_NB_WORD) {
+        max_nb_word = 0;
+        for (i = MAX(hlength->offset , word_length);i < hlength->nb_value;i++) {
+          max_nb_word += hlength->frequency[i] * (i - (word_length - 1));
+        }
+        nb_word_bound = pow((double)nb_state , word_length);
+        if (nb_word_bound < max_nb_word) {
+          max_nb_word = (int)nb_word_bound; 
+        }
+
+        if (max_nb_word > MAX_NB_WORD) {
           status = false;
           error.update(SEQ_error[SEQR_MAX_NB_WORD]);
         }
@@ -3005,17 +3060,6 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
       i *= marginal[variable]->nb_value;
     }
     power[word_length - 1] = i;
-
-    // calcul du nombre de mots
-
-    max_nb_word = 0;
-    for (i = MAX(hlength->offset , word_length);i < hlength->nb_value;i++) {
-      max_nb_word += hlength->frequency[i] * (i - (word_length - 1));
-    }
-    nb_word = (int)pow((double)marginal[variable]->nb_value , word_length);
-    if (nb_word < max_nb_word) {
-      max_nb_word = nb_word; 
-    }
 
     frequency = new int[max_nb_word];
     word_value = new int[max_nb_word];
