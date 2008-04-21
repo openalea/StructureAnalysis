@@ -7254,6 +7254,7 @@ Semi_markov_data* Hidden_semi_markov::simulation(Format_error &error , const His
                                                  bool counting_flag , bool divergence_flag) const
 
 {
+  register int i;
   Markovian_sequences *observ_seq;
   Semi_markov_data *seq;
 
@@ -7261,8 +7262,13 @@ Semi_markov_data* Hidden_semi_markov::simulation(Format_error &error , const His
   seq = Semi_markov::simulation(error , hlength , counting_flag , divergence_flag);
 
   if ((seq) && (!divergence_flag)) {
+    seq->posterior_probability = new double[seq->nb_sequence];
+    for (i = 0;i < seq->nb_sequence;i++) {
+      seq->posterior_probability[i] = Semi_markov::likelihood_computation(*seq , i);
+    }
+
     observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq);
+    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
     delete observ_seq;
   }
 
@@ -7284,6 +7290,7 @@ Semi_markov_data* Hidden_semi_markov::simulation(Format_error &error , int nb_se
                                                  int length , bool counting_flag) const
 
 {
+  register int i;
   Markovian_sequences *observ_seq;
   Semi_markov_data *seq;
 
@@ -7291,8 +7298,13 @@ Semi_markov_data* Hidden_semi_markov::simulation(Format_error &error , int nb_se
   seq = Semi_markov::simulation(error , nb_sequence , length , counting_flag);
 
   if (seq) {
+    seq->posterior_probability = new double[seq->nb_sequence];
+    for (i = 0;i < seq->nb_sequence;i++) {
+      seq->posterior_probability[i] = Semi_markov::likelihood_computation(*seq , i);
+    }
+
     observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq);
+    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
     delete observ_seq;
   }
 
@@ -7314,6 +7326,7 @@ Semi_markov_data* Hidden_semi_markov::simulation(Format_error &error , int nb_se
                                                  const Markovian_sequences &iseq , bool counting_flag) const
 
 {
+  register int i;
   Markovian_sequences *observ_seq;
   Semi_markov_data *seq;
 
@@ -7321,8 +7334,13 @@ Semi_markov_data* Hidden_semi_markov::simulation(Format_error &error , int nb_se
   seq = Semi_markov::simulation(error , nb_sequence , iseq , counting_flag);
 
   if (seq) {
+    seq->posterior_probability = new double[seq->nb_sequence];
+    for (i = 0;i < seq->nb_sequence;i++) {
+      seq->posterior_probability[i] = Semi_markov::likelihood_computation(*seq , i);
+    }
+
     observ_seq = seq->remove_variable_1();
-    seq->hidden_likelihood = likelihood_computation(*observ_seq);
+    seq->hidden_likelihood = likelihood_computation(*observ_seq , seq->posterior_probability);
     delete observ_seq;
   }
 
