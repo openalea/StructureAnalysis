@@ -1904,6 +1904,24 @@ void Variable_order_markov::threshold_application(double min_probability)
     }
   }
 
+  if (accessibility) {
+    for (i = 0;i < nb_state;i++) {
+      delete [] accessibility[i];
+    }
+    delete [] accessibility;
+  }
+  accessibility = 0;
+
+  delete [] component_nb_state;
+
+  if (component) {
+    for (i = 0;i < nb_component;i++) {
+      delete [] component[i];
+    }
+    delete [] component;
+  }
+  nb_component = 0;
+
   component_computation();
 
   if (next) {
@@ -3235,7 +3253,8 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
 
   ascii_print(os , file_flag);
 
-  if ((nb_component == 1) && (seq) && ((!hidden) || (seq->type[0] == STATE))) {
+//  if ((nb_component == 1) && (seq) && ((!hidden) || (seq->type[0] == STATE))) {
+  if ((seq) && ((!hidden) || (seq->type[0] == STATE))) {
     standard_normal_value = standard_normal_value_computation(0.025);
 
     if (!hidden) {
@@ -3298,11 +3317,18 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
           case false : {
             if (memory_type[i] == TERMINAL) {
               for (j = 0;j < nb_state;j++) {
-                half_confidence_interval = standard_normal_value *
-                                           sqrt(transition[i][j] * (1. - transition[i][j]) / memory_count[i]);
-                os << setw(width[0]) << MAX(transition[i][j] - half_confidence_interval , 0.)
-                   << setw(width[0]) << MIN(transition[i][j] + half_confidence_interval , 1.)
-                   << "| ";
+                if ((transition[i][j] > 0.) && (transition[i][j] < 1.)) {
+                  half_confidence_interval = standard_normal_value *
+                                             sqrt(transition[i][j] * (1. - transition[i][j]) / memory_count[i]);
+                  os << setw(width[0]) << MAX(transition[i][j] - half_confidence_interval , 0.)
+                     << setw(width[0]) << MIN(transition[i][j] + half_confidence_interval , 1.)
+                     << "| ";
+                }
+                else {
+                  os << setw(width[0]) << " "
+                     << setw(width[0]) << " "
+                     << "| ";
+                }
               }
             }
 
@@ -4819,6 +4845,61 @@ bool Variable_order_markov_data::ascii_write(Format_error &error , const char *p
       markov->ascii_write(out_file , this , exhaustive , true ,
                           ::test_hidden(markov->nb_output_process , markov->nonparametric_process));
     }
+  }
+
+  return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'un objet Variable_order_markov_data.
+ *
+ *  arguments : stream, format (ligne/colonne), flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
+
+ostream& Variable_order_markov_data::ascii_data_write(ostream &os , char format ,
+                                                      bool exhaustive) const
+
+{
+  Markovian_sequences::ascii_write(os , exhaustive , false);
+  ascii_print(os , format , false , posterior_probability);
+
+  return os;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'un objet Variable_order_markov_data dans un fichier.
+ *
+ *  arguments : reference sur un objet Format_error, path,
+ *              format (ligne/colonne), flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
+
+bool Variable_order_markov_data::ascii_data_write(Format_error &error , const char *path ,
+                                                  char format , bool exhaustive) const
+
+{
+  bool status = false;
+  ofstream out_file(path);
+
+
+  error.init();
+
+  if (!out_file) {
+    status = false;
+    error.update(STAT_error[STATR_FILE_NAME]);
+  }
+
+  else {
+    status = true;
+    if (format != 'a') {
+      Markovian_sequences::ascii_write(out_file , exhaustive , true);
+    }
+    ascii_print(out_file , format , true , posterior_probability);
   }
 
   return status;
