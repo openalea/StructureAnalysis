@@ -673,9 +673,7 @@ Semi_markov* Semi_markov::thresholding(double min_probability) const
 
 
   smarkov = new Semi_markov(*this , false , false);
-
   smarkov->Chain::thresholding(min_probability);
-  smarkov->component_computation();
 
   for (i = 1;i <= smarkov->nb_output_process;i++) {
     if (smarkov->nonparametric_process[i]) {
@@ -2330,6 +2328,60 @@ bool Semi_markov_data::ascii_write(Format_error &error , const char *path ,
       semi_markov->ascii_write(out_file , this , exhaustive , true ,
                                ::test_hidden(semi_markov->nb_output_process , semi_markov->nonparametric_process));
     }
+  }
+
+  return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'un objet Semi_markov_data.
+ *
+ *  arguments : stream, format (ligne/colonne), flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
+
+ostream& Semi_markov_data::ascii_data_write(ostream &os , char format , bool exhaustive) const
+
+{
+  Markovian_sequences::ascii_write(os , exhaustive , false);
+  ascii_print(os , format , false , posterior_probability);
+
+  return os;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'un objet Semi_markov_data dans un fichier.
+ *
+ *  arguments : reference sur un objet Format_error, path,
+ *              format (ligne/colonne), flag niveau de detail.
+ *
+ *--------------------------------------------------------------*/
+
+bool Semi_markov_data::ascii_data_write(Format_error &error , const char *path ,
+                                        char format , bool exhaustive) const
+
+{
+  bool status = false;
+  ofstream out_file(path);
+
+
+  error.init();
+
+  if (!out_file) {
+    status = false;
+    error.update(STAT_error[STATR_FILE_NAME]);
+  }
+
+  else {
+    status = true;
+    if (format != 'a') {
+      Markovian_sequences::ascii_write(out_file , exhaustive , true);
+    }
+    ascii_print(out_file , format , true , posterior_probability);
   }
 
   return status;
