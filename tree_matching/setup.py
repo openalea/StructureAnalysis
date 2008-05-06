@@ -18,7 +18,7 @@ setup_requires = install_requires + ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Tree_Matching',
-          version='0.1',
+          version='0.3.0',
           author='Pascal Ferraro, Aida Ouangraoua',
           description='Tree matching library',
           url='',
