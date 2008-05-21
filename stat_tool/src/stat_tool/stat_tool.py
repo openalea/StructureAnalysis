@@ -80,7 +80,7 @@ class _PlotManager:
                 g(c_commands)
                 del g
         for tmpfile in file_list:
-            os.remove(os.getcwd()+os.sep+tmpfile)
+            os.remove(os.getcwd()+'/'+tmpfile)
 
     def __replacestr(self, message, string, subst):
         # replace string by subst in message
@@ -215,9 +215,9 @@ class Histogram:
         try:
             file_list=[]
             if ViewPoint is None:
-                self.__histo.plot_write(os.getcwd()+os.sep+prefix, Title)
+                self.__histo.plot_write(os.getcwd()+'/'+prefix, Title)
             else:
-                self.__histo.plot_write_survival(os.getcwd()+os.sep+prefix, 
+                self.__histo.plot_write_survival(os.getcwd()+'/'+prefix, 
                                                  Title)
             # build the list of the files actually created: 
             for var in range(3):
@@ -234,7 +234,7 @@ class Histogram:
                 for extension in [".plot", ".print"]]
         except RuntimeError, f:
             for tmpfile in file_list:
-                os.remove(os.getcwd()+os.sep+tmpfile)
+                os.remove(os.getcwd()+'/'+tmpfile)
             raise FormatError, f
         else:
             if ViewPoint==None:
