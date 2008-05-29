@@ -3,7 +3,7 @@
 #use this file to pass custom parameter to SConstruct script
 
 import sys
-if('win' in sys.platform):
+if('win32' in sys.platform):
     compiler='mingw'
 
 else:
