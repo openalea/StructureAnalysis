@@ -320,7 +320,7 @@ class HiddenMarkovTree:
                     import random
                     prefix+=str(random.randint(1,9))
             try:
-                self.__chmt.Plot(os.getcwd()+os.sep+prefix, Title)
+                self.__chmt.Plot(os.getcwd()+"/"+prefix, Title)
                 # build the list of the created files: 
                 for var in range(self.__chmt.NbInt()+1):
                     for char in [str(c) for c in range(5)]+[""]:
@@ -391,7 +391,7 @@ class HiddenMarkovTree:
                     import random
                     prefix+=str(random.randint(1,9))
             try:
-                self.__chmt.StateProfilePlot(os.getcwd()+os.sep+prefix, 
+                self.__chmt.StateProfilePlot(os.getcwd()+"/"+prefix, 
                                              Title,
                                              TreeId,
                                              EndVertex,
@@ -704,7 +704,7 @@ class HiddenMarkovTreeData(trees.Trees):
                     import random
                     prefix+=str(random.randint(1,9))
             try:
-                self.__ctrees.Plot(os.getcwd()+os.sep+prefix, Title)
+                self.__ctrees.Plot(os.getcwd()+"/"+prefix, Title)
                 # build the list of the created files: 
                 for var in [str(self._valid_cvariable(v)+1) 
                             for v in range(self.NbInt())]+["0"]:

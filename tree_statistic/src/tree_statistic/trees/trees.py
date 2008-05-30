@@ -1970,7 +1970,7 @@ class Trees:
                     import random
                     prefix+=str(random.randint(1,9))
             try:
-                self.__ctrees.Plot(os.getcwd()+os.sep+prefix, Title)
+                self.__ctrees.Plot(os.getcwd()+"/"+prefix, Title)
                 # build the list of the created files: 
                 for var in range(self.NbInt()):
                     for char in [str(c) for c in range(5)]+[""]:
