@@ -40,6 +40,7 @@
 #include <math.h>
 #include "tool/timer.h"
 using namespace std;
+VPTOOLS_USING(Timer)
 
 TreeMatch::TreeMatch()
 {
@@ -1242,7 +1243,7 @@ void TreeMatch::weigthedMatching()
         {
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance=MatchByAttribute(*_trees[i_tree],
@@ -1316,7 +1317,7 @@ void TreeMatch::selfSimilarityWeigthedMatching()
       _distances[tree].resize(nbTree-tree,0.0);
     }
 
-  TOOLS(Timer) chrono;
+  Timer chrono;
   chrono.start();
 
   DistanceType matching_distance=MatchByAttribute(*_trees[0],
@@ -1341,7 +1342,7 @@ void TreeMatch::localWeigthedMatching()
         {
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance=LocalMatchByAttribute(*_trees[i_tree],
@@ -1590,7 +1591,7 @@ void TreeMatch::topologicalMatching()
           int tree_size1=_trees[i_tree]->getNbVertex();
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance;
@@ -1715,7 +1716,7 @@ void TreeMatch::localTopologicalMatching()
           int tree_size1=_trees[i_tree]->getNbVertex();
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance;
@@ -1781,7 +1782,7 @@ void TreeMatch::sequenceMatching()
           int tree_size1=_trees[i_tree]->getNbVertex();
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance;
@@ -1878,7 +1879,7 @@ void TreeMatch::selkowMatching()
           int tree_size1=_trees[i_tree]->getNbVertex();
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance;

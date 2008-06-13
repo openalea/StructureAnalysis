@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -53,7 +50,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -84,10 +81,10 @@ struct ZoneSimple : public Zone
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWZone TOOLS(Zone)
-#define RWZoneSimple TOOLS(ZoneSimple)
+#define RWZone VPTOOLS(Zone)
+#define RWZoneSimple VPTOOLS(ZoneSimple)
 
 /* ----------------------------------------------------------------------- */
 

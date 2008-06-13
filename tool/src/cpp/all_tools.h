@@ -46,20 +46,13 @@
 
 /// Utilities
 #include "util_assert.h"
-#include "util_glut.h"
 #include "util_string.h"
 
-#include "util_tuple.h"
 #include "util_types.h"
 
 #include "util_math.h"
-#include "util_polymath.h"
-
-#include "util_matrix.h"
-#include "util_vector.h"
 
 /// other tools
-#include "bfstream.h"
 #include "dirnames.h"
 #include "errormsg.h"
 #include "rcobject.h"

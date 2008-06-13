@@ -51,46 +51,12 @@
 #include "config.h"
 #include "tools_namespace.h"
 
-/* -------------------------------------------------------------------------- 
- * PRECISION OPTIONS
- * --------------------------------------------------------------------------
- */
-
-#include <cfloat>
-
-#ifdef GEOM_USE_DOUBLE
-/// type for real values. can be float or double depending to the macro GEOM_USE_DOUBLE
-typedef double real_t;
-/// min real value
-const real_t REAL_MIN = DBL_MIN;
-/// max real value
-const real_t REAL_MAX = DBL_MAX;
-/// real epsilon value
-const real_t REAL_EPSILON = DBL_EPSILON;
-#else
-/// type for real values. can be float or double depending to the macro GEOM_USE_DOUBLE
-typedef float real_t;
-/// min real value
-const real_t REAL_MIN = FLT_MIN;
-/// max real value
-const real_t REAL_MAX = FLT_MAX;
-/// real epsilon value
-const real_t REAL_EPSILON = FLT_EPSILON;
-#endif
-
-/// Geom epsilon value
-#define GEOM_EPSILON 1e-5
-/// Geom tolerance value
-#define GEOM_TOLERANCE 1e-10
-/// Geom out of range value
-#define GEOM_OUT_OF_RANGE LONG_MAX;
 
 #ifdef _WIN64
 #define __WORDSIZE  64
 #endif
 
 // Basic types redefinition
-
 #ifdef __GNUC__
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS
@@ -142,8 +108,6 @@ typedef unsigned int uint32_t;
 #ifndef UINT16_MAX
 #define UINT16_MAX USHRT_MAX
 #endif
-/// type int32_t (long)
-//typedef long int32_t;
 /// int32_t min value
 #ifndef INT32_MIN 
 #define INT32_MIN LONG_MIN
@@ -166,6 +130,8 @@ typedef unsigned int      uint_t;
 typedef int               int_t;
 
 #include <stddef.h>
+
+
 
 
 /* ----------------------------------------------------------------------- */

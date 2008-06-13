@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -40,7 +37,7 @@
 
 #ifdef RWOUT
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 Time::Time( unsigned hour, unsigned minute, unsigned second )
 {
@@ -78,6 +75,6 @@ void Time::extract( struct tm* t ) const
 	if(timeinfo!=NULL)*t = *timeinfo;
 }
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 #endif

@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -55,7 +52,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -73,7 +70,7 @@ class CDate;
 
 const unsigned long Epoch= 2177452800UL;
 
-class GEOM_API Time
+class VPTOOLS_API Time
 {
 
 // seconds 01/01/1901->01/01/1970
@@ -110,10 +107,10 @@ public:
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWTime TOOLS(Time)
-#define RWTimer TOOLS(Timer)
+#define RWTime VPTOOLS(Time)
+#define RWTimer VPTOOLS(Timer)
 
 /* ----------------------------------------------------------------------- */
 

@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -55,7 +52,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -145,25 +142,25 @@ TOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWTValVector TOOLS(ValVector)
-#define RWTValVectorIterator TOOLS(ValVectorIt)::iterator
+#define RWTValVector VPTOOLS(ValVector)
+#define RWTValVectorIterator VPTOOLS(ValVectorIt)::iterator
 
-#define RWTValOrderedVector TOOLS(ValOrdVector)
-#define RWTValOrderedVectorIterator TOOLS(ValOrdVectorIt)::iterator
+#define RWTValOrderedVector VPTOOLS(ValOrdVector)
+#define RWTValOrderedVectorIterator VPTOOLS(ValOrdVectorIt)::iterator
 
-#define RWTPtrVector TOOLS(PtrVector)
-#define RWTPtrVectorIterator TOOLS(PtrVectorIt)::iterator
+#define RWTPtrVector VPTOOLS(PtrVector)
+#define RWTPtrVectorIterator VPTOOLS(PtrVectorIt)::iterator
 
-#define RWTPtrOrderedVector TOOLS(PtrOrdVector)
-#define RWTPtrOrderedVectorIterator TOOLS(PtrOrdVectorIt)::iterator
+#define RWTPtrOrderedVector VPTOOLS(PtrOrdVector)
+#define RWTPtrOrderedVectorIterator VPTOOLS(PtrOrdVectorIt)::iterator
 
-#define RWTValSortedVector TOOLS(ValSortedVector)
-#define RWTValSortedVectorIterator TOOLS(ValSortedVectorIt)::iterator
+#define RWTValSortedVector VPTOOLS(ValSortedVector)
+#define RWTValSortedVectorIterator VPTOOLS(ValSortedVectorIt)::iterator
 
-#define RWTPtrSortedVector TOOLS(PtrSortedVector)
-#define RWTPtrSortedVectorIterator TOOLS(PtrSortedVectorIt)::iterator
+#define RWTPtrSortedVector VPTOOLS(PtrSortedVector)
+#define RWTPtrSortedVectorIterator VPTOOLS(PtrSortedVectorIt)::iterator
 
 /* ----------------------------------------------------------------------- */
 

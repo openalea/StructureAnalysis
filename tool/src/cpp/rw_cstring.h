@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -55,7 +52,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -69,7 +66,7 @@ TOOLS_BEGIN_NAMESPACE
 */
 
 
-class GEOM_API RWString : public std::string
+class VPTOOLS_API RWString : public std::string
 {
  public:
  enum stripType { leading, trailing, both };
@@ -128,9 +125,9 @@ class GEOM_API RWString : public std::string
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-typedef TOOLS(RWString) RWCString;
+typedef VPTOOLS(RWString) RWCString;
 
 /* ----------------------------------------------------------------------- */
 

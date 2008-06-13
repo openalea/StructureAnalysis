@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -44,7 +41,7 @@ using namespace std;
 /* ----------------------------------------------------------------------- */
 
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -96,6 +93,6 @@ RWString RWString::strip( stripType s, char c )
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 #endif

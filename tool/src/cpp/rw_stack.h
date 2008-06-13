@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -54,7 +51,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -89,9 +86,9 @@ struct RwStack : public stack<T,C>
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWTStack TOOLS(RwStack)
+#define RWTStack VPTOOLS(RwStack)
 
 /* ----------------------------------------------------------------------- */
 

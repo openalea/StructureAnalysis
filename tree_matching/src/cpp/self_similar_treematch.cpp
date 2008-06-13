@@ -36,6 +36,7 @@
 
 
 #include "treematch.h"
+VPTOOLS_USING(Timer)
 //------------------------------------------------------------------------------------------------------
 // SELF SIMILAR TOPOLOGICAL MATCHING
 //------------------------------------------------------------------------------------------------------
@@ -69,7 +70,7 @@ void TreeMatch::selfSimilarityTopologicalMatching()
       _distances[tree].resize(nbTree-tree,0.0);
     }
 
-  TOOLS(Timer) chrono;
+  Timer chrono;
   chrono.start();
   if (nb_tree==1)
     DistanceType matching_distance=MatchByTopology(*_trees[0],
@@ -113,7 +114,7 @@ void TreeMatch::selfSimilarityComplexMatching()
       _distances[tree].resize(nbTree-tree,0.0);
     }
 
-  TOOLS(Timer) chrono;
+  Timer chrono;
   chrono.start();
   if (nb_tree==1)
     DistanceType matching_distance=MatchByComplex(*_trees[0],
@@ -215,7 +216,7 @@ void TreeMatch::endSpaceFreeTopologicalMatching()
       _distances[tree].resize(nbTree-tree,0.0);
     }
 
-  TOOLS(Timer) chrono;
+  Timer chrono;
   chrono.start();
   DistanceType matching_distance=MatchEndSpaceFreeByTopology(*_trees[0],
 							     *_trees[1]);
@@ -263,7 +264,7 @@ void TreeMatch::fractalTopologicalMatching()
       _distances[tree].resize(nb_tree-tree,0.0);
     }
 
-  TOOLS(Timer) chrono;
+  Timer chrono;
   chrono.start();
   
   DistanceType distance_to_self_similar_tree = 0.0;

@@ -7,9 +7,6 @@
  *
  *       File author(s): C. Nouguier & F. Boudon (frederic.boudon@cirad.fr) nouguier 
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               
  *  ----------------------------------------------------------------------------
@@ -37,8 +34,8 @@
 
 
 
-#ifndef __util_math_h__
-#define __util_math_h__
+#ifndef __util_vpmath_h__
+#define __util_vpmath_h__
 
 /*! \file util_math.h
     \brief File that contains some math utility.
@@ -48,65 +45,11 @@
 #include <algorithm> // For min, max ...
 
 /* ----------------------------------------------------------------------- */
-
-#ifdef GEOM_USE_DOUBLE
-
-/// value of a degree in radian
-#define GEOM_RAD 0.01745329252
-#define GEOM_RAD 0.01745329252
-/// value of a radian in degree 
-#define GEOM_DEG 57.295779513
-/// value of 2 pi
-#define GEOM_TWO_PI 6.2831853072
-
-#ifdef M_PI
-#  define GEOM_PI M_PI
-#else
+#ifndef M_PI
 /// value of pi 
-#  define GEOM_PI 3.14159265358979323846
-/// value of pi
-#  define M_PI GEOM_PI
-#endif //M_PI
-
-#ifdef M_PI_2
-/// value of pi / 2
-#  define GEOM_HALF_PI M_PI_2
-#else
-/// value of pi / 2
-#  define GEOM_HALF_PI 1.5707963286
-/// value of pi / 2
-#  define M_PI_2 GEOM_HALF_PI 
-#endif //M_PI_2
-
-#else
-
-/// value of a degree in radian
-#define GEOM_RAD 0.01745329252f
-/// value of a radian in degree 
-#define GEOM_DEG 57.295779513f
-/// value of 2 pi
-#define GEOM_TWO_PI 6.2831853072f
-
-#ifdef M_PI
-#  define GEOM_PI M_PI
-#else
-/// value of pi 
-#  define GEOM_PI 3.14159265358979323846f
-/// value of pi
-#  define M_PI GEOM_PI
+#  define M_PI 3.14159265358979323846
 #endif
 
-#ifdef M_PI_2
-/// value of pi / 2
-#  define GEOM_HALF_PI M_PI_2
-#else
-/// value of pi / 2
-#  define GEOM_HALF_PI 1.5707963286f
-/// value of pi / 2
-#  define M_PI_2 GEOM_HALF_PI 
-#endif
-
-#endif
 
 /// Returns the cube value of \e v. 
 inline float cb( const float& v ) {

@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Nouguier (christophe.nouguier@cirad.fr) 
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               
  *  ----------------------------------------------------------------------------
@@ -48,11 +45,12 @@
 
 
 #include <ctime>
+#include <assert.h>
 #include "tools_namespace.h"
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -65,7 +63,7 @@ TOOLS_BEGIN_NAMESPACE
 
 */
 
-class GEOM_API Timer
+class Timer
 {
 
  public:
@@ -73,37 +71,59 @@ class GEOM_API Timer
   /*!
     Construcs and starts a Timer.
   */
-  Timer( );
+  Timer( ) :
+	 _on(true), 
+	 _start((clock_t)0), 
+	 _stop((clock_t)0)
+  {
+  }
 
+  // Destructor
+	 ~Timer() {} ; 
 
   /*!
     Returns the number of seconds elpased since \e this timer is 
     in the running state.
   */
-  double elapsedTime( ) const;
+  inline double elapsedTime( ) const {
+	return (double)((_on ? clock() : _stop) - _start) / CLOCKS_PER_SEC;
+  }
 
   /*!
     returns true if \e this timer is in the running state.
   */
-  inline bool isRunning( ) const
-    {
-      return _on;
-    }
+  inline bool isRunning( ) const { return _on; }
 
   /*!
     Resets \e this timer and returns the elapsed time.
   */
-  double reset( );
+  inline double reset( )
+  {
+    register double laps = elapsedTime();
+    _start = _stop = clock();
+    return laps;
+  }
 
   /*!
     Puts \e this timer in the running state.
   */
-  void start( );
+  inline void start( ){
+	_start = _stop = clock();
+	_on = true;
+  }
+
 
   /*!
     Stops \e this. and returns the elpased time.
   */
-  double stop( );
+  inline double stop( )
+  {
+   register double laps = elapsedTime();
+   _stop = clock();
+   _on = false;
+   return laps;
+  }
+
 
   /*!
     Pauses for a specified number of seconds \e sec
@@ -111,7 +131,14 @@ class GEOM_API Timer
     \par Preconditions
     - \e sec must be positive.
   */
-  static void wait( double sec );
+  inline static void wait( double sec )
+  {
+	// preconditions
+	assert(0 < sec);
+
+	clock_t goal = (long)(sec * CLOCKS_PER_SEC) + clock();
+	while( goal > clock() );
+  }
 
  private:
 
@@ -124,7 +151,7 @@ class GEOM_API Timer
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 

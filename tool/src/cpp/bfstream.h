@@ -37,8 +37,8 @@
 
 
 
-#ifndef __bfstream_h__
-#define __bfstream_h__
+#ifndef __vp_bfstream_h__
+#define __vp_bfstream_h__
 
 /*! \file bfstream.h
     \brief File for binary file stream
@@ -50,8 +50,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-//using namespace std;
-#include "util_tuple.h"
 
 /* ----------------------------------------------------------------------- */
 
@@ -75,7 +73,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -112,7 +110,7 @@ inline void flipBytes( const char * src, char * dest, size_t n )
     \brief bofstream specializes the \c ofstream class to store variables
     in binary format. */
 
-class GEOM_API bofstream
+class bofstream
 {
 
 public:
@@ -227,27 +225,6 @@ public:
     return *this;
   }
 
-  /// Binary write of a \b Tuple2.
-  template<class T>
-  bofstream& operator<<( const Tuple2<T>& t )
-  {
-    return (operator<<(t.getAt(0))).operator<<(t.getAt(1));
-  }
-
-  /// Binary write of a \b Tuple3.
-  template<class T>
-  bofstream& operator<<( const Tuple3<T>& t )
-  {
-    return ((operator<<(t.getAt(0))).operator<<(t.getAt(1))).operator<<(t.getAt(2));
-  }
-
-  /// Binary write of a \b Tuple4.
-  template<class T>
-  bofstream& operator<<( const Tuple4<T>& t )
-  {
-    return (((operator<<(t.getAt(0))).operator<<(t.getAt(1))).operator<<(t.getAt(2))).operator<<(t.getAt(3));
-  }
-
   /// Binary write of \e data of size \e size.
   void write( const char * data, size_t size )
   {
@@ -299,7 +276,7 @@ protected:
     \brief bifstream specializes the \c ifstream class to restore variables
     in binary format. */
 
-class GEOM_API bifstream
+class  bifstream
 {
 
 public:
@@ -398,27 +375,6 @@ public:
   bifstream& operator>>( unsigned short& us )
   {
     return _readBytes((char *)&us,sizeof(us));
-  }
-
-  /// Binary read of a \b Tuple2.
-  template<class T>
-  bifstream& operator>>( Tuple2<T>& t )
-  {
-    return (operator>>(t.getAt(0))).operator>>(t.getAt(1));
-  }
-
-  /// Binary read of a \b Tuple3.
-  template<class T>
-  bifstream& operator>>( Tuple3<T>& t )
-  {
-    return ((operator>>(t.getAt(0))).operator>>(t.getAt(1))).operator>>(t.getAt(2));
-  }
-
-  /// Binary read of a \b Tuple4.
-  template<class T>
-  bifstream& operator>>( Tuple4<T>& t )
-  {
-    return (((operator>>(t.getAt(0))).operator>>(t.getAt(1))).operator>>(t.getAt(2))).operator>>(t.getAt(3));
   }
 
   /// Binary read of \e data of size \e size.
@@ -563,7 +519,7 @@ private:
     \brief beofstream specializes the \c bofstream class to store variables
     in big endian format. */
 
-class GEOM_API beofstream : public bofstream
+class  beofstream : public bofstream
 {
 
 public:
@@ -610,7 +566,7 @@ private:
     \brief beifstream specializes the \c bifstream class to restore variables
     in big endian format. */
 
-class GEOM_API beifstream : public bifstream
+class  beifstream : public bifstream
 {
 
 public:
@@ -652,7 +608,7 @@ private:
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 

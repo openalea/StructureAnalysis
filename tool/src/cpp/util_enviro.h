@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr) 
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               
  *  ----------------------------------------------------------------------------
@@ -39,64 +36,58 @@
     \brief Function relative to the environment.
 */
 
-#ifndef __util_enviro_h__
-#define __util_enviro_h__
+#ifndef __util_vp_enviro_h__
+#define __util_vp_enviro_h__
 
 #include <string>
 #include "tools_namespace.h"
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /// Get the Home directory.
-GEOM_API std::string getHome();
+VPTOOLS_API std::string getHome();
 
 /// Get the Current Working directory.
-GEOM_API std::string getCwd();
+VPTOOLS_API std::string getCwd();
 
 /// Get AMAPmod directory.
-GEOM_API std::string getAMAPmodDir();
-
-/// Get Symbol directory.
-GEOM_API std::string getSymbolDir();
+VPTOOLS_API std::string getAMAPmodDir();
 
 /// Set AMAPmod directory.
-GEOM_API void setAMAPmodDir(const std::string&);
-
-/// Set Symbol directory.
-GEOM_API void setSymbolDir(const std::string&);
+VPTOOLS_API void setAMAPmodDir(const std::string&);
 
 /// Get User name
-GEOM_API std::string getUserName();
+VPTOOLS_API std::string getUserName();
 
 /// Get Family Name of the Operating System [ex:Windows,Linux].
-GEOM_API std::string getOSFamily();
+VPTOOLS_API std::string getOSFamily();
 
 /// Get Name of the Operating System [ex:Windows NT].
-GEOM_API std::string getOSName();
+VPTOOLS_API std::string getOSName();
 
 /// Get Release of the Operating System [ex:5.1].
-GEOM_API std::string getOSRelease();
+VPTOOLS_API std::string getOSRelease();
 
 /// Get Version of the Operating System [ex:2840].
-GEOM_API std::string getOSVersion();
+VPTOOLS_API std::string getOSVersion();
 
 /// Get the machine name.
-GEOM_API std::string getMachineName();
+VPTOOLS_API std::string getMachineName();
 
 /// Get the architecture of the machine.
-GEOM_API std::string getArchitecture();
+VPTOOLS_API std::string getArchitecture();
 
 /// Get the compiler name.
-GEOM_API std::string getCompilerName();
+VPTOOLS_API std::string getCompilerName();
 
 /// Get the compiler version.
-GEOM_API std::string getCompilerVersion();
+VPTOOLS_API std::string getCompilerVersion();
 
 /// Get the language.
-GEOM_API std::string getOSLanguage();
-GEOM_API std::string getLanguage();
-GEOM_API void setLanguage(const std::string&);
+VPTOOLS_API std::string getOSLanguage();
+VPTOOLS_API std::string getLanguage();
+VPTOOLS_API void setLanguage(const std::string&);
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 #endif

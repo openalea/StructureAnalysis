@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -58,7 +55,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -116,10 +113,10 @@ class Locale
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-typedef TOOLS(Locale) RWLocale;
-typedef TOOLS(Locale) RWLocaleSnapshot;
+typedef VPTOOLS(Locale) RWLocale;
+typedef VPTOOLS(Locale) RWLocaleSnapshot;
 
 /* ----------------------------------------------------------------------- */
 

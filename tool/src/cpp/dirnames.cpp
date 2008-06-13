@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -48,7 +45,7 @@
 #endif
 
 using namespace std;
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 inline std::string QString2StdString(const QString& st)
 #if QT_VERSION >= 0x040000
@@ -170,7 +167,7 @@ string append_suffix(const string & filename, const string & suffix) {
 }
 
 string get_suffix(const string & filename){
-#ifdef PGL_DEBUG
+#ifdef VPTOOLS_DEBUG
 	size_t pos = filename.find_last_of('.');
 	if (pos == std::string::npos) return string("");
 	else return std::string(filename.begin()+filename.find_last_of('.')+1,filename.end());
@@ -243,4 +240,4 @@ bool copy(const std::string& src,const std::string& dest){
 #endif
 }
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE

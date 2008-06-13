@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -40,7 +37,7 @@
 
 #ifdef RWOUT
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 CDate::CDate( unsigned day, unsigned month, unsigned year )
 {
@@ -63,6 +60,6 @@ void CDate::extract( struct tm* t ) const
 	*t = *timeinfo;
 }
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 #endif

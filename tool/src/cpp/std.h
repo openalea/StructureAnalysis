@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Nouguier (christophe.nouguier@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------

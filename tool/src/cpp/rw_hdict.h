@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -55,7 +52,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -155,10 +152,10 @@ struct ValHDictIt : public STDEXT::hash_map< Key, T, rw_hash<Key> >::iterator
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWTValHashDictionary TOOLS(ValHDict)
-#define RWTValHashDictionaryIterator TOOLS(ValHDictIt)
+#define RWTValHashDictionary VPTOOLS(ValHDict)
+#define RWTValHashDictionaryIterator VPTOOLS(ValHDictIt)
 
 /* ----------------------------------------------------------------------- */
 

@@ -13,11 +13,12 @@ SConsignFile()
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
-tools = ['alea', 'qt4','opengl','readline', 'install']
+tools = ['qt4','opengl','readline']
 
 env = Environment(options=options)
 conf= ALEAConfig(name, tools)
 conf.UpdateOptions(options)
+
 options.Update(env)
 conf.Update(env)
 
@@ -30,9 +31,11 @@ BuildDir(prefix, '.')
 
 env.Prepend(CPPPATH='$build_includedir')
 
+
+
 # Build stage
-SConscript(pj(prefix,"src/cpp/SConscript"), 
-           exports={"env": env})
+env.SConscript(pj(prefix,"src/cpp/SConscript"), 
+           exports="env")
 
 Default("build")
 

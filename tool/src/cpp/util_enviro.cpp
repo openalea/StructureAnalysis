@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -71,9 +68,8 @@ extern "C" char *cuserid(char *);
 #endif
 
 using namespace std;
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
-static string SYMBOL_DIR;
 static string AMAPMOD_DIR;
 
 string getHome(){
@@ -370,12 +366,6 @@ void setAMAPmodDir(const std::string& dir){
 #endif
 }
 
-void setSymbolDir(const std::string& dir){
-	SYMBOL_DIR = dir;
-#ifdef _WIN32
-	setRegValueA(HKEY_CURRENT_USER,"Software\\AMAP\\AMAPmod","SMBPath",dir);
-#endif
-}
 
 string getAMAPmodDir(){
 		if(!AMAPMOD_DIR.empty())return AMAPMOD_DIR;
@@ -403,31 +393,6 @@ string getAMAPmodDir(){
 		AMAPMOD_DIR = string(dir);
 #endif
 		return AMAPMOD_DIR;
-}
-
-string getSymbolDir(){
-		if(!SYMBOL_DIR.empty())return SYMBOL_DIR;
-#ifdef _WIN32
-        char * dir = getenv("SYMBOL_DIR");
-        if(dir){
-			SYMBOL_DIR = string(dir);
-			return SYMBOL_DIR;
-		}
-
-		if(!getRegValueA(HKEY_CURRENT_USER,"Software\\AMAP\\AMAPmod",
-			"SMBPath",SYMBOL_DIR)){
-			getRegValueA(HKEY_LOCAL_MACHINE,"Software\\AMAP\\AMAPmod",
-			"SMBPath",SYMBOL_DIR);
-		}
-		if(SYMBOL_DIR.empty())
-			SYMBOL_DIR = getAMAPmodDir() + "/databases/SMBFiles";
-#else
-        char * dir = getenv("SYMBOL_DIR");
-        if(!dir)dir = "/usr/local/AMAPmod/databases/SMBFiles";
-		SYMBOL_DIR = string(dir);
-        return SYMBOL_DIR;
-#endif
-	return SYMBOL_DIR;
 }
 
 
@@ -667,5 +632,5 @@ void setLanguage(const string& lang){
 #endif
 }
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 

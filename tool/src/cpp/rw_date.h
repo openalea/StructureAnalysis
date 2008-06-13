@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -53,7 +50,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -69,7 +66,7 @@ TOOLS_BEGIN_NAMESPACE
 
 class Time;
 
-class GEOM_API CDate
+class VPTOOLS_API CDate
 {
  friend class Time;
 
@@ -94,9 +91,9 @@ public:
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWDate TOOLS(CDate)
+#define RWDate VPTOOLS(CDate)
 
 /* ----------------------------------------------------------------------- */
 

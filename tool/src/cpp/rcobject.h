@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Nouguier (christophe.nouguier@cirad.fr) 
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *               
  *  ----------------------------------------------------------------------------
@@ -58,7 +55,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -76,7 +73,7 @@ TOOLS_BEGIN_NAMESPACE
    declare the virtual destructor. You need then to implement it.
 */
 
-class GEOM_API RefCountObject
+class VPTOOLS_API RefCountObject
 {
 
 public:
@@ -345,8 +342,13 @@ public:
   /// Return a conversion of \e self into size_t
   size_t toSizeT( ) const { return (size_t)__ptr; }
   
-  /// Return a conversion of \e self into uint32_t
-  uint32_t toUint32( ) const { return (uint32_t)__ptr; }
+  /// Return a conversion of \e self into uint_t
+  uint32_t toUint32( ) const 
+#if __WORDSIZE == 64
+  { return (uintptr_t)__ptr; }
+#else
+  { return (uint32_t)__ptr; }
+#endif
   
   
   //@}
@@ -395,10 +397,10 @@ T* get_pointer(const RefCountPtr<T>& p)
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 /// Tools Reference Counting Pointer 
-#define RCPtr TOOLS(RefCountPtr)
+#define RCPtr VPTOOLS(RefCountPtr)
 
 /* ----------------------------------------------------------------------- */
 

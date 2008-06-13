@@ -7,9 +7,6 @@
  *
  *       File author(s): F. Boudon (boudon@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -49,9 +46,9 @@
 #include <sstream>
 #include "tools_namespace.h"
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
-#define NUMBER(i) \
+#define NUMBER(i,t) \
   std::stringstream s; \
   s << i; \
   return s.str();
@@ -59,102 +56,52 @@ TOOLS_BEGIN_NAMESPACE
 
 /// Transform a number into a string
 inline std::string number( long int i) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%li",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"li")
 }
 
 /// Transform a number into a string
 inline std::string number ( unsigned long int i ) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%lu",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"lu")
 }
 
 /// Transform a number into a string
 inline std::string  number ( int i ) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%i",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"i")
 }
 
 /// Transform a number into a string
 inline std::string  number ( unsigned int i) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%u",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"u")
 }
 
 /// Transform a number into a string
 inline std::string  number ( short int i ) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%hi",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"hi")
 }
 
 /// Transform a number into a string
 inline std::string  number ( unsigned short int i) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%hu",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"hu")
 }
 
 /// Transform a number into a string
 inline std::string  number ( double i ) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%e",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"e")
 }
 
 /// Transform a number into a string
 inline std::string  number ( float i ) {
-  NUMBER(i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%e",i);
-  return std::string(tmp);
-*/
+  NUMBER(i,"e")
 }
 
 /// Transform a number into a string
 inline std::string  number ( unsigned char i ) {
-  NUMBER((int)i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%hhi",i);
-  return std::string(tmp);
-*/
+  NUMBER((int)i,"hhi")
 }
 
 /// Transform a number into a string
 inline std::string  number ( char i ) {
-  NUMBER((int)i)
-/*
-  char * tmp = new char[64];
-  sprintf(tmp,"%hhi",i);
-  return std::string(tmp);
-*/
+  NUMBER((int)i,"hhi")
 }
 
 /// Transform all character of the string into lower character.
@@ -171,6 +118,6 @@ inline std::string toUpper(const std::string& c){
   return res;
 }
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
 #endif

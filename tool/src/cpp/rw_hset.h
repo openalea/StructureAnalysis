@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -60,7 +57,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -131,12 +128,12 @@ struct ValHSetIt : public STDEXT::hash_set<T, rw_hash<T> >::iterator
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWTValHashSet TOOLS(ValHSet)
-#define RWTValHashSetIterator TOOLS(ValHSetIt)
-#define RWTValHashTable TOOLS(ValHSet)
-#define RWTValHashTableIterator TOOLS(ValHSetIt)
+#define RWTValHashSet VPTOOLS(ValHSet)
+#define RWTValHashSetIterator VPTOOLS(ValHSetIt)
+#define RWTValHashTable VPTOOLS(ValHSet)
+#define RWTValHashTableIterator VPTOOLS(ValHSetIt)
 
 /* ----------------------------------------------------------------------- */
 

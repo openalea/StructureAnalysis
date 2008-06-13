@@ -7,9 +7,6 @@
  *
  *       File author(s): Ch. Pradal (christophe.pradal@cirad.fr)
  *
- *       $Source$
- *       $Id$
- *
  *       Forum for AMAPmod developers    : amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
@@ -61,7 +58,7 @@
 
 /* ----------------------------------------------------------------------- */
 
-TOOLS_BEGIN_NAMESPACE
+VPTOOLS_BEGIN_NAMESPACE
 
 /* ----------------------------------------------------------------------- */
 
@@ -158,12 +155,12 @@ TOOLS_BEGIN_NAMESPACE
 #endif
 /* ----------------------------------------------------------------------- */
 
-TOOLS_END_NAMESPACE
+VPTOOLS_END_NAMESPACE
 
-#define RWTValSlist TOOLS(ValSList)
-#define RWTValSlistIterator TOOLS(ValSListIt)
-#define RWTPtrSlist TOOLS(PtrSList)
-#define RWTPtrSlistIterator TOOLS(PtrSListIt)
+#define RWTValSlist VPTOOLS(ValSList)
+#define RWTValSlistIterator VPTOOLS(ValSListIt)
+#define RWTPtrSlist VPTOOLS(PtrSList)
+#define RWTPtrSlistIterator VPTOOLS(PtrSListIt)
 
 /* ----------------------------------------------------------------------- */
 

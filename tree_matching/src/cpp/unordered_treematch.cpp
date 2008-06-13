@@ -39,6 +39,8 @@
 
 #include <math.h>
 #include "tool/timer.h"
+VPTOOLS_USING(Timer)
+
 using namespace std;
 
 TreeMatch_U::TreeMatch_U()
@@ -262,7 +264,7 @@ void TreeMatch_U::topologicalMatching()
           int tree_size1=_trees[i_tree]->getNbVertex();
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance;
@@ -321,7 +323,7 @@ void TreeMatch_U::weightedMatching()
         {
           Sequence* matching_sequence=new Sequence();
 
-          TOOLS(Timer) chrono;
+          Timer chrono;
           chrono.start();
 
           DistanceType matching_distance=MatchByTopology(*_trees[i_tree],

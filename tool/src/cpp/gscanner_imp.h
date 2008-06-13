@@ -7,9 +7,6 @@
 *
 *       File author(s): Ch. Godin (christophe.godin@cirad.fr)
 *
-*       $Source$
-*       $Id$
-*
 *       Forum for AMAPmod developers    : amldevlp@cirad.fr
 *
 *  ----------------------------------------------------------------------------
@@ -62,16 +59,16 @@ GENERIC_LEXER::GENERIC_LEXER(std::istream* is ,
   // yylineno is taken care of by yyFlexLexer
   _columno = 1;
 
-  _cwd = TOOLS(get_cwd());                             // gets the current work dir
+  _cwd = VPTOOLS(get_cwd());                             // gets the current work dir
   if (filename) {
 
     _current_file_name = std::string(filename);
 
     // changes the current cwd so that new includes and file references can
     // be done from the place of this file. The old cwd is lost in this case.
-    std::string new_cwd = TOOLS(get_dirname)(filename);     // gets the new working dir name
+    std::string new_cwd = VPTOOLS(get_dirname)(filename);     // gets the new working dir name
     if (new_cwd != "") {                       // defines the new cwd
-      if (!TOOLS(chg_dir)(new_cwd)){
+      if (!VPTOOLS(chg_dir)(new_cwd)){
         *_lo << "\tchg_dir() returned an error.";
         *_lo << std::endl;
       }
@@ -117,9 +114,9 @@ bool GENERIC_LEXER::pushStream(std::istream& is, const char* f){
                 // (current work directory)
 
                 if (f) {
-                        std::string new_cwd = TOOLS(get_dirname)(f);     // gets the new working dir name
+                        std::string new_cwd = VPTOOLS(get_dirname)(f);     // gets the new working dir name
                         if (new_cwd != "") {                // defines the new cwd
-                                if (!TOOLS(chg_dir)(new_cwd)) *_lo << "\tchg_dir() returned an error." << std::endl;
+                                if (!VPTOOLS(chg_dir)(new_cwd)) *_lo << "\tchg_dir() returned an error." << std::endl;
                                 else _cwd = new_cwd;
                         }
                 }

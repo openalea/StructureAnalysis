@@ -35,8 +35,8 @@
  */
 
 
-#ifndef __tools_namespace_h__
-#define __tools_namespace_h__
+#ifndef __vptools_namespace_h__
+#define __vptools_namespace_h__
 
 /*! \file tools_namespace.h
     \brief Definition of tools namespace.
@@ -53,66 +53,110 @@
 
 #ifdef NO_NAMESPACE
 
-#ifdef TOOLS_NAMESPACE
-#undef TOOLS_NAMESPACE
+#ifdef VPTOOLS_NAMESPACE
+#undef VPTOOLS_NAMESPACE
 #endif
 
-#ifdef TOOLS_NAMESPACE_NAME
-#undef TOOLS_NAMESPACE_NAME
+#ifdef VPTOOLS_NAMESPACE_NAME
+#undef VPTOOLS_NAMESPACE_NAME
 #endif
 
 #else
 
 /// Macro that enable the tools namespace
-#define TOOLS_NAMESPACE
+#define VPTOOLS_NAMESPACE
 
 #endif
 
-#ifdef TOOLS_NAMESPACE
+#ifdef VPTOOLS_NAMESPACE
 
-#ifndef TOOLS_NAMESPACE_NAME
+#ifndef VPTOOLS_NAMESPACE_NAME
 
 /// Macro that contains the tools namespace name
-#define TOOLS_NAMESPACE_NAME TOOLS
+#define VPTOOLS_NAMESPACE_NAME VPTOOLS
 #endif
 
 /// Macro for beginning the tools namespace.
-#define TOOLS_BEGIN_NAMESPACE namespace TOOLS_NAMESPACE_NAME {
+#define VPTOOLS_BEGIN_NAMESPACE namespace VPTOOLS_NAMESPACE_NAME {
 
 /// Macro for ending the tools namespace.
-#define TOOLS_END_NAMESPACE };
+#define VPTOOLS_END_NAMESPACE };
 
 /// Macro for using the tools namespace.
-#define TOOLS_USING_NAMESPACE using namespace TOOLS_NAMESPACE_NAME;
+#define VPTOOLS_USING_NAMESPACE using namespace VPTOOLS_NAMESPACE_NAME;
 
 /// Macro for using an object of the tools namespace.
-#define TOOLS_USING(obj) using TOOLS_NAMESPACE_NAME::obj;
+#define VPTOOLS_USING(obj) using VPTOOLS_NAMESPACE_NAME::obj;
 
 /// Macro to use an object from the tools namespace.
-#define TOOLS(obj) TOOLS_NAMESPACE_NAME::obj
+#define VPTOOLS(obj) VPTOOLS_NAMESPACE_NAME::obj
 
 #else
 
 #ifdef __GNUC__
-#warning namespace TOOLS not used
+#warning namespace VPTOOLS not used
 #endif
 
 /// Macro for beginning the tools namespace.
-#define TOOLS_BEGIN_NAMESPACE  
+#define VPTOOLS_BEGIN_NAMESPACE  
 
 /// Macro for ending the tools namespace.
-#define TOOLS_END_NAMESPACE  
+#define VPTOOLS_END_NAMESPACE  
 
 /// Macro for using the tools namespace.
-#define TOOLS_USING_NAMESPACE  
+#define VPTOOLS_USING_NAMESPACE  
 
 /// Macro for using an object of the tools namespace.
-#define TOOLS_USING(obj)
+#define VPTOOLS_USING(obj)
 
 /// Macro to use an object from the tools namespace.
-#define TOOLS(obj) obj
+#define VPTOOLS(obj) obj
 
 #endif
+
+
+#if defined(_WIN32)
+
+#if defined(VPTOOLS_NODLL)
+#undef VPTOOLS_MAKEDLL
+#undef VPTOOLS_DLL
+#else
+#ifndef VPTOOLS_DLL
+#define VPTOOLS_DLL
+#endif
+#endif
+
+#if defined(VPTOOLS_MAKEDLL)
+#ifndef VPTOOLS_DLL
+#define VPTOOLS_DLL
+#endif
+#endif
+
+#ifdef VPTOOLS_DLL
+
+#ifdef VPTOOLS_MAKEDLL             /* create a vptool DLL library */
+#define VPTOOLS_API  __declspec(dllexport)
+#undef VPTOOLS_FWDEF
+#else                                                   /* use a vptool DLL library */
+#define VPTOOLS_API  __declspec(dllimport)
+#endif
+
+#define VPTOOLS_TEMPLATE_API(T) template class VPTOOLS_API T;
+#endif
+
+#else // OS != _WIN32
+
+#undef VPTOOLS_MAKEDLL             /* ignore these for other platforms */
+#undef VPTOOLS_DLL
+
+#endif
+
+#ifndef VPTOOLS_API
+#define VPTOOLS_API
+#define VPTOOLS_TEMPLATE_API(T) 
+#endif
+
+
 
 
 #endif // __tools_namespace_h__
