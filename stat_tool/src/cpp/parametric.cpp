@@ -285,7 +285,6 @@ Parametric& Parametric::operator=(const Parametric &dist)
   return *this;
 }
 
-
 /*--------------------------------------------------------------*
  *
  *  Analyse du format d'un objet Parametric.

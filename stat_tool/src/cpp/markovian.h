@@ -253,6 +253,8 @@ protected :
     bool test_hidden() const;
     void thresholding(double min_probability);
 
+    void state_permutation(int *perm) const; // permutation des etats
+
 public :
 
     Nonparametric_process(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
@@ -306,7 +308,10 @@ public :
     int nb_value;           // nombre de valeurs
     Parametric **observation;  // lois d'observation
 
-    void copy(const Parametric_process &process);
+    void copy(const Parametric_process &process);     
+
+    void state_permutation(int *perm) const; // permutation des etats
+
     void add_state(const Parametric_process &process , int state);
     void remove();
 

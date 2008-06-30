@@ -351,6 +351,27 @@ void Nonparametric_process::thresholding(double min_probability)
 
 /*--------------------------------------------------------------*
  *
+ *  Application d'une permutation des etats. La validite de la 
+ *  permutation doit etre verifiee par la procedure appelante.
+ *
+ *--------------------------------------------------------------*/
+
+void Nonparametric_process::state_permutation(int *perm) const
+{
+  register int i;
+  Distribution **pobservation= new Distribution*[nb_state];
+  
+  for (i= 0; i < nb_state; i++)
+    pobservation[perm[i]]= observation[i];
+  for (i= 0; i < nb_state; i++)
+    observation[i]= pobservation[i];
+  delete [] pobservation;
+  pobservation= NULL;
+
+}
+
+/*--------------------------------------------------------------*
+ *
  *  Analyse du format des lois d'observation.
  *
  *  arguments : reference sur un objet Format_error, stream,

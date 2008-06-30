@@ -145,6 +145,27 @@ void Parametric_process::copy(const Parametric_process &process)
 
 /*--------------------------------------------------------------*
  *
+ *  Application d'une permutation des etats. La validite de la 
+ *  permutation doit etre verifiee par la procedure appelante.
+ *
+ *--------------------------------------------------------------*/
+
+void Parametric_process::state_permutation(int *perm) const
+{
+  register int i;
+  Parametric **pobservation= new Parametric*[nb_state];
+  
+  for (i= 0; i < nb_state; i++)
+    pobservation[perm[i]]= observation[i];
+  for (i= 0; i < nb_state; i++)
+    observation[i]= pobservation[i];
+  delete [] pobservation;
+  pobservation= NULL;
+
+}
+
+/*--------------------------------------------------------------*
+ *
  *  Copie d'un objet Parametric_process avec ajout d'un etat.
  *
  *  arguments : reference sur un objet Parametric_process, etat de reference.
