@@ -159,6 +159,74 @@ bool CiHmot_wrapper_file_ascii_write1(const Hidden_markov_out_tree& hmt,
                                       const char * path)
 { return CiHmot_wrapper_file_ascii_write2(hmt, path, false); }
 
+void CiHmot_wrapper_state_permutation(const Hidden_markov_out_tree& hmt,
+                                      list perm)
+{
+   bool status= true, several_errors= false;
+   int llength, i;
+   ostringstream error_message;
+   object o;
+   Format_error error;
+   int *iperm= NULL;
+
+   llength= boost::python::len(perm);
+   if ((llength > 0) && (llength == hmt.get_nb_state()))
+   {
+      iperm= new int[llength];
+      for (i= 0; i < llength; i++)
+      {
+         o= perm[i];
+         try
+         {
+            extract<int> x(o);
+            if (x.check())
+               iperm[i]= x();
+            else
+               status= false;
+         }
+         catch (...)
+         {
+            status= false;
+         }
+         if (!status)
+         {
+            if (several_errors)
+               error_message << endl;
+            else
+               several_errors= true;
+            error_message << "incorrect type for element " << i
+                          << " of argument list: expecting an int ";
+         }
+      }
+      if (!status)
+      {
+         delete [] iperm;
+         iperm= NULL;
+         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
+         throw_error_already_set();
+      }
+   }
+   else
+   {
+      status= false;
+      error_message << "incorrect permutation" << endl;
+      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+   if (status)
+   {
+      hmt.state_permutation(error, iperm);
+      if (error.get_nb_error() > 0)
+      {
+         error_message << error;
+         PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+         throw_error_already_set();
+      }
+      delete [] iperm;
+      iperm= NULL;
+   }
+}
+
 bool CiHmot_wrapper_spreadsheet_write1(const Hidden_markov_out_tree& hmt,
                                        const char * path)
 {
@@ -651,6 +719,9 @@ BOOST_PYTHON_MODULE(chmt)
         .def("Simulate", &CiHmot_wrapper_simulate_trees,
                          return_value_policy< manage_new_object >())
         .def("SpreadsheetWrite", &CiHmot_wrapper_spreadsheet_write1)
+        .def("StatePermutation", &CiHmot_wrapper_state_permutation,
+                                 "StatePermutation(self, list) \n\n"
+                                 "permutation of the model states\n")
         .def("StateProfile", &CiHmot_wrapper_state_profile,
                              "StateProfile(self, int, int, int, int) -> list \n\n"
                              "return trees object and strings"

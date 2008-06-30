@@ -240,6 +240,23 @@ Stat_trees::Nonparametric_tree_process& Nonparametric_tree_process::operator=(co
 
 /*****************************************************************
  *
+ *  Permutation of the states for Nonparametric_tree_process
+ *  using a given permutation perm (validity checked before call)
+ *
+ **/
+
+void Nonparametric_tree_process::state_permutation(int* perm) const
+{
+   if (observation != NULL)
+      Nonparametric_process::state_permutation(perm);
+
+   // if the characteristic distributions were actually computed,
+   // they should be permuted as well
+}
+
+
+/*****************************************************************
+ *
  *  Access to members of Nonparametric_tree_process class
  *
  **/
@@ -2989,6 +3006,96 @@ Hidden_markov_tree* Hidden_markov_tree::thresholding(double min_probability) con
    // check the meaning of this
 
    return markov;
+}
+
+/*****************************************************************
+ *
+ *  Permutation of the states of a Hidden_markov_tree based on
+ *  a given permutation perm (which must be the same length as
+ *  the number of states)
+ *
+ **/
+
+void Hidden_markov_tree::state_permutation(Format_error& error,
+                                           int* perm) const
+{
+   register int i, j;
+   bool status= true;
+   // each element of check_perm must be used exactly once
+   bool * const check_perm= new bool[nb_state];
+   double* pinitial= NULL;
+   double** ptransition= NULL;
+
+   // check permutation
+   error.init();
+
+   for (i= 0; i < nb_state; i++)
+      check_perm[i]= false; // indicates if ith element was used in perm
+
+   for (i= 0; i < nb_state; i++)
+   {
+      if (check_perm[perm[i]])
+         status= false;
+      else
+         check_perm[perm[i]]= true;
+   }
+
+   if (!status)
+      error.update(STAT_TREES_error[STATR_NO_PERMUTATION]);
+   else
+   {
+      // permutation of initial probabilities
+      pinitial= new double[nb_state];
+      for (i= 0; i < nb_state; i++)
+         pinitial[perm[i]]= initial[i];
+      for (i= 0; i < nb_state; i++)
+         initial[i]= pinitial[i];
+      delete [] pinitial;
+      pinitial= NULL;
+
+      // permutation of transition probabilities
+      ptransition= new double*[nb_state];
+      for (i= 0; i < nb_state; i++)
+         ptransition[i]= new double[nb_state];
+      for (i= 0; i < nb_state; i++)
+         for (j= 0; j < nb_state; j++)
+            ptransition[perm[i]][perm[j]]= transition[i][j];
+      for (i= 0; i < nb_state; i++)
+         for (j= 0; j < nb_state; j++)
+            transition[i][j]= ptransition[i][j];
+      for (i= 0; i < nb_state; i++)
+         delete [] ptransition[i];
+      delete [] ptransition;
+      ptransition= NULL;
+
+      if (self_row != NULL)
+      {
+         // permutation of auto-transition probabilities
+         int* pself_row= new int[nb_state];
+         for (i= 0; i < nb_state; i++)
+            pself_row[perm[i]]= self_row[i];
+         for (i= 0; i < nb_state; i++)
+            self_row[i]= pself_row[i];
+         delete [] pself_row;
+         pself_row= NULL;
+      }
+      // permutation of observation distributions
+      if (npprocess[0] != NULL)
+         npprocess[0]->state_permutation(perm);
+      for (i= 1; i <= _nb_ioutput_process; i++)
+      {
+         if (npprocess[i] != NULL)
+            npprocess[i]->state_permutation(perm);
+         if (piprocess[i] != NULL)
+            piprocess[i]->state_permutation(perm);
+      }
+      for (i= 1; i <= _nb_doutput_process; i++)
+         if (pdprocess[i] != NULL)
+            pdprocess[i]->state_permutation(perm);
+
+      if (markov_data != NULL)
+         markov_data->state_permutation(perm);
+   }
 }
 
 /*****************************************************************
@@ -7137,6 +7244,51 @@ void Hidden_markov_tree_data::build_state_characteristics()
                                                    0);
    delete [] otrees1;
    otrees1= NULL;
+}
+
+/*****************************************************************
+ *
+ *  Permutation of the states of a Hidden_markov_tree_data
+ *  based on a given permutation perm
+ *
+ **/
+
+void Hidden_markov_tree_data::state_permutation(int* perm) const
+{
+   register int i, t;
+   Tree_characteristics* pstate_char= new Tree_characteristics[_nb_states];
+   ptHistogram_array_2d  pobservation= new Histogram**[_nb_states];
+   Typed_edge_one_int_tree::vertex_iterator it, end;
+   One_int_container c;
+
+   for (i= 0; i < _nb_states; i++)
+   {
+      pstate_char[perm[i]]= state_characteristics[i];
+      pobservation[perm[i]]= observation[i];
+   }
+   for (i= 0; i < _nb_states; i++)
+   {
+      state_characteristics[i]= pstate_char[i];
+      observation[i]= pobservation[i];
+   }
+   delete [] pstate_char;
+   pstate_char= NULL;
+   delete [] pobservation;
+   pobservation= NULL;
+
+   if (state_trees != NULL)
+   {
+      for(t= 0; t < _nb_trees; t++)
+      {
+         tie(it, end)= state_trees[t]->vertices();
+         while (it < end)
+         {
+            c= state_trees[t]->get(*it);
+            c.Int()= perm[c.Int()];
+            state_trees[t]->put(*it++, c);
+         }
+      }
+   }
 }
 
 std::ostream& Hidden_markov_tree_data::state_profile_ascii_print(std::ostream& os,

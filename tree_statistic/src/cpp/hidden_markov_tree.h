@@ -154,6 +154,9 @@ private :
    void init_Distribution_array(Distribution** d, int inb_value);
    void init_occupancy(const Nonparametric_tree_process& process, int occupancy_nb_value);
 
+   /** Permutation of the states of \e self */
+   void state_permutation(int* perm) const;
+
    double get_double_characteristic(double* d, int value) const;
    Distribution** get_ptptDistribution_characteristic(Distribution** d) const;
    Distribution* get_ptDistribution_characteristic(Distribution** d,
@@ -192,6 +195,10 @@ public :
    double get_no_occurrence(int value) const;
    double get_leave(int value) const;
    double get_absorption(int value) const;
+
+   /** Permutation of the state of \e self*/
+   void state_permutation(Format_error& error, int* perm) const;
+
    Distribution** get_first_occurrence_root() const;
    Distribution* get_first_occurrence_root(int value) const;
    Distribution** get_first_occurrence_leaves() const;
@@ -485,6 +492,9 @@ public :
 
    Hidden_markov_tree* thresholding(double min_probability= MIN_PROBABILITY) const;
 
+   /** Permutation of the states of \e self */
+   void state_permutation(Format_error& error, int* perm) const;
+
    virtual std::ostream& line_write(std::ostream& os) const;
 
    virtual std::ostream& ascii_write(std::ostream& os, bool exhaustive= false) const;
@@ -641,6 +651,9 @@ private :
    // of one observed variable
    void build_state_trees();
    void build_state_characteristics();
+
+   /** Permutation of the states of \e self */
+   void state_permutation(int* perm) const;
 
    std::ostream& state_profile_ascii_print(std::ostream& os, int index,
                                            int nb_state,

@@ -112,7 +112,7 @@ const char *STAT_TREES_label[] = {
   "maximum posterior state probabilities" ,
   "maximum posterior in state probabilities" ,
   "maximum posterior out state probabilities" ,
-  "ambiguity" , // STATL_AMBIGUITY 
+  "ambiguity" , // STATL_AMBIGUITY
 
   "tree" ,
   "trees" ,
@@ -167,6 +167,8 @@ const char *STAT_TREES_error[] = {
   "failure in the computation of the optimal state trees" ,
 
   "not present" , // STATR_NOT_PRESENT
+
+  "vector does not define a permutation" , // STATR_NO_PERMUTATION
 
   "bad variable type" , // STAR_VARIABLE_TYPE
   "variable 1: bad variable type" , // STAR_VARIABLE_1_TYPE

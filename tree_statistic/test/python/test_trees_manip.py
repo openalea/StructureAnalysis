@@ -254,7 +254,7 @@ try:
 except trees.FormatError, e:
     print e
 else:
-    print "Failed to raise exception for number of clusters too loe."
+    print "Failed to raise exception for number of clusters too low."
     print V
 try:
     T.Cluster("Limit", 0, limits)

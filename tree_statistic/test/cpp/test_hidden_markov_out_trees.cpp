@@ -29,11 +29,10 @@ int main(void)
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
-   Hidden_semi_markov *hsmc;
-   // Hidden_markov_tree *hmt, *hmt2;
-   Hidden_markov_out_tree *hmot, *hmot2;
-   Hidden_markov_tree_data *hmtd;
-   tree_type **ptrees;
+   register int t, j;
+   unsigned int u;
+   const int nb_trees= 5, size= 15, nb_children_max= 2;
+   bool w= false;
    value default_value;
    visitor v;
    vertex_array va;
@@ -45,12 +44,14 @@ int main(void)
    const char * wspath= "./hmot_spreadsheet.hmt";
    const char * swapath= "./laricio_3ascii.hsc";
    // const char * swspath= "./laricio_3spreadsheet.hsc";
-   const int nb_trees= 5, size= 15, nb_children_max= 2;
-   register int t, j;
-   unsigned int u;
+   int* perm;
    double*** state_marginal= NULL, ***output_cond= NULL;
    double** sum_state_marginal= NULL;
-   bool w= false;
+   Hidden_semi_markov *hsmc;
+   // Hidden_markov_tree *hmt, *hmt2;
+   Hidden_markov_out_tree *hmot, *hmot2;
+   Hidden_markov_tree_data *hmtd;
+   tree_type **ptrees;
 
    // default constructor of Hidden_markov_tree_data
    hmtd= new Hidden_markov_tree_data();
@@ -59,7 +60,7 @@ int main(void)
    delete hmtd;
    hmtd= NULL;
 
-   // read and printi a hidden semi-Markov chain
+   // read and print a hidden semi-Markov chain
    hsmc= hidden_semi_markov_ascii_read(error, hsmcpath);
    cout << error;
 
@@ -87,6 +88,17 @@ int main(void)
 
       if (hmot != NULL)
          hmot->ascii_write(cout, false);
+
+      // permutation of the states
+      perm= new int[hmot->get_nb_state()];
+      for(j= 0; j < hmot->get_nb_state(); j++)
+         perm[hmot->get_nb_state()-j -1]=j;
+      hmot->state_permutation(error, perm);
+      cout << error;
+      cout << "Permutation of the states: " << endl;
+      hmot->ascii_write(cout, false);
+      delete [] perm;
+      perm= NULL;
 
       cout << endl;
 

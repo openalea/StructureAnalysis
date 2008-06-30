@@ -66,4 +66,28 @@ for t in range(T.NbTrees()):
 print "Type of the attributes:", T.Types()
 print "Copy a hmt"
 HC=hmt.HiddenMarkovTree(H)
-print HC
+HC.Display()
+# permutation of the states
+# check exceptions raised by StatePermutation
+try:
+    HC.StatePermutation([2.2, 1.0])
+except TypeError, e:
+    print e
+else:
+    print "Failed to raise exception for bad permutation"
+try:
+    HC.StatePermutation([1, 1])
+except trees.FormatError, e:
+    print e
+else:
+    print "Failed to raise exception for bad permutation"
+try:
+    HC.StatePermutation([0, 1, 2])
+except trees.FormatError, e:
+    print e
+else:
+    print "Failed to raise exception for bad permutation"
+print "Permutation of the states: "
+HC.StatePermutation([1, 0])
+HC.Display()
+

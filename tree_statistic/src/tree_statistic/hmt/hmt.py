@@ -542,6 +542,15 @@ class HiddenMarkovTree:
                     if str(val).upper() != "NAN":
                         criteria[name]=val
         return criteria
+
+    def StatePermutation(self, perm):
+        """Permutation of the states of self.
+        
+        Usage:  StatePermutation(list)"""
+        try:
+            self.__chmt.StatePermutation(perm)
+        except RuntimeError, e:
+            raise FormatError, e
     
     def _likelihood(self, trees):
         # compute the likelihood of a given set of trees
