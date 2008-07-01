@@ -55,7 +55,7 @@
 #include <string>
 
 /***************************************************************/
-TOOLS_USING_NAMESPACE
+VPTOOLS_USING_NAMESPACE
 /***************************************************************/
 
 namespace Stat_trees
