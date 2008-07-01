@@ -14,48 +14,34 @@ name = 'tree_statistic'
 SConsignFile()
 
 options = Options(['../options.py','options.py'], ARGUMENTS)
-
 options.Add(BoolOption('with_test', 'build test modules', 1))
 
 # dependencies
-wrapper_conf = ALEAConfig(name,['boost_python', 'install','vplants.tool', 'vplants.sequence_analysis','vplants.stat_tool','vplants.tree'])
-cpp_conf = ALEAConfig(name, ['install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
-opt_conf = ALEAConfig(name, ['boost_python', 'install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree'])
+tools = ['boost_python', 'install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree']
 
-# Set all the common options for the package
-# TODO: Have a configure stage.
-# Fill the options from file option.py or cmd line args.
-opt_conf.UpdateOptions(options)
-
-opt_env = Environment(options=options)
-opt_conf.Update(opt_env)
+env = Environment(options=options)
+conf= ALEAConfig(name, tools)
+conf.UpdateOptions(options)
+options.Update(env)
+conf.Update(env)
 
 # Generate Help available with the cmd scons -h
-Help(options.GenerateHelpText(opt_env))
-
+Help(options.GenerateHelpText(env))
 
 # Set build directory
-prefix = opt_env['build_prefix']
+prefix = env['build_prefix']
 BuildDir(prefix, '.')
 
+env.Prepend(CPPPATH='$build_includedir')
+env.Prepend(LIBPATH='$build_libdir')
 
-cpp_env = ALEAEnvironment(cpp_conf, options=options)
-cpp_env.Prepend( CPPPATH = pj( '$build_includedir','tree_statistic' ) )
-#cpp_env.Append(CPPPATH='$build_includedir')
-#cpp_env.AppendUnique(LIBS= ["efence"])
-# optional
-
-wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
-wrapper_env.Prepend( CPPPATH = pj( '$build_includedir','tree_statistic' ) )
-#wrapper_env.Append(CPPPATH='$build_includedir')
-#wrapper_env.AppendUnique(LIBS= ["efence"])
-# optional
+env.Prepend( CPPPATH = pj( '$build_includedir','tree_statistic' ) )
 
 # Build stage
-SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
-SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
-if opt_env['with_test']:
-	SConscript(pj(prefix,"test/cpp/SConscript"), exports={"env":cpp_env})
+SConscript(pj(prefix,"src/cpp/SConscript"), exports="env")
+SConscript(pj(prefix,"src/wrapper/SConscript"), exports="env")
+if env['with_test']:
+    SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")
 
 Default("build")
 

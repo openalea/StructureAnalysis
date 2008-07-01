@@ -19,39 +19,26 @@ options = Options(['../options.py', 'options.py'], ARGUMENTS)
 common_tools = ['vplants.mtg', 'plantgl', 'vplants.tool',
                 'vplants.amlobj', 'vplants.stat_tool',]
 
-wrapper_tools = ['boost_python', 'alea'] + common_tools
-cpp_tools = ['alea','install'] + common_tools
+tools = ['alea','install'] + common_tools
 
-#wrapper_conf= ALEAConfig(name, wrapper_tools)
-cpp_conf = ALEAConfig(name, cpp_tools)
-opt_conf = ALEAConfig(name, wrapper_tools+cpp_tools)
-
-# Set all the common options for the package
-# TODO: Have a configure stage.
-# Fill the options from file option.py or cmd line args.
-opt_conf.UpdateOptions(options)
-
-opt_env = Environment(options=options)
-opt_conf.Update(opt_env)
+env = Environment(options=options)
+conf= ALEAConfig(name, tools)
+conf.UpdateOptions(options)
+options.Update(env)
+conf.Update(env)
 
 # Generate Help available with the cmd scons -h
-Help(options.GenerateHelpText(opt_env))
-
+Help(options.GenerateHelpText(env))
 
 # Set build directory
-prefix = opt_env['build_prefix']
+prefix = env['build_prefix']
 BuildDir(prefix, '.')
 
-
-cpp_env = ALEAEnvironment(cpp_conf, options=options)
-cpp_env.Append(CPPPATH='$build_includedir')
-
-#wrapper_env = ALEAEnvironment(wrapper_conf, options=options)
-#wrapper_env.Append(CPPPATH='$build_includedir')
+env.Prepend(CPPPATH='$build_includedir')
+env.Prepend(LIBPATH='$build_libdir')
 
 # Build stage
-SConscript(pj(prefix,"src/cpp/SConscript"), exports={"env": cpp_env})
-#SConscript(pj(prefix,"src/wrapper/SConscript"), exports={"env":wrapper_env})
-
+SConscript(pj(prefix,"src/cpp/SConscript"),
+           exports='env')
 
 Default("build")
