@@ -6,6 +6,7 @@ import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import ctree, ctrees
 
+_PlotManager=stat_tool.stat_tool._PlotManager
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_DEPTH=ctree.I_DEFAULT_TREE_DEPTH()
@@ -2002,7 +2003,7 @@ class Trees:
             else:
                 nb_windows= \
                    self.__ctrees.NbValues(self._valid_cvariable(variable))
-                self.__plot= stat_tool._PlotManager(file_list, prefix+file_id, 
+                self.__plot= _PlotManager(file_list, prefix+file_id, 
                                                      nb_windows)
 
     def Save(self, file_name, overwrite=False, variable_names=None):

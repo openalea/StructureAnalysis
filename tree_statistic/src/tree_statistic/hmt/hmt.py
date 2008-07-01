@@ -4,6 +4,7 @@ import string
 import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
 import chmt
 
+_PlotManager=stat_tool.stat_tool._PlotManager
 VariableType=stat_tool.VariableType
 FormatError=stat_tool.FormatError
 CharacteristicType=trees.CharacteristicType
@@ -421,7 +422,7 @@ class HiddenMarkovTree:
             msg='Characteristic not computed: '+str(ViewPoint)
             raise ValueError, msg                
         else:
-            self.__plot= stat_tool._PlotManager(file_list, prefix+file_id, 
+            self.__plot= _PlotManager(file_list, prefix+file_id, 
                                                  nb_windows)
 
 ##        import os
@@ -448,7 +449,7 @@ class HiddenMarkovTree:
 ##                os.remove(tmpfile)
 ##            raise FormatError, f
 ##        else:                      
-##            self.__plot=stat_tool._PlotManager(file_list, 
+##            self.__plot=_PlotManager(file_list, 
 ##                                                prefix+str(variable+1), 1)
 
     def Save(self, file_name, format="ASCII", overwrite=False):
@@ -763,7 +764,7 @@ class HiddenMarkovTreeData(trees.Trees):
                 # plot the files using the PlotManager class of stat_tool
                 nb_windows= \
                    self.__ctrees.NbValues(0)
-                self.__plot=stat_tool._PlotManager(file_list, prefix+file_id, 
+                self.__plot=_PlotManager(file_list, prefix+file_id, 
                                                     nb_windows)
                                                     
     def _ctrees(self):
