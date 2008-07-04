@@ -653,7 +653,7 @@ private :
    void build_state_characteristics();
 
    /** Permutation of the states of \e self */
-   void state_permutation(int* perm) const;
+   void state_permutation(int* perm);
 
    std::ostream& state_profile_ascii_print(std::ostream& os, int index,
                                            int nb_state,

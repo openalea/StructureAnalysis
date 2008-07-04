@@ -2107,8 +2107,9 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
              otrees->ascii_write(cerr);
 #            endif
              otrees->build_observation_histogram();
-             // above line generates a segmentation fault
-             // otrees->build_state_characteristics();
+             otrees->build_characteristics();
+             // line below generates a segmentation fault
+             otrees->build_state_characteristics();
 
 
              // computation of the parametric observation distributions

@@ -698,6 +698,7 @@ protected :
 
    // ? void build_index_value();
    // ? void build_depth_value();
+
    Histogram* get_characteristic(int value, ptHistogram_array h) const;
 
    void build_marginal_histogram(Typed_edge_one_int_tree* otrees1);

@@ -546,6 +546,7 @@ class HiddenMarkovTree:
 
     def StatePermutation(self, perm):
         """Permutation of the states of self.
+        perm[i]==j means that current state i will become new state j.
         
         Usage:  StatePermutation(list)"""
         try:

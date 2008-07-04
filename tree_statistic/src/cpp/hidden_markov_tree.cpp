@@ -7249,28 +7249,30 @@ void Hidden_markov_tree_data::build_state_characteristics()
 /*****************************************************************
  *
  *  Permutation of the states of a Hidden_markov_tree_data
- *  based on a given permutation perm
+ *  based on a given permutation perm.
+ *  Validity of permutation must be ensured before call
  *
  **/
 
-void Hidden_markov_tree_data::state_permutation(int* perm) const
+void Hidden_markov_tree_data::state_permutation(int* perm)
 {
-   register int i, t;
+   register int i, var, t;
    Tree_characteristics* pstate_char= new Tree_characteristics[_nb_states];
-   ptHistogram_array_2d  pobservation= new Histogram**[_nb_states];
+   ptHistogram_array_2d pobservation= new Histogram**[_nb_integral];
    Typed_edge_one_int_tree::vertex_iterator it, end;
    One_int_container c;
 
-   for (i= 0; i < _nb_states; i++)
+   for(var= 0; var < _nb_integral; var++)
    {
-      pstate_char[perm[i]]= state_characteristics[i];
-      pobservation[perm[i]]= observation[i];
+      pobservation[var]= new Histogram*[_nb_states];
+      for (i= 0; i < _nb_states; i++)
+         pobservation[var][perm[i]]= observation[var][i];
+      for (i= 0; i < _nb_states; i++)
+         observation[var][i]= pobservation[var][i];
+      delete [] pobservation[var];
+      pobservation[var]= NULL;
    }
-   for (i= 0; i < _nb_states; i++)
-   {
-      state_characteristics[i]= pstate_char[i];
-      observation[i]= pobservation[i];
-   }
+
    delete [] pstate_char;
    pstate_char= NULL;
    delete [] pobservation;
@@ -7289,6 +7291,7 @@ void Hidden_markov_tree_data::state_permutation(int* perm) const
          }
       }
    }
+   build_state_characteristics();
 }
 
 std::ostream& Hidden_markov_tree_data::state_profile_ascii_print(std::ostream& os,

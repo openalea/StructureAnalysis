@@ -330,6 +330,7 @@ Histogram* Tree_characteristics::get_marginal() const
   // ? Curves* get_depth_value() const
   //  { return depth_value; }
 
+
 Histogram* Tree_characteristics::get_characteristic(int value,
                                                     Histogram** h) const
 {
