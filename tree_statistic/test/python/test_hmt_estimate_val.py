@@ -28,5 +28,5 @@ EH.Display()
 # raise UserWarning, "Warning: need to be debugged"
 print "Parameter estimation from the simulated trees " + \
 "using state number and self transition specifications:"
-EH=T.Estimate("HIDDEN_MARKOV_TREE", 3, "LEFTRIGHT", 0.99, 100)
+EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "IRREDUCIBLE", 0.99, 100)
 EH.Display()

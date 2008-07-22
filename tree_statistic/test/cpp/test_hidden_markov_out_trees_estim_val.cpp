@@ -78,7 +78,8 @@ int main(void)
 
       hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_init,
                                                      true, VITERBI,
-                                                     nb_iterations, true);
+                                                     FORWARD_BACKWARD,
+                                                     1., nb_iterations, true);
       cout << error;
 
       if (hmot2 != NULL)
@@ -92,7 +93,8 @@ int main(void)
 
       hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', nb_states,
                                                      false, true, VITERBI,
-                                                     0.7, nb_iterations);
+                                                     FORWARD_BACKWARD,
+                                                     1., 0.7, nb_iterations);
       cout << error;
       cout << endl;
 

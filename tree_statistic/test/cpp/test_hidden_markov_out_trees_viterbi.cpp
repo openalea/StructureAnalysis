@@ -118,11 +118,6 @@ int main(void)
       hmtdv= hmot->state_tree_computation(error, *hmtd, VITERBI, true);
 
       cout << error << endl;
-      /*
-      if ((likelihood2 < likelihood - DOUBLE_ERROR)
-             || (likelihood2 > likelihood + DOUBLE_ERROR))
-             cout << "\nERROR: " << likelihood << " " << likelihood2 << endl;
-      */
       if (hmtdv != NULL)
       {
          cout << endl << "Computation of the state trees: " << endl;
@@ -150,6 +145,46 @@ int main(void)
          cout << "Likelihood : " << likelihood << endl;
          delete hmtdv;
          hmtdv= NULL;
+
+#        if 0
+         cout << endl << "Restored hidden trees by stochastic estimation: " << endl;
+         hmtdv= hmot->sstate_simulation(*hmtd, hidden_likelihood);
+         cout << endl;
+         // print the restored trees
+         if (hmtdv != NULL)
+         {
+            for (t= 0; t < nb_trees; t++)
+            {
+               ptrees[t]= hmtd->get_state_tree(t);
+               ptrees[t]->display(cout, 0);
+               delete ptrees[t];
+            }
+            cout << endl;
+
+            cout << "Completed likelihood : " << hidden_likelihood << endl;
+            delete hmtdv;
+            hmtdv= NULL;
+         }
+
+         cout << endl << "Restored hidden trees by Gibbs sampling: " << endl;
+         hmtdv= hmot->gibbs_state_simulation(*hmtd, hidden_likelihood);
+         cout << endl;
+         // print the restored trees
+         if (hmtdv != NULL)
+         {
+            for (t= 0; t < nb_trees; t++)
+            {
+               ptrees[t]= hmtd->get_state_tree(t);
+               ptrees[t]->display(cout, 0);
+               delete ptrees[t];
+            }
+            cout << endl;
+
+            cout << "Completed likelihood : " << hidden_likelihood << endl;
+            delete hmtdv;
+            hmtdv= NULL;
+         }
+#        endif
       }
 
       delete [] ptrees;

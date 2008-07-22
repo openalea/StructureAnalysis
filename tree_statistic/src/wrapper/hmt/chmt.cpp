@@ -519,8 +519,10 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_markov(const Hidden_markov_t
                                                            const Hidden_markov_out_tree& ihmarkov,
                                                            bool counting_flag,
                                                            int state_trees,
+                                                           int algorithm,
+                                                           double saem_exponent,
                                                            int nb_iter,
-                                                           bool characteristic_flag)
+                                                           bool force_param)
 {
    Hidden_markov_out_tree *hmt= NULL;
    Format_error error;
@@ -528,7 +530,8 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_markov(const Hidden_markov_t
 
    hmt= hmtd.hidden_markov_out_tree_estimation(error, cout, ihmarkov,
                                                counting_flag, state_trees,
-                                               nb_iter, characteristic_flag);
+                                               algorithm, saem_exponent,
+                                               nb_iter, force_param);
    if (hmt == NULL)
    {
       error_message << error;
@@ -544,6 +547,8 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition(const Hidden
                                                                     bool left_right,
                                                                     bool counting_flag,
                                                                     int state_trees,
+                                                                    int algorithm,
+                                                                    double saem_exponent,
                                                                     double self_transition,
                                                                     int nb_iter,
                                                                     list force_param)
@@ -611,7 +616,8 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition(const Hidden
    {
       hmt= hmtd.hidden_markov_out_tree_estimation(error, cout, type, nb_state,
                                                   left_right, counting_flag,
-                                                  state_trees, self_transition,
+                                                  state_trees, algorithm,
+                                                  saem_exponent, self_transition,
                                                   nb_iter, fparam);
 
       if (hmt == NULL)
@@ -619,6 +625,11 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition(const Hidden
          error_message << error;
          PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
          throw_error_already_set();
+      }
+      if (fparam != NULL)
+      {
+         delete [] fparam;
+         fparam= NULL;
       }
    }
    return hmt;

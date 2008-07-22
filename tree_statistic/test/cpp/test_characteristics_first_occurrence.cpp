@@ -30,7 +30,7 @@ int main(void)
   const double parameter= D_DEFAULT;
   int nb_trees= n;
   const Parametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
-  const Parametric cdistribl(ident,2,5,parameter,probability);
+  const Parametric cdistribl(ident,0,3,parameter,probability);
   unsigned int cmax_depth= 20;
   unsigned int cmax_size= 20;
   unsigned int _max_depth, _max_size;
@@ -41,7 +41,7 @@ int main(void)
   tree_type *default_base_tree, tmp_base_tree;
   tree_type  **observed_trees;
   Int_trees *b;
-  Typed_edge_one_int_tree *otrees1;
+  Typed_edge_one_int_tree **otrees1;
   Tree_characteristics **tc;
   Distribution **distrib;
   Histogram h;
@@ -55,7 +55,7 @@ int main(void)
 
   itype= new int[0];
   observed_trees= new tree_type*[nb_trees];
-  otrees1= new Typed_edge_one_int_tree[nb_trees];
+  otrees1= new Typed_edge_one_int_tree*[nb_trees];
 
   default_base_tree= new tree_type(1,0,0,1);
   default_base_tree->add_vertex(v);
@@ -92,7 +92,7 @@ int main(void)
   tc= new Tree_characteristics*[_nb_integral];
 
   for (t= 0; t < nb_trees; t++)
-      otrees1[t]= *(observed_trees[t]->select_int_variable(0));
+      otrees1[t]= observed_trees[t]->select_int_variable(0);
 
 
   tc[0]= new Tree_characteristics(_min_value,

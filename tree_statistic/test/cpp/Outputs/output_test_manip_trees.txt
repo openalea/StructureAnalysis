@@ -1397,17 +1397,91 @@ cumulative number of children: 31
   |-(19, 11.8616)
     
 
+
+Discard 3rd variable
+3 VARIABLES
+
+VARIABLE 1 : INTEGER VALUE   20 values
+
+value histogram - sample size: 34
+mean: 9.52941   variance: 41.2264   standard deviation: 6.42078
+
+VARIABLE 2 : INTEGER VALUE   21 values
+
+value histogram - sample size: 34
+mean: 10.5294   variance: 41.2264   standard deviation: 6.42078
+
+VARIABLE 3 : REAL VALUE   (minimum value: 5.37796e-270, maximum value: 9.88131e-323)
+
+
+tree size histogram - sample size: 3
+mean: 11.3333   variance: 0.333333   standard deviation: 0.57735
+
+cumulative size: 34
+
+number of children histogram - sample size: 34
+mean: 0.911765   variance: 2.02228   standard deviation: 1.42207
+
+cumulative number of children: 31
+(9, 10, 15.3332)
+|-(7, 8, 12.7339)
+| |-(0, 1, 6.80496)
+| |-(2, 3, 19.2121)
+|   
+|-(19, 20, 21.1755)
+| |-(3, 4, 10.6826)
+| |-(2, 3, 5.12182)
+| |-(19, 20, 6.54086)
+| |-(10, 11, 18.914)
+|   
+|-(12, 13, 16.983)
+|-(2, 3, 14.9819)
+
+(5, 6, 10.196)
+|-(16, 17, 21.1739)
+| |-(3, 4, 15.6846)
+| |-(17, 18, 9.10911)
+|   
+|-(1, 2, 21.1376)
+| |-(1, 2, 3.12716)
+| |-(9, 10, 4.23073)
+| |-(4, 5, 21.8284)
+|   
+|-(10, 11, 3.84712)
+  |-(18, 19, 20.2404)
+  |-(5, 6, 12.7022)
+  |-(7, 8, 18.4209)
+    
+
+(7, 8, 16.1848)
+|-(3, 4, 11.1531)
+| |-(17, 18, 9.58764)
+| |-(13, 14, 21.7605)
+| |-(11, 12, 16.3774)
+|   
+|-(17, 18, 18.7573)
+| |-(17, 18, 11.1861)
+| |-(18, 19, 9.59374)
+| |-(16, 17, 15.6113)
+|   
+|-(6, 7, 7.03244)
+  |-(18, 19, 11.8616)
+    
+
+*** ERROR : bad number of selected variables: 4
+
 Build sequences (all possible paths)...
+
 2 VARIABLES
 
-VARIABLE 1 : VALUE   (minimum value: 0, maximum value: 19)
+VARIABLE 1 : INT   (minimum value: 0, maximum value: 19)
 
-value histogram - sample size: 67
+marginal histogram - sample size: 67
 mean: 9.04478   variance: 33.1646   standard deviation: 5.75887
 
-VARIABLE 2 : VALUE   (minimum value: 1, maximum value: 20)
+VARIABLE 2 : INT   (minimum value: 1, maximum value: 20)
 
-value histogram - sample size: 67
+marginal histogram - sample size: 67
 mean: 10.0448   variance: 33.1646   standard deviation: 5.75887
 
 sequence length histogram - sample size: 23
@@ -1461,16 +1535,17 @@ cumulated length: 67
 
 7 8 | 3 4 | 17 18    (22)
 Build sequences (all non redundant paths)...
+
 2 VARIABLES
 
-VARIABLE 1 : VALUE   (minimum value: 0, maximum value: 19)
+VARIABLE 1 : INT   (minimum value: 0, maximum value: 19)
 
-value histogram - sample size: 24
+marginal histogram - sample size: 24
 mean: 9.58333   variance: 44.5145   standard deviation: 6.67192
 
-VARIABLE 2 : VALUE   (minimum value: 1, maximum value: 20)
+VARIABLE 2 : INT   (minimum value: 1, maximum value: 20)
 
-value histogram - sample size: 24
+marginal histogram - sample size: 24
 mean: 10.5833   variance: 44.5145   standard deviation: 6.67192
 
 sequence length histogram - sample size: 24

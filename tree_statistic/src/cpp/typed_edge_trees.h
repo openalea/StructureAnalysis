@@ -269,7 +269,8 @@ protected :
 
    void remove();
    // deallocator
-   void copy(const Typed_edge_trees<Generic_Int_fl_container>& otrees);
+   void copy(const Typed_edge_trees<Generic_Int_fl_container>& otrees,
+             bool characteristic_flag= true);
    // copy operator
    void init(int inb_integral, int inb_float, int_array itype,
              int inb_trees, bool init_flag);
@@ -318,7 +319,7 @@ protected :
 public :
 
    Typed_edge_trees(int inb_integral= 1, int inb_float= 0, int inb_trees= 0);
-   Typed_edge_trees(const Typed_edge_trees& otrees);
+   Typed_edge_trees(const Typed_edge_trees& otrees, bool characteristic_flag= true);
    Typed_edge_trees(int inb_trees,
                   int const * itype,
                   pt_tree_type_array otrees,
@@ -687,12 +688,12 @@ protected :
    //                             int cvariable , bool initial_run_flag = false);
    // ?   void copy(const Tree_characteristics &tchar , int param = DEFAULT);
    // ?   void add_variable(const Tree_characteristics &tchar , int variable = 0);
-   void remove_characteristic(ptHistogram_array c, int inb_values);
+   void remove_characteristic(ptHistogram_array& c, int inb_values);
 
    void remove();
    void copy(const Tree_characteristics& t_char);
 
-   void init_characteristic(ptHistogram_array c, int inb_values, int imax_val);
+   void init_characteristic(ptHistogram_array& c, int inb_values, int imax_val);
    void init(int imax_size, int imax_depth);
    // allocation of the histograms
 
@@ -701,11 +702,11 @@ protected :
 
    Histogram* get_characteristic(int value, ptHistogram_array h) const;
 
-   void build_marginal_histogram(Typed_edge_one_int_tree* otrees1);
-   void build_first_occurrence_root_histogram(Typed_edge_one_int_tree* otrees1, int imax_depth);
-   void build_first_occurrence_leaves_histogram(Typed_edge_one_int_tree* otrees1, int imax_depth);
-   void build_zone_histograms(Typed_edge_one_int_tree* otrees1, int imax_size);
-   void build_nb_occurrences_histogram(Typed_edge_one_int_tree* otrees1, int imax_size);
+   void build_marginal_histogram(Typed_edge_one_int_tree** otrees1);
+   void build_first_occurrence_root_histogram(Typed_edge_one_int_tree** otrees1, int imax_depth);
+   void build_first_occurrence_leaves_histogram(Typed_edge_one_int_tree** otrees1, int imax_depth);
+   void build_zone_histograms(Typed_edge_one_int_tree** otrees1, int imax_size);
+   void build_nb_occurrences_histogram(Typed_edge_one_int_tree** otrees1, int imax_size);
 // template <typename Generic_Int_fl_container>
 // void build_children_pairs_histogram(Typed_edge_one_int_tree** otrees1);
 
@@ -733,7 +734,7 @@ public :
                         int imax_size,
                         int imax_depth,
                         int inb_trees,
-                        Typed_edge_one_int_tree* otrees1,
+                        Typed_edge_one_int_tree** otrees1,
                         int ivariable= I_DEFAULT);
    Tree_characteristics(const Tree_characteristics& t_char);
    ~Tree_characteristics();
@@ -744,7 +745,7 @@ public :
                                int imax_size,
                                int imax_depth,
                                int inb_trees,
-                               Typed_edge_one_int_tree* otrees1,
+                               Typed_edge_one_int_tree** otrees1,
                                int ivariable= I_DEFAULT);
    // construction of the histograms
 

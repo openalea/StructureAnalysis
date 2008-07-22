@@ -215,8 +215,7 @@ Typed_edge_one_int_tree* Typed_edge_int_fl_tree<Generic_Int_fl_container>::selec
    gvertex_iterator it, end;
    value v;
 
-   // assert(blabla);
-   // does Int(variable exist ?)
+   assert((variable >=0) && (variable < _nb_integral));
    utree= this->get_structure();
    res_tree= new Typed_edge_one_int_tree(*utree);
    tie(it, end)= this->vertices();
@@ -226,6 +225,8 @@ Typed_edge_one_int_tree* Typed_edge_int_fl_tree<Generic_Int_fl_container>::selec
        res_tree->put(*it, v);
        it++;
      }
+   delete utree;
+   utree= NULL;
    return res_tree;
 }
 
@@ -403,9 +404,10 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
  **/
 
 template<typename Generic_Int_fl_container>
-Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_trees& otrees)
+Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_trees& otrees,
+                                                             bool characteristic_flag)
  : STAT_interface()
-{ copy(otrees); }
+{ copy(otrees, characteristic_flag); }
 
 /*****************************************************************
  *
@@ -2601,10 +2603,6 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(Format_error& e
 
       for(t= 0; t < _nb_trees; t++)
       {
-#   ifdef DEBUG
-         cerr << "Current tree: " << trees[t]->get_size() << " vertices." << endl;
-         trees[t]->display(cout, trees[t]->root());
-#   endif
          nb_nodes= 1;
 
          v= trees[t]->root();
@@ -2659,9 +2657,6 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(Format_error& e
          {
             tmp_zone= zones.front(); // current zone
             vroot= tmp_zone.front(); // first vertex of zone
-#   ifdef DEBUG
-            cerr << "Handle zone rooted at: " << vroot << endl;
-#   endif
             val= (trees[t]->get(vroot)).Int(variable);
             if (is_selected[val])
             {
@@ -2693,9 +2688,6 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(Format_error& e
                   tmp_zone.pop_front();
             }
             zones.pop_front();
-#   ifdef DEBUG
-            cerr << "Size of current tree: " << trees[t]->get_size() << endl;
-#   endif
          }
          delete [] clist;
          clist= NULL;
@@ -4422,7 +4414,8 @@ void Typed_edge_trees<Generic_Int_fl_container>::remove()
  **/
 
 template<typename Generic_Int_fl_container>
-void Typed_edge_trees<Generic_Int_fl_container>::copy(const Typed_edge_trees& otrees)
+void Typed_edge_trees<Generic_Int_fl_container>::copy(const Typed_edge_trees& otrees,
+                                                      bool characteristic_flag)
 { // copy operator
    int var= 0, t; //nb_int= 0, j;
 
@@ -4452,19 +4445,36 @@ void Typed_edge_trees<Generic_Int_fl_container>::copy(const Typed_edge_trees& ot
    for(var= 0; var < _nb_integral+_nb_float; var++)
       _type[var]= otrees._type[var];
 
-   if (otrees.characteristics != NULL)
+   if (characteristic_flag)
    {
-      characteristics= new Tree_characteristics*[_nb_integral];
-      for(var= 0; var < _nb_integral; var++)
+      if (otrees.characteristics != NULL)
       {
-         if (otrees.characteristics[var] != NULL)
-            characteristics[var]= new Tree_characteristics(*(otrees.characteristics[var]));
-         else
-            characteristics[var]= NULL;
+         characteristics= new Tree_characteristics*[_nb_integral];
+         for(var= 0; var < _nb_integral; var++)
+         {
+            if (otrees.characteristics[var] != NULL)
+               characteristics[var]= new Tree_characteristics(*(otrees.characteristics[var]));
+            else
+               characteristics[var]= NULL;
+         }
       }
+      else
+         characteristics= NULL;
    }
    else
+   {
+      if (characteristics != NULL)
+      {
+         for(var= 0; var < _nb_integral; var++)
+            if (characteristics[var] != NULL)
+            {
+               delete characteristics[var];
+               characteristics[var]= NULL;
+            }
+         delete [] characteristics;
+      }
       characteristics= NULL;
+   }
 
    if (otrees.hsize != NULL)
       hsize= new Histogram(*(otrees.hsize));
@@ -4817,10 +4827,6 @@ void Typed_edge_trees<Generic_Int_fl_container>::min_max_value_computation()
     int t, variable;
     vertex_iterator it, end;
     value v;
-#   ifdef DEBUG
-    int nb_integral= get_nb_int();
-    cerr << "Number of integer variables: " << nb_integral << endl;
-#   endif
 
     for(variable= 0; variable < _nb_integral; variable++)
     {
@@ -5021,13 +5027,13 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_nb_children_histogram()
 template<typename Generic_Int_fl_container>
 void Typed_edge_trees<Generic_Int_fl_container>::build_characteristics(int variable)
 {
-   Typed_edge_one_int_tree *otrees1= new Typed_edge_one_int_tree[_nb_trees];
+   Typed_edge_one_int_tree **otrees1= new Typed_edge_one_int_tree*[_nb_trees];
    int t; //i
 
    assert((variable < _nb_integral) && (characteristics != NULL));
 
    for(t= 0; t < _nb_trees; t++)
-       otrees1[t]= *(trees[t]->select_int_variable(variable));
+       otrees1[t]= trees[t]->select_int_variable(variable);
 
    if (characteristics[variable] != NULL)
    {
@@ -5042,6 +5048,11 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_characteristics(int varia
                                                        _nb_trees,
                                                        otrees1,
                                                        variable);
+   for(t= 0; t < _nb_trees; t++)
+   {
+       delete otrees1[t];
+       otrees1[t]= NULL;
+   }
    delete [] otrees1;
    otrees1= NULL;
 }

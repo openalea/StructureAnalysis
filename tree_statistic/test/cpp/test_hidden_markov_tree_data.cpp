@@ -80,7 +80,8 @@ int main(void)
    cout << *hmtd << endl;
 
    hmot_estim= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot,
-                                                       true, VITERBI, 10, true);
+                                                       true, VITERBI, FORWARD_BACKWARD,
+                                                       1., 10, true);
    cout << endl << "Parameter estimation:" << endl;
    cout << error;
    hmot_estim->ascii_write(cout, false);
@@ -145,7 +146,7 @@ int main(void)
 
 #ifdef DEBUG
    cout << endl << "Plot of the augmented Hidden_markov_tree_data:" << endl;
-   state_hmtd->plot_write(error, "/home/jbdurand/tmpf");
+   state_hmtd->plot_write(error, "/home/durand/tmpf");
    cout << error;
 #endif
 
@@ -226,7 +227,8 @@ int main(void)
    cout << *hmtd << endl;
 
    hmot_estim= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot,
-                                                       true, VITERBI, 10, true);
+                                                       true, VITERBI, FORWARD_BACKWARD,
+                                                       1., 10, true);
    cout << endl << "Parameter estimation:" << endl;
    cout << error;
    hmot_estim->ascii_write(cout, false);
@@ -283,7 +285,7 @@ int main(void)
    state_hmtd->ascii_write(cout, false);
 #ifdef DEBUG
    cout << endl << "Plot of the augmented Hidden_markov_tree_data:" << endl;
-   state_hmtd->plot_write(error, "/home/jbdurand/tmpg");
+   state_hmtd->plot_write(error, "/home/durand/tmpg");
    cout << error;
 #endif
 
@@ -357,7 +359,8 @@ int main(void)
    delete tmp_trees;
    tmp_trees= NULL;
    hmot_estim= state_tree->hidden_markov_out_tree_estimation(error, cout, 'o', 2, true,
-                                                             true, VITERBI, 0.99999, 1);
+                                                             true, VITERBI, FORWARD_BACKWARD,
+                                                             1., 0.99999, 1);
    delete [] variables;
    cout << error;
    hmot_estim->ascii_write(cout, false);

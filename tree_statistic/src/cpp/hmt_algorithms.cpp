@@ -55,6 +55,7 @@
 #include <sstream>
 #include <iomanip>
 
+// for simulation; see stat_tool
 extern int cumul_method(int nb_value, const double *cumul, double scale= 1.);
 extern char* label(const char*);
 
@@ -328,30 +329,18 @@ Hidden_markov_tree_data* Hidden_markov_out_tree::state_tree_computation(Format_e
 
       // computation of the tree characteristics
       // and of the model characteristic distributions
-/*      if (res_trees->hidden_likelihood == D_INF)
-      {
-         delete res_trees;
-         res_trees= NULL;
-         error.update(STAT_TREES_error[STATR_STATE_TREE_COMPUTATION_FAILURE]);
-      }
-
-      else
-      {
-
-*/
       res_trees->_nb_states= nb_state; // -1 ?
 
-      // res_trees->chain_data= new Chain_data(*res_trees, 0, 1, this);
-
-      res_trees->chain_data= new Chain_data(type, nb_state, nb_state);
-      res_trees->build_characteristics();
-      res_trees->build_size_histogram();
-      res_trees->build_nb_children_histogram();
-      res_trees->build_observation_histogram();
-
       if (characteristic_flag)
+      {
+         res_trees->chain_data= new Chain_data(type, nb_state, nb_state);
+         res_trees->build_characteristics();
+         res_trees->build_size_histogram();
+         res_trees->build_nb_children_histogram();
+         res_trees->build_observation_histogram();
+
          res_trees->markov->characteristic_computation(*res_trees, true);
-   // }
+      }
    }
    return res_trees;
 }
@@ -795,11 +784,18 @@ Hidden_markov_tree_data* Hidden_markov_out_tree::simulation(Format_error& error,
       res= new Hidden_markov_tree_data(_nb_ioutput_process, _nb_doutput_process,
                                        ihsize, ihnb_children,
                                        false, true);
+
       for(var= 0; var < _nb_ioutput_process; var++)
+         res->_type[var]= INT_VALUE;
+
+      for(var= 0; var < _nb_doutput_process; var++)
+         res->_type[var+_nb_ioutput_process]= REAL_VALUE;
+
+      /* for(var= 0; var < _nb_ioutput_process; var++)
          res->_type[0]= INT_VALUE;
 
       for(var= 0; var < _nb_doutput_process; var++)
-         res->_type[0]= REAL_VALUE;
+         res->_type[0]= REAL_VALUE;*/
 
       res->markov= new Hidden_markov_out_tree(*this, false, false);
 
@@ -1636,40 +1632,57 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
                                                            const Hidden_markov_out_tree& ihmarkov,
                                                            bool counting_flag,
                                                            int state_trees,
+                                                           int algorithm,
+                                                           double saem_exponent,
                                                            int nb_iter,
-                                                           bool characteristic_flag,
                                                            bool force_param) const
 {
    typedef Hidden_markov_tree::double_array_3d double_array_3d;
    typedef Hidden_markov_tree::double_array_4d double_array_4d;
-   // typedef Hidden_markov_tree_data::tree_type tree_type;
-   // typedef tree_type::vertex_iterator vertex_iterator;
+   typedef Hidden_markov_tree_data::tree_type tree_type;
+   typedef tree_type::vertex_descriptor vid;
+   typedef generic_visitor<tree_type> visitor;
+   typedef visitor::vertex_array vertex_array;
 
-   bool status;
-   register int i , j , k , var, t;
-   unsigned int u; //m , n,
-   int max_nb_value, iter, nb_likelihood_decrease, val; // offset, nb_value
+   bool status, state_simulation;
+   register int i , j , k , var, t, pstate, cstate;
+   unsigned int u, current_size;
+   int max_nb_value, iter, nb_likelihood_decrease, val;
    double likelihood= D_INF, previous_likelihood, observation_likelihood ,
           min_likelihood= 0,  *reestim= NULL, entropy1= D_INF,
-          max_marginal_entropy= D_INF;
+          max_marginal_entropy= D_INF, saem_coef= 0., state_likelihood= D_INF,
+          best_likelihood= D_INF; // best likelihood for SEM
    double_array_3d state_marginal= NULL, output_cond= NULL,
                    upward_prob= NULL, upward_parent_prob= NULL,
-                   downward_prob= NULL, state_entropy= NULL;
-   double_array_4d downward_pair_prob= NULL;
+                   downward_prob= NULL, state_entropy= NULL,
+                   state_array= NULL;
+   double_array_4d downward_pair_prob= NULL,
+                   state_pair_array= NULL;
+   Format_error error_v;
+   vertex_iterator it, end;
+   value v;
+   vid cnode, pnode; // current and parent vertices
+   vertex_array va;
+   visitor vst;
    std::deque<int> *path= NULL;
    Chain_reestimation<double> *chain_reestim= NULL;
    Reestimation<double> ***observation_reestim= NULL;
    Histogram *hobservation= NULL;
    Hidden_markov_out_tree *hmarkovt= NULL;
-   Hidden_markov_tree_data *otrees= NULL;
-   vertex_iterator it, end;
-   value v;
+   Hidden_markov_out_tree  *best_hmarkovt= NULL; // best model for SEM
+   Hidden_markov_tree_data *otrees= NULL,
+                           *state_restoration= NULL;
+   Typed_edge_int_fl_tree<Int_fl_container> *current_tree= NULL;
+   Typed_edge_one_int_tree *state_tree= NULL;
 
  # ifdef DEBUG
    double test[NB_STATE][4];
  # endif
 
    error.init();
+
+   if (algorithm == VITERBI)
+      error_v.init();
 
    // test of the number of observed values per variable
 
@@ -1680,15 +1693,6 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
          status= true;
          break;
       }
-
-   /* for(var= 0; var < _nb_float; var++)
-      if (get_max_fl_value(var) - get_min_fl_value(var) > 1)
-      {
-         status= true;
-         break;
-      } */
-   // is this really necessary ?
-
 
    if (!status)
       error.update(STAT_TREES_error[STATR_NB_OUTPUT]);
@@ -1734,24 +1738,60 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
 
    if ((nb_iter != I_DEFAULT) && (nb_iter < 1))
    {
-      status = false;
+      status= false;
       error.update(STAT_error[STATR_NB_ITERATION]);
    }
+   if (!((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
+       (algorithm == GIBBS_SAMPLING) || (algorithm == FORWARD_BACKWARD)))
+   {
+      status= false;
+      error.update(STAT_TREES_error[STATR_EM_ALGORITHM]);
+   }
+
+   if ((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
+       (algorithm == GIBBS_SAMPLING))
+   {
+      if ((saem_exponent < 0) || (saem_exponent >= 1))
+      {
+         status= false;
+         ostringstream error_message;
+         error_message << STAT_TREES_error[STATR_SAEM_EXP] << ": " << saem_exponent;
+         error.update((error_message.str()).c_str());
+      }
+      state_simulation= true;
+   }
+   else
+      state_simulation= false;
 
    if (status)
    {
       if (_max_size > (unsigned int)COUNTING_MAX_SIZE)
          counting_flag = false;
 
-      // creating the hidden Markov tree
+      // create hidden Markov tree
 
       hmarkovt= new Hidden_markov_out_tree(ihmarkov, false, false);
+
+      if (state_simulation)
+      {
+         best_hmarkovt= new Hidden_markov_out_tree(*hmarkovt, false, false);
+         // initialise state trees for state simulation
+
+         if (algorithm == GIBBS_SAMPLING)
+            otrees= hmarkovt->state_tree_computation(error_v, *this, VITERBI, false);
+
+         if (otrees == NULL)
+            otrees= new Hidden_markov_tree_data(*this, false);
+
+         if (otrees->state_trees == NULL)
+            otrees->build_state_trees();
+      }
 
 #   ifdef DEBUG
       cout << *hmarkovt;
 #   endif
 
-      // creation des structures de donnees de l'algorithme
+      // create data structures for estimation
 
       chain_reestim= new Chain_reestimation<double>((hmarkovt->type == 'o' ?  'o' : 'v') ,
                                                     hmarkovt->nb_state, hmarkovt->nb_state);
@@ -1777,13 +1817,31 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
       iter= 0;
       nb_likelihood_decrease= 0;
 
+      if (state_simulation)
+      {
+         state_pair_array= new double_array_3d[this->_nb_trees];
+         state_array= new double_array_2d[this->_nb_trees];
+         for(t= 0; t < this->_nb_trees; t++)
+         {
+            state_pair_array[t]= new double_array_2d[hmarkovt->nb_state];
+            state_array[t]= new double*[hmarkovt->nb_state];
+            for(j= 0; j < hmarkovt->nb_state; j++)
+            {
+               state_pair_array[t][j]= new double*[hmarkovt->nb_state];
+               for(i= 0; i < hmarkovt->nb_state; i++)
+                  state_pair_array[t][j][i]= new double[this->trees[t]->get_size()];
+               state_array[t][j]= new double[this->trees[t]->get_size()];
+            }
+         }
+      }
+
       do
       {
          iter++;
          previous_likelihood= likelihood;
          likelihood= 0.;
 
-         // initialization of the reestimation quantities
+         // initialisation of the reestimation quantities
 
          chain_reestim->init();
 
@@ -1800,19 +1858,105 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
             for(j= 0; j < 4; j++)
                test[i][j] = 0.;
 #     endif
-         hmarkovt->state_marginal_distribution(*this, state_marginal);
-         hmarkovt->output_conditional_distribution(*this, output_cond);
 
-         likelihood= hmarkovt->upward_step(*this, upward_prob, upward_parent_prob,
-                                           state_entropy, state_marginal,
-                                           output_cond, entropy1);
-         hmarkovt->downward_step(*this, downward_prob, downward_pair_prob,
-                                 upward_prob, upward_parent_prob,
-                                 state_marginal, output_cond, entropy1);
+         if ((algorithm == FORWARD_BACKWARD) || (saem_exponent != .0))
+         {
+            hmarkovt->state_marginal_distribution(*this, state_marginal);
+            hmarkovt->output_conditional_distribution(*this, output_cond);
 
+            likelihood= hmarkovt->upward_step(*this, upward_prob, upward_parent_prob,
+                                              state_entropy, state_marginal,
+                                              output_cond, entropy1);
+            hmarkovt->downward_step(*this, downward_prob, downward_pair_prob,
+                                    upward_prob, upward_parent_prob,
+                                    state_marginal, output_cond, entropy1);
 
-         if (likelihood == D_INF)
-            break;
+            if (likelihood == D_INF)
+               break;
+         }
+         else
+            likelihood= hmarkovt->likelihood_computation(*this);
+
+         if (algorithm == VITERBI)
+         {
+            state_restoration= hmarkovt->state_tree_computation(error_v, *otrees, VITERBI, false);
+            if (error_v.get_nb_error() > 0)
+               break;
+         }
+
+         if (algorithm == FORWARD_BACKWARD_SAMPLING)
+         {
+            state_restoration= hmarkovt->sstate_simulation(*otrees,
+                                                           state_likelihood,
+                                                           false);
+            if (state_likelihood <= D_INF)
+               break;
+         }
+
+         if (algorithm == GIBBS_SAMPLING)
+         {
+            state_restoration= hmarkovt->gibbs_state_simulation(*otrees,
+                                                                state_likelihood,
+                                                                false);
+            if (state_likelihood <= D_INF)
+               break;
+         }
+
+         if (state_restoration != NULL)
+         {
+            // transition counts
+            for(t= 0; t < state_restoration->_nb_trees; t++)
+            {
+               current_tree= state_restoration->trees[t];
+               current_size= current_tree->get_size();
+               state_tree= state_restoration->state_trees[t];
+
+               va= vst.get_breadthorder(*current_tree);
+
+               cnode= va[0];
+               cstate= state_tree->get(cnode).Int();
+               for(j= 0; j < hmarkovt->nb_state; j++)
+               {
+                  if (j == cstate)
+                     state_array[t][j][cnode]= 1.0;
+                  else
+                     state_array[t][j][cnode]= .0;
+                  for(i= 0; i < hmarkovt->nb_state; i++)
+                     state_pair_array[t][i][j][cnode]= .0;
+                     // this quantity will be added to transition reestimation quantities
+               }
+
+               for(u= 1; u < current_size; u++)
+               {
+                  cnode= va[u];
+                  pnode= current_tree->parent(cnode);
+                  cstate= state_tree->get(cnode).Int();
+                  pstate= state_tree->get(pnode).Int();
+                  for(j= 0; j < hmarkovt->nb_state; j++)
+                  {
+                     if (j == cstate)
+                     {
+                        state_array[t][j][cnode]= 1.0;
+                        for(i= 0; i < hmarkovt->nb_state; i++)
+                           if (i == pstate)
+                              state_pair_array[t][i][j][cnode]= 1.0;
+                           else
+                              state_pair_array[t][i][j][cnode]= .0;
+                     }
+                     else
+                     {
+                        state_array[t][j][cnode]= .0;
+                        for(i= 0; i < hmarkovt->nb_state; i++)
+                           state_pair_array[t][i][j][cnode]= .0;
+                     }
+                  }
+               }
+            } // end for t
+            delete state_restoration;
+            state_restoration= NULL;
+         }
+         if (saem_exponent != .0)
+            saem_coef= 1./(double)pow(iter+1, saem_exponent);
 
          // accumulation of the reestimation quantities for initial distribution
          // and transition probabilities
@@ -1821,19 +1965,36 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
             for(j= 0; j < hmarkovt->nb_state; j++)
                for(t= 0; t < _nb_trees; t++)
                {
-                  downward_pair_prob[t][i][j][trees[t]->root()]= 0.;
-                  // since this quantity has no meaning, its addition
-                  // should not modify chain_reestim->transition[i][j]
+                  if (downward_pair_prob != NULL)
+                     downward_pair_prob[t][i][j][trees[t]->root()]= 0.;
+                     // since this quantity has no meaning, its addition
+                     // should not modify chain_reestim->transition[i][j]
                   for(u= 0; u < trees[t]->get_size(); u++)
-                      chain_reestim->transition[i][j]
-                         += downward_pair_prob[t][i][j][u];
+                  {
+                     if ((algorithm == FORWARD_BACKWARD))
+                        chain_reestim->transition[i][j]
+                           += downward_pair_prob[t][i][j][u];
+                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+                        chain_reestim->transition[i][j]
+                           += (1-saem_coef)*downward_pair_prob[t][i][j][u]
+                           + saem_coef*state_pair_array[t][i][j][u];
+                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+                        chain_reestim->transition[i][j]+= state_pair_array[t][i][j][u];
+                  }
                }
 
          for(i= 0; i < hmarkovt->nb_state; i++)
             for(t= 0; t < _nb_trees; t++)
             {
                u= trees[t]->root();
-               chain_reestim->initial[i]+= downward_prob[t][i][u];
+               if ((algorithm == FORWARD_BACKWARD))
+                  chain_reestim->initial[i]+= downward_prob[t][i][u];
+               if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+                  chain_reestim->initial[i]
+                     += (1-saem_coef)*downward_prob[t][i][u]
+                     + saem_coef*state_array[t][i][u];
+               if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+                  chain_reestim->initial[i]+= state_array[t][i][u];
             }
 
          // accumulation of the reestimation quantities for observation distributions
@@ -1848,13 +2009,21 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
                {
                   val= v.Int(var);
                   for(k= 0; k < hmarkovt->nb_state; k++)
-                     observation_reestim[var][k]->frequency[val]
-                        += downward_prob[t][k][*it];
+                  {
+                     if ((algorithm == FORWARD_BACKWARD))
+                        observation_reestim[var][k]->frequency[val]
+                           += downward_prob[t][k][*it];
+                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+                        observation_reestim[var][k]->frequency[val]
+                           += (1-saem_coef)*downward_prob[t][k][*it];
+                           + saem_coef*state_array[t][k][*it];
+                     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+                        observation_reestim[var][k]->frequency[val]+= state_array[t][k][*it];
+                  }
                }
                it++;
             }
          }
-
 
          if (likelihood != D_INF)
          {
@@ -1862,6 +2031,12 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
                nb_likelihood_decrease++;
             else
                nb_likelihood_decrease= 0;
+            // save best parameter for restoration algorithms
+            if ((state_simulation) && (likelihood > best_likelihood))
+            {
+               *best_hmarkovt= *hmarkovt;
+               best_likelihood= likelihood;
+            }
          }
 
          // reestimation of the initial distribution
@@ -1982,56 +2157,94 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
       // deallocation of the arrays
 
       delete chain_reestim;
+      chain_reestim= NULL;
 
-      for(t= 0; t < _nb_trees; t++)
+      if ((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
+          (algorithm == GIBBS_SAMPLING))
       {
-         for(j= 0; j < hmarkovt->nb_state; j++)
+         for(t= 0; t < _nb_trees; t++)
          {
-            delete [] state_marginal[t][j];
-            state_marginal[t][j]= NULL;
-            delete [] output_cond[t][j];
-            output_cond[t][j]= NULL;
-            delete [] upward_prob[t][j];
-            upward_prob[t][j]= NULL;
-            delete [] upward_parent_prob[t][j];
-            upward_parent_prob[t][j]= NULL;
-            delete [] downward_prob[t][j];
-            downward_prob[t][j]= NULL;
-            for(i= 0; i < hmarkovt->nb_state; i++)
+            for(j= 0; j < hmarkovt->nb_state; j++)
             {
-               delete [] downward_pair_prob[t][j][i];
-               downward_pair_prob[t][j][i]= NULL;
+               for(i= 0; i < hmarkovt->nb_state; i++)
+               {
+                  delete [] state_pair_array[t][j][i];
+                  state_pair_array[t][j][i]= NULL;
+               }
+               delete [] state_array[t][j];
+               state_array[t][j]= NULL;
+               delete [] state_pair_array[t][j];
+               state_pair_array[t][j]= NULL;
             }
-            delete [] downward_pair_prob[t][j];
-            downward_pair_prob[t][j]= NULL;
+            delete [] state_array[t];
+            state_array[t]= NULL;
+            delete [] state_pair_array[t];
+            state_pair_array[t]= NULL;
          }
-
-         delete [] state_marginal[t];
-         state_marginal[t]= NULL;
-         delete [] output_cond[t];
-         output_cond[t]= NULL;
-         delete [] upward_prob[t];
-         upward_prob[t]= NULL;
-         delete [] upward_parent_prob[t];
-         upward_parent_prob[t]= NULL;
-         delete [] downward_prob[t];
-         downward_prob[t]= NULL;
-         delete [] downward_pair_prob[t];
-         downward_pair_prob[t]= NULL;
+         delete [] state_array;
+         state_array= NULL;
+         delete [] state_pair_array;
+         state_pair_array= NULL;
       }
 
-      delete [] state_marginal;
-      state_marginal= NULL;
-      delete [] output_cond;
-      output_cond= NULL;
-      delete [] upward_prob;
-      upward_prob= NULL;
-      delete [] upward_parent_prob;
-      upward_parent_prob= NULL;
-      delete [] downward_prob;
-      downward_prob= NULL;
-      delete [] downward_pair_prob;
-      downward_pair_prob= NULL;
+      if ((algorithm == FORWARD_BACKWARD) || (saem_exponent != .0))
+      {
+         for(t= 0; t < _nb_trees; t++)
+         {
+            for(j= 0; j < hmarkovt->nb_state; j++)
+            {
+               delete [] state_marginal[t][j];
+               state_marginal[t][j]= NULL;
+               delete [] output_cond[t][j];
+               output_cond[t][j]= NULL;
+               delete [] upward_prob[t][j];
+               upward_prob[t][j]= NULL;
+               delete [] upward_parent_prob[t][j];
+               upward_parent_prob[t][j]= NULL;
+               delete [] downward_prob[t][j];
+               downward_prob[t][j]= NULL;
+               delete [] state_entropy[t][j];
+               state_entropy[t][j]= NULL;
+               for(i= 0; i < hmarkovt->nb_state; i++)
+               {
+                  delete [] downward_pair_prob[t][j][i];
+                  downward_pair_prob[t][j][i]= NULL;
+               }
+               delete [] downward_pair_prob[t][j];
+               downward_pair_prob[t][j]= NULL;
+            }
+
+            delete [] state_marginal[t];
+            state_marginal[t]= NULL;
+            delete [] output_cond[t];
+            output_cond[t]= NULL;
+            delete [] upward_prob[t];
+            upward_prob[t]= NULL;
+            delete [] upward_parent_prob[t];
+            upward_parent_prob[t]= NULL;
+            delete [] downward_prob[t];
+            downward_prob[t]= NULL;
+            delete [] state_entropy[t];
+            state_entropy[t]= NULL;
+            delete [] downward_pair_prob[t];
+            downward_pair_prob[t]= NULL;
+         }
+
+         delete [] state_marginal;
+         state_marginal= NULL;
+         delete [] output_cond;
+         output_cond= NULL;
+         delete [] upward_prob;
+         upward_prob= NULL;
+         delete [] upward_parent_prob;
+         upward_parent_prob= NULL;
+         delete [] downward_prob;
+         downward_prob= NULL;
+         delete [] state_entropy;
+         state_entropy= NULL;
+         delete [] downward_pair_prob;
+         downward_pair_prob= NULL;
+      }
 
       for(var= 0; var < hmarkovt->_nb_ioutput_process; var++)
       {
@@ -2045,7 +2258,6 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
       }
       delete [] observation_reestim;
       observation_reestim= NULL;
-      // does not seem to work
 
       delete hobservation;
       hobservation= NULL;
@@ -2058,6 +2270,18 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
       }
       else
       {
+         if ((state_simulation) && (likelihood > best_likelihood))
+         {
+            *best_hmarkovt= *hmarkovt;
+            best_likelihood= likelihood;
+         }
+         if (state_simulation)
+         {
+            *hmarkovt= *best_hmarkovt;
+            delete otrees;
+            otrees= NULL;
+         }
+
          if ((state_trees == FORWARD_BACKWARD) || (state_trees == VITERBI))
          {
              if (hmarkovt->markov_data != NULL)
@@ -2108,7 +2332,6 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
 #            endif
              otrees->build_observation_histogram();
              otrees->build_characteristics();
-             // line below generates a segmentation fault
              otrees->build_state_characteristics();
 
 
@@ -2155,6 +2378,21 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
          hmarkovt->characteristic_computation(*otrees, counting_flag, I_DEFAULT, false);
       }
    }
+
+
+   if (state_simulation)
+   {
+      if (best_hmarkovt != NULL)
+      {
+         delete best_hmarkovt;
+         best_hmarkovt= NULL;
+      }
+   }
+   otrees= NULL;
+   reestim= NULL;
+   state_tree= NULL;
+   current_tree= NULL;
+
    return hmarkovt;
 }
 
@@ -2170,7 +2408,6 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
  *  the initial self_transition probabilities and the iteration number
  *
  **/
-
 Hidden_markov_out_tree*
 Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
                                                            std::ostream& os,
@@ -2179,6 +2416,8 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
                                                            bool left_right,
                                                            bool counting_flag,
                                                            int state_trees,
+                                                           int algorithm,
+                                                           double saem_exponent,
                                                            double self_transition,
                                                            int nb_iter,
                                                            bool* force_param) const
@@ -2245,7 +2484,8 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
          ihmt->pdprocess[var]->init();
 
       hmt= hidden_markov_out_tree_estimation(error, os, *ihmt, counting_flag,
-                                             state_trees , nb_iter, fparam);
+                                             state_trees , algorithm, saem_exponent,
+                                             nb_iter, fparam);
       delete ihmt;
       ihmt= NULL;
     }
@@ -4046,6 +4286,415 @@ Hidden_markov_out_tree::generalized_viterbi(const Hidden_markov_tree_data& trees
    delete [] otrees;
    otrees= NULL;
 
+
+   return res_trees;
+}
+
+/*****************************************************************
+ *
+ *  Simulate state trees given observed trees (SEM-like principle
+ *  Compute the completed likelihood
+ *
+ **/
+
+Hidden_markov_tree_data*
+Hidden_markov_out_tree::sstate_simulation(const Hidden_markov_tree_data& trees,
+                                          double& state_likelihood,
+                                          bool characteristic_flag) const
+{
+   typedef Hidden_markov_tree_data::tree_type tree_type;
+   typedef tree_type::vertex_descriptor vid;
+   typedef generic_visitor<tree_type> visitor;
+   typedef visitor::vertex_array vertex_array;
+
+   register int var, j, pstate;
+   int nb_trees= trees._nb_trees, t, u, current_size;
+   double likelihood, entropy;
+   vid cnode, pnode; // current and parent vertices;
+   int *itype= NULL;
+   double *cumul_stated; // cumulative distribution of states;
+   double_array_3d state_marginal= NULL, output_cond= NULL,
+                   upward_prob= NULL, upward_parent_prob= NULL,
+                   state_entropy= NULL, downward_prob= NULL;
+   double_array_4d downward_pair_prob= NULL;
+   Typed_edge_one_int_tree::value state_v;
+   vertex_array va;
+   visitor v;
+   Typed_edge_int_fl_tree<Int_fl_container> *current_tree= NULL;
+   Hidden_markov_tree_data *res_trees= NULL;
+   Typed_edge_one_int_tree *state_tree= NULL;
+
+   res_trees= new Hidden_markov_tree_data(trees);
+   if (res_trees->state_trees == NULL)
+      res_trees->build_state_trees();
+
+   if (res_trees->markov != NULL)
+      delete res_trees->markov;
+   res_trees->markov= new Hidden_markov_out_tree(*this, false, false);
+
+   cumul_stated= new double[nb_state];
+   state_likelihood= 0.;
+
+   // computation of smoothed probabilities
+   state_marginal_distribution(trees, state_marginal);
+   output_conditional_distribution(trees, output_cond);
+   likelihood= upward_step(trees, upward_prob, upward_parent_prob,
+                           state_entropy, state_marginal,
+                           output_cond, entropy);
+   downward_step(trees, downward_prob, downward_pair_prob,
+                 upward_prob, upward_parent_prob,
+                 state_marginal, output_cond, entropy);
+
+   if (likelihood > D_INF)
+   {
+      for(t= 0; t < nb_trees; t++)
+      {
+         current_tree= trees.trees[t];
+         current_size= current_tree->get_size();
+         state_tree= res_trees->state_trees[t];
+
+         va= v.get_breadthorder(*current_tree);
+
+         // a node must be reached after its parent
+         assert(va.size() == current_size);
+
+         // initialisation: simulate root vertex
+         cnode= va[0];
+         cumul_stated[0]= downward_prob[t][0][cnode];
+         for(j= 1; j < nb_state; j++)
+            cumul_stated[j]= cumul_stated[j-1]+downward_prob[t][j][cnode];
+         state_v.Int()= cumul_method(nb_state, cumul_stated);
+         state_tree->put(cnode, state_v);
+
+         // completed likelihood
+         state_likelihood+= log(initial[state_v.Int()])
+                            + log(output_cond[t][state_v.Int()][cnode]);
+
+
+         // downward recursion
+
+         for(u= 1; u < current_size; u++)
+         {
+            cnode= va[u];
+            pnode= current_tree->parent(cnode);
+            state_v= state_tree->get(pnode);
+            pstate= state_v.Int();
+
+            if (downward_prob[t][0][pnode] == 0)
+               for(j= 0; j < nb_state; j++)
+                  cumul_stated[j]= 1.;
+            else
+            {
+               cumul_stated[0]= downward_pair_prob[t][pstate][0][cnode];
+               for(j= 1; j < nb_state; j++)
+                  cumul_stated[j]= cumul_stated[j-1]
+                                   + downward_pair_prob[t][pstate][j][cnode];
+               for(j= 0; j < nb_state; j++)
+                  cumul_stated[j]= cumul_stated[j]
+                                   / downward_prob[t][pstate][pnode];
+               state_v.Int()= cumul_method(nb_state, cumul_stated);
+               state_tree->put(cnode, state_v);
+               state_likelihood+= log(transition[pstate][state_v.Int()])
+                                  + log(output_cond[t][state_v.Int()][cnode]);
+            }
+         }
+      }
+      // end for t
+   }
+   else
+   {
+      delete res_trees;
+      res_trees= NULL;
+   }
+   if ((res_trees != NULL) && (characteristic_flag))
+   {
+      res_trees->min_max_value_computation();
+      res_trees->chain_data= new Chain_data(type, 0, 1);
+      res_trees->build_characteristics();
+      res_trees->build_size_histogram();
+      res_trees->build_nb_children_histogram();
+      res_trees->_nb_states= nb_state;
+      res_trees->build_observation_histogram();
+   }
+
+   for(t= 0; t < nb_trees; t++)
+   {
+      for(j= 0; j < nb_state; j++)
+      {
+         delete [] state_marginal[t][j];
+         state_marginal[t][j]= NULL;
+         delete [] output_cond[t][j];
+         output_cond[t][j]= NULL;
+         delete [] upward_prob[t][j];
+         upward_prob[t][j]= NULL;
+         delete [] upward_parent_prob[t][j];
+         upward_parent_prob[t][j]= NULL;
+         delete [] downward_prob[t][j];
+         downward_prob[t][j]= NULL;
+         delete [] state_entropy[t][j];
+         state_entropy[t][j]= NULL;
+         for(pstate= 0; pstate < nb_state; pstate++)
+         {
+            delete [] downward_pair_prob[t][j][pstate];
+            downward_pair_prob[t][j][pstate]= NULL;
+         }
+         delete [] downward_pair_prob[t][j];
+         downward_pair_prob[t][j]= NULL;
+      }
+
+      delete [] state_marginal[t];
+      state_marginal[t]= NULL;
+      delete [] output_cond[t];
+      output_cond[t]= NULL;
+      delete [] upward_prob[t];
+      upward_prob[t]= NULL;
+      delete [] upward_parent_prob[t];
+      upward_parent_prob[t]= NULL;
+      delete [] downward_prob[t];
+      downward_prob[t]= NULL;
+      delete [] state_entropy[t];
+      state_entropy[t]= NULL;
+      delete [] downward_pair_prob[t];
+      downward_pair_prob[t]= NULL;
+   }
+
+   delete [] state_marginal;
+   state_marginal= NULL;
+   delete [] output_cond;
+   output_cond= NULL;
+   delete [] upward_prob;
+   upward_prob= NULL;
+   delete [] upward_parent_prob;
+   upward_parent_prob= NULL;
+   delete [] downward_prob;
+   downward_prob= NULL;
+   delete [] state_entropy;
+   state_entropy= NULL;
+   delete [] downward_pair_prob;
+   downward_pair_prob= NULL;
+
+   delete [] itype;
+   itype= NULL;
+
+   delete [] cumul_stated;
+   cumul_stated= NULL;
+
+   return res_trees;
+
+}
+
+/*****************************************************************
+ *
+ *  Simulate state trees given observed trees (Gibbs sampling)
+ *  Compute the completed likelihood
+ *
+ **/
+
+Hidden_markov_tree_data*
+Hidden_markov_out_tree::gibbs_state_simulation(const Hidden_markov_tree_data& trees,
+                                               double& state_likelihood,
+                                               bool characteristic_flag) const
+{
+   typedef Hidden_markov_tree_data::tree_type tree_type;
+   typedef tree_type::vertex_descriptor vid;
+   typedef tree_type::children_iterator children_iterator;
+   typedef generic_visitor<tree_type> visitor;
+   typedef visitor::vertex_array vertex_array;
+
+   register int var, j, pstate, cstate;
+   int nb_trees= trees._nb_trees, t, u, current_size;
+   double pnorm; // normalisation factor
+   vid cnode, pnode; // current and parent vertices
+   double *cumul_stated, // cumulative distribution of states
+          *stated; // state distribution
+   double_array_3d output_cond= NULL, state_marginal= NULL;
+   Typed_edge_one_int_tree::value state_v, state_c;
+   vertex_array va;
+   visitor v;
+   children_iterator ch_it, ch_end;
+   Typed_edge_int_fl_tree<Int_fl_container> *current_tree= NULL;
+   Hidden_markov_tree_data *res_trees= NULL;
+   Typed_edge_one_int_tree *state_tree= NULL;
+
+   res_trees= new Hidden_markov_tree_data(trees, false, false);
+
+   if (res_trees->markov != NULL)
+      delete res_trees->markov;
+   res_trees->markov= new Hidden_markov_out_tree(*this, false, false);
+
+   cumul_stated= new double[nb_state];
+   stated= new double[nb_state];
+   state_likelihood= 0.;
+
+   output_conditional_distribution(trees, output_cond);
+
+   if (res_trees->state_trees == NULL)
+   {
+      // initialise state trees
+      res_trees->build_state_trees();
+      state_marginal_distribution(trees, state_marginal);
+      for(t= 0; t < nb_trees; t++)
+      {
+         current_tree= trees.trees[t];
+         current_size= current_tree->get_size();
+         state_tree= res_trees->state_trees[t];
+
+         va= v.get_breadthorder(*current_tree);
+
+         for(u= 0; u < current_size; u++)
+         {
+            cnode= va[u];
+            cumul_stated[0]= state_marginal[t][0][cnode];
+            for(j= 1; j < nb_state; j++)
+               cumul_stated[j]= cumul_stated[j-1] + state_marginal[t][j][cnode];
+            state_v.Int()= cumul_method(nb_state, cumul_stated);
+            state_tree->put(cnode, state_v);
+         }
+      }
+   }
+
+   for(t= 0; t < nb_trees; t++)
+   {
+      current_tree= trees.trees[t];
+      current_size= current_tree->get_size();
+      state_tree= res_trees->state_trees[t];
+
+      va= v.get_breadthorder(*current_tree);
+
+      // a node must be reached after its parent
+      assert(va.size() == current_size);
+
+      // initialisation: simulate root vertex
+      cnode= va[0];
+      pnorm= 0.;
+      for(j= 0; j < nb_state; j++)
+      {
+         stated[j]= output_cond[t][j][cnode];
+         tie(ch_it, ch_end)= current_tree->children(cnode);
+         while(ch_it < ch_end)
+         {
+            state_c= state_tree->get(*ch_it++);
+            cstate= state_c.Int();
+            stated[j]*= transition[j][cstate];
+         }
+         pnorm+= stated[j];
+      }
+
+      if (pnorm == 0.)
+         for(j= 0; j < nb_state; j++)
+            cumul_stated[j]= 1.;
+      else
+         for(j= 0; j < nb_state; j++)
+            stated[j]= stated[j]/pnorm;
+
+      if (pnorm > 0.)
+      {
+         cumul_stated[0]= stated[0];
+         for(j= 1; j < nb_state; j++)
+            cumul_stated[j]= cumul_stated[j-1]+stated[j];
+      }
+
+      state_v.Int()= cumul_method(nb_state, cumul_stated);
+      state_tree->put(cnode, state_v);
+
+      // completed likelihood
+      state_likelihood+= log(initial[state_v.Int()])
+                         + log(output_cond[t][state_v.Int()][cnode]);
+
+      // downward recursion
+
+      for(u= 1; u < current_size; u++)
+      {
+         cnode= va[u];
+         pnode= current_tree->parent(cnode);
+         state_v= state_tree->get(pnode);
+         pstate= state_v.Int();
+
+         pnorm= 0.;
+         for(j= 0; j < nb_state; j++)
+         {
+            stated[j]= output_cond[t][j][cnode];
+            tie(ch_it, ch_end)= current_tree->children(cnode);
+            while(ch_it < ch_end)
+            {
+               state_c= state_tree->get(*ch_it++);
+               cstate= state_c.Int();
+               stated[j]*= transition[j][cstate];
+            }
+            stated[j]*= transition[pstate][j];
+            pnorm+= stated[j];
+         }
+
+         if (pnorm == 0.)
+            for(j= 0; j < nb_state; j++)
+               cumul_stated[j]= 1.;
+         else
+            for(j= 0; j < nb_state; j++)
+               stated[j]= stated[j]/pnorm;
+
+         if (pnorm > 0.)
+         {
+            cumul_stated[0]= stated[0];
+            for(j= 1; j < nb_state; j++)
+               cumul_stated[j]= cumul_stated[j-1]+stated[j];
+         }
+
+         state_v.Int()= cumul_method(nb_state, cumul_stated);
+         state_tree->put(cnode, state_v);
+
+         state_likelihood+= log(transition[pstate][state_v.Int()])
+                            + log(output_cond[t][state_v.Int()][cnode]);
+      }
+   }   // end for t
+
+   if (characteristic_flag)
+   {
+      res_trees->min_max_value_computation();
+      res_trees->chain_data= new Chain_data(type, 0, 1);
+      res_trees->build_characteristics();
+      res_trees->build_size_histogram();
+      res_trees->build_nb_children_histogram();
+      res_trees->_nb_states= nb_state;
+      res_trees->build_observation_histogram();
+   }
+
+   if (state_marginal != NULL)
+   {
+      for(t= 0; t < nb_trees; t++)
+      {
+         for(j= 0; j < nb_state; j++)
+         {
+            delete [] state_marginal[t][j];
+            state_marginal[t][j]= NULL;
+         }
+
+         delete [] state_marginal[t];
+         state_marginal[t]= NULL;
+      }
+      delete [] state_marginal;
+      state_marginal= NULL;
+   }
+
+   for(t= 0; t < nb_trees; t++)
+   {
+      for(j= 0; j < nb_state; j++)
+      {
+         delete [] output_cond[t][j];
+         output_cond[t][j]= NULL;
+      }
+
+      delete [] output_cond[t];
+      output_cond[t]= NULL;
+   }
+
+   delete [] output_cond;
+   output_cond= NULL;
+
+   delete [] cumul_stated;
+   cumul_stated= NULL;
+
+   delete [] stated;
+   stated= NULL;
 
    return res_trees;
 }

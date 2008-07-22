@@ -170,6 +170,9 @@ const char *STAT_TREES_error[] = {
 
   "vector does not define a permutation" , // STATR_NO_PERMUTATION
 
+  "bad exponent for saem" , // STATR_SAEM_EXP
+  "bad estimation algorithm" , // STATR_EM_ALGORITHM
+
   "bad variable type" , // STAR_VARIABLE_TYPE
   "variable 1: bad variable type" , // STAR_VARIABLE_1_TYPE
   "bad minimum tree size" , // STATR_MIN_TREE_SIZE

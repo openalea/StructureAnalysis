@@ -141,17 +141,17 @@ mean: 270   variance: 189   standard deviation: 13.7477
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
-
+Permutation of the states: 
 HIDDEN_MARKOV_OUT_TREE
 
 2 STATES
 
 INITIAL_PROBABILITIES
-0.2  0.8  
+0.8  0.2  
 
 TRANSITION_PROBABILITIES
-0.8  0.2  
-0.3  0.7  
+0.7  0.3  
+0.2  0.8  
 
 recurrent class: states 0 1
 
@@ -160,87 +160,122 @@ recurrent class: states 0 1
 OUTPUT_PROCESS 1 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
-BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
-mean: 90   variance: 81   standard deviation: 9
-
-STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
 mean: 450   variance: 225   standard deviation: 15
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
+mean: 90   variance: 81   standard deviation: 9
 
 OUTPUT_PROCESS 2 : PARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
-BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
-mean: 270   variance: 189   standard deviation: 13.7477
-
-STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
 
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
+mean: 270   variance: 189   standard deviation: 13.7477
+
+HIDDEN_MARKOV_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.8  0.2  
+
+TRANSITION_PROBABILITIES
+0.7  0.3  
+0.2  0.8  
+
+recurrent class: states 0 1
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
+mean: 450   variance: 225   standard deviation: 15
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
+mean: 90   variance: 81   standard deviation: 9
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
+mean: 810   variance: 81   standard deviation: 9
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
+mean: 270   variance: 189   standard deviation: 13.7477
+
 Simulated trees : 
 (463, 822)
-|-(105, 271)
-| |-(82, 276)
-| | |-(444, 796)
-| | |-(89, 249)
+|-(475, 811)
+| |-(437, 814)
+| | |-(86, 249)
+| | |-(448, 796)
 | |   
-| |-(107, 288)
+| |-(478, 822)
 |   
-|-(441, 811)
-  |-(461, 810)
-  |-(451, 794)
+|-(84, 271)
+  |-(96, 270)
+  |-(91, 246)
     
 (472, 823)
-|-(441, 816)
-| |-(444, 815)
-| | |-(89, 286)
-| | |-(443, 803)
+|-(85, 279)
+| |-(87, 277)
+| | |-(448, 821)
+| | |-(86, 260)
 | |   
-| |-(444, 814)
+| |-(86, 277)
 |   
-|-(453, 814)
-  |-(448, 823)
-  |-(463, 814)
+|-(92, 276)
+  |-(89, 290)
+  |-(98, 277)
     
-(449, 803)
-|-(471, 801)
-| |-(455, 809)
-| | |-(441, 817)
-| | |-(448, 803)
+(89, 259)
+|-(103, 256)
+| |-(93, 268)
+| | |-(85, 281)
+| | |-(89, 260)
 | |   
-| |-(85, 272)
+| |-(441, 811)
 |   
-|-(436, 822)
-  |-(80, 270)
-  |-(482, 823)
+|-(81, 288)
+  |-(433, 810)
+  |-(110, 291)
     
 (446, 816)
 |-(442, 803)
 | |-(440, 801)
-| | |-(433, 817)
-| | |-(96, 250)
+| | |-(80, 281)
+| | |-(460, 797)
 | |   
-| |-(426, 811)
+| |-(76, 271)
 |   
-|-(84, 281)
+|-(439, 818)
   |-(94, 296)
-  |-(96, 252)
+  |-(461, 798)
     
-(90, 251)
-|-(83, 269)
-| |-(453, 816)
-| | |-(81, 331)
+(451, 797)
+|-(438, 809)
+| |-(92, 279)
+| | |-(435, 847)
 | | |-(101, 254)
 | |   
-| |-(426, 820)
+| |-(76, 286)
 |   
-|-(67, 290)
-  |-(82, 257)
-  |-(102, 283)
+|-(410, 823)
+  |-(436, 801)
+  |-(470, 818)
     
 
 Simulated hidden trees : 
-1
+0
 |-0
 | |-0
 | | |-1
@@ -252,7 +287,7 @@ Simulated hidden trees :
   |-1
   |-1
     
-1
+0
 |-1
 | |-1
 | | |-0
@@ -276,23 +311,23 @@ Simulated hidden trees :
   |-0
   |-1
     
-1
-|-1
-| |-1
+0
+|-0
+| |-0
 | | |-1
 | | |-0
 | |   
 | |-1
 |   
 |-0
-  |-0
+  |-1
   |-0
     
 0
 |-0
 | |-1
 | | |-0
-| | |-0
+| | |-1
 | |   
 | |-1
 |   
@@ -303,19 +338,6 @@ Simulated hidden trees :
 
 Marginal distributions for tree number 1 : 
 state 0 : 
-0.2
-|-0.4
-| |-0.5
-| | |-0.55
-| | |-0.55
-| |   
-| |-0.5
-|   
-|-0.4
-  |-0.5
-  |-0.5
-    
-state 1 : 
 0.8
 |-0.6
 | |-0.5
@@ -328,30 +350,43 @@ state 1 :
   |-0.5
   |-0.5
     
+state 1 : 
+0.2
+|-0.4
+| |-0.5
+| | |-0.55
+| | |-0.55
+| |   
+| |-0.5
+|   
+|-0.4
+  |-0.5
+  |-0.5
+    
 Output conditional distributions for tree number 1 : 
 state 0 : 
-0
-|-0.000317786
-| |-0.00080657
+0.000341526
+|-0.000293492
+| |-0.000747014
 | | |-0
-| | |-0.000401901
+| | |-0.000344012
 | |   
-| |-9.23239e-05
+| |-8.71128e-05
 |   
 |-0
   |-0
   |-0
     
 state 1 : 
-0.000341526
+0
 |-0
 | |-0
-| | |-0.000320423
+| | |-0.000371508
 | | |-0
 | |   
 | |-0
 |   
-|-0.000982498
-  |-0.00090012
-  |-0.000243089
+|-0.00105208
+  |-0.00100403
+  |-0.000276947
     

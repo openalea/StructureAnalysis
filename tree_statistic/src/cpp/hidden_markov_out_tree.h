@@ -188,12 +188,22 @@ protected :
                                                     char format= 'a',
                                                     int vertex= I_DEFAULT) const;
 
-   /**Compute the nb_state_trees best trees */
+   /**Compute the nb_state_trees best state trees */
    Hidden_markov_tree_data* generalized_viterbi(const Hidden_markov_tree_data& trees,
                                                 std::vector<ostringstream*>& messages,
                                                 int nb_state_trees,
                                                 double likelihood,
                                                 int index= I_DEFAULT) const;
+
+   /**Simulate a state tree given observed tree (SEM-like principle)*/
+   Hidden_markov_tree_data* sstate_simulation(const Hidden_markov_tree_data& trees,
+                                              double& state_likelihood,
+                                              bool characteristic_flag= true) const;
+
+   /**Simulate a state tree given observed tree, via Gibbs sampling*/
+   Hidden_markov_tree_data* gibbs_state_simulation(const Hidden_markov_tree_data& trees,
+                                                   double& state_likelihood,
+                                                   bool characteristic_flag= true) const;
 
    /**Compute the completed likelihood for a given set of trees and state trees*/
    double state_likelihood_computation(const Hidden_markov_tree_data& trees) const;
@@ -336,8 +346,7 @@ public :
                                        const Trees& otrees,
                                        bool counting_flag= true) const;
 
-   // methods above should be used for testing purposes only...
-
+   // methods below should be used for testing purposes only...
    void get_state_marginal_distribution(const Hidden_markov_tree_data& trees,
                                         double_array_3d& state_marginal) const;
    void get_output_conditional_distribution(const Hidden_markov_tree_data& trees,

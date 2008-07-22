@@ -78,7 +78,7 @@ Tree_characteristics::Tree_characteristics(int imin_value,
                                            int imax_size,
                                            int imax_depth,
                                            int inb_trees,
-                                           Typed_edge_one_int_tree* otrees1,
+                                           Typed_edge_one_int_tree** otrees1,
                                            int ivariable)
   :  _variable(ivariable)
   ,  _min_value(imin_value)
@@ -97,7 +97,6 @@ Tree_characteristics::Tree_characteristics(int imin_value,
                          inb_trees,
                          otrees1,
                          _variable); }
-
 
 /*****************************************************************
  *
@@ -255,11 +254,12 @@ void Tree_characteristics::build_characteristics(int imin_value,
                                                  int imax_size,
                                                  int imax_depth,
                                                  int inb_trees,
-                                                 Typed_edge_one_int_tree* otrees1,
+                                                 Typed_edge_one_int_tree** otrees1,
                                                  int ivariable)
 {
    bool build= true;
-   int val, nb_values= _max_value - _min_value + 1;
+   int val, nb_values= _max_value - _min_value + 1,
+       cp_nb_values= nb_values;
 
    _variable= ivariable;
    _min_value= imin_value;
@@ -294,6 +294,14 @@ void Tree_characteristics::build_characteristics(int imin_value,
       build_zone_histograms(otrees1, imax_size);
       build_nb_occurrences_histogram(otrees1, imax_size);
       // build_children_pairs_histogram(otrees1)
+   }
+   else
+   {
+      remove_characteristic(first_occurrence_root, cp_nb_values);
+      remove_characteristic(first_occurrence_leaves, cp_nb_values);
+      remove_characteristic(sojourn_size, cp_nb_values);
+      remove_characteristic(nb_zones, cp_nb_values);
+      remove_characteristic(nb_occurrences, cp_nb_values);
    }
 }
 
@@ -1189,7 +1197,7 @@ std::ostream& Tree_characteristics::ascii_write_nb_occurrences(std::ostream &os,
  *
  **/
 
-void Tree_characteristics::remove_characteristic(Histogram** c,
+void Tree_characteristics::remove_characteristic(Histogram**& c,
                                                  int inb_values)
 {
    int value;
@@ -1236,7 +1244,7 @@ void Tree_characteristics::remove()
  *
  **/
 
-void Tree_characteristics::init_characteristic(Histogram** c,
+void Tree_characteristics::init_characteristic(Histogram**& c,
                                                int inb_values,
                                                int imax_val)
 {
@@ -1264,7 +1272,7 @@ void Tree_characteristics::init(int imax_size, int imax_depth)
 
    init_characteristic(first_occurrence_leaves, nb_values, imax_depth);
 
-   init_characteristic(sojourn_size, nb_values, imax_size);
+   // init_characteristic(sojourn_size, nb_values, imax_size);
 
    init_characteristic(nb_zones, nb_values, imax_size);
 
@@ -1278,7 +1286,7 @@ void Tree_characteristics::init(int imax_size, int imax_depth)
  *
  **/
 
-void Tree_characteristics::build_marginal_histogram(Typed_edge_one_int_tree* otrees1)
+void Tree_characteristics::build_marginal_histogram(Typed_edge_one_int_tree** otrees1)
 { // marginal histogram
 
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
@@ -1286,18 +1294,21 @@ void Tree_characteristics::build_marginal_histogram(Typed_edge_one_int_tree* otr
    int t, v;
    vertex_iterator it, end;
 
-   if ((otrees1) &&(_min_value >= 0) && (_max_value <= MARGINAL_MAX_VALUE))
+   if ((otrees1 != NULL) &&(_min_value >= 0) && (_max_value <= MARGINAL_MAX_VALUE))
    {
       if (marginal == NULL)
          marginal = new Histogram(_max_value+1);
 
       for(t = 0; t < _nb_trees; t++)
       {
-         tie(it, end)= otrees1[t].vertices();
-         while (it < end)
+         if (otrees1[t] != NULL)
          {
-            v= (otrees1[t].get(*it++)).Int();
-            (marginal->frequency[v])++;
+            tie(it, end)= otrees1[t]->vertices();
+            while (it < end)
+            {
+               v= (otrees1[t]->get(*it++)).Int();
+               (marginal->frequency[v])++;
+            }
          }
       }
 
@@ -1316,7 +1327,7 @@ void Tree_characteristics::build_marginal_histogram(Typed_edge_one_int_tree* otr
  *
  **/
 
-void Tree_characteristics::build_first_occurrence_root_histogram(Typed_edge_one_int_tree* otrees1,
+void Tree_characteristics::build_first_occurrence_root_histogram(Typed_edge_one_int_tree** otrees1,
                                                                  int imax_depth)
 { //  histogram of first occurrence (root)
 
@@ -1350,25 +1361,28 @@ void Tree_characteristics::build_first_occurrence_root_histogram(Typed_edge_one_
 
       for(t= 0; t < _nb_trees; t++)
       {
-         for(v= 0; v < nb_values; v++)
-            occurrence[v]= false;
-
-         size= otrees1[t].get_size();
-         va= visitor.get_breadthorder(otrees1[t]);
-         index= 0;
-
-         curr_val= _min_value; // current value
-
-         while ((index < size) && (curr_val <= _max_value))
+         if (otrees1[t] != NULL)
          {
-            v= (otrees1[t].get(va[index])).Int() - _min_value;
-            if (!occurrence[v])
+            for(v= 0; v < nb_values; v++)
+               occurrence[v]= false;
+
+            size= otrees1[t]->get_size();
+            va= visitor.get_breadthorder(*otrees1[t]);
+            index= 0;
+
+            curr_val= _min_value; // current value
+
+            while ((index < size) && (curr_val <= _max_value))
             {
-               occurrence[v]= true;
-               (first_occurrence_root[v]->frequency[otrees1[t].get_depth(va[index])])++;
-               curr_val++;
+               v= (otrees1[t]->get(va[index])).Int() - _min_value;
+               if (!occurrence[v])
+               {
+                  occurrence[v]= true;
+                  (first_occurrence_root[v]->frequency[otrees1[t]->get_depth(va[index])])++;
+                  curr_val++;
+               }
+               index++;
             }
-            index++;
          }
       }
 
@@ -1393,7 +1407,7 @@ void Tree_characteristics::build_first_occurrence_root_histogram(Typed_edge_one_
  *
  **/
 
-void Tree_characteristics::build_first_occurrence_leaves_histogram(Typed_edge_one_int_tree* otrees1,
+void Tree_characteristics::build_first_occurrence_leaves_histogram(Typed_edge_one_int_tree** otrees1,
                                                                    int imax_depth)
 { //  histogram of first occurrence (leaves)
 
@@ -1424,25 +1438,28 @@ void Tree_characteristics::build_first_occurrence_leaves_histogram(Typed_edge_on
 
       for(t= 0; t < _nb_trees; t++)
       {
-         for(v= 0; v < nb_values; v++)
-            occurrence[v]= false;
-
-         size= otrees1[t].get_size();
-         va= visitor.get_leavesfirstorder(otrees1[t], depth);
-         index= 0;
-
-         curr_val= _min_value; // current value
-
-         while ((index < size) && (curr_val <= _max_value))
+         if (otrees1[t] != NULL)
          {
-            v= (otrees1[t].get(va[index])).Int() - _min_value;
-            if (!occurrence[v])
+            for(v= 0; v < nb_values; v++)
+               occurrence[v]= false;
+
+            size= otrees1[t]->get_size();
+            va= visitor.get_leavesfirstorder(*otrees1[t], depth);
+            index= 0;
+
+            curr_val= _min_value; // current value
+
+            while ((index < size) && (curr_val <= _max_value))
             {
-               occurrence[v]= true;
-               (first_occurrence_leaves[v]->frequency[depth[index]])++;
-               curr_val++;
+               v= (otrees1[t]->get(va[index])).Int() - _min_value;
+               if (!occurrence[v])
+               {
+                  occurrence[v]= true;
+                  (first_occurrence_leaves[v]->frequency[depth[index]])++;
+                  curr_val++;
+               }
+               index++;
             }
-            index++;
          }
       }
 
@@ -1467,7 +1484,7 @@ void Tree_characteristics::build_first_occurrence_leaves_histogram(Typed_edge_on
  *
  **/
 
-void Tree_characteristics::build_zone_histograms(Typed_edge_one_int_tree* otrees1,
+void Tree_characteristics::build_zone_histograms(Typed_edge_one_int_tree** otrees1,
                                                  int imax_size)
 { //  histogram of homogeneous zones
 
@@ -1510,72 +1527,75 @@ void Tree_characteristics::build_zone_histograms(Typed_edge_one_int_tree* otrees
 
       for(t= 0; t < _nb_trees; t++)
       {
-         nb_nodes= 1;
-
-         v= otrees1[t].root();
-         size= otrees1[t].get_size();
-         val= (otrees1[t].get(v)).Int();
-         current_zone= 0;
-         tmp_zone.push_back(v);
-         zones.push_back(tmp_zone);
-         node_list.push_back(v);
-         zone_id.push_back(current_zone);
-         tmp_zone.pop_back();
-
-         while (!node_list.empty())
+         if (otrees1[t] != NULL)
          {
-            v= node_list.front();
-            current_zone= zone_id.front();
-            tie(it, end)= otrees1[t].children(v);
-            //cout << "Traitement du sommet " << v << " de la zone "
-            //     << zones[current_zone]
-            while (it < end)
+            nb_nodes= 1;
+
+            v= otrees1[t]->root();
+            size= otrees1[t]->get_size();
+            val= (otrees1[t]->get(v)).Int();
+            current_zone= 0;
+            tmp_zone.push_back(v);
+            zones.push_back(tmp_zone);
+            node_list.push_back(v);
+            zone_id.push_back(current_zone);
+            tmp_zone.pop_back();
+
+            while (!node_list.empty())
             {
-               val= (otrees1[t].get(*it)).Int();
-               if (val == (otrees1[t].get(v)).Int())
-               // *it belongs to the current homogeneous zone
+               v= node_list.front();
+               current_zone= zone_id.front();
+               tie(it, end)= otrees1[t]->children(v);
+               //cout << "Traitement du sommet " << v << " de la zone "
+               //     << zones[current_zone]
+               while (it < end)
                {
-                   (zones[current_zone]).push_back(*it);
-                   node_list.push_back(*it);
-                   zone_id.push_back(current_zone);
-               }
-               else
-               // beginning of a new zone
-               {
-                  tmp_zone.push_back(*it);
-                  zones.push_back(tmp_zone);
-                  tmp_zone.pop_back();
-                  node_list.push_back(*it);
-                  zone_id.push_back(zones.size()-1);
-               }
-               it++;
-            } // each child handled
-            node_list.pop_front();
-            zone_id.pop_front();
+                  val= (otrees1[t]->get(*it)).Int();
+                  if (val == (otrees1[t]->get(v)).Int())
+                  // *it belongs to the current homogeneous zone
+                  {
+                      (zones[current_zone]).push_back(*it);
+                      node_list.push_back(*it);
+                      zone_id.push_back(current_zone);
+                  }
+                  else
+                  // beginning of a new zone
+                  {
+                     tmp_zone.push_back(*it);
+                     zones.push_back(tmp_zone);
+                     tmp_zone.pop_back();
+                     node_list.push_back(*it);
+                     zone_id.push_back(zones.size()-1);
+                  }
+                  it++;
+               } // each child handled
+               node_list.pop_front();
+               zone_id.pop_front();
+            }
+
+            for(val= 0; val < nb_values; val++)
+               nb_zones_t[val]= 0;
+
+            while (!zones.empty())
+            {
+               v= (zones.back()).front();
+               val= (otrees1[t]->get(v)).Int();
+               nb_zones_t[val-_min_value]++;
+               // current tree has one more zone of value "val"
+
+               size= (zones.back()).size();
+               // cout << "Zone de valeur " << val << " enracinee au sommet " << v
+               //      << " de taille " << size << endl;
+               (sojourn_size[val-_min_value]->frequency[size])++;
+               // ... and of size "size'
+
+               zones.pop_back();
+            }
+
+            for(val= 0; val < nb_values; val++)
+               (nb_zones[val]->frequency[nb_zones_t[val]])++;
+
          }
-
-         for(val= 0; val < nb_values; val++)
-            nb_zones_t[val]= 0;
-
-         while (!zones.empty())
-         {
-            v= (zones.back()).front();
-            val= (otrees1[t].get(v)).Int();
-            nb_zones_t[val-_min_value]++;
-            // current tree has one more zone of value "val"
-
-            size= (zones.back()).size();
-            // cout << "Zone de valeur " << val << " enracinee au sommet " << v
-            //      << " de taille " << size << endl;
-            (sojourn_size[val-_min_value]->frequency[size])++;
-            // ... and of size "size'
-
-            zones.pop_back();
-         }
-
-         for(val= 0; val < nb_values; val++)
-            (nb_zones[val]->frequency[nb_zones_t[val]])++;
-
       } // each tree handled
 
       for(val= 0; val < nb_values; val++)
@@ -1606,7 +1626,7 @@ void Tree_characteristics::build_zone_histograms(Typed_edge_one_int_tree* otrees
  *
  **/
 
-void Tree_characteristics::build_nb_occurrences_histogram(Typed_edge_one_int_tree* otrees1,
+void Tree_characteristics::build_nb_occurrences_histogram(Typed_edge_one_int_tree** otrees1,
                                                           int imax_size)
 {
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
@@ -1629,18 +1649,21 @@ void Tree_characteristics::build_nb_occurrences_histogram(Typed_edge_one_int_tre
 
    for(t = 0; t < _nb_trees; t++)
    {
-      for(val= 0; val < nb_values; val++)
-         nb_occurrences_t[val]= 0;
-
-      tie(it, end)= otrees1[t].vertices();
-      while (it < end)
+      if (otrees1[t] != NULL)
       {
-         val= (otrees1[t].get(*it++)).Int() - _min_value;
-         nb_occurrences_t[val]++;
-      }
+         for(val= 0; val < nb_values; val++)
+            nb_occurrences_t[val]= 0;
 
-      for(val= 0; val < nb_values; val++)
-         (nb_occurrences[val]->frequency[nb_occurrences_t[val]])++;
+         tie(it, end)= otrees1[t]->vertices();
+         while (it < end)
+         {
+            val= (otrees1[t]->get(*it++)).Int() - _min_value;
+            nb_occurrences_t[val]++;
+         }
+
+         for(val= 0; val < nb_values; val++)
+            (nb_occurrences[val]->frequency[nb_occurrences_t[val]])++;
+      }
    }
 
    for(val= 0; val < nb_values; val++)

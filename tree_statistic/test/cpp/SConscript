@@ -18,9 +18,12 @@ pj = os.path.join
 # env.ALEAIncludes("tree_statistic", includes)
 
 
-# env.Append(CPPDEFINES= ['MESSAGE'])
+# env_test.Append(CPPDEFINES= ['MESSAGE'])
+if env_test['debug']:
+   env_test.Append(CPPDEFINES= ['DEBUG'])
 env_test.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
-
+env_test.AppendUnique(LIBS= ['efence'])
+# env_test.AppendUnique(LIBS= ['leaktrace'])
 # env.Append(CPPPATH= includes)
 
 #Sources

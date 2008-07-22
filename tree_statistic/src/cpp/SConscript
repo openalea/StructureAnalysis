@@ -18,9 +18,10 @@ includes += env.ALEAGlob("*.hpp")
 env.ALEAIncludes("tree_statistic", includes)
 
 
-env.Append(CPPDEFINES= ['MESSAGE'])
 env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
-#env.AppendUnique(LIBS=['efence'])
+# if env['debug']:
+#    env.Append(CPPDEFINES= ['DEBUG'])
+#    env.AppendUnique(LIBS=['efence'])
 # optional
 
 # Build shared libraries

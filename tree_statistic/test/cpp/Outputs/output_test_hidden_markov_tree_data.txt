@@ -45,7 +45,6 @@ Simulate the attributes...
 Print the data with the hidden Markov tree: 
 
 3 STATES
-ORDER 1
 
 INITIAL_PROBABILITIES
 0.4  0.3  0.3  
@@ -291,7 +290,7 @@ iteration 10   log-likelihood of the observed trees: -90.9944
 
 10 iterations
 
-log-likelihood of the state trees: -97.0198 | -90.8011
+log-likelihood of the state trees: -115.594 | -115.594
 
 Parameter estimation:
 HIDDEN_MARKOV_OUT_TREE
@@ -526,7 +525,6 @@ log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 Print the data with the hidden Markov tree: 
 
 3 STATES
-ORDER 1
 
 INITIAL_PROBABILITIES
 0.4  0.3  0.3  
@@ -996,7 +994,6 @@ information: -52.0713 (-1.57792)
 Hidden_markov_tree_data augmented with the state tree and the smoothed probabilities:
 
 3 STATES
-ORDER 1
 
 INITIAL_PROBABILITIES
 0.4  0.3  0.3  
@@ -1065,6 +1062,154 @@ observation probability matrix
 0    1    0    0    0    0
 1  0.3  0.2  0.1  0.2  0.2
 2  0.2  0.3  0.1  0.2  0.2
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 2 distribution
+
+path length (starting from root) up to the first occurrence of output 3 distribution
+
+path length (starting from root) up to the first occurrence of output 4 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
+
+output 0 sojourn size distribution
+
+output 1 sojourn size distribution
+
+output 2 sojourn size distribution
+
+output 3 sojourn size distribution
+
+output 4 sojourn size distribution
+
+number of zones of output 0 per size 13 tree distribution
+
+number of zones of output 1 per size 13 tree distribution
+
+number of zones of output 2 per size 13 tree distribution
+
+number of zones of output 3 per size 13 tree distribution
+
+number of zones of output 4 per size 13 tree distribution
+
+number of occurrences of output 0 per size 13 tree distribution
+
+number of occurrences of output 1 per size 13 tree distribution
+
+number of occurrences of output 2 per size 13 tree distribution
+
+number of occurrences of output 3 per size 13 tree distribution
+
+number of occurrences of output 4 per size 13 tree distribution
+
+tree size histogram - sample size: 5
+mean: 13   variance: 0   standard deviation: 0
+
+cumulative size: 65
+
+information of the trees in the iid case: -93.3781 (-1.43659)
+
+log-likelihood of the state trees: -126.115   (normalized: -1.94023)
+
+log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
+
+-1 free parameters   2 * penalyzed log-likelihood (AIC): -192.04
+
+-1 free parameters   2 * penalyzed log-likelihood (AICc): -192.04
+
+-1 free parameters   2 * penalyzed log-likelihood (BIC): -189.865
+
+-1 free parameters   2 * penalyzed log-likelihood (BICc): -194.04
+
+-1 free parameters   2 * penalyzed log-likelihood (ICL): -248.055
+
+-1 free parameters   2 * penalyzed log-likelihood (ICLc): -252.229
+
+
+Plot of the augmented Hidden_markov_tree_data:
+
+Plain Hidden_markov_tree_data:
+
+3 STATES
+
+INITIAL_PROBABILITIES
+0.471456   0.388743   0.139801   
+
+TRANSITION_PROBABILITIES
+0.549361   0.194979   0.25566    
+0.0750259  0.437981   0.486993   
+0.187366   0.224457   0.588177   
+
+recurrent class: states 0 1 2
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from root) up to the first occurrence of state 2 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 2 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+state 2 sojourn size distribution
+
+number of zones of state 0 per size 13 tree distribution
+
+number of zones of state 1 per size 13 tree distribution
+
+number of zones of state 2 per size 13 tree distribution
+
+number of occurrences of state 0 per size 13 tree distribution
+
+number of occurrences of state 1 per size 13 tree distribution
+
+number of occurrences of state 2 per size 13 tree distribution
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 1
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.269971
+OUTPUT 1 : 0.246085
+OUTPUT 2 : 0.102351
+OUTPUT 3 : 0.310344
+OUTPUT 4 : 0.071249
+
+STATE 2 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.18217
+OUTPUT 1 : 0.18847
+OUTPUT 2 : 0.213875
+OUTPUT 3 : 0.286674
+OUTPUT 4 : 0.128812
+
+observation probability matrix
+
+          0         1         2         3         4
+0         1         0         0         0         0
+1  0.269971  0.246085  0.102351  0.310344  0.071249
+2   0.18217   0.18847  0.213875  0.286674  0.128812
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
@@ -1208,158 +1353,6 @@ cumulative size: 65
 
 information of the trees in the iid case: -93.3781 (-1.43659)
 
-log-likelihood of the state trees: -126.115   (normalized: -1.94023)
-
-log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
-
--1 free parameters   2 * penalyzed log-likelihood (AIC): -192.04
-
--1 free parameters   2 * penalyzed log-likelihood (AICc): -192.04
-
--1 free parameters   2 * penalyzed log-likelihood (BIC): -189.865
-
--1 free parameters   2 * penalyzed log-likelihood (BICc): -194.04
-
--1 free parameters   2 * penalyzed log-likelihood (ICL): -248.055
-
--1 free parameters   2 * penalyzed log-likelihood (ICLc): -252.229
-
-
-Plain Hidden_markov_tree_data:
-
-3 STATES
-ORDER 1
-
-INITIAL_PROBABILITIES
-0.471456   0.388743   0.139801   
-
-TRANSITION_PROBABILITIES
-0.549361   0.194979   0.25566    
-0.0750259  0.437981   0.486993   
-0.187366   0.224457   0.588177   
-
-recurrent class: states 0 1 2
-
-1 OUTPUT_PROCESS
-
-OUTPUT_PROCESS 1 : NONPARAMETRIC
-
-STATE 0 OBSERVATION_DISTRIBUTION
-OUTPUT 0 : 1
-
-STATE 1 OBSERVATION_DISTRIBUTION
-OUTPUT 0 : 0.269971
-OUTPUT 1 : 0.246085
-OUTPUT 2 : 0.102351
-OUTPUT 3 : 0.310344
-OUTPUT 4 : 0.071249
-
-STATE 2 OBSERVATION_DISTRIBUTION
-OUTPUT 0 : 0.18217
-OUTPUT 1 : 0.18847
-OUTPUT 2 : 0.213875
-OUTPUT 3 : 0.286674
-OUTPUT 4 : 0.128812
-
-observation probability matrix
-
-          0         1         2         3         4
-0         1         0         0         0         0
-1  0.269971  0.246085  0.102351  0.310344  0.071249
-2   0.18217   0.18847  0.213875  0.286674  0.128812
-
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 5
-mean: 0.6   variance: 0.8   standard deviation: 0.894427
-
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 4
-mean: 1.5   variance: 1.66667   standard deviation: 1.29099
-
-path length (starting from root) up to the first occurrence of output 2 histogram - sample size: 5
-mean: 1.8   variance: 0.7   standard deviation: 0.83666
-
-path length (starting from root) up to the first occurrence of output 3 histogram - sample size: 5
-mean: 1.8   variance: 1.7   standard deviation: 1.30384
-
-path length (starting from root) up to the first occurrence of output 4 histogram - sample size: 3
-mean: 2.66667   variance: 0.333333   standard deviation: 0.57735
-
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 5
-mean: 0   variance: 0   standard deviation: 0
-
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 4
-mean: 0.25   variance: 0.25   standard deviation: 0.5
-
-path length (starting from terminal nodes) up to the first occurrence of output 2 histogram - sample size: 5
-mean: 0.4   variance: 0.3   standard deviation: 0.547723
-
-path length (starting from terminal nodes) up to the first occurrence of output 3 histogram - sample size: 5
-mean: 0   variance: 0   standard deviation: 0
-
-path length (starting from terminal nodes) up to the first occurrence of output 4 histogram - sample size: 3
-mean: 0   variance: 0   standard deviation: 0
-
-output 0 sojourn size histogram - sample size: 14
-mean: 2   variance: 3.84615   standard deviation: 1.96116
-
-output 1 sojourn size histogram - sample size: 8
-mean: 1.25   variance: 0.5   standard deviation: 0.707107
-
-output 2 sojourn size histogram - sample size: 7
-mean: 1.14286   variance: 0.142857   standard deviation: 0.377964
-
-output 3 sojourn size histogram - sample size: 10
-mean: 1.4   variance: 0.711111   standard deviation: 0.843274
-
-output 4 sojourn size histogram - sample size: 5
-mean: 1   variance: 0   standard deviation: 0
-
-number of zones of output 0 per tree histogram - sample size: 5
-mean: 2.8   variance: 1.7   standard deviation: 1.30384
-coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
-
-number of zones of output 1 per tree histogram - sample size: 5
-mean: 1.6   variance: 1.3   standard deviation: 1.14018
-coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
-
-number of zones of output 2 per tree histogram - sample size: 5
-mean: 1.4   variance: 0.8   standard deviation: 0.894427
-coefficient of skewness: 2.23607   coefficient of kurtosis: -0.4
-
-number of zones of output 3 per tree histogram - sample size: 5
-mean: 2   variance: 0.5   standard deviation: 0.707107
-coefficient of skewness: 0   coefficient of kurtosis: -1
-
-number of zones of output 4 per tree histogram - sample size: 5
-mean: 1   variance: 1.5   standard deviation: 1.22474
-coefficient of skewness: 1.36083   coefficient of kurtosis: -1
-
-number of occurrences of output 0 per tree histogram - sample size: 5
-mean: 5.6   variance: 7.8   standard deviation: 2.79285
-coefficient of skewness: 0.339696   coefficient of kurtosis: -1.93846
-
-number of occurrences of output 1 per tree histogram - sample size: 5
-mean: 2   variance: 2.5   standard deviation: 1.58114
-coefficient of skewness: 0   coefficient of kurtosis: -1.64
-
-number of occurrences of output 2 per tree histogram - sample size: 5
-mean: 1.6   variance: 0.8   standard deviation: 0.894427
-coefficient of skewness: 1.25779   coefficient of kurtosis: -1.3375
-
-number of occurrences of output 3 per tree histogram - sample size: 5
-mean: 2.8   variance: 1.7   standard deviation: 1.30384
-coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
-
-number of occurrences of output 4 per tree histogram - sample size: 5
-mean: 1   variance: 1.5   standard deviation: 1.22474
-coefficient of skewness: 1.36083   coefficient of kurtosis: -1
-
-tree size histogram - sample size: 5
-mean: 13   variance: 0   standard deviation: 0
-
-cumulative size: 65
-
-information of the trees in the iid case: -93.3781 (-1.43659)
-
 log-likelihood of the state trees: -115.594   (normalized: -1.77837)
 
 log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
@@ -1453,7 +1446,6 @@ Simulate the attributes...
 Print the data with the hidden Markov tree: 
 
 2 STATES
-ORDER 1
 
 INITIAL_PROBABILITIES
 0.2  0.8  
@@ -1547,19 +1539,19 @@ reference chi-square value: 1e+37   reference critical probability: 0.05
 reference chi-square value: 1e+37   reference critical probability: 0.01
 
 iteration 1   log-likelihood of the observed trees: -521.89
-iteration 2   log-likelihood of the observed trees: -511.295
-iteration 3   log-likelihood of the observed trees: -511.295
-iteration 4   log-likelihood of the observed trees: -511.295
-iteration 5   log-likelihood of the observed trees: -511.295
-iteration 6   log-likelihood of the observed trees: -511.295
-iteration 7   log-likelihood of the observed trees: -511.295
-iteration 8   log-likelihood of the observed trees: -511.295
-iteration 9   log-likelihood of the observed trees: -511.295
-iteration 10   log-likelihood of the observed trees: -511.295
+iteration 2   log-likelihood of the observed trees: -511.466
+iteration 3   log-likelihood of the observed trees: -511.466
+iteration 4   log-likelihood of the observed trees: -511.466
+iteration 5   log-likelihood of the observed trees: -511.466
+iteration 6   log-likelihood of the observed trees: -511.466
+iteration 7   log-likelihood of the observed trees: -511.466
+iteration 8   log-likelihood of the observed trees: -511.466
+iteration 9   log-likelihood of the observed trees: -511.466
+iteration 10   log-likelihood of the observed trees: -511.466
 
 10 iterations
 
-log-likelihood of the state trees: -521.89 | -511.295
+log-likelihood of the state trees: -511.466 | -511.466
 
 Parameter estimation:
 HIDDEN_MARKOV_OUT_TREE
@@ -1623,8 +1615,8 @@ state 0 observation histogram - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 
 STATE 1 OBSERVATION_DISTRIBUTION
-NEGATIVE_BINOMIAL   INF_BOUND : 782   PARAMETER : 23.996   PROBABILITY : 0.472073
-mean: 808.81   variance: 56.0817   standard deviation: 7.48877
+BINOMIAL   INF_BOUND : 661   SUP_BOUND : 900   PROBABILITY : 0.618557
+mean: 808.835   variance: 56.3907   standard deviation: 7.50937
 
 state 1 observation histogram - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
@@ -1636,25 +1628,24 @@ cumulative size: 65
 
 information of the trees in the iid case: -473.346 (-7.28225)
 
-log-likelihood of the state trees: -511.295   (normalized: -7.86608)
+log-likelihood of the state trees: -511.466   (normalized: -7.86871)
 
-log-likelihood of the observed trees: -511.295   (normalized: -7.86608)
+log-likelihood of the observed trees: -511.466   (normalized: -7.86871)
 
-14 free parameters   2 * penalyzed log-likelihood (AIC): -1050.59
+14 free parameters   2 * penalyzed log-likelihood (AIC): -1050.93
 
-14 free parameters   2 * penalyzed log-likelihood (AICc): -1058.99
+14 free parameters   2 * penalyzed log-likelihood (AICc): -1059.33
 
-14 free parameters   2 * penalyzed log-likelihood (BIC): -1081.03
+14 free parameters   2 * penalyzed log-likelihood (BIC): -1081.37
 
 14 free parameters   2 * penalyzed log-likelihood (BICc): nan
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -1081.03
+14 free parameters   2 * penalyzed log-likelihood (ICL): -1081.37
 
 14 free parameters   2 * penalyzed log-likelihood (ICLc): nan
 Print the data with the hidden Markov tree: 
 
 2 STATES
-ORDER 1
 
 INITIAL_PROBABILITIES
 0.2  0.8  
@@ -1854,7 +1845,6 @@ information: -70.2446 (-2.80978)
 Hidden_markov_tree_data augmented with the state tree and the smoothed probabilities:
 
 2 STATES
-ORDER 1
 
 INITIAL_PROBABILITIES
 0.2  0.8  
@@ -1976,11 +1966,15 @@ log-likelihood of the observed trees: -521.89   (normalized: -8.02907)
 
 -1 free parameters   2 * penalyzed log-likelihood (ICLc): -1043.78
 
+chi-square test (2 degrees of freedom)
+chi-square value: 5.33442   critical probability: 0.069996
+reference chi-square value: 5.93876   reference critical probability: 0.05
+
+Plot of the augmented Hidden_markov_tree_data:
 
 Plain Hidden_markov_tree_data:
 
 2 STATES
-ORDER 1
 
 INITIAL_PROBABILITIES
 0.4   0.6   
@@ -1990,6 +1984,26 @@ TRANSITION_PROBABILITIES
 0.4   0.6   
 
 recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+number of zones of state 0 per size 13 tree distribution
+
+number of zones of state 1 per size 13 tree distribution
+
+number of occurrences of state 0 per size 13 tree distribution
+
+number of occurrences of state 1 per size 13 tree distribution
 
 2 OUTPUT_PROCESSES
 
@@ -2019,8 +2033,8 @@ state 0 observation histogram - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 
 STATE 1 OBSERVATION_DISTRIBUTION
-NEGATIVE_BINOMIAL   INF_BOUND : 782   PARAMETER : 23.996   PROBABILITY : 0.472073
-mean: 808.81   variance: 56.0817   standard deviation: 7.48877
+BINOMIAL   INF_BOUND : 661   SUP_BOUND : 900   PROBABILITY : 0.618557
+mean: 808.835   variance: 56.3907   standard deviation: 7.50937
 
 state 1 observation histogram - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
@@ -2032,22 +2046,26 @@ cumulative size: 65
 
 information of the trees in the iid case: -473.346 (-7.28225)
 
-log-likelihood of the state trees: -511.295   (normalized: -7.86608)
+log-likelihood of the state trees: -511.466   (normalized: -7.86871)
 
-log-likelihood of the observed trees: -511.295   (normalized: -7.86608)
+log-likelihood of the observed trees: -511.466   (normalized: -7.86871)
 
-14 free parameters   2 * penalyzed log-likelihood (AIC): -1050.59
+14 free parameters   2 * penalyzed log-likelihood (AIC): -1050.93
 
-14 free parameters   2 * penalyzed log-likelihood (AICc): -1058.99
+14 free parameters   2 * penalyzed log-likelihood (AICc): -1059.33
 
-14 free parameters   2 * penalyzed log-likelihood (BIC): -1081.03
+14 free parameters   2 * penalyzed log-likelihood (BIC): -1081.37
 
-14 free parameters   2 * penalyzed log-likelihood (BICc): -1022.59
+14 free parameters   2 * penalyzed log-likelihood (BICc): -1022.93
 
-14 free parameters   2 * penalyzed log-likelihood (ICL): -1081.03
+14 free parameters   2 * penalyzed log-likelihood (ICL): -1081.37
 
-14 free parameters   2 * penalyzed log-likelihood (ICLc): -1022.59
+14 free parameters   2 * penalyzed log-likelihood (ICLc): -1022.93
 
+chi-square test (2 degrees of freedom)
+chi-square value: 1.00288e+09   critical probability: 6.42372e-241
+reference chi-square value: 5.93876   reference critical probability: 0.05
+reference chi-square value: 9.10382   reference critical probability: 0.01
 
 Extract an observation distribution from plain Hidden_markov_tree_data:
 *** ERROR : state trees not in the data
@@ -2079,3 +2097,170 @@ Extract a characteristic distribution (zones) from plain Hidden_markov_tree_data
 
 Extract a characteristic distribution (zones) from augmented Hidden_markov_tree_data:
 *** ERROR : characteristics not computed
+iteration 1   log-likelihood of the observed trees: -43.8762
+
+1 iteration
+
+log-likelihood of the state trees: -43.3087 | -43.3087
+HIDDEN_MARKOV_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+1        0        
+
+TRANSITION_PROBABILITIES
+0.99999  1e-05    
+0        1        
+
+transient class: state 0
+recurrent class: state 1 (absorbing state)
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 0 histogram - sample size: 5
+mean: 0.6   variance: 0.3   standard deviation: 0.547723
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from root) up to the first occurrence of state 1 histogram - sample size: 5
+mean: 0.8   variance: 1.2   standard deviation: 1.09545
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 histogram - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 histogram - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+state 0 sojourn size distribution
+
+state 0 sojourn size histogram - sample size: 10
+mean: 4   variance: 11.7778   standard deviation: 3.43188
+
+absorption probability of state 1: 1
+
+state 1 sojourn size histogram - sample size: 13
+mean: 1.92308   variance: 2.24359   standard deviation: 1.49786
+
+number of zones of state 0 per size 13 tree distribution
+
+number of zones of state 0 per tree histogram - sample size: 5
+mean: 2   variance: 0.5   standard deviation: 0.707107
+coefficient of skewness: 0   coefficient of kurtosis: -1
+
+number of zones of state 1 per size 13 tree distribution
+
+number of zones of state 1 per tree histogram - sample size: 5
+mean: 2.6   variance: 1.3   standard deviation: 1.14018
+coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
+
+number of occurrences of state 0 per size 13 tree distribution
+
+number of occurrences of state 0 per tree histogram - sample size: 5
+mean: 8   variance: 4   standard deviation: 2
+coefficient of skewness: -0.9375   coefficient of kurtosis: -1.4375
+
+number of occurrences of state 1 per size 13 tree distribution
+
+number of occurrences of state 1 per tree histogram - sample size: 5
+mean: 5   variance: 4   standard deviation: 2
+coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : NONPARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.615388
+OUTPUT 1 : 0.384612
+
+STATE 1 OBSERVATION_DISTRIBUTION
+OUTPUT 0 : 0.465518
+OUTPUT 1 : 0.534482
+
+observation probability matrix
+
+          0         1
+0  0.615388  0.384612
+1  0.465518  0.534482
+
+path length (starting from root) up to the first occurrence of output 0 distribution
+
+path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 5
+mean: 0.6   variance: 0.3   standard deviation: 0.547723
+
+path length (starting from root) up to the first occurrence of output 1 distribution
+
+path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+mean: 0.8   variance: 1.2   standard deviation: 1.09545
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
+
+path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+mean: 0   variance: 0   standard deviation: 0
+
+output 0 sojourn size distribution
+
+output 0 sojourn size histogram - sample size: 10
+mean: 4   variance: 11.7778   standard deviation: 3.43188
+
+output 1 sojourn size distribution
+
+output 1 sojourn size histogram - sample size: 13
+mean: 1.92308   variance: 2.24359   standard deviation: 1.49786
+
+number of zones of output 0 per size 13 tree distribution
+
+number of zones of output 0 per tree histogram - sample size: 5
+mean: 2   variance: 0.5   standard deviation: 0.707107
+coefficient of skewness: 0   coefficient of kurtosis: -1
+
+number of zones of output 1 per size 13 tree distribution
+
+number of zones of output 1 per tree histogram - sample size: 5
+mean: 2.6   variance: 1.3   standard deviation: 1.14018
+coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
+
+number of occurrences of output 0 per size 13 tree distribution
+
+number of occurrences of output 0 per tree histogram - sample size: 5
+mean: 8   variance: 4   standard deviation: 2
+coefficient of skewness: -0.9375   coefficient of kurtosis: -1.4375
+
+number of occurrences of output 1 per size 13 tree distribution
+
+number of occurrences of output 1 per tree histogram - sample size: 5
+mean: 5   variance: 4   standard deviation: 2
+coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
+
+tree size histogram - sample size: 5
+mean: 13   variance: 0   standard deviation: 0
+
+cumulative size: 65
+
+information of the trees in the iid case: -43.3081 (-0.666278)
+
+log-likelihood of the state trees: -43.3087   (normalized: -0.666288)
+
+log-likelihood of the observed trees: -43.3081   (normalized: -0.666278)
+
+2 free parameters   2 * penalyzed log-likelihood (AIC): -90.6161
+
+2 free parameters   2 * penalyzed log-likelihood (AICc): -90.8097
+
+2 free parameters   2 * penalyzed log-likelihood (BIC): -94.9649
+
+2 free parameters   2 * penalyzed log-likelihood (BICc): nan
+
+2 free parameters   2 * penalyzed log-likelihood (ICL): -94.9662
+
+2 free parameters   2 * penalyzed log-likelihood (ICLc): nan

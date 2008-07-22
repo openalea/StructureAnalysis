@@ -224,8 +224,9 @@ for t in range(V.NbTrees()):
     print "Tree number ", t, ": "
     print V.Tree(t)
 limits=[]
-for c in range((10/step)+1):
+for c in range((10/step)):
     limits.append(step*(c+1))
+limits.append(10)
 V2=T.Cluster("Limit", 1, limits)
 equal=True
 for t in range(V.NbTrees()):

@@ -1298,6 +1298,63 @@ class Trees:
         """Return the name of the tree attributes."""
         return list(self.__attributes)
 
+    def BuildSequences(self, maximal_sequences=True):
+        """Extract Sequences from the Trees, 
+        cutting or not sequences after branching"""
+        import os
+        # print the sequences into a file
+        prefix="seqtmp"
+        file_created=False
+        while not file_created:
+            try:
+                cfile=open(prefix+'.seq','r')
+            except IOError:
+                # file does not exist
+                file_name= prefix+".seq"
+                file_created=True
+            else:
+                cfile.close()
+                import random
+                prefix+=str(random.randint(1,9))                
+        try:
+            self.__ctrees.BuildSequences(file_name, maximal_sequences)
+        except RuntimeError, error:
+            os.remove(file_name)
+            raise FormatError, error
+        else:
+            import openalea.aml as amlPy
+            res= amlPy.Sequences(file_name)
+            os.remove(file_name)            
+            return res
+
+    def BuildVectors(self):
+        """Extract Vectors from the Trees."""
+        import os
+        # print the vectors into a file
+        prefix="vectmp"
+        file_created=False
+        while not file_created:
+            try:
+                cfile=open(prefix+'.vec','r')
+            except IOError:
+                # file does not exist
+                file_name= prefix+".vec"
+                file_created=True
+            else:
+                cfile.close()
+                import random
+                prefix+=str(random.randint(1,9))                
+        try:
+            self.__ctrees.BuildVectors(file_name)
+        except RuntimeError, error:
+            os.remove(file_name)
+            raise FormatError, error
+        else:
+            import openalea.aml as amlPy
+            res= amlPy.Vectors(file_name)
+            os.remove(file_name)            
+            return res
+
     def Cluster(self, mode, variable, limit):
         """Clustering of values.
 
@@ -1423,42 +1480,86 @@ class Trees:
                 raise ValueError, msg
         
     def Estimate(self, model_name, arg1, arg2=None, arg3=None, arg4=None, 
-                 arg5=None, arg6=None, ForceParametric=[]):
+                 arg5=None, arg6=None, Algorithm="ForwardBackward", Saem=1., 
+                 ForceParametric=[]):
         """Estimate a (hidden) Markov tree.
+        Algorithm correspond to the type of restoration/maximisation algorithm:
+            'ForwardBackward', 'Viterbi', 'ForwardBackwardSampling' 
+            or 'GibbsSampling'
+        Saem correspond to the rate of decay of the part corresponding 
+        to restored states. Saem=0. for pure SEM or CEM algorithms.
         
         Usage:  Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, 
                           InitialSelfTransition, NbIteration, StateTrees, 
-                          Counting, ForceParametric)
-                Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Counting)"""
+                          Algorithm, Saem, Counting, ForceParametric)
+                Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Algorithm, 
+                          Saem, Counting)"""
         import openalea.tree_statistic.hmt, openalea.tree_statistic.hmt.chmt
         hmt=openalea.tree_statistic.hmt
         chmt=openalea.tree_statistic.hmt.chmt
         RestorationAlgorithm=stat_tool.RestorationAlgorithm
         chmt_data=chmt.CHmt_data(self._ctrees())
         if type(model_name)==str:
+            if type(Algorithm)!=str:
+                msg='bad type for argument "Algorithm" in ' \
+                'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
+                'SelfTransition, NbIteration, StateTrees, Algorithm, '\
+                'Saem, Counting): '\
+                +"type 'str' expected"
+                raise TypeError, msg                
+            if Algorithm.upper()=="FORWARDBACKWARD":
+                algo="FORWARD_BACKWARD"
+                algo="RestorationAlgorithm."+algo.upper()
+            elif Algorithm.upper()=="FORWARDBACKWARDSAMPLING":
+                algo="FORWARD_BACKWARD_SAMPLING"
+                algo="RestorationAlgorithm."+algo.upper()
+            elif Algorithm.upper()=="GIBBSSAMPLING":
+                algo="GIBBS_SAMPLING"
+                algo="RestorationAlgorithm."+algo.upper()
+            elif Algorithm.upper()=="VITERBI":
+                algo="VITERBI"
+                algo="RestorationAlgorithm."+algo.upper()
+            else:
+                msg='bad value for argument "Algorithm" in ' \
+                'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
+                  'SelfTransition, NbIteration, StateTrees, Algorithm, '\
+                  'Saem, Counting): '\
+                  +str(Algorithm)
+                raise ValueError, msg
+            EMAlgo=eval(algo)
+            if type(Saem)!=float:
+                msg='bad type for argument "Saem" in ' \
+                'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
+                'SelfTransition, NbIteration, StateTrees, Algorithm, '\
+                'Saem, Counting): '\
+                +"type 'float' expected"
+                raise TypeError, msg
             if model_name.upper()=="HIDDEN_MARKOV_TREE":
                 if type(arg1)==int:
                     # Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, 
                     #          InitialSelfTransition, NbIteration, StateTrees, 
-                    #          Counting, ForceParametric)
+                    #          Counting, Algorithm, Saem, ForceParametric)
                     if arg2 is None:
                         msg='argument "structure" is mandatory in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting)'
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric)'
                         raise TypeError, msg
                     elif type(arg2)!=str:
                         msg='bad type for argument "structure" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting): '\
-                          +"type 'str' expected"
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric): '
+                        +"type 'str' expected"
                         raise TypeError, msg
                     elif ((arg2.upper()!="IRREDUCTIBLE")
                           and (arg2.upper()!="IRREDUCIBLE")
                           and (arg2.upper()!="LEFTRIGHT")):
                         msg='bad value for argument "structure" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting): '\
-                          +arg2+" - expecting 'Irreducible' or 'LeftRight'"
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric): '
+                        +arg2+" - expecting 'Irreducible' or 'LeftRight'"
                         raise ValueError, msg
                     structure=(arg2.upper()=="LEFTRIGHT")
                     if arg3 is None:
@@ -1466,34 +1567,39 @@ class Trees:
                     elif type(arg3)!=float:
                         msg='bad type for argument "SelfTransition" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting): '\
-                          +"type 'float' expected"
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric): '
+                        +"type 'float' expected"
                         raise TypeError, msg                        
-                    if arg4 is None:                        
-                        msg='argument "NbIteration" is mandatory in ' \
-                        'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting)'
-                        raise TypeError, msg
+                    if arg4 is None:
+                        arg4=stat_tool.D_DEFAULT
+##                        msg='argument "NbIteration" is mandatory in ' \
+##                        'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
+##                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+##                        'Algorithm, Saem, ForceParametric): '
+##                        raise TypeError, msg
                     elif type(arg4)!=int:
                         msg='bad type for argument "NbIteration" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting): '\
-                          +"type 'int' expected"
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric): '
+                        +"type 'int' expected"
                         raise TypeError, msg
                     if arg5 is None:
-                        arg5="NO_COMPUTATION"
+                        arg5="VITERBI"
                     elif type(arg5)!=str:
                         msg='bad type for argument "StateTrees" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting): '\
-                          +"type 'str' expected"
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric): '
+                        +"type 'str' expected"
                         raise TypeError, msg
                     elif ((arg5.upper()!="FORWARDBACKWARD")
                           and (arg5.upper()!="VITERBI")):
-                        msg='bad value for argument "StateTrees" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting): '\
-                          +arg2
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric): '
+                        +arg2
                         raise ValueError, msg
                     if (arg5.upper()=="FORWARDBACKWARD"):
                         arg5="FORWARD_BACKWARD"
@@ -1504,40 +1610,49 @@ class Trees:
                     elif type(arg6)!=int:
                         msg='bad type for argument "Counting" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
-                          'SelfTransition, NbIteration, StateTrees, Counting): '\
-                          +"boolean type expected"
+                        'SelfTransition, NbIteration, StateTrees, Counting, '\
+                        'Algorithm, Saem, ForceParametric): '
+                        +"boolean type expected"
                         raise TypeError, msg
                     try:
                         chmt=chmt_data.EstimationCiHmot(arg1, structure, arg6, 
-                                                        StateTrees, arg3, arg4, 
+                                                        StateTrees, EMAlgo, 
+                                                        Saem, arg3, arg4, 
                                                         ForceParametric)
                     except RuntimeError, error:
                         raise FormatError, error
                 elif issubclass(arg1.__class__, hmt.HiddenMarkovTree):
-                    # Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Counting)
+                    # Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Counting,
+                    #          Algorithm, Saem, ForceParametric)
                     if arg2 is None:
-                        msg='argument "NbIteration" is mandatory in ' \
-                        'Estimate("HIDDEN_MARKOV_TREE", hmt, ' \
-                                  'NbIteration, Counting)'
-                        raise TypeError, msg
+                        arg2=stat_tool.D_DEFAULT
+##                        msg='argument "NbIteration" is mandatory in ' \
+##                        'Estimate("HIDDEN_MARKOV_TREE", hmt, ' \
+##                                  'NbIteration, Algorithm, Saem, Counting)'
+##                        raise TypeError, msg
                     elif type(arg2)!=int:
                         msg='bad type for argument "NbIteration" in ' \
-                        'Estimate("HIDDEN_MARKOV_TREE", hmt, ' \
-                                  'NbIteration, Counting): '\
+                        'Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, ' \
+                                  'Counting, Algorithm, Saem, ForceParametric): '\
                           +"type 'int' expected"
                         raise TypeError, msg
                     if arg3 is None:
                         arg3=True
-                    elif type(arg3)!=int:
+                    elif ((type(arg3)!=int) and (type(arg3)!=bool)):
                         msg='bad type for argument "Counting" in ' \
-                        'Estimate("HIDDEN_MARKOV_TREE", hmt, ' \
-                                  'NbIteration, Counting): '\
+                        'Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, ' \
+                                  'Counting, Algorithm, Saem, ForceParametric): '\
                           +"boolean type expected"
                         raise TypeError, msg
+                    if (ForceParametric==[]):
+                        ForceParametric=False
+                    elif type(ForceParametric)!=bool:
+                        ForceParametric=False
                     try:
                         chmt=chmt_data.EstimationCiHmot(arg1._chmt(), arg3, 
                                                         RestorationAlgorithm.VITERBI,
-                                                        arg2, True)
+                                                        EMAlgo, Saem, arg2, 
+                                                        ForceParametric)
                     except RuntimeError, error:
                         raise FormatError, error
                 else:
@@ -1553,7 +1668,6 @@ class Trees:
         self._copy_tid_conversion(estimated_hmt)
         estimated_hmt._attributes=self.Attributes()
         return estimated_hmt
-
         
     def ExtractHistogram(self, nature, variable=None, value=None):
         """Extract a frequency distribution from the Trees.
@@ -1635,63 +1749,6 @@ class Trees:
                 return stat_tool.Histogram(chisto)
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"
-
-    def BuildSequences(self, maximal_sequences=True):
-        """Extract Sequences from the Trees, 
-        cutting or not sequences after branching"""
-        import os
-        # print the sequences into a file
-        prefix="seqtmp"
-        file_created=False
-        while not file_created:
-            try:
-                cfile=open(prefix+'.seq','r')
-            except IOError:
-                # file does not exist
-                file_name= prefix+".seq"
-                file_created=True
-            else:
-                cfile.close()
-                import random
-                prefix+=str(random.randint(1,9))                
-        try:
-            self.__ctrees.BuildSequences(file_name, maximal_sequences)
-        except RuntimeError, error:
-            os.remove(file_name)
-            raise FormatError, error
-        else:
-            import openalea.aml as amlPy
-            res= amlPy.Sequences(file_name)
-            os.remove(file_name)            
-            return res
-
-    def BuildVectors(self):
-        """Extract Vectors from the Trees."""
-        import os
-        # print the vectors into a file
-        prefix="vectmp"
-        file_created=False
-        while not file_created:
-            try:
-                cfile=open(prefix+'.vec','r')
-            except IOError:
-                # file does not exist
-                file_name= prefix+".vec"
-                file_created=True
-            else:
-                cfile.close()
-                import random
-                prefix+=str(random.randint(1,9))                
-        try:
-            self.__ctrees.BuildVectors(file_name)
-        except RuntimeError, error:
-            os.remove(file_name)
-            raise FormatError, error
-        else:
-            import openalea.aml as amlPy
-            res= amlPy.Vectors(file_name)
-            os.remove(file_name)            
-            return res
 
     def Merge(self, tree_list):
         """Merge Trees objects (contained in a list) with self.

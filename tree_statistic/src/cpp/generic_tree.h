@@ -241,6 +241,9 @@ struct generic_visitor
 
        assert(res.size() == t.get_size());
        assert(depth.size() == t.get_size());
+       delete [] occurred;
+       occurred= NULL;
+
        return res;
    }
 

@@ -119,11 +119,11 @@ int main(void)
       ms->ascii_write(cout, false);
 
       cout << endl << "Plot of the Markovian Sequences into homedir:" << endl;
-      ms->plot_write(error, "/home/jbdurand/tmp_ms");
+      ms->plot_write(error, "/home/durand/tmp_ms");
       cout << error;
 
       cout << endl << "Plot of the Trees into homedir:" << endl;
-      hmtd->Trees::plot_write(error, "/home/jbdurand/tmp_t");
+      hmtd->Trees::plot_write(error, "/home/durand/tmp_t");
       cout << error;
 #     endif
 
@@ -135,7 +135,7 @@ int main(void)
          cout << "Sequences: " << endl;
          seq->ascii_write(cout, false);
          cout << endl << "Plot of the Sequences into homedir:" << endl;
-         seq->plot_write(error, "/home/jbdurand/tmp_s");
+         seq->plot_write(error, "/home/durand/tmp_s");
          cout << error;
       }
 #     endif
@@ -156,115 +156,122 @@ int main(void)
          cout << endl;
 
          hmot= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_init,
-                                                       true, VITERBI, 100, true);
-         hmtd= hmot->get_markov_data();
+                                                       true, VITERBI, FORWARD_BACKWARD,
+                                                       0., 100, true);
          cout << error;
-
-         hmc= ms->hidden_semi_markov_estimation(error, cout, *hmc_init, COMPLETE_LIKELIHOOD,
-                                                true, VITERBI, 100);
-         // hmc= ms->hidden_variable_order_markov_estimation(error, cout, *hmc_init, true,
-         //                                                  true, VITERBI, 100);
-         cout << error;
-
-         // check the likelihood computation
-         likelihood= hmtd->get_likelihood();
-         check_likelihood= hmot->likelihood_computation(*hmtd);
-         if (abs(likelihood-check_likelihood) > DOUBLE_ERROR)
-            cout << "Warning: likelihood differs from Hidden_markov_tree_data"
-                 << " to Hidden_markov_tree::likelihood_computation" << endl;
-
-         // check the completed likelihood computation
-         hidden_likelihood= hmtd->get_hidden_likelihood();
-         check_hidden_likelihood= hmot->get_viterbi(*hmtd);
-         if (abs(hidden_likelihood-check_hidden_likelihood) > DOUBLE_ERROR)
-            cout << "Warning: completed likelihood differs from Hidden_markov_tree_data"
-                 << " to Hidden_markov_tree::viterbi" << endl;
-         cout << "Estimated HMT : " << endl;
-         hmot->ascii_write(cout, false);
-         cout << "log-likelihood of the state trees: " << hidden_likelihood << endl;
-         cout << "log-likelihood of the observed trees: " << likelihood << endl;
-         cout << endl;
-
-         cout << "Estimated HMC : " << endl;
-         hmc->ascii_write(cout, false);
-         cout << endl;
-
-         // check the state profile computation
-         status= hmc->state_profile_ascii_write(error, cout, 1, GENERALIZED_VITERBI, 5);
-         if (!status)
-            cout << error << endl;
-
-         status= hmot->state_profile(error, *hmtd, tid, smoothed, hmtdv,
-                                     vud, generalized, messages, GENERALIZED_VITERBI, 5);
-         if (!status)
-            cout << error << endl;
-
-         ptrees= new state_tree_type*[1];
-
-         if (smoothed != NULL)
+         if (hmot != NULL)
          {
-            cout << endl << "Computation of the 1st smoothed tree: " << endl;
-            cout << messages[cptm]->str();
-            delete messages[cptm];
-            messages[cptm++]= NULL;
-            potrees= new tree_type*[1];
-            potrees[0]= smoothed->get_tree(0);
-            potrees[0]->display(cout, 0);
+            hmtd= hmot->get_markov_data();
+
+            hmc= ms->hidden_semi_markov_estimation(error, cout, *hmc_init, COMPLETE_LIKELIHOOD,
+                                                   true, VITERBI, 100);
+            // hmc= ms->hidden_variable_order_markov_estimation(error, cout, *hmc_init, true,
+            //                                                  true, VITERBI, 100);
+            cout << error;
+
+            // check the likelihood computation
+            likelihood= hmtd->get_likelihood();
+            check_likelihood= hmot->likelihood_computation(*hmtd);
+            if (abs(likelihood-check_likelihood) > DOUBLE_ERROR)
+               cout << "Warning: likelihood differs from Hidden_markov_tree_data"
+                    << " to Hidden_markov_tree::likelihood_computation" << endl;
+
+            // check the completed likelihood computation
+            hidden_likelihood= hmtd->get_hidden_likelihood();
+            check_hidden_likelihood= hmot->get_viterbi(*hmtd);
+            if (abs(hidden_likelihood-check_hidden_likelihood) > DOUBLE_ERROR)
+               cout << "Warning: completed likelihood differs from Hidden_markov_tree_data"
+                    << " to Hidden_markov_tree::viterbi" << endl;
+            cout << "Estimated HMT : " << endl;
+            hmot->ascii_write(cout, false);
+            cout << "log-likelihood of the state trees: " << hidden_likelihood << endl;
+            cout << "log-likelihood of the observed trees: " << likelihood << endl;
             cout << endl;
-            delete potrees[0];
-            potrees[0]= NULL;
 
-            cout << messages[cptm]->str();
-            delete messages[cptm];
-            messages[cptm++]= NULL;
-            cout << messages[cptm]->str();
-            delete messages[cptm];
-            messages[cptm++]= NULL;
-            delete smoothed;
-            smoothed= NULL;
-         }
-         if (vud != NULL)
-         {
-            cout << endl << "Viterbi upward-downward algorithm: " << endl;
-            cout << messages[cptm]->str();
-            delete messages[cptm];
-            messages[cptm++]= NULL;
-            potrees= new tree_type*[1];
-            potrees[0]= vud->get_tree(0);
-            potrees[0]->display(cout, 0);
+            cout << "Estimated HMC : " << endl;
+            hmc->ascii_write(cout, false);
             cout << endl;
-            delete potrees[0];
-            potrees[0]= NULL;
 
-            cout << messages[cptm]->str();
-            delete messages[cptm];
-            messages[cptm++]= NULL;
-            delete vud;
-            vud= NULL;
-            delete [] potrees;
-            potrees= NULL;
-         }
+            // check the state profile computation
+            status= hmc->state_profile_ascii_write(error, cout, 1, GENERALIZED_VITERBI,
+                                                   5, DOWNWARD);
+            if (!status)
+               cout << error << endl;
 
-         if (generalized != NULL)
-         {
-            cout << endl << "Generalized viterbi: " << endl;
-            cout << messages[cptm]->str();
-            delete messages[cptm];
-            messages[cptm++]= NULL;
-            potrees= new tree_type*[1];
-            potrees[0]= generalized->get_tree(0);
-            potrees[0]->display(cout, 0);
-            cout << endl;
-            delete potrees[0];
-            potrees[0]= NULL;
+            status= hmot->state_profile(error, *hmtd, tid, smoothed, hmtdv,
+                                        vud, generalized, messages, GENERALIZED_VITERBI, 5);
+            if (!status)
+               cout << error << endl;
 
-            cout << messages[cptm]->str();
-            delete messages[cptm];
-            messages[cptm++]= NULL;
-            delete generalized;
-            generalized= NULL;
-            delete [] potrees;
-            potrees= NULL;
+            ptrees= new state_tree_type*[1];
+
+            if (smoothed != NULL)
+            {
+               cout << endl << "Computation of the 1st smoothed tree: " << endl;
+               cout << messages[cptm]->str();
+               delete messages[cptm];
+               messages[cptm++]= NULL;
+               potrees= new tree_type*[1];
+               potrees[0]= smoothed->get_tree(0);
+               potrees[0]->display(cout, 0);
+               cout << endl;
+               delete potrees[0];
+               potrees[0]= NULL;
+
+               cout << messages[cptm]->str();
+               delete messages[cptm];
+               messages[cptm++]= NULL;
+               cout << messages[cptm]->str();
+               delete messages[cptm];
+               messages[cptm++]= NULL;
+               delete smoothed;
+               smoothed= NULL;
+            }
+            if (vud != NULL)
+            {
+               cout << endl << "Viterbi upward-downward algorithm: " << endl;
+               cout << messages[cptm]->str();
+               delete messages[cptm];
+               messages[cptm++]= NULL;
+               potrees= new tree_type*[1];
+               potrees[0]= vud->get_tree(0);
+               potrees[0]->display(cout, 0);
+               cout << endl;
+               delete potrees[0];
+               potrees[0]= NULL;
+
+               cout << messages[cptm]->str();
+               delete messages[cptm];
+               messages[cptm++]= NULL;
+               delete vud;
+               vud= NULL;
+               delete [] potrees;
+               potrees= NULL;
+            }
+
+            if (generalized != NULL)
+            {
+               cout << endl << "Generalized viterbi: " << endl;
+               cout << messages[cptm]->str();
+               delete messages[cptm];
+               messages[cptm++]= NULL;
+               potrees= new tree_type*[1];
+               potrees[0]= generalized->get_tree(0);
+               potrees[0]->display(cout, 0);
+               cout << endl;
+               delete potrees[0];
+               potrees[0]= NULL;
+
+               cout << messages[cptm]->str();
+               delete messages[cptm];
+               messages[cptm++]= NULL;
+               delete generalized;
+               generalized= NULL;
+               delete [] potrees;
+               potrees= NULL;
+            }
+            delete hmot;
+            hmot= NULL;
          }
 
          for(t= 0; t < nb_trees; t++)

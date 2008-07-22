@@ -34,6 +34,8 @@ BuildDir(prefix, '.')
 
 env.Prepend(CPPPATH='$build_includedir')
 env.Prepend(LIBPATH='$build_libdir')
+# env.AppendUnique(LIBS= ["efence"])
+env.Append(CPPDEFINES= ['MESSAGE'])
 
 env.Prepend( CPPPATH = pj( '$build_includedir','tree_statistic' ) )
 

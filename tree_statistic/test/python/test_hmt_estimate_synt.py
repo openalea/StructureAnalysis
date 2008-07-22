@@ -42,15 +42,44 @@ except stat_tool.FormatError, f:
     print f
 else:
     print "Failed to raise exception for bad number of output processes"
+print "Parameter estimation with bad type of algorithm:"
+try:
+    EH=T.Estimate("HIDDEN_MARKOV_TREE", H, 20, Algorithm="Saem")
+except ValueError, f:
+    print f
+else:
+    print "Failed to raise exception for bad type of algorithm"
+print "Parameter estimation with bad value for Saem exponent:"
+try:
+    EH=T.Estimate("HIDDEN_MARKOV_TREE", H, 20, Algorithm="GibbsSampling", Saem=2.)
+except stat_tool.FormatError, f:
+    print f
+else:
+    print "Failed to raise exception for bad value of Saem"
 EH.Display()
 # parameter estimation from the simulated trees
 # initialization from a self-transition probability
 print "Parameter estimation from the simulated trees" + \
 " using the self-transition probability specification:"
-EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.999, 20)
+EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreductible", 0.8, 20)
+EH.Display()
+print "Parameter estimation from the simulated trees" + \
+" using self-transition specification and EM 'a la Gibbs':"
+EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreducible", 0.8, 20, Algorithm="GibbsSampling",
+              Saem=0.)
+EH.Display()
+print "Parameter estimation from the simulated trees" + \
+" using self-transition specification and CEM:"
+EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreducible", 0.8, 20, Algorithm="Viterbi",
+              Saem=0.)
+EH.Display()
+print "Parameter estimation from the simulated trees" + \
+" using self-transition specification and SAEM:"
+EH=T.Estimate("HIDDEN_MARKOV_TREE", 2, "Irreducible", 0.8, 20, Algorithm="ForwardBackwardSampling",
+              Saem=0.5)
 EH.Display()
 # Extract the trees from model
-print "Extract the data part of the initial (file) HMT"
+print "Extract the data part of the initial (file) HMT, with no data:"
 try:
     HMTD=H.ExtractData()
 except stat_tool.FormatError, f:

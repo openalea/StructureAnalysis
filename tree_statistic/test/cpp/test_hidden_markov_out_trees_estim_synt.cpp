@@ -37,6 +37,8 @@ int main(void)
 
    register int t, j, i, nb_states, nb_trees= 5;
    bool plot_ok= false;
+   const int size= 15, nb_children_max= 2,
+             nb_iterations= 5;
    unsigned int u;
    double likelihood, entropy1, entropy2;
    value default_value;
@@ -44,7 +46,11 @@ int main(void)
    vertex_iterator it, end;
    vertex_array va;
    Format_error error;
-   Hidden_markov_out_tree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL;
+   int* perm;
+   const char * hmotpath= "./hmot_np_2s.hmt";
+   const char * hmotinitpath= "./hmot_np_init_2s.hmt";
+   Hidden_markov_out_tree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL,
+                          *hmot_estim= NULL;
    Hidden_markov_tree_data *hmtd= NULL, *hmtdman= NULL,
                            *hmtdtmp= NULL;
    Trees *ctrees= NULL;
@@ -53,10 +59,6 @@ int main(void)
    std::vector<Hidden_markov_tree_data*> tree_list;
    hmtd_tree_type ctree;
    // const char * hsmcpath= "./laricio_3.hsc";
-   const char * hmotpath= "./hmot_np_2s.hmt";
-   const char * hmotinitpath= "./hmot_np_init_2s.hmt";
-   const int size= 15, nb_children_max= 2,
-             nb_iterations= 5;
    double_array_3d state_marginal= NULL, output_cond= NULL,
           upward_prob= NULL, upward_parent_prob= NULL,
           downward_prob= NULL,
@@ -221,7 +223,8 @@ int main(void)
             hmot_init->ascii_write(cout, false);
 
          hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_init,
-                                                        true, VITERBI, 1, true);
+                                                        true, VITERBI, FORWARD_BACKWARD,
+                                                        1., 1, true);
          cout << error;
 
          if (hmot2 != NULL)
@@ -236,7 +239,9 @@ int main(void)
             {
                hmot_init= hmot2;
                hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_init,
-                                                              true, VITERBI, 1, true);
+                                                              true, VITERBI,
+                                                              FORWARD_BACKWARD,
+                                                              1., 1, true);
                delete hmot_init;
                hmot_init= NULL;
                cout << "relative likelihood increase at iteration " << i << ": "
@@ -245,15 +250,27 @@ int main(void)
             }
             cout << endl << "estimated HMT (" << nb_iterations << " iterations)" << endl;
             cout << *hmot2;
-   #if 1
+
             cout << endl << "Testing state profile plot" << endl;
             plot_ok= hmot2->state_profile_plot_write(error, "/home/durand/ftmp",
                                                      4, 8, NULL);
+
+            // permutation of the states
+            perm= new int[hmot2->get_nb_state()];
+            for(j= 0; j < hmot2->get_nb_state(); j++)
+               perm[hmot2->get_nb_state()-j -1]=j;
+            hmot2->state_permutation(error, perm);
+            cout << error;
+            cout << "Permutation of the states: " << endl;
+            hmot2->ascii_write(cout, false);
+            delete [] perm;
+            perm= NULL;
+
             if (!plot_ok)
                cout << error;
             delete hmot2;
             hmot2= NULL;
-   #endif
+
          }
          cout << endl;
 
@@ -261,7 +278,8 @@ int main(void)
               << "specification." << endl;
 
          hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', 2, false,
-                                                        true, VITERBI, 0.99999, 1);
+                                                        true, VITERBI, FORWARD_BACKWARD,
+                                                        1., 0.99999, 1);
          cout << error;
 
          if (hmot2 != NULL)
@@ -274,7 +292,9 @@ int main(void)
             {
                hmot_init= hmot2;
                hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_init,
-                                                              true, VITERBI, 1, true);
+                                                              true, VITERBI,
+                                                              FORWARD_BACKWARD,
+                                                              1., 1, true);
                delete hmot_init;
                hmot_init= NULL;
                cout << "relative likelihood increase at iteration " << i << ": "
@@ -287,6 +307,75 @@ int main(void)
             hmot2= NULL;
          }
 
+         cout << "Testing estimation using SEM algorithm" << endl;
+
+         hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', 2, false,
+                                                        true, VITERBI, FORWARD_BACKWARD_SAMPLING,
+                                                        0., 0.99999, 3);
+         cout << error;
+         if (hmot2 != NULL)
+         {
+            cout << *hmot2 << endl;
+            delete hmot2;
+            hmot2= NULL;
+         }
+
+         cout << "Testing estimation using EM algorithm 'a la Gibbs'" << endl;
+
+         hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', 2, false,
+                                                        true, VITERBI, GIBBS_SAMPLING,
+                                                        0., 0.99999, 3);
+         cout << error;
+         if (hmot2 != NULL)
+         {
+            cout << *hmot2 << endl;
+            delete hmot2;
+            hmot2= NULL;
+         }
+
+         cout << "Testing estimation using CEM algorithm" << endl;
+
+         hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', 2, false,
+                                                        true, VITERBI, VITERBI,
+                                                        0., 0.99999, 3);
+         cout << error;
+         if (hmot2 != NULL)
+         {
+            cout << *hmot2 << endl;
+            delete hmot2;
+            hmot2= NULL;
+         }
+
+         cout << "Testing estimation using SAEM algorithm" << endl;
+
+         hmot_estim= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', 2, false,
+                                                             true, VITERBI, FORWARD_BACKWARD_SAMPLING,
+                                                             0.5, 0.99999, 10);
+         cout << error;
+         if (hmot_estim != NULL)
+         {
+            cout << *hmot_estim << endl;
+         }
+         cout << endl;
+
+         cout << "Testing estimation using SAEM algorithm "
+              << "and initial model specification" << endl;
+
+         hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_estim,
+                                                        true, VITERBI, FORWARD_BACKWARD_SAMPLING,
+                                                        0.5, 10, true);
+         cout << error;
+         if (hmot2 != NULL)
+         {
+            cout << *hmot2 << endl;
+            delete hmot2;
+            hmot2= NULL;
+         }
+         if (hmot_estim != NULL)
+         {
+            delete hmot_estim;
+            hmot_estim= NULL;
+         }
          cout << endl;
 
          for(t= 0; t < nb_trees; t++)

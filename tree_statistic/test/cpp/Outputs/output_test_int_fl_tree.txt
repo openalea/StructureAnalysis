@@ -85,6 +85,21 @@ Selection of the 2th variable of the tree :
 | |-6
 |   
 |-4
+Tree used for simulation
+*
+|-*
+| |-*
+|   
+|-*
+| |-*
+| |-*
+| |-*
+|   
+|-*
+  |-*
+  |-*
+  |-*
+    
 
 Random-structure tree with 2 int and 1 double : 
 (5, 6, 2.5)

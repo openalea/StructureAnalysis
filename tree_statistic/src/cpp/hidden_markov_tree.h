@@ -142,16 +142,16 @@ private :
 
    void copy(const Nonparametric_tree_process& process, bool characteristic_flag= true);
 
-   void copy_double_array(double* dest, const double* source, int inb_value);
-   void copy_Distribution_array(Distribution** dest,
+   void copy_double_array(double*& dest, const double* source, int inb_value);
+   void copy_Distribution_array(Distribution**& dest,
                                 Distribution** const source,
                                 int inb_value);
    void remove();
-   void remove_double_array(double* d);
+   void remove_double_array(double*& d);
    /** Deallocate arrays of pointers on Distributions */
-   void remove_Distribution_array(Distribution** d, int inb_value);
+   void remove_Distribution_array(Distribution**& d, int inb_value);
 
-   void init_Distribution_array(Distribution** d, int inb_value);
+   void init_Distribution_array(Distribution**& d, int inb_value);
    void init_occupancy(const Nonparametric_tree_process& process, int occupancy_nb_value);
 
    /** Permutation of the states of \e self */
@@ -636,13 +636,14 @@ private :
    /// histogram corresponding to the conditional observation distribution,
    /// depending on the considered observed (integral) variable
    /// and on the value of the state variable
-    ptHistogram_array_2d observation;
+   ptHistogram_array_2d observation;
 
     /// histogram of the characteristic quantities
     /// for the hidden state variable
-    Tree_characteristics *state_characteristics;
+   Tree_characteristics *state_characteristics;
 
-   void copy(const Hidden_markov_tree_data& otrees, bool model_flag= true);
+   void copy(const Hidden_markov_tree_data& otrees, bool model_flag= true,
+             bool characteristic_flag= true);
    void remove();
 
    void nb_state_computation();
@@ -697,7 +698,8 @@ public :
                            Default_tree** otrees);
    Hidden_markov_tree_data(const Trees& otrees);
    Hidden_markov_tree_data(const Hidden_markov_tree_data& trees,
-                           bool model_flag= true);
+                           bool model_flag= true,
+                           bool characteristic_flag= true);
    ~Hidden_markov_tree_data();
    Hidden_markov_tree_data& operator=(const Hidden_markov_tree_data& trees);
 
@@ -732,9 +734,10 @@ public :
                                                              std::ostream& os,
                                                              const Hidden_markov_out_tree& ihmarkov,
                                                              bool counting_flag= true,
-                                                             int state_trees= 0,
+                                                             int state_trees= VITERBI,
+                                                             int algorithm= FORWARD_BACKWARD,
+                                                             double saem_exponent= 1.,
                                                              int nb_iter= I_DEFAULT,
-                                                             bool characteristic_flag= true,
                                                              bool force_param= false) const;
 
    /** Estimate a Hidden Markov Out Tree from the number of states and the data in \e self */
@@ -744,7 +747,9 @@ public :
                                                              int nb_state,
                                                              bool left_right,
                                                              bool counting_flag= true,
-                                                             int state_trees= 0,
+                                                             int state_trees= VITERBI,
+                                                             int algorithm= FORWARD_BACKWARD,
+                                                             double saem_exponent= 1.,
                                                              double self_transition= D_DEFAULT,
                                                              int nb_iter= I_DEFAULT,
                                                              bool* force_param= NULL) const;

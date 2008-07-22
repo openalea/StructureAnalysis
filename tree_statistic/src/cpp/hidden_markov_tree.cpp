@@ -179,7 +179,8 @@ Nonparametric_tree_process::Nonparametric_tree_process(const Nonparametric_tree_
 
       case 'c':
       {
-         Nonparametric_process::copy(process);
+         // Nonparametric_process::copy(process);
+         // should already be done by constructor
          copy(process, param);
          break;
       }
@@ -425,7 +426,7 @@ void Nonparametric_tree_process::copy(const Nonparametric_tree_process& process,
  *
  **/
 
-void Nonparametric_tree_process::remove_double_array(double* d)
+void Nonparametric_tree_process::remove_double_array(double*& d)
 {
    if (d != NULL)
       delete [] d;
@@ -439,7 +440,7 @@ void Nonparametric_tree_process::remove_double_array(double* d)
  *
  **/
 
-void Nonparametric_tree_process::remove_Distribution_array(Distribution** d,
+void Nonparametric_tree_process::remove_Distribution_array(Distribution**& d,
                                                            int inb_value)
 {
    int i;
@@ -498,7 +499,7 @@ void Nonparametric_tree_process::remove()
  *
  **/
 
-void Nonparametric_tree_process::init_Distribution_array(Distribution** d,
+void Nonparametric_tree_process::init_Distribution_array(Distribution**& d,
                                                          int inb_value)
 {
    int i;
@@ -663,7 +664,7 @@ void Nonparametric_tree_process::create_characteristic(const Distribution& isize
  *
  **/
 
-void Nonparametric_tree_process::copy_double_array(double* dest,
+void Nonparametric_tree_process::copy_double_array(double*& dest,
                                                    const double* source,
                                                    int inb_value)
 {
@@ -680,7 +681,7 @@ void Nonparametric_tree_process::copy_double_array(double* dest,
       dest= NULL;
 }
 
-void Nonparametric_tree_process::copy_Distribution_array(Distribution** dest,
+void Nonparametric_tree_process::copy_Distribution_array(Distribution**& dest,
                                                          Distribution** const source,
                                                          int inb_value)
 {
@@ -3501,145 +3502,6 @@ Parametric_process* Hidden_markov_tree::get_dparametric_process(int variable) co
 
 /*****************************************************************
  *
- *  Constructor of Hidden_markov_tree class
- *  using a Markov object, the number of observed processes,
- *  the non-parametric observation processes
- *  and the size of the trees (or other quantities for which
- *  the characteristic distributions are invariant - if any)
- *
- **/
-
-/* Hidden_markov_tree::Hidden_markov_tree(const Chain * pchain,
-                                       int inb_nonparam,
-                                       int inb_param,
-                                       Nonparametric_process** pobservation,
-                                       int size)
- : Chain(*pchain)
- , markov_data(NULL)
- , _nb_ioutput_process(inb_nonparam)
- , _nb_doutput_process(inb_param)
-{
-   register int i;
-
-   self_row = new int[nb_state];
-   self_row_computation();
-
-   npprocess = new (Nonparametric_tree_process*)[_nb_ioutput_process+1];
-   npprocess[0] = new Nonparametric_tree_process(nb_state, nb_state, false);
-
-   piprocess = new (Parametric_process*)[_nb_doutput_process];
-
-   for(i= 1; i <= _nb_ioutput_process; i++)
-      npprocess[i] = new Nonparametric_tree_process(*pobservation[i-1]);
-
-   for(i= 1; i <= _nb_doutput_process; i++)
-      pdprocess[i] = NULL;
-
-   component_computation();
-   characteristic_computation(size, true);
-}
-*/
-/*****************************************************************
- *
- *  Copy constructor for Hidden_markov_tree class
- *  with a structural transformation
- *  using the type of transformation ('s' : state, 'o' : "children order"),
- *  and a parameter (reference state/ "children order")
- *
- **/
-/*
-Hidden_markov_tree::Hidden_markov_tree(const Hidden_markov_tree& markov,
-                                       char manip,
-                                       int param)
- : Chain(markov, markov._ch_order, manip, param)
-{
-   register int i;
-
-   markov_data= NULL;
-
-   switch (manip)
-   {
-      case 's' :
-         _ch_order= markov._ch_order;
-         break;
-      case 'o' :
-         _ch_order= param;
-         break;
-   }
-
-   self_row= new int[nb_state];
-   self_row_computation();
-
-   switch (manip)
-   {
-      case 's' :
-      {
-         _nb_ioutput_process= markov._nb_ioutput_process;
-         _nb_doutput_process= markov._nb_doutput_process;
-
-         npprocess= new (Nonparametric_tree_process*)[_nb_ioutput_process+1];
-         npprocess[0]= new Nonparametric_tree_process(nb_state, nb_state, false);
-
-         piprocess= new (Parametric_process*)[_nb_ioutput_process+1];
-         piprocess[0]= NULL;
-
-         for(i= 0; i < _nb_ioutput_process; i++)
-         {
-            if (markov.npprocess[i+1] != NULL)
-            {
-               npprocess[i+1]= new Nonparametric_tree_process(*(markov.npprocess[i+1]),
-                                                              manip, param);
-               piprocess[i+1]= NULL;
-            }
-            else
-            {
-               npprocess[i+1]= NULL;
-               piprocess[i+1]= new Parametric_process(*(markov.piprocess[i+1]),
-                                                      manip, param);
-            }
-         }
-
-         pdprocess= new (Parametric_process*)[_nb_doutput_process];
-         for(i= 0; i < _nb_doutput_process; i++)
-            pdprocess[i]= new Parametric_process(*(markov.pdprocess[i]),
-                                                 manip, param);
-         break;
-      }
-
-      case 'o' :
-      {
-         _nb_ioutput_process= markov._nb_ioutput_process;
-         _nb_doutput_process= markov._nb_doutput_process;
-
-         npprocess= new (Nonparametric_tree_process*)[_nb_ioutput_process+1];
-         for(i= 0; i <= _nb_ioutput_process; i++)
-         {
-            if (markov.npprocess[i] != NULL)
-            {
-               npprocess[i]= new Nonparametric_tree_process(*(markov.npprocess[i]),
-                                                             'c', false);
-               piprocess[i]= NULL;
-            }
-            else
-            {
-               npprocess[i]= NULL;
-               piprocess[i]= new Parametric_process(*(markov.piprocess[i]),
-                                                    'c', false);
-            }
-         }
-
-         pdprocess= new (Parametric_process*)[_nb_doutput_process];
-         for(i= 0; i < _nb_doutput_process; i++)
-            pdprocess[i] = new Parametric_process(*(markov.pdprocess[i]),
-                                                 'c', false);
-      }
-      break;
-   }
-}
-*/
-
-/*****************************************************************
- *
  *  Computation of the characteristic distributions
  *  for Hidden_markov_tree class
  *  using the size of the trees (or other quantities for which
@@ -3890,6 +3752,7 @@ void Hidden_markov_tree::copy(const Hidden_markov_tree& markov, bool data_flag,
    register int i;
 
    // Chain::copy(markov) must be used before (or Chain::Chain)
+   // as well as remove()
 
    if ((data_flag) && (markov.markov_data != NULL))
       markov_data= new Hidden_markov_tree_data(*(markov.markov_data), false);
@@ -5974,7 +5837,8 @@ Hidden_markov_tree_data::Hidden_markov_tree_data(const Trees& otrees)
  **/
 
 Hidden_markov_tree_data::Hidden_markov_tree_data(const Hidden_markov_tree_data& trees,
-                                                 bool model_flag)
+                                                 bool model_flag,
+                                                 bool characteristic_flag)
 
  : Trees(trees)
  , markov(NULL)
@@ -5985,7 +5849,7 @@ Hidden_markov_tree_data::Hidden_markov_tree_data(const Hidden_markov_tree_data& 
  , state_trees(NULL)
  , observation(NULL)
  , state_characteristics(NULL)
-{ copy(trees , model_flag); }
+{ copy(trees , model_flag, characteristic_flag); }
 
 /*****************************************************************
  *
@@ -7221,7 +7085,8 @@ void Hidden_markov_tree_data::build_state_trees()
 
 void Hidden_markov_tree_data::build_state_characteristics()
 {
-   Typed_edge_one_int_tree *otrees1= new Typed_edge_one_int_tree[_nb_trees];
+
+   Typed_edge_one_int_tree **otrees1= new Typed_edge_one_int_tree*[_nb_trees];
    int t; // i
 
    if (_nb_states == I_DEFAULT)
@@ -7233,7 +7098,7 @@ void Hidden_markov_tree_data::build_state_characteristics()
       state_characteristics= NULL;
    }
    for(t= 0; t < _nb_trees; t++)
-      otrees1[t]= *(this->state_trees[t]);
+      otrees1[t]= this->state_trees[t];
 
    state_characteristics= new Tree_characteristics(0,
                                                    _nb_states-1,
@@ -7242,6 +7107,7 @@ void Hidden_markov_tree_data::build_state_characteristics()
                                                    _nb_trees,
                                                    otrees1,
                                                    0);
+
    delete [] otrees1;
    otrees1= NULL;
 }
@@ -7419,10 +7285,16 @@ void Hidden_markov_tree_data::remove()
    register int t, var, j;
 
    if (markov != NULL)
+   {
       delete markov;
+      markov= NULL;
+   }
 
    if (chain_data != NULL)
+   {
       delete chain_data;
+      chain_data= NULL;
+   }
 
    if (this->state_trees != NULL)
    {
@@ -7460,8 +7332,11 @@ void Hidden_markov_tree_data::remove()
       observation= NULL;
    }
 
-   delete state_characteristics;
-   state_characteristics= NULL;
+   if (state_characteristics != NULL)
+   {
+      delete state_characteristics;
+      state_characteristics= NULL;
+   }
 
    // A posterior call to Trees::remove() is required...
 }
@@ -7474,17 +7349,26 @@ void Hidden_markov_tree_data::remove()
  **/
 
 void Hidden_markov_tree_data::copy(const Hidden_markov_tree_data& trees,
-                                   bool model_flag)
+                                   bool model_flag,
+                                   bool characteristic_flag)
 {
    register int t, var, j;
 
    if ((model_flag) && (trees.markov != NULL))
+   {
+      if (markov != NULL)
+         delete markov;
       markov= new Hidden_markov_tree(*(trees.markov), false);
+   }
    else
       markov= NULL;
 
    if (trees.chain_data != NULL)
+   {
+      if (chain_data != NULL)
+         delete chain_data;
       chain_data= new Chain_data(*(trees.chain_data));
+   }
    else
       chain_data= NULL;
 
@@ -7506,31 +7390,43 @@ void Hidden_markov_tree_data::copy(const Hidden_markov_tree_data& trees,
    else
       this->state_trees= NULL;
 
-   if (trees.state_characteristics != NULL)
-      state_characteristics= new Tree_characteristics(*(trees.state_characteristics));
-   else
-      state_characteristics= NULL;
-
-   if (trees.observation != NULL)
+   if (characteristic_flag)
    {
-      observation= new ptHistogram_array[_nb_integral];
-      for(var= 0; var < _nb_integral; var++)
-         if (trees.observation[var] != NULL)
-         {
-            observation[var]= new Histogram*[state_characteristics->marginal->nb_value];
-            for(j= 0; j < state_characteristics->marginal->nb_value; j++)
+      if (trees.state_characteristics != NULL)
+         state_characteristics= new Tree_characteristics(*(trees.state_characteristics));
+      else
+         state_characteristics= NULL;
+
+      if (trees.observation != NULL)
+      {
+         observation= new ptHistogram_array[_nb_integral];
+         for(var= 0; var < _nb_integral; var++)
+            if (trees.observation[var] != NULL)
             {
-               if (trees.observation[var][j] != NULL)
-                  observation[var][j]= new Histogram(*(trees.observation[var][j]));
-               else
-                  observation[var][j]= NULL;
+               observation[var]= new Histogram*[state_characteristics->marginal->nb_value];
+               for(j= 0; j < state_characteristics->marginal->nb_value; j++)
+               {
+                  if (trees.observation[var][j] != NULL)
+                     observation[var][j]= new Histogram(*(trees.observation[var][j]));
+                  else
+                     observation[var][j]= NULL;
+               }
             }
-         }
-         else
-            observation[var]= NULL;
+            else
+               observation[var]= NULL;
+      }
+      else
+         observation= NULL;
    }
    else
+   {
+      if (state_characteristics != NULL)
+         delete state_characteristics;
+      if (observation != NULL)
+         delete observation;
+      state_characteristics= NULL;
       observation= NULL;
+   }
 
 }
 
