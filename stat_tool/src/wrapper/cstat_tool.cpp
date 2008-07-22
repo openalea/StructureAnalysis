@@ -500,6 +500,8 @@ BOOST_PYTHON_MODULE(cstat_tool)
         .value("FORWARD", FORWARD)
         .value("FORWARD_BACKWARD", FORWARD_BACKWARD)
         .value("VITERBI", VITERBI)
+        .value("FORWARD_BACKWARD_SAMPLING", FORWARD_BACKWARD_SAMPLING)
+        .value("GIBBS_SAMPLING", GIBBS_SAMPLING)
         .export_values()
     ;
 
