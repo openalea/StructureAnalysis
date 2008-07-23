@@ -18,7 +18,7 @@ includes += env.ALEAGlob("*.hpp")
 env.ALEAIncludes("tree_statistic", includes)
 
 
-env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
+#env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
 # if env['debug']:
 #    env.Append(CPPDEFINES= ['DEBUG'])
 #    env.AppendUnique(LIBS=['efence'])
@@ -40,8 +40,7 @@ hidden_markov_out_tree.cpp
 hmt_algorithms.cpp
 """)
 
-target = "vptree_statistic"
 
 # Build the library
-lib = env.ALEALibrary(target, sources,)
+lib = env.ALEALibrary("vptree_statistic", sources)
 

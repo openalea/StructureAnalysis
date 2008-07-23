@@ -1249,7 +1249,9 @@ ostream& Nonparametric_tree_process::spreadsheet_print(ostream &os, int process,
                                                        Histogram** empirical_observation,
                                                        const Tree_characteristics* characteristics) const
 {
+#ifdef __GNUC__  
    #warning Nonparametric_tree_process::spreadsheet_print not implemented
+#endif
    return os;
 }
 
@@ -4876,7 +4878,9 @@ double Hidden_markov_tree::penalty_computation(double min_probability) const
                   state_marginal[j] += npprocess[0]->index_value->point[j][val] *
                                        (1.-nonparametric_process[0]->size->cumul[val]);
             */
+#ifdef __GNUC__  
 #warning Nonparametric_tree_process::index_value undefined in Hidden_markov_tree::penalty_computation
+#endif
             sum= 0.;
 
             for(j= 0; j < nb_state; j++)

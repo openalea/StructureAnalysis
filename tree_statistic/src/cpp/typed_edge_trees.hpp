@@ -3406,7 +3406,9 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_print(ostream& os,
                                                                bool comment_flag,
                                                                int line_nb_character) const
 {
+#ifdef __GNUC__  
 #warning Typed_edge_trees<Generic_Int_fl_container>::ascii_print  not implemented
+#endif
    return os;
 }
 

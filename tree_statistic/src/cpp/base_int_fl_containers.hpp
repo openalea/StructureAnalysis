@@ -147,7 +147,9 @@ template<int inb_integral>
 const double& Base_Int_fl_container<inb_integral, 0>::Double(int i) const
 {
   assert(i < _nb_float);
+#ifdef __GNUC__  
   #warning no return statement
+#endif
   return 0;
 }
 
@@ -155,7 +157,9 @@ template<int inb_integral>
 double& Base_Int_fl_container<inb_integral, 0>::Double(int i)
 {
   assert(i < _nb_float);
+#ifdef __GNUC__  
   #warning no return statement
+#endif
   return 0;
 }
 
@@ -220,7 +224,9 @@ template<int inb_float>
 const int& Base_Int_fl_container<0, inb_float>::Int(int i) const
 {
   assert(i < 0);
+#ifdef __GNUC__    
   #warning no return statement
+#endif  
   return 0;
 }
 
@@ -228,7 +234,9 @@ template<int inb_float>
 int& Base_Int_fl_container<0, inb_float>::Int(int i)
 {
   assert(i < 0);
+#ifdef __GNUC__  
   #warning no return statement
+#endif  
   return 0;
 }
 
