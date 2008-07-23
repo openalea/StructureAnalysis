@@ -137,7 +137,7 @@ class Test:
 
     def test_extract(self):
 
-        from extract import ExtractDistribution
+        from data_transform import ExtractDistribution
         from distribution import Uniform
 
 

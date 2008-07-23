@@ -114,7 +114,7 @@ class Test:
 
 
     def test_extract(self):
-        from extract import ExtractDistribution
+        from data_transform import ExtractDistribution
         from distribution import Binomial, NegativeBinomial
 
         m = self.test_build_convolution()
