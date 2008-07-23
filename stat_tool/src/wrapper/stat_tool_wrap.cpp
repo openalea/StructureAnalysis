@@ -44,7 +44,9 @@ BOOST_PYTHON_MODULE(_stat_tool)
 {
   //show_user_defined : true 
   //show_signatures : false
+#if BOOST_VERSION >= 103400
   docstring_options doc_options(true, false);
+#endif
 
   class_constant();
   class_format_error();
