@@ -286,7 +286,7 @@ void Histogram_wrapper_ascii_write_file(const Distribution_data& histo,
    // obviously the commented solution would be more satisfying,
    // but the "file" option is overridden for Parametric_model::ascii_write
    status= histo.Histogram::ascii_write(out_file , exhaustive , true);
-   if (not status)
+   if (!status)
    {
       error_message << error;
       PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
@@ -302,7 +302,7 @@ void Histogram_wrapper_spreadsheet_write(const Distribution_data& histo,
    Format_error error;
 
    status= histo.spreadsheet_write(error, path);
-   if (not status)
+   if (!status)
    {
       error_message << error;
       PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
@@ -319,7 +319,7 @@ void Histogram_wrapper_plot_write(const Distribution_data& histo,
    Format_error error;
 
    status= histo.plot_write(error, prefix, title);
-   if (not status)
+   if (! status)
    {
       error_message << error;
       PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
@@ -336,7 +336,7 @@ void Histogram_wrapper_plot_write_survival(const Distribution_data& histo,
    Format_error error;
 
    status= histo.survival_plot_write(error, prefix, title);
-   if (not status)
+   if (! status)
    {
       error_message << error;
       PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
