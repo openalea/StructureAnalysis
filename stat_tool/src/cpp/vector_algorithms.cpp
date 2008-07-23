@@ -665,10 +665,12 @@ double Vectors::kendall_rank_single_correlation_computation() const
  *  Comparaison de vecteurs.
  *
  *  arguments : references sur un objet Format_error et sur un objet Vector_distance,
+ *              flag standardisation (uniquement variables de meme type).
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance &ivector_dist)
+Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance &ivector_dist ,
+                                     bool standardization)
 
 {
   bool status = true;
@@ -730,6 +732,18 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
         }
       }
     }
+
+    if (!standardization) {
+      for (i = 1;i < nb_variable;i++) {
+        if (ivector_dist.variable_type[i] != ivector_dist.variable_type[0]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_VARIABLE_TYPE];
+          error.correction_update((error_message.str()).c_str() , STAT_variable_type_word[0]);
+        }
+      }
+    }
   }
 
   if (status) {
@@ -746,47 +760,52 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
       else {
         rank[i] = 0;
       }
-
-      // calcul des dispersions pour la standardisation
-
-      if (marginal[i]) {
-        vector_dist->dispersion_computation(i , marginal[i] , rank[i]);
-      }
-
-      else {
-        switch (vector_dist->distance_type) {
-        case ABSOLUTE_VALUE :
-          vector_dist->dispersion[i] = mean_absolute_difference_computation(i);
-          break;
-        case QUADRATIC :
-          vector_dist->dispersion[i] = 2 * covariance[i][i];
-          break;
-        }
-
-        if (vector_dist->dispersion[i] == 0.) {
-          vector_dist->dispersion[i] = 1.;
-        }
-      }
     }
 
-#   ifdef DEBUG
-    double *variable_distance;
+    // calcul des dispersions pour la standardisation
 
-    variable_distance = new double[nb_variable];
-    for (i = 0;i < nb_variable;i++) {
-      variable_distance[i] = 0.;
-    }
-
-    cout << *vector_dist;
-    if (vector_dist->distance_type == ABSOLUTE_VALUE) {
+    if (standardization) {
       for (i = 0;i < nb_variable;i++) {
-        if (vector_dist->variable_type[i] == NUMERIC) {
-          cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i << "   mean absolute difference: "
-               << mean_absolute_difference_computation(i) << endl;
+        if (marginal[i]) {
+          vector_dist->dispersion_computation(i , marginal[i] , rank[i]);
+        }
+
+        else {
+          switch (vector_dist->distance_type) {
+          case ABSOLUTE_VALUE :
+            vector_dist->dispersion[i] = mean_absolute_difference_computation(i);
+            break;
+          case QUADRATIC :
+            vector_dist->dispersion[i] = 2 * covariance[i][i];
+            break;
+          }
+
+          if (vector_dist->dispersion[i] == 0.) {
+            vector_dist->dispersion[i] = 1.;
+          }
         }
       }
+
+#     ifdef DEBUG
+      double *variable_distance;
+
+      variable_distance = new double[nb_variable];
+      for (i = 0;i < nb_variable;i++) {
+        variable_distance[i] = 0.;
+      }
+
+      cout << *vector_dist;
+      if (vector_dist->distance_type == ABSOLUTE_VALUE) {
+        for (i = 0;i < nb_variable;i++) {
+          if (vector_dist->variable_type[i] == NUMERIC) {
+            cout << "\n" << STAT_label[STATL_VARIABLE] << " " << i << "   mean absolute difference: "
+                 << mean_absolute_difference_computation(i) << endl;
+          }
+        }
+      }
+#     endif
+
     }
-#   endif
 
     dist_matrix = new Distance_matrix(nb_vector , STAT_label[STATL_VECTOR] , identifier);
 
@@ -839,24 +858,55 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
           }
           }
 
-#         ifdef DEBUG
-          switch (vector_dist->distance_type) {
-          case ABSOLUTE_VALUE :
-            variable_distance[k] += fabs(ldistance) / vector_dist->dispersion[k];
-            break;
-          case QUADRATIC :
-            variable_distance[k] += ldistance * ldistance / vector_dist->dispersion[k];
+          switch (standardization) {
+
+          case false : {
+
+#           ifdef DEBUG
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              variable_distance[k] += fabs(ldistance);
+              break;
+            case QUADRATIC :
+              variable_distance[k] += ldistance * ldistance;
+              break;
+            }
+#           endif
+
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              distance += vector_dist->weight[k] * fabs(ldistance);
+              break;
+            case QUADRATIC :
+              distance += vector_dist->weight[k] * ldistance * ldistance;
+              break;
+            }
             break;
           }
-#         endif
 
-          switch (vector_dist->distance_type) {
-          case ABSOLUTE_VALUE :
-            distance += vector_dist->weight[k] * fabs(ldistance) / vector_dist->dispersion[k];
+          case true : {
+
+#           ifdef DEBUG
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              variable_distance[k] += fabs(ldistance) / vector_dist->dispersion[k];
+              break;
+            case QUADRATIC :
+              variable_distance[k] += ldistance * ldistance / vector_dist->dispersion[k];
+              break;
+            }
+#           endif
+
+            switch (vector_dist->distance_type) {
+            case ABSOLUTE_VALUE :
+              distance += vector_dist->weight[k] * fabs(ldistance) / vector_dist->dispersion[k];
+              break;
+            case QUADRATIC :
+              distance += vector_dist->weight[k] * ldistance * ldistance / vector_dist->dispersion[k];
+              break;
+            }
             break;
-          case QUADRATIC :
-            distance += vector_dist->weight[k] * ldistance * ldistance / vector_dist->dispersion[k];
-            break;
+          }
           }
         }
 
