@@ -231,7 +231,8 @@ public :
 
     bool rank_correlation_computation(Format_error &error , std::ostream &os ,
                                       int correlation_type , const char *path = 0) const;
-    Distance_matrix* comparison(Format_error &error , const Vector_distance &ivector_dist);
+    Distance_matrix* comparison(Format_error &error , const Vector_distance &ivector_dist ,
+                                bool standardization = true);
     bool contingency_table(Format_error &error , std::ostream &os , int variable1 , int variable2 ,
                            const char *path = 0 , char format = 'a') const;
 
