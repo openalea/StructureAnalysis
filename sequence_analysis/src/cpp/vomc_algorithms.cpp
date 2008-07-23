@@ -3028,6 +3028,7 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
     // extraction des caracteristiques des sequences simulees
 
     for (i = 0;i < seq->nb_variable;i++) {
+      seq->min_value_computation(i);
       seq->max_value_computation(i);
       seq->build_marginal_histogram(i);
     }
@@ -3036,7 +3037,8 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
     seq->build_observation_histogram();
     seq->build_characteristic();
 
-    if ((!(seq->characteristics[0])) || (seq->marginal[0]->nb_value != nb_state)) {
+//    if ((!(seq->characteristics[0])) || (seq->marginal[0]->nb_value != nb_state)) {
+    if (!(seq->characteristics[0])) {
       delete seq;
       seq = 0;
       error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
