@@ -44,7 +44,7 @@
 /* ----------------------------------------------------------------------- */
 
 #include "tools_namespace.h"
-#include "util_assert.h" // For #include <assert.h>
+#include <assert.h>
 #include "util_types.h"  // For #include <stddef.h> and typedef long int32_t;
 
 #ifdef RCOBJECT_DEBUG
