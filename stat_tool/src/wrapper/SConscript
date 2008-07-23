@@ -1,0 +1,35 @@
+# -*-python-*-
+ 	
+
+import os
+
+Import("env")
+
+# Export symbols under windows
+if env['compiler'] == 'mingw':
+    LINKFLAGS=["-enable-stdcall-fixup",
+               "-enable-auto-import",
+               "-enable-runtime-pseudo-reloc",
+               "-s"]
+    env.AppendUnique(LINKFLAGS=LINKFLAGS)
+
+
+# Build wrappers as shared libraries
+includes= env.ALEAGlob('*.h')
+sources = env.ALEAGlob('*.cpp')
+
+
+LIBS = ['vptool', 'vpstat_tool']
+env.AppendUnique(LIBS=LIBS)
+
+# Add defines to export symbols on Windows
+env.AppendUnique(CPPDEFINES=['MESSAGE'])
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
+
+sources.remove("./cstat_tool.cpp")
+env.ALEAWrapper("../openalea/stat_tool/old", "cstat_tool", ["cstat_tool.cpp"])
+
+
+env.ALEAWrapper("../openalea/stat_tool", "_stat_tool", sources)
+
+

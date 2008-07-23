@@ -1,0 +1,100 @@
+Methodologie Ecriture wrapper Python
+------------------------------------
+
+Objectifs : 
+- Integration de la librarie Stat_tool en Python
+- Amelioration de l'interface en ligne de command (CLI)
+- Creation des noeuds openalea
+- Suppression de la couche AML
+- Nouvelles fonctions de plot
+
+1) Identification des classes et fonctions à exporter:
+        -> Quels sont les objects à manipuler en Python
+        -> Quels sont les fonctionalités haut niveau
+
+2) Creation des modules et des classes python correspondant
+        -> Un module python par 
+             * famille de classe (ex histogram.py, mixture.py, ...)
+             * famille de fonctions (ex estimate.py, simulate.py, ...)
+
+
+3) Ecriture de Tests dans les modules Python 
+        -> Dans une classe Test
+        -> specification de l'interface 
+             * interface AML vs interface Object/Python
+                    ex : Estimate("Mixture", m, Param=2,...))
+                         m.estimate_mixture(param=2)
+        
+        -> integration Python : len, str, getitem
+
+	-> pour chaque objet
+             * constructeur
+             * estimate
+	     * simulate
+             * extract functions
+
+
+
+4) Implementation des fonctions pour faire passer les tests
+        * Question en Boost ou en Python ?
+ 
+        -> en C++/Boost si la fonction C++ utile n'est pas wrapper
+        -> en Python si pas de wrapping necessaire
+           
+        en pratique:
+	
+	Ecriture de fonction Python pour les fonctions de compatibilité AML 
+               (parsing des arguments)
+	Ecriture de fonction Python pour les constructeurs ex : Histogram
+	Ecriture de wrappers pour les classe de base et leurs methodes utilisées.
+        (Il est inutile de tout wrapper)
+
+        * Choix des noms
+        -> class wrapper : _MixtureDist, _MixtureData, _Sequences, _MarkovData...
+        -> fonctions AML :  Merge, ToHistogram...
+        -> pour les parameters par keywords : on conserve la syntaxe AML (avec des majuscules)
+
+        * Extension des classes wrappées
+ 
+        -> Pour étendre des classes déjà wrapper, utiliser la fonction "extend_class"       
+        -> Utile pour ajouter de la doc et des fonctions Python comme Plot, Display, Save
+
+        interface.extend_class( _stat_tool._Mixture_dist, interface.StatInterface)
+
+        * Gestion d'erreur : Utiliser les Exceptions Python
+
+
+5) Ecriture de la documentation sous forme de docstring (voir regression.py)
+     -> Utiliser format restructured text 
+     -> En tete de module __doc__ , __docformat__, copyright
+     -> Ajouter le champ __all__ contenant la liste des noms du module 
+     	 (penser à ajouter les classes exportées en boost)
+     -> Ajouter la doc dans les wrappers Python (voir export_mixture.cpp)
+
+ 
+6) Gestion des E/S
+        * Les fonctions Plot/Display/Save sont écrit en Python
+         
+
+7) ReFactorisation du code
+         -> Certaine fonctions ont pu être exporter plusieurs fois
+         -> utilisation de l'heritage boost
+         -> utilisation de template (si necessaire)
+         
+8) Ecriture des nouvelles fonctions de plot
+      Les fonctions de plot écrites en C++ doivent être indépendante de la
+    librarie de Plot utilisée (ex GNUPLOT, MATHPLOTLIB).
+      
+      -> les objects plotables implémentent une fonction get_plotable() qui
+      renvoie un objet de type MultiPlotSet* (defini dans plotable.h)
+     
+     -> Les données contenu dans cet objet sont traduit en fonction de la 
+     librarie utilisée. (voir plot.py)
+
+     -> MultiPlotSet contient une liste de MultiPlot qui contient lui-même
+     une liste de SinglePlot
+
+     -> Ces objects peuvent être étendu en fonction des besoins. Penser
+     à adapter les wrappers (dans export_plotable.cpp)
+
+
