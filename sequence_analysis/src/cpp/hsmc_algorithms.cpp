@@ -6393,9 +6393,9 @@ bool Hidden_semi_markov::state_profile_write(Format_error &error , ostream &os ,
       seq = new Semi_markov_data(iseq , 'c' , (type == 'e' ? true : false));
     }
 
-    hsmarkov1 = new Hidden_semi_markov(*this , false , false);
+    hsmarkov1 = new Hidden_semi_markov(*this , false);
 
-    hsmarkov2 = new Hidden_semi_markov(*this , false , false);
+    hsmarkov2 = new Hidden_semi_markov(*this , false);
     hsmarkov2->create_cumul();
     hsmarkov2->log_computation();
 
@@ -6669,7 +6669,7 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
         seq = new Semi_markov_data(iseq , 'c' , (type == 'e' ? true : false));
       }
 
-      hsmarkov = new Hidden_semi_markov(*this , false , false);
+      hsmarkov = new Hidden_semi_markov(*this , false);
 
       seq_likelihood = hsmarkov->forward_backward(*seq , index , *data_out_file , output , 'g' ,
                                                   max_marginal_entropy , entropy);
@@ -7026,9 +7026,9 @@ Semi_markov_data* Hidden_semi_markov::state_sequence_computation(Format_error &e
   if (status) {
     seq = new Semi_markov_data(iseq , 'a' , (type == 'e' ? true : false));
 
-    seq->semi_markov = new Semi_markov(*this , false , false);
+    seq->semi_markov = new Semi_markov(*this , false);
 
-    hsmarkov = new Hidden_semi_markov(*this , false , false);
+    hsmarkov = new Hidden_semi_markov(*this , false);
 
     hsmarkov->create_cumul();
     hsmarkov->log_computation();
@@ -7096,7 +7096,13 @@ Semi_markov_data* Hidden_semi_markov::state_sequence_computation(Format_error &e
       seq->build_transition_count(this);
       seq->build_observation_histogram();
 
-      if (characteristic_flag) {
+      if (!(seq->characteristics[0])) {
+        delete seq;
+        seq = 0;
+        error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
+      }
+
+      else if (characteristic_flag) {
         seq->semi_markov->characteristic_computation(*seq , true);
       }
     }
