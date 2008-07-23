@@ -672,7 +672,7 @@ Semi_markov* Semi_markov::thresholding(double min_probability) const
   Semi_markov *smarkov;
 
 
-  smarkov = new Semi_markov(*this , false , false);
+  smarkov = new Semi_markov(*this , false , 0);
   smarkov->Chain::thresholding(min_probability);
 
   for (i = 1;i <= smarkov->nb_output_process;i++) {
