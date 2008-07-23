@@ -4650,7 +4650,13 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
       seq->build_transition_count(*hmarkov);
       seq->build_observation_histogram();
 
-      if (characteristic_flag) {
+      if (!(seq->characteristics[0])) {
+        delete seq;
+        seq = 0;
+        error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
+      }
+
+      else if (characteristic_flag) {
         seq->markov->characteristic_computation(*seq , true);
       }
     }
