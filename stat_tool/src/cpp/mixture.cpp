@@ -1314,8 +1314,164 @@ bool Mixture::plot_write(Format_error &error , const char *prefix ,
 }
 
 
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un melange et de la structure de donnees associee.
+ *
+ *  argument : pointeur sur un objet Mixture_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
+
+{
+  register int i , j;
+  std::stringstream ss;
 
 
+  // nombre de fenetres: nb_component + 2 si ajustement
+
+  MultiPlotSet *plotset = new MultiPlotSet(mixt_histo ? nb_component + 2 : 1);
+  MultiPlotSet &set = *plotset;
+
+  set.title = "Mixture fit";
+  set.border = "15 lw 0";
+
+  // 1ere vue : melange ajuste
+
+  if (nb_value - 1 < TIC_THRESHOLD) {
+    set[0].xtics = 1;
+  }
+
+  set[0].xrange = Range(0, nb_value - 1);
+
+  if (mixt_histo) {
+    set[0].yrange = Range(0, (MAX(mixt_histo->max , max * mixt_histo->nb_element)
+                              * YSCALE) + 1);
+  }
+  else {
+    set[0].yrange = Range(0, MIN(max * YSCALE , 1.));
+  }
+
+  // definition du nombre de SinglePlot 
+
+  i = 0;
+
+  if (mixt_histo) {
+    set[0].resize(nb_component + 2);
+    set[0][i].legend = STAT_label[STATL_HISTOGRAM];
+    set[0][i].style = "impulses";
+
+    mixt_histo->plotable_frequency_write(set[0][i++]);
+  }
+
+  else {
+   set[0].resize(nb_component + 1);
+  }
+
+  set[0][i].legend = STAT_label[STATL_MIXTURE];
+  set[0][i].style = "linespoints";
+
+  plotable_mass_write(set[0][i++] , (mixt_histo ? mixt_histo->nb_element : 1));
+  
+  for (j = 0;j < nb_component;j++) {
+    ss.str("");
+    ss << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
+    set[0][i + j].legend = ss.str();
+
+    set[0][i + j].style = "linespoints";
+
+    if (mixt_histo) {
+      component[j]->plotable_mass_write(set[0][i + j] , weight->mass[j] * mixt_histo->nb_element);
+    }
+    else {
+      component[j]->plotable_mass_write(set[0][i + j] , weight->mass[j]);
+    }
+  }
+
+  if (mixt_histo) {
+
+    // 2eme vue : poids
+
+    if (weight->nb_value - 1 < TIC_THRESHOLD) {
+      set[1].xtics = 1;
+    }
+
+    set[1].xrange = Range(0, weight->nb_value - 1);
+    set[1].yrange = Range(0, (MAX(mixt_histo->weight->max ,
+                                  weight->max * mixt_histo->weight->nb_element) 
+                              * YSCALE) + 1);
+
+    set[1].resize(2);
+
+    ss.str("");
+    ss << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM];
+    set[1][0].legend = ss.str();
+    set[1][0].style = "impulses";
+
+    ss.str("");
+    ss << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
+    set[1][1].legend = ss.str();
+    set[1][1].style = "linespoints";
+
+    mixt_histo->weight->plotable_frequency_write(set[1][0]);
+    weight->plotable_mass_write(set[1][1] , mixt_histo->weight->nb_element);
+
+    i = 2;
+    for (j = 0;j < nb_component;j++) {
+      if (mixt_histo->component[j]->nb_element > 0) {
+
+        // vues suivantes : composantes ajustees
+
+        if (component[j]->nb_value - 1 < TIC_THRESHOLD) {
+          set[i].xtics = 1;
+        }
+
+        set[i].xrange = Range(0 , component[j]->nb_value - 1);
+        set[i].yrange = Range(0 , (MAX(mixt_histo->component[j]->max ,
+                                       component[j]->max * mixt_histo->component[j]->nb_element)
+                                   * YSCALE) + 1);
+
+        set[i].resize(2);
+
+        ss.str("");
+        ss << STAT_label[STATL_HISTOGRAM] << " " << j + 1;
+        set[i][0].legend = ss.str();
+        set[i][0].style = "impulses";
+
+        ss.str("");
+        ss << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
+        set[i][1].legend = ss.str();
+        set[i][1].style = "linespoints";
+
+        mixt_histo->component[j]->plotable_frequency_write(set[i][0]);
+        component[j]->plotable_mass_write(set[i][1] , mixt_histo->component[j]->nb_element);
+  
+        i++;
+      }
+    }
+  }
+
+  return plotset;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Mixture.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Mixture::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+
+  set = get_plotable(mixture_data);
+
+  return set;
+}
 
 
 /*--------------------------------------------------------------*
@@ -1362,160 +1518,6 @@ double Mixture::penalty_computation() const
 
   return penalty;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Sortie d'un melange et de la structure de donnees associee.
- *
- *  argument : pointeur sur un objet Mixture_data.
- *
- *--------------------------------------------------------------*/
-
-MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
-
-{
-  register int i , j;
-  std::stringstream ss;
-
-
-  // nombre de fenetres : nb_component + 2 si ajustement
-  MultiPlotSet *plotset = new MultiPlotSet(mixt_histo ? nb_component + 2 : 1);   
-  MultiPlotSet &set = *plotset; //avoid pointer indirection
-
-  set.title = "Mixture fit";  // titre general
-  set.border = "15 lw 0";  // cadre
-    
-  // 1ere vue: melange ajuste
-  if (nb_value - 1 < TIC_THRESHOLD) 
-    set[0].xtics = 1;  // set xtics 0,1
-
-  set[0].xrange = Range(0, nb_value - 1);
-  if (mixt_histo) 
-    set[0].yrange = Range(0, (MAX(mixt_histo->max , max * mixt_histo->nb_element) 
-			     * YSCALE) + 1); 
-  else 
-    set[0].yrange = Range(0, MIN(max * YSCALE , 1.));
-
-  // definition du nombre de SinglePlot 
-  i = 0;
-
-  if (mixt_histo) 
-    {
-      set[0].resize(nb_component + 2);
-      set[0][i].legend = STAT_label[STATL_HISTOGRAM];
-      set[0][i].style = "impulses";
-
-      mixt_histo->plotable_frequency_write(set[0][i++]);
-    }
-
-  else 
-    set[0].resize(nb_component + 1);
-  
-
-  set[0][i].legend = STAT_label[STATL_MIXTURE];
-  set[0][i].style = "linespoints";
-  
-  plotable_mass_write(set[0][i++] , (mixt_histo ? mixt_histo->nb_element : 1));
-  
-  for (j = 0; j < nb_component; j++) 
-    {
-      ss.str("");
-      ss << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;  // concatenation
-      set[0][i + j].legend = ss.str();
-
-      set[0][i + j].style = "linespoints";
-      
-      if (mixt_histo) 
-	plotable_mass_write(set[0][i + j] , weight->mass[j] * mixt_histo->nb_element);
-      else 
-	plotable_mass_write(set[0][i + j] , weight->mass[j]);
-    
-    }
-
-  if (mixt_histo) {
-
-    // 2eme vue: poids
-    if (weight->nb_value - 1 < TIC_THRESHOLD) 
-      set[1].xtics = 1;  // set xtics 0,1
-
-    set[1].xrange = Range(0, weight->nb_value - 1);
-    set[1].yrange = Range(0, (MAX(mixt_histo->weight->max ,
-				  weight->max * mixt_histo->weight->nb_element) 
-			      * YSCALE) + 1);
-
-    set[1].resize(2);
-
-    ss.str("");
-    ss << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM];  // concatenation
-    set[1][0].legend = ss.str();
-    set[1][0].style = "impulses";
-
-    ss.str("");
-    ss << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];  // concatenation
-    set[1][1].legend = ss.str();
-    set[1][1].style = "linespoints";
-    
-    mixt_histo->weight->plotable_frequency_write(set[1][0]);
-    weight->plotable_mass_write(set[1][1] , mixt_histo->weight->nb_element);
-    
-    i = 2;
-    for (j = 0;j < nb_component;j++) {
-
-      if (mixt_histo->component[j]->nb_element > 0) 
-	{
-
-	  // vues suivantes: composantes ajustees
-	  
-	  if (component[j]->nb_value - 1 < TIC_THRESHOLD) 
-	      set[i].xtics = 1;  // set xtics 0,1
-	
-	  set[i].xrange = Range(0, component[j]->nb_value - 1);
-
-	  set[i].yrange = Range(0, (MAX(mixt_histo->component[j]->max ,
-					component[j]->max * mixt_histo->component[j]->nb_element) 
-				    * YSCALE) + 1);
-
-	  set[i].resize(2);
-
-	  ss.str("");
-	  ss << STAT_label[STATL_HISTOGRAM] << " " << j + 1;  // concatenation
-	  set[i][0].legend = ss.str();
-	  set[i][0].style = "impulses";
-	  
-	  ss.str("");
-	  ss << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;  // concatenation
-	  set[i][1].legend = ss.str(); 
-	  set[i][1].style = "linespoints";
-	  
-	  mixt_histo->component[j]->plotable_frequency_write(set[i][0]);
-	  component[j]->plotable_mass_write(set[i][1] , mixt_histo->component[j]->nb_element);
-	  
-	  i++;
-	}
-    }
-  }
-  
-  return plotset;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Sortie  d'un melange et de la structure de donnees associee.
- *
- *--------------------------------------------------------------*/
-
-MultiPlotSet* Mixture::get_plotable() const
-{
-  MultiPlotSet *set;
-
-  set = get_plotable(mixture_data);
-
-  return set;
-}
-
-
 
 
 /*--------------------------------------------------------------*
@@ -1995,6 +1997,29 @@ bool Mixture_data::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Mixture_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Mixture_data::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+
+  if (mixture) {
+    set = mixture->get_plotable(this);
+  }
+  else {
+    set = 0;
+  }
+
+  return set;
 }
 
 

@@ -14,7 +14,7 @@ SConsignFile()
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
-tools = ['boost_python', 'vplants.tool', 'install']
+tools = ['boost_python', 'vplants.tool', 'install', 'alea']
 
 env = Environment(options=options)
 conf= ALEAConfig(name, tools)

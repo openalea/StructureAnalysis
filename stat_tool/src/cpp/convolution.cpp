@@ -1054,6 +1054,145 @@ bool Convolution::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
+ *  Sortie graphique d'un produit de convolution et
+ *  de la structure de donnees associee.
+ *
+ *  argument : pointeur sur un objet Convolution_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) const
+
+{
+  register int i;
+  double plot_max;
+  std::stringstream ss;
+
+
+  // nombre de fenetres: nb_distribution + 2 si ajustement
+
+  MultiPlotSet *plotset = new MultiPlotSet(convol_histo ? nb_distribution + 2 : 1);
+  MultiPlotSet &set = *plotset;
+
+  set.title = "Convolution fit";
+  set.border = "15 lw 0";
+
+  // 1ere vue : produit de convolution
+
+  if (nb_value - 1 < TIC_THRESHOLD) {
+    set[0].xtics = 1;
+  }
+
+  plot_max = distribution[0]->max;
+  for (i = 1;i < nb_distribution;i++) {
+    if (distribution[i]->max > plot_max) {
+      plot_max = distribution[i]->max;
+    }
+  }
+
+  set[0].xrange = Range(0, nb_value - 1);
+  set[0].yrange = Range(0, MIN(plot_max * YSCALE , 1.));
+
+  // definition du nombre de SinglePlot 
+
+  set[0].resize(nb_distribution + 1);
+
+  set[0][0].legend = STAT_label[STATL_CONVOLUTION];
+  set[0][0].style = "linespoints";
+
+  plotable_mass_write(set[0][0]);
+
+  for (i = 0;i < nb_distribution;i++) {
+    ss.str("");
+    ss << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
+    set[0][i + 1].legend = ss.str();
+
+    set[0][i + 1].style = "linespoints";
+
+    distribution[i]->plotable_mass_write(set[0][i + 1]);
+  }
+
+  if (convol_histo) {
+
+    // 2eme vue : produit de convolution ajuste
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      set[1].xtics = 1;
+    }
+
+    set[1].xrange = Range(0, nb_value - 1);
+    set[1].yrange = Range(0, (MAX(convol_histo->max , max * convol_histo->nb_element)
+                              * YSCALE) + 1);
+
+    set[1].resize(2);
+
+    ss.str("");
+    ss << STAT_label[STATL_HISTOGRAM];
+    set[1][0].legend = ss.str();
+    set[1][0].style = "impulses";
+
+    ss.str("");
+    ss << STAT_label[STATL_CONVOLUTION];
+    set[1][1].legend = ss.str();
+    set[1][1].style = "linespoints";
+
+    convol_histo->plotable_frequency_write(set[1][0]);
+    plotable_mass_write(set[1][1] , convol_histo->nb_element);
+
+    for (i = 0;i < nb_distribution;i++) {
+
+      // vues suivantes : distributions ajustees
+
+      if (distribution[i]->nb_value - 1 < TIC_THRESHOLD) {
+        set[i + 2].xtics = 1;
+      }
+
+      set[i + 2].xrange = Range(0 , distribution[i]->nb_value - 1);
+      set[i + 2].yrange = Range(0 , (MAX(convol_histo->histogram[i]->max ,
+                                         distribution[i]->max * convol_histo->histogram[i]->nb_element)
+                                     * YSCALE) + 1);
+
+      set[i + 2].resize(2);
+
+      ss.str("");
+      ss << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      set[i + 2][0].legend = ss.str();
+      set[i + 2][0].style = "impulses";
+
+      ss.str("");
+      ss << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
+      set[i + 2][1].legend = ss.str();
+      set[i + 2][1].style = "linespoints";
+
+      convol_histo->histogram[i]->plotable_frequency_write(set[i + 2][0]);
+      distribution[i]->plotable_mass_write(set[i + 2][1] , convol_histo->histogram[i]->nb_element);
+    }
+  }
+
+  return plotset;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Convolution.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Convolution::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+
+  set = get_plotable(convolution_data);
+
+  return set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Fonctions pour la persistance.
  *
  *--------------------------------------------------------------*/
@@ -1498,6 +1637,29 @@ bool Convolution_data::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Convolution_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Convolution_data::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+
+  if (convolution) {
+    set = convolution->get_plotable(this);
+  }
+  else {
+    set = 0;
+  }
+
+  return set;
 }
 
 

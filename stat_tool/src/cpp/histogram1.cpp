@@ -1013,6 +1013,52 @@ bool Histogram::plot_print(const char *path , int nb_histo ,
 
 /*--------------------------------------------------------------*
  *
+ *  Ecriture d'un histogramme.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Histogram::plotable_frequency_write(SinglePlot &plot) const
+
+{
+  register int i;
+
+
+  for (i = offset;i < nb_value;i++) {
+    plot.add_point(i , frequency[i]);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la fonction de repartition deduite d'un histogramme.
+ *
+ *  arguments : reference sur un objet SinglePlot,
+ *              facteur d'echelle (valeur par defaut : 1).
+ *
+ *--------------------------------------------------------------*/
+
+void Histogram::plotable_cumul_write(SinglePlot &plot , double scale) const
+
+{
+  register int i;
+  double *cumul;
+
+
+  cumul = cumul_computation(scale);
+
+  for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
+    plot.add_point(i , cumul[i]);
+  }
+
+  delete [] cumul;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul des taux de survie a partir d'un histogramme et
  *  ecriture du resultat.
  *
@@ -1301,50 +1347,6 @@ bool Histogram::survival_plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Ecriture d'un histogramme.
- *
- *  argument : reference sur un objet SinglePlot.
- *
- *--------------------------------------------------------------*/
-
-void Histogram::plotable_frequency_write(SinglePlot &plot) const
-
-{
-  register int i;
-
-  for (i = offset;i < nb_value;i++) 
-    plot.add_point(i, frequency[i]);
-  
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Ecriture d'un histogramme.
- *
- *  arguments : reference sur un objet SinglePlot,
- *              facteur d'echelle (valeur par defaut : 1).
- *
- *--------------------------------------------------------------*/
-
-void Histogram::plotable_cumul_write(SinglePlot &plot , double scale) const
-
-{
-  register int i;
-  double *cumul;
-
-  cumul = cumul_computation(scale);
-
-  for (i = MAX(offset - 1 , 0); i < nb_value; i++) 
-    plot.add_point(i, cumul[i]);
-
-
-  delete [] cumul;
 }
 
 

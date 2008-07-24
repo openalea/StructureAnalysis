@@ -1260,44 +1260,6 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
 }
 
 
-
-/*--------------------------------------------------------------*
- *
- *  Ecriture d'une loi.
- *
- *  arguments : reference sur un objet SinglePlot,
- *              facteur d'echelle (valeur par defaut : 1).
- *
- *--------------------------------------------------------------*/
-
-void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
-{
-  register int i;
-
-  for (i = MAX(offset - 1 , 0); i < nb_value; i++) 
-    plot.add_point(i, mass[i] * scale); 
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Ecriture de la fonction de repartition d'une loi.
- *
- *  argument : reference sur un objet SinglePlot.
- *
- *--------------------------------------------------------------*/
-
-void Distribution::plotable_cumul_write(SinglePlot &plot) const
-
-{
-  register int i;
-
-  for (i = MAX(offset - 1 , 0);i < nb_value;i++)
-    plot.add_point(i, cumul[i]); 
-}
-
-
-
 /*--------------------------------------------------------------*
  *
  *  Ecriture d'une famille de fonctions de repartition en vue du matching
@@ -1308,7 +1270,6 @@ void Distribution::plotable_cumul_write(SinglePlot &plot) const
  *              les fonctions de repartition.
  *
  *--------------------------------------------------------------*/
-
 
 bool cumul_matching_plot_print(const char *path , int nb_cumul , int *offset ,
                                int *nb_value , double **cumul)
@@ -1675,6 +1636,47 @@ bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture d'une loi.
+ *
+ *  arguments : reference sur un objet SinglePlot,
+ *              facteur d'echelle (valeur par defaut : 1).
+ *
+ *--------------------------------------------------------------*/
+
+void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
+
+{
+  register int i;
+
+
+  for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
+    plot.add_point(i , mass[i] * scale);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la fonction de repartition d'une loi.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Distribution::plotable_cumul_write(SinglePlot &plot) const
+
+{
+  register int i;
+
+
+  for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
+    plot.add_point(i , cumul[i]);
+  }
 }
 
 

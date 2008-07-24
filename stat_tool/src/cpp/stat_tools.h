@@ -49,6 +49,8 @@
 
 using namespace plotable;
 
+
+
 /****************************************************************
  *
  *  Macros :
@@ -483,6 +485,9 @@ class Distribution {    // loi de probabilite discrete
     bool survival_plot_print(const char *path , double *survivor) const;
     std::ostream& print(std::ostream&) const;
 
+    void plotable_mass_write(SinglePlot &plot , double scale = 1.) const;
+    void plotable_cumul_write(SinglePlot &plot) const;
+
 /*    RWspace binaryStoreSize(int ialloc_nb_value = I_DEFAULT) const;
     void restoreGuts(RWvistream &is);
     void restoreGuts(RWFile &file);
@@ -506,9 +511,6 @@ class Distribution {    // loi de probabilite discrete
     void chi2_degree_of_freedom(const Histogram &histo , Test &test) const;
 
     void penalty_computation(double weight , int type , double *penalty , int outside) const;
-
-    void plotable_mass_write(SinglePlot &plot , double scale) const;
-    void plotable_cumul_write(SinglePlot &plot) const;
 
 public :
 
@@ -810,6 +812,9 @@ public :
                     double shift = 0.) const;
     bool survival_plot_print(const char *path , double *survivor) const;
 
+    void plotable_cumul_write(SinglePlot &plot , double scale) const;
+    void plotable_frequency_write(SinglePlot &plot) const;
+
 /*    RWspace binaryStoreSize() const;
     void restoreGuts(RWvistream&);
     void restoreGuts(RWFile&);
@@ -830,9 +835,6 @@ public :
 
     Parametric* parametric_estimation(int ident , int min_inf_bound = 0 , bool flag = true ,
                                       double cumul_threshold = CUMUL_THRESHOLD) const;
-
-    void plotable_cumul_write(SinglePlot &plot , double scale) const;
-    void plotable_frequency_write(SinglePlot &plot) const;
 
 public :
 
