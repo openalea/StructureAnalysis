@@ -2,7 +2,7 @@
  	
 
 import os
-
+pj = os.path.join
 Import("env")
 
 # Export symbols under windows
@@ -26,7 +26,7 @@ env.AppendUnique(LIBS=LIBS)
 env.AppendUnique(CPPDEFINES=['MESSAGE'])
 env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 
-sources.remove("./cstat_tool.cpp")
+sources.remove(pj(".","cstat_tool.cpp"))
 env.ALEAWrapper("../openalea/stat_tool/old", "cstat_tool", ["cstat_tool.cpp"])
 
 

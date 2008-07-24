@@ -34,7 +34,10 @@
 #include "export_distancematrix.h"
 
 #include <boost/python.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 103400
 #include <boost/python/docstring_options.hpp>
+#endif
 
 using namespace boost::python;
 

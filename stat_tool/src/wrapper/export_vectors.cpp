@@ -5,7 +5,7 @@
  *        Copyright 2006-2007 INRIA - CIRAD - INRA                      
  *                                                                              
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
+ *                        Jean-Baptiste Dur&& <Jean-Baptiste.Dur&&@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>         
  *                                                                              
@@ -513,7 +513,7 @@ public:
     Format_error error;
     Regression * ret = NULL;
 
-    if(algo != 'a' and algo != 's')
+    if(algo != 'a' && algo != 's')
       {
 	PyErr_SetString(PyExc_Exception, "Bad Algorithm");
 	boost::python::throw_error_already_set();
@@ -544,7 +544,7 @@ public:
 	double v = extract<double>(filter[i]);
 	vars[i] = v;
       }
-    if(algo != 'a' and algo != 's')
+    if(algo != 'a' && algo != 's')
       {
 	PyErr_SetString(PyExc_Exception, "Bad Algorithm");
 	boost::python::throw_error_already_set();
