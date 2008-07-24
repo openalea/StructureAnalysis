@@ -4,6 +4,10 @@ __docformat__ = "restructuredtext"
 import interface
 import _stat_tool
 
+from _stat_tool import _Regression
+
+__all__ = ['_Regression',
+           'Regression']
 
 def Regression(vec, type, 
                explanatory_variable, response_variable, 

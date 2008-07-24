@@ -445,9 +445,54 @@ class Test:
         m.old_plot()
 
 
-    def test_plot(self):
+    def test_plot_mixture_1(self):
         m = self.get_mixture()
         m.plot()
 
+    def test_plot_mixture_2(self):
         m = self.get_mixture_2()
         m.plot()
+
+    def test_plot_mixture_data(self):
+        from mixture import Mixture
+        from simulate import Simulate
+        from distribution import Distribution
+
+        mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 0.4, 
+                        Distribution("NB", 10, 10, 0.5))
+        mixt_histo1 = Simulate(mixt1, 200)
+
+        mixt1.plot()
+        mixt_histo1.plot()
+
+
+    def test_plot_convolution(self):
+        
+        from convolution import Convolution
+        from simulate import Simulate
+        from estimate import Estimate
+        from data_transform import Shift
+        from histogram import Histogram
+        
+        convol1 = Convolution("../../../test/convolution1.conv")
+        convol1.plot()
+
+        histo_b2 = Histogram("../../../test/nothofagus_antarctica_bud_2.his")
+        histo_s2 = Histogram("../../../test/nothofagus_antarctica_shoot_2.his")
+        
+        convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
+                            NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)
+        
+        convol31.plot()
+
+
+    def test_plot_convolution_data(self):
+        
+        from convolution import Convolution
+        from simulate import Simulate
+        
+        convol1 = Convolution("../../../test/convolution1.conv")
+        convol_histo1 = Simulate(convol1, 200)
+        convol_histo1.plot()
+
+
