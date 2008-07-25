@@ -442,7 +442,7 @@ class Test:
 
     def test_old_plot(self):
         m = self.get_mixture()
-        m.old_plot()
+        #m.old_plot()
 
 
     def test_plot_mixture_1(self):

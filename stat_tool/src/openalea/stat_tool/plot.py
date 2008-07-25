@@ -372,7 +372,7 @@ class Test:
     def test_gnuplot(self):
         a = self.get_plotable()
 
-        plotter = gnuplot()
-        plotter.plot(a, "test_plot")
+        #plotter = gnuplot()
+        #plotter.plot(a, "test_plot")
 
         
