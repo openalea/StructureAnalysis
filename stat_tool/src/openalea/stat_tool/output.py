@@ -338,13 +338,13 @@ class StatInterface(object):
 
         except AttributeError:
             import warnings
-            warning.warn("Use old style plot.")
+            warnings.warn("Use old style plot.")
             
             plotable = None
 
         except ImportError:
             import warnings
-            warning.warn("No Plotter available. Use old style plot.")
+            warnings.warn("No Plotter available. Use old style plot.")
             plotable = None
 
         
