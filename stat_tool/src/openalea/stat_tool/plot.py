@@ -14,7 +14,14 @@ class plotter(object):
 
 import os, glob
 
+class fakeplot(plotter):
 
+    def plot(self, obj, title):
+        """ Plot obj with title """
+    return
+
+
+    
 class gnuplot(plotter):
     """ GNUPlot implementation """
 
@@ -129,7 +136,7 @@ class mplotlib(plotter):
         multiset = plotable
 
         # Title & border
-        #if title: pylab.windowtitle(title) 
+        #if title: pylab.suptitle(title) 
 
         #multiset.border
 
@@ -192,7 +199,7 @@ class mplotlib(plotter):
                 legends.append(legend)
 
             pylab.legend(lines, legends)
-
+            pylab.grid(bool(multiplot.grid))
                 
             # Range
             xrange = multiplot.xrange

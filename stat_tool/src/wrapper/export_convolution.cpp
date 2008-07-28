@@ -70,31 +70,19 @@ public:
 	stat_tool::wrap_util::throw_error("Input list cannot be empty");
       }
 
-    
-    const Parametric **dist = new const Parametric*[nb_dist];
 
-    try
-      {
-	for(int i=0; i<nb_dist; i++)
-	  {
-	    dist[i] = boost::python::extract< Parametric *>(dists[i]);
-	  }
-      }
-    catch(...)
-      {
-	delete[] dist;
-	throw;
-      }
+    stat_tool::wrap_util::auto_ptr_array<const Parametric *>
+      dist(new const Parametric*[nb_dist]);
+
+
+    for(int i=0; i<nb_dist; i++)
+	dist[i] = boost::python::extract< Parametric *>(dists[i]);
+        
+    conv = convolution_building(error, nb_dist, dist.get());
     
-    
-    conv = convolution_building(error, nb_dist, dist);
-    
-    delete[] dist;
-	
     if(!conv)
-      {
-	stat_tool::wrap_util::throw_error(error);
-      }
+    	stat_tool::wrap_util::throw_error(error);
+    
     
     return boost::shared_ptr<Convolution>(conv);
   }

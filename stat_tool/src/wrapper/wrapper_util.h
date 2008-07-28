@@ -42,6 +42,88 @@ namespace stat_tool
       boost::python::throw_error_already_set();
     };
 
+
+
+    // Redefine auto_ptr for array (use delete[] instead)
+    template<class T>
+      class auto_ptr_array
+      {
+      private:
+        T* ap;    // refers to the actual owned object (if any)
+      public:
+        typedef T element_type;
+
+        // constructor
+        explicit auto_ptr_array (T* ptr = 0) throw() : ap(ptr) { }
+
+        // copy constructors (with implicit conversion)
+        // - note: nonconstant parameter
+        auto_ptr_array (auto_ptr_array& rhs) throw() : ap(rhs.release()) { }
+
+        template<class Y>
+        auto_ptr_array (auto_ptr_array<Y>& rhs) throw() : ap(rhs.release()) { }
+
+        // assignments (with implicit conversion)
+        // - note: nonconstant parameter
+        auto_ptr_array& operator= (auto_ptr_array& rhs) throw()
+        {
+            reset(rhs.release());
+            return *this;
+        }
+        template<class Y>
+        auto_ptr_array& operator= (auto_ptr_array<Y>& rhs) throw()
+        {
+            reset(rhs.release());
+            return *this;
+        }
+
+        // destructor
+        ~auto_ptr_array() throw()
+        {
+            delete[] ap;
+        }
+
+        // value access
+        T* get() const throw()
+        {
+            return ap;
+        }
+
+	T& operator[](int index) throw()
+	{
+	  return ap[index];
+	}
+
+        T& operator*() const throw()
+        {
+            return *ap;
+        }
+        T* operator->() const throw()
+        {
+            return ap;
+        }
+
+        // release ownership
+        T* release() throw()
+        {
+            T* tmp(ap);
+            ap = 0;
+            return tmp;
+        }
+
+        // reset value
+        void reset (T* ptr=0) throw()
+        {
+            if (ap != ptr)
+            {
+                delete ap;
+                ap = ptr;
+            }
+        }
+      };
+
+
+
   };
 };
  

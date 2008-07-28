@@ -414,7 +414,6 @@ class StatInterface(object):
 
 ################################################################################
 
-
 class Test:
 
     
@@ -494,5 +493,15 @@ class Test:
         convol1 = Convolution("../../../test/convolution1.conv")
         convol_histo1 = Simulate(convol1, 200)
         convol_histo1.plot()
+
+    
+    def test_plot_distribution_set(self):
+        
+        from distribution import Distribution 
+        d1 = Distribution("B", 2, 18, 0.5) 
+        d2 = Distribution("NB", 10, 10, 0.5)
+        d3 = Distribution("U", 10, 20)
+        
+        Plot(d1, d2, d3)
 
 

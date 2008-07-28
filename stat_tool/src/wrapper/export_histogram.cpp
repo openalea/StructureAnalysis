@@ -104,34 +104,21 @@ public:
     ostringstream output;
     Format_error error;
     int nb_histo = boost::python::len(histos);
-    const Histogram **ihisto;
 
     // Test list length
     if(nb_histo ==0)
-      {
 	stat_tool::wrap_util::throw_error("No histogram to compare");
-      }
 
-    ihisto = new const Histogram*[nb_histo];
+    stat_tool::wrap_util::auto_ptr_array<const Histogram*>
+      ihisto(new const Histogram*[nb_histo]);
 
     // Extract list element
-    try
-      {
-	for(int i=0; i<nb_histo; i++)
-	  {
-	    ihisto[i] = boost::python::extract< Histogram *>(histos[i]);
-	  }
-      }
-    catch(...)
-      {
-	delete[] ihisto;
-	throw;
-      }
+    for(int i=0; i<nb_histo; i++)
+      ihisto[i] = boost::python::extract< Histogram *>(histos[i]);
     
     // call comparaison
-    bool res = h.comparison(error, output, nb_histo, ihisto, type, filename, format);
+    bool res = h.comparison(error, output, nb_histo, ihisto.get(), type, filename, format);
     
-    delete[] ihisto;
 
     if(!res)
       stat_tool::wrap_util::throw_error(error);
@@ -298,30 +285,20 @@ public:
   static Distribution_data* merge_histograms(const Histogram& h, 
 					     const boost::python::list& histo_list)
   {
-    const Histogram **pelement = NULL;
     Distribution_data *histo = NULL;
-    
     int nb_element = boost::python::len(histo_list) + 1;
-    pelement = new const Histogram*[nb_element];
+    
+    stat_tool::wrap_util::auto_ptr_array<const Histogram*>
+      pelement(new const Histogram*[nb_element]);
 
     pelement[0] = &h;
 
     for (int i = 1; i < nb_element; i++)
-     {
-       try
-         {
-	   pelement[i] = extract<Histogram*>(histo_list[i-1]);
-         }
-       catch (...)
-         {
-	   delete [] pelement;
-	   throw;
-         }
-     }
+      pelement[i] = extract<Histogram*>(histo_list[i-1]);
+      
     
     // create new distribution_data object
-    histo = new Distribution_data(nb_element, pelement);
-    delete [] pelement;
+    histo = new Distribution_data(nb_element, pelement.get());
     if (! histo)
       stat_tool::wrap_util::throw_error("Could not initialize Histogram from arguments");
 	
@@ -400,13 +377,12 @@ public:
     Format_error error;
 
     int nb_limit = len(limit);
-    int *l = new int[nb_limit];
+    stat_tool::wrap_util::auto_ptr_array<int> l (new int[nb_limit]);
 
     for (int i=0; i<nb_limit; i++)
 	l[i] = extract<int>(limit[i]);
     
-    Distribution_data* ret = h.cluster(error, nb_limit, l);
-    delete[] l;
+    Distribution_data* ret = h.cluster(error, nb_limit, l.get());
 
 
     if(!ret)
@@ -424,7 +400,7 @@ public:
     Format_error error;
 
     int nb_symbol = len(symbol);
-    int *l = new int[nb_symbol];
+    stat_tool::wrap_util::auto_ptr_array<int> l (new int[nb_symbol]);
 
     int expected_nb_symbol = h.nb_value - h.offset;
     if(nb_symbol != expected_nb_symbol)
@@ -433,9 +409,7 @@ public:
     for (int i=0; i<nb_symbol; i++)
 	l[i] = extract<int>(symbol[i]);
     
-    Distribution_data* ret = h.transcode(error, l);
-    delete[] l;
-
+    Distribution_data* ret = h.transcode(error, l.get());
 
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -613,31 +587,20 @@ public:
   static boost::shared_ptr<Distribution_data> 
   distribution_data_from_list(boost::python::list& int_list)
   {
-    int *pelement = NULL;
     Distribution_data *histo = NULL;
-    
     int nb_element = boost::python::len(int_list);
     
     if (! nb_element)
-      stat_tool::wrap_util::throw_error("At least one observation is required to initialize Histogram"); 
+      stat_tool::wrap_util::throw_error("At least one observation"
+					"is required to initialize Histogram"); 
     
-    pelement = new int[nb_element];
+    stat_tool::wrap_util::auto_ptr_array<int> pelement(new int[nb_element]);
     for (int i = 0; i < nb_element; i++)
-     {
-       try
-         {
-	   pelement[i] = extract<int>(int_list[i]);
-         }
-       catch (...)
-         {
-	   delete [] pelement;
-	   throw;
-         }
-     }
+      pelement[i] = extract<int>(int_list[i]);
+      
     
     // create new distribution_data object
-    histo= new Distribution_data(nb_element, pelement);
-    delete [] pelement;
+    histo= new Distribution_data(nb_element, pelement.get());
     if (! histo)
       stat_tool::wrap_util::throw_error("Could not initialize Histogram from argument");
 	

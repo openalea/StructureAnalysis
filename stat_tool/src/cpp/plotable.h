@@ -82,8 +82,11 @@ namespace plotable
     string xlabel;
     string ylabel;
 
+    bool grid;
+
     MultiPlot(int size=1)
-      :plots(size), xtics(0), ytics(0), xrange(0,0), yrange(0,0)
+      :plots(size), xtics(0), ytics(0), 
+      xrange(0,0), yrange(0,0), grid(false)
       {};
     
     SinglePlot& operator[](int index)

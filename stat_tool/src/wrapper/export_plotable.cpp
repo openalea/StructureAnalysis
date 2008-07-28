@@ -79,6 +79,8 @@ void class_plotable()
     .def_readwrite("xrange", &MultiPlot::xrange)
     .def_readwrite("yrange", &MultiPlot::yrange)
 
+    .def_readwrite("grid", &MultiPlot::grid)
+
     .def("resize", &MultiPlot::resize)
     .def("__len__", &MultiPlot::size)
     .def("__getitem__", &MultiPlot::operator[],

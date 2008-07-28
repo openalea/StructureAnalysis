@@ -93,6 +93,7 @@ public:
     return res;
   }
 
+
   
   static void survival_spreadsheet_write(const Parametric_model& p,
 						const std::string& filename)
@@ -106,7 +107,7 @@ public:
 
 
    
-  static void survival_plot_write(Parametric_model& p,
+  static void survival_plot_write(const Parametric_model& p,
 				  const std::string& prefix, const std::string& title)
   {
     Format_error error;
@@ -115,6 +116,35 @@ public:
       stat_tool::wrap_util::throw_error(error);
   }
 
+  
+  static MultiPlotSet* survival_get_plotable(const Parametric_model& p)
+  {
+    Format_error error;
+    MultiPlotSet* ret = p.survival_get_plotable(error);
+    if(!ret)
+      stat_tool::wrap_util::throw_error(error);
+    
+    return ret;
+  }
+
+  
+  static MultiPlotSet* get_plotable(const Parametric_model& p, 
+				const boost::python::list& dist_list)
+  {
+    Format_error error;
+    int nb_dist = boost::python::len(dist_list);
+    stat_tool::wrap_util::auto_ptr_array<const Distribution *> 
+      dists(new const Distribution*[nb_dist]);
+
+    for (int i = 0; i < nb_dist; i++)
+      dists[i] = extract<Distribution*>(dist_list[i]);
+
+    MultiPlotSet* ret;// = p.get_plotable(error, nb_dist, dists.get());
+    if(!ret)
+      stat_tool::wrap_util::throw_error(error);
+    
+    return ret;
+  }
 
 
 };
@@ -128,7 +158,6 @@ void class_distribution()
 
   
   // Distribution base class
-  //class_< Distribution, boost::noncopyable, Distribution_Wrapper >("Distribution", init< optional< int > >())
   class_< Distribution>("_Distribution")
     .def(self_ns::str(self)) // __str__
     .def( self == self )
@@ -154,7 +183,6 @@ void class_distribution()
     ;
 
 
-
   enum_<stat_tool::wrap_util::UniqueInt<5, 0> >("DistributionIdentifier")
     .value("NON_PARAMETRIC", NONPARAMETRIC)
     .value("BINOMIAL",BINOMIAL)
@@ -174,12 +202,20 @@ void class_distribution()
     .def(self_ns::str(self)) // __str__ 
 
     // Output
+    .def("get_plotable", ParametricModelWrap::get_plotable,
+	 return_value_policy< manage_new_object >(),
+	 "Return a plotable for a list of distribution")
+
     .def("survival_ascii_write", ParametricModelWrap::survival_ascii_write,
 	 "Return a string containing the object description (survival viewpoint)")
 
     .def("survival_plot_write", ParametricModelWrap::survival_plot_write,
 	 python::args("prefix", "title"),
 	 "Write GNUPLOT files (survival viewpoint)")
+
+    .def("survival_get_plotable", ParametricModelWrap::survival_get_plotable,
+	  return_value_policy< manage_new_object >(),
+	 "Return a plotable object")
     
     .def("survival_spreadsheet_write", &ParametricModelWrap::survival_spreadsheet_write,
 	 python::arg("filename"),

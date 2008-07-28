@@ -48,15 +48,15 @@ public:
 
     std::stringstream output;
     int nb_proto = len(prototype);
-    int *protos = new int[nb_proto];
+
+    stat_tool::wrap_util::auto_ptr_array<int>
+      protos(new int[nb_proto]);
 
     for (int i=0; i<nb_proto; i++)
       protos[i] = extract<int>(prototype[i]);
 
     ret = dm.partitioning(error, output, nb_cluster,
-			  protos, initialization, algorithm);
-
-    delete[] protos;
+			  protos.get(), initialization, algorithm);
 
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -81,21 +81,32 @@ public:
     cluster_pattern = new int*[nb_cluster];
     
     // Build dynamic 2D array
-    for (int i=0; i<nb_cluster; i++)
+    try{
+      for (int i=0; i<nb_cluster; i++)
+	{
+	  boost::python::list* l = extract<boost::python::list*>(clusters[i]);
+	  int nb_item = len(*l);
+	  cluster_nb_pattern[i] = nb_item;
+	  
+	  cluster_pattern[i] = new int[nb_item];
+
+	  for (int j=0; j<cluster_nb_pattern[i]; j++)
+	    cluster_pattern[i][j] = extract<int>((*l)[j]);
+	}
+    }
+    catch(...)
       {
-	boost::python::list* l = extract<boost::python::list*>(clusters[i]);
-	int nb_item = len(*l);
-	cluster_nb_pattern[i] = nb_item;
-
-	cluster_pattern[i] = new int[nb_item];
-
-	for (int j=0; j<cluster_nb_pattern[i]; j++)
-	  cluster_pattern[i][j] = extract<int>((*l)[j]);
+	// Free memory
+	for (int i=0; i<nb_cluster; i++)
+	  delete[] cluster_pattern[i];
+	
+	delete[] cluster_nb_pattern;
+	delete[] cluster_pattern;
       }
-
-
+    
     ret = dm.partitioning(error, output, nb_cluster,
 			  cluster_nb_pattern, cluster_pattern);
+      
 
     // Free memory
     for (int i=0; i<nb_cluster; i++)

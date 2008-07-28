@@ -1748,6 +1748,18 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
 }
 
 
+
+/*--------------------------------------------------------------*
+ *  Sortie graphique de la loi
+ *--------------------------------------------------------------*/
+
+
+MultiPlotSet* Distribution::get_plotable() const
+{
+  Format_error error;
+  return get_plotable(error, 0, 0);
+}
+
 /*--------------------------------------------------------------*
  *
  *  Sortie graphique d'une famille de lois :
@@ -1759,6 +1771,7 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
  *              nombre de lois, pointeurs sur les lois.
  *
  *--------------------------------------------------------------*/
+
 
 MultiPlotSet* Distribution::get_plotable(Format_error &error , int nb_dist ,
                                          const Distribution **idist) const

@@ -530,6 +530,7 @@ class Distribution {    // loi de probabilite discrete
     bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
                     const Distribution **idist , const char *title) const;
 
+    MultiPlotSet* get_plotable() const;
     MultiPlotSet* get_plotable(Format_error &error , int nb_dist ,
                                const Distribution **idist) const;
 

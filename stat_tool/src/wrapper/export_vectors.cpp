@@ -254,16 +254,12 @@ public:
     Vectors * ret = NULL;
 
     int nb_var = len(variables);
-    int *vars = new int[nb_var];
+    stat_tool::wrap_util::auto_ptr_array<int> vars(new int[nb_var]);
 
     for (int i=0; i<nb_var; i++)
-      {
-	int v = extract<int>(variables[i]);
-	vars[i] = v;
-      }
+	vars[i] = extract<int>(variables[i]);
 
-    ret = v.select_variable(error, nb_var, vars, keep);
-    delete[] vars;
+    ret = v.select_variable(error, nb_var, vars.get(), keep);
 
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -279,16 +275,12 @@ public:
     Vectors * ret = NULL;
 
     int nb_id = len(identifiers);
-    int *ids = new int[nb_id];
+    stat_tool::wrap_util::auto_ptr_array<int> ids(new int[nb_id]);
 
     for (int i=0; i<nb_id; i++)
-      {
-	int v = extract<int>(identifiers[i]);
-	ids[i] = v;
-      }
+      ids[i] = extract<int>(identifiers[i]);
 
-    ret = v.select_individual(error, nb_id, ids, keep);
-    delete[] ids;
+    ret = v.select_individual(error, nb_id, ids.get(), keep);
 
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -322,16 +314,13 @@ public:
     Vectors * ret = NULL;
     
     int nb_vec = len(vecs);
-    const Vectors **vects = new const Vectors*[nb_vec];
+    stat_tool::wrap_util::auto_ptr_array<const Vectors *>
+      vects(new const Vectors*[nb_vec]);
 
     for (int i=0; i<nb_vec; i++)
-      {
-	Vectors* v = extract<Vectors*>(vecs[i]);
-	vects[i] = v;
-      }
+      vects[i] = extract<Vectors*>(vecs[i]);
     
-    ret = v.merge(error, nb_vec, vects);
-    delete[] vects;
+    ret = v.merge(error, nb_vec, vects.get());
     
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -347,16 +336,13 @@ public:
     Vectors * ret = NULL;
     
     int nb_vec = len(vecs);
-    const Vectors **vects = new const Vectors*[nb_vec];
+    stat_tool::wrap_util::auto_ptr_array<const Vectors *>
+      vects(new const Vectors*[nb_vec]);
     
     for (int i=0; i<nb_vec; i++)
-      {
-	Vectors* v = extract<Vectors*>(vecs[i]);
-	vects[i] = v;
-      }
+      vects[i] = extract<Vectors*>(vecs[i]);
     
-    ret = v.merge_variable(error, nb_vec, vects, ref_sample);
-    delete[] vects;
+    ret = v.merge_variable(error, nb_vec, vects.get(), ref_sample);
     
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -364,6 +350,7 @@ public:
     return ret;
   }
   
+
   // Cluster
   static Vectors* cluster_step(const Vectors& v, int variable, int step)
   {
@@ -437,7 +424,8 @@ public:
     Format_error error;
 
     int nb_symbol = len(symbol);
-    int *l = new int[nb_symbol];
+    stat_tool::wrap_util::auto_ptr_array<int>
+      l(new int[nb_symbol]);
 
     int expected_nb_symbol = (int)(v.get_max_value(variable - 1) 
 				   - v.get_min_value(variable - 1)) + 1;
@@ -448,8 +436,7 @@ public:
     for (int i=0; i<nb_symbol; i++)
       l[i] = extract<int>(symbol[i]);
     
-    Vectors* ret = v.transcode(error, variable, l);
-    delete[] l;
+    Vectors* ret = v.transcode(error, variable, l.get());
 
 
     if(!ret)
@@ -537,20 +524,20 @@ public:
     Regression * ret = NULL;
 
     int nb_var = len(filter);
-    double *vars = new double[nb_var];
+    stat_tool::wrap_util::auto_ptr_array<double>
+      vars(new double[nb_var]);
 
     for (int i=0; i<nb_var; i++)
-      {
-	double v = extract<double>(filter[i]);
-	vars[i] = v;
-      }
+      vars[i] = extract<double>(filter[i]);
+
     if(algo != 'a' && algo != 's')
       {
 	PyErr_SetString(PyExc_Exception, "Bad Algorithm");
 	boost::python::throw_error_already_set();
       }
 
-    ret = v.moving_average(error, explanatory_var, response_var, nb_var, vars, algo);
+    ret = v.moving_average(error, explanatory_var, response_var, 
+			   nb_var, vars.get(), algo);
 
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -741,25 +728,24 @@ public:
   {
     Vector_distance* dist;
     int nb_variable;
-    int *variable_type;
-    double *variable_weight;
 
     nb_variable = boost::python::len(types);
-    variable_weight = new double[nb_variable];
-    variable_type = new int[nb_variable];
+
+    stat_tool::wrap_util::auto_ptr_array<double>
+      variable_weight (new double[nb_variable]);
+
+    stat_tool::wrap_util::auto_ptr_array<int>
+      variable_type (new int[nb_variable]);
 
     // Extract each element of the vector
     for(int i=0; i<nb_variable; i++)
       {
-	int t = boost::python::extract<int>(types[i]);
-	double w = boost::python::extract<double>(weigths[i]);
-	variable_weight[i] = w;
-	variable_type[i] = t;
+	variable_type[i] = boost::python::extract<int>(types[i]);
+	variable_weight[i] = boost::python::extract<double>(weigths[i]);
       }
     
-    dist = new Vector_distance(nb_variable , variable_type , variable_weight , distance_type);
-    delete [] variable_weight;
-    delete [] variable_type;
+    dist = new Vector_distance(nb_variable, variable_type.get(), 
+			       variable_weight.get(), distance_type);
     
     return boost::shared_ptr<Vector_distance>(dist);
   }

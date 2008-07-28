@@ -78,35 +78,23 @@ public:
       }
 
     
-    double* weight = new double[nb_component];
-    const Parametric **component = new const Parametric*[nb_component];
+    stat_tool::wrap_util::auto_ptr_array<double>
+      weight(new double[nb_component]);
 
-    try
+    stat_tool::wrap_util::auto_ptr_array<const Parametric *>
+      component(new const Parametric*[nb_component]);
+
+    for(int i=0; i<nb_component; i++)
       {
-	for(int i=0; i<nb_component; i++)
-	  {
-	    weight[i] = boost::python::extract< double >(weights[i]);
-	    component[i] = boost::python::extract< Parametric *>(dists[i]);
-	    
-	  }
+	weight[i] = boost::python::extract< double >(weights[i]);
+	component[i] = boost::python::extract< Parametric *>(dists[i]);
       }
-    catch(...)
-      {
-	delete[] weight;
-	delete[] component;
-	throw;
-      }
+
+    mix = mixture_building(error, nb_component, weight.get(), component.get());
     
-    
-    mix = mixture_building(error, nb_component, weight, component);
-    
-    delete[] weight;
-    delete[] component;
-	
     if(!mix)
-      {
-	stat_tool::wrap_util::throw_error(error);
-      }
+      stat_tool::wrap_util::throw_error(error);
+      
     
     return boost::shared_ptr<Mixture>(mix);
   }
@@ -122,29 +110,18 @@ public:
     
     // Test list length
     if(nb_component == 0)
-      {
-	stat_tool::wrap_util::throw_error("Input list cannot be empty");
-      }
+      stat_tool::wrap_util::throw_error("Input list cannot be empty");
+      
+    
+    stat_tool::wrap_util::auto_ptr_array<const Parametric *>
+      component(new const Parametric*[nb_component]);
 
-    
-    const Parametric **component = new const Parametric*[nb_component];
 
-    try
-      {
-	for(int i=0; i<nb_component; i++)
-	  component[i] = boost::python::extract< Parametric *>(dists[i]);
-      }
-    catch(...)
-      {
-	delete[] component;
-	throw;
-      }
+    for(int i=0; i<nb_component; i++)
+      component[i] = boost::python::extract< Parametric *>(dists[i]);
     
+    mix = new Mixture(nb_component, component.get());
     
-    mix = new Mixture(nb_component, component);
-    
-    delete[] component;
-	
     return boost::shared_ptr<Mixture>(mix);
   }
 
