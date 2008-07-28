@@ -1065,11 +1065,12 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
 {
   register int i;
-  double plot_max;
-  std::stringstream ss;
+  int xmax;
+  double ymax;
+  std::ostringstream legend;
 
 
-  // nombre de fenetres: nb_distribution + 2 si ajustement
+  // nombre de fenetres : nb_distribution + 2 si ajustement
 
   MultiPlotSet *plotset = new MultiPlotSet(convol_histo ? nb_distribution + 2 : 1);
   MultiPlotSet &set = *plotset;
@@ -1083,15 +1084,20 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     set[0].xtics = 1;
   }
 
-  plot_max = distribution[0]->max;
+  xmax = nb_value - 1;
+  if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
+      (mass[xmax] > PLOT_MASS_THRESHOLD)) {
+    xmax++;
+  }
+  set[0].xrange = Range(0 , xmax);
+
+  ymax = distribution[0]->max;
   for (i = 1;i < nb_distribution;i++) {
-    if (distribution[i]->max > plot_max) {
-      plot_max = distribution[i]->max;
+    if (distribution[i]->max > ymax) {
+      ymax = distribution[i]->max;
     }
   }
-
-  set[0].xrange = Range(0, nb_value - 1);
-  set[0].yrange = Range(0, MIN(plot_max * YSCALE , 1.));
+  set[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
 
   // definition du nombre de SinglePlot 
 
@@ -1103,9 +1109,9 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
   plotable_mass_write(set[0][0]);
 
   for (i = 0;i < nb_distribution;i++) {
-    ss.str("");
-    ss << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
-    set[0][i + 1].legend = ss.str();
+    legend.str("");
+    legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
+    set[0][i + 1].legend = legend.str();
 
     set[0][i + 1].style = "linespoints";
 
@@ -1120,20 +1126,16 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
       set[1].xtics = 1;
     }
 
-    set[1].xrange = Range(0, nb_value - 1);
-    set[1].yrange = Range(0, (MAX(convol_histo->max , max * convol_histo->nb_element)
-                              * YSCALE) + 1);
+    set[1].xrange = Range(0 , xmax);
+    set[1].yrange = Range(0 , ceil(MAX(convol_histo->max ,
+				   max * convol_histo->nb_element) * YSCALE));
 
     set[1].resize(2);
 
-    ss.str("");
-    ss << STAT_label[STATL_HISTOGRAM];
-    set[1][0].legend = ss.str();
+    set[1][0].legend = STAT_label[STATL_HISTOGRAM];
     set[1][0].style = "impulses";
 
-    ss.str("");
-    ss << STAT_label[STATL_CONVOLUTION];
-    set[1][1].legend = ss.str();
+    set[1][1].legend = STAT_label[STATL_CONVOLUTION];
     set[1][1].style = "linespoints";
 
     convol_histo->plotable_frequency_write(set[1][0]);
@@ -1147,21 +1149,27 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
         set[i + 2].xtics = 1;
       }
 
-      set[i + 2].xrange = Range(0 , distribution[i]->nb_value - 1);
-      set[i + 2].yrange = Range(0 , (MAX(convol_histo->histogram[i]->max ,
+      xmax = distribution[i]->nb_value - 1;
+      if ((distribution[i]->cumul[xmax] > 1. - DOUBLE_ERROR) &&
+          (distribution[i]->mass[xmax] > PLOT_MASS_THRESHOLD)) {
+        xmax++;
+      }
+      set[i + 2].xrange = Range(0 , xmax);
+
+      set[i + 2].yrange = Range(0 , ceil(MAX(convol_histo->histogram[i]->max ,
                                          distribution[i]->max * convol_histo->histogram[i]->nb_element)
-                                     * YSCALE) + 1);
+                                         * YSCALE));
 
       set[i + 2].resize(2);
 
-      ss.str("");
-      ss << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
-      set[i + 2][0].legend = ss.str();
+      legend.str("");
+      legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      set[i + 2][0].legend = legend.str();
       set[i + 2][0].style = "impulses";
 
-      ss.str("");
-      ss << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
-      set[i + 2][1].legend = ss.str();
+      legend.str("");
+      legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
+      set[i + 2][1].legend = legend.str();
       set[i + 2][1].style = "linespoints";
 
       convol_histo->histogram[i]->plotable_frequency_write(set[i + 2][0]);

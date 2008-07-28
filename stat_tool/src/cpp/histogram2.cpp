@@ -71,16 +71,26 @@ extern char* label(const char *file_name);
  *
  *--------------------------------------------------------------*/
 
-ostream& dissimilarity_ascii_write(ostream &os , int nb_histo , const Histogram **histo ,
-                                   int type , double **dissimilarity)
+ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
+                                              const Histogram **ihisto ,
+                                              int type , double **dissimilarity) const
 
 {
   register int i , j;
-  int nb_value , buff , width[3];
+  int max_nb_value , buff , width[3];
   long old_adjust;
   double information , **cumul;
   Test *test;
+  const Histogram **histo;
 
+
+  nb_histo++;
+  histo = new const Histogram*[nb_histo];
+
+  histo[0] = this;
+  for (i = 1;i < nb_histo;i++) {
+    histo[i] = ihisto[i - 1];
+  }
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
@@ -116,14 +126,14 @@ ostream& dissimilarity_ascii_write(ostream &os , int nb_histo , const Histogram 
 
   // calcul des largeurs des colonnes
 
-  nb_value = histo[0]->nb_value;
+  max_nb_value = histo[0]->nb_value;
   for (i = 1;i < nb_histo;i++) {
-    if (histo[i]->nb_value > nb_value) {
-      nb_value = histo[i]->nb_value;
+    if (histo[i]->nb_value > max_nb_value) {
+      max_nb_value = histo[i]->nb_value;
     }
   }
 
-  width[0] = column_width(nb_value - 1);
+  width[0] = column_width(max_nb_value - 1);
 
   width[1] = 0;
   for (i = 0;i < nb_histo;i++) {
@@ -155,7 +165,7 @@ ostream& dissimilarity_ascii_write(ostream &os , int nb_histo , const Histogram 
   }
   os << endl;
 
-  for (i = 0;i < nb_value;i++) {
+  for (i = 0;i < max_nb_value;i++) {
     os << setw(width[0]) << i;
     for (j = 0;j < nb_histo;j++) {
       if (i < histo[j]->nb_value) {
@@ -296,6 +306,8 @@ ostream& dissimilarity_ascii_write(ostream &os , int nb_histo , const Histogram 
 
   os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
+  delete [] histo;
+
   return os;
 }
 
@@ -310,8 +322,9 @@ ostream& dissimilarity_ascii_write(ostream &os , int nb_histo , const Histogram 
  *
  *--------------------------------------------------------------*/
 
-bool dissimilarity_ascii_write(Format_error &error , const char *path , int nb_histo ,
-                               const Histogram **histo , int type , double **dissimilarity)
+bool Histogram::dissimilarity_ascii_write(Format_error &error , const char *path ,
+                                          int nb_histo , const Histogram **ihisto ,
+                                          int type , double **dissimilarity) const
 
 {
   bool status;
@@ -327,7 +340,7 @@ bool dissimilarity_ascii_write(Format_error &error , const char *path , int nb_h
 
   else {
     status = true;
-    dissimilarity_ascii_write(out_file , nb_histo , histo , type , dissimilarity);
+    dissimilarity_ascii_write(out_file , nb_histo , ihisto , type , dissimilarity);
   }
 
   return status;
@@ -345,15 +358,17 @@ bool dissimilarity_ascii_write(Format_error &error , const char *path , int nb_h
  *
  *--------------------------------------------------------------*/
 
-bool dissimilarity_spreadsheet_write(Format_error &error , const char *path , int nb_histo ,
-                                     const Histogram **histo , int type , double **dissimilarity)
+bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char *path ,
+                                                int nb_histo , const Histogram **ihisto ,
+                                                int type , double **dissimilarity) const
 
 {
   bool status;
   register int i , j;
-  int nb_value;
+  int max_nb_value;
   double information , **cumul , **concentration;
   Test *test;
+  const Histogram **histo;
   ofstream out_file(path);
 
 
@@ -366,6 +381,14 @@ bool dissimilarity_spreadsheet_write(Format_error &error , const char *path , in
 
   else {
     status = true;
+
+    nb_histo++;
+    histo = new const Histogram*[nb_histo];
+
+    histo[0] = this;
+    for (i = 1;i < nb_histo;i++) {
+      histo[i] = ihisto[i - 1];
+    }
 
     // ecriture des caracteristiques des histogrammes
 
@@ -406,10 +429,10 @@ bool dissimilarity_spreadsheet_write(Format_error &error , const char *path , in
       }
     }
 
-    nb_value = histo[0]->nb_value;
+    max_nb_value = histo[0]->nb_value;
     for (i = 1;i < nb_histo;i++) {
-      if (histo[i]->nb_value > nb_value) {
-        nb_value = histo[i]->nb_value;
+      if (histo[i]->nb_value > max_nb_value) {
+        max_nb_value = histo[i]->nb_value;
       }
     }
 
@@ -431,7 +454,7 @@ bool dissimilarity_spreadsheet_write(Format_error &error , const char *path , in
     }
     out_file << endl;
 
-    for (i = 0;i < nb_value;i++) {
+    for (i = 0;i < max_nb_value;i++) {
       out_file << i;
       for (j = 0;j < nb_histo;j++) {
         out_file << "\t";
@@ -558,6 +581,8 @@ bool dissimilarity_spreadsheet_write(Format_error &error , const char *path , in
       break;
     }
     }
+
+    delete [] histo;
   }
 
   return status;
@@ -790,16 +815,18 @@ bool Histogram::comparison(Format_error &error , ostream &os , int nb_histo ,
   }
 
 # ifdef MESSAGE
-  dissimilarity_ascii_write(os , nb_histo , histo , type , dissimilarity);
+  dissimilarity_ascii_write(os , nb_histo - 1 , ihisto , type , dissimilarity);
 # endif
 
   if (path) {
     switch (format) {
     case 'a' :
-      status = dissimilarity_ascii_write(error , path , nb_histo , histo , type , dissimilarity);
+      status = dissimilarity_ascii_write(error , path , nb_histo - 1 , ihisto ,
+                                         type , dissimilarity);
       break;
     case 's' :
-      status = dissimilarity_spreadsheet_write(error , path , nb_histo , histo , type , dissimilarity);
+      status = dissimilarity_spreadsheet_write(error , path , nb_histo - 1 , ihisto ,
+                                               type , dissimilarity);
       break;
     }
   }
@@ -1034,8 +1061,8 @@ bool Histogram::wilcoxon_mann_whitney_comparison(Format_error &error , ostream &
  *
  *--------------------------------------------------------------*/
 
-bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
-                const Histogram **histo , const char *title)
+bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_histo ,
+                           const Histogram **ihisto , const char *title) const
 
 {
   bool status = true;
@@ -1052,12 +1079,21 @@ bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
     bool cumul_concentration_flag;
     register int i , j , k;
     int max_nb_value , max_frequency , max_range , reference_matching ,
-        reference_concentration , *offset , *nb_value;
+        reference_concentration , *poffset , *pnb_value;
     double max_mass , shift , **cumul , **concentration;
     const Histogram *phisto[2];
     const Histogram **merged_histo;
     ostringstream *data_file_name;
+    const Histogram **histo;
 
+
+    nb_histo++;
+    histo = new const Histogram*[nb_histo];
+
+    histo[0] = this;
+    for (i = 1;i < nb_histo;i++) {
+      histo[i] = ihisto[i - 1];
+    }
 
     // ecriture des fichiers de donnees
 
@@ -1080,8 +1116,8 @@ bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
     }
 
     if (status) {
-      offset = new int[nb_histo];
-      nb_value = new int[nb_histo];
+      poffset = new int[nb_histo];
+      pnb_value = new int[nb_histo];
 
       cumul = new double*[nb_histo];
       concentration = new double*[nb_histo];
@@ -1100,8 +1136,8 @@ bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
       for (i = 0;i < nb_histo;i++) {
         data_file_name[i + 1] << prefix << i + 1 << ".dat";
 
-        offset[i] = histo[i]->offset;
-        nb_value[i] = histo[i]->nb_value;
+        poffset[i] = histo[i]->offset;
+        pnb_value[i] = histo[i]->nb_value;
 
         // calcul des fonctions de repartition et de concentration
 
@@ -1150,11 +1186,11 @@ bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
       if ((cumul_concentration_flag) && (nb_histo > 1)) {
         data_file_name[nb_histo + 1] << prefix << nb_histo + 1 << ".dat";
         cumul_matching_plot_print((data_file_name[nb_histo + 1].str()).c_str() , nb_histo ,
-                                  offset , nb_value , cumul);
+                                  poffset , pnb_value , cumul);
       }
 
-      delete [] offset;
-      delete [] nb_value;
+      delete [] poffset;
+      delete [] pnb_value;
 
       for (i = 0;i < nb_histo;i++) {
         delete [] cumul[i];
@@ -1408,6 +1444,7 @@ bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
       delete [] merged_histo;
     }
 
+    delete [] histo;
     delete [] data_file_name;
 
     if (!status) {
@@ -1899,10 +1936,7 @@ bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
   }
 
   else {
-    const Histogram *histo[1];
-
-    histo[0] = this;
-    status = ::plot_write(error , prefix , 1 , histo , title);
+    status = Histogram::plot_write(error , prefix , 0 , 0 , title);
   }
 
   return status;

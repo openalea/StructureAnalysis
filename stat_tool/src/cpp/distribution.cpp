@@ -47,10 +47,8 @@
 #include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
-#include "plotable.h"
 
 using namespace std;
-using namespace plotable;
 
 
 
@@ -1184,7 +1182,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
             plot_nb_value = histo_nb_value[i];
           }
         }
-	
+
         else {
           if (!dist_nb_value) {
             histo_nb_value[i] = dist[index_dist[i]]->nb_value;
@@ -1361,8 +1359,8 @@ char* label(const char *file_name)
  *
  *--------------------------------------------------------------*/
 
-bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
-                const Distribution **dist , const char *title)
+bool Distribution::plot_write(Format_error &error , const char *prefix , int nb_dist ,
+                              const Distribution **idist , const char *title) const
 
 {
   bool status;
@@ -1376,20 +1374,30 @@ bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
   }
 
   else {
+    bool cumul_concentration_flag;
     register int i , j , k;
-    int plot_nb_value , max_nb_value , cumul_concentration_flag , max_range ,
-        reference_matching , reference_concentration , *offset , *nb_value;
-    double max , min_complement , **cumul , **concentration;
+    int plot_nb_value , max_nb_value , max_range , reference_matching ,
+        reference_concentration , *poffset , *pnb_value;
+    double max , min_complement , **pcumul , **concentration;
     ostringstream *data_file_name;
+    const Distribution **dist;
 
+
+    nb_dist++;
+    dist = new const Distribution*[nb_dist];
+
+    dist[0] = this;
+    for (i = 1;i < nb_dist;i++) {
+      dist[i] = idist[i - 1];
+    }
 
     // ecriture des fichiers de donnees
 
     data_file_name = new ostringstream[nb_dist + 1];
 
-    offset = new int[nb_dist];
-    nb_value = new int[nb_dist];
-    cumul = new double*[nb_dist];
+    poffset = new int[nb_dist];
+    pnb_value = new int[nb_dist];
+    pcumul = new double*[nb_dist];
 
     concentration = new double*[nb_dist];
     for (i = 0;i < nb_dist;i++) {
@@ -1405,9 +1413,9 @@ bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
     for (i = 0;i < nb_dist;i++) {
       data_file_name[i] << prefix << i << ".dat";
 
-      offset[i] = dist[i]->offset;
-      nb_value[i] = dist[i]->nb_value;
-      cumul[i] = dist[i]->cumul;
+      poffset[i] = dist[i]->offset;
+      pnb_value[i] = dist[i]->nb_value;
+      pcumul[i] = dist[i]->cumul;
 
       // calcul des fonctions de concentration
 
@@ -1446,12 +1454,12 @@ bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
     if ((status) && (cumul_concentration_flag) && (nb_dist > 1)) {
       data_file_name[nb_dist] << prefix << nb_dist << ".dat";
       cumul_matching_plot_print((data_file_name[nb_dist].str()).c_str() , nb_dist ,
-                                offset , nb_value , cumul);
+                                poffset , pnb_value , pcumul);
     }
 
-    delete [] offset;
-    delete [] nb_value;
-    delete [] cumul;
+    delete [] poffset;
+    delete [] pnb_value;
+    delete [] pcumul;
 
     for (i = 0;i < nb_dist;i++) {
       delete [] concentration[i];
@@ -1628,6 +1636,7 @@ bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
       }
     }
 
+    delete [] dist;
     delete [] data_file_name;
 
     if (!status) {
@@ -1657,6 +1666,10 @@ void Distribution::plotable_mass_write(SinglePlot &plot , double scale) const
   for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
     plot.add_point(i , mass[i] * scale);
   }
+  if ((cumul[nb_value - 1] > 1. - DOUBLE_ERROR) &&
+      (mass[nb_value - 1] > PLOT_MASS_THRESHOLD)) {
+    plot.add_point(nb_value , 0.);
+  }
 }
 
 
@@ -1677,6 +1690,293 @@ void Distribution::plotable_cumul_write(SinglePlot &plot) const
   for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
     plot.add_point(i , cumul[i]);
   }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la mise en correspondance d'une fonction de repartition avec
+ *  la fonction de repartition d'une loi de reference.
+ *
+ *  argument : reference sur un objet SinglePlot et sur la loi de reference.
+ *
+ *--------------------------------------------------------------*/
+
+void Distribution::plotable_cumul_matching_write(SinglePlot &plot ,
+                                                 const Distribution &reference_dist) const
+
+{
+  register int i;
+
+
+  plot.add_point(0. , 0.);
+  for (i = MIN(reference_dist.offset , 1);i < offset;i++) {
+    plot.add_point(reference_dist.cumul[i] , 0.);
+  }
+  for (i = offset;i < nb_value;i++) {
+    plot.add_point(reference_dist.cumul[i] , cumul[i]);
+  }
+  for (i = nb_value;i < reference_dist.nb_value;i++) {
+    plot.add_point(reference_dist.cumul[i] , cumul[nb_value - 1]);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la courbe de concentration d'une loi.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Distribution::plotable_concentration_write(SinglePlot &plot) const
+
+{
+  register int i;
+  double *concentration;
+
+
+  concentration = concentration_function_computation();
+
+  plot.add_point(0. , 0.);
+  for (i = offset;i < nb_value;i++) {
+    plot.add_point(cumul[i] , concentration[i]);
+  }
+
+  delete [] concentration;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'une famille de lois :
+ *  - lois et fonctions de repartition,
+ *  - mise en correspondance des fonctions de repartition,
+ *  - courbes de concentration.
+ *
+ *  arguments : reference sur un objet Format_error,
+ *              nombre de lois, pointeurs sur les lois.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Distribution::get_plotable(Format_error &error , int nb_dist ,
+                                         const Distribution **idist) const
+
+{
+  MultiPlotSet *plotset;
+
+
+  error.init();
+
+  if (nb_dist > PLOT_NB_DISTRIBUTION) {
+    plotset = 0;
+    error.update(STAT_error[STATR_PLOT_NB_DISTRIBUTION]);
+  }
+
+  else {
+    register int i , j , k;
+    int plot_nb_value , xmax , max_range , cumul_concentration_nb_dist ,
+        nb_plot , reference_matching;
+    double ymax , min_complement;
+    const Distribution **dist;
+    std::ostringstream legend , title;
+
+
+    nb_dist++;
+    dist = new const Distribution*[nb_dist];
+
+    dist[0] = this;
+    for (i = 1;i < nb_dist;i++) {
+      dist[i] = idist[i - 1];
+    }
+
+    xmax = 0;
+    ymax = 0.;
+    cumul_concentration_nb_dist = 0;
+    max_range = 0;
+    min_complement = 1.;
+
+    for (i = 0;i < nb_dist;i++) {
+
+      // calcul du nombre de valeurs maximum, de l'etendue maximum et
+      // de la probabilite maximum
+
+      plot_nb_value = dist[i]->plot_nb_value_computation();
+      if (plot_nb_value > xmax) {
+        xmax = plot_nb_value;
+      }
+      if (dist[i]->max > ymax) {
+        ymax = dist[i]->max;
+      }
+
+      if (dist[i]->variance > 0.) {
+        cumul_concentration_nb_dist++;
+        if (dist[i]->nb_value - dist[i]->offset > max_range) {
+          max_range = dist[i]->nb_value - dist[i]->offset;
+          reference_matching = i;
+        }
+        if (dist[i]->complement < min_complement) {
+          min_complement = dist[i]->complement;
+        }
+      }
+    }
+
+    nb_plot = 1;
+    if (cumul_concentration_nb_dist > 0) {
+      nb_plot += 3;
+    }
+    if (nb_dist == 1) {
+      nb_plot--;
+    }
+ 
+    plotset = new MultiPlotSet(nb_plot);
+    MultiPlotSet &set = *plotset;
+
+    set.title = "Distribution set";
+    set.border = "15 lw 0";
+
+    // 1ere vue : lois
+
+    if (MAX(xmax , 2) - 1 < TIC_THRESHOLD) {
+      set[0].xtics = 1;
+    }
+
+    set[0].xrange = Range(0 , MAX(xmax , 2) - 1);
+    set[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
+
+    // definition du nombre de SinglePlot 
+
+    set[0].resize(nb_dist);
+
+    for (i = 0;i < nb_dist;i++) {
+      legend.str("");
+      legend << STAT_label[STATL_DISTRIBUTION];
+      if (nb_dist > 1) {
+        legend << " " << i + 1;
+      }
+      dist[i]->plot_title_print(legend);
+      set[0][i].legend = legend.str();
+
+      set[0][i].style = "linespoints";
+
+      dist[i]->plotable_mass_write(set[0][i]);
+    }
+
+    if (cumul_concentration_nb_dist > 0) {
+
+      // 2eme vue : fonctions de repartition
+
+      if (xmax - 1 < TIC_THRESHOLD) {
+        set[1].xtics = 1;
+      }
+
+      set[1].xrange = Range(0 , xmax - 1);
+      set[1].yrange = Range(0. , 1. - min_complement);
+
+      // definition du nombre de SinglePlot 
+
+      set[1].resize(cumul_concentration_nb_dist);
+
+      i = 0;
+      for (j = 0;j < nb_dist;j++) {
+        if (dist[j]->variance > 0.) {
+          legend.str("");
+          legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION];
+          if (nb_dist > 1) {
+            legend << " " << j + 1;
+          }
+          legend << " " << STAT_label[STATL_FUNCTION];
+          set[1][i].legend = legend.str();
+
+          set[1][i].style = "linespoints";
+
+          dist[j]->plotable_cumul_write(set[1][i]);
+          i++;
+        }
+      }
+
+      // 3eme vue : mise en correspondance des fonctions de repartition en prenant
+      // comme reference la loi dont l'etendue est la plus grande
+
+      if (nb_dist > 1) {
+        title.str("");
+        title << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
+              << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
+        set[2].title = title.str();
+
+        set[2].xtics = 0.1;
+        set[2].ytics = 0.1;
+
+        set[2].xrange = Range(0. , 1. - min_complement);
+        set[2].yrange = Range(0. , 1. - min_complement);
+
+        // definition du nombre de SinglePlot 
+
+        set[2].resize(cumul_concentration_nb_dist);
+
+        i = 0;
+        for (j = 0;j < nb_dist;j++) {
+          if (dist[j]->variance > 0.) {
+            legend.str("");
+            legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
+                   << " " << j + 1 << " " << STAT_label[STATL_FUNCTION];
+            set[2][i].legend = legend.str();
+
+            set[2][i].style = "linespoints";
+
+            dist[j]->plotable_cumul_matching_write(set[2][i] , *dist[reference_matching]);
+            i++;
+          }
+        }
+      }
+
+      // 4eme vue : courbes de concentration
+
+      if (nb_dist == 1) {
+        i = 2;
+      }
+      else {
+        i = 3;
+      }
+
+      set[i].xtics = 0.1;
+      set[i].ytics = 0.1;
+
+      set[i].xrange = Range(0. , 1. - min_complement);
+      set[i].yrange = Range(0. , 1. - min_complement);
+
+      // definition du nombre de SinglePlot 
+
+      set[i].resize(cumul_concentration_nb_dist + 1);
+
+      j = 0;
+      for (k = 0;k < nb_dist;k++) {
+        if (dist[k]->variance > 0.) {
+          legend.str("");
+          legend << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_CURVE];
+          if (nb_dist > 1) {
+            legend << " " << k + 1;
+          }
+          set[i][j].legend = legend.str();
+
+          set[i][j].style = "linespoints";
+
+          dist[k]->plotable_concentration_write(set[i][j]);
+          j++;
+        }
+      }
+
+      set[i][j].style = "lines";
+
+      set[i][j].add_point(0. , 0.);
+      set[i][j].add_point(1. - min_complement , 1. - min_complement);
+    }
+
+    delete [] dist;
+  }
+
+  return plotset;
 }
 
 
@@ -1821,8 +2121,7 @@ bool Distribution::survival_plot_print(const char *path , double *survivor) cons
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des taux de survie a partir d'une loi et
- *  sortie Gnuplot du resultat.
+ *  Calcul des taux de survie a partir d'une loi et sortie Gnuplot du resultat.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              titre des figures.
@@ -1834,10 +2133,6 @@ bool Distribution::survival_plot_write(Format_error &error , const char *prefix 
 
 {
   bool status;
-  register int i;
-  double *survivor;
-  Curves *survival_rate;
-  ostringstream data_file_name[2];
 
 
   error.init();
@@ -1848,6 +2143,11 @@ bool Distribution::survival_plot_write(Format_error &error , const char *prefix 
   }
 
   else {
+    register int i;
+    double *survivor;
+    Curves *survival_rate;
+    ostringstream data_file_name[2];
+
 
     // ecriture des fichiers de donnees
 
@@ -1947,6 +2247,122 @@ bool Distribution::survival_plot_write(Format_error &error , const char *prefix 
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la fonction de survie d'une loi.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Distribution::plotable_survivor_write(SinglePlot &plot) const
+
+{
+  register int i;
+  double *survivor;
+
+
+  survivor = survivor_function_computation();
+
+  for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
+    plot.add_point(i , survivor[i]);
+  }
+
+  delete [] survivor;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des taux de survie a partir d'une loi et sortie graphique du resultat.
+ *
+ *  argument : reference sur un objet Format_error.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
+
+{
+  MultiPlotSet *plotset;
+
+
+  error.init();
+
+  if (variance == 0.) {
+    plotset = 0;
+    error.update(STAT_error[STATR_PLOT_NULL_VARIANCE]);
+  }
+
+  else {
+    register int i , j;
+    int xmax;
+    Curves *survival_rate;
+    std::ostringstream legend;
+
+
+    plotset = new MultiPlotSet(2);
+    MultiPlotSet &set = *plotset;
+
+    // 1ere vue : loi et fonction de survie
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      set[0].xtics = 1;
+    }
+
+    xmax = nb_value - 1;
+    if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
+        (mass[xmax] > PLOT_MASS_THRESHOLD)) {
+      xmax++;
+    }
+    set[0].xrange = Range(0 , xmax);
+
+    set[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
+
+    set[0].resize(2);
+    set[0][0].legend = STAT_label[STATL_DISTRIBUTION];
+
+    set[0][0].style = "linespoints";
+
+    plotable_mass_write(set[0][0]);
+
+    legend.str("");
+    legend << STAT_label[STATL_SURVIVOR] << " " << STAT_label[STATL_FUNCTION];
+    set[0][1].legend = legend.str();
+
+    set[0][1].style = "linespoints";
+
+    plotable_survivor_write(set[0][1]);
+
+    // 2eme vue : loi et fonction de survie
+
+    survival_rate = new Curves(*this);
+
+    if (survival_rate->length - 1 < TIC_THRESHOLD) {
+      set[1].xtics = 1;
+    }
+
+    set[1].resize(2);
+
+    set[1].xrange = Range(survival_rate->offset , survival_rate->length - 1);
+    set[1].yrange = Range(0. , 1.);
+
+    set[1][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
+    set[1][0].style = "linespoints";
+
+    survival_rate->plotable_print(0 , set[1][0]);
+
+    set[1][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
+    set[1][1].style = "linespoints";
+
+    survival_rate->plotable_print(1 , set[1][1]);
+
+    delete survival_rate;
+  }
+
+  return plotset;
 }
 
 

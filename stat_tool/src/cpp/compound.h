@@ -93,6 +93,7 @@ private :
     std::ostream& spreadsheet_write(std::ostream &os , const Compound_data *compound_histo) const;
     bool plot_write(const char *prefix , const char *title ,
                     const Compound_data *compound_histo) const;
+    plotable::MultiPlotSet* get_plotable(const Compound_data *compound_histo) const;
 
     void computation(Parametric **power_dist , int min_nb_value ,
                      double cumul_threshold , bool sum_flag , bool dist_flag);
@@ -120,6 +121,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    plotable::MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Compound);
 
@@ -184,6 +186,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    plotable::MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Compound_data);
 

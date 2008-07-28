@@ -962,6 +962,180 @@ bool Compound::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
+ *  Sortie graphique d'une loi composee et de la structure de donnees associee.
+ *
+ *  argument : pointeur sur un objet Compound_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
+
+{
+  register int i;
+  int xmax;
+  double scale = 1.;
+  std::ostringstream legend;
+
+
+  MultiPlotSet *plotset = new MultiPlotSet(3);
+  MultiPlotSet &set = *plotset;
+
+  set.title = "Compound distribution fit";
+  set.border = "15 lw 0";
+
+  // 1ere vue : loi composee
+
+  if (nb_value - 1 < TIC_THRESHOLD) {
+    set[0].xtics = 1;
+  }
+
+  xmax = nb_value - 1;
+  if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
+      (mass[xmax] > PLOT_MASS_THRESHOLD)) {
+    xmax++;
+  }
+  set[0].xrange = Range(0 , xmax);
+
+  i = 0;
+
+  if (compound_histo) {
+    set[0].yrange = Range(0 , ceil(MAX(compound_histo->max ,
+                                       max * compound_histo->nb_element) * YSCALE));
+
+    set[0].resize(2);
+    set[0][i].legend = STAT_label[STATL_HISTOGRAM];
+    set[0][i].style = "impulses";
+
+    compound_histo->plotable_frequency_write(set[0][i++]);
+
+    scale = compound_histo->nb_element;
+  }
+
+  else {
+    set[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
+
+    set[0].resize(1);
+  }
+
+  legend.str("");
+  legend << STAT_label[STATL_COMPOUND] << " " << STAT_label[STATL_DISTRIBUTION];
+  set[0][i].legend = legend.str();
+  set[0][i].style = "linespoints";
+
+  plotable_mass_write(set[0][i] , scale);
+
+  // 2eme vue : loi de la somme
+
+  if (sum_distribution->nb_value - 1 < TIC_THRESHOLD) {
+    set[1].xtics = 1;
+  }
+
+  xmax = sum_distribution->nb_value - 1;
+  if ((sum_distribution->cumul[xmax] > 1. - DOUBLE_ERROR) &&
+      (sum_distribution->mass[xmax] > PLOT_MASS_THRESHOLD)) {
+    xmax++;
+  }
+  set[1].xrange = Range(0 , xmax);
+
+  i = 0;
+
+  if (compound_histo) {
+    set[1].yrange = Range(0 , ceil(MAX(compound_histo->sum_histogram->max ,
+                                       sum_distribution->max * compound_histo->sum_histogram->nb_element) * YSCALE));
+
+    set[1].resize(2);
+    legend.str("");
+    legend << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM];
+    set[1][i].legend = legend.str();
+    set[1][i].style = "impulses";
+
+    compound_histo->plotable_frequency_write(set[1][i++]);
+
+    scale = compound_histo->sum_histogram->nb_element;
+  }
+
+  else {
+    set[1].yrange = Range(0. , MIN(sum_distribution->max * YSCALE , 1.));
+
+    set[1].resize(1);
+  }
+
+  legend.str("");
+  legend << STAT_label[STATL_SUM] << " " << STAT_label[STATL_DISTRIBUTION];
+  set[1][i].legend = legend.str();
+  set[1][i].style = "linespoints";
+
+  plotable_mass_write(set[1][i] , scale);
+
+  // 3eme vue : loi elementaire
+
+  if (distribution->nb_value - 1 < TIC_THRESHOLD) {
+    set[2].xtics = 1;
+  }
+
+  xmax = distribution->nb_value - 1;
+  if ((distribution->cumul[xmax] > 1. - DOUBLE_ERROR) &&
+      (distribution->mass[xmax] > PLOT_MASS_THRESHOLD)) {
+    xmax++;
+  }
+  set[2].xrange = Range(0 , xmax);
+
+  i = 0;
+
+  if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
+    set[2].yrange = Range(0 , ceil(MAX(compound_histo->histogram->max ,
+                                       distribution->max * compound_histo->histogram->nb_element) * YSCALE));
+
+    set[2].resize(2);
+    legend.str("");
+    legend << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM];
+    set[2][i].legend = legend.str();
+    set[2][i].style = "impulses";
+
+    compound_histo->plotable_frequency_write(set[2][i++]);
+
+    scale = compound_histo->histogram->nb_element;
+  }
+
+  else {
+    set[2].yrange = Range(0. , MIN(distribution->max * YSCALE , 1.));
+
+    set[2].resize(1);
+
+    scale = 1.;
+  }
+
+  legend.str("");
+  legend << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_DISTRIBUTION];
+  set[2][i].legend = legend.str();
+  set[2][i].style = "linespoints";
+
+  plotable_mass_write(set[2][i] , scale);
+
+  return plotset;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Compound.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Compound::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+
+  set = get_plotable(compound_data);
+
+  return set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Fonctions pour la persistance.
  *
  *--------------------------------------------------------------*/
@@ -1363,6 +1537,29 @@ bool Compound_data::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Compound_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Compound_data::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+
+  if (compound) {
+    set = compound->get_plotable(this);
+  }
+  else {
+    set = 0;
+  }
+
+  return set;
 }
 
 

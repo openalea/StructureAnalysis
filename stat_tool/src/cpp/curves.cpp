@@ -618,6 +618,26 @@ bool Curves::plot_print(const char *path , int ilength ,
 
 /*--------------------------------------------------------------*
  *
+ *  Ecriture d'une courbe.
+ *
+ *  arguments : indicede la courbe, reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Curves::plotable_print(int index , SinglePlot &plot) const
+
+{
+  register int i;
+
+
+  for (i = offset;i < length;i++) {
+    plot.add_point(i , point[index][i]);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Visualisation d'un objet Curves.
  *
  *  arguments : stream, reference sur un objet Curves.

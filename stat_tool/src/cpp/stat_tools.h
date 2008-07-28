@@ -44,10 +44,10 @@
 #include <fstream>
 // #include <rw/collect.h>
 #include "reestimation.h"
-
 #include "plotable.h"
 
 using namespace plotable;
+
 
 
 
@@ -218,16 +218,18 @@ const double ASCII_ROUNDNESS = 1.e-5;  // arrondi sur la fonction de repartition
 const double SPREADSHEET_ROUNDNESS = 1.e-7;  // arrondi sur la fonction de repartition
                                              // pour borner une loi (sortie tableur)
 
-const int PLOT_NB_DISTRIBUTION = 10;   // nombre maximum de lois affichees (sortie Gnuplot)
-const int PLOT_NB_HISTOGRAM = 10;      // nombre maximum d'histogrammes affiches (sortie Gnuplot)
+const int PLOT_NB_DISTRIBUTION = 10;   // nombre maximum de lois affichees (sortie graphique)
+const int PLOT_NB_HISTOGRAM = 10;      // nombre maximum d'histogrammes affiches (sortie graphique)
 const double PLOT_ROUNDNESS = 1.e-5;   // arrondi sur la fonction de repartition
-                                       // pour borner une loi (sortie Gnuplot)
-const double PLOT_SHIFT = 0.2;         // decalage entre 2 histogrammes (sortie Gnuplot)
+                                       // pour borner une loi (sortie graphique)
+const double PLOT_SHIFT = 0.2;         // decalage entre 2 histogrammes (sortie graphique)
 const double PLOT_MAX_SHIFT = 0.5;     // decalage maximum entre le premier et le dernier
-                                       // histogramme (sortie Gnuplot)
+                                       // histogramme (sortie graphique)
 const int TIC_THRESHOLD = 10;          // nombre de graduations minimum pour echelle
-                                       // automatique (sortie Gnuplot)
-const double YSCALE = 1.4;             // facteur d'echelle axe y (sortie Gnuplot)
+                                       // automatique (sortie graphique)
+const double PLOT_MASS_THRESHOLD = 1.e-3;  // valeur minimale pour afficher un 0 apres la derniere
+                                           // valeur possible (sortie graphique)
+const double YSCALE = 1.4;             // facteur d'echelle axe y (sortie graphique)
 
 
 
@@ -381,7 +383,7 @@ public :
     virtual std::ostream& line_write(std::ostream &os) const = 0;
 
     virtual std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const = 0;
-  //    virtual std::ostream& spreadsheet_write(std::ostream &os) const = 0;
+//    virtual std::ostream& spreadsheet_write(std::ostream &os) const = 0;
 
     virtual bool ascii_write(Format_error &error , const char *path ,
                              bool exhaustive = false) const = 0;
@@ -389,7 +391,7 @@ public :
     virtual bool plot_write(Format_error &error , const char *prefix ,
                             const char *title = 0) const = 0;
 
-    virtual plotable::MultiPlotSet* get_plotable() const { return NULL;} ;
+    virtual plotable::MultiPlotSet* get_plotable() const { return NULL; };
 
 //    bool binary_write(Format_error &error , const char *path) const;
 };
@@ -431,10 +433,8 @@ class Distribution {    // loi de probabilite discrete
     friend bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                            double *scale , int *dist_nb_value , int nb_histo ,
                            const Histogram **histo , int *index_dist);
-    friend bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
-                           const Distribution **dist , const char *title);
 
-  //protected :
+// protected :
   public :
 
     int nb_value;           // nombre de valeurs a partir de 0
@@ -487,6 +487,9 @@ class Distribution {    // loi de probabilite discrete
 
     void plotable_mass_write(SinglePlot &plot , double scale = 1.) const;
     void plotable_cumul_write(SinglePlot &plot) const;
+    void plotable_cumul_matching_write(SinglePlot &plot , const Distribution &reference_dist) const;
+    void plotable_concentration_write(SinglePlot &plot) const;
+    void plotable_survivor_write(SinglePlot &plot) const;
 
 /*    RWspace binaryStoreSize(int ialloc_nb_value = I_DEFAULT) const;
     void restoreGuts(RWvistream &is);
@@ -512,7 +515,7 @@ class Distribution {    // loi de probabilite discrete
 
     void penalty_computation(double weight , int type , double *penalty , int outside) const;
 
-public :
+// public :
 
     Distribution(int inb_value = 0);
     Distribution(const Distribution &dist , double scale);
@@ -524,11 +527,18 @@ public :
     bool operator==(const Distribution&) const;
     bool operator!=(const Distribution &dist) const { return !(*this == dist); }
 
+    bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
+                    const Distribution **idist , const char *title) const;
+
+    MultiPlotSet* get_plotable(Format_error &error , int nb_dist ,
+                               const Distribution **idist) const;
+
     std::ostream& survival_ascii_write(std::ostream &os) const;
     bool survival_ascii_write(Format_error &error , const char *path) const;
     bool survival_spreadsheet_write(Format_error &error , const char *path) const;
     bool survival_plot_write(Format_error &error , const char *prefix ,
                              const char *title = 0) const;
+    MultiPlotSet* survival_get_plotable(Format_error &error) const;
 
     double mean_absolute_deviation_computation() const;
     double skewness_computation() const;
@@ -564,8 +574,6 @@ public :
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
                 const Histogram **histo , int *index_dist);
-bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
-                const Distribution **dist , const char *title);
 
 
 
@@ -778,28 +786,11 @@ class Histogram : public Reestimation<int> {  // histogramme
                            double *scale , int *dist_nb_value , int nb_histo ,
                            const Histogram **histo , int *index_dist);
 
-    friend bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
-                           const Histogram **histo , const char *title);
-
-    friend std::ostream& dissimilarity_ascii_write(std::ostream &os, int nb_histo, 
-						   const Histogram **histo,  int type, 
-						   double **dissimilarity);
-
-    friend bool dissimilarity_ascii_write(Format_error &error, const char *path, 
-					  int nb_histo, const Histogram **histo, 
-					  int type, double **dissimilarity);
-
-    friend bool dissimilarity_spreadsheet_write(Format_error &error, const char *path, 
-						int nb_histo, const Histogram **histo, 
-						int type , double **dissimilarity);
-
-
-protected :
-    void shift(const Histogram &histo , int shift_param);
-    void cluster(const Histogram &histo , int step);
-
+// protected :
 public :
 
+    void shift(const Histogram &histo , int shift_param);
+    void cluster(const Histogram &histo , int step);
 
     std::ostream& ascii_print(std::ostream &os , int comment_flag = false , bool cumul_flag = false) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
@@ -814,6 +805,8 @@ public :
 
     void plotable_cumul_write(SinglePlot &plot , double scale) const;
     void plotable_frequency_write(SinglePlot &plot) const;
+/*    void plotable_cumul_matching_write(SinglePlot &plot , Histogral &reference_histo) const;
+      void plotable_concentration_write(SinglePlot &plot) const; */
 
 /*    RWspace binaryStoreSize() const;
     void restoreGuts(RWvistream&);
@@ -829,6 +822,16 @@ public :
 
     Test* kruskal_wallis_test(int nb_histo , const Histogram **ihisto) const;
 
+    std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,
+                                            const Histogram **ihisto ,
+                                            int type , double **dissimilarity) const;
+    bool dissimilarity_ascii_write(Format_error &error , const char *path ,
+                                   int nb_histo , const Histogram **ihisto ,
+                                   int type , double **dissimilarity) const;
+    bool dissimilarity_spreadsheet_write(Format_error &error , const char *path ,
+                                         int nb_histo , const Histogram **ihisto ,
+                                         int type , double **dissimilarity) const;
+
     void update(const Reestimation<double> *reestim , int inb_element);
     Histogram* frequency_scale(int inb_element) const;
     double* rank_computation() const;
@@ -836,7 +839,7 @@ public :
     Parametric* parametric_estimation(int ident , int min_inf_bound = 0 , bool flag = true ,
                                       double cumul_threshold = CUMUL_THRESHOLD) const;
 
-public :
+// public :
 
     Histogram(int inb_value = 0)
       :Reestimation<int>(inb_value) {}
@@ -861,6 +864,9 @@ public :
     Time_events* build_time_events(Format_error &error , int itime) const;  // sequence_analysis
 
     bool ascii_write(Format_error &error , const char *path) const;
+
+    bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
+                    const Histogram **ihisto , const char *title) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
     bool survival_ascii_write(Format_error &error , const char *path) const;
@@ -949,15 +955,6 @@ Distribution_data* histogram_ascii_read(Format_error &error , const char *path);
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
                 const Histogram **histo , int *index_dist);
-bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
-                const Histogram **histo , const char *title);
-
-std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo , const Histogram **histo ,
-                                        int type , double **dissimilarity);
-bool dissimilarity_ascii_write(Format_error &error , const char *path , int nb_histo ,
-                               const Histogram **histo , int type , double **dissimilarity);
-bool dissimilarity_spreadsheet_write(Format_error &error , const char *path , int nb_histo ,
-                                     const Histogram **histo , int type , double **dissimilarity);
 
 
 

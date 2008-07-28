@@ -1059,6 +1059,61 @@ void Histogram::plotable_cumul_write(SinglePlot &plot , double scale) const
 
 /*--------------------------------------------------------------*
  *
+ *  Ecriture de la mise en correspondance d'une fonction de repartition avec
+ *  la fonction de repartition d'une loi de reference.
+ *
+ *  argument : reference sur un objet SinglePlot et sur la loi de reference.
+ *
+ *--------------------------------------------------------------*/
+
+/* void Histogram::plotable_cumul_matching_write(SinglePlot &plot ,
+                                              double *reference_cumul) const
+
+{
+  register int i;
+
+
+  plot.add_point(0. , 0.);
+  for (i = MIN(reference_dist.offset , 1);i < offset;i++) {
+    plot.add_point(reference_cumul[i] , 0.);
+  }
+  for (i = offset;i < nb_value;i++) {
+    plot.add_point(reference_dist.cumul[i] , cumul[i]);
+  }
+  for (i = nb_value;i < reference_dist.nb_value;i++) {
+    plot.add_point(reference_dist.cumul[i] , cumul[nb_value - 1]);
+  }
+} */
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la courbe de concentration deduite d'un histogramme.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+/* void Histogram::plotable_concentration_write(SinglePlot &plot) const
+
+{
+  register int i;
+  double *concentration;
+
+
+  concentration = concentration_function_computation();
+
+  plot.add_point(0. , 0.);
+  for (i = offset;i < nb_value;i++) {
+    plot.add_point(cumul[i] , concentration[i]);
+  }
+
+  delete [] concentration;
+} */
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul des taux de survie a partir d'un histogramme et
  *  ecriture du resultat.
  *

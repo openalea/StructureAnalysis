@@ -41,6 +41,12 @@
 
 
 
+#include "plotable.h"
+
+using namespace plotable;
+
+
+
 /****************************************************************
  *
  *  Constantes :
@@ -100,6 +106,7 @@ public :
     bool plot_print(const char *path , int ilength = I_DEFAULT ,
                     const Curves *curves_0 = 0 , const Curves *curves_1 = 0) const;
     bool plot_print_standard_residual(const char *path , double *standard_residual = 0) const;  // sequence_analysis
+    void plotable_print(int index , SinglePlot &plot) const;
 
 /*    RWspace binaryStoreSize() const;
     void restoreGuts(RWvistream&);

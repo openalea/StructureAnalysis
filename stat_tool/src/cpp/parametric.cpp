@@ -1681,10 +1681,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
   }
 
   else {
-    const Distribution *dist[1];
-
-    dist[0] = this;
-    status = ::plot_write(error , prefix , 1 , dist , title);
+    status = Distribution::plot_write(error , prefix , 0 , 0 , title);
   }
 
   return status;
