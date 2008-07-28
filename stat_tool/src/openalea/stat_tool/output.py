@@ -307,13 +307,28 @@ def Save(obj, *args, **kargs):
 class StatInterface(object):
     """ Abstract base class for stat_tool objects """
 
-    def old_plot(self, title="", *args):
+    def old_plot(self, title="", *args, **kargs):
         """ Old AML style plot """
+
+        ViewPoint = kargs.get("ViewPoint")
+        survival = bool(ViewPoint.lower() == "survival")
+
 
         import tempfile
         prefix = tempfile.mktemp()
-        self.plot_write(prefix, title)
+
+        if(survival):
+
+            try:
+                self.survival_plot_write(prefix, title)
+
+            except AttributeError:
+                raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
+
+        else:
+            self.plot_write(prefix, title)
         
+
         plot_file = prefix + ".plot"
 
         # Add an infinite pause in the command file
@@ -328,12 +343,21 @@ class StatInterface(object):
             os.remove(f)
 
 
-    def plot(self, title="", *args):
+    def plot(self, title="", *args, **kargs):
         __doc__ = Plot.__doc__
 
+        ViewPoint = kargs.get("ViewPoint")
+        survival = bool(ViewPoint.lower() == "survival")
 
         try:
-            plotable = self.get_plotable()
+            if(survival):
+                plotable = self.survival_get_plotable()
+            else:
+                if(args):
+                    plotable = self.get_plotable(args)
+                else:
+                    plotable = self.get_plotable()
+
             plotter = plot.get_plotter()
 
         except AttributeError:
@@ -349,10 +373,11 @@ class StatInterface(object):
 
         
         if(plotable):
-            plotter.plot(plotable, title, *args)
+            plotter.plot(plotable, title, *args, **kargs)
         else:
-            self.old_plot(title, *args)
+            self.old_plot(title, *args, **kargs)
             
+
 
     def display(self, Detail=1, ViewPoint="", Format=""):
         __doc__ = Plot.__doc__

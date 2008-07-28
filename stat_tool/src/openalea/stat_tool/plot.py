@@ -6,7 +6,7 @@ __doc__ = """ Plot functions """
 class plotter(object):
     """ Abstract base class for all plotter """
 
-    def plot(self, obj, title):
+    def plot(self, obj, title, *args, **kargs):
         """ Plot obj with title """
         
         raise NotImplementedError()
@@ -16,7 +16,7 @@ import os, glob
 
 class fakeplot(plotter):
 
-    def plot(self, obj, title):
+    def plot(self, obj, title, *args, **kargs):
         """ Plot obj with title """
     return
 
@@ -32,7 +32,7 @@ class gnuplot(plotter):
 
 
 
-    def plot(self, plotable, title, *args):
+    def plot(self, plotable, title, *args, **kargs):
         """ Plot an plotable with title """
 
         import Gnuplot
@@ -127,7 +127,7 @@ class mplotlib(plotter):
 
 
 
-    def plot(self, plotable, title, *args):
+    def plot(self, plotable, title, *args, **kargs):
         """ 
         Plot a plotable with title 
         """
