@@ -127,7 +127,7 @@ public:
     return ret;
   }
 
-  
+
   static MultiPlotSet* get_plotable(const Parametric_model& p, 
 				const boost::python::list& dist_list)
   {
@@ -137,9 +137,11 @@ public:
       dists(new const Distribution*[nb_dist]);
 
     for (int i = 0; i < nb_dist; i++)
-      dists[i] = extract<Distribution*>(dist_list[i]);
+      dists[i] = extract<const Distribution*>(dist_list[i]);
 
-    MultiPlotSet* ret;// = p.get_plotable(error, nb_dist, dists.get());
+    const Distribution** d = dists.get();
+
+    MultiPlotSet* ret = p.get_plotable_dists(error, nb_dist, d);
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
     
@@ -205,6 +207,11 @@ void class_distribution()
     .def("get_plotable", ParametricModelWrap::get_plotable,
 	 return_value_policy< manage_new_object >(),
 	 "Return a plotable for a list of distribution")
+
+    .def("get_plotable", &STAT_interface::get_plotable,
+	 return_value_policy< manage_new_object >(),
+	 "Return a plotable (no parameters)")
+
 
     .def("survival_ascii_write", ParametricModelWrap::survival_ascii_write,
 	 "Return a string containing the object description (survival viewpoint)")

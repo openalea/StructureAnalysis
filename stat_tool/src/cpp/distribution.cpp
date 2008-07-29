@@ -1757,7 +1757,7 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
 MultiPlotSet* Distribution::get_plotable() const
 {
   Format_error error;
-  return get_plotable(error, 0, 0);
+  return get_plotable_dists(error, 0, 0);
 }
 
 /*--------------------------------------------------------------*
@@ -1773,8 +1773,8 @@ MultiPlotSet* Distribution::get_plotable() const
  *--------------------------------------------------------------*/
 
 
-MultiPlotSet* Distribution::get_plotable(Format_error &error , int nb_dist ,
-                                         const Distribution **idist) const
+MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist ,
+					       const Distribution **idist) const
 
 {
   MultiPlotSet *plotset;
@@ -1918,6 +1918,8 @@ MultiPlotSet* Distribution::get_plotable(Format_error &error , int nb_dist ,
               << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
         set[2].title = title.str();
 
+	set[2].grid = true;
+
         set[2].xtics = 0.1;
         set[2].ytics = 0.1;
 
@@ -1955,6 +1957,7 @@ MultiPlotSet* Distribution::get_plotable(Format_error &error , int nb_dist ,
 
       set[i].xtics = 0.1;
       set[i].ytics = 0.1;
+      set[i].grid = true;
 
       set[i].xrange = Range(0. , 1. - min_complement);
       set[i].yrange = Range(0. , 1. - min_complement);

@@ -307,12 +307,13 @@ def Save(obj, *args, **kargs):
 class StatInterface(object):
     """ Abstract base class for stat_tool objects """
 
-    def old_plot(self, title="", *args, **kargs):
+    def old_plot(self, *args, **kargs):
         """ Old AML style plot """
 
-        ViewPoint = kargs.get("ViewPoint")
-        survival = bool(ViewPoint.lower() == "survival")
+        title = kargs.get("Title", "")
+        ViewPoint = kargs.get("ViewPoint", "")
 
+        survival = bool(ViewPoint.lower() == "survival")
 
         import tempfile
         prefix = tempfile.mktemp()
@@ -321,7 +322,6 @@ class StatInterface(object):
 
             try:
                 self.survival_plot_write(prefix, title)
-
             except AttributeError:
                 raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
 
@@ -343,10 +343,12 @@ class StatInterface(object):
             os.remove(f)
 
 
-    def plot(self, title="", *args, **kargs):
+    def plot(self, *args, **kargs):
         __doc__ = Plot.__doc__
+        
+        title = kargs.get("Title", "")
+        ViewPoint = kargs.get("ViewPoint", "")
 
-        ViewPoint = kargs.get("ViewPoint")
         survival = bool(ViewPoint.lower() == "survival")
 
         try:
@@ -354,7 +356,7 @@ class StatInterface(object):
                 plotable = self.survival_get_plotable()
             else:
                 if(args):
-                    plotable = self.get_plotable(args)
+                    plotable = self.get_plotable(list(args))
                 else:
                     plotable = self.get_plotable()
 
@@ -529,4 +531,10 @@ class Test:
         
         Plot(d1, d2, d3)
 
-
+        
+    def test_plot_distribution_survival(self):
+        
+        from distribution import Distribution 
+        d1 = Distribution("B", 2, 18, 0.5) 
+        
+        d1.plot(ViewPoint="survival")

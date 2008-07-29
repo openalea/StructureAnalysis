@@ -18,7 +18,7 @@ class fakeplot(plotter):
 
     def plot(self, obj, title, *args, **kargs):
         """ Plot obj with title """
-    return
+        return
 
 
     
@@ -198,7 +198,11 @@ class mplotlib(plotter):
                 lines.append(l)
                 legends.append(legend)
 
-            pylab.legend(lines, legends)
+            # Legend
+            lg = pylab.legend(lines, legends)
+            lg.legendPatch.set_alpha(0.1) # transparency
+
+            # Grid
             pylab.grid(bool(multiplot.grid))
                 
             # Range
@@ -206,17 +210,18 @@ class mplotlib(plotter):
             yrange = multiplot.yrange
             a = pylab.gca()
             if(xrange.min != xrange.max):
-                a.set_xlim([xrange.min, xrange.max])
+                a.set_xlim([round(xrange.min, 5), round(xrange.max, 5)])
+
             if(yrange.min != yrange.max):
-                a.set_ylim([yrange.min, yrange.max])
+                a.set_ylim([round(yrange.min, 5), round(yrange.max,5)])
 
             # Tics
-            xt = multiplot.xtics
+            xt = round(multiplot.xtics, 5)
             if(xt > 0):
                 xmin, xmax = pylab.xlim() 
                 pylab.xticks(pylab.arange(xmin, xmax, xt))
 
-            yt = multiplot.ytics
+            yt = round(multiplot.ytics, 5)
             if(yt > 0):
                 ymin, ymax = pylab.ylim() 
                 pylab.yticks(pylab.arange(ymin, ymax, yt))

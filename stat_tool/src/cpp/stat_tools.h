@@ -531,7 +531,7 @@ class Distribution {    // loi de probabilite discrete
                     const Distribution **idist , const char *title) const;
 
     MultiPlotSet* get_plotable() const;
-    MultiPlotSet* get_plotable(Format_error &error , int nb_dist ,
+    MultiPlotSet* get_plotable_dists(Format_error &error , int nb_dist ,
                                const Distribution **idist) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
