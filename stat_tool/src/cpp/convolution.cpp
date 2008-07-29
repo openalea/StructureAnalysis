@@ -1135,10 +1135,11 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     set[1][0].legend = STAT_label[STATL_HISTOGRAM];
     set[1][0].style = "impulses";
 
+    convol_histo->plotable_frequency_write(set[1][0]);
+
     set[1][1].legend = STAT_label[STATL_CONVOLUTION];
     set[1][1].style = "linespoints";
 
-    convol_histo->plotable_frequency_write(set[1][0]);
     plotable_mass_write(set[1][1] , convol_histo->nb_element);
 
     for (i = 0;i < nb_distribution;i++) {
@@ -1190,12 +1191,7 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 MultiPlotSet* Convolution::get_plotable() const
 
 {
-  MultiPlotSet *set;
-
-
-  set = get_plotable(convolution_data);
-
-  return set;
+  return get_plotable(convolution_data);
 }
 
 

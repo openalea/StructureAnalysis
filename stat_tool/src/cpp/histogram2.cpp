@@ -1945,6 +1945,32 @@ bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
+ *  Sortie graphique d'un objet Distribution_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Distribution_data::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+
+  if (distribution) {
+    set = distribution->get_plotable(this);
+  }
+
+  else {
+//    Format_error error;
+
+//    set = Histogram::get_plotable(error , 0 , 0);
+  }
+
+  return set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Fonctions pour la persistance.
  *
  *--------------------------------------------------------------*/

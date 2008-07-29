@@ -1033,27 +1033,58 @@ void Histogram::plotable_frequency_write(SinglePlot &plot) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture de la fonction de repartition deduite d'un histogramme.
+ *  Ecriture de la loi deduite de l'histogramme.
  *
- *  arguments : reference sur un objet SinglePlot,
- *              facteur d'echelle (valeur par defaut : 1).
+ *  argument : reference sur un objet SinglePlot.
  *
  *--------------------------------------------------------------*/
 
-void Histogram::plotable_cumul_write(SinglePlot &plot , double scale) const
+void Histogram::plotable_mass_write(SinglePlot &plot) const
+
+{
+  register int i;
+
+
+  for (i =  MAX(offset - 1 , 0);i < nb_value;i++) {
+    plot.add_point(i , (double)frequency[i] / (double)nb_element);
+  }
+  if ((double)frequency[nb_value - 1] / (double)nb_element > PLOT_MASS_THRESHOLD) {
+    plot.add_point(nb_value , 0.);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la fonction de repartition deduite d'un histogramme.
+ *
+ *  arguments : reference sur un objet SinglePlot, pointeur sur la fonction de repartition,
+ *              facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
+
+void Histogram::plotable_cumul_write(SinglePlot &plot , double *icumul ,
+                                     double scale) const
 
 {
   register int i;
   double *cumul;
 
 
-  cumul = cumul_computation(scale);
+  if (icumul) {
+    cumul = icumul;
+  }
+  else {
+    cumul = cumul_computation(scale);
+  }
 
   for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
     plot.add_point(i , cumul[i]);
   }
 
-  delete [] cumul;
+  if (!icumul) {
+    delete [] cumul;
+  }
 }
 
 
@@ -1062,54 +1093,81 @@ void Histogram::plotable_cumul_write(SinglePlot &plot , double scale) const
  *  Ecriture de la mise en correspondance d'une fonction de repartition avec
  *  la fonction de repartition d'une loi de reference.
  *
- *  argument : reference sur un objet SinglePlot et sur la loi de reference.
+ *  arguments : reference sur un objet SinglePlot, bornes et reference
+ *              sur la fonction de repartition de reference,
+ *              pointeur sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-/* void Histogram::plotable_cumul_matching_write(SinglePlot &plot ,
-                                              double *reference_cumul) const
+void Histogram::plotable_cumul_matching_write(SinglePlot &plot , int reference_offset ,
+                                              int  reference_nb_value , double *reference_cumul ,
+                                              double *icumul) const
 
 {
   register int i;
+  double *cumul;
 
+
+  if (icumul) {
+    cumul = icumul;
+  }
+  else {
+    cumul = cumul_computation();
+  }
 
   plot.add_point(0. , 0.);
-  for (i = MIN(reference_dist.offset , 1);i < offset;i++) {
+  for (i = MIN(reference_offset , 1);i < offset;i++) {
     plot.add_point(reference_cumul[i] , 0.);
   }
   for (i = offset;i < nb_value;i++) {
-    plot.add_point(reference_dist.cumul[i] , cumul[i]);
+    plot.add_point(reference_cumul[i] , cumul[i]);
   }
-  for (i = nb_value;i < reference_dist.nb_value;i++) {
-    plot.add_point(reference_dist.cumul[i] , cumul[nb_value - 1]);
+  for (i = nb_value;i < reference_nb_value;i++) {
+    plot.add_point(reference_cumul[i] , cumul[nb_value - 1]);
   }
-} */
+
+  if (!icumul) {
+    delete [] cumul;
+  }
+}
 
 
 /*--------------------------------------------------------------*
  *
  *  Ecriture de la courbe de concentration deduite d'un histogramme.
  *
- *  argument : reference sur un objet SinglePlot.
+ *  argument : reference sur un objet SinglePlot, pointeur sur la fonction de repartition,
+ *             facteur d'echelle.
  *
  *--------------------------------------------------------------*/
 
-/* void Histogram::plotable_concentration_write(SinglePlot &plot) const
+void Histogram::plotable_concentration_write(SinglePlot &plot , double *icumul ,
+                                             double scale) const
 
 {
   register int i;
-  double *concentration;
+  double *cumul , *concentration;
 
 
-  concentration = concentration_function_computation();
+  if (icumul) {
+    cumul = icumul;
+  }
+  else {
+    cumul = cumul_computation(scale);
+  }
+
+  concentration = concentration_function_computation(scale);
 
   plot.add_point(0. , 0.);
   for (i = offset;i < nb_value;i++) {
     plot.add_point(cumul[i] , concentration[i]);
   }
 
+  if (!icumul) {
+    delete [] cumul;
+  }
   delete [] concentration;
-} */
+}
 
 
 /*--------------------------------------------------------------*
@@ -1402,6 +1460,140 @@ bool Histogram::survival_plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul et ecriture de la fonction de survie d'un histogramme.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Histogram::plotable_survivor_write(SinglePlot &plot) const
+
+{
+  register int i;
+  double *survivor;
+
+
+  survivor = survivor_function_computation();
+
+  for (i = MAX(offset - 1 , 0);i < nb_value;i++) {
+    plot.add_point(i , survivor[i]);
+  }
+
+  delete [] survivor;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des taux de survie a partir d'un histogramme et sortie graphique du resultat.
+ *
+ *  argument : reference sur un objet Format_error.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
+
+{
+  MultiPlotSet *plotset;
+
+
+  error.init();
+
+  if (variance == 0.) {
+    plotset = 0;
+    error.update(STAT_error[STATR_PLOT_NULL_VARIANCE]);
+  }
+
+  else {
+    register int i , j;
+    int xmax;
+    Curves *survival_rate;
+    std::ostringstream legend;
+
+
+    plotset = new MultiPlotSet(3);
+    MultiPlotSet &set = *plotset;
+
+    set.title = "Survival analysis";
+    set.border = "15 lw 0";
+
+    // 1ere vue : histogramme
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      set[0].xtics = 1;
+    }
+
+    set[0].xrange = Range(0 , nb_value - 1);
+    set[0].yrange = Range(0 , ceil(max * YSCALE));
+
+    set[0].resize(1);
+
+    set[0][0].legend = STAT_label[STATL_HISTOGRAM];
+    set[0][0].style = "impulses";
+
+    plotable_frequency_write(set[0][0]);
+
+    // 2eme vue : loi et fonction de survie
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      set[1].xtics = 1;
+    }
+
+    xmax = nb_value - 1;
+    if ((double)frequency[xmax] / (double)nb_element > PLOT_MASS_THRESHOLD) {
+      xmax++;
+    }
+    set[1].xrange = Range(0 , xmax);
+
+    set[1].yrange = Range(0. , MIN(max * YSCALE , 1.));
+
+    set[1].resize(2);
+
+    set[1][0].legend = STAT_label[STATL_DISTRIBUTION];
+    set[1][0].style = "linespoints";
+
+    plotable_mass_write(set[1][0]);
+
+    legend.str("");
+    legend << STAT_label[STATL_SURVIVOR] << " " << STAT_label[STATL_FUNCTION];
+    set[1][1].legend = legend.str();
+
+    set[1][1].style = "linespoints";
+
+    plotable_survivor_write(set[1][1]);
+
+    // 3eme vue : loi et fonction de survie
+
+    survival_rate = new Curves(*this);
+
+    if (survival_rate->length - 1 < TIC_THRESHOLD) {
+      set[2].xtics = 1;
+    }
+
+    set[2].resize(2);
+
+    set[2].xrange = Range(survival_rate->offset , survival_rate->length - 1);
+    set[2].yrange = Range(0. , 1.);
+
+    set[2][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
+    set[2][0].style = "linespoints";
+
+    survival_rate->plotable_print(0 , set[2][0]);
+
+    set[2][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
+    set[2][1].style = "linespoints";
+
+    survival_rate->plotable_print(1 , set[2][1]);
+
+    delete survival_rate;
+  }
+
+  return plotset;
 }
 
 

@@ -804,10 +804,16 @@ public :
                     double shift = 0.) const;
     bool survival_plot_print(const char *path , double *survivor) const;
 
-    void plotable_cumul_write(SinglePlot &plot , double scale) const;
     void plotable_frequency_write(SinglePlot &plot) const;
-/*    void plotable_cumul_matching_write(SinglePlot &plot , Histogral &reference_histo) const;
-      void plotable_concentration_write(SinglePlot &plot) const; */
+    void plotable_mass_write(SinglePlot &plot) const;
+    void plotable_cumul_write(SinglePlot &plot , double *icumul = 0 ,
+                              double scale = D_DEFAULT) const;
+    void plotable_cumul_matching_write(SinglePlot &plot , int reference_offset ,
+                                       int  reference_nb_value , double *reference_cumul ,
+                                       double *icumul = 0) const;
+    void plotable_concentration_write(SinglePlot &plot , double *icumul = 0 ,
+                                      double scale = D_DEFAULT) const;
+    void plotable_survivor_write(SinglePlot &plot) const;
 
 /*    RWspace binaryStoreSize() const;
     void restoreGuts(RWvistream&);
@@ -874,6 +880,7 @@ public :
     bool survival_spreadsheet_write(Format_error &error , const char *path) const;
     bool survival_plot_write(Format_error &error , const char *prefix ,
                              const char *title = 0) const;
+    MultiPlotSet* survival_get_plotable(Format_error &error) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_histo ,
                     const Histogram **ihisto , int type , const char *path = 0 ,

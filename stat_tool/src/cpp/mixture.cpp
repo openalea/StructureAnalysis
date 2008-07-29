@@ -1479,12 +1479,7 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 MultiPlotSet* Mixture::get_plotable() const
 
 {
-  MultiPlotSet *set;
-
-
-  set = get_plotable(mixture_data);
-
-  return set;
+  return get_plotable(mixture_data);
 }
 
 

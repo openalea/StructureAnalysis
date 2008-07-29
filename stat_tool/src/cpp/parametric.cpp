@@ -1707,6 +1707,217 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
+ *  Sortie graphique d'une loi parametrique et d'un histogramme.
+ *
+ *  argument : pointeur sur un histogramme.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) const
+
+{
+  MultiPlotSet *plotset;
+
+
+  if (histo) {
+    register int i , j;
+    int nb_plot_set , plot_nb_value;
+    double scale , *pcumul;
+    std::ostringstream legend , title;
+
+
+    nb_plot_set = 1;
+    if (variance > 0.) {
+      nb_plot_set += 3;
+    }
+    if (histo->variance == 0.) {
+      nb_plot_set--;
+    }
+ 
+    plotset = new MultiPlotSet(nb_plot_set);
+    MultiPlotSet &set = *plotset;
+
+    set.title = "Distribution fit";
+    set.border = "15 lw 0";
+
+    // 1ere vue : ajustement
+
+    plot_nb_value = plot_nb_value_computation(histo);
+
+    if (plot_nb_value - 1 < TIC_THRESHOLD) {
+      set[0].xtics = 1;
+    }
+
+    set[0].xrange = Range(0 , MAX(plot_nb_value - 1 , 1));
+    set[0].yrange = Range(0 , ceil(MAX(histo->max ,
+                                   max * histo->nb_element) * YSCALE));
+
+    set[0].resize(2);
+
+    set[0][0].legend = STAT_label[STATL_HISTOGRAM];
+    set[0][0].style = "impulses";
+
+    histo->plotable_frequency_write(set[0][0]);
+
+    set[0][1].legend = STAT_label[STATL_DISTRIBUTION];
+    set[0][1].style = "linespoints";
+
+    plotable_mass_write(set[0][1] , histo->nb_element);
+
+    if (variance > 0.) {
+
+      // calcul de la fonction de repartition de l'histogramme
+
+      scale = histo->nb_element / (1. - complement);
+      pcumul = histo->cumul_computation(scale);
+
+      // 2eme vue : fonctions de repartition
+
+      if (plot_nb_value - 1 < TIC_THRESHOLD) {
+        set[1].xtics = 1;
+      }
+
+      set[1].xrange = Range(0 , plot_nb_value - 1);
+      set[1].yrange = Range(0. , 1. - complement);
+
+      // definition du nombre de SinglePlot 
+
+      set[1].resize(histo->variance > 0. ? 2 : 1);
+
+      i = 0;
+      if (histo->variance > 0.) {
+        legend.str("");
+        legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+               << STAT_label[STATL_FUNCTION];
+        set[1][i].legend = legend.str();
+
+        set[1][i].style = "linespoints";
+
+        histo->plotable_cumul_write(set[1][i] , pcumul);
+        i++;
+      }
+
+      legend.str("");
+      legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+             << STAT_label[STATL_FUNCTION];
+      set[1][i].legend = legend.str();
+
+      set[1][i].style = "linespoints";
+
+      plotable_cumul_write(set[1][i]);
+
+      // 3eme vue : mise en correspondance des fonctions de repartition en prenant
+      // comme reference celle de la loi
+
+      if (histo->variance > 0.) {
+        title.str("");
+        title << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+              << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
+        set[2].title = title.str();
+
+        set[2].xtics = 0.1;
+        set[2].ytics = 0.1;
+
+        set[2].xrange = Range(0. , 1. - complement);
+        set[2].yrange = Range(0. , 1. - complement);
+
+        // definition du nombre de SinglePlot 
+
+        set[2].resize(2);
+
+        legend.str("");
+        legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+               << STAT_label[STATL_FUNCTION];
+        set[2][0].legend = legend.str();
+
+        set[2][0].style = "linespoints";
+
+        histo->plotable_cumul_matching_write(set[2][0] , offset , nb_value , cumul , pcumul);
+
+        legend.str("");
+        legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+                << STAT_label[STATL_FUNCTION];
+        set[2][1].legend = legend.str();
+
+        set[2][1].style = "linespoints";
+
+        plotable_cumul_matching_write(set[2][1] , *this);
+      }
+
+      // courbes de concentration
+
+      if (histo->variance == 0.) {
+        i = 2;
+      }
+      else {
+        i = 3;
+      }
+
+      set[i].xtics = 0.1;
+      set[i].ytics = 0.1;
+
+      set[i].xrange = Range(0. , 1. - complement);
+      set[i].yrange = Range(0. , 1. - complement);
+
+      // definition du nombre de SinglePlot 
+
+      set[i].resize(histo->variance > 0. ? 3 : 2);
+
+      j = 0;
+      if (histo->variance > 0.) {
+        legend.str("");
+        legend << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_CONCENTRATION] << " "
+               << STAT_label[STATL_CURVE];
+        set[i][j].legend = legend.str();
+
+        set[i][j].style = "linespoints";
+
+        histo->plotable_concentration_write(set[i][j] , pcumul , scale);
+        j++;
+      }
+
+      legend.str("");
+      legend << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_CONCENTRATION] << " "
+             << STAT_label[STATL_CURVE];
+      set[i][j].legend = legend.str();
+
+      set[i][j].style = "linespoints";
+
+      plotable_concentration_write(set[i][j]);
+      j++;
+
+      set[i][j].style = "lines";
+
+      set[i][j].add_point(0. , 0.);
+      set[i][j].add_point(1. - complement , 1. - complement);
+    }
+  }
+
+  else {
+    Format_error error;
+
+    plotset = Distribution::get_plotable(error , 0 , 0);
+  }
+
+  return plotset;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Parametric_model.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Parametric_model::get_plotable() const
+
+{
+  return get_plotable(histogram);
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Fonctions pour la persistance.
  *
  *--------------------------------------------------------------*/

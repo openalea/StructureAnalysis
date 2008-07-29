@@ -1790,7 +1790,7 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
   else {
     register int i , j , k;
     int plot_nb_value , xmax , max_range , cumul_concentration_nb_dist ,
-        nb_plot , reference_matching;
+        nb_plot_set , reference_matching;
     double ymax , min_complement;
     const Distribution **dist;
     std::ostringstream legend , title;
@@ -1835,15 +1835,15 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
       }
     }
 
-    nb_plot = 1;
+    nb_plot_set = 1;
     if (cumul_concentration_nb_dist > 0) {
-      nb_plot += 3;
+      nb_plot_set += 3;
     }
     if (nb_dist == 1) {
-      nb_plot--;
+      nb_plot_set--;
     }
  
-    plotset = new MultiPlotSet(nb_plot);
+    plotset = new MultiPlotSet(nb_plot_set);
     MultiPlotSet &set = *plotset;
 
     set.title = "Distribution set";
@@ -2268,7 +2268,7 @@ bool Distribution::survival_plot_write(Format_error &error , const char *prefix 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture de la fonction de survie d'une loi.
+ *  Calcul et ecriture de la fonction de survie d'une loi.
  *
  *  argument : reference sur un objet SinglePlot.
  *
@@ -2322,6 +2322,9 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
     plotset = new MultiPlotSet(2);
     MultiPlotSet &set = *plotset;
 
+    set.title = "Survival analysis";
+    set.border = "15 lw 0";
+
     // 1ere vue : loi et fonction de survie
 
     if (nb_value - 1 < TIC_THRESHOLD) {
@@ -2338,8 +2341,8 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
     set[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
 
     set[0].resize(2);
-    set[0][0].legend = STAT_label[STATL_DISTRIBUTION];
 
+    set[0][0].legend = STAT_label[STATL_DISTRIBUTION];
     set[0][0].style = "linespoints";
 
     plotable_mass_write(set[0][0]);

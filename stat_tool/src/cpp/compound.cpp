@@ -1125,12 +1125,7 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
 MultiPlotSet* Compound::get_plotable() const
 
 {
-  MultiPlotSet *set;
-
-
-  set = get_plotable(compound_data);
-
-  return set;
+  return get_plotable(compound_data);
 }
 
 
