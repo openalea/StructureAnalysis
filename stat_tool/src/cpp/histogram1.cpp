@@ -1550,7 +1550,7 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
     }
     set[1].xrange = Range(0 , xmax);
 
-    set[1].yrange = Range(0. , MIN(max * YSCALE , 1.));
+    set[1].yrange = Range(0. , 1.);
 
     set[1].resize(2);
 

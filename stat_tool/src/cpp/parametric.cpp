@@ -1759,7 +1759,11 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
     histo->plotable_frequency_write(set[0][0]);
 
-    set[0][1].legend = STAT_label[STATL_DISTRIBUTION];
+    legend.str("");
+    legend << STAT_label[STATL_DISTRIBUTION];
+    plot_title_print(legend);
+    set[0][1].legend = legend.str();
+
     set[0][1].style = "linespoints";
 
     plotable_mass_write(set[0][1] , histo->nb_element);
@@ -1896,7 +1900,7 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
   else {
     Format_error error;
 
-    plotset = Distribution::get_plotable(error , 0 , 0);
+    plotset = Distribution::get_plotable_dists(error , 0 , 0);
   }
 
   return plotset;

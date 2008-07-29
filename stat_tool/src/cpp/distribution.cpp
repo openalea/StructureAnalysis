@@ -2338,7 +2338,7 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
     }
     set[0].xrange = Range(0 , xmax);
 
-    set[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
+    set[0].yrange = Range(0. , 1. - complement);
 
     set[0].resize(2);
 

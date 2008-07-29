@@ -532,9 +532,30 @@ class Test:
         Plot(d1, d2, d3)
 
         
-    def test_plot_distribution_survival(self):
+    def test_plot_survival(self):
         
         from distribution import Distribution 
+        from histogram import Histogram
+        from simulate import Simulate
+
         d1 = Distribution("B", 2, 18, 0.5) 
         
         d1.plot(ViewPoint="survival")
+
+        histo1 = Simulate(d1, 200)
+        histo1.plot(ViewPoint="survival")
+
+        
+
+    def test_plot_parametric_model(self):
+
+        from distribution import Distribution 
+        from simulate import Simulate
+        from histogram import Histogram
+        from estimate import Estimate
+        
+        dist1 = Distribution("NB", 0, 3.5, 0.3)
+        histo1 = Simulate(dist1, 200)
+        Plot(histo1)
+        dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
+        Plot(dist2)
