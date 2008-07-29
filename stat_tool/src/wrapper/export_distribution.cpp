@@ -127,6 +127,23 @@ public:
     return ret;
   }
 
+  
+//   static void plot_write(const Parametric_model& p,
+// 			 const std::string& prefix, const std::string& title,
+// 			 const boost::python::list& dist_list)
+//   {
+//     Format_error error;
+
+//     int nb_dist = boost::python::len(dist_list);
+//     stat_tool::wrap_util::auto_ptr_array<const Distribution *> 
+//       dists(new const Distribution*[nb_dist]);
+
+//     const Distribution &d = (const Distribution&)(p);
+
+//     if(!d.plot_write(error, prefix.c_str(), nb_dist, dists.get(), title.c_str()))
+//       stat_tool::wrap_util::throw_error(error);
+//   }
+
 
   static MultiPlotSet* get_plotable(const Parametric_model& p, 
 				const boost::python::list& dist_list)
@@ -211,6 +228,14 @@ void class_distribution()
     .def("get_plotable", &STAT_interface::get_plotable,
 	 return_value_policy< manage_new_object >(),
 	 "Return a plotable (no parameters)")
+
+//     .def("plot_write", ParametricModelWrap::plot_write,
+// 	 python::args("prefix", "title", "dists"),
+// 	 "Write GNUPLOT files (with prefix) for a list of distribution")
+
+//     .def("plot_write", &StatInterfaceWrap::plot_write,
+// 	 python::args("prefix", "title"),
+// 	  "Write GNUPLOT files (with prefix)")
 
 
     .def("survival_ascii_write", ParametricModelWrap::survival_ascii_write,

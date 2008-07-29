@@ -660,6 +660,16 @@ public:
   }
 
 
+  static MultiPlotSet* survival_get_plotable(const Distribution_data& d)
+  {
+    Format_error error;
+    MultiPlotSet* ret = d.survival_get_plotable(error);
+    if(!ret)
+      stat_tool::wrap_util::throw_error(error);
+    
+    return ret;
+  }
+
 
   static Parametric_model* extract_model(const Distribution_data& d)
   {
@@ -696,6 +706,10 @@ void class_distribution_data()
     .def("survival_plot_write", DistributionDataWrap::survival_plot_write,
 	 python::args("prefix", "title"),
 	 "Write GNUPLOT files (survival viewpoint)")
+
+    .def("survival_get_plotable", DistributionDataWrap::survival_get_plotable,
+	  return_value_policy< manage_new_object >(),
+	 "Return a plotable object")
 
     .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write,
 	 python::arg("filename"),

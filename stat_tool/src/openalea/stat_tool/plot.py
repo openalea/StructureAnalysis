@@ -6,7 +6,7 @@ __doc__ = """ Plot functions """
 class plotter(object):
     """ Abstract base class for all plotter """
 
-    def plot(self, obj, title, *args, **kargs):
+    def plot(self, obj, title, groups=[], *args, **kargs):
         """ Plot obj with title """
         
         raise NotImplementedError()
@@ -16,7 +16,7 @@ import os, glob
 
 class fakeplot(plotter):
 
-    def plot(self, obj, title, *args, **kargs):
+    def plot(self, obj, title, groups=[], *args, **kargs):
         """ Plot obj with title """
         return
 
@@ -32,8 +32,11 @@ class gnuplot(plotter):
 
 
 
-    def plot(self, plotable, title, *args, **kargs):
-        """ Plot an plotable with title """
+    def plot(self, plotable, title, groups=[], *args, **kargs):
+        """ 
+        Plot an plotable with title 
+        groups : list of group (int) to plot
+        """
 
         import Gnuplot
 
@@ -48,6 +51,10 @@ class gnuplot(plotter):
         
         # For each subplot
         for i, multiplot in enumerate(multiset):
+
+            # Group filter
+            if(groups and multiplot.group not in groups):
+                continue
             
             g.title(multiplot.title)
 
@@ -127,11 +134,12 @@ class mplotlib(plotter):
 
 
 
-    def plot(self, plotable, title, *args, **kargs):
+    def plot(self, plotable, title, groups=[], *args, **kargs):
         """ 
         Plot a plotable with title 
+        groups : list of group (int) to plot
         """
-
+        
         pylab = self.pylab
         multiset = plotable
 
@@ -145,6 +153,24 @@ class mplotlib(plotter):
         f1.set_facecolor("w")
 
 
+        # Count group
+        group_size = {} # Group size
+        group_index = {} # group counter
+        for multiplot in multiset:
+            g = multiplot.group
+            try:
+                group_size[g] += 1
+
+            except KeyError:
+                # init group
+                group_size[g] = 1
+                group_index[g] = 0
+
+                f = pylab.figure(g+1)
+                f.set_facecolor("w")
+
+
+
         # nb subplot
         nbx = len(multiset)
         
@@ -152,8 +178,18 @@ class mplotlib(plotter):
         # For each subplot
         for i, multiplot in enumerate(multiset):
             
-            #pylab.figure(i+1)
-            pylab.subplot(nbx, 1, i+1)
+            g = multiplot.group
+            # Group filter
+            if(groups and g not in groups):
+                continue
+
+            # Select window
+            pylab.figure(g+1)
+
+            # Select Subplot
+            pylab.subplot(group_size[g], 1, group_index[g] + 1)
+            group_index[g] += 1
+
             pylab.title(multiplot.title)
             
             # Labels
@@ -358,6 +394,7 @@ class Test:
         p[2].xlabel = "x3"
         p[2].ylabel = "y3"
         p[2].xtics = 1.5
+        p[2].group = 1
 
 
         p[2][0].add_point(_stat_tool.PlotPoint(3, 0.2))

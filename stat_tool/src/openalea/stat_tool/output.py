@@ -325,9 +325,10 @@ class StatInterface(object):
             except AttributeError:
                 raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
 
+        elif(args):
+            self.plot_write(prefix, title, list(args))
         else:
             self.plot_write(prefix, title)
-        
 
         plot_file = prefix + ".plot"
 
@@ -377,7 +378,7 @@ class StatInterface(object):
         if(plotable):
             plotter.plot(plotable, title, *args, **kargs)
         else:
-            self.old_plot(title, *args, **kargs)
+            self.old_plot(*args, **kargs)
             
 
 
@@ -530,7 +531,7 @@ class Test:
         d3 = Distribution("U", 10, 20)
         
         Plot(d1, d2, d3)
-
+        d1.old_plot()
         
     def test_plot_survival(self):
         

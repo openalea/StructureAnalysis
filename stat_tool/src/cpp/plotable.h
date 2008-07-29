@@ -84,9 +84,12 @@ namespace plotable
 
     bool grid;
 
+    int group; // Window id (default is 0)
+
     MultiPlot(int size=1)
       :plots(size), xtics(0), ytics(0), 
-      xrange(0,0), yrange(0,0), grid(false)
+      xrange(0,0), yrange(0,0), 
+      grid(false), group(0)
       {};
     
     SinglePlot& operator[](int index)

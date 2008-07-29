@@ -80,6 +80,7 @@ void class_plotable()
     .def_readwrite("yrange", &MultiPlot::yrange)
 
     .def_readwrite("grid", &MultiPlot::grid)
+    .def_readwrite("group", &MultiPlot::group)
 
     .def("resize", &MultiPlot::resize)
     .def("__len__", &MultiPlot::size)
