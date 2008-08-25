@@ -740,6 +740,16 @@ public :
                                                              int nb_iter= I_DEFAULT,
                                                              bool force_param= false) const;
 
+/*   Hidden_markov_out_tree* hidden_markov_out_tree_estimation2(Format_error& error,
+                                                              std::ostream& os,
+                                                              const Hidden_markov_out_tree& ihmarkov,
+                                                              bool counting_flag= true,
+                                                              int state_trees= VITERBI,
+                                                              int algorithm= FORWARD_BACKWARD,
+                                                              double saem_exponent= 1.,
+                                                              int nb_iter= I_DEFAULT,
+                                                              bool force_param= false) const;*/
+
    /** Estimate a Hidden Markov Out Tree from the number of states and the data in \e self */
    Hidden_markov_out_tree* hidden_markov_out_tree_estimation(Format_error& error,
                                                              std::ostream& os,
