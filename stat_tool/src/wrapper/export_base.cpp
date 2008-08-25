@@ -53,6 +53,17 @@ void class_constant()
   scope().attr("MAX_DIFF_BOUND") = MAX_DIFF_BOUND;
   scope().attr("MAX_MEAN") = MAX_MEAN;
 
+  enum_<stat_tool::wrap_util::UniqueInt<6, 0> >("VariableTypeBis")
+    .value("INT_VALUE", INT_VALUE)
+    .value("REAL_VALUE", REAL_VALUE)
+    .value("STATE", STATE)
+    .value("OLD_INT_VALUE", OLD_INT_VALUE)
+    .value("NB_INTERNODE", NB_INTERNODE)
+    .value("AUXILIARY", AUXILIARY)
+    .export_values()
+  ;
+
+
 }
 
 // Format Error

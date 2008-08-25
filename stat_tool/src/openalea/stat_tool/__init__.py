@@ -53,5 +53,8 @@ from _stat_tool import D_DEFAULT
 from _stat_tool import D_INF
 from _stat_tool import MAX_DIFF_BOUND
 from _stat_tool import MAX_MEAN
+from _stat_tool import VariableType
+from _stat_tool import VariableTypeBis
 
-
+# Exception
+from error import StatToolError

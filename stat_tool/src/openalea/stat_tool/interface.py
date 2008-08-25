@@ -13,7 +13,8 @@ def extend_class(cls, *base_class):
     
     b = list(cls.__bases__)
     for c in base_class:
-        b.append(c)
+        if (c not in b):
+            b.append(c)
     cls.__bases__ = tuple(b)
 
     return cls

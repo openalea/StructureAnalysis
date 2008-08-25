@@ -127,7 +127,7 @@ class mplotlib(plotter):
         """ Initialize matplotlib """
         
         import matplotlib
-        matplotlib.use('Qt4Agg')
+        #matplotlib.use('Qt4Agg')
 
         import pylab
         self.pylab = pylab

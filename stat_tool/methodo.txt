@@ -50,7 +50,7 @@ Objectifs :
         (Il est inutile de tout wrapper)
 
         * Choix des noms
-        -> class wrapper : _MixtureDist, _MixtureData, _Sequences, _MarkovData...
+        -> class wrapper : _Mixture, _MixtureData, _Sequences, _MarkovData...
         -> fonctions AML :  Merge, ToHistogram...
         -> pour les parameters par keywords : on conserve la syntaxe AML (avec des majuscules)
 
@@ -73,7 +73,7 @@ Objectifs :
 
  
 6) Gestion des E/S
-        * Les fonctions Plot/Display/Save sont écrit en Python
+        * Les fonctions Plot/Display/Save sont écrit en Python dans le module output.py
          
 
 7) ReFactorisation du code

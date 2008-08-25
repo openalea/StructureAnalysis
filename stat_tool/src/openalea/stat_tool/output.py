@@ -375,7 +375,7 @@ class StatInterface(object):
             plotable = None
 
         
-        if(plotable):
+        if(plotable is not None):
             plotter.plot(plotable, title, *args, **kargs)
         else:
             self.old_plot(*args, **kargs)
