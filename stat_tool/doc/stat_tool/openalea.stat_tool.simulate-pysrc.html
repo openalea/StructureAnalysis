@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>openalea.stat_tool.simulate</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="openalea.stat_tool-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;openalea ::
+        <a href="openalea.stat_tool-module.html">Package&nbsp;stat_tool</a> ::
+        Module&nbsp;simulate
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="openalea.stat_tool.simulate-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="openalea.stat_tool.simulate-module.html">Module openalea.stat_tool.simulate</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable openalea.stat_tool.__doc__=openalea.stat_tool-module.html#__doc__,Variable openalea.stat_tool.cluster.__doc__=openalea.stat_tool.cluster-module.html#__doc__,Variable openalea.stat_tool.comparison.__doc__=openalea.stat_tool.comparison-module.html#__doc__,Variable openalea.stat_tool.compound.__doc__=openalea.stat_tool.compound-module.html#__doc__,Variable openalea.stat_tool.convolution.__doc__=openalea.stat_tool.convolution-module.html#__doc__,Variable openalea.stat_tool.data_transform.__doc__=openalea.stat_tool.data_transform-module.html#__doc__,Variable openalea.stat_tool.distribution.__doc__=openalea.stat_tool.distribution-module.html#__doc__,Variable openalea.stat_tool.error.__doc__=openalea.stat_tool.error-module.html#__doc__,Variable openalea.stat_tool.estimate.__doc__=openalea.stat_tool.estimate-module.html#__doc__,Variable openalea.stat_tool.histogram.__doc__=openalea.stat_tool.histogram-module.html#__doc__,Variable openalea.stat_tool.interface.__doc__=openalea.stat_tool.interface-module.html#__doc__,Variable openalea.stat_tool.mixture.__doc__=openalea.stat_tool.mixture-module.html#__doc__,Variable openalea.stat_tool.old.distribution.__doc__=openalea.stat_tool.old.distribution-module.html#__doc__,Variable openalea.stat_tool.old.error.__doc__=openalea.stat_tool.old.error-module.html#__doc__,Variable openalea.stat_tool.output.__doc__=openalea.stat_tool.output-module.html#__doc__,Variable openalea.stat_tool.plot.__doc__=openalea.stat_tool.plot-module.html#__doc__,Variable openalea.stat_tool.regression.__doc__=openalea.stat_tool.regression-module.html#__doc__,Variable openalea.stat_tool.simulate.__doc__=openalea.stat_tool.simulate-module.html#__doc__,Variable openalea.stat_tool.vectors.__doc__=openalea.stat_tool.vectors-module.html#__doc__"><a title="openalea.stat_tool.__doc__
+openalea.stat_tool.cluster.__doc__
+openalea.stat_tool.comparison.__doc__
+openalea.stat_tool.compound.__doc__
+openalea.stat_tool.convolution.__doc__
+openalea.stat_tool.data_transform.__doc__
+openalea.stat_tool.distribution.__doc__
+openalea.stat_tool.error.__doc__
+openalea.stat_tool.estimate.__doc__
+openalea.stat_tool.histogram.__doc__
+openalea.stat_tool.interface.__doc__
+openalea.stat_tool.mixture.__doc__
+openalea.stat_tool.old.distribution.__doc__
+openalea.stat_tool.old.error.__doc__
+openalea.stat_tool.output.__doc__
+openalea.stat_tool.plot.__doc__
+openalea.stat_tool.regression.__doc__
+openalea.stat_tool.simulate.__doc__
+openalea.stat_tool.vectors.__doc__" class="py-name" href="#" onclick="return doclink('link-0', '__doc__', 'link-0');">__doc__</a></tt> <tt class="py-op">=</tt> <tt class="py-docstring">""" Simulation functions """</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"><tt class="py-name">__docformat__</tt> <tt class="py-op">=</tt> <tt class="py-string">"Restructuredtext"</tt> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"> </tt>
+<a name="Simulate"></a><div id="Simulate-def"><a name="L5"></a><tt class="py-lineno"> 5</tt> <a class="py-toggle" href="#" id="Simulate-toggle" onclick="return toggle('Simulate');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.simulate-module.html#Simulate">Simulate</a><tt class="py-op">(</tt><tt class="py-param">obj</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Simulate-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="Simulate-expanded"><a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line">    <tt class="py-docstring">""" Generation of a random saple from a distribution """</tt> </tt>
+<a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line"> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">obj</tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Method openalea.stat_tool._stat_tool._Convolution.simulate()=openalea.stat_tool._stat_tool._Convolution-class.html#simulate,Method openalea.stat_tool._stat_tool._Mixture.simulate()=openalea.stat_tool._stat_tool._Mixture-class.html#simulate,Method openalea.stat_tool._stat_tool._Parametric.simulate()=openalea.stat_tool._stat_tool._Parametric-class.html#simulate,Method openalea.stat_tool._stat_tool._ParametricModel.simulate()=openalea.stat_tool._stat_tool._ParametricModel-class.html#simulate,Module openalea.stat_tool.simulate=openalea.stat_tool.simulate-module.html"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-1', 'simulate', 'link-1');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"><tt class="py-comment">################################################################################</tt> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"><tt class="py-comment"></tt> </tt>
+<a name="Test"></a><div id="Test-def"><a name="L14"></a><tt class="py-lineno">14</tt> <a class="py-toggle" href="#" id="Test-toggle" onclick="return toggle('Test');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="openalea.stat_tool.simulate.Test-class.html">Test</a><tt class="py-op">:</tt> </tt>
+</div><div id="Test-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="Test-expanded"><a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line">     </tt>
+<a name="Test.test_simulate_mixture"></a><div id="Test.test_simulate_mixture-def"><a name="L16"></a><tt class="py-lineno">16</tt> <a class="py-toggle" href="#" id="Test.test_simulate_mixture-toggle" onclick="return toggle('Test.test_simulate_mixture');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.simulate.Test-class.html#test_simulate_mixture">test_simulate_mixture</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_simulate_mixture-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="Test.test_simulate_mixture-expanded"><a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line">         </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line">        <tt class="py-keyword">from</tt> <tt id="link-2" class="py-name" targets="Module openalea.stat_tool.mixture=openalea.stat_tool.mixture-module.html"><a title="openalea.stat_tool.mixture" class="py-name" href="#" onclick="return doclink('link-2', 'mixture', 'link-2');">mixture</a></tt> <tt class="py-keyword">import</tt> <tt id="link-3" class="py-name" targets="Function openalea.stat_tool.mixture.Mixture()=openalea.stat_tool.mixture-module.html#Mixture"><a title="openalea.stat_tool.mixture.Mixture" class="py-name" href="#" onclick="return doclink('link-3', 'Mixture', 'link-3');">Mixture</a></tt> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line">        <tt class="py-name">m</tt> <tt class="py-op">=</tt> <tt id="link-4" class="py-name"><a title="openalea.stat_tool.mixture.Mixture" class="py-name" href="#" onclick="return doclink('link-4', 'Mixture', 'link-3');">Mixture</a></tt><tt class="py-op">(</tt><tt class="py-string">"../../../test/mixture1.mixt"</tt><tt class="py-op">)</tt> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line">         </tt>
+<a name="L21"></a><tt class="py-lineno">21</tt>  <tt class="py-line">        <tt class="py-name">s1</tt> <tt class="py-op">=</tt> <tt id="link-5" class="py-name" targets="Function openalea.stat_tool.simulate.Simulate()=openalea.stat_tool.simulate-module.html#Simulate"><a title="openalea.stat_tool.simulate.Simulate" class="py-name" href="#" onclick="return doclink('link-5', 'Simulate', 'link-5');">Simulate</a></tt><tt class="py-op">(</tt><tt class="py-name">m</tt><tt class="py-op">,</tt> <tt class="py-number">1000</tt><tt class="py-op">)</tt> </tt>
+<a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">s1</tt> </tt>
+</div></div><a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="openalea.stat_tool-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Mon Aug 25 14:39:18 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

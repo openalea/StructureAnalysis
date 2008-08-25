@@ -1,0 +1,701 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>openalea.stat_tool.distribution</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="openalea.stat_tool-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;openalea ::
+        <a href="openalea.stat_tool-module.html">Package&nbsp;stat_tool</a> ::
+        Module&nbsp;distribution
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="openalea.stat_tool.distribution-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="openalea.stat_tool.distribution-module.html">Module openalea.stat_tool.distribution</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable openalea.stat_tool.__doc__=openalea.stat_tool-module.html#__doc__,Variable openalea.stat_tool.cluster.__doc__=openalea.stat_tool.cluster-module.html#__doc__,Variable openalea.stat_tool.comparison.__doc__=openalea.stat_tool.comparison-module.html#__doc__,Variable openalea.stat_tool.compound.__doc__=openalea.stat_tool.compound-module.html#__doc__,Variable openalea.stat_tool.convolution.__doc__=openalea.stat_tool.convolution-module.html#__doc__,Variable openalea.stat_tool.data_transform.__doc__=openalea.stat_tool.data_transform-module.html#__doc__,Variable openalea.stat_tool.distribution.__doc__=openalea.stat_tool.distribution-module.html#__doc__,Variable openalea.stat_tool.error.__doc__=openalea.stat_tool.error-module.html#__doc__,Variable openalea.stat_tool.estimate.__doc__=openalea.stat_tool.estimate-module.html#__doc__,Variable openalea.stat_tool.histogram.__doc__=openalea.stat_tool.histogram-module.html#__doc__,Variable openalea.stat_tool.interface.__doc__=openalea.stat_tool.interface-module.html#__doc__,Variable openalea.stat_tool.mixture.__doc__=openalea.stat_tool.mixture-module.html#__doc__,Variable openalea.stat_tool.old.distribution.__doc__=openalea.stat_tool.old.distribution-module.html#__doc__,Variable openalea.stat_tool.old.error.__doc__=openalea.stat_tool.old.error-module.html#__doc__,Variable openalea.stat_tool.output.__doc__=openalea.stat_tool.output-module.html#__doc__,Variable openalea.stat_tool.plot.__doc__=openalea.stat_tool.plot-module.html#__doc__,Variable openalea.stat_tool.regression.__doc__=openalea.stat_tool.regression-module.html#__doc__,Variable openalea.stat_tool.simulate.__doc__=openalea.stat_tool.simulate-module.html#__doc__,Variable openalea.stat_tool.vectors.__doc__=openalea.stat_tool.vectors-module.html#__doc__"><a title="openalea.stat_tool.__doc__
+openalea.stat_tool.cluster.__doc__
+openalea.stat_tool.comparison.__doc__
+openalea.stat_tool.compound.__doc__
+openalea.stat_tool.convolution.__doc__
+openalea.stat_tool.data_transform.__doc__
+openalea.stat_tool.distribution.__doc__
+openalea.stat_tool.error.__doc__
+openalea.stat_tool.estimate.__doc__
+openalea.stat_tool.histogram.__doc__
+openalea.stat_tool.interface.__doc__
+openalea.stat_tool.mixture.__doc__
+openalea.stat_tool.old.distribution.__doc__
+openalea.stat_tool.old.error.__doc__
+openalea.stat_tool.output.__doc__
+openalea.stat_tool.plot.__doc__
+openalea.stat_tool.regression.__doc__
+openalea.stat_tool.simulate.__doc__
+openalea.stat_tool.vectors.__doc__" class="py-name" href="#" onclick="return doclink('link-0', '__doc__', 'link-0');">__doc__</a></tt> <tt class="py-op">=</tt> <tt class="py-docstring">""" Distributions """</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-name">__docformat__</tt> <tt class="py-op">=</tt> <tt class="py-string">"restructuredtext"</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-1" class="py-name" targets="Module openalea.stat_tool._stat_tool=openalea.stat_tool._stat_tool-module.html"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-1', '_stat_tool', 'link-1');">_stat_tool</a></tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-2" class="py-name" targets="Module openalea.stat_tool.interface=openalea.stat_tool.interface-module.html"><a title="openalea.stat_tool.interface" class="py-name" href="#" onclick="return doclink('link-2', 'interface', 'link-2');">interface</a></tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment"># Public members</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-comment"></tt><tt class="py-keyword">from</tt> <tt id="link-3" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-3', '_stat_tool', 'link-1');">_stat_tool</a></tt> <tt class="py-keyword">import</tt> <tt id="link-4" class="py-name" targets="Class openalea.stat_tool._stat_tool._Distribution=openalea.stat_tool._stat_tool._Distribution-class.html"><a title="openalea.stat_tool._stat_tool._Distribution" class="py-name" href="#" onclick="return doclink('link-4', '_Distribution', 'link-4');">_Distribution</a></tt>  </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-5" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-5', '_stat_tool', 'link-1');">_stat_tool</a></tt> <tt class="py-keyword">import</tt> <tt id="link-6" class="py-name" targets="Class openalea.stat_tool._stat_tool._ParametricModel=openalea.stat_tool._stat_tool._ParametricModel-class.html"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-6', '_ParametricModel', 'link-6');">_ParametricModel</a></tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-7" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-7', '_stat_tool', 'link-1');">_stat_tool</a></tt> <tt class="py-keyword">import</tt> <tt id="link-8" class="py-name" targets="Class openalea.stat_tool.distribution.DistributionIdentifier=openalea.stat_tool.distribution.DistributionIdentifier-class.html,Class openalea.stat_tool.old.cstat_tool'.DistributionIdentifier=openalea.stat_tool.old.cstat_tool%27.DistributionIdentifier-class.html"><a title="openalea.stat_tool.distribution.DistributionIdentifier
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier" class="py-name" href="#" onclick="return doclink('link-8', 'DistributionIdentifier', 'link-8');">DistributionIdentifier</a></tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-name">__all__</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-string">"_Distribution"</tt><tt class="py-op">,</tt>  </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line">           <tt class="py-string">"_ParametricModel"</tt><tt class="py-op">,</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line">           <tt class="py-string">"Distribution"</tt><tt class="py-op">,</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line">           <tt class="py-string">"Binomial"</tt><tt class="py-op">,</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line">           <tt class="py-string">"Poisson"</tt><tt class="py-op">,</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line">           <tt class="py-string">"Uniform"</tt><tt class="py-op">,</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line">           <tt class="py-string">"NegativeBinomial"</tt><tt class="py-op">,</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line">           <tt class="py-string">"ToHistogram"</tt><tt class="py-op">,</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line">           <tt class="py-string">"ToDistribution"</tt><tt class="py-op">,</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line">           <tt class="py-string">"distribution_type"</tt><tt class="py-op">,</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line">           <tt class="py-string">"DistributionIdentifier"</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line">           <tt class="py-op">]</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt id="link-9" class="py-name" targets="Variable openalea.stat_tool.distribution.distribution_type=openalea.stat_tool.distribution-module.html#distribution_type,Variable openalea.stat_tool.distribution_type=openalea.stat_tool-module.html#distribution_type"><a title="openalea.stat_tool.distribution.distribution_type
+openalea.stat_tool.distribution_type" class="py-name" href="#" onclick="return doclink('link-9', 'distribution_type', 'link-9');">distribution_type</a></tt> <tt class="py-op">=</tt> \ </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">    <tt class="py-op">{</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line">    <tt class="py-string">"B"</tt><tt class="py-op">:</tt>  <tt id="link-10" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-10', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-11" class="py-name" targets="Variable openalea.stat_tool._stat_tool.BINOMIAL=openalea.stat_tool._stat_tool-module.html#BINOMIAL,Variable openalea.stat_tool.distribution.DistributionIdentifier.BINOMIAL=openalea.stat_tool.distribution.DistributionIdentifier-class.html#BINOMIAL,Variable openalea.stat_tool.old.cstat_tool'.BINOMIAL=openalea.stat_tool.old.cstat_tool%27-module.html#BINOMIAL,Variable openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.BINOMIAL=openalea.stat_tool.old.cstat_tool%27.DistributionIdentifier-class.html#BINOMIAL"><a title="openalea.stat_tool._stat_tool.BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.BINOMIAL" class="py-name" href="#" onclick="return doclink('link-11', 'BINOMIAL', 'link-11');">BINOMIAL</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line">    <tt class="py-string">"BINOMIAL"</tt> <tt class="py-op">:</tt> <tt id="link-12" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-12', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-13" class="py-name"><a title="openalea.stat_tool._stat_tool.BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.BINOMIAL" class="py-name" href="#" onclick="return doclink('link-13', 'BINOMIAL', 'link-11');">BINOMIAL</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line">    <tt class="py-string">"P"</tt><tt class="py-op">:</tt> <tt id="link-14" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-14', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-15" class="py-name" targets="Variable openalea.stat_tool._stat_tool.POISSON=openalea.stat_tool._stat_tool-module.html#POISSON,Variable openalea.stat_tool.distribution.DistributionIdentifier.POISSON=openalea.stat_tool.distribution.DistributionIdentifier-class.html#POISSON,Variable openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.POISSON=openalea.stat_tool.old.cstat_tool%27.DistributionIdentifier-class.html#POISSON,Variable openalea.stat_tool.old.cstat_tool'.POISSON=openalea.stat_tool.old.cstat_tool%27-module.html#POISSON"><a title="openalea.stat_tool._stat_tool.POISSON
+openalea.stat_tool.distribution.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.POISSON" class="py-name" href="#" onclick="return doclink('link-15', 'POISSON', 'link-15');">POISSON</a></tt><tt class="py-op">,</tt>  </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line">    <tt class="py-string">"POISSON"</tt> <tt class="py-op">:</tt> <tt id="link-16" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-16', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-17" class="py-name"><a title="openalea.stat_tool._stat_tool.POISSON
+openalea.stat_tool.distribution.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.POISSON" class="py-name" href="#" onclick="return doclink('link-17', 'POISSON', 'link-15');">POISSON</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line">    <tt class="py-string">"NB"</tt><tt class="py-op">:</tt> <tt id="link-18" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-18', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-19" class="py-name" targets="Variable openalea.stat_tool._stat_tool.NEGATIVE_BINOMIAL=openalea.stat_tool._stat_tool-module.html#NEGATIVE_BINOMIAL,Variable openalea.stat_tool.distribution.DistributionIdentifier.NEGATIVE_BINOMIAL=openalea.stat_tool.distribution.DistributionIdentifier-class.html#NEGATIVE_BINOMIAL,Variable openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.NEGATIVE_BINOMIAL=openalea.stat_tool.old.cstat_tool%27.DistributionIdentifier-class.html#NEGATIVE_BINOMIAL,Variable openalea.stat_tool.old.cstat_tool'.NEGATIVE_BINOMIAL=openalea.stat_tool.old.cstat_tool%27-module.html#NEGATIVE_BINOMIAL"><a title="openalea.stat_tool._stat_tool.NEGATIVE_BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.NEGATIVE_BINOMIAL" class="py-name" href="#" onclick="return doclink('link-19', 'NEGATIVE_BINOMIAL', 'link-19');">NEGATIVE_BINOMIAL</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line">    <tt class="py-string">"NEGATIVE_BINOMIAL"</tt><tt class="py-op">:</tt>  <tt id="link-20" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-20', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-21" class="py-name"><a title="openalea.stat_tool._stat_tool.NEGATIVE_BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.NEGATIVE_BINOMIAL" class="py-name" href="#" onclick="return doclink('link-21', 'NEGATIVE_BINOMIAL', 'link-19');">NEGATIVE_BINOMIAL</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line">    <tt class="py-string">"U"</tt><tt class="py-op">:</tt>  <tt id="link-22" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-22', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-23" class="py-name" targets="Variable openalea.stat_tool._stat_tool.UNIFORM=openalea.stat_tool._stat_tool-module.html#UNIFORM,Variable openalea.stat_tool.distribution.DistributionIdentifier.UNIFORM=openalea.stat_tool.distribution.DistributionIdentifier-class.html#UNIFORM,Variable openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.UNIFORM=openalea.stat_tool.old.cstat_tool%27.DistributionIdentifier-class.html#UNIFORM,Variable openalea.stat_tool.old.cstat_tool'.UNIFORM=openalea.stat_tool.old.cstat_tool%27-module.html#UNIFORM"><a title="openalea.stat_tool._stat_tool.UNIFORM
+openalea.stat_tool.distribution.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.UNIFORM" class="py-name" href="#" onclick="return doclink('link-23', 'UNIFORM', 'link-23');">UNIFORM</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">    <tt class="py-string">"UNIFORM"</tt> <tt class="py-op">:</tt> <tt id="link-24" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-24', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-25" class="py-name"><a title="openalea.stat_tool._stat_tool.UNIFORM
+openalea.stat_tool.distribution.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.UNIFORM" class="py-name" href="#" onclick="return doclink('link-25', 'UNIFORM', 'link-23');">UNIFORM</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line">    <tt id="link-26" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-26', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-27" class="py-name"><a title="openalea.stat_tool._stat_tool.BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.BINOMIAL" class="py-name" href="#" onclick="return doclink('link-27', 'BINOMIAL', 'link-11');">BINOMIAL</a></tt><tt class="py-op">:</tt> <tt id="link-28" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-28', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-29" class="py-name"><a title="openalea.stat_tool._stat_tool.BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.BINOMIAL" class="py-name" href="#" onclick="return doclink('link-29', 'BINOMIAL', 'link-11');">BINOMIAL</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">    <tt id="link-30" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-30', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-31" class="py-name"><a title="openalea.stat_tool._stat_tool.POISSON
+openalea.stat_tool.distribution.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.POISSON" class="py-name" href="#" onclick="return doclink('link-31', 'POISSON', 'link-15');">POISSON</a></tt> <tt class="py-op">:</tt> <tt id="link-32" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-32', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-33" class="py-name"><a title="openalea.stat_tool._stat_tool.POISSON
+openalea.stat_tool.distribution.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.POISSON" class="py-name" href="#" onclick="return doclink('link-33', 'POISSON', 'link-15');">POISSON</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">    <tt id="link-34" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-34', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-35" class="py-name"><a title="openalea.stat_tool._stat_tool.UNIFORM
+openalea.stat_tool.distribution.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.UNIFORM" class="py-name" href="#" onclick="return doclink('link-35', 'UNIFORM', 'link-23');">UNIFORM</a></tt> <tt class="py-op">:</tt> <tt id="link-36" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-36', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-37" class="py-name"><a title="openalea.stat_tool._stat_tool.UNIFORM
+openalea.stat_tool.distribution.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.UNIFORM" class="py-name" href="#" onclick="return doclink('link-37', 'UNIFORM', 'link-23');">UNIFORM</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line">    <tt id="link-38" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-38', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-39" class="py-name"><a title="openalea.stat_tool._stat_tool.NEGATIVE_BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.NEGATIVE_BINOMIAL" class="py-name" href="#" onclick="return doclink('link-39', 'NEGATIVE_BINOMIAL', 'link-19');">NEGATIVE_BINOMIAL</a></tt> <tt class="py-op">:</tt> <tt id="link-40" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-40', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-41" class="py-name"><a title="openalea.stat_tool._stat_tool.NEGATIVE_BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.NEGATIVE_BINOMIAL" class="py-name" href="#" onclick="return doclink('link-41', 'NEGATIVE_BINOMIAL', 'link-19');">NEGATIVE_BINOMIAL</a></tt><tt class="py-op">,</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line">    <tt class="py-op">}</tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line"> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"> </tt>
+<a name="get_distribution_type"></a><div id="get_distribution_type-def"><a name="L46"></a><tt class="py-lineno"> 46</tt> <a class="py-toggle" href="#" id="get_distribution_type-toggle" onclick="return toggle('get_distribution_type');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#get_distribution_type">get_distribution_type</a><tt class="py-op">(</tt><tt class="py-param">typeid</tt><tt class="py-op">,</tt> <tt class="py-param">filter</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="get_distribution_type-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="get_distribution_type-expanded"><a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">    <tt class="py-docstring">""" Return a distribution type constante corresponding to type </tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line"><tt class="py-docstring">    typeid must be in filter list</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line"> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">    <tt class="py-comment"># Convert distribution type </tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-keyword">if</tt><tt class="py-op">(</tt><tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">typeid</tt><tt class="py-op">,</tt> <tt class="py-name">str</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">        <tt class="py-name">typeid</tt> <tt class="py-op">=</tt> <tt class="py-name">typeid</tt><tt class="py-op">.</tt><tt class="py-name">upper</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">    <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">        <tt class="py-name">typeid</tt> <tt class="py-op">=</tt> <tt id="link-42" class="py-name"><a title="openalea.stat_tool.distribution.distribution_type
+openalea.stat_tool.distribution_type" class="py-name" href="#" onclick="return doclink('link-42', 'distribution_type', 'link-9');">distribution_type</a></tt><tt class="py-op">[</tt><tt class="py-name">typeid</tt><tt class="py-op">]</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt><tt class="py-op">(</tt><tt class="py-name">filter</tt> <tt class="py-keyword">and</tt> <tt class="py-keyword">not</tt> <tt class="py-name">typeid</tt> <tt class="py-keyword">in</tt> <tt class="py-name">filter</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">TypeError</tt><tt class="py-op">(</tt><tt class="py-string">"Bad distribution type %s. Should be %s"</tt><tt class="py-op">%</tt><tt class="py-op">(</tt><tt class="py-name">typeid</tt><tt class="py-op">,</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">filter</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">typeid</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">    <tt class="py-keyword">except</tt> <tt class="py-name">KeyError</tt><tt class="py-op">:</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">        <tt id="link-43" class="py-name" targets="Module openalea.stat_tool.error=openalea.stat_tool.error-module.html,Module openalea.stat_tool.old.error=openalea.stat_tool.old.error-module.html"><a title="openalea.stat_tool.error
+openalea.stat_tool.old.error" class="py-name" href="#" onclick="return doclink('link-43', 'error', 'link-43');">error</a></tt> <tt class="py-op">=</tt> <tt class="py-string">"Invalid Distribution type, possible type are %s"</tt><tt class="py-op">%</tt><tt class="py-op">(</tt><tt class="py-name">str</tt><tt class="py-op">(</tt><tt id="link-44" class="py-name"><a title="openalea.stat_tool.distribution.distribution_type
+openalea.stat_tool.distribution_type" class="py-name" href="#" onclick="return doclink('link-44', 'distribution_type', 'link-9');">distribution_type</a></tt><tt class="py-op">.</tt><tt class="py-name">keys</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt class="py-op">)</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">        <tt class="py-keyword">raise</tt> <tt class="py-name">AttributeError</tt><tt class="py-op">(</tt><tt id="link-45" class="py-name"><a title="openalea.stat_tool.error
+openalea.stat_tool.old.error" class="py-name" href="#" onclick="return doclink('link-45', 'error', 'link-43');">error</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line"> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line"> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line"> </tt>
+<a name="Distribution"></a><div id="Distribution-def"><a name="L66"></a><tt class="py-lineno"> 66</tt> <a class="py-toggle" href="#" id="Distribution-toggle" onclick="return toggle('Distribution');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#Distribution">Distribution</a><tt class="py-op">(</tt><tt class="py-param">type_or_filename</tt><tt class="py-op">,</tt> <tt class="py-op">*</tt><tt class="py-param">args</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Distribution-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Distribution-expanded"><a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line"><tt class="py-docstring">    Construction of a parametric discrete distribution (either binomial, </tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line"><tt class="py-docstring">    Poisson, negative binomial or uniform) from the name and the parameters of the </tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line"><tt class="py-docstring">    distribution or from an ASCII file.</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line"><tt class="py-docstring">    Usage</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line"><tt class="py-docstring">    -----</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line"><tt class="py-docstring">      * ``Distribution("BINOMIAL", inf_bound, sup_bound, proba)``</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line"><tt class="py-docstring">      * ``Distribution("POISSON", inf_bound, param)``</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line"><tt class="py-docstring">      * ``Distribution("NEGATIVE_BINOMIAL", inf_bound, param, proba)``</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line"><tt class="py-docstring">      * ``Distribution("UNIFORM", inf_bound, sup_bound)``</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line"><tt class="py-docstring">      * ``Distribution(file_name)``</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line"><tt class="py-docstring">    Parameters</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line"><tt class="py-docstring">    ----------</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line"><tt class="py-docstring">      * inf_bound (int): lower bound to the range of possible values (shift parameter),</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line"><tt class="py-docstring">      * sup_bound (int): upper bound to the range of possible values \</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line"><tt class="py-docstring">      (only relevant for binomial or uniform distributions),</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line"><tt class="py-docstring">      * param (int, real): parameter of either the Poisson distribution or \</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line"><tt class="py-docstring">      the negative binomial distribution.</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line"><tt class="py-docstring">      * proba (int, float): probability of success \</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line"><tt class="py-docstring">      (only relevant for binomial or negative binomial distributions),</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line"><tt class="py-docstring">      * file_name (string). </tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line"><tt class="py-docstring">      Remark: the names of the parametric discrete distributions can be summarized \</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line"><tt class="py-docstring">    by their first letters: </tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"><tt class="py-docstring">        * "B" ("BINOMIAL"), </tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line"><tt class="py-docstring">        * "P" ("POISSON"),  </tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line"><tt class="py-docstring">        * "NB" ("NEGATIVE_BINOMIAL"), </tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line"><tt class="py-docstring">        * "U" ("UNIFORM"),</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line"><tt class="py-docstring">    Return</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line"><tt class="py-docstring">    ------</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line"><tt class="py-docstring">    If the construction succeeds, an object of type distribution is returned, </tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line"><tt class="py-docstring">    otherwise no object is returned. </tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line"><tt class="py-docstring">    Description</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line"><tt class="py-docstring">    -----------</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line"><tt class="py-docstring">    A supplementary shift parameter (argument inf_bound) is required with respect </tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line"><tt class="py-docstring">    to the usual definitions of these discrete distributions. Constraints over </tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line"><tt class="py-docstring">    parameters are given in the file syntax corresponding to the type distribution </tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line"><tt class="py-docstring">    (cf. File Syntax). </tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line"><tt class="py-docstring">    See Also</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line"><tt class="py-docstring">    --------</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line"><tt class="py-docstring">    `Save`, `Estimate`, `Simulate`.</tt> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">         </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line">    <tt class="py-name">typeid</tt> <tt class="py-op">=</tt> <tt class="py-name">type_or_filename</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line"> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">    <tt class="py-comment"># Filename</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-keyword">if</tt><tt class="py-op">(</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-number">0</tt> <tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">        <tt class="py-name">filename</tt> <tt class="py-op">=</tt> <tt class="py-name">typeid</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-46" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-46', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">(</tt><tt class="py-name">filename</tt><tt class="py-op">)</tt> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line"> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line">    <tt class="py-comment"># Convert distribution type </tt> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-name">typeid</tt> <tt class="py-op">=</tt> <tt id="link-47" class="py-name" targets="Function openalea.stat_tool.distribution.get_distribution_type()=openalea.stat_tool.distribution-module.html#get_distribution_type"><a title="openalea.stat_tool.distribution.get_distribution_type" class="py-name" href="#" onclick="return doclink('link-47', 'get_distribution_type', 'link-47');">get_distribution_type</a></tt><tt class="py-op">(</tt><tt class="py-name">typeid</tt><tt class="py-op">)</tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line"> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt><tt class="py-op">(</tt><tt class="py-name">typeid</tt> <tt class="py-op">==</tt> <tt id="link-48" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-48', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-49" class="py-name"><a title="openalea.stat_tool._stat_tool.BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.BINOMIAL" class="py-name" href="#" onclick="return doclink('link-49', 'BINOMIAL', 'link-11');">BINOMIAL</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-50" class="py-name" targets="Function openalea.stat_tool.distribution.Binomial()=openalea.stat_tool.distribution-module.html#Binomial"><a title="openalea.stat_tool.distribution.Binomial" class="py-name" href="#" onclick="return doclink('link-50', 'Binomial', 'link-50');">Binomial</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line">     </tt>
+<a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt><tt class="py-op">(</tt><tt class="py-name">typeid</tt> <tt class="py-op">==</tt> <tt id="link-51" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-51', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-52" class="py-name"><a title="openalea.stat_tool._stat_tool.POISSON
+openalea.stat_tool.distribution.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.POISSON" class="py-name" href="#" onclick="return doclink('link-52', 'POISSON', 'link-15');">POISSON</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-53" class="py-name" targets="Function openalea.stat_tool.distribution.Poisson()=openalea.stat_tool.distribution-module.html#Poisson"><a title="openalea.stat_tool.distribution.Poisson" class="py-name" href="#" onclick="return doclink('link-53', 'Poisson', 'link-53');">Poisson</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> </tt>
+<a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">     </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt><tt class="py-op">(</tt><tt class="py-name">typeid</tt> <tt class="py-op">==</tt> <tt id="link-54" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-54', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-55" class="py-name"><a title="openalea.stat_tool._stat_tool.NEGATIVE_BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.NEGATIVE_BINOMIAL" class="py-name" href="#" onclick="return doclink('link-55', 'NEGATIVE_BINOMIAL', 'link-19');">NEGATIVE_BINOMIAL</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-56" class="py-name" targets="Function openalea.stat_tool.distribution.NegativeBinomial()=openalea.stat_tool.distribution-module.html#NegativeBinomial"><a title="openalea.stat_tool.distribution.NegativeBinomial" class="py-name" href="#" onclick="return doclink('link-56', 'NegativeBinomial', 'link-56');">NegativeBinomial</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> </tt>
+<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">             </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt><tt class="py-op">(</tt><tt class="py-name">typeid</tt> <tt class="py-op">==</tt> <tt id="link-57" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-57', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-58" class="py-name"><a title="openalea.stat_tool._stat_tool.UNIFORM
+openalea.stat_tool.distribution.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.UNIFORM" class="py-name" href="#" onclick="return doclink('link-58', 'UNIFORM', 'link-23');">UNIFORM</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-59" class="py-name" targets="Function openalea.stat_tool.distribution.Uniform()=openalea.stat_tool.distribution-module.html#Uniform"><a title="openalea.stat_tool.distribution.Uniform" class="py-name" href="#" onclick="return doclink('link-59', 'Uniform', 'link-59');">Uniform</a></tt><tt class="py-op">(</tt><tt class="py-op">*</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line"> </tt>
+<a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line"> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line"> </tt>
+<a name="Binomial"></a><div id="Binomial-def"><a name="L141"></a><tt class="py-lineno">141</tt> <a class="py-toggle" href="#" id="Binomial-toggle" onclick="return toggle('Binomial');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#Binomial">Binomial</a><tt class="py-op">(</tt><tt class="py-param">inf_bound</tt><tt class="py-op">,</tt> <tt class="py-param">sup_bound</tt><tt class="py-op">=</tt><tt id="link-60" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-60', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-61" class="py-name" targets="Variable openalea.stat_tool._stat_tool.I_DEFAULT=openalea.stat_tool._stat_tool-module.html#I_DEFAULT,Variable openalea.stat_tool.old.I_DEFAULT=openalea.stat_tool.old-module.html#I_DEFAULT,Function openalea.stat_tool.old.cstat_tool'.I_DEFAULT()=openalea.stat_tool.old.cstat_tool%27-module.html#I_DEFAULT,Variable openalea.stat_tool.old.stat_tool'.I_DEFAULT=openalea.stat_tool.old.stat_tool%27-module.html#I_DEFAULT"><a title="openalea.stat_tool._stat_tool.I_DEFAULT
+openalea.stat_tool.old.I_DEFAULT
+openalea.stat_tool.old.cstat_tool'.I_DEFAULT
+openalea.stat_tool.old.stat_tool'.I_DEFAULT" class="py-name" href="#" onclick="return doclink('link-61', 'I_DEFAULT', 'link-61');">I_DEFAULT</a></tt><tt class="py-op">,</tt> <tt class="py-param">proba</tt><tt class="py-op">=</tt><tt id="link-62" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-62', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-63" class="py-name" targets="Variable openalea.stat_tool._stat_tool.D_DEFAULT=openalea.stat_tool._stat_tool-module.html#D_DEFAULT,Variable openalea.stat_tool.old.D_DEFAULT=openalea.stat_tool.old-module.html#D_DEFAULT,Function openalea.stat_tool.old.cstat_tool'.D_DEFAULT()=openalea.stat_tool.old.cstat_tool%27-module.html#D_DEFAULT,Variable openalea.stat_tool.old.stat_tool'.D_DEFAULT=openalea.stat_tool.old.stat_tool%27-module.html#D_DEFAULT"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-63', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Binomial-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Binomial-expanded"><a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line"><tt class="py-docstring">    Construction of a binomial distribution</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line"><tt class="py-docstring">    Arguments:</tt> </tt>
+<a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line"><tt class="py-docstring">      inf_bound (int) : lower bound to the range of possible values (shift parameter)</tt> </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line"><tt class="py-docstring">      sup_bound (int) : upper bound to the range of possilbe values </tt> </tt>
+<a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line"><tt class="py-docstring">      proba (int, float) :  probability of 'success' </tt> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L150"></a><tt class="py-lineno">150</tt>  <tt class="py-line"> </tt>
+<a name="L151"></a><tt class="py-lineno">151</tt>  <tt class="py-line">    <tt class="py-comment"># Check parameters</tt> </tt>
+<a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-keyword">assert</tt> <tt id="link-64" class="py-name" targets="Variable openalea.stat_tool._stat_tool._Parametric.inf_bound=openalea.stat_tool._stat_tool._Parametric-class.html#inf_bound,Variable openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound=openalea.stat_tool.old.cstat_tool%27._Parametric-class.html#inf_bound"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-64', 'inf_bound', 'link-64');">inf_bound</a></tt> <tt class="py-op">&lt;</tt> <tt id="link-65" class="py-name" targets="Variable openalea.stat_tool._stat_tool._Parametric.sup_bound=openalea.stat_tool._stat_tool._Parametric-class.html#sup_bound,Variable openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound=openalea.stat_tool.old.cstat_tool%27._Parametric-class.html#sup_bound"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-65', 'sup_bound', 'link-65');">sup_bound</a></tt> </tt>
+<a name="L153"></a><tt class="py-lineno">153</tt>  <tt class="py-line">    <tt class="py-keyword">assert</tt> <tt class="py-op">(</tt><tt id="link-66" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-66', 'sup_bound', 'link-65');">sup_bound</a></tt> <tt class="py-op">-</tt> <tt id="link-67" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-67', 'inf_bound', 'link-64');">inf_bound</a></tt><tt class="py-op">)</tt> <tt class="py-op">&lt;</tt> <tt id="link-68" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-68', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-69" class="py-name" targets="Variable openalea.stat_tool._stat_tool.MAX_DIFF_BOUND=openalea.stat_tool._stat_tool-module.html#MAX_DIFF_BOUND"><a title="openalea.stat_tool._stat_tool.MAX_DIFF_BOUND" class="py-name" href="#" onclick="return doclink('link-69', 'MAX_DIFF_BOUND', 'link-69');">MAX_DIFF_BOUND</a></tt> </tt>
+<a name="L154"></a><tt class="py-lineno">154</tt>  <tt class="py-line">    <tt class="py-keyword">assert</tt> <tt class="py-name">proba</tt> <tt class="py-op">&lt;=</tt><tt class="py-number">1.</tt> <tt class="py-keyword">and</tt> <tt class="py-name">proba</tt> <tt class="py-op">&gt;=</tt><tt class="py-number">0</tt> </tt>
+<a name="L155"></a><tt class="py-lineno">155</tt>  <tt class="py-line"> </tt>
+<a name="L156"></a><tt class="py-lineno">156</tt>  <tt class="py-line">    <tt class="py-name">param</tt> <tt class="py-op">=</tt> <tt id="link-70" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-70', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-71" class="py-name"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-71', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt> </tt>
+<a name="L157"></a><tt class="py-lineno">157</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-72" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-72', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">(</tt><tt id="link-73" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-73', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-74" class="py-name"><a title="openalea.stat_tool._stat_tool.BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.BINOMIAL" class="py-name" href="#" onclick="return doclink('link-74', 'BINOMIAL', 'link-11');">BINOMIAL</a></tt><tt class="py-op">,</tt> <tt id="link-75" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-75', 'inf_bound', 'link-64');">inf_bound</a></tt><tt class="py-op">,</tt> <tt id="link-76" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-76', 'sup_bound', 'link-65');">sup_bound</a></tt><tt class="py-op">,</tt> <tt class="py-name">param</tt><tt class="py-op">,</tt> <tt class="py-name">proba</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L158"></a><tt class="py-lineno">158</tt>  <tt class="py-line"> </tt>
+<a name="L159"></a><tt class="py-lineno">159</tt>  <tt class="py-line">     </tt>
+<a name="L160"></a><tt class="py-lineno">160</tt>  <tt class="py-line"> </tt>
+<a name="Poisson"></a><div id="Poisson-def"><a name="L161"></a><tt class="py-lineno">161</tt> <a class="py-toggle" href="#" id="Poisson-toggle" onclick="return toggle('Poisson');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#Poisson">Poisson</a><tt class="py-op">(</tt><tt class="py-param">inf_bound</tt><tt class="py-op">,</tt> <tt class="py-param">param</tt><tt class="py-op">=</tt><tt id="link-77" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-77', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-78" class="py-name"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-78', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Poisson-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Poisson-expanded"><a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line"><tt class="py-docstring">    Construction of a poisson distribution</tt> </tt>
+<a name="L164"></a><tt class="py-lineno">164</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L165"></a><tt class="py-lineno">165</tt>  <tt class="py-line"><tt class="py-docstring">    Arguments:</tt> </tt>
+<a name="L166"></a><tt class="py-lineno">166</tt>  <tt class="py-line"><tt class="py-docstring">        inf_bound (int) : lower bound to the range of possible values (shift parameter)</tt> </tt>
+<a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line"><tt class="py-docstring">        param (int, float) : parameter of the Poisson distribution</tt> </tt>
+<a name="L168"></a><tt class="py-lineno">168</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line"> </tt>
+<a name="L170"></a><tt class="py-lineno">170</tt>  <tt class="py-line">    <tt class="py-keyword">assert</tt> <tt class="py-name">param</tt> <tt class="py-op">&gt;</tt> <tt class="py-number">0.</tt> <tt class="py-keyword">and</tt> <tt class="py-name">param</tt> <tt class="py-op">&lt;</tt> <tt id="link-79" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-79', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-80" class="py-name" targets="Variable openalea.stat_tool._stat_tool.MAX_MEAN=openalea.stat_tool._stat_tool-module.html#MAX_MEAN"><a title="openalea.stat_tool._stat_tool.MAX_MEAN" class="py-name" href="#" onclick="return doclink('link-80', 'MAX_MEAN', 'link-80');">MAX_MEAN</a></tt> </tt>
+<a name="L171"></a><tt class="py-lineno">171</tt>  <tt class="py-line"> </tt>
+<a name="L172"></a><tt class="py-lineno">172</tt>  <tt class="py-line">    <tt id="link-81" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-81', 'sup_bound', 'link-65');">sup_bound</a></tt> <tt class="py-op">=</tt> <tt id="link-82" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-82', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-83" class="py-name"><a title="openalea.stat_tool._stat_tool.I_DEFAULT
+openalea.stat_tool.old.I_DEFAULT
+openalea.stat_tool.old.cstat_tool'.I_DEFAULT
+openalea.stat_tool.old.stat_tool'.I_DEFAULT" class="py-name" href="#" onclick="return doclink('link-83', 'I_DEFAULT', 'link-61');">I_DEFAULT</a></tt> </tt>
+<a name="L173"></a><tt class="py-lineno">173</tt>  <tt class="py-line">    <tt class="py-name">proba</tt> <tt class="py-op">=</tt> <tt id="link-84" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-84', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-85" class="py-name"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-85', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt> </tt>
+<a name="L174"></a><tt class="py-lineno">174</tt>  <tt class="py-line"> </tt>
+<a name="L175"></a><tt class="py-lineno">175</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-86" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-86', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">(</tt><tt id="link-87" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-87', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-88" class="py-name"><a title="openalea.stat_tool._stat_tool.POISSON
+openalea.stat_tool.distribution.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.POISSON
+openalea.stat_tool.old.cstat_tool'.POISSON" class="py-name" href="#" onclick="return doclink('link-88', 'POISSON', 'link-15');">POISSON</a></tt><tt class="py-op">,</tt> <tt id="link-89" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-89', 'inf_bound', 'link-64');">inf_bound</a></tt><tt class="py-op">,</tt> <tt id="link-90" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-90', 'sup_bound', 'link-65');">sup_bound</a></tt><tt class="py-op">,</tt> <tt class="py-name">param</tt><tt class="py-op">,</tt> <tt class="py-name">proba</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L176"></a><tt class="py-lineno">176</tt>  <tt class="py-line"> </tt>
+<a name="L177"></a><tt class="py-lineno">177</tt>  <tt class="py-line"> </tt>
+<a name="L178"></a><tt class="py-lineno">178</tt>  <tt class="py-line"> </tt>
+<a name="NegativeBinomial"></a><div id="NegativeBinomial-def"><a name="L179"></a><tt class="py-lineno">179</tt> <a class="py-toggle" href="#" id="NegativeBinomial-toggle" onclick="return toggle('NegativeBinomial');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#NegativeBinomial">NegativeBinomial</a><tt class="py-op">(</tt><tt class="py-param">inf_bound</tt><tt class="py-op">,</tt> <tt class="py-param">param</tt><tt class="py-op">=</tt><tt id="link-91" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-91', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-92" class="py-name"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-92', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt><tt class="py-op">,</tt> <tt class="py-param">proba</tt><tt class="py-op">=</tt><tt id="link-93" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-93', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-94" class="py-name"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-94', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="NegativeBinomial-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="NegativeBinomial-expanded"><a name="L180"></a><tt class="py-lineno">180</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L181"></a><tt class="py-lineno">181</tt>  <tt class="py-line"><tt class="py-docstring">    Construction of a negative binomial distribution</tt> </tt>
+<a name="L182"></a><tt class="py-lineno">182</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L183"></a><tt class="py-lineno">183</tt>  <tt class="py-line"><tt class="py-docstring">    Arguments:</tt> </tt>
+<a name="L184"></a><tt class="py-lineno">184</tt>  <tt class="py-line"><tt class="py-docstring">        inf_bound (int) : lower bound to the range of possible values (shift parameter)</tt> </tt>
+<a name="L185"></a><tt class="py-lineno">185</tt>  <tt class="py-line"><tt class="py-docstring">        param (int, float) : parameter of the Poisson distribution</tt> </tt>
+<a name="L186"></a><tt class="py-lineno">186</tt>  <tt class="py-line"><tt class="py-docstring">        proba (int, float) :  probability of 'success' </tt> </tt>
+<a name="L187"></a><tt class="py-lineno">187</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L188"></a><tt class="py-lineno">188</tt>  <tt class="py-line"> </tt>
+<a name="L189"></a><tt class="py-lineno">189</tt>  <tt class="py-line">    <tt class="py-comment"># Check parameters</tt> </tt>
+<a name="L190"></a><tt class="py-lineno">190</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-keyword">assert</tt> <tt class="py-name">proba</tt> <tt class="py-op">&lt;=</tt><tt class="py-number">1.</tt> <tt class="py-keyword">and</tt> <tt class="py-name">proba</tt> <tt class="py-op">&gt;=</tt><tt class="py-number">0</tt> </tt>
+<a name="L191"></a><tt class="py-lineno">191</tt>  <tt class="py-line">    <tt class="py-keyword">assert</tt> <tt class="py-op">(</tt><tt class="py-name">param</tt> <tt class="py-op">*</tt> <tt class="py-op">(</tt><tt class="py-number">1.</tt> <tt class="py-op">-</tt> <tt class="py-name">proba</tt><tt class="py-op">)</tt> <tt class="py-op">/</tt> <tt class="py-name">proba</tt><tt class="py-op">)</tt> <tt class="py-op">&lt;</tt>  <tt id="link-95" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-95', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-96" class="py-name"><a title="openalea.stat_tool._stat_tool.MAX_MEAN" class="py-name" href="#" onclick="return doclink('link-96', 'MAX_MEAN', 'link-80');">MAX_MEAN</a></tt> </tt>
+<a name="L192"></a><tt class="py-lineno">192</tt>  <tt class="py-line">         </tt>
+<a name="L193"></a><tt class="py-lineno">193</tt>  <tt class="py-line">    <tt id="link-97" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-97', 'sup_bound', 'link-65');">sup_bound</a></tt> <tt class="py-op">=</tt> <tt id="link-98" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-98', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-99" class="py-name"><a title="openalea.stat_tool._stat_tool.I_DEFAULT
+openalea.stat_tool.old.I_DEFAULT
+openalea.stat_tool.old.cstat_tool'.I_DEFAULT
+openalea.stat_tool.old.stat_tool'.I_DEFAULT" class="py-name" href="#" onclick="return doclink('link-99', 'I_DEFAULT', 'link-61');">I_DEFAULT</a></tt> </tt>
+<a name="L194"></a><tt class="py-lineno">194</tt>  <tt class="py-line"> </tt>
+<a name="L195"></a><tt class="py-lineno">195</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-100" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-100', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">(</tt><tt id="link-101" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-101', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-102" class="py-name"><a title="openalea.stat_tool._stat_tool.NEGATIVE_BINOMIAL
+openalea.stat_tool.distribution.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.NEGATIVE_BINOMIAL
+openalea.stat_tool.old.cstat_tool'.NEGATIVE_BINOMIAL" class="py-name" href="#" onclick="return doclink('link-102', 'NEGATIVE_BINOMIAL', 'link-19');">NEGATIVE_BINOMIAL</a></tt><tt class="py-op">,</tt> <tt id="link-103" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-103', 'inf_bound', 'link-64');">inf_bound</a></tt><tt class="py-op">,</tt> <tt id="link-104" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-104', 'sup_bound', 'link-65');">sup_bound</a></tt><tt class="py-op">,</tt> <tt class="py-name">param</tt><tt class="py-op">,</tt> <tt class="py-name">proba</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L196"></a><tt class="py-lineno">196</tt>  <tt class="py-line"> </tt>
+<a name="L197"></a><tt class="py-lineno">197</tt>  <tt class="py-line"> </tt>
+<a name="Uniform"></a><div id="Uniform-def"><a name="L198"></a><tt class="py-lineno">198</tt> <a class="py-toggle" href="#" id="Uniform-toggle" onclick="return toggle('Uniform');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#Uniform">Uniform</a><tt class="py-op">(</tt><tt class="py-param">inf_bound</tt><tt class="py-op">,</tt> <tt class="py-param">sup_bound</tt><tt class="py-op">=</tt><tt id="link-105" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-105', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-106" class="py-name"><a title="openalea.stat_tool._stat_tool.I_DEFAULT
+openalea.stat_tool.old.I_DEFAULT
+openalea.stat_tool.old.cstat_tool'.I_DEFAULT
+openalea.stat_tool.old.stat_tool'.I_DEFAULT" class="py-name" href="#" onclick="return doclink('link-106', 'I_DEFAULT', 'link-61');">I_DEFAULT</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Uniform-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Uniform-expanded"><a name="L199"></a><tt class="py-lineno">199</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L200"></a><tt class="py-lineno">200</tt>  <tt class="py-line"><tt class="py-docstring">    Construction of a uniform distribution</tt> </tt>
+<a name="L201"></a><tt class="py-lineno">201</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L202"></a><tt class="py-lineno">202</tt>  <tt class="py-line"><tt class="py-docstring">    Arguments:</tt> </tt>
+<a name="L203"></a><tt class="py-lineno">203</tt>  <tt class="py-line"><tt class="py-docstring">        inf_bound (int) : lower bound to the range of possible values (shift parameter)</tt> </tt>
+<a name="L204"></a><tt class="py-lineno">204</tt>  <tt class="py-line"><tt class="py-docstring">        sup_bound (int) : upper bound to the range of possilbe values </tt> </tt>
+<a name="L205"></a><tt class="py-lineno">205</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L206"></a><tt class="py-lineno">206</tt>  <tt class="py-line"> </tt>
+<a name="L207"></a><tt class="py-lineno">207</tt>  <tt class="py-line">    <tt class="py-comment"># Check parameters</tt> </tt>
+<a name="L208"></a><tt class="py-lineno">208</tt>  <tt class="py-line"><tt class="py-comment"></tt> </tt>
+<a name="L209"></a><tt class="py-lineno">209</tt>  <tt class="py-line">    <tt class="py-keyword">assert</tt> <tt id="link-107" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-107', 'inf_bound', 'link-64');">inf_bound</a></tt> <tt class="py-op">&lt;</tt> <tt id="link-108" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-108', 'sup_bound', 'link-65');">sup_bound</a></tt> </tt>
+<a name="L210"></a><tt class="py-lineno">210</tt>  <tt class="py-line">    <tt class="py-keyword">assert</tt> <tt class="py-op">(</tt><tt id="link-109" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-109', 'sup_bound', 'link-65');">sup_bound</a></tt> <tt class="py-op">-</tt> <tt id="link-110" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-110', 'inf_bound', 'link-64');">inf_bound</a></tt><tt class="py-op">)</tt> <tt class="py-op">&lt;</tt> <tt id="link-111" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-111', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-112" class="py-name"><a title="openalea.stat_tool._stat_tool.MAX_DIFF_BOUND" class="py-name" href="#" onclick="return doclink('link-112', 'MAX_DIFF_BOUND', 'link-69');">MAX_DIFF_BOUND</a></tt> </tt>
+<a name="L211"></a><tt class="py-lineno">211</tt>  <tt class="py-line">     </tt>
+<a name="L212"></a><tt class="py-lineno">212</tt>  <tt class="py-line">    <tt class="py-name">param</tt> <tt class="py-op">=</tt> <tt id="link-113" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-113', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-114" class="py-name"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-114', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt> </tt>
+<a name="L213"></a><tt class="py-lineno">213</tt>  <tt class="py-line">    <tt class="py-name">proba</tt> <tt class="py-op">=</tt> <tt id="link-115" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-115', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-116" class="py-name"><a title="openalea.stat_tool._stat_tool.D_DEFAULT
+openalea.stat_tool.old.D_DEFAULT
+openalea.stat_tool.old.cstat_tool'.D_DEFAULT
+openalea.stat_tool.old.stat_tool'.D_DEFAULT" class="py-name" href="#" onclick="return doclink('link-116', 'D_DEFAULT', 'link-63');">D_DEFAULT</a></tt> </tt>
+<a name="L214"></a><tt class="py-lineno">214</tt>  <tt class="py-line">         </tt>
+<a name="L215"></a><tt class="py-lineno">215</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-117" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-117', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">(</tt><tt id="link-118" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-118', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-119" class="py-name"><a title="openalea.stat_tool._stat_tool.UNIFORM
+openalea.stat_tool.distribution.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.DistributionIdentifier.UNIFORM
+openalea.stat_tool.old.cstat_tool'.UNIFORM" class="py-name" href="#" onclick="return doclink('link-119', 'UNIFORM', 'link-23');">UNIFORM</a></tt><tt class="py-op">,</tt> <tt id="link-120" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.inf_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.inf_bound" class="py-name" href="#" onclick="return doclink('link-120', 'inf_bound', 'link-64');">inf_bound</a></tt><tt class="py-op">,</tt> <tt id="link-121" class="py-name"><a title="openalea.stat_tool._stat_tool._Parametric.sup_bound
+openalea.stat_tool.old.cstat_tool'._Parametric.sup_bound" class="py-name" href="#" onclick="return doclink('link-121', 'sup_bound', 'link-65');">sup_bound</a></tt><tt class="py-op">,</tt> <tt class="py-name">param</tt><tt class="py-op">,</tt> <tt class="py-name">proba</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L216"></a><tt class="py-lineno">216</tt>  <tt class="py-line"> </tt>
+<a name="L217"></a><tt class="py-lineno">217</tt>  <tt class="py-line"> </tt>
+<a name="L218"></a><tt class="py-lineno">218</tt>  <tt class="py-line"> </tt>
+<a name="L219"></a><tt class="py-lineno">219</tt>  <tt class="py-line"> </tt>
+<a name="L220"></a><tt class="py-lineno">220</tt>  <tt class="py-line"><tt class="py-comment"># Extend _ParametricModel</tt> </tt>
+<a name="L221"></a><tt class="py-lineno">221</tt>  <tt class="py-line"><tt class="py-comment"></tt><tt id="link-122" class="py-name"><a title="openalea.stat_tool.interface" class="py-name" href="#" onclick="return doclink('link-122', 'interface', 'link-2');">interface</a></tt><tt class="py-op">.</tt><tt id="link-123" class="py-name" targets="Function openalea.stat_tool.interface.extend_class()=openalea.stat_tool.interface-module.html#extend_class"><a title="openalea.stat_tool.interface.extend_class" class="py-name" href="#" onclick="return doclink('link-123', 'extend_class', 'link-123');">extend_class</a></tt><tt class="py-op">(</tt> <tt id="link-124" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-124', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-125" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-125', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">,</tt> <tt id="link-126" class="py-name"><a title="openalea.stat_tool.interface" class="py-name" href="#" onclick="return doclink('link-126', 'interface', 'link-2');">interface</a></tt><tt class="py-op">.</tt><tt id="link-127" class="py-name" targets="Class openalea.stat_tool.output.StatInterface=openalea.stat_tool.output.StatInterface-class.html"><a title="openalea.stat_tool.output.StatInterface" class="py-name" href="#" onclick="return doclink('link-127', 'StatInterface', 'link-127');">StatInterface</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L222"></a><tt class="py-lineno">222</tt>  <tt class="py-line">  </tt>
+<a name="L223"></a><tt class="py-lineno">223</tt>  <tt class="py-line"> </tt>
+<a name="L224"></a><tt class="py-lineno">224</tt>  <tt class="py-line"> </tt>
+<a name="L225"></a><tt class="py-lineno">225</tt>  <tt class="py-line"><tt class="py-comment"># Cast Functions</tt> </tt>
+<a name="L226"></a><tt class="py-lineno">226</tt>  <tt class="py-line"><tt class="py-comment"></tt> </tt>
+<a name="ToDistribution"></a><div id="ToDistribution-def"><a name="L227"></a><tt class="py-lineno">227</tt> <a class="py-toggle" href="#" id="ToDistribution-toggle" onclick="return toggle('ToDistribution');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#ToDistribution">ToDistribution</a><tt class="py-op">(</tt><tt class="py-param">histo</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ToDistribution-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ToDistribution-expanded"><a name="L228"></a><tt class="py-lineno">228</tt>  <tt class="py-line">    <tt class="py-docstring">"""    </tt> </tt>
+<a name="L229"></a><tt class="py-lineno">229</tt>  <tt class="py-line"><tt class="py-docstring">    Cast an object of type `_DistributionData` into an object of type `_Distribution`.</tt> </tt>
+<a name="L230"></a><tt class="py-lineno">230</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L231"></a><tt class="py-lineno">231</tt>  <tt class="py-line"><tt class="py-docstring">    Usage</tt> </tt>
+<a name="L232"></a><tt class="py-lineno">232</tt>  <tt class="py-line"><tt class="py-docstring">    -----</tt> </tt>
+<a name="L233"></a><tt class="py-lineno">233</tt>  <tt class="py-line"><tt class="py-docstring">      * ``ToDistribution(histo)``</tt> </tt>
+<a name="L234"></a><tt class="py-lineno">234</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L235"></a><tt class="py-lineno">235</tt>  <tt class="py-line"><tt class="py-docstring">    Parameters</tt> </tt>
+<a name="L236"></a><tt class="py-lineno">236</tt>  <tt class="py-line"><tt class="py-docstring">    ----------</tt> </tt>
+<a name="L237"></a><tt class="py-lineno">237</tt>  <tt class="py-line"><tt class="py-docstring">      * histo (DistributionData)</tt> </tt>
+<a name="L238"></a><tt class="py-lineno">238</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L239"></a><tt class="py-lineno">239</tt>  <tt class="py-line"><tt class="py-docstring">    Return</tt> </tt>
+<a name="L240"></a><tt class="py-lineno">240</tt>  <tt class="py-line"><tt class="py-docstring">    ------</tt> </tt>
+<a name="L241"></a><tt class="py-lineno">241</tt>  <tt class="py-line"><tt class="py-docstring">    If the object histo contains a 'model' part, an object of type `_Distribution` </tt> </tt>
+<a name="L242"></a><tt class="py-lineno">242</tt>  <tt class="py-line"><tt class="py-docstring">    is returned, otherwise no object is returned. </tt> </tt>
+<a name="L243"></a><tt class="py-lineno">243</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L244"></a><tt class="py-lineno">244</tt>  <tt class="py-line"><tt class="py-docstring">    See Also</tt> </tt>
+<a name="L245"></a><tt class="py-lineno">245</tt>  <tt class="py-line"><tt class="py-docstring">    --------</tt> </tt>
+<a name="L246"></a><tt class="py-lineno">246</tt>  <tt class="py-line"><tt class="py-docstring">      `ToHistogram`</tt> </tt>
+<a name="L247"></a><tt class="py-lineno">247</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L248"></a><tt class="py-lineno">248</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">histo</tt><tt class="py-op">.</tt><tt id="link-128" class="py-name" targets="Method openalea.stat_tool._stat_tool._DistributionData.extract_model()=openalea.stat_tool._stat_tool._DistributionData-class.html#extract_model"><a title="openalea.stat_tool._stat_tool._DistributionData.extract_model" class="py-name" href="#" onclick="return doclink('link-128', 'extract_model', 'link-128');">extract_model</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L249"></a><tt class="py-lineno">249</tt>  <tt class="py-line"> </tt>
+<a name="L250"></a><tt class="py-lineno">250</tt>  <tt class="py-line"> </tt>
+<a name="ToHistogram"></a><div id="ToHistogram-def"><a name="L251"></a><tt class="py-lineno">251</tt> <a class="py-toggle" href="#" id="ToHistogram-toggle" onclick="return toggle('ToHistogram');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution-module.html#ToHistogram">ToHistogram</a><tt class="py-op">(</tt><tt class="py-param">dist</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ToHistogram-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ToHistogram-expanded"><a name="L252"></a><tt class="py-lineno">252</tt>  <tt class="py-line">    <tt class="py-docstring">""" </tt> </tt>
+<a name="L253"></a><tt class="py-lineno">253</tt>  <tt class="py-line"><tt class="py-docstring">    Cast an object of type `_Distribution` into an object of type `_DistributionData`.</tt> </tt>
+<a name="L254"></a><tt class="py-lineno">254</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L255"></a><tt class="py-lineno">255</tt>  <tt class="py-line"><tt class="py-docstring">    Usage</tt> </tt>
+<a name="L256"></a><tt class="py-lineno">256</tt>  <tt class="py-line"><tt class="py-docstring">    -----</tt> </tt>
+<a name="L257"></a><tt class="py-lineno">257</tt>  <tt class="py-line"><tt class="py-docstring">      * ``ToHistogram(dist)``</tt> </tt>
+<a name="L258"></a><tt class="py-lineno">258</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L259"></a><tt class="py-lineno">259</tt>  <tt class="py-line"><tt class="py-docstring">    Parameters</tt> </tt>
+<a name="L260"></a><tt class="py-lineno">260</tt>  <tt class="py-line"><tt class="py-docstring">    ----------</tt> </tt>
+<a name="L261"></a><tt class="py-lineno">261</tt>  <tt class="py-line"><tt class="py-docstring">      * dist (distribution). </tt> </tt>
+<a name="L262"></a><tt class="py-lineno">262</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L263"></a><tt class="py-lineno">263</tt>  <tt class="py-line"><tt class="py-docstring">    Return</tt> </tt>
+<a name="L264"></a><tt class="py-lineno">264</tt>  <tt class="py-line"><tt class="py-docstring">    ------</tt> </tt>
+<a name="L265"></a><tt class="py-lineno">265</tt>  <tt class="py-line"><tt class="py-docstring">    If the object dist contains a 'data' part, an object of type `_DistributionData` </tt> </tt>
+<a name="L266"></a><tt class="py-lineno">266</tt>  <tt class="py-line"><tt class="py-docstring">    is returned, otherwise no object is returned. </tt> </tt>
+<a name="L267"></a><tt class="py-lineno">267</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L268"></a><tt class="py-lineno">268</tt>  <tt class="py-line"><tt class="py-docstring">    See Also</tt> </tt>
+<a name="L269"></a><tt class="py-lineno">269</tt>  <tt class="py-line"><tt class="py-docstring">    --------</tt> </tt>
+<a name="L270"></a><tt class="py-lineno">270</tt>  <tt class="py-line"><tt class="py-docstring">    `ToDistribution`</tt> </tt>
+<a name="L271"></a><tt class="py-lineno">271</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L272"></a><tt class="py-lineno">272</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">dist</tt><tt class="py-op">.</tt><tt id="link-129" class="py-name" targets="Method openalea.stat_tool._stat_tool._Convolution.extract_data()=openalea.stat_tool._stat_tool._Convolution-class.html#extract_data,Method openalea.stat_tool._stat_tool._Mixture.extract_data()=openalea.stat_tool._stat_tool._Mixture-class.html#extract_data,Method openalea.stat_tool._stat_tool._ParametricModel.extract_data()=openalea.stat_tool._stat_tool._ParametricModel-class.html#extract_data"><a title="openalea.stat_tool._stat_tool._Convolution.extract_data
+openalea.stat_tool._stat_tool._Mixture.extract_data
+openalea.stat_tool._stat_tool._ParametricModel.extract_data" class="py-name" href="#" onclick="return doclink('link-129', 'extract_data', 'link-129');">extract_data</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L273"></a><tt class="py-lineno">273</tt>  <tt class="py-line"> </tt>
+<a name="L274"></a><tt class="py-lineno">274</tt>  <tt class="py-line"> </tt>
+<a name="L275"></a><tt class="py-lineno">275</tt>  <tt class="py-line"><tt class="py-comment">############################# Test Distribution #################################</tt> </tt>
+<a name="L276"></a><tt class="py-lineno">276</tt>  <tt class="py-line"><tt class="py-comment"></tt> </tt>
+<a name="Test"></a><div id="Test-def"><a name="L277"></a><tt class="py-lineno">277</tt> <a class="py-toggle" href="#" id="Test-toggle" onclick="return toggle('Test');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html">Test</a><tt class="py-op">:</tt> </tt>
+</div><div id="Test-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Test-expanded"><a name="L278"></a><tt class="py-lineno">278</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_constructor"></a><div id="Test.test_constructor-def"><a name="L279"></a><tt class="py-lineno">279</tt> <a class="py-toggle" href="#" id="Test.test_constructor-toggle" onclick="return toggle('Test.test_constructor');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_constructor">test_constructor</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_constructor-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_constructor-expanded"><a name="L280"></a><tt class="py-lineno">280</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L281"></a><tt class="py-lineno">281</tt>  <tt class="py-line"> </tt>
+<a name="L282"></a><tt class="py-lineno">282</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_ascii"></a><div id="Test.test_ascii-def"><a name="L283"></a><tt class="py-lineno">283</tt> <a class="py-toggle" href="#" id="Test.test_ascii-toggle" onclick="return toggle('Test.test_ascii');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_ascii">test_ascii</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_ascii-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_ascii-expanded"><a name="L284"></a><tt class="py-lineno">284</tt>  <tt class="py-line">        <tt class="py-comment"># ASCII representation</tt> </tt>
+<a name="L285"></a><tt class="py-lineno">285</tt>  <tt class="py-line"><tt class="py-comment"></tt>        <tt class="py-comment">#d = Distribution("../../../test/meri1.his")</tt> </tt>
+<a name="L286"></a><tt class="py-lineno">286</tt>  <tt class="py-line"><tt class="py-comment"></tt>        <tt class="py-comment">#assert d</tt> </tt>
+<a name="L287"></a><tt class="py-lineno">287</tt>  <tt class="py-line"><tt class="py-comment"></tt> </tt>
+<a name="L288"></a><tt class="py-lineno">288</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-130" class="py-name" targets="Function openalea.stat_tool.distribution.Distribution()=openalea.stat_tool.distribution-module.html#Distribution,Class openalea.stat_tool.old.cstat_tool'.Distribution=openalea.stat_tool.old.cstat_tool%27.Distribution-class.html"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-130', 'Distribution', 'link-130');">Distribution</a></tt> <tt class="py-op">(</tt><tt class="py-string">"UNIFORM"</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">10</tt><tt class="py-op">)</tt> </tt>
+<a name="L289"></a><tt class="py-lineno">289</tt>  <tt class="py-line"> </tt>
+<a name="L290"></a><tt class="py-lineno">290</tt>  <tt class="py-line">        <tt class="py-name">s</tt> <tt class="py-op">=</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">)</tt> </tt>
+<a name="L291"></a><tt class="py-lineno">291</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-131" class="py-name" targets="Method openalea.stat_tool.old.cstat_tool'.Histogram.display()=openalea.stat_tool.old.cstat_tool%27.Histogram-class.html#display,Method openalea.stat_tool.old.distribution.DistributionData.display()=openalea.stat_tool.old.distribution.DistributionData-class.html#display,Method openalea.stat_tool.old.distribution.StatModel.display()=openalea.stat_tool.old.distribution.StatModel-class.html#display,Method openalea.stat_tool.output.StatInterface.display()=openalea.stat_tool.output.StatInterface-class.html#display"><a title="openalea.stat_tool.old.cstat_tool'.Histogram.display
+openalea.stat_tool.old.distribution.DistributionData.display
+openalea.stat_tool.old.distribution.StatModel.display
+openalea.stat_tool.output.StatInterface.display" class="py-name" href="#" onclick="return doclink('link-131', 'display', 'link-131');">display</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">s</tt> </tt>
+</div><a name="L292"></a><tt class="py-lineno">292</tt>  <tt class="py-line"> </tt>
+<a name="L293"></a><tt class="py-lineno">293</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_uniform"></a><div id="Test.test_uniform-def"><a name="L294"></a><tt class="py-lineno">294</tt> <a class="py-toggle" href="#" id="Test.test_uniform-toggle" onclick="return toggle('Test.test_uniform');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_uniform">test_uniform</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_uniform-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_uniform-expanded"><a name="L295"></a><tt class="py-lineno">295</tt>  <tt class="py-line"> </tt>
+<a name="L296"></a><tt class="py-lineno">296</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-132" class="py-name"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-132', 'Distribution', 'link-130');">Distribution</a></tt> <tt class="py-op">(</tt><tt class="py-string">"UNIFORM"</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">10</tt><tt class="py-op">)</tt> </tt>
+<a name="L297"></a><tt class="py-lineno">297</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-133" class="py-name" targets="Method openalea.stat_tool._stat_tool._Convolution.simulate()=openalea.stat_tool._stat_tool._Convolution-class.html#simulate,Method openalea.stat_tool._stat_tool._Mixture.simulate()=openalea.stat_tool._stat_tool._Mixture-class.html#simulate,Method openalea.stat_tool._stat_tool._Parametric.simulate()=openalea.stat_tool._stat_tool._Parametric-class.html#simulate,Method openalea.stat_tool._stat_tool._ParametricModel.simulate()=openalea.stat_tool._stat_tool._ParametricModel-class.html#simulate,Module openalea.stat_tool.simulate=openalea.stat_tool.simulate-module.html"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-133', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L298"></a><tt class="py-lineno">298</tt>  <tt class="py-line"> </tt>
+<a name="L299"></a><tt class="py-lineno">299</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-134" class="py-name"><a title="openalea.stat_tool.distribution.Uniform" class="py-name" href="#" onclick="return doclink('link-134', 'Uniform', 'link-59');">Uniform</a></tt> <tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">10</tt><tt class="py-op">)</tt> </tt>
+<a name="L300"></a><tt class="py-lineno">300</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-135" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-135', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L301"></a><tt class="py-lineno">301</tt>  <tt class="py-line"> </tt>
+<a name="L302"></a><tt class="py-lineno">302</tt>  <tt class="py-line">        <tt class="py-name">m</tt> <tt class="py-op">=</tt> <tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-136" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-136', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-137" class="py-name"><a title="openalea.stat_tool._stat_tool._DistributionData.extract_model" class="py-name" href="#" onclick="return doclink('link-137', 'extract_model', 'link-128');">extract_model</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L303"></a><tt class="py-lineno">303</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">m</tt><tt class="py-op">,</tt> <tt id="link-138" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-138', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-139" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-139', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L304"></a><tt class="py-lineno">304</tt>  <tt class="py-line"> </tt>
+<a name="L305"></a><tt class="py-lineno">305</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_binomial"></a><div id="Test.test_binomial-def"><a name="L306"></a><tt class="py-lineno">306</tt> <a class="py-toggle" href="#" id="Test.test_binomial-toggle" onclick="return toggle('Test.test_binomial');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_binomial">test_binomial</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_binomial-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_binomial-expanded"><a name="L307"></a><tt class="py-lineno">307</tt>  <tt class="py-line"> </tt>
+<a name="L308"></a><tt class="py-lineno">308</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-140" class="py-name"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-140', 'Distribution', 'link-130');">Distribution</a></tt> <tt class="py-op">(</tt><tt class="py-string">"BINOMIAL"</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">10</tt><tt class="py-op">,</tt> <tt class="py-number">0.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L309"></a><tt class="py-lineno">309</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-141" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-141', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L310"></a><tt class="py-lineno">310</tt>  <tt class="py-line"> </tt>
+<a name="L311"></a><tt class="py-lineno">311</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-142" class="py-name"><a title="openalea.stat_tool.distribution.Binomial" class="py-name" href="#" onclick="return doclink('link-142', 'Binomial', 'link-50');">Binomial</a></tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">10</tt><tt class="py-op">,</tt> <tt class="py-number">0.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L312"></a><tt class="py-lineno">312</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-143" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-143', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L313"></a><tt class="py-lineno">313</tt>  <tt class="py-line"> </tt>
+<a name="L314"></a><tt class="py-lineno">314</tt>  <tt class="py-line">        <tt class="py-name">m</tt> <tt class="py-op">=</tt> <tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-144" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-144', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-145" class="py-name"><a title="openalea.stat_tool._stat_tool._DistributionData.extract_model" class="py-name" href="#" onclick="return doclink('link-145', 'extract_model', 'link-128');">extract_model</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L315"></a><tt class="py-lineno">315</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">m</tt><tt class="py-op">,</tt> <tt id="link-146" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-146', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-147" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-147', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L316"></a><tt class="py-lineno">316</tt>  <tt class="py-line"> </tt>
+<a name="L317"></a><tt class="py-lineno">317</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_poisson"></a><div id="Test.test_poisson-def"><a name="L318"></a><tt class="py-lineno">318</tt> <a class="py-toggle" href="#" id="Test.test_poisson-toggle" onclick="return toggle('Test.test_poisson');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_poisson">test_poisson</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_poisson-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_poisson-expanded"><a name="L319"></a><tt class="py-lineno">319</tt>  <tt class="py-line"> </tt>
+<a name="L320"></a><tt class="py-lineno">320</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-148" class="py-name"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-148', 'Distribution', 'link-130');">Distribution</a></tt> <tt class="py-op">(</tt><tt class="py-string">"POISSON"</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">2</tt><tt class="py-op">)</tt> </tt>
+<a name="L321"></a><tt class="py-lineno">321</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-149" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-149', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L322"></a><tt class="py-lineno">322</tt>  <tt class="py-line"> </tt>
+<a name="L323"></a><tt class="py-lineno">323</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-150" class="py-name"><a title="openalea.stat_tool.distribution.Poisson" class="py-name" href="#" onclick="return doclink('link-150', 'Poisson', 'link-53');">Poisson</a></tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">2</tt><tt class="py-op">)</tt> </tt>
+<a name="L324"></a><tt class="py-lineno">324</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-151" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-151', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L325"></a><tt class="py-lineno">325</tt>  <tt class="py-line"> </tt>
+<a name="L326"></a><tt class="py-lineno">326</tt>  <tt class="py-line">        <tt class="py-name">m</tt> <tt class="py-op">=</tt> <tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-152" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-152', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-153" class="py-name"><a title="openalea.stat_tool._stat_tool._DistributionData.extract_model" class="py-name" href="#" onclick="return doclink('link-153', 'extract_model', 'link-128');">extract_model</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L327"></a><tt class="py-lineno">327</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">m</tt><tt class="py-op">,</tt> <tt id="link-154" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-154', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-155" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-155', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L328"></a><tt class="py-lineno">328</tt>  <tt class="py-line"> </tt>
+<a name="L329"></a><tt class="py-lineno">329</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_neg_binomial"></a><div id="Test.test_neg_binomial-def"><a name="L330"></a><tt class="py-lineno">330</tt> <a class="py-toggle" href="#" id="Test.test_neg_binomial-toggle" onclick="return toggle('Test.test_neg_binomial');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_neg_binomial">test_neg_binomial</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_neg_binomial-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_neg_binomial-expanded"><a name="L331"></a><tt class="py-lineno">331</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-156" class="py-name"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-156', 'Distribution', 'link-130');">Distribution</a></tt> <tt class="py-op">(</tt><tt class="py-string">"NEGATIVE_BINOMIAL"</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">1</tt><tt class="py-op">,</tt> <tt class="py-number">0.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L332"></a><tt class="py-lineno">332</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-157" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-157', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L333"></a><tt class="py-lineno">333</tt>  <tt class="py-line"> </tt>
+<a name="L334"></a><tt class="py-lineno">334</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-158" class="py-name"><a title="openalea.stat_tool.distribution.NegativeBinomial" class="py-name" href="#" onclick="return doclink('link-158', 'NegativeBinomial', 'link-56');">NegativeBinomial</a></tt> <tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">1</tt><tt class="py-op">,</tt> <tt class="py-number">0.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L335"></a><tt class="py-lineno">335</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">list</tt><tt class="py-op">(</tt><tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-159" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-159', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L336"></a><tt class="py-lineno">336</tt>  <tt class="py-line"> </tt>
+<a name="L337"></a><tt class="py-lineno">337</tt>  <tt class="py-line">        <tt class="py-name">m</tt> <tt class="py-op">=</tt> <tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-160" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-160', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt id="link-161" class="py-name"><a title="openalea.stat_tool._stat_tool._DistributionData.extract_model" class="py-name" href="#" onclick="return doclink('link-161', 'extract_model', 'link-128');">extract_model</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L338"></a><tt class="py-lineno">338</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">m</tt><tt class="py-op">,</tt> <tt id="link-162" class="py-name"><a title="openalea.stat_tool._stat_tool" class="py-name" href="#" onclick="return doclink('link-162', '_stat_tool', 'link-1');">_stat_tool</a></tt><tt class="py-op">.</tt><tt id="link-163" class="py-name"><a title="openalea.stat_tool._stat_tool._ParametricModel" class="py-name" href="#" onclick="return doclink('link-163', '_ParametricModel', 'link-6');">_ParametricModel</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L339"></a><tt class="py-lineno">339</tt>  <tt class="py-line"> </tt>
+<a name="L340"></a><tt class="py-lineno">340</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_plot"></a><div id="Test.test_plot-def"><a name="L341"></a><tt class="py-lineno">341</tt> <a class="py-toggle" href="#" id="Test.test_plot-toggle" onclick="return toggle('Test.test_plot');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_plot">test_plot</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_plot-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_plot-expanded"><a name="L342"></a><tt class="py-lineno">342</tt>  <tt class="py-line"> </tt>
+<a name="L343"></a><tt class="py-lineno">343</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-164" class="py-name"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-164', 'Distribution', 'link-130');">Distribution</a></tt> <tt class="py-op">(</tt><tt class="py-string">"POISSON"</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">2</tt><tt class="py-op">)</tt> </tt>
+<a name="L344"></a><tt class="py-lineno">344</tt>  <tt class="py-line">        <tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-165" class="py-name" targets="Method openalea.stat_tool.old.distribution.DistributionData.plot()=openalea.stat_tool.old.distribution.DistributionData-class.html#plot,Method openalea.stat_tool.old.distribution.StatModel.plot()=openalea.stat_tool.old.distribution.StatModel-class.html#plot,Method openalea.stat_tool.output.StatInterface.plot()=openalea.stat_tool.output.StatInterface-class.html#plot,Module openalea.stat_tool.plot=openalea.stat_tool.plot-module.html,Method openalea.stat_tool.plot.fakeplot.plot()=openalea.stat_tool.plot.fakeplot-class.html#plot,Method openalea.stat_tool.plot.gnuplot.plot()=openalea.stat_tool.plot.gnuplot-class.html#plot,Method openalea.stat_tool.plot.mplotlib.plot()=openalea.stat_tool.plot.mplotlib-class.html#plot,Method openalea.stat_tool.plot.plotter.plot()=openalea.stat_tool.plot.plotter-class.html#plot"><a title="openalea.stat_tool.old.distribution.DistributionData.plot
+openalea.stat_tool.old.distribution.StatModel.plot
+openalea.stat_tool.output.StatInterface.plot
+openalea.stat_tool.plot
+openalea.stat_tool.plot.fakeplot.plot
+openalea.stat_tool.plot.gnuplot.plot
+openalea.stat_tool.plot.mplotlib.plot
+openalea.stat_tool.plot.plotter.plot" class="py-name" href="#" onclick="return doclink('link-165', 'plot', 'link-165');">plot</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L345"></a><tt class="py-lineno">345</tt>  <tt class="py-line"> </tt>
+<a name="L346"></a><tt class="py-lineno">346</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_fromnothing"></a><div id="Test.test_fromnothing-def"><a name="L347"></a><tt class="py-lineno">347</tt> <a class="py-toggle" href="#" id="Test.test_fromnothing-toggle" onclick="return toggle('Test.test_fromnothing');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_fromnothing">test_fromnothing</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_fromnothing-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_fromnothing-expanded"><a name="L348"></a><tt class="py-lineno">348</tt>  <tt class="py-line"> </tt>
+<a name="L349"></a><tt class="py-lineno">349</tt>  <tt class="py-line">        <tt class="py-comment"># From nothing</tt> </tt>
+<a name="L350"></a><tt class="py-lineno">350</tt>  <tt class="py-line"><tt class="py-comment"></tt>        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L351"></a><tt class="py-lineno">351</tt>  <tt class="py-line">            <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-166" class="py-name"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-166', 'Distribution', 'link-130');">Distribution</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L352"></a><tt class="py-lineno">352</tt>  <tt class="py-line">            <tt class="py-keyword">assert</tt> <tt class="py-name">False</tt> </tt>
+<a name="L353"></a><tt class="py-lineno">353</tt>  <tt class="py-line"> </tt>
+<a name="L354"></a><tt class="py-lineno">354</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">Exception</tt><tt class="py-op">:</tt> </tt>
+<a name="L355"></a><tt class="py-lineno">355</tt>  <tt class="py-line">            <tt class="py-keyword">assert</tt> <tt class="py-name">True</tt> </tt>
+</div><a name="L356"></a><tt class="py-lineno">356</tt>  <tt class="py-line"> </tt>
+<a name="L357"></a><tt class="py-lineno">357</tt>  <tt class="py-line"> </tt>
+<a name="Test.test_to_histogram"></a><div id="Test.test_to_histogram-def"><a name="L358"></a><tt class="py-lineno">358</tt> <a class="py-toggle" href="#" id="Test.test_to_histogram-toggle" onclick="return toggle('Test.test_to_histogram');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="openalea.stat_tool.distribution.Test-class.html#test_to_histogram">test_to_histogram</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Test.test_to_histogram-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="Test.test_to_histogram-expanded"><a name="L359"></a><tt class="py-lineno">359</tt>  <tt class="py-line"> </tt>
+<a name="L360"></a><tt class="py-lineno">360</tt>  <tt class="py-line">        <tt class="py-name">d</tt> <tt class="py-op">=</tt> <tt id="link-167" class="py-name"><a title="openalea.stat_tool.distribution.Distribution
+openalea.stat_tool.old.cstat_tool'.Distribution" class="py-name" href="#" onclick="return doclink('link-167', 'Distribution', 'link-130');">Distribution</a></tt> <tt class="py-op">(</tt><tt class="py-string">"NEGATIVE_BINOMIAL"</tt><tt class="py-op">,</tt> <tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-number">1</tt><tt class="py-op">,</tt> <tt class="py-number">0.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L361"></a><tt class="py-lineno">361</tt>  <tt class="py-line">        <tt class="py-name">h</tt>  <tt class="py-op">=</tt> <tt class="py-name">d</tt><tt class="py-op">.</tt><tt id="link-168" class="py-name"><a title="openalea.stat_tool._stat_tool._Convolution.simulate
+openalea.stat_tool._stat_tool._Mixture.simulate
+openalea.stat_tool._stat_tool._Parametric.simulate
+openalea.stat_tool._stat_tool._ParametricModel.simulate
+openalea.stat_tool.simulate" class="py-name" href="#" onclick="return doclink('link-168', 'simulate', 'link-133');">simulate</a></tt><tt class="py-op">(</tt><tt class="py-number">1000</tt><tt class="py-op">)</tt> </tt>
+<a name="L362"></a><tt class="py-lineno">362</tt>  <tt class="py-line">        <tt class="py-name">d2</tt> <tt class="py-op">=</tt> <tt id="link-169" class="py-name" targets="Function openalea.stat_tool.distribution.ToDistribution()=openalea.stat_tool.distribution-module.html#ToDistribution"><a title="openalea.stat_tool.distribution.ToDistribution" class="py-name" href="#" onclick="return doclink('link-169', 'ToDistribution', 'link-169');">ToDistribution</a></tt><tt class="py-op">(</tt><tt class="py-name">h</tt><tt class="py-op">)</tt> </tt>
+<a name="L363"></a><tt class="py-lineno">363</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">h</tt> <tt class="py-keyword">and</tt> <tt class="py-name">d2</tt> </tt>
+<a name="L364"></a><tt class="py-lineno">364</tt>  <tt class="py-line"> </tt>
+<a name="L365"></a><tt class="py-lineno">365</tt>  <tt class="py-line">        <tt class="py-name">h2</tt> <tt class="py-op">=</tt> <tt id="link-170" class="py-name" targets="Function openalea.stat_tool.distribution.ToHistogram()=openalea.stat_tool.distribution-module.html#ToHistogram"><a title="openalea.stat_tool.distribution.ToHistogram" class="py-name" href="#" onclick="return doclink('link-170', 'ToHistogram', 'link-170');">ToHistogram</a></tt><tt class="py-op">(</tt><tt class="py-name">d2</tt><tt class="py-op">)</tt> </tt>
+<a name="L366"></a><tt class="py-lineno">366</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">h2</tt> </tt>
+<a name="L367"></a><tt class="py-lineno">367</tt>  <tt class="py-line">        <tt class="py-keyword">assert</tt> <tt class="py-name">h</tt> <tt class="py-op">==</tt> <tt class="py-name">h2</tt> </tt>
+</div></div><a name="L368"></a><tt class="py-lineno">368</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="openalea.stat_tool-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Mon Aug 25 14:39:20 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
