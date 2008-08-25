@@ -1,7 +1,7 @@
 #include "plotable.h"
 
 using namespace plotable;
-
+using namespace std;
 
 //////////////////////// SinglePlot /////////////////////////////////////////////
 
