@@ -37,7 +37,7 @@ using namespace boost;
 
 void class_markovian()
 {
-    enum_<stat_tool::wrap_util::UniqueInt<4, 1> >("RestorationAlgorithm")
+    enum_<stat_tool::wrap_util::UniqueInt<8, 1> >("RestorationAlgorithm")
       .value("NO_COMPUTATION", 0)
       .value("FORWARD", FORWARD)
       .value("FORWARD_BACKWARD", FORWARD_BACKWARD)

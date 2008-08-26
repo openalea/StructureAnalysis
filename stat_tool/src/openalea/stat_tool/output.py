@@ -342,12 +342,13 @@ class StatInterface(object):
 
         plot_file = prefix + suffix + ".plot"
 
+        f = open(plot_file, "a")
+        f.write("pause -1")
+        f.close()            
+
         # call gnuplot
         os.system("gnuplot %s"%(plot_file))
-
-        raw_input("Press Enter to finish")
         
-
         for f in glob.glob(prefix+"*"):
             os.remove(f)
 
