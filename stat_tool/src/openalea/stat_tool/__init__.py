@@ -55,6 +55,7 @@ from _stat_tool import MAX_DIFF_BOUND
 from _stat_tool import MAX_MEAN
 from _stat_tool import VariableType
 from _stat_tool import VariableTypeBis
+from _stat_tool import RestorationAlgorithm
 
 # Exception
 from error import StatToolError

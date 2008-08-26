@@ -312,10 +312,12 @@ class StatInterface(object):
 
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
+        suffix = kargs.get("Suffix", "")
+        params = kargs.get("Params", ())
 
         survival = bool(ViewPoint.lower() == "survival")
         stateprofile = bool(ViewPoint.lower() == "stateprofile")
-
+        
         import tempfile
         prefix = tempfile.mktemp()
 
@@ -328,7 +330,7 @@ class StatInterface(object):
 
         elif(stateprofile):
             try:
-                self.state_profile_plot_write(prefix, title)
+                self.state_profile_plot_write(prefix, title, *params)
             except AttributeError:
                 raise AttributeError("%s has not 'state_profile' viewpoint"%(str(type(self))))
 
@@ -338,16 +340,14 @@ class StatInterface(object):
         else:
             self.plot_write(prefix, title)
 
-        plot_file = prefix + ".plot"
+        plot_file = prefix + suffix + ".plot"
 
-        # Add an infinite pause in the command file
-        f = open(plot_file, 'a')
-        f.write("pause -1")
-        f.close()
-        
         # call gnuplot
         os.system("gnuplot %s"%(plot_file))
+
+        raw_input("Press Enter to finish")
         
+
         for f in glob.glob(prefix+"*"):
             os.remove(f)
 
