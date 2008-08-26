@@ -1963,6 +1963,7 @@ MultiPlotSet* Distribution_data::get_plotable() const
 //    Format_error error;
 
 //    set = Histogram::get_plotable(error , 0 , 0);
+    set = 0;
   }
 
   return set;

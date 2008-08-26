@@ -84,7 +84,7 @@ class Test:
     def test_plot(self):
         # plot
         h = Histogram("../../../test/meri1.his")
-        #h.plot()
+        h.plot()
 
 
     def test_container(self):
