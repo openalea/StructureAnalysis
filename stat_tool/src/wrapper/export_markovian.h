@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+ /*------------------------------------------------------------------------------
  *                                                                              
  *        VPlants.Stat_Tool : VPlants Statistics module
  *                                                                              
@@ -15,71 +15,14 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_base.h 5309 2008-07-23 13:49:01Z dufourko $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
+#ifndef __CLASS_STAT_TOOL_MARKOVIAN__
+#define __CLASS_STAT_TOOL_MARKOVIAN__
+
+void class_markovian();
 
 
-/* WRAPPER Boost.python for stat_tool class */
-#include "export_plotable.h"
-
-#include "export_base.h"
-#include "export_distribution.h"
-#include "export_histogram.h"
-#include "export_mixture.h"
-#include "export_vectors.h"
-#include "export_convolution.h"
-//#include "export_compound.h"
-#include "export_distancematrix.h"
-#include "export_markovian.h"
-
-#include <boost/python.hpp>
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 103400
-#include <boost/python/docstring_options.hpp>
 #endif
-
-using namespace boost::python;
-
-
-// Define python module "_stat_tool"
-BOOST_PYTHON_MODULE(_stat_tool)
-{
-  //show_user_defined : true 
-  //show_signatures : false
-#if BOOST_VERSION >= 103400
-  docstring_options doc_options(true, false);
-#endif
-
-  class_constant();
-  class_format_error();
-  class_stat_interface();
-
-  class_vectors();
-  class_vectordistance();
-  class_regression();
-
-  class_distance_matrix();
-  class_clusters();
-  class_dendrogram();
-
-  class_distribution();
-  class_histogram();
-  class_distribution_data();
-  
-  class_mixture();
-  class_mixture_data();
-
-  class_convolution();
-  class_convolution_data();
-  
-  //class_compound();
-  //class_compound_data();
-
-  class_markovian();
-
-  class_plotable();
-
-}
-

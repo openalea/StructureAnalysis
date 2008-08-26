@@ -15,71 +15,39 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_base.cpp 5432 2008-08-25 16:51:24Z jbdurand $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
-
-
-/* WRAPPER Boost.python for stat_tool class */
-#include "export_plotable.h"
-
-#include "export_base.h"
-#include "export_distribution.h"
-#include "export_histogram.h"
-#include "export_mixture.h"
-#include "export_vectors.h"
-#include "export_convolution.h"
-//#include "export_compound.h"
-#include "export_distancematrix.h"
 #include "export_markovian.h"
+#include "wrapper_util.h"
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/markovian.h"
 
 #include <boost/python.hpp>
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 103400
-#include <boost/python/docstring_options.hpp>
-#endif
+#include <boost/python/detail/api_placeholder.hpp>
+#include <boost/python/make_constructor.hpp>
 
 using namespace boost::python;
+using namespace boost;
 
 
-// Define python module "_stat_tool"
-BOOST_PYTHON_MODULE(_stat_tool)
+
+
+void class_markovian()
 {
-  //show_user_defined : true 
-  //show_signatures : false
-#if BOOST_VERSION >= 103400
-  docstring_options doc_options(true, false);
-#endif
-
-  class_constant();
-  class_format_error();
-  class_stat_interface();
-
-  class_vectors();
-  class_vectordistance();
-  class_regression();
-
-  class_distance_matrix();
-  class_clusters();
-  class_dendrogram();
-
-  class_distribution();
-  class_histogram();
-  class_distribution_data();
-  
-  class_mixture();
-  class_mixture_data();
-
-  class_convolution();
-  class_convolution_data();
-  
-  //class_compound();
-  //class_compound_data();
-
-  class_markovian();
-
-  class_plotable();
+    enum_<stat_tool::wrap_util::UniqueInt<4, 1> >("RestorationAlgorithm")
+      .value("NO_COMPUTATION", 0)
+      .value("FORWARD", FORWARD)
+      .value("FORWARD_BACKWARD", FORWARD_BACKWARD)
+      .value("VITERBI", VITERBI)
+      .value("GENERALIZED_VITERBI", GENERALIZED_VITERBI)
+      .value("FORWARD_BACKWARD_SAMPLING", FORWARD_BACKWARD_SAMPLING)
+      .value("GIBBS_SAMPLING", GIBBS_SAMPLING)
+      .value("FORWARD_DYNAMIC_PROGRAMMING", FORWARD_DYNAMIC_PROGRAMMING)
+      
+      .export_values()
+    ;
 
 }
-
