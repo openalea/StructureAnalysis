@@ -314,6 +314,7 @@ class StatInterface(object):
         ViewPoint = kargs.get("ViewPoint", "")
 
         survival = bool(ViewPoint.lower() == "survival")
+        stateprofile = bool(ViewPoint.lower() == "stateprofile")
 
         import tempfile
         prefix = tempfile.mktemp()
@@ -324,6 +325,13 @@ class StatInterface(object):
                 self.survival_plot_write(prefix, title)
             except AttributeError:
                 raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
+
+        elif(stateprofile):
+            try:
+                self.state_profile_plot_write(prefix, title)
+            except AttributeError:
+                raise AttributeError("%s has not 'state_profile' viewpoint"%(str(type(self))))
+
 
         elif(args):
             self.plot_write(prefix, title, list(args))
@@ -351,10 +359,15 @@ class StatInterface(object):
         ViewPoint = kargs.get("ViewPoint", "")
 
         survival = bool(ViewPoint.lower() == "survival")
+        stateprofile = bool(ViewPoint.lower() == "stateprofile")
 
         try:
             if(survival):
                 plotable = self.survival_get_plotable()
+
+            elif(stateprofile):
+                plotable = self.stateprofile_get_plotable()
+
             else:
                 if(args):
                     plotable = self.get_plotable(list(args))
