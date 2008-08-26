@@ -358,22 +358,23 @@ class StatInterface(object):
         
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
+        params = kargs.get("Params", ())
 
         survival = bool(ViewPoint.lower() == "survival")
         stateprofile = bool(ViewPoint.lower() == "stateprofile")
 
         try:
             if(survival):
-                plotable = self.survival_get_plotable()
+                plotable = self.survival_get_plotable(*params)
 
             elif(stateprofile):
-                plotable = self.stateprofile_get_plotable()
+                plotable = self.stateprofile_get_plotable(*params)
 
             else:
                 if(args):
-                    plotable = self.get_plotable(list(args))
+                    plotable = self.get_plotable(list(args), *params)
                 else:
-                    plotable = self.get_plotable()
+                    plotable = self.get_plotable(*params)
 
             plotter = plot.get_plotter()
 
