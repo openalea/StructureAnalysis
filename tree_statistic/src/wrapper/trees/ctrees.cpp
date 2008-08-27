@@ -26,6 +26,8 @@
 using namespace boost::python;
 using namespace Stat_trees;
 
+using boost::python::list;
+
 // Declarations ================================================================
 namespace  {
 //
@@ -54,13 +56,13 @@ template<int num, int id> struct UniqueInt
  */
 
 
-Trees* Trees_wrapper_init1(list tree_list)
+Trees* Trees_wrapper_init1(boost::python::list tree_list)
 {
    int nb_trees, t, nb_variables, var, nbint, findex, iindex;
    int *itype= NULL, *rawtype= NULL;
    Trees::pt_tree_type_array otrees;
    object o;
-   list ltype;
+   boost::python::list ltype;
    ostringstream error_message;
    bool status= true, several_errors= false;
    Trees *trees= NULL;
@@ -111,7 +113,7 @@ Trees* Trees_wrapper_init1(list tree_list)
       }
       else
       {
-         ltype= extract<list>(o.attr("Types")());
+         ltype= extract<boost::python::list>(o.attr("Types")());
          // s= extract<string>(ltype.attr("__str__")());
          nb_variables= boost::python::len(ltype);
          itype= new int[nb_variables];
@@ -172,7 +174,7 @@ Trees* Trees_wrapper_init1(list tree_list)
 }
 
 Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
-                               list symbols)
+                               boost::python::list symbols)
 {
    // requires that "variable" is valid
    int c, nb_classes, nb_values;
@@ -270,7 +272,7 @@ Trees* Trees_wrapper_cluster_step(const Trees& reftree, int variable,
 }
 
 Trees* Trees_wrapper_cluster_limit(const Trees& reftree, int variable,
-                                   list limits)
+                                   boost::python::list limits)
 {
    int c, nb_class;
    object o;
@@ -445,9 +447,9 @@ Distribution_data* Trees_wrapper_extract_feature(const Trees& reftree,
    return histo;
 }
 
-list Trees_wrapper_max(const Trees& reftree)
+boost::python::list Trees_wrapper_max(const Trees& reftree)
 {
-   list res;
+   boost::python::list res;
    int i;
    Trees::value val;
 
@@ -460,9 +462,9 @@ list Trees_wrapper_max(const Trees& reftree)
    return res;
 }
 
-list Trees_wrapper_min(const Trees& reftree)
+boost::python::list Trees_wrapper_min(const Trees& reftree)
 {
-   list res;
+   boost::python::list res;
    int i;
    Trees::value val;
 
@@ -476,7 +478,7 @@ list Trees_wrapper_min(const Trees& reftree)
 }
 
 Trees* Trees_wrapper_select_variable(const Trees& reftree,
-                                     list variables, bool keep)
+                                     boost::python::list variables, bool keep)
 {
    int nb_variables, var;
    int *variable_list;
@@ -544,7 +546,7 @@ Trees* Trees_wrapper_select_variable(const Trees& reftree,
 }
 
 Trees* Trees_wrapper_select_individual(const Trees& reftree,
-                                       list identifiers, bool keep)
+                                       boost::python::list identifiers, bool keep)
 {
    register int nb_ids;
    int t= 0;
@@ -640,7 +642,7 @@ Trees* Trees_wrapper_segmentation_extract_value(const Trees& reftree,
 
 Trees* Trees_wrapper_segmentation_extract_values(const Trees& reftree,
                                                  int variable,
-                                                 list values,
+                                                 boost::python::list values,
                                                  bool keep)
 {
    int nb_values, val;
@@ -741,7 +743,7 @@ Trees* Trees_wrapper_shift_float(const Trees& reftree, int variable, double shif
 }
 
 Trees* Trees_wrapper_merge(const Trees& reftree, Format_error& error,
-                           list tree_list)
+                           boost::python::list tree_list)
 {
    int nb_trees, t; //, nb_variables, var;
    Trees::pt_observed_trees_array otrees;
@@ -838,7 +840,7 @@ unsigned int Trees_wrapper_max_order(const Trees& reftree)
 }
 
 
-Trees* Trees_wrapper_merge2(const Trees& reftree, list tree_list)
+Trees* Trees_wrapper_merge2(const Trees& reftree, boost::python::list tree_list)
 {
    int nb_trees, t; //, nb_variables, var;
    Trees::pt_observed_trees_array otrees;
@@ -937,7 +939,7 @@ Trees* Trees_wrapper_merge2(const Trees& reftree, list tree_list)
    return trees;
 }
 
-Trees* Trees_wrapper_merge_variable(const Trees& reftree, list tree_list)
+Trees* Trees_wrapper_merge_variable(const Trees& reftree, boost::python::list tree_list)
 {
    int nb_trees, t;
    Trees::pt_observed_trees_array otrees;
@@ -1020,6 +1022,26 @@ Trees* Trees_wrapper_merge_variable(const Trees& reftree, list tree_list)
    return trees;
 }
 
+MultiPlotSet* Trees_wrapper_get_plotable(const Trees& reftree,
+					 int plot_type,
+					 int variable)
+{
+   Format_error error;
+   ostringstream error_message;
+   MultiPlotSet *plotset= NULL;
+
+   plotset= reftree.get_plotable(error, plot_type, variable);
+
+   if (plotset == NULL)
+   {
+      error_message << error;
+      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+
+   return plotset;
+   
+}
 void Trees_wrapper_plot_write(const Trees& reftree,
                               const char* prefix,
                               const char* title)
@@ -1027,6 +1049,9 @@ void Trees_wrapper_plot_write(const Trees& reftree,
    bool status= true;
    ostringstream error_message;
    Format_error error;
+
+   cout << "Call to Trees_wrapper_plot_write with prefix = "
+        << prefix << endl;
 
    status= reftree.plot_write(error, prefix, title);
    if (not status)
@@ -1091,6 +1116,10 @@ BOOST_PYTHON_MODULE(ctrees)
                                       return_value_policy< manage_new_object >())
         .def("ExtractFeatureHistogram", &Trees_wrapper_extract_feature,
                                         return_value_policy< manage_new_object >())
+        .def("IsCharacteristic", &Trees::is_characteristic,
+	                         "IsCharacteristic(self, variable, charac) -> bool \n\n",
+	                         "Check whether a characteristic is present"
+	                         "for a given variable")
         .def("NbInt", &Trees::get_nb_int,
                       "NbInt(self) -> int \n\n"
                       "return the number of variables "
@@ -1126,7 +1155,11 @@ BOOST_PYTHON_MODULE(ctrees)
                               "MergeVariable(self, tree_list) -> CTrees. \n\n"
                               "Merge the variables of self and that of the trees "
                               "in the list given as an argument.")
-        .def("Plot", &Trees_wrapper_plot_write)
+        .def("get_plotable", &Trees_wrapper_get_plotable,
+                              return_value_policy< manage_new_object >(),
+  	                     "Fill MultiPlotSet structure.")
+        .def("plot_write", &Trees_wrapper_plot_write,
+	                   "Write into a gnuplot file.")
         .def("SegmentationExtract", &Trees_wrapper_segmentation_extract_value,
                                     return_value_policy< manage_new_object >(),
                                     "SegmentationExtract(self, variable, value, mode) -> CTrees. \n\n"

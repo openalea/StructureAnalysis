@@ -5,16 +5,18 @@
 import trees, ctree
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import openalea.stat_tool as stat_tool
-import openalea.sequence_analysis as sequence
+
+VariableType = stat_tool.VariableTypeBis
+
+I_DEFAULT_TREE_SIZE = trees.I_DEFAULT_TREE_SIZE
+I_DEFAULT_TREE_DEPTH = trees.I_DEFAULT_TREE_DEPTH
+
+FormatError = stat_tool.StatToolError
+VariableTypeDict = VariableType.values
+
+TreeValue = trees.TreeValue
 
 
-VariableType=stat_tool.VariableType
-
-I_DEFAULT_TREE_SIZE=trees.I_DEFAULT_TREE_SIZE
-I_DEFAULT_TREE_DEPTH=trees.I_DEFAULT_TREE_DEPTH
-
-TreeValue=trees.TreeValue
-    
 class Tree(trees.Tree):
     """An implementation of trees with enhanced functionalities."""
     
@@ -29,7 +31,7 @@ class Tree(trees.Tree):
         - a list of integral and floating values or a TreeValue object
           and a TreeStructure object;
         - a Tree object
-        Examples: T=Tree([0], 0, 0)
+        Examples: T = Tree([0], 0, 0)
                   U=Tree([0, 1.], TreeStructure(T))""" 
         if issubclass(arg.__class__, trees.Tree):
             #arg is supposed to be a Tree...            
@@ -196,7 +198,7 @@ class TreeStructure(trees.TreeStructure):
         elif issubclass(arg.__class__, TreeStructure):
             #... or a tree structure
             trees.TreeStructure.__init__(self, arg)
-        elif issubclass(arg.__class__, stat_tool.Distribution):
+        elif issubclass(arg.__class__, stat_tool._Distribution):
             #... or a Distribution
             trees.TreeStructure.__init__(self, arg, arg2, arg3)
         else:

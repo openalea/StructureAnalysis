@@ -6,12 +6,15 @@ import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import ctree, ctrees
 
-_PlotManager=stat_tool.stat_tool._PlotManager
+from openalea.stat_tool import interface
+interface.extend_class(ctrees.CTrees, interface.StatInterface)
+
+# _PlotManager=stat_tool.stat_tool._PlotManager
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_DEPTH=ctree.I_DEFAULT_TREE_DEPTH()
-VariableType=stat_tool.VariableType
-FormatError=stat_tool.FormatError
+VariableType=stat_tool.VariableTypeBis
+FormatError=stat_tool.StatToolError
 CharacteristicType=ctree.Characteristic
 
 VariableTypeDict=VariableType.values
@@ -943,7 +946,7 @@ class TreeStructure:
 
 
 
-class Trees:
+class Trees(object):
     """A set of trees with integral and floating attributes."""
 
           
@@ -1320,7 +1323,7 @@ class Trees:
             self.__ctrees.BuildSequences(file_name, maximal_sequences)
         except RuntimeError, error:
             os.remove(file_name)
-            raise FormatError, error
+            raise FormatError(error)
         else:
             import openalea.aml as amlPy
             res= amlPy.Sequences(file_name)
@@ -1348,7 +1351,7 @@ class Trees:
             self.__ctrees.BuildVectors(file_name)
         except RuntimeError, error:
             os.remove(file_name)
-            raise FormatError, error
+            raise FormatError(error)
         else:
             import openalea.aml as amlPy
             res= amlPy.Vectors(file_name)
@@ -1620,7 +1623,7 @@ class Trees:
                                                         Saem, arg3, arg4, 
                                                         ForceParametric)
                     except RuntimeError, error:
-                        raise FormatError, error
+                        raise FormatError(error)
                 elif issubclass(arg1.__class__, hmt.HiddenMarkovTree):
                     # Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Counting,
                     #          Algorithm, Saem, ForceParametric)
@@ -1654,7 +1657,7 @@ class Trees:
                                                         EMAlgo, Saem, arg2, 
                                                         ForceParametric)
                     except RuntimeError, error:
-                        raise FormatError, error
+                        raise FormatError(error)
                 else:
                     msg="bad type for argument 1: "+type(arg1)
                     raise TypeError, msg
@@ -1680,10 +1683,10 @@ class Trees:
         if type(nature)==str:
             if (nature.upper()=="SIZE"):
                 chisto=self.__ctrees.ExtractSizeHistogram()
-                return stat_tool.Histogram(chisto)
+                return chisto
             elif (nature.upper()=="NBCHILDREN"):
                 chisto=self.__ctrees.ExtractNbChildrenHistogram()
-                return stat_tool.Histogram(chisto)
+                return chisto
             elif (nature.upper()=="VALUE"):
                 if variable is None:
                     if self.NbVariables()==1:
@@ -1697,9 +1700,9 @@ class Trees:
                     chisto=self.__ctrees.ExtractValueHistogram(
                         self._valid_cvariable(variable)+1)
                 except RuntimeError, error:
-                    raise FormatError, error
+                    raise FormatError(error)
                 else:
-                    return stat_tool.Histogram(chisto)
+                    return chisto
             elif ((nature.upper()=="FIRSTOCCURRENCEROOT") or
                   (nature.upper()=="FIRSTOCCURRENCELEAVES") or
                   (nature.upper()=="SOJOURNSIZE") or
@@ -1736,9 +1739,9 @@ class Trees:
                     chisto=self.__ctrees.ExtractFeatureHistogram(
                         chartype, self._valid_cvariable(variable)+1, value)
                 except RuntimeError, error:
-                    raise FormatError, error
+                    raise FormatError(error)
                 else:
-                    return stat_tool.Histogram(chisto)
+                    return chisto
             else:
                 try:
                     v=self.__name_to_variable(nature)
@@ -1746,7 +1749,7 @@ class Trees:
                     msg="unknown feature histogram: "+nature
                     raise ValueError, msg
                 chisto=self.__ctrees.ExtractValueHistogram(v+1)
-                return stat_tool.Histogram(chisto)
+                return chisto
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"
 
@@ -1776,6 +1779,187 @@ class Trees:
         # self._copy_tid_conversion(merged)
         return merged
 
+    def MPlot(self, ViewPoint="Data", Length=None, BottomDiameter=None, 
+              Color=None, DressingFile=None, Title="", variable=0):
+        """Graphical output using the Geom 3D viewer for Trees 
+           or MultiPlotSet for features.
+        
+        Usage:  MPlot(ViewPoint="Data")
+                MPlot("FirstOccurrenceRoot", variable=0)
+        Other possible values for ViewPoint: 
+            FirstOccurrenceLeaves
+            SojournSize
+            Counting"""
+        if type(ViewPoint)!=str:
+            msg='bad type for argument "ViewPoint": '\
+              +"type 'str' expected"
+            raise TypeError, msg
+        import os
+        if ViewPoint.upper()=="DATA":
+            # Graphical output of the Trees using the Geom 3D viewer 
+            # create the MTG file
+            mtgprefix="gvtmp"
+            file_created=False
+            while not file_created:
+                try:
+                    cfile=open(mtgprefix+'.mtg','r')
+                except IOError:
+                    # file does not exist
+                    mtgfile_name= mtgprefix+".mtg"
+                    file_created=True
+                else:
+                    cfile.close()
+                    import random
+                    mtgprefix+=str(random.randint(1,9))
+    
+            if DressingFile is None:
+                # create the dressing file
+                drfprefix="dftmp"
+                file_created=False
+                while not file_created:
+                    try:
+                        cfile=open(drfprefix+'.drf','r')
+                    except IOError:
+                        # file does not exist
+                        drffile_name= drfprefix+".drf"
+                        file_created=True
+                    else:
+                        cfile.close()
+                        import random
+                        drfprefix+=str(random.randint(1,9))
+                
+                dressing=file(drffile_name,'w+')
+                dressing.write("Phyllotaxy = 103\n")
+                dressing.write("NbPlantsPerLine = "+str(self.NbTrees())+"\n")
+                dressing.close()
+            else:
+                # use the given dressing file
+                drffile_name=DressingFile
+    
+            # create the temporary MTG file
+            self.Save(mtgfile_name, False, list(self.__attributes))
+    
+            import openalea.aml as amlPy
+            
+            mode=False
+            if not amlPy.getmode():
+            # conversion from AML object to Python
+                mode=True
+                amlPy.setmode(1)
+                
+            M=amlPy.MTG(mtgfile_name)
+            DR=amlPy.DressingData(drffile_name)
+                            
+            if Length is None:
+                # define a default length function
+                default_lengthfunc= lambda x: 20
+                for var in range(self.NbVariables()):
+                    lvariable_name=self.__attributes[var]
+                    if ((lvariable_name.upper()).find("LEN") != -1):
+                        # current variable name contains "LEN"
+                        default_lengthfunc= \
+                            lambda x: amlPy.Feature(x, lvariable_name)
+                        break
+            else:
+                default_lengthfunc= Length
+            # check the type and value
+            def lengthfunc(x):
+                res=default_lengthfunc(x)
+                if (type(res)==int) or (type(res)==float):
+                    if (res > 0):
+                        return res
+                    else:
+                        return 10
+                else:
+                    return 10
+    
+            if BottomDiameter is None:
+                # define a default diameter function
+                default_diamfunc= lambda x: 5
+                for var in range(self.NbVariables()):
+                    dvariable_name=self.__attributes[var]
+                    if ((dvariable_name.upper()).find("DIA") != -1):
+                        # current variable name contains "DIA"
+                        default_diamfunc= \
+                            lambda x: amlPy.Feature(x, dvariable_name)
+                        break
+            else:
+                default_diamfunc= BottomDiameter
+            # check the type and value
+            def diamfunc(x):
+                res=default_diamfunc(x)
+                if (type(res)==int) or (type(res)==float):
+                    if (res > 0):
+                        return res
+                    else:
+                        return 10
+                else:
+                    return 10
+    
+            if Color is None:
+                # define a default color function
+                default_colorfunc= lambda x: 0
+                for var in range(self.NbVariables()):
+                    cvariable_type=self.__types[var]
+                    cvariable_name=self.__attributes[var]
+                    if (cvariable_type == VariableType.STATE):
+                        # current variable is a state variable
+                        default_colorfunc= \
+                            lambda x: amlPy.Feature(x, cvariable_name)+2
+                        break
+            else:
+                default_colorfunc= Color
+            # check the type and value
+            def colorfunc(x):
+                res=default_colorfunc(x)
+                if (type(res)==int):
+                    if (res > 0):
+                        return res
+                    else:
+                        return 0
+                else:
+                    return 0
+    
+
+            vtx_list=amlPy.VtxList(Scale=1)
+            pf=amlPy.PlantFrame(vtx_list, Scale=2, DressingData=DR, 
+                                Length=lengthfunc, BottomDiameter=diamfunc)
+            amlPy.Plot(pf, Color=colorfunc)
+            
+            if mode:
+                amlPy.setmode(0)
+            
+            # remove the temporary files
+            os.remove(mtgfile_name)
+            if DressingFile is None:
+                os.remove(drffile_name)
+                
+        else:
+            # Graphical output of the features using Gnuplot.py
+            if ViewPoint.upper()=="FIRSTOCCURRENCEROOT":
+                ftype=CharacteristicType.FIRST_OCCURRENCE_ROOT
+            elif ViewPoint.upper()=="FIRSTOCCURRENCELEAVES":
+                ftype=CharacteristicType.FIRST_OCCURRENCE_LEAVES
+            elif ViewPoint.upper()=="SOJOURNSIZE":
+                ftype=CharacteristicType.SOJOURN_SIZE
+            elif ViewPoint.upper()=="COUNTING":
+                ftype=CharacteristicType.NB_ZONES
+            else:
+                msg='bad value for argument "ViewPoint": '+ViewPoint
+                raise ValueError, msg
+            cvariable = self._valid_cvariable(variable)
+            print "Using cvariable", cvariable
+            if (not self.__ctrees.IsCharacteristic(cvariable, ftype)):
+                msg = "Characteristic " + ViewPoint + " not computed " + \
+                    "for variable ", variable
+                raise FormatError(msg)
+            file_id = str(self._valid_cvariable(variable)+1)+str(ftype+1)
+            try:
+                self.__ctrees.plot(Title=Title, Suffix=file_id,
+                                   Params=(ftype, variable))
+            except RuntimeError, f:
+                raise FormatError(f)
+
     def MergeVariable(self, tree_list):
         """Merge the variables of Trees objects (contained in a list) with self.
 
@@ -1794,7 +1978,7 @@ class Trees:
         try:
             cmerged=self.__ctrees.MergeVariable(ctree_list)
         except RuntimeError, error:
-            raise FormatError, error
+            raise FormatError(error)
         merged=Trees(cmerged, types, attributes)
         self._copy_vid_conversion(merged)
         self._copy_tid_conversion(merged)
@@ -2012,56 +2196,62 @@ class Trees:
             else:
                 msg='bad value for argument "ViewPoint": '+ViewPoint
                 raise ValueError, msg
-            ref_file_id=str(self._valid_cvariable(variable)+1)
-            # part of the filename which identifies the graph to be displayed
-            file_id=str(self._valid_cvariable(variable)+1)+str(ftype+1)
-            prefix="ftmp"
-            file_created=False
-            file_list=[]
-            # find a non existing file name
-            while not file_created:
-                try:
-                    cfile=open(prefix+'11.plot','r')
-                except IOError:
-                    file_created=True
-                else:
-                    import random
-                    prefix+=str(random.randint(1,9))
+            cvariable = self._valid_cvariable(variable)
+            print "Using cvariable", cvariable
+            if (not self.__ctrees.IsCharacteristic(cvariable, ftype)):
+                msg = "Characteristic " + ViewPoint + " not computed " + \
+                    "for variable ", variable
+                raise FormatError(msg)
+##            ref_file_id=str(self._valid_cvariable(variable)+1)
+##            # part of the filename which identifies the graph to be displayed
+            file_id = str(self._valid_cvariable(variable)+1)+str(ftype+1)
+##            prefix="ftmp"
+##            file_created=False
+##            file_list=[]
+##            # find a non existing file name
+##            while not file_created:
+##                try:
+##                    cfile=open(prefix+'11.plot','r')
+##                except IOError:
+##                    file_created=True
+##                else:
+##                    import random
+##                    prefix+=str(random.randint(1,9))
             try:
-                self.__ctrees.Plot(os.getcwd()+"/"+prefix, Title)
+                self.__ctrees.plot(Title=Title, Suffix=file_id)
                 # build the list of the created files: 
-                for var in range(self.NbInt()):
-                    for char in [str(c) for c in range(5)]+[""]:
-                        filename=prefix+str(self._valid_cvariable(var)+1)+char
-                        try:
-                            tmpfile=open(filename+'.plot', 'r')
-                        except IOError:
-                            pass
-                        else:
-                            tmpfile.close()
-                            # add the .plot and .print files
-                            file_list+=[filename+extension
-                                for extension in [".plot", ".print"]]
-                            if (char=='1') or (char==''):
-                                # add the .dat file
-                                file_list+=[filename+".dat"]
+##                for var in range(self.NbInt()):
+##                    for char in [str(c) for c in range(5)]+[""]:
+##                        filename=prefix+str(self._valid_cvariable(var)+1)+char
+##                        try:
+##                            tmpfile=open(filename+'.plot', 'r')
+##                        except IOError:
+##                            pass
+##                        else:
+##                            tmpfile.close()
+##                            # add the .plot and .print files
+##                            file_list+=[filename+extension
+##                                for extension in [".plot", ".print"]]
+##                            if (char=='1') or (char==''):
+##                                # add the .dat file
+##                                file_list+=[filename+".dat"]
             except RuntimeError, f:
-                for tmpfile in file_list:
-                   os.remove(tmpfile)
+##                for tmpfile in file_list:
+##                   os.remove(tmpfile)
                 raise FormatError, f
-            try:
-                # check if the desired file exists
-                cfile=open(prefix+file_id+'.plot','r')
-            except IOError:
-                for tmpfile in file_list:
-                   os.remove(tmpfile)
-                msg='Characteristic not computed: '+str(ViewPoint)
-                raise ValueError, msg                
-            else:
-                nb_windows= \
-                   self.__ctrees.NbValues(self._valid_cvariable(variable))
-                self.__plot= _PlotManager(file_list, prefix+file_id, 
-                                                     nb_windows)
+##            try:
+##                # check if the desired file exists
+##                cfile=open(prefix+file_id+'.plot','r')
+##            except IOError:
+##                for tmpfile in file_list:
+##                   os.remove(tmpfile)
+##                msg='Characteristic not computed: '+str(ViewPoint)
+##                raise ValueError, msg                
+            # else:
+            #     nb_windows= \
+            #       self.__ctrees.NbValues(self._valid_cvariable(variable))
+            #     self.__plot= _PlotManager(file_list, prefix+file_id, 
+            #                                          nb_windows)
 
     def Save(self, file_name, overwrite=False, variable_names=None):
         """Save trees into a file as a MTG."""

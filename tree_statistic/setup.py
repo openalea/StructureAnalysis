@@ -29,7 +29,7 @@ if __name__ == '__main__':
         
           # Packages
           namespace_packages = [namespace],
-          create_namespaces = True,
+          create_namespaces = False,
 
           packages=[namespace+".tree_statistic",
                     namespace+".tree_statistic.trees",
@@ -38,10 +38,6 @@ if __name__ == '__main__':
                     ],
 
           package_dir={
-            namespace+".tree_statistic": 'src/tree_statistic',
-            namespace+".tree_statistic.trees": 'src/tree_statistic/trees',
-            namespace+".tree_statistic.hmt": 'src/tree_statistic/hmt',
-            namespace+".tree_statistic.int_fl_containers": 'src/tree_statistic/int_fl_containers',
             '' : 'src',
             },
 

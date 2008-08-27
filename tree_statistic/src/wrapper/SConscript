@@ -13,7 +13,7 @@ if env['compiler'] == 'mingw':
     env.AppendUnique(LINKFLAGS=LINKFLAGS)
 
 
-py_dir = '../tree_statistic'
+py_dir = '../openalea/tree_statistic'
 
 # Build wrappers as shared libraries
 #sources = Split("""""")

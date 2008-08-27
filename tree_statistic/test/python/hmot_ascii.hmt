@@ -11,6 +11,22 @@ TRANSITION_PROBABILITIES
 
 # recurrent class: states 0 1
 
+# path length (starting from root) up to the first occurrence of state 0 distribution
+
+# path length (starting from root) up to the first occurrence of state 1 distribution
+
+# path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+# path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+# number of zones of state 0 per size 50 tree distribution
+
+# number of zones of state 1 per size 50 tree distribution
+
+# number of occurrences of state 0 per size 50 tree distribution
+
+# number of occurrences of state 1 per size 50 tree distribution
+
 2 OUTPUT_PROCESSES
 
 OUTPUT_PROCESS 1 : PARAMETRIC

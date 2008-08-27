@@ -417,7 +417,7 @@ Default_tree* Tree_wrapper_init1(Default_tree::key root,
                                  int n, object default_value)
 {
    Int_fl_container cvalue;
-   list values, types;
+   boost::python::list values, types;
    int nb_integral, nb_float, index, type,
        int_index, float_index; // length,
    object current_object;
@@ -425,8 +425,8 @@ Default_tree* Tree_wrapper_init1(Default_tree::key root,
    // bool status= true;
    Default_tree* tree;
 
-   values= extract<list>(default_value.attr("Values")());
-   types= extract<list>(default_value.attr("Types")());
+   values= extract<boost::python::list>(default_value.attr("Values")());
+   types= extract<boost::python::list>(default_value.attr("Types")());
    nb_integral= extract<int>(default_value.attr("NbInt")());
    nb_float= extract<int>(default_value.attr("NbFloat")());
    int_index= 0;
@@ -457,7 +457,7 @@ tree_traits<Default_tree>::vertex_descriptor
 Tree_wrapper_AddVertex(Default_tree& tree, object o)
 {
    Int_fl_container cvalue(0, 0);
-   list values, types;
+   boost::python::list values, types;
    int nb_integral, nb_float, index, type, //length,
        int_index, float_index, tree_nb_integral, tree_nb_float;
    object current_object;
@@ -467,8 +467,8 @@ Tree_wrapper_AddVertex(Default_tree& tree, object o)
    tree_nb_integral= tree.get_nb_int();
    tree_nb_float= tree.get_nb_float();
 
-   values= extract<list>(o.attr("Values")());
-   types= extract<list>(o.attr("Types")());
+   values= extract<boost::python::list>(o.attr("Values")());
+   types= extract<boost::python::list>(o.attr("Types")());
    nb_integral= extract<int>(o.attr("NbInt")());
    nb_float= extract<int>(o.attr("NbFloat")());
    int_index= 0;
@@ -518,7 +518,7 @@ Tree_wrapper_AddVertex(Default_tree& tree, object o)
    return tree.add_vertex(cvalue);
 }
 
-void Tree_wrapper_IidSimulation(Default_tree& tree, const list& distribution_list)
+void Tree_wrapper_IidSimulation(Default_tree& tree, const boost::python::list& distribution_list)
 {
    int length, index, nb_int= tree.get_nb_int();
    Default_tree::pt_Distribution_array distributions;
@@ -568,7 +568,7 @@ void Tree_wrapper_IidSimulation(Default_tree& tree, const list& distribution_lis
 void Tree_wrapper_Put(Default_tree& tree, Default_tree::key v, object o)
 {
    Int_fl_container cvalue(0, 0);
-   list values, types;
+   boost::python::list values, types;
    int nb_integral, nb_float, index, type, //length,
        int_index, float_index, tree_nb_integral, tree_nb_float;
    object current_object;
@@ -578,8 +578,8 @@ void Tree_wrapper_Put(Default_tree& tree, Default_tree::key v, object o)
    tree_nb_integral= tree.get_nb_int();
    tree_nb_float= tree.get_nb_float();
 
-   values= extract<list>(o.attr("Values")());
-   types= extract<list>(o.attr("Types")());
+   values= extract<boost::python::list>(o.attr("Values")());
+   types= extract<boost::python::list>(o.attr("Types")());
    nb_integral= extract<int>(o.attr("NbInt")());
    nb_float= extract<int>(o.attr("NbFloat")());
    int_index= 0;
@@ -701,12 +701,12 @@ class TreeValue
 protected :
 
    int _nb_integral, _nb_float;
-   list values;
+   boost::python::list values;
    std::vector<int> types;
 
 public :
 
-   TreeValue(list lvalues_or_types)
+   TreeValue(boost::python::list lvalues_or_types)
    : _nb_integral(0)
    , _nb_float(0)
    , values(lvalues_or_types)
@@ -767,10 +767,10 @@ public :
    int get_type(int index) const
    { return types[index]; }
 
-   list get_values() const { return values; }
-   list get_types() const
+   boost::python::list get_values() const { return values; }
+   boost::python::list get_types() const
    {
-      list res;
+      boost::python::list res;
       unsigned int index;
 
       for(index= 0; index < types.size(); index++)
@@ -883,7 +883,7 @@ BOOST_PYTHON_MODULE(ctree)
     ;*/
 
     class_< TreeValue >("TreeValue", init< const TreeValue& >())
-        .def(init<list>())
+        .def(init<boost::python::list>())
         .def("NbInt", &TreeValue::get_nb_integral)
         .def("NbFloat", &TreeValue::get_nb_float)
         .def("Type", &TreeValue::get_type)

@@ -358,6 +358,64 @@ Histogram* Tree_characteristics::get_characteristic(int value,
    return res;
 }
 
+/*****************************************************************
+ *
+ *  Check whether given characteristic, refered to by charac, is present
+ *
+ **/
+
+bool Tree_characteristics::is_characteristic(int charac) const
+{
+   bool present= true;
+   const int nb_values= _max_value - _min_value + 1;
+   int value;
+
+   switch (charac)
+   {
+      case FIRST_OCCURRENCE_ROOT :
+         if (first_occurrence_root == NULL)
+        present= false;
+     else
+        for(value= 0; value < nb_values; value++)
+               if (first_occurrence_root[value] == NULL)
+                  present= false;
+         break;
+      case FIRST_OCCURRENCE_LEAVES :
+         if (first_occurrence_leaves == NULL)
+        present= false;
+     else
+        for(value= 0; value < nb_values; value++)
+               if (first_occurrence_leaves[value] == NULL)
+                  present= false;
+         break;
+      case SOJOURN_SIZE :
+         if (sojourn_size == NULL)
+        present= false;
+     else
+        for(value= 0; value < nb_values; value++)
+               if (sojourn_size[value] == NULL)
+                  present= false;
+         break;
+      case NB_ZONES :
+         if (nb_zones == NULL)
+        present= false;
+     else
+        for(value= 0; value < nb_values; value++)
+               if (nb_zones[value] == NULL)
+                  present= false;
+         break;
+      case NB_OCCURRENCES :
+         if (nb_occurrences == NULL)
+        present= false;
+     else
+        for(value= 0; value < nb_values; value++)
+               if (nb_occurrences[value] == NULL)
+                  present= false;
+         break;
+  }
+  return present;
+}
+
 
 Histogram* Tree_characteristics::get_first_occurrence_root(int value) const
 { return get_characteristic(value, first_occurrence_root); }
@@ -1120,6 +1178,382 @@ bool Tree_characteristics::plot_print(const char * prefix,
 
    return status;
 }
+
+/*****************************************************************
+ *
+ *  Graphical output of Tree_characteristics
+ *  using a plotable data structure and the type of characteristic
+ *
+ **/
+
+MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
+                                                 int variable,
+                                                 int nb_variables,
+                                                 int type) const
+{
+   bool status= true, start;
+   const int nb_values= _max_value - _min_value + 1;;
+   int val;
+   MultiPlotSet *plotset= new MultiPlotSet(1);
+   MultiPlotSet &plot= *plotset;
+   std::ostringstream vstring;
+
+   switch (plot_type)
+   {
+      case FIRST_OCCURRENCE_ROOT :
+      {
+         plot[0].resize(nb_values);
+         plot.border= "15 lw 0";
+         // plot.bidule= "set tics out";
+         // plot.bidule= "nomirror";
+         vstring.str("");
+         if (nb_variables > 1)
+            vstring << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+         plot.title= vstring.str();
+
+         for (val= 0; val < nb_values; val++)
+         {
+            vstring.str("");
+            if (MAX(1, first_occurrence_root[val]->nb_value-1) < TIC_THRESHOLD)
+               plot[0].xtics= 1;
+
+            if ((int)(first_occurrence_root[val]->max * YSCALE)+1 < TIC_THRESHOLD)
+               plot[0].ytics= 1;
+
+            plot[0].xrange= Range(0, MAX(first_occurrence_root[val]->nb_value-1 , 1));
+            plot[0].yrange= Range(0, (int)(first_occurrence_root[val]->max*YSCALE)+1);
+            vstring << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
+                    << " " << val << " " << STAT_label[STATL_HISTOGRAM];
+            plot[0].title= vstring.str();
+            first_occurrence_root[val]->plotable_frequency_write(plot[0][val]);
+
+            // plot[0].bidule ="autofreq";
+         }
+         break;
+      }
+      case FIRST_OCCURRENCE_LEAVES :
+      {
+         break;
+      }
+      case SOJOURN_SIZE :
+      {
+         break;
+      }
+      case NB_ZONES :
+      {
+         break;
+      }
+      case NB_OCCURRENCES :
+      {
+         break;
+      }
+   }
+   /*
+   // first_occurrence_leaves
+   histo_index = j;
+
+   if (first_occurrence_leaves != NULL)
+   {
+      for (i= 0; i < 2; i++)
+      {
+         ostringstream file_name[2];
+
+         switch (i)
+         {
+            case 0 :
+               file_name[0] << prefix << variable+1 << 2 << ".plot";
+               break;
+            case 1 :
+               file_name[0] << prefix << variable+1 << 2 << ".print";
+               break;
+         }
+
+         ofstream out_file((file_name[0].str()).c_str());
+
+         if (i == 1)
+         {
+            out_file << "set terminal postscript" << endl;
+            file_name[1] << label(prefix) << variable+1 << 2 << ".ps";
+            out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+         }
+
+         out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                  << "set title";
+         if ((title != NULL) || (nb_variables > 1))
+         {
+            out_file << " \"";
+            if (title)
+            {
+               out_file << title;
+               if (nb_variables > 1)
+                  out_file << " - ";
+            }
+            if (nb_variables > 1)
+               out_file << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+
+            out_file << "\"";
+         }
+         out_file << "\n\n";
+
+         j= histo_index;
+
+         start= true;
+
+         for (val= 0; val < nb_values; val++)
+         {
+            if (!start)
+            {
+              if (i == 0)
+                 out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+              out_file << endl;
+            }
+            else
+               start= false;
+
+            if (MAX(1, first_occurrence_leaves[val]->nb_value-1) < TIC_THRESHOLD)
+               out_file << "set xtics 0,1" << endl;
+
+            if ((int)(first_occurrence_leaves[val]->max * YSCALE)+1 < TIC_THRESHOLD)
+               out_file << "set ytics 0,1" << endl;
+
+            out_file << "plot [0:" << MAX(first_occurrence_leaves[val]->nb_value-1 , 1) << "] [0:"
+                       << (int)(first_occurrence_leaves[val]->max*YSCALE)+1 << "] \""
+                       << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                       << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
+                       << " " << val << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+
+            if (MAX(1 , first_occurrence_leaves[val]->nb_value-1) < TIC_THRESHOLD)
+               out_file << "set xtics autofreq" << endl;
+
+            if ((int)(first_occurrence_leaves[val]->max*YSCALE)+1 < TIC_THRESHOLD)
+               out_file << "set ytics autofreq" << endl;
+         }
+
+         if (i == 1)
+            out_file << "\nset terminal x11" << endl;
+
+         out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+      }
+   }
+
+   // sojourn_size
+   histo_index= j;
+
+   if (sojourn_size != NULL)
+   {
+      for (i= 0; i < 2; i++)
+      {
+         ostringstream file_name[2];
+
+         switch (i)
+         {
+            case 0 :
+               file_name[0] << prefix << variable+1 << 3 << ".plot";
+               break;
+            case 1 :
+               file_name[0] << prefix << variable+1 << 3 << ".print";
+               break;
+         }
+
+         ofstream out_file((file_name[0].str()).c_str());
+
+         if (i == 1)
+         {
+            out_file << "set terminal postscript" << endl;
+            file_name[1] << label(prefix) << variable+1 << 3 << ".ps";
+            out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+         }
+
+         out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                  << "set title";
+
+         if ((title != NULL) || (nb_variables > 1))
+         {
+            out_file << " \"";
+            if (title != NULL)
+            {
+               out_file << title;
+               if (nb_variables > 1)
+                  out_file << " - ";
+            }
+            if (nb_variables > 1)
+               out_file << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+            out_file << "\"";
+         }
+         out_file << "\n\n";
+
+         j= histo_index;
+
+         start= true;
+         for (val= 0; val < nb_values; val++)
+         {
+            if (sojourn_size[val]->nb_element > 0)
+            {
+               if (!start)
+               {
+                  if (i == 0)
+                     out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                  out_file << endl;
+               }
+               else
+                  start= false;
+
+               if (sojourn_size[val]->nb_value-1 < TIC_THRESHOLD)
+                  out_file << "set xtics 0,1" << endl;
+
+               if ((int)(sojourn_size[val]->max*YSCALE)+1 < TIC_THRESHOLD)
+                  out_file << "set ytics 0,1" << endl;
+
+               out_file << "plot [0:" << sojourn_size[val]->nb_value-1 << "] [0:"
+                        << (int)(sojourn_size[val]->max*YSCALE)+1 << "] \""
+                        << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                        << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_OUTPUT] << " " << val
+                        << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+                        << "\" with impulses" << endl;
+
+               if (sojourn_size[val]->nb_value-1 < TIC_THRESHOLD)
+                  out_file << "set xtics autofreq" << endl;
+
+               if ((int)(sojourn_size[val]->max*YSCALE)+1 < TIC_THRESHOLD)
+                  out_file << "set ytics autofreq" << endl;
+            }
+         }
+         if (i == 1)
+            out_file << "\nset terminal x11" << endl;
+
+         out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+      }
+   }
+
+   // nb_zones and nb_occurrences
+   histo_index= j;
+
+   if ((nb_zones != NULL) && (nb_occurrences != NULL))
+   {
+      for (i= 0; i < 2; i++)
+      {
+         ostringstream file_name[2];
+
+         switch (i)
+         {
+            case 0 :
+               file_name[0] << prefix << variable+1 << 4 << ".plot";
+               break;
+            case 1 :
+               file_name[0] << prefix << variable+1 << 4 << ".print";
+               break;
+         }
+
+         ofstream out_file((file_name[0].str()).c_str());
+
+         if (i == 1)
+         {
+            out_file << "set terminal postscript" << endl;
+            file_name[1] << label(prefix) << variable + 1 << 4 << ".ps";
+            out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+         }
+
+         out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                  << "set title";
+
+         if ((title != NULL) || (nb_variables > 1))
+         {
+            out_file << " \"";
+            if (title != NULL)
+            {
+               out_file << title;
+               if (nb_variables > 1)
+                  out_file << " - ";
+            }
+            if (nb_variables > 1)
+               out_file << STAT_label[STATL_VARIABLE] << " " << variable+1;
+
+            out_file << "\"";
+         }
+         out_file << "\n\n";
+
+         j= histo_index;
+
+         for (val= 0; val < nb_values; val++)
+         {
+           if (nb_zones[val]->nb_value-1 < TIC_THRESHOLD)
+              out_file << "set xtics 0,1" << endl;
+
+           if ((int)(nb_zones[val]->max*YSCALE)+1 < TIC_THRESHOLD)
+              out_file << "set ytics 0,1" << endl;
+
+           out_file << "plot [0:" << nb_zones[val]->nb_value-1 << "] [0:"
+                    << (int)(nb_zones[val]->max * YSCALE) + 1 << "] \""
+                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                    << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
+                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM]
+                    << "\" with impulses" << endl;
+
+           if (nb_zones[val]->nb_value-1 < TIC_THRESHOLD)
+              out_file << "set xtics autofreq" << endl;
+
+           if ((int)(nb_zones[val]->max*YSCALE)+1 < TIC_THRESHOLD)
+              out_file << "set ytics autofreq" << endl;
+
+           if (i == 0)
+              out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+
+           out_file << endl;
+
+           if (nb_occurrences[val]->nb_value-1 < TIC_THRESHOLD)
+              out_file << "set xtics 0,1" << endl;
+
+           if ((int)(nb_occurrences[val]->max*YSCALE)+1 < TIC_THRESHOLD)
+              out_file << "set ytics 0,1" << endl;
+
+           out_file << "plot [0:" << nb_occurrences[val]->nb_value-1 << "] [0:"
+                    << (int)(nb_occurrences[val]->max*YSCALE)+1 << "] \""
+                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
+                    << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
+                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM]
+                    << "\" with impulses" << endl;
+
+           if (nb_occurrences[val]->nb_value-1 < TIC_THRESHOLD)
+              out_file << "set xtics autofreq" << endl;
+
+           if ((int)(nb_occurrences[val]->max*YSCALE)+1 < TIC_THRESHOLD)
+              out_file << "set ytics autofreq" << endl;
+
+           if (i == 0)
+              out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+
+           out_file << endl;
+         }
+
+         if (hsize.nb_value-1 < TIC_THRESHOLD)
+            out_file << "set xtics 0,1" << endl;
+
+         if ((int)(hsize.max*YSCALE)+1 < TIC_THRESHOLD)
+            out_file << "set ytics 0,1" << endl;
+
+         out_file << "plot [0:" << hsize.nb_value - 1 << "] [0:"
+                  << (int)(hsize.max*YSCALE)+1 << "] \""
+                  << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+                  << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+                  << "\" with impulses" << endl;
+
+         if (hsize.nb_value-1 < TIC_THRESHOLD)
+            out_file << "set xtics autofreq" << endl;
+
+         if ((int)(hsize.max*YSCALE)+1 < TIC_THRESHOLD)
+            out_file << "set ytics autofreq" << endl;
+
+         if (i == 1)
+            out_file << "\nset terminal x11" << endl;
+
+         out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+      }
+   }
+
+   */
+   return plotset;
+}
+
 
 std::ostream& Tree_characteristics::ascii_write_first_occurrence_root(std::ostream &os,
                                                                       bool exhaustive,

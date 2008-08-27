@@ -3206,6 +3206,10 @@ bool Hidden_markov_tree::plot_write(Format_error& error,
 
    error.init();
 
+   cout << "Call to Hidden_markov_tree::plot_write with prefix = "
+        << prefix << endl;
+
+
    if (!status)
      error.update(STAT_error[STATR_FILE_PREFIX]);
 
@@ -6317,6 +6321,8 @@ bool Hidden_markov_tree_data::plot_write(Format_error& error,
    if (markov != NULL)
    {
       status= markov->plot_write(prefix, title, this);
+      cout << "Call to Hidden_markov_tree_data::plot_write with prefix = "
+	   << prefix << endl;
 
       error.init();
 

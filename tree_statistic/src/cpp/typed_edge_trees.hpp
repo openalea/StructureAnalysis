@@ -3406,7 +3406,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_print(ostream& os,
                                                                bool comment_flag,
                                                                int line_nb_character) const
 {
-#ifdef __GNUC__  
+#ifdef __GNUC__
 #warning Typed_edge_trees<Generic_Int_fl_container>::ascii_print  not implemented
 #endif
    return os;
@@ -3556,8 +3556,8 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(Format_error&
 
 template<typename Generic_Int_fl_container>
 bool Typed_edge_trees<Generic_Int_fl_container>::plot_write(Format_error& error,
-                                                          const char * prefix,
-                                                          const char * title) const
+                                                            const char * prefix,
+                                                            const char * title) const
 {
    register int var;
    bool status= true, characteristics_computed;
@@ -3593,125 +3593,70 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_write(Format_error& error,
    return status;
 }
 
-/*{
-   bool status;
-   register int var, i , j , k;
-   int nb_histo;
-   const Histogram **phisto; // = NULL;
-   ostringstream data_file_name;
+/*****************************************************************
+ *
+ *  Graphical output of Typed_edge_trees
+ *  using a plotable data structure, the type of characteristic
+ *  and the considered variable
+ *
+ **/
+
+template<typename Generic_Int_fl_container>
+MultiPlotSet* Typed_edge_trees<Generic_Int_fl_container>::get_plotable(Format_error& error,
+                                                                       int plot_type,
+                                                                       int variable) const
+{
+   bool characteristics_computed;
+   MultiPlotSet *plotset= NULL;
+   Histogram **charac= NULL;
 
    error.init();
 
-   // data file writing
-
-   data_file_name << prefix << ".dat";
-
-   phisto= new (const Histogram*)[_nb_integral+1];
-
-   nb_histo= 0;
-   for(var= 0; var < _nb_integral; var++)
-      if ((_type[var] != POSITION) && (characteristics[var]->marginal != NULL))
-         phisto[nb_histo++]= characteristics[var]->marginal;
-
-   status= hsize->plot_print((data_file_name.str()).c_str(), nb_histo, phisto);
-   // Is something similar required for hnb_children ?
-
-   delete [] phisto;
-
-   if (!status)
-      error.update(STAT_error[STATR_FILE_PREFIX]);
-   // writes the command and printing files
+   if (characteristics == NULL)
+      error.update(STAT_TREES_error[STATR_CHARACTERISTICS_NOT_COMPUTED]);
    else
    {
-      for(i= 0; i < 2; i++)
+      switch (plot_type)
       {
-         j= 2;
-         ostringstream file_name[2];
-
-         switch (i)
+         case FIRST_OCCURRENCE_ROOT :
          {
-            case 0 :
-              file_name[0] << prefix << ".plot";
-              break;
-            case 1 :
-              file_name[0] << prefix << ".print";
-              break;
+            charac= characteristics[variable]->first_occurrence_root;
+            break;
          }
-
-         ofstream out_file((file_name[0].str()).c_str());
-
-         if (i == 1)
+         case FIRST_OCCURRENCE_LEAVES :
          {
-            out_file << "set terminal postscript" << endl;
-            file_name[1] << label(prefix) << ".ps";
-            out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+            charac= characteristics[variable]->first_occurrence_leaves;
+            break;
          }
-
-         out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
-                  << "set title";
-         if (title)
-            out_file << " \"" << title << "\"";
-
-         out_file << "\n\n";
-
-         for(k= 0; k < _nb_integral; k++)
+         case SOJOURN_SIZE :
          {
-            if ((_type[k] != POSITION) && (characteristics[k]->marginal != NULL))
-            {
-               if ((characteristics[k]->marginal)->nb_value-1 < TIC_THRESHOLD)
-                  out_file << "set xtics 0,1" << endl;
-
-               if ((int)((characteristics[k]->marginal)->max * YSCALE) + 1 < TIC_THRESHOLD)
-                  out_file << "set ytics 0,1" << endl;
-
-               out_file << "plot [0:" << MAX((characteristics[k]->marginal)->nb_value - 1 , 1) << "] [0:"
-                        << (int)((characteristics[k]->marginal)->max * YSCALE) + 1 << "] \""
-                        << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
-                        << STAT_label[STATL_VARIABLE] << " " << k + 1 << " - "
-                        << (_type[k] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
-                        << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
-
-               if ((characteristics[k]->marginal)->nb_value-1 < TIC_THRESHOLD)
-                  out_file << "set xtics autofreq" << endl;
-
-               if ((int)((characteristics[k]->marginal)->max * YSCALE)+1 < TIC_THRESHOLD)
-                  out_file << "set ytics autofreq" << endl;
-
-
-               if (i == 0)
-                  out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-
-               out_file << endl;
-            }
-        }
-
-         if (hsize->nb_value-1 < TIC_THRESHOLD)
-            out_file << "set xtics 0,1" << endl;
-
-         if ((int)(hsize->max * YSCALE) + 1 < TIC_THRESHOLD)
-            out_file << "set ytics 0,1" << endl;
-
-         out_file << "plot [0:" << hsize->nb_value-1 << "] [0:"
-                  << (int)(hsize->max * YSCALE)+1 << "] \""
-                  << label((data_file_name.str()).c_str()) << "\" using 1 title \""
-                  << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
-                  << "\" with impulses" << endl;
-
-         if (hsize->nb_value-1 < TIC_THRESHOLD)
-            out_file << "set xtics autofreq" << endl;
-
-         if ((int)(hsize->max * YSCALE)+1 < TIC_THRESHOLD)
-            out_file << "set ytics autofreq" << endl;
-
-         if (i == 1)
-            out_file << "\nset terminal x11" << endl;
-
-         out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+            charac= characteristics[variable]->sojourn_size;
+            break;
+         }
+         case NB_ZONES :
+         {
+            charac= characteristics[variable]->nb_zones;
+            break;
+         }
+         case NB_OCCURRENCES :
+         {
+            charac= characteristics[variable]->nb_occurrences;
+            break;
+         }
       }
-  }
-  return status;
+
+      // check whether required characteristic is computed
+      characteristics_computed= (charac != NULL);
+
+      if (characteristics_computed)
+         plotset= characteristics[variable]->get_plotable(plot_type,
+                                                          variable,
+                                                          _nb_integral,
+                                                          _type[variable]);
+   }
+   return plotset;
 }
-*/
+
 
 /*****************************************************************
  *
@@ -4196,6 +4141,28 @@ Tree_characteristics* Typed_edge_trees<Generic_Int_fl_container>::get_characteri
       res= NULL;
 
    return res; // characteristics[variable];
+}
+
+/*****************************************************************
+ *
+ *  Check whether given characteristic, refered to by charac, is
+ *  present for the variable
+ *
+ **/
+
+template<typename Generic_Int_fl_container>
+bool Typed_edge_trees<Generic_Int_fl_container>::is_characteristic(int variable, int charac) const
+{
+  bool present= true;
+
+  if ((variable >= _nb_integral) || (variable < 0))
+     return false;
+  if (characteristics != NULL)
+     present= characteristics[variable]->is_characteristic(charac);
+  else
+     present= false;
+
+   return present;
 }
 
 /*****************************************************************

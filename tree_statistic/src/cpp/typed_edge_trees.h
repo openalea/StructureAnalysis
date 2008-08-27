@@ -432,6 +432,11 @@ public :
     bool plot_write(Format_error& error, const char * prefix,
                     const char * title= NULL) const;
 
+    /** Graphical output of \e self*/
+    MultiPlotSet* get_plotable(Format_error& error,
+                               int plot_type,
+                               int variable) const;
+
     std::ostream& ascii_write_size_histogram(std::ostream& os,
                                              bool exhaustive,
                                              bool file_flag) const;
@@ -500,6 +505,9 @@ public :
    Tree_characteristics* get_characteristics(int variable) const;
    // access to the characteristic quantity distributions
    // for the observed variables
+
+   // check whether given characteristic is present
+   bool is_characteristic(int variable, int charac) const;
 
    // ? Tree_curves* get_index_value(int variable) const;
    // ? Tree_curves** get_index_value() const;
@@ -702,6 +710,9 @@ protected :
 
    Histogram* get_characteristic(int value, ptHistogram_array h) const;
 
+   // check whether given characteristic is present
+   bool is_characteristic(int charac) const;
+
    void build_marginal_histogram(Typed_edge_one_int_tree** otrees1);
    void build_first_occurrence_root_histogram(Typed_edge_one_int_tree** otrees1, int imax_depth);
    void build_first_occurrence_leaves_histogram(Typed_edge_one_int_tree** otrees1, int imax_depth);
@@ -725,6 +736,12 @@ protected :
   /** Gnuplot output of \e self*/
    bool plot_print(const char * prefix, const char * title, int variable,
                    int nb_variables, int type, const Histogram& hsize) const;
+
+  /** Graphical output of \e self*/
+  MultiPlotSet* get_plotable(int plot_type,
+                             int variable,
+                             int nb_variables,
+                             int type) const;
 
 public :
 

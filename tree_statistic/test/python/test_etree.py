@@ -9,8 +9,8 @@ sup_bound=3
 probability= 0.6
 ident=stat_tool.DistributionIdentifier.UNIFORM
 parameter=stat_tool.D_DEFAULT
-distrib= stat_tool.Parametric(ident, inf_bound, sup_bound, 
-                               parameter, probability)
+distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, 
+                                    parameter, probability)
 print distrib
 max_depth= 3
 max_size= 8

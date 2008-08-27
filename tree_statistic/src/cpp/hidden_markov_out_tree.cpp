@@ -351,6 +351,10 @@ bool Hidden_markov_out_tree::plot_write(Format_error& error,
 {
    bool status= plot_write(prefix, title, markov_data);
 
+   cout << "Call to Hidden_markov_out_tree::plot_write with prefix = "
+        << prefix << endl;
+
+
    error.init();
 
    if (!status)
@@ -577,6 +581,11 @@ bool Hidden_markov_out_tree::plot_write(const char * prefix, const char * title,
    Histogram *hsize= NULL, **observation= NULL;
    Tree_characteristics *characteristics= NULL;
 
+   cout << "Call to Hidden_markov_out_tree::plot_write with prefix = "
+        << prefix << endl;
+
+
+   // print characteristic distributions for state process
    if ((otrees != NULL) && (otrees->_type[0] == STATE))
    {
       variable= 0;
@@ -586,8 +595,7 @@ bool Hidden_markov_out_tree::plot_write(const char * prefix, const char * title,
 
    status= npprocess[0]->plot_print(prefix, title, 0, NULL, characteristics, hsize);
 
-   // printing of the (characteristic ?) distributions of each
-   // observed process
+   // print characteristic distributions of each observed process
 
    if (status)
    {

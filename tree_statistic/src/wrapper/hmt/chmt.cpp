@@ -160,7 +160,7 @@ bool CiHmot_wrapper_file_ascii_write1(const Hidden_markov_out_tree& hmt,
 { return CiHmot_wrapper_file_ascii_write2(hmt, path, false); }
 
 void CiHmot_wrapper_state_permutation(const Hidden_markov_out_tree& hmt,
-                                      list perm)
+                                      boost::python::list perm)
 {
    bool status= true, several_errors= false;
    int llength, i;
@@ -307,7 +307,7 @@ CiHmot_wrapper_simulate_trees(const Hidden_markov_out_tree& hmt,
    return markov_data;
 }
 
-list CiHmot_wrapper_state_profile(const Hidden_markov_out_tree& hmt,
+boost::python::list CiHmot_wrapper_state_profile(const Hidden_markov_out_tree& hmt,
                                   int viterbi_algorithm,
                                   int nb_state_trees,
                                   int index,
@@ -316,7 +316,7 @@ list CiHmot_wrapper_state_profile(const Hidden_markov_out_tree& hmt,
    bool status= false;
    unsigned int cpt_msg= 0;
    Format_error error;
-   list res;
+   boost::python::list res;
    str msg;
    ostringstream error_message;
    std::vector<ostringstream*> messages;
@@ -474,6 +474,9 @@ void CiHmot_wrapper_plot_write(const Hidden_markov_out_tree& hmt,
    ostringstream error_message;
    Format_error error;
 
+   cout << "Call to CiHmot_wrapper_plot_write with prefix = "
+        << prefix << endl;
+
    status= hmt.plot_write(error, prefix, title);
    if (not status)
    {
@@ -551,7 +554,7 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition(const Hidden
                                                                     double saem_exponent,
                                                                     double self_transition,
                                                                     int nb_iter,
-                                                                    list force_param)
+                                                                    boost::python::list force_param)
 {
    bool status= true, several_errors= false;
    const int nb_variables= hmtd.get_nb_int() + hmtd.get_nb_float();
@@ -722,7 +725,8 @@ BOOST_PYTHON_MODULE(chmt)
                                   return_value_policy< manage_new_object >())
         .def("FileAsciiWrite", &CiHmot_wrapper_file_ascii_write1)
         .def("FileAsciiWrite", &CiHmot_wrapper_file_ascii_write2)
-        .def("Plot", &CiHmot_wrapper_plot_write)
+        .def("plot_write", &CiHmot_wrapper_plot_write,
+	                   "Write into a gnuplot file.")
         .def("Simulate", &CiHmot_wrapper_simulate_histo,
                          return_value_policy< manage_new_object >())
         .def("Simulate", &CiHmot_wrapper_simulate_size,
@@ -737,8 +741,8 @@ BOOST_PYTHON_MODULE(chmt)
                              "StateProfile(self, int, int, int, int) -> list \n\n"
                              "return trees object and strings"
                              "for the state tree analysis\n")
-        .def("StateProfilePlot", &CiHmot_wrapper_state_profile_plot_write,
-                                 "StateProfilePlot(self, str, str, int, int) -> void \n\n"
+        .def("state_profile_plot_write", &CiHmot_wrapper_state_profile_plot_write,
+                                 "state_profile_plot_write(self, str, str, int, int, int) -> void \n\n"
                                  "write Gnuplot files for state and entropy"
                                  "profiles for the state tree analysis\n")
     ;
@@ -767,7 +771,7 @@ BOOST_PYTHON_MODULE(chmt)
              return_value_policy< manage_new_object >())
         .def("ExtractValueHistogram", &Chmt_data_wrapper_extract_value,
                                       return_value_policy< manage_new_object>())
-        .def("Plot", &CHmt_data_wrapper_plot_write)
+        .def("plot_write", &CHmt_data_wrapper_plot_write)
         .def("__str__", &CHmt_data_wrapper_ascii_write0)
     ;
 

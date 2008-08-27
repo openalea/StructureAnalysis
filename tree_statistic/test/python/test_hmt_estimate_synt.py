@@ -7,7 +7,7 @@ sup_bound=3
 probability= 0.6
 ident=stat_tool.DistributionIdentifier.UNIFORM
 parameter=stat_tool.D_DEFAULT
-distrib= stat_tool.Parametric(ident, inf_bound, sup_bound, parameter, probability)
+distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
 # Distribution used for the number of children and the tree attributes
 file_name="hmot_np_2s.hmt"
 # read a HMT from a file
@@ -38,7 +38,7 @@ print "Parameter estimation using a initial HMT "+ \
 "with bad number of output processes:"
 try:
     EH=T.Estimate("HIDDEN_MARKOV_TREE", H2O, 20)
-except stat_tool.FormatError, f:
+except trees.FormatError, f:
     print f
 else:
     print "Failed to raise exception for bad number of output processes"
@@ -52,7 +52,7 @@ else:
 print "Parameter estimation with bad value for Saem exponent:"
 try:
     EH=T.Estimate("HIDDEN_MARKOV_TREE", H, 20, Algorithm="GibbsSampling", Saem=2.)
-except stat_tool.FormatError, f:
+except trees.FormatError, f:
     print f
 else:
     print "Failed to raise exception for bad value of Saem"
@@ -82,7 +82,7 @@ EH.Display()
 print "Extract the data part of the initial (file) HMT, with no data:"
 try:
     HMTD=H.ExtractData()
-except stat_tool.FormatError, f:
+except trees.FormatError, f:
     print f
 else:
     print "Failed to raise exception for no data part in HiddenMarkovTree"
@@ -109,6 +109,8 @@ print HISTO
 print "Observation histogram for variable 1 and state 1:"
 OBS1=S.ExtractHistogram("Observation", 1, 1)
 print OBS1
+# EH.Plot("Observation", variable=0)
+# S.Plot("Observation", variable=0)
 # State profiles
 EH.Display(ViewPoint="StateProfile", TreeId=1, NbStateTrees=4)
 # parameter estimation from the simulated trees

@@ -4,11 +4,15 @@ import string
 import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
 import chmt
 
-_PlotManager=stat_tool.stat_tool._PlotManager
-VariableType=stat_tool.VariableType
-FormatError=stat_tool.FormatError
+VariableType=stat_tool.VariableTypeBis
+FormatError=stat_tool.StatToolError
 CharacteristicType=trees.CharacteristicType
 EntropyAlgorithm=chmt.EntropyAlgorithm
+VariableTypeDict=VariableType.values
+
+from openalea.stat_tool import interface
+interface.extend_class(chmt.CiHmot, interface.StatInterface)
+interface.extend_class(chmt.CHmt_data, interface.StatInterface)
 
 class HiddenMarkovTree:
     """An implementation of the hidden Markov out-trees with conditionally 
@@ -308,46 +312,46 @@ class HiddenMarkovTree:
                 file_id+=str(ftype+2)
             # in the special case of observation distributions, 
             # the suffix can be "0" or void, depending on the number of values
-            prefix="ftmp"
-            file_created=False
-            file_list=[]
+##            prefix="ftmp"
+##            file_created=False
+##            file_list=[]
             # find a non existing file name
-            while not file_created:
-                try:
-                    cfile=open(prefix+'01.dat','r')
-                except IOError:
-                    file_created=True
-                else:
-                    import random
-                    prefix+=str(random.randint(1,9))
+##            while not file_created:
+##                try:
+##                    cfile=open(prefix+'01.dat','r')
+##                except IOError:
+##                    file_created=True
+##                else:
+##                    import random
+##                    prefix+=str(random.randint(1,9))
             try:
-                self.__chmt.Plot(os.getcwd()+"/"+prefix, Title)
+                self.__chmt.plot(Title=Title, Suffix=file_id)
                 # build the list of the created files: 
-                for var in range(self.__chmt.NbInt()+1):
-                    for char in [str(c) for c in range(5)]+[""]:
-                        filename=prefix+str(var)+char
-                        try:
-                            tmpfile=open(filename+'.plot', 'r')
-                        except IOError:
-                            pass
-                        else:
-                            tmpfile.close()
-                            # add the .plot and .print files
-                            file_list+=[filename+extension
-                                for extension in [".plot", ".print"]]
-                            if (char=='2'):
-                                # add the .dat file
-                                file_list+=[prefix+str(var)+"1.dat"]
-                            elif  (char==''):
-                                file_list+=[prefix+str(var)+".dat"]
-                            # get the correct file_id in the case 
-                            # of observation distributions
-                            if (((var==variable+1) and is_observation) 
-                                and (char=='0')):
-                                file_id+="0"
+##                for var in range(self.__chmt.NbInt()+1):
+##                    for char in [str(c) for c in range(5)]+[""]:
+##                        filename=prefix+str(var)+char
+##                        try:
+##                            tmpfile=open(filename+'.plot', 'r')
+##                        except IOError:
+##                            pass
+##                        else:
+##                            tmpfile.close()
+##                            # add the .plot and .print files
+##                            file_list+=[filename+extension
+##                                for extension in [".plot", ".print"]]
+##                            if (char=='2'):
+##                                # add the .dat file
+##                                file_list+=[prefix+str(var)+"1.dat"]
+##                            elif  (char==''):
+##                                file_list+=[prefix+str(var)+".dat"]
+##                            # get the correct file_id in the case 
+##                            # of observation distributions
+##                            if (((var==variable+1) and is_observation) 
+##                                and (char=='0')):
+##                                file_id+="0"
             except RuntimeError, f:
-                for tmpfile in file_list:
-                   os.remove(tmpfile)
+##                for tmpfile in file_list:
+##                   os.remove(tmpfile)
                 raise FormatError, f
         else: # ViewPoint.upper()=="STATEPROFILE"
             nb_windows=4
@@ -373,57 +377,55 @@ class HiddenMarkovTree:
                 raise ValueError, msg    
             ref_file_id=""
             file_id=ref_file_id
-            prefix="ftmp"
-            file_created=False
-            file_list=[]
-            # find a non existing file name
-            while not file_created:
-                try:
-                    cfile0=open(prefix+'0.dat','r')
-                except IOError:
-                    try:
-                        cfile1=open(prefix+'1.dat','r')
-                    except IOError:
-                        file_created=True
-                    else:
-                        import random
-                        prefix+=str(random.randint(1,9))
-                else:
-                    import random
-                    prefix+=str(random.randint(1,9))
+##            prefix="ftmp"
+##            file_created=False
+##            file_list=[]
+##            # find a non existing file name
+##            while not file_created:
+##                try:
+##                    cfile0=open(prefix+'0.dat','r')
+##                except IOError:
+##                    try:
+##                        cfile1=open(prefix+'1.dat','r')
+##                    except IOError:
+##                        file_created=True
+##                    else:
+##                        import random
+##                        prefix+=str(random.randint(1,9))
+##                else:
+##                    import random
+##                    prefix+=str(random.randint(1,9))
             try:
-                self.__chmt.StateProfilePlot(os.getcwd()+"/"+prefix, 
-                                             Title,
-                                             TreeId,
-                                             EndVertex,
-                                             entropy_algo)
+                self.__chmt.plot(Title=Title, Suffix=file_id, 
+                                 ViewPoint="StateProfile",
+                                 Params=(TreeId, EndVertex, entropy_algo))
                 # build the list of the created files: 
-                for char in [str(c) for c in range(2)]+[""]:
-                    filename=prefix+char
-                    try:
-                        tmpfile=open(filename+'.dat', 'r')
-                    except IOError:
-                        pass
-                    else:
-                        tmpfile.close()
-                        file_list+=[filename+".dat"]
-                file_list+=[prefix+extension
-                    for extension in [".plot", ".print"]]
+##                for char in [str(c) for c in range(2)]+[""]:
+##                    filename=prefix+char
+##                    try:
+##                        tmpfile=open(filename+'.dat', 'r')
+##                    except IOError:
+##                        pass
+##                    else:
+##                        tmpfile.close()
+##                        file_list+=[filename+".dat"]
+##                file_list+=[prefix+extension
+##                    for extension in [".plot", ".print"]]
             except RuntimeError, f:
-                for tmpfile in file_list:
-                   os.remove(tmpfile)
+##                for tmpfile in file_list:
+##                   os.remove(tmpfile)
                 raise FormatError, f
-        try:
-            # check if the desired file exists
-            cfile=open(prefix+file_id+'.plot','r')
-        except IOError:
-            for tmpfile in file_list:
-               os.remove(tmpfile)
-            msg='Characteristic not computed: '+str(ViewPoint)
-            raise ValueError, msg                
-        else:
-            self.__plot= _PlotManager(file_list, prefix+file_id, 
-                                                 nb_windows)
+##        try:
+##            # check if the desired file exists
+##            cfile=open(prefix+file_id+'.plot','r')
+##        except IOError:
+##            for tmpfile in file_list:
+##               os.remove(tmpfile)
+##            msg='Characteristic not computed: '+str(ViewPoint)
+##            raise ValueError, msg                
+##        else:
+##            self.__plot= _PlotManager(file_list, prefix+file_id, 
+##                                                 nb_windows)
 
 ##        import os
 ##        prefix="ftmp"
@@ -506,17 +508,16 @@ class HiddenMarkovTree:
                                      "expected"
             else:
                 # Simulate(size_histo, nb_children_histo)
-                if issubclass(arg1.__class__, stat_tool.Histogram):
-                    if issubclass(arg2.__class__, stat_tool.Histogram):
+                if issubclass(arg1.__class__, stat_tool._DistributionData):
+                    if issubclass(arg2.__class__, stat_tool._DistributionData):
                         chmt_data= \
-                            self.__chmt.Simulate(arg1._chisto(), arg2._chisto(), 
-                                                 True, False)
+                            self.__chmt.Simulate(arg1, arg2, True, False)
                     else:
                         raise TypeError, "bad type for argument 2:  " \
-                                         "stat_tool.Histogram expected"
+                                         "stat_tool._DistributionData expected"
                 else:
                     raise TypeError, "bad type for argument 1:  " \
-                                     "stat_tool.Histogram expected"
+                                     "stat_tool._DistributionData expected"
         except RuntimeError, error:
                 raise FormatError, error
         chmt_data=chmt_data.StateTrees()
@@ -671,7 +672,7 @@ class HiddenMarkovTreeData(trees.Trees):
                     raise FormatError, error
             else:
                 chisto=trees.Trees.ExtractHistogram(self, nature)
-            return stat_tool.Histogram(chisto)
+            return chisto
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"
 
@@ -699,74 +700,88 @@ class HiddenMarkovTreeData(trees.Trees):
             # Plot(ViewPoint="Observation", variable)
             # Graphical output of the features using Gnuplot.py
             import os
-            ftype=CharacteristicType.OBSERVATION
-            ref_file_id=str(self._valid_cvariable(variable))
+            ftype = CharacteristicType.OBSERVATION
+            if ((self.Type(variable) == VariableType.INT_VALUE) or
+                (self.Type(variable) == VariableType.REAL_VALUE)):
+                cvariable = self._valid_cvariable(variable)
+            else:
+                msg = "Bad variable type for variable ", variable, ": " + \
+                      str(self.Type(variable))
+                raise TypeError, msg
+            ref_file_id = str(cvariable)
+            # if the number of values is low for variable, 
+            # each characteristic is drawn into a file with "0" suffix
+            if (self.__ctrees.IsCharacteristic(cvariable,
+                                               CharacteristicType.NB_ZONES)):
+                file_id = ref_file_id + "0"
+            else:
+                file_id = ref_file_id
             # part of the filename which identifies the graph to be displayed
-            prefix="ftmp"
-            file_created=False
-            file_list=[]
-            # find a non existing file name
-            while not file_created:
-                try:
-                    cfile=open(prefix+'1.plot','r')
-                except IOError:
-                    file_created=True
-                else:
-                    import random
-                    prefix+=str(random.randint(1,9))
+##            prefix="ftmp"
+##            file_created=False
+##            file_list=[]
+##            # find a non existing file name
+##            while not file_created:
+##                try:
+##                    cfile=open(prefix+'1.plot','r')
+##                except IOError:
+##                    file_created=True
+##                else:
+##                    import random
+##                    prefix+=str(random.randint(1,9))
             try:
-                self.__ctrees.Plot(os.getcwd()+"/"+prefix, Title)
+                self.__ctrees.plot(Title=Title, Suffix=file_id)
                 # build the list of the created files: 
-                for var in [str(self._valid_cvariable(v)+1) 
-                            for v in range(self.NbInt())]+["0"]:
-                    for char in [str(c) for c in range(5)]+[""]:
-                        filename=prefix+var+char
-                        try:
-                            tmpfile=open(filename+'.plot', 'r')
-                        except IOError:
-                            pass
-                        else:
-                            tmpfile.close()
-                            # add the .plot and .print files
-                            file_list+=[filename+extension
-                                for extension in [".plot", ".print"]]
-                for var in [str(self._valid_cvariable(v)+1) 
-                            for v in range(self.NbInt())]+["0"]:
-                    for char in [str(c) for c in range(5)]+[""]:
-                        filename=prefix+char+var
-                        try:
-                            tmpfile=open(filename+'.dat', 'r')
-                        except IOError:
-                            pass
-                        else:
-                            # add the .dat file
-                            tmpfile.close()
-                            file_list+=[filename+".dat"]
+##                for var in [str(self._valid_cvariable(v)+1) 
+##                            for v in range(self.NbInt())]+["0"]:
+##                    for char in [str(c) for c in range(5)]+[""]:
+##                        filename=prefix+var+char
+##                        try:
+##                            tmpfile=open(filename+'.plot', 'r')
+##                        except IOError:
+##                            pass
+##                        else:
+##                            tmpfile.close()
+##                            # add the .plot and .print files
+##                            file_list+=[filename+extension
+##                                for extension in [".plot", ".print"]]
+##                for var in [str(self._valid_cvariable(v)+1) 
+##                            for v in range(self.NbInt())]+["0"]:
+##                    for char in [str(c) for c in range(5)]+[""]:
+##                        filename=prefix+char+var
+##                        try:
+##                            tmpfile=open(filename+'.dat', 'r')
+##                        except IOError:
+##                            pass
+##                        else:
+##                            # add the .dat file
+##                            tmpfile.close()
+##                            file_list+=[filename+".dat"]
             except RuntimeError, f:
-                for tmpfile in file_list:
-                   os.remove(tmpfile)
+##                for tmpfile in file_list:
+##                   os.remove(tmpfile)
                 raise FormatError, f
-            if (prefix+ref_file_id+'0.plot') in file_list:
-                file_id=ref_file_id+"0"
-            else:
-                file_id=ref_file_id
-            try:
-                # check if the desired file exists
-                cfile=open(prefix+file_id+'.plot','r')
-            except IOError:
-                for tmpfile in file_list:
-                   os.remove(tmpfile)
-                if variable==0:
-                    msg='The hidden variable is no output process'
-                else:
-                    msg='Observation distribution not available: '+str(ViewPoint)
-                raise ValueError, msg                
-            else:
-                # plot the files using the PlotManager class of stat_tool
-                nb_windows= \
-                   self.__ctrees.NbValues(0)
-                self.__plot=_PlotManager(file_list, prefix+file_id, 
-                                                    nb_windows)
+##            if (prefix+ref_file_id+'0.plot') in file_list:
+##                file_id=ref_file_id+"0"
+##            else:
+##                file_id=ref_file_id
+##            try:
+##                # check if the desired file exists
+##                cfile=open(prefix+file_id+'.plot','r')
+##            except IOError:
+##                for tmpfile in file_list:
+##                   os.remove(tmpfile)
+##                if variable==0:
+##                    msg='The hidden variable is no output process'
+##                else:
+##                    msg='Observation distribution not available: '+str(ViewPoint)
+##                raise ValueError, msg                
+##            else:
+##                # plot the files using the PlotManager class of stat_tool
+##                nb_windows= \
+##                   self.__ctrees.NbValues(0)
+##                self.__plot=_PlotManager(file_list, prefix+file_id, 
+##                                                    nb_windows)
                                                     
     def _ctrees(self):
         return self.__ctrees

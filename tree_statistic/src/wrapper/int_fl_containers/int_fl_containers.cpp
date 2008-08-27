@@ -27,15 +27,15 @@ void SetDouble_wrapper(Int_fl_container& i,  int index, double v)
 Int_fl_container* wrapper_init1(object tree_value)
 {
    Int_fl_container *res;
-   list values, types;
+   boost::python::list values, types;
    int nb_integral, nb_float, index, type,
        int_index, float_index; // length,
    object current_object;
    ostringstream error_message;
    // bool status= true;
 
-   values= extract<list>(tree_value.attr("Values")());
-   types= extract<list>(tree_value.attr("Types")());
+   values= extract<boost::python::list>(tree_value.attr("Values")());
+   types= extract<boost::python::list>(tree_value.attr("Types")());
    nb_integral= extract<int>(tree_value.attr("NbInt")());
    nb_float= extract<int>(tree_value.attr("NbFloat")());
    int_index= 0;

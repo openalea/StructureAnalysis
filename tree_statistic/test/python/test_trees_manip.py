@@ -7,11 +7,11 @@ sup_bound=3
 probability= 0.6
 ident=stat_tool.DistributionIdentifier.UNIFORM
 parameter=stat_tool.D_DEFAULT
-children_distrib= stat_tool.Parametric(ident, inf_bound, sup_bound,
-                                        parameter, probability)
+children_distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound,
+                                             parameter, probability)
 # distribution of the children
-attributes_distrib= stat_tool.Parametric(ident, 0, 10,
-                                          parameter, probability)
+attributes_distrib= stat_tool._ParametricModel(ident, 0, 10,
+                                               parameter, probability)
 # distribution of the attributes
 max_depth=3
 max_size=10
@@ -43,13 +43,13 @@ print T
 # extract histograms
 print "Histogram of the tree size: "
 histo=T.ExtractHistogram("Size")
-histo.Display(Detail=2)
+histo.display(Detail=2)
 print "Histogram of the number of children: "
 histo=T.ExtractHistogram("NbChildren")
-histo.Display(Detail=2)
+histo.display(Detail=2)
 print "Histogram of marginal distribution: "
 histo=T.ExtractHistogram("Value", 1)
-histo.Display(Detail=2)
+histo.display(Detail=2)
 # save trees
 T.Save("fake_mtg_forest.txt", True)
 # merge trees
@@ -226,7 +226,8 @@ for t in range(V.NbTrees()):
 limits=[]
 for c in range((10/step)):
     limits.append(step*(c+1))
-limits.append(10)
+limits.append(11)
+print limits
 V2=T.Cluster("Limit", 1, limits)
 equal=True
 for t in range(V.NbTrees()):
@@ -322,7 +323,7 @@ else:
     print "Failed to raise exception for bad number of classes."
 try:
     V=T.Transcode(1, range(0, 5) + range(6,13))
-except stat_tool.FormatError, e:
+except trees.FormatError, e:
     print e
 else:
     print "Failed to raise exception for non-consecutive symbols."

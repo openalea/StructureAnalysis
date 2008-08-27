@@ -30,7 +30,7 @@ int main(void)
   const double parameter= D_DEFAULT;
   int nb_trees= n;
   const Parametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
-  const Parametric cdistribl(ident,2,5,parameter,probability);
+  const Parametric cdistribl(ident,0,5,parameter,probability);
   int cmax_depth= 20;
   int cmax_size= 20;
   int t, *itype, i;
@@ -105,10 +105,10 @@ int main(void)
 
   // copy of the Tree_characteristics objects;
 
-  cout << "Checking the assignement operator of 'Tree_characteristics' : " << endl;
+  cout << "Check assignement operator for 'Tree_characteristics' : " << endl;
   Tree_characteristics *pt_copy_tc= new Tree_characteristics(*(tc[0])), copy_tc= *(tc[0]);
 
-  cout << "Histogram for the marginal distribution is : " << endl;
+  cout << "Histogram of the marginal distribution: " << endl;
   tc[0]->ascii_write_marginal(cout, 1, 0);
 
   //delete tc[0];

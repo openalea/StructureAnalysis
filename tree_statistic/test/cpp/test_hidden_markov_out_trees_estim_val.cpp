@@ -90,6 +90,22 @@ int main(void)
          delete hmot2;
          hmot2=NULL;
       }
+/*
+      hmot2= hmtd->hidden_markov_out_tree_estimation2(error, cout, *hmot_init,
+                                                      true, VITERBI,
+                                                      FORWARD_BACKWARD,
+                                                      1., nb_iterations, true);
+      cout << error;
+      cout << endl;*/
+
+      if (hmot2 != NULL)
+      {
+         cout << endl << "Estimated HMT using above initialization (basic EM algorithm):" << endl;
+         hmot2->ascii_write(cout, false);
+         nb_states= hmot2->get_nb_state();
+         delete hmot2;
+         hmot2=NULL;
+      }
 
       hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', nb_states,
                                                      false, true, VITERBI,
