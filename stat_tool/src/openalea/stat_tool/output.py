@@ -378,18 +378,11 @@ class StatInterface(object):
 
             plotter = plot.get_plotter()
 
-        except AttributeError:
+        except:
             import warnings
-            warnings.warn("Use old style plot.")
-            
+            warnings.warn("Cannot use new plotter. Use old style plot.")
             plotable = None
-
-        except ImportError:
-            import warnings
-            warnings.warn("No Plotter available. Use old style plot.")
-            plotable = None
-
-        
+               
         if(plotable is not None):
             plotter.plot(plotable, title, *args, **kargs)
         else:
