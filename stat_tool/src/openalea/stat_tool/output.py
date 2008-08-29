@@ -359,6 +359,7 @@ class StatInterface(object):
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
         params = kargs.get("Params", ())
+        groups = kargs.get("Groups", ())
 
         survival = bool(ViewPoint.lower() == "survival")
         stateprofile = bool(ViewPoint.lower() == "stateprofile")
@@ -384,7 +385,7 @@ class StatInterface(object):
             plotable = None
                
         if(plotable is not None):
-            plotter.plot(plotable, title, *args, **kargs)
+            plotter.plot(plotable, title, groups, *args, **kargs)
         else:
             self.old_plot(*args, **kargs)
             
