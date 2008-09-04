@@ -38,7 +38,8 @@ if __name__ == '__main__':
           # Packages
           packages=['openalea.stat_tool', 
                     'openalea.stat_tool.demo', 
-                    'openalea.stat_tool.old'],
+                    'vplants',
+                    ],
 
           package_dir={ "" : "src"  },
           
