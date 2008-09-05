@@ -2,6 +2,16 @@ __docformat__ = "restructuredtext"
 __doc__ = """ Plot functions """
 
 
+import sys
+
+DISABLE_PLOT = True
+
+
+# !!! Do not plot in nosetests !!!
+if("nosetests" in sys.argv[0]):
+    DISABLE_PLOT = True
+
+
 
 class plotter(object):
     """ Abstract base class for all plotter """
@@ -34,7 +44,7 @@ class gnuplot(plotter):
 
     def plot(self, plotable, title, groups=[], *args, **kargs):
         """ 
-        Plot an plotable with title 
+        Plot a plotable with title 
         groups : list of group (int) to plot
         """
 
@@ -283,6 +293,9 @@ def get_plotter():
     Return a plotter object (matplotlib or gnuplot)
     If none is available, raise an ImportError exception
     """
+    global DISABLE_PLOT
+    if DISABLE_PLOT:
+        return fakeplot()
 
     # Try user define PLOTTER
     global PLOTTER
@@ -306,7 +319,7 @@ def get_plotter():
 ########################## Test ################################################
 
 class Test:
-
+    
     def test_plotable(self):
         import _stat_tool
 
@@ -419,9 +432,10 @@ class Test:
 
 
     def test_gnuplot(self):
+        
+        if(DISABLE_PLOT) : return
         a = self.get_plotable()
-
-        #plotter = gnuplot()
-        #plotter.plot(a, "test_plot")
+        plotter = gnuplot()
+        plotter.plot(a, "test_plot")
 
         

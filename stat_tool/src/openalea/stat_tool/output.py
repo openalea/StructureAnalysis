@@ -307,6 +307,7 @@ def Save(obj, *args, **kargs):
 class StatInterface(object):
     """ Abstract base class for stat_tool objects """
 
+    
     def old_plot(self, *args, **kargs):
         """ Old AML style plot """
 
@@ -346,8 +347,12 @@ class StatInterface(object):
         f.write("pause -1")
         f.close()            
 
-        # call gnuplot
-        os.system("gnuplot %s"%(plot_file))
+
+        import Gnuplot
+        command = Gnuplot.GnuplotOpts.gnuplot_command
+
+        if(not plot.DISABLE_PLOT):
+            os.system("%s %s"%(command, plot_file))
         
         for f in glob.glob(prefix+"*"):
             os.remove(f)
@@ -383,7 +388,9 @@ class StatInterface(object):
             import warnings
             warnings.warn("Cannot use new plotter. Use old style plot.")
             plotable = None
-               
+    
+        if(plot.DISABLE_PLOT): return
+
         if(plotable is not None):
             plotter.plot(plotable, title, groups, *args, **kargs)
         else:
@@ -478,7 +485,7 @@ class Test:
 
     def test_old_plot(self):
         m = self.get_mixture()
-        #m.old_plot()
+        m.old_plot()
 
 
     def test_plot_mixture_1(self):
