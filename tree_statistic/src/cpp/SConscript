@@ -12,13 +12,13 @@ if env['compiler'] == 'mingw':
 
 # Select and install the headers
 
+
 includes = env.ALEAGlob("*.h")
 includes += env.ALEAGlob("*.hpp")
 
 env.ALEAIncludes("tree_statistic", includes)
 
 
-#env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
 # if env['debug']:
 #    env.Append(CPPDEFINES= ['DEBUG'])
 #    env.AppendUnique(LIBS=['efence'])

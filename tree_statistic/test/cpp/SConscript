@@ -6,7 +6,7 @@ import os, commands
 
 Import("env")
 
-env_test = env.Copy()
+env_test = env.Clone()
 
 pj = os.path.join
 
@@ -61,7 +61,7 @@ def prog(p):
 
 test_prog=map(prog, tests)
 
-"""
+'''
 def rmTests(target, source, env):
   import os
   print [ os.remove(str(s)) for s in source]
@@ -69,7 +69,7 @@ def rmTests(target, source, env):
 
 r= env.AddPostAction(test_prog, rmTests)
 Alias("clean_test",r)
-"""
+'''
 
 # print test_prog
 

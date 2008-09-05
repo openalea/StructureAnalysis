@@ -2,40 +2,18 @@
 
 from openalea.sconsx import config, environ
 import os
+
 pj = os.path.join
-
-Config = config.Config
-ALEAConfig = config.ALEAConfig
-
-name = 'tool'
-
-SConsignFile()
+ALEASolution = config.ALEASolution
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
-
 tools = ['qt4','opengl','readline']
 
-env = Environment(options=options)
-conf= ALEAConfig(name, tools)
-conf.UpdateOptions(options)
-
-options.Update(env)
-conf.Update(env)
-
-# Generate Help available with the cmd scons -h
-Help(options.GenerateHelpText(env))
-
-# Set build directory
+env = ALEASolution(options, tools)
 prefix = env['build_prefix']
-BuildDir(prefix, '.')
-
-env.Prepend(CPPPATH='$build_includedir')
-
-
 
 # Build stage
 env.SConscript(pj(prefix,"src/cpp/SConscript"), 
            exports="env")
-
 Default("build")
 

@@ -2,41 +2,20 @@
 
 from openalea.sconsx import config, environ
 import os
+
 pj = os.path.join
-
-Config = config.Config
-ALEAConfig = config.ALEAConfig
-ALEAEnvironment = config.ALEAEnvironment
-
-name = 'sequence_analysis'
-
-SConsignFile()
+ALEASolution = config.ALEASolution
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
-
 tools = ['boost_python', 'alea', 'vplants.tool', 'install', 'vplants.stat_tool']
 
-env = Environment(options=options)
-conf= ALEAConfig(name, tools)
-conf.UpdateOptions(options)
-options.Update(env)
-conf.Update(env)
-
-# Generate Help available with the cmd scons -h
-Help(options.GenerateHelpText(env))
-
-# Set build directory
-prefix = env['build_prefix']
-BuildDir(prefix, '.')
-
-env.Prepend(CPPPATH='$build_includedir')
-env.Prepend(LIBPATH='$build_libdir')
+env = ALEASolution(options, tools)
 
 # Build stage
+prefix = env['build_prefix']
 SConscript(pj(prefix,"src/cpp/SConscript"),
            exports='env')
 SConscript(pj(prefix,"src/wrapper/SConscript"),
            exports='env')
 
 Default("build")
-

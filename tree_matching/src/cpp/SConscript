@@ -6,7 +6,7 @@ pj = os.path.join
 
 Import( "env" )
 
-lib_env = env.Copy()
+lib_env = env.Clone()
 
 # Export Symbols on Windows
 if lib_env['compiler'] == 'mingw':

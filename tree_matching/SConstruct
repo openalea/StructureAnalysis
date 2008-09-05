@@ -3,15 +3,8 @@
 from openalea.sconsx import config, environ
 import os
 
-Config = config.Config
-ALEAConfig = config.ALEAConfig
-ALEAEnvironment = config.ALEAEnvironment
-
 pj = os.path.join
-
-name = 'tree_matching'
-
-SConsignFile()
+ALEASolution = config.ALEASolution
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
 
@@ -21,21 +14,9 @@ common_tools = ['vplants.mtg', 'plantgl', 'vplants.tool',
 
 tools = ['alea','install'] + common_tools
 
-env = Environment(options=options)
-conf= ALEAConfig(name, tools)
-conf.UpdateOptions(options)
-options.Update(env)
-conf.Update(env)
+env = ALEASolution(options, tools)
 
-# Generate Help available with the cmd scons -h
-Help(options.GenerateHelpText(env))
-
-# Set build directory
 prefix = env['build_prefix']
-BuildDir(prefix, '.')
-
-env.Prepend(CPPPATH='$build_includedir')
-env.Prepend(LIBPATH='$build_libdir')
 
 # Build stage
 SConscript(pj(prefix,"src/cpp/SConscript"),

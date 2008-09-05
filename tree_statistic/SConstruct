@@ -3,15 +3,8 @@
 from openalea.sconsx import config, environ
 import os
 
-Config = config.Config
-ALEAConfig = config.ALEAConfig
-ALEAEnvironment = config.ALEAEnvironment
-
 pj = os.path.join
-
-name = 'tree_statistic'
-
-SConsignFile()
+ALEASolution = config.ALEASolution
 
 options = Options(['../options.py','options.py'], ARGUMENTS)
 options.Add(BoolOption('with_test', 'build test modules', 1))
@@ -19,31 +12,17 @@ options.Add(BoolOption('with_test', 'build test modules', 1))
 # dependencies
 tools = ['boost_python', 'install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree']
 
-env = Environment(options=options)
-conf= ALEAConfig(name, tools)
-conf.UpdateOptions(options)
-options.Update(env)
-conf.Update(env)
+env = ALEASolution(options, tools)
 
-# Generate Help available with the cmd scons -h
-Help(options.GenerateHelpText(env))
-
-# Set build directory
-prefix = env['build_prefix']
-BuildDir(prefix, '.')
-
-env.Prepend(CPPPATH='$build_includedir')
-env.Prepend(LIBPATH='$build_libdir')
 # env.AppendUnique(LIBS= ["efence"])
 env.Append(CPPDEFINES= ['MESSAGE'])
-
-env.Prepend( CPPPATH = pj( '$build_includedir','tree_statistic' ) )
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
 
 # Build stage
+prefix = env['build_prefix']
 SConscript(pj(prefix,"src/cpp/SConscript"), exports="env")
 SConscript(pj(prefix,"src/wrapper/SConscript"), exports="env")
 if env['with_test']:
     SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")
 
 Default("build")
-

@@ -13,6 +13,7 @@ scons_parameters=["build_prefix="+build_prefix]
 
 # platform dependencies
 install_requires = ['vplants.stat_tool']
+install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
 
 if("win" in sys.platform):

@@ -5,7 +5,7 @@ bn = os.path.basename
 
 Import( "env" )
 
-lib_env = env.Copy()
+lib_env = env.Clone()
 
 # Import / Export symbols for windows dll
 if lib_env['compiler'] == 'mingw':
