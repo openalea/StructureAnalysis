@@ -306,13 +306,14 @@ def Estimate(histo, type, *args, **kargs):
 
 
 ############################ Tests #############################################
+from openalea.stat_tool import get_test_file
 
 class Test:
 
     def test_nonparametric(self):
         from histogram import Histogram
 
-        h = Histogram("../../../test/meri1.his")
+        h = Histogram(get_test_file("meri1.his"))
         e =  h.estimate_nonparametric()
         assert e
 
@@ -322,14 +323,14 @@ class Test:
     def test_nb(self):
         from histogram import Histogram
 
-        h = Histogram("../../../test/peup2.his")
+        h = Histogram(get_test_file("peup2.his"))
         assert h.estimate_parametric('NB')
 
 
     def test_binomial(self):
         from histogram import Histogram
 
-        h = Histogram("../../../test/meri5.his")
+        h = Histogram(get_test_file("meri5.his"))
         assert h.estimate_parametric('B')
 
 
@@ -344,7 +345,7 @@ class Test:
     def test_mixture_1(self):
         from histogram import Histogram
 
-        h = Histogram("../../../test/peup2.his")
+        h = Histogram(get_test_file("peup2.his"))
         m1 =  h.estimate_mixture(["B", "NB", "NB", "NB"], NbComponent="Estimated")
         assert m1
 
@@ -353,7 +354,7 @@ class Test:
         from histogram import Histogram
         from distribution import Binomial
 
-        h = Histogram("../../../test/peup2.his")
+        h = Histogram(get_test_file("peup2.his"))
 
         m2 = h.estimate_mixture([Binomial(0, 10, 0.5), "NB"])
         assert m2
@@ -363,8 +364,8 @@ class Test:
         from histogram import Histogram
         from data_transform import Shift
 
-        elementary = Histogram("../../../test/nothofagus_antarctica_bud_2.his")
-        total = Histogram("../../../test/nothofagus_antarctica_shoot_2.his")
+        elementary = Histogram(get_test_file("nothofagus_antarctica_bud_2.his"))
+        total = Histogram(get_test_file("nothofagus_antarctica_shoot_2.his"))
 
         convol1 = Estimate(Shift(total, 1), "CONVOLUTION", Estimate(elementary, "NP"), 
                            NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)

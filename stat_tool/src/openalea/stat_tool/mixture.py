@@ -85,6 +85,7 @@ interface.extend_class( _stat_tool._MixtureData, interface.StatInterface)
 
 
 ########################## Test Mixture ########################################
+from openalea.stat_tool import get_test_file
 
 class Test:
     def test_emty(self):
@@ -99,7 +100,7 @@ class Test:
 
     def test_file(self):
 
-        m = Mixture("../../../test/mixture1.mixt")
+        m = Mixture(get_test_file("mixture1.mixt"))
         assert m
 
 
@@ -161,7 +162,7 @@ class Test:
 
         from histogram import Histogram 
 
-        h = Histogram("../../../test/meri2.his")
+        h = Histogram(get_test_file("meri2.his"))
         m = h.estimate_mixture(["B", "NB"])
 
         d = m.extract_data()

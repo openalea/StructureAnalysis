@@ -370,6 +370,7 @@ def ToDistanceMatrix(clusters):
     return _DistanceMatrix(clusters)
 
 ################################################################################
+from openalea.stat_tool import get_test_file
 
 
 class Test:
@@ -377,7 +378,7 @@ class Test:
     def test_cluster(self):
 
         from histogram import Histogram
-        fagus = Histogram("../../../test/fagus1.his")
+        fagus = Histogram(get_test_file("fagus1.his"))
 
         histo2 = Cluster(fagus, "Step", 2)
         histo3 = Cluster(fagus, "Information", 0.8)
@@ -390,7 +391,7 @@ class Test:
     def test_transcode(self):
 
         from histogram import Histogram
-        fagus = Histogram("../../../test/fagus1.his")
+        fagus = Histogram(get_test_file("fagus1.his"))
 
         histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, 4, 5])
         
@@ -400,7 +401,7 @@ class Test:
     def test_transcode_err(self):
 
         from histogram import Histogram
-        fagus = Histogram("../../../test/fagus1.his")
+        fagus = Histogram(get_test_file("fagus1.his"))
 
         try:
             histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, ])
@@ -417,7 +418,7 @@ class Test:
         from comparison import Compare
         from data_transform import SelectVariable
 
-        vec10 = Vectors("../../../test/chene_sessile.vec")
+        vec10 = Vectors(get_test_file("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 
         assert vec15

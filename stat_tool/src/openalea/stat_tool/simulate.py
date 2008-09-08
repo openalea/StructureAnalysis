@@ -10,13 +10,14 @@ def Simulate(obj, *args):
 
 
 ################################################################################
+from openalea.stat_tool import get_test_file
 
 class Test:
     
     def test_simulate_mixture(self):
         
         from mixture import Mixture
-        m = Mixture("../../../test/mixture1.mixt")
+        m = Mixture(get_test_file("mixture1.mixt"))
         
         s1 = Simulate(m, 1000)
         assert s1

@@ -54,6 +54,7 @@ def Compound(*args):
 
 
 ########################## Test Compound ########################################
+from openalea.stat_tool import get_test_file
 
 class Test:
     def test_emty(self):
@@ -65,7 +66,7 @@ class Test:
             assert True
 
     def test_file(self):
-        c = Compound("../../../test/compound1.cd")
+        c = Compound(get_test_file("compound1.cd"))
         assert c
 
 

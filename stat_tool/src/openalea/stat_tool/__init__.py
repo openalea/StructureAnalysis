@@ -18,16 +18,22 @@ Stat_Tool
 """
 
 # Test prefix
-test_prefix = "../../../test/"
 
-def get_test_prefix():
-    global test_prefix
-    return test_prefix
+def get_test_file(filename=""):
+ 
+    import os
+    path1 = os.path.abspath("../../../test/")
+    path1 = os.path.abspath("./test/")
+    path1 = os.path.abspath("./")
+
+    if os.path.isdir(path1):
+        return os.path.join(path1, filename)
+    elif os.path.isdir(path2):
+        return os.path.join(path2, filename)
+    else:
+        return os.path.join(path3, filename)
 
 
-def set_test_prefix(prefix=""):
-    global test_prefix
-    test_prefix = prefix
 
 
 from distribution import *

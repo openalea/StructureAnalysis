@@ -58,6 +58,7 @@ def Histogram(arg):
 
 
 ############################## Tests ###########################################
+from openalea.stat_tool import get_test_file
 
 # Test Histogram
 class Test:
@@ -70,7 +71,7 @@ class Test:
 
     def test_ascii(self):
         # ASCII representation
-        h = Histogram("../../../test/meri1.his")
+        h = Histogram(get_test_file("meri1.his"))
         assert h
 
         s = str(h)
@@ -83,13 +84,13 @@ class Test:
 
     def test_plot(self):
         # plot
-        h = Histogram("../../../test/meri1.his")
+        h = Histogram(get_test_file("meri1.his"))
         h.plot()
 
 
     def test_container(self):
         # container / iterator
-        h = Histogram("../../../test/meri1.his")
+        h = Histogram(get_test_file("meri1.his"))
 
         assert h[0] == 0
         assert h[10] == 1
@@ -109,13 +110,13 @@ class Test:
     def test_fromfile(self):
 
         # From file
-        h = Histogram("../../../test/meri1.his")
+        h = Histogram(get_test_file("meri1.his"))
         assert h
     
         # File
         h.save("test.his")
-    
-        h2 = Histogram("../../../test/meri1.his")
+
+        h1 = Histogram(get_test_file("meri1.his"))
         #h2 = Histogram("test.his")
         assert len(h) == len(h2)
         assert list(h) == list(h2)
@@ -123,7 +124,7 @@ class Test:
     
     
         try:
-            h = Histogram("peup1.hi")
+            h = Histogram(get_test_file("peup1.hi"))
             assert False
         except Exception:
             assert True

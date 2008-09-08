@@ -457,6 +457,7 @@ class StatInterface(object):
         
 
 ################################################################################
+from openalea.stat_tool import get_test_file
 
 class Test:
 
@@ -478,7 +479,7 @@ class Test:
 
         from histogram import Histogram 
 
-        h = Histogram("../../../test/meri2.his")
+        h = Histogram(get_test_file("meri2.his"))
         m = h.estimate_mixture(["B", "NB"])
         return m
 
@@ -517,11 +518,11 @@ class Test:
         from data_transform import Shift
         from histogram import Histogram
         
-        convol1 = Convolution("../../../test/convolution1.conv")
+        convol1 = Convolution(get_test_file("convolution1.conv"))
         convol1.plot()
 
-        histo_b2 = Histogram("../../../test/nothofagus_antarctica_bud_2.his")
-        histo_s2 = Histogram("../../../test/nothofagus_antarctica_shoot_2.his")
+        histo_b2 = Histogram(get_test_file("nothofagus_antarctica_bud_2.his"))
+        histo_s2 = Histogram(get_test_file("nothofagus_antarctica_shoot_2.his"))
         
         convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
                             NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)
@@ -534,7 +535,7 @@ class Test:
         from convolution import Convolution
         from simulate import Simulate
         
-        convol1 = Convolution("../../../test/convolution1.conv")
+        convol1 = Convolution(get_test_file("convolution1.conv"))
         convol_histo1 = Simulate(convol1, 200)
         convol_histo1.plot()
 

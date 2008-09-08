@@ -254,6 +254,7 @@ def ContingencyTable(vec, variable1, variable2,
 
 
 ################################################################################
+from openalea.stat_tool import get_test_file
 
 class Test:
 
@@ -287,10 +288,10 @@ class Test:
     def test_vectors_file(self):
         # File operations
 
-        v1 = Vectors("../../../test/vectors.vec")
-        v1.save("../../../test/vectors2.vec", ViewPoint="Data")
+        v1 = Vectors(get_test_file("vectors.vec"))
+        v1.save(get_test_file("vectors2.vec"), ViewPoint="Data")
 
-        v2 = Vectors("../../../test/vectors2.vec")
+        v2 = Vectors(get_test_file("vectors2.vec"))
 
         assert v1 and v2
         assert len(v2) == len(v1)
@@ -344,13 +345,13 @@ class Test:
 
 
     def test_variance_analysis(self):
-        vec10 = Vectors("../../../test/chene_sessile.vec")
+        vec10 = Vectors(get_test_file("chene_sessile.vec"))
         va = VarianceAnalysis(vec10, 1, 4, "O")
         assert va and str(va)
 
 
     def test_contingency_table(self):
-        vec10 = Vectors("../../../test/chene_sessile.vec")
+        vec10 = Vectors(get_test_file("chene_sessile.vec"))
         ct = ContingencyTable(vec10, 1, 4)
         assert ct and str(ct)
 

@@ -67,6 +67,7 @@ interface.extend_class( _stat_tool._ConvolutionData, interface.StatInterface)
 
 
 ########################## Test Convolution ########################################
+from openalea.stat_tool import get_test_file
 
 class Test:
     def test_emty(self):
@@ -79,7 +80,7 @@ class Test:
 
 
     def test_file(self):
-        c = Convolution("../../../test/convolution1.conv")
+        c = Convolution(get_test_file("convolution1.conv"))
         assert c
 
 

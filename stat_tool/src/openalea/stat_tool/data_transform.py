@@ -666,8 +666,7 @@ def Fit(histo, dist):
 
 
 ################################################################################
-from openalea.stat_tool import get_test_prefix
-
+from openalea.stat_tool import get_test_file
 
 class TestShift:
 
@@ -675,7 +674,7 @@ class TestShift:
 
         from histogram import Histogram 
 
-        h = Histogram(get_test_prefix() + "meri2.his")
+        h = Histogram(get_test_file("meri2.his"))
         assert h.shift(2)
 
         assert Shift(h, 2) == h.shift(2)
@@ -702,7 +701,7 @@ class TestShift:
         from distribution import Distribution
         from histogram import Histogram
 
-        meri5 = Histogram(get_test_prefix() + "meri5.his")
+        meri5 = Histogram(get_test_file("meri5.his"))
         dist5 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
         assert dist5
 
@@ -819,7 +818,7 @@ class TestExtract:
 
         from histogram import Histogram
 
-        h = Histogram(get_test_prefix() + "meri2.his")
+        h = Histogram(get_test_file("meri2.his"))
         mixt = h.estimate_mixture(["B", "NB"])
 
         assert ExtractData(mixt)
@@ -857,7 +856,7 @@ class TestExtract:
 
         from histogram import Histogram
 
-        h = Histogram(get_test_prefix() + "meri2.his")
+        h = Histogram(get_test_file("meri2.his"))
         mixt = h.estimate_mixture(["B", "NB"])
 
         assert ExtractHistogram(mixt, "Weight")
@@ -894,11 +893,11 @@ class TestMerge:
 
     def test_merge_histo(self):
         from histogram import Histogram
-        meri1 = Histogram(get_test_prefix() + "meri1.his")
-        meri2 = Histogram(get_test_prefix() + "meri2.his")
-        meri3 = Histogram(get_test_prefix() + "meri3.his")
-        meri4 = Histogram(get_test_prefix() + "meri4.his")
-        meri5 = Histogram(get_test_prefix() + "meri5.his")
+        meri1 = Histogram(get_test_file("meri1.his"))
+        meri2 = Histogram(get_test_file("meri2.his"))
+        meri3 = Histogram(get_test_file("meri3.his"))
+        meri4 = Histogram(get_test_file("meri4.his"))
+        meri5 = Histogram(get_test_file("meri5.his"))
 
         meri = Merge(meri1, meri2, meri3, meri4, meri5)
         assert meri

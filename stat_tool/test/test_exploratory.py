@@ -34,7 +34,7 @@ def test_aml_1():
     # model selection approach: estimation of both the mixture parameters and
     # the number of components 
 
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  nb_component="Estimated")
+    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  NbComponent="Estimated")
     # mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
     # Plot(ExtractDistribution(mixt2, "Mixture"))
     # Display(mixt2)
@@ -46,11 +46,11 @@ def test_aml_1():
     peup5 = Histogram("peup5.his")
     peup6 = Histogram("peup6.his")
 
-    mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", nb_component="Estimated")
+    mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
     
     peup = Merge(peup1, peup2, peup3, peup4, peup5, peup6)
     
-    mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", nb_component="Estimated")
+    mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
     assert mixt11
     mixt11 = Estimate(peup, "MIXTURE", "B", "NB")
     assert mixt11

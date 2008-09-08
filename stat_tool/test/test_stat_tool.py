@@ -1,8 +1,6 @@
 
 from openalea.stat_tool import *
 
-# Test directory
-set_test_prefix("")
 
 
 def test_distribition_histogram():

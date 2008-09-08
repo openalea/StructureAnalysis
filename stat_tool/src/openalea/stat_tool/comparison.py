@@ -193,12 +193,13 @@ def ComparisonTest(type, histo1, histo2):
 
 
 ############# Tests ############################################################
+from openalea.stat_tool import get_test_file
 
 class Test:
     def test_comparisontest(self):
 
-        meri1 = Histogram("../../../test/meri1.his")
-        meri2 = Histogram("../../../test/meri2.his")
+        meri1 = Histogram(get_test_file("meri1.his"))
+        meri2 = Histogram(get_test_file("meri2.his"))
 
         assert ComparisonTest("F", meri1, meri2)
         assert ComparisonTest("T", meri1, meri2)
@@ -207,9 +208,9 @@ class Test:
 
     def test_comparison(self):
 
-        meri1 = Histogram("../../../test/meri1.his")
-        meri2 = Histogram("../../../test/meri2.his")
-        meri3 = Histogram("../../../test/meri3.his")
+        meri1 = Histogram(get_test_file("meri1.his"))
+        meri2 = Histogram(get_test_file("meri2.his"))
+        meri3 = Histogram(get_test_file("meri3.his"))
 
         assert Compare(meri1, meri2, meri3, 'N')
         assert Compare(meri1, meri2, meri3, 'O')
@@ -221,7 +222,7 @@ class Test:
         from vectors import Vectors, VectorDistance
         from data_transform import SelectVariable
 
-        vec10 = Vectors("../../../test/chene_sessile.vec")
+        vec10 = Vectors(get_test_file("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         assert vec15
 
