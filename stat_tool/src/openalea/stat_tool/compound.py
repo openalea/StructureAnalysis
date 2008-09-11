@@ -56,64 +56,64 @@ def Compound(*args):
 ########################## Test Compound ########################################
 from openalea.stat_tool import get_test_file
 
-#class Test:
- #    def test_emty(self):
-#         try:
-#             m = Compound()
-#             assert False
+class __Test:
+    def __test_emty(self):
+        try:
+            m = Compound()
+            assert False
 
-#         except TypeError:
-#             assert True
+        except TypeError:
+            assert True
 
-#     def test_file(self):
-#         c = Compound(get_test_file("compound1.cd"))
-#         assert c
-
-
-#     def test_build_compound(self):
-#         from distribution import Uniform
-
-#         d1 = Uniform(0,10)
-#         d2 = Uniform(10,20)
-
-#         m = Compound(d1, d2)
-#         assert m
-#         return m
+    def __test_file(self):
+        c = Compound(get_test_file("compound1.cd"))
+        assert c
 
 
-#     def test_plot(self):
+    def __test_build_compound(self):
+        from distribution import Uniform
 
-#         m = test_build_compound()
-#         m.plot()
+        d1 = Uniform(0,10)
+        d2 = Uniform(10,20)
 
-#         assert str(m)
-#         m.display()
-
-
-#     def test_simulation(self):
-
-#         m = test_build_compound()
-#         s = m.simulate(1000)
-
-#         assert len(s) == 1000
-#         assert str(s)
+        m = Compound(d1, d2)
+        assert m
+        return m
 
 
-#     def test_extract(self):
-#         from extract import ExtractDistribution
-#         from distribution import Uniform
+    def __test_plot(self):
 
-#         m = test_build_compound()
+        m = test_build_compound()
+        m.plot()
 
-#         assert m.extract_compound() == ExtractDistribution(m, "Compound")
-
-#         assert m.extract_sum() == Uniform(0,10)
-#         assert m.extract_sum() == ExtractDistribution(m, "Sum")
-
-#         assert m.extract_elementary() == Uniform(10,20)
-#         assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
+        assert str(m)
+        m.display()
 
 
-#     def test_extract_data(self):
+    def __test_simulation(self):
 
-#         assert False    
+        m = test_build_compound()
+        s = m.simulate(1000)
+
+        assert len(s) == 1000
+        assert str(s)
+
+
+    def __test_extract(self):
+        from extract import ExtractDistribution
+        from distribution import Uniform
+
+        m = test_build_compound()
+
+        assert m.extract_compound() == ExtractDistribution(m, "Compound")
+
+        assert m.extract_sum() == Uniform(0,10)
+        assert m.extract_sum() == ExtractDistribution(m, "Sum")
+
+        assert m.extract_elementary() == Uniform(10,20)
+        assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
+
+
+    def __test_extract_data(self):
+
+        assert False    

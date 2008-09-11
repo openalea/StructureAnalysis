@@ -173,7 +173,7 @@ def test_convol():
 
 
 
-def test_compound():
+def __test_compound():
     #########################################################################
     #
     #  compound distribution : not publicly distributed in the Python version

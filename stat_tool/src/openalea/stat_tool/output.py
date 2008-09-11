@@ -6,6 +6,7 @@ __docformat__ = " restructuredtext "
 import plot
 import os
 import glob
+import sys
 
 # Output functions
 
@@ -348,8 +349,15 @@ class StatInterface(object):
         f.close()            
 
 
-        import Gnuplot
-        command = Gnuplot.GnuplotOpts.gnuplot_command
+        try:
+            import Gnuplot
+            command = Gnuplot.GnuplotOpts.gnuplot_command
+        except ImportError:
+            if("win32" in sys.platform):
+                command = "gnuplot.exe"
+            else:
+                command = "gnuplot"
+
 
         if(not plot.DISABLE_PLOT):
             os.system("%s %s"%(command, plot_file))
