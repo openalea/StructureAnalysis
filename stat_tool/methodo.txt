@@ -8,7 +8,7 @@ Objectifs :
 - Suppression de la couche AML
 - Nouvelles fonctions de plot
 
-1) Identification des classes et fonctions à exporter:
+1) Identification des classes et fonctions a� exporter:
         -> Quels sont les objects à manipuler en Python
         -> Quels sont les fonctionalités haut niveau
 
@@ -54,9 +54,9 @@ Objectifs :
         -> fonctions AML :  Merge, ToHistogram...
         -> pour les parameters par keywords : on conserve la syntaxe AML (avec des majuscules)
 
-        * Extension des classes wrappées
+        * Extension des classes wrappers
  
-        -> Pour étendre des classes déjà wrapper, utiliser la fonction "extend_class"       
+        -> Pour etendre des classes deja wrappees, utiliser la fonction "extend_class"       
         -> Utile pour ajouter de la doc et des fonctions Python comme Plot, Display, Save
 
         interface.extend_class( _stat_tool._Mixture_dist, interface.StatInterface)
@@ -68,22 +68,22 @@ Objectifs :
      -> Utiliser format restructured text 
      -> En tete de module __doc__ , __docformat__, copyright
      -> Ajouter le champ __all__ contenant la liste des noms du module 
-     	 (penser à ajouter les classes exportées en boost)
+    (penser à ajouter les classes exportées en boost)
      -> Ajouter la doc dans les wrappers Python (voir export_mixture.cpp)
 
  
 6) Gestion des E/S
-        * Les fonctions Plot/Display/Save sont écrit en Python dans le module output.py
+        * Les fonctions Plot/Display/Save sont ecrit en Python dans le module output.py
          
 
 7) ReFactorisation du code
-         -> Certaine fonctions ont pu être exporter plusieurs fois
+         -> Certaine fonctions ont pu etre exportee plusieurs fois
          -> utilisation de l'heritage boost
          -> utilisation de template (si necessaire)
          
 8) Ecriture des nouvelles fonctions de plot
-      Les fonctions de plot écrites en C++ doivent être indépendante de la
-    librarie de Plot utilisée (ex GNUPLOT, MATHPLOTLIB).
+      Les fonctions de plot ecrites en C++ doivent etre independante de la
+    librarie de Plot utilisee (ex GNUPLOT, MATHPLOTLIB).
       
       -> les objects plotables implémentent une fonction get_plotable() qui
       renvoie un objet de type MultiPlotSet* (defini dans plotable.h)

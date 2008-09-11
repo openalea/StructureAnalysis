@@ -21,7 +21,7 @@ setup_requires = install_requires + ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Stat_Tool',
-          version='0.3.1',
+          version='0.4.0',
           author='Y. Guedon, JB. Durand',
           description='statistics',
           url='',

@@ -354,7 +354,7 @@ class StatInterface(object):
             command = Gnuplot.GnuplotOpts.gnuplot_command
         except ImportError:
             if("win32" in sys.platform):
-                command = "gnuplot.exe"
+                command = "pgnuplot.exe"
             else:
                 command = "gnuplot"
 

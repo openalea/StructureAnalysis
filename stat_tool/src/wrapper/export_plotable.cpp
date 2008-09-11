@@ -46,13 +46,11 @@ void class_plotable()
     .def_readwrite("min", &PlotPoint::first )
     .def_readwrite("max", &PlotPoint::second );
 
-
 //   class_ < Range >("Range", init<float, float>())
 //     .def_readwrite("min", &PlotPoint::first )
 //     .def_readwrite("max", &PlotPoint::second );
 
 
-  // _Format_error
   class_< SinglePlot >("SinglePlot")
     
     .def("add_point", (void (SinglePlot::*)(const PlotPoint&)) &SinglePlot::add_point)
