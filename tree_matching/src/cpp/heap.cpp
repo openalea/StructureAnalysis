@@ -131,7 +131,7 @@ Item* Heap::at(size_type size) const
 {
   vector<Item*>::const_iterator beg;
   beg = begin();
-  for (uint32_t i=0;i<size;i++)
+  for (size_type i=0;i<size;i++)
     beg++;
   return(*beg);
   //delete beg;
