@@ -25,7 +25,7 @@ else:
 if __name__ == '__main__':
     
     setup(name='VPlants.Tool',
-          version='0.3.1',
+          version='0.4.0',
           author='',
           author_email='',
           description='vplants tools',
