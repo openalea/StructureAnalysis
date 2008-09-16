@@ -1,6 +1,8 @@
-from setuptools import setup, find_packages
 import os, sys
 from os.path import join as pj
+
+from setuptools import setup, find_packages
+from openalea.deploy.binary_deps import binary_deps
 
 packagename = 'sequence_analysis'
 namespace = 'openalea'
@@ -12,13 +14,13 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # platform dependencies
-install_requires = ['vplants.stat_tool']
+install_requires = [binary_deps('vplants.stat_tool')]
 install_requires = []
 setup_requires = install_requires + ['openalea.deploy']
 
 if("win" in sys.platform):
-    install_requires += ["boostpython"]
-    setup_requires += ["boostpython"]
+    install_requires += [binary_deps("boostpython")]
+    setup_requires += [binary_deps("boostpython")]
 
 
 if __name__ == '__main__':

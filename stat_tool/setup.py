@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
  
@@ -11,9 +12,9 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # platform dependencies
-install_requires = ['vplants.tool']
+install_requires = [binary_deps('vplants.tool')]
 if("win" in sys.platform):
-    install_requires += ["boostpython"]
+    install_requires += [binary_deps("boostpython")]
 
 setup_requires = install_requires + ['openalea.deploy']
 

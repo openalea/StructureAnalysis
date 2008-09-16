@@ -14,7 +14,7 @@ scons_parameters=["build_prefix="+build_prefix]
 setup_requires = ['openalea.deploy']
 install_requires = setup_requires
 if("win" in sys.platform):
-    setup_requires += [] #['qt4']
+    setup_requires += [] 
     install_requires += ['qt4']
 else:
     install_requires = []
