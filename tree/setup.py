@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
  
