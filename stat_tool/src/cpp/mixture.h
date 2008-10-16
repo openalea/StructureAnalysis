@@ -47,7 +47,7 @@
  */
 
 
-const int MIXTURE_NB_COMPONENT = 30;   // nombre maximum de composantes
+const int MIXTURE_NB_COMPONENT = 100;   // nombre maximum de composantes
 
 const double MIXTURE_PARAMETER = 20.;  // parametre initial pour une loi binomiale negative
 const double MIN_WEIGHT_STEP = 0.1;    // pas minimum d'initialisation des poids
