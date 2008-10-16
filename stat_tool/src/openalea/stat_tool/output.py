@@ -406,7 +406,7 @@ class StatInterface(object):
             
 
 
-    def display(self, Detail=1, ViewPoint="", Format=""):
+    def display(self, Detail=1, ViewPoint="", Format="", file_flag=False):
         __doc__ = Plot.__doc__
 
         # Detail level
@@ -446,7 +446,13 @@ class StatInterface(object):
                 raise AttributeError("%s has not 'stateprofile' viewpoint"%(str(type(self))))
                 
         else:
-            return self.ascii_write(exaustive)
+            if (file_flag):
+                try:
+                    return self.ascii_write(exaustive, true)
+                except AttributeError:
+                    raise AttributeError("%s has not 'fileflag'"%(str(type(self))))
+            else:
+                return self.ascii_write(exaustive)
 
 
 
@@ -457,7 +463,7 @@ class StatInterface(object):
             outstr = self.spreadsheet_write(filename)
 
         else:
-            outstr = self.display(Detail, ViewPoint, Format)
+            outstr = self.display(Detail, ViewPoint, Format, True)
 
             f = open(filename, 'w')
             f.write(outstr)
