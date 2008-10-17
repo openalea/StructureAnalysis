@@ -25,6 +25,8 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/mixture.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/mv_mixture.h"
 #include "stat_tool/compound.h"
 
 #include <boost/python.hpp>
@@ -281,9 +283,6 @@ public:
 
 };
 
-
-
-
 void class_mixture_data()
 {
   class_< Mixture_data, bases< Histogram, STAT_interface > >
@@ -316,4 +315,345 @@ void class_mixture_data()
 
 
 
+////////////////////////// Class Mv_Mixture //////////////////////////////////
 
+
+class MvMixtureWrap
+{
+
+public:
+
+  static boost::shared_ptr<Mv_Mixture> mv_mixture_from_file(char* filename)
+  {
+    Format_error error;
+    Mv_Mixture *mix = NULL;
+    mix = mv_mixture_ascii_read(error, filename);
+
+    if (mix == NULL)
+      {
+	stat_tool::wrap_util::throw_error(error);
+      }
+
+    return boost::shared_ptr<Mv_Mixture>(mix);
+  }
+
+  static boost::shared_ptr<Mv_Mixture> mv_mixture_from_components(boost::python::list& weights, 
+								  boost::python::list& dists)
+  {
+    Format_error error;
+    Mv_Mixture *mix = NULL;
+    int nb_component = 0; 
+    int nb_variable = 0;
+    
+    nb_component = boost::python::len(weights);
+    // Test list length
+    if(nb_component != boost::python::len(dists))
+      {
+	stat_tool::wrap_util::throw_error("Input lists must have the same length");
+      }
+    // Test list length
+    if(nb_component == 0)
+      {
+	stat_tool::wrap_util::throw_error("Input lists cannot be empty");
+      }
+
+    nb_variable = boost::python::len(dists[0]);
+
+    if(nb_variable == 0)
+      {
+	stat_tool::wrap_util::throw_error("Number of variable must be positive");
+      }
+
+
+    stat_tool::wrap_util::auto_ptr_array<double>
+      weight(new double[nb_component]);
+
+    stat_tool::wrap_util::auto_ptr_array<Parametric_process *>
+      pcomponent(new Parametric_process*[nb_variable]);
+ 
+    stat_tool::wrap_util::auto_ptr_array<Nonparametric_process *>
+      npcomponent(new Nonparametric_process*[nb_variable]);
+
+    stat_tool::wrap_util::auto_ptr_array<bool>
+      is_parametric(new bool[nb_variable]);
+
+    int i, var;
+
+    for(i=0; i<nb_component; i++)
+      weight[i] = boost::python::extract< double >(weights[i]);
+
+    for (var=0; var < nb_variable; var++) {
+
+      stat_tool::wrap_util::auto_ptr_array<Parametric *>
+	pprocess(new Parametric*[nb_component]);
+      stat_tool::wrap_util::auto_ptr_array<Distribution *>
+	npprocess(new Distribution*[nb_component]);
+
+      pprocess[0] = NULL;
+      npprocess[0] = NULL;
+
+      for(i=0; i<nb_component; i++) {
+	boost::python::extract< Parametric *> x(dists[i][var]);
+	if (x.check()) {
+	  pprocess[i] = x();
+	  npprocess[i] = NULL;
+	  if (i == 0)
+	    is_parametric[var] = true;
+	  else {
+	    if (!is_parametric[var])
+	      stat_tool::wrap_util::throw_error("Distributions must be the same type for a given variable");
+	  }
+	}
+	else {
+	  boost::python::extract< Distribution *> x(dists[i][var]);
+	  if (x.check()) {
+	    npprocess[i] = x();
+	    pprocess[i] = NULL;
+	    if (i == 0)
+	      is_parametric[var] = false;
+	    else {
+	      if (is_parametric[var])
+		stat_tool::wrap_util::throw_error("Distributions must be the same type for a given variable");
+	    }
+	  }
+	  else
+	    stat_tool::wrap_util::throw_error("Bad type for list element: must be Parametric or Distribution");
+
+	}
+      } // end for (i)
+      if (pprocess[0] != NULL) {
+	pcomponent[var] = new Parametric_process(nb_component, pprocess.get());
+	npcomponent[var] = NULL;
+      }
+      else {
+	pcomponent[var] = NULL;
+	npcomponent[var] = new Nonparametric_process(nb_component, npprocess.get());
+      }
+
+      for(i=0; i<nb_component; i++) {	  
+	if (npprocess[i] != NULL)
+	  delete npprocess[i];
+	if (pprocess[i] != NULL)
+	  delete pprocess[i];
+      }
+      
+    } // end for (var)
+
+    mix = mv_mixture_building(error, nb_component, nb_variable, 
+			      weight.get(), pcomponent.get(), npcomponent.get());
+    
+    for(var=0; var<nb_variable; var++) {	  
+      if (pcomponent[var] != NULL)
+	  delete pcomponent[var];
+      if (npcomponent[var] != NULL)
+	  delete npcomponent[var];
+    }
+    
+    if(mix == NULL)
+      stat_tool::wrap_util::throw_error(error);    
+    
+    return boost::shared_ptr<Mv_Mixture>(mix);
+  }
+
+
+  static Mv_Mixture_data* simulation(const Mv_Mixture& mixt, int nb_element)
+  {
+    Format_error error;
+    Mv_Mixture_data* ret = NULL;
+
+    ret = mixt.simulation(error, nb_element);
+    if(ret == NULL) stat_tool::wrap_util::throw_error(error);
+
+    return ret;
+  }
+
+
+  static Parametric_model* extract_weight(const Mv_Mixture& mixt)
+  {
+    Parametric_model* ret;
+    Mv_Mixture_data* mixt_data = NULL;
+
+    mixt_data = mixt.get_mixture_data();
+    ret = new Parametric_model(*(mixt.get_weight()),
+			       (mixt_data ? mixt_data->get_weight() : NULL));
+    return ret;
+  }
+
+
+  static Parametric_model* extract_mixture(const Mv_Mixture& mixt, int ivariable)
+  {
+    Format_error error;
+    Parametric_model* ret;
+    Mv_Mixture_data* mixt_data = NULL;
+    Distribution *marginal = mixt.extract_distribution(error, ivariable);
+    Histogram *marginal_hist = NULL;
+
+    if (marginal == NULL) stat_tool::wrap_util::throw_error(error);
+
+    mixt_data = mixt.get_mixture_data();
+
+    if (mixt_data != NULL)
+      marginal_hist = mixt_data->get_marginal(ivariable);
+
+    ret = new Parametric_model(*marginal, marginal_hist);
+
+    if (marginal_hist != NULL)
+      delete marginal_hist;
+
+    if (marginal != NULL) {
+      delete marginal;
+      marginal = NULL;
+    }
+
+    return ret;
+  }
+
+
+  static Mv_Mixture_data* extract_data(const Mv_Mixture& mixt)
+  {
+    Format_error error;
+    Mv_Mixture_data* ret = NULL;
+
+    ret = mixt.extract_data(error);
+    if(!ret) stat_tool::wrap_util::throw_error(error);
+
+    return ret;
+  }
+
+
+};
+
+
+
+// Boost declaration
+
+void class_mv_mixture()
+{
+
+  class_< Mv_Mixture, bases< STAT_interface > >
+    ("_MvMixture", "Multivariate Mixture Distribution")
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_file),
+	 "Build from a filename"
+	 )
+    
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_components),
+	 "Build from a list of weights and a list of list of distributions\n"
+	 "(components and variables)")
+	 
+    .def(self_ns::str(self)) // __str__ 
+    
+    .def("simulate", MvMixtureWrap::simulation, 
+	 return_value_policy< manage_new_object >(),
+	 python::arg("nb_element"),
+	 "Simulate nb_element elements")
+
+    .def("nb_component", &Mv_Mixture::get_nb_component,
+	 "Return the number of components")
+    
+    .def("extract_weight", MvMixtureWrap::extract_weight, 
+	 return_value_policy< manage_new_object >(),
+	 "Return the weight distribution")
+
+    .def("extract_mixture", MvMixtureWrap::extract_mixture, 
+	 return_value_policy< manage_new_object >(),
+	 "Return the MvMixture distribution")
+
+    .def("extract_data", MvMixtureWrap::extract_data, 
+	 return_value_policy< manage_new_object >(),
+	 "Return the associated _MvMixtureData object"
+	 )
+    ;
+}
+
+
+
+////////////////////////// Class Mv_Mixture_data //////////////////////////////////
+
+class MvMixtureDataWrap
+{
+
+public:
+
+  static Distribution_data* extract(const Mv_Mixture_data& d, int ivariable, int index)
+  {
+    Format_error error;
+    Distribution_data* ret = NULL;
+
+    ret = d.extract(error, ivariable, index);
+    if(!ret) stat_tool::wrap_util::throw_error(error);
+
+    return ret;
+  }
+
+  static Distribution_data* extract_marginal(const Mv_Mixture_data& d, int ivariable)
+  {
+    Format_error error;
+    Distribution_data* ret = NULL;
+
+    ret = d.extract_marginal(error, ivariable);
+    if(!ret) stat_tool::wrap_util::throw_error(error);
+
+    return ret;
+  }
+
+  static Distribution_data* extract_weight(const Mv_Mixture_data& mixt_histo)
+  {
+    Distribution_data* ret;
+
+    ret = new Distribution_data(*(mixt_histo.get_weight()) ,
+				mixt_histo.get_mixture()->get_weight());
+
+    return ret;
+  }
+
+
+  static Mv_Mixture* extract_mixture(const Mv_Mixture_data& mixt_histo)
+  {
+    Mv_Mixture* ret, *cp_ret = NULL;
+
+    cp_ret = mixt_histo.get_mixture();
+
+    if (cp_ret != NULL) {      
+      ret = new Mv_Mixture(*cp_ret);
+      delete cp_ret;
+    }
+    else
+      stat_tool::wrap_util::throw_error("No mixture model available for Mixture Data");
+    return ret;
+  }
+
+};
+
+void class_mv_mixture_data()
+{
+  class_< Mv_Mixture_data, bases< Vectors > >
+    ("_MvMixtureData",  "Multivariate Mixture Data")
+
+    .def(self_ns::str(self))
+
+    .def("nb_component", &Mv_Mixture_data::get_nb_component,
+	 "Return the number of components."
+	 )
+
+    .def("extract_component", MvMixtureDataWrap::extract, 
+	 return_value_policy< manage_new_object >(),
+	 python::arg("index"),
+	 "Get a particular component for a particular variable. First index is 1"
+	 )
+
+    .def("extract_marginal", MvMixtureDataWrap::extract_marginal, 
+	 return_value_policy< manage_new_object >(),
+	 "Return a _DistributionData for a particular variable."
+	 )
+
+    .def("extract_weight", MvMixtureDataWrap::extract_weight, 
+	 return_value_policy< manage_new_object >(),
+	 "Return a _DistributionData for mixture weights."
+	 )
+    
+    .def("extract_mixture", MvMixtureDataWrap::extract_mixture, 
+	 return_value_policy< manage_new_object >(),
+	 "Return a _DistributionData for mixture model"
+	 )    
+    ;
+}

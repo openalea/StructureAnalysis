@@ -112,6 +112,33 @@ Nonparametric_process::Nonparametric_process(int inb_state , int inb_value ,
 //    observation[i]->variance_computation();
   }
 }
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur de la classe Nonparametric_process.
+ *
+ *  arguments : nombre d'etats, lois d'observation.
+ *
+ *--------------------------------------------------------------*/
+
+Nonparametric_process::Nonparametric_process(int inb_state , Distribution **pobservation)
+
+{
+  register int i;
+
+  nb_value = 0;
+  nb_state = inb_state;
+
+  observation = new Distribution*[nb_state];
+  for (i = 0;i < nb_state;i++) {
+    observation[i] = new Distribution(*pobservation[i]);
+
+    observation[i]->cumul_computation();
+
+    observation[i]->max_computation();
+    nb_value = max(nb_value, observation[i]->nb_value);
+  }  
+
+}
 
 
 /*--------------------------------------------------------------*

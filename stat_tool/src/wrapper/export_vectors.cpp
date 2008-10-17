@@ -217,6 +217,27 @@ public:
     return res;
   }
 
+  static void file_ascii_write(const Vectors& d, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = d.ascii_write(error, path,exhaustive);
+    if (!result)
+       stat_tool::wrap_util::throw_error(error);
+      
+  }
+ 
+ static void file_ascii_data_write(const Vectors& d, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = d.ascii_data_write(error, path,exhaustive);
+    if (!result)
+       stat_tool::wrap_util::throw_error(error);
+      
+  }
 
   static Vectors* value_select(const Vectors& v,  int variable,
 			       const object& min, const object& max, bool keep)
@@ -703,6 +724,13 @@ void class_vectors()
     // Output
     .def("ascii_data_write", VectorsWrap::ascii_data_write,
 	 "Return a string with the object representation")
+  
+    // save to file
+    .def("file_ascii_write", VectorsWrap::file_ascii_write, 
+	 "Save vector summary into a file")
+ 
+   .def("file_ascii_write", VectorsWrap::file_ascii_data_write, 
+	 "Save vector data into a file")
 
     // Shift
     .def("shift", VectorsWrap::shift,

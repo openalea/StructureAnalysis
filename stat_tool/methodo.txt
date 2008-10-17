@@ -8,7 +8,7 @@ Objectifs :
 - Suppression de la couche AML
 - Nouvelles fonctions de plot
 
-1) Identification des classes et fonctions a� exporter:
+1) Identification des classes et fonctions à exporter:
         -> Quels sont les objects à manipuler en Python
         -> Quels sont les fonctionalités haut niveau
 
@@ -53,6 +53,9 @@ Objectifs :
         -> class wrapper : _Mixture, _MixtureData, _Sequences, _MarkovData...
         -> fonctions AML :  Merge, ToHistogram...
         -> pour les parameters par keywords : on conserve la syntaxe AML (avec des majuscules)
+
+	* Liste des classes exportées :
+	-> Dans stat_tool_wrap.cpp 
 
         * Extension des classes wrappers
  

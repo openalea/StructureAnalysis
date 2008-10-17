@@ -150,10 +150,10 @@ public :
 };
 
 
-Mv_Mixture* mixture_building(Format_error &error , int nb_component , 
-			     int nb_variable, double *weight, 
-			     Parametric_process **ppcomponent,
-			     Nonparametric_process **pnpcomponent);
+Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , 
+				int nb_variable, double *weight, 
+				Parametric_process **ppcomponent,
+				Nonparametric_process **pnpcomponent);
 Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
 				  double cumul_threshold = CUMUL_THRESHOLD);
 

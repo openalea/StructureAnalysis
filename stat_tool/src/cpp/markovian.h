@@ -260,6 +260,7 @@ public :
 
     Nonparametric_process(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
     Nonparametric_process(int inb_state , int inb_value , double **observation_probability);
+    Nonparametric_process(int inb_state , Distribution **pobservation);    
     Nonparametric_process(const Nonparametric_process &process , char manip = 'c' , int state = I_DEFAULT);
     ~Nonparametric_process();
     Nonparametric_process& operator=(const Nonparametric_process &process);

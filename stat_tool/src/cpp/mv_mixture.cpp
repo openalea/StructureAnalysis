@@ -517,9 +517,9 @@ Mv_Mixture_data* Mv_Mixture::extract_data(Format_error &error) const
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* mixture_building(Format_error &error , int nb_component , int nb_variable , 
-			     double *weight, Parametric_process **ppcomponent,
-			     Nonparametric_process **pnpcomponent)
+Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , int nb_variable , 
+				double *weight, Parametric_process **ppcomponent,
+				Nonparametric_process **pnpcomponent)
 
 {
   bool status;

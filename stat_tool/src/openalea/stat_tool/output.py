@@ -406,14 +406,14 @@ class StatInterface(object):
             
 
 
-    def display(self, Detail=1, ViewPoint="", Format="", file_flag=False):
+    def display(self, Detail=1, ViewPoint="", Format=""):
         __doc__ = Plot.__doc__
 
         # Detail level
         if(Detail>1):
-            exaustive = True
+            exhaustive = True
         else:
-            exaustive = False
+            exhaustive = False
 
         # ViewPoint
 
@@ -428,11 +428,11 @@ class StatInterface(object):
         elif(ViewPoint.lower() == "data"):
             try:
                 # try with format argument
-                return self.ascii_data_write(exaustive, format)
+                return self.ascii_data_write(exhaustive, format)
 
             except Exception, e:
                 try:
-                    return self.ascii_data_write(exaustive)
+                    return self.ascii_data_write(exhaustive)
 
                 except AttributeError:
                     raise AttributeError("%s has not 'data' viewpoint"%(str(type(self))))
@@ -446,28 +446,30 @@ class StatInterface(object):
                 raise AttributeError("%s has not 'stateprofile' viewpoint"%(str(type(self))))
                 
         else:
-            if (file_flag):
-                try:
-                    return self.ascii_write(exaustive, true)
-                except AttributeError:
-                    raise AttributeError("%s has not 'fileflag'"%(str(type(self))))
-            else:
-                return self.ascii_write(exaustive)
+            return self.ascii_write(exhaustive)
 
 
 
     def save(self, filename, Detail=2, ViewPoint="", Format="ASCII" ):
         __doc__ = Save.__doc__
 
+        # Detail level
+        if(Detail>1):
+            exhaustive = True
+        else:
+            exhaustive = False
+            
         if(Format.lower() == "spreadsheet"):
             outstr = self.spreadsheet_write(filename)
-
-        else:
-            outstr = self.display(Detail, ViewPoint, Format, True)
 
             f = open(filename, 'w')
             f.write(outstr)
             f.close()
+
+        elif(Format.lower() == "Data"):
+            self.file_ascii_data_write(filename, exhaustive)        
+        else:
+            self.file_ascii_write(filename, exhaustive)
         
 
 ################################################################################

@@ -71,6 +71,9 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_mixture();
   class_mixture_data();
 
+  class_mv_mixture();
+  class_mv_mixture_data();
+
   class_convolution();
   class_convolution_data();
   

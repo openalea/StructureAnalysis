@@ -117,7 +117,7 @@ class Test:
         h.save("test.his")
 
         h1 = Histogram(get_test_file("meri1.his"))
-        #h2 = Histogram("test.his")
+        h2 = Histogram("test.his")
         assert len(h) == len(h2)
         assert list(h) == list(h2)
         os.remove("test.his")

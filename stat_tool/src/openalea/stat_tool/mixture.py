@@ -7,9 +7,13 @@ import _stat_tool
 
 from _stat_tool import _Mixture
 from _stat_tool import _MixtureData
+from _stat_tool import _MvMixture
+from _stat_tool import _MvMixtureData
 
 __all__ = ['_Mixture', 
            '_MixtureData',
+           '_MvMixture',
+           '_MvMixtureData',
            'Mixture',
            ]
 
@@ -82,6 +86,11 @@ interface.extend_class( _stat_tool._Mixture, interface.StatInterface)
 # Extend _MixtureData
 interface.extend_class( _stat_tool._MixtureData, interface.StatInterface)
 
+# Extend _MvMixture
+interface.extend_class( _stat_tool._MvMixture, interface.StatInterface)
+
+# Extend _MvMixtureData
+interface.extend_class( _stat_tool._MvMixtureData, interface.StatInterface)
 
 
 ########################## Test Mixture ########################################

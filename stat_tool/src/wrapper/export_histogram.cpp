@@ -682,6 +682,17 @@ public:
 
     return ret;
   }
+ 
+  static void file_ascii_write(const Distribution_data& d, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = d.ascii_write(error, path,exhaustive);
+    if (!result)
+       stat_tool::wrap_util::throw_error(error);
+      
+  }
 };
 
 
@@ -719,6 +730,10 @@ void class_distribution_data()
     .def("extract_model", DistributionDataWrap::extract_model, 
 	 return_value_policy< manage_new_object >(),
 	 "Return the 'model' part of the histogram")
+
+    // save to file
+    .def("file_ascii_write", DistributionDataWrap::file_ascii_write, 
+	 "Save histogram into a file")
 
     ;
 
