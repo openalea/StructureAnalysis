@@ -1,6 +1,7 @@
 __docformat__ = "restructuredtext"
 __doc__ = """ Mixture """
 
+import os
 
 import interface
 import _stat_tool
@@ -82,7 +83,6 @@ def Mixture(*args):
 # Extend _Mixture
 interface.extend_class( _stat_tool._Mixture, interface.StatInterface)
 
-
 # Extend _MixtureData
 interface.extend_class( _stat_tool._MixtureData, interface.StatInterface)
 
@@ -92,6 +92,37 @@ interface.extend_class( _stat_tool._MvMixture, interface.StatInterface)
 # Extend _MvMixtureData
 interface.extend_class( _stat_tool._MvMixtureData, interface.StatInterface)
 
+# Add methods to _MvMixture
+
+def _MvMixture_old_plot(self, variable, Title=""):
+    """Plot a given variable"""
+    if ((variable < 0) or (variable >= self.nb_variable())):
+        raise IndexError
+    file_id = str(variable+1)
+    interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)
+
+def _MvMixture_get_plotable(self):
+    """Return a plotable object (not yet implemented)"""
+    return None
+
+_MvMixture.old_plot = _MvMixture_old_plot
+_MvMixture.get_plotable = _MvMixture_get_plotable
+
+# Add methods to _MvMixtureData
+
+def _MvMixtureData_old_plot(self, variable, Title=""):
+    """Plot a given variable"""
+    if ((variable < 0) or (variable >= self.get_nb_variable())):
+        raise IndexError
+    file_id = str(variable+1)
+    interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)
+
+def _MvMixtureData_get_plotable(self):
+    """Return a plotable object (not yet implemented)"""
+    return None
+
+_MvMixtureData.old_plot = _MvMixtureData_old_plot
+_MvMixtureData.get_plotable = _MvMixtureData_get_plotable
 
 ########################## Test Mixture ########################################
 from openalea.stat_tool import get_test_file
@@ -178,3 +209,46 @@ class Test:
         assert d
 
 
+    def test_build_mv_mixture(self):
+
+        from distribution import Binomial, Poisson
+        from mixture import _MvMixture
+
+        d11 = Binomial(2, 12, 0.1)
+        d12 = Binomial(0, 10, 0.5)
+        d13 = Binomial(3, 10, 0.8)
+
+        d21 = Poisson(2, 8.0)
+        d22 = Poisson(4, 5.0)
+        d23 = Poisson(0, 2.0)
+        
+        m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
+        assert m
+        return m
+    
+    def test_mv_fromfile(self):
+
+        from mixture import _MvMixture
+
+        # From file
+        m = _MvMixture(get_test_file("mixture_mv1.mixt"))
+        assert m
+    
+        # File
+        m.save("test_mv.mixt")
+
+        m1 = _MvMixture(get_test_file("mixture_mv1.mixt"))
+        m2 = _MvMixture("test_mv.mixt")
+        assert m.nb_component() == m2.nb_component()
+        assert str(m) == str(m2)
+        
+        os.remove("test_mv.mixt")    
+
+        mnp = _MvMixture(get_test_file("mixture_mv_nonparam.mixt"))
+        assert m
+
+        try:
+            h = _MvMixture(get_test_file("no_such_file.mixt"))
+            assert False
+        except Exception:
+            assert True

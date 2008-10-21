@@ -35,6 +35,7 @@
  */
 
 
+#include <iomanip>
 
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
@@ -46,6 +47,9 @@
 
 using namespace std;
 
+extern int column_width(int);
+extern int column_width(int nb_value , const double *value , double scale = 1.);
+extern char* label(const char*);
 
 
 /*--------------------------------------------------------------*
@@ -1240,4 +1244,265 @@ void Nonparametric_process::init()
 
   delete [] active_output;
   delete [] state_nb_value;
+}
+
+/*--------------------------------------------------------------*
+ *
+ *  Affichage des lois d'observation a partir d'un flux de sortie,
+ *  des histogrammes correspondant aux observations pour chaque etat,
+ *  des flags sur l'affichage exhaustif et dans un fichier
+ *
+ *--------------------------------------------------------------*/
+
+std::ostream& Nonparametric_process::ascii_print(std::ostream &os, 
+						 Histogram **empirical_observation, 
+						 bool exhaustive, bool file_flag) const {
+
+  register int i , j;
+  int buff , width[2];
+  double *pmass;
+
+  if (observation != NULL)
+    {
+      // affichage des lois d'observation
+      for(i= 0; i < nb_state; i++)
+      {
+         os << "\n" << STAT_word[STATW_STATE] << " " << i << " "
+            << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+         pmass= observation[i]->mass+observation[i]->offset;
+
+         for(j= observation[i]->offset; j < observation[i]->nb_value; j++)
+         {
+            if (*pmass > 0.)
+               os << STAT_word[STATW_OUTPUT] << " " << j << " : " << *pmass << endl;
+            pmass++;
+         }
+
+	 // affichage des histogrammes correspondants
+         if ((empirical_observation != NULL) && (exhaustive))
+         {
+            os << "\n";
+            if (file_flag)
+               os << "# ";
+
+            os << "   | " << STAT_label[STATL_STATE] << " " << i << " "
+               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+               << " | " << STAT_label[STATL_STATE] << " " << i << " "
+               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+
+            observation[i]->ascii_print(os, file_flag, false, false, empirical_observation[i]);
+         }
+      }
+
+      // calcul de la largeur de colonne
+
+      width[0]= column_width(nb_state-1);
+
+      width[1]= 0;
+      for(i= 0; i < nb_state; i++)
+      {
+         buff= column_width(observation[i]->nb_value, observation[i]->mass);
+         if (buff > width[1])
+            width[1] = buff;
+      }
+      width[1]+= ASCII_SPACE;
+
+      // affichage de la matrice des probabilites d'observation
+      os << "\n";
+      if (file_flag)
+         os << "# ";
+
+      os << STAT_label[STATL_OBSERVATION_PROBABILITIY_MATRIX] << endl;
+
+      os << "\n";
+      if (file_flag)
+         os << "# ";
+
+      os << setw(width[0]+width[1]) << 0;
+      for(i= 1; i < nb_value; i++)
+         os << setw(width[1]) << i;
+
+      for(i= 0; i < nb_state; i++)
+      {
+         os << "\n";
+         if (file_flag)
+            os << "# ";
+
+         os << setw(width[0]) << i ;
+         for(j= 0; j < nb_value; j++)
+            os << setw(width[1]) << observation[i]->mass[j];
+      }
+      os << endl;
+    }
+  
+  return os;
+
+}
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie gnuplot d'un processus non parametrique a partir du
+ *  prefixe de nom de fichier, le titre du graphe, la valeur 
+ *  de l'etat, et les histogrammes correspondants aux lois
+ *  d'observation
+ *
+ *--------------------------------------------------------------*/
+
+bool Nonparametric_process::plot_print(const char *prefix, const char *title, 
+				       int process, Histogram **empirical_observation) const {
+				       
+   bool status= false, start;
+   register int val, i, j= 0, k= 0;
+   int nb_histo, nb_dist, histo_index,
+       dist_index, plot_index, *dist_nb_value, *index_dist; 
+   double *scale;
+   const Distribution **pdist;
+   const Histogram **phisto;
+   ostringstream data_file_name[2];
+
+   // data file printing
+
+   data_file_name[0] << prefix << process << 0 << ".dat";
+
+
+   // name of the file containing the data for all the graphs
+   data_file_name[1] << prefix << process << 1 << ".dat";
+
+   // list of the successive distributions to be printed
+   pdist= new const Distribution*[1 * nb_value + nb_state];
+   dist_nb_value= new int[1 * nb_value + nb_state];
+   // scales for printing distributions and histograms together
+   scale= new double[1 * nb_value + nb_state];
+   // list of the successive histograms to be printed
+   phisto= new const Histogram*[1 + 2 * nb_value + nb_state];
+   // correspondance between the histograms and the distributions ?
+   index_dist= new int[1 + 2 * nb_value + nb_state];
+
+   nb_histo= 0;
+   nb_dist= 0;
+
+   if (observation != NULL)
+   {
+      for(val= 0; val < nb_state; val++)
+      {
+         pdist[nb_dist]= observation[val];
+         dist_nb_value[nb_dist]= observation[val]->nb_value;
+
+         if (empirical_observation != NULL)
+         {
+           phisto[nb_histo]= empirical_observation[val];
+           index_dist[nb_histo]= nb_dist;
+           scale[nb_dist++]= phisto[nb_histo++]->nb_element;
+         }
+         else
+            scale[nb_dist++]= 1.;
+      }
+   }
+
+   // create the file, named prefix(variable+1)1.dat, containing
+   // the values for all the gnuplot graphs
+
+   status= ::plot_print((data_file_name[1].str()).c_str(), nb_dist, pdist,
+			scale, dist_nb_value, nb_histo, phisto, index_dist);
+
+   // write the command and printing files
+   if (status)
+   {
+      // i == 0 -> output on terminal (.plot file)
+      // i == 1 -> output into a postscript file  (.plot file)
+
+      histo_index= 1;
+      dist_index= 0;
+
+      // observation
+      if (observation != NULL)
+      {
+         for(i= 0; i < 2; i++)
+         {
+            ostringstream file_name[2];
+
+            switch (i)
+            {
+              case 0 :
+                 file_name[0] << prefix << process << 0 << ".plot";
+                 break;
+              case 1 :
+                 file_name[0] << prefix << process << 0 << ".print";
+                 break;
+            }
+
+            ofstream out_file((file_name[0].str()).c_str());
+
+            if (i == 1)
+            {
+               out_file << "set terminal postscript" << endl;
+               file_name[1] << label(prefix) << process << 0 << ".ps";
+               out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+            }
+
+            out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                     << "set title";
+
+            if (title != NULL)
+               out_file << " \"" << title << " - " << STAT_label[STATL_OUTPUT_PROCESS]
+                        << " " << process << "\"";
+            out_file << "\n\n";
+
+            j= histo_index;
+            k= dist_index;
+
+            for(val= 0; val < nb_state; val++)
+            {
+               if (dist_nb_value[k] - 1 < TIC_THRESHOLD)
+                  out_file << "set xtics 0,1" << endl;
+
+               if (empirical_observation != NULL)
+               {
+                  out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
+                           << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
+                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
+                           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+                           << "\" with impulses,\\" << endl;
+                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
+                           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
+                           << "\" with linespoints" << endl;
+                  j++;
+               }
+               else
+               {
+                  out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
+                           << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
+                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
+                           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
+                           << "\" with linespoints" << endl;
+               }
+
+               if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                  out_file << "set xtics autofreq" << endl;
+               k++;
+
+               if ((i == 0) && (val < nb_state - 1))
+                  out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+               out_file << endl;
+            }
+
+            if (i == 1)
+               out_file << "\nset terminal x11" << endl;
+
+            out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+         }
+      }
+
+      delete [] pdist;
+      delete [] dist_nb_value;
+      delete [] scale;
+      delete [] phisto;
+      delete [] index_dist;
+   }
+
+   return status;
+
 }

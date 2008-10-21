@@ -37,6 +37,8 @@
 #EchoOn()
 from openalea.stat_tool import *
 
+plot.DISABLE_PLOT = False
+ 
 meri1 = Histogram("meri1.his")
 meri2 = Histogram("meri2.his")
 meri3 = Histogram("meri3.his")
@@ -104,3 +106,30 @@ histo4 = Cluster(peup, "Limit", [13, 24])
 
 mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
 # mixt11 = Estimate(peup, "MIXTURE", "B", "NB")
+
+d11 = distribution.Binomial(2, 12, 0.1)
+d12 = distribution.Binomial(0, 10, 0.5)
+d13 = distribution.Binomial(3, 10, 0.8)
+
+d21 = distribution.Poisson(2, 8.0)
+d22 = distribution.Poisson(4, 5.0)
+d23 = distribution.Poisson(0, 2.0)
+
+m = mixture._MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
+print m
+
+m2 = mixture._MvMixture("mixture_mv1.mixt")
+print m2
+
+print "Egalite des melanges construits par liste ",\
+      "de distributions et par fichiers : ", str(str(m)==str(m2))
+
+m = mixture._MvMixture("mixture_mv_nonparam.mixt")
+print m
+
+print "Simulation de melanges multivaries : "
+v = m.simulate(300);
+print v
+
+# m.old_plot(Title="Simulated mixture")
+# m.old_plot(variable=1, Title="")

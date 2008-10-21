@@ -1015,7 +1015,9 @@ Parametric_model::Parametric_model(const Parametric_model &dist , bool data_flag
 Parametric_model::~Parametric_model()
 
 {
-  delete histogram;
+  if (histogram) {
+    delete histogram; 
+  }
 }
 
 

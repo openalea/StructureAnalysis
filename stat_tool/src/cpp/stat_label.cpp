@@ -53,6 +53,7 @@ const char *STAT_word[] = {
   "DISTRIBUTIONS" ,
   "DISTRIBUTION" ,
   "WEIGHT" ,
+  "WEIGHTS" ,
 
   "COMPOUND_DISTRIBUTION" ,
   "SUM_DISTRIBUTION" ,

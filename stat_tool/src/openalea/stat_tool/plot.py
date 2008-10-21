@@ -4,7 +4,7 @@ __doc__ = """ Plot functions """
 
 import sys
 
-DISABLE_PLOT = True
+DISABLE_PLOT = False
 
 
 # !!! Do not plot in nosetests !!!

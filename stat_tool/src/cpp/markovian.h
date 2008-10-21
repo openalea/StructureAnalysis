@@ -274,6 +274,15 @@ public :
     int get_nb_value() const { return nb_value; }
     Distribution* get_observation(int state) const
     { return observation[state]; }
+
+    // affichage des lois d'observation
+    std::ostream& ascii_print(std::ostream &os, Histogram **empirical_observation, 
+			      bool exhaustive, bool file_flag) const;
+
+    /** sortie gnuplot */
+    bool plot_print(const char *prefix, const char *title, 
+		    int process, Histogram **empirical_observation = NULL) const;
+
 };
 
 

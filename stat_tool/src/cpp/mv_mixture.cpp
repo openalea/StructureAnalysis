@@ -110,16 +110,16 @@ Mv_Mixture::Mv_Mixture(int inb_component , double *pweight , int inb_variable,
   pcomponent = new Parametric_process*[nb_var];
   npcomponent = new Nonparametric_process*[nb_var];
 
-  for (var = 0;i < nb_var;var++) {
-      if (pnpcomponent[var] != NULL)
+  for (var = 0;var < nb_var;var++) {
+    if ((pnpcomponent != NULL) && (pnpcomponent[var] != NULL))
       {
          npcomponent[var]= new Nonparametric_process(*(pnpcomponent[var]));
-         pcomponent[var+1]= NULL;
+         pcomponent[var]= NULL;
       }
       else
       {
          npcomponent[var]= NULL;
-         pcomponent[var+1]= new Parametric_process(*(ppcomponent[var]));
+         pcomponent[var]= new Parametric_process(*(ppcomponent[var]));
       }
    }
 }
@@ -226,6 +226,9 @@ void Mv_Mixture::copy(const Mv_Mixture &mixt , bool data_flag)
 
   nb_component = mixt.nb_component;
   nb_var = mixt.nb_var;
+
+  pcomponent = new Parametric_process*[nb_var];
+  npcomponent = new Nonparametric_process*[nb_var];
 
   weight = new Parametric(*(mixt.weight));
 
@@ -402,7 +405,7 @@ Distribution* Mv_Mixture::extract_nonparametric_model(Format_error &error ,
 Distribution* Mv_Mixture::extract_distribution(Format_error &error , int ivariable) const 
 {
   bool status = true;
-  register int i , j;  
+  register int i , j, variable = ivariable - 1;  
   double *pweight , *pmass;
   Distribution *pDistribution = NULL; 
 
@@ -416,43 +419,45 @@ Distribution* Mv_Mixture::extract_distribution(Format_error &error , int ivariab
     pDistribution = new Distribution();
     pDistribution->nb_value = 0;
 
-    if (pcomponent[ivariable] != NULL) {
+    if (pcomponent[variable] != NULL) {
       for (i = 0;i < nb_component;i++) {
-	if (pcomponent[ivariable]->observation[i]->nb_value > pDistribution->nb_value) {
-	  pDistribution->nb_value = pcomponent[ivariable]->observation[i]->nb_value;
+	if (pcomponent[variable]->observation[i]->nb_value > pDistribution->nb_value) {
+	  pDistribution->nb_value = pcomponent[variable]->observation[i]->nb_value;
 	}
       }
 
       pDistribution->offset = pDistribution->nb_value; // majorant
       for (i = 0;i < nb_component;i++) {
-	if (pcomponent[ivariable]->observation[i]->offset < pDistribution->offset) {
-	  pDistribution->offset = pcomponent[ivariable]->observation[i]->offset;
+	if (pcomponent[variable]->observation[i]->offset < pDistribution->offset) {
+	  pDistribution->offset = pcomponent[variable]->observation[i]->offset;
 	}
       }
 
+      pDistribution->mass = new double[pDistribution->nb_value];
+      pDistribution->cumul = new double[pDistribution->nb_value];
       pmass = pDistribution->mass - 1;
       for (i = 0;i < pDistribution->nb_value;i++) {
 	pweight = weight->mass;
 	*++pmass = 0.;
 	for (j = 0;j < nb_component;j++) {
-	  if (i < pcomponent[ivariable]->observation[j]->nb_value) {
-	    *pmass += *pweight * pcomponent[ivariable]->observation[j]->mass[i];
+	  if (i < pcomponent[variable]->observation[j]->nb_value) {
+	    *pmass += *pweight * pcomponent[variable]->observation[j]->mass[i];
 	  }
 	  pweight++;
 	}
       }
     }
-    else { // npcomponent[ivariable] != NULL)
+    else { // npcomponent[variable] != NULL)
       for (i = 0;i < nb_component;i++) {
-	if (npcomponent[ivariable]->get_observation(i)->nb_value > pDistribution->nb_value) {
-	  pDistribution->nb_value = npcomponent[ivariable]->get_observation(i)->nb_value;
+	if (npcomponent[variable]->get_observation(i)->nb_value > pDistribution->nb_value) {
+	  pDistribution->nb_value = npcomponent[variable]->get_observation(i)->nb_value;
 	}
       }
 
       pDistribution->offset = pDistribution->nb_value; // majorant
       for (i = 0;i < nb_component;i++) {
-	if (npcomponent[ivariable]->get_observation(i)->offset < pDistribution->offset) {
-	  pDistribution->offset = npcomponent[ivariable]->get_observation(i)->offset;
+	if (npcomponent[variable]->get_observation(i)->offset < pDistribution->offset) {
+	  pDistribution->offset = npcomponent[variable]->get_observation(i)->offset;
 	}
       }
 
@@ -461,8 +466,8 @@ Distribution* Mv_Mixture::extract_distribution(Format_error &error , int ivariab
 	pweight = weight->mass;
 	*++pmass = 0.;
 	for (j = 0;j < nb_component;j++) {
-	  if (i < npcomponent[ivariable]->get_observation(j)->nb_value) {
-	    *pmass += *pweight * npcomponent[ivariable]->get_observation(j)->mass[i];
+	  if (i < npcomponent[variable]->get_observation(j)->nb_value) {
+	    *pmass += *pweight * npcomponent[variable]->get_observation(j)->mass[i];
 	  }
 	  pweight++;
 	}
@@ -579,7 +584,7 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
   register int i , j;
   int line, nb_variable;
   long index , nb_component, value;
-  double cumul , weight[MIXTURE_NB_COMPONENT];   
+  double cumul , *weight = NULL;   
   Nonparametric_process **np_observation;
   Parametric_process **p_observation;
   Mv_Mixture *mixt;
@@ -598,6 +603,7 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
     line = 0;
     nb_component = 0;
 
+    // lit jusqu'au prochain saut de ligne
     while (buffer.readLine(in_file , false)) {
       line++;
 
@@ -625,10 +631,44 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
           }
           break;
         }
+        }
+
+        i++;
+      }
+      
+      if (i > 0) {
+        if (i != 1) {
+          status = false;
+          error.update(STAT_parsing[STATP_FORMAT] , line);
+        }
+
+        break;
+      }
+
+    }
+
+    // lit jusqu'au prochain saut de ligne
+    while (buffer.readLine(in_file , false)) {
+      line++;
+
+#     ifdef DEBUG
+      cout << line << "  " << buffer << endl;
+#     endif
+
+      position = buffer.first('#');
+      if (position != RW_NPOS) {
+        buffer.remove(position);
+      }
+      i = 0;
+
+      RWCTokenizer next(buffer);
+
+      while (!((token = next()).isNull())) {
+        switch (i) {
 
         // test nombre de composantes
 
-        case 1 : {
+        case 0 : {
           lstatus = locale.stringToNum(token , &nb_component);
           if ((lstatus) && ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT))) {
             lstatus = false;
@@ -640,10 +680,20 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
           }
           break;
         }
+
+        case 1 : {
+          if (token != STAT_word[STATW_DISTRIBUTIONS]) {
+            status = false;
+            error.correction_update(STAT_parsing[STATP_KEY_WORD] , STAT_word[STATW_DISTRIBUTIONS] , line , i + 1);
+          }
+          break;
+        }
+
         }
 
         i++;
       }
+
 
       if (i > 0) {
         if (i != 2) {
@@ -659,12 +709,19 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
       status = false;
       error.update(STAT_parsing[STATP_FORMAT] , line);
     }
+    else 
+      weight = new double[nb_component];
 
     if (status) {
       nb_variable = I_DEFAULT;
 
       np_observation= NULL;
       p_observation= NULL;
+
+      // lecture des poids
+
+      index= 0;
+      i = 0;
 
       while (buffer.readLine(in_file , false))
 	{
@@ -678,7 +735,70 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
 	  if (position != RW_NPOS)
 	    buffer.remove(position);
 	  
+	  // i= 0;
+
+	  RWCTokenizer next(buffer);
+
+	  while (!((token = next()).isNull())) {
+	    if (i == 0) {
+	      if (token != STAT_word[STATW_WEIGHTS]) {
+		status = false;
+		error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , 
+					STAT_word[STATW_WEIGHTS] , line , i + 1);
+	      }
+	    }
+	    else {
+	      if (index < nb_component) {
+		lstatus = locale.stringToNum(token , weight + index);
+		if (lstatus) {
+		  if ((weight[index] <= 0.) || (weight[index] > 1. - cumul + DOUBLE_ERROR)) {
+		    lstatus = false;
+		  }
+		  else {
+		    cumul += weight[index];
+		  }
+		}
+	      
+		if (!lstatus) {
+		  status = false;
+		  error.update(STAT_parsing[STATP_WEIGHT_VALUE] , line , i + 1);
+		}
+	      
+		index++;
+	      }
+	    }
+	    i++;
+	  }
+	  if (i >= nb_component)
+	    break;	   
+	} // end : while (buffer.readLine(in_file , false))
+	       
+      if (index != nb_component) {
+	status= false;
+	error.update(STAT_parsing[STATP_FORMAT] , line);
+      }
+	       
+
+      if (cumul < CUMUL_THRESHOLD) {
+	status = false;
+	error.update(STAT_parsing[STATP_PROBABILITY_SUM]);
+      }    
+
+      // lecture des lois d'observation
+      while (buffer.readLine(in_file , false))
+	{
+	  line++;
+	  
+#         ifdef DEBUG
+	  cout << line << "  " << buffer << endl;
+#         endif
+
+	  position = buffer.first('#');
+	  if (position != RW_NPOS)
+	    buffer.remove(position);
+	  
 	  i= 0;
+	  index = 0;
 
 	  RWCTokenizer next(buffer);
 
@@ -708,15 +828,15 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
                         break;
                      }
 
-                     // test du mot-cle OUTPUT_PROCESS(ES)
+                     // test du mot-cle VARIABLE(S)
 
                      case 1 :
                      {
-                        if (token != STAT_word[nb_variable == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES])
+                        if (token != STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES])
                         {
                            status = false;
                            error.correction_update(STAT_parsing[STATP_KEY_WORD] ,
-                                                   STAT_word[nb_variable == 1 ? STATW_OUTPUT_PROCESS : STATW_OUTPUT_PROCESSES],
+                                                   STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES],
                                                    line, i+1);
                         }
                         break;
@@ -751,8 +871,6 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
                   p_observation[i]= NULL;
                }
 	       
-               index= 0;
-
                while (buffer.readLine(in_file , false))
 		 {
 		   line++;
@@ -774,18 +892,18 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
 		       switch (i)
 			 {
 
-			   // test du mot-cle OUTPUT_PROCESS
+			   // test du mot-cle VARIABLE
 
 			 case 0 :
 			   {
 			     nonparametric= true;
 			     
-			     if (token == STAT_word[STATW_OUTPUT_PROCESS])
+			     if (token == STAT_word[STATW_VARIABLE])
 			       index++;
 			     else
 			       {
 				 status= false;
-				 error.correction_update(STAT_parsing[STATP_KEY_WORD], STAT_word[STATW_OUTPUT_PROCESS],
+				 error.correction_update(STAT_parsing[STATP_KEY_WORD], STAT_word[STATW_VARIABLE],
 							 line, i+1);
 			       }
 			     break;
@@ -802,25 +920,15 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
 			     if (!lstatus)
 			       {
 				 status= false;
-				 error.update(STAT_parsing[STATP_OUTPUT_PROCESS_INDEX],
+				 error.update(STAT_parsing[STATP_VARIABLE_INDEX],
 					      line, i+1);
 			       }
 			     break;
-			   }
-            
-			   // test nom du parametre (WEIGHT)
+			   }            
 
-			 case 2 : {
-			   if (token != STAT_word[STATW_WEIGHT]) {
-			     status = false;
-			     error.correction_update(STAT_parsing[STATP_PARAMETER_NAME] , STAT_word[STATW_WEIGHT] , line , i + 1);
-			   }
-			   break;
-			 }
+			   // test on separator
 
-			   // test du separateur ":"
-			   			   
-			 case 3 :
+			 case 2 :
 			   {
 			     if (token != ":")
 			       {
@@ -828,31 +936,11 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
 				 error.update(STAT_parsing[STATP_SEPARATOR], line, i+1);
 			       }
 			     break;
-			   }			   
-
-			   // test valeur du poids
-			   
-			 case 4 : {
-			   lstatus = locale.stringToNum(token , weight + index);
-			   if (lstatus) {
-			     if ((weight[index] <= 0.) || (weight[index] > 1. - cumul + DOUBLE_ERROR)) {
-			       lstatus = false;
-			     }
-			     else {
-			       cumul += weight[index];
-			     }
 			   }
-
-			   if (!lstatus) {
-			     status = false;
-			     error.update(STAT_parsing[STATP_WEIGHT_VALUE] , line , j + 1);
-			   }
-			   break;
-			 }
 
 			   // test sur les mots-cles NONPARAMETRIC / PARAMETRIC
-
-			 case 5 :
+			   
+			 case 3 :
 			   {
 			     if (token == STAT_word[STATW_NONPARAMETRIC])
 			       nonparametric = true;
@@ -865,7 +953,8 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
 				     status = false;
 				     ostringstream correction_message;
 				     correction_message << STAT_word[STATW_NONPARAMETRIC] << " or "
-							<< STAT_word[STATW_PARAMETRIC];
+							<< STAT_word[STATW_PARAMETRIC] << "(instead of "
+							<< token << ")";
 				     error.correction_update(STAT_parsing[STATP_KEY_WORD],
 							     (correction_message.str()).c_str(),
 							     line, i+1);
@@ -880,7 +969,7 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
 		   
 		   if (i > 0)
 		     {
-		       if (i != 6)
+		       if (i != 4)
 			 {
 			   status= false;
 			   error.update(STAT_parsing[STATP_FORMAT], line);
@@ -996,12 +1085,19 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 {
   register int i, var;
   int bnb_parameter;
-  double scale[MIXTURE_NB_COMPONENT];
-  const Distribution *ptComponent[MIXTURE_NB_COMPONENT];
+  // double *scale;
+// const Distribution *ptComponent[MIXTURE_NB_COMPONENT];
   Histogram **observation= NULL;
 
-  os << STAT_word[STATW_MIXTURE] << " " << nb_component << " " << STAT_word[STATW_DISTRIBUTIONS] << endl;
+  os << STAT_word[STATW_MIXTURE] << endl << endl;
+  os << nb_component << " " << STAT_word[STATW_DISTRIBUTIONS] << endl << endl;
   // ascii_characteristic_print(os , false , file_flag);
+
+  os << STAT_word[STATW_WEIGHTS] << endl;
+  for (i = 0;i < nb_component;i++)
+    os << weight->mass[i] << "  ";	
+  os << endl;
+      
       
   if (nb_var > 0) {
     os << "\n" << nb_var << " "
@@ -1009,10 +1105,10 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 
     for(var= 1; var <= nb_var; var++)
       {
-	os << "\n" << STAT_word[STATW_OUTPUT_PROCESS];
+	os << "\n" << STAT_word[STATW_VARIABLE];
 	os << " " << var;
 
-	if (npcomponent[var] != NULL)
+	if (npcomponent[var-1] != NULL)
 	  os << " : " << STAT_word[STATW_NONPARAMETRIC];
 	else
 	  os << " : " << STAT_word[STATW_PARAMETRIC];
@@ -1025,17 +1121,21 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 	  }
 
 	  if (mixt_data->component != NULL)
-	    observation= mixt_data->component[var];
+	    observation= mixt_data->component[var-1];
+	  else
+	    observation= NULL;
 	}
-	if (npcomponent[var] == NULL)
-	  pcomponent[var]->ascii_print(os, observation, exhaustive, file_flag);
+	if (npcomponent[var-1] == NULL)
+	  pcomponent[var-1]->ascii_print(os, observation, exhaustive, file_flag);
+	else
+	  npcomponent[var-1]->ascii_print(os, observation, exhaustive, file_flag);
 
 	if (exhaustive) {
-	  for (i = 0;i < nb_component;i++) {
-	    if (pcomponent[var] != NULL)
-	      ptComponent[var] = pcomponent[var]->observation[i];
+	  /* for (i = 0;i < nb_component;i++) {
+	    if (pcomponent[var-1] != NULL)
+	      ptComponent[var-1] = pcomponent[var-1]->observation[i];
 	    else
-	      ptComponent[var] = npcomponent[var]->get_observation(i);
+	      ptComponent[var-1] = npcomponent[var-1]->get_observation(i);
 
 	    if (mixt_data) {
 	      scale[i] = mixt_data->nb_vector * weight->mass[i];
@@ -1043,7 +1143,7 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 	    else {
 	      scale[i] = weight->mass[i];
 	    }
-	  }
+	    }*/
       
 	  os << "\n";
 	  if (file_flag) {
@@ -1055,7 +1155,7 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 	  }
 	  os << " | " << STAT_label[STATL_MIXTURE];
 	  for (i = 0;i < nb_component;i++) {
-	    os << " | " << STAT_label[STATL_DISTRIBUTION] << " " << var + 1;
+	    os << " | " << STAT_label[STATL_DISTRIBUTION] << " " << var;
 	  }
 	  if (mixt_data != NULL) {
 	    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
@@ -1072,7 +1172,7 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
       double likelihood , information;
 
       bnb_parameter = nb_parameter_computation(MIN_PROBABILITY);
-      likelihood = likelihood_computation(*mixt_data);
+      likelihood = likelihood_computation(*mixt_data, true);
       information = mixt_data->information_computation();
       os << "\n";
       if (file_flag)
@@ -1134,9 +1234,10 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 	     << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BICc] << "): "
 	     << 2 * likelihood - penalty_computation() << endl;
 
-	  likelihood = likelihood_computation(*mixt_data);
-	  information = mixt_data->information_computation();
-
+	  // calculer la vraisemblance classifiante ?
+	  // likelihood = likelihood_computation(*mixt_data);
+	  // information = mixt_data->information_computation();
+	  /*
 	  os << "\n";
 	  if (file_flag) {
 	    os << "# ";
@@ -1149,16 +1250,11 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 	  }
 	  os << STAT_label[STATL_MAX_CLASSIFICATION_LIKELIHOOD] << ": " << information << "   ("
 	     << STAT_label[STATL_INFORMATION] << ": " << information / mixt_data->nb_vector << ")" << endl;
+	  */
 
 	} // end if (likelihood > 0)
     } // end if (mixt_data != NULL)
-    else {
-      for (i = 0;i < nb_component;i++) {
-	os << "\n" << STAT_word[STATW_DISTRIBUTION] << " " << i + 1 << " "
-	   << STAT_word[STATW_WEIGHT] << " : "  << weight->mass[i] << endl;	
-      }
-    }
-      
+
     if (mixt_data != NULL) {
       if (exhaustive) {
 	os << "\n";
@@ -1416,195 +1512,46 @@ bool Mv_Mixture::spreadsheet_write(Format_error &error , const char *path) const
  *--------------------------------------------------------------*/
 
 bool Mv_Mixture::plot_write(const char *prefix , const char *title ,
-                         const Mv_Mixture_data *mixt_data) const
+			    const Mv_Mixture_data *mixt_data) const
 
 {
-//   bool status;
-//   register int i , j , k;
-//   int nb_histo = 0 , index_dist[MIXTURE_NB_COMPONENT + 2];
-//   double scale[MIXTURE_NB_COMPONENT + 2];
-//   const Distribution *pdist[MIXTURE_NB_COMPONENT + 2];
-//   const Histogram *phisto[MIXTURE_NB_COMPONENT + 2];
-//   ostringstream data_file_name[MIXTURE_NB_COMPONENT + 1];
+  bool status = true;
+  int var = 0, cvariable = 0; 
+  Parametric_model *pparam = NULL;
+  Histogram **observation = NULL;
+  Format_error error;
 
+  // affiche la loi des poids
+  if (mixt_data != NULL) {
+    pparam = new Parametric_model(*weight, mixt_data->weight);
+    status= pparam->plot_write(error, prefix, title);
+    delete pparam;
+    pparam = NULL;
+  }
 
-//   // ecriture des fichiers de donnees
-
-//   data_file_name[0] << prefix << ".dat";
-
-//   if (mixt_data) {
-//     pdist[0] = this;
-//     phisto[nb_histo] = mixt_data;
-//     index_dist[nb_histo++] = 0;
-//     scale[0] = mixt_data->nb_vector;
-
-//     pdist[1] = weight;
-//     phisto[nb_histo] = mixt_data->weight;
-//     index_dist[nb_histo++] = 1;
-//     scale[1] = mixt_data->weight->nb_element;
-
-//     for (i = 0;i < nb_component;i++) {
-//       pdist[i + 2] = component[i];
-//       if (mixt_data->component[i]->nb_element > 0) {
-//         phisto[nb_histo] = mixt_data->component[i];
-//         index_dist[nb_histo++] = i + 2;
-//         scale[i + 2] = mixt_data->component[i]->nb_element;
-//       }
-//       else {
-//         scale[i + 2] = 1.;
-//       }
-//     }
-
-//     status = ::plot_print((data_file_name[0].str()).c_str() , nb_component + 2 , pdist ,
-//                           scale , 0 , nb_histo , phisto , index_dist);
-//   }
-
-//   else {
-//     status = plot_print((data_file_name[0].str()).c_str());
-//   }
-
-//   if (status) {
-//     for (i = 0;i < nb_component;i++) {
-//       data_file_name[i + 1] << prefix << i + 1 << ".dat";
-
-//       pdist[0] = component[i];
-
-//       if (mixt_data) {
-//         scale[0] = weight->mass[i] * mixt_data->nb_element;
-//       }
-//       else {
-//         scale[0] = weight->mass[i];
-//       }
-
-//       ::plot_print((data_file_name[i + 1].str()).c_str() , 1 , pdist , scale , 0 , 0 , 0 , 0);
-//     }
-
-//     // ecriture du fichier de commandes et du fichier d'impression
-
-//     for (i = 0;i < 2;i++) {
-//       ostringstream file_name[2];
-
-//       switch (i) {
-//       case 0 :
-//         file_name[0] << prefix << ".plot";
-//         break;
-//       case 1 :
-//         file_name[0] << prefix << ".print";
-//         break;
-//       }
-
-//       ofstream out_file((file_name[0].str()).c_str());
-
-//       if (i == 1) {
-//         out_file << "set terminal postscript" << endl;
-//         file_name[1] << label(prefix) << ".ps";
-//         out_file << "set output \"" << file_name[1].str() << "\"\n\n";
-//       }
-
-//       out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
-//                << "set title";
-//       if (title) {
-//         out_file << " \"" << title << "\"";
-//       }
-//       out_file << "\n\n";
-
-//       if (nb_value - 1 < TIC_THRESHOLD) {
-//         out_file << "set xtics 0,1" << endl;
-//       }
-
-//       if (mixt_data) {
-//         out_file << "plot [0:" << nb_value - 1 << "] [0:"
-//                  << (int)(MAX(mixt_data->max , max * mixt_data->nb_element) * YSCALE) + 1
-//                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
-//                  << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
-//         out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_histo + 1
-//                  << " title \"" << STAT_label[STATL_MIXTURE] << "\" with linespoints";
-//       }
-
-//       else {
-//         out_file << "plot [0:" << nb_value - 1 << "] [0:"
-//                  << MIN(max * YSCALE , 1.) << "] \""
-//                  << label((data_file_name[0].str()).c_str()) << "\" title \""
-//                  << STAT_label[STATL_MIXTURE] << "\" with linespoints";
-//       }
-
-//       for (j = 0;j < nb_component;j++) {
-//         out_file << ",\\" << endl;
-//         out_file << "\"" << label((data_file_name[j + 1].str()).c_str()) << "\" title \""
-//                  << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
-//         component[j]->plot_title_print(out_file);
-//         out_file << "\" with linespoints";
-//       }
-//       out_file << endl;
-
-//       if (nb_value - 1 < TIC_THRESHOLD) {
-//         out_file << "set xtics autofreq" << endl;
-//       }
-
-//       if (mixt_data) {
-//         if (i == 0) {
-//           out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-//         }
-//         out_file << endl;
-
-//         if (weight->nb_value - 1 < TIC_THRESHOLD) {
-//           out_file << "set xtics 0,1" << endl;
-//         }
-
-//         out_file << "plot [0:" << weight->nb_value - 1 << "] [0:"
-//                  << (int)(MAX(mixt_data->weight->max ,
-//                               weight->max * mixt_data->weight->nb_element) * YSCALE) + 1
-//                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << 2
-//                  << " title \"" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM]
-//                  << "\" with impulses,\\" << endl;
-//         out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_histo + 2
-//                  << " title \"" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION]
-//                  << "\" with linespoints" << endl;
-
-//         if (weight->nb_value - 1 < TIC_THRESHOLD) {
-//           out_file << "set xtics autofreq" << endl;
-//         }
-
-//         j = 3;
-//         for (k = 0;k < nb_component;k++) {
-//           if (mixt_data->component[k]->nb_element > 0) {
-//             if (i == 0) {
-//               out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-//             }
-//             out_file << endl;
-
-//             if (component[k]->nb_value - 1 < TIC_THRESHOLD) {
-//               out_file << "set xtics 0,1" << endl;
-//             }
-
-//             out_file << "plot [0:" << component[k]->nb_value - 1 << "] [0:"
-//                      << (int)(MAX(mixt_data->component[k]->max ,
-//                                   component[k]->max * mixt_data->component[k]->nb_element) * YSCALE) + 1
-//                      << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-//                      << " title \"" << STAT_label[STATL_HISTOGRAM] << " " << k + 1
-//                      << "\" with impulses,\\" << endl;
-//             out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_histo + k + 3
-//                      << " title \"" << STAT_label[STATL_DISTRIBUTION] << " " << k + 1;
-//             component[k]->plot_title_print(out_file);
-//             out_file << "\" with linespoints" << endl;
-
-//             if (component[k]->nb_value - 1 < TIC_THRESHOLD) {
-//               out_file << "set xtics autofreq" << endl;
-//             }
-//           }
-//         }
-//       }
-
-//       if (i == 1) {
-//         out_file << "\nset terminal x11" << endl;
-//       }
-
-//       out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
-//     }
-//   }
-
-//   return status;
-  return false;
+  if (status) {
+    for (var = 1; var <= nb_var; var++) {
+      if (mixt_data != NULL) {
+	switch (mixt_data->type[0])
+	  {
+	  case INT_VALUE :
+	    cvariable = var - 1;
+	    break;
+	  case STATE :
+	    cvariable = var;
+	    break;
+	  }
+	
+	if (mixt_data->component != NULL)
+	  observation = mixt_data->component[cvariable];
+      }
+      if (npcomponent[var-1] != NULL)
+	npcomponent[var-1]->plot_print(prefix, title, var, observation);
+      else
+	pcomponent[var-1]->plot_print(prefix, title, var, observation);
+    }
+  }
+  return status;
 }
 
 
@@ -2114,7 +2061,7 @@ Mv_Mixture_data& Mv_Mixture_data::operator=(const Mv_Mixture_data &mixt_data)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un sous-histogramme.
+ *  Extraction d'un histogramme correspondant a une composante
  *
  *  arguments : reference sur un objet Format_error, variable,
  *  indice de l'histogramme.
@@ -2176,7 +2123,7 @@ Distribution_data* Mv_Mixture_data::extract_marginal(Format_error &error , int i
 
 {
   bool status = true;
-  register int i , j;  
+  register int var;  
   Distribution *pDistribution = NULL; 
   Histogram *pHistogram = NULL;
   Distribution_data *marginal = NULL;
@@ -2188,7 +2135,8 @@ Distribution_data* Mv_Mixture_data::extract_marginal(Format_error &error , int i
 
   if (status) {
 
-    pHistogram = get_marginal(ivariable);
+    var = ivariable-1;
+    pHistogram = get_marginal(var);
     if (mixture != NULL)
       pDistribution = mixture->extract_distribution(error, ivariable);
       

@@ -110,7 +110,10 @@ void Mv_Mixture::get_output_conditional_distribution(const Mv_Mixture_data &mixt
 
   for (n = 0; n < mixt_data.nb_vector; n++) {
     for (i = 0; i < nb_component; i++) {
-      output_cond[n][i] = 0.;
+      if (log_computation)
+	output_cond[n][i] = 0.;
+      else
+	output_cond[n][i] = 1.;
       for (var = 0; var < mixt_data.nb_variable; var++) {
 	if (pcomponent[var] != NULL) {
 	  if (log_computation) {
@@ -163,9 +166,9 @@ double Mv_Mixture::likelihood_computation(const Mv_Mixture_data &mixt_data,
   for (n = 0; n < mixt_data.nb_vector; n++) {
     buff = 0.;
     for (i = 0;i < mixt_data.nb_component;i++)
-      likelihood += weight->mass[i] * output_cond[n][i];
+      buff += weight->mass[i] * output_cond[n][i];
 
-    if (likelihood != D_INF)
+    if (buff >= D_INF)
       likelihood += buff;
     else {
       likelihood = D_INF;
@@ -515,6 +518,25 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
       iint_vector[n] = NULL;
     }
 
+    // calcul des caracteristiques des histogrammes
+    for (var = 0; var < nb_var; var++) {
+      for (k = 0; k < nb_component; k++) {
+	hcomponent[var][k]->nb_value_computation();
+	hcomponent[var][k]->offset_computation();
+	hcomponent[var][k]->nb_element_computation();
+	hcomponent[var][k]->max_computation();
+	hcomponent[var][k]->mean_computation();
+	hcomponent[var][k]->variance_computation();
+      }
+    }
+
+    hweight->nb_value_computation();
+    hweight->offset_computation();
+    hweight->nb_element_computation();
+    hweight->max_computation();
+    hweight->mean_computation();
+    hweight->variance_computation();
+    
     delete [] iint_vector;
     iint_vector = NULL;
     delete [] iidentifier;

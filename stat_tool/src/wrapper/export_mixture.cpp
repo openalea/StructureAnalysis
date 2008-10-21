@@ -344,6 +344,9 @@ public:
     Mv_Mixture *mix = NULL;
     int nb_component = 0; 
     int nb_variable = 0;
+    // Parametric *pcomp = NULL;
+    // boost::python::list comp_list;
+    
     
     nb_component = boost::python::len(weights);
     // Test list length
@@ -383,17 +386,15 @@ public:
       weight[i] = boost::python::extract< double >(weights[i]);
 
     for (var=0; var < nb_variable; var++) {
-
-      stat_tool::wrap_util::auto_ptr_array<Parametric *>
-	pprocess(new Parametric*[nb_component]);
-      stat_tool::wrap_util::auto_ptr_array<Distribution *>
-	npprocess(new Distribution*[nb_component]);
+     
+      Parametric **pprocess = new Parametric*[nb_component];
+      Distribution **npprocess = new Distribution*[nb_component];
 
       pprocess[0] = NULL;
       npprocess[0] = NULL;
 
       for(i=0; i<nb_component; i++) {
-	boost::python::extract< Parametric *> x(dists[i][var]);
+	boost::python::extract< Parametric* > x(dists[i][var]);
 	if (x.check()) {
 	  pprocess[i] = x();
 	  npprocess[i] = NULL;
@@ -422,21 +423,23 @@ public:
 	}
       } // end for (i)
       if (pprocess[0] != NULL) {
-	pcomponent[var] = new Parametric_process(nb_component, pprocess.get());
+	pcomponent[var] = new Parametric_process(nb_component, pprocess);
 	npcomponent[var] = NULL;
       }
       else {
 	pcomponent[var] = NULL;
-	npcomponent[var] = new Nonparametric_process(nb_component, npprocess.get());
+	npcomponent[var] = new Nonparametric_process(nb_component, npprocess);
       }
 
-      for(i=0; i<nb_component; i++) {	  
+      /*for(i=0; i<nb_component; i++) {	  
 	if (npprocess[i] != NULL)
 	  delete npprocess[i];
 	if (pprocess[i] != NULL)
-	  delete pprocess[i];
-      }
-      
+	delete pprocess[i];
+	}*/
+
+      delete [] pprocess;
+      delete [] npprocess;
     } // end for (var)
 
     mix = mv_mixture_building(error, nb_component, nb_variable, 
@@ -508,7 +511,6 @@ public:
     return ret;
   }
 
-
   static Mv_Mixture_data* extract_data(const Mv_Mixture& mixt)
   {
     Format_error error;
@@ -520,6 +522,26 @@ public:
     return ret;
   }
 
+  static void file_ascii_write(const Mv_Mixture& m, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = m.ascii_write(error, path, exhaustive);
+    if (!result)
+       stat_tool::wrap_util::throw_error(error);
+      
+  }
+
+  static void plot_write(const Mv_Mixture& m, const char* path,  const char* title)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = m.plot_write(error, path, title);
+    if (!result)
+      stat_tool::wrap_util::throw_error(error);    
+  }
 
 };
 
@@ -549,6 +571,9 @@ void class_mv_mixture()
 
     .def("nb_component", &Mv_Mixture::get_nb_component,
 	 "Return the number of components")
+
+    .def("nb_variable", &Mv_Mixture::get_nb_variable,
+	 "Return the number of variables")
     
     .def("extract_weight", MvMixtureWrap::extract_weight, 
 	 return_value_policy< manage_new_object >(),
@@ -556,12 +581,19 @@ void class_mv_mixture()
 
     .def("extract_mixture", MvMixtureWrap::extract_mixture, 
 	 return_value_policy< manage_new_object >(),
-	 "Return the MvMixture distribution")
+	 "Return the _MvMixture distribution")
 
     .def("extract_data", MvMixtureWrap::extract_data, 
 	 return_value_policy< manage_new_object >(),
 	 "Return the associated _MvMixtureData object"
 	 )
+
+    .def("file_ascii_write", MvMixtureWrap::file_ascii_write,
+	 "Save _MvMixture into a file")
+
+    .def("plot_write", MvMixtureWrap::plot_write,
+	 python::args("prefix", "title"),
+	 "Write GNUPLOT files")
     ;
 }
 
@@ -622,6 +654,28 @@ public:
     return ret;
   }
 
+  static void file_ascii_write(const Mv_Mixture_data& m, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = m.ascii_write(error, path, exhaustive);
+    if (!result)
+       stat_tool::wrap_util::throw_error(error);
+      
+  }
+
+  static void plot_write(const Mv_Mixture_data& m, const char* path,  
+			 const char* title)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = m.plot_write(error, path, title);
+    if (!result)
+      stat_tool::wrap_util::throw_error(error);    
+  }
+
 };
 
 void class_mv_mixture_data()
@@ -643,17 +697,24 @@ void class_mv_mixture_data()
 
     .def("extract_marginal", MvMixtureDataWrap::extract_marginal, 
 	 return_value_policy< manage_new_object >(),
-	 "Return a _DistributionData for a particular variable."
+	 "Return a _MvMixtureData for a particular variable."
 	 )
 
     .def("extract_weight", MvMixtureDataWrap::extract_weight, 
 	 return_value_policy< manage_new_object >(),
-	 "Return a _DistributionData for mixture weights."
+	 "Return a _MvMixtureData for mixture weights."
 	 )
     
     .def("extract_mixture", MvMixtureDataWrap::extract_mixture, 
 	 return_value_policy< manage_new_object >(),
-	 "Return a _DistributionData for mixture model"
+	 "Return a _MvMixtureData for mixture model"
 	 )    
+
+    .def("file_ascii_write", MvMixtureDataWrap::file_ascii_write,
+	 "Save _MvMixtureData into a file")
+
+    .def("plot_write", MvMixtureDataWrap::plot_write,
+	 python::args("prefix", "title"),
+	 "Write GNUPLOT files")
     ;
 }
