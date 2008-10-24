@@ -469,8 +469,7 @@ public:
 
     return ret;
   }
-
-
+  
   static Parametric_model* extract_weight(const Mv_Mixture& mixt)
   {
     Parametric_model* ret;

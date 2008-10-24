@@ -87,6 +87,7 @@ class Vectors : public STAT_interface {  // vecteurs
 
     friend class Regression;
     friend class Sequences;
+    friend class Mv_Mixture;
 
     friend Vectors* vectors_ascii_read(Format_error &error , const char *path);
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
@@ -254,9 +255,9 @@ public :
                                char algorithm = 'a') const;
     Regression* nearest_neighbor_smoother(Format_error &error , int explanatory_variable ,
                                           int response_variable , double span , bool weighting = true) const;
-    Mv_Mixture* mixture_estimation(Format_error &error, const Mv_Mixture &imixture, 
+    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, const Mv_Mixture &imixture, 
 				   int nb_iter=I_DEFAULT, bool force_param=false) const;
-    Mv_Mixture* mixture_estimation(Format_error &error, int nb_component, 
+    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, int nb_component, 
 				   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
 
     // acces membres de la classe

@@ -789,7 +789,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , int nb_component , 
  *
  *--------------------------------------------------------------*/
 
-Mixture* Histogram::mixture_estimation(Format_error &error , ostream &os , int min_nb_component ,
+Mixture* Histogram::mixture_estimation(Format_error &error , std::ostream &os , int min_nb_component ,
                                        int max_nb_component , int *ident , int min_inf_bound ,
                                        bool mixt_flag , bool component_flag , int penalty_type ,
                                        double weight_step) const

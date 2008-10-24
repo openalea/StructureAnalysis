@@ -34,10 +34,17 @@
  *  ----------------------------------------------------------------------------
  */
 
-
-
 #ifndef MVMIXTURE_H
 #define MVMIXTURE_H
+
+#include "markovian.h"
+
+/****************************************************************
+ *
+ *  Constantes :
+ */
+
+const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-6;
 
 /****************************************************************
  *
@@ -56,7 +63,8 @@ class Nonparametric_process;
 
 class Mv_Mixture : public STAT_interface {  
 
-    friend class Histogram;
+    friend class Histogram;    
+    friend class Vectors;
     friend class Mv_Mixture_data;
 
     friend Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , double *weight ,
@@ -89,25 +97,32 @@ private :
     double penalty_computation() const;
   
     /** Conditional density of observations */
-    void get_output_conditional_distribution(const Mv_Mixture_data &mixt_data, 
+    void get_output_conditional_distribution(const Vectors &mixt_data, 
 					     double** &output_cond,
 					     bool log_computation=false) const;
-  
-    /** E step of EM algorithm */
-    void expectation_step(Mv_Mixture_data *mixt_data , int nb_element) const;
+
+    /** Conditional distribution of states */
+    void get_posterior_distribution(const Vectors &mixt_data, 
+				    double** output_cond,
+				    double** &posterior_dist) const;
+
+    /** MAP algorithm */
+    std::vector<int>* state_computation(Format_error &error, const Vectors &vec, 
+					int algorithm=VITERBI, int index=I_DEFAULT,
+					double** posterior_dist=NULL) const;
 
     /** Initialization of EM algorithm */
-    void init(bool component_flag);
+    void init();
 
 public :
 
     Mv_Mixture();
     Mv_Mixture(int inb_component , double *pweight , int inb_variable,
 	       Parametric_process **ppcomponent, Nonparametric_process **pnpcomponent);
-    Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag , int inb_variable);
-    Mv_Mixture(int inb_component , int inb_variable, 
-	       const Parametric_process **ppcomponent, 
+    Mv_Mixture(int inb_component , int inb_variable, const Parametric_process **ppcomponent, 
 	       const Nonparametric_process **pnpcomponent);
+    Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag , int inb_variable);
+    Mv_Mixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
     Mv_Mixture(const Mv_Mixture &mixt , bool data_flag = true)
     { copy(mixt , data_flag); }
     ~Mv_Mixture();
@@ -133,9 +148,14 @@ public :
                     const char *title = 0) const;
     plotable::MultiPlotSet* get_plotable() const;
 
-    double likelihood_computation(const Mv_Mixture_data &mixt_data, 
+    double likelihood_computation(const Vectors &mixt_data, 
 				  bool log_computation=false) const;
+
     Mv_Mixture_data* simulation(Format_error &error , int nb_element) const;
+
+    /** add restored states to Vectors */
+    Mv_Mixture_data* cluster(Format_error &error,  const Vectors &vec, 
+			     int algorithm=VITERBI) const;
 
     // acces membres de la classe
 
@@ -165,6 +185,7 @@ class Mv_Mixture_data : public Vectors {
                                   
     friend class Histogram;
     friend class Mv_Mixture;
+    friend class Vectors;
 
     friend std::ostream& operator<<(std::ostream &os , const Mv_Mixture_data &mixt_data)
     { return mixt_data.ascii_write(os , false); }

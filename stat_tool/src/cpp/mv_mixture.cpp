@@ -201,6 +201,58 @@ Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
   }
 }
 
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur de la classe Mv_Mixture.
+ *
+ *  arguments : nombre de composantes, nombre de variables,
+ *  nombre de valeurs pour chaque variable, 
+ *  choix de lois parametriques ou non
+ *
+ *--------------------------------------------------------------*/
+
+Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable, 
+		       int *nb_value, bool *force_param) {
+  
+
+  register int var;
+  bool *fparam = NULL;
+
+  mixture_data = NULL;
+  nb_component = inb_component;
+  nb_var = inb_variable;
+
+  weight = NULL;
+
+  pcomponent = new Parametric_process*[nb_var];
+  npcomponent = new Nonparametric_process*[nb_var];
+
+  fparam= new bool[nb_var];
+  if (force_param == NULL) {
+    for (var = 0; var < nb_var; var++)
+      fparam[var]= false;
+  }
+  else {
+    for (var = 0; var < nb_var; var++)
+      fparam[var]= force_param[var];
+  }
+
+  npcomponent= new Nonparametric_process*[nb_var];
+  pcomponent= new Parametric_process*[nb_var];
+
+  for(var = 0; var < nb_var; var++) {
+    if ((*nb_value <= NB_OUTPUT) && !(fparam[var])) {
+      npcomponent[var] = new Nonparametric_process(nb_component, *nb_value++, true);
+      pcomponent[var] = NULL;
+    }
+    else {
+      npcomponent[var] = NULL;
+      pcomponent[var] = new Parametric_process(nb_component, (int)(*nb_value++ * SAMPLE_NB_VALUE_COEFF));
+    }
+  }
+  delete [] fparam;
+  fparam= NULL;
+}
 
 /*--------------------------------------------------------------*
  *
@@ -1083,11 +1135,15 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 				 bool exhaustive , bool file_flag) const
 
 {
-  register int i, var;
+  register int i, var, 
+    data_var; // index that corresponds to var in mixt_data
   int bnb_parameter;
+  int *var_array = NULL;
   // double *scale;
 // const Distribution *ptComponent[MIXTURE_NB_COMPONENT];
   Histogram **observation= NULL;
+  Format_error error;
+  Vectors *vect_data = NULL;
 
   os << STAT_word[STATW_MIXTURE] << endl << endl;
   os << nb_component << " " << STAT_word[STATW_DISTRIBUTIONS] << endl << endl;
@@ -1115,13 +1171,17 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 
 	os << endl;
 	if (mixt_data != NULL) {
+	  if (mixt_data->type[0] == STATE)
+	    data_var = var;
+	  else
+	    data_var = var-1;
 	  os << "\n";
 	  if (file_flag) {
 	    os << "# ";
 	  }
 
 	  if (mixt_data->component != NULL)
-	    observation= mixt_data->component[var-1];
+	    observation= mixt_data->component[data_var];
 	  else
 	    observation= NULL;
 	}
@@ -1172,7 +1232,20 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
       double likelihood , information;
 
       bnb_parameter = nb_parameter_computation(MIN_PROBABILITY);
-      likelihood = likelihood_computation(*mixt_data, true);
+      if (mixt_data->type[0] == STATE) {
+	var_array = new int[1];
+	var_array[0] = 1;
+	vect_data = mixt_data->select_variable(error, 1, var_array, false);
+	if (vect_data == NULL) {
+	  cerr << error;
+	  likelihood = D_INF;
+	}
+	else
+	  likelihood = likelihood_computation(*vect_data, true);
+      }
+      else
+	likelihood = likelihood_computation(*mixt_data, true);
+
       information = mixt_data->information_computation();
       os << "\n";
       if (file_flag)
@@ -1275,6 +1348,13 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
       }
     }
   }
+  
+  if (var_array != NULL) {
+    delete [] var_array;
+    if (vect_data != NULL)
+      delete vect_data;
+  }
+
   return os;
 }
 
@@ -1516,7 +1596,7 @@ bool Mv_Mixture::plot_write(const char *prefix , const char *title ,
 
 {
   bool status = true;
-  int var = 0, cvariable = 0; 
+  int var = 0, cvariable = 0; // variable index that corresponds to var in mixture_data 
   Parametric_model *pparam = NULL;
   Histogram **observation = NULL;
   Format_error error;
@@ -1907,7 +1987,7 @@ Mv_Mixture_data::Mv_Mixture_data(const Vectors &vec , int inb_component)
 
 {
   register int i, var;
-
+  int nb_val;
 
   mixture = NULL;
   nb_component = inb_component;
@@ -1919,7 +1999,8 @@ Mv_Mixture_data::Mv_Mixture_data(const Vectors &vec , int inb_component)
     for (var = 0;var < nb_variable;var++) {
       component[var] = new Histogram*[nb_component];
       for (i = 0;i < nb_component;i++) {
-	component[var][i] = new Histogram((int)ceil(get_max_value(var))+1);
+	nb_val = (int)ceil(get_max_value(var))+1;
+	component[var][i] = new Histogram(nb_val);
       }
     }
   }
@@ -2011,10 +2092,11 @@ void Mv_Mixture_data::remove()
     register int i, var;
 
     for (var = 0; var < nb_variable; var++) {
-      for (i = 0;i < nb_component;i++) {
-	delete component[var][i];
-	component[var][i] = NULL;
-      }
+      for (i = 0;i < nb_component;i++) 
+	if (component[var] != NULL) {
+	  delete component[var][i];
+	  component[var][i] = NULL;
+	}
       delete [] component[var]; 
       component[var] = NULL; 
     }

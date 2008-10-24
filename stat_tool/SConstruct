@@ -6,6 +6,8 @@ pj = os.path.join
 ALEASolution = config.ALEASolution
 
 options = Options(['../options.py', 'options.py'], ARGUMENTS)
+options.Add(BoolOption('with_test', 'build test modules', 1))
+
 tools = ['boost_python', 'vplants.tool', 'install', 'alea']
 
 env = ALEASolution(options, tools)
@@ -17,3 +19,5 @@ SConscript(pj(prefix,"src/cpp/SConscript"),
 SConscript(pj(prefix,"src/wrapper/SConscript"),
            exports='env')
 
+if env['with_test']:
+    SConscript(pj(prefix,"test/cpp/SConscript"), exports="env")

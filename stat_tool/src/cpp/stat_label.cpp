@@ -451,6 +451,8 @@ const char *STAT_error[] = {
   "bad maximum value" ,
   "empty histogram" ,
 
+  "not present" , // STATR_NOT_PRESENT
+
   "marginal histogram not built" ,
   "bad" ,
   "bad number of vectors" ,

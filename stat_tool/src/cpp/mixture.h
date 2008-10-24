@@ -54,7 +54,7 @@ const double MIN_WEIGHT_STEP = 0.1;    // pas minimum d'initialisation des poids
 const double MAX_WEIGHT_STEP = 0.5;    // pas maximum d'initialisation des poids
 const int MIXTURE_COEFF = 2;           // coefficient arrondi estimateur
 const double MIXTURE_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
-const int MIXTURE_NB_ITER = 50;        // nombre maximum d'iterations EM
+const int MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
 
 
 

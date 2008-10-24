@@ -28,6 +28,7 @@
 #include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
 #include "stat_tool/distribution.h"
+#include "stat_tool/mv_mixture.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -582,6 +583,91 @@ public:
     return ret;
   }
 
+  static Mv_Mixture* mixture_estimation_1(const Vectors& v, const Mv_Mixture& mixt,
+					  int nb_iter, bool force_param)
+  {
+    Mv_Mixture* ret = NULL;
+    Format_error error;
+  
+    ret = v.mixture_estimation(error, cout, mixt, nb_iter, force_param);
+
+    if(ret == NULL)
+      stat_tool::wrap_util::throw_error(error);
+
+    return ret;
+  }
+
+  static Mv_Mixture* mixture_estimation_2(const Vectors& v, int nb_component, 
+					  int nb_iter, boost::python::list force_param)
+  {
+    bool status = true, several_errors= false;
+    Mv_Mixture* ret = NULL;
+    bool *fparam= NULL;
+    Format_error error;
+    ostringstream error_message;
+    int nb_fparam, p;
+    const int nb_variables = v.get_nb_variable();
+    object o;
+
+    nb_fparam= boost::python::len(force_param);
+
+    if (nb_fparam > 0) {
+      if (nb_fparam != nb_variables) {
+	status = false;
+	error_message << "bad size of argument list: " << nb_fparam
+		      << ": should be the number of variables ("
+		      << nb_variables << ")";
+	PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+	throw_error_already_set();
+      }
+      else {
+	fparam = new bool[nb_fparam];
+	for (p = 0; p < nb_fparam; p++) {
+	  o = force_param[p];
+	  try {
+	    extract<bool> x(o);
+	    if (x.check())
+	      fparam[p]= x();
+	    else
+	      status=false;
+	  }
+	  catch (...) {
+	    status = false;
+	  }
+	  if (!status) {
+	    if (several_errors)
+	      error_message << endl;
+	    else
+	      several_errors = true;
+	    error_message << "incorrect type for element " << p
+			  << " of argument list: expecting a boolean";
+	  }
+	}
+	if (!status) {
+	  delete [] fparam;
+	  fparam = NULL;
+	  PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
+	  throw_error_already_set();
+	}
+      }
+    }
+ 
+   if (status) {
+
+      ret = v.mixture_estimation(error, cout, nb_component, nb_iter, fparam);
+      if (fparam != NULL) {
+	delete [] fparam;
+	fparam = NULL;
+      }
+
+      if (ret == NULL)
+	stat_tool::wrap_util::throw_error(error);
+    }
+    return ret;
+  }
+
+
+
   static string contingency_table(const Vectors& v, int variable1, int variable2, 
 				   const string& filename, char format)
   {
@@ -680,6 +766,16 @@ void class_vectors()
 	 return_value_policy< manage_new_object >(),
 	 python::args("explanatory_var", "response_var", "span", "weighting"),
 	 "Linear regression (nearest neighbours)")
+  
+    .def("mixture_estimation", VectorsWrap::mixture_estimation_1,
+	 return_value_policy< manage_new_object >(),
+	 python::args("initial_mixture", "nb_max_iteration", "force_param"),
+	 "Mixture estimation (EM algorithm with initial model)")
+
+    .def("mixture_estimation", VectorsWrap::mixture_estimation_2,
+	 return_value_policy< manage_new_object >(),
+	 python::args("nb_component", "nb_max_iteration", "force_param"),
+	 "Mixture estimation (EM algorithm with fixed number of components)")
 
     // Merge
     .def("merge", VectorsWrap::merge,
