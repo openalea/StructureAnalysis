@@ -45,6 +45,8 @@
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/distribution.h"   // definition of Parametric_model class
+#include "stat_tool/vectors.h"
 #include "sequence_analysis/sequences.h"
 #include "int_fl_containers.h"
 #include "generic_typed_edge_tree.h"
@@ -351,10 +353,6 @@ bool Hidden_markov_out_tree::plot_write(Format_error& error,
 {
    bool status= plot_write(prefix, title, markov_data);
 
-   cout << "Call to Hidden_markov_out_tree::plot_write with prefix = "
-        << prefix << endl;
-
-
    error.init();
 
    if (!status)
@@ -580,10 +578,6 @@ bool Hidden_markov_out_tree::plot_write(const char * prefix, const char * title,
    int variable= 0; //, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
    Histogram *hsize= NULL, **observation= NULL;
    Tree_characteristics *characteristics= NULL;
-
-   cout << "Call to Hidden_markov_out_tree::plot_write with prefix = "
-        << prefix << endl;
-
 
    // print characteristic distributions for state process
    if ((otrees != NULL) && (otrees->_type[0] == STATE))

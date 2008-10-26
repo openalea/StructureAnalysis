@@ -384,7 +384,7 @@ void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
    }
 }
 
-void Trees_wrapper_build_vectors(const Trees& reftree, const char* prefix)
+void Trees_wrapper_build_vectors_path(const Trees& reftree, const char* prefix)
 {
    ostringstream error_message;
    bool status= true;
@@ -408,6 +408,27 @@ void Trees_wrapper_build_vectors(const Trees& reftree, const char* prefix)
       PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
       throw_error_already_set();
    }
+}
+
+Vectors* Trees_wrapper_build_vectors_object(const Trees& reftree)
+{
+   ostringstream error_message;
+   bool status= true;
+   Format_error error;
+   Vectors* vec= NULL;
+
+
+   vec = reftree.build_vectors(error);
+   if (vec == NULL)
+      status= false;
+
+   if (!status)
+   {
+      error_message << error;
+      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+   return vec;
 }
 
 Distribution_data* Trees_wrapper_extract_value(const Trees& reftree, int variable)
@@ -1023,8 +1044,8 @@ Trees* Trees_wrapper_merge_variable(const Trees& reftree, boost::python::list tr
 }
 
 MultiPlotSet* Trees_wrapper_get_plotable(const Trees& reftree,
-					 int plot_type,
-					 int variable)
+                     int plot_type,
+                     int variable)
 {
    Format_error error;
    ostringstream error_message;
@@ -1040,7 +1061,7 @@ MultiPlotSet* Trees_wrapper_get_plotable(const Trees& reftree,
    }
 
    return plotset;
-   
+
 }
 void Trees_wrapper_plot_write(const Trees& reftree,
                               const char* prefix,
@@ -1049,9 +1070,6 @@ void Trees_wrapper_plot_write(const Trees& reftree,
    bool status= true;
    ostringstream error_message;
    Format_error error;
-
-   cout << "Call to Trees_wrapper_plot_write with prefix = "
-        << prefix << endl;
 
    status= reftree.plot_write(error, prefix, title);
    if (not status)
@@ -1102,10 +1120,14 @@ BOOST_PYTHON_MODULE(ctrees)
                                "BuildSequences(self) -> void \n\n"
                                "Build sequences from trees and print them"
                                "into a file.")
-        .def("BuildVectors", &Trees_wrapper_build_vectors,
-                             "BuildVectors(self) -> void \n\n"
+        .def("BuildVectors", &Trees_wrapper_build_vectors_path,
+                             "BuildVectors(self, path) -> void \n\n"
                              "Build vectors from trees and print them"
                              "into a file.")
+        .def("BuildVectors", &Trees_wrapper_build_vectors_object,
+	                     return_value_policy< manage_new_object >(),
+                             "BuildVectors(self, path) -> void \n\n"
+                             "Build vectors object from trees.")
         .def("ExtractSizeHistogram", &Trees::extract_size,
                                      return_value_policy< manage_new_object >(),
                                      "ExtractSizeHistogram(self) -> Histogram \n\n"
@@ -1117,9 +1139,9 @@ BOOST_PYTHON_MODULE(ctrees)
         .def("ExtractFeatureHistogram", &Trees_wrapper_extract_feature,
                                         return_value_policy< manage_new_object >())
         .def("IsCharacteristic", &Trees::is_characteristic,
-	                         "IsCharacteristic(self, variable, charac) -> bool \n\n",
-	                         "Check whether a characteristic is present"
-	                         "for a given variable")
+                             "IsCharacteristic(self, variable, charac) -> bool \n\n",
+                             "Check whether a characteristic is present"
+                             "for a given variable")
         .def("NbInt", &Trees::get_nb_int,
                       "NbInt(self) -> int \n\n"
                       "return the number of variables "
@@ -1157,9 +1179,9 @@ BOOST_PYTHON_MODULE(ctrees)
                               "in the list given as an argument.")
         .def("get_plotable", &Trees_wrapper_get_plotable,
                               return_value_policy< manage_new_object >(),
-  	                     "Fill MultiPlotSet structure.")
+                         "Fill MultiPlotSet structure.")
         .def("plot_write", &Trees_wrapper_plot_write,
-	                   "Write into a gnuplot file.")
+                       "Write into a gnuplot file.")
         .def("SegmentationExtract", &Trees_wrapper_segmentation_extract_value,
                                     return_value_policy< manage_new_object >(),
                                     "SegmentationExtract(self, variable, value, mode) -> CTrees. \n\n"

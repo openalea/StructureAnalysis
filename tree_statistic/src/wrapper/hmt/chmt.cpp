@@ -7,6 +7,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/distribution.h"
+#include "stat_tool/vectors.h"
 
 #include "tree_statistic/tree_labels.h"
 #include "tree_statistic/int_fl_containers.h"
@@ -474,9 +475,6 @@ void CiHmot_wrapper_plot_write(const Hidden_markov_out_tree& hmt,
    ostringstream error_message;
    Format_error error;
 
-   cout << "Call to CiHmot_wrapper_plot_write with prefix = "
-        << prefix << endl;
-
    status= hmt.plot_write(error, prefix, title);
    if (not status)
    {
@@ -726,7 +724,7 @@ BOOST_PYTHON_MODULE(chmt)
         .def("FileAsciiWrite", &CiHmot_wrapper_file_ascii_write1)
         .def("FileAsciiWrite", &CiHmot_wrapper_file_ascii_write2)
         .def("plot_write", &CiHmot_wrapper_plot_write,
-	                   "Write into a gnuplot file.")
+                       "Write into a gnuplot file.")
         .def("Simulate", &CiHmot_wrapper_simulate_histo,
                          return_value_policy< manage_new_object >())
         .def("Simulate", &CiHmot_wrapper_simulate_size,

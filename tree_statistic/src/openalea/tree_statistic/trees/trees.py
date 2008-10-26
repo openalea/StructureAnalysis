@@ -1333,30 +1333,31 @@ class Trees(object):
     def BuildVectors(self):
         """Extract Vectors from the Trees."""
         import os
-        # print the vectors into a file
-        prefix="vectmp"
-        file_created=False
-        while not file_created:
-            try:
-                cfile=open(prefix+'.vec','r')
-            except IOError:
-                # file does not exist
-                file_name= prefix+".vec"
-                file_created=True
-            else:
-                cfile.close()
-                import random
-                prefix+=str(random.randint(1,9))                
-        try:
-            self.__ctrees.BuildVectors(file_name)
-        except RuntimeError, error:
-            os.remove(file_name)
-            raise FormatError(error)
-        else:
-            import openalea.aml as amlPy
-            res= amlPy.Vectors(file_name)
-            os.remove(file_name)            
-            return res
+##        # print the vectors into a file
+##        prefix="vectmp"
+##        file_created=False
+##        while not file_created:
+##            try:
+##                cfile=open(prefix+'.vec','r')
+##            except IOError:
+##                # file does not exist
+##                file_name= prefix+".vec"
+##                file_created=True
+##            else:
+##                cfile.close()
+##                import random
+##                prefix+=str(random.randint(1,9))                
+##        try:
+##            self.__ctrees.BuildVectors(file_name)
+##        except RuntimeError, error:
+##            os.remove(file_name)
+##            raise FormatError(error)
+##        else:
+##            import openalea.aml as amlPy
+##            res= amlPy.Vectors(file_name)
+##            os.remove(file_name)            
+##            return res
+        return self.__ctrees.BuildVectors()
 
     def Cluster(self, mode, variable, limit):
         """Clustering of values.

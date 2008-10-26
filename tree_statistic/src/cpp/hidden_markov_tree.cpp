@@ -47,6 +47,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/distribution.h"   // definition of Parametric_model class
+#include "stat_tool/vectors.h"
 #include "sequence_analysis/sequences.h"
 
 #include "int_fl_containers.h"
@@ -1249,7 +1250,7 @@ ostream& Nonparametric_tree_process::spreadsheet_print(ostream &os, int process,
                                                        Histogram** empirical_observation,
                                                        const Tree_characteristics* characteristics) const
 {
-#ifdef __GNUC__  
+#ifdef __GNUC__
    #warning Nonparametric_tree_process::spreadsheet_print not implemented
 #endif
    return os;
@@ -3206,10 +3207,6 @@ bool Hidden_markov_tree::plot_write(Format_error& error,
 
    error.init();
 
-   cout << "Call to Hidden_markov_tree::plot_write with prefix = "
-        << prefix << endl;
-
-
    if (!status)
      error.update(STAT_error[STATR_FILE_PREFIX]);
 
@@ -4882,7 +4879,7 @@ double Hidden_markov_tree::penalty_computation(double min_probability) const
                   state_marginal[j] += npprocess[0]->index_value->point[j][val] *
                                        (1.-nonparametric_process[0]->size->cumul[val]);
             */
-#ifdef __GNUC__  
+#ifdef __GNUC__
 #warning Nonparametric_tree_process::index_value undefined in Hidden_markov_tree::penalty_computation
 #endif
             sum= 0.;
@@ -5376,7 +5373,7 @@ Hidden_markov_tree* Stat_trees::hidden_markov_tree_ascii_read(Format_error& erro
 
          while (!((token = next()).isNull()))
          {
-           // test keyword (EQUILIBRIUM) HIIDEN_MARKOV_TREE
+           // test keyword (EQUILIBRIUM) HIDDEN_MARKOV_TREE
 
             if (i == 0)
             {
@@ -6321,8 +6318,6 @@ bool Hidden_markov_tree_data::plot_write(Format_error& error,
    if (markov != NULL)
    {
       status= markov->plot_write(prefix, title, this);
-      cout << "Call to Hidden_markov_tree_data::plot_write with prefix = "
-	   << prefix << endl;
 
       error.init();
 

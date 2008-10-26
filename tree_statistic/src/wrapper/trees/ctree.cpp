@@ -4,12 +4,11 @@
 #include "tree/tree_traits.h"
 
 #include "stat_tool/stat_tools.h"
-// #include <convolution.h>
-// #include <compound.h>
-// #include <renewal.h>
 #include "stat_tool/curves.h"
-// #include <mixture.h>
 #include "stat_tool/markovian.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/vectors.h"
+
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/sequence_label.h"
 

@@ -40,6 +40,8 @@
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"    // definition of Curves class for Sequences
 #include "stat_tool/markovian.h" // definition of constants
+#include "stat_tool/distribution.h"
+#include "stat_tool/vectors.h"
 #include "sequence_analysis/sequences.h" // definition of constants
 #include "int_fl_containers.h"
 #include "generic_typed_edge_tree.h"
@@ -1194,7 +1196,7 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
    bool status= true, start;
    const int nb_values= _max_value - _min_value + 1;;
    int val;
-   MultiPlotSet *plotset= new MultiPlotSet(1);
+   MultiPlotSet *plotset= new MultiPlotSet(nb_values);
    MultiPlotSet &plot= *plotset;
    std::ostringstream vstring;
 
@@ -1202,7 +1204,6 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
    {
       case FIRST_OCCURRENCE_ROOT :
       {
-         plot[0].resize(nb_values);
          plot.border= "15 lw 0";
          // plot.bidule= "set tics out";
          // plot.bidule= "nomirror";
@@ -1213,21 +1214,23 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
 
          for (val= 0; val < nb_values; val++)
          {
+            plot[val].resize(1);
+            plot[val][0].style= "impulses";
             vstring.str("");
             if (MAX(1, first_occurrence_root[val]->nb_value-1) < TIC_THRESHOLD)
-               plot[0].xtics= 1;
+               plot[val].xtics= 1;
 
             if ((int)(first_occurrence_root[val]->max * YSCALE)+1 < TIC_THRESHOLD)
-               plot[0].ytics= 1;
+               plot[val].ytics= 1;
 
-            plot[0].xrange= Range(0, MAX(first_occurrence_root[val]->nb_value-1 , 1));
-            plot[0].yrange= Range(0, (int)(first_occurrence_root[val]->max*YSCALE)+1);
+            plot[val].xrange= Range(0, MAX(first_occurrence_root[val]->nb_value-1 , 1));
+            plot[val].yrange= Range(0, (int)(first_occurrence_root[val]->max*YSCALE)+1);
             vstring << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
                     << " " << val << " " << STAT_label[STATL_HISTOGRAM];
-            plot[0].title= vstring.str();
-            first_occurrence_root[val]->plotable_frequency_write(plot[0][val]);
+            plot[val].title= vstring.str();
+            first_occurrence_root[val]->plotable_frequency_write(plot[val][0]);
 
-            // plot[0].bidule ="autofreq";
+            // plot[val].bidule ="autofreq";
          }
          break;
       }

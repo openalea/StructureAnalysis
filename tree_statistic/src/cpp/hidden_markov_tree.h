@@ -211,6 +211,8 @@ public :
    Distribution* get_nb_occurrences(int value) const;
 };
 
+bool test_hidden(int nb_output_process, Nonparametric_tree_process **process);
+
 /**
    \class Hidden_markov_tree
    \brief the common part of all hidden Markov trees
@@ -225,7 +227,6 @@ class Hidden_markov_tree : public STAT_interface , protected Chain
                                                             const char * path,
                                                             int size, bool counting_flag,
                                                             double cumul_threshold);
-   // Why "occupancy", by the way ?
 
    friend std::ostream& operator<<(std::ostream &os, const Hidden_markov_tree& markov);
 
