@@ -120,7 +120,7 @@ def Plot(obj, *args, **kargs):
       * Title="Smoothed probabilities")
       * Plot(hsmc, identifier, ViewPoint="StateProfile", Title="Smoothed probabilities") 
 
-    Paramters
+    Parameters
     ---------
       * obj1 (`_Distribution`, `_Mixture`, `_Convolution`, `_Compound`,\
       `_DistributionData`, `_MixtureData`, `_ConvolutionData`, `_CompoundData`, \

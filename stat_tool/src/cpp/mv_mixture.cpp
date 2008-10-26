@@ -1622,8 +1622,13 @@ bool Mv_Mixture::plot_write(const char *prefix , const char *title ,
 	    break;
 	  }
 	
-	if (mixt_data->component != NULL)
-	  observation = mixt_data->component[cvariable];
+	if (mixt_data->component != NULL) {
+	  if (mixt_data->component[cvariable] != NULL) {
+	    observation = mixt_data->component[cvariable];
+	  }
+	  else
+	    observation = NULL;
+	}
       }
       if (npcomponent[var-1] != NULL)
 	npcomponent[var-1]->plot_print(prefix, title, var, observation);
@@ -2066,9 +2071,13 @@ void Mv_Mixture_data::copy(const Mv_Mixture_data &mixt_data , bool model_flag)
 
   component = new Histogram**[nb_variable];
   for (var = 0; var < nb_variable; var++) {
-    component[var] = new Histogram*[nb_component];
-    for (i = 0;i < nb_component;i++)
-      component[var][i] = new Histogram(*mixt_data.component[var][i]);
+    if (mixt_data.component[var] != NULL) {
+      component[var] = new Histogram*[nb_component];
+      for (i = 0;i < nb_component;i++)
+	component[var][i] = new Histogram(*mixt_data.component[var][i]);
+    }
+    else
+      component[var] = NULL;
   }
 }
 

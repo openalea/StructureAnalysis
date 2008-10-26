@@ -277,7 +277,7 @@ double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
 
 {
   register int n, i, var, nb_vector = mixt_data.get_nb_vector();
-  double likelihood = 0. , buff , **output_cond = NULL;
+  double log_likelihood = 1. , buff , **output_cond = NULL;
   double *pmass = NULL;
  
   get_output_conditional_distribution(mixt_data, output_cond, false);
@@ -287,19 +287,21 @@ double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
     for (i = 0;i < nb_component;i++)
       buff += weight->mass[i] * output_cond[n][i];
 
-    if (buff >= D_INF)
-      likelihood += buff;
+    if (buff > 0)
+      log_likelihood += log(buff);
     else {
-      likelihood = D_INF;
-      break;
+      if (log_computation)
+	return D_INF;
+      else
+	return 0.;
     }
   }
 
-  if (log_computation) {
-    if (likelihood > 0)
-      likelihood = log(likelihood);
+  if (!log_computation) {
+    if (log_likelihood > D_INF)
+      log_likelihood = exp(log_likelihood);
     else
-      likelihood = D_INF;
+      log_likelihood = 0.;
   }
 
   for (n = 0; n < nb_vector; n++) {
@@ -310,7 +312,7 @@ double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
   delete [] output_cond;
   output_cond = NULL;
   
-  return likelihood;
+  return log_likelihood;
 }
 
 /*--------------------------------------------------------------*
@@ -358,7 +360,7 @@ void Mv_Mixture::init() {
 
 Mv_Mixture* Vectors::mixture_estimation(Format_error &error, 
 					ostream& os, const Mv_Mixture &imixture, 
-					int nb_iter, bool force_param) const {
+					int nb_iter, bool *force_param) const {
 
   bool status, state_simulation, all_states_used;
   register int i , j , var;
@@ -656,7 +658,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
 					   * MAX(sqrt(observation_reestim[var][j]->variance), 1.) 
 					   * MIXTURE_COEFF),
 				     MIN_NB_ELEMENT));
-	    if (!force_param)
+	    if ((force_param == NULL) || (!force_param[var]))
 	      observation_likelihood 
 		= hobservation->Reestimation<int>::type_parametric_estimation(mixt->pcomponent[var]->observation[j],
 									      0, true, 
@@ -695,7 +697,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
 	cout << *mixt;
 #     endif
       
-    }
+    } // end do
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (iter < MIXTURE_NB_ITER) &&
 				      (((likelihood - previous_likelihood) / -likelihood > MVMIXTURE_LIKELIHOOD_DIFF) ||
 				       (min_likelihood == D_INF) || (nb_likelihood_decrease == 1))) ||
@@ -743,7 +745,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
 					   * MAX(sqrt(observation_reestim[var][j]->variance), 1.) 
 					   * MIXTURE_COEFF),
 				     MIN_NB_ELEMENT));
-	    if (!force_param)
+	    if ((force_param == NULL) || (!force_param[var]))
 	      observation_likelihood 
 		= hobservation->Reestimation<int>::type_parametric_estimation(mixt->pcomponent[var]->observation[j],
 									      0, true, 
@@ -771,9 +773,8 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
 	  }
 	}
       } // end for (var)
-
       
-    } // end do
+    } // end if (likelihood != D_INF)
 
       // deallocation of the arrays
     
@@ -954,7 +955,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
 					int nb_component, int nb_iter, bool *force_param) const {
 
   // note: length of force_param must be checked before call
-  bool status= true, fparam= !(force_param==NULL);
+  bool status= true;
   register int var;
   int nb_value[nb_variable];
   Mv_Mixture *imixt = NULL, *mixt = NULL;
@@ -978,7 +979,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
 
     imixt->init();
 
-    mixt = mixture_estimation(error, os, *imixt, nb_iter, fparam);
+    mixt = mixture_estimation(error, os, *imixt, nb_iter);
 
     delete imixt;
     imixt = NULL;

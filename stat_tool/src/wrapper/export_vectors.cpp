@@ -584,21 +584,8 @@ public:
   }
 
   static Mv_Mixture* mixture_estimation_1(const Vectors& v, const Mv_Mixture& mixt,
-					  int nb_iter, bool force_param)
-  {
-    Mv_Mixture* ret = NULL;
-    Format_error error;
-  
-    ret = v.mixture_estimation(error, cout, mixt, nb_iter, force_param);
-
-    if(ret == NULL)
-      stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
-
-  static Mv_Mixture* mixture_estimation_2(const Vectors& v, int nb_component, 
-					  int nb_iter, boost::python::list force_param)
+					  int nb_iter=I_DEFAULT, 
+					  boost::python::list force_param=boost::python::list())
   {
     bool status = true, several_errors= false;
     Mv_Mixture* ret = NULL;
@@ -651,7 +638,97 @@ public:
 	}
       }
     }
+    else {
+      nb_fparam = nb_variables;
+      fparam = new bool[nb_fparam];
+      for (p = 0; p < nb_fparam; p++)
+	fparam[p] = false;
+    }
  
+    if (status) {
+
+      ret = v.mixture_estimation(error, cout, mixt, nb_iter, fparam);
+      if (fparam != NULL) {
+	delete [] fparam;
+	fparam = NULL;
+      }
+      
+      if (ret == NULL)
+	stat_tool::wrap_util::throw_error(error);
+      
+      if (error.get_nb_error() > 0) {
+	ret->ascii_write(cout, true);
+	delete ret;
+	error_message << error << endl;
+	PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
+	throw_error_already_set();
+      }
+    }
+    return ret;
+  }
+
+  static Mv_Mixture* mixture_estimation_2(const Vectors& v, int nb_component, 
+					  int nb_iter=I_DEFAULT, 
+					  boost::python::list force_param=boost::python::list())
+  {
+    bool status = true, several_errors= false;
+    Mv_Mixture* ret = NULL;
+    bool *fparam= NULL;
+    Format_error error;
+    ostringstream error_message;
+    int nb_fparam, p;
+    const int nb_variables = v.get_nb_variable();
+    object o;
+
+    nb_fparam= boost::python::len(force_param);
+
+    if (nb_fparam > 0) {
+      if (nb_fparam != nb_variables) {
+	status = false;
+	error_message << "bad size of argument list: " << nb_fparam
+		      << ": should be the number of variables ("
+		      << nb_variables << ")";
+	PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+	throw_error_already_set();
+      }
+      else {
+	fparam = new bool[nb_fparam];
+	for (p = 0; p < nb_fparam; p++) {
+	  o = force_param[p];
+	  try {
+	    extract<bool> x(o);
+	    if (x.check())
+	      fparam[p]= x();
+	    else
+	      status=false;
+	  }
+	  catch (...) {
+	    status = false;
+	  }
+	  if (!status) {
+	    if (several_errors)
+	      error_message << endl;
+	    else
+	      several_errors = true;
+	    error_message << "incorrect type for element " << p
+			  << " of argument list: expecting a boolean";
+	  }
+	}
+	if (!status) {
+	  delete [] fparam;
+	  fparam = NULL;
+	  PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
+	  throw_error_already_set();
+	}
+      }
+    }
+    else {
+      nb_fparam = nb_variables;
+      fparam = new bool[nb_fparam];
+      for (p = 0; p < nb_fparam; p++)
+	fparam[p] = false;
+    }
+
    if (status) {
 
       ret = v.mixture_estimation(error, cout, nb_component, nb_iter, fparam);
@@ -662,6 +739,14 @@ public:
 
       if (ret == NULL)
 	stat_tool::wrap_util::throw_error(error);
+      
+      if (error.get_nb_error() > 0) {
+	ret->ascii_write(cout, true);
+	delete ret;
+	error_message << error << endl;
+	PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
+	throw_error_already_set();
+      }
     }
     return ret;
   }

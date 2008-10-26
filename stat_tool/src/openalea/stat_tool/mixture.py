@@ -214,13 +214,13 @@ class Test:
         from distribution import Binomial, Poisson
         from mixture import _MvMixture
 
-        d11 = Binomial(2, 12, 0.1)
-        d12 = Binomial(0, 10, 0.5)
-        d13 = Binomial(3, 10, 0.8)
+        d11 = Binomial(0, 12, 0.1)
+        d12 = Binomial(0, 12, 0.5)
+        d13 = Binomial(0, 12, 0.8)
 
-        d21 = Poisson(2, 8.0)
-        d22 = Poisson(4, 5.0)
-        d23 = Poisson(0, 2.0)
+        d21 = Poisson(0, 18.0)
+        d22 = Poisson(0, 5.0)
+        d23 = Poisson(0, .20)
         
         m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
         assert m
@@ -252,3 +252,25 @@ class Test:
             assert False
         except Exception:
             assert True
+
+    def test_simulate_estimate_mv_mixture(self):
+
+        from distribution import Binomial, Poisson
+        from mixture import _MvMixture
+
+        d11 = Binomial(0, 12, 0.1)
+        d12 = Binomial(0, 12, 0.5)
+        d13 = Binomial(0, 12, 0.8)
+
+        d21 = Poisson(0, 18.0)
+        d22 = Poisson(0, 5.0)
+        d23 = Poisson(0, .20)
+        
+        m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
+        v = m.simulate(5000);
+        assert v
+
+        m_estim_model = v.mixture_estimation(m, 100,  [True, True]);
+        assert m_estim_model
+        m_estim_nbcomp = v.mixture_estimation(2, _stat_tool.I_DEFAULT, [True, True]);
+        assert m_estim_nbcomp

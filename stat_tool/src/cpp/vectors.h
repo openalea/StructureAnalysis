@@ -256,7 +256,7 @@ public :
     Regression* nearest_neighbor_smoother(Format_error &error , int explanatory_variable ,
                                           int response_variable , double span , bool weighting = true) const;
     Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, const Mv_Mixture &imixture, 
-				   int nb_iter=I_DEFAULT, bool force_param=false) const;
+				   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
     Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, int nb_component, 
 				   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
 
