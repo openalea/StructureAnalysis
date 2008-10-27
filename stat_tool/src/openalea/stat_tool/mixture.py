@@ -97,8 +97,10 @@ interface.extend_class( _stat_tool._MvMixtureData, interface.StatInterface)
 def _MvMixture_old_plot(self, variable, Title=""):
     """Plot a given variable"""
     if ((variable < 0) or (variable >= self.nb_variable())):
-        raise IndexError
+        raise IndexError, "variable index out of range: "+str(variable)
     file_id = str(variable+1)
+    if (not self._is_parametric(variable)):
+        file_id += "0"
     interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)
 
 def _MvMixture_get_plotable(self):
@@ -113,7 +115,7 @@ _MvMixture.get_plotable = _MvMixture_get_plotable
 def _MvMixtureData_old_plot(self, variable, Title=""):
     """Plot a given variable"""
     if ((variable < 0) or (variable >= self.get_nb_variable())):
-        raise IndexError
+        raise IndexError, "variable index out of range: "+str(variable)
     file_id = str(variable+1)
     interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)
 
@@ -257,14 +259,15 @@ class Test:
 
         from distribution import Binomial, Poisson
         from mixture import _MvMixture
-
+        
         d11 = Binomial(0, 12, 0.1)
-        d12 = Binomial(0, 12, 0.5)
-        d13 = Binomial(0, 12, 0.8)
+        d12 = Binomial(2, 13, 0.6)
+        d13 = Binomial(3, 15, 0.9)
 
-        d21 = Poisson(0, 18.0)
+        d21 = Poisson(0, 25.0)
         d22 = Poisson(0, 5.0)
-        d23 = Poisson(0, .20)
+        d23 = Poisson(0, 0.2)
+
         
         m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
         v = m.simulate(5000);
@@ -272,5 +275,5 @@ class Test:
 
         m_estim_model = v.mixture_estimation(m, 100,  [True, True]);
         assert m_estim_model
-        m_estim_nbcomp = v.mixture_estimation(2, _stat_tool.I_DEFAULT, [True, True]);
+        m_estim_nbcomp = v.mixture_estimation(2);
         assert m_estim_nbcomp

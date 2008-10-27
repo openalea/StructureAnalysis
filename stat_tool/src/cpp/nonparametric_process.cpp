@@ -1406,13 +1406,12 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
 			scale, dist_nb_value, nb_histo, phisto, index_dist);
 
    // write the command and printing files
-   if (status)
-   {
+   if (status) {
       // i == 0 -> output on terminal (.plot file)
       // i == 1 -> output into a postscript file  (.plot file)
 
-      histo_index= 1;
-      dist_index= 0;
+     histo_index= 0; // or 1?
+     dist_index= 0;
 
       // observation
       if (observation != NULL)

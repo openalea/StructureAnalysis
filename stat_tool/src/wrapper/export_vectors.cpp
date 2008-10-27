@@ -584,8 +584,8 @@ public:
   }
 
   static Mv_Mixture* mixture_estimation_1(const Vectors& v, const Mv_Mixture& mixt,
-					  int nb_iter=I_DEFAULT, 
-					  boost::python::list force_param=boost::python::list())
+					  int nb_iter, 
+					  boost::python::list force_param)
   {
     bool status = true, several_errors= false;
     Mv_Mixture* ret = NULL;
@@ -668,8 +668,8 @@ public:
   }
 
   static Mv_Mixture* mixture_estimation_2(const Vectors& v, int nb_component, 
-					  int nb_iter=I_DEFAULT, 
-					  boost::python::list force_param=boost::python::list())
+					  int nb_iter, 
+					  boost::python::list force_param)
   {
     bool status = true, several_errors= false;
     Mv_Mixture* ret = NULL;
@@ -852,12 +852,12 @@ void class_vectors()
 	 python::args("explanatory_var", "response_var", "span", "weighting"),
 	 "Linear regression (nearest neighbours)")
   
-    .def("mixture_estimation", VectorsWrap::mixture_estimation_1,
+    .def("mixture_estimation_wrap", VectorsWrap::mixture_estimation_1,
 	 return_value_policy< manage_new_object >(),
 	 python::args("initial_mixture", "nb_max_iteration", "force_param"),
 	 "Mixture estimation (EM algorithm with initial model)")
 
-    .def("mixture_estimation", VectorsWrap::mixture_estimation_2,
+    .def("mixture_estimation_wrap", VectorsWrap::mixture_estimation_2,
 	 return_value_policy< manage_new_object >(),
 	 python::args("nb_component", "nb_max_iteration", "force_param"),
 	 "Mixture estimation (EM algorithm with fixed number of components)")

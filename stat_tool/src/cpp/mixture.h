@@ -146,7 +146,7 @@ public :
                      bool component_flag = true);
     double likelihood_computation(const Mixture_data &mixt_histo) const;
     Mixture_data* simulation(Format_error &error , int nb_element) const;
-
+  
     // acces membres de la classe
 
     Mixture_data* get_mixture_data() const { return mixture_data; }

@@ -520,6 +520,21 @@ public:
 
     return ret;
   }
+  
+  static bool _is_parametric(const Mv_Mixture& mixt, int ivariable)
+  {
+    ostringstream error_message;
+    
+    if ((ivariable < 0) or (ivariable > mixt.get_nb_component())) {
+      error_message << "Bad variable index: " << ivariable;
+      PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
+      throw_error_already_set();  
+    }
+    else
+      return mixt.is_parametric(ivariable);
+  }
+
+
 
   static void file_ascii_write(const Mv_Mixture& m, const char* path, bool exhaustive)
   {
@@ -585,6 +600,11 @@ void class_mv_mixture()
     .def("extract_data", MvMixtureWrap::extract_data, 
 	 return_value_policy< manage_new_object >(),
 	 "Return the associated _MvMixtureData object"
+	 )
+
+    .def("_is_parametric", MvMixtureWrap::_is_parametric, 
+	 python::args("variable"),
+	 "Return True if the variable is parametric"
 	 )
 
     .def("file_ascii_write", MvMixtureWrap::file_ascii_write,

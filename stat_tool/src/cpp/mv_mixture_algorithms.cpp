@@ -339,7 +339,7 @@ void Mv_Mixture::init() {
     weight->mass[j]= 1. / nb_component;
 
   for(var = 0; var < nb_var; var++) {
-    if (pcomponent[var] != NULL)
+    if (pcomponent[var] != NULL) 
       pcomponent[var]->init();
     else
       npcomponent[var]->init();
@@ -668,7 +668,6 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
 	    else
 	      observation_likelihood
 		= hobservation->Reestimation<int>::parametric_estimation(mixt->pcomponent[var]->observation[j],
-                              
 									 0, true, OBSERVATION_THRESHOLD);
 	    // above instruction prevents the type of the distribution to vary
 	    // (not suitable for an automatic initialization of pcomponent of UNIFORM type

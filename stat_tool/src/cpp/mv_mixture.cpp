@@ -55,7 +55,7 @@ using namespace std;
 
 extern char* label(const char *file_name);
 
-
+extern int cumul_method(int nb_value, const double *cumul, double scale= 1.);
 
 /*--------------------------------------------------------------*
  *
@@ -90,7 +90,6 @@ Mv_Mixture::Mv_Mixture(int inb_component , double *pweight , int inb_variable,
 
 {
   register int var, i;
-
 
   mixture_data = NULL;
   nb_component = inb_component;
@@ -215,8 +214,11 @@ Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
 		       int *nb_value, bool *force_param) {
   
 
-  register int var;
+  register int var, i;
+  double param;
   bool *fparam = NULL;
+
+  Parametric *rand = new Parametric(UNIFORM, 0, 10 , D_DEFAULT , D_DEFAULT);
 
   mixture_data = NULL;
   nb_component = inb_component;
@@ -247,7 +249,14 @@ Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
     }
     else {
       npcomponent[var] = NULL;
-      pcomponent[var] = new Parametric_process(nb_component, (int)(*nb_value++ * SAMPLE_NB_VALUE_COEFF));
+      pcomponent[var] = new Parametric_process(nb_component, (int)(*nb_value * SAMPLE_NB_VALUE_COEFF));
+      for(i = 0; i < nb_component; i++) {
+	delete pcomponent[var]->observation[i];
+	param = (cumul_method(10, rand->cumul, 1.) + 1);
+	pcomponent[var]->observation[i] = 
+	  new Parametric(NEGATIVE_BINOMIAL, 0, I_DEFAULT , 1., 1. / (double)((param * *nb_value)+1.));
+      }
+      nb_value++;
     }
   }
   delete [] fparam;
@@ -385,7 +394,7 @@ Parametric_model* Mv_Mixture::extract_parametric_model(Format_error &error , int
 {
   bool status = true;
   Parametric_model *ppcomponent = NULL;
-
+  Histogram *hcomponent = NULL;
 
   if ((index < 1) || (index > nb_component)) {
     status = false;
@@ -400,10 +409,20 @@ Parametric_model* Mv_Mixture::extract_parametric_model(Format_error &error , int
   if (status) {
     if (pcomponent[ivariable] != NULL){
       index--;
+      if (mixture_data != NULL) {
+	if (mixture_data->type[0] == STATE) {
+	  if (mixture_data->component[ivariable+1] != NULL)
+	    hcomponent = mixture_data->component[ivariable+1][index];
+	}
+	else {
+	  if (mixture_data->component[ivariable] != NULL)
+	    hcomponent = mixture_data->component[ivariable][index];
+	}
+      }
       ppcomponent = new Parametric_model(*pcomponent[ivariable]->observation[index] ,
-	 				(mixture_data ? mixture_data->component[ivariable][index] : NULL));
+					 hcomponent);
     }
-  }    
+  } 
 
   return ppcomponent;
 }
@@ -1883,8 +1902,9 @@ double Mv_Mixture::penalty_computation() const
 	    log(weight->mass[i] * mixture_data->nb_vector);
       }
       else
-	penalty += npcomponent[var]->nb_parameter_computation(MIN_PROBABILITY) *
-	  log(weight->mass[i] * mixture_data->nb_vector);
+	for (i = 0;i < nb_component;i++)
+	  penalty += npcomponent[var]->nb_parameter_computation(MIN_PROBABILITY) *
+	    log(weight->mass[i] * mixture_data->nb_vector);
     }
   }
 
@@ -1957,6 +1977,18 @@ Distribution* Mv_Mixture::get_nonparametric_component(int variable, int index) c
     pnpcomponent = new Distribution(*npcomponent[variable]->get_observation(index));
 
   return pnpcomponent;
+}    
+
+/*--------------------------------------------------------------*
+ *
+ *  Retourne vrai si la ieme variable est parametrique
+ *
+ *--------------------------------------------------------------*/
+
+bool Mv_Mixture::is_parametric(int ivariable) const {
+
+  assert((ivariable >= 0) && (ivariable < nb_var));
+  return (pcomponent[ivariable] != NULL);
 }
 
 // ###################### Mv_Mixture_data #########################################
@@ -2176,7 +2208,11 @@ Distribution_data* Mv_Mixture_data::extract(Format_error &error , int ivariable,
     status = false;
     error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
   }
-  else {
+  if (type[ivariable] == STATE) {
+    status = false;
+    error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
+  }
+  if (status) {
     index--;
     if (component[ivariable][index]->nb_element == 0) {
       status = false;
@@ -2223,7 +2259,10 @@ Distribution_data* Mv_Mixture_data::extract_marginal(Format_error &error , int i
     status = false;
     error.update(STAT_error[STATR_VARIABLE_INDEX]);
   }
-
+  if (type[ivariable] == STATE) {
+    status = false;
+    error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
+  }
   if (status) {
 
     var = ivariable-1;

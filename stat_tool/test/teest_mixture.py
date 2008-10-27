@@ -108,10 +108,10 @@ mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated
 # mixt11 = Estimate(peup, "MIXTURE", "B", "NB")
 
 d11 = distribution.Binomial(0, 12, 0.1)
-d12 = distribution.Binomial(0, 10, 0.5)
-d13 = distribution.Binomial(0, 10, 0.8)
+d12 = distribution.Binomial(2, 13, 0.6)
+d13 = distribution.Binomial(3, 15, 0.9)
 
-d21 = distribution.Poisson(0, 15.0)
+d21 = distribution.Poisson(0, 25.0)
 d22 = distribution.Poisson(0, 5.0)
 d23 = distribution.Poisson(0, 0.2)
 
@@ -128,7 +128,7 @@ m = mixture._MvMixture("mixture_mv_nonparam.mixt")
 print m
 
 print "Simulation de melanges multivaries : "
-v = m.simulate(300);
+v = m.simulate(5000);
 print v
 
 m.plot(variable=1, Title="Simulated mixture")
@@ -142,7 +142,7 @@ m_estim_model.plot(variable = 1, Title="Estimated mixture")
 print "Estimation de melanges multivaries ", \
       "d'apres un nombre de composantes : "
 
-m_estim_nbcomp = v.mixture_estimation(2, I_DEFAULT, [True, True]);
+m_estim_nbcomp = v.mixture_estimation(3, 100,  [True, True]);
+
 m_estim_nbcomp.plot(variable = 1, Title="Estimated mixture")
 
-print m_estim_nbcomp

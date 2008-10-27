@@ -157,6 +157,9 @@ public :
     Mv_Mixture_data* cluster(Format_error &error,  const Vectors &vec, 
 			     int algorithm=VITERBI) const;
 
+    /** retourne "vrai" si le ieme processus est parametrique */
+    bool is_parametric(int ivariable) const;
+
     // acces membres de la classe
 
     Mv_Mixture_data* get_mixture_data() const { return mixture_data; }
