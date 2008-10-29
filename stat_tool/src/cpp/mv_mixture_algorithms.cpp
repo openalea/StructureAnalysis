@@ -949,14 +949,15 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
  *  non de lois d'observation parametriques (pour chaque variable)
  *
  *--------------------------------------------------------------*/
-
+#include <boost/scoped_array.hpp>
+ 
 Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
 					int nb_component, int nb_iter, bool *force_param) const {
 
   // note: length of force_param must be checked before call
   bool status= true;
   register int var;
-  int nb_value[nb_variable];
+  boost::scoped_array<int> nb_value(new int[nb_variable]);
   Mv_Mixture *imixt = NULL, *mixt = NULL;
 
   error.init();
@@ -974,7 +975,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
     // initial Mixture
 
     imixt = new Mv_Mixture(nb_component, nb_variable,
-			   nb_value, force_param);
+			   nb_value.get(), force_param);
 
     imixt->init();
 

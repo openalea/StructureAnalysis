@@ -525,7 +525,7 @@ public:
   {
     ostringstream error_message;
     
-    if ((ivariable < 0) or (ivariable > mixt.get_nb_component())) {
+    if ((ivariable < 0) || (ivariable > mixt.get_nb_component())) {
       error_message << "Bad variable index: " << ivariable;
       PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
       throw_error_already_set();  
