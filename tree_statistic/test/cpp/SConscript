@@ -10,14 +10,6 @@ env_test = env.Clone()
 
 pj = os.path.join
 
-# includes=map(lambda x: pj(x,"tree_statistic"), env["CPPPATH"])
-# includes+=map(lambda x: pj(x,"tool"), env["CPPPATH"])
-# includes+=map(lambda x: pj(x,"tree"), env["CPPPATH"])
-# includes+=map(lambda x: pj(x,"stat_tool"), env["CPPPATH"])
-# includes+=map(lambda x: pj(x,"sequence_analysis"), env["CPPPATH"])
-# env.ALEAIncludes("tree_statistic", includes)
-
-
 # env_test.Append(CPPDEFINES= ['MESSAGE'])
 if env_test['debug']:
    env_test.Append(CPPDEFINES= ['DEBUG'])

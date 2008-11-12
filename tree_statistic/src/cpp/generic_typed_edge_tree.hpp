@@ -148,7 +148,10 @@ Typed_edge_tree<Type>::Typed_edge_tree(key root,
                                        const value& default_value)
  : Generic_tree<Type>(root, n, default_value)
  , edge_types()
-{ edge_types.reserve(n-1); }
+{
+   if (n > 0)
+      edge_types.reserve(n-1);
+}
 
 
 /*--------------------------------------------------------------*

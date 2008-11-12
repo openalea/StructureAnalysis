@@ -4,8 +4,8 @@
  *  mixed data as defined in int_fl_containers.h
  */
 
-#include "base_int_fl_containers.h"
-#include "int_fl_containers.h"
+#include "tree_statistic/base_int_fl_containers.h"
+#include "tree_statistic/int_fl_containers.h"
 
 #include "tool/rw_cstring.h"
 

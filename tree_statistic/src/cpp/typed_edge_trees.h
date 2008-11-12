@@ -49,6 +49,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <float.h>
+#include <limits.h>
 
 extern char* label(const char*);
 extern int* identifier_select(int nb_pattern , int* pattern_identifier,
