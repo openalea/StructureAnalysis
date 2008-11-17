@@ -1,0 +1,250 @@
+/****************************************************************
+ *
+ *  Test multivariate mixture models
+ */
+
+#include "stat_tool/stat_tools.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/curves.h"
+#include "stat_tool/markovian.h"
+#include "stat_tool/mixture.h"
+#include "stat_tool/mv_mixture.h"
+
+int main(void) {
+  
+  int var, i, nb_variable, nb_component;
+  const int nb_vector = 500;
+  double *pweight = NULL;
+  bool *fparam = NULL;
+  Format_error error;
+  const char * mixpath= "./tmp.mix"; 
+  const char * gnupath = "./tmp_mix", * gnu_datapath = "./tmp_mix_data";
+  const char * margpath= "./marg_mix", * gnu_tmppath = "./tmp_mix_d"; 
+  const char * np_modelpath= "./np_model.mix", * gnu_tmpnppath = "./tmp_mix_d"; 
+  Distribution *marginal = NULL;
+  Distribution_data *marginal_histo = NULL;
+  Mv_Mixture *mv1 = NULL, *mv_cp = NULL;
+  Mv_Mixture *mv_np1 = NULL, *mv_np_estim = NULL;
+  Mv_Mixture *mv_estim = NULL;
+  Mv_Mixture_data *mv_data = NULL;
+  Parametric **dt1 = NULL, **dt2 = NULL;
+  Parametric_process **ppcomponent = NULL;
+
+  // constructors of Mv_Mixture
+  mv1 = new Mv_Mixture();
+
+  // destructor of Mv_Mixture
+  delete mv1;
+  mv1= NULL;
+   
+  nb_variable = 2;
+  nb_component = 3;
+
+  dt1 = new Parametric*[nb_component];
+  dt2 = new Parametric*[nb_component];
+  pweight = new double[nb_component];
+  ppcomponent = new Parametric_process*[nb_variable];
+
+  pweight[0] = 0.1;
+  pweight[1] = 0.2;
+  pweight[2] = 0.7;
+
+  
+  
+  dt1[0] = new Parametric(0, BINOMIAL, 2, 12, D_DEFAULT, 0.1);
+  dt1[1] = new Parametric(0, BINOMIAL, 0, 10, D_DEFAULT, 0.5);
+  dt1[2] = new Parametric(0, BINOMIAL, 3, 10, D_DEFAULT, 0.8);
+
+  dt2[0] = new Parametric(0, POISSON, 2, I_DEFAULT, 8.0, D_DEFAULT);
+  dt2[1] = new Parametric(0, POISSON, 4, I_DEFAULT, 5.0, D_DEFAULT);
+  dt2[2] = new Parametric(0, POISSON, 0, I_DEFAULT, 2.0, D_DEFAULT);
+
+  cout << "Observation distributions for variable 1:" << endl;
+  for (i = 0; i < nb_component; i++) {
+    dt1[i]-> ascii_print(cout);
+  }
+  
+  ppcomponent[0] = new Parametric_process(nb_component, dt1);
+  ppcomponent[1] = new Parametric_process(nb_component, dt2);
+
+  for (i = 0; i < nb_component; i++) {
+    delete dt1[i];
+    dt1[i] = NULL;
+    delete dt2[i];
+    dt2[i] = NULL;
+  }
+
+  cout << endl;
+
+  mv1 = new Mv_Mixture(nb_component, pweight, nb_variable, ppcomponent, NULL);
+
+  cout << "Mixture of " << nb_component << " components with " <<
+    nb_variable << " variables:" << endl;
+
+  mv1->ascii_write(cout, true);
+  cout << endl;
+
+  // copy
+  mv_cp = new Mv_Mixture(*mv1);
+  cout << "Copy constructor of Mv_Mixture: " << endl;
+  mv_cp->ascii_write(cout);
+  cout << endl;
+  
+  // destructor of Mv_Mixture
+  delete mv_cp;
+  mv_cp= NULL;
+
+  delete mv1;
+  mv1= NULL;
+  
+  cout << "Mv_mixture_building (print into file " << mixpath << "): " << endl;
+
+  mv1 = mv_mixture_building(error , nb_component , nb_variable, pweight, 
+			   ppcomponent, NULL);
+
+  if (mv1 == NULL)
+    cout << error;
+  else {
+    mv1->ascii_write(error, mixpath, true);
+    delete mv1;
+    mv1= NULL;
+  }
+  cout << endl;
+
+  cout << "Read Mv_Mixture from file " << mixpath << ": " << endl;
+
+  mv1 = mv_mixture_ascii_read(error , mixpath);
+
+  if (mv1 == NULL) {
+    cout << error;
+    return 1;
+  }
+  else {
+    mv1->ascii_write(cout, true);
+  }
+  cout << endl;
+
+  mv_data = mv1->simulation(error, nb_vector);
+  if (mv_data == NULL) {
+    cout << error;
+    return 1;
+  }
+  else {
+    mv_data->ascii_write(cout, true);
+  }
+  cout << endl;
+
+  cout << "Gnuplot output for Mv_Mixture ('" << gnupath << "' file)" << endl;
+  mv1->plot_write(error, gnupath, "");
+  cout << error << endl;
+
+  cout << "Gnuplot output for Mv_Mixture_data ('" << gnu_datapath << "' file)" << endl;
+  mv_data->plot_write(error, gnu_datapath, "");
+  cout << error << endl;
+
+  cout << "Extract marginal distribution for variable 1" << endl;
+  marginal = mv1->extract_distribution(error, 1);
+  marginal_histo = mv_data->extract_marginal(error, 1);
+
+  if (marginal != NULL) {
+    marginal->ascii_print(cout, false, false, false);
+    delete marginal; 
+  }
+  else
+    cout << error;
+
+  if (marginal_histo != NULL) {
+    cout << "Gnuplot output for marginal ('" << margpath << "' file)" << endl;
+    marginal_histo->plot_write(error, margpath);
+    delete marginal_histo; 
+  }
+  else
+    cout << error;
+  
+  cout << "Estimate Mv_Mixture from initial model: " << endl;
+  mv_estim = mv_data->mixture_estimation(error, cout, *mv1);
+  
+  if (mv_estim == NULL) {
+    cout << error;
+  }
+  else {
+    mv_estim->ascii_write(cout, true);
+    mv_estim->plot_write(error, gnu_tmppath, "");
+    delete mv_estim;
+    mv_estim = NULL;
+  }
+  cout << endl;
+  
+  fparam = new bool[2];
+  fparam[0] = true;
+  fparam[1] = false;
+
+  cout << "Estimate Mv_Mixture from initial nb_component: " << endl;
+  mv_estim = mv_data->mixture_estimation(error, cout, 3, I_DEFAULT, fparam);
+  
+  delete [] fparam;
+
+  if (mv_estim == NULL) {
+    cout << error;
+  }
+  else {
+    mv_estim->ascii_write(cout, true);
+    mv_estim->plot_write(error, gnu_tmppath, "");
+    delete mv_estim;
+    mv_estim = NULL;
+  }
+  cout << endl;
+
+  delete mv1;
+  mv1= NULL;
+  delete mv_data;
+  mv_data = NULL;
+
+  for (var = 0; var < nb_variable; var++) {
+    delete ppcomponent[var];
+    ppcomponent[var] = NULL;
+  }
+  
+  cout << "Read non parametric model: " << endl;
+
+  mv_np1 = mv_mixture_ascii_read(error, np_modelpath);
+  
+  if (mv_np1 == NULL) {
+    cout << error;
+    return 1;
+  }
+
+  mv_data = mv_np1->simulation(error, nb_vector);
+  if (mv_data == NULL) {
+    cout << error;
+    return 1;
+  }
+
+  cout << "Gnuplot output for Mv_Mixture_data ('" << gnu_tmpnppath << "' file)" << endl;
+  mv_data->plot_write(error, gnu_tmpnppath, "");
+  cout << error << endl;
+
+
+  cout << "Estimate Mv_Mixture from initial nb_component: " << endl;
+  mv_estim = mv_data->mixture_estimation(error, cout, 3);
+  
+  if (mv_estim == NULL) {
+    cout << error;
+  }
+  else {
+    mv_estim->ascii_write(cout, true);
+    mv_estim->plot_write(error, gnu_tmpnppath, "");
+    delete mv_estim;
+    mv_estim = NULL;
+  }
+
+  delete mv_data;
+  delete mv_np1;
+
+  delete [] dt1;
+  delete [] dt2;
+  delete [] pweight;
+  delete [] ppcomponent;
+
+  return 0;
+}
