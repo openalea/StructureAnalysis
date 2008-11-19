@@ -617,6 +617,8 @@ ostream& Hidden_semi_markov::ascii_write(ostream &os , bool exhaustive) const
   Semi_markov::ascii_write(os , semi_markov_data , exhaustive ,
                            false , true);
 
+//  os << "\nEnd state: " << end_state() << endl;
+
   return os;
 }
 
@@ -728,3 +730,103 @@ void Hidden_semi_markov::saveGuts(RWFile &file) const
 {
   Semi_markov::saveGuts(file);
 } */
+
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Recherche etat de fin.
+ *
+ *--------------------------------------------------------------*/
+
+int Hidden_semi_markov::end_state() const
+
+{
+  register int i , j , k;
+  int end_state = I_DEFAULT , output;
+
+
+  for (i = nb_state - 1;i >= 0;i--) {
+    if (state_type[i] == 'a') {
+
+#     ifdef DEBUG
+      cout << "\nstate: " << i << " | ";
+#     endif
+
+      end_state = i;
+
+      for (j = 1;j <= nb_output_process;j++) {
+        if (nonparametric_process[j]) {
+          for (k = nonparametric_process[j]->observation[i]->offset;k < nonparametric_process[j]->observation[i]->nb_value;k++) {
+            if (nonparametric_process[j]->observation[i]->mass[k] == 1.) {
+              output = k;
+
+#             ifdef DEBUG
+              cout << "output: " << output << " | ";
+#             endif
+
+              break;
+            }
+          }
+
+          if (k < nonparametric_process[j]->observation[i]->nb_value) {
+            for (k = 0;k < nb_state;k++) {
+              if ((k != i) && (output >= nonparametric_process[j]->observation[k]->offset) &&
+                  (output < nonparametric_process[j]->observation[k]->nb_value) &&
+                  (nonparametric_process[j]->observation[k]->mass[output] > 0.)) {
+                end_state = I_DEFAULT;
+                break;
+              }
+            }
+            if (end_state == I_DEFAULT) {
+              break;
+            }
+          }
+
+          else {
+            end_state = I_DEFAULT;
+            break;
+          }
+        }
+
+        else {
+          for (k = parametric_process[j]->observation[i]->offset;k < parametric_process[j]->observation[i]->nb_value;k++) {
+            if (parametric_process[j]->observation[i]->mass[k] == 1.) {
+              output = k;
+              break;
+            }
+          }
+
+          if (k < parametric_process[j]->observation[i]->nb_value) {
+            for (k = 0;k < nb_state;k++) {
+              if ((k != i) && (output >= parametric_process[j]->observation[k]->offset) &&
+                  (output < parametric_process[j]->observation[k]->nb_value) &&
+                  (parametric_process[j]->observation[k]->mass[output] > 0.)) {
+                end_state = I_DEFAULT;
+                break;
+              }
+            }
+            if (end_state == I_DEFAULT) {
+              break;
+            }
+          }
+
+          else {
+            end_state = I_DEFAULT;
+            break;
+          }
+        }
+      }
+
+#     ifdef DEBUG
+      cout << "end state: " << end_state << endl;
+#     endif
+
+      if (end_state == i) {
+        break;
+      }
+    }
+  }
+
+  return end_state;
+}
