@@ -459,7 +459,7 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 
   i = 1;
   for (j = 0;j < nb_curve;j++) {
-    if (curves) {
+    if ((curves) && (j < curves->nb_curve)) {
       width[i++] = column_width(length - offset , curves->point[j] + offset) + ASCII_SPACE;
     }
     width[i++] = column_width(length - offset , point[j] + offset) + ASCII_SPACE;
@@ -482,7 +482,7 @@ ostream& Curves::ascii_print(ostream &os , bool file_flag , const Curves *curves
 
     j = 1;
     for (k = 0;k < nb_curve;k++) {
-      if (curves) {
+      if ((curves) && (k < curves->nb_curve)) {
         os << setw(width[j++]) << curves->point[k][i];
       }
       os << setw(width[j++]) << point[k][i];
@@ -523,7 +523,7 @@ ostream& Curves::spreadsheet_print(ostream &os , const Curves *curves) const
     os << i;
 
     for (j = 0;j < nb_curve;j++) {
-      if (curves) {
+      if ((curves) && (j < curves->nb_curve)) {
         os << "\t" << curves->point[j][i];
       }
       os << "\t" << point[j][i];
@@ -597,13 +597,13 @@ bool Curves::plot_print(const char *path , int ilength ,
       }
 
       if (curves_0) {
-        for (j = 0;j < nb_curve;j++) {
+        for (j = 0;j < curves_0->nb_curve;j++) {
           out_file << curves_0->point[j][i] << " ";
         }
       }
 
       if (curves_1) {
-        for (j = 0;j < nb_curve;j++) {
+        for (j = 0;j < curves_1->nb_curve;j++) {
           out_file << curves_1->point[j][i] << " ";
         }
       }
