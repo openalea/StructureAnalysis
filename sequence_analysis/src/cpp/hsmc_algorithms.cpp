@@ -1677,7 +1677,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une semi-chaine de Markov cachee a partir d'un echantillon
- *  de sequences par l'algorithme SEM/MCEM.
+ *  de sequences par l'algorithme MCEM.
  *
  *  arguments : reference sur un objet Format_error, stream, semi-chaine de Markov cachee initiale,
  *              parametres pour le nombre de sequences d'etats simulees, type d'estimateur
@@ -7088,21 +7088,25 @@ Semi_markov_data* Hidden_semi_markov::state_sequence_computation(Format_error &e
       }
 #     endif
 
-      seq->min_value_computation(0);
-      seq->max_value_computation(0);
+/*      seq->min_value_computation(0);
+      seq->max_value_computation(0); */
+
+      seq->min_value[0] = 0;
+      seq->max_value[0] = nb_state - 1;
       seq->build_marginal_histogram(0);
       seq->build_characteristic(0 , true , (type == 'e' ? true : false));
 
       seq->build_transition_count(this);
       seq->build_observation_histogram();
 
-      if (!(seq->characteristics[0])) {
+/*      if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
         delete seq;
         seq = 0;
         error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
       }
 
-      else if (characteristic_flag) {
+      else if (characteristic_flag) { */
+      if (characteristic_flag) {
         seq->semi_markov->characteristic_computation(*seq , true);
       }
     }
