@@ -13,7 +13,8 @@ pj = os.path.join
 if env_test['debug']:
    env_test.Append(CPPDEFINES= ['DEBUG'])
 env_test.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
-env_test.AppendUnique(LIBS= ['efence'])
+if env_test['with_efence']:
+    env_test.AppendUnique(LIBS= ['efence'])
 
 tests= Split("""
 test_mvmixture.cpp
@@ -40,7 +41,7 @@ def rmTests(target, source, env):
   return 1
 
 r= env.AddPostAction(test_prog, rmTests)
-Alias("clean_test",r)
+Alias('clean_test',r)
 """
 
 # print test_prog
