@@ -134,7 +134,7 @@ public :
 
     Variable_order_markov_data* state_sequence_computation(Format_error &error ,
                                                            const Markovian_sequences &seq ,
-                                                           bool characteristic_flag = false) const;
+                                                           bool characteristic_flag = true) const;
 
     Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength ,
                                            bool counting_flag = true , bool divergence_flag = false) const;
