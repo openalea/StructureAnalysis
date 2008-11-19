@@ -913,7 +913,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une chaine de Markov d'ordre variable cachee
- *  a partir d'un echantillon de sequences par l'algorithme SEM/MCEM.
+ *  a partir d'un echantillon de sequences par l'algorithme MCEM.
  *
  *  arguments : reference sur un objet Format_error, stream, chaine de Markov cachee initiale,
  *              type d'estimation des probabilites de transition initiale (cas ordinaire),
@@ -4642,21 +4642,25 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
     else {
       seq->hidden_likelihood = likelihood_computation(iseq , seq->posterior_probability);
 
-      seq->min_value_computation(0);
-      seq->max_value_computation(0);
+/*      seq->min_value_computation(0);
+      seq->max_value_computation(0); */
+
+      seq->min_value[0] = 0;
+      seq->max_value[0] = nb_state - 1;
       seq->build_marginal_histogram(0);
       seq->build_characteristic(0);
 
       seq->build_transition_count(*hmarkov);
       seq->build_observation_histogram();
 
-      if (!(seq->characteristics[0])) {
+/*      if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
         delete seq;
         seq = 0;
         error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
       }
 
-      else if (characteristic_flag) {
+      else if (characteristic_flag) { */
+      if (characteristic_flag) {
         seq->markov->characteristic_computation(*seq , true);
       }
     }
