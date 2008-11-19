@@ -2038,6 +2038,8 @@ Semi_markov_data& Semi_markov_data::operator=(const Semi_markov_data &seq)
     delete semi_markov;
     delete chain_data;
 
+    delete [] posterior_probability;
+
     remove();
     Sequences::remove();
 
