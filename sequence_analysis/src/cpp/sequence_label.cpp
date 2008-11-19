@@ -134,6 +134,7 @@ const char *SEQ_label[] = {
   "pruning threshold" ,
   "initial counts" ,
   "transition counts" ,
+  "maximum transition count difference" ,
   "log-likelihoods" ,
   "count" ,
   "delta" ,
