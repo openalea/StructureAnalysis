@@ -495,12 +495,26 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
       }
 
       case NB_RUN : {
-        phisto = characteristics[variable]->nb_run[value];
+        if (characteristics[variable]->nb_run) {
+          phisto = characteristics[variable]->nb_run[value];
+        }
+        else {
+          phisto = 0;
+          status = false;
+          error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
+        }
         break;
       }
 
       case NB_OCCURRENCE : {
-        phisto = characteristics[variable]->nb_occurrence[value];
+        if (characteristics[variable]->nb_occurrence) {
+          phisto = characteristics[variable]->nb_occurrence[value];
+        }
+        else {
+          phisto = 0;
+          status = false;
+          error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
+        }
         break;
       }
       }
@@ -700,8 +714,6 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
 
         seq->characteristics[i]->first_occurrence = new Histogram*[seq->marginal[i]->nb_value];
         seq->characteristics[i]->recurrence_time = new Histogram*[seq->marginal[i]->nb_value];
-        seq->characteristics[i]->nb_run = new Histogram*[seq->marginal[i]->nb_value];
-        seq->characteristics[i]->nb_occurrence = new Histogram*[seq->marginal[i]->nb_value];
 
         for (j = 0;j < seq->marginal[i]->nb_value;j++) {
           nb_histo = 0;
@@ -719,22 +731,6 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
             }
           }
           seq->characteristics[i]->recurrence_time[j] = new Histogram(nb_histo , phisto);
-
-          nb_histo = 0;
-          for (k = 0;k < nb_sample;k++) {
-            if (j < pseq[k]->marginal[i]->nb_value) {
-              phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_run[j];
-            }
-          }
-          seq->characteristics[i]->nb_run[j] = new Histogram(nb_histo , phisto);
-
-          nb_histo = 0;
-          for (k = 0;k < nb_sample;k++) {
-            if (j < pseq[k]->marginal[i]->nb_value) {
-              phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_occurrence[j];
-            }
-          }
-          seq->characteristics[i]->nb_occurrence[j] = new Histogram(nb_histo , phisto);
         }
 
         for (j = 1;j < nb_sample;j++) {
@@ -782,6 +778,35 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
 
         else {
           seq->build_sojourn_time_histogram(i , (characteristics[i]->initial_run ? true : false));
+        }
+
+        for (j = 0;j < nb_sample;j++) {
+          if ((!(pseq[j]->characteristics[i]->nb_run)) && (!(pseq[j]->characteristics[i]->nb_occurrence))) {
+            break;
+          }
+        }
+
+        if (j == nb_sample) {
+          seq->characteristics[i]->nb_run = new Histogram*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->nb_occurrence = new Histogram*[seq->marginal[i]->nb_value];
+
+          for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+            nb_histo = 0;
+            for (k = 0;k < nb_sample;k++) {
+              if (j < pseq[k]->marginal[i]->nb_value) {
+                phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_run[j];
+              }
+            }
+            seq->characteristics[i]->nb_run[j] = new Histogram(nb_histo , phisto);
+
+            nb_histo = 0;
+            for (k = 0;k < nb_sample;k++) {
+              if (j < pseq[k]->marginal[i]->nb_value) {
+                phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_occurrence[j];
+              }
+            }
+            seq->characteristics[i]->nb_occurrence[j] = new Histogram(nb_histo , phisto);
+          }
         }
       }
 
@@ -1609,18 +1634,19 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
  *
  *  Ajout d'une serie de vecteurs absorbants a la fin de chaque sequence.
  *
- *  arguments : reference sur un objet Format_error, variable, longueur des sequences,
+ *  arguments : reference sur un objet Format_error, longueur des sequences,
  *              longueur des series finales absorbantes.
  *
  *--------------------------------------------------------------*/
 
- Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error , int variable ,
-                                                             int sequence_length , int run_length) const
+Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error ,
+                                                            int sequence_length ,
+                                                            int run_length) const
 
 {
   bool status = true , initial_run_flag;
   register int i , j , k;
-  int *ilength , *pisequence , *cisequence;
+  int end_value , *ilength , *pisequence , *cisequence;
   double *prsequence , *crsequence;
   Markovian_sequences *seq;
 
@@ -1631,22 +1657,6 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
   if (index_parameter_type == TIME) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
-
-  if ((variable < 1) || (variable > nb_variable)) {
-    status = false;
-    error.update(STAT_error[STATR_VARIABLE_INDEX]);
-  }
-
-  else {
-    variable--;
-
-    if ((type[variable] != INT_VALUE) && (type[variable] != STATE)) {
-      status = false;
-      ostringstream correction_message;
-      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
-      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
-    }
   }
 
   if ((sequence_length != I_DEFAULT) && ((sequence_length <= max_length) ||
@@ -1693,15 +1703,15 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
             *pisequence++ = *cisequence++;
           }
 
-          if (j == variable) {
-            for (k = length[i];k < seq->length[i];k++) {
-              *pisequence++ = marginal[j]->nb_value;
-            }
+          if ((min_value[j] > 0) || (max_value[j] < 0)) {
+            end_value = 0;
           }
           else {
-            for (k = length[i];k < seq->length[i];k++) {
-              *pisequence++ = 0;
-            }
+            end_value = max_value[j] + 1;
+          }
+
+          for (k = length[i];k < seq->length[i];k++) {
+            *pisequence++ = end_value;
           }
 
 #         ifdef DEBUG
@@ -1726,23 +1736,29 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
           for (k = 0;k < length[i];k++) {
             *prsequence++ = *crsequence++;
           }
+
+          if ((min_value[j] > 0.) || (max_value[j] < 0.)) {
+            end_value = 0;
+          }
+          else {
+            if (ceil(max_value[j]) > max_value[j]) {
+              end_value = ceil(max_value[j]);
+            }
+            else {
+              end_value = max_value[j] + 1;
+            }
+          }
+
           for (k = length[i];k < seq->length[i];k++) {
-            *prsequence++ = 0.;
+            *prsequence++ = end_value;
           }
         }
       }
     }
 
     for (i = 0;i < seq->nb_variable;i++) {
-      if (i == variable) {
-        seq->min_value[i] = min_value[i];
-        seq->max_value[i] = max_value[i] + 1;
-      }
-      else {
-        seq->min_value_computation(i);
-        seq->max_value_computation(i);
-      }
-
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
       seq->build_marginal_histogram(i);
     }
 
@@ -2918,7 +2934,7 @@ void Markovian_sequences::build_characteristic(int variable , bool sojourn_time_
         build = false;
       }
 
-      else {
+      else if (type[i] != STATE) {
         for (j = 0;j < marginal[i]->nb_value;j++) {
           if (marginal[i]->frequency[j] == 0) {
             build = false;
