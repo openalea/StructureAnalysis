@@ -85,6 +85,8 @@ private :
     Hidden_semi_markov(char itype , int inb_state , int inb_output_process , int *nb_value)
     :Semi_markov(itype , inb_state , inb_output_process , nb_value) {}
 
+    int end_state() const;
+
     double forward_backward(const Markovian_sequences &seq , int index , std::ostream &os ,
                             int output , char format , double &max_marginal_entropy ,
                             double &entropy1) const;
@@ -161,7 +163,7 @@ public :
 
     Semi_markov_data* state_sequence_computation(Format_error &error , ostream &os ,
                                                  const Markovian_sequences &seq ,
-                                                 bool characteristic_flag = false) const;
+                                                 bool characteristic_flag = true) const;
 
     Semi_markov_data* simulation(Format_error &error , const Histogram &hlength ,
                                  bool counting_flag = true , bool divergence_flag = false) const;
