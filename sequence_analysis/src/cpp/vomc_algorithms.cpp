@@ -1874,13 +1874,13 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
 {
   bool *bic_memory , *kt_memory;
   register int i , j , k;
-  int buff , max_memory_count , row , initial_count , *memory_count , *nb_parameter ,
-      *diff_nb_parameter , width[3];
+  int buff , max_memory_count , row , initial_count , *memory_count , *max_state ,
+      *nb_parameter , *diff_nb_parameter , width[3];
   long old_adjust;
-  double standard_normal_value , half_confidence_interval , diff , child_likelihood ,
-         child_krichevsky_trofimov , num , denom , *initial_likelihood , *memory_likelihood ,
-         *max_likelihood , *krichevsky_trofimov , *max_krichevsky_trofimov , **confidence_limit ,
-         **transition_likelihood , **diff_likelihood;
+  double standard_normal_value , half_confidence_interval , diff , max_abs_diff , child_likelihood ,
+         child_krichevsky_trofimov , num , denom , *diff_count , *initial_likelihood ,
+         *memory_likelihood , *max_likelihood , *krichevsky_trofimov , *max_krichevsky_trofimov ,
+         **confidence_limit , **transition_likelihood , **diff_likelihood;
 
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
@@ -1925,6 +1925,33 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   }
   width[0] += ASCII_SPACE;
 
+  // Peres-Shields fluctuation estimator
+
+  diff_count = new double[nb_row];
+  max_state = new int[nb_row];
+
+  diff_count[0] = memory_count[row];
+
+  for (i = 1;i < nb_row;i++) {
+    diff_count[i] = memory_count[row];
+    if (((!begin) || (order[i] > 1)) && (memory_count[i] > 0)) {
+      max_abs_diff = 0.;
+      for (j = 0;j < nb_state;j++) {
+        diff = fabs(transition[parent[i]][j] * memory_count[i] -
+                    markov_data->chain_data->transition[i][j]);
+//        if (diff > diff_count[i]) {
+//          diff_count[i] = diff;
+        if (diff > max_abs_diff) {
+          max_abs_diff = diff;
+          diff_count[i] = transition[parent[i]][j] * memory_count[i] -
+                          markov_data->chain_data->transition[i][j];
+          max_state[i] = j;
+        }
+      }
+    }
+  }
+  width[1] = column_width(nb_row - 1 , diff_count + 1) + ASCII_SPACE;
+
   if (begin) {
     os << "\n" << SEQ_label[SEQL_INITIAL_COUNTS] << endl;
 
@@ -1949,6 +1976,8 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
     os << "  " << setw(width[0]) << initial_count << endl;
   }
 
+//  os << "\nthreshold: " << pow((double)memory_count[0] , 0.75) << endl;
+
   os << "\n" << SEQ_label[SEQL_TRANSITION_COUNTS] << endl;
 
   for (i = 0;i < max_order;i++) {
@@ -1959,6 +1988,8 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
   for (i = 0;i < nb_state;i++) {
     os << setw(width[0]) << i;
   }
+  os << setw(width[0]) << " "
+     << "    " << SEQ_label[SEQL_MAX_TRANSITION_COUNT_DIFFERENCE];
 
   for (i = (begin ? 1 : 0);i <= max_order;i++) {
     os << "\n";
@@ -1975,7 +2006,12 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
         for (k = 0;k < nb_state;k++) {
           os << setw(width[0]) << markov_data->chain_data->transition[j][k];
         }
-        os << "  " << setw(width[0]) << memory_count[j] << endl;
+        os << "  " << setw(width[0]) << memory_count[j];
+
+        if (diff_count[j] != memory_count[row]) {
+          os << setw(width[1]) << diff_count[j] << " (" << max_state[j] << ")";
+        }
+        os << endl;
       }
     }
   }
@@ -2396,6 +2432,9 @@ ostream& Variable_order_markov::transition_count_ascii_write(ostream &os , bool 
       }
     }
   }
+
+  delete [] diff_count;
+  delete [] max_state;
 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
     if (memory_count[i] > 0) {
@@ -3027,7 +3066,11 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
 
     // extraction des caracteristiques des sequences simulees
 
-    for (i = 0;i < seq->nb_variable;i++) {
+    seq->min_value[0] = 0;
+    seq->max_value[0] = nb_state - 1;
+    seq->build_marginal_histogram(0);
+
+    for (i = 1;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
       seq->build_marginal_histogram(i);
@@ -3037,14 +3080,14 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
     seq->build_observation_histogram();
     seq->build_characteristic();
 
-//    if ((!(seq->characteristics[0])) || (seq->marginal[0]->nb_value != nb_state)) {
-    if (!(seq->characteristics[0])) {
+/*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
       delete seq;
       seq = 0;
       error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
     }
 
-    else if (!divergence_flag) {
+    else if (!divergence_flag) { */
+    if (!divergence_flag) {
       markov->characteristic_computation(*seq , counting_flag);
 
       // calcul de la vraisemblance
