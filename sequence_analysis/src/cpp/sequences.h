@@ -134,9 +134,9 @@ const double OCCUPANCY_THRESHOLD = 0.99999;  // seuil sur la fonction de reparti
                                              // pour borner une loi d'occupation d'un etat
 const double OCCUPANCY_MEAN = 10.;     // temps moyen d'occupation d'un etat
 
-const int MIN_NB_STATE_SEQUENCE = 1;   // nombre de sequences d'etats 1ere iteration de SEM
-const int MAX_NB_STATE_SEQUENCE = 10;  // nombre de sequences d'etats maximum pour SEM
-const double NB_STATE_SEQUENCE_PARAMETER = 1.;  // parametre nombre de sequences d'etats pour SEM
+const int MIN_NB_STATE_SEQUENCE = 1;   // nombre de sequences d'etats 1ere iteration de l'algorithme MCEM
+const int MAX_NB_STATE_SEQUENCE = 10;  // nombre de sequences d'etats maximum pour l'algorithme MCEM
+const double NB_STATE_SEQUENCE_PARAMETER = 1.;  // parametre nombre de sequences d'etats pour l'algorithme MCEM
 
 const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300; // nombre maximum de sequences pour la sortie des probabilites
                                                    // a posteriori des sequences d'etats les plus probables
@@ -966,7 +966,7 @@ public :
     Markovian_sequences* remove_variable_1() const;
 
     Markovian_sequences* initial_run_computation(Format_error &error) const;
-    Markovian_sequences* add_absorbing_run(Format_error &error , int variable ,
+    Markovian_sequences* add_absorbing_run(Format_error &error ,
                                            int sequence_length = I_DEFAULT ,
                                            int run_length = I_DEFAULT) const;
 
