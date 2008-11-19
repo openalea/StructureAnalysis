@@ -777,7 +777,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
           state_no_occurrence_probability(i);
         }
         if (seq.type[0] == STATE) {
-          state_first_occurrence_distribution(i , (seq.characteristics[0] ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
+          state_first_occurrence_distribution(i , ((seq.characteristics[0]) && (seq.characteristics[0]->first_occurrence[i]->nb_element > 0) ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
         }
         else {
           state_first_occurrence_distribution(i);
@@ -787,7 +787,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
           state_leave_probability(memory , i);
         }
         if (seq.type[0] == STATE) {
-          state_recurrence_time_distribution(memory , i , (seq.characteristics[0] ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
+          state_recurrence_time_distribution(memory , i , ((seq.characteristics[0]) && (seq.characteristics[0]->recurrence_time[i]->nb_element > 0) ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
         }
         else {
           state_recurrence_time_distribution(memory , i);
@@ -795,7 +795,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
 
         if (state_type[i] != 'a') {
           if (seq.type[0] == STATE) {
-            state_sojourn_time_distribution(memory , i , (seq.characteristics[0] ? seq.characteristics[0]->sojourn_time[i]->nb_value : 1));
+            state_sojourn_time_distribution(memory , i , ((seq.characteristics[0]) && (seq.characteristics[0]->sojourn_time[i]->nb_element > 0) ? seq.characteristics[0]->sojourn_time[i]->nb_value : 1));
           }
           else {
             state_sojourn_time_distribution(memory , i);
@@ -881,13 +881,13 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
           if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
-          output_first_occurrence_distribution(i , j , (seq.characteristics[seq_variable] ? seq.characteristics[seq_variable]->first_occurrence[j]->nb_value : 1));
+          output_first_occurrence_distribution(i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->first_occurrence[j]->nb_element > 0) ? seq.characteristics[seq_variable]->first_occurrence[j]->nb_value : 1));
 
           if (type == 'o') {
             output_leave_probability(memory , i , j);
           }
           if (nonparametric_process[i]->leave[j] < 1.) {
-            output_recurrence_time_distribution(memory , i , j , (seq.characteristics[seq_variable] ? seq.characteristics[seq_variable]->recurrence_time[j]->nb_value : 1));
+            output_recurrence_time_distribution(memory , i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->recurrence_time[j]->nb_element > 0) ? seq.characteristics[seq_variable]->recurrence_time[j]->nb_value : 1));
           }
           else {
             delete nonparametric_process[i]->recurrence_time[j];
@@ -902,7 +902,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
           }
 
           if (k < nb_state) {
-            output_sojourn_time_distribution(memory , i , j , (seq.characteristics[seq_variable] ? seq.characteristics[seq_variable]->sojourn_time[j]->nb_value : 1));
+            output_sojourn_time_distribution(memory , i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->sojourn_time[j]->nb_element > 0) ? seq.characteristics[seq_variable]->sojourn_time[j]->nb_value : 1));
           }
           else {
             nonparametric_process[i]->absorption[j] = 1.;
