@@ -4594,6 +4594,8 @@ Variable_order_markov_data& Variable_order_markov_data::operator=(const Variable
     delete markov;
     delete chain_data;
 
+    delete [] posterior_probability;
+
     remove();
     Sequences::remove();
 
