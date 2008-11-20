@@ -274,7 +274,7 @@ def ToHistogram(dist):
 
 ############################# Test Distribution #################################
 
-class Test:
+class TestDistribution:
 
     def test_constructor(self):
         pass

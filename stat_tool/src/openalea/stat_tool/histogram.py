@@ -82,7 +82,7 @@ class Test:
     
 
 
-    def test_plot(self):
+    def __test_plot(self):
         # plot
         h = Histogram(get_test_file("meri1.his"))
         h.plot()

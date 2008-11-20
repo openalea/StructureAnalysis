@@ -95,7 +95,7 @@ class Test:
         return m
 
 
-    def test_plot(self):
+    def __test_plot(self):
 
         m = self.test_build_convolution()
         m.plot()

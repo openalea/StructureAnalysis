@@ -500,20 +500,20 @@ class Test:
         return m
 
 
-    def test_old_plot(self):
+    def __test_old_plot(self):
         m = self.get_mixture()
         m.old_plot()
 
 
-    def test_plot_mixture_1(self):
+    def __test_plot_mixture_1(self):
         m = self.get_mixture()
         m.plot()
 
-    def test_plot_mixture_2(self):
+    def __test_plot_mixture_2(self):
         m = self.get_mixture_2()
         m.plot()
 
-    def test_plot_mixture_data(self):
+    def __test_plot_mixture_data(self):
         from mixture import Mixture
         from simulate import Simulate
         from distribution import Distribution
@@ -526,7 +526,7 @@ class Test:
         mixt_histo1.plot()
 
 
-    def test_plot_convolution(self):
+    def __test_plot_convolution(self):
         
         from convolution import Convolution
         from simulate import Simulate
@@ -546,7 +546,7 @@ class Test:
         convol31.plot()
 
 
-    def test_plot_convolution_data(self):
+    def __test_plot_convolution_data(self):
         
         from convolution import Convolution
         from simulate import Simulate
@@ -556,7 +556,7 @@ class Test:
         convol_histo1.plot()
 
     
-    def test_plot_distribution_set(self):
+    def __test_plot_distribution_set(self):
         
         from distribution import Distribution 
         d1 = Distribution("B", 2, 18, 0.5) 
@@ -566,7 +566,7 @@ class Test:
         Plot(d1, d2, d3)
         d1.old_plot()
         
-    def test_plot_survival(self):
+    def __test_plot_survival(self):
         
         from distribution import Distribution 
         from histogram import Histogram
@@ -581,7 +581,7 @@ class Test:
 
         
 
-    def test_plot_parametric_model(self):
+    def __test_plot_parametric_model(self):
 
         from distribution import Distribution 
         from simulate import Simulate
@@ -593,3 +593,4 @@ class Test:
         Plot(histo1)
         dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
         Plot(dist2)
+
