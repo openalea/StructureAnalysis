@@ -460,11 +460,10 @@ class StatInterface(object):
             exhaustive = False
             
         if(Format.lower() == "spreadsheet"):
-            outstr = self.spreadsheet_write(filename)
-
-            f = open(filename, 'w')
-            f.write(outstr)
-            f.close()
+            self.spreadsheet_write(filename)
+            #f = open(filename, 'w')
+            #f.write(outstr)
+            #f.close()
 
         elif(Format.lower() == "Data"):
             self.file_ascii_data_write(filename, exhaustive)        
