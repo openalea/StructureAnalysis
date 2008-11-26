@@ -1047,6 +1047,132 @@ Markovian_sequences* Markovian_sequences::transcode(Format_error &error ,
 
 /*--------------------------------------------------------------*
  *
+ *  Suppression des valeurs non-representees d'une variable entiere.
+ *
+ *  arguments : reference sur un objet Format_error, stream, indice de la variable,
+ *              flag pour ajouter une variable.
+ *
+ *--------------------------------------------------------------*/
+
+Markovian_sequences* Markovian_sequences::consecutive_values(Format_error &error , ostream &os ,
+                                                             int ivariable , bool add_flag) const
+
+{
+  bool status = true;
+  register int i , j;
+  int variable , offset , max , *symbol , *itype;
+  Markovian_sequences *seq;
+
+
+  seq = 0;
+  error.init();
+
+  if ((ivariable < 1) || (ivariable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    ivariable--;
+
+    if ((type[ivariable] != INT_VALUE) && (type[ivariable] != STATE)) {
+      status = false;
+      ostringstream correction_message;
+      correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[STATE];
+      error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
+    }
+
+    else {
+      for (i = 0;i < marginal[ivariable]->nb_value;i++) {
+        if (marginal[ivariable]->frequency[i] == 0) {
+          break;
+        }
+      }
+
+      if (i == marginal[ivariable]->nb_value) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << ivariable + 1 << ": "
+                      << SEQ_error[SEQR_CONSECUTIVE_VALUES];
+        error.update((error_message.str()).c_str());
+      }
+    }
+  }
+
+  if (status) {
+
+#   ifdef MESSAGE
+    os << "\n" << SEQ_label[SEQL_MISSING_VALUE] << ":";
+    for (i = 0;i < marginal[ivariable]->nb_value;i++) {
+      if (marginal[ivariable]->frequency[i] == 0) {
+        os << " " << i;
+      }
+    }
+    os << endl;
+#   endif
+
+    symbol = new int[marginal[ivariable]->nb_value - marginal[ivariable]->offset];
+
+//    i = 0;
+    i = -1;
+    for (j = marginal[ivariable]->offset;j < marginal[ivariable]->nb_value;j++) {
+//      symbol[j - marginal[ivariable]->offset] = i;
+      if (marginal[ivariable]->frequency[j] > 0) {
+        i++;
+      }
+      symbol[j - marginal[ivariable]->offset] = i;
+    }
+//    max = i - 1;
+    max = i;
+
+#   ifdef DEBUG
+    cout << "\nTest :";
+    for (i = 0;i < marginal[ivariable]->nb_value - marginal[ivariable]->offset;i++) {
+      cout << " " << symbol[i];
+    }
+    cout << endl;
+#   endif
+
+    switch (add_flag) {
+    case false :
+      variable = ivariable;
+      offset = 0;
+      break;
+    case true :
+      variable = 0;
+      offset = 1;
+      break;
+    }
+
+    itype = new int[nb_variable + offset];
+    for (i = 0;i < nb_variable;i++) {
+      itype[i + offset] = type[i];
+    }
+    itype[variable] = INT_VALUE;
+
+    seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
+                                  nb_variable + offset , itype);
+    delete [] itype;
+
+    seq->Sequences::transcode(*this , ivariable , 0 , max , symbol , add_flag);
+    delete [] symbol;
+
+    for (i = 0;i < seq->nb_variable;i++) {
+      if (i == variable) {
+        seq->build_characteristic(i , true , (((characteristics[ivariable]) && (characteristics[ivariable]->initial_run)) ? true : false));
+      }
+      else if (characteristics[i - offset]) {
+        seq->characteristics[i] = new Sequence_characteristics(*(characteristics[i - offset]));
+      }
+    }
+  }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Regroupement des symboles d'une variable entiere.
  *
  *  arguments : reference sur un objet Format_error, indice de la variable,
@@ -1136,7 +1262,6 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int ivar
       delete [] itype;
 
       seq->Sequences::transcode(*this , ivariable , 0 , nb_class - 1 , symbol , add_flag);
-
       delete [] symbol;
 
       for (i = 0;i < seq->nb_variable;i++) {
