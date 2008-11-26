@@ -1718,7 +1718,12 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
         error.update((error_message.str()).c_str());
       }
 
-      if (!characteristics[1]) {
+      if (marginal[1]->nb_value > NB_STATE) {
+        status = false;
+        error.update(SEQ_error[SEQR_NB_OUTPUT]);
+      }
+
+/*      if (!characteristics[1]) {
         for (i = 0;i < marginal[1]->nb_value;i++) {
           if (marginal[1]->frequency[i] == 0) {
             status = false;
@@ -1728,7 +1733,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
             error.update((error_message.str()).c_str());
           }
         }
-      }
+      } */
     }
   }
 
