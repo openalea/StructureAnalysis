@@ -929,7 +929,7 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
         if (type == 'o') {
           state_leave_probability(i);
         }
-        if (nonparametric_process[0]->leave[i] < 1.) {
+        if (nonparametric_process[0]->leave[i] < 1. - DOUBLE_ERROR) {
           state_recurrence_time_distribution(i);
         }
         else {
@@ -1000,12 +1000,19 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
           if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
-          output_first_occurrence_distribution(i , j);
+          if (nonparametric_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
+            output_first_occurrence_distribution(i , j);
+          }
+          else {
+            delete nonparametric_process[i]->first_occurrence[j];
+            nonparametric_process[i]->first_occurrence[j] = 0;
+            nonparametric_process[i]->leave[j] = 1.;
+          }
 
-          if (type == 'o') {
+          if ((type == 'o') && (nonparametric_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
-          if (nonparametric_process[i]->leave[j] < 1.) {
+          if (nonparametric_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
             output_recurrence_time_distribution(memory , i , j);
           }
           else {
@@ -1113,7 +1120,7 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
         if (type == 'o') {
           state_leave_probability(i);
         }
-        if (nonparametric_process[0]->leave[i] < 1.) {
+        if (nonparametric_process[0]->leave[i] < 1. - DOUBLE_ERROR) {
           if (seq.type[0] == STATE) {
             state_recurrence_time_distribution(i , ((seq.characteristics[0]) && (seq.characteristics[0]->recurrence_time[i]->nb_element > 0) ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
           }
@@ -1203,12 +1210,19 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
           if (type == 'o') {
             output_no_occurrence_probability(i , j);
           }
-          output_first_occurrence_distribution(i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->first_occurrence[j]->nb_element > 0) ? seq.characteristics[seq_variable]->first_occurrence[j]->nb_value : 1));
+          if (nonparametric_process[i]->no_occurrence[j] < 1. - DOUBLE_ERROR) {
+            output_first_occurrence_distribution(i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->first_occurrence[j]->nb_element > 0) ? seq.characteristics[seq_variable]->first_occurrence[j]->nb_value : 1));
+          }
+          else {
+            delete nonparametric_process[i]->first_occurrence[j];
+            nonparametric_process[i]->first_occurrence[j] = 0;
+            nonparametric_process[i]->leave[j] = 1.;
+          }
 
-          if (type == 'o') {
+          if ((type == 'o') && (nonparametric_process[i]->first_occurrence[j])) {
             output_leave_probability(memory , i , j);
           }
-          if (nonparametric_process[i]->leave[j] < 1.) {
+          if (nonparametric_process[i]->leave[j] < 1. - DOUBLE_ERROR) {
             output_recurrence_time_distribution(memory , i , j , ((seq.characteristics[seq_variable]) && (j < seq.characteristics[seq_variable]->nb_value) && (seq.characteristics[seq_variable]->recurrence_time[j]->nb_element > 0) ? seq.characteristics[seq_variable]->recurrence_time[j]->nb_value : 1));
           }
           else {
