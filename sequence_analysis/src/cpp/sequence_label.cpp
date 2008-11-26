@@ -163,6 +163,7 @@ const char *SEQ_label[] = {
   "number of occurrences of output" ,
   "per sequence" ,
   "per length" ,
+  "missing value" ,
   "words" ,
 
   "state probabilities" ,
@@ -363,6 +364,7 @@ const char *SEQ_error[] = {
 
   "state sequences not in the data" ,
   "characteristics not computed" ,
+  "consecutive values from 0" ,
   "non-existing characteristic distribution" ,
   "non-existing forward sojourn time distribution" ,
   "incompatible with model" ,
