@@ -1036,7 +1036,12 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
         error.update((error_message.str()).c_str());
       }
 
-      if (!characteristics[1]) {
+      if (marginal[1]->nb_value > NB_STATE) {
+        status = false;
+        error.update(SEQ_error[SEQR_NB_OUTPUT]);
+      }
+
+/*      if (!characteristics[1]) {
         for (i = 0;i < marginal[1]->nb_value;i++) {
           if (marginal[1]->frequency[i] == 0) {
             status = false;
@@ -1046,7 +1051,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
             error.update((error_message.str()).c_str());
           }
         }
-      }
+      } */
     }
   }
 
