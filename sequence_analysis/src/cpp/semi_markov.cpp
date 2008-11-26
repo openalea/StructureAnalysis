@@ -910,7 +910,7 @@ ostream& Semi_markov::ascii_write(ostream &os , const Semi_markov_data *seq ,
   register int i;
   int variable;
   Histogram **observation = 0;
-  Sequence_characteristics *characteristics = 0;
+  Sequence_characteristics *characteristics;
 
 
   switch (hidden) {
@@ -949,6 +949,10 @@ ostream& Semi_markov::ascii_write(ostream &os , const Semi_markov_data *seq ,
   if ((seq) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
   }
+  else {
+    characteristics = 0;
+  }
+
   nonparametric_process[0]->ascii_print(os , 0 , 0 , characteristics , exhaustive ,
                                         file_flag , forward);
 
@@ -1026,8 +1030,12 @@ ostream& Semi_markov::ascii_write(ostream &os , const Semi_markov_data *seq ,
       if (seq->observation) {
         observation = seq->observation[variable];
       }
+
       if (seq->characteristics[variable]) {
         characteristics = seq->characteristics[variable];
+      }
+      else {
+        characteristics = 0;
       }
     }
 
@@ -1245,7 +1253,7 @@ ostream& Semi_markov::spreadsheet_write(ostream &os , const Semi_markov_data *se
   register int i;
   int variable;
   Histogram **observation = 0;
-  Sequence_characteristics *characteristics = 0;
+  Sequence_characteristics *characteristics;
 
 
   switch (hidden) {
@@ -1284,6 +1292,10 @@ ostream& Semi_markov::spreadsheet_write(ostream &os , const Semi_markov_data *se
   if ((seq) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
   }
+  else {
+    characteristics = 0;
+  }
+
   nonparametric_process[0]->spreadsheet_print(os , 0 , 0 , characteristics , forward);
 
   // ecriture des lois associees a chaque processus d'observation
@@ -1321,8 +1333,12 @@ ostream& Semi_markov::spreadsheet_write(ostream &os , const Semi_markov_data *se
       if (seq->observation) {
         observation = seq->observation[variable];
       }
+
       if (seq->characteristics[variable]) {
         characteristics = seq->characteristics[variable];
+      }
+      else {
+        characteristics = 0;
       }
     }
 
@@ -1469,12 +1485,15 @@ bool Semi_markov::plot_write(const char *prefix , const char *title ,
   register int i;
   int variable;
   Histogram *hlength = 0 , **observation = 0;
-  Sequence_characteristics *characteristics = 0;
+  Sequence_characteristics *characteristics;
 
 
   if ((seq) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
     hlength = seq->hlength;
+  }
+  else {
+    characteristics = 0;
   }
 
   status = nonparametric_process[0]->plot_print(prefix , title , 0 , 0 , characteristics ,
@@ -1499,8 +1518,12 @@ bool Semi_markov::plot_write(const char *prefix , const char *title ,
         if (seq->observation) {
           observation = seq->observation[variable];
         }
+
         if (seq->characteristics[variable]) {
           characteristics = seq->characteristics[variable];
+        }
+        else {
+          characteristics = 0;
         }
       }
 
