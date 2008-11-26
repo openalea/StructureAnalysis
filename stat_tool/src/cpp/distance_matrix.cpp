@@ -38,6 +38,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <cstring>
 
 #include "tool/config.h"
 

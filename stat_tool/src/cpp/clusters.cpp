@@ -38,6 +38,8 @@
 
 #include <sstream>
 #include <iomanip>
+#include <cstring>
+
 // #include <rw/vstream.h>
 // #include <rw/rwfile.h>
 #include "stat_tools.h"
