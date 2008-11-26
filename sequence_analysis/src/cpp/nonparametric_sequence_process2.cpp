@@ -196,13 +196,15 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
              << " " << i << ": " << no_occurrence[i] << endl;
         }
 
-        os << "\n";
-        if (file_flag) {
-          os << "# ";
+        if (first_occurrence[i]) {
+          os << "\n";
+          if (file_flag) {
+            os << "# ";
+          }
+          os << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+             << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+          first_occurrence[i]->ascii_characteristic_print(os , false , file_flag);
         }
-        os << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-           << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
-        first_occurrence[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
       if ((characteristics) && (i < characteristics->nb_value)) {
@@ -215,7 +217,9 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         characteristics->first_occurrence[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
-      if (exhaustive) {
+      if ((((first_occurrence) && (first_occurrence[i])) ||
+           ((characteristics) && (i < characteristics->nb_value) &&
+            (characteristics->first_occurrence[i]->nb_element > 0))) && (exhaustive)) {
         os << "\n";
         if (file_flag) {
           os << "# ";
@@ -227,7 +231,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
              << " " << i << " " << STAT_label[STATL_HISTOGRAM];
         }
 
-        if (first_occurrence) {
+        if ((first_occurrence) && (first_occurrence[i])) {
           os << " | " << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
@@ -768,9 +772,11 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
              << " " << i << ": " << no_occurrence[i] << endl;
         }
 
-        os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-           << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
-        first_occurrence[i]->spreadsheet_characteristic_print(os);
+        if (first_occurrence[i]) {
+          os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+             << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+          first_occurrence[i]->spreadsheet_characteristic_print(os);
+        }
       }
 
       if ((characteristics) && (i < characteristics->nb_value)) {
@@ -779,31 +785,35 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
         characteristics->first_occurrence[i]->spreadsheet_characteristic_print(os);
       }
 
-      os << "\n";
-      if ((characteristics) && (i < characteristics->nb_value) &&
-          (characteristics->first_occurrence[i]->nb_element > 0)) {
-        os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-           << " " << i << " " << STAT_label[STATL_HISTOGRAM];
-      }
-
-      if (first_occurrence) {
-        os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-           << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
+      if (((first_occurrence) && (first_occurrence[i])) ||
+          ((characteristics) && (i < characteristics->nb_value) &&
+           (characteristics->first_occurrence[i]->nb_element > 0))) {
+        os << "\n";
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->first_occurrence[i]->nb_element > 0)) {
-          os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-             << STAT_label[STATL_FUNCTION];
+          os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+             << " " << i << " " << STAT_label[STATL_HISTOGRAM];
         }
-        os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
-           << STAT_label[STATL_FUNCTION] << endl;
 
-        first_occurrence[i]->spreadsheet_print(os , true , false , true ,
-                                               (((characteristics) && (i < characteristics->nb_value) && (characteristics->first_occurrence[i]->nb_element > 0)) ? characteristics->first_occurrence[i] : 0));
-      }
+        if ((first_occurrence) && (first_occurrence[i])) {
+          os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+             << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
+          if ((characteristics) && (i < characteristics->nb_value) &&
+              (characteristics->first_occurrence[i]->nb_element > 0)) {
+            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+               << STAT_label[STATL_FUNCTION];
+          }
+          os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+             << STAT_label[STATL_FUNCTION] << endl;
 
-      else {
-        os << endl;
-        characteristics->first_occurrence[i]->spreadsheet_print(os);
+          first_occurrence[i]->spreadsheet_print(os , true , false , true ,
+                                                 (((characteristics) && (i < characteristics->nb_value) && (characteristics->first_occurrence[i]->nb_element > 0)) ? characteristics->first_occurrence[i] : 0));
+        }
+
+        else {
+          os << endl;
+          characteristics->first_occurrence[i]->spreadsheet_print(os);
+        }
       }
     }
   }
@@ -1222,7 +1232,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
 
     if ((first_occurrence) || (characteristics)) {
       for (i = 0;i < nb_value;i++) {
-        if (first_occurrence) {
+        if ((first_occurrence) && (first_occurrence[i])) {
           pdist[nb_dist] = first_occurrence[i];
 
           if ((characteristics) && (i < characteristics->nb_value) &&
@@ -1646,134 +1656,136 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
       histo_index = 1;
       dist_index = 0;
 
-      for (i = 0;i < 2;i++) {
-        ostringstream file_name[2];
+      if ((first_occurrence) || (characteristics)) {
+        for (i = 0;i < 2;i++) {
+          ostringstream file_name[2];
 
-        switch (i) {
-        case 0 :
-          file_name[0] << prefix << process << 2 << ".plot";
-          break;
-        case 1 :
-          file_name[0] << prefix << process << 2 << ".print";
-          break;
-        }
-
-        ofstream out_file((file_name[0].str()).c_str());
-
-        if (i == 1) {
-          out_file << "set terminal postscript" << endl;
-          file_name[1] << label(prefix) << process << 2 << ".ps";
-          out_file << "set output \"" << file_name[1].str() << "\"\n\n";
-        }
-
-        out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
-                 << "set title";
-        if ((title) || (process > 0)) {
-          out_file << " \"";
-          if (title) {
-            out_file << title;
-            if (process > 0) {
-              out_file << " - ";
-            }
+          switch (i) {
+          case 0 :
+            file_name[0] << prefix << process << 2 << ".plot";
+            break;
+          case 1 :
+            file_name[0] << prefix << process << 2 << ".print";
+            break;
           }
-          if (process > 0) {
-            out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+
+          ofstream out_file((file_name[0].str()).c_str());
+
+          if (i == 1) {
+            out_file << "set terminal postscript" << endl;
+            file_name[1] << label(prefix) << process << 2 << ".ps";
+            out_file << "set output \"" << file_name[1].str() << "\"\n\n";
           }
-          out_file << "\"";
-        }
-        out_file << "\n\n";
 
-        j = histo_index;
-        k = dist_index;
-
-        start = true;
-        for (m = 0;m < nb_value;m++) {
-          if (first_occurrence) {
-            if (!start) {
-              if (i == 0) {
-                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                   << "set title";
+          if ((title) || (process > 0)) {
+            out_file << " \"";
+            if (title) {
+              out_file << title;
+              if (process > 0) {
+                out_file << " - ";
               }
-              out_file << endl;
             }
-            else {
-              start = false;
+            if (process > 0) {
+              out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+            }
+            out_file << "\"";
+          }
+          out_file << "\n\n";
+
+          j = histo_index;
+          k = dist_index;
+
+          start = true;
+          for (m = 0;m < nb_value;m++) {
+            if ((first_occurrence) && (first_occurrence[m])) {
+              if (!start) {
+                if (i == 0) {
+                  out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                }
+                out_file << endl;
+              }
+              else {
+                start = false;
+              }
+
+              if (MAX(dist_nb_value[k] , 2) - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics 0,1" << endl;
+              }
+
+              if ((characteristics) && (m < characteristics->nb_value) &&
+                  (characteristics->first_occurrence[m]->nb_element > 0)) {
+                out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
+                         << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
+                         << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
+                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+                         << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
+                out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
+                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+                         << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
+                j++;
+              }
+
+              else {
+                out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
+                         << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
+                         << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
+                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+                         << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
+              }
+
+              if (MAX(dist_nb_value[k] , 2) - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics autofreq" << endl;
+              }
+              k++;
             }
 
-            if (MAX(dist_nb_value[k] , 2) - 1 < TIC_THRESHOLD) {
-              out_file << "set xtics 0,1" << endl;
-            }
+            else if ((characteristics) && (m < characteristics->nb_value) &&
+                     (characteristics->first_occurrence[m]->nb_element > 0)) {
+              if (!start) {
+                if (i == 0) {
+                  out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                }
+                out_file << endl;
+              }
+              else {
+                start = false;
+              }
 
-            if ((characteristics) && (m < characteristics->nb_value) &&
-                (characteristics->first_occurrence[m]->nb_element > 0)) {
-              out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
-                       << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
-                       << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
+              if (MAX(phisto[j]->nb_value , 2) - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics 0,1" << endl;
+              }
+              if ((int)(phisto[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+                out_file << "set ytics 0,1" << endl;
+              }
+
+              out_file << "plot [0:" << MAX(phisto[j]->nb_value , 2) - 1 << "] [0:"
+                       << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
+                       << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                        << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-                       << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
-              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                       << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-                       << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
+                       << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+
+              if (MAX(phisto[j]->nb_value , 2) - 1 < TIC_THRESHOLD) {
+                out_file << "set xtics autofreq" << endl;
+              }
+              if ((int)(phisto[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+                out_file << "set ytics autofreq" << endl;
+              }
               j++;
             }
-
-            else {
-              out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
-                       << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
-                       << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                       << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-                       << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
-            }
-
-            if (MAX(dist_nb_value[k] , 2) - 1 < TIC_THRESHOLD) {
-              out_file << "set xtics autofreq" << endl;
-            }
-            k++;
           }
 
-          else if ((characteristics) && (m < characteristics->nb_value) &&
-                   (characteristics->first_occurrence[m]->nb_element > 0)) {
-            if (!start) {
-              if (i == 0) {
-                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-              }
-              out_file << endl;
-            }
-            else {
-              start = false;
-            }
-
-            if (MAX(phisto[j]->nb_value , 2) - 1 < TIC_THRESHOLD) {
-              out_file << "set xtics 0,1" << endl;
-            }
-            if ((int)(phisto[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
-              out_file << "set ytics 0,1" << endl;
-            }
-
-            out_file << "plot [0:" << MAX(phisto[j]->nb_value , 2) - 1 << "] [0:"
-                     << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
-                     << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                     << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
-                     << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
-
-            if (MAX(phisto[j]->nb_value , 2) - 1 < TIC_THRESHOLD) {
-              out_file << "set xtics autofreq" << endl;
-            }
-            if ((int)(phisto[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
-              out_file << "set ytics autofreq" << endl;
-            }
-            j++;
+          if (i == 1) {
+            out_file << "\nset terminal x11" << endl;
           }
+
+          out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
         }
 
-        if (i == 1) {
-          out_file << "\nset terminal x11" << endl;
-        }
-
-        out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+        histo_index = j;
+        dist_index = k;
       }
-
-      histo_index = j;
-      dist_index = k;
 
       if ((recurrence_time) || (characteristics)) {
         for (i = 0;i < 2;i++) {
