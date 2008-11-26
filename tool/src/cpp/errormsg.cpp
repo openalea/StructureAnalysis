@@ -37,13 +37,10 @@
 
 
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-#ifdef __GNUC__
-#include <stream.h>   //for the use of function extern char* form(const char* ...); (printf format)
-#endif
-#include <assert.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstdarg>
+#include <cassert>
 
 #include "errormsg.h"
 
