@@ -953,6 +953,8 @@ public :
     Markovian_sequences* cluster(Format_error &error , int variable , int step) const;
     Markovian_sequences* transcode(Format_error &error , int ivariable , int *symbol ,
                                    bool add_flag = false) const;
+    Markovian_sequences* consecutive_values(Format_error &error , std::ostream &os ,
+                                            int ivariable , bool add_flag = false) const;
     Markovian_sequences* cluster(Format_error &error , int ivariable , int nb_class ,
                                  int *ilimit , bool add_flag = false) const;
     Markovian_sequences* cluster(Format_error &error , int variable , int nb_class ,
