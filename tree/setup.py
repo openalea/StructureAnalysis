@@ -25,7 +25,7 @@ else:
 if __name__ == '__main__':
     
     setup(name='VPlants.Tree',
-          version='0.1',
+          version='0.6.0',
           author='C. Pradal',
           description='Tree structure header',
           url='http://openalea.gforge.inria.fr',

@@ -16,7 +16,7 @@ setup_requires = install_requires + ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Tree_Statistic',
-          version='0.1.1',
+          version='0.6.0',
           author='JB durand',
           description='Tree statistic library',
           url='',
