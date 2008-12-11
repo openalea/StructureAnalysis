@@ -1,14 +1,32 @@
 # a test for the class trees.trees.Trees: constructor and basic methods
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+ 
 import sys, os
 import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.trees as trees
+
+
+class MyThread(QThread):
+    def __init__(self):
+        QThread.__init__(self)
+    
+    def doit(self, P):
+        app = QApplication([])
+        amlPy.Plot(P)
+        #self.start()
+        #app.exec_()
+
+
 inf_bound=1
 sup_bound=3
 probability= 0.6
 ident=stat_tool.DistributionIdentifier.UNIFORM
 parameter=stat_tool.D_DEFAULT
 distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+
 print distrib
+
 max_depth=3
 max_size=20
 n=5
@@ -45,6 +63,9 @@ else:
 # TreeStructure to Tree
 print "Copy the entire structure to a tree T:"
 T=trees.Tree([1.0, 0], R)
+
+
+
 T.Display(False)
 print "Root of T:", T.Root()
 print "Size of T:", T.Size()
@@ -153,6 +174,9 @@ except ValueError, v:
     print v
 else:
     print "Failed ro raise exception for bad attribute name"
+
+
+
 # reading a Tree from a MTG
 print "Read tree from MTG file 'sample_mtg.txt':"
 import openalea.aml as amlPy
@@ -169,16 +193,27 @@ filter=lambda x: x < 6
 attributes=["anything"]
 MT=trees.Tree("sample_mtg.txt", filter, attributes, [f], scale=1)
 print MT.Display()
+
+
 import openalea.aml as amlPy
-MSTG=amlPy.MTG("sample_mtg.txt")
-DR=amlPy.DressingData("dressing.drf")
+
+MSTG = amlPy.MTG("sample_mtg.txt")
+DR = amlPy.DressingData("dressing.drf")
+
 def Longueur(x):
     return 20*amlPy.Feature(x, "length")
 def Rayon(x):
     return 1
+
 P=amlPy.PlantFrame(amlPy.MTGRoot(), Scale=1, DressingData = DR, Length = Longueur, 
                    BottomDiameter=Rayon)
-amlPy.Plot(P)
+
+
+# this is a call to the QThread, that is required to prevent QTapplication seg fault
+m = MyThread()
+m.doit(P)
+
+
 # checking exceptions
 # invalid file name
 try:
