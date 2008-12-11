@@ -3,6 +3,26 @@ import sys
 import os
 import openalea.tree_statistic.trees as trees
 import openalea.stat_tool as stat_tools
+
+
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+
+
+class MyThread(QThread):
+    def __init__(self):
+        QThread.__init__(self)
+    
+    def doit(self, T):
+        app = QApplication([])
+        T.Plot()
+        #self.start()
+        #app.exec_()
+
+
+
+
+
 stat_tools.plot.DISABLE_PLOT = True
 
 inf_bound=0
@@ -48,7 +68,11 @@ T.ExtractHistogram("Value", variable=1).plot()
 T.Plot(ViewPoint="FirstOccurrenceRoot", variable=1)
 T.MPlot(ViewPoint="FirstOccurrenceRoot", variable=1)
 
-T.Plot()
+#T.Plot()
+
+m = MyThread()
+m.doit(T)
+
 print "Number of trees (supposedly ", nbtrees, "): ", T.NbTrees()
 print "Comparison of trees contained in Trees " \
       "and those used for initialization: "
@@ -78,6 +102,7 @@ OR=trees.TreeStructure(distrib, omax_size, max_depth)
 otmp_tree=trees.Tree(otv, OR)
 on=1
 otree_list.append(trees.Tree(otmp_tree))
+
 while on < onbtrees:
     on=on+1
     OR.Simulate(distrib, omax_size, max_depth)
@@ -102,9 +127,10 @@ print T
 print "Print 1st tree of Trees object:"
 print T.Tree(0).Display()
 T=T.Cluster("Step", 0, 10)
+
+
 import openalea.aml as amlPy
 amlPy.setmode(1)
-
 # build vectors from trees
 vec = T.BuildVectors()
 print vec
@@ -126,6 +152,8 @@ print "Print 1st tree of Trees object:"
 print T.Tree(0).Display()
 # checking exceptions
 # invalid file name
+
+
 try:
     T=trees.Trees("no_such_file.t\/t")
 except IOError, e:
@@ -141,6 +169,7 @@ except ValueError, v:
 else:
     print "Failed to raise exception for inconsistent attribute number"
 # bad attribute name
+
 try:
     T=trees.Trees("sample_mtg_forest.txt", filter, [f], [f], scale=2)
 except TypeError, t:
