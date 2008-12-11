@@ -12,7 +12,7 @@ def register_packages(pkgmanager):
 
     nf = CompositeNodeFactory(name='Corsican pine change point', 
                               description='', 
-                              category='Stat',
+                              category='Stat,composite,demo',
                               doc='',
                               inputs=[],
                               outputs=[],
