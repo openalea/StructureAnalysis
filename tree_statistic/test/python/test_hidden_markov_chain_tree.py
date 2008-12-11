@@ -8,7 +8,7 @@ nb_children=1
 size=100
 ident=stat_tool.DistributionIdentifier.UNIFORM
 parameter=stat_tool.D_DEFAULT
-distrib= stat_tool.Parametric(ident, 1, 1, parameter, 1)
+distrib= stat_tool._ParametricModel(ident, 1, 1, parameter, 1)
 # name of 
 hmotrefpath= "./hmot_np.hmt";
 hmotinitpath= "./hmot_np_init.hmt";
