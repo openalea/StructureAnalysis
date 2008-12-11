@@ -1,27 +1,39 @@
 import sys
 import os
+import string
 import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
-import openalea.tree_statistic.trees.ctree as ctree
+#from openalea.tree_statistic.trees import *
+
+import openalea.tree_statistic.trees.etrees as etrees
+
+ctree = etrees.ctree
+
+
+
 # TreeValues
 print "Building a TreeValue [2, 1.0, 0]"
-default_value=int_fl_containers.Int_fl_container(1, 0)
-i= ctree.TreeValue([0, 0., 0])
-i[0]= 1
-i[1]= 1
-i[0]= 2
+default_value = int_fl_containers.Int_fl_container(1, 0)
+i = ctree.TreeValue([0, 0., 0])
+i[0] = 1
+i[1] = 1
+i[0] = 2
 print "i: ", i
-ifc=int_fl_containers.Int_fl_container(i)
+ifc = int_fl_containers.Int_fl_container(i)
 print "Int_fl_container conversion of i: ",ifc
+
+
 # test of a default tree
 print "Test of a default CTree:"
-w=ctree.CTree(1,0,0,1)
+w = ctree.CTree(1,0,0,1)
+
 # nb int, nb float, root, nb vertices
 print "Is vertex 0 the root vertex ?: ", w.IsRoot(0)
 print "Is vertex 1 the root vertex ?: ", w.IsRoot(1)
 print "Root vertex: ", w.Root()
 print "Tree size: ", w.Size()
 print "Entire tree: ", w
+    
 # test of a manually-defined tree
 print "Test of a manually-defined tree"
 tm=ctree.CTree(1,0,0,0)
@@ -40,9 +52,10 @@ for i in range(5):
         print "Parent of vertex ", i, ": ", tm.Parent(i)
         print "Is edge (", tm.Parent(i), ", ",i,") a valid edge ?:"
         print tm.IsEdge(tm.Parent(i), i)
+
 # test of the copy constructor
 print 'Test of copy constructor: a copy of the above tree'
-cptm=ctree.CTree(tm)
+cptm = ctree.CTree(tm)
 print cptm
 for i in range(5):
     if not(tm.IsRoot(i)):
@@ -54,7 +67,7 @@ sup_bound=3
 probability= 0.6
 ident=stat_tool.DistributionIdentifier.UNIFORM
 parameter=stat_tool.D_DEFAULT
-distrib= stat_tool.Parametric(ident, inf_bound, sup_bound, parameter, probability)
+distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
 print distrib
 max_depth= 3
 max_size= 20
@@ -63,8 +76,9 @@ u=ctree.TreeStructure()
 print u
 print "Defining a TreeStructure object"
 u=ctree.TreeStructure(0, 1)
-print "Simulating a random structure with less than ", max_size, " vertices and \
-with maximal depth ", max_depth, "."
+
+#with maximal depth ", max_depth, "."
+
 u.Simulate(distrib, max_size, max_depth)
 print u # u.Display(u.Root())
 # is_edge
