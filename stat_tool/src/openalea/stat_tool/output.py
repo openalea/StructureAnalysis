@@ -366,6 +366,72 @@ class StatInterface(object):
             os.remove(f)
 
 
+    def plot_print(self, *args, **kargs):
+        """ Old AML style print into .ps file """
+
+        title = kargs.get("Title", "")
+        ViewPoint = kargs.get("ViewPoint", "")
+        suffix = kargs.get("Suffix", "")
+        params = kargs.get("Params", ())
+
+        survival = bool(ViewPoint.lower() == "survival")
+        stateprofile = bool(ViewPoint.lower() == "stateprofile")
+        
+        import tempfile
+        prefix = tempfile.mktemp()
+
+        if(survival):
+
+            try:
+                self.survival_plot_write(prefix, title)
+            except AttributeError:
+                raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
+
+        elif(stateprofile):
+            try:
+                self.state_profile_plot_write(prefix, title, *params)
+            except AttributeError:
+                raise AttributeError("%s has not 'state_profile' viewpoint"%(str(type(self))))
+
+
+        elif(args):
+            self.plot_write(prefix, title, list(args))
+        else:
+            self.plot_write(prefix, title)
+
+        plot_file = prefix + suffix + ".print"
+        print "Graph printed into file:",  prefix + suffix + ".ps"
+        f = open(plot_file, "r")
+        f.readline()
+        contents = f.read()
+        f.close()
+        f = open(plot_file, "w+")
+        f.write("set terminal postscript color \n")
+        f.write(contents)
+        f.close()
+        f = open(plot_file, "a")
+        f.write("pause -1")
+        f.close()            
+
+
+        try:
+            import Gnuplot
+            command = Gnuplot.GnuplotOpts.gnuplot_command
+        except ImportError:
+            if("win32" in sys.platform):
+                command = "pgnuplot.exe"
+            else:
+                command = "gnuplot"
+
+
+        if(not plot.DISABLE_PLOT):
+            os.system("%s %s"%(command, plot_file))
+        
+        for f in glob.glob(prefix+"*"):
+            if f != prefix + suffix + ".ps":
+                os.remove(f)
+
+
     def plot(self, *args, **kargs):
         __doc__ = Plot.__doc__
         

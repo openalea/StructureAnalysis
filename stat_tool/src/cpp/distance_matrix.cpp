@@ -40,6 +40,8 @@
 #include <iomanip>
 #include <cstring>
 
+#include <string.h>
+
 #include "tool/config.h"
 
 // #include <rw/vstream.h>
