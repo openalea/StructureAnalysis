@@ -59,7 +59,7 @@
 
 #endif
 
-#ifdef SYSTEM_IS__Linux
+#if defined(SYSTEM_IS__Linux)
 // AML
 // Apparament, il y a un probleme avec la fonction cuserid,
 // qui pourtant est bien defini dans stdio.h
@@ -115,14 +115,14 @@ bool setRegValue(HKEY key,
 
 	// address of handle to open key
 	PHKEY phkResult = new HKEY;
-	
-	if(RegCreateKeyEx(key,lpSubKey,0,NULL, 
-					  REG_OPTION_NON_VOLATILE, 
+
+	if(RegCreateKeyEx(key,lpSubKey,0,NULL,
+					  REG_OPTION_NON_VOLATILE,
 					  KEY_ALL_ACCESS,
-					  NULL, 
-					  phkResult, 
+					  NULL,
+					  phkResult,
 					  NULL) == ERROR_SUCCESS){
-		
+
 		// address of name of value to query
 		LPTSTR lpValueName = new WCHAR[ValueName.size()+1];
 		for(int i = 0 ; i < ValueName.size() ; i++){
@@ -141,10 +141,10 @@ bool setRegValue(HKEY key,
 		p[ValueData.size()] = '\0';
 
 		// data buffer size
-		DWORD lpcbData = DWORD((ValueData.size()+1)*sizeof(WORD));  
-		
-		if(RegSetValueEx(*phkResult, lpValueName , 
-					     NULL, lpType, 
+		DWORD lpcbData = DWORD((ValueData.size()+1)*sizeof(WORD));
+
+		if(RegSetValueEx(*phkResult, lpValueName ,
+					     NULL, lpType,
 						 lpData, lpcbData ) == ERROR_SUCCESS){
 		}
 		else {
@@ -186,11 +186,11 @@ bool getRegValue(HKEY key,
 
 	// address of handle to open key
 	PHKEY phkResult = new HKEY;
-	
+
 	if(RegOpenKeyEx(key,lpSubKey,
-					0,KEY_QUERY_VALUE, 
+					0,KEY_QUERY_VALUE,
 					phkResult) == ERROR_SUCCESS){
-		
+
 		// address of name of value to query
 		LPTSTR lpValueName = new WCHAR[ValueName.size()+1];
 		for(int i = 0 ; i < ValueName.size() ; i++){
@@ -204,17 +204,17 @@ bool getRegValue(HKEY key,
 		LPBYTE lpData    = (LPBYTE)new WORD[MAXPATHLEN];
 		// address of data buffer size
 		LPDWORD lpcbData = new DWORD(MAXPATHLEN*sizeof(WORD));
-		
-		if(RegQueryValueEx(*phkResult, lpValueName , 
-						   NULL, lpType, 
-						   lpData, lpcbData ) == ERROR_SUCCESS 
+
+		if(RegQueryValueEx(*phkResult, lpValueName ,
+						   NULL, lpType,
+						   lpData, lpcbData ) == ERROR_SUCCESS
 			&& *lpcbData <= (MAXPATHLEN*sizeof(WORD))){
 			if(*lpType != REG_SZ){
 			printf("Warning ! Error of type value '%s' of key %s\\%s\n",
 				    ValueName.c_str(),predefKey(key).c_str(),SubKey.c_str());
 
 			}
-			else {				
+			else {
 				string res;
 				LPTSTR p = (LPTSTR)lpData;
 //				printf("Value %s data size : %i / %i = %i\n",
@@ -265,21 +265,21 @@ bool setRegValueA(HKEY key,
 
 	// address of handle to open key
 	HKEY phkResult;
-	
-	if(RegCreateKeyExA(key,SubKey.c_str(),0,NULL, 
-					  REG_OPTION_NON_VOLATILE, 
+
+	if(RegCreateKeyExA(key,SubKey.c_str(),0,NULL,
+					  REG_OPTION_NON_VOLATILE,
 					  KEY_ALL_ACCESS,
-					  NULL, 
-					  &phkResult, 
+					  NULL,
+					  &phkResult,
 					  NULL) == ERROR_SUCCESS){
-		
+
 		DWORD lpType   = REG_SZ; // value type
 
      	// data buffer size
-		DWORD lpcbData((ValueData.size()+1));  
-		
-		if(RegSetValueExA(phkResult, ValueName.c_str() , 
-					     NULL, lpType, 
+		DWORD lpcbData((ValueData.size()+1));
+
+		if(RegSetValueExA(phkResult, ValueName.c_str() ,
+					     NULL, lpType,
 						 (BYTE*)ValueData.c_str(), lpcbData ) == ERROR_SUCCESS){
 		}
 		else {
@@ -310,11 +310,11 @@ bool getRegValueA(HKEY key,
 
 	// address of handle to open key
 	HKEY phkResult;
-	
+
 	if(RegOpenKeyExA(key,SubKey.c_str(),
-					0,KEY_QUERY_VALUE, 
+					0,KEY_QUERY_VALUE,
 					&phkResult) == ERROR_SUCCESS){
-		
+
 
 		// address of buffer for value type
 		DWORD lpType   = REG_SZ;
@@ -322,17 +322,17 @@ bool getRegValueA(HKEY key,
 		LPBYTE lpData    = (LPBYTE)new char[MAXPATHLEN];
 		// address of data buffer size
 		DWORD lpcbData(MAXPATHLEN);
-		
-		if(RegQueryValueExA(phkResult, ValueName.c_str() , 
-						   NULL, &lpType, 
-						   lpData, &lpcbData ) == ERROR_SUCCESS 
+
+		if(RegQueryValueExA(phkResult, ValueName.c_str() ,
+						   NULL, &lpType,
+						   lpData, &lpcbData ) == ERROR_SUCCESS
 			&& lpcbData <= MAXPATHLEN){
 			if(lpType != REG_SZ){
 			printf("Warning ! Error of type value '%s' of key %s\\%s\n",
 				    ValueName.c_str(),predefKey(key).c_str(),SubKey.c_str());
 
 			}
-			else {				
+			else {
 				string res = (char *)lpData;
 				if(res.size() != 0 && res[0]!='\0'){
 					ValueData = res;
@@ -427,6 +427,9 @@ string getUserName(){
         }
 
 // #endif
+#elif defined(__APPLE__)
+    #warning username not defined
+    return string("");
 #else
         char uname[L_cuserid]; // defined in stdio.h;
     (char*)cuserid(uname);
@@ -618,7 +621,7 @@ string getLanguage(){
 #endif
 #ifdef _WIN32
 	if(!getRegValueA(HKEY_CURRENT_USER,"Software\\AMAP\\AMAPmod",
-			"Language",lang)){  	  
+			"Language",lang)){
 	  lang = getOSLanguage();
 	  setRegValueA(HKEY_CURRENT_USER,"Software\\AMAP\\AMAPmod","Language",lang);
 	}

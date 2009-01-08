@@ -118,7 +118,8 @@
 #if defined(__GNUC__)
 #ifndef GNU_STL_EXTENSION
 
-#ifndef __MINGW32__
+#if defined (__MINGW32__) || defined(__APPLE__)
+#else
 #include <features.h>
 #endif
 
@@ -126,7 +127,7 @@
 #if __GNUC_PREREQ(3,0)
 #define GNU_STL_EXTENSION
 #endif
-#elif defined (__MINGW32__)
+#elif defined (__MINGW32__) || defined(__APPLE__)
 #define GNU_STL_EXTENSION
 #elif defined (SYSTEM_IS__CYGWIN)
 #define GNU_STL_EXTENSION
