@@ -233,6 +233,8 @@ public :
 
 class Nonparametric_process {  // processus d'observation non-parametrique
 
+    friend class Mv_Mixture;
+
     friend Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
                                                       int &line , int nb_state , bool hidden);
 
@@ -260,7 +262,7 @@ public :
 
     Nonparametric_process(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
     Nonparametric_process(int inb_state , int inb_value , double **observation_probability);
-    Nonparametric_process(int inb_state , Distribution **pobservation);    
+    Nonparametric_process(int inb_state , Distribution **pobservation);
     Nonparametric_process(const Nonparametric_process &process , char manip = 'c' , int state = I_DEFAULT);
     ~Nonparametric_process();
     Nonparametric_process& operator=(const Nonparametric_process &process);
@@ -276,12 +278,12 @@ public :
     { return observation[state]; }
 
     // affichage des lois d'observation
-    std::ostream& ascii_print(std::ostream &os, Histogram **empirical_observation, 
-			      bool exhaustive, bool file_flag) const;
+    std::ostream& ascii_print(std::ostream &os, Histogram **empirical_observation,
+                  bool exhaustive, bool file_flag) const;
 
     /** sortie gnuplot */
-    bool plot_print(const char *prefix, const char *title, 
-		    int process, Histogram **empirical_observation = NULL) const;
+    bool plot_print(const char *prefix, const char *title,
+            int process, Histogram **empirical_observation = NULL) const;
 
 };
 
@@ -319,7 +321,7 @@ public :
     int nb_value;           // nombre de valeurs
     Parametric **observation;  // lois d'observation
 
-    void copy(const Parametric_process &process);     
+    void copy(const Parametric_process &process);
 
     void state_permutation(int *perm) const; // permutation des etats
 

@@ -104,7 +104,9 @@ protected :
     Histogram **marginal;   // lois marginales empiriques
     double *mean;           // vecteur moyenne
     double **covariance;    // matrice de variance-covariance
+    /// int_vector[vector_id][variable]
     int **int_vector;       // vecteurs, variables entieres
+    /// real_vector[vector_id][variable]
     double **real_vector;   // vecteurs, variables reelles
 
     void init(int inb_vector , int *iidentifier , int inb_variable , int *itype , bool init_flag);
@@ -208,8 +210,8 @@ public :
 
     std::ostream& line_write(std::ostream &os) const;
 
-    std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false, 
-				 bool comment_flag=false) const;
+    std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false,
+                 bool comment_flag=false) const;
     bool ascii_data_write(Format_error &error , const char *path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
@@ -255,10 +257,10 @@ public :
                                char algorithm = 'a') const;
     Regression* nearest_neighbor_smoother(Format_error &error , int explanatory_variable ,
                                           int response_variable , double span , bool weighting = true) const;
-    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, const Mv_Mixture &imixture, 
-				   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
-    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, int nb_component, 
-				   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
+    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, const Mv_Mixture &imixture,
+                                   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
+    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, int nb_component,
+                                   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
 
     // acces membres de la classe
 

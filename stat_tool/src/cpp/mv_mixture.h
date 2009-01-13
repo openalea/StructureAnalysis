@@ -61,9 +61,9 @@ class Nonparametric_process;
 // melange de lois multivariees
 // a variables independantes
 
-class Mv_Mixture : public STAT_interface {  
+class Mv_Mixture : public STAT_interface {
 
-    friend class Histogram;    
+    friend class Histogram;
     friend class Vectors;
     friend class Mv_Mixture_data;
 
@@ -95,21 +95,21 @@ private :
 
     int nb_parameter_computation(double min_probability) const;
     double penalty_computation() const;
-  
+
     /** Conditional density of observations */
-    void get_output_conditional_distribution(const Vectors &mixt_data, 
-					     double** &output_cond,
-					     bool log_computation=false) const;
+    void get_output_conditional_distribution(const Vectors &mixt_data,
+                         double** &output_cond,
+                         bool log_computation=false) const;
 
     /** Conditional distribution of states */
-    void get_posterior_distribution(const Vectors &mixt_data, 
-				    double** output_cond,
-				    double** &posterior_dist) const;
+    void get_posterior_distribution(const Vectors &mixt_data,
+                    double** output_cond,
+                    double** &posterior_dist) const;
 
     /** MAP algorithm */
-    std::vector<int>* state_computation(Format_error &error, const Vectors &vec, 
-					int algorithm=VITERBI, int index=I_DEFAULT,
-					double** posterior_dist=NULL) const;
+    std::vector<int>* state_computation(Format_error &error, const Vectors &vec,
+                                        int algorithm=VITERBI, int index=I_DEFAULT,
+                                        double** posterior_dist=NULL) const;
 
     /** Initialization of EM algorithm */
     void init();
@@ -118,9 +118,9 @@ public :
 
     Mv_Mixture();
     Mv_Mixture(int inb_component , double *pweight , int inb_variable,
-	       Parametric_process **ppcomponent, Nonparametric_process **pnpcomponent);
-    Mv_Mixture(int inb_component , int inb_variable, const Parametric_process **ppcomponent, 
-	       const Nonparametric_process **pnpcomponent);
+           Parametric_process **ppcomponent, Nonparametric_process **pnpcomponent);
+    Mv_Mixture(int inb_component , int inb_variable, const Parametric_process **ppcomponent,
+           const Nonparametric_process **pnpcomponent);
     Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag , int inb_variable);
     Mv_Mixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
     Mv_Mixture(const Mv_Mixture &mixt , bool data_flag = true)
@@ -129,14 +129,17 @@ public :
     Mv_Mixture& operator=(const Mv_Mixture &mixt);
 
     /** extract parametric component */
-    Parametric_model* extract_parametric_model(Format_error &error , int ivariable, 
-					       int index) const;
+    Parametric_model* extract_parametric_model(Format_error &error , int ivariable,
+                           int index) const;
     /** extract nonparametric component */
-    Distribution* extract_nonparametric_model(Format_error &error , int ivariable, 
-					      int index) const;
+    Distribution* extract_nonparametric_model(Format_error &error , int ivariable,
+                          int index) const;
     /** extract marginal mixture distribution */
     Distribution* extract_distribution(Format_error &error , int ivariable) const;
     Mv_Mixture_data* extract_data(Format_error &error) const;
+
+   /** Permutation of the states of \e self */
+   void state_permutation(Format_error& error, int* perm) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -148,16 +151,16 @@ public :
                     const char *title = 0) const;
     plotable::MultiPlotSet* get_plotable() const;
 
-    double likelihood_computation(const Vectors &mixt_data, 
-				  bool log_computation=false) const;
+    double likelihood_computation(const Vectors &mixt_data,
+                  bool log_computation=false) const;
 
     Mv_Mixture_data* simulation(Format_error &error , int nb_element) const;
 
     /** add restored states to Vectors */
-    Mv_Mixture_data* cluster(Format_error &error,  const Vectors &vec, 
-			     int algorithm=VITERBI) const;
+    Mv_Mixture_data* cluster(Format_error &error,  const Vectors &vec,
+                             int algorithm=VITERBI) const;
 
-    /** retourne "vrai" si le ieme processus est parametrique */
+    /** return "true" if ith process is parametric */
     bool is_parametric(int ivariable) const;
 
     // acces membres de la classe
@@ -173,19 +176,19 @@ public :
 };
 
 
-Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , 
-				int nb_variable, double *weight, 
-				Parametric_process **ppcomponent,
-				Nonparametric_process **pnpcomponent);
+Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component ,
+                int nb_variable, double *weight,
+                Parametric_process **ppcomponent,
+                Nonparametric_process **pnpcomponent);
 Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
-				  double cumul_threshold = CUMUL_THRESHOLD);
+                  double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
 // structure de donnees correspondant
  // a un melange
-class Mv_Mixture_data : public Vectors {  
-                                  
+class Mv_Mixture_data : public Vectors {
+
     friend class Histogram;
     friend class Mv_Mixture;
     friend class Vectors;
@@ -198,10 +201,14 @@ private :
     Mv_Mixture *mixture;       // pointeur sur un objet Mv_Mixture
     int nb_component;       // nombre de composantes
     Histogram *weight;      // histogramme des poids
+    /// component[variable][state]
     Histogram ***component;  // histogrammes correspondant aux variables et aux composantes
 
     void copy(const Mv_Mixture_data &mixt_data , bool model_flag = true);
     void remove();
+
+    /** Permutation of the states of \e self.*/
+    void state_permutation(int *perm);
 
 public :
 

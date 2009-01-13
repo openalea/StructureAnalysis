@@ -70,20 +70,20 @@ double Mv_Mixture_data::information_computation() const
 
   if (information != D_INF) {
       for (i = 0;i < nb_component;i++) {
-	if (weight->frequency[i] > 0) {
-	  buff = 0.;
-	  for (var = 0;var < nb_variable;var++) 
-	    if (type[var] != STATE) {
-	      buff += component[var][i]->information_computation();
-	      if (buff != D_INF) {
-		information += buff;
-	      }
-	      else {
-		information = D_INF;
-		break;
-	      }
-	  }
-	}
+    if (weight->frequency[i] > 0) {
+      buff = 0.;
+      for (var = 0;var < nb_variable;var++)
+        if (type[var] != STATE) {
+          buff += component[var][i]->information_computation();
+          if (buff != D_INF) {
+        information += buff;
+          }
+          else {
+        information = D_INF;
+        break;
+          }
+      }
+    }
       }
   }
 
@@ -99,12 +99,12 @@ double Mv_Mixture_data::information_computation() const
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture::get_output_conditional_distribution(const Vectors &mixt_data, 
-						     double** &output_cond,
-						     bool log_computation) const
+void Mv_Mixture::get_output_conditional_distribution(const Vectors &mixt_data,
+                             double** &output_cond,
+                             bool log_computation) const
 {
   int n, i, var;
-  const int nb_vector = mixt_data.get_nb_vector(), 
+  const int nb_vector = mixt_data.get_nb_vector(),
     nb_variable = mixt_data.get_nb_variable();
 
   if (output_cond == NULL) {
@@ -120,34 +120,34 @@ void Mv_Mixture::get_output_conditional_distribution(const Vectors &mixt_data,
   for (n = 0; n < nb_vector; n++) {
     for (i = 0; i < nb_component; i++) {
       if (log_computation)
-	output_cond[n][i] = 0.;
+    output_cond[n][i] = 0.;
       else
-	output_cond[n][i] = 1.;
+    output_cond[n][i] = 1.;
       for (var = 0; var < nb_variable; var++) {
-	if (pcomponent[var] != NULL) {
-	  if (log_computation) {
-	    if (pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]] > 0)
-	      output_cond[n][i] += log(pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]]);
-	    else {
-	      output_cond[n][i] = D_INF;
-	      break;
-	    }
-	  }
-	  else
-	    output_cond[n][i]*= pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]];
-	}
-	else {
-	  if (log_computation) {
-	    if (npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]] > 0)
-	      output_cond[n][i] += log(npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]]);
-	    else {
-	      output_cond[n][i] = D_INF;
-	      break;
-	    }
-	  }
-	  else
-	    output_cond[n][i]*= npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]];
-	}
+    if (pcomponent[var] != NULL) {
+      if (log_computation) {
+        if (pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]] > 0)
+          output_cond[n][i] += log(pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]]);
+        else {
+          output_cond[n][i] = D_INF;
+          break;
+        }
+      }
+      else
+        output_cond[n][i]*= pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]];
+    }
+    else {
+      if (log_computation) {
+        if (npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]] > 0)
+          output_cond[n][i] += log(npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]]);
+        else {
+          output_cond[n][i] = D_INF;
+          break;
+        }
+      }
+      else
+        output_cond[n][i]*= npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]];
+    }
       }
     }
   }
@@ -162,9 +162,9 @@ void Mv_Mixture::get_output_conditional_distribution(const Vectors &mixt_data,
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture::get_posterior_distribution(const Vectors &mixt_data, 
-					    double** output_cond,
-					    double** &posterior_dist) const {
+void Mv_Mixture::get_posterior_distribution(const Vectors &mixt_data,
+                        double** output_cond,
+                        double** &posterior_dist) const {
   int n, i;
   const int nb_vector = mixt_data.get_nb_vector();
   double marginal;
@@ -187,9 +187,9 @@ void Mv_Mixture::get_posterior_distribution(const Vectors &mixt_data,
     }
     for (i = 0; i < nb_component; i++) {
       if (marginal > 0)
-	posterior_dist[n][i] /= marginal;
+    posterior_dist[n][i] /= marginal;
       else
-	posterior_dist[n][i] = 0.;
+    posterior_dist[n][i] = 0.;
     }
   }
 }
@@ -199,15 +199,15 @@ void Mv_Mixture::get_posterior_distribution(const Vectors &mixt_data,
  *  Restauration des etats d'un objet Vectors, pour un melange de lois.
  *
  *  arguments : reference sur un objet Format_error, sur un object Vectors,
- *  l' algorithme de restauration, l'index (a partir de 0) 
+ *  l' algorithme de restauration, l'index (a partir de 0)
  *  et la loi a posteriori des etats
  *
  *--------------------------------------------------------------*/
 
-std::vector<int>* Mv_Mixture::state_computation(Format_error &error, const Vectors &vec, 
-						int algorithm,
-						int index,
-						double** posterior_dist) const {
+std::vector<int>* Mv_Mixture::state_computation(Format_error &error, const Vectors &vec,
+                        int algorithm,
+                        int index,
+                        double** posterior_dist) const {
 
   bool status = true, delete_cond = false;
   int n, i, s;
@@ -216,7 +216,7 @@ std::vector<int>* Mv_Mixture::state_computation(Format_error &error, const Vecto
   int nb_vector = vec.get_nb_vector(),
     nb_variable = vec.get_nb_variable();
   std::vector<int> *res_vec = NULL;
-  
+
   error.init();
 
   if (index != I_DEFAULT) {
@@ -232,30 +232,30 @@ std::vector<int>* Mv_Mixture::state_computation(Format_error &error, const Vecto
   if (status) {
     if (posterior_dist == NULL) {
       delete_cond = true;
-      get_output_conditional_distribution(vec, output_cond, false); 
+      get_output_conditional_distribution(vec, output_cond, false);
       get_posterior_distribution(vec, output_cond, cp_posterior_dist);
       posterior_dist = cp_posterior_dist;
     }
     res_vec = new std::vector<int>(nb_vector);
     for (n = 0; n < nb_vector; n++) {
       if ((index == I_DEFAULT) || (index == n)) {
-	s = 0;
-	pmax =  posterior_dist[n][0];
-	for (i = 1; i < nb_component; i++)
-	  if (posterior_dist[n][i] > pmax) {
-	    pmax = posterior_dist[n][i];
-	    s = i;
-	  }
-	if (index == I_DEFAULT)
-	  (*res_vec)[n] = s;
-	else
-	  (*res_vec)[0] = s;
-      }      
-    }    
+    s = 0;
+    pmax =  posterior_dist[n][0];
+    for (i = 1; i < nb_component; i++)
+      if (posterior_dist[n][i] > pmax) {
+        pmax = posterior_dist[n][i];
+        s = i;
+      }
+    if (index == I_DEFAULT)
+      (*res_vec)[n] = s;
+    else
+      (*res_vec)[0] = s;
+      }
+    }
     if (delete_cond) {
       for (n = 0; n < nb_vector; n++) {
-	delete [] output_cond[n];
-	output_cond[n] = NULL;
+    delete [] output_cond[n];
+    output_cond[n] = NULL;
       }
       delete [] output_cond;
       output_cond = NULL;
@@ -272,14 +272,14 @@ std::vector<int>* Mv_Mixture::state_computation(Format_error &error, const Vecto
  *
  *--------------------------------------------------------------*/
 
-double Mv_Mixture::likelihood_computation(const Vectors &mixt_data, 
-					  bool log_computation) const
+double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
+                      bool log_computation) const
 
 {
   register int n, i, var, nb_vector = mixt_data.get_nb_vector();
   double log_likelihood = 1. , buff , **output_cond = NULL;
   double *pmass = NULL;
- 
+
   get_output_conditional_distribution(mixt_data, output_cond, false);
 
   for (n = 0; n < nb_vector; n++) {
@@ -291,9 +291,9 @@ double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
       log_likelihood += log(buff);
     else {
       if (log_computation)
-	return D_INF;
+    return D_INF;
       else
-	return 0.;
+    return 0.;
     }
   }
 
@@ -311,7 +311,7 @@ double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
 
   delete [] output_cond;
   output_cond = NULL;
-  
+
   return log_likelihood;
 }
 
@@ -339,7 +339,7 @@ void Mv_Mixture::init() {
     weight->mass[j]= 1. / nb_component;
 
   for(var = 0; var < nb_var; var++) {
-    if (pcomponent[var] != NULL) 
+    if (pcomponent[var] != NULL)
       pcomponent[var]->init();
     else
       npcomponent[var]->init();
@@ -358,9 +358,9 @@ void Mv_Mixture::init() {
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* Vectors::mixture_estimation(Format_error &error, 
-					ostream& os, const Mv_Mixture &imixture, 
-					int nb_iter, bool *force_param) const {
+Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
+                    ostream& os, const Mv_Mixture &imixture,
+                    int nb_iter, bool *force_param) const {
 
   bool status, state_simulation, all_states_used;
   register int i , j , var;
@@ -408,26 +408,26 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
     }
     else {
       for(var = 0; var < nb_variable; var++) {
-	if (((imixture.npcomponent[var] != NULL) &&
-	     (imixture.npcomponent[var]->get_nb_value() != (int)get_max_value(var)+1)) ||
-	    ((imixture.pcomponent[var] != NULL) &&
-	     (imixture.pcomponent[var]->nb_value < (int)get_max_value(var)+1))) {
-	  status = false;
-	  ostringstream error_message;
-	  error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << var << ": "
-			<< STAT_error[STATR_NB_VALUE];
-	  error.update((error_message.str()).c_str());
-	}
-	else
-	  if ((imixture.npcomponent[var] != NULL) && (marginal != NULL))
-	    for(j = 0; j < (int)get_max_value(var); j++)
-	      if (marginal[var]->frequency[j] == 0) {
-		status= false;
-		ostringstream error_message;
-		error_message << STAT_label[STATL_VARIABLE] << " " << var << ": "
-			      << STAT_error[STATR_MISSING_VALUE] << " " << j;
-		error.update((error_message.str()).c_str());
-	      }
+    if (((imixture.npcomponent[var] != NULL) &&
+         (imixture.npcomponent[var]->get_nb_value() != (int)get_max_value(var)+1)) ||
+        ((imixture.pcomponent[var] != NULL) &&
+         (imixture.pcomponent[var]->nb_value < (int)get_max_value(var)+1))) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << var << ": "
+            << STAT_error[STATR_NB_VALUE];
+      error.update((error_message.str()).c_str());
+    }
+    else
+      if ((imixture.npcomponent[var] != NULL) && (marginal != NULL))
+        for(j = 0; j < (int)get_max_value(var); j++)
+          if (marginal[var]->frequency[j] == 0) {
+        status= false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << var << ": "
+                  << STAT_error[STATR_MISSING_VALUE] << " " << j;
+        error.update((error_message.str()).c_str());
+          }
       }
     }
   }
@@ -468,41 +468,41 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
     if (state_simulation) {
       best_mixt = new Mv_Mixture(*mixt, false);
       // initialize hidden states for state simulation
-       
+
       /*         if (algorithm == GIBBS_SAMPLING)
-		 mixt_data= mixt->state_tree_computation(error_v, *this, VITERBI, false); */
-       
+         mixt_data= mixt->state_tree_computation(error_v, *this, VITERBI, false); */
+
       if (mixt_data == NULL)
-	mixt_data = new Mv_Mixture_data(*this, false);
-       
+    mixt_data = new Mv_Mixture_data(*this, false);
+
       /* if (mixt_data->state_trees == NULL)
-	 mixt_data->build_state_trees(); */
+     mixt_data->build_state_trees(); */
     }
-     
+
 #   ifdef DEBUG
     cout << *mixt;
 #   endif
-     
+
     // create data structures for estimation
-     
+
     observation_reestim = new Reestimation<double>**[mixt->nb_var];
     weight_reestim = new Reestimation<double>(mixt->nb_component);
     for(var = 0; var < mixt->nb_var; var++) {
       observation_reestim[var] = new Reestimation<double>*[mixt->nb_component];
       for(j = 0; j < mixt->nb_component; j++)
-	observation_reestim[var][j] = new Reestimation<double>((int)get_max_value(var)+1);
+    observation_reestim[var][j] = new Reestimation<double>((int)get_max_value(var)+1);
     }
 
     max_nb_value = 0;
     for(var = 0; var < mixt->nb_var; var++)
       if ((mixt->pcomponent[var] != NULL) && (max_nb_value < (int)get_max_value(var)+1))
-	max_nb_value= (int)get_max_value(var) + 1;
-     
+    max_nb_value= (int)get_max_value(var) + 1;
+
     if (max_nb_value > 0)
       hobservation= new Histogram(max_nb_value);
     else
       hobservation= NULL;
-     
+
     iter = 0;
     nb_likelihood_decrease = 0;
 
@@ -513,20 +513,20 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
       iter++;
       previous_likelihood = likelihood;
       likelihood = 0.;
-	
+
       // initialization of the reestimation quantities
-	
+
       for(var = 0; var < mixt->nb_var; var++)
-	for(j = 0; j < mixt->nb_component; j++) {
-	  reestim = observation_reestim[var][j]->frequency;
-	  for(val = 0; val < (int)get_max_value(var) + 1; val++)
-	    reestim[val] = 0.; // *reestim++ = 0.;
-	}
+    for(j = 0; j < mixt->nb_component; j++) {
+      reestim = observation_reestim[var][j]->frequency;
+      for(val = 0; val < (int)get_max_value(var) + 1; val++)
+        reestim[val] = 0.; // *reestim++ = 0.;
+    }
 
 #     ifdef DEBUG
       for(i = 0; i < mixt->nb_component; i++)
-	for(j = 0; j < 4; j++)
-	  test[i][j] = 0.;
+    for(j = 0; j < 4; j++)
+      test[i][j] = 0.;
 #     endif
 
       // if ((algorithm == FORWARD_BACKWARD) || (saem_exponent != .0))
@@ -537,35 +537,35 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
 
       likelihood = mixt->likelihood_computation(*this, true);
       if (likelihood == D_INF)
-	break;
+    break;
       // }
       /* else
-	 likelihood= mixt->likelihood_computation(*this);*/
+     likelihood= mixt->likelihood_computation(*this);*/
 
       /*         if (algorithm == VITERBI)
-		 {
-		 state_restoration= mixt->state_tree_computation(error_v, *mixt_data, VITERBI, false);
-		 if (error_v.get_nb_error() > 0)
-		 break;
-		 }
+         {
+         state_restoration= mixt->state_tree_computation(error_v, *mixt_data, VITERBI, false);
+         if (error_v.get_nb_error() > 0)
+         break;
+         }
 
-		 if (algorithm == FORWARD_BACKWARD_SAMPLING)
-		 {
-		 state_restoration= mixt->sstate_simulation(*mixt_data,
-		 state_likelihood,
-		 false);
-		 if (state_likelihood <= D_INF)
-		 break;
-		 }
+         if (algorithm == FORWARD_BACKWARD_SAMPLING)
+         {
+         state_restoration= mixt->sstate_simulation(*mixt_data,
+         state_likelihood,
+         false);
+         if (state_likelihood <= D_INF)
+         break;
+         }
 
-		 if (algorithm == GIBBS_SAMPLING)
-		 {
-		 state_restoration= mixt->gibbs_state_simulation(*mixt_data,
-		 state_likelihood,
-		 false);
-		 if (state_likelihood <= D_INF)
-		 break;
-		 } */
+         if (algorithm == GIBBS_SAMPLING)
+         {
+         state_restoration= mixt->gibbs_state_simulation(*mixt_data,
+         state_likelihood,
+         false);
+         if (state_likelihood <= D_INF)
+         break;
+         } */
 
       /* if (state_restoration != NULL) {
       // transition counts
@@ -583,200 +583,200 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
       } // end for t
       delete state_restoration;
       state_restoration= NULL;
-      }*/ 
-      
+      }*/
+
       /* if (saem_exponent != .0)
-	 saem_coef= 1./(double)pow(iter+1, saem_exponent); */
+     saem_coef= 1./(double)pow(iter+1, saem_exponent); */
 
       // accumulation of the reestimation quantities for initial distribution
       // and transition probabilities
 
       for(i = 0; i < mixt->nb_component; i++)
-	for(n = 0; n < nb_vector; n++) {
-	  /* if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
-	     (1-saem_coef)*cond_prob[n][i]
-	     + saem_coef*state_array[n][i];
-	     if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
-	     state_array[n][i];
-	     }*/
-	  weight_reestim->frequency[i]+= cond_prob[n][i];
+    for(n = 0; n < nb_vector; n++) {
+      /* if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+         (1-saem_coef)*cond_prob[n][i]
+         + saem_coef*state_array[n][i];
+         if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+         state_array[n][i];
+         }*/
+      weight_reestim->frequency[i]+= cond_prob[n][i];
 
-	  // accumulation of the reestimation quantities for observation distributions
-	  for(var = 0; var < mixt->nb_var; var++) {
-	    val = int_vector[n][var];
-	    // if ((algorithm == FORWARD_BACKWARD))
-	    observation_reestim[var][i]->frequency[val] += cond_prob[n][i];
-	    /* if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
-	       (1-saem_coef)* cond_prob[n][i] + saem_coef*state_array[n][i];
-	       if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
-	       state_array[n][i];*/
-	  }
-	}
-      
+      // accumulation of the reestimation quantities for observation distributions
+      for(var = 0; var < mixt->nb_var; var++) {
+        val = int_vector[n][var];
+        // if ((algorithm == FORWARD_BACKWARD))
+        observation_reestim[var][i]->frequency[val] += cond_prob[n][i];
+        /* if ((algorithm != FORWARD_BACKWARD) && (saem_exponent != .0))
+           (1-saem_coef)* cond_prob[n][i] + saem_coef*state_array[n][i];
+           if ((algorithm != FORWARD_BACKWARD) && (saem_exponent == .0))
+           state_array[n][i];*/
+      }
+    }
+
       if (likelihood != D_INF) {
-	if (likelihood < previous_likelihood)
-	  nb_likelihood_decrease++;
-	else
-	  nb_likelihood_decrease = 0;
-	// save best parameter for restoration algorithms
-	if ((state_simulation) && (likelihood > best_likelihood)) {
-	  *best_mixt= *mixt;
-	  best_likelihood= likelihood;
-	}
+    if (likelihood < previous_likelihood)
+      nb_likelihood_decrease++;
+    else
+      nb_likelihood_decrease = 0;
+    // save best parameter for restoration algorithms
+    if ((state_simulation) && (likelihood > best_likelihood)) {
+      *best_mixt= *mixt;
+      best_likelihood= likelihood;
+    }
       }
 
       // reestimation of the weights
       /* for (i = 0; i < nb_component; i++) {
-	 mixt->weight->mass[i] = (double)mixt_histo->weight->frequency[k] /
-	 (double)mixt_histo->weight->nb_element;
-	 }*/
+     mixt->weight->mass[i] = (double)mixt_histo->weight->frequency[k] /
+     (double)mixt_histo->weight->nb_element;
+     }*/
 
       reestimation(mixt->nb_component, weight_reestim->frequency ,
-		   mixt->weight->mass, MIN_PROBABILITY, false);
+           mixt->weight->mass, MIN_PROBABILITY, false);
 
-      
+
       // reestimation of the observation distributions
-      
-      for(var = 0; var < mixt->nb_var; var++) {
-	if (mixt->npcomponent[var] != NULL)
-	  for(j = 0; j < mixt->nb_component; j++)
-	    reestimation((int)get_max_value(var)+1, observation_reestim[var][j]->frequency,
-			 mixt->npcomponent[var]->get_observation(j)->mass,
-			 MIN_PROBABILITY, false);
 
-	else { // (mixt->pcomponent[var] != NULL)
-	  for(j = 0; j < mixt->nb_component; j++) {
-	    observation_reestim[var][j]->nb_value_computation();
-	    observation_reestim[var][j]->offset_computation();
-	    observation_reestim[var][j]->nb_element_computation();
-	    observation_reestim[var][j]->max_computation();
-	    observation_reestim[var][j]->mean_computation();
-	    observation_reestim[var][j]->variance_computation();
-	    
-	    hobservation->update(observation_reestim[var][j],
-				 MAX((int)(observation_reestim[var][j]->nb_element
-					   * MAX(sqrt(observation_reestim[var][j]->variance), 1.) 
-					   * MIXTURE_COEFF),
-				     MIN_NB_ELEMENT));
-	    if ((force_param == NULL) || (!force_param[var]))
-	      observation_likelihood 
-		= hobservation->Reestimation<int>::type_parametric_estimation(mixt->pcomponent[var]->observation[j],
-									      0, true, 
-									      OBSERVATION_THRESHOLD);
-	    // above instruction allows the type of the distribution to vary
-	    
-	    else
-	      observation_likelihood
-		= hobservation->Reestimation<int>::parametric_estimation(mixt->pcomponent[var]->observation[j],
-									 0, true, OBSERVATION_THRESHOLD);
-	    // above instruction prevents the type of the distribution to vary
-	    // (not suitable for an automatic initialization of pcomponent of UNIFORM type
-	    
-	    if (observation_likelihood == D_INF)
-	      min_likelihood = D_INF;
-	    else {
-	      mixt->pcomponent[var]->observation[j]->computation((int)get_max_value(var)+1,
-								 OBSERVATION_THRESHOLD);
-	      
-	      if (mixt->pcomponent[var]->observation[j]->ident == BINOMIAL)
-		for(i = mixt->pcomponent[var]->observation[j]->nb_value; i < (int)get_max_value(var)+1; i++)
-		  mixt->pcomponent[var]->observation[j]->mass[i]= 0.;
-	    }
-	  }
-	}
+      for(var = 0; var < mixt->nb_var; var++) {
+    if (mixt->npcomponent[var] != NULL)
+      for(j = 0; j < mixt->nb_component; j++)
+        reestimation((int)get_max_value(var)+1, observation_reestim[var][j]->frequency,
+             mixt->npcomponent[var]->get_observation(j)->mass,
+             MIN_PROBABILITY, false);
+
+    else { // (mixt->pcomponent[var] != NULL)
+      for(j = 0; j < mixt->nb_component; j++) {
+        observation_reestim[var][j]->nb_value_computation();
+        observation_reestim[var][j]->offset_computation();
+        observation_reestim[var][j]->nb_element_computation();
+        observation_reestim[var][j]->max_computation();
+        observation_reestim[var][j]->mean_computation();
+        observation_reestim[var][j]->variance_computation();
+
+        hobservation->update(observation_reestim[var][j],
+                 MAX((int)(observation_reestim[var][j]->nb_element
+                       * MAX(sqrt(observation_reestim[var][j]->variance), 1.)
+                       * MIXTURE_COEFF),
+                     MIN_NB_ELEMENT));
+        if ((force_param == NULL) || (!force_param[var]))
+          observation_likelihood
+        = hobservation->Reestimation<int>::type_parametric_estimation(mixt->pcomponent[var]->observation[j],
+                                          0, true,
+                                          OBSERVATION_THRESHOLD);
+        // above instruction allows the type of the distribution to vary
+
+        else
+          observation_likelihood
+        = hobservation->Reestimation<int>::parametric_estimation(mixt->pcomponent[var]->observation[j],
+                                     0, true, OBSERVATION_THRESHOLD);
+        // above instruction prevents the type of the distribution to vary
+        // (not suitable for an automatic initialization of pcomponent of UNIFORM type
+
+        if (observation_likelihood == D_INF)
+          min_likelihood = D_INF;
+        else {
+          mixt->pcomponent[var]->observation[j]->computation((int)get_max_value(var)+1,
+                                 OBSERVATION_THRESHOLD);
+
+          if (mixt->pcomponent[var]->observation[j]->ident == BINOMIAL)
+        for(i = mixt->pcomponent[var]->observation[j]->nb_value; i < (int)get_max_value(var)+1; i++)
+          mixt->pcomponent[var]->observation[j]->mass[i]= 0.;
+        }
+      }
+    }
       } // end for (var)
-    
+
 #     ifdef MESSAGE
       os << STAT_label[STATL_ITERATION] << " " << iter << "   "
-	 << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << endl;
+     << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << endl;
 #     endif
 
 #     ifdef DEBUG
       if (iter % 5 == 0)
-	cout << *mixt;
+    cout << *mixt;
 #     endif
-      
+
     } // end do
     while ((likelihood != D_INF) && (((nb_iter == I_DEFAULT) && (iter < MIXTURE_NB_ITER) &&
-				      (((likelihood - previous_likelihood) / -likelihood > MVMIXTURE_LIKELIHOOD_DIFF) ||
-				       (min_likelihood == D_INF) || (nb_likelihood_decrease == 1))) ||
-				     ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
-    
+                      (((likelihood - previous_likelihood) / -likelihood > MVMIXTURE_LIKELIHOOD_DIFF) ||
+                       (min_likelihood == D_INF) || (nb_likelihood_decrease == 1))) ||
+                     ((nb_iter != I_DEFAULT) && (iter < nb_iter))));
+
     if (likelihood != D_INF) {
-      
+
 #     ifdef MESSAGE
       if (iter > 1)
-	os << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
+    os << "\n" << iter << " " << STAT_label[STATL_ITERATIONS] << endl;
       else
-	os << "\n" << iter << " " << STAT_label[STATL_ITERATION] << endl;
+    os << "\n" << iter << " " << STAT_label[STATL_ITERATION] << endl;
 #     endif
-      
+
       // reestimation of the weights
       /* for (i = 0; i < nb_component; i++) {
-	 mixt->weight->mass[i] = (double)mixt_histo->weight->frequency[k] /
-	 (double)mixt_histo->weight->nb_element;
-	 }*/
+     mixt->weight->mass[i] = (double)mixt_histo->weight->frequency[k] /
+     (double)mixt_histo->weight->nb_element;
+     }*/
 
       reestimation(mixt->nb_component, weight_reestim->frequency ,
-		   mixt->weight->mass, MIN_PROBABILITY, false);
+           mixt->weight->mass, MIN_PROBABILITY, false);
 
-      
+
       // reestimation of the observation distributions
-      
-      for(var = 0; var < mixt->nb_var; var++) {
-	if (mixt->npcomponent[var] != NULL)
-	  for(j = 0; j < mixt->nb_component; j++)
-	    reestimation((int)get_max_value(var)+1, observation_reestim[var][j]->frequency,
-			 mixt->npcomponent[var]->get_observation(j)->mass,
-			 MIN_PROBABILITY, false);
 
-	else { // (mixt->pcomponent[var] != NULL)
-	  for(j = 0; j < mixt->nb_component; j++) {
-	    observation_reestim[var][j]->nb_value_computation();
-	    observation_reestim[var][j]->offset_computation();
-	    observation_reestim[var][j]->nb_element_computation();
-	    observation_reestim[var][j]->max_computation();
-	    observation_reestim[var][j]->mean_computation();
-	    observation_reestim[var][j]->variance_computation();
-	    
-	    hobservation->update(observation_reestim[var][j],
-				 MAX((int)(observation_reestim[var][j]->nb_element
-					   * MAX(sqrt(observation_reestim[var][j]->variance), 1.) 
-					   * MIXTURE_COEFF),
-				     MIN_NB_ELEMENT));
-	    if ((force_param == NULL) || (!force_param[var]))
-	      observation_likelihood 
-		= hobservation->Reestimation<int>::type_parametric_estimation(mixt->pcomponent[var]->observation[j],
-									      0, true, 
-									      OBSERVATION_THRESHOLD);
-	    // above instruction allows the type of the distribution to vary
-	    
-	    else
-	      observation_likelihood
-		= hobservation->Reestimation<int>::parametric_estimation(mixt->pcomponent[var]->observation[j],
-                              
-									 0, true, OBSERVATION_THRESHOLD);
-	    // above instruction prevents the type of the distribution to vary
-	    // (not suitable for an automatic initialization of pcomponent of UNIFORM type
-	    
-	    if (observation_likelihood == D_INF)
-	      min_likelihood = D_INF;
-	    else {
-	      mixt->pcomponent[var]->observation[j]->computation((int)get_max_value(var)+1,
-								 OBSERVATION_THRESHOLD);
-	      
-	      if (mixt->pcomponent[var]->observation[j]->ident == BINOMIAL)
-		for(i = mixt->pcomponent[var]->observation[j]->nb_value; i < (int)get_max_value(var)+1; i++)
-		  mixt->pcomponent[var]->observation[j]->mass[i]= 0.;
-	    }
-	  }
-	}
+      for(var = 0; var < mixt->nb_var; var++) {
+    if (mixt->npcomponent[var] != NULL)
+      for(j = 0; j < mixt->nb_component; j++)
+        reestimation((int)get_max_value(var)+1, observation_reestim[var][j]->frequency,
+             mixt->npcomponent[var]->get_observation(j)->mass,
+             MIN_PROBABILITY, false);
+
+    else { // (mixt->pcomponent[var] != NULL)
+      for(j = 0; j < mixt->nb_component; j++) {
+        observation_reestim[var][j]->nb_value_computation();
+        observation_reestim[var][j]->offset_computation();
+        observation_reestim[var][j]->nb_element_computation();
+        observation_reestim[var][j]->max_computation();
+        observation_reestim[var][j]->mean_computation();
+        observation_reestim[var][j]->variance_computation();
+
+        hobservation->update(observation_reestim[var][j],
+                 MAX((int)(observation_reestim[var][j]->nb_element
+                       * MAX(sqrt(observation_reestim[var][j]->variance), 1.)
+                       * MIXTURE_COEFF),
+                     MIN_NB_ELEMENT));
+        if ((force_param == NULL) || (!force_param[var]))
+          observation_likelihood
+        = hobservation->Reestimation<int>::type_parametric_estimation(mixt->pcomponent[var]->observation[j],
+                                          0, true,
+                                          OBSERVATION_THRESHOLD);
+        // above instruction allows the type of the distribution to vary
+
+        else
+          observation_likelihood
+        = hobservation->Reestimation<int>::parametric_estimation(mixt->pcomponent[var]->observation[j],
+
+                                     0, true, OBSERVATION_THRESHOLD);
+        // above instruction prevents the type of the distribution to vary
+        // (not suitable for an automatic initialization of pcomponent of UNIFORM type
+
+        if (observation_likelihood == D_INF)
+          min_likelihood = D_INF;
+        else {
+          mixt->pcomponent[var]->observation[j]->computation((int)get_max_value(var)+1,
+                                 OBSERVATION_THRESHOLD);
+
+          if (mixt->pcomponent[var]->observation[j]->ident == BINOMIAL)
+        for(i = mixt->pcomponent[var]->observation[j]->nb_value; i < (int)get_max_value(var)+1; i++)
+          mixt->pcomponent[var]->observation[j]->mass[i]= 0.;
+        }
+      }
+    }
       } // end for (var)
-      
+
     } // end if (likelihood != D_INF)
 
       // deallocation of the arrays
-    
+
     /* if ((algorithm == VITERBI) || (algorithm == FORWARD_BACKWARD_SAMPLING) ||
        (algorithm == GIBBS_SAMPLING)) {
        for(n = 0; n < nb_vector; n++) {
@@ -795,15 +795,15 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
       delete [] output_cond[n];
       output_cond[n] = NULL;
     }
-    
+
     delete [] output_cond;
     output_cond = NULL;
     // }
 
     for(var = 0; var < mixt->nb_var; var++) {
       for(j = 0; j < mixt->nb_component; j++) {
-	delete observation_reestim[var][j];
-	observation_reestim[var][j] = NULL;
+    delete observation_reestim[var][j];
+    observation_reestim[var][j] = NULL;
       }
       delete [] observation_reestim[var];
       observation_reestim[var] = NULL;
@@ -823,24 +823,24 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
     }
     else {
       if ((state_simulation) && (likelihood > best_likelihood)) {
-	*best_mixt = *mixt;
-	best_likelihood = likelihood;
+    *best_mixt = *mixt;
+    best_likelihood = likelihood;
       }
       if (state_simulation) {
-	*mixt= *best_mixt;
-	delete mixt_data;
-	mixt_data = NULL;
+    *mixt= *best_mixt;
+    delete mixt_data;
+    mixt_data = NULL;
       }
 
       /* if ((state_trees == FORWARD_BACKWARD) || (state_trees == VITERBI)) {
-	 if (mixt->mixture_data != NULL)
-	 delete mixt->mixture_data;*/
+     if (mixt->mixture_data != NULL)
+     delete mixt->mixture_data;*/
 
       mixt->mixture_data = mixt->cluster(error,  *this, VITERBI);
       mixt_data = mixt->mixture_data;
-      
+
       /* switch (state_trees) {
-	
+
       case FORWARD_BACKWARD :
       {
       mixt_data->build_state_trees();
@@ -854,32 +854,32 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
       }
       break;
       };
-	  
+
       case VITERBI :
       {
       mixt->create_cumul();
       mixt->log_computation();
-	  
+
       mixt_data->build_state_trees();
       mixt_data->hidden_likelihood= mixt->viterbi(*mixt_data);
-	  
+
       mixt->remove_cumul();
       break;
       }
       }*/
 
       mixt_data->nb_component = mixt->nb_component;
-      
+
       // computation of the parametric observation distributions
       // for mixt_data->component[0] is not to be used
       delete [] mixt_data->component[0];
       mixt_data->component[0] = NULL;
       for(var = 0; var < mixt->nb_var; var++)
-	if (mixt->pcomponent[var] != NULL) {
-	  for(j = 0; j < mixt->nb_component; j++)
-	    mixt->pcomponent[var]->observation[j]->computation(mixt_data->component[var+1][j]->nb_value,
-							       OBSERVATION_THRESHOLD);
-	}
+    if (mixt->pcomponent[var] != NULL) {
+      for(j = 0; j < mixt->nb_component; j++)
+        mixt->pcomponent[var]->observation[j]->computation(mixt_data->component[var+1][j]->nb_value,
+                                   OBSERVATION_THRESHOLD);
+    }
 
 #       ifdef MESSAGE
       cout << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << mixt->likelihood_computation(*this, true);
@@ -893,7 +893,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
       {
       if (mixt->mixture_data != NULL)
       delete mixt->mixture_data;
-	
+
       mixt->mixture_data= new Hidden_markov_tree_data(*this);
       mixt_data= mixt->mixture_data;
       // mixt_data->state_variable_init(INT_VALUE);
@@ -901,41 +901,41 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
     all_states_used = true;
     for (j = 0; j < mixt->nb_component; j++) {
       if (mixt_data->component[1][j]->nb_value == 0) {
-	all_states_used = false;
-	break;
+    all_states_used = false;
+    break;
       }
     }
-      
+
 
     if (!all_states_used) {
 
       ostringstream error_message;
       error_message << STAT_label[STATL_STATE] << " " << j << ": "
-			<< STAT_error[STATR_NOT_PRESENT];
+            << STAT_error[STATR_NOT_PRESENT];
       error.update((error_message.str()).c_str());
       delete mixt->mixture_data;
       mixt->mixture_data = NULL;
     }
-	  
+
 
     for(var = 0; var < mixt->nb_var; var++)
       if (mixt->npcomponent[var] != NULL)
-	for(j = 0; j < mixt->nb_component; j++) {
-	  mixt->npcomponent[var]->get_observation(j)->cumul_computation();
-	  mixt->npcomponent[var]->get_observation(j)->max_computation();
-	}
+    for(j = 0; j < mixt->nb_component; j++) {
+      mixt->npcomponent[var]->get_observation(j)->cumul_computation();
+      mixt->npcomponent[var]->get_observation(j)->max_computation();
+    }
   }
-  
+
   if (state_simulation) {
     if (best_mixt != NULL) {
       delete best_mixt;
       best_mixt = NULL;
     }
   }
-  
+
   mixt_data= NULL;
   reestim= NULL;
-  
+
   return mixt;
 }
 
@@ -950,9 +950,9 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
  *
  *--------------------------------------------------------------*/
 #include <boost/scoped_array.hpp>
- 
+
 Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
-					int nb_component, int nb_iter, bool *force_param) const {
+                    int nb_component, int nb_iter, bool *force_param) const {
 
   // note: length of force_param must be checked before call
   bool status= true;
@@ -971,11 +971,11 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
     for(var = 0; var < nb_variable; var++) {
       nb_value[var] = marginal[var]->nb_value;
     }
-    
+
     // initial Mixture
 
     imixt = new Mv_Mixture(nb_component, nb_variable,
-			   nb_value.get(), force_param);
+               nb_value.get(), force_param);
 
     imixt->init();
 
@@ -1023,7 +1023,7 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
     for (var = 0; var < nb_var; var++) {
       hcomponent[var] = new Histogram*[nb_component];
       for (k = 0; k < nb_component; k++)
-	hcomponent[var][k] = new Histogram(nb_element);
+    hcomponent[var][k] = new Histogram(nb_element);
     }
 
     for (n = 0; n < nb_element; n++) {
@@ -1038,12 +1038,12 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
 
       // composante
       for (var = 0; var < nb_var; var++) {
-	if (pcomponent[var] != NULL)
-	  value = pcomponent[var]->observation[k]->simulation();
-	else
-	  value = npcomponent[var]->get_observation(k)->simulation();
-	(hcomponent[var][k]->frequency[value])++;	
-	iint_vector[n][var] = value;
+    if (pcomponent[var] != NULL)
+      value = pcomponent[var]->observation[k]->simulation();
+    else
+      value = npcomponent[var]->get_observation(k)->simulation();
+    (hcomponent[var][k]->frequency[value])++;
+    iint_vector[n][var] = value;
       }
     } // end for (n)
 
@@ -1057,12 +1057,12 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
     // calcul des caracteristiques des histogrammes
     for (var = 0; var < nb_var; var++) {
       for (k = 0; k < nb_component; k++) {
-	hcomponent[var][k]->nb_value_computation();
-	hcomponent[var][k]->offset_computation();
-	hcomponent[var][k]->nb_element_computation();
-	hcomponent[var][k]->max_computation();
-	hcomponent[var][k]->mean_computation();
-	hcomponent[var][k]->variance_computation();
+    hcomponent[var][k]->nb_value_computation();
+    hcomponent[var][k]->offset_computation();
+    hcomponent[var][k]->nb_element_computation();
+    hcomponent[var][k]->max_computation();
+    hcomponent[var][k]->mean_computation();
+    hcomponent[var][k]->variance_computation();
       }
     }
 
@@ -1072,7 +1072,7 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
     hweight->max_computation();
     hweight->mean_computation();
     hweight->variance_computation();
-    
+
     delete [] iint_vector;
     iint_vector = NULL;
     delete [] iidentifier;
@@ -1097,8 +1097,8 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec, 
-				     int algorithm) const {
+Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
+                                     int algorithm) const {
 
   int n, var, s, k;
   int nb_vector = vec.get_nb_vector(),
@@ -1116,9 +1116,9 @@ Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
       iint_vector[n] = new int[nb_variable+1];
       iint_vector[n][0] = (*states)[n];
       for (var = 1; var < nb_variable+1; var++) {
-	iint_vector[n][var] = vec.int_vector[n][var-1];
+          iint_vector[n][var] = vec.int_vector[n][var-1];
       }
-    }      
+    }
 
     state_vec = new Vectors(nb_vector, vec.identifier, nb_variable+1, iint_vector);
 
@@ -1144,7 +1144,7 @@ Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
       s = (*states)[n];
       (hweight->frequency[s])++;
       for (var = 1; var < nb_var+1; var++) {
-	(hcomponent[var][s]->frequency[vec.int_vector[n][var-1]])++;
+    (hcomponent[var][s]->frequency[vec.int_vector[n][var-1]])++;
       }
     } // end for (n)
 
@@ -1153,15 +1153,15 @@ Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
 
     for (var = 1; var <= nb_var; var++) {
       for (k = 0; k < nb_component; k++) {
-	hcomponent[var][k]->nb_value_computation();
-	hcomponent[var][k]->offset_computation();
-	hcomponent[var][k]->nb_element_computation();
-	hcomponent[var][k]->max_computation();
-	hcomponent[var][k]->mean_computation();
-	hcomponent[var][k]->variance_computation();
+    hcomponent[var][k]->nb_value_computation();
+    hcomponent[var][k]->offset_computation();
+    hcomponent[var][k]->nb_element_computation();
+    hcomponent[var][k]->max_computation();
+    hcomponent[var][k]->mean_computation();
+    hcomponent[var][k]->variance_computation();
       }
     }
-    
+
     hweight->nb_value_computation();
     hweight->offset_computation();
     hweight->nb_element_computation();
@@ -1175,5 +1175,5 @@ Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
     state_vec = NULL;
   }
   return clusters_vec;
-  
+
 }

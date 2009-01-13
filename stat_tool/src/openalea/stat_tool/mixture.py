@@ -107,8 +107,69 @@ def _MvMixture_get_plotable(self):
     """Return a plotable object (not yet implemented)"""
     return None
 
+def _MvMixture_criteria(self):
+    """Extract the value of each selection criterion"""
+    disp = self.display()
+    criteria = {}
+    names = ["AIC", "AICc", "BIC", "BICc"]
+    for name in names:
+        f = disp.find("(" + name + "):")
+        if (f != -1):
+            pos = f + len(name) + 3
+            i = disp.find("\n", pos)
+            try:
+                val = float(disp[pos:i])
+            except ValueError:
+                pass
+            else:
+                if str(val).upper() != "NAN":
+                    criteria[name] = val
+    return criteria
+
+_stat_tool._MvMixture.save_backup = _stat_tool._MvMixture.save
+
+def _MvMixture_save(self, file_name, format="ASCII", overwrite=False):
+        """Save MvMixture object into a file.
+        
+        Argument file_name is a string designing the file name and path.
+        String argument format must be "ASCII" or "SpreadSheet".
+        Boolean argument overwrite is false is the file should not 
+        be overwritten."""
+        if not overwrite:
+            try:
+                f = file(file_name, 'r')
+            except IOError:
+                f = file(file_name, 'w+')
+            else:
+                msg = "File " + file_name + " already exists"
+                raise IOError, msg
+            f.close()
+        import string
+        if not (string.upper(format)=="ASCII" 
+                or string.upper(format)=="SPREADSHEET"):
+            msg = "unknown file format: " + str(format)
+            raise ValueError, msg
+        else:
+            try:
+                _stat_tool._MvMixture.save_backup(self, file_name, Detail=1, 
+                                                  ViewPoint='', Format=format)
+            except RuntimeError, error:
+                raise FormatError, error
+
+_stat_tool._MvMixture.state_permutation_backup = _stat_tool._MvMixture.state_permutation
+
+def _MvMixture_state_permutation(self, perm):
+  """Permutation of the states of self.
+  perm[i]==j means that current state i will become new state j.
+        
+  Usage:  state_permutation(list)"""
+  self.state_permutation_backup(perm)
+
 _MvMixture.old_plot = _MvMixture_old_plot
 _MvMixture.get_plotable = _MvMixture_get_plotable
+_MvMixture._criteria = _MvMixture_criteria
+_MvMixture.save = _MvMixture_save
+_MvMixture.state_permutation = _MvMixture_state_permutation
 
 # Add methods to _MvMixtureData
 

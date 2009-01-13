@@ -393,7 +393,8 @@ const char *STAT_parsing[] = {
   "overlap of observation distributions" ,
   "non-overlap of observation distributions" ,
   "bad number of output processes" ,
-  "bad output process index"
+  "bad output process index" ,
+  "vector does not define a permutation"  // STATR_NO_PERMUTATION
 };
 
 
