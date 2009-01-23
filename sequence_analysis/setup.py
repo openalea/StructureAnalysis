@@ -26,7 +26,7 @@ if sys.platform.startswith('win'):
 if __name__ == '__main__':
 
     setup(name='VPlants.Sequence_analysis',
-          version='0.6.0',
+          version='0.6.2',
           author='Yann Guedon',
           description='sequence analysis library',
           url='http://www-sop.inria.fr/virtualplants/',
