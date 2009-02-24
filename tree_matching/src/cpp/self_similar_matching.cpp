@@ -254,7 +254,7 @@ DistanceType SelfSimilarMatching::match()
   const int size1 = T1->getNbVertex();
   const int size2 = T2->getNbVertex();
   DistanceType D=0;
-  cerr << endl << "Already computed : 0% matched ...    " << flush;
+  cerr << "Already computed : 0% matched ...    " <<"\x0d"<< flush;
   int interval = 10;
   int sup = size1/interval;
   int cpt = 0;
@@ -269,13 +269,10 @@ DistanceType SelfSimilarMatching::match()
 	    {
 	      distanceBetweenForest(input_vertex,reference_vertex);
 	      DistanceType d = distanceBetweenTree(input_vertex,reference_vertex);
-	      (_distanceMatrix[input_vertex])[reference_vertex]=d;
+	     	      (_distanceMatrix[input_vertex])[reference_vertex]=d;
 	    }
-	  if (size1 - input_vertex>cpt*sup)
-	    {
-	      cpt++;
-	      std::cerr << endl << "Already computed : "<<cpt*interval <<"% " <<" matched ... " << flush;
-	    }
+	  if (int(100. - 100*input_vertex/size1)%5 == 0)
+	      cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
 	  for (int i=1;i<=T1->getNbChild(input_vertex);i++)
 	    {
 	      _distances.closeDistancesVector(T1->child(input_vertex,i));

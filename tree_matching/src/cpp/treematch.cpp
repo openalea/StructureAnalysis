@@ -108,6 +108,7 @@ TreeMatch::TreeMatch(MTG& mtg,
   _roots=new VIdList();
   _selfSimilarity = self_similarity;
 
+
   assert(roots);
   assert((roots->surfaceType()==AMObjType::VTX)||(roots->surfaceType()==AMObjType::INTEGER));
   ArrayIter* pnext_root=roots->iterator();
@@ -180,7 +181,7 @@ TreeMatch::TreeMatch(MTG& mtg,
           _sequences_tab[tree]=new SequenceTabVector(_nbTree-tree,(Sequence***) NULL);
         }
     }
-
+  _matchingType = BY_TOPOLOGY;
   if (!strcmp(matching_type,"by_weights"))
     _matchingType = BY_WEIGHTS;
   if (!strcmp(matching_type,"sequence"))
@@ -281,7 +282,8 @@ TreeMatch::TreeMatch(MTG& mtg,
   _nd = &Nd;
   _roots=new VIdList();
   _selfSimilarity = self_similarity;
-  
+  cout<<"Self_simialrity = "<<self_similarity<<endl;
+
   assert(roots);
   assert((roots->surfaceType()==AMObjType::VTX)||(roots->surfaceType()==AMObjType::INTEGER));
   ArrayIter* pnext_root=roots->iterator();
@@ -1037,8 +1039,6 @@ DistanceType TreeMatch::MatchByTopology( TreeGraph& Tree1,
   // NodeCostFunction used
   NodeCost* MCF=new NodeCost(TOPOLOGIC);
   // making of the matching
-  int optimization = 1;
-  //Matching* M=new Matching(Tree1,Tree2,*MCF ,optimization);
   SelfSimilarMatching* M=new SelfSimilarMatching(Tree1,Tree2,*MCF );
   // effective matching : the result is stored in D
   DistanceType D=M->match();

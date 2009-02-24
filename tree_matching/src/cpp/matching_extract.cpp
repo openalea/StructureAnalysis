@@ -693,6 +693,10 @@ void TreeMatch::putDistanceMatrix(MatchingDistanceTable matrix)
 
 DistanceType TreeMatch::getDistance(int inp_tree,int ref_tree) const
 {
+  if ((inp_tree<0)||(inp_tree>_distances.size())||(inp_tree<0)||(inp_tree>_distances.size())){
+    cerr<<"Warning out of Range"<<endl;
+    return 0.0;
+  }
   if (inp_tree==ref_tree) return(0.0);
 
   if (inp_tree>ref_tree)
