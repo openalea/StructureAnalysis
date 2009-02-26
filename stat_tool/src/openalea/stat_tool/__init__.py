@@ -36,33 +36,33 @@ def get_test_file(filename=""):
 
 
 import _stat_tool
-#from distribution import *
-#from histogram import *
-#from mixture import *
-#from compound import *
-#from convolution import *
-#from vectors import *
+from distribution import *
+from histogram import *
+from mixture import *
+from compound import *
+from convolution import *
+from vectors import *
 
-#from estimate import *
-#from simulate import *
-#from comparison import *
-#from regression import *
+from estimate import *
+from simulate import *
+from comparison import *
+from regression import *
 
-#from output import  *
-#from data_transform import *
-#from cluster import *
+from output import  *
+from data_transform import *
+from cluster import *
         
 
 # Constant
-#from _stat_tool import I_DEFAULT
-#from _stat_tool import D_DEFAULT
-#from _stat_tool import D_INF
-#from _stat_tool import MAX_DIFF_BOUND
-#from _stat_tool import MAX_MEAN
-#from _stat_tool import VariableType
-#from _stat_tool import VariableTypeBis
-#from _stat_tool import RestorationAlgorithm
+from _stat_tool import I_DEFAULT
+from _stat_tool import D_DEFAULT
+from _stat_tool import D_INF
+from _stat_tool import MAX_DIFF_BOUND
+from _stat_tool import MAX_MEAN
+from _stat_tool import VariableType
+from _stat_tool import VariableTypeBis
+from _stat_tool import RestorationAlgorithm
 
 # Exception
-#from error import StatToolError
+from error import StatToolError
 #
