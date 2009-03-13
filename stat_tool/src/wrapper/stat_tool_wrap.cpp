@@ -1,22 +1,22 @@
 /*------------------------------------------------------------------------------
- *                                                                              
+ *
  *        VPlants.Stat_Tool : VPlants Statistics module
- *                                                                              
- *        Copyright 2006-2007 INRIA - CIRAD - INRA                      
- *                                                                              
+ *
+ *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>         
- *                                                                              
- *        Distributed under the GPL 2.0 License.                               
- *        See accompanying file LICENSE.txt or copy at                          
+ *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *
+ *        Distributed under the GPL 2.0 License.
+ *        See accompanying file LICENSE.txt or copy at
  *           http://www.gnu.org/licenses/gpl-2.0.txt
- *                                                                              
- *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
- *       
+ *
+ *        OpenAlea WebSite : http://openalea.gforge.inria.fr
+ *
  *        $Id$
- *                                                                       
+ *
  *-----------------------------------------------------------------------------*/
 
 
@@ -30,7 +30,7 @@
 #include "export_mixture.h"
 #include "export_vectors.h"
 #include "export_convolution.h"
-//#include "export_compound.h"
+#include "export_compound.h"
 #include "export_distancematrix.h"
 #include "export_markovian.h"
 
@@ -46,7 +46,7 @@ using namespace boost::python;
 // Define python module "_stat_tool"
 BOOST_PYTHON_MODULE(_stat_tool)
 {
-  //show_user_defined : true 
+  //show_user_defined : true
   //show_signatures : false
 #if BOOST_VERSION >= 103400
   docstring_options doc_options(true, false);
@@ -67,7 +67,7 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_distribution();
   class_histogram();
   class_distribution_data();
-  
+
   class_mixture();
   class_mixture_data();
 
@@ -76,9 +76,9 @@ BOOST_PYTHON_MODULE(_stat_tool)
 
   class_convolution();
   class_convolution_data();
-  
-  //class_compound();
-  //class_compound_data();
+
+  class_compound();
+  class_compound_data();
 
   class_markovian();
 
