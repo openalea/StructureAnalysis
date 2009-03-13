@@ -119,7 +119,8 @@ Nous distinguons trois catégories de fonctions :
 
 A chaque type figuré en fonte standard sur la Figure 7-2 correspond une forme syntaxique qui permet de définir une instance de ce type dans un fichier ASCII. La forme syntaxique des types «données» se rapproche de tableaux de nombres alors que la forme syntaxique des types «modèle» est construite à partir de mots clés qui traduisent la structure du modèle. Par convention, le séparateur est une suite quelconque d'espaces et de tabulations. Il est possible d'insérer des commentaires (ligne commençant par un # ou fin de ligne après le #) dans ces fichiers ASCII. Les fonctions d'entrée ou constructeur ont pour nom le type de l'objet créé. Par exemple, la fonction Histogram construit l'objet histo de type HISTOGRAM à partir du fichier "exemple.his".
 
->>> histo = Histogram("exemple.his")
+
+    >>> histo = Histogram("exemple.his") #doctest: +SKIP 
 
 Les objets de type DISTRIBUTION, MIXTURE, CONVOLUTION, COMPOUND, RENEWAL peuvent être construits à partir de lois discrètes ou de familles de lois discrètes, c'est à dire d'objets de type DISTRIBUTION, MIXTURE, CONVOLUTION, COMPOUND. Les objet de type «données» peuvent être construits soit à partir de fichiers ASCII, soit à partir de structures de données extraites d'un MTG.
 

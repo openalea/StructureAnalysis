@@ -33,14 +33,19 @@ The object `h` has a few methods, The `display` method :func:`~openalea.stat_too
    
 .. doctest::
 
-   >>> h.display()  
+    >>> h.display()  
+    'histogram - sample size: 66\nmean: 4.37879   variance: 1.62354   standard deviation: 1.27418\ncoefficient of skewness: 0.0727983   coefficient of kurtosis: -0.709664\nmean absolute deviation: 1.06841   coefficient of concentration: 0.161214\ninformation: -107.512 (-1.62897)\n'
 
-::
 
-    histogram - sample size: 66
-    mean: 4.37879   variance: 1.62354   standard deviation: 1.27418
-    coefficient of skewness: 0.0727983   coefficient of kurtosis: -0.709664
-    mean absolute deviation: 1.06841   coefficient of concentration: 0.161214
-    information: -107.512 (-1.62897)
+Vectors
+=======
+
+Similarly, you can upload a vector using::
+
+.. doctest::
+
+    >>> h = Vectors('./test/chene_sessile.vec')
+    >>> h.display()
+
 
 
