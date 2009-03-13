@@ -1,9 +1,9 @@
 __doc__ = """ Simulation functions """
-__docformat__ = "Restructuredtext"
+#__docformat__ = "Restructuredtext"
 
 
 def Simulate(obj, *args):
-    """ Generation of a random saple from a distribution """
+    """ Generation of a random sample from a distribution """
 
     return obj.simulate(*args)
 

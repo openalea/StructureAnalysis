@@ -1,5 +1,5 @@
-__doc__ = """ Convolution """
-__docformat__ = "restructuredtext"
+""" Convolution """
+
 
 import interface
 import _stat_tool
@@ -9,52 +9,46 @@ from _stat_tool import _ConvolutionData
 
 __all__ = ['Convolution',
            '_Convolution',
-           '_ConvolutionData',
-           ]
-
+           '_ConvolutionData',]
 
 
 def Convolution(*args):
-    """    
-    Construction of an object of type convolution from elementary distributions 
-    or from an ASCII file.
+    """Construction of an object of type convolution from elementary
+    distributions or from an ASCII file.
+    
+    The distribution of the sum of independent random variables is the
+    convolution of the distributions of these elementary random variables.
+    
+    :Parameters:
+      * dist1, dist2, ...(distribution, mixture, convolution, compound) -
+        elementary distributions,
+      * file_name (string).
 
-    Usage
-    -----
-      * ``Convolution(dist1, dist2,...)``
-      * ``Convolution(file_name)``
+    :Returns:    
+        If the construction succeeds, the returned object is of type 
+        convolution, otherwise no object is returned.
 
-    Parameters
-    ----------
-      * dist1, dist2, ...(distribution, mixture, convolution, compound): elementary distributions,
-      * file_name (string). 
-
-    Return
-    ------
-    If the construction succeeds, the returned object is of type convolution, 
-    otherwise no object is returned. 
-
-    Background
-    ----------
-    The distribution of the sum of independent random variables is the convolution 
-    of the distributions of these elementary random variables. 
-
-    See Also
-    --------
-    ``Save``, ``Estimate``, ``Simulate``.
+    :Examples:
+        >>> Convolution(dist1, dist2, ...)
+        >>> Convolution(file_name)
+      
+    .. seealso::    
+        :func:`~openalea.stat_tool.output.Save`,
+        :func:`~openalea.stat_tool.estimate.Estimate`,
+        :func:`~openalea.stat_tool.simulate.Simulate`.
     """
 
-    if(len(args)==0) : 
+    if(len(args)==0):
         raise TypeError()
 
     # filename
-    if(len(args)==1) :
+    if(len(args)==1):
         return _stat_tool._Convolution(args[0])
 
     # build list of distributions
     else:
         return _stat_tool._Convolution(list(args))
-    
+
 
 
 # Extend _Convolution
@@ -66,10 +60,12 @@ interface.extend_class( _stat_tool._ConvolutionData, interface.StatInterface)
 
 
 
-########################## Test Convolution ########################################
+
 from openalea.stat_tool import get_test_file
 
+
 class Test:
+    
     def test_emty(self):
         try:
             m = Convolution()
@@ -78,13 +74,13 @@ class Test:
         except Exception:
             assert True
 
-
     def test_file(self):
+        
         c = Convolution(get_test_file("convolution1.conv"))
         assert c
 
-
     def test_build_convolution(self):
+        
         from distribution import Binomial, NegativeBinomial
 
         d1 = Binomial(0, 10, 0.5)
@@ -94,7 +90,6 @@ class Test:
         assert m
         return m
 
-
     def __test_plot(self):
 
         m = self.test_build_convolution()
@@ -102,7 +97,6 @@ class Test:
 
         assert str(m)
         m.display()
-
 
     def test_simulation(self):
 
@@ -113,8 +107,8 @@ class Test:
         assert s.nb_histogram() == 2
         assert str(s)
 
-
     def test_extract(self):
+
         from data_transform import ExtractDistribution
         from distribution import Binomial, NegativeBinomial
 
@@ -129,7 +123,6 @@ class Test:
         assert ExtractDistribution(m, "Elementary", 1) == Binomial(0, 10, 0.5)
         assert ExtractDistribution(m, "Elementary", 2) == NegativeBinomial(0, 1, 0.1)
 
-
     def test_extract_data(self):
         from distribution import Binomial
 
@@ -138,7 +131,5 @@ class Test:
 
         m = s.estimate_convolution(Binomial(0, 10, 0.5), Estimator="Parametric")
 
-        d = m.extract_data()    
+        d = m.extract_data()
         assert d
-
-

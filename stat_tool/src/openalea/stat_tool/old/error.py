@@ -12,13 +12,10 @@
 # 
 #       OpenAlea WebSite : http://openalea.gforge.inria.fr
 #
-
-__doc__="""
-Error classes
-"""
+"""Error classes"""
 
 __license__= "GPL2.0"
-__revision__=" $Id: sceneobject.py 559 2007-05-25 12:25:30Z dufourko $ "
+__revision__=" $Id$ "
 
 
 class StatToolError(Exception):

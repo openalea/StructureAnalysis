@@ -1,7 +1,8 @@
-__doc__ = """ Histogram functions and classes """
+__doc__ = """Histogram functions and classes"""
 __docformat__ = "restructuredtext"
 
-import sys,os
+import sys
+import os
 sys.path.append(os.path.abspath("."))
 
 import _stat_tool
@@ -10,7 +11,7 @@ import interface
 from _stat_tool import _DistributionData
 
 # Extend _DistributionData class dynamically
-interface.extend_class( _stat_tool._DistributionData, interface.StatInterface)
+interface.extend_class(_stat_tool._DistributionData, interface.StatInterface)
 
 __all__ = ["_DistributionData",
            "Histogram",
@@ -18,59 +19,55 @@ __all__ = ["_DistributionData",
 
 
 def Histogram(arg):
-    """
-    Construction of a frequency distribution from an object of type list(int) or from
-    an ascii file.
-    
-    Usage
-    -----
-      * ``Histogram(list)``
-      * ``Histogram(filename)``
+    """Construction of a frequency distribution from an object of type
+    list(int) or from an ASCII file.
 
-    Parameters
-    ----------
-      * list (list(int))
-      * filename (string)
+    In the file syntax, the frequencies *fi* for each possible value
+    *i* are given in two columns. In the case of an argument of type
+    (list(int)), it is simply assumed that each array element represents
+     one data item.
 
-    Return
-    ------
-       If the construction succeeds, an object of type `_DistributionData` is returned, 
-    
-    Description
-    -----------
-    In the file syntax, the frequencies fi for each possible value i are given
-    in two columns. In the case of an argument of type (list(int)), it is simply assumed 
-    that each array element represents one data item.
+    :Parameters:
+      * `list` (list(int)) -
+      * `filename` (string) -
 
-    See Also
-    --------
-       `Save`, `Cluster`, `Merge`, `Shift`, `Transcode`, `ValueSelect`, `Compare`, `Estimate`
+    :Returns:
+       If the construction succeeds, an object of type `_DistributionData`
+       is returned.
+
+    :Examples:
+      >>> Histogram(list)
+      >>> Histogram(filename)
+
+    .. seealso::
+        :func:`~openalea.stat_tool.output.Save`,
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`~openalea.stat_tool.comparison.Compare`,
+        :func:`~openalea.stat_tool.estimate.Estimate`
 
     """
 
     return _DistributionData(arg)
 
 
-
-
-
-
-
-
-############################## Tests ###########################################
 from openalea.stat_tool import get_test_file
 
 # Test Histogram
+
+
 class Test:
 
     def test_constructor(self):
-    
-        h = Histogram([0,1,2,3])
+        """constructor """
+        h = Histogram([0, 1, 2, 3])
         assert h
 
-
     def test_ascii(self):
-        # ASCII representation
+        """ ASCII representation"""
         h = Histogram(get_test_file("meri1.his"))
         assert h
 
@@ -79,40 +76,31 @@ class Test:
 
         h.ascii_write(True)
         h.survival_ascii_write()
-    
-
 
     def __test_plot(self):
-        # plot
+        """ plot"""
         h = Histogram(get_test_file("meri1.his"))
         h.plot()
 
-
     def test_container(self):
-        # container / iterator
+        """ container / iterator"""
         h = Histogram(get_test_file("meri1.his"))
 
         assert h[0] == 0
         assert h[10] == 1
 
-
     def test_fromnothing(self):
-
-        # From nothing
+        """From nothing"""
         try:
             h = Histogram()
             assert False
-
         except TypeError:
             assert True
 
-
     def test_fromfile(self):
-
-        # From file
+        """From file"""
         h = Histogram(get_test_file("meri1.his"))
         assert h
-    
         # File
         h.save("test.his")
 
@@ -121,24 +109,20 @@ class Test:
         assert len(h) == len(h2)
         assert list(h) == list(h2)
         os.remove("test.his")
-    
-    
+
         try:
             h = Histogram(get_test_file("peup1.hi"))
             assert False
         except Exception:
             assert True
-        
 
     def test_len(self):
         h = Histogram(range(10))
         assert len(h) == 10
 
-    
     def test_fromlist(self):
-
-        # From list
-        h = Histogram([1,2,3])
+        """From list"""
+        h = Histogram([1, 2, 3])
         assert h
 
         try:
@@ -147,6 +131,3 @@ class Test:
 
         except TypeError:
             assert True
-
-
-	

@@ -36,44 +36,36 @@ def Vectors(*args):
     Construction of a set of vectors from a multidimensional array, 
     from a set of sequences or from an ASCII file.
     
-    Usage
-    -----
-      * ``Vectors(list, Identifiers=[1, 8, 12])``
-      * ``Vectors(seq, IndexVariable=True)``
-      * ``Vectors(file_name)``
+    The data structure of type list(list(int)) should be constituted at the 
+    most internal level of arrays of constant size. 
 
-    Parameters
-    ----------
-      * list (list(list(int)))
-      * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
-      * file_name (string). 
+    :Parameters:
+      - `list` (list(list(int))) :
+      - `seq` (sequences, discrete_sequences, markov_data, semi-markov_data)
+      - `file_name` (string) : 
 
-    Keywords
-    --------
-      * Identifiers (list(int)): explicit identifiers of vectors. 
-      This optional argument can only be used if the first mandatory argument is of 
-      type list(list(int)).
+    :Keywords:
+      - Identifiers (list(int)): explicit identifiers of vectors. 
+        This optional argument can only be used if the first mandatory argument is of 
+        type list(list(int)).
+      - IndexVariable (bool): taking into account of the implicit index parameter as 
+        a supplementary variable (default value: False). This optional argument can 
+        only be used if the first mandatory argument is of type `sequences`, 
+        `discrete_sequences`, `markov_data` or `semi-markov_data`. 
 
-      * IndexVariable (bool): taking into account of the implicit index parameter as 
-      a supplementary variable (default value: False). This optional argument can 
-      only be used if the first mandatory argument is of type `sequences`, 
-      `discrete_sequences`, `markov_data` or `semi-markov_data`. 
-
-    Return
-    ------
+    :Returns:
        If the construction succeeds, an object of type vectors is returned, 
        otherwise no object is returned.
 
-    Description
-    -----------
-       The data structure of type list(list(int)) should be constituted at the 
-       most internal level of arrays of constant size. 
-
-    See Also
-    --------
-      `Save`, `ExtractHistogram`, `Cluster`, `Merge`, `MergeVariable`, `SelectIndividual`, 
-      `SelectVariable`, `Shift`, `Transcode`, `ValueSelect`, `Compare`, 
-      `ComputeRankCorrelation`, `ContingencyTable`, `Regression`, `VarianceAnalysis`
+    :Examples:
+        >>> Vectors(list, Identifiers=[1, 8, 12])
+        >>> Vectors(seq, IndexVariable=True)
+        >>> Vectors(file_name)
+     
+    .. seealso::
+        `Save`, `ExtractHistogram`, `Cluster`, `Merge`, `MergeVariable`, `SelectIndividual`, 
+        `SelectVariable`, `Shift`, `Transcode`, `ValueSelect`, `Compare`, 
+        `ComputeRankCorrelation`, `ContingencyTable`, `Regression`, `VarianceAnalysis`
     """
     return _Vectors(*args)
 
@@ -115,39 +107,35 @@ def VectorDistance(*args, **kargs):
     Construction of an object of type vector_distance from types (and eventually weights) 
     of variables or from an ASCII file.
 
-    Usage
-    -----
-      * ``VectorDistance(type1, type2,..., Distance="QUADRATIC")``
-      * ``VectorDistance(weight1, type1, weight2, type2,..., Distance="QUADRATIC")``
-      * ``VectorDistance(file_name)``
-
-    Parameters
-    ----------
-      * type1, type2, ... (string): 
-      variable types ("NUMERIC" ("N"), "ORDINAL" ("O") or "SYMBOLIC" ("S")),
-      * weight1, weight2, ... (float): weights of variables,
-      * file_name (string). 
-
-    Keywords
-    --------
-      * Distance (string): distance type: "ABSOLUTE_VALUE" (default) or "QUADRATIC". 
-      This optional argument is only relevant in the multivariate case. 
-
-    Return
-    ------
-    If the construction succeeds, an object of type vector_distance is returned.
-
-    Background
-    ----------
     The type _VectorDistance implements standardization procedures. The objective of 
     standardization is to avoid the dependence on the variable type 
     (chosen among symbolic, ordinal, numeric and circular) and, for numeric variables, 
     on the choice of the measurement units by converting the original variables to 
     unitless variables. 
 
-    See Also
-    --------
-      `Compare`
+    :Parameters:
+      - `type1`, `type2`, ... (string): 
+        variable types ("NUMERIC" ("N"), "ORDINAL" ("O") or "SYMBOLIC" ("S")),
+      - `weight1`, `weight2`, ... (float): weights of variables,
+      - `file_name` (string). 
+
+    :Keywords:
+    
+      * Distance (string): distance type: "ABSOLUTE_VALUE" (default) or "QUADRATIC". 
+        This optional argument is only relevant in the multivariate case. 
+
+    :Returns:
+        If the construction succeeds, an object of type vector_distance is returned.
+        
+    :Examples:
+        >>> VectorDistance(type1, type2,..., Distance="QUADRATIC")
+        >>> VectorDistance(weight1, type1, weight2, type2,..., Distance="QUADRATIC")
+        >>> VectorDistance(file_name)
+
+
+
+    .. seealso::
+        `Compare`
     """
 
     # filename
@@ -197,25 +185,26 @@ def VarianceAnalysis(vec, class_variable, response_variable,
                      type, FileName="result", Format="ASCII"):
     """
     One-way variance analysis.
-    Usage
-    -----
-      * ``VarianceAnalysis(vec, class_variable, response_variable, type, FileName="result", Format="SpreadSheet")``
+    
+    :Examples:
+    
+        >>> VarianceAnalysis(vec, class_variable, response_variable, type, FileName="result", Format="SpreadSheet")
       
-    Parameters
-    ----------
+    :Parameters:
+
       * vec (_Vectors),
       * class_variable (int): index of the class or group variable,
       * response_variable (int): index of the response variable,
       * type (string): type of the response variable ("NUMERIC" ("N") or "ORDINAL" ("O")). 
 
-    Keywords
-    --------
+    :Keywords:
+    
       * FileName (string): name of the result file,
       * Format (string): format of the result file: "ASCII" (default format) or "SpreadSheet". This optional argument can only be used in conjunction with the optional argument FileName. 
 
-    Return
-    ------
-    The variance analysis result as a string
+    :Returns:
+    
+        The variance analysis result as a string
 
     """
 
@@ -240,24 +229,26 @@ def ContingencyTable(vec, variable1, variable2,
     """
     Computation of a contingency table.
 
-    Usage
-    -----
-      * ``ContingencyTable(vec, variable1, variable2, FileName="result", Format="SpreadSheet")``
-      
-    Parameters
-    ----------
+    :Parameters:
+    
       * vec (_Vectors),
       * variable1, variable2 (int): variable indices,
 
-    Keywords
-    --------
+    :Keywords:
+
       * FileName (string): name of the result file,
       * Format (string): format of the result file: "ASCII" (default format) or "SpreadSheet". 
-      This optional argument can only be used in conjunction with the optional argument FileName. 
+        This optional argument can only be used in conjunction with the optional argument FileName. 
 
-    Return
-    ------
-    The contingency table result as a string
+    :Returns:
+
+        The contingency table result as a string
+        
+    :Examples:
+    
+        >>> ContingencyTable(vec, variable1, variable2, FileName="result", Format="SpreadSheet")
+      
+  
     """
 
     return vec.contingency_table(variable1, variable2, FileName, Format)

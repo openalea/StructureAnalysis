@@ -1,8 +1,9 @@
-__docformat__ = "restructuredtext"
-__doc__ = """ Plot functions """
-
+""" Plot functions """
 
 import sys
+import os
+import glob
+
 
 DISABLE_PLOT = False
 
@@ -10,7 +11,6 @@ DISABLE_PLOT = False
 # !!! Do not plot in nosetests !!!
 if("nosetests" in sys.argv[0]):
     DISABLE_PLOT = True
-
 
 
 class plotter(object):
@@ -22,14 +22,11 @@ class plotter(object):
         raise NotImplementedError()
 
 
-import os, glob
-
 class fakeplot(plotter):
 
     def plot(self, obj, title, groups=[], *args, **kargs):
         """ Plot obj with title """
         return
-
 
     
 class gnuplot(plotter):
@@ -39,8 +36,6 @@ class gnuplot(plotter):
         """ Initialize GnuPlot """
         import Gnuplot
         self.session = Gnuplot.Gnuplot()
-
-
 
     def plot(self, plotable, title, groups=[], *args, **kargs):
         """ 
@@ -78,8 +73,6 @@ class gnuplot(plotter):
             g.xlabel(multiplot.xlabel)
             g.ylabel(multiplot.ylabel)
 
-            
-
             # List of argument for the plot function
             plot_list = []
             for singleplot in multiplot:
@@ -95,8 +88,11 @@ class gnuplot(plotter):
                     y.append(pt.y)
                 
                 p = Gnuplot.Data(x, y)
-                if(style): p.set_option(with=style)
-                if(legend) : p.set_option(title=legend)
+                if style:
+                    p.set_option(with=style)
+
+                if legend:
+                    p.set_option(title=legend)
                 plot_list.append(p)
                 
 
@@ -126,6 +122,8 @@ class gnuplot(plotter):
 class mplotlib(plotter):
     """ 
     MathPlotLib implementation 
+
+    test
     """
 
     linestyles = ('-', '--', ':', '.')
@@ -134,7 +132,9 @@ class mplotlib(plotter):
     
 
     def __init__(self):
-        """ Initialize matplotlib """
+        """ Initialize matplotlib 
+
+        test2"""
         
         import matplotlib
         #matplotlib.use('Qt4Agg')
@@ -179,12 +179,9 @@ class mplotlib(plotter):
                 f = pylab.figure(g+1)
                 f.set_facecolor("w")
 
-
-
         # nb subplot
         nbx = len(multiset)
         
-
         # For each subplot
         for i, multiplot in enumerate(multiset):
             
@@ -276,11 +273,10 @@ class mplotlib(plotter):
 
 
         pylab.show()
-
-
-################################################################################    
+   
 
 PLOTTER = None
+
 
 def set_plotter(plot):
     global PLOTTER

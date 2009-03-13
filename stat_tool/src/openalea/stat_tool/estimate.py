@@ -1,16 +1,12 @@
-__doc__ = """ Estimation functions """
+""" Estimation functions """
 __docformat__ = "restructuredtext"
-
-
 
 import sys,os
 sys.path.append(os.path.abspath("."))
 
-
 import _stat_tool
 import interface
 import distribution
-
 
 
 likelihood_penalty_type = {
@@ -47,35 +43,32 @@ class EstimateFunctions(object):
     This class must not be used alone, but throught an histogram object
     """
     
-
     def estimate_nonparametric(histo):
         """ 
         Estimate a non parametric distribution 
-        
-        Usage:
-            estimate_nonparametric(histo)
-
-        Arguments:
-            histo (histogram, mixture_data, convolution_data, compound_data),
+       
+        :Parameters:
+          * histo (histogram, mixture_data, convolution_data, compound_data)
+           
+        :Examples:
+            
+            >>> estimate_nonparametric(histo)
         """
-
         return  _stat_tool._ParametricModel(histo)
-
-
 
     def estimate_parametric(histo, ident, MinInfBound=0, InfBoundStatus="Free"):
         """ Estimate a parametric distribution 
 
-        Usage:
-            estimate_parametric(histo, ident, MinInfBound=0, InfBoundStatus="Free")
-
-        Arguments:
-             histo (histogram, mixture_data, convolution_data, compound_data),
-             ident ("BINOMIAL", "POISSON", "NEGATIVE_BINOMIAL", "UNIFORM")
-             MinInfBound (int): lower bound to the range of possible values (0 - default value - or 1). 
-
-             InfBoundStatus (string): shifting or not of the distribution: 
+        :Parameters:
+          * histo (histogram, mixture_data, convolution_data, compound_data),
+          * ident ("BINOMIAL", "POISSON", "NEGATIVE_BINOMIAL", "UNIFORM")
+          * MinInfBound (int): lower bound to the range of possible values (0 - default value - or 1). 
+          * InfBoundStatus (string): shifting or not of the distribution: 
                                       "Free" (default value) or "Fixed". T
+                                      
+        :Examples:
+          >>> estimate_parametric(histo, ident, MinInfBound=0, InfBoundStatus="Free")
+
         """
     
         flag = bool(InfBoundStatus == "Free")
@@ -98,57 +91,45 @@ class EstimateFunctions(object):
                          NbComponent = "Fixed", Penalty='AIC'):
         """ Estimate a mixture distribution 
     
-        Usage
-        -----
-          * ``estimate_mixture(histo, ("MIXTURE", "B", dist,...,),
+        :Examples:
+        
+            >>> estimate_mixture(histo, ("MIXTURE", "B", dist,...,),
                              MinInfBound=1, InfBoundStatus="Fixed", 
-                             DistInfBoundStatus="Fixed")``
-   
-          * ``estimate_mixture(histo, ("MIXTURE", "B", "NB",...,),
+                             DistInfBoundStatus="Fixed")
+            >>> estimate_mixture(histo, ("MIXTURE", "B", "NB",...,),
                                MinInfBound=1, InfBoundStatus="Fixed", 
                                DistInfBoundStatus="Fixed",
-                               NbComponent="Estimated", Penalty="AIC")``
+                               NbComponent="Estimated", Penalty="AIC")
 
 
-        Parameters
-        ----------
+        :Parameters:
+        
           * histo (histogram, mixture_data, convolution_data, compound_data),
-
           * distributions (list) : a list of distribution object 
                                    or distribution label(string) : 'B', 'NB', 'U', 'P', ...
                                    
-        Keywords
-        --------
-           
+        :Keywords:
+                   
           * MinInfBound (int): lower bound to the range of possible values (0 -default- or 1). \
                                This optional argument cannot be used in conjunction \
                                with the optional argument InitialDistribution.
-
           * InfBoundStatus (string): shifting or not of the distribution: "Free" (default value) or "Fixed".
-
           * DistInfBoundStatus (string): shifting or not of the subsequent components of \
                                          the mixture: "Free" (default value) or "Fixed". 
-
           * NbComponent (string): estimation of the number of components of the mixture: \
                                   "Fixed" (default value) or "Estimated". Le number of estimated \
                                   components is comprised between\
                                   1 and a maximum number which is given by the number of specified \
                                   parametric distributions in the mandatory arguments \
                                   (all of these distributions are assumed to be unknown).
-
           * Penalty (string): type of Penalty function for model selection: \
                               "AIC" (Akaike Information Criterion), \
                               "AICc" (corrected Akaike Information Criterion - default value) \
                               "BIC" (Bayesian Information Criterion). \
-                      
+           
                               This optional argument can only be used if the optional argument 
                               NbComponent is set at "Estimated".
-        Return
-        ------
-
-        See Also
-        --------
-
+        
         """
     
         estimate = [] # list of bool
@@ -210,17 +191,6 @@ class EstimateFunctions(object):
 
         """ Estimate a convolution 
     
-        Usage
-        -----
-
-        Parameters
-        ----------
-
-        Return
-        ------
-
-        See Also
-        --------
         
         """
         
@@ -264,12 +234,13 @@ _Histogram = interface.extend_class( _stat_tool._Histogram, EstimateFunctions)
 def Estimate(histo, type, *args, **kargs):
     """ 
     Estimation function for AML compatibility
-    see :
-      estimation_nonparametric
-      estimation_parametric
-      estimation_mixture
-      estimation_convolution
-      estimation_compound
+
+    .. seealso::
+        `estimation_nonparametric`,
+        `estimation_parametric`,
+        `estimation_mixture`,
+        `estimation_convolution`,
+        `estimation_compound`,
     """
 
     fct_map = {
@@ -335,7 +306,10 @@ class Test:
 
 
     def test_poisson(self):
-
+        """        
+        >>> p = distribution.Poisson(0, 10)
+        >>> h = p.simulate(1000)        
+        """
         p = distribution.Poisson(0, 10)
         h = p.simulate(1000)
 

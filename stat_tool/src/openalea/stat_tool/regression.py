@@ -1,5 +1,5 @@
 __doc__ = "Regression"
-__docformat__ = "restructuredtext"
+#__docformat__ = "restructuredtext"
 
 import interface
 import _stat_tool
@@ -16,58 +16,56 @@ def Regression(vec, type,
     """
     Simple regression (with a single explanatory variable).
 
-    Usage
-    -----
-      * ``Regression(vec, "Linear", explanatory_variable, response_variable)``
-      * ``Regression(vec, "MovingAverage", explanatory_variable, response_variable, filter, Algorithm="LeastSquares")``
-      * ``Regression(vec, "MovingAverage", explanatory_variable, response_variable, frequencies, Algorithm="LeastSquares")``
-      * ``Regression(vec, "MovingAverage", explanatory_variable, response_variable, dist, Algorithm="LeastSquares")``
-      * ``Regression(vec, "NearestNeighbours", explanatory_variable, response_variable, span, Weighting=False)``
-
+    :Parameters:
     
-    Parameters
-    ----------
-      vec : vectors
+      * vec : vectors
         vectors
-      type : string
+      * type : string
         `"Linear"` or `"MovingAverage"` or `"NearestNeighbours"`
-      explanatory_variable : int
+      * explanatory_variable : int
         index of the explanatory variable
-      response_variable : int 
+      * response_variable : int 
         index of the response variable
-      filter : list of float 
-        filter values on the half width 
-        i.e. from one extremity to the central value
+      * filter : list of float
+        filter values on the half width i.e. from one extremity to the central value
         (with the constraint filter[i] + filter[m] = 1),
-      frequencies : list of float
+      * frequencies : list of float
         frequencies defining the filter,
-      dist : distribution, mixture, convolution, compound 
+      * dist : distribution, mixture, convolution, compound 
         symmetric distribution, whose size of the support is even, defining the filter 
         (for instance Distribution("BINOMIAL",0,4,0.5)),
-      span : float
+      * span : float
         proportion of individuals in each neighbourhood. 
 
-    Keywords
-    --------
-      Algorithm : string
+    :Keywords:
+    
+      * Algorithm : string
           - `"Averaging"` (default) 
-          - `"LeastSquares"`  
-        This optional argument can only be used if the second mandatory argument specifying 
-        the regression type is "MovingAverage".
+          - `"LeastSquares"`
+            
+        This optional argument can only be used if the second mandatory argument
+        specifying the regression type is "MovingAverage".
 
-      Weighting : bool 
+      * Weighting : bool 
         weighting or not of the neighbours according to their distance to the 
-        computed point (default value: True). This optional argument can only 
+        computed point (default value: True). This optional argument can only
         be used if the second mandatory argument specifying the regression type 
         is "NearestNeighbours". 
 
-    Return
-    ------
-      An object of type regression is returned.
+    :Returns:
+    
+        An object of type regression is returned.
 
-    See Also
-    --------
-      `plot`
+    :Examples:
+    
+        >>> Regression(vec, "Linear", explanatory_variable, response_variable)
+        >>> Regression(vec, "MovingAverage", explanatory_variable, response_variable, filter, Algorithm="LeastSquares")
+        >>> Regression(vec, "MovingAverage", explanatory_variable, response_variable, frequencies, Algorithm="LeastSquares")
+        >>> Regression(vec, "MovingAverage", explanatory_variable, response_variable, dist, Algorithm="LeastSquares")
+        >>> Regression(vec, "NearestNeighbours", explanatory_variable, response_variable, span, Weighting=False)
+    
+    .. seealso::
+        `plot`
 
     """
 
@@ -125,28 +123,30 @@ class Test:
 
 
     def test_moving_average(self):
+        
         from vectors import Vectors
 
-        v = Vectors([[0,0], [1,1], [2,2], [3,3]])
+        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
 
         # Test algorithm
         try:
-            r = v.moving_average_regression(1, 2, [1,], 'n') 
+            r = v.moving_average_regression(1, 2, [1, ], 'n') 
             assert False
         except:
             assert True
 
 
-        r1 = Regression(v, "MovingAverage" , 1, 2, [1,])
-        r = v.moving_average_regression(1, 2, [1,], 'a') 
+        r1 = Regression(v, "MovingAverage" , 1, 2, [1, ])
+        r = v.moving_average_regression(1, 2, [1, ], 'a') 
         assert r
         assert r1
 
 
     def test_nearest_neighbours(self):
+        
         from vectors import Vectors
 
-        v = Vectors([[0,0], [1,1], [2,2], [3,3]])
+        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
 
         r1 = Regression(v, "NearestNeighbours", 1, 2, 1, Weighting=False)
         r = v.nearest_neighbours_regression(1, 2, 1., False) 
@@ -159,10 +159,10 @@ class Test:
     def test_badtype(self):
         from vectors import Vectors
 
-        v = Vectors([[0,0], [1,1], [2,2], [3,3]])
+        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
 
         try:
-            Regression(v, "N", 1, 2, [1,])
+            Regression(v, "N", 1, 2, [1, ])
             assert False
         except TypeError:
             assert True

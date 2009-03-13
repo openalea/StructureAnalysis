@@ -1,5 +1,4 @@
-"""Classes shared by most statistical modules
-"""
+"""Classes shared by most statistical modules"""
 
 
 import cstat_tool, os

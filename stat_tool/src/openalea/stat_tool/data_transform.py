@@ -6,18 +6,8 @@ def Merge(obj, *args):
     """    
     Merging of objects of the same 'data' type or merging of sample correlation functions.
 
-    Usage
-    -----
-      * ``Merge(histo1, histo2,...)``
-      * ``Merge(vec1, vec2,...)``
-      * ``Merge(timev1, timev2,...)``
-      * ``Merge(seq1, seq2,...)``
-      * ``Merge(discrete_seq1, discrete_seq2,...)``
-      * ``Merge(top1, top2,...)``
-      * ``Merge(correl1, correl2,...)``
-
-    Parameters
-    ----------
+    :Parameters:
+    
       * histo1, histo2, ... (_Histogram, _MixtureData, _ConvolutionData, _CompoundData),
       * vec1, vec2, ... (_Vectors),
       * timev1, timev2, ... (_TimeEvents, _RenewalData),
@@ -25,31 +15,40 @@ def Merge(obj, *args):
       * top1, top2, ... (_Tops),
       * correl1, correl2, ... (_Correlation). 
 
-    Return
-    ------
-    If the arguments are of type _Histogram, _MixtureData, _ConvolutionData, _CompoundData     
-    an object of type _Histogram is returned.
-
-    If the arguments are of type _Vectors and if the vectors have the same number of variables, 
-    an object of type vectors is returned, otherwise no object is returned.
+    :Returns:
     
-    If the arguments are of type _TimeEvents, _RenewalData, an object of type 
-    _TimeEvents is returned.
+        If the arguments are of type _Histogram, _MixtureData, _ConvolutionData, _CompoundData     
+        an object of type _Histogram is returned.
 
-    If the arguments are of type _Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData 
-    and if the sequences have the same number of variables, an object of type _Sequences 
-    is returned.
+        If the arguments are of type _Vectors and if the vectors have the same number of variables, 
+        an object of type vectors is returned, otherwise no object is returned.
+    
+        If the arguments are of type _TimeEvents, _RenewalData, an object of type 
+        _TimeEvents is returned.
+    
+        If the arguments are of type _Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData 
+        and if the sequences have the same number of variables, an object of type _Sequences 
+        is returned.
+    
+        If the arguments are of type _Tops, an object of type _Tops is returned.
+        If the arguments are of type correlation, an object of type correlation is returned. 
 
-    If the arguments are of type _Tops, an object of type _Tops is returned.
-    If the arguments are of type correlation, an object of type correlation is returned. 
+    :Examples:
+    
+        >>> Merge(histo1, histo2,...)
+        >>> Merge(vec1, vec2,...)
+        >>> Merge(timev1, timev2,...)
+        >>> Merge(seq1, seq2,...)
+        >>> Merge(discrete_seq1, discrete_seq2,...)
+        >>> Merge(top1, top2,...)
+        >>> Merge(correl1, correl2,...)
 
-    See Also
-    --------
-    `Cluster`, `Shift`, `Transcode`, `ValueSelect`, `MergeVariable`, `SelectIndividual`, 
-    `SelectVariable`, `NbEventSelect`, `TimeScaling`, `TimeSelect`, `AddAbsorbingRun`, 
-    `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, `MovingAverage`, 
-    `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, `SegmentationExtract`, `VariableScaling`, 
-    `RemoveApicalInternodes` """
+    .. seealso::
+        `Cluster`, `Shift`, `Transcode`, `ValueSelect`, `MergeVariable`, `SelectIndividual`, 
+        `SelectVariable`, `NbEventSelect`, `TimeScaling`, `TimeSelect`, `AddAbsorbingRun`, 
+        `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, `MovingAverage`, 
+        `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, `SegmentationExtract`, `VariableScaling`, 
+        `RemoveApicalInternodes` """
     
     return obj.merge(list(args))
 
@@ -59,40 +58,40 @@ def MergeVariable(obj, *args, **kargs):
     """     
     Merging of variables.
 
-    Usage
-    -----
-      * MergeVariable ``(vec1, vec2,..., RefSample=2)``
-      * MergeVariable ``(seq1, seq2,..., RefSample=2)`` 
-
-    Parameters
-    ----------
-    vec1, vec2, ... (_Vectors),
-    seq1, seq2, ... (_Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData). 
-
-    Keyworkds
-    ---------
-      * RefSample (int): reference sample to define individual identifiers 
-    (the default: no reference sample).
-
-    Return
-    ------
-    If the arguments are of type _Vectors and if the number of vectors is the same 
-    for each sample, an object of type _Vectors is returned.
-
-    If the arguments are of type _Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData,
-    if all the variables are of type STATE, and if the number and the lengths of sequences 
-    are the same for each sample, an object of type _Sequences or _DiscreteSequences is returned.
+    :Parameters:
     
-    The returned object is of type _DiscreteSequences if all the variables are of type STATE, 
-    if the possible values for each variable are consecutive from 0 and if the number of 
-    possible values for each variable is < 15. 
+        * vec1, vec2, ... (_Vectors),
+        * seq1, seq2, ... (_Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData). 
 
-    See Also
-    --------
-    `Merge`, `Cluster`, `Shift`, `Transcode`, `ValueSelect`, `SelectIndividual`, `SelectVariable`, 
-    `AddAbsorbingRun`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-    `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, 
-    `SegmentationExtract`, `VariableScaling`.
+    :Keywords:
+    
+      * RefSample (int): reference sample to define individual identifiers 
+        (the default: no reference sample).
+
+    :Returns:
+
+        If the arguments are of type _Vectors and if the number of vectors is the same 
+        for each sample, an object of type _Vectors is returned.
+
+        If the arguments are of type _Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData,
+        if all the variables are of type STATE, and if the number and the lengths of sequences 
+        are the same for each sample, an object of type _Sequences or _DiscreteSequences is returned.
+    
+        The returned object is of type _DiscreteSequences if all the variables are of type STATE, 
+        if the possible values for each variable are consecutive from 0 and if the number of 
+        possible values for each variable is < 15. 
+
+    :Examples:
+    
+        >>> MergeVariable(vec1, vec2,..., RefSample=2)
+        >>> MergeVariable(seq1, seq2,..., RefSample=2) 
+
+    .. seealso::
+    
+        `Merge`, `Cluster`, `Shift`, `Transcode`, `ValueSelect`, `SelectIndividual`, `SelectVariable`, 
+        `AddAbsorbingRun`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
+        `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, 
+        `SegmentationExtract`, `VariableScaling`.
     """
 
     RefSample = kargs.get("RefSample", -1)
@@ -107,34 +106,7 @@ def ExtractData(model):
     """    
     Extraction of the 'data' part of an object of type 'model'.
     
-    Usage
-    -----
-      * ``ExtractData(mixt)``
-      * ``ExtractData(convol)``
-      * ``ExtractData(compound)``
 
-      * ``ExtractData(hmc)``
-      * ``ExtractData(hsmc)`` 
-
-    Parameters
-    ----------
-      * mixt (_Mixture),
-      * convol (_Convolution),
-      * compound (_Compound),
-
-      * hmc (_HiddenMarkov),
-      * hsmc (_HiddenSemiMarkov). 
-
-    Return
-    ------
-    If mixt contains a 'data' part, an object of type `_MixtureData` is returned.
-    If convol contains a 'data' part, an object of type `_ConvolutionData is returned.
-    If compound contains a 'data' part, an object of type `_CompoundData is returned.
-    If hmc contains a 'data' part, an object of type `_MarkovData` is returned.
-    If hsmc contains a 'data' part, an object of type `_SemiMarkovData` is returned.
-
-    Description
-    -----------
     This function enables to extract the 'data' part of an object of type 'model' 
     when the estimation of model parameters from data gives rise to the construction 
     of pseudo-data. This situation is notably exemplified by the computation of 
@@ -142,9 +114,32 @@ def ExtractData(model):
     argument StateSequences of the function Estimate set at "ForwardBackward" or 
     "Viterbi"). 
 
-    See Also
-    --------
-    `Estimate`
+    :Parameters:
+    
+      * mixt (_Mixture),
+      * convol (_Convolution),
+      * compound (_Compound),
+      * hmc (_HiddenMarkov),
+      * hsmc (_HiddenSemiMarkov). 
+
+    :Returns:
+    
+        If mixt contains a 'data' part, an object of type `_MixtureData` is returned.
+        If convol contains a 'data' part, an object of type `_ConvolutionData is returned.
+        If compound contains a 'data' part, an object of type `_CompoundData is returned.
+        If hmc contains a 'data' part, an object of type `_MarkovData` is returned.
+        If hsmc contains a 'data' part, an object of type `_SemiMarkovData` is returned.
+
+    :Examples:
+    
+        >>> ExtractData(mixt)
+        >>> ExtractData(convol)
+        >>> ExtractData(compound)
+        >>> ExtractData(hmc)
+        >>> ExtractData(hsmc) 
+    
+    .. seealso::
+        `Estimate`
     """
 
     return model.extract_data()
@@ -154,54 +149,47 @@ def ExtractData(model):
 def ExtractDistribution(model, *args):
     """    
     Extraction of a distribution from an object of type 'model'.
+  
+    :Parameters:
 
-    Usage
-    -----
-      * ``ExtractDistribution(mixt, mixt_type)``
-      * ``ExtractDistribution(mixt, "Component", index)``
-      * ``ExtractDistribution(convol, "Elementary", index)``
-      * ``ExtractDistribution(convol, "Convolution")``
-      * ``ExtractDistribution(compound, compound_type)``
-
-      * ``ExtractDistribution(renew, renew_type)``
-      * ``ExtractDistribution(renew, "NbEvent", time)``
-
-      * ``ExtractDistribution(markov, markov_type, state)``
-      * ``ExtractDistribution(markov, markov_type, variable, output)``
-
-      * ``ExtractDistribution(top_param, position)`` 
-      
-    Parameters
-    ----------
       * mixt (_Mixture),
       * mixt_type (string): type of distribution: "Weight" or "Mixture",
       * index (int): index of the elementary distribution,
       * convol (_Convolution),
       * compound (_Compound),
       * compound_type (string): type of distribution: "Sum", "Elementary" or "Compound",
-
       * renew (renewal),
       * renew_type (string): type of distribution: "InterEvent", "Backward", "Forward", "LengthBias" or "Mixture",
       * time (int): observation period,
-
       * markov (markov, semi-markov, hidden_markov, hidden_semi-markov),
       * markov_type (string): type of distribution: "Observation", "FirstOccurrence", "Recurrence", "Sojourn", "NbRun" or "NbOccurrence",
       * state (int): state,
       * variable (int): variable index,
       * output (int): output,
-
       * top_param (top_parameters),
       * position (int): position. 
 
-    Return
-    ------
-    If the arguments (mixt_type, index, compound_type, renew_type, time, 
-    markov_type, state, variable, output, position) defined an existing 
-    distribution, an object of type `_Distribution` is returned. 
+    :Returns:
+    
+        If the arguments (mixt_type, index, compound_type, renew_type, time, 
+        markov_type, state, variable, output, position) defined an existing 
+        distribution, an object of type `_Distribution` is returned. 
 
-    See Also
-    --------
-    `Plot`, `Fit`, `Simulate`. 
+    :Examples:
+    
+        >>> ExtractDistribution(mixt, mixt_type)
+        >>> ExtractDistribution(mixt, "Component", index)
+        >>> ExtractDistribution(convol, "Elementary", index)
+        >>> ExtractDistribution(convol, "Convolution")
+        >>> ExtractDistribution(compound, compound_type)
+        >>> ExtractDistribution(renew, renew_type)
+        >>> ExtractDistribution(renew, "NbEvent", time)
+        >>> ExtractDistribution(markov, markov_type, state)
+        >>> ExtractDistribution(markov, markov_type, variable, output)
+        >>> ExtractDistribution(top_param, position)
+    
+    .. seealso::
+        `Plot`, `Fit`, `Simulate`. 
     """
     
     return Extract(model, *args)
@@ -210,62 +198,54 @@ def ExtractDistribution(model, *args):
 def ExtractHistogram(data, *args):
     """  
     Extraction of a frequency distribution from an object of type 'data'.
-
-    Usage
-    -----
-      * ``ExtractHistogram(mixt_histo, mixt_type)``
-      * ``ExtractHistogram(mixt_histo, "Component", index)``
-      * ``ExtractHistogram(convol_histo, "Elementary", index)``
-      * ``ExtractHistogram(convol_histo, "Convolution")``
-      * ``ExtractHistogram(compound_histo, compound_type)``
-
-      * ``ExtractHistogram(vec1)``
-      * ``ExtractHistogram(vecn, variable)``
-
-      * ``ExtractHistogram(renewval_data, renew_type)``
-      * ``ExtractHistogram(timev, timev_type)``
-      * ``ExtractHistogram(timev, "NbEvent", time)``
-
-      * ``ExtractHistogram(seq, "Length")``
-      * ``ExtractHistogram(seq, "Value")``
-      * ``ExtractHistogram(seq, "Value", variable)``
-      * ``ExtractHistogram(discrete_seq1, seq_type, value)``
-      * ``ExtractHistogram(discrete_seqn, seq_type, variable, value)``
-      * ``ExtractHistogram(simul_seq1, "Observation", value)``
-      * ``ExtractHistogram(simul_seq1, "Observation", variable, value)``
-
-      * ``ExtractHistogram(tops, "Main")``
-      * ``ExtractHistogram(top, "NbAxillary", position)``
-      
-      
-    Parameters
-    ----------
+  
+    :Parameters:
+    
       * mixt_histo (_MixtureData),
       * mixt_type (string): type of distribution: "Weight" or "Mixture",
       * index (int): index of the elementary distribution,
       * convol_histo (_ConvolutionData),
       * compound_histo (_CompoundData),
       * compound_type (string): type of distribution: "Sum", "Elementary" or "Compound",
-
       * vec1 (_Vectors) : values,
       * vecn (_Vectors) : vectors,
       * variable (int) : variable index
-
       * timev (_TimeEvents, _RenewalData)
       * timev_type (string): 
       * time  (int)  : observation period
 
-      ...
+    :Returns:
+        
+        If the arguments (mixt_type, index, compound_type, renew_type, time, 
+        markov_type, state, variable, output, position) defined an existing frequency
+        distribution, an object of type `_Histogram` is returned. 
 
-    Return
-    ------
-    If the arguments (mixt_type, index, compound_type, renew_type, time, 
-    markov_type, state, variable, output, position) defined an existing frequency
-    distribution, an object of type `_Histogram` is returned. 
+    :Examples:
+    
+        >>> ExtractHistogram(mixt_histo, mixt_type)
+        >>> ExtractHistogram(mixt_histo, "Component", index)
+        >>> ExtractHistogram(convol_histo, "Elementary", index)
+        >>> ExtractHistogram(convol_histo, "Convolution")
+        >>> ExtractHistogram(compound_histo, compound_type)
+        >>> ExtractHistogram(vec1)
+        >>> ExtractHistogram(vecn, variable)
+        >>> ExtractHistogram(renewval_data, renew_type)
+        >>> ExtractHistogram(timev, timev_type)
+        >>> ExtractHistogram(timev, "NbEvent", time)
+        >>> ExtractHistogram(seq, "Length")
+        >>> ExtractHistogram(seq, "Value")
+        >>> ExtractHistogram(seq, "Value", variable)
+        >>> ExtractHistogram(discrete_seq1, seq_type, value)
+        >>> ExtractHistogram(discrete_seqn, seq_type, variable, value)
+        >>> ExtractHistogram(simul_seq1, "Observation", value)
+        >>> ExtractHistogram(simul_seq1, "Observation", variable, value)
+        >>> ExtractHistogram(tops, "Main")
+        >>> ExtractHistogram(top, "NbAxillary", position)
+      
+    
 
-    See Also
-    --------
-    `Plot`, `Fit`, `Simulate`. 
+    .. seealso::
+        `Plot`, `Fit`, `Simulate`. 
     """
     
     return Extract(data, *args)
@@ -345,30 +325,19 @@ def SelectVariable(obj, variables, Mode="Keep"):
     """ 
     Selection of variables.
 
-    Usage
-    -----
+    :Parameters:
 
-      * ``SelectVariable(vec, variable, Mode="Reject")``
-      * ``SelectVariable(vec, variables, Mode="Reject")``
-
-      * ``SelectVariable(seq, variable, Mode="Reject")``
-      * ``SelectVariable(seq, variables, Mode="Reject")``
-
-    Parameters
-    ----------
       * vec (vectors),
-
       * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
-
       * variable (int): variable index.
       * variables (array(int)): variable indices. 
 
-    Keywords
-    --------
+    :Keywords:
+    
       * Mode (string): conservation or rejection of the selected variables: "Keep" (default) or "Reject". 
 
-    Return
-    ------
+    :Returns:
+    
       If either variable or variables[1], ..., variables[n] are valid indices of variables, 
       an object of type vectors (respectively sequences or discrete_sequences) is returned, 
       otherwise no object is returned. In the case of a first argument of type sequences, 
@@ -376,12 +345,18 @@ def SelectVariable(obj, variables, Mode="Keep"):
       if the possible values for each variable are consecutive from 0 and if the number of 
       possible values for each variable is < 15. 
 
-    See Also
-    --------
-      `AddAbsorbingRun`, `Cluster`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-      `Merge`, `MergeVariable`, `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, 
-      `Reverse`, `SelectIndividual`, `Shift`, `Transcode`, `ValueSelect`, 
-      `SegmentationExtract`, `VariableScaling`. 
+    :Examples:
+    
+        >>> SelectVariable(vec, variable, Mode="Reject")
+        >>> SelectVariable(vec, variables, Mode="Reject")
+        >>> SelectVariable(seq, variable, Mode="Reject")
+        >>> SelectVariable(seq, variables, Mode="Reject")
+
+    .. seealso::
+        `AddAbsorbingRun`, `Cluster`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
+        `Merge`, `MergeVariable`, `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, 
+        `Reverse`, `SelectIndividual`, `Shift`, `Transcode`, `ValueSelect`, 
+        `SegmentationExtract`, `VariableScaling`. 
     """
 
     keep = bool(Mode == "Keep")
@@ -399,46 +374,42 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
     """    
     Selection of vectors, sequences, tops or patterns (in a dissimilarity matrix).
 
-    Usage
-    -----
-      * ``SelectIndividual(vec, identifiers, Mode="Reject")``
-      * ``SelectIndividual(seq, identifiers, Mode="Reject")``
-      * ``SelectIndividual(top, identifiers, Mode="Reject")``
-      * ``SelectIndividual(dist_matrix, identifiers, Mode="Reject")`` 
+    :Parameters:
+    
+      * vec (vectors),
+      * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
+      * top (tops),
+      * dist_matrix (distance_matrix),
+      * identifiers (array(int)): identifiers. 
 
-    Parameters
-    ----------
-      vec (vectors),
-
-      seq (sequences, discrete_sequences, markov_data, semi-markov_data),
-
-      top (tops),
-
-      dist_matrix (distance_matrix),
- 
-      identifiers (array(int)): identifiers. 
-
-    Keywords
-    --------
+    :Keywords:
+    
        Mode (string): conservation or rejection of the selected individuals: "Keep" (default) or "Reject". 
 
-    Returned
-    --------
-    If identifiers[1], ..., identifiers[n] are valid identifiers of vectors (respectively 
-    sequences, tops or patterns compared in a dissimilarity matrix), an object of type vectors 
-    (respectively sequences or discrete_sequences, tops or distance_matrix) is returned, 
-    otherwise no object is returned. In the case of a first argument of type sequences, 
-    discrete_sequences, markov_data, semi-markov_data, the returned object is of type 
-    discrete_sequences if all the variables are of type STATE, if the possible values for 
-    each variable are consecutive from 0 and if the number of possible values for each variable 
-    is < 15. 
+    :Returns:
+    
+        If identifiers[1], ..., identifiers[n] are valid identifiers of vectors (respectively 
+        sequences, tops or patterns compared in a dissimilarity matrix), an object of type vectors 
+        (respectively sequences or discrete_sequences, tops or distance_matrix) is returned, 
+        otherwise no object is returned. In the case of a first argument of type sequences, 
+        discrete_sequences, markov_data, semi-markov_data, the returned object is of type 
+        discrete_sequences if all the variables are of type STATE, if the possible values for 
+        each variable are consecutive from 0 and if the number of possible values for each variable 
+        is < 15. 
 
-    See Also
-    --------
-    `Cluster`, `Merge`, `Shift`, `Transcode`, `ValueSelect`, `MergeVariable`, `SelectVariable`, 
-    `AddAbsorbingRun`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-    `MovingAverage`, `RecurrenceTimeSequences`, `RemoveSeries`, `Reverse`, `SegmentationExtract`, 
-    `VariableScaling`, `RemoveApicalInternodes`, `Symmetrize`. 
+    :Examples:
+    
+        >>> SelectIndividual(vec, identifiers, Mode="Reject")
+        >>> SelectIndividual(seq, identifiers, Mode="Reject")
+        >>> SelectIndividual(top, identifiers, Mode="Reject")
+        >>> SelectIndividual(dist_matrix, identifiers, Mode="Reject") 
+
+    .. seealso::
+    
+        `Cluster`, `Merge`, `Shift`, `Transcode`, `ValueSelect`, `MergeVariable`, `SelectVariable`, 
+        `AddAbsorbingRun`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
+        `MovingAverage`, `RecurrenceTimeSequences`, `RemoveSeries`, `Reverse`, `SegmentationExtract`, 
+        `VariableScaling`, `RemoveApicalInternodes`, `Symmetrize`. 
     """
 
     keep = bool(Mode == "Keep")
@@ -452,56 +423,50 @@ def ValueSelect(obj, *args, **kargs):
     """ 
     Selection of individuals according to the values taken by a variable
 
-    Usage
-    -----
-      * ``ValueSelect(histo, value, Mode="Reject")``
-      * ``ValueSelect(histo, min_value, max_value, Mode="Reject")``
-
-      * ``ValueSelect(vec1, value, Mode="Reject")``
-      * ``ValueSelect(vec1, min_value, max_value, Mode="Reject")``
-      * ``ValueSelect(vecn, variable, value, Mode="Reject")``
-      * ``ValueSelect(vecn, variable, min_value, max_value, Mode="Reject")``
-
-      * ``ValueSelect(seq1, value, Mode="Reject")``
-      * ``ValueSelect(seq1, min_value, max_value, Mode="Reject")``
-      * ``ValueSelect(seqn, variable, value, Mode="Reject")``
-      * ``ValueSelect(seqn, variable, min_value, max_value, Mode="Reject")``
-
-    Parameters
-    ----------
+    :Parameters:
+    
       * histo (histogram, mixture_data, convolution_data, compound_data),
-
       * value (int): value,
       * min_value (int): minimum value,
       * max_value (int): maximum value,
-
       * vec1 (vectors): values,
       * vecn (vectors): vectors,
       * variable (int): variable index,
-
       * seq1 (sequences, discrete_sequences, markov_data, semi-markov_data): univariate sequences,
       * seqn (sequences, discrete_sequences, markov_data, semi-markov_data): multivariate sequences. 
-    Keywords
-    --------
+    
+    :Keywords:
+    
       * Mode (string): conservation or rejection of selected individuals: "Keep" (the default) or "Reject". 
    
-    Return
-    ------
+    :Returns:
     
-    If either value 0 or if 0 < min_value < max_value and if the range of values defined either 
-    by value or by min_value and max_value enables to select individuals, an object of 
-    type HISTOGRAM is returned (respectively vectors, sequences or discrete_sequences), 
-    otherwise no object is returned. In the case of a first argument of type sequences, 
-    discrete_sequences, markov_data or semi-markov_data, the returned object is of type 
-    discrete_sequences if all the variables are of type STATE, if the possible values for each 
-    variable are consecutive from 0 and if the number of possible values for each variable is < 15. 
+        If either value 0 or if 0 < min_value < max_value and if the range of values defined either 
+        by value or by min_value and max_value enables to select individuals, an object of 
+        type HISTOGRAM is returned (respectively vectors, sequences or discrete_sequences), 
+        otherwise no object is returned. In the case of a first argument of type sequences, 
+        discrete_sequences, markov_data or semi-markov_data, the returned object is of type 
+        discrete_sequences if all the variables are of type STATE, if the possible values for each 
+        variable are consecutive from 0 and if the number of possible values for each variable is < 15. 
 
-    See Also
-    --------
-    `Cluster`, `Merge`, `Shift`, `Transcode`, `SelectIndividual`, `MergeVariable`, 
-    `SelectVariable`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-    `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, 
-    `SegmentationExtract`, `VariableScaling`. 
+    :Examples:
+
+        >>> ValueSelect(histo, value, Mode="Reject")
+        >>> ValueSelect(histo, min_value, max_value, Mode="Reject")
+        >>> ValueSelect(vec1, value, Mode="Reject")
+        >>> ValueSelect(vec1, min_value, max_value, Mode="Reject")
+        >>> ValueSelect(vecn, variable, value, Mode="Reject")
+        >>> ValueSelect(vecn, variable, min_value, max_value, Mode="Reject")
+        >>> ValueSelect(seq1, value, Mode="Reject")
+        >>> ValueSelect(seq1, min_value, max_value, Mode="Reject")
+        >>> ValueSelect(seqn, variable, value, Mode="Reject")
+        >>> ValueSelect(seqn, variable, min_value, max_value, Mode="Reject")
+
+    .. seealso::
+        `Cluster`, `Merge`, `Shift`, `Transcode`, `SelectIndividual`, `MergeVariable`, 
+        `SelectVariable`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
+        `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, 
+        `SegmentationExtract`, `VariableScaling`. 
     """
 
     keep = __get_mode__(kargs)
@@ -557,29 +522,18 @@ def Shift(obj, *args):
     """ 
     Shifting of values
     
-    Usage
-    -----
-      * ``Shift(histo, param)``
-      * ``Shift(vec1, param)``
-      * ``Shift(vecn, variable, param)``
-      * ``Shift(seq1, param)``
-      * ``Shift(seqn, variable, param)``
-
-    Arguments
-    ---------
+    :Parameters:
+    
       * histo (histogram, mixture_data, convolution_data, compound_data),
-
       * param (int): shifting parameter,
-
       * vec1 (vectors): values,
       * vecn (vectors): vectors,
       * variable (int): variable index,
-
       * seq1 (sequences): univariate sequences,
       * seqn (sequences): multivariate sequences. 
 
-    Return
-    ------
+    :Returns:
+
       If the shifting makes that the lower bound to the possible values is positive, an 
       object of type HISTOGRAM (respectively _Vectors, _Sequences) is returned. In the 
       case of a first argument of type sequences, the returned object is of type 
@@ -587,8 +541,16 @@ def Shift(obj, *args):
       for each variable are consecutive from 0 and if the number of possible values for 
       each variable is 15. 
 
-    See Also
-    --------
+    :Examples:
+    
+        >>> Shift(histo, param)
+        >>> Shift(vec1, param)
+        >>> Shift(vecn, variable, param)
+        >>> Shift(seq1, param)
+        >>> Shift(seqn, variable, param)
+        
+    .. seealso::
+    
       `Cluster`, `Merge`, `Transcode`, `MergeVariable`, `SelectIndividual`, `SelectVariable`, 
       `AddAbsorbingRun`, `Cumulate`, `Difference`, `Lengthselect`, `MovingAverage`, `IndexExtract`, 
       `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, `SegmentationExtract`, `ValueSelect`, 
@@ -624,39 +586,37 @@ def Fit(histo, dist):
     """
     Fit of a frequency distribution by a theoretical distribution.
 
-    Usage
-    -----
-      * ``Fit(histo, dist)``
+    The result is displayed in the shell window (characteristics of the frequency 
+    and theoretical distributions, log-likelihood of the data for the theoretical distribution, 
+    information - maximum possible log-likelihood of the data -, c2 goodness of fit test). 
 
-    Arguments
-    ---------
+    The difference between the information measure and the log-likelihood is the 
+    Kullback-Leibler divergence from the observed distribution to the theoretical distribution. 
+    It is also one-half the deviance of the theoretical distribution.
+
+    Assume that a sample of size n is generated by a given random variable. 
+    The statistic measures the random deviation between the observed frequencies fi and the 
+    theoretical frequencies npi:
+
+           with       
+
+    If each theoretical frequency npi is greater than a given threshold (between 1 and 5 
+    according to the authors), has a c2 with k - 1 degrees of freedom.
+       
+    :Parameters:
+    
       * histo (histogram, mixture_data, convolution_data, compound_data),
       * dist (distribution, mixture, convolution, compound). 
 
-    Return
-    ------
+    :Returns:
+    
        Distribution
 
-    Description
-    -----------
-       The result is displayed in the shell window (characteristics of the frequency 
-       and theoretical distributions, log-likelihood of the data for the theoretical distribution, 
-       information - maximum possible log-likelihood of the data -, c2 goodness of fit test). 
+    
+    :Examples:
+    
+        >>> Fit(histo, dist)
 
-    Background
-    ----------
-       The difference between the information measure and the log-likelihood is the 
-       Kullback-Leibler divergence from the observed distribution to the theoretical distribution. 
-       It is also one-half the deviance of the theoretical distribution.
-
-       Assume that a sample of size n is generated by a given random variable. 
-       The statistic measures the random deviation between the observed frequencies fi and the 
-       theoretical frequencies npi:
-
-    	   with   	
-
-       If each theoretical frequency npi is greater than a given threshold (between 1 and 5 
-       according to the authors), has a c2 with k - 1 degrees of freedom. 
     """
 
     return histo.fit(dist)

@@ -1,14 +1,18 @@
-__doc__ = """ Interfaces for stat_tool objects """
-__docformat__ = "restructuredtext"
+""" Interfaces for stat_tool objects """
+#__docformat__ = "restructuredtext"
 
 
 
 def extend_class(cls, *base_class):
     """ Extend boost python class 
-    cls : the class to extend
-    base_class : the base class to extend
+    
+    :Parameters:
+    
+      * `cls` - the class to extend
+      * `base_class` - the base class to extend
 
-    return : the modified cls
+    :returns:
+        the modified cls
     """
     
     b = list(cls.__bases__)
@@ -18,8 +22,6 @@ def extend_class(cls, *base_class):
     cls.__bases__ = tuple(b)
 
     return cls
-
-
 
 
 from output import StatInterface    
