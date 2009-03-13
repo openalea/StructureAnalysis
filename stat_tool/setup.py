@@ -1,14 +1,29 @@
+"""setup file for stat_tool package"""
+import os, sys
 from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
-import os, sys
 from os.path import join as pj
- 
-packagename = 'stat_tool'
+
+
+
+name = 'VPlants.Stat_Tool'
 namespace = 'openalea'
+# to get the version
+version="0.6.2"
+description = 'statistics' 
+long_description = """"""
+author = 'Y. Guedon, JB. Durand',
+author_email = 'samuel.dufour@sophia.inria.fr, christophe.pradal@cirad.fr'
+url = 'http://openalea.gforge.inria.fr'
+license = 'GPL' 
+__revision__ = "$Id$"
+
+
+packagename = 'stat_tool'
 build_prefix = "build-scons"
 
 # Scons build directory
-scons_parameters=["build_prefix="+build_prefix]
+scons_parameters = ["build_prefix=" + build_prefix]
 
 
 # platform dependencies
@@ -21,12 +36,15 @@ setup_requires = install_requires + ['openalea.deploy']
 
 if __name__ == '__main__':
     
-    setup(name='VPlants.Stat_Tool',
-          version='0.6.2',
-          author='Y. Guedon, JB. Durand',
-          description='statistics',
-          url='',
-          license='GPL',
+    setup(name=name,
+          version=version,
+          description=description,
+          long_description=long_description,
+          author=author,
+          author_email=author_email,
+          url=url,
+          license=license,
+ 
           
           # Define where to execute scons
           scons_scripts=['SConstruct'],
