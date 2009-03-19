@@ -43,7 +43,7 @@ def Compound(*args):
     .. seealso::
         `Save`, `Estimate`, `Simulate`
     """
-    if((len(args)==0) or (len(args)>2)) : 
+    if((len(args)==0) or (len(args)>3)) : 
         raise TypeError("Bad number of arguments")
 
     # filename
@@ -51,9 +51,13 @@ def Compound(*args):
         return _stat_tool._Compound(args[0])
 
     # build list of distributions
-    if(len(args)==2) :
-        raise("to be done")
+    if(len(args)==2) :    
         return _stat_tool._Compound(args[0], args[1])
+    
+    if(len(args)==3) :    
+        return _stat_tool._Compound(args[0], args[1], args[2])
+    
+    
 
 
 # Extend _Compound
@@ -69,9 +73,9 @@ interface.extend_class(_CompoundData, interface.StatInterface)
 from openalea.stat_tool import get_test_file
 
 
-class __Test:
+class Test:
 
-    def __test_emty(self):
+    def test_emty(self):
         try:
             m = Compound()
             assert False
@@ -79,11 +83,11 @@ class __Test:
         except TypeError:
             assert True
 
-    def __test_file(self):
+    def test_file(self):
         c = Compound(get_test_file("compound1.cd"))
         assert c
 
-    def __test_build_compound(self):
+    def test_build_compound(self):
         from distribution import Uniform
 
         d1 = Uniform(0,10)
@@ -93,27 +97,27 @@ class __Test:
         assert m
         return m
 
-    def __test_plot(self):
+    def test_plot(self):
 
-        m = self.__test_build_compound()
+        m = self.test_build_compound()
         m.plot()
 
         assert str(m)
         m.display()
 
-    def __test_simulation(self):
+    def test_simulation(self):
 
-        m = self.__test_build_compound()
+        m = self.test_build_compound()
         s = m.simulate(1000)
 
         assert len(s) == 1000
         assert str(s)
 
-    def __test_extract(self):
-        from extract import ExtractDistribution
+    def test_extract(self):
+        from data_transform import ExtractDistribution
         from distribution import Uniform
 
-        m = self.__test_build_compound()
+        m = self.test_build_compound()
 
         assert m.extract_compound() == ExtractDistribution(m, "Compound")
 
@@ -123,6 +127,8 @@ class __Test:
         assert m.extract_elementary() == Uniform(10,20)
         assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
 
-    def __test_extract_data(self):
-
+    def _test_extract_data(self):
+        # to be done
         assert False
+
+
