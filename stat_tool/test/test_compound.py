@@ -1,9 +1,9 @@
-
+"""Compound tests"""
 from openalea.stat_tool import *
 
 
 class Test_unit:
-    """ a simple unittest class """
+    """a simple unittest class"""
     
     def test_empty(self):
         """Test that empty constructor fails"""
@@ -19,17 +19,18 @@ class Test_unit:
         assert c
 
     def test_build_compound(self):
-        """run constructor with filename two distributions as arguments"""
+        """run constructor with  two distributions as arguments"""
         from openalea.stat_tool.distribution import Uniform
-
+        
         d1 = Uniform(0,10)
         d2 = Uniform(10,20)
-
+        
         m = Compound(d1, d2)
+        
         assert m
         return m
 
-    def test_plot(self):
+    def test_plot(self):        
         """run plotting routines """
         m = self.test_build_compound()
         m.plot()
@@ -39,6 +40,7 @@ class Test_unit:
 
     def test_simulation(self):
         """Test the simulate method"""
+        
         m = self.test_build_compound()
         s = m.simulate(1000)
 
@@ -60,10 +62,20 @@ class Test_unit:
         assert m.extract_elementary() == Uniform(10,20)
         assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
 
-    def _test_extract_data(self):
-        # to be done
-        assert False
-    
+    def test_extract_data(self):
+        """
+        todo : check if this test makes sense
+        """
+        from openalea.stat_tool.distribution import Binomial
+
+        m = self.test_build_compound()
+        s = m.simulate(1000)
+
+        m = s.estimate_compound(Binomial(0, 10, 0.5))
+
+        d = m.extract_data()
+        assert d
+        
 
 def test1():
     
@@ -92,4 +104,4 @@ def test1():
 
 if __name__=="__main__":
 
-    test_compound()
+    test1()

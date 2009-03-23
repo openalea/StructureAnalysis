@@ -3,204 +3,21 @@ from openalea.stat_tool import *
 
 
 
-def test_distribition_histogram():
-    #########################################################################
-    #
-    #  discrete distributions/histograms, comparison of histograms/frequency distributions
-    #
-    #  beech, Wild cherry tree: number of nodes per growth unit (GU)
-    #
-    #  meri1.his: order 1,
-    #  meri1.his: order 2,
-    #  meri1.his: order 3, GU 1,
-    #  meri1.his: order 3, GU 2,
-    #  meri5.his: short shoots.
-    #
-    #########################################################################
-
-    dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
-    dist0 = Distribution("distribution1.dist")
-    
-    dist1 = Distribution("B", 0, 10, 0.3)
-    dist1 = Distribution("NB", 0, 3.5, 0.3)
-    
-    # computation of survivior function and hasard rate
-    
-    Display(dist1, ViewPoint="Survival")
-    # Plot(dist1, ViewPoint="Survival")
-
-    # simulation/estimation
-
-    histo1 = Simulate(dist1, 200)
-
-    # Display(histo1, ViewPoint->"Survival")
-    # Plot(histo1, ViewPoint->"Survival")
-
-    # "B" "BINOMIAL", "P" "POISSON", "NB" "NEGATIVE_BINOMIAL"
-    # InfBoundStatus->"Free" (default) / "Fixed"
-    # MinInfBound->0 (default) / 1
-
-    dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
-
-    fagus = Histogram("fagus1.his")
-
-    # transformation of histograms, extraction/filter
-
-    histo2 = Cluster(fagus, "Step", 2)
-    histo3 = Cluster(fagus, "Information", 0.8)
-    histo4 = Cluster(fagus, "Limit", [2, 4, 6, 8, 10])
-    histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, 4, 5])
-    # Display(histo5, Detail=2)
-
-    histo7 = Shift(fagus, -2)
-    
-    histo8 = ValueSelect(fagus, 2, 8)
-
-    dist3 = Estimate(fagus, "B")
-
-    # comparison of histograms
-
-    meri1 = Histogram("meri1.his")
-    meri2 = Histogram("meri2.his")
-    meri3 = Histogram("meri3.his")
-    meri4 = Histogram("meri4.his")
-    meri5 = Histogram("meri5.his")
-
-    ## Compare(meri1, meri2, meri3, meri4, meri5, "N", FileName="ASCII/meri.cmp")
-    Compare(meri1, meri2, meri3, meri4, meri5, "O")
-
-    ComparisonTest("F", meri1, meri2)
-    ComparisonTest("T", meri1, meri2)
-    ComparisonTest("W", meri1, meri2)
-
-    # fit of a known distribution to an  histogram
-
-    dist5 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
-    Display(dist5, Detail=2)
-    # Plot(dist5)
-
+def test_distribution_histogram():
+    # moved to test_distribution
+    pass
 
 def test_mixture():
-    #########################################################################
-    # 
-    #  finite mixture of discrete distributions
-    #
-    #########################################################################
-    meri1 = Histogram("meri1.his")
-    meri2 = Histogram("meri2.his")
-    meri3 = Histogram("meri3.his")
-    meri4 = Histogram("meri4.his")
-    meri5 = Histogram("meri5.his")
-
-    mixt1 = Mixture("mixture1.mixt")
-    mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 0.4, Distribution("NB", 10, 10, 0.5))
-    
-    mixt_histo1 = Simulate(mixt1, 200)
-    
-    # extraction of histograms/frequency distributions corresponding to a given mixture component
-    # (i.e. elementary distributions which are combined by mixture)
-    
-    histo10 = ExtractHistogram(mixt_histo1, "Component", 1)
-    histo11 = ExtractHistogram(mixt_histo1, "Component", 2)
-    histo12 = Merge(histo10, histo11)
-    histo13 = ExtractHistogram(mixt_histo1, "Weight")
-    
-    # estimation
-
-    mixt2 = Estimate(mixt_histo1, "MIXTURE", "B", "NB", MinInfBound=0, 
-                     InfBoundStatus="Fixed", DistInfBoundStatus="Fixed")
-    
-    mixt_histo2 = ExtractData(mixt2)
-
-    histo14 = ExtractHistogram(ExtractData(mixt2), "Component", 1)
-    histo15 = ToHistogram(ExtractDistribution(mixt2, "Component", 1))
-    
-    # estimation and selection of the number of components
-
-    mixt3 = Estimate(meri1, "MIXTURE", Distribution("B", 6, 7, 0.5), "B")
-
-    # NbComponent->"Fixed" (default) / "Estimated"
-    # Penalty->"AIC"/ "AICc" / "BIC" / "BICc" (default), option valide si NbComponent->"Estimated"
- 
-    meri = Merge(meri1, meri2, meri3, meri4, meri5)
-    
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  NbComponent="Estimated", Penalty="BIC")
-    # Display(mixt2, Detail=2)
-    dist_mixt = ExtractDistribution(mixt2, "Mixture")
-    # Plot(dist_mixt)
-
+    # moved to test_mixture.py
+    pass
 
 def test_convol():
-    #########################################################################
-    #
-    #  convolution of discrete distributions
-    #
-    #########################################################################
-    
-    convol1 = Convolution(Distribution("B", 0, 10, 0.5), Distribution("NB", 0, 10, 0.5))
-    convol1 = Convolution("convolution1.conv")
-    
-    convol_histo1 = Simulate(convol1, 200)
-    
-    histo20 = ExtractHistogram(convol_histo1, "Elementary", 1)
-    
-    convol2 = Estimate(convol_histo1, "CONVOLUTION", 
-                       ExtractDistribution(convol1, "Elementary", 1), MinInfBound=0)
-    
-    histo21 = ExtractHistogram(ExtractData(convol2), 'Elementary', 1)
-    histo22 = ToHistogram(ExtractDistribution(convol2,'Elementary', 1))
-    
-    histo_b2 = Histogram("nothofagus_antarctica_bud_2.his")
-    histo_s2 = Histogram("nothofagus_antarctica_shoot_2.his")
-    
-    # Estimator="Likelihood" (default) / "PenalizedLikelihood" / "Parametric"
-    # Si Estimator="PenalizedLikelihood", options supplementaires possibles
-    # Penalty="FirstDifference" / "SecondDifference" (default) / "Entropy", Weight,
-    # Outside="Zero" (default) / "Continuation" (cf. stat_funs4.cpp).
-    
-    # "NP" or "NON_PARAMETRIC" (for estimation only)
-    
-    convol30 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
-                        NbIteration=500)
-    convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
-                        NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)
-    convol32 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
-                        Estimator="Parametric")
-    Display(convol31)
-    # Plot(convol31)
-    # Plot(ExtractDistribution(convol31, "Convolution"))
-    Save(convol31, "nothofagus_antartica_2.xld", Format="SpreadSheet")
+    # moved to test_convolution.py
+    pass
 
-
-
-def __test_compound():
-    #########################################################################
-    #
-    #  compound distribution : not publicly distributed in the Python version
-    #
-    #########################################################################
-    
-    cdist1 = Compound("compound1.cd")
-
-    chisto1 = Simulate(cdist1, 200)
-
-    histo30 = ExtractHistogram(chisto1, "Sum")
-
-    cdist2 = Estimate(chisto1, "COMPOUND", ExtractDistribution(cdist1, "Elementary"), 
-                      "Sum", MinInfBound=0)
-    
-    histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
-    histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
-    
-    peup1 = Histogram("peup1.his")
-    mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
-    histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
-    histo34 = Shift(histo33, -11)
-
-    cdist3 = Estimate(histo34, "COMPOUND", Distribution("B", 0, 1, 0.7), "Sum")
-    cdist4 = Estimate(histo34, "COMPOUND", Distribution("B", 0, 1, 0.7), "Sum", MinInfBound=0)
-
-
+def test_compound():
+    # moved to test_compound.py
+    pass
 
 def test_vectors():
     #########################################################################
@@ -305,4 +122,12 @@ def test_vectors():
     vec16 = SelectVariable(vec9596, [1, 3], Mode="Reject")
     matrix12 = Compare(vec16, VectorDistance("N", "N", "N", "N"))
     matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
-    
+   
+
+if __name__=="__main__":
+
+    test_distribution_histogram()
+    test_convol() 
+    test_mixture()
+    test_compound()
+    test_vectors()
