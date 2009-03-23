@@ -1,0 +1,95 @@
+
+from openalea.stat_tool import *
+
+
+class Test_unit:
+    """ a simple unittest class """
+    
+    def test_empty(self):
+        """Test that empty constructor fails"""
+        try:
+            m = Compound()
+            assert False
+        except TypeError:
+            assert True
+
+    def test_file(self):
+        """run constructor with filename argument"""
+        c = Compound("compound1.cd")
+        assert c
+
+    def test_build_compound(self):
+        """run constructor with filename two distributions as arguments"""
+        from openalea.stat_tool.distribution import Uniform
+
+        d1 = Uniform(0,10)
+        d2 = Uniform(10,20)
+
+        m = Compound(d1, d2)
+        assert m
+        return m
+
+    def test_plot(self):
+        """run plotting routines """
+        m = self.test_build_compound()
+        m.plot()
+
+        assert str(m)
+        m.display()
+
+    def test_simulation(self):
+        """Test the simulate method"""
+        m = self.test_build_compound()
+        s = m.simulate(1000)
+
+        assert len(s) == 1000
+        assert str(s)
+
+    def test_extract(self):
+        """run and test the extract methods"""
+        from openalea.stat_tool.data_transform import ExtractDistribution
+        from openalea.stat_tool.distribution import Uniform
+
+        m = self.test_build_compound()
+
+        assert m.extract_compound() == ExtractDistribution(m, "Compound")
+
+        assert m.extract_sum() == Uniform(0,10)
+        assert m.extract_sum() == ExtractDistribution(m, "Sum")
+
+        assert m.extract_elementary() == Uniform(10,20)
+        assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
+
+    def _test_extract_data(self):
+        # to be done
+        assert False
+    
+
+def test1():
+    
+    cdist1 = Compound("compound1.cd")
+
+    chisto1 = Simulate(cdist1, 200)
+
+    histo30 = ExtractHistogram(chisto1, "Sum")
+
+    #cdist2 = Estimate(chisto1, "COMPOUND", ExtractDistribution(cdist1, "Elementary"), "Sum", MinInfBound=0)
+
+    cdist2 = Estimate(chisto1, "COMPOUND", ExtractDistribution(cdist1, "Elementary"), ExtractDistribution(cdist1, "Sum"), MinInfBound=0)
+    
+    histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
+    histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
+    
+    peup1 = Histogram("peup1.his")
+    mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
+    histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
+    histo34 = Shift(histo33, -11)
+
+    #cdist3 = Estimate(histo34, "COMPOUND", Distribution("B", 0, 1, 0.7), "Sum")
+    #cdist4 = Estimate(histo34, "COMPOUND", Distribution("B", 0, 1, 0.7), "Sum", MinInfBound=0)
+
+
+
+if __name__=="__main__":
+
+    test_compound()

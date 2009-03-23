@@ -1,5 +1,11 @@
+"""Compound module
 
-"""Compound module"""
+
+.. todo:: 
+    - check the extract and extract_data functionalities.
+    - do we want a third constructor with the third parameter?
+    - cleanup documentation.
+"""
 __revision__ = "$Id$"
 
 import interface
@@ -59,7 +65,6 @@ def Compound(*args):
     
     
 
-
 # Extend _Compound
 interface.extend_class(_Compound, interface.StatInterface)
 
@@ -68,67 +73,5 @@ interface.extend_class(_Compound, interface.StatInterface)
 interface.extend_class(_CompoundData, interface.StatInterface)
 
 
-
-######################## Test Compound ########################################
-from openalea.stat_tool import get_test_file
-
-
-class Test:
-
-    def test_emty(self):
-        try:
-            m = Compound()
-            assert False
-
-        except TypeError:
-            assert True
-
-    def test_file(self):
-        c = Compound(get_test_file("compound1.cd"))
-        assert c
-
-    def test_build_compound(self):
-        from distribution import Uniform
-
-        d1 = Uniform(0,10)
-        d2 = Uniform(10,20)
-
-        m = Compound(d1, d2)
-        assert m
-        return m
-
-    def test_plot(self):
-
-        m = self.test_build_compound()
-        m.plot()
-
-        assert str(m)
-        m.display()
-
-    def test_simulation(self):
-
-        m = self.test_build_compound()
-        s = m.simulate(1000)
-
-        assert len(s) == 1000
-        assert str(s)
-
-    def test_extract(self):
-        from data_transform import ExtractDistribution
-        from distribution import Uniform
-
-        m = self.test_build_compound()
-
-        assert m.extract_compound() == ExtractDistribution(m, "Compound")
-
-        assert m.extract_sum() == Uniform(0,10)
-        assert m.extract_sum() == ExtractDistribution(m, "Sum")
-
-        assert m.extract_elementary() == Uniform(10,20)
-        assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
-
-    def _test_extract_data(self):
-        # to be done
-        assert False
 
 

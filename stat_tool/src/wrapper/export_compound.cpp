@@ -167,15 +167,66 @@ void class_compound()
      .def("extract_sum", CompoundWrap::extract_sum_distribution,
      return_value_policy< manage_new_object >(), "Return the sum distribution")
      .def("extract_elementary", CompoundWrap::extract_distribution,
-     return_value_policy< manage_new_object >(), "Return the elementary distribution")
+     return_value_policy< manage_new_object >(),
+	 boost::python::arg("index"),
+	 "Return the elementary distribution")
 	;
 }
+
+
+
+class CompoundDataWrap
+{
+
+public:
+
+    static Distribution_data* extract(const Compound_data& compound, char type)
+	  {
+	    Format_error error;
+	    Distribution_data* ret = NULL;
+
+	    ret = compound.extract(error, type);
+	    if(!ret) stat_tool::wrap_util::throw_error(error);
+
+	    return ret;
+	  }
+
+
+	static Distribution_data* extract_sum_distribution(const Compound_data& compound_data)
+	{
+	    Distribution_data* ret;
+
+	    ret = new Distribution_data(*(compound_data.get_sum_histogram()),
+	              compound_data.get_compound()->get_sum_distribution());
+	    return ret;
+	}
+
+
+	static Distribution_data* extract_distribution(const Compound_data& compound_data)
+	{
+	    Distribution_data* ret;
+
+	    ret = new Distribution_data(*(compound_data.get_histogram()),
+	    	              compound_data.get_compound()->get_distribution());
+	    return ret;
+	}
+
+};
 
 
 void class_compound_data()
 {
   class_< Compound_data, bases< STAT_interface, Histogram > >
     ("_CompoundData", "Compound data")
+    .def("extract", CompoundDataWrap::extract,
+     return_value_policy< manage_new_object >(), "Return the data")
+     .def("extract_sum", CompoundDataWrap::extract_sum_distribution,
+     return_value_policy< manage_new_object >(), "Return the sum distribution")
+     .def("extract_elementary", CompoundDataWrap::extract_distribution,
+     return_value_policy< manage_new_object >(),
+	 boost::python::arg("index"),
+	 "Return the elementary distribution")
+
     ;
 }
 
