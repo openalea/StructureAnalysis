@@ -89,7 +89,7 @@ def Plot(obj, *args, **kargs):
 
     In the case of Markovian models or sequences, the graphical outputs are 
     grouped as follows:
-      * "SelfTransition": self-transition probability as a function of the
+      * "SelfTransition": add outgoing server thunderbirdself-transition probability as a function of the
         index parameter (non-homogeneous Markov chain),
       * "Observation": observation distributions attached to each state of the
         underlying (semi-)Markov chain (lumped processes or hidden Markovian
@@ -283,7 +283,7 @@ class StatInterface(object):
 
     def old_plot(self, *args, **kargs):
         """ Old AML style plot """
-
+        print 'OLD style being used'
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
         suffix = kargs.get("Suffix", "")
@@ -398,6 +398,7 @@ class StatInterface(object):
     def plot(self, *args, **kargs):
         __doc__ = Plot.__doc__
         
+        print 'NEW style beiung used'
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
         params = kargs.get("Params", ())
@@ -408,15 +409,19 @@ class StatInterface(object):
 
         try:
             if(survival):
+                print 'calling survival'
                 plotable = self.survival_get_plotable(*params)
 
             elif(stateprofile):
+                print 'calling stateprofile'
                 plotable = self.stateprofile_get_plotable(*params)
 
             else:
                 if(args):
+                    print 'calling args'
                     plotable = self.get_plotable(list(args), *params)
                 else:
+                    print 'calling noargs'
                     plotable = self.get_plotable(*params)
 
             plotter = plot.get_plotter()

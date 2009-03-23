@@ -8,6 +8,12 @@ import _stat_tool
 import interface
 import distribution
 
+# to be checked or improve. Maybe the c++ code could be more explicit, i.e., 
+# e switched to elementary and so on.
+compound_type = {
+    'e': 'e',
+    's': 's',
+    }
 
 likelihood_penalty_type = {
     'AIC': _stat_tool.AIC, 
@@ -40,7 +46,7 @@ estimator_type = {
 class EstimateFunctions(object):
     """ 
     Class containing histogram estimation functions
-    This class must not be used alone, but throught an histogram object
+    This class must not be used alone, but through an histogram object
     """
     
     def estimate_nonparametric(histo):
@@ -184,7 +190,58 @@ class EstimateFunctions(object):
             return histo.mixture_estimation(ident, MinInfBound, flag, 
                                             component_flag, Penalty)
 
-    
+    def estimate_compound(histo,
+                          known_distribution,
+                          InitialDistribution=None,
+                          MinInfBound=0,
+                          Type='e',
+                          Weight=-1. , 
+                          NbIteration=-1,
+                          Penalty="SecondDifference", 
+                          Outside="Zero",
+                          Estimator="Likelihood"):
+        """estimate a compound"""
+        try: 
+            if (Type):
+                Type = compound_type[Type]
+        except KeyError:
+            raise AttributeError("Bad type. Possible types are %s"%(str(compound_type.keys())))
+        
+        try:
+            if(Estimator):
+                Estimator = estimator_type[Estimator]
+        except KeyError:
+            raise AttributeError("Bad estimator. Possible estimator are %s"%(str(estimator_type.keys())))
+
+        try:
+            if(Penalty):
+                Penalty = smoothing_penalty_type[Penalty]
+        except KeyError:
+            raise AttributeError("Bad penalty. Possible penalty are %s"%(str(smoothing_penalty_type.keys())))
+
+        try:
+            if(Outside):
+                Outside = outside_type[Outside]
+        except KeyError:
+            raise AttributeError("Bad side effect management type: should be %s"%(str(outside_type.keys())))
+
+
+        #print InitialDistribution
+        #print known_distribution
+        
+        if (InitialDistribution):
+            print InitialDistribution
+            return histo.compound_estimation(
+                            known_distribution, InitialDistribution, Type,
+                            Estimator,
+                            NbIteration, Weight, Penalty, Outside)
+
+        else :
+            return histo.compound_estimation(
+                            known_distribution, Type, MinInfBound,  Estimator,
+                            NbIteration, Weight, Penalty, Outside)
+
+        
     def estimate_convolution(histo, known_distribution, InitialDistribution=None,
                              MinInfBound=0, Estimator="Likelihood", NbIteration=-1,
                              Weight=-1. , Penalty="SecondDifference", Outside="Zero"):
@@ -256,6 +313,7 @@ def Estimate(histo, type, *args, **kargs):
         "UNIFORM" : _Histogram.estimate_parametric,
         "MIXTURE" : _Histogram.estimate_mixture,
         "CONVOLUTION" : _Histogram.estimate_convolution,
+        "COMPOUND": _Histogram.estimate_compound,
         }
 
     type = type.upper()
@@ -266,6 +324,8 @@ def Estimate(histo, type, *args, **kargs):
             return fct(histo, type, *args, **kargs)
         elif (fct == _Histogram.estimate_mixture):
             return fct(histo, args, **kargs)
+#        elif (fct == _Histogram.estimate_compound):
+#            return fct(histo, *args, **kargs)
         else:
             return fct(histo, *args, **kargs)
 
@@ -273,89 +333,5 @@ def Estimate(histo, type, *args, **kargs):
         raise KeyError("Valid type are %s"%(str(fct_map.keys())))
         
 
-
-
-
-############################ Tests #############################################
-from openalea.stat_tool import get_test_file
-
-class Test:
-
-    def test_nonparametric(self):
-        from histogram import Histogram
-
-        h = Histogram(get_test_file("meri1.his"))
-        e =  h.estimate_nonparametric()
-        assert e
-
-        # assert abs(e.likelihood() - VAL) < epsilon
-
-
-    def test_nb(self):
-        from histogram import Histogram
-
-        h = Histogram(get_test_file("peup2.his"))
-        assert h.estimate_parametric('NB')
-
-
-    def test_binomial(self):
-        from histogram import Histogram
-
-        h = Histogram(get_test_file("meri5.his"))
-        assert h.estimate_parametric('B')
-
-
-    def test_poisson(self):
-        """        
-        >>> p = distribution.Poisson(0, 10)
-        >>> h = p.simulate(1000)        
-        """
-        p = distribution.Poisson(0, 10)
-        h = p.simulate(1000)
-
-        assert h.estimate_parametric('P')
-
-
-    def test_mixture_1(self):
-        from histogram import Histogram
-
-        h = Histogram(get_test_file("peup2.his"))
-        m1 =  h.estimate_mixture(["B", "NB", "NB", "NB"], NbComponent="Estimated")
-        assert m1
-
-
-    def test_mixture_2(self):
-        from histogram import Histogram
-        from distribution import Binomial
-
-        h = Histogram(get_test_file("peup2.his"))
-
-        m2 = h.estimate_mixture([Binomial(0, 10, 0.5), "NB"])
-        assert m2
-
-
-    def test_convolution(self):
-        from histogram import Histogram
-        from data_transform import Shift
-
-        elementary = Histogram(get_test_file("nothofagus_antarctica_bud_2.his"))
-        total = Histogram(get_test_file("nothofagus_antarctica_shoot_2.his"))
-
-        convol1 = Estimate(Shift(total, 1), "CONVOLUTION", Estimate(elementary, "NP"), 
-                           NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)
-
-        convol2 = total.shift(1).estimate_convolution(elementary.estimate_nonparametric(), 
-                                                      NbIteration=100, 
-                                                      Estimator="PenalizedLikelihood", 
-                                                      Weight=0.5)
-
-        assert convol1 and convol2
-        assert convol1 == convol2
-
-
-
-    def test_compound(self):
-
-        assert False
 
 

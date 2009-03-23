@@ -38,7 +38,7 @@ def compare_histo(histo, *args, **kargs):
 
     _type = args[-1]
     try:
-        _type = type_dict[type.upper()]
+        _type = type_dict[_type.upper()]
     except KeyError:
         print "Type not recognized."
         return
@@ -207,53 +207,6 @@ def ComparisonTest(type, histo1, histo2):
     func = getattr(histo1, type_dict[type])
     ret = func(histo2)
     return ret
-
-
-
-############# Tests ############################################################
-from openalea.stat_tool import get_test_file
-
-class Test:
-    def test_comparisontest(self):
-
-        meri1 = Histogram(get_test_file("meri1.his"))
-        meri2 = Histogram(get_test_file("meri2.his"))
-
-        assert ComparisonTest("F", meri1, meri2)
-        assert ComparisonTest("T", meri1, meri2)
-        assert ComparisonTest("W", meri1, meri2)
-
-
-    def test_comparison(self):
-
-        meri1 = Histogram(get_test_file("meri1.his"))
-        meri2 = Histogram(get_test_file("meri2.his"))
-        meri3 = Histogram(get_test_file("meri3.his"))
-
-        assert Compare(meri1, meri2, meri3, 'N')
-        assert Compare(meri1, meri2, meri3, 'O')
-        assert Compare(meri1, meri2, meri3, 'S')
-
-
-    def test_compare_vectors(self):
-        
-        from vectors import Vectors, VectorDistance
-        from data_transform import SelectVariable
-
-        vec10 = Vectors(get_test_file("chene_sessile.vec"))
-        vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
-        assert vec15
-
-        matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
-        assert matrix10
-
-
-    def test_compare_sequence(self):
-        pass
-        
-
-    def test_compare_markov(self):
-        pass
 
 
     
