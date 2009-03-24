@@ -1,11 +1,18 @@
 """output tests"""
 __revision__ = "$Id: $"
 
+import sys
 
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import get_plotter, gnuplot 
 
 DISABLE_PLOT = False
+
+
+# !!! Do not plot in nosetests !!!
+if("nosetests" in sys.argv[0]):
+    DISABLE_PLOT = True
+
 
 class Test:
     
