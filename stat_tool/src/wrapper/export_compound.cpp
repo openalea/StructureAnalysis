@@ -144,6 +144,17 @@ public:
 	    return ret;
 	}
 
+	static void file_ascii_write(const Compound m, const char* path, bool exhaustive)
+	{
+	     bool result = true;
+	     Format_error error;
+
+	     result = m.ascii_write(error, path, exhaustive);
+	     if (!result)
+	        stat_tool::wrap_util::throw_error(error);
+
+	   }
+
 };
 
 
@@ -170,6 +181,8 @@ void class_compound()
      return_value_policy< manage_new_object >(),
 	 boost::python::arg("index"),
 	 "Return the elementary distribution")
+	 .def("file_ascii_write", CompoundWrap::file_ascii_write,
+     "Save Compound into a file")
 	;
 }
 

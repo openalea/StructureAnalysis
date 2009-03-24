@@ -128,8 +128,8 @@ void class_stat_interface()
 {
   class_< STAT_interface, boost::noncopyable > ("_StatInterface", no_init)
     .def("ascii_write", &StatInterfaceWrap::ascii_write,
-	 python::arg("exaustive"),
-	 "Return a string containing the object description (exaustive or not)")
+	 python::arg("exhaustive"),
+	 "Return a string containing the object description (exhaustive or not)")
     
     .def("plot_write", &StatInterfaceWrap::plot_write,
 	 python::args("prefix", "title"),
