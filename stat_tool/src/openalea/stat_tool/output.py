@@ -283,7 +283,6 @@ class StatInterface(object):
 
     def old_plot(self, *args, **kargs):
         """ Old AML style plot """
-        print 'OLD style being used'
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
         suffix = kargs.get("Suffix", "")
@@ -398,7 +397,7 @@ class StatInterface(object):
     def plot(self, *args, **kargs):
         __doc__ = Plot.__doc__
         
-        print 'NEW style beiung used'
+
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
         params = kargs.get("Params", ())
@@ -421,7 +420,6 @@ class StatInterface(object):
                     print 'calling args'
                     plotable = self.get_plotable(list(args), *params)
                 else:
-                    print 'calling noargs'
                     plotable = self.get_plotable(*params)
 
             plotter = plot.get_plotter()
@@ -499,116 +497,3 @@ class StatInterface(object):
         else:
             self.file_ascii_write(filename, exhaustive)
         
-
-from openalea.stat_tool import get_test_file
-
-
-class Test:
-    
-    def get_mixture(self):
-        
-        from distribution import Uniform
-        from mixture import Mixture
- 
-        d1 = Uniform(0, 10)
-        d2 = Uniform(10, 20)
-        d3 = Uniform(20, 30)
-
-        m = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
-        
-        return m
-
-    def get_mixture_2(self):
-
-        from histogram import Histogram 
-
-        h = Histogram(get_test_file("meri2.his"))
-        m = h.estimate_mixture(["B", "NB"])
-        return m
-
-    def __test_old_plot(self):
-        m = self.get_mixture()
-        m.old_plot()
-
-    def __test_plot_mixture_1(self):
-        m = self.get_mixture()
-        m.plot()
-
-    def __test_plot_mixture_2(self):
-        m = self.get_mixture_2()
-        m.plot()
-
-    def __test_plot_mixture_data(self):
-        from mixture import Mixture
-        from simulate import Simulate
-        from distribution import Distribution
-
-        mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 0.4, 
-                        Distribution("NB", 10, 10, 0.5))
-        mixt_histo1 = Simulate(mixt1, 200)
-
-        mixt1.plot()
-        mixt_histo1.plot()
-
-    def __test_plot_convolution(self):
-        
-        from convolution import Convolution
-        from simulate import Simulate
-        from estimate import Estimate
-        from data_transform import Shift
-        from histogram import Histogram
-        
-        convol1 = Convolution(get_test_file("convolution1.conv"))
-        convol1.plot()
-
-        histo_b2 = Histogram(get_test_file("nothofagus_antarctica_bud_2.his"))
-        histo_s2 = Histogram(get_test_file("nothofagus_antarctica_shoot_2.his"))
-        
-        convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
-                            NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)
-        convol31.plot()
-
-    def __test_plot_convolution_data(self):
-        
-        from convolution import Convolution
-        from simulate import Simulate
-        
-        convol1 = Convolution(get_test_file("convolution1.conv"))
-        convol_histo1 = Simulate(convol1, 200)
-        convol_histo1.plot()
-
-    def __test_plot_distribution_set(self):
-        
-        from distribution import Distribution 
-        d1 = Distribution("B", 2, 18, 0.5) 
-        d2 = Distribution("NB", 10, 10, 0.5)
-        d3 = Distribution("U", 10, 20)
-        
-        Plot(d1, d2, d3)
-        d1.old_plot()
-        
-    def __test_plot_survival(self):
-        
-        from distribution import Distribution 
-        from histogram import Histogram
-        from simulate import Simulate
-
-        d1 = Distribution("B", 2, 18, 0.5) 
-        
-        d1.plot(ViewPoint="survival")
-
-        histo1 = Simulate(d1, 200)
-        histo1.plot(ViewPoint="survival")
-        
-    def __test_plot_parametric_model(self):
-
-        from distribution import Distribution 
-        from simulate import Simulate
-        from histogram import Histogram
-        from estimate import Estimate
-        
-        dist1 = Distribution("NB", 0, 3.5, 0.3)
-        histo1 = Simulate(dist1, 200)
-        Plot(histo1)
-        dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
-        Plot(dist2)
