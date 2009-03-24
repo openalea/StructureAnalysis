@@ -1,4 +1,4 @@
-"""Compound tests
+"""Mixture tests
 #
 #  Frequency distributions
 #
@@ -32,7 +32,19 @@
 #
 #########################################################################
 """
-from openalea.stat_tool import *
+__revision__ = "$Id: $"
+
+import os
+
+
+from openalea.stat_tool.distribution import Uniform
+from openalea.stat_tool.mixture import Mixture
+from openalea.stat_tool.data_transform import ExtractDistribution
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.mixture import _MvMixture
+from openalea.stat_tool.distribution import Binomial, Poisson
+from openalea.stat_tool.estimate import Estimate
+from openalea.stat_tool.comparison import Compare, ComparisonTest
 
 class Test:
     """a simple unittest class"""
@@ -52,7 +64,6 @@ class Test:
 
     def test_build_mixture(self):
         """run constructor with two distributions as arguments"""
-        from openalea.stat_tool.distribution import Uniform
 
         d1 = Uniform(0, 10)
         d2 = Uniform(10, 20)
@@ -83,10 +94,6 @@ class Test:
     def test_extract(self):
         """run and test the extract methods"""
 
-        from openalea.stat_tool.data_transform import ExtractDistribution
-        from openalea.stat_tool.distribution import Uniform
-
-
         m = self.test_build_mixture()
         assert m.nb_component() == 3
 
@@ -104,7 +111,6 @@ class Test:
 
     def test_extract_data(self):
         """run and test the extract_data methods"""
-        from openalea.stat_tool.histogram import Histogram
 
         h = Histogram("meri2.his")
         m = h.estimate_mixture(["B", "NB"])
@@ -113,9 +119,6 @@ class Test:
         assert d
 
     def test_build_mv_mixture(self):
-
-        from openalea.stat_tool.distribution import Binomial, Poisson
-        from openalea.stat_tool.mixture import _MvMixture
 
         d11 = Binomial(0, 12, 0.1)
         d12 = Binomial(0, 12, 0.5)
@@ -130,9 +133,6 @@ class Test:
         return m
 
     def _test_mv_fromfile(self):
-
-        from openalea.stat_tool.mixture import _MvMixture
-
         # From file
         m = _MvMixture("mixture_mv1.mixt")
         assert m
@@ -140,7 +140,7 @@ class Test:
         # File
         m.save("test_mv.mixt")
 
-        m1 = _MvMixture("mixture_mv1.mixt")
+        _m1 = _MvMixture("mixture_mv1.mixt")
         m2 = _MvMixture("test_mv.mixt")
         assert m.nb_component() == m2.nb_component()
         assert str(m) == str(m2)
@@ -148,18 +148,15 @@ class Test:
         os.remove("test_mv.mixt")
 
         mnp = _MvMixture("mixture_mv_nonparam.mixt")
-        assert m
+        assert mnp
 
         try:
-            h = _MvMixture("no_such_file.mixt")
+            _h = _MvMixture("no_such_file.mixt")
             assert False
         except Exception:
             assert True
 
     def test_simulate_estimate_mv_mixture(self):
-
-        from openalea.stat_tool.distribution import Binomial, Poisson
-        from openalea.stat_tool.mixture import _MvMixture
 
         d11 = Binomial(0, 12, 0.1)
         d12 = Binomial(2, 13, 0.6)
@@ -180,6 +177,11 @@ class Test:
         assert m_estim_nbcomp
 
 #  funtional tests
+from openalea.stat_tool.output import plot, Plot
+from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
+from openalea.stat_tool.simulate import Simulate
+import openalea.stat_tool.distribution as distribution 
+from openalea.stat_tool.cluster import Cluster
 
 def _test1():
     plot.DISABLE_PLOT = True
@@ -206,7 +208,7 @@ def _test1():
     # made only of a preformed part and a second sub-population made of both a preformed part
     # and a neoformed part
     
-    mixt1 = Estimate(meri2, "MIXTURE", "B", "B")
+    _mixt1 = Estimate(meri2, "MIXTURE", "B", "B")
     
     meri = Merge(meri1, meri2, meri3, meri4, meri5)
     
@@ -218,7 +220,7 @@ def _test1():
     # Plot(ExtractDistribution(mixt2, "Mixture"))
     # Display(mixt2)
     
-    mixt_data = ExtractData(mixt2)
+    _mixt_data = ExtractData(mixt2)
     
     
     dist5 = Estimate(meri5, "BINOMIAL")
@@ -260,34 +262,48 @@ def _test1():
     d22 = distribution.Poisson(0, 5.0)
     d23 = distribution.Poisson(0, 0.2)
 
-    m = mixture._MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
+    m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
     print m
 
-    m2 = mixture._MvMixture("mixture_mv1.mixt")
+    m2 = _MvMixture("mixture_mv1.mixt")
     print m2
 
     print "Egalite des melanges construits par liste ",\
       "de distributions et par fichiers : ", str(str(m)==str(m2))
 
-    m = mixture._MvMixture("mixture_mv_nonparam.mixt")
+    m = _MvMixture("mixture_mv_nonparam.mixt")
     print m
 
     print "Simulation de melanges multivaries : "
-    v = m.simulate(5000);
+    v = m.simulate(5000)
     print v
 
     m.plot(variable=1, Title="Simulated mixture")
 
     print "Estimation de melanges multivaries ", \
         "d'apres un modele initial : "
-    m_estim_model = v.mixture_estimation(m, 100,  [True, True]);
+    m_estim_model = v.mixture_estimation(m, 100,  [True, True])
       
     m_estim_model.plot(variable = 1, Title="Estimated mixture")
     
     print "Estimation de melanges multivaries ", \
         "d'apres un nombre de composantes : "
         
-    m_estim_nbcomp = v.mixture_estimation(3, 100,  [True, True]);
+    m_estim_nbcomp = v.mixture_estimation(3, 100, [True, True])
     
     m_estim_nbcomp.plot(variable = 1, Title="Estimated mixture")
 
+
+
+
+if __name__=="__main__":
+    # perform all the test in the class Test (unit tests)
+    test = Test()
+    for method in dir(test):
+        if method.startswith('_'):
+            continue
+        if callable(getattr(test, method)):
+            getattr(test, method)()
+        else:
+            print 'skipping'
+    # and functional tests.    

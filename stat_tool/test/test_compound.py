@@ -1,8 +1,13 @@
 """Compound tests"""
-from openalea.stat_tool import *
+__revision__ = "$Id: $"
 
 
-class Test_unit:
+from openalea.stat_tool.compound import Compound
+from openalea.stat_tool.data_transform import ExtractDistribution
+from openalea.stat_tool.distribution import Uniform
+
+
+class Test:
     """a simple unittest class"""
     
     def test_empty(self):
@@ -20,10 +25,9 @@ class Test_unit:
 
     def test_build_compound(self):
         """run constructor with  two distributions as arguments"""
-        from openalea.stat_tool.distribution import Uniform
         
-        d1 = Uniform(0,10)
-        d2 = Uniform(10,20)
+        d1 = Uniform(0, 10)
+        d2 = Uniform(10, 20)
         
         m = Compound(d1, d2)
         
@@ -49,23 +53,18 @@ class Test_unit:
 
     def test_extract(self):
         """run and test the extract methods"""
-        from openalea.stat_tool.data_transform import ExtractDistribution
-        from openalea.stat_tool.distribution import Uniform
-
         m = self.test_build_compound()
 
         assert m.extract_compound() == ExtractDistribution(m, "Compound")
 
-        assert m.extract_sum() == Uniform(0,10)
+        assert m.extract_sum() == Uniform(0, 10)
         assert m.extract_sum() == ExtractDistribution(m, "Sum")
 
-        assert m.extract_elementary() == Uniform(10,20)
+        assert m.extract_elementary() == Uniform(10, 20)
         assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
 
     def test_extract_data(self):
-        """
-        todo : check if this test makes sense
-        """
+        """todo : check if this test makes sense"""
         from openalea.stat_tool.distribution import Binomial
 
         m = self.test_build_compound()
@@ -75,7 +74,12 @@ class Test_unit:
 
         d = m.extract_data()
         assert d
-        
+    
+from openalea.stat_tool.estimate import Estimate
+from openalea.stat_tool.simulate import Simulate
+from openalea.stat_tool.data_transform import ExtractHistogram, ExtractData, Shift
+from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.distribution import ToHistogram
 
 def test1():
     
@@ -103,5 +107,15 @@ def test1():
 
 
 if __name__=="__main__":
+    # perform all the test in the class Test (unit tests)
+    test = Test()
+    for method in dir(test):
+        if method.startswith('_'):
+            continue
+        if callable(getattr(test, method)):
+            getattr(test, method)()
+        else:
+            print 'skipping'
+    # and functional tests.    
 
     test1()

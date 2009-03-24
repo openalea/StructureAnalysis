@@ -1,3 +1,6 @@
+"""test data_transform"""
+__revision__ = "$Id: $"
+
 from openalea.stat_tool import vectors, histogram, distribution, mixture, convolution, simulate
 from openalea.stat_tool.vectors import Vectors
 from openalea.stat_tool.histogram import Histogram
@@ -240,6 +243,25 @@ class TestMerge:
         
 
     
+if __name__=="__main__":
+    # perform all the test in the class Test (unit tests)
+    testshift = TestShift()
+    testmerge = TestShift()
+    testextract = TestExtract()
+    testselect = TestSelect()
+    
+    for test in [testshift, testmerge, testextract, testselect]:
+        for method in dir(test):
+            if method.startswith('_'):
+                continue
+            if callable(getattr(test, method)):
+                print 'testing %s ' % method
+                getattr(test, method)()
+            else:
+                print 'skipping'
+                    
+    # and functional tests.    
+
 
 
 

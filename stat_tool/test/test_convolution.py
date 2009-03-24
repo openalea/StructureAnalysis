@@ -1,4 +1,5 @@
 """Convolution tests"""
+__revision__ = "$Id: $"
 
 from openalea.stat_tool import Convolution, Distribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
@@ -124,4 +125,14 @@ def test1():
 
 
 if __name__=="__main__":
+    # perform all the test in the class Test (unit tests)
+    test = Test()
+    for method in dir(test):
+        if method.startswith('_'):
+            continue
+        if callable(getattr(test, method)):
+            getattr(test, method)()
+        else:
+            print 'skipping'
+    # and functional tests.    
     test1()

@@ -1,6 +1,6 @@
-"""hsitogram tests"""
+"""histogram tests"""
+__revision__ = "$Id: $"
 
-#from openalea.stat_tool import *
 from openalea.stat_tool.distribution import ToHistogram
 from openalea.stat_tool.distribution import ToDistribution
 from openalea.stat_tool.histogram import Histogram
@@ -102,3 +102,17 @@ class Test:
         assert h == h2
         
     
+
+if __name__=="__main__":
+    # perform all the test in the class Test (unit tests)
+    test = Test()
+    for method in dir(test):
+        if method.startswith('_'):
+            continue
+        if callable(getattr(test, method)):
+            getattr(test, method)()
+        else:
+            print 'skipping'
+    # and functional tests.    
+
+

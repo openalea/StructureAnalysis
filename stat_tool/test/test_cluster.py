@@ -1,8 +1,6 @@
 """ Cluster tests"""
-__revision__ = "$Id: i$"
+__revision__ = "$Id: $"
 
-
-#from openalea.stat_tool import histogram, vectors, comparison, data_transform
 
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.vectors import Vectors, VectorDistance
@@ -68,6 +66,19 @@ class Test:
         assert c1
         assert ToDistanceMatrix(c1)
 
+
+
+if __name__=="__main__":
+    # perform all the test in the class Test (unit tests)
+    test = Test()
+    for method in dir(test):
+        if method.startswith('_'):
+            continue
+        if callable(getattr(test, method)):
+            getattr(test, method)()
+        else:
+            print 'skipping'
+    # and functional tests.    
 
 
 

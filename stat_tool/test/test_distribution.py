@@ -1,6 +1,7 @@
 """Distribution tests"""
+__revision__ = "$Id: $"
 
-#from openalea.stat_tool import *
+
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.distribution import Distribution
 from openalea.stat_tool.distribution import Uniform
@@ -12,7 +13,7 @@ from openalea.stat_tool.distribution import ToDistribution
 from openalea.stat_tool.histogram import Histogram
 
 
-class TestDistribution:
+class Test:
     """unit tests"""
     def __init__(self):
         pass
@@ -187,5 +188,21 @@ def test1():
     Display(dist5, Detail=2)
     Plot(dist5)
     
+
+if __name__=="__main__":
+    # perform all the test in the class Test (unit tests)
+    test = Test()
+    for method in dir(test):
+        if method.startswith('_'):
+            continue
+        if callable(getattr(test, method)):
+            getattr(test, method)()
+        else:
+            print 'skipping'
+    # and functional tests.    
+    
+    test1()
+
+
     
     
