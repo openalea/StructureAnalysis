@@ -189,19 +189,18 @@ Distribution::Distribution(int inb_value)
  *
  *--------------------------------------------------------------*/
 
-Distribution::Distribution(const Distribution &dist , double scale)
+Distribution::Distribution(const Distribution &dist , double scaling_coeff)
 
 {
   register int i , j;
   int min , max;
-  double buff , *pmass;
+  double *pmass;
 
 
-  buff = dist.nb_value * scale;
-  nb_value = ((int)buff == buff ? (int)buff : (int)buff + 1);
+  nb_value = (int)floor(dist.nb_value * scaling_coeff) + 1;
   alloc_nb_value = nb_value;
 
-  offset = (int)(dist.offset * scale);
+  offset = (int)floor(dist.offset * scaling_coeff);
   complement = dist.complement;
   nb_parameter = 0;
 
@@ -214,26 +213,20 @@ Distribution::Distribution(const Distribution &dist , double scale)
   }
 
   for (i = dist.offset;i < dist.nb_value;i++) {
-    if ((int)(i * scale) == (int)((i + 1) * scale)) {
-      mass[(int)(i * scale)] += dist.mass[i];
+    min = (int)floor(i * scaling_coeff);
+    max = (int)floor((i + 1) * scaling_coeff);
+
+    if (scaling_coeff < 1.) {
+      mass[min] += (max - i * scaling_coeff) * dist.mass[i] / scaling_coeff;
+      mass[max] += ((i + 1) * scaling_coeff - max) * dist.mass[i] / scaling_coeff;
     }
 
     else {
-      min = (int)(i * scale);
-      buff = (i + 1) * scale;
-      max = ((int)buff == buff ? (int)buff - 1 : (int)buff);
-
-      for (j = min;j <= max;j++) {
-        if (j == min) {
-          mass[j] += (min + 1 - i * scale) * dist.mass[i] / scale;
-        }
-        else if (j == max) {
-          mass[j] += ((i + 1) * scale - max) * dist.mass[i] / scale;
-        }
-        else {
-          mass[j] += dist.mass[i] / scale;
-        }
+      mass[min] += (min + 1 - i * scaling_coeff) * dist.mass[i] / scaling_coeff;
+      for (j = min + 1;j < max;j++) {
+        mass[j] += dist.mass[i] / scaling_coeff;
       }
+      mass[max] += ((i + 1) * scaling_coeff - max) * dist.mass[i] / scaling_coeff;
     }
   }
 
@@ -1749,7 +1742,6 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
 }
 
 
-
 /*--------------------------------------------------------------*
  *  Sortie graphique de la loi
  *--------------------------------------------------------------*/
@@ -1758,8 +1750,9 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
 MultiPlotSet* Distribution::get_plotable() const
 {
   Format_error error;
-  return get_plotable_dists(error, 0, 0);
+  return get_plotable_dists(error , 0 , 0);
 }
+
 
 /*--------------------------------------------------------------*
  *
@@ -1775,7 +1768,7 @@ MultiPlotSet* Distribution::get_plotable() const
 
 
 MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist ,
-					       const Distribution **idist) const
+                                               const Distribution **idist) const
 
 {
   MultiPlotSet *plotset;
@@ -1919,7 +1912,7 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
               << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
         set[2].title = title.str();
 
-	set[2].grid = true;
+        set[2].grid = true;
 
         set[2].xtics = 0.1;
         set[2].ytics = 0.1;
