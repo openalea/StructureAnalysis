@@ -141,8 +141,8 @@ public :
     :Histogram(histo) { distribution = 0; }
     Distribution_data(int inb_element , int *pelement)
     :Histogram(inb_element , pelement) { distribution = 0; }
-    Distribution_data(const Histogram &histo , char transform , int param)
-    :Histogram(histo , transform , param) { distribution = 0; }
+    Distribution_data(const Histogram &histo , char transform , int param , int mode = FLOOR)
+    :Histogram(histo , transform , param , mode) { distribution = 0; }
     Distribution_data(int nb_histo , const Histogram **phisto)
     :Histogram(nb_histo , phisto) { distribution = 0; }
     Distribution_data(const Histogram &histo , const Distribution *dist);
