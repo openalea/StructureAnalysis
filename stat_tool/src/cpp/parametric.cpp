@@ -191,8 +191,8 @@ Parametric::Parametric(const Distribution &dist , int ialloc_nb_value)
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(const Distribution &dist , double scale)
-:Distribution(dist , scale)
+Parametric::Parametric(const Distribution &dist , double scaling_coeff)
+:Distribution(dist , scaling_coeff)
 
 {
   ident = NONPARAMETRIC;
@@ -201,6 +201,66 @@ Parametric::Parametric(const Distribution &dist , double scale)
   sup_bound = I_DEFAULT;
   parameter = D_DEFAULT;
   probability = D_DEFAULT;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'une loi inter-evenement a partir d'une loi
+ *  inter-evenement initiale par dilatation/retraction de l'echelle des temps.
+ *
+ *  arguments : reference sur une loi inter-evenement, facteur d'echelle.
+ *
+ *--------------------------------------------------------------*/
+
+Parametric::Parametric(const Parametric &dist , double scaling_coeff)
+:Distribution((int)floor(dist.nb_value * scaling_coeff) + 1)
+
+{
+  double scaled_mean , scaled_variance , ratio , shifted_mean;
+
+
+  // scaled_mean = scaling_coeff * dist.mean;
+  // scaled_variance = scaling_coeff * scaling_coeff * dist.variance;
+  scaled_mean = scaling_coeff * dist.parametric_mean_computation();
+  scaled_variance = scaling_coeff * scaling_coeff * dist.parametric_variance_computation();
+
+  inf_bound = (int)floor(dist.inf_bound * scaling_coeff);
+  sup_bound = I_DEFAULT;
+  parameter = D_DEFAULT;
+  probability = D_DEFAULT;
+
+  shifted_mean = scaled_mean - inf_bound;
+  ratio = scaled_variance / shifted_mean;
+
+  // cas binomiale
+
+  if (ratio < 1. - POISSON_RANGE) {
+    ident = BINOMIAL;
+    sup_bound = (int)ceil(inf_bound + shifted_mean * shifted_mean /
+                (shifted_mean - scaled_variance));
+    if (sup_bound <= inf_bound) {
+      sup_bound = inf_bound + 1;
+    }
+    probability = shifted_mean / (sup_bound - inf_bound);
+  }
+
+  // cas binomiale negative
+
+  else if (ratio > 1. + POISSON_RANGE) {
+    ident = NEGATIVE_BINOMIAL;
+    parameter = shifted_mean * shifted_mean / (scaled_variance - shifted_mean);
+    probability = shifted_mean / scaled_variance;
+  }
+
+  // cas Poisson
+
+  else {
+    ident = POISSON;
+    parameter = shifted_mean;
+  }
+
+  computation();
 }
 
 
