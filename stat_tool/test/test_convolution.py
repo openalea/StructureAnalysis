@@ -4,7 +4,6 @@ __revision__ = "$Id: $"
 from openalea.stat_tool import Convolution, Distribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 
 
 class Test:
@@ -13,19 +12,28 @@ class Test:
     def test_empty(self):
         """Test that empty constructor fails"""
         try:
-            m = Convolution()
+            _m = Convolution()
             assert False
         except Exception:
             assert True
 
-    def test_file(self):
+    def test_constructor_fromfile(self):
         """run constructor with filename argument"""
         c = Convolution("convolution1.conv")
         assert c
+        
+        return c
+
+    def test_constructor_fromfile_failure(self):
+        """run constructor with filename argument"""
+        try:
+            _h = Convolution("convolution1.con")
+            assert False
+        except Exception:
+            assert True
 
     def test_build_convolution(self):
         """run constructor with filename two distributions as arguments"""
-        from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 
         d1 = Binomial(0, 10, 0.5)
         d2 = NegativeBinomial(0, 1, 0.1)

@@ -7,10 +7,8 @@ from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Distribution
 
 
-
 class Test:
     """a simple unittest class"""
- 
 
     def test_empty(self):
         """Test that empty constructor fails"""
@@ -20,23 +18,25 @@ class Test:
         except Exception:
             assert True
     
-    def test_constructor(self):
-        """constructor """
-        h = Histogram([0, 1, 2, 3])
+    def test_constructor_fromfile(self):
+        """run constructor with filename argument"""
+        h = Histogram("peup1.his")
         assert h
-        
-    def test_fromfile(self):
+
+        return h
+    
+    def test_constructor_fromfile_failure(self):
         """run constructor with filename argument"""
         try:
-            h = Histogram("peup1.hi")
+            _h = Histogram("peup1.hi")
             assert False
         except Exception:
             assert True
-
-        h = Histogram("peup1.his")
-        assert h
         
-        return h
+    def test_constructor_fromlist(self):
+        """constructor """
+        h = Histogram([0, 1, 2, 3])
+        assert h
         
     def test_fromfile2(self):
         """From file"""
@@ -54,7 +54,7 @@ class Test:
 
     def test_ascii_and_display(self):
         """ test display"""
-        h = self.test_fromfile()
+        h = self.test_constructor_fromfile()
         
         s = str(h)
         assert h.display() == s
@@ -75,7 +75,7 @@ class Test:
 
     def test_plot(self):
         """ plot"""
-        h = self.test_fromfile()
+        h = self.test_constructor_fromfile()
         h.plot()
 
     def test_len(self):

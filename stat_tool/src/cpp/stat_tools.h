@@ -194,11 +194,6 @@ const double SAMPLE_NB_VALUE_COEFF = 5.;  // facteur pour deduire le nombre de v
                                           // par une v.a. du nombre de valeurs d'un histogramme
 const int INF_BOUND_MARGIN = 5;        // plage de recherche pour la borne inferieure
 const int SUP_BOUND_MARGIN = 3;        // plage de recherche pour la borne superieure
-const double POISSON_RATIO = 0.7;      // rapport moyenne/variance minimum pour
-                                       // estimer une loi de Poisson
-
-const double POISSON_RANGE = 0.1;      // plage de variation pour choisir une loi de
-                                       // Poisson par dilatation de l'echelle des temps
 
 const double NB_VALUE_COEFF = 2.;      // facteur pour deduire le nombre de valeurs prises par une v.a.
                                        // du nombre de valeurs prises par une v.a. initiale
