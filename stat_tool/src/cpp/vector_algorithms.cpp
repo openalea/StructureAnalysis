@@ -675,6 +675,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
   bool status = true;
   register int i , j , k;
   double distance , ldistance , **rank;
+  Histogram *merged_marginal;
   Vector_distance *vector_dist;
   Distance_matrix *dist_matrix;
 
@@ -752,13 +753,50 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
 
     rank = new double*[nb_variable];
 
-    for (i = 0;i < nb_variable;i++) {
-      if (vector_dist->variable_type[i] == ORDINAL) {
-        rank[i] = marginal[i]->rank_computation();
+    switch (standardization) {
+
+    case false : {
+      if (vector_dist->variable_type[0] == ORDINAL) {
+        merged_marginal = new Histogram(nb_variable , (const Histogram**)marginal);
+        rank[0] = merged_marginal->rank_computation();
+
+#       ifdef MESSAGE
+        cout << "\nRanks:";
+        for (i = merged_marginal->offset;i < merged_marginal->nb_value;i++) {
+          cout << " " << rank[0][i];
+        }
+        cout << endl;
+#       endif
+
+        for (i = 1;i < nb_variable;i++) {
+          rank[i] = new double[merged_marginal->nb_value];
+          for (j = merged_marginal->offset;j < merged_marginal->nb_value;j++) {
+            rank[i][j] = rank[0][j];
+          }
+        }
+
+        delete merged_marginal;
       }
+
       else {
-        rank[i] = 0;
+        for (i = 0;i < nb_variable;i++) {
+          rank[i] = 0;
+        }
       }
+      break;
+    }
+
+    case true : {
+      for (i = 0;i < nb_variable;i++) {
+        if (vector_dist->variable_type[i] == ORDINAL) {
+          rank[i] = marginal[i]->rank_computation();
+        }
+        else {
+          rank[i] = 0;
+        }
+      }
+      break;
+    }
     }
 
     // calcul des dispersions pour la standardisation
