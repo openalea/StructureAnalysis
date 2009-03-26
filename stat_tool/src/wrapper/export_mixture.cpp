@@ -186,7 +186,15 @@ public:
 
     return ret;
   }
+  static void file_ascii_write(const Mixture m, const char* path, bool exhaustive)
+    {
+    	bool result = true;
+    	Format_error error;
 
+    	result = m.ascii_write(error, path, exhaustive);
+    	if (!result)
+    	   stat_tool::wrap_util::throw_error(error);
+      }
 
 };
 
@@ -237,7 +245,10 @@ void class_mixture()
      return_value_policy< manage_new_object >(),
      "Return the associated _MixtureData object"
      )
-    ;
+
+    .def("file_ascii_write", MixtureWrap::file_ascii_write,
+    	     "Save Compound into a file")
+    	    ;
 }
 
 
@@ -280,6 +291,16 @@ public:
     return ret;
   }
 
+  static void file_ascii_write(const Mixture_data m, const char* path, bool exhaustive)
+  {
+  	bool result = true;
+  	Format_error error;
+
+  	result = m.ascii_write(error, path, exhaustive);
+  	if (!result)
+  	   stat_tool::wrap_util::throw_error(error);
+    }
+
 
 };
 
@@ -287,29 +308,21 @@ void class_mixture_data()
 {
   class_< Mixture_data, bases< Histogram, STAT_interface > >
     ("_MixtureData",  "Mixture Data")
-
     .def(self_ns::str(self))
-
     .def("nb_component", &Mixture_data::get_nb_component,
-     "Return the number of components."
-     )
-
+     "Return the number of components.")
     .def("extract_component", MixtureDataWrap::extract,
      return_value_policy< manage_new_object >(),
      python::arg("index"),
-     "Get a particular component. First index is 1"
-     )
-
+     "Get a particular component. First index is 1")
     .def("extract_weight", MixtureDataWrap::extract_weight,
      return_value_policy< manage_new_object >(),
-     "Return a _DistributionData"
-     )
-
+     "Return a _DistributionData")
     .def("extract_mixture", MixtureDataWrap::extract_mixture,
      return_value_policy< manage_new_object >(),
-     "Return a _DistributionData"
-     )
-
+     "Return a _DistributionData")
+     .def("file_ascii_write", MixtureDataWrap::file_ascii_write,
+     "Save Compound into a file")
     ;
 }
 
