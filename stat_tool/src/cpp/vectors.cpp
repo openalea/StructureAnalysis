@@ -950,11 +950,11 @@ Vectors* Vectors::shift(Format_error &error , int variable , double shift_param)
  *  Regroupement des valeurs d'une variable.
  *
  *  arguments : reference sur un objet Format_error, indice de la variable,
- *              pas de regroupement.
+ *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::cluster(Format_error &error , int variable , int step) const
+Vectors* Vectors::cluster(Format_error &error , int variable , int step , int mode) const
 
 {
   bool status = true;
@@ -986,7 +986,19 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int step) const
           // regroupement des valeurs entieres
 
           if (j == variable) {
-            vec->int_vector[i][j] = int_vector[i][j] / step;
+            switch (mode) {
+            case FLOOR :
+              vec->int_vector[i][j] = int_vector[i][j] / step;
+              break;
+            case ROUND :
+              vec->int_vector[i][j] = (int_vector[i][j] + step / 2) / step;
+//	      vec->int_vector[i][j] = (int)::round((double)int_vector[i][j] / (double)step);
+              break;
+            case CEIL :
+              vec->int_vector[i][j] = (int_vector[i][j] + step - 1) / step;
+//	      vec->int_vector[i][j] = (int)ceil((double)int_vector[i][j] / (double)step);
+              break;
+            }
           }
 
           // copie des valeurs entieres
@@ -1016,11 +1028,29 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int step) const
     for (i = 0;i < vec->nb_variable;i++) {
       if (i == variable) {
         if (vec->type[i] == INT_VALUE) {
-          vec->min_value[i] = (int)min_value[i] / step;
-          vec->max_value[i] = (int)max_value[i] / step;
+          switch (mode) {
+          case FLOOR :
+            vec->min_value[i] = (int)min_value[i] / step;
+	    vec->max_value[i] = (int)max_value[i] / step;
+//            vec->min_value[i] = floor(min_value[i] / step);
+//            vec->max_value[i] = floor(max_value[i] / step);
+            break;
+          case ROUND :
+            vec->min_value[i] = ((int)min_value[i] + step / 2) / step;
+	    vec->max_value[i] = ((int)max_value[i] + step / 2) / step;
+//            vec->min_value[i] = ::round(min_value[i] / step);
+//            vec->max_value[i] = ::round(max_value[i] / step);
+            break;
+          case CEIL :
+            vec->min_value[i] = ((int)min_value[i] + step - 1) / step;
+            vec->max_value[i] = ((int)max_value[i] + step - 1) / step;
+//            vec->min_value[i] = ceil(min_value[i] / step);
+//            vec->max_value[i] = ceil(max_value[i] / step);
+            break;
+          }
 
           if (marginal[i]) {
-            vec->marginal[i] = new Histogram(*(marginal[i]) , 'c' , step);
+            vec->marginal[i] = new Histogram(*(marginal[i]) , 'c' , step , mode);
             vec->mean[i] = vec->marginal[i]->mean;
             vec->covariance[i][i] = vec->marginal[i]->variance;
           }
@@ -1589,11 +1619,12 @@ Vectors* Vectors::scaling(Format_error &error , int variable , int scaling_coeff
  *
  *  Arrondi des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable.
+ *  arguments : reference sur un objet Format_error, indice de la variable,
+ *              mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::round(Format_error &error , int variable) const
+Vectors* Vectors::round(Format_error &error , int variable , int mode) const
 
 {
   bool status = true;
@@ -1678,7 +1709,17 @@ Vectors* Vectors::round(Format_error &error , int variable) const
           // arrondi des valeurs reelles
 
           if ((variable == I_DEFAULT) || (variable == j)) {
-            vec->int_vector[i][j] = (int)::round(real_vector[i][j]);
+            switch (mode) {
+            case FLOOR :
+              vec->int_vector[i][j] = (int)floor(real_vector[i][j]);
+              break;
+            case ROUND :
+              vec->int_vector[i][j] = (int)::round(real_vector[i][j]);
+              break;
+            case CEIL :
+              vec->int_vector[i][j] = (int)ceil(real_vector[i][j]);
+              break;
+            }
           }
 
           // copie des valeurs reelles
@@ -1692,8 +1733,20 @@ Vectors* Vectors::round(Format_error &error , int variable) const
 
     for (i = 0;i < vec->nb_variable;i++) {
       if ((variable == I_DEFAULT) || (variable == i)) {
-        vec->min_value[i] = ::round(min_value[i]);
-        vec->max_value[i] = ::round(max_value[i]);
+        switch (mode) {
+        case FLOOR :
+          vec->min_value[i] = floor(min_value[i]);
+          vec->max_value[i] = floor(max_value[i]);
+          break;
+        case ROUND :
+          vec->min_value[i] = ::round(min_value[i]);
+          vec->max_value[i] = ::round(max_value[i]);
+          break;
+        case CEIL :
+          vec->min_value[i] = ceil(min_value[i]);
+          vec->max_value[i] = ceil(max_value[i]);
+          break;
+        }
 
         vec->build_marginal_histogram(i);
       }
@@ -3095,7 +3148,7 @@ ostream& Vectors::ascii_print(ostream &os , bool comment_flag) const
  *--------------------------------------------------------------*/
 
 ostream& Vectors::ascii_data_write(ostream &os , bool exhaustive, 
-				   bool comment_flag) const
+                                   bool comment_flag) const
 
 {
   ascii_write(os, exhaustive, comment_flag);
