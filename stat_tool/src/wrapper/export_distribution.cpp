@@ -1,22 +1,22 @@
 /*------------------------------------------------------------------------------
- *                                                                              
+ *
  *        VPlants.Stat_Tool : VPlants Statistics module
- *                                                                              
- *        Copyright 2006-2007 INRIA - CIRAD - INRA                      
- *                                                                              
+ *
+ *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>         
- *                                                                              
- *        Distributed under the GPL 2.0 License.                               
- *        See accompanying file LICENSE.txt or copy at                          
+ *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *
+ *        Distributed under the GPL 2.0 License.
+ *        See accompanying file LICENSE.txt or copy at
  *           http://www.gnu.org/licenses/gpl-2.0.txt
- *                                                                              
- *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
- *       
+ *
+ *        OpenAlea WebSite : http://openalea.gforge.inria.fr
+ *
  *        $Id$
- *                                                                       
+ *
  *-----------------------------------------------------------------------------*/
 
 #include "wrapper_util.h"
@@ -70,7 +70,7 @@ public:
 
     return ret;
   }
-  
+
   static Distribution_data* extract_data(const Parametric_model& p)
   {
     Format_error error;
@@ -86,15 +86,15 @@ public:
   {
     std::stringstream s;
     std::string res;
-    
+
     p.survival_ascii_write(s);
     res = s.str();
-    
+
     return res;
   }
 
 
-  
+
   static void survival_spreadsheet_write(const Parametric_model& p,
 						const std::string& filename)
   {
@@ -102,11 +102,11 @@ public:
 
     if(!p.survival_spreadsheet_write(error, filename.c_str()))
       stat_tool::wrap_util::throw_error(error);
-      
+
   }
 
 
-   
+
   static void survival_plot_write(const Parametric_model& p,
 				  const std::string& prefix, const std::string& title)
   {
@@ -116,18 +116,18 @@ public:
       stat_tool::wrap_util::throw_error(error);
   }
 
-  
+
   static MultiPlotSet* survival_get_plotable(const Parametric_model& p)
   {
     Format_error error;
     MultiPlotSet* ret = p.survival_get_plotable(error);
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
-    
+
     return ret;
   }
 
-  
+
 //   static void plot_write(const Parametric_model& p,
 // 			 const std::string& prefix, const std::string& title,
 // 			 const boost::python::list& dist_list)
@@ -135,7 +135,7 @@ public:
 //     Format_error error;
 
 //     int nb_dist = boost::python::len(dist_list);
-//     stat_tool::wrap_util::auto_ptr_array<const Distribution *> 
+//     stat_tool::wrap_util::auto_ptr_array<const Distribution *>
 //       dists(new const Distribution*[nb_dist]);
 
 //     const Distribution &d = (const Distribution&)(p);
@@ -145,12 +145,12 @@ public:
 //   }
 
 
-  static MultiPlotSet* get_plotable(const Parametric_model& p, 
+  static MultiPlotSet* get_plotable(const Parametric_model& p,
 				const boost::python::list& dist_list)
   {
     Format_error error;
     int nb_dist = boost::python::len(dist_list);
-    stat_tool::wrap_util::auto_ptr_array<const Distribution *> 
+    stat_tool::wrap_util::auto_ptr_array<const Distribution *>
       dists(new const Distribution*[nb_dist]);
 
     for (int i = 0; i < nb_dist; i++)
@@ -161,9 +161,21 @@ public:
     MultiPlotSet* ret = p.get_plotable_dists(error, nb_dist, d);
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
-    
+
     return ret;
   }
+
+  static void file_ascii_write(const Parametric_model p, const char* path, bool exhaustive)
+  {
+  	     bool result = true;
+  	     Format_error error;
+
+  	     result = p.ascii_write(error, path, exhaustive);
+  	     if (!result)
+  	        stat_tool::wrap_util::throw_error(error);
+
+  	   }
+
 
 
 };
@@ -175,7 +187,7 @@ public:
 void class_distribution()
 {
 
-  
+
   // Distribution base class
   class_< Distribution>("_Distribution")
     .def(self_ns::str(self)) // __str__
@@ -197,7 +209,7 @@ void class_distribution()
     .def_readonly("probability", &Parametric::probability)
     .def(self_ns::str(self))
 
-    .def("simulate", &Parametric::simulation, 
+    .def("simulate", &Parametric::simulation,
 	 "Simulation one value")
     ;
 
@@ -210,7 +222,7 @@ void class_distribution()
     .value("UNIFORM",UNIFORM)
     .export_values()
     ;
-  
+
 
   // _Parametric Model
   class_< Parametric_model, bases< Parametric, STAT_interface > >
@@ -218,7 +230,7 @@ void class_distribution()
 
     .def(init< int, int, int, double, double, optional< double > >())
     .def("__init__", make_constructor(ParametricModelWrap::parametric_model_from_file))
-    .def(self_ns::str(self)) // __str__ 
+    .def(self_ns::str(self)) // __str__
 
     // Output
     .def("get_plotable", ParametricModelWrap::get_plotable,
@@ -248,23 +260,27 @@ void class_distribution()
     .def("survival_get_plotable", ParametricModelWrap::survival_get_plotable,
 	  return_value_policy< manage_new_object >(),
 	 "Return a plotable object")
-    
+
     .def("survival_spreadsheet_write", &ParametricModelWrap::survival_spreadsheet_write,
 	 python::arg("filename"),
 	 "Write object to filename (spreadsheet format)")
-    
+
     // Extract
-    .def("extract_data", ParametricModelWrap::extract_data, 
+    .def("extract_data", ParametricModelWrap::extract_data,
 	 return_value_policy< manage_new_object >(),
 	 "Return the 'data' part of the model")
 
-    .def("simulate", ParametricModelWrap::simulation, 
+    .def("simulate", ParametricModelWrap::simulation,
 	 return_value_policy< manage_new_object >(),
 	 python::arg("nb_value"),
 	 "Simulate values")
 
-    .def("simulate", &Parametric::simulation, 
+    .def("simulate", &Parametric::simulation,
 	 "Simulation one value")
+
+	 .def("file_ascii_write", ParametricModelWrap::file_ascii_write,
+	 "Return a string containing the object description")
+
 
     ;
 
