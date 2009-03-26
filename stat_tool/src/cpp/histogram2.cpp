@@ -1157,7 +1157,8 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
           max_mass = (double)histo[i]->max / (double)histo[i]->nb_element;
         }
 
-        if (histo[i]->variance > 0.) {
+        if (((histo[i]->variance == D_DEFAULT) && (histo[i]->nb_value > histo[i]->offset + 1)) ||
+            (histo[i]->variance > 0.)) {
           cumul_concentration_flag = true;
           if (histo[i]->nb_value - histo[i]->offset > max_range) {
             max_range = histo[i]->nb_value - histo[i]->offset;
@@ -1340,7 +1341,8 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
           out_file << "plot [0:" << max_nb_value - 1 << "] [0:1] ";
           k = 0;
           for (j = 0;j < nb_histo;j++) {
-            if (histo[j]->variance > 0.) {
+            if (((histo[j]->variance == D_DEFAULT) && (histo[j]->nb_value > histo[j]->offset + 1)) ||
+                (histo[j]->variance > 0.)) {
               if (k > 0) {
                 out_file << ",\\\n";
               }
@@ -1381,7 +1383,8 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
             out_file << "plot [0:1] [0:1] ";
             k = 0;
             for (j = 0;j < nb_histo;j++) {
-              if (histo[j]->variance > 0.) {
+              if (((histo[j]->variance == D_DEFAULT) && (histo[j]->nb_value > histo[j]->offset + 1)) ||
+                  (histo[j]->variance > 0.)) {
                 if (k > 0) {
                   out_file << ",\\\n";
                 }
@@ -1414,7 +1417,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
 
           out_file << "plot [0:1] [0:1] ";
           for (j = 0;j < nb_histo;j++) {
-            if (histo[j]->variance > 0.) {
+            if ((histo[j]->variance != D_DEFAULT) && (histo[j]->variance > 0.)) {
               out_file << "\"" << label((data_file_name[j + 1].str()).c_str()) << "\" using 5:6 title \""
                        << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_CURVE];
               if (nb_histo > 1) {
