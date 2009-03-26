@@ -115,7 +115,8 @@ protected :
 
     void build_real_vector(int variable = I_DEFAULT);
 
-    void transcode(const Vectors &vec , int variable , int min_symbol , int max_symbol , int *symbol);
+    void transcode(const Vectors &vec , int variable , int min_symbol ,
+                   int max_symbol , int *symbol);
     void cluster(const Vectors &vec , int variable , int nb_class , double *limit);
     void select_variable(const Vectors &vec , int *variable);
     Vectors* select_variable(int explanatory_variable , int response_variable) const;
@@ -188,13 +189,15 @@ public :
     Vectors* shift(Format_error &error , int variable , int shift_param) const;
     Vectors* shift(Format_error &error , int variable , double shift_param) const;
     Vectors* transcode(Format_error &error , int variable , int *symbol) const;
-    Vectors* cluster(Format_error &error , int variable , int step) const;
+    Vectors* cluster(Format_error &error , int variable , int step ,
+                     int mode = FLOOR) const;
     Vectors* cluster(Format_error &error , int variable , int inb_value ,
                      int *ilimit) const;
     Vectors* cluster(Format_error &error , int variable , int nb_class ,
                      double *ilimit) const;
     Vectors* scaling(Format_error &error , int variable , int scaling_coeff) const;
-    Vectors* round(Format_error &error , int variable = I_DEFAULT) const;
+    Vectors* round(Format_error &error , int variable = I_DEFAULT ,
+                   int mode = ROUND) const;
 
     Vectors* value_select(Format_error &error , int variable , int imin_value ,
                           int imax_value , bool keep = true) const;
@@ -210,8 +213,8 @@ public :
 
     std::ostream& line_write(std::ostream &os) const;
 
-    std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false,
-                 bool comment_flag=false) const;
+    std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false ,
+                                   bool comment_flag = false) const;
     bool ascii_data_write(Format_error &error , const char *path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
