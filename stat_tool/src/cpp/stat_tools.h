@@ -94,6 +94,12 @@ const int NB_VALUE = 1000;             // nombre de valeurs prises par une v.a.
 const int SAMPLE_NB_VALUE = NB_VALUE;  // nombre de valeurs d'un histogramme
 
 enum {
+  FLOOR ,
+  ROUND ,
+  CEIL
+};
+
+enum {
   NONPARAMETRIC ,
   BINOMIAL ,
   POISSON ,
@@ -186,10 +192,13 @@ const double NB_THRESHOLD = 500.;      // seuil pour utiliser le calcul en log d
 
 const double SAMPLE_NB_VALUE_COEFF = 5.;  // facteur pour deduire le nombre de valeurs prises
                                           // par une v.a. du nombre de valeurs d'un histogramme
-const int INF_BOUND_MARGIN = 5;        // plage de recherche pour la borne superieure
-const int SUP_BOUND_MARGIN = 3;        // plage de recherche pour la borne inferieure
+const int INF_BOUND_MARGIN = 5;        // plage de recherche pour la borne inferieure
+const int SUP_BOUND_MARGIN = 3;        // plage de recherche pour la borne superieure
 const double POISSON_RATIO = 0.7;      // rapport moyenne/variance minimum pour
                                        // estimer une loi de Poisson
+
+const double POISSON_RANGE = 0.1;      // plage de variation pour choisir une loi de
+                                       // Poisson par dilatation de l'echelle des temps
 
 const double NB_VALUE_COEFF = 2.;      // facteur pour deduire le nombre de valeurs prises par une v.a.
                                        // du nombre de valeurs prises par une v.a. initiale
@@ -518,7 +527,7 @@ class Distribution {    // loi de probabilite discrete
 // public :
 
     Distribution(int inb_value = 0);
-    Distribution(const Distribution &dist , double scale);
+    Distribution(const Distribution &dist , double scaling_coeff);
     Distribution(const Histogram &histo);
     Distribution(const Distribution &dist , char transform = 'c' ,
                  int ialloc_nb_value = I_DEFAULT);
@@ -532,7 +541,7 @@ class Distribution {    // loi de probabilite discrete
 
     MultiPlotSet* get_plotable() const;
     MultiPlotSet* get_plotable_dists(Format_error &error , int nb_dist ,
-                               const Distribution **idist) const;
+                                     const Distribution **idist) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
     bool survival_ascii_write(Format_error &error , const char *path) const;
@@ -675,8 +684,8 @@ public :
     Parametric(int iident , int iinf_bound , int isup_bound , double iparameter ,
                double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
     Parametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
-    Parametric(const Distribution &dist , double scale);
-    Parametric(const Parametric &dist , double scale); // !! not implemented
+    Parametric(const Distribution &dist , double scaling_coeff);
+    Parametric(const Parametric &dist , double scaling_coeff);
     Parametric(const Histogram &histo);
     Parametric(const Parametric &dist , char transform = 'c' ,
                int ialloc_nb_value = I_DEFAULT);
@@ -791,7 +800,7 @@ class Histogram : public Reestimation<int> {  // histogramme
 public :
 
     void shift(const Histogram &histo , int shift_param);
-    void cluster(const Histogram &histo , int step);
+    void cluster(const Histogram &histo , int step , int mode);
 
     std::ostream& ascii_print(std::ostream &os , int comment_flag = false , bool cumul_flag = false) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
@@ -849,19 +858,19 @@ public :
 // public :
 
     Histogram(int inb_value = 0)
-      :Reestimation<int>(inb_value) {}
+    :Reestimation<int>(inb_value) {}
     Histogram(const Distribution &dist)
-      :Reestimation<int>(dist.nb_value) {}
+    :Reestimation<int>(dist.nb_value) {}
     Histogram(int inb_element , int *pelement);
     Histogram(int nb_histo , const Histogram **histo)
-      :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
-    Histogram(const Histogram &histo , char transform , int param);
+    :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
+    Histogram(const Histogram &histo , char transform , int param , int mode = FLOOR);
 
     bool operator==(const Histogram&) const;
     bool operator!=(const Histogram &histo) const { return !(*this == histo); }
 
     Distribution_data* shift(Format_error &error , int shift_param) const;
-    Distribution_data* cluster(Format_error &error , int step) const;
+    Distribution_data* cluster(Format_error &error , int step , int mode = FLOOR) const;
     Distribution_data* cluster(Format_error &error , double ratio , std::ostream &os) const;
     Distribution_data* cluster(Format_error &error , int nb_class , int *ilimit) const;
     Distribution_data* transcode(Format_error &error , int *isymbol) const;
