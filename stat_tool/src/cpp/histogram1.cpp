@@ -151,11 +151,12 @@ void Histogram::shift(const Histogram &histo , int shift_param)
  *
  *  Regroupement des valeurs d'un histogramme.
  *
- *  arguments : reference sur un objet Histogram, pas pour le regroupement.
+ *  arguments : reference sur un objet Histogram, pas pour le regroupement,
+ *              mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-void Histogram::cluster(const Histogram &histo , int step)
+void Histogram::cluster(const Histogram &histo , int step , int mode)
 
 {
   register int i;
@@ -163,24 +164,57 @@ void Histogram::cluster(const Histogram &histo , int step)
 
 
   nb_element = histo.nb_element;
-  nb_value = (histo.nb_value - 1) / step + 1;
+
+  switch (mode) {
+  case FLOOR :
+    offset = histo.offset / step;
+    nb_value = (histo.nb_value - 1) / step + 1;
+    break;
+  case ROUND :
+    offset = (histo.offset + step / 2) / step;
+    nb_value = (histo.nb_value - 1 + step / 2) / step + 1;
+    break;
+  case CEIL :
+    offset = (histo.offset + step - 1) / step;
+    nb_value = (histo.nb_value + step - 2) / step + 1;
+    break;
+  }
+
   alloc_nb_value = nb_value;
-  offset = histo.offset / step;
 
   // cumul des frequences
 
   frequency = new int[nb_value];
 
-  pfrequency = frequency - 1;
-  cfrequency = histo.frequency;
+  for (i = 0;i < nb_value;i++) {
+    frequency[i] = 0;
+  }
+  cfrequency = histo.frequency + histo.offset;
 
-  for (i = 0;i < histo.nb_value;i++) {
-    if (i % step == 0) {
-      *++pfrequency = *cfrequency++;
+  switch (mode) {
+
+  case FLOOR : {
+    for (i = histo.offset;i < histo.nb_value;i++) {
+      frequency[i / step] += *cfrequency++;
     }
-    else {
-      *pfrequency += *cfrequency++;
+    break;
+  }
+
+  case ROUND : {
+    for (i = histo.offset;i < histo.nb_value;i++) {
+      frequency[(i + step / 2) / step] += *cfrequency++;
+//      frequency[(int)round((double)i / (double)step)] += *cfrequency++;
     }
+    break;
+  }
+
+  case CEIL : {
+    for (i = histo.offset;i < histo.nb_value;i++) {
+      frequency[(i + step - 1) / step] += *cfrequency++;
+//      frequency[(int)ceil((double)i / (double)step)] += *cfrequency++;
+    }
+    break;
+  }
   }
 
   // calcul des caracteristiques de l'histogramme
@@ -197,11 +231,12 @@ void Histogram::cluster(const Histogram &histo , int step)
  *
  *  arguments : reference sur un objet Histogram, type de transformation
  *              ('s' : translation, 'c' : groupement des valeurs),
- *              pas de regroupement ('c') / parametre de translation ('s').
+ *              pas de regroupement ('c') / parametre de translation ('s'),
+ *              mode regroupement (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Histogram::Histogram(const Histogram &histo , char transform , int param)
+Histogram::Histogram(const Histogram &histo , char transform , int param , int mode)
 
 {
   switch (transform) {
@@ -209,7 +244,7 @@ Histogram::Histogram(const Histogram &histo , char transform , int param)
     shift(histo , param);
     break;
   case 'c' :
-    cluster(histo , param);
+    cluster(histo , param , mode);
     break;
   default :
     copy(histo);
@@ -289,11 +324,12 @@ Distribution_data* Histogram::shift(Format_error &error , int shift_param) const
  *
  *  Regroupement des valeurs d'un histogramme.
  *
- *  arguments : reference sur un objet Format_error, pas pour le regroupement.
+ *  arguments : reference sur un objet Format_error, pas pour le regroupement,
+ *              mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Histogram::cluster(Format_error &error , int step) const
+Distribution_data* Histogram::cluster(Format_error &error , int step , int mode) const
 
 {
   Distribution_data *histo;
@@ -307,7 +343,7 @@ Distribution_data* Histogram::cluster(Format_error &error , int step) const
   }
 
   else {
-    histo = new Distribution_data(*this , 'c' , step);
+    histo = new Distribution_data(*this , 'c' , step , mode);
   }
 
   return histo;
@@ -877,7 +913,7 @@ ostream& Histogram::spreadsheet_print(ostream &os , bool cumul_flag , bool conce
   double *cumul, *concentration;
 
 
-  if ((!cumul_flag) || (mean == 0.)) {
+  if ((!cumul_flag) || (variance == D_DEFAULT) || (variance == 0.)) {
     concentration_flag = false;
   }
 
@@ -931,7 +967,8 @@ bool Histogram::plot_print(const char *path , double *cumul ,
   if (out_file) {
     status = true;
 
-    if ((offset == 0) && (variance > 0.)) {
+    if ((offset == 0) && (((variance == D_DEFAULT) && (nb_value > 1)) ||
+         (variance > 0.))) {
       out_file << -1 << " " << -1 + shift << " " << 0 << " "
                << 0 << " " << 0 << " " << 0 << endl;
     }
@@ -939,8 +976,11 @@ bool Histogram::plot_print(const char *path , double *cumul ,
     for (i = 0;i < nb_value;i++) {
       out_file << i << " " << i + shift << " " << frequency[i] << " "
                << (double)frequency[i] / (double)nb_element;
-      if (variance > 0.) {
-        out_file << " " << cumul[i] << " " << concentration[i];
+      if (((variance == D_DEFAULT) && (nb_value > offset + 1)) || (variance > 0.)) {
+        out_file << " " << cumul[i];
+      }
+      if ((variance != D_DEFAULT) && (variance > 0.)) {
+        out_file << " " << concentration[i];
       }
       out_file << endl;
     }
@@ -1692,7 +1732,7 @@ double* Histogram::concentration_function_computation(double scale) const
   double norm , *concentration_function , *pconcentration;
 
 
-  if (mean > 0.) {
+  if ((variance != D_DEFAULT) && (variance > 0.)) {
     if (scale == D_DEFAULT) {
       scale = nb_element;
     }
