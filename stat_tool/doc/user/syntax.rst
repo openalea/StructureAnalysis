@@ -1,4 +1,4 @@
-.. include:: ../../../../openalea/doc/alias.rst
+.. include:: alias.rst
 
 File Syntax, STAT module
 ########################
