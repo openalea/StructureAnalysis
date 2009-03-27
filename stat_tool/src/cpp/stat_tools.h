@@ -807,7 +807,7 @@ public :
     bool plot_print(const char *path , double *cumul , double *concentration ,
                     double shift = 0.) const;
     bool survival_plot_print(const char *path , double *survivor) const;
-    virtual std::ostream& plot_title_print(std::ostream &os) const
+    std::ostream& plot_title_print(std::ostream &os) const
     { return os; }
 
     void plotable_frequency_write(SinglePlot &plot) const;

@@ -1958,13 +1958,11 @@ MultiPlotSet* Distribution_data::get_plotable() const
 {
   MultiPlotSet *set;
 
-  cout << "###################3" <<endl;
   if (distribution) {
     set = distribution->get_plotable(this);
   }
   else {
     Format_error error;
-    cout << "---------------------###################3" <<endl;
     set = Histogram::get_plotable_hists(error , 0 , 0);
 
   }
@@ -2178,6 +2176,7 @@ MultiPlotSet* Histogram::get_plotable_hists(Format_error &error, int nb_hist,
   return plotset;
 
 }
+
 
 /*--------------------------------------------------------------*
  *
