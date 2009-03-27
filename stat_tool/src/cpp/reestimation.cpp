@@ -44,13 +44,6 @@
 #include "stat_label.h"
 #include "tool/util_math.h"
 
-const double POISSON_RATIO = 0.7;      // rapport moyenne/variance minimum pour
-                                       // estimer une loi de Poisson
-                                       // Defined here instead os stat_tool header. 
-                                       // Indeed, this constant is defined elsewhere
-                                       //  (e.g., sequence analysis/renewal.h) and enter 
-                                       //  into conflict if set into stat_tool.h
-
 using namespace std;
 
 

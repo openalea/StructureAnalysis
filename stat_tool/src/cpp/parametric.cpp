@@ -48,10 +48,6 @@
 #include "distribution.h"
 #include "stat_label.h"
 
-
-const double POISSON_RANGE = 0.1;
-
-
 using namespace std;
 
 
