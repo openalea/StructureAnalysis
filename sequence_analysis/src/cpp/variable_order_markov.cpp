@@ -838,26 +838,7 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov &markov
                                              int inb_output_process , int nb_value)
 
 {
-  register int i;
-  int nb_terminal;
-
-
   memory_tree_completion(markov);
-
-  if (type == 'e') {
-    nb_terminal = (nb_row - 1) * (nb_state - 1) / nb_state + 1;
-
-    for (i = 1;i < nb_row;i++) {
-      if (!child[i]) {
-        initial[i] = 1. / (double)nb_terminal;
-      }
-      else {
-        initial[i] = 0.;
-      }
-    }
-
-    initial_probability_computation();
-  }
 
   nb_output_process = inb_output_process;
 
@@ -887,25 +868,9 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov &markov
 
 {
   register int i;
-  int nb_terminal;
 
 
   memory_tree_completion(markov);
-
-  if (type == 'e') {
-    nb_terminal = (nb_row - 1) * (nb_state - 1) / nb_state + 1;
-
-    for (i = 1;i < nb_row;i++) {
-      if (!child[i]) {
-        initial[i] = 1. / (double)nb_terminal;
-      }
-      else {
-        initial[i] = 0.;
-      }
-    }
-
-    initial_probability_computation();
-  }
 
   nb_output_process = inb_output_process;
 
@@ -2968,6 +2933,7 @@ ostream& Variable_order_markov::ascii_print(ostream &os , bool file_flag) const
 {
   register int i , j , k;
   int buff , width;
+  double *stationary_probability;
   long old_adjust;
 
 
@@ -3001,6 +2967,20 @@ ostream& Variable_order_markov::ascii_print(ostream &os , bool file_flag) const
   }
 
   case 'e' : {
+
+    // extraction des probabilites stationnairees correspondant aux memoires completees
+
+    stationary_probability = new double[nb_row];
+
+    for (i = 1;i < nb_row;i++) {
+      stationary_probability[i] = initial[i];
+    }
+    for (i = nb_row - 1;i >= 1;i--) {
+      if (memory_type[i] == COMPLETION) {
+        stationary_probability[parent[i]] += stationary_probability[i];
+      }
+    }
+
     if (file_flag) {
       os << "# ";
     }
@@ -3011,7 +2991,7 @@ ostream& Variable_order_markov::ascii_print(ostream &os , bool file_flag) const
         if (file_flag) {
           os << "# ";
         }
-        os << setw(width) << initial[i];
+        os << setw(width) << stationary_probability[i];
 
         os << " ";
         for (j = max_order - 1;j >= order[i];j--) {
@@ -3023,6 +3003,8 @@ ostream& Variable_order_markov::ascii_print(ostream &os , bool file_flag) const
         os << endl;
       }
     }
+
+    delete [] stationary_probability;
     break;
   }
   }
@@ -3693,6 +3675,7 @@ ostream& Variable_order_markov::spreadsheet_print(ostream &os) const
 
 {
   register int i , j , k;
+  double *stationary_probability;
 
 
   os << "\n" << nb_state << "\t" << STAT_word[STATW_STATES] << endl;
@@ -3709,16 +3692,32 @@ ostream& Variable_order_markov::spreadsheet_print(ostream &os) const
   }
 
   case 'e' : {
+
+    // extraction des probabilites stationnairees correspondant aux memoires completees
+
+    stationary_probability = new double[nb_row];
+
+    for (i = 1;i < nb_row;i++) {
+      stationary_probability[i] = initial[i];
+    }
+    for (i = nb_row - 1;i >= 1;i--) {
+      if (memory_type[i] == COMPLETION) {
+        stationary_probability[parent[i]] += stationary_probability[i];
+      }
+    }
+
     os << "\n" << STAT_label[STATL_STATIONARY_PROBABILITIES] << endl;
     for (i = 1;i < nb_row;i++) {
       if (memory_type[i] == TERMINAL) {
-        os << initial[i] << "\t\t";
+        os << stationary_probability[i] << "\t\t";
         for (j = order[i] - 1;j >= 0;j--) {
           os << state[i][j] << " ";
         }
         os << endl;
       }
     }
+
+    delete [] stationary_probability;
     break;
   }
   }
