@@ -828,12 +828,12 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
  *  Regroupement des valeurs d'une variable.
  *
  *  arguments : reference sur un objet Format_error, indice de la variable,
- *              pas de regroupement.
+ *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
 Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int variable ,
-                                                  int step) const
+                                                  int step , int mode) const
 
 {
   bool status = true;
@@ -868,7 +868,7 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
   if (status) {
     seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
                                   nb_variable , type);
-    seq->Sequences::cluster(*this , variable , step);
+    seq->Sequences::cluster(*this , variable , step , mode);
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (i == variable) {
