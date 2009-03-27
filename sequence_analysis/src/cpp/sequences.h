@@ -457,7 +457,7 @@ protected :
     bool increasing_sequence_checking(Format_error &error , int variable , bool strict ,
                                       const char *pattern_label , const char *variable_label) const;
 
-    void cluster(const Sequences &seq , int variable , int step);
+    void cluster(const Sequences &seq , int variable , int step , int mode);
     void transcode(const Sequences &seq , int ivariable , int min_symbol , int max_symbol ,
                    int *symbol , bool add_flag = false);
     void cluster(const Sequences &seq , int variable , int nb_class , double *limit);
@@ -604,14 +604,16 @@ public :
 
     Sequences* shift(Format_error &error , int variable , int shift_param) const;
     Sequences* shift(Format_error &error , int variable , double shift_param) const;
-    Sequences* cluster(Format_error &error , int variable , int step) const;
+    Sequences* cluster(Format_error &error , int variable , int step ,
+                       int mode = FLOOR) const;
     Sequences* transcode(Format_error &error , int variable , int *symbol) const;
     Sequences* cluster(Format_error &error , int variable , int nb_class ,
                        int *ilimit) const;
     Sequences* cluster(Format_error &error , int variable , int nb_class ,
                        double *ilimit) const;
     Sequences* scaling(Format_error &error , int variable , int scaling_coeff) const;
-    Sequences* round(Format_error &error , int variable = I_DEFAULT) const;
+    Sequences* round(Format_error &error , int variable = I_DEFAULT ,
+                     int mode = ROUND) const;
 
     Sequences* index_parameter_select(Format_error &error , int min_index_parameter ,
                                       int max_index_parameter , bool keep) const;
@@ -950,7 +952,8 @@ public :
     Markovian_sequences* merge(Format_error &error , int nb_sample ,
                                const Markovian_sequences **iseq) const;
 
-    Markovian_sequences* cluster(Format_error &error , int variable , int step) const;
+    Markovian_sequences* cluster(Format_error &error , int variable , int step ,
+                                 int mode = FLOOR) const;
     Markovian_sequences* transcode(Format_error &error , int ivariable , int *symbol ,
                                    bool add_flag = false) const;
     Markovian_sequences* consecutive_values(Format_error &error , std::ostream &os ,
