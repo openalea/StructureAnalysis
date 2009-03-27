@@ -54,63 +54,6 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'une loi inter-evenement a partir d'une loi
- *  inter-evenement initiale par dilatation/retraction de l'echelle des temps.
- *
- *  arguments : reference sur une loi inter-evenement, facteur d'echelle.
- *
- *--------------------------------------------------------------*/
-
-Parametric::Parametric(const Parametric &dist , double scale)
-:Distribution((int)(dist.nb_value * scale) + 1)
-
-{
-  double bmean , bvariance , ratio , shift_mean;
-
-
-  bmean = scale * dist.mean;
-  bvariance = scale * scale * dist.variance;
-
-  inf_bound = (int)(dist.inf_bound * scale);
-  sup_bound = I_DEFAULT;
-  parameter = D_DEFAULT;
-  probability = D_DEFAULT;
-
-  shift_mean = bmean - inf_bound;
-  ratio = bvariance / shift_mean;
-
-  // cas binomiale
-
-  if (ratio < 1. - POISSON_RANGE) {
-    ident = BINOMIAL;
-    sup_bound = (int)ceil(inf_bound + shift_mean * shift_mean / (shift_mean - bvariance));
-    if (sup_bound <= inf_bound) {
-      sup_bound = inf_bound + 1;
-    }
-    probability = shift_mean / (sup_bound - inf_bound);
-  }
-
-  // cas binomiale negative
-
-  else if (ratio > 1. + POISSON_RANGE) {
-    ident = NEGATIVE_BINOMIAL;
-    parameter = shift_mean * shift_mean / (bvariance - shift_mean);
-    probability = shift_mean / bvariance;
-  }
-
-  // cas Poisson
-
-  else {
-    ident = POISSON;
-    parameter = shift_mean;
-  }
-
-  computation();
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur de la classe Nb_event.
  *
  *  arguments : type, temps d'observation, nombre de valeurs,
