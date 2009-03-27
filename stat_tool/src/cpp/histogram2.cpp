@@ -1946,6 +1946,7 @@ bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
 }
 
 
+
 /*--------------------------------------------------------------*
  *
  *  Sortie graphique d'un objet Distribution_data.
@@ -1957,21 +1958,226 @@ MultiPlotSet* Distribution_data::get_plotable() const
 {
   MultiPlotSet *set;
 
-
+  cout << "###################3" <<endl;
   if (distribution) {
     set = distribution->get_plotable(this);
   }
-
   else {
-//    Format_error error;
+    Format_error error;
+    cout << "---------------------###################3" <<endl;
+    set = Histogram::get_plotable_hists(error , 0 , 0);
 
-//    set = Histogram::get_plotable(error , 0 , 0);
-    set = 0;
   }
 
   return set;
 }
 
+/*--------------------------------------------------------------*
+ *
+ *  Sortie Matplotlib d'une famille d'histogrammes :
+ *  - histogrammes seuls et histogrammes etages,
+ *  - lois et fonctions de repartition deduites des histogrammes,
+ *  - mise en correspondance des fonctions de repartition,
+ *  - courbes de concentration.
+ *
+ *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *              nombre d'histogrammes, pointeurs sur les histogrammes, titre des figures.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Histogram::get_plotable_hists(Format_error &error, int nb_hist,
+											const Histogram **ihist) const
+{
+  MultiPlotSet *plotset;
+
+  error.init();
+
+  if (nb_hist > PLOT_NB_HISTOGRAM) {
+    plotset = 0;
+    error.update(STAT_error[STATR_PLOT_NB_HISTOGRAM]);
+  }
+  else{
+    bool cumul_concentration_flag;
+	register int i , j , k;
+    const Histogram **hist;
+    std::ostringstream legend , title;
+    int max_nb_value , max_frequency , max_range , reference_matching ,
+        reference_concentration , *poffset , *pnb_value, nb_plot_set;
+    double max_mass , shift , **cumul , **concentration;
+    double min_complement = 0;
+
+
+	nb_hist++;
+	hist = new const Histogram*[nb_hist];
+
+	hist[0] = this;
+	for (i = 1;i < nb_hist;i++) {
+	      hist[i] = ihist[i - 1];
+	}
+
+    cumul = new double*[nb_hist];
+    concentration = new double*[nb_hist];
+    for (i = 0;i < nb_hist;i++) {
+      cumul[i] = 0;
+      concentration[i] = 0;
+    }
+
+	max_nb_value = 0;
+	max_frequency = 0;
+	max_mass = 0.;
+	cumul_concentration_flag = false;
+	max_range = 0;
+	shift = 0.;
+
+    for (i = 0;i < nb_hist;i++) {
+
+      // calcul des fonctions de repartition et de concentration
+
+	  cumul[i] = hist[i]->cumul_computation();
+	  concentration[i] = hist[i]->concentration_function_computation();
+
+      // calcul du nombre de valeurs maximum, de l'etendue maximum,
+	  // de la frequence maximum et de la probabilite maximum
+
+	  if (hist[i]->nb_value > max_nb_value) {
+	    max_nb_value = hist[i]->nb_value;
+	  }
+	  if (hist[i]->max > max_frequency) {
+		max_frequency = hist[i]->max;
+	  }
+	  if ((double)hist[i]->max / (double)hist[i]->nb_element > max_mass) {
+	    max_mass = (double)hist[i]->max / (double)hist[i]->nb_element;
+	  }
+
+	  if (((hist[i]->variance == D_DEFAULT) && (hist[i]->nb_value > hist[i]->offset + 1)) ||
+		 (hist[i]->variance > 0.)) {
+		 cumul_concentration_flag = true;
+		 if (hist[i]->nb_value - hist[i]->offset > max_range) {
+		   max_range = hist[i]->nb_value - hist[i]->offset;
+		   reference_matching = i;
+		 }
+		 reference_concentration = i;
+	  }
+	}
+
+	nb_plot_set = 1;
+
+	if (nb_hist > 0) {
+	  nb_plot_set += 3;
+	}
+	if (nb_hist == 1) {
+	  nb_plot_set--;
+	}
+
+    plotset = new MultiPlotSet(nb_plot_set);
+    MultiPlotSet &set = *plotset;
+    set.title = "Distribution set";
+    set.border = "15 lw 0";
+
+	// 1ere vue : lois
+
+	if (MAX(max_nb_value , 2) - 1 < TIC_THRESHOLD) {
+	  set[0].xtics = 1;
+	}
+
+	set[0].xrange = Range(0 , MAX(max_nb_value , 2) - 1);
+	set[0].yrange = Range(0. , MIN(max_frequency * YSCALE , 1.));
+
+    // definition du nombre de SinglePlot
+
+	set[0].resize(nb_hist);
+
+	for (i = 0;i < nb_hist;i++) {
+	  legend.str("");
+	  legend << STAT_label[STATL_HISTOGRAM];
+	  if (nb_hist > 1) {
+	    legend << " " << i + 1;
+	  }
+	  hist[i]->plot_title_print(legend);
+	  set[0][i].legend = legend.str();
+
+	  set[0][i].style = "linespoints";
+
+	  hist[i]->plotable_mass_write(set[0][i]);
+	}
+	if (nb_hist > 0) {
+
+	  // 2eme vue : fonctions de repartition
+
+	  if (max_nb_value - 1 < TIC_THRESHOLD) {
+	    set[1].xtics = 1;
+	  }
+
+	  set[1].xrange = Range(0 , max_nb_value - 1);
+	  set[1].yrange = Range(0. , 1. - min_complement);
+
+	  // definition du nombre de SinglePlot
+
+	  set[1].resize(nb_hist);
+
+	  i = 0;
+	  for (j = 0;j < nb_hist;j++) {
+	    if (hist[j]->variance > 0.) {
+	      legend.str("");
+	      legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM];
+	      if (nb_hist > 1) {
+	        legend << " " << j + 1;
+	      }
+	      legend << " " << STAT_label[STATL_FUNCTION];
+	      set[1][i].legend = legend.str();
+          set[1][i].style = "linespoints";
+
+          hist[j]->plotable_cumul_write(set[1][i]);
+          i++;
+        }
+      }
+    }
+
+	if (nb_hist == 1) {
+	  i = 2;
+	}
+	else {
+	  i = 3;
+	}
+
+	set[i].xtics = 0.1;
+	set[i].ytics = 0.1;
+	set[i].grid = true;
+
+	set[i].xrange = Range(0. , 1. - min_complement);
+	set[i].yrange = Range(0. , 1. - min_complement);
+	// definition du nombre de SinglePlot
+
+	set[i].resize(nb_hist + 1);
+
+	j = 0;
+	for (k = 0;k < nb_hist;k++) {
+	  if (hist[k]->variance > 0.) {
+	    legend.str("");
+	    legend << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_CURVE];
+	    if (nb_hist > 1) {
+	      legend << " " << k + 1;
+	    }
+	    set[i][j].legend = legend.str();
+        set[i][j].style = "linespoints";
+
+        hist[k]->plotable_concentration_write(set[i][j]);
+        j++;
+      }
+    }
+
+    set[i][j].style = "lines";
+    set[i][j].add_point(0. , 0.);
+    set[i][j].add_point(1. - min_complement , 1. - min_complement);
+
+    delete [] hist;
+
+  }
+
+  // to be done
+  return plotset;
+
+}
 
 /*--------------------------------------------------------------*
  *
