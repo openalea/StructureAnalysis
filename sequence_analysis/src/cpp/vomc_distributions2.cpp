@@ -593,7 +593,7 @@ void Variable_order_markov::characteristic_computation(int length , bool countin
         }
       }
 
-#     ifdef MESSAGE
+#     ifdef DEBUG
       if (type == 'e') {
         double sum = 0.;
 
@@ -816,7 +816,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
         }
       }
 
-#     ifdef MESSAGE
+#     ifdef DEBUG
       if (type == 'e') {
         double sum = 0.;
 
