@@ -746,8 +746,7 @@ void Markovian_sequences::transition_count_computation(const Variable_order_chai
     }
   }
 
-  // extraction des comptages des transition correspondant
-  // aux memoires non-terminales
+  // extraction des comptages des transitions correspondant aux memoires non-terminales
 
   for (i = chain_data.nb_row - 1;i >= 1;i--) {
     if ((markov.memory_type[i] == COMPLETION) || (non_terminal)) {
@@ -1013,8 +1012,8 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 {
   bool status = true , order0 , *active_memory , *selected_memory;
   register int i , j , k;
-  int sample_size , length_nb_sequence , nb_row , state , *memory_count , *nb_parameter ,
-      *diff_nb_parameter;
+  int sample_size , length_nb_sequence , nb_row , state , nb_terminal , *memory_count ,
+      *nb_parameter , *diff_nb_parameter;
   double num , denom , max_likelihood , *memory_likelihood , *diff_likelihood;
   Variable_order_markov *markov , *completed_markov;
   Variable_order_chain_data *chain_data;
@@ -1583,6 +1582,22 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
       seq->order0_estimation(*completed_markov);
       break;
     }
+    }
+
+    if (completed_markov->type == 'e') {
+      nb_terminal = (completed_markov->nb_row - 1) * (completed_markov->nb_state - 1) /
+                    completed_markov->nb_state + 1;
+
+      for (i = 1;i < completed_markov->nb_row;i++) {
+        if (!completed_markov->child[i]) {
+          completed_markov->initial[i] = 1. / (double)nb_terminal;
+        }
+        else {
+          completed_markov->initial[i] = 0.;
+        }
+      }
+
+      completed_markov->initial_probability_computation();
     }
 
     // estimation des lois d'observation
