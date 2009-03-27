@@ -807,6 +807,8 @@ public :
     bool plot_print(const char *path , double *cumul , double *concentration ,
                     double shift = 0.) const;
     bool survival_plot_print(const char *path , double *survivor) const;
+    virtual std::ostream& plot_title_print(std::ostream &os) const
+    { return os; }
 
     void plotable_frequency_write(SinglePlot &plot) const;
     void plotable_mass_write(SinglePlot &plot) const;
@@ -885,6 +887,8 @@ public :
     bool survival_plot_write(Format_error &error , const char *prefix ,
                              const char *title = 0) const;
     MultiPlotSet* survival_get_plotable(Format_error &error) const;
+    MultiPlotSet* get_plotable_hists(Format_error &error , int nb_hist ,
+                                     const Histogram **ihist) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_histo ,
                     const Histogram **ihisto , int type , const char *path = 0 ,
