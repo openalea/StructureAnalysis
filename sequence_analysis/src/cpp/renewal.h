@@ -61,9 +61,6 @@ const double RB_THRESHOLD = 2000.;     // seuil pour utiliser le calcul rapide d
 const double RNB_THRESHOLD = 2000.;    // seuil pour utiliser le calcul rapide de la loi du
                                        // nombre d'ev correspondant a une loi binomiale negative
 
-const double POISSON_RANGE = 0.1;      // plage de variation pour choisir une loi de
-                                       // Poisson par dilatation de l'echelle des temps
-
 enum {
   INTER_EVENT ,
   WITHIN_OBSERVATION_PERIOD ,
