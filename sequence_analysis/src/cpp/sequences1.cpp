@@ -2767,11 +2767,11 @@ Sequences* Sequences::shift(Format_error &error , int variable , double shift_pa
  *  Regroupement des valeurs d'une variable.
  *
  *  arguments : reference sur un objet Sequences, indice de la variable,
- *              pas de regroupement.
+ *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-void Sequences::cluster(const Sequences &seq , int variable , int step)
+void Sequences::cluster(const Sequences &seq , int variable , int step , int mode)
 
 {
   register int i , j , k;
@@ -2805,8 +2805,30 @@ void Sequences::cluster(const Sequences &seq , int variable , int step)
         // regroupement des valeurs entieres
 
         if (j == variable) {
-          for (k = 0;k < length[i];k++) {
-            *pisequence++ = *cisequence++ / step;
+          switch (mode) {
+
+          case FLOOR : {
+            for (k = 0;k < length[i];k++) {
+              *pisequence++ = *cisequence++ / step;
+            }
+            break;
+          }
+
+          case ROUND : {
+            for (k = 0;k < length[i];k++) {
+              *pisequence++ = (*cisequence++ + step / 2) / step;
+//              *pisequence++ = (int)::round((double)*cisequence++ / (double)step);
+            }
+            break;
+          }
+
+          case CEIL : {
+            for (k = 0;k < length[i];k++) {
+              *pisequence++ = (*cisequence++ + step - 1) / step;
+//              *pisequence++ = (int)ceil((double)*cisequence++ / (double)step);
+            }
+            break;
+          }
           }
         }
 
@@ -2845,16 +2867,35 @@ void Sequences::cluster(const Sequences &seq , int variable , int step)
   for (i = 0;i < nb_variable;i++) {
     if (i == variable) {
       if (type[i] != REAL_VALUE) {
-        min_value[i] = (int)seq.min_value[i] / step;
-        max_value[i] = (int)seq.max_value[i] / step;
+        switch (mode) {
+        case FLOOR :
+          min_value[i] = (int)seq.min_value[i] / step;
+          max_value[i] = (int)seq.max_value[i] / step;
+//          min_value[i] = floor(seq.min_value[i] / step);
+//          max_value[i] = floor(seq.max_value[i] / step);
+          break;
+        case ROUND :
+          min_value[i] = ((int)seq.min_value[i] + step / 2) / step;
+          max_value[i] = ((int)seq.max_value[i] + step / 2) / step;
+//          min_value[i] = ::round(seq.min_value[i] / step);
+//          max_value[i] = ::round(seq.max_value[i] / step);
+          break;
+        case CEIL :
+          min_value[i] = ((int)seq.min_value[i] + step - 1) / step;
+          max_value[i] = ((int)seq.max_value[i] + step - 1) / step;
+//          min_value[i] = ceil(seq.min_value[i] / step);
+//          max_value[i] = ceil(seq.max_value[i] / step);
+          break;
+        }
       }
+
       else {
         min_value[i] = seq.min_value[i] / step;
         max_value[i] = seq.max_value[i] / step;
       }
 
       if (seq.marginal[i]) {
-        marginal[i] = new Histogram(*(seq.marginal[i]) , 'c' , step);
+        marginal[i] = new Histogram(*(seq.marginal[i]) , 'c' , step , mode);
       }
       else {
         build_marginal_histogram(i);
@@ -2877,11 +2918,11 @@ void Sequences::cluster(const Sequences &seq , int variable , int step)
  *  Regroupement des valeurs d'une variable.
  *
  *  arguments : reference sur un objet Format_error, indice de la variable,
- *              pas de regroupement.
+ *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::cluster(Format_error &error , int variable , int step) const
+Sequences* Sequences::cluster(Format_error &error , int variable , int step , int mode) const
 
 {
   bool status = true;
@@ -2927,7 +2968,7 @@ Sequences* Sequences::cluster(Format_error &error , int variable , int step) con
   if (status) {
     seq = new Sequences(nb_sequence , identifier , length , index_parameter_type ,
                         nb_variable , type);
-    seq->cluster(*this , variable , step);
+    seq->cluster(*this , variable , step , mode);
   }
 
   return seq;
@@ -3602,11 +3643,12 @@ Sequences* Sequences::scaling(Format_error &error , int variable , int scaling_c
  *
  *  Arrondi des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable.
+ *  arguments : reference sur un objet Format_error, indice de la variable,
+ *              mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::round(Format_error &error , int variable) const
+Sequences* Sequences::round(Format_error &error , int variable , int mode) const
 
 {
   bool status = true;
@@ -3721,8 +3763,29 @@ Sequences* Sequences::round(Format_error &error , int variable) const
 
           if (((variable == I_DEFAULT) && (type[j] == REAL_VALUE)) || (variable == j)) {
             pisequence = seq->int_sequence[i][j];
-            for (k = 0;k < seq->length[i];k++) {
-              *pisequence++ = (int)::round(*crsequence++);
+
+            switch (mode) {
+
+            case FLOOR : {
+              for (k = 0;k < seq->length[i];k++) {
+                *pisequence++ = (int)floor(*crsequence++);
+              }
+              break;
+            }
+
+            case ROUND : {
+              for (k = 0;k < seq->length[i];k++) {
+                *pisequence++ = (int)::round(*crsequence++);
+              }
+              break;
+            }
+
+            case CEIL : {
+              for (k = 0;k < seq->length[i];k++) {
+                *pisequence++ = (int)ceil(*crsequence++);
+              }
+              break;
+            }
             }
           }
 
@@ -3740,8 +3803,21 @@ Sequences* Sequences::round(Format_error &error , int variable) const
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (((variable == I_DEFAULT) && (type[i] == REAL_VALUE)) || (variable == i)) {
-        seq->min_value[i] = ::round(min_value[i]);
-        seq->max_value[i] = ::round(max_value[i]);
+        switch (mode) {
+        case FLOOR :
+          seq->min_value[i] = floor(min_value[i]);
+          seq->max_value[i] = floor(max_value[i]);
+          break;
+        case ROUND :
+          seq->min_value[i] = ::round(min_value[i]);
+          seq->max_value[i] = ::round(max_value[i]);
+          break;
+        case CEIL :
+          seq->min_value[i] = ceil(min_value[i]);
+          seq->max_value[i] = ceil(max_value[i]);
+          break;
+        }
+
         seq->build_marginal_histogram(i);
       }
 
