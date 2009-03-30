@@ -36,8 +36,11 @@ def Histogram(arg):
        is returned.
 
     :Examples:
-      >>> Histogram(list)
-      >>> Histogram(filename)
+    .. doctest::
+        :options: +SKIP
+
+        >>> Histogram(list)
+        >>> Histogram(filename)
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Save`,

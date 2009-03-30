@@ -29,6 +29,9 @@ def Convolution(*args):
         convolution, otherwise no object is returned.
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
+    
         >>> Convolution(dist1, dist2, ...)
         >>> Convolution(file_name)
       

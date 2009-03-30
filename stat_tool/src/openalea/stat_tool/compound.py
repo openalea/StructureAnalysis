@@ -43,6 +43,9 @@ def Compound(*args):
         otherwise no object is returned.
         
     :Examples:
+    .. doctest::
+        :options: +SKIP
+
         >>> Compound(sum_dist, dist)
         >>> Compound(filename)
 

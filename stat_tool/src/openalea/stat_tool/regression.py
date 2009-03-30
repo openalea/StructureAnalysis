@@ -57,6 +57,8 @@ def Regression(vec, type,
         An object of type regression is returned.
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> Regression(vec, "Linear", explanatory_variable, response_variable)
         >>> Regression(vec, "MovingAverage", explanatory_variable, response_variable, filter, Algorithm="LeastSquares")

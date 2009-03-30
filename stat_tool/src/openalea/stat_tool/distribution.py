@@ -97,11 +97,14 @@ def Distribution(type_or_filename, *args):
         returned, otherwise no object is returned.
 
     :Examples:
-      >>> Distribution("BINOMIAL", inf_bound, sup_bound, proba)
-      >>> Distribution("POISSON", inf_bound, param)
-      >>> Distribution("NEGATIVE_BINOMIAL", inf_bound, param, proba)
-      >>> Distribution("UNIFORM", inf_bound, sup_bound)
-      >>> Distribution(file_name)
+    .. doctest::
+        :options: +SKIP
+    
+        >>> Distribution("BINOMIAL", inf_bound, sup_bound, proba)
+        >>> Distribution("POISSON", inf_bound, param)
+        >>> Distribution("NEGATIVE_BINOMIAL", inf_bound, param, proba)
+        >>> Distribution("UNIFORM", inf_bound, sup_bound)
+        >>> Distribution(file_name)
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Save`,
@@ -235,6 +238,9 @@ def ToDistribution(histo):
         is returned.
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
+    
         >>> ToDistribution(histo)
 
     .. seealso::
@@ -256,6 +262,9 @@ def ToHistogram(dist):
         is returned.
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
+
         >>> ToHistogram(dist)
 
     .. seealso::
@@ -264,5 +273,4 @@ def ToHistogram(dist):
     return dist.extract_data()
 
 
-##################### Test Distribution #################################
 

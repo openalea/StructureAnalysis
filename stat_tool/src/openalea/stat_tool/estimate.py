@@ -57,6 +57,8 @@ class EstimateFunctions(object):
           * histo (histogram, mixture_data, convolution_data, compound_data)
            
         :Examples:
+        .. doctest::
+            :options: +SKIP
             
             >>> estimate_nonparametric(histo)
         """
@@ -73,7 +75,10 @@ class EstimateFunctions(object):
                                       "Free" (default value) or "Fixed". T
                                       
         :Examples:
-          >>> estimate_parametric(histo, ident, MinInfBound=0, InfBoundStatus="Free")
+        .. doctest::
+            :options: +SKIP
+        
+            >>> estimate_parametric(histo, ident, MinInfBound=0, InfBoundStatus="Free")
 
         """
     
@@ -98,6 +103,8 @@ class EstimateFunctions(object):
         """ Estimate a mixture distribution 
     
         :Examples:
+        .. doctest::
+            :options: +SKIP
         
             >>> estimate_mixture(histo, ("MIXTURE", "B", dist,...,),
                              MinInfBound=1, InfBoundStatus="Fixed", 

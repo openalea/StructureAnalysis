@@ -58,6 +58,9 @@ def Vectors(*args):
        otherwise no object is returned.
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
+    
         >>> Vectors(list, Identifiers=[1, 8, 12])
         >>> Vectors(seq, IndexVariable=True)
         >>> Vectors(file_name)
@@ -128,6 +131,9 @@ def VectorDistance(*args, **kargs):
         If the construction succeeds, an object of type vector_distance is returned.
         
     :Examples:
+    .. doctest::
+        :options: +SKIP
+    
         >>> VectorDistance(type1, type2,..., Distance="QUADRATIC")
         >>> VectorDistance(weight1, type1, weight2, type2,..., Distance="QUADRATIC")
         >>> VectorDistance(file_name)
@@ -187,6 +193,8 @@ def VarianceAnalysis(vec, class_variable, response_variable,
     One-way variance analysis.
     
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> VarianceAnalysis(vec, class_variable, response_variable, type, FileName="result", Format="SpreadSheet")
       
@@ -245,6 +253,8 @@ def ContingencyTable(vec, variable1, variable2,
         The contingency table result as a string
         
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> ContingencyTable(vec, variable1, variable2, FileName="result", Format="SpreadSheet")
       

@@ -23,6 +23,9 @@ def compare_histo(histo, *args, **kargs):
         The comparison result.
       
     :Examples:
+    .. doctest::
+        :options: +SKIP
+    
         >>> compare_histo(histo1, histo2, ..., type, FileName="result", 
         ... Format="ASCII")
           
@@ -73,6 +76,10 @@ def compare_vectors(vec, vector_distance):
         An object of type _DistanceMatrix is returned. 
 
     :Examples:
+    
+    .. doctest::
+        :options: +SKIP
+    
         >>> compare_vectors(vec, vector_distance) 
     
     .. seealso::
@@ -190,6 +197,10 @@ def ComparisonTest(type, histo1, histo2):
        A string containing the result of the tests
        
     :Examples:
+
+    .. doctest::
+        :options: +SKIP
+
         >>> ComparisonTest(type, histo1, histo2)
     
     """

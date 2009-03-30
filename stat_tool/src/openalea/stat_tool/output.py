@@ -64,15 +64,17 @@ def Display(obj, *args, **kargs):
         A string
 
     :Examples:
-     
-     >>> from openalea.stat_tool.output import Display
-     >>> Display(obj, Detail=2)
-     >>> Display(vec, ViewPoint="Data", Detail=2)
-     >>> Display(seq, ViewPoint="Data", Format="Line", Detail=2)
-     >>> Display(dist, ViewPoint="Survival")
-     >>> Display(histo, ViewPoint="Survival")
-     >>> Display(hmc, identifier, ViewPoint="StateProfile")
-     >>> Display(hsmc, identifier, ViewPoint="StateProfile") 
+    .. doctest::
+        :options: +SKIP 
+    
+        >>> from openalea.stat_tool.output import Display
+        >>> Display(obj, Detail=2)
+        >>> Display(vec, ViewPoint="Data", Detail=2)
+        >>> Display(seq, ViewPoint="Data", Format="Line", Detail=2)
+        >>> Display(dist, ViewPoint="Survival")
+        >>> Display(histo, ViewPoint="Survival")
+        >>> Display(hmc, identifier, ViewPoint="StateProfile")
+        >>> Display(hsmc, identifier, ViewPoint="StateProfile") 
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Plot`,
@@ -165,7 +167,9 @@ def Plot(obj, *args, **kargs):
         Nothing.
         
     :Examples:
-    
+    .. doctest::
+        :options: +SKIP
+
         >>> from openalea.stat_tool.output import Display
         >>> Plot(obj1, Title="Distribution")
         >>> Plot(vec1, Title="Values")
@@ -258,6 +262,8 @@ def Save(obj, *args, **kargs):
         No object returned.
         
     :Examples:
+    .. doctest::
+        :options: +SKIP
 
         >>> Save(obj, file_name, Format="ASCII", Detail=2)
         >>> Save(histo, file_name, ViewPoint="Data")

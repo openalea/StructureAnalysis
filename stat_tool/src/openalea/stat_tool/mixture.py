@@ -38,6 +38,9 @@ def Mixture(*args):
         otherwise no object is returned.
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
+
         >>> Mixture(weight1, dist1, weight2, dist2,...)
         >>> Mixture(filename)
 

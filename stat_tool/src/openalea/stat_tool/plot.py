@@ -8,8 +8,12 @@ import glob
 DISABLE_PLOT = False
 
 
+
 # !!! Do not plot in nosetests !!!
-if("nosetests" in sys.argv[0]):
+# buildbot cannot close the windwos popped up by the method/function Plot/plot
+# So, we test if the command "python setup.py nosetests" has been used.
+# Still, using nosetests executable, windows should pop up.
+if("nosetests" in sys.argv):
     DISABLE_PLOT = True
 
 
@@ -128,10 +132,11 @@ class mplotlib(plotter):
         import pylab
         self.pylab = pylab
 
-    def plot(self, plotable, title, groups=[], *args, **kargs):
+    def plot(self, plotable, title, groups=[], show=True, *args, **kargs):
         """ 
         Plot a plotable with title 
         groups : list of group (int) to plot
+        show=True by default will pop up the figure
         """
         
         pylab = self.pylab
@@ -252,7 +257,8 @@ class mplotlib(plotter):
                 ymin, ymax = pylab.ylim() 
                 pylab.yticks(pylab.arange(ymin, ymax, yt))
 
-        pylab.show()
+        if show==True:
+            pylab.show()
    
 
 PLOTTER = None

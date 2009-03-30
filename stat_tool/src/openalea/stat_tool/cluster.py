@@ -85,7 +85,10 @@ def Cluster(obj, type, *args, **kargs):
         if the number of possible values for each variable is < 15. 
 
     :Examples:
-    
+   
+    .. doctest::
+        :options: +SKIP
+  
         >>> Cluster(histo, "Step", step)
         >>> Cluster(histo, "Information", information_ratio)
         >>> Cluster(histo, "Limit", limits)
@@ -195,14 +198,16 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
         possible values for each variable is < 15. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
-      >>> Transcode(histo, new_values)
-      >>> Transcode(vec1, new_values)
-      >>> Transcode(vecn, variable, new_values)
-      >>> Transcode(seq1, new_values)
-      >>> Transcode(seqn, variable, new_values)
-      >>> Transcode(discrete_seq1, new_values, AddVariable=True)
-      >>> Transcode(discrete_seqn, variable, new_values, AddVariable=True)
+        >>> Transcode(histo, new_values)
+        >>> Transcode(vec1, new_values)
+        >>> Transcode(vecn, variable, new_values)
+        >>> Transcode(seq1, new_values)
+        >>> Transcode(seqn, variable, new_values)
+        >>> Transcode(discrete_seq1, new_values, AddVariable=True)
+        >>> Transcode(discrete_seqn, variable, new_values, AddVariable=True)
     
     .. seealso::
     
@@ -257,10 +262,13 @@ def Clustering(matrix, type, *args, **kargs):
         if 2 < nb_cluster < (number of patterns), an object of type clusters is returned
         
     :Examples:
-      >>> Clustering(dissimilarity_matrix, "Partition", nb_cluster, Prototypes=[1, 3, 12])
-      >>> Clustering(dissimilarity_matrix, "Partition", clusters)
-      >>> Clustering(dissimilarity_matrix, "Hierarchy", Algorithm="Agglomerative")
-      >>> Clustering(dissimilarity_matrix, "Hierarchy", Algorithm="Divisive")
+    .. doctest::
+        :options: +SKIP
+    
+        >>> Clustering(dissimilarity_matrix, "Partition", nb_cluster, Prototypes=[1, 3, 12])
+        >>> Clustering(dissimilarity_matrix, "Partition", clusters)
+        >>> Clustering(dissimilarity_matrix, "Hierarchy", Algorithm="Agglomerative")
+        >>> Clustering(dissimilarity_matrix, "Hierarchy", Algorithm="Divisive")
     
     .. seealso::
         `SelectIndividual`,
@@ -361,6 +369,9 @@ def ToDistanceMatrix(clusters):
         An object of type distance_matrix is returned. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
+    
         >>> ToDistanceMatrix(clusters)
 
     .. seealso::

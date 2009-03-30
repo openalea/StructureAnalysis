@@ -34,6 +34,8 @@ def Merge(obj, *args):
         If the arguments are of type correlation, an object of type correlation is returned. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> Merge(histo1, histo2,...)
         >>> Merge(vec1, vec2,...)
@@ -82,6 +84,8 @@ def MergeVariable(obj, *args, **kargs):
         possible values for each variable is < 15. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> MergeVariable(vec1, vec2,..., RefSample=2)
         >>> MergeVariable(seq1, seq2,..., RefSample=2) 
@@ -131,6 +135,8 @@ def ExtractData(model):
         If hsmc contains a 'data' part, an object of type `_SemiMarkovData` is returned.
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> ExtractData(mixt)
         >>> ExtractData(convol)
@@ -176,6 +182,8 @@ def ExtractDistribution(model, *args):
         distribution, an object of type `_Distribution` is returned. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> ExtractDistribution(mixt, mixt_type)
         >>> ExtractDistribution(mixt, "Component", index)
@@ -221,6 +229,8 @@ def ExtractHistogram(data, *args):
         distribution, an object of type `_Histogram` is returned. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> ExtractHistogram(mixt_histo, mixt_type)
         >>> ExtractHistogram(mixt_histo, "Component", index)
@@ -346,6 +356,8 @@ def SelectVariable(obj, variables, Mode="Keep"):
       possible values for each variable is < 15. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> SelectVariable(vec, variable, Mode="Reject")
         >>> SelectVariable(vec, variables, Mode="Reject")
@@ -398,6 +410,8 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
         is < 15. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> SelectIndividual(vec, identifiers, Mode="Reject")
         >>> SelectIndividual(seq, identifiers, Mode="Reject")
@@ -450,6 +464,8 @@ def ValueSelect(obj, *args, **kargs):
         variable are consecutive from 0 and if the number of possible values for each variable is < 15. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
 
         >>> ValueSelect(histo, value, Mode="Reject")
         >>> ValueSelect(histo, min_value, max_value, Mode="Reject")
@@ -542,6 +558,8 @@ def Shift(obj, *args):
       each variable is 15. 
 
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> Shift(histo, param)
         >>> Shift(vec1, param)
@@ -614,6 +632,8 @@ def Fit(histo, dist):
 
     
     :Examples:
+    .. doctest::
+        :options: +SKIP
     
         >>> Fit(histo, dist)
 
