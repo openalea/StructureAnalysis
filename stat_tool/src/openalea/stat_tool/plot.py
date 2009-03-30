@@ -4,9 +4,7 @@ import sys
 import os
 import glob
 
-
 DISABLE_PLOT = False
-
 
 
 # !!! Do not plot in nosetests !!!
@@ -15,6 +13,7 @@ DISABLE_PLOT = False
 # Still, using nosetests executable, windows should pop up.
 if("nosetests" in sys.argv):
     DISABLE_PLOT = True
+
 
 
 class plotter(object):
@@ -87,7 +86,8 @@ class gnuplot(plotter):
                 
                 p = Gnuplot.Data(x, y)
                 if style:
-                    p.set_option(with=style)
+                    "todo: check that this option works."
+                    p.set_option(with_=style)
 
                 if legend:
                     p.set_option(title=legend)
@@ -112,9 +112,6 @@ class gnuplot(plotter):
 
             g.plot(*plot_list)
             raw_input("Press Enter to continue")
-
-
-        
 
 
 class mplotlib(plotter):
