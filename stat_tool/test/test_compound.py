@@ -1,10 +1,11 @@
 """Compound tests"""
 __revision__ = "$Id: $"
 
-
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.distribution import Uniform
+from openalea.stat_tool.distribution import Binomial
+from openalea.stat_tool.plot import DISABLE_PLOT
 
 
 class Test:
@@ -13,15 +14,25 @@ class Test:
     def test_empty(self):
         """Test that empty constructor fails"""
         try:
-            m = Compound()
+            _m = Compound()
             assert False
         except TypeError:
             assert True
 
-    def test_file(self):
+    def test_constructor_fromfile(self):
         """run constructor with filename argument"""
         c = Compound("compound1.cd")
         assert c
+        
+        return c
+
+    def test_constructor_fromfile_failure(self):
+        """run constructor with filename argument"""
+        try:
+            _h = Compound("compound1.con")
+            assert False
+        except Exception:
+            assert True
 
     def test_build_compound(self):
         """run constructor with  two distributions as arguments"""
@@ -37,7 +48,8 @@ class Test:
     def test_plot(self):        
         """run plotting routines """
         m = self.test_build_compound()
-        m.plot()
+        if DISABLE_PLOT==False:
+            m.plot()
 
         assert str(m)
         m.display()
@@ -65,7 +77,7 @@ class Test:
 
     def test_extract_data(self):
         """todo : check if this test makes sense"""
-        from openalea.stat_tool.distribution import Binomial
+        #from openalea.stat_tool.distribution import Binomial
 
         m = self.test_build_compound()
         s = m.simulate(1000)
@@ -79,30 +91,40 @@ from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.data_transform import ExtractHistogram, ExtractData, Shift
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import ToHistogram
+from openalea.stat_tool.distribution import ToHistogram, Distribution
 
 def test1():
-    
+    """Various tests on compound data"""
     cdist1 = Compound("compound1.cd")
 
     chisto1 = Simulate(cdist1, 200)
 
-    histo30 = ExtractHistogram(chisto1, "Sum")
+    _histo30 = ExtractHistogram(chisto1, "Sum")
 
-    #cdist2 = Estimate(chisto1, "COMPOUND", ExtractDistribution(cdist1, "Elementary"), "Sum", MinInfBound=0)
+    cdist2 = Estimate(chisto1, "COMPOUND",
+                      ExtractDistribution(cdist1, "Elementary"),
+                      ExtractDistribution(cdist1, "Sum"),
+                      MinInfBound=0)
 
-    cdist2 = Estimate(chisto1, "COMPOUND", ExtractDistribution(cdist1, "Elementary"), ExtractDistribution(cdist1, "Sum"), MinInfBound=0)
+    cdist2 = Estimate(chisto1, "COMPOUND",
+                      ExtractDistribution(cdist1, "Elementary"),
+                      ExtractDistribution(cdist1, "Sum"),
+                      MinInfBound=0)
     
-    histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
-    histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
+    _histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
+    _histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
     
     peup1 = Histogram("peup1.his")
     mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
     histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
-    histo34 = Shift(histo33, -11)
+    _histo34 = Shift(histo33, -11)
 
-    #cdist3 = Estimate(histo34, "COMPOUND", Distribution("B", 0, 1, 0.7), "Sum")
-    #cdist4 = Estimate(histo34, "COMPOUND", Distribution("B", 0, 1, 0.7), "Sum", MinInfBound=0)
+    #_cdist3 = Estimate(histo34, "COMPOUND",
+    #                  Distribution("B", 0, 1, 0.7),
+    #                  ExtractDistribution(histo34, "Sum"))
+    #_cdist4 = Estimate(histo34, "COMPOUND",
+    #                  Distribution("B", 0, 1, 0.7),
+    #                  ExtractDistribution(histo34, "Sum"), MinInfBound=0)
 
 
 

@@ -72,4 +72,5 @@ if __name__=="__main__":
             getattr(test, method)()
         else:
             print 'skipping'
-    # and functional tests.    
+    # and functional tests
+ 

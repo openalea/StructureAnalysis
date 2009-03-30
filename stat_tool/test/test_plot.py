@@ -5,13 +5,7 @@ import sys
 
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import get_plotter, gnuplot 
-
-DISABLE_PLOT = False
-
-
-# !!! Do not plot in nosetests !!!
-if("nosetests" in sys.argv[0]):
-    DISABLE_PLOT = True
+from openalea.stat_tool.plot import DISABLE_PLOT
 
 
 class Test:
@@ -57,7 +51,8 @@ class Test:
 
         # test plot
         plotter = get_plotter()
-        plotter.plot(p, "test_plot")
+        if DISABLE_PLOT==False:
+            plotter.plot(p, "test_plot")
         
 
         
@@ -120,15 +115,17 @@ class Test:
 
         a = self.get_plotable()
         plotter = get_plotter()
-        plotter.plot(a, "test_plot")
+        if DISABLE_PLOT==False:
+            plotter.plot(a, "test_plot")
 
 
-    def test_gnuplot(self):
+    def _test_gnuplot(self):
         
         if (DISABLE_PLOT) : return
         a = self.get_plotable()
         plotter = gnuplot()
-        plotter.plot(a, "test_plot")
+        if DISABLE_PLOT==False:
+            plotter.plot(a, "test_plot")
 
         
 

@@ -1,9 +1,11 @@
 """Convolution tests"""
 __revision__ = "$Id: $"
 
+
 from openalea.stat_tool import Convolution, Distribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.data_transform import ExtractDistribution
+from openalea.stat_tool.plot import DISABLE_PLOT
 
 
 class Test:
@@ -46,7 +48,8 @@ class Test:
     def test_plot(self):
         """run plotting routines """
         m = self.test_build_convolution()
-        m.plot()
+        if DISABLE_PLOT==False:
+            m.plot()
 
         assert str(m)
         m.display()
@@ -90,23 +93,26 @@ class Test:
 
 
 def test1():
-    from openalea.stat_tool import Estimate, Simulate
+    from openalea.stat_tool import Estimate
+    from openalea.stat_tool import Simulate
     from openalea.stat_tool import ExtractHistogram, ExtractData
     from openalea.stat_tool import ToHistogram
-    from openalea.stat_tool import Histogram, Shift, Display, Save
+    from openalea.stat_tool import Histogram, Shift, Display, Save, Plot
   
-    convol1 = Convolution(Distribution("B", 0, 10, 0.5), Distribution("NB", 0, 10, 0.5))
+    _convol0 = Convolution(Distribution("B", 0, 10, 0.5), 
+                           Distribution("NB", 0, 10, 0.5))
     convol1 = Convolution("convolution1.conv")
     
     convol_histo1 = Simulate(convol1, 200)
     
-    histo20 = ExtractHistogram(convol_histo1, "Elementary", 1)
+    _histo20 = ExtractHistogram(convol_histo1, "Elementary", 1)
     
     convol2 = Estimate(convol_histo1, "CONVOLUTION", 
-                       ExtractDistribution(convol1, "Elementary", 1), MinInfBound=0)
+                       ExtractDistribution(convol1, "Elementary", 1),
+                       MinInfBound=0)
     
-    histo21 = ExtractHistogram(ExtractData(convol2), 'Elementary', 1)
-    histo22 = ToHistogram(ExtractDistribution(convol2,'Elementary', 1))
+    _histo21 = ExtractHistogram(ExtractData(convol2), 'Elementary', 1)
+    _histo22 = ToHistogram(ExtractDistribution(convol2, 'Elementary', 1))
     
     histo_b2 = Histogram("nothofagus_antarctica_bud_2.his")
     histo_s2 = Histogram("nothofagus_antarctica_shoot_2.his")
@@ -118,16 +124,19 @@ def test1():
     
     # "NP" or "NON_PARAMETRIC" (for estimation only)
     
-    convol30 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
-                        NbIteration=500)
-    convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
-                        NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)
-    convol32 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", Estimate(histo_b2, "NP"), 
+    _convol30 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", 
+                        Estimate(histo_b2, "NP"), NbIteration=500)
+    convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", 
+                        Estimate(histo_b2, "NP"), NbIteration=100,
+                        Estimator="PenalizedLikelihood", Weight=0.5)
+    _convol32 = Estimate(Shift(histo_s2, 1), "CONVOLUTION",
+                        Estimate(histo_b2, "NP"),
                         Estimator="Parametric")
     Display(convol31)
-    # Plot(convol31)
-    # Plot(ExtractDistribution(convol31, "Convolution"))
-    Save(convol31, "nothofagus_antartica_2.xld", Format="SpreadSheet")
+    if DISABLE_PLOT==False:
+        Plot(convol31)
+        Plot(ExtractDistribution(convol31, "Convolution"))
+    Save(convol31, "nothofagus_antartica_2.xls", Format="SpreadSheet")
 
 
 
