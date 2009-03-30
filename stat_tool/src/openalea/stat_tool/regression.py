@@ -1,5 +1,5 @@
-__doc__ = "Regression"
-#__docformat__ = "restructuredtext"
+"""Regression"""
+__revision__ = "$Id$"
 
 import interface
 import _stat_tool
@@ -57,6 +57,7 @@ def Regression(vec, type,
         An object of type regression is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -67,7 +68,7 @@ def Regression(vec, type,
         >>> Regression(vec, "NearestNeighbours", explanatory_variable, response_variable, span, Weighting=False)
     
     .. seealso::
-        `plot`
+        :func:`~openalea.stat_tool.output.Plot`
 
     """
 

@@ -3,7 +3,7 @@
 
 .. todo:: 
     - check the extract and extract_data functionalities.
-    - do we want a third constructor with the third parameter?
+    - do we want the third constructor ?
     - cleanup documentation.
 """
 __revision__ = "$Id$"
@@ -38,11 +38,12 @@ def Compound(*args):
       * `filename` (STRING) -
 
     :Returns:
-    
+  
         If the construction succeeds, an object of type `COMPOUND` is returned,
         otherwise no object is returned.
         
     :Examples:
+
     .. doctest::
         :options: +SKIP
 
@@ -50,7 +51,9 @@ def Compound(*args):
         >>> Compound(filename)
 
     .. seealso::
-        `Save`, `Estimate`, `Simulate`
+        :func:`~openalea.stat_tool.output.Save`,
+        :func:`~openalea.stat_tool.estimate.Estimate`,
+        :func:`~openalea.stat_tool.simulate.Simulate`
     """
     if((len(args)==0) or (len(args)>3)) : 
         raise TypeError("Bad number of arguments")

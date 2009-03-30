@@ -1,5 +1,5 @@
-__doc__ = """Histogram functions and classes"""
-__docformat__ = "restructuredtext"
+"""Histogram functions and classes"""
+__revision__ = "$Id$"
 
 import sys
 import os
@@ -36,6 +36,7 @@ def Histogram(arg):
        is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
 

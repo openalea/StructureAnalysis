@@ -1,5 +1,7 @@
 """ Interfaces for stat_tool objects """
-#__docformat__ = "restructuredtext"
+__revision__ = "$Id$"
+
+from output import StatInterface    
 
 
 
@@ -22,8 +24,5 @@ def extend_class(cls, *base_class):
     cls.__bases__ = tuple(b)
 
     return cls
-
-
-from output import StatInterface    
 
         

@@ -1,4 +1,5 @@
 """ Plot functions """
+__revision__ = "$Id$"
 
 import sys
 import os

@@ -1,5 +1,6 @@
-__doc__ = """ Simulation functions """
-#__docformat__ = "Restructuredtext"
+""" Simulation functions """
+__revision__ = "$Id$"
+
 
 
 def Simulate(obj, *args):

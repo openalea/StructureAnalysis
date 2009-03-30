@@ -1,6 +1,5 @@
-__doc__ = """ Data transformation functions """
-__docformat__ = " restructuredtext "
-
+__doc__ = """Data transformation functions"""
+__revision__ = "$Id$"
 
 def Merge(obj, *args):    
     """    
@@ -34,6 +33,7 @@ def Merge(obj, *args):
         If the arguments are of type correlation, an object of type correlation is returned. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -46,11 +46,29 @@ def Merge(obj, *args):
         >>> Merge(correl1, correl2,...)
 
     .. seealso::
-        `Cluster`, `Shift`, `Transcode`, `ValueSelect`, `MergeVariable`, `SelectIndividual`, 
-        `SelectVariable`, `NbEventSelect`, `TimeScaling`, `TimeSelect`, `AddAbsorbingRun`, 
-        `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, `MovingAverage`, 
-        `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, `SegmentationExtract`, `VariableScaling`, 
-        `RemoveApicalInternodes` """
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.cluster.NbEventSelect`,
+        :func:`~openalea.stat_tool.cluster.TimeScaling`,
+        :func:`~openalea.stat_tool.cluster.TimeSelect`,
+        :func:`~openalea.stat_tool.cluster.AddAbsorbingRun`, 
+        :func:`~openalea.stat_tool.cluster.Cumulate`,
+        :func:`~openalea.stat_tool.cluster.Difference`, 
+        :func:`~openalea.stat_tool.cluster.IndexExtract`,
+        :func:`~openalea.stat_tool.cluster.LengthSelect`, 
+        :func:`~openalea.stat_tool.cluster.MovingAverage`, 
+        :func:`~openalea.stat_tool.cluster.RecurrenceTimeSequences`,
+        :func:`~openalea.stat_tool.cluster.RemoveRun`,
+        :func:`~openalea.stat_tool.cluster.Reverse`, 
+        :func:`~openalea.stat_tool.cluster.SegmentationExtract`, 
+        :func:`~openalea.stat_tool.cluster.VariableScaling`, 
+        :func:`~openalea.stat_tool.cluster.RemoveApicalInternodes` 
+    """
     
     return obj.merge(list(args))
 
@@ -84,6 +102,7 @@ def MergeVariable(obj, *args, **kargs):
         possible values for each variable is < 15. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -91,11 +110,24 @@ def MergeVariable(obj, *args, **kargs):
         >>> MergeVariable(seq1, seq2,..., RefSample=2) 
 
     .. seealso::
-    
-        `Merge`, `Cluster`, `Shift`, `Transcode`, `ValueSelect`, `SelectIndividual`, `SelectVariable`, 
-        `AddAbsorbingRun`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-        `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, 
-        `SegmentationExtract`, `VariableScaling`.
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.cluster.AddAbsorbingRun`, 
+        :func:`~openalea.stat_tool.cluster.Cumulate`,
+        :func:`~openalea.stat_tool.cluster.Difference`, 
+        :func:`~openalea.stat_tool.cluster.IndexExtract`,
+        :func:`~openalea.stat_tool.cluster.LengthSelect`, 
+        :func:`~openalea.stat_tool.cluster.MovingAverage`, 
+        :func:`~openalea.stat_tool.cluster.RecurrenceTimeSequences`,
+        :func:`~openalea.stat_tool.cluster.RemoveRun`,
+        :func:`~openalea.stat_tool.cluster.Reverse`, 
+        :func:`~openalea.stat_tool.cluster.SegmentationExtract`, 
+        :func:`~openalea.stat_tool.cluster.VariableScaling`, 
     """
 
     RefSample = kargs.get("RefSample", -1)
@@ -107,9 +139,7 @@ def MergeVariable(obj, *args, **kargs):
 ################################################################################
 
 def ExtractData(model):
-    """    
-    Extraction of the 'data' part of an object of type 'model'.
-    
+    """Extraction of the 'data' part of an object of type 'model'.
 
     This function enables to extract the 'data' part of an object of type 'model' 
     when the estimation of model parameters from data gives rise to the construction 
@@ -119,22 +149,21 @@ def ExtractData(model):
     "Viterbi"). 
 
     :Parameters:
-    
       * mixt (_Mixture),
       * convol (_Convolution),
       * compound (_Compound),
       * hmc (_HiddenMarkov),
-      * hsmc (_HiddenSemiMarkov). 
+      * hsmc (_HiddenSemiMarkov).
 
     :Returns:
-    
-        If mixt contains a 'data' part, an object of type `_MixtureData` is returned.
-        If convol contains a 'data' part, an object of type `_ConvolutionData is returned.
-        If compound contains a 'data' part, an object of type `_CompoundData is returned.
-        If hmc contains a 'data' part, an object of type `_MarkovData` is returned.
-        If hsmc contains a 'data' part, an object of type `_SemiMarkovData` is returned.
+      - If mixt contains a 'data' part, an object of type `_MixtureData` is returned.
+      - If convol contains a 'data' part, an object of type `_ConvolutionData is returned.
+      - If compound contains a 'data' part, an object of type `_CompoundData is returned.
+      - If hmc contains a 'data' part, an object of type `_MarkovData` is returned.
+      - If hsmc contains a 'data' part, an object of type `_SemiMarkovData` is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -145,7 +174,7 @@ def ExtractData(model):
         >>> ExtractData(hsmc) 
     
     .. seealso::
-        `Estimate`
+        :func:`~openalea.stat_tool.estimate.Estimate`
     """
 
     return model.extract_data()
@@ -182,6 +211,7 @@ def ExtractDistribution(model, *args):
         distribution, an object of type `_Distribution` is returned. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -197,7 +227,9 @@ def ExtractDistribution(model, *args):
         >>> ExtractDistribution(top_param, position)
     
     .. seealso::
-        `Plot`, `Fit`, `Simulate`. 
+        :func:`~openalea.stat_tool.output.Plot`,
+        :func:`~openalea.stat_tool.data_transform.Fit`, 
+        :func:`~openalea.stat_tool.simulate.Simulate`. 
     """
     
     return Extract(model, *args)
@@ -229,6 +261,7 @@ def ExtractHistogram(data, *args):
         distribution, an object of type `_Histogram` is returned. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -255,7 +288,9 @@ def ExtractHistogram(data, *args):
     
 
     .. seealso::
-        `Plot`, `Fit`, `Simulate`. 
+        :func:`~openalea.stat_tool.output.Plot`,
+        :func:`~openalea.stat_tool.data_transform.Fit`, 
+        :func:`~openalea.stat_tool.simulate.Simulate`.
     """
     
     return Extract(data, *args)
@@ -356,6 +391,7 @@ def SelectVariable(obj, variables, Mode="Keep"):
       possible values for each variable is < 15. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -365,10 +401,24 @@ def SelectVariable(obj, variables, Mode="Keep"):
         >>> SelectVariable(seq, variables, Mode="Reject")
 
     .. seealso::
-        `AddAbsorbingRun`, `Cluster`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-        `Merge`, `MergeVariable`, `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, 
-        `Reverse`, `SelectIndividual`, `Shift`, `Transcode`, `ValueSelect`, 
-        `SegmentationExtract`, `VariableScaling`. 
+        `AddAbsorbingRun`, 
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.stat_tool.cumulate.Cumulate`,
+        `Difference`, 
+        `IndexExtract`,
+        `LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+        `MovingAverage`,
+        `RecurrenceTimeSequences`,
+        `RemoveRun`, 
+        `Reverse`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        `SegmentationExtract`, 
+        `VariableScaling`. 
     """
 
     keep = bool(Mode == "Keep")
@@ -410,6 +460,7 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
         is < 15. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -419,11 +470,27 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
         >>> SelectIndividual(dist_matrix, identifiers, Mode="Reject") 
 
     .. seealso::
-    
-        `Cluster`, `Merge`, `Shift`, `Transcode`, `ValueSelect`, `MergeVariable`, `SelectVariable`, 
-        `AddAbsorbingRun`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-        `MovingAverage`, `RecurrenceTimeSequences`, `RemoveSeries`, `Reverse`, `SegmentationExtract`, 
-        `VariableScaling`, `RemoveApicalInternodes`, `Symmetrize`. 
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`
+        `AddAbsorbingRun`, 
+        `Cumulate`, 
+        `Difference`, 
+        `IndexExtract`, 
+        `LengthSelect`, 
+        `MovingAverage`, 
+        `RecurrenceTimeSequences`, 
+        `RemoveSeries`, 
+        `Reverse`, 
+        `SegmentationExtract`, 
+        `VariableScaling`, 
+        `RemoveApicalInternodes`, 
+        `Symmetrize`.
+        
     """
 
     keep = bool(Mode == "Keep")
@@ -464,6 +531,7 @@ def ValueSelect(obj, *args, **kargs):
         variable are consecutive from 0 and if the number of possible values for each variable is < 15. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
 
@@ -479,10 +547,23 @@ def ValueSelect(obj, *args, **kargs):
         >>> ValueSelect(seqn, variable, min_value, max_value, Mode="Reject")
 
     .. seealso::
-        `Cluster`, `Merge`, `Shift`, `Transcode`, `SelectIndividual`, `MergeVariable`, 
-        `SelectVariable`, `Cumulate`, `Difference`, `IndexExtract`, `LengthSelect`, 
-        `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, 
-        `SegmentationExtract`, `VariableScaling`. 
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.data_transform.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`
+        Cumulate`
+        Difference`
+        IndexExtract`
+        LengthSelect`, 
+        MovingAverage`,
+        RecurrenceTimeSequences`
+        RemoveRun`,
+        Reverse`, 
+        SegmentationExtract`,
+        VariableScaling`. 
     """
 
     keep = __get_mode__(kargs)
@@ -558,6 +639,7 @@ def Shift(obj, *args):
       each variable is 15. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -568,11 +650,24 @@ def Shift(obj, *args):
         >>> Shift(seqn, variable, param)
         
     .. seealso::
-    
-      `Cluster`, `Merge`, `Transcode`, `MergeVariable`, `SelectIndividual`, `SelectVariable`, 
-      `AddAbsorbingRun`, `Cumulate`, `Difference`, `Lengthselect`, `MovingAverage`, `IndexExtract`, 
-      `RecurrenceTimeSequences`, `RemoveRun`, `Reverse`, `SegmentationExtract`, `ValueSelect`, 
-      `VariableScaling`.
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`
+        :func:`~openalea.stat_tool.data_transform.AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.data_transform.Cumulate`,
+        :func:`~openalea.stat_tool.data_transform.Difference`,
+        :func:`~openalea.stat_tool.data_transform.Lengthselect`, 
+        :func:`~openalea.stat_tool.data_transform.MovingAverage`,
+        :func:`~openalea.stat_tool.data_transform.IndexExtract`, 
+        :func:`~openalea.stat_tool.data_transform.RecurrenceTimeSequences`,
+        :func:`~openalea.stat_tool.data_transform.RemoveRun`,
+        :func:`~openalea.stat_tool.data_transform.Reverse`,
+        :func:`~openalea.stat_tool.data_transform.SegmentationExtract`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        :func:`~openalea.stat_tool.data_transform.VariableScaling`.
     """
     
     try:
@@ -632,6 +727,7 @@ def Fit(histo, dist):
 
     
     :Examples:
+
     .. doctest::
         :options: +SKIP
     

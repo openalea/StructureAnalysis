@@ -1,5 +1,6 @@
-#__docformat__ = "restructuredtext"
-__doc__ = """ Mixture """
+""" Mixture class"""
+__revision__ = "$Id$"
+
 
 import os
 
@@ -38,6 +39,7 @@ def Mixture(*args):
         otherwise no object is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
 

@@ -1,5 +1,5 @@
 __doc__ = """ Distributions module"""
-__docformat__ = "restructuredtext"
+__revision__ = "$Id$"
 
 import _stat_tool
 import interface
@@ -97,6 +97,7 @@ def Distribution(type_or_filename, *args):
         returned, otherwise no object is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -238,6 +239,7 @@ def ToDistribution(histo):
         is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -262,6 +264,7 @@ def ToHistogram(dist):
         is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
 

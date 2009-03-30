@@ -7,27 +7,31 @@ from histogram import Histogram
 
 
 def compare_histo(histo, *args, **kargs):
-    """    
-    Comparison of frequency distributions.
-  
+    """Comparison of frequency distributions.
+
     :Parameters:
-      * `histo1`, `histo2`,... (histogram, mixture_data, convolution_data, compound_data),
-      * type (string): variable type ("NUMERIC" ("N"), "ORDINAL" ("O") or "SYMBOLIC" ("S")).
-      
+      * `histo1`, `histo2`, ... (histogram, mixture_data, convolution_data, compound_data),
+      * `type` (string): variable type ("NUMERIC" ("N"), "ORDINAL" ("O") or "SYMBOLIC" ("S")).
+
     :Keywords:
-      * FileName (string): name of the result file,
-      * Format (string): format of the result file: "ASCII" (default format) or "SpreadSheet". 
+      - FileName (string) : name of the result file 
+      - Format (string) : format of the result file: "ASCII" (default format) or "SpreadSheet". 
         This optional argument can only be used in conjunction with the optional argument FileName. 
 
     :Returns:
-        The comparison result.
-      
+      The comparison result.
+
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
         >>> compare_histo(histo1, histo2, ..., type, FileName="result", 
         ... Format="ASCII")
+    
+    .. seealso:: 
+        :func:`~openalea.stat_tool.comparison.Compare`
+        
           
     """
     type_dict = {
@@ -40,6 +44,10 @@ def compare_histo(histo, *args, **kargs):
 	    }
 
     _type = args[-1]
+    # check the last argument's type
+    if type('O')!=type(_type):
+        raise(TypeError, """The last argument must be a string (e.g., 
+        "O", "ORDINAL." See the documentation""")
     try:
         _type = type_dict[_type.upper()]
     except KeyError:
@@ -63,17 +71,17 @@ def compare_vectors(vec, vector_distance):
     """Comparison of vectors.
 
     The type _VectorDistance implements standardization procedures. 
-    The objective of standardization is to avoid the dependence on 
+    The objective of standardization is to avoid the dependence on
     the variable type (chosen among symbolic, ordinal, numeric and circular) 
-    and, for numeric variables, on the choice of the measurement units 
-    by converting the original variables to dimensionless variables. 
- 
+    and, for numeric variables, on the choice of the measurement units
+    by converting the original variables to dimensionless variables.
+
     :Parameters:
-      - `vec` (_Vectors) 
-      - `vector_distance` (_VectorDistance) 
+     - `vec` (_Vectors) : test
+     - `vector_distance` (_VectorDistance) : test 
 
     :Returns:
-        An object of type _DistanceMatrix is returned. 
+      An object of type _DistanceMatrix is returned. 
 
     :Examples:
     
@@ -83,7 +91,9 @@ def compare_vectors(vec, vector_distance):
         >>> compare_vectors(vec, vector_distance) 
     
     .. seealso::
-        `VectorDistance`, `Clustering`.  
+        :func:`~openalea.stat_tool.vectors.VectorDistance`, 
+        :func:`~openalea.stat_tool.cluster.Clustering`, 
+        :func:`~openalea.stat_tool.comparison.Compare` 
      """
 
     return vec.compare(vector_distance)
@@ -101,17 +111,24 @@ def compare_markov(mc, *args, **kargs):
 
 
 def Compare(arg1, *args, **kargs):
-    """ 
-    Comparison functions factory
-    
+    """Comparison functions factory
+
     :Parameters:
-      - `arg1` - should be in: 
+      - `arg1` should be in : 
           * `compare_histo` : Histograms comparison
           * `compare_vectors` : Vectors comparison
           * `compare_seq` : Sequences comparison
           * `compare_markov` : Markovian models comparison
-          
+
+    .. seealso::
+        :func:`~openalea.stat_tool.comparison.compare_histo`,
+        :func:`~openalea.stat_tool.comparison.compare_vectors`
+        :func:`~openalea.stat_tool.comparison.compare_seq`
+        :func:`~openalea.stat_tool.comparison.compare_markov`
+
     .. todo:: Get the AMAPMod documentation
+    
+    
     """
 
     p1 = arg1
@@ -143,6 +160,7 @@ def ComparisonTest(type, histo1, histo2):
     coefficients (skewness and kurtosis coefficients). The test statistic is:
     
     .. math::
+        
         F_{n_1-1,n_2-1} = \frac
             {
             \frac{\displaystyle\sum_{i=1}^{n_1}\left( x_{1i}-m_1 \right)^2}{n_1-1}

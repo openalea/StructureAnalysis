@@ -1,4 +1,6 @@
-__doc__= """ Error classes """
+""" Error classes """
+__revision__ = "$Id$"
+
 
 from _stat_tool import _FormatError
 

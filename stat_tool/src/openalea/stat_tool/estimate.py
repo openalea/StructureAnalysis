@@ -1,5 +1,5 @@
 """ Estimation functions """
-__docformat__ = "restructuredtext"
+__revision__ = "$Id$"
 
 import sys,os
 sys.path.append(os.path.abspath("."))
@@ -57,6 +57,7 @@ class EstimateFunctions(object):
           * histo (histogram, mixture_data, convolution_data, compound_data)
            
         :Examples:
+
         .. doctest::
             :options: +SKIP
             
@@ -75,6 +76,7 @@ class EstimateFunctions(object):
                                       "Free" (default value) or "Fixed". T
                                       
         :Examples:
+
         .. doctest::
             :options: +SKIP
         
@@ -102,19 +104,7 @@ class EstimateFunctions(object):
                          NbComponent = "Fixed", Penalty='AIC'):
         """ Estimate a mixture distribution 
     
-        :Examples:
-        .. doctest::
-            :options: +SKIP
-        
-            >>> estimate_mixture(histo, ("MIXTURE", "B", dist,...,),
-                             MinInfBound=1, InfBoundStatus="Fixed", 
-                             DistInfBoundStatus="Fixed")
-            >>> estimate_mixture(histo, ("MIXTURE", "B", "NB",...,),
-                               MinInfBound=1, InfBoundStatus="Fixed", 
-                               DistInfBoundStatus="Fixed",
-                               NbComponent="Estimated", Penalty="AIC")
-
-
+       
         :Parameters:
         
           * histo (histogram, mixture_data, convolution_data, compound_data),
@@ -142,6 +132,19 @@ class EstimateFunctions(object):
            
                               This optional argument can only be used if the optional argument 
                               NbComponent is set at "Estimated".
+                              
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+        
+            >>> estimate_mixture(histo, ("MIXTURE", "B", dist,...,),
+                             MinInfBound=1, InfBoundStatus="Fixed", 
+                             DistInfBoundStatus="Fixed")
+            >>> estimate_mixture(histo, ("MIXTURE", "B", "NB",...,),
+                               MinInfBound=1, InfBoundStatus="Fixed", 
+                               DistInfBoundStatus="Fixed",
+                               NbComponent="Estimated", Penalty="AIC")
         
         """
     
@@ -300,11 +303,11 @@ def Estimate(histo, type, *args, **kargs):
     Estimation function for AML compatibility
 
     .. seealso::
-        `estimation_nonparametric`,
-        `estimation_parametric`,
-        `estimation_mixture`,
-        `estimation_convolution`,
-        `estimation_compound`,
+        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimation_nonparametric`,
+        :func:`~openalea.stat_tool.estimate.estimation_parametric`,
+        :func:`~openalea.stat_tool.estimate.estimation_mixture`,
+        :func:`~openalea.stat_tool.estimate.estimation_convolution`,
+        :func:`~openalea.stat_tool.estimate.estimation_compound`,
     """
 
     fct_map = {

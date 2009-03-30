@@ -1,5 +1,6 @@
-__doc__ = "Vectors function and class"
-__docformat__ = "restructuredtext"
+"""Vectors function and class"""
+__revision__ = "$Id$"
+
 
 import _stat_tool
 import interface
@@ -58,6 +59,7 @@ def Vectors(*args):
        otherwise no object is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -66,11 +68,26 @@ def Vectors(*args):
         >>> Vectors(file_name)
      
     .. seealso::
-        `Save`, `ExtractHistogram`, `Cluster`, `Merge`, `MergeVariable`, `SelectIndividual`, 
-        `SelectVariable`, `Shift`, `Transcode`, `ValueSelect`, `Compare`, 
-        `ComputeRankCorrelation`, `ContingencyTable`, `Regression`, `VarianceAnalysis`
+        :func:`~openalea.stat_tool.output.Save`,
+        :func:`~openalea.stat_tool.data_transform.ExtractHistogram`, 
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        :func:`~openalea.stat_tool.comparison.Compare`, 
+        :func:`~openalea.stat_tool.comparison.ComputeRankCorrelation`,
+        :func:`~openalea.stat_tool.comparison.ContingencyTable`, 
+        :func:`~openalea.stat_tool.comparison.Regression`, 
+        :func:`~openalea.stat_tool.comparison.VarianceAnalysis`
     """
-    return _Vectors(*args)
+    if (len(args)==0):
+        raise TypeError("Expected a list or filename argument")
+    else:
+        return _Vectors(*args)
 
 
 
@@ -131,6 +148,7 @@ def VectorDistance(*args, **kargs):
         If the construction succeeds, an object of type vector_distance is returned.
         
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -141,7 +159,7 @@ def VectorDistance(*args, **kargs):
 
 
     .. seealso::
-        `Compare`
+        :func:`~openalea.stat_tool.comparison.Compare`
     """
 
     # filename
@@ -193,9 +211,10 @@ def VarianceAnalysis(vec, class_variable, response_variable,
     One-way variance analysis.
     
     :Examples:
+
     .. doctest::
         :options: +SKIP
-    
+
         >>> VarianceAnalysis(vec, class_variable, response_variable, type, FileName="result", Format="SpreadSheet")
       
     :Parameters:
@@ -253,9 +272,10 @@ def ContingencyTable(vec, variable1, variable2,
         The contingency table result as a string
         
     :Examples:
+
     .. doctest::
         :options: +SKIP
-    
+
         >>> ContingencyTable(vec, variable1, variable2, FileName="result", Format="SpreadSheet")
       
   

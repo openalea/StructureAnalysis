@@ -1,4 +1,5 @@
 """ Convolution """
+__revision__ = "$Id$"
 
 
 import interface
@@ -29,6 +30,7 @@ def Convolution(*args):
         convolution, otherwise no object is returned.
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     

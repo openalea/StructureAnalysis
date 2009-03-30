@@ -1,4 +1,5 @@
 """Output functions"""
+__revision__ = "$Id$"
 
 import plot
 import os
@@ -27,9 +28,8 @@ def Display(obj, *args, **kargs):
     :math:`P(S_t=j|X_0^{\tau-1}=x_0^\tau)` as a
     function of the index parameter `t` computed from the parameters of a hidden
     Markovian model for the sequence :math:`x_0^\tau` (ViewPoint="StateProfile").
-     
+
     :Parameters:
-    
       * `obj` - object to display,
       * `vec` (`_Vectors`), 
       * `seq` (`_Sequences`, `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData`, `_Tops`),
@@ -40,7 +40,6 @@ def Display(obj, *args, **kargs):
       * `identifier` (int) - identifier of a sequence.
 
     :Keywords:
-
       * ViewPoint (string): point of view on the object ("Survival" or "Data"
         or "StateProfile"). This optional argument can be set at
           * "Data" only if the first argument is of type `_Vectors`,
@@ -64,6 +63,7 @@ def Display(obj, *args, **kargs):
         A string
 
     :Examples:
+
     .. doctest::
         :options: +SKIP 
     
@@ -121,7 +121,6 @@ def Plot(obj, *args, **kargs):
     Markovian model for the sequence (ViewPoint="StateProfile"). 
 
     :Parameters:
-    
       * obj1 (`_Distribution`, `_Mixture`, `_Convolution`, `_Compound`,
         `_DistributionData`, `_MixtureData`, `_ConvolutionData`,
         `_CompoundData`,`_Renewal`, `_TimeEvents`, `_RenewalData`,
@@ -167,6 +166,7 @@ def Plot(obj, *args, **kargs):
         Nothing.
         
     :Examples:
+
     .. doctest::
         :options: +SKIP
 
@@ -262,6 +262,7 @@ def Save(obj, *args, **kargs):
         No object returned.
         
     :Examples:
+
     .. doctest::
         :options: +SKIP
 
@@ -299,7 +300,6 @@ class StatInterface(object):
         
         import tempfile
         prefix = tempfile.mktemp()
-
         if(survival):
             try:
                 self.survival_plot_write(prefix, title)
@@ -314,7 +314,7 @@ class StatInterface(object):
 
         elif(args):
             self.plot_write(prefix, title, list(args))
-        else:
+        else:            
             self.plot_write(prefix, title)
 
         plot_file = prefix + suffix + ".plot"
@@ -414,22 +414,18 @@ class StatInterface(object):
 
         try:
             if(survival):
-                print 'calling survival'
                 plotable = self.survival_get_plotable(*params)
 
             elif(stateprofile):
-                print 'calling stateprofile'
                 plotable = self.stateprofile_get_plotable(*params)
 
             else:
                 if(args):
-                    print 'calling args'
                     plotable = self.get_plotable(list(args), *params)
                 else:
                     plotable = self.get_plotable(*params)
-
+            
             plotter = plot.get_plotter()
-
         except:
             import warnings
             warnings.warn("Cannot use new plotter. Use old style plot.")
@@ -441,6 +437,8 @@ class StatInterface(object):
             plotter.plot(plotable, title, groups, *args, **kargs)
         else:
             self.old_plot(*args, **kargs)
+            
+        
             
     def display(self, Detail=1, ViewPoint="", Format=""):
         __doc__ = Plot.__doc__

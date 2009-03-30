@@ -198,6 +198,7 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
         possible values for each variable is < 15. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -210,11 +211,26 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
         >>> Transcode(discrete_seqn, variable, new_values, AddVariable=True)
     
     .. seealso::
-    
-        `Cluster`, `Merge`, `Shift`, `ValueSelect`, `MergeVariable`, `SelectIndividual`, 
-        `SelectVariable`, `AddAbsorbingRun`, `Cumulate`, `Difference`, `IndexExtract`, 
-        `LengthSelect`, `MovingAverage`, `RecurrenceTimeSequences`, `RemoveRun`, 
-        `Reverse`, `SegmentationExtract`, `VariableScaling`. 
+
+        :func:`~openalea.stat_tool.cluster.Clustering`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`,
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`,
+        :func:`~openalea.stat_tool.cumulate.Cumulate`,
+        :func:`~openalea.stat_tool.data_transform.AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cumulate.Cumulate`,
+        :func:`~openalea.stat_tool.data_transform.Difference`,
+        :func:`~openalea.stat_tool.data_transform.IndexExtract`, 
+        :func:`~openalea.stat_tool.data_transform.LengthSelect`,
+        :func:`~openalea.stat_tool.data_transform.MovingAverage`,
+        :func:`~openalea.stat_tool.data_transform.RecurrenceTimeSequences`,
+        :func:`~openalea.stat_tool.data_transform.Removerun`, 
+        :func:`~openalea.stat_tool.data_transform.Reverse`,
+        :func:`~openalea.stat_tool.data_transform.SegmentationExtract`,
+        :func:`~openalea.stat_tool.data_transform.VariableScaling`. 
     """
 
     # Default variable value
@@ -262,6 +278,7 @@ def Clustering(matrix, type, *args, **kargs):
         if 2 < nb_cluster < (number of patterns), an object of type clusters is returned
         
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
@@ -271,10 +288,10 @@ def Clustering(matrix, type, *args, **kargs):
         >>> Clustering(dissimilarity_matrix, "Hierarchy", Algorithm="Divisive")
     
     .. seealso::
-        `SelectIndividual`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`,
         `Symmetrize`,
-        `Compare`,
-        `ToDistanceMatrix`. 
+        :func:`~openalea.stat_tool.comparison.Compare`,
+        :func:`~openalea.stat_tool.cluster.ToDistanceMatrix`. 
     """
     
     format_map = { "ASCII" :'a',
@@ -369,13 +386,16 @@ def ToDistanceMatrix(clusters):
         An object of type distance_matrix is returned. 
 
     :Examples:
+
     .. doctest::
         :options: +SKIP
     
         >>> ToDistanceMatrix(clusters)
 
     .. seealso::
-        `Clustering`
+        :func:`~openalea.stat_tool.cluster.Clustering`,
+    
+    .. todo:: provide concrete example(s).
     """
     
     return _DistanceMatrix(clusters)
