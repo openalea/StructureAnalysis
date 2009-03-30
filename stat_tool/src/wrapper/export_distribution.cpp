@@ -167,16 +167,14 @@ public:
 
   static void file_ascii_write(const Parametric_model p, const char* path, bool exhaustive)
   {
-  	     bool result = true;
-  	     Format_error error;
+     bool result = true;
+     Format_error error;
 
-  	     result = p.ascii_write(error, path, exhaustive);
-  	     if (!result)
-  	        stat_tool::wrap_util::throw_error(error);
+     result = p.ascii_write(error, path, exhaustive);
+     if (!result)
+        stat_tool::wrap_util::throw_error(error);
 
-  	   }
-
-
+  }
 
 };
 
@@ -187,14 +185,12 @@ public:
 void class_distribution()
 {
 
-
   // Distribution base class
   class_< Distribution>("_Distribution")
     .def(self_ns::str(self)) // __str__
     .def( self == self )
     .def( self != self )
     ;
-
 
   // Parametric base class
   class_< Parametric, bases< Distribution > >
@@ -278,9 +274,8 @@ void class_distribution()
     .def("simulate", &Parametric::simulation,
 	 "Simulation one value")
 
-	 .def("file_ascii_write", ParametricModelWrap::file_ascii_write,
-	 "Return a string containing the object description")
-
+    .def("file_ascii_write", ParametricModelWrap::file_ascii_write,
+	"Return a string containing the object description")
 
     ;
 
