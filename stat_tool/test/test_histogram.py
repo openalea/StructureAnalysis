@@ -26,7 +26,7 @@ class Test:
         return h
     
     def test_constructor_fromfile_failure(self):
-        """run constructor with filename argument"""
+        """run constructor with wrong filename argument"""
         try:
             _h = Histogram("peup1.hi")
             assert False
@@ -34,7 +34,7 @@ class Test:
             assert True
         
     def test_constructor_fromlist(self):
-        """constructor """
+        """constructor from list """
         h = Histogram([0, 1, 2, 3])
         assert h
         

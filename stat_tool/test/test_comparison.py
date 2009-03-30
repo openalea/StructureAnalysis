@@ -31,9 +31,6 @@ class Test:
 
     def test_compare_vectors(self):
         
-        #from vectors import Vectors, VectorDistance
-        #from data_transform import SelectVariable
-
         vec10 = Vectors("chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         assert vec15

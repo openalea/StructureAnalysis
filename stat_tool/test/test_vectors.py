@@ -11,9 +11,16 @@ from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.cluster import Clustering
 from openalea.stat_tool.output import Display
+from openalea.stat_tool.plot import Plot
 
 class Test:
+    """a simple unittest class"""
 
+    def test_empty(self):
+        """Test that empty constructor works"""
+        _v = Vectors()
+        
+            
     def test_vectors_pylist(self):
         """test vector constructor from list"""
         v = Vectors([[0, 1, 2, 3], [4, 5, 6, 7]])
@@ -133,15 +140,15 @@ class Test:
         vec10 = Vectors("chene_sessile.vec")
     
         # plot of the pointwise averages
-        # Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
+        Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
     
         vec95 = ValueSelect(vec10, 1, 1995)
         vec96 = ValueSelect(vec10, 1, 1996)
-        #vec97 = ValueSelect(vec10, 1, 1997)
+        vec97 = ValueSelect(vec10, 1, 1997)
 
         VarianceAnalysis(vec10, 1, 2, "N")
         Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec95, 2), "N")
-        # Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2))
+        Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2))
     
         ContingencyTable(vec10, 1, 4)
     
@@ -162,20 +169,20 @@ class Test:
         # Plot(ExtractHistogram(vec11, 5), ExtractHistogram(vec12, 5), ExtractHistogram(vec13, 5))
     
         mixt20 = Estimate(ExtractHistogram(vec10, 2), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent="Estimated")
-        # Display(mixt20)
-        # Plot(mixt20)
-        # Plot(ExtractDistribution(mixt20, "Mixture"))
+        Display(mixt20)
+        Plot(mixt20)
+        Plot(ExtractDistribution(mixt20, "Mixture"))
     
         mixt21 = Estimate(ExtractHistogram(vec10, 5), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent="Estimated")
     
         vec9596 = ValueSelect(vec10, 1, 1995, 1996)
-        # Plot(ExtractHistogram(ValueSelect(vec9596, 4, 1), 6), ExtractHistogram(ValueSelect(vec9596, 4, 2), 6), ExtractHistogram(ValueSelect(vec9596, 4, 3, 4), 6))
+        Plot(ExtractHistogram(ValueSelect(vec9596, 4, 1), 6), ExtractHistogram(ValueSelect(vec9596, 4, 2), 6), ExtractHistogram(ValueSelect(vec9596, 4, 3, 4), 6))
     
         # linear regression
     
         regress10 = Regression(vec10, "Linear", 5, 2)
         Display(regress10)
-        # Plot(regress10)
+        Plot(regress10)
     
         # nonparametric regression (loess smoother)
 
