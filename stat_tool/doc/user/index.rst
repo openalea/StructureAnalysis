@@ -24,7 +24,7 @@ how to use VPlants.Stat_tool see :ref:`stat_tool_reference`.
 
 .. toctree::
     :maxdepth: 1
-            
+
     description.rst
     list.rst
     syntax.rst
