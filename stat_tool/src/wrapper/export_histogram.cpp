@@ -1,22 +1,22 @@
 /*------------------------------------------------------------------------------
- *                                                                              
+ *
  *        VPlants.Stat_Tool : VPlants Statistics module
- *                                                                              
- *        Copyright 2006-2007 INRIA - CIRAD - INRA                      
- *                                                                              
+ *
+ *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>         
- *                                                                              
- *        Distributed under the GPL 2.0 License.                               
- *        See accompanying file LICENSE.txt or copy at                          
+ *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *
+ *        Distributed under the GPL 2.0 License.
+ *        See accompanying file LICENSE.txt or copy at
  *           http://www.gnu.org/licenses/gpl-2.0.txt
- *                                                                              
- *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
- *       
+ *
+ *        OpenAlea WebSite : http://openalea.gforge.inria.fr
+ *
  *        $Id$
- *                                                                       
+ *
  *-----------------------------------------------------------------------------*/
 
 #include "wrapper_util.h"
@@ -75,7 +75,7 @@ public:
     ostringstream output;
     h.F_comparison(output, histo);
     return output.str();
-      
+
   }
 
   static std::string t_comparison(const Histogram& h, const Histogram &histo)
@@ -94,11 +94,11 @@ public:
 	stat_tool::wrap_util::throw_error(error);
       }
     return output.str();
-      
+
   }
 
-  static std::string comparison(const Histogram& h, 
-				boost::python::tuple& histos, int type, 
+  static std::string comparison(const Histogram& h,
+				boost::python::tuple& histos, int type,
 				const char* filename, char format)
   {
     ostringstream output;
@@ -115,10 +115,10 @@ public:
     // Extract list element
     for(int i=0; i<nb_histo; i++)
       ihisto[i] = boost::python::extract< Histogram *>(histos[i]);
-    
+
     // call comparaison
     bool res = h.comparison(error, output, nb_histo, ihisto.get(), type, filename, format);
-    
+
 
     if(!res)
       stat_tool::wrap_util::throw_error(error);
@@ -134,7 +134,7 @@ public:
   {
     Parametric_model* ret;
     Format_error error;
-    
+
     ret = h.parametric_estimation(error, ident, min_inf_bound, flag);
 
     if(!ret)
@@ -144,8 +144,8 @@ public:
   }
 
 
-  static Mixture* mixture_estimation_1(const Histogram& h, const Mixture& imixt, 
-				       boost::python::list& estimate_tuple, 
+  static Mixture* mixture_estimation_1(const Histogram& h, const Mixture& imixt,
+				       boost::python::list& estimate_tuple,
 				       int min_inf_bound,
 				       bool flag, bool component_flag)
   {
@@ -158,7 +158,7 @@ public:
 
     for (int i=0; i<nb_element; i++)
       estimate[i] = boost::python::extract< bool >(estimate_tuple[i]);
-  
+
     ret = h.mixture_estimation(error, imixt, estimate, min_inf_bound, flag,
 			     component_flag);
 
@@ -168,10 +168,10 @@ public:
     return ret;
 
   }
-  
 
-  static Mixture* mixture_estimation_2(const Histogram& h, 
-				       boost::python::list& ident_tuple, 
+
+  static Mixture* mixture_estimation_2(const Histogram& h,
+				       boost::python::list& ident_tuple,
 				       int min_inf_bound,
 				       bool flag, bool component_flag, int penalty)
   {
@@ -180,7 +180,7 @@ public:
     Format_error error;
 
     int nb_component = boost::python::len(ident_tuple);
-    int ident[MIXTURE_NB_COMPONENT]; 
+    int ident[MIXTURE_NB_COMPONENT];
 
     for (int i=0; i<nb_component; i++)
       ident[i] = boost::python::extract<int>(ident_tuple[i]);
@@ -194,21 +194,21 @@ public:
     return ret;
   }
 
-  
-  static Convolution* convolution_estimation_1(const Histogram& h, 
+
+  static Convolution* convolution_estimation_1(const Histogram& h,
 					       const Parametric &known_dist ,
-					       const Parametric &unknown_dist , 
-					       int estimator, int nb_iter, 
-					       double weight, int penalty_type, 
+					       const Parametric &unknown_dist ,
+					       int estimator, int nb_iter,
+					       double weight, int penalty_type,
 					       int outside)
   {
     Convolution* ret;
     ostringstream output;
     Format_error error;
-    
+
     ret = h.convolution_estimation(error, output, known_dist, unknown_dist, estimator,
 				 nb_iter, weight, penalty_type, outside);
-    
+
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
 
@@ -216,78 +216,78 @@ public:
   }
 
 
-  static Convolution* convolution_estimation_2(const Histogram& h, 
+  static Convolution* convolution_estimation_2(const Histogram& h,
 					       const Parametric &known_dist,
-					       int min_inf_bound, 
-					       int estimator, int nb_iter, 
-					       double weight,  int penalty_type, 
+					       int min_inf_bound,
+					       int estimator, int nb_iter,
+					       double weight,  int penalty_type,
 					       int outside)
   {
     Convolution* ret;
     ostringstream output;
     Format_error error;
-    
+
     ret = h.convolution_estimation(error, output, known_dist,  min_inf_bound, estimator,
 				 nb_iter, weight, penalty_type, outside);
-    
+
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
-    
+
     return ret;
   }
 
-  
 
-  static Compound* compound_estimation_1(const Histogram& h, 
+
+  static Compound* compound_estimation_1(const Histogram& h,
 					 const Parametric &sum_dist,
 					 const Parametric &dist,
 					 char type,
-					 int estimator, int nb_iter, 
-					 double weight,  int penalty_type, 
+					 int estimator, int nb_iter,
+					 double weight,  int penalty_type,
 					 int outside)
   {
     Compound* ret;
     ostringstream output;
     Format_error error;
-    
+
     ret = h.compound_estimation(error, output, sum_dist,  dist, type, estimator,
 				   nb_iter, weight, penalty_type, outside);
-    
+
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
-    
+
     return ret;
   }
 
-  
-  static Compound* compound_estimation_2(const Histogram& h, 
+
+  static Compound* compound_estimation_2(const Histogram& h,
 					 const Parametric &known_dist,
 					 char type, int min_inf_bound,
-					 int estimator, int nb_iter, 
-					 double weight, int penalty_type, 
+					 int estimator, int nb_iter,
+					 double weight, int penalty_type,
 					 int outside)
   {
     Compound* ret;
     ostringstream output;
     Format_error error;
-    
+
     ret = h.compound_estimation(error, output, known_dist, type, min_inf_bound, estimator,
 			      nb_iter, weight, penalty_type, outside);
-    
+
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
-    
+
     return ret;
   }
 
 
   // Merge Histogram in a distribution_data
-  static Distribution_data* merge_histograms(const Histogram& h, 
+  static Distribution_data* merge_histograms(const Histogram& h,
 					     const boost::python::list& histo_list)
   {
     Distribution_data *histo = NULL;
     int nb_element = boost::python::len(histo_list) + 1;
-    
+
     stat_tool::wrap_util::auto_ptr_array<const Histogram*>
       pelement(new const Histogram*[nb_element]);
 
@@ -295,18 +295,18 @@ public:
 
     for (int i = 1; i < nb_element; i++)
       pelement[i] = extract<Histogram*>(histo_list[i-1]);
-      
-    
+
+
     // create new distribution_data object
     histo = new Distribution_data(nb_element, pelement.get());
     if (! histo)
       stat_tool::wrap_util::throw_error("Could not initialize Histogram from arguments");
-	
+
     return histo;
   }
 
 
-  static Distribution_data* value_select(const Histogram& h, 
+  static Distribution_data* value_select(const Histogram& h,
 					 int min, int max,
 					 bool keep)
   {
@@ -369,7 +369,7 @@ public:
     return ret;
   }
 
-  static Distribution_data* cluster_limit(const Histogram& h, 
+  static Distribution_data* cluster_limit(const Histogram& h,
 					  boost::python::list& limit
 					  )
   {
@@ -381,7 +381,7 @@ public:
 
     for (int i=0; i<nb_limit; i++)
 	l[i] = extract<int>(limit[i]);
-    
+
     Distribution_data* ret = h.cluster(error, nb_limit, l.get());
 
 
@@ -392,7 +392,7 @@ public:
   }
 
 
-  static Distribution_data* transcode(const Histogram& h, 
+  static Distribution_data* transcode(const Histogram& h,
 				      boost::python::list& symbol
 				      )
   {
@@ -408,7 +408,7 @@ public:
 
     for (int i=0; i<nb_symbol; i++)
 	l[i] = extract<int>(symbol[i]);
-    
+
     Distribution_data* ret = h.transcode(error, l.get());
 
     if(!ret)
@@ -417,6 +417,25 @@ public:
     return ret;
   }
 
+  static MultiPlotSet* get_plotable(const Histogram& p,
+                const boost::python::list& hist_list)
+  {
+    Format_error error;
+    int nb_hist = boost::python::len(hist_list);
+    stat_tool::wrap_util::auto_ptr_array<const Histogram *>
+      hists(new const Histogram*[nb_hist]);
+
+    for (int i = 0; i < nb_hist; i++)
+      hists[i] = extract<const Histogram*>(hist_list[i]);
+
+    const Histogram** d = hists.get();
+
+    MultiPlotSet* ret = p.get_plotable_hists(error, nb_hist, d);
+    if(!ret)
+      stat_tool::wrap_util::throw_error(error);
+
+    return ret;
+  }
 
 
 };
@@ -435,7 +454,7 @@ void class_histogram()
       .value("CIRCULAR", CIRCULAR)
       .export_values()
       ;
-    
+
     enum_<stat_tool::wrap_util::UniqueInt<6, 2> >("LikelihoodPenaltyType")
       .value("AIC", AIC)
       .value("AICc", AICc)
@@ -452,13 +471,13 @@ void class_histogram()
       .value("ENTROPY", ENTROPY)
       .export_values()
       ;
-   
+
     enum_<stat_tool::wrap_util::UniqueInt<2, 4> >("OutsideType")
       .value("ZERO", ZERO)
       .value("CONTINUATION", CONTINUATION)
       .export_values()
       ;
-   
+
 
     enum_<stat_tool::wrap_util::UniqueInt<4, 5> >("EstimatorType")
       .value("ZERO", ZERO)
@@ -468,7 +487,7 @@ void class_histogram()
       .export_values()
       ;
 
-    
+
 
     // _Histogram
     class_<Histogram>("_Histogram", no_init)
@@ -477,7 +496,7 @@ void class_histogram()
       .def(self_ns::str(self))
       .def("__len__", HistogramWrap::histo_get_nb_element)
       .def("__getitem__", HistogramWrap::histo_get_item)
-      
+
       // Comparison
       .def("compare", HistogramWrap::comparison,
 	   python::arg("histogram"),
@@ -494,13 +513,13 @@ void class_histogram()
       .def("wmw_comparison", HistogramWrap::wmw_comparison,
 	   python::arg("histogram"),
 	   " Wilcoxon-Mann-Whitney comparison of histograms")
-      
+
       // Estimation
-      .def("parametric_estimation", HistogramWrap::parametric_estimation, 
+      .def("parametric_estimation", HistogramWrap::parametric_estimation,
 	   return_value_policy< manage_new_object >(),
 	   "Parametric model estimation")
 
-      .def("mixture_estimation", HistogramWrap::mixture_estimation_1, 
+      .def("mixture_estimation", HistogramWrap::mixture_estimation_1,
 	   return_value_policy< manage_new_object >(),
 	   "Mixture Estimation")
 
@@ -508,7 +527,7 @@ void class_histogram()
 	   return_value_policy< manage_new_object >(),
 	   "Mixture Estimation")
 
-      .def("convolution_estimation", HistogramWrap::convolution_estimation_1, 
+      .def("convolution_estimation", HistogramWrap::convolution_estimation_1,
 	   return_value_policy< manage_new_object >(),
 	   "Convolution Estimation")
 
@@ -516,7 +535,7 @@ void class_histogram()
 	   return_value_policy< manage_new_object >(),
 	   "Convolution Estimation")
 
-      .def("compound_estimation", HistogramWrap::compound_estimation_1, 
+      .def("compound_estimation", HistogramWrap::compound_estimation_1,
 	   return_value_policy< manage_new_object >(),
 	   "Compound  Estimation")
 
@@ -531,17 +550,17 @@ void class_histogram()
 	   "Selection of individuals according to the values taken by a variable")
 
       // Cluster
-      .def("cluster_step", HistogramWrap::cluster_step, 
+      .def("cluster_step", HistogramWrap::cluster_step,
 	   return_value_policy< manage_new_object >(),
 	   python::arg("step"),
 	   "Cluster with step")
 
-      .def("cluster_information", HistogramWrap::cluster_information, 
+      .def("cluster_information", HistogramWrap::cluster_information,
 	   return_value_policy< manage_new_object >(),
 	   python::arg("ratio"),
 	   "Cluster with information")
-      
-      .def("cluster_limit", HistogramWrap::cluster_limit, 
+
+      .def("cluster_limit", HistogramWrap::cluster_limit,
 	   return_value_policy< manage_new_object >(),
 	   python::arg("limites"),
 	   "Cluster with limits")
@@ -552,24 +571,30 @@ void class_histogram()
 
 
       // Others
-      .def("merge", HistogramWrap::merge_histograms,  
+      .def("merge", HistogramWrap::merge_histograms,
 	   return_value_policy< manage_new_object >(),
 	   python::arg("histograms"),
 	   "Merge histograms")
 
-      .def("shift", HistogramWrap::shift, 
+      .def("shift", HistogramWrap::shift,
 	   return_value_policy< manage_new_object >(),
 	   python::arg("shift_param"),
 	   "Shift Histogram")
 
-      .def("fit", HistogramWrap::fit, 
+      .def("fit", HistogramWrap::fit,
 	   return_value_policy< manage_new_object >(),
 	   python::arg("parametric_model"),
 	   "Fit histogram")
 
-      ;
+      .def("get_plotable", HistogramWrap::get_plotable,
+       return_value_policy< manage_new_object >(),
+       "Return a plotable for a list of histograms")
 
-    
+      .def("get_plotable", &STAT_interface::get_plotable,
+        return_value_policy< manage_new_object >(),
+        "Return a plotable (no parameters)")
+        ;
+
 
 }
 
@@ -584,26 +609,26 @@ class DistributionDataWrap
 public:
 
   // Histogram constructor from a python list
-  static boost::shared_ptr<Distribution_data> 
+  static boost::shared_ptr<Distribution_data>
   distribution_data_from_list(boost::python::list& int_list)
   {
     Distribution_data *histo = NULL;
     int nb_element = boost::python::len(int_list);
-    
+
     if (! nb_element)
       stat_tool::wrap_util::throw_error("At least one observation"
-					"is required to initialize Histogram"); 
-    
+					"is required to initialize Histogram");
+
     stat_tool::wrap_util::auto_ptr_array<int> pelement(new int[nb_element]);
     for (int i = 0; i < nb_element; i++)
       pelement[i] = extract<int>(int_list[i]);
-      
-    
+
+
     // create new distribution_data object
     histo= new Distribution_data(nb_element, pelement.get());
     if (! histo)
       stat_tool::wrap_util::throw_error("Could not initialize Histogram from argument");
-	
+
     return boost::shared_ptr<Distribution_data>(histo);
   }
 
@@ -627,14 +652,14 @@ public:
   {
     std::stringstream s;
     std::string res;
-    
+
     d.survival_ascii_write(s);
     res = s.str();
-    
+
     return res;
   }
 
-  
+
   static void survival_spreadsheet_write(const Distribution_data& d,
 						const std::string& filename)
   {
@@ -647,7 +672,7 @@ public:
 
   }
 
-   
+
   static void survival_plot_write(const Distribution_data& d,
 				  const std::string& prefix, const std::string& title)
   {
@@ -666,7 +691,7 @@ public:
     MultiPlotSet* ret = d.survival_get_plotable(error);
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
-    
+
     return ret;
   }
 
@@ -682,7 +707,7 @@ public:
 
     return ret;
   }
- 
+
   static void file_ascii_write(const Distribution_data& d, const char* path, bool exhaustive)
   {
     bool result = true;
@@ -691,7 +716,7 @@ public:
     result = d.ascii_write(error, path,exhaustive);
     if (!result)
        stat_tool::wrap_util::throw_error(error);
-      
+
   }
 };
 
@@ -704,10 +729,10 @@ void class_distribution_data()
     // _Distribution_data
   class_<Distribution_data, bases<Histogram, STAT_interface> >
     ("_DistributionData", "_DistributionData", init< optional< int > >())
-      
+
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_list ))
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_file))
-      
+
     .def(self_ns::str(self)) // __str__
 
     // Output
@@ -725,14 +750,14 @@ void class_distribution_data()
     .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write,
 	 python::arg("filename"),
 	 "Write object to filename (spreadsheet format)")
-    
+
     // Extract
-    .def("extract_model", DistributionDataWrap::extract_model, 
+    .def("extract_model", DistributionDataWrap::extract_model,
 	 return_value_policy< manage_new_object >(),
 	 "Return the 'model' part of the histogram")
 
     // save to file
-    .def("file_ascii_write", DistributionDataWrap::file_ascii_write, 
+    .def("file_ascii_write", DistributionDataWrap::file_ascii_write,
 	 "Save histogram into a file")
 
     ;
