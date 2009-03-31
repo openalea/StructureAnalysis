@@ -15,24 +15,21 @@ class Test:
         h = Histogram(("meri1.his"))
         e =  h.estimate_nonparametric()
         assert e
-
         # assert abs(e.likelihood() - VAL) < epsilon
 
-
     def test_nb(self):
-
+        """NegativeBinomial"""
         h = Histogram(("peup2.his"))
         assert h.estimate_parametric('NB')
 
 
     def test_binomial(self):
-
+        """BINOMIAL Distribution"""
         h = Histogram(("meri5.his"))
         assert h.estimate_parametric('B')
 
-
     def test_poisson(self):
-        """        
+        """Poisson distribution
         >>> p = distribution.Poisson(0, 10)
         >>> h = p.simulate(1000)        
         """
@@ -52,7 +49,6 @@ class Test:
     def test_mixture_2(self):
 
         h = Histogram(("peup2.his"))
-
         m2 = h.estimate_mixture([Binomial(0, 10, 0.5), "NB"])
         assert m2
 
@@ -76,7 +72,7 @@ class Test:
 
 
     def _test_compound(self):
-
+        """todo"""
         assert False
 
 

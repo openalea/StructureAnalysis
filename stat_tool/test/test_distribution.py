@@ -11,9 +11,11 @@ from openalea.stat_tool.distribution import Poisson
 from openalea.stat_tool.distribution import ToHistogram
 from openalea.stat_tool.distribution import ToDistribution
 from openalea.stat_tool.histogram import Histogram
+from openalea.stat_tool.output import Display
+from openalea.stat_tool import Estimate
+from openalea.stat_tool import Simulate
 
-
-class Test:
+class TestUnit:
     """unit tests"""
     def __init__(self):
         pass
@@ -26,18 +28,113 @@ class Test:
         except Exception:
             assert True
     
-    def test_file(self):
+    def test_constructorfromfile(self):
         """run constructor with filename argument"""
         m = Distribution("distribution1.dist")
         assert m
         
+        return m
+    
+    def test_constructorfromfile_failure(self):
+        """run constructor with wring filename argument"""
+        try:
+            _d = Distribution("distribution.d")
+            assert False
+        except Exception:
+            assert True
+            
+    def test_build_distribution(self):
+        """build distribution"""
+
+        d1 = Uniform(0, 10)
+        d2 = Distribution("UNIFORM", 0, 10)
+        
+        assert d1==d2
+        return d1
+    
+    def test_print(self):
+        """test that print command exists"""
+        d = self.test_build_distribution()
+        print d
                  
     def test_display(self):
         """test display"""
-        d = Distribution("UNIFORM", 0, 10)
-
+        d = self.test_build_distribution()
+        d.display() == d.ascii_write(False)
         s = str(d)
         assert d.display() == s
+        assert d.display()==Display(d)
+    
+    def str(self):
+        self.test_display()
+        
+    def test_ascii_write(self):
+        self.test_display()
+        
+    def test_len(self):
+        """not implemented; irrelevant"""
+        pass
+        
+    def test_plot(self):
+        """test plotting routines"""
+        d = Distribution("POISSON", 0, 2)
+        d.plot()
+
+    def test_plot_write(self):
+        h = self.test_build_distribution()
+        h.plot_write('test', 'title')
+
+    def test_file_ascii_write(self):
+        d = self.test_build_distribution()
+        d.file_ascii_write('test.dat', True)
+        
+    def test_spreadsheet_write(self):
+        d = self.test_build_distribution()
+        d.spreadsheet_write('test.dat')
+    
+    def test_survival_ascii_write(self):
+        """ survival_ascii_write"""
+        d = self.test_build_distribution()
+        d.survival_ascii_write()
+
+    def test_simulation(self):
+        """Test the simulate method"""
+        m = self.test_build_distribution()
+        s = m.simulate(1000)
+
+        assert len(s) == 1000
+        assert str(s)
+        
+    def test_extract(self):
+        """run and test the extract methods"""
+        pass
+
+    def test_extract_data(self):
+        """run and test the extract_data methods"""
+        # todo
+        d1 = Binomial(0,10,0.5)
+        s = d1.simulate(1000)
+        e = s.estimate_parametric("B")
+        
+        d = e.extract_data()
+        assert d
+        
+        eprime = Estimate(s, "Binomial")
+        
+        
+        
+
+class TestFunctional:
+    def test_to_histogram(self):
+
+        d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
+        h = d.simulate(1000)
+        d2 = ToDistribution(h)
+        assert h and d2
+
+        h2 = ToHistogram(d2)
+        assert h2
+        assert h == h2
 
     def test_uniform(self):
 
@@ -82,34 +179,6 @@ class Test:
 
         m = d.simulate(1000).extract_model()
         assert isinstance(m, _stat_tool._ParametricModel)
-
-    def test_plot(self):
-
-        d = Distribution("POISSON", 0, 2)
-        d.plot()
-
-    def test_fromnothing(self):
-
-        # From nothing
-        try:
-            d = Distribution()
-            assert False
-
-        except Exception:
-            assert True
-
-    def test_to_histogram(self):
-
-        d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
-        h = d.simulate(1000)
-        d2 = ToDistribution(h)
-        assert h and d2
-
-        h2 = ToHistogram(d2)
-        assert h2
-        assert h == h2
-
-
 
 def test1():
      #########################################################################

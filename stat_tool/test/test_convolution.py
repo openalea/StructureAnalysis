@@ -6,9 +6,12 @@ from openalea.stat_tool import Convolution, Distribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.plot import DISABLE_PLOT
+from openalea.stat_tool.output import Display
+from openalea.stat_tool import Estimate
+from openalea.stat_tool import Simulate
 
 
-class Test:
+class TestUnit:
     """a simple unittest class"""
  
     def test_empty(self):
@@ -23,11 +26,11 @@ class Test:
         """run constructor with filename argument"""
         c = Convolution("convolution1.conv")
         assert c
-        
+
         return c
 
     def test_constructor_fromfile_failure(self):
-        """run constructor with filename argument"""
+        """run constructor with wrong filename argument"""
         try:
             _h = Convolution("convolution1.con")
             assert False
@@ -35,40 +38,74 @@ class Test:
             assert True
 
     def test_build_convolution(self):
-        """run constructor with filename two distributions as arguments"""
+        """build convolution"""
 
         d1 = Binomial(0, 10, 0.5)
         d2 = NegativeBinomial(0, 1, 0.1)
 
         m = Convolution(d1, d2)
-        
+
         assert m
         return m
 
+    def test_print(self):
+        """test that print command exists"""
+        c = self.test_build_convolution()
+        print c
+
+    def test_display(self):
+        """check that .display and Display calls are equivalent"""
+        c = self.test_build_convolution()
+        c.display() == c.ascii_write(False)
+        s = str(c)
+        assert c.display() == s
+        assert c.display()==Display(c)
+
+    def str(self):
+        self.test_display()
+
+    def test_ascii_write(self):
+        self.test_display()
+
+    def test_len(self):
+        c = self.test_build_convolution()
+        
+        assert len(c) == 2
+        assert len(c) == c.nb_distribution()
+
     def test_plot(self):
         """run plotting routines """
-        m = self.test_build_convolution()
+        c = self.test_build_convolution()
         if DISABLE_PLOT==False:
-            m.plot()
+            c.plot()
 
-        assert str(m)
-        m.display()
+    def test_plot_write(self):
+        c = self.test_build_convolution()
+        c.plot_write('test', 'title')
 
+    def test_file_ascii_write(self):
+        d = self.test_build_convolution()
+        d.file_ascii_write('test.dat', True)
+
+    def test_spreadsheet_write(self):
+        d = self.test_build_convolution()
+        d.spreadsheet_write('test.dat')
+            
     def test_simulation(self):
         """Test the simulate method"""
 
         m = self.test_build_convolution()
         s = m.simulate(1000)
-
-        assert len(s) == 1000
+        
         assert s.nb_histogram() == 2
         assert str(s)
+        
+        Simulate(m, 1000)
 
     def test_extract(self):
         """run and test the extract methods"""
-      
+
         m = self.test_build_convolution()
-        assert m.nb_distribution() == 2
 
         assert m.extract_convolution() == ExtractDistribution(m, "Convolution")
 
@@ -85,45 +122,48 @@ class Test:
         m = self.test_build_convolution()
         s = m.simulate(1000)
 
-        m = s.estimate_convolution(Binomial(0, 10, 0.5), Estimator="Parametric")
+        e = s.estimate_convolution(Binomial(0, 10, 0.5), Estimator="Parametric")
 
-        d = m.extract_data()
+        d = e.extract_data()
         assert d
+        
+        eprime = Estimate(s, "CONVOLUTION", Binomial(0, 10, 0.5))
+        # todo: check that e and eprime are similar
+
+
 
 
 
 def test1():
-    from openalea.stat_tool import Estimate
-    from openalea.stat_tool import Simulate
     from openalea.stat_tool import ExtractHistogram, ExtractData
     from openalea.stat_tool import ToHistogram
     from openalea.stat_tool import Histogram, Shift, Display, Save, Plot
-  
+
     _convol0 = Convolution(Distribution("B", 0, 10, 0.5), 
                            Distribution("NB", 0, 10, 0.5))
     convol1 = Convolution("convolution1.conv")
-    
+
     convol_histo1 = Simulate(convol1, 200)
-    
+
     _histo20 = ExtractHistogram(convol_histo1, "Elementary", 1)
-    
+
     convol2 = Estimate(convol_histo1, "CONVOLUTION", 
                        ExtractDistribution(convol1, "Elementary", 1),
                        MinInfBound=0)
-    
+
     _histo21 = ExtractHistogram(ExtractData(convol2), 'Elementary', 1)
     _histo22 = ToHistogram(ExtractDistribution(convol2, 'Elementary', 1))
-    
+
     histo_b2 = Histogram("nothofagus_antarctica_bud_2.his")
     histo_s2 = Histogram("nothofagus_antarctica_shoot_2.his")
-    
+
     # Estimator="Likelihood" (default) / "PenalizedLikelihood" / "Parametric"
     # Si Estimator="PenalizedLikelihood", options supplementaires possibles
     # Penalty="FirstDifference" / "SecondDifference" (default) / "Entropy", Weight,
     # Outside="Zero" (default) / "Continuation" (cf. stat_funs4.cpp).
-    
+
     # "NP" or "NON_PARAMETRIC" (for estimation only)
-    
+
     _convol30 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", 
                         Estimate(histo_b2, "NP"), NbIteration=500)
     convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION", 
@@ -143,7 +183,7 @@ def test1():
 
 if __name__=="__main__":
     # perform all the test in the class Test (unit tests)
-    test = Test()
+    test = TestUnit()
     for method in dir(test):
         if method.startswith('_'):
             continue
@@ -151,5 +191,5 @@ if __name__=="__main__":
             getattr(test, method)()
         else:
             print 'skipping'
-    # and functional tests.    
+    # and functional tests.
     test1()

@@ -45,8 +45,9 @@ from openalea.stat_tool.mixture import _MvMixture
 from openalea.stat_tool.distribution import Binomial, Poisson
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.comparison import Compare, ComparisonTest
+from openalea.stat_tool.output import Display
 
-class Test:
+class TestUnit:
     """a simple unittest class"""
 
     def test_empty(self):
@@ -64,8 +65,16 @@ class Test:
         
         return m
 
+    def test_constructor_fromfile_failure(self):
+        """run constructor with wrong filename argument"""
+        try:
+            _m = Mixture("mixture1.mix")
+            assert False
+        except Exception:
+            assert True
+            
     def test_build_mixture(self):
-        """run constructor with two distributions as arguments"""
+        """build mixture"""
 
         d1 = Uniform(0, 10)
         d2 = Uniform(10, 20)
@@ -76,20 +85,52 @@ class Test:
         assert m
         return m
 
+    def test_print(self):
+        """test that print command exists"""
+        m = self.test_build_mixture()
+        print m
+        
+    def test_display(self):
+        """check that .display and Display calls are equivalent"""
+        m = self.test_build_mixture()
+        m.display() == m.ascii_write(False)
+        s = str(m)
+        assert m.display() == s
+        assert m.display()==Display(m)
+        
+    def str(self):
+        self.test_display()
+        
+    def test_ascii_write(self):
+        self.test_display()
+        
+    def test_len(self):
+        c = self.test_build_mixture()
+        assert len(c) == 3
+        
     def test_plot(self):
         """run plotting routines """
         m = self.test_build_mixture()
         if DISABLE_PLOT==False:
             m.plot()
 
-        # todo move to matplotlib
-        assert str(m)
-        m.display()
+    def test_plot_write(self):
+        h = self.test_build_mixture()
+        h.plot_write('test', 'title')
 
+    def test_file_ascii_write(self):
+        d = self.test_build_mixture()
+        d.file_ascii_write('test.dat', True)
+
+    def test_spreadsheet_write(self):
+        d = self.test_build_mixture()
+        d.spreadsheet_write('test.dat')
+    
+        
     def test_simulation(self):
         """Test the simulate method"""
         m = self.test_build_mixture()
-        s = m.simulate(10)
+        s = m.simulate(1000)
 
         assert s.nb_component() == 3
         assert str(s)
@@ -98,7 +139,6 @@ class Test:
         """run and test the extract methods"""
 
         m = self.test_build_mixture()
-        assert m.nb_component() == 3
 
         assert m.extract_weight() == ExtractDistribution(m, "Weight")
 
@@ -113,7 +153,7 @@ class Test:
         assert m.extract_component(3) == Uniform(20, 30)
 
     def test_extract_data(self):
-        """run and test the extract_data methods"""
+        """run and test the extract_data methods""" 
 
         h = Histogram("meri2.his")
         m = h.estimate_mixture(["B", "NB"])
@@ -121,6 +161,8 @@ class Test:
         d = m.extract_data()
         assert d
 
+
+class Test_mv_mixture:
     def test_build_mv_mixture(self):
 
         d11 = Binomial(0, 12, 0.1)
@@ -301,7 +343,7 @@ def test1():
 
 if __name__=="__main__":
     # perform all the test in the class Test (unit tests)
-    test = Test()
+    test = TestUnit()
     for method in dir(test):
         if method.startswith('_'):
             continue
@@ -309,4 +351,15 @@ if __name__=="__main__":
             getattr(test, method)()
         else:
             print 'skipping'
+            
+    test = Test_mv_mixture()
+    for method in dir(test):
+        if method.startswith('_'):
+            continue
+        if callable(getattr(test, method)):
+            getattr(test, method)()
+        else:
+            print 'skipping'     
+            
+    
     # and functional tests.    

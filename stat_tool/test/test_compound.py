@@ -6,6 +6,7 @@ from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.distribution import Uniform
 from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.plot import DISABLE_PLOT
+from openalea.stat_tool.output import Display
 
 
 class Test:
@@ -45,18 +46,50 @@ class Test:
         assert m
         return m
 
+    def test_print(self):
+        """test that print command exists"""
+        c = self.test_build_compound()
+        print c
+        
+    def test_display(self):
+        """check that .display and Display calls are equivalent"""
+        c = self.test_build_compound()
+        c.display() == c.ascii_write(False) 
+        s = str(c)
+        assert c.display() == s
+        assert c.display()==Display(c)
+
+    def str(self):
+        self.test_display()
+
+    def test_ascii_write(self):
+        self.test_display()
+
+    def test_len(self):
+        """not implemented; irrelevant?"""
+        pass
+    
     def test_plot(self):        
         """run plotting routines """
         m = self.test_build_compound()
-        if DISABLE_PLOT==False:
+        if DISABLE_PLOT == False:
             m.plot()
 
-        assert str(m)
-        m.display()
+    def test_plot_write(self):
+        h = self.test_build_compound()
+        h.plot_write('test', 'title')
 
+    def test_file_ascii_write(self):
+        h = self.test_build_compound()
+        h.file_ascii_write('test.dat', True)
+      
+    def test_spreadsheet_write(self):
+        h = self.test_build_compound()
+        h.spreadsheet_write('test.dat')
+    
+        
     def test_simulation(self):
         """Test the simulate method"""
-        
         m = self.test_build_compound()
         s = m.simulate(1000)
 
@@ -79,13 +112,16 @@ class Test:
         """todo : check if this test makes sense"""
         #from openalea.stat_tool.distribution import Binomial
 
-        m = self.test_build_compound()
-        s = m.simulate(1000)
+        c = self.test_build_compound()
+        s = c.simulate(1000)
 
-        m = s.estimate_compound(Binomial(0, 10, 0.5))
+        e = s.estimate_compound(Binomial(0, 10, 0.5))
 
-        d = m.extract_data()
+        d = e.extract_data()
         assert d
+        
+        eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), Uniform(10,20))
+
     
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.simulate import Simulate
