@@ -3,24 +3,17 @@
 
 .. _stat_tool_user:
 
-Stat_tool User Guide
-####################
+VPlants Stat_tool User Guide
+############################
 
 :Version: |version|
 :Release: |release|
 :Date: |today|
 
-This manual details functions, modules, and objects included in 
-VPlants.Stat_tool, describing what they are and what they do. For learning
-how to use VPlants.Stat_tool see :ref:`stat_tool_reference`.
+An overview of the stat_tool package and its functionalities can be found in the :ref:`STAT TOOL module <stat_tool_description>` section. A list of classes and functions is available in the :ref:`List of AML functions<stat_tool_list>` section. The third section provides the :ref:`syntax<stat_tool_syntax>` associated to the different data structures (convolution, mixture, ...). Finally the :ref:`Tutorial<stat_tool_tutorial>` section will help you starting to use the functionalities of stat_tool (reading, saving, manipulating data structures). 
 
-.. warning::
+.. note:: The reference guide is also available; see :ref:`stat_tool_reference`.
 
-   This Guide is still very much in progress.
-   Many aspects of VPlants.Stat_tool are not covered.
-
-   More documentation can be found on the
-   `openalea <http://openalea.gforge.inria.fr>`__ wiki.
 
 .. toctree::
     :maxdepth: 1
@@ -29,3 +22,16 @@ how to use VPlants.Stat_tool see :ref:`stat_tool_reference`.
     list.rst
     syntax.rst
     tutorial.rst
+
+Stat_tool Administration guide
+##############################
+
+Methodolgy to wrap the former stat_tool package (from AML) into python as well as a work in progress section are available here below:
+
+.. toctree::
+    :maxdepth: 2
+
+    Administration documents<admin.rst>
+
+
+

@@ -1,6 +1,5 @@
 .. see the /docutils/parsers/rst/include files that could be useful
 
-.. Packages
 
 
 .. |deploy| replace:: OpenAlea.Deploy

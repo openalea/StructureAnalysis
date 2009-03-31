@@ -5,6 +5,7 @@
 .. testsetup:: *
    
     from openalea.stat_tool import *
+    import pylab
     from pylab import savefig, clf
 
 
@@ -85,11 +86,14 @@ new style, either with GNUPLOT or MATPLOTLIB. By default, matplotlib is used:
 
 .. figure:: stat_tool_histogram_plot.png
     :width: 50%
+    :align: center
 
 save in a gnuplot file with plot_write method::
 
     >>> h1.plot_write('output', 'title')
 
+
+    >>> h1.print_plot() # save gnuplot output in a postscript file
 clustering
 -----------
 
@@ -110,7 +114,7 @@ clustering
 Merging
 -------
 
-the following examples illustrates the usage of the :func:`¬openalea.stat_tool.data_transform.Merge` function. See also Figure `fig_merging`_ for the output plots.
+the following examples illustrates the usage of the :func:`¬openalea.stat_tool.data_transform.Merge` function. See also Figure :ref:`fig_merging` for the output plots.
 
 .. doctest::
 
@@ -137,12 +141,12 @@ The two original histograms are shown here below:
 
 
 
-.. fig_merging::
+.. _fig_merging:
 .. figure:: stat_tool_histogram_merging.png
     :width: 50%
     :align: center
 
-    **Figure: The merging of two histograms **
+    **Figure: The merging of two histograms**
 
 
 

@@ -5,6 +5,7 @@
 .. testsetup:: *
    
     from openalea.stat_tool import *
+    import pylab
     from pylab import savefig
 
 

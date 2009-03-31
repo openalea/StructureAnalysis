@@ -1,3 +1,5 @@
+.. _stat_tool_tutorial:
+
 .. define some aliases:
 .. _histogram: syntax.html#type-histogram
 
@@ -15,11 +17,11 @@ Tutorial
 
 
 
-.. include:: histogram.rst
-.. include:: vectors.rst
+.. .. include:: histogram.rst
+.. .. include:: vectors.rst
 
 .. toctree::
-   :hidden:
+    :maxdepth: 1
 
     histogram.rst
     vectors.rst
@@ -54,7 +56,7 @@ Distribution, Histogram, Compound
     >>> m = h.estimate_mixture(["B", "NB"]) #doctest: +SKIP 
     >>> d = m.extract_data() #doctest: +SKIP
     >>> d.plot(show=False) #doctest: +SKIP
-    >>> savefig('doc/user/tutorial_fig1.png') #doctest: +SKIP
+    >>> savefig('doc/user/tutorial_fig1.png')
     
 
 .. figure:: tutorial_fig1.png

@@ -1,11 +1,15 @@
-.. include:: alias.rst
+.. _stat_tool_syntax:
+
+.. |leq|   unicode:: U+02264 
+.. |geq|   unicode:: U+02265 
+
+.. .. include:: alias.rst
 
 File Syntax, STAT module
 ########################
 
 An ASCII file format is defined for each of the following object type of the STAT module:
 
-.. contents::
 
 
 

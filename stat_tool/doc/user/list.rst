@@ -1,3 +1,6 @@
+.. _stat_tool_list:
+
+
 List of AML functions of the STAT module
 ########################################
 
@@ -25,7 +28,7 @@ List of AML functions of the STAT module
 - `Cumulate` 
 - `Difference` 
 - :func:`~openalea.stat_tool.output.Display` 
-- `Distribution` 
+- :class:`~openalea.stat_tool.distribution.Distribution` 
 - :class:`~openalea.stat_tool.estimate.Estimate` (distributions) 
 - `Estimate` (renewal process) 
 - `Estimate` (Markovian models) 
@@ -62,7 +65,7 @@ List of AML functions of the STAT module
 - `SemiMarkov`
 - `Sequences`
 - :func:`~openalea.stat_tool.data_transform.Shift`
-- `Simulate` (distributions) 
+- :class:`~openalea.stat_tool.simulate.Simulate` (distributions) 
 - `Simulate` (renewal process) 
 - `Simulate` (Markovian models) 
 - `Simulate` ('topt' parameters) 
@@ -71,8 +74,8 @@ List of AML functions of the STAT module
 - `TimeScaling` 
 - `TimeSelect`
 - :func:`~openalea.stat_tool.cluster.ToDistanceMatrix`
-- `ToDistribution`
-- `ToHistogram`
+- :func:`~openalea.stat_tool.distribution.ToDistribution`
+- :func:`~openalea.stat_tool.distribution.ToHistogram`
 - `TopParameters`
 - `Tops`
 - :func:`~openalea.stat_tool.cluster.Transcode`
@@ -81,10 +84,11 @@ List of AML functions of the STAT module
 - `VariableScaling`
 - :func:`~openalea.stat_tool.vectors.VarianceAnalysis` 
 - :func:`~openalea.stat_tool.vectors.VectorDistance`
-- `Vectors`
+- :class:`~openalea.stat_tool.vectors.Vectors`
 
 4.2 List of AML functions from STAT: by category
 ================================================
+
 Input/output functions
 ----------------------
 - :func:`~openalea.stat_tool.compound.Compound` : construction d'un objet de type COMPOUND
