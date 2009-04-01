@@ -169,20 +169,21 @@ void class_compound()
     "Build from two distributions")
     .def("__init__", make_constructor(CompoundWrap::compound_two_distributions_and_threshold),
     "Build from two distributions and a threshold")
+    .def(self_ns::str(self)) // __str__
     .def("simulate", CompoundWrap::simulation, return_value_policy< manage_new_object >(),
-     boost::python::arg("nb_element"), "Simulate nb_element elements")
-     .def("extract_data", CompoundWrap::extract_data,
-     return_value_policy< manage_new_object >(), "Return the data")
-     .def("extract_compound", CompoundWrap::extract_compound,
-     return_value_policy< manage_new_object >(), "Return the compound distribution")
-     .def("extract_sum", CompoundWrap::extract_sum_distribution,
-     return_value_policy< manage_new_object >(), "Return the sum distribution")
-     .def("extract_elementary", CompoundWrap::extract_distribution,
-     return_value_policy< manage_new_object >(),
-	 boost::python::arg("index"),
-	 "Return the elementary distribution")
-	 .def("file_ascii_write", CompoundWrap::file_ascii_write,
-     "Save Compound into a file")
+    boost::python::arg("nb_element"), "Simulate nb_element elements")
+    .def("extract_data", CompoundWrap::extract_data,
+    return_value_policy< manage_new_object >(), "Return the data")
+    .def("extract_compound", CompoundWrap::extract_compound,
+    return_value_policy< manage_new_object >(), "Return the compound distribution")
+    .def("extract_sum", CompoundWrap::extract_sum_distribution,
+    return_value_policy< manage_new_object >(), "Return the sum distribution")
+    .def("extract_elementary", CompoundWrap::extract_distribution,
+    return_value_policy< manage_new_object >(),
+	boost::python::arg("index"),
+	"Return the elementary distribution")
+	.def("file_ascii_write", CompoundWrap::file_ascii_write,
+    "Save Compound into a file")
 	;
 }
 
