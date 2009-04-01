@@ -17,11 +17,11 @@ Tutorial
 
 
 
-.. .. include:: histogram.rst
-.. .. include:: vectors.rst
+.. include:: histogram.rst
+.. include:: vectors.rst
 
 .. toctree::
-    :maxdepth: 1
+    :hidden:
 
     histogram.rst
     vectors.rst
