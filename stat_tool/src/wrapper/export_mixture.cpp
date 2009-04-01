@@ -218,6 +218,9 @@ void class_mixture()
     .def("__init__", make_constructor(MixtureWrap::mixture_from_unknown_component),
      "Build from unknown components") // internal use
 
+    .def("__len__", &Mixture::get_nb_component,
+    "Return the number of components") // __len__
+
     .def(self_ns::str(self)) // __str__
 
     .def("simulate", MixtureWrap::simulation,
