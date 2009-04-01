@@ -157,6 +157,8 @@ void class_convolution()
     .def("__init__", make_constructor(ConvolutionWrap::convolution_from_dists))
     .def("__init__", make_constructor(ConvolutionWrap::convolution_from_file))
 
+    .def("__len__", &Convolution::get_nb_distribution, 
+    "Return the number of components") // __len__
     .def(self_ns::str(self)) // __str__
 
     .def("simulate",   ConvolutionWrap::simulation,
