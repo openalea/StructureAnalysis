@@ -6,7 +6,7 @@ from openalea.stat_tool import Convolution, Distribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.plot import DISABLE_PLOT
-from openalea.stat_tool.output import Display
+from openalea.stat_tool.output import Display, Save
 from openalea.stat_tool import Estimate
 from openalea.stat_tool import Simulate
 
@@ -43,10 +43,10 @@ class TestUnit:
         d1 = Binomial(0, 10, 0.5)
         d2 = NegativeBinomial(0, 1, 0.1)
 
-        m = Convolution(d1, d2)
+        c = Convolution(d1, d2)
 
-        assert m
-        return m
+        assert c
+        return c
 
     def test_print(self):
         """test that print command exists"""
@@ -78,7 +78,20 @@ class TestUnit:
         c = self.test_build_convolution()
         if DISABLE_PLOT==False:
             c.plot()
-
+ 
+    def test_save(self):
+        c1 = self.test_build_convolution()
+        c1.save('test1.dat')
+        Save(c1, 'test2.dat')
+        
+        c1_read = Convolution('test1.dat')
+        c2_read = Convolution('test2.dat')
+        
+        assert c1 and c1_read and c2_read
+        assert len(c1)==len(c1_read) and len(c2_read)
+        
+        assert str(c1_read) == str(c2_read)
+        
     def test_plot_write(self):
         c = self.test_build_convolution()
         c.plot_write('test', 'title')
@@ -94,13 +107,13 @@ class TestUnit:
     def test_simulation(self):
         """Test the simulate method"""
 
-        m = self.test_build_convolution()
-        s = m.simulate(1000)
+        c = self.test_build_convolution()
+        s = c.simulate(1000)
         
         assert s.nb_histogram() == 2
         assert str(s)
         
-        Simulate(m, 1000)
+        Simulate(c, 1000)
 
     def test_extract(self):
         """run and test the extract methods"""

@@ -5,7 +5,7 @@ from openalea.stat_tool.distribution import ToHistogram
 from openalea.stat_tool.distribution import ToDistribution
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Distribution
-from openalea.stat_tool.output  import Display
+from openalea.stat_tool.output  import Display, Save
 from openalea.stat_tool.plot import DISABLE_PLOT
 
 
@@ -97,7 +97,24 @@ class Test:
         h = self.test_build_histogram()
         if DISABLE_PLOT == False:
             h.plot()
-    
+
+    def _test_save(self):
+        h1 = self.test_build_histogram()
+        h1.save('test1.dat')
+        Save(h1, 'test2.dat')
+        
+        h1_read = Histogram('test1.dat')
+        h2_read = Histogram('test2.dat')
+        
+        assert h1 and h1_read and h2_read
+        assert len(h1)==len(h1_read) and len(h2_read)
+        
+        # +1 because an histogram is composed of n+1 values, where n is the length 
+        # of the original data set
+        for i in xrange(len(h1)+1):
+            assert h1[i] == h1_read[i]
+            assert h1[i] == h2_read[i]
+
     def test_plot_write(self):
         h = self.test_build_histogram()
         h.plot_write('test', 'title')

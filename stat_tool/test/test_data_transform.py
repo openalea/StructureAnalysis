@@ -8,17 +8,42 @@ from openalea.stat_tool.distribution import Distribution, Uniform, Binomial, Neg
 from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.simulate import Simulate
+from openalea.stat_tool.compound import Compound
+
 from openalea.stat_tool.data_transform import Shift, Merge, Fit, ValueSelect, SelectVariable, SelectIndividual, MergeVariable, ExtractDistribution, ExtractHistogram, ExtractData
 
 class TestShift:
 
+    def test_shift_compound_data(self):
+        
+        d1 = Binomial(0, 10, 0.5)
+        d2 = NegativeBinomial(0, 1, 0.1)
+        comp = Compound(d1, d2)
+        comp_data = comp.simulate(1000)
+        assert comp_data.shift(20) == Shift(comp_data, 20)
+       
+    def test_shift_convolution_data(self):
+        
+        d1 = Binomial(0, 10, 0.5)
+        d2 = NegativeBinomial(0, 1, 0.1)
+        conv = Convolution(d1, d2)
+        conv_data = conv.simulate(1000)
+        assert conv_data.shift(20) == Shift(conv_data, 20) 
+    
+    def test_shift_mixture_data(self):
+        
+        d1 = Binomial(0, 10, 0.5)
+        d2 = NegativeBinomial(0, 1, 0.1)
+        mixt = Mixture(0.1, d1, 0.4, d2)
+        mixt_data = mixt.simulate(1000)
+        assert mixt_data.shift(20) == Shift(mixt_data, 20)
+         
     def test_shift_histo(self):
-
+        # equivalent to test Distribution data
         h = Histogram("meri2.his")
         assert h.shift(2)
 
         assert Shift(h, 2) == h.shift(2)
-
 
     def test_shift_vector(self):
 
@@ -27,11 +52,14 @@ class TestShift:
 
         assert Shift(v1, 2)
         assert Shift(vn, 1, 2)
-
+        
+        assert str(Shift(vn, 1,2)) == str(vn.shift(1,2))
+        
     def test_shift_sequence(self):
         pass
         #raise NotImplementedError()
 
+class TestFit:
     def test_fit(self):
 
         meri5 = Histogram("meri5.his")
@@ -246,9 +274,10 @@ class TestMerge:
 if __name__=="__main__":
     # perform all the test in the class Test (unit tests)
     testshift = TestShift()
-    testmerge = TestShift()
+    testmerge = TestMerge()
     testextract = TestExtract()
     testselect = TestSelect()
+    testfit = TestFit()
     
     for test in [testshift, testmerge, testextract, testselect]:
         for method in dir(test):

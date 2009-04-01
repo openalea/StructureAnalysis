@@ -4,9 +4,9 @@ __revision__ = "$Id: $"
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.distribution import Uniform
-from openalea.stat_tool.distribution import Binomial
+from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.plot import DISABLE_PLOT
-from openalea.stat_tool.output import Display
+from openalea.stat_tool.output import Display, Save
 
 
 class Test:
@@ -38,13 +38,13 @@ class Test:
     def test_build_compound(self):
         """run constructor with  two distributions as arguments"""
         
-        d1 = Uniform(0, 10)
-        d2 = Uniform(10, 20)
+        d1 = Binomial(2, 5, 0.5)
+        d2 = NegativeBinomial(0, 2, 0.5)
         
-        m = Compound(d1, d2)
+        c = Compound(d1, d2)
         
-        assert m
-        return m
+        assert c
+        return c
 
     def test_print(self):
         """test that print command exists"""
@@ -75,6 +75,18 @@ class Test:
         if DISABLE_PLOT == False:
             m.plot()
 
+    def test_save(self):
+        c1 = self.test_build_compound()
+        c1.save('test1.dat')
+        Save(c1, 'test2.dat')
+        
+        c1_read = Compound('test1.dat')
+        c2_read = Compound('test2.dat')
+        
+        assert c1 and c1_read and c2_read
+        assert str(c1_read) == str(c2_read)
+                
+
     def test_plot_write(self):
         h = self.test_build_compound()
         h.plot_write('test', 'title')
@@ -102,10 +114,11 @@ class Test:
 
         assert m.extract_compound() == ExtractDistribution(m, "Compound")
 
-        assert m.extract_sum() == Uniform(0, 10)
+        
+        assert m.extract_sum() == Binomial(2, 5, 0.5)
         assert m.extract_sum() == ExtractDistribution(m, "Sum")
 
-        assert m.extract_elementary() == Uniform(10, 20)
+        assert m.extract_elementary() == NegativeBinomial(0, 2, 0.5)
         assert m.extract_elementary() == ExtractDistribution(m, "Elementary")
 
     def test_extract_data(self):
@@ -115,12 +128,12 @@ class Test:
         c = self.test_build_compound()
         s = c.simulate(1000)
 
-        e = s.estimate_compound(Binomial(0, 10, 0.5))
+        e = s.estimate_compound(Binomial(2, 5, 0.5))
 
         d = e.extract_data()
         assert d
         
-        eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), Uniform(10,20))
+        eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), NegativeBinomial(0, 2, 0.5))
 
     
 from openalea.stat_tool.estimate import Estimate

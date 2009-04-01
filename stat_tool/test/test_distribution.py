@@ -3,15 +3,16 @@ __revision__ = "$Id: $"
 
 
 from openalea.stat_tool import _stat_tool
-from openalea.stat_tool.distribution import Distribution
-from openalea.stat_tool.distribution import Uniform
-from openalea.stat_tool.distribution import Binomial
-from openalea.stat_tool.distribution import NegativeBinomial
-from openalea.stat_tool.distribution import Poisson
-from openalea.stat_tool.distribution import ToHistogram
-from openalea.stat_tool.distribution import ToDistribution
+#from openalea.stat_tool.distribution import Distribution
+#from openalea.stat_tool.distribution import Uniform
+#from openalea.stat_tool.distribution import Binomial
+#from openalea.stat_tool.distribution import NegativeBinomial
+#from openalea.stat_tool.distribution import Poisson
+#from openalea.stat_tool.distribution import ToHistogram
+from openalea.stat_tool.distribution import *
+#ToDistribution
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.output import Display
+from openalea.stat_tool.output import Display, Save
 from openalea.stat_tool import Estimate
 from openalea.stat_tool import Simulate
 
@@ -80,6 +81,11 @@ class TestUnit:
         d = Distribution("POISSON", 0, 2)
         d.plot()
 
+    def test_save(self):
+        m = self.test_build_distribution()
+        m.save('test.dat')
+        Save(m, 'test.dat')
+        
     def test_plot_write(self):
         h = self.test_build_distribution()
         h.plot_write('test', 'title')

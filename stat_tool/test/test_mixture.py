@@ -37,15 +37,14 @@ __revision__ = "$Id: $"
 import os
 
 from openalea.stat_tool.plot import DISABLE_PLOT
-from openalea.stat_tool.distribution import Uniform
-from openalea.stat_tool.mixture import Mixture
+
+from openalea.stat_tool.mixture import Mixture, _MvMixture
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.mixture import _MvMixture
-from openalea.stat_tool.distribution import Binomial, Poisson
+from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.comparison import Compare, ComparisonTest
-from openalea.stat_tool.output import Display
+from openalea.stat_tool.output import Display, Save
 
 class TestUnit:
     """a simple unittest class"""
@@ -75,13 +74,12 @@ class TestUnit:
             
     def test_build_mixture(self):
         """build mixture"""
-
-        d1 = Uniform(0, 10)
-        d2 = Uniform(10, 20)
-        d3 = Uniform(20, 30)
-
-        m = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
+        d1 = Binomial(0, 12, 0.1)
+        d2 = Binomial(0, 12, 0.5)
+        d3 = Binomial(0, 12, 0.8)
         
+        m = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
+
         assert m
         return m
 
@@ -113,7 +111,24 @@ class TestUnit:
         m = self.test_build_mixture()
         if DISABLE_PLOT==False:
             m.plot()
+    
+    def test_save(self):
+        # m1 contains 3 uniform distributon  yet, the test1.dat contaisn only 2
+        # the third one being a binomial dist. Moreover, the loading of the 
+        # test1 and test2 file fails
+        m1 = self.test_build_mixture()
+        m1.save('test1.dat')
+        Save(m1, 'test2.dat')
+         
+               
+        m1_read = Mixture('test1.dat')
+        m2_read = Mixture('test2.dat')
+        
+        assert m1 and m1_read and m2_read
+        assert len(m1)==len(m1_read) and len(m2_read)
+        assert str(m1_read) == str(m2_read)
 
+        
     def test_plot_write(self):
         h = self.test_build_mixture()
         h.plot_write('test', 'title')
@@ -125,7 +140,6 @@ class TestUnit:
     def test_spreadsheet_write(self):
         d = self.test_build_mixture()
         d.spreadsheet_write('test.dat')
-    
         
     def test_simulation(self):
         """Test the simulate method"""
@@ -144,13 +158,13 @@ class TestUnit:
 
         assert m.extract_mixture() == ExtractDistribution(m, "Mixture")
 
-        assert ExtractDistribution(m, "Component", 1) == Uniform(0, 10)
-        assert ExtractDistribution(m, "Component", 2) == Uniform(10, 20)
-        assert ExtractDistribution(m, "Component", 3) == Uniform(20, 30)
+        assert ExtractDistribution(m, "Component", 1) == Binomial(0, 12, 0.1)
+        assert ExtractDistribution(m, "Component", 2) == Binomial(0, 12, 0.5)
+        assert ExtractDistribution(m, "Component", 3) == Binomial(0, 12, 0.8)
 
-        assert m.extract_component(1) == Uniform(0, 10)
-        assert m.extract_component(2) == Uniform(10, 20)
-        assert m.extract_component(3) == Uniform(20, 30)
+        assert m.extract_component(1) == Binomial(0, 12, 0.1)
+        assert m.extract_component(2) == Binomial(0, 12, 0.5)
+        assert m.extract_component(3) == Binomial(0, 12, 0.8)
 
     def test_extract_data(self):
         """run and test the extract_data methods""" 

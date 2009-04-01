@@ -10,7 +10,7 @@ from openalea.stat_tool.data_transform import ExtractHistogram, \
 from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.cluster import Clustering
-from openalea.stat_tool.output import Display, Plot
+from openalea.stat_tool.output import Display, Plot, Save
 
 from openalea.stat_tool.plot import DISABLE_PLOT
 
@@ -52,30 +52,96 @@ class Test:
             assert True
 
 
-    def test_vectors_file(self):
+    def test_vectors_fromfile(self):
         """test vector constructor from file"""
 
-        v1 = Vectors("vectors.vec")
-        v1.save("vectors2.vec", ViewPoint="Data")
+        v = Vectors("vectors.vec")
+        assert v
+        
+        return v
+        
+    def test_vectors_fromfile_failure(self):
+        """run constructor with filename argument"""
+        try:
+            _v = Vectors("vectors.v")
+            assert False
+        except Exception:
+            assert True
+                    
+    def test_build_vectors(self):
+        """run constructor with two lists"""
 
-        v2 = Vectors("vectors2.vec")
-
-        assert v1 and v2
-        assert len(v2) == len(v1)
-
-        for i in xrange(len(v2)):
-            assert v1[i] == v2[i]
-
-
-
-    def test_vectors_display(self):
-        """ASCII representation"""
-        v = Vectors([[0, 1, 2, 3], [4, 5, 6, 7]])
+        v = Vectors([[1,2,3], [1,3,1]])
+        assert 2 == v.get_nb_vector()
+        assert 3 == v.get_nb_variable()
+        
+        assert v
+        return v
+        
+    def test_print(self):
+        """test that print command exists"""
+        v = self.test_build_vectors()
+        print v
+        
+    def test_display(self):
+        """check that .display and Display calls are equivalent"""
+        v = self.test_build_vectors()
+        v.display() == v.ascii_write(False) 
         s = str(v)
         assert v.display() == s
+        assert v.display()==Display(v)
+        
+    def str(self):
+        self.test_display()
 
+    def test_ascii_write(self):
+        self.test_display()
 
+    def test_len(self):
+        v = self.test_build_vectors()
+        
+        assert len(v) == 2
+        assert len(v) == v.get_nb_vector()
 
+    def _test_plot(self):
+        """run plotting routines """
+        # todo: does not produce anythinh but expected ?
+        c = self.test_build_vectors()
+        if DISABLE_PLOT==False:
+            c.plot()
+
+    def test_save(self):
+        v1 = self.test_build_vectors()
+        v1.save('test1.dat')
+        Save(v1, 'test2.dat')
+        
+        v1_read = Vectors('test1.dat')
+        v2_read = Vectors('test2.dat')
+        
+        assert v1 and v1_read and v2_read
+        assert len(v1)==len(v1_read) and len(v2_read)
+        
+        for i in xrange(len(v1)):
+            assert v1[i] == v1_read[i]
+            assert v1[i] == v2_read[i]
+
+            
+    def test_plot_write(self):
+        v = self.test_build_vectors()
+        v.plot_write('test', 'title')
+
+    def test_file_ascii_write(self):
+        v = self.test_build_vectors()
+        v.file_ascii_write('test.dat', True)
+
+    def test_spreadsheet_write(self):
+        v = self.test_build_vectors()
+        v.spreadsheet_write('test.dat')      
+            
+    def test_simulation(self):
+        """nothing to be done here"""
+        pass
+    
     def test_vectors_container(self):
         """vector container : len"""
         v = Vectors([[0,1,2,3], [4,5,6,7]])
@@ -114,6 +180,7 @@ class Test:
 
     def test_variance_analysis(self):
         """test VarianceAnalysis"""
+        # todo: finalise and make method variance_analysis robust.
         vec10 = Vectors("chene_sessile.vec")
         va = VarianceAnalysis(vec10, 1, 4, "O")
         assert va and str(va)
@@ -124,6 +191,9 @@ class Test:
         vec10 = Vectors("chene_sessile.vec")
         ct = ContingencyTable(vec10, 1, 4)
         assert ct and str(ct)
+        
+        ct2 = vec10.contingency_table(1,4, "what", "what")
+        assert ct == ct2
         
     def test_to_clean(self):
          #########################################################################
