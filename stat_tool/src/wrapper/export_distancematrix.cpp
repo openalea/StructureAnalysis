@@ -45,9 +45,25 @@ public:
   {
     Clusters *ret;
     Format_error error;
+    bool berror = false;
 
     std::stringstream output;
     int nb_proto = len(prototype);
+
+    ostringstream error_message;
+    try{
+      if (algorithm!=1 and algorithm!=2)
+      {
+        error_message << "Incorrect value for the algorithm argument (must be 1 or 2)"<<endl;
+        PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
+        berror = true;
+      }
+    }
+    catch(...)
+    {
+      berror = true;
+    }   
+
 
     stat_tool::wrap_util::auto_ptr_array<int>
       protos(new int[nb_proto]);
@@ -165,13 +181,16 @@ void class_distance_matrix()
 
   class_< Distance_matrix, bases< STAT_interface > >
     ("_DistanceMatrix", "Distance Matrix", init<const Distance_matrix&>())
+
+
+     .def(self_ns::str(self)) // __str__
     
     // Clustering
     .def("partitioning_prototype", DistanceMatrixWrap::partitioning_prototype,
 	 return_value_policy< manage_new_object >() )
     .def("partitioning_clusters", DistanceMatrixWrap::partitioning_clusters,
 	 return_value_policy< manage_new_object >() )
-    .def("hierarchical_clustering", DistanceMatrixWrap::hierarchical_clustering)
+    .def("hierarchical_clustering", DistanceMatrixWrap::hierarchical_clustering, "Clustering using hierarchical methods")
     ;
 }
 
