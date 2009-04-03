@@ -225,6 +225,7 @@ public:
     std::stringstream s;
     std::string res;
 
+
     d.ascii_data_write(s, exhaustive, true);
     res = s.str();
     return res;
@@ -944,7 +945,7 @@ void class_vectors()
     .def("file_ascii_write", VectorsWrap::file_ascii_write,
      "Save vector summary into a file")
 
-   .def("file_ascii_write", VectorsWrap::file_ascii_data_write,
+   .def("file_ascii_data_write", VectorsWrap::file_ascii_data_write,
      "Save vector data into a file")
 
     // Shift
