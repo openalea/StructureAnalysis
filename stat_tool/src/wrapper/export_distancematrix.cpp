@@ -158,6 +158,17 @@ public:
     
   }
 
+  static void file_ascii_write(const Distance_matrix& d, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = d.ascii_write(error, path, exhaustive);
+    if (!result)
+       stat_tool::wrap_util::throw_error(error);
+
+  }
+
 
 
 };
@@ -190,7 +201,10 @@ void class_distance_matrix()
 	 return_value_policy< manage_new_object >() )
     .def("partitioning_clusters", DistanceMatrixWrap::partitioning_clusters,
 	 return_value_policy< manage_new_object >() )
-    .def("hierarchical_clustering", DistanceMatrixWrap::hierarchical_clustering, "Clustering using hierarchical methods")
+    .def("hierarchical_clustering", DistanceMatrixWrap::hierarchical_clustering,
+    "Clustering using hierarchical methods")
+    .def("file_ascii_write", DistanceMatrixWrap::file_ascii_write,
+     "Save vector summary into a file")
     ;
 }
 
