@@ -357,8 +357,9 @@ def __get_mode__(kargs):
     """ Return True if kargs has "keep" for the "mode" key """
 
     mode = kargs.get("mode", None)
-    if(not mode): kargs.get("Mode", None)
-    if(mode == "Keep") : keep = True
+    if(not mode): 
+        mode = kargs.get("Mode", None)
+    if(mode == "Keep" or mode == "keep") : keep = True
     else : keep = False
 
     return keep
@@ -421,7 +422,8 @@ def SelectVariable(obj, variables, Mode="Keep"):
         `VariableScaling`. 
     """
 
-    keep = bool(Mode == "Keep")
+    keep = bool(Mode == "Keep" or Mode == "keep")
+    
 
     # Test if variables is a list
     try:
@@ -568,6 +570,7 @@ def ValueSelect(obj, *args, **kargs):
 
     keep = __get_mode__(kargs)
 
+    print keep
     # Test for vectors
     try:
         nb_variable = obj.get_nb_variable()
