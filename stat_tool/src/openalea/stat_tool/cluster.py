@@ -291,7 +291,9 @@ def Clustering(matrix, type, *args, **kargs):
         :func:`~openalea.stat_tool.data_transform.SelectIndividual`,
         `Symmetrize`,
         :func:`~openalea.stat_tool.comparison.Compare`,
-        :func:`~openalea.stat_tool.cluster.ToDistanceMatrix`. 
+        :func:`~openalea.stat_tool.cluster.ToDistanceMatrix`.
+        
+    .. note:: if type=Partition, Algorthim must be 1 (divisive) or 2 (ordering). 
     """
     
     format_map = { "ASCII" :'a',
@@ -327,13 +329,24 @@ def Clustering(matrix, type, *args, **kargs):
         if(isinstance(args[0], int)):
 
             nb_cluster = args[0]
+            
+            
+            try:
+                Algorithm = algorithm_map[Algorithm]
+            except KeyError:
+                raise KeyError("Invalid Algorithm. Possible values are : "
+                           + str(algorithm_map.keys()))
+            if Algorithm=='Agglomerative':
+                raise TypeError("Algorithm must be Divisive or Ordering")
+            
             # WARNING : in this case, algorithm is an int (default is 1)
-            if(not isinstance(Algorithm, int)):
-                if(kargs.has_key("Algorithm")):
-                    raise TypeError("Algorithm must be an int")
-                else:
-                    Algorithm = 1
-
+#            if(not isinstance(Algorithm, int)):
+#                if(kargs.has_key("Algorithm")):
+#                    raise TypeError("Algorithm must be an int")
+#                else:
+#                    Algorithm = 1
+#            if (Algorithm!=1 and Algorithm!=2):
+#                    raise TypeError("Algorithm must be an int set to 1 or 2")
             if(len(Prototypes) != nb_cluster):
                 raise TypeError("Prototypes must have %i values"%(nb_cluster))
             
