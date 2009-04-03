@@ -673,6 +673,8 @@ void class_mv_mixture()
      "(components and variables)")
 
     .def(self_ns::str(self)) // __str__
+    .def("__len__", &Mv_Mixture::get_nb_component,
+    "Return the number of components") // __len__
 
     .def("simulate", MvMixtureWrap::simulation,
      return_value_policy< manage_new_object >(),
