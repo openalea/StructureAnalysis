@@ -3,12 +3,12 @@ __revision__ = "$Id: $"
 
 
 from openalea.stat_tool import _stat_tool
-#from openalea.stat_tool.distribution import Distribution
-#from openalea.stat_tool.distribution import Uniform
-#from openalea.stat_tool.distribution import Binomial
-#from openalea.stat_tool.distribution import NegativeBinomial
-#from openalea.stat_tool.distribution import Poisson
-#from openalea.stat_tool.distribution import ToHistogram
+from openalea.stat_tool.distribution import Distribution
+from openalea.stat_tool.distribution import Uniform
+from openalea.stat_tool.distribution import Binomial
+from openalea.stat_tool.distribution import NegativeBinomial
+from openalea.stat_tool.distribution import Poisson
+from openalea.stat_tool.distribution import ToHistogram
 from openalea.stat_tool.distribution import *
 #ToDistribution
 from openalea.stat_tool.histogram import Histogram

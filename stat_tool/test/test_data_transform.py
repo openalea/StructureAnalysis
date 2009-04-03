@@ -1,4 +1,4 @@
-"""test data_transform"""
+"""test data_transform methods and compare them with class members methods"""
 __revision__ = "$Id: $"
 
 from openalea.stat_tool import vectors, histogram, distribution, mixture, convolution, simulate
@@ -60,14 +60,26 @@ class TestShift:
         #raise NotImplementedError()
 
 class TestFit:
-    def test_fit(self):
+    def test_fit_histogram(self):
 
         meri5 = Histogram("meri5.his")
-        dist5 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
-        assert dist5
+        dist1 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
+        dist2 = meri5.fit(Distribution("B", 0, 10, 0.437879))
+        assert str(dist1)==str(dist2)
+        
+class TestSelectHist:
+    
+    def test_value_select_float(self):
+        meri1 = Histogram("meri1.his")
+        
+        # note keep=False is equivalent to Mode=keep,is this correct ?
+        assert str(ValueSelect(meri1, 0,10,Mode="Keep"))==\
+            str(meri1.value_select( min=0,max=10,keep=True))
 
-
-class TestSelect:
+    
+    
+    
+class TestSelectVector:
     def test_value_select_float(self):
     
         v = Vectors([[0.1, 0.3, 4.2], 
@@ -78,11 +90,19 @@ class TestSelect:
         v1b = ValueSelect(v, 1, 0.2, 2.0, Mode="keep")
         v2 =  ValueSelect(v, 2, 1.0, 6.0, Mode="keep")
         v3 =  ValueSelect(v, 3, 1.0, 2.0, Mode="keep")
-        
+            
         assert v and v1b and v2 and v3
         print len(v1b)
-        assert len(v1b) == 2
+        assert len(v1b) == 1
         
+        assert str(ValueSelect(v, 1,0.2,2, mode="Keep")) == \
+                str(v.value_select(1,0.2,2, keep=True))
+        assert str(ValueSelect(v, 2, 1.0, 6.0, mode="Keep")) == \
+                str(v.value_select(2, 1.0, 6.0, keep=True))
+        assert str(ValueSelect(v, 3, 1.0, 2.0, mode="Keep")) == \
+                str(v.value_select(3, 1.0, 2., keep=True))
+                
+         
     def test_value_select_int(self):
 
         v = Vectors([[1, 3, 4], 
@@ -114,7 +134,7 @@ class TestSelect:
             assert v1
             assert len(v1) == 3
             assert len(v1[0]) == 1
-
+            assert str(v.select_variable([i+1], keep=True))==str(SelectVariable(v, i+1, Mode="Keep"))
             for j in range(3):
                 assert v1[j][0] == a[j][i]
 
@@ -127,7 +147,11 @@ class TestSelect:
 
         v = Vectors(a)
         selection = SelectIndividual(v, [1,2], Mode="Keep")
+        selection2 = v.select_individual([1,2], keep=True)
         
+        assert str(selection)==str(selection2)
+        
+
         assert len(selection) == 2
         print selection[0] == [1, 3, 4]
 
@@ -145,6 +169,11 @@ class TestExtract:
         assert m
         return m
 
+    def test_build_compound(self):
+        d1 = Binomial(2, 5, 0.5)
+        d2 = NegativeBinomial(0, 2, 0.5)
+        c = Compound(d1, d2)
+        return c
 
     def test_build_convolution(self):
 
@@ -162,19 +191,18 @@ class TestExtract:
         mixt = h.estimate_mixture(["B", "NB"])
 
         assert ExtractData(mixt)
-        #assert Convolution().extract_data()
-        #assert Compound().extract_data()
-
+        assert mixt.extract_data()==ExtractData(mixt)
 
     def test_extract_mixture_distribution(self):
 
         mixt = self.test_build_mixture()
 
         assert ExtractDistribution(mixt, "Weight")
-        assert ExtractDistribution(mixt, "Mixture")
-        assert ExtractDistribution(mixt, "Component", 1)
-        assert ExtractDistribution(mixt, "Component", 2)
-        assert ExtractDistribution(mixt, "Component", 3)
+        assert ExtractDistribution(mixt, "Weight")==mixt.extract_weight()
+        assert ExtractDistribution(mixt, "Mixture")==mixt.extract_mixture()
+        assert ExtractDistribution(mixt, "Component", 1)==mixt.extract_component(1)
+        assert ExtractDistribution(mixt, "Component", 2)==mixt.extract_component(2)
+        assert ExtractDistribution(mixt, "Component", 3)==mixt.extract_component(3)
 
         try:
             ExtractDistribution(mixt, "Component", 0)
@@ -187,20 +215,28 @@ class TestExtract:
 
         convol = self.test_build_convolution()
 
-        assert ExtractDistribution(convol, "Convolution")
-        assert ExtractDistribution(convol, "Elementary", 1)
-        assert ExtractDistribution(convol, "Elementary", 2)
+        assert ExtractDistribution(convol, "Convolution")==convol.extract_convolution()
+        assert ExtractDistribution(convol, "Elementary", 1)==convol.extract_elementary(1)
+        assert ExtractDistribution(convol, "Elementary", 2)==convol.extract_elementary(2)
+ 
+    def test_extract_compound_distribution(self):
 
+        comp = self.test_build_compound()
+
+        assert ExtractDistribution(comp, "Compound")==comp.extract_compound()
+        assert ExtractDistribution(comp, "Elementary")==comp.extract_elementary()
+        assert ExtractDistribution(comp, "Sum")==comp.extract_sum()
 
     def test_extract_histogram(self):
 
         h = Histogram("meri2.his")
         mixt = h.estimate_mixture(["B", "NB"])
 
-        assert ExtractHistogram(mixt, "Weight")
-        assert ExtractHistogram(mixt, "Mixture")
-        assert ExtractHistogram(mixt, "Component", 1)
-        assert ExtractHistogram(mixt, "Component", 2)
+        assert ExtractHistogram(mixt, "Weight")==mixt.extract_weight()
+
+        assert ExtractHistogram(mixt, "Mixture")==mixt.extract_mixture()
+        assert ExtractHistogram(mixt, "Component", 1)==mixt.extract_component(1)
+        assert ExtractHistogram(mixt, "Component", 2)==mixt.extract_component(2)
 
         try:
             ExtractHistogram(mixt, "Component", 3)
@@ -234,6 +270,10 @@ class TestMerge:
 
         meri = Merge(meri1, meri2, meri3, meri4, meri5)
         assert meri
+        meri_bis = meri1.merge([meri2, meri3, meri4, meri5])
+        assert meri_bis
+        assert str(meri)==str(meri_bis)
+        
 
     def test_merge_vectors(self):
         
@@ -245,12 +285,17 @@ class TestMerge:
              [6, 2, 122],
              [3, 4, 31],]
 
-
         v1 = Vectors(a)
         v2 = Vectors(b)
 
         v = Merge(v1, v2)
         assert v
+        
+        a = v1.merge([v2])
+        b = v2.merge([v1])
+        assert str(a)==str(b)
+        
+        assert str(a)==str(v)
 
     def test_mergevariable(self):
         a = [[1, 3, 4], 
@@ -259,15 +304,17 @@ class TestMerge:
 
         v = Vectors(a)
 
-        v1 =  SelectVariable(v, 1, Mode="Keep")
+        v1 =  SelectVariable(v, 1, Mode="keep")
         v2 =  SelectVariable(v, 2, Mode="Keep")
         v3 =  SelectVariable(v, 3, Mode="Keep")
 
         merged = MergeVariable(v1,v2,v3)
-
+        merged2 = v1.merge_variable([v2,v3],1)
         for i in range(3):
             for j in range(3):
                 assert merged[i][j] == v[i][j]
+                
+        assert str(merged) == str(merged2)
         
 
     
@@ -276,10 +323,11 @@ if __name__=="__main__":
     testshift = TestShift()
     testmerge = TestMerge()
     testextract = TestExtract()
-    testselect = TestSelect()
+    testselectvector = TestSelectVector()
+    testselecthist = TestSelectHist()
     testfit = TestFit()
     
-    for test in [testshift, testmerge, testextract, testselect]:
+    for test in [testshift, testmerge, testextract, testselecthist, testselectvector, testfit]:
         for method in dir(test):
             if method.startswith('_'):
                 continue

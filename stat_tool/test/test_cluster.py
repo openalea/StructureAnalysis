@@ -26,6 +26,12 @@ class Test:
         assert histo2
         assert histo3
         assert histo4
+        
+        assert str(fagus.cluster_step(2))==str(histo2)
+        assert str(fagus.cluster_information(0.8))==str(histo3)
+        assert str(fagus.cluster_limit([2,4,6,8,10]))==str(histo4)
+
+
 
     def test_transcode(self):
         """test transcode on histograms"""
@@ -34,6 +40,8 @@ class Test:
 
         histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, 4, 5])
         
+        assert str(histo5)==str(fagus.transcode([1, 2, 2, 3, 3, 4, 4, 5]))
+
         assert histo5
 
     
@@ -59,14 +67,39 @@ class Test:
 
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
 
-        c1 = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12])
-        Clustering(matrix10, "Hierarchy", Algorithm="Agglomerative")
-        Clustering(matrix10, "Hierarchy", Algorithm="Divisive")
+        
+        
+        c1 = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12], 
+                        Algorithm="Divisive")
+        c1_bis = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12], 
+                            Algorithm="Ordering")
+
+        
+        c2 = Clustering(matrix10, "Hierarchy", Algorithm="Agglomerative")
+        c3 = Clustering(matrix10, "Hierarchy", Algorithm="Divisive")
+        c4 = Clustering(matrix10, "Hierarchy", Algorithm="Ordering")
 
         assert c1
+        assert c2
+        assert c3
+        assert c4
         assert ToDistanceMatrix(c1)
 
+        # first argument is the Algorithm
+        #  * 0 for agglomerative
+        #  * 1 for divisive
+        # Second argument is the criterion
+        #  * 2 for averaging
+        c2==matrix10.hierarchical_clustering(0, 2, "test", "test")
+        c3==matrix10.hierarchical_clustering(0, 1, "test", "test")
+        c4==matrix10.hierarchical_clustering(0, 0, "test", "test")
+        
+        # 1 for initialisation and 1 for divisive
+        str(c1)==str(matrix10.partitioning_prototype(3, [1, 3, 12], 1, 1))
+        str(c1_bis)==str(matrix10.partitioning_prototype(3, [1, 3, 12], 1, 2))
 
+        #todo partioning_clusters
+        
 
 if __name__=="__main__":
     # perform all the test in the class Test (unit tests)
