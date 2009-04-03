@@ -279,6 +279,10 @@ def Save(obj, *args, **kargs):
     .. seealso::
         :func:`~openalea.stat_tool.output.Display`,
         :func:`~openalea.stat_tool.output.Plot`.
+        
+    .. todo::
+        In the statInterface, Format is used for ViewPoint=="Data" need to be
+        clarified
     """
 
     return obj.save(*args, **kargs)
@@ -496,7 +500,7 @@ class StatInterface(object):
             #f.write(outstr)
             #f.close()
 
-        elif(Format.lower() == "Data"):
+        elif(Format.lower() == "data"):
             self.file_ascii_data_write(filename, exhaustive)        
         else:
             self.file_ascii_write(filename, exhaustive)
