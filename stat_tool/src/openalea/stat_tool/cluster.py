@@ -149,13 +149,18 @@ def Cluster(obj, type, *args, **kargs):
         raise AttributeError("Object doesn't support %s."%(func_name))
 
 
-    # optinal arg : variable
+    # optional arg : variable 
     try:
-        nb_variable = obj.get_nb_variable()
-        if(nb_variable == 1):
-            variable = 1
-
-        return func(variable, param)
+        if obj.get_nb_variable() == 1:
+            return func(param)
+        else:
+            try:
+                variable = args[0]
+                param = args[1]    
+            except KeyError:
+                raise KeyError("Number of variables > 1 but no variable argument provided")         
+            return func(variable, param)
+        
 
     except AttributeError: #no get_nb_variable
         return func(param)
