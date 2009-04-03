@@ -1,135 +1,145 @@
 """histogram tests"""
 __revision__ = "$Id: $"
 
-from openalea.stat_tool.distribution import ToHistogram
+from openalea.stat_tool.distribution import ToHistogram, Binomial
 from openalea.stat_tool.distribution import ToDistribution
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Distribution
 from openalea.stat_tool.output  import Display, Save
-from openalea.stat_tool.plot import DISABLE_PLOT
 
+from tools import interface
 
-class Test:
-    """a simple unittest class"""
-
-    def test_empty(self):
-        """Test that empty constructor fails"""
-        try:
-            _h = Histogram()
-            assert False
-        except Exception:
-            assert True
+class Test(interface):
+    """a simple unittest class
     
-    def test_constructor_fromfile(self):
-        """run constructor with filename argument"""
-        h = Histogram("peup1.his")
-        assert h
+    Integration Test 
+    ================
+    
+    * 'ok' means works and testedPerform test on 
+    * 'works' means that the output has b=not been tested yet
+    
+    ========================    ==================================
+    ** from the interface**
+    ascii_write                 ok
+    display                     ok
+    extract_data                nothing to be done
+    file_ascii_write            ok
+    get_plotable                what is it for ?     
+    plot                        ok                      
+    save                        ok
+    plot_print                  ok
+    simulate                    ok
+    plot_write                  ok
+    spreadsheet_write           ok
+    survival_ascii_write        ok
+    survival_spreadsheet_write  ok
 
-        return h
-    
-    def test_constructor_fromfile_failure(self):
-        """run constructor with wrong filename argument"""
-        try:
-            _h = Histogram("peup1.hi")
-            assert False
-        except Exception:
-            assert True
-    
-    def test_build_histogram(self):
-        """build histogram"""
-        h1 = Histogram("meri1.his")
+    **others**
+    extract_model               ok
 
-        assert h1
-        return h1
+    ** see test_cluster**
+    cluster_information         ok
+    cluster_limit               ok
+    cluster_step                ok
+    transcode                   ok
+
+    **comparison**
+    compare                     ???
+    compare_histo               ok
+    t_comparison                ok
+    wmw_comparison              ok
+    f_comparison                ok
     
-    def test_constructor_fromlist(self):
-        """constructor from list """
-        h = Histogram([0, 1, 2, 3])
-        assert h
+    compound_estimation          ??
+    convolution_estimation       ??
+    mixture_estimation           ???
+    parametric_estimation        ???
+    survival_get_plotable        ???
+    
+    **see test_estimate**
+    estimate_compound            ok
+    estimate_convolution         ok     
+    estimate_mixture             ok 
+    estimate_nonparametric       ok
+    estimate_parametric          ok
+      
+    **see data_transform**
+    fit                            ok
+    merge                          ok
+    shift                          ok
+    value_select                   ok
+    """
+    def __init__(self):
+        self.data = self.build_data()
+        self.filename = "peup1.his"
+        self.structure = Histogram
         
-        try:
-            h = Histogram([0, 'a', 'b', 3])
-            assert False
-        except TypeError:
-            assert True
+    def build_data(self):
+        v = Histogram([0, 1, 2, 3])
+        assert v
+        return v
+      
+    def test_empty(self):
+        self.empty()
+        
+    def test_constructor_from_file(self):
+        self.constructor_from_file()
 
-                
-    # this test has to be cleaned or merged with the other
-    def test_fromfile2(self):
-        """From file"""
-        import os
-        h = Histogram("meri1.his")
-        assert h
-        # File
-        h.save("test.his")
-
-        h1 = Histogram("meri1.his")
-        h2 = Histogram("test.his")
-        assert len(h) == len(h2)
-        assert list(h) == list(h2)
-        os.remove("test.his")
+    def test_constructor_from_file_failure(self):
+        self.constructor_from_file_failure()
 
     def test_print(self):
-        """test that print command exists"""
-        h = self.test_build_histogram()
-        print h
+        self.print_data()
         
     def test_display(self):
-        """check that .display and Display calls are equivalent"""
-        h = self.test_build_histogram()
-        h.display() == h.ascii_write(False) 
-        s = str(h)
-        assert h.display() == s
-        assert h.display()==Display(h)
-        
-    def str(self):
-        self.test_display()
-        
-    def test_ascii_write(self):
-        self.test_display()
-        
+        self.display()
+        self.display_versus_ascii_write()
+        self.display_versus_str()
+                
     def test_len(self):
-        h = Histogram(range(10))
-        assert len(h) == 10
-        
-    def test_plot(self):        
-        """run plotting routines """
-        h = self.test_build_histogram()
-        if DISABLE_PLOT == False:
-            h.plot()
+        v = self.data
+        assert len(v) == 4
 
-    def _test_save(self):
-        h1 = self.test_build_histogram()
-        h1.save('test1.dat')
-        Save(h1, 'test2.dat')
-        
-        h1_read = Histogram('test1.dat')
-        h2_read = Histogram('test2.dat')
-        
-        assert h1 and h1_read and h2_read
-        assert len(h1)==len(h1_read) and len(h2_read)
-        
-        # +1 because an histogram is composed of n+1 values, where n is the length 
-        # of the original data set
-        for i in xrange(len(h1)+1):
-            assert h1[i] == h1_read[i]
-            assert h1[i] == h2_read[i]
+    def test_plot(self):
+        self.plot()
+
+    def test_save(self):
+        self.save()
 
     def test_plot_write(self):
-        h = self.test_build_histogram()
-        h.plot_write('test', 'title')
+        self.plot_write()
 
     def test_file_ascii_write(self):
-        m = self.test_build_histogram()
-        m.file_ascii_write('test.dat', True)
-    
+        self.file_ascii_write()
+      
     def test_spreadsheet_write(self):
-        m = self.test_build_histogram()
-        m.spreadsheet_write('test.dat')
+        self.spreadsheet_write()
+        
+    def test_plot_write(self):
+        self.plot_write()
+
+    def test_file_ascii_write(self):
+        self.file_ascii_write()
+      
+    def test_spreadsheet_write(self):
+        self.spreadsheet_write()
+    
+    def test_simulate(self):
+        pass
+     
+    def test_extract(self):
+        pass
+    
+    def test_extract_data(self):
+        """todo : check if this test makes sense"""
+        h = Histogram("meri1.his")
+        e = h.estimate_nonparametric()
+        
+        assert e
     
     def test_survival_ascii_write(self):
         """ test display"""
-        h = self.test_build_histogram()
+        h = self.data
         h.survival_ascii_write()
         
     def test_container(self):
@@ -151,12 +161,9 @@ class Test:
         assert h2
         assert h == h2
 
-    def test_extract_data(self):
-        """todo : check if this test makes sense"""
-        h = Histogram("meri1.his")
-        e = h.estimate_nonparametric()
-        
-        assert e
+    def test_extract_model(self):    
+        d = Binomial(0,10,0.5)
+        d == d.simulate(1000).extract_model()
         
 
 

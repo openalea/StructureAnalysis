@@ -44,118 +44,109 @@ from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.comparison import Compare, ComparisonTest
-from openalea.stat_tool.output import Display, Save
 
-class TestUnit:
-    """a simple unittest class"""
+from openalea.stat_tool.output import plot
+from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
+from openalea.stat_tool.simulate import Simulate
+import openalea.stat_tool.distribution as distribution 
+from openalea.stat_tool.cluster import Cluster
 
-    def test_empty(self):
-        """Test that empty constructor fails"""
-        try:
-            m = Mixture()
-            assert False
-        except Exception:
-            assert True
+from tools import interface
 
-    def test_constructor_fromfile(self):
-        """run constructor with filename argument"""
-        m = Mixture("mixture1.mixt")
-        assert m
+class Test(interface):
+    """a simple unittest class
+    
+    Integration test 
+    ================
+    
+    * 'ok' means works and testedPerform test on 
+    * 'works' means that the output has b=not been tested yet
+    
+    ========================    ==================================
+    ** from the interface**
+    ascii_write                 ok
+    display                     ok    
+    extract_data                ok
+    file_ascii_write            ok
+    get_plotable                what is it for ?     
+    plot                        ok                       
+    save                        ok
+    plot_print                  ok
+    simulate                    ok
+    plot_write                  ok
+    spreadsheet_write           ok
+    survival_ascii_write        ok
+    survival_spreadsheet_write  ok
+    **others**
+    extract_mixture             ok
+    extratc_component           ok
+    extra_weight                ok
+    str                         ok
+    len                         not relevant
+    nb_component                ok
+    old_plot                    works   
+    ========================    ==================================    
+    """
+
+    def __init__(self):
+        self.data = self.build_data()
+        self.filename = "mixture1.mixt"
+        self.structure = Mixture
         
-        return m
-
-    def test_constructor_fromfile_failure(self):
-        """run constructor with wrong filename argument"""
-        try:
-            _m = Mixture("mixture1.mix")
-            assert False
-        except Exception:
-            assert True
-            
-    def test_build_mixture(self):
-        """build mixture"""
+    def build_data(self):
         d1 = Binomial(0, 12, 0.1)
         d2 = Binomial(0, 12, 0.5)
         d3 = Binomial(0, 12, 0.8)
         
-        m = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
+        data = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
+        assert data.nb_component() == 3
+        return data
+            
+    def test_empty(self):
+        self.empty()
 
-        assert m
-        return m
+    def test_constructor_from_file(self):
+        self.constructor_from_file()
+
+    def test_constructor_from_file_failure(self):
+        self.constructor_from_file_failure()
 
     def test_print(self):
-        """test that print command exists"""
-        m = self.test_build_mixture()
-        print m
+        self.print_data()
         
     def test_display(self):
-        """check that .display and Display calls are equivalent"""
-        m = self.test_build_mixture()
-        m.display() == m.ascii_write(False)
-        s = str(m)
-        assert m.display() == s
-        assert m.display()==Display(m)
-        
-    def str(self):
-        self.test_display()
-        
-    def test_ascii_write(self):
-        self.test_display()
-        
+        self.display()
+        self.display_versus_ascii_write()
+        self.display_versus_str()
+           
     def test_len(self):
-        c = self.test_build_mixture()
+        c = self.data
         assert len(c) == 3
-        
-    def test_plot(self):
-        """run plotting routines """
-        m = self.test_build_mixture()
-        if DISABLE_PLOT==False:
-            m.plot()
-    
-    def test_save(self):
-        # m1 contains 3 uniform distributon  yet, the test1.dat contaisn only 2
-        # the third one being a binomial dist. Moreover, the loading of the 
-        # test1 and test2 file fails
-        m1 = self.test_build_mixture()
-        m1.save('test1.dat')
-        Save(m1, 'test2.dat')
-         
-               
-        m1_read = Mixture('test1.dat')
-        m2_read = Mixture('test2.dat')
-        
-        assert m1 and m1_read and m2_read
-        assert len(m1)==len(m1_read) and len(m2_read)
-        assert str(m1_read) == str(m2_read)
 
-        
+    def test_plot(self):        
+        self.plot()
+
+    def test_save(self):
+        self.save()
+                
     def test_plot_write(self):
-        h = self.test_build_mixture()
-        h.plot_write('test', 'title')
+        self.plot_write()
 
     def test_file_ascii_write(self):
-        d = self.test_build_mixture()
-        d.file_ascii_write('test.dat', True)
-
+        self.file_ascii_write()
+      
     def test_spreadsheet_write(self):
-        d = self.test_build_mixture()
-        d.spreadsheet_write('test.dat')
+        self.spreadsheet_write()
+    
+    def test_simulate(self):
+        self.simulate()     
         
-    def test_simulation(self):
-        """Test the simulate method"""
-        m = self.test_build_mixture()
-        s = m.simulate(1000)
-
-        assert s.nb_component() == 3
-        assert str(s)
-
     def test_extract(self):
         """run and test the extract methods"""
 
-        m = self.test_build_mixture()
+        m = self.data
 
         assert m.extract_weight() == ExtractDistribution(m, "Weight")
-
         assert m.extract_mixture() == ExtractDistribution(m, "Mixture")
 
         assert ExtractDistribution(m, "Component", 1) == Binomial(0, 12, 0.1)
@@ -176,71 +167,6 @@ class TestUnit:
         assert d
 
 
-class Test_mv_mixture:
-    def test_build_mv_mixture(self):
-
-        d11 = Binomial(0, 12, 0.1)
-        d12 = Binomial(0, 12, 0.5)
-        d13 = Binomial(0, 12, 0.8)
-
-        d21 = Poisson(0, 18.0)
-        d22 = Poisson(0, 5.0)
-        d23 = Poisson(0, .20)
-
-        m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
-        assert m
-        return m
-
-    def _test_mv_fromfile(self):
-        # From file
-        m = _MvMixture("mixture_mv1.mixt")
-        assert m
-
-        # File
-        m.save("test_mv.mixt")
-
-        _m1 = _MvMixture("mixture_mv1.mixt")
-        m2 = _MvMixture("test_mv.mixt")
-        assert m.nb_component() == m2.nb_component()
-        assert str(m) == str(m2)
-
-        os.remove("test_mv.mixt")
-
-        mnp = _MvMixture("mixture_mv_nonparam.mixt")
-        assert mnp
-
-        try:
-            _h = _MvMixture("no_such_file.mixt")
-            assert False
-        except Exception:
-            assert True
-
-    def test_simulate_estimate_mv_mixture(self):
-
-        d11 = Binomial(0, 12, 0.1)
-        d12 = Binomial(2, 13, 0.6)
-        d13 = Binomial(3, 15, 0.9)
-
-        d21 = Poisson(0, 25.0)
-        d22 = Poisson(0, 5.0)
-        d23 = Poisson(0, 0.2)
-
-
-        #m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
-        #v = m.simulate(5000)
-        #assert v
-
-        #m_estim_model = v.mixture_estimation(m, 100, [True, True])
-        #assert m_estim_model
-        #m_estim_nbcomp = v.mixture_estimation(2)
-        #assert m_estim_nbcomp
-
-#  funtional tests
-from openalea.stat_tool.output import plot, Plot
-from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
-from openalea.stat_tool.simulate import Simulate
-import openalea.stat_tool.distribution as distribution 
-from openalea.stat_tool.cluster import Cluster
 
 def test1():
     plot.DISABLE_PLOT = DISABLE_PLOT
@@ -353,27 +279,3 @@ def test1():
     #m_estim_nbcomp.plot(variable = 1, Title="Estimated mixture")
 
 
-
-
-if __name__=="__main__":
-    # perform all the test in the class Test (unit tests)
-    test = TestUnit()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'
-            
-    test = Test_mv_mixture()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'     
-            
-    
-    # and functional tests.    

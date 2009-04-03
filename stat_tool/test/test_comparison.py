@@ -15,11 +15,12 @@ class Test:
         meri1 = Histogram("meri1.his")
         meri2 = Histogram("meri2.his")
 
-        assert ComparisonTest("F", meri1, meri2)
-        assert ComparisonTest("T", meri1, meri2)
-        assert ComparisonTest("W", meri1, meri2)
+        assert ComparisonTest("F", meri1, meri2)==meri1.f_comparison(meri2)
+        assert ComparisonTest("T", meri1, meri2)==meri1.t_comparison(meri2)
+        assert ComparisonTest("W", meri1, meri2)==meri1.wmw_comparison(meri2)
 
-    def test_comparison(self):
+
+    def test_comparison_histo(self):
 
         meri1 = Histogram("meri1.his")
         meri2 = Histogram("meri2.his")
@@ -28,7 +29,11 @@ class Test:
         assert Compare(meri1, meri2, meri3, 'N')
         assert Compare(meri1, meri2, meri3, 'O')
         assert Compare(meri1, meri2, meri3, 'S')
-
+        
+        assert str(meri1.compare_histo(meri2, meri3, "N"))==Compare(meri1, meri2, meri3, 'N')
+        assert str(meri1.compare_histo(meri2, meri3, "S"))==Compare(meri1, meri2, meri3, 'S')
+        assert str(meri1.compare_histo(meri2, meri3, "O"))==Compare(meri1, meri2, meri3, 'O')
+        
     def test_compare_vectors(self):
         
         vec10 = Vectors("chene_sessile.vec")
@@ -37,6 +42,8 @@ class Test:
 
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         assert matrix10
+        
+        assert str(vec15.compare(VectorDistance("N", "N", "N"))) == str(matrix10)
 
     def test_compare_sequence(self):
         pass

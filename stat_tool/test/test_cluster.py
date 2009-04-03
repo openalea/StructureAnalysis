@@ -14,7 +14,7 @@ class Test:
     def __init__(self):
         pass
 
-    def test_cluster(self):
+    def test_cluster_histo(self):
         """test cluster on histograms"""
 
         fagus = Histogram("fagus1.his")
@@ -31,18 +31,35 @@ class Test:
         assert str(fagus.cluster_information(0.8))==str(histo3)
         assert str(fagus.cluster_limit([2,4,6,8,10]))==str(histo4)
 
+    def test_cluster_vectors(self):
+        """not yet implemented"""
+        v = Vectors([[1,2,3], [1,3,1], [4,5,6]])
+        assert str(Cluster(v, "Step", 1, 2))==str(v.cluster_step(1,2))  
+        assert str(Cluster(v, "Limit", 1, [2,4,6]))==str(v.cluster_limit(1, [2,4 ,6]))        
 
+    def test_cluster_sequence(self):
+        """not yet implemented"""
+        pass
+    
+    def test_cluster_discrete_sequence(self):
+        """not yet implemented"""
+        pass
 
-    def test_transcode(self):
+    def test_transcode_histo(self):
         """test transcode on histograms"""
-
         fagus = Histogram("fagus1.his")
-
         histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, 4, 5])
-        
         assert str(histo5)==str(fagus.transcode([1, 2, 2, 3, 3, 4, 4, 5]))
 
-        assert histo5
+ 
+    def _test_transcode_vectors(self):
+        """test transcode on histograms
+        .. todo:: to finalise 
+        """
+        vec = Vectors([[1,2,3], [1,3,1], [4,5,6]])
+        
+        assert str(vec)==str(fagus.transcode([1, 2, 2, 3, 3, 4, 4, 5]))
+
 
     
     def test_transcode_err(self):
@@ -57,7 +74,7 @@ class Test:
             assert True
 
     def test_clustering(self):        
-        """test clustering on vectors/matrices"""
+        """test clustering on matrices"""
         
 
         vec10 = Vectors("chene_sessile.vec")

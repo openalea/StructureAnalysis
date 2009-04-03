@@ -6,6 +6,9 @@ from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.data_transform import Shift
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.estimate import Estimate
+from openalea.stat_tool.compound import Compound
+from openalea.stat_tool.simulate import Simulate
+from openalea.stat_tool import  *
 
 
 class Test:
@@ -71,24 +74,23 @@ class Test:
 
 
 
-    def _test_compound(self):
-        """todo"""
-        assert False
+    def test_compound(self):
+        
+        cdist1 = Compound("compound1.cd")
+        chisto1 = Simulate(cdist1, 200)
+        cdist2 = Estimate(chisto1, "COMPOUND",
+                      ExtractDistribution(cdist1, "Elementary"),
+                      ExtractDistribution(cdist1, "Sum"),
+                      MinInfBound=0)
+    
+        cdist3 = chisto1.estimate_compound(
+                                  ExtractDistribution(cdist1, "Elementary"), 
+                                  ExtractDistribution(cdist1, "Sum"))
+        
+        assert cdist2==cdist3
+        
 
 
-
-
-
-if __name__=="__main__":
-    # perform all the test in the class Test (unit tests)
-    test = Test()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'
-    # and functional tests.    
+ 
 
 

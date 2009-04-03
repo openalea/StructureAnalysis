@@ -16,121 +16,125 @@ from openalea.stat_tool.output import Display, Save
 from openalea.stat_tool import Estimate
 from openalea.stat_tool import Simulate
 
-class TestUnit:
-    """unit tests"""
-    def __init__(self):
-        pass
-    
-    def test_empty(self):
-        """Test that empty constructor fails"""
-        try:
-            _m = Distribution()
-            assert False
-        except Exception:
-            assert True
-    
-    def test_constructorfromfile(self):
-        """run constructor with filename argument"""
-        m = Distribution("distribution1.dist")
-        assert m
-        
-        return m
-    
-    def test_constructorfromfile_failure(self):
-        """run constructor with wring filename argument"""
-        try:
-            _d = Distribution("distribution.d")
-            assert False
-        except Exception:
-            assert True
-            
-    def test_build_distribution(self):
-        """build distribution"""
+from tools import interface
 
-        d1 = Uniform(0, 10)
-        d2 = Distribution("UNIFORM", 0, 10)
-        
+class Test(interface):
+    """a simple unittest class
+
+    Integration Test 
+    ================
+    
+    * 'ok' means works and testedPerform test on 
+    * 'works' means that the output has b=not been tested yet
+    
+    ========================    ==================================
+    ** from the interface**
+    ascii_write                 ok
+    display                     ok
+    extract_data                nothing to be done
+    file_ascii_write            ok
+    get_plotable                what is it for ?     
+    plot                        ok                       
+    save                        ok
+    plot_print                  ok
+    simulate                    ok
+    plot_write                  ok
+    spreadsheet_write           ok
+    survival_ascii_write        ok
+    survival_spreadsheet_write  ok
+    **others**
+    ident                       ok            
+    probability                 ok
+    sup_bound                   ok
+    parameter                   ok
+    inf_bound                   ok     
+    old_plot                    notdone   
+    survival_get_plotable       notdone                                           
+    survival_plot_write         what is the purpose?
+    str                         ok
+    len                         not relevant
+    ========================    ==================================
+ 
+    """
+    def __init__(self):
+        self.data = self.build_data()
+        self.filename = "distribution1.dist"
+        self.structure = Distribution
+    
+    def build_data(self):
+        d1 = Binomial(0,10,0.5)
+        d2 = Distribution("BINOMIAL", 0, 10, 0.5)
         assert d1==d2
         return d1
-    
+
+    def test_empty(self):
+        self.empty()
+
+    def test_constructor_from_file(self):
+        self.constructor_from_file()
+
+    def test_constructor_from_file_failure(self):
+        self.constructor_from_file_failure()
+
     def test_print(self):
-        """test that print command exists"""
-        d = self.test_build_distribution()
-        print d
-                 
-    def test_display(self):
-        """test display"""
-        d = self.test_build_distribution()
-        d.display() == d.ascii_write(False)
-        s = str(d)
-        assert d.display() == s
-        assert d.display()==Display(d)
-    
-    def str(self):
-        self.test_display()
+        self.print_data()
         
-    def test_ascii_write(self):
-        self.test_display()
+    def test_display(self):
+        self.display()
+        self.display_versus_ascii_write()
+        self.display_versus_str()
         
     def test_len(self):
-        """not implemented; irrelevant"""
+        """not implemented; irrelevant?"""
         pass
-        
-    def test_plot(self):
-        """test plotting routines"""
-        d = Distribution("POISSON", 0, 2)
-        d.plot()
+    
+    def test_plot(self):        
+        self.plot()
 
     def test_save(self):
-        m = self.test_build_distribution()
-        m.save('test.dat')
-        Save(m, 'test.dat')
-        
+        self.save()
+                
     def test_plot_write(self):
-        h = self.test_build_distribution()
-        h.plot_write('test', 'title')
+        self.plot_write()
 
     def test_file_ascii_write(self):
-        d = self.test_build_distribution()
-        d.file_ascii_write('test.dat', True)
-        
+        self.file_ascii_write()
+      
     def test_spreadsheet_write(self):
-        d = self.test_build_distribution()
-        d.spreadsheet_write('test.dat')
+        self.spreadsheet_write()
     
+    def test_simulate(self):
+        self.simulate()
+        
     def test_survival_ascii_write(self):
-        """ survival_ascii_write"""
-        d = self.test_build_distribution()
-        d.survival_ascii_write()
-
-    def test_simulation(self):
-        """Test the simulate method"""
-        m = self.test_build_distribution()
-        s = m.simulate(1000)
-
-        assert len(s) == 1000
-        assert str(s)
+        self.survival_ascii_write()
+        
+    def test_survival_spreadsheet_write(self):
+        self.survival_spreadsheet_write()
         
     def test_extract(self):
-        """run and test the extract methods"""
+        """
+        .. note:: nothing to be done here"""
         pass
 
     def test_extract_data(self):
-        """run and test the extract_data methods"""
-        # todo
-        d1 = Binomial(0,10,0.5)
-        s = d1.simulate(1000)
-        e = s.estimate_parametric("B")
+        """run and test the extract_data methods
         
+        .. todo:: check this test
+        """
+        s = self.simulate()
+        e = s.estimate_parametric("B")
         d = e.extract_data()
         assert d
-        
         eprime = Estimate(s, "Binomial")
         
-        
-        
 
-class TestFunctional:
+class TestDistribution:
+    """Test the distribution (Unifor, Binomial, ...)
+    
+    test the sup_bound, inf_bound, probability, parameter,ident
+    
+    test the ToDistribution and ToHistogram"""
     def test_to_histogram(self):
 
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
@@ -146,7 +150,12 @@ class TestFunctional:
 
         d = Distribution("UNIFORM", 0, 10)
         assert list(d.simulate(1000))
-
+        assert d.sup_bound==10
+        assert d.inf_bound==0
+        assert d.probability==-1
+        assert d.parameter==-1
+        assert d.ident==4
+        
         d = Uniform(0, 10)
         assert list(d.simulate(1000))
 
@@ -157,6 +166,11 @@ class TestFunctional:
 
         d = Distribution("BINOMIAL", 0, 10, 0.5)
         assert list(d.simulate(1000))
+        assert d.sup_bound==10
+        assert d.inf_bound==0
+        assert d.probability==0.5
+        assert d.parameter==-1
+        assert d.ident==1
 
         d = Binomial(0, 10, 0.5)
         assert list(d.simulate(1000))
@@ -168,6 +182,11 @@ class TestFunctional:
 
         d = Distribution("POISSON", 0, 2)
         assert list(d.simulate(1000))
+        assert d.sup_bound==-1
+        assert d.inf_bound==0
+        assert d.probability==-1
+        assert d.parameter==2
+        assert d.ident==2
 
         d = Poisson(0, 2)
         assert list(d.simulate(1000))
@@ -179,7 +198,11 @@ class TestFunctional:
         
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         assert list(d.simulate(1000))
-
+        assert d.sup_bound==-1
+        assert d.inf_bound==0
+        assert d.probability==0.5
+        assert d.parameter==1
+        assert d.ident==3
         d = NegativeBinomial(0, 1, 0.5)
         assert list(d.simulate(1000))
 
@@ -264,19 +287,6 @@ def test1():
     Plot(dist5)
     
 
-if __name__=="__main__":
-    # perform all the test in the class Test (unit tests)
-    test = Test()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'
-    # and functional tests.    
-    
-    test1()
 
 
     
