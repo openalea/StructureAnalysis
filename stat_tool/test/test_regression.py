@@ -5,6 +5,7 @@ __revision__ = "$Id: $"
 from openalea.stat_tool.regression import Regression
 from openalea.stat_tool.vectors import Vectors
 
+
 class Test:
 
     def test_linear_regression(self):
@@ -15,10 +16,10 @@ class Test:
 
         assert r
         assert r1
+        assert str(r) == str(r1)
 
     def test_moving_average(self):
         
-
         v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
 
         # Test algorithm
@@ -33,7 +34,8 @@ class Test:
         r = v.moving_average_regression(1, 2, [1, ], 'a') 
         assert r
         assert r1
-
+        assert str(r)==str(r1)
+       
     def test_nearest_neighbours(self):
         
 
@@ -43,6 +45,7 @@ class Test:
         r = v.nearest_neighbours_regression(1, 2, 1., False) 
         assert r
         assert r1
+        assert str(r) == str(r1)
 
     def test_badtype(self):
 
