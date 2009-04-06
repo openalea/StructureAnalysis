@@ -980,7 +980,24 @@ bool Vector_distance::ascii_write(Format_error &error , const char *path ,
                                   bool exhaustive) const
 
 {
-  return false;
+  bool status;
+  ofstream out_file(path);
+
+  error.init();
+
+  if (!out_file) {
+    status = false;
+    error.update(STAT_error[STATR_FILE_NAME]);
+  }
+
+  else {
+    status = true;
+    ascii_write(out_file , exhaustive );
+  }
+
+  return status;
+
+
 }
 
 
