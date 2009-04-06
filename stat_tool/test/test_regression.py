@@ -7,7 +7,39 @@ from openalea.stat_tool.vectors import Vectors
 
 
 class Test:
-
+    """a simple unittest class
+    
+    Integration test 
+    ================
+    
+    * 'ok' means works and testedPerform test on 
+    * 'works' means that the output has b=not been tested yet
+    
+    ========================    ==================================
+    ** from the interface**
+    ascii_write(False)          ok
+    display                     ok
+    file_ascii_write            ok
+    get_plotable                ?
+    old_plot                    ?
+    plot                        gnuplot
+    plot_print()                ok
+    plot_write                  ok  
+    save                        ok
+    spreadsheet_write           ok
+    file_ascii_write            ok
+    
+    str                 ok
+    """
+    
+    def __init__(self):
+        self.data = None
+        self.filename = None
+        self.Structure = Regression
+    
+    
+    
+    
     def test_linear_regression(self):
 
         v = Vectors([[0,0], [1,1], [2,2], [3,3]])
