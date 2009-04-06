@@ -1007,6 +1007,20 @@ public:
 
     return boost::shared_ptr<Vector_distance>(dist);
   }
+  
+  static void file_ascii_write(const Vector_distance& d, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = d.ascii_write(error, path,exhaustive);
+    if (!result)
+       stat_tool::wrap_util::throw_error(error);
+
+  }
+
+
+
 
 };
 
@@ -1027,7 +1041,12 @@ void class_vectordistance()
     .def("__init__", make_constructor(VectorDistanceWrap::build_from_types))
     .def("__init__", make_constructor(VectorDistanceWrap::read_from_file))
 
+    .def(self_ns::str(self))
     .def("__len__", &Vector_distance::get_nb_variable)
+    
+    .def("file_ascii_write", VectorDistanceWrap::file_ascii_write,
+     "Save vector distance summary into a file")
+
 
     ;
 
