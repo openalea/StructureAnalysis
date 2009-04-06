@@ -50,9 +50,12 @@ class interface():
     
     def constructor_from_file(self):
         """Test constructor from file"""
-        c = self.structure(self.filename)
-        assert c
-        return c
+        if self.filename==None:
+            return None
+        else:
+            c = self.structure(self.filename)
+            assert c
+            return c
     
     def constructor_from_file_failure(self):
         """run constructor with filename argument"""
