@@ -50,10 +50,7 @@ class Test(interface):
     wmw_comparison              ok
     f_comparison                ok
     
-    compound_estimation          ??
-    convolution_estimation       ??
-    mixture_estimation           ???
-    parametric_estimation        ???
+    
     survival_get_plotable        ???
     
     **see test_estimate**
@@ -62,6 +59,10 @@ class Test(interface):
     estimate_mixture             ok 
     estimate_nonparametric       ok
     estimate_parametric          ok
+    compound_estimation          equivalent to estimate_mixture and not tested
+    convolution_estimation       equivalent to estimate_mixture and not tested
+    mixture_estimation           equivalent to estimate_mixture and tested
+    parametric_estimation        equivalent to estimate_mixture and not tested
       
     **see data_transform**
     fit                            ok

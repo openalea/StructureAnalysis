@@ -35,7 +35,7 @@ class interface():
     def __init__(self, data, filename, structure_object):
         self.data = None
         self.filename = None
-        self.structure_object = None
+        self.structure = None
         
     def build_data(self):
         raise NotImplementedError()
@@ -97,6 +97,14 @@ class interface():
         .. todo:: This is surely a bug. to be checked"""
         c1 = self.data  
 
+        try:
+            os.remove('test1.dat')
+        except:
+            pass
+        try:
+            os.remove('test2.dat')
+        except:
+            pass
         
         if Format is None:
             c1.save('test1.dat')
@@ -104,7 +112,7 @@ class interface():
         else:
             c1.save('test1.dat', Format="Data")
             Save(c1, 'test2.dat', Format="Data")
-        
+            
         c1_read = self.structure('test1.dat')
         c2_read = self.structure('test2.dat')
         
@@ -158,3 +166,4 @@ class interface():
     
     def test_extract_data(self):
         raise NotImplementedError()
+

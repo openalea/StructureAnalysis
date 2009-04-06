@@ -2,13 +2,14 @@
 __revision__ = "$Id: $"
 
 from openalea.stat_tool import distribution, data_transform, histogram
-from openalea.stat_tool.distribution import Binomial
-from openalea.stat_tool.data_transform import Shift
+from openalea.stat_tool.distribution import Binomial, get_distribution_type
+from openalea.stat_tool.data_transform import Shift, ExtractDistribution
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.estimate import Estimate
+
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.simulate import Simulate
-from openalea.stat_tool import  *
+from openalea.stat_tool import  _stat_tool
+from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
 
 
 class Test:
@@ -44,9 +45,24 @@ class Test:
 
     def test_mixture_1(self):
 
+        distributions = ["B","NB","NB","NB"]
         h = Histogram(("peup2.his"))
-        m1 =  h.estimate_mixture(["B", "NB", "NB", "NB"], NbComponent="Estimated")
+        m1 =  h.estimate_mixture(distributions, NbComponent="Estimated")
         assert m1
+        
+        
+        type=[]
+        for d in distributions:
+            temp = distribution.get_distribution_type(d, 
+                                                      [_stat_tool.BINOMIAL,
+                                                       _stat_tool.POISSON,
+                                                       _stat_tool.NEGATIVE_BINOMIAL,])
+            type.append(temp)
+        
+        c = h.mixture_estimation(type, 0, True, True,
+                                likelihood_penalty_type['AIC'])
+        
+        assert str(c)==str(m1)
 
 
     def test_mixture_2(self):
