@@ -169,6 +169,19 @@ public:
 
   }
 
+  static Distance_matrix* read_from_file(char *filename)
+  {
+    Distance_matrix *data;
+    Format_error error;
+
+    // not implemented. see vectors.cpp for an exmaple.
+    //data = distance_matrix_ascii_read(error, filename);
+    
+    if(data) { return data; }
+    else { stat_tool::wrap_util::throw_error(error);   }
+
+  };
+
 
 
 };
@@ -193,9 +206,14 @@ void class_distance_matrix()
   class_< Distance_matrix, bases< STAT_interface > >
     ("_DistanceMatrix", "Distance Matrix", init<const Distance_matrix&>())
 
+    .def("__init__", make_constructor(DistanceMatrixWrap::read_from_file))
 
-     .def(self_ns::str(self)) // __str__
+    .def(self_ns::str(self)) // __str__
     
+    .def("get_nb_row", &Distance_matrix::get_nb_row, "get number of rows")
+    .def("get_nb_column", &Distance_matrix::get_nb_column, "get number of columns")
+    
+
     // Clustering
     .def("partitioning_prototype", DistanceMatrixWrap::partitioning_prototype,
 	 return_value_policy< manage_new_object >() )
