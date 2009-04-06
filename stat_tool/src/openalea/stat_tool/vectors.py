@@ -165,7 +165,8 @@ def VectorDistance(*args, **kargs):
     # filename
     if(len(args)==1 and isinstance(args[0], str)):
         filename = args[0]
-        return _stat_tool._VectorDistance.__init__(self, filename)
+    #    return _stat_tool._VectorDistance.__init__(self, filename)
+        return _stat_tool._VectorDistance(filename)
 
     # Get keyword parameters
     distance = None
@@ -200,6 +201,10 @@ def VectorDistance(*args, **kargs):
 
         cindex += 1
 
+
+    if sum(weigths)==0:
+        weigths = [1./len(weigths) for _elem in weigths]
+        
     return _stat_tool._VectorDistance(types, weigths, distance)
     
 
