@@ -1327,6 +1327,118 @@ bool Regression::spreadsheet_write(Format_error &error , const char *path) const
 }
 
 
+MultiPlotSet* Regression::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+  Format_error error;
+  set = Regression::get_plotable(error);
+
+  return set;
+}
+
+
+MultiPlotSet* Regression::get_plotable(Format_error &error) const
+{
+  
+    bool status;
+  register int i , j , k;
+  int **frequency;
+  double residual_mean , residual_standard_deviation , min_standard_residual , max_standard_residual ,
+         min_response , max_response , *standard_residual , *presidual , *pstandard_residual, *ppoint;
+  ostringstream data_file_name[2];
+
+  ppoint = point;
+  const int nb_vector = vectors->get_nb_vector();
+  error.init();
+
+  MultiPlotSet *plotset = new MultiPlotSet(2);
+  MultiPlotSet &set = *plotset;
+
+  set.title = "Regression";
+  set.border = "15 lw 0";
+
+
+  residual_mean = residual_mean_computation();
+  residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
+
+  standard_residual = new double[nb_vector];
+  presidual = residual;
+  pstandard_residual = standard_residual;
+  min_standard_residual = 0.;
+  max_standard_residual = 0.;
+
+  for (i = 0;i < nb_vector;i++) {
+    *pstandard_residual = *presidual++ / residual_standard_deviation;
+    if (*pstandard_residual < min_standard_residual) {
+      min_standard_residual = *pstandard_residual;
+    }
+    if (*pstandard_residual > max_standard_residual) {
+      max_standard_residual = *pstandard_residual;
+    }
+    pstandard_residual++;
+  }
+
+  min_response = MIN(min_computation() , vectors->min_value[1]);
+  max_response = MAX(max_computation() , vectors->max_value[1]);
+
+  // ---------------- regression plot + original data ----------------------------------
+  ostringstream oss (ostringstream::out);
+ 
+  // get the regression parameter to plot the formula in the legend
+  ascii_formal_print(oss);
+  set[0][0].legend = oss.str();
+
+  set[0][0].style = "linespoints";
+  set[0].grid = "true";
+
+  // plot original data
+  for (i = 0;i < vectors->nb_vector;i++) {
+    set[0][0].add_point(vectors->int_vector[i][0] , vectors->int_vector[i][1]);
+    set[0][0].add_point(vectors->int_vector[i][0] , ppoint[i]);
+  }
+
+  // allow a new curve to be plotted (the regression)
+  set[0].resize(2);
+  for (i = 0;i < vectors->nb_vector;i++) {
+    set[0][1].add_point(vectors->int_vector[i][0] , parameter[0] + parameter[1]*vectors->int_vector[i][0]);
+  }
+  set[0][1].style = "-";
+  switch (ident) {
+  case STAT_LINEAR : {
+    set[0][1].legend = "Linear regression";
+    break;
+    }
+  case STAT_MONOMOLECULAR : {
+    set[0][1].legend = "Monomolecular regression";
+    break;
+    }
+  case STAT_LOGISTIC : {
+    set[0][1].legend = "Logistic regression";
+    break;
+    }
+  }
+  set[0][1].color = "g";
+  
+  plotset[0][0].ylabel = STAT_label[STATL_RESPONSE_VARIABLE]; 
+
+  // ------------------------ residual plot---------------------------
+  set[1][0].legend = "residuals";
+  set[1][0].style = "o";
+  set[0][1].color = "r";
+  for (i = 0;i < vectors->nb_vector;i++) {
+    set[1][0].add_point(vectors->int_vector[i][0] , standard_residual[i]);
+  }
+  plotset[0][1].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
+  plotset[0][1].ylabel = STAT_label[STATL_STANDARDIZED_RESIDUAL];
+  set[1].grid = "true";
+
+
+
+  return plotset;
+
+}
 /*--------------------------------------------------------------*
  *
  *  Sortie Gnuplot d'un objet Regression.
