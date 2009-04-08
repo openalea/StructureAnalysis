@@ -1,7 +1,6 @@
 
-
-Administration documents
-########################
+Current Developments
+####################
 
 .. contents::
 
@@ -15,108 +14,242 @@ Work in progress
 documentation
 -------------
 
-The sphinx documentation is now used to manage the documentation so as to include a reference guide as well as a User guide (and this administration section).
+The sphinx documentation is now used to manage the documentation so as to 
+include a reference guide as well as a User guide (and this administration
+section).
 
-All docstrings are currently compatible with the sphinx requirements (reST syntax)
+All docstrings are currently compatible with the sphinx requirements (reST
+ syntax).
 
 Wrapper and validation 
 ----------------------
 
-Here is a list of data structures together with the methods that are available, either through the boost_python interface or directly from python.
+Here is a list of data structures together with the methods that are available, 
+either through the boost_python interface or directly from python.
 
 
 .. note:: In the following table, 
     
     * `X` means that the function does not work or is not finalised, 
-    * `ok` means implemented,tested and working
+    * `ok` means implemented, tested and working
     * `I` or `irrelevant` means means irrelevant: this functionality does not exist for this class
 
-Class family
-++++++++++++
 
-=========================== =========================== ======================= =========================== =========================== ======================== =====================
-command/data structure      convolution                 compound                Mixture                     Distribution                    Histogram            Vectors   
-=========================== =========================== ======================= =========================== =========================== ======================== =====================
+There are classes/modules related to data types like compound.py and modules
+related to functions like cluster.py. First, let us look at the data type
+ 
+Data types
+++++++++++
+
+In general there are two constructors from a filename or from distributions::
+
+    Convolution(filename)
+    Compound(filename)
+    Mixture(filename)
+    Distribution(filename)
+    Histogram(filename)
+    Vectors(filename)  
+
+and
+::
+
+    Convolution(d1,d2)
+    Compound(d1,d2)
+    Mixture(0,1,d1,0,2,d2)
+    Distribution(d1)
+    Histogram([1,2,...])
+    Vectors([[],[]])
+
+All of those types have common methods that are summarized in the following 
+table. Here are some aliaes being used in the table.
+
+    compound        = 1;
+    convolution     = 2;
+    distribution    = 3;
+    histogram       = 4;
+    mixture         = 5;
+    vector          = 6;
+    matrix          = 7;
+    mv_mixture      = 8;
+    regression      = 9;
+    vector_distance = 10
+    
+
+=========================== ======= ======= ======= ======= ======= ======= ======
+Basic methods               1       2       3       4       5       6       7    
+=========================== ======= ======= ======= ======= ======= ======= ======
 **Constructors**
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-constructor (from file)     c = Convolution(filename)   c = Compound(filename)  m = Mixture(filename)       d = Distribution(filename)  h = Histogram(filename)  v = Vectors(filename)  
-constructor (from dist)     c = Convolution(d1,d2)      c = Compound(d1,d2)     m = Mixture(0,1,d1,0,2,d2)  d = Distribution(d1)        h = Histogram([1,2,...]) v = Vectors([[],[]])
-**display and IO**
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-.display                    ok                          ok                      ok                          ok                          ok                       ok
-Display(var)                ok                          ok                      ok                          ok                          ok                       ok
-.save(filename)             ok                          ok                      ok                          ok                          ok                       ok
-Save(filename)              ok                          ok                      ok                          ok                          ok                       ok
-print var                   ok                          ok                      ok                          ok                          ok                       ok
-var.ascii_write(True)       ok                          ok                      ok                          ok                          ok                       ok
-var.file_ascii_write(True)  ok                          ok                      ok                          ok                          ok                       ok
-var.spreadsheet_write(True) ok                          ok                      ok                          ok                          ok                       ok
-var.survival_ascii_write()  I                           I                       I                           ok                          ok                       I
-str(var)                    ok                          ok                      ok                          ok                          ok                       ok
-len(var)                    ok                          I?                      ok                          I                           ok                       ok
-container: var[]            I                           I?                      I?                          I?                          ok                       ok
-**Plotting routines**
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-var.plot() #gnuplot         ok                          ok                      ok                          ok                          ok                       X
-var.plot() #matplotlib      ok                          runs but to be checked  ok                          ok                          ok                       X
-var.print_plot()            ok                          ok                      ok                          ok                          ok
-var.plot_write()            ok                          ok                      ok                          ok                          ok                       ok
-**family**
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-var.simulate                ok                          ok                      ok                          ok                          I                        I
-Simulate(var, "",...)       ok                          ok                      ok                          ok                          I                        I
-var.estimate_<name>()       ok                          ok                      ok                          ok (name=paramtric)         ok (name=non_parametric) I
-Estimate(var, ""...)        ok                          ok                      I                           I                           I                        I
-var.extract_convolution()   ok                          I                       I                           I                           I                        I  
-var.extract_compound()      I                           ok                      I                           I                           I                        I
-var.extract_mixture()       I                           I                       ok                          I                           I                        I 
-var.extract_elementary()    ok                          ok                      I                           I                           I                        I
-var.extract_component       I                           I                       ok                          I                           I                        I
-var.extract_data()          ok                          ok                      ok                          TODO                        TODO                     I
-var.extract_weight()        I                           I                       ok                          I                           I                        I
-var.extract_sum()           I                           ok                      I?                          I                           I                        I
-var.extract_elementary()    ok                          ok                      I                           I                           I                        I
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**specialized function**
-ToHistogram                 I                           I                       I                           I                           ok
-ToDistribution              I                           I                       I                           I                           ok
-=========================== =========================== ======================= =========================== =========================== ======================== =====================
+From filename               ok      ok      ok      ok      ok      ok      X
+From distribution           ok      ok      ok      ok      ok      ok      X
+**methods**
+ascii_write                 ok      ok      ok      ok      ok      ok      ok
+display==Display            ok      ok      ok      ok      ok      ok      ok
+extract_data                ok      ok      ok      ok      ok      ok      ok
+file_ascii_write            ok      ok      ok      ok      ok      ok      ok
+plot==Plot                  ok      ok      ok      ok      ok      **I?**  **I?**
+save==Save                  ok      ok      ok      ok      ok      ok      ok
+plot_print                  ok      ok      ok      ok      ok      ok      ok
+simulate==Simulate          ok      ok      ok      ok      ok      ok      ok
+plot_write                  ok      ok      ok      ok      ok      ok      ok
+spreadsheet_write           ok      ok      ok      ok      ok      ok      ok
+str                         ok      ok      ok      ok      ok      ok      ok
+len                         I       ok      I       ok      ok      ok      I
+old_plot                    ok      ok      ok      ok      ok      ok      ok
+=========================== ======= ======= ======= ======= ======= ======= ======
+
+**Specific methods**
 
 
+======================= ===========
+Compound                status
+======================= ===========
+extract_compound        ok
+extract_elementary      ok  
+extract_sum             ok
+======================= ===========
 
-=========================== =========================== ======================= =========================== =============================== ========
-command/data structure      convolutionData             compoundData            MixtureData                 DistributionData                Vectors
-=========================== =========================== ======================= =========================== =============================== ========
-**Data transformation**
-----------------------------------------------------------------------------------------------------------------------------------------------------
-.fit=Fit
-.merge=Merge
-.shift==Shift                ok                         ok                      ok                          ok                              ok
-cluster_information     
-cluster_limit
-get_plotable            
-t_comparison
-cluster_step 
-transcode
-compare
-ms.value_select
-compare_histo        
-wmw_comparison
-merge                 
-f_comparison            
-=========================== =========================== ======================= =========================== =============================== ========
+and 
 
-**cluster**
-cluster_step 
-cluster_information     
-cluster_limit
+======================= ===========
+Convolution             status
+======================= ===========
+extract_convolution     ok
+extract_elementary      ok  
+======================= ===========
+
+and
+
+=========================== ===========
+Distribution                status
+=========================== ===========
+survival_ascii_write        ok
+survival_spreadsheet_write  ok
+survival_plot_write         ok
+ident                       ok            
+probability                 ok
+sup_bound                   ok
+parameter                   ok
+inf_bound                   ok     
+=========================== ===========
+
+and
+
+=========================== ===========
+Histogram                   status
+=========================== ===========
+spreadsheet_write           ok
+survival_ascii_write        ok
+survival_spreadsheet_write  ok
+extract_model               ok
+**see test_cluster**
+cluster_information         ok
+cluster_limit               ok
+cluster_step                ok
+transcode                   ok
+**see test_comparison**
+compare                     ???
+compare_histo               ok
+t_comparison                ok
+wmw_comparison              ok
+f_comparison                ok
+**see test_estimate**
+estimate_compound           ok
+estimate_convolution        ok     
+estimate_mixture            ok 
+estimate_nonparametric      ok
+estimate_parametric         ok
+compound_estimation         X
+convolution_estimation      X
+mixture_estimation          X
+parametric_estimation       X
+**see data_transform**
+fit                         ok
+merge                       ok
+shift                       ok
+value_select                ok  
+=========================== ===========
+
+and
+
+======================= ===========
+Mixture                 status
+======================= ===========
+extract_weight          ok
+extract_mixture         ok  
+======================= ===========
+
+and
+
+=========================== ===========
+Vectors                     status
+=========================== ===========
+survival_ascii_write        ok
+survival_spreadsheet_write  ok
+get_nb_vector               ok
+get_nb_variable             ok
+get_identifiers             ok
+contingency_table           ok
+variance_analysis           ok
+extract                     seg fault e.g. str(v.extract(1))
+**see test_data_transform**
+merge                       ok
+shift                       ok
+merge_variable              ok      
+select_individual           ok
+select_variable             ok
+value_select                ok
+**see test_regression**
+linear_regression           ok
+moving_average_regression   ok
+nearest_neighbours_regress  ok
+**see test_cluster**
+cluster_limit               ok
+cluster_step                ok
+transcode                   to be done
+compare                     ok     
+mixture_cluster             to be done
+mixture_estimation          to be done
+mixture_estimation_wrap     to be done
+=========================== ===========
+
+and
+
+=========================== ===============
+Matrix                      status
+=========================== ===============
+hierarchical_clustering     ok
+partitioning_clusters       ok
+partitioning_prototype      ok
+get_nb_row                  ok
+get_nb_column               ok
+=========================== ===============
+
+and
+
+=========================== ==========================
+others
+=========================== ==========================
+ExtractHistogram            ok
+ExtractDistribution         ok
+=========================== ==========================
+
+Other methods
+=============
+
+**cluster** (histogram)
+cluster_step==Cluster(step=...)                     ok
+cluster_information==Cluster(information=...)       ok
+cluster_limit==Cluster(limit=...)                   ok
 cluster.ToDistanceMatrix
-cluster.Transcode
+transcode==Transcode                                ok
 cluster._Dendrogram       
-cluster.Cluster           
 cluster.Clustering
 
+
 **regression**
+Regression(v, "Linear")==v.linear_regression(...)                               ok
+Regression(v, "MovingAverage")==v.moving_average_regression(...)                ok
+Regression(v, "NearestNeighbours")==v.nearest_neighbours_regression(...)        ok
 
 **comparison**
 comparison.compare_seq       
@@ -127,46 +260,17 @@ comparison.compare_histo
 comparison.compare_markov  
 comparison.Histogram         
 
-**vectors**
-
-
-.vector_distance_type
-.ContingencyTable             ok v.contingency_table           documentation to finalise what are the extra input arguments (filename and format ?)
-.interface                    
-.distance_type               
-.VarianceAnalysis            ok variance_analys XXXX see(issue) 
-.VectorDistance            ok 
-
-v.mixture_cluster                
-v.get_identifiers     
-v.mixture_estimation
-v.mixture_estimation_wrap  
-v.select_individual
-v.cluster_limit     
-v.get_nb_variable
-v.select_variable
-v.cluster_step     
-v.get_nb_vector
-v.moving_average_regression      
-v.compare          
-v.nearest_neighbours_regression  v.shift
-v.spreadsheet_write
-v.transcode
-v.value_select
-v.linear_regression  
-v.extract                       
-v.merge                         
-v.file_ascii_write 
-v.merge_variable                 
-
-
 
 
 Current issues
 ==============
 
-* Issue with the UNIFORM distribution while saving and loading a mixture of uniform distribution. See test_save in test_mixture.
+* Issue with the UNIFORM distribution while saving and loading a mixture of
+  uniform distribution. See test_save in test_mixture.
 * Issue with the Histogram distribution in test_save:
   if h = Histogram('mixture1.mixt/')
-    len(h) returns 76 but this seem to be the length of the original data set, not the histogram itself. Is this what we want ? 
-* VarianceAnalysis works but variance_analysis wrapping is not robust, not well documented, leads to crashses.
+    len(h) returns 76 but this seem to be the length of the original data set,
+     not the histogram itself. Is this what we want ? 
+* VarianceAnalysis works but variance_analysis wrapping is not robust, not well
+  documented, leads to crashses.
+* what shall we do with markovian.cpp and chain.cpp ?
