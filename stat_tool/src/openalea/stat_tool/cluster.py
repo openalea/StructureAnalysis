@@ -298,7 +298,9 @@ def Clustering(matrix, type, *args, **kargs):
         :func:`~openalea.stat_tool.comparison.Compare`,
         :func:`~openalea.stat_tool.cluster.ToDistanceMatrix`.
         
-    .. note:: if type=Partition, Algorthim must be 1 (divisive) or 2 (ordering). 
+    .. note:: if type=Partition, Algorthim must be 1 (divisive) or 2 (ordering).
+    
+    .. note:: if type!=Divisive criterion must be provided 
     """
     
     format_map = { "ASCII" :'a',
