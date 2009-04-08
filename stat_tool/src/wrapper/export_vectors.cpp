@@ -853,10 +853,10 @@ void class_vectors()
      python::args("identifiers", "keep"),
      "Select individuals given a list of identifiers")
 
-
     // Extract
     .def("extract", VectorsWrap::extract_histogram,
      return_value_policy< manage_new_object >(),
+     python::args("variable"),
      "Extract histogram")
 
     // Regression
@@ -1018,9 +1018,6 @@ public:
        stat_tool::wrap_util::throw_error(error);
 
   }
-
-
-
 
 };
 
