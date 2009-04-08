@@ -24,9 +24,10 @@ interface.extend_class( _VectorDistance, interface.StatInterface)
 
 def _Vectors_mixture_estimation(self, model, nb_iteration=_stat_tool.I_DEFAULT,
                                 force_param=[]):
-    """Estimate a mixture from _Vectors given initial model or number of components,
-    the maximal number of iterations and a flag for using parametric observation
-    distributions or not, within a given family"""
+    """Estimate a mixture from _Vectors given initial model or number of 
+    components, the maximal number of iterations and a flag for using parametric
+    observation distributions or not, within a given family
+    """
     return _stat_tool._Vectors.mixture_estimation_wrap(self, model, nb_iteration, force_param);
 
 _Vectors.mixture_estimation = _Vectors_mixture_estimation
