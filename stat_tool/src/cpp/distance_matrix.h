@@ -114,6 +114,7 @@ protected :
 
     int cumul_length_computation(bool *row_flag , bool *column_flag) const;
     double cumul_distance_computation(bool *row_flag , bool *column_flag) const;
+    plotable::MultiPlotSet* get_plotable(Format_error &) const;
 
 public :
 
@@ -145,6 +146,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    plotable::MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Distance_matrix);
 
