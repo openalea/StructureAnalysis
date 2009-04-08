@@ -2153,6 +2153,186 @@ bool Distance_matrix::spreadsheet_write(Format_error &error , const char *path) 
 }
 
 
+
+MultiPlotSet* Distance_matrix::get_plotable() const
+
+{
+  MultiPlotSet *set;
+
+  Format_error error;
+  set = Distance_matrix::get_plotable(error);
+
+  return set;
+}
+
+
+MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
+{
+  bool status;
+  register int i, j;
+  int plot_nb_pattern, *index;
+  double max, *plot_distance;
+  std::ostringstream legend;
+
+  error.init();
+  
+  MultiPlotSet *plotset = new MultiPlotSet(1);
+  MultiPlotSet &set = *plotset;
+
+  set.title = "Distance Matrix";
+  set.border = "15 lw 0";
+  set[0].resize(2);
+
+  legend.str("vector");
+  set[0][0].legend = legend.str();
+  legend.str("");
+  set[0][1].legend = legend.str();
+
+  set[0][0].style = "linespoints";
+
+  set[0][1].style = "impulses";
+  set[0][1].label = "true";
+  set[0].grid = "true";
+
+  // create the data
+  if ((nb_row == 1) && (nb_column == 1)) {
+      plot_nb_pattern = 2;
+      plot_distance = new double[1];
+
+      plot_distance[0] = distance[0][0];
+      if ((distance[0][0] != -D_INF) && (length[0][0] > 1)) {
+        plot_distance[0] /= length[0][0];
+      }
+      set[0][0].add_point(1,0);
+      set[0][0].add_point(2,plot_distance[0]);
+    }
+
+  else {
+      plot_nb_pattern = MAX(nb_row , nb_column);
+      plot_distance = new double[plot_nb_pattern];
+
+      // tri par distance croissante
+
+     if (nb_row == 1) {
+        for (i = 0;i < nb_column;i++) {
+          plot_distance[i] = distance[0][i];
+          if ((distance[0][i] != -D_INF) && (length[0][i] > 1)) {
+            plot_distance[i] /= length[0][i];
+          }
+        }
+      }
+
+      else if (nb_column == 1) {
+        for (i = 0;i < nb_row;i++) {
+          plot_distance[i] = distance[i][0];
+          if ((distance[i][0] != -D_INF) && (length[i][0] > 1)) {
+            plot_distance[i] /= length[i][0];
+          }
+        }
+      }
+
+      else if (nb_row == nb_column) {
+        for (i = 0;i < nb_row;i++) {
+          plot_distance[i] = ::cumul_distance_computation(nb_column , distance[i]);
+          if (plot_distance[i] != -D_INF) {
+            plot_distance[i] /= cumul_computation(1 , nb_column , length + i);
+          }
+        }
+      }
+
+      index = pattern_sort(plot_nb_pattern , plot_distance , I_DEFAULT);
+
+      for (i = 0;i < plot_nb_pattern;i++) {
+        if (plot_distance[index[i]] == -D_INF) {
+          plot_nb_pattern = i;
+          break;
+        }
+        else {
+            set[0][0].add_point(i + 1,plot_distance[index[i]]);
+        }
+      }
+    }
+
+  // set[0][0] contains the data and is filled here above
+  // set[0][1] contains the labels and is filled here below
+  std::ostringstream temp;
+
+  if (plot_nb_pattern > 0) {
+      for (i = 0;i < 2;i++) {
+
+        if ((nb_row == 1) && (nb_column == 1)) {
+            temp.str("");
+            temp << row_identifier[0] ;
+            set[0][1].add_text(1., 0., temp.str());
+
+            temp.str("");
+            temp << column_identifier[0] ;
+            set[0][1].add_text(2.,plot_distance[0], temp.str());
+
+            max = plot_distance[0];
+        }
+
+        else {
+          for (j = 0;j < plot_nb_pattern;j++) {
+            if (nb_row > 1) {
+            temp.str("");
+              temp << row_identifier[index[j]];
+              set[0][1].add_text(j+1, plot_distance[index[j]], temp.str());
+            }
+            else {
+              temp.str("");
+              temp << column_identifier[index[j]];
+              set[0][1].add_text(j+1, plot_distance[index[j]], temp.str());
+            }
+          }
+
+          max = plot_distance[index[plot_nb_pattern - 1]];
+        }
+
+
+// to be finalised
+//
+/*        if (plot_nb_pattern < TIC_THRESHOLD) {
+          out_file << "set xtics 1,1" << endl;
+        }
+*/
+/*        out_file << "plot [1:" << plot_nb_pattern << "] [0:" << max * YSCALE
+                 << "] \"" << ::label((data_file_name.str()).c_str()) << "\" title \"";
+*/
+        if (nb_row == 1) {
+//          out_file << STAT_label[STATL_REFERENCE] << " " << label << " " << row_identifier[0];
+        }
+        else if (nb_column == 1) {
+ //         out_file << STAT_label[STATL_TEST] << " " << label << " " << column_identifier[0];
+        }
+        else if (nb_row == nb_column) {
+   //       out_file << label;
+        }
+        if (plot_nb_pattern < TIC_THRESHOLD) {
+//          out_file << "set xtics autofreq" << endl;
+        }
+// out_file << "plot [1:" << plot_nb_pattern << "] [0:" << max * YSCALE
+//                 << "] \"" << ::label((data_file_name.str()).c_str()) << "\" title \"";
+
+//        out_file << "\nunset label" << endl;
+
+        //out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+      }
+    }
+
+    delete [] plot_distance;
+    if ((nb_row > 1) || (nb_column > 1)) {
+      delete [] index;
+    }
+  
+
+
+
+
+  return plotset;
+
+}
+
 /*--------------------------------------------------------------*
  *
  *  Sortie Gnuplot d'un objet Distance_matrix.
