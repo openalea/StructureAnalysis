@@ -105,7 +105,8 @@ def MergeVariable(obj, *args, **kargs):
 
     .. doctest::
         :options: +SKIP
-    
+
+        >>> MergeVariable(histo1, histo2)
         >>> MergeVariable(vec1, vec2,..., RefSample=2)
         >>> MergeVariable(seq1, seq2,..., RefSample=2) 
 
@@ -267,9 +268,13 @@ def ExtractHistogram(data, *args):
     
         >>> ExtractHistogram(mixt_histo, mixt_type)
         >>> ExtractHistogram(mixt_histo, "Component", index)
+        >>> ExtractHistogram(mixt_histo, "Mixture")
+        >>> ExtractHistogram(mixt_histo, "Weight")
         >>> ExtractHistogram(convol_histo, "Elementary", index)
         >>> ExtractHistogram(convol_histo, "Convolution")
         >>> ExtractHistogram(compound_histo, compound_type)
+        >>> ExtractHistogram(compound_histo, "Sum")
+        >>> ExtractHistogram(compound_histo, "Elementary")
         >>> ExtractHistogram(vec1)
         >>> ExtractHistogram(vecn, variable)
         >>> ExtractHistogram(renewval_data, renew_type)
@@ -312,19 +317,22 @@ def Extract(obj, *args):
         "Compound" : "extract_compound",
         }
 
-
     # Test without "string" command (ex for _Vecotors)
     if(len(args) == 0 or not isinstance(args[0], str)):
 
         # _Vectors with one variable
         try:
-            if(obj.get_nb_variable() == 1):
-                args.append(1)
-        except:
-            pass
-
-        try:
-            return obj.extract(*args)
+            nb_var = obj.get_nb_variable()
+            if (nb_var>1):
+                try:
+                    variable = args[0]
+                    
+                except IndexError:
+                    raise TypeError("Extract with vectors object need 1 arguments (variable) if nb variable>1")
+            else:
+                variable = 1
+                
+            return obj.extract(variable)
 
         except AttributeError:
             raise TypeError("Expect an extract command as first argument." + \
