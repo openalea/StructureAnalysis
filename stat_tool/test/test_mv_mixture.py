@@ -32,7 +32,7 @@
 #
 #########################################################################
 """
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 import os
 
@@ -44,7 +44,6 @@ from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.comparison import Compare, ComparisonTest
-from openalea.stat_tool.output import Display, Save
 
 from tools import interface
  
@@ -56,7 +55,6 @@ class Test(interface):
     ================
     
     * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
     
     ========================    ==================================
     ** from the interface**
@@ -64,7 +62,7 @@ class Test(interface):
     display                     ok    
     extract_data                ok
     file_ascii_write            ok
-    get_plotable                what is it for ?     
+    get_plotable                ?     
     plot                        ok  but only gnuplot implemented                     
     save                        ok
     plot_print                  ok
@@ -78,7 +76,7 @@ class Test(interface):
     str                         ok
     len                         ok
     nb_component                ok
-    old_plot                    works   
+    old_plot                    ok   
     state_permutation           ok
     
     _criteria                   need a test
@@ -90,9 +88,10 @@ class Test(interface):
    
    
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = "mixture_mv1.mixt"
-        self.structure = _MvMixture
+        interface.__init__(self,
+                           self.build_data(),
+                           "mixture_mv1.mixt",
+                           _MvMixture)
         
     def build_data(self):
         d11 = Binomial(0, 12, 0.1)
@@ -109,7 +108,7 @@ class Test(interface):
         return data
        
     def _test_empty(self):
-        """there is such an empty constructor in MvMixture!"""
+        """there is an empty constructor in MvMixture!"""
         self.empty()
         
     def test_constructor_from_file(self):
@@ -131,7 +130,6 @@ class Test(interface):
         assert len(c) == 3
 
     def test_plot(self):
-            
         if DISABLE_PLOT == False:    
             self.data.plot(1)
             self.data.plot(2)
@@ -175,16 +173,10 @@ class Test(interface):
         m_estim_nbcomp = v.mixture_estimation(2)
         assert m_estim_nbcomp
 
-    def test_permutation(self):
+    def _test_permutation(self):
         data1 = self.data
         
-        data2 = data1.permutation([0,2,1])
-        data3 = data2.permutation([0,1,2])
+        data2 = data1.state_permutation([0,2,1])
+        data3 = data2.state_permutation([0,1,2])
         
         assert str(data1)==str(data2)
-
-if __name__=="__main__":
-    print 'fgg'
-    t = Test()
-    print 'gg    '
-    t.test_save()

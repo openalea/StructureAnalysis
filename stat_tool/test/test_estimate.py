@@ -1,8 +1,8 @@
 """estimate tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
-from openalea.stat_tool import distribution, data_transform, histogram
-from openalea.stat_tool.distribution import Binomial, get_distribution_type
+from openalea.stat_tool import distribution
+from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.data_transform import Shift, ExtractDistribution
 from openalea.stat_tool.histogram import Histogram
 
@@ -12,10 +12,13 @@ from openalea.stat_tool import  _stat_tool
 from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
 
 
+
 class Test:
 
+    def __init__(self):
+        pass
+    
     def test_nonparametric(self):
-
         h = Histogram(("meri1.his"))
         e =  h.estimate_nonparametric()
         assert e
@@ -25,7 +28,6 @@ class Test:
         """NegativeBinomial"""
         h = Histogram(("peup2.his"))
         assert h.estimate_parametric('NB')
-
 
     def test_binomial(self):
         """BINOMIAL Distribution"""
@@ -42,53 +44,49 @@ class Test:
 
         assert h.estimate_parametric('P')
 
-
     def test_mixture_1(self):
-
-        distributions = ["B","NB","NB","NB"]
+        distributions = ["B", "NB", "NB", "NB"]
         h = Histogram(("peup2.his"))
         m1 =  h.estimate_mixture(distributions, NbComponent="Estimated")
         assert m1
         
-        
-        type=[]
+        types = []
         for d in distributions:
             temp = distribution.get_distribution_type(d, 
                                                       [_stat_tool.BINOMIAL,
                                                        _stat_tool.POISSON,
                                                        _stat_tool.NEGATIVE_BINOMIAL,])
-            type.append(temp)
+            types.append(temp)
         
-        c = h.mixture_estimation(type, 0, True, True,
+        c = h.mixture_estimation(types, 0, True, True,
                                 likelihood_penalty_type['AIC'])
         
         assert str(c)==str(m1)
 
-
     def test_mixture_2(self):
-
         h = Histogram(("peup2.his"))
         m2 = h.estimate_mixture([Binomial(0, 10, 0.5), "NB"])
         assert m2
-
 
     def test_convolution(self):
 
         elementary = Histogram(("nothofagus_antarctica_bud_2.his"))
         total = Histogram(("nothofagus_antarctica_shoot_2.his"))
 
-        convol1 = Estimate(Shift(total, 1), "CONVOLUTION", Estimate(elementary, "NP"), 
-                           NbIteration=100, Estimator="PenalizedLikelihood", Weight=0.5)
+        convol1 = Estimate(Shift(total, 1), "CONVOLUTION",
+                           Estimate(elementary, "NP"), 
+                           NbIteration=100, 
+                           Estimator="PenalizedLikelihood", 
+                           Weight=0.5)
 
-        convol2 = total.shift(1).estimate_convolution(elementary.estimate_nonparametric(), 
-                                                      NbIteration=100, 
-                                                      Estimator="PenalizedLikelihood", 
-                                                      Weight=0.5)
+        convol2 = total.shift(1).estimate_convolution(
+                                    elementary.estimate_nonparametric(), 
+                                    NbIteration=100, 
+                                    Estimator="PenalizedLikelihood", 
+                                    Weight=0.5)
 
         assert convol1 and convol2
         assert convol1 == convol2
-
-
 
     def test_compound(self):
         
@@ -103,7 +101,7 @@ class Test:
                                   ExtractDistribution(cdist1, "Elementary"), 
                                   ExtractDistribution(cdist1, "Sum"))
         
-        assert cdist2==cdist3
+        assert cdist2 == cdist3
         
 
 

@@ -1,18 +1,8 @@
 """vectors tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
-from openalea.stat_tool.vectors import Vectors, VectorDistance, \
-    VarianceAnalysis, ContingencyTable
-from openalea.stat_tool.data_transform import ValueSelect
-from openalea.stat_tool.regression import Regression
-from openalea.stat_tool.data_transform import ExtractHistogram, \
-    SelectIndividual, SelectVariable, ExtractDistribution
-from openalea.stat_tool.comparison import Compare
-from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.cluster import Clustering
-from openalea.stat_tool.output import Display, Plot, Save
-
-from openalea.stat_tool.plot import DISABLE_PLOT
+from openalea.stat_tool.vectors import  VectorDistance
+    
 
 from tools import interface
 
@@ -29,28 +19,26 @@ class Test(interface):
     ** from the interface**
     ascii_write                 ok
     display                     ok
-    extract_data                nothing to be done
     file_ascii_write            ok
-    get_plotable                what is it for ?     
-    plot                        Not working                       
+    get_plotable                no purpose     
+    plot                        no purpose                       
     save                        ok
-    plot_print                  ok
-    simulate                    ok
+    plot_print                  no purpose
     plot_write                  ok
-    spreadsheet_write           ok
-    survival_ascii_write        ok
-    survival_spreadsheet_write  ok
+    spreadsheet_write           not implemented in the cpp code
    
     str                         ok
     len                         ok 
     """
+   
+        
+
 
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = "vector_distance.vd"
-        self.structure = VectorDistance
- 
-        
+        interface.__init__(self, 
+                           self.build_data(), 
+                           "vector_distance.vd",
+                           VectorDistance)        
     def build_data(self):
         v = VectorDistance('N', 'O', 'S') 
         assert v 
@@ -78,11 +66,6 @@ class Test(interface):
         assert len(v) == 3
 
     def _test_plot(self):
-        """run plotting routines """
-        # todo: does not produce anythinh but expected ?
-#        c = self.test_build_vectors()
-#        if DISABLE_PLOT==False:
-#            c.plot()
         pass
     
     def test_save(self):
@@ -107,7 +90,7 @@ class Test(interface):
         pass
     
     def test_vector_distance(self):
-        """ test vector distance"""
+        """ test vector distance constructors"""
         v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC')
         assert v and len(v) == 3
 

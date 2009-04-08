@@ -1,5 +1,11 @@
+"""Abstract base class used by test_mixture, test_compound, etc"""
+
 from openalea.stat_tool import *
 from openalea.stat_tool.plot import DISABLE_PLOT
+import os
+from openalea.stat_tool.output import Display, Save
+
+__revision__ = "$Id$"
 
 class interface():
     """Interface to be used by test file that perform tests on the following
@@ -32,10 +38,10 @@ class interface():
                 self.empty()
         
     """
-    def __init__(self, data, filename, structure_object):
-        self.data = None
-        self.filename = None
-        self.structure = None
+    def __init__(self, data=None, filename=None, Structure=None):
+        self.data = data
+        self.filename = filename
+        self.structure = Structure
         
     def build_data(self):
         raise NotImplementedError()
@@ -50,7 +56,7 @@ class interface():
     
     def constructor_from_file(self):
         """Test constructor from file"""
-        if self.filename==None:
+        if self.filename == None:
             return None
         else:
             c = self.structure(self.filename)
@@ -78,7 +84,7 @@ class interface():
         
     def display_versus_ascii_write(self):
         """check that display is equivalent to ascii_write"""
-        Display(self.data) == self.data.ascii_write(False) 
+        assert Display(self.data) == self.data.ascii_write(False) 
 
     def display_versus_str(self):
         """check that display and str are equivalent"""
@@ -91,10 +97,14 @@ class interface():
         if DISABLE_PLOT == False:
             self.data.plot()
             
-    def save(self, Format=None):
+    def save(self, Format=None, skip_reading=False):
         """In the Vector case, Format should be Data. 
-        
+        :param skip_reading: some class do not have Filename Constructor; 
+            skip_reading can be set to False to prevent code to be run.
+            
         .. todo:: This is surely a bug. to be checked"""
+        
+        
         c1 = self.data  
 
         try:
@@ -112,12 +122,15 @@ class interface():
         else:
             c1.save('test1.dat', Format="Data")
             Save(c1, 'test2.dat', Format="Data")
-            
-        c1_read = self.structure('test1.dat')
-        c2_read = self.structure('test2.dat')
+       
+        if skip_reading:
+            pass
+        else:     
+            c1_read = self.structure('test1.dat')
+            c2_read = self.structure('test2.dat')
         
-        assert c1 and c1_read and c2_read
-        assert str(c1_read) == str(c2_read)
+            assert c1 and c1_read and c2_read
+            assert str(c1_read) == str(c2_read)
         
         os.remove('test1.dat')
         os.remove('test2.dat')

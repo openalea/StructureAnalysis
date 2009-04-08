@@ -32,7 +32,7 @@
 #
 #########################################################################
 """
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 import os
 
@@ -45,7 +45,7 @@ from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.comparison import Compare, ComparisonTest
 
-from openalea.stat_tool.output import plot
+from openalea.stat_tool.output import plot, Plot, Display
 from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
 from openalea.stat_tool.simulate import Simulate
 import openalea.stat_tool.distribution as distribution 
@@ -89,9 +89,10 @@ class Test(interface):
     """
 
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = "mixture1.mixt"
-        self.structure = Mixture
+        interface.__init__(self, 
+                           self.build_data(),
+                           "mixture1.mixt",
+                           Mixture)
         
     def build_data(self):
         d1 = Binomial(0, 12, 0.1)
@@ -189,8 +190,10 @@ def test1():
     ComparisonTest("T", meri1, meri3)
     ComparisonTest("W", meri1, meri3)
 
-    # estimation of a mixture of two distributions assuming a first sub-population of GUs
-    # made only of a preformed part and a second sub-population made of both a preformed part
+    # estimation of a mixture of two distributions assuming a first 
+    # sub-population of GUs
+    # made only of a preformed part and a second sub-population made of 
+    # both a preformed part
     # and a neoformed part
     
     _mixt1 = Estimate(meri2, "MIXTURE", "B", "B")
@@ -202,8 +205,8 @@ def test1():
     
     mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  NbComponent="Estimated")
     # mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
-    # Plot(ExtractDistribution(mixt2, "Mixture"))
-    # Display(mixt2)
+    Plot(ExtractDistribution(mixt2, "Mixture"))
+    Display(mixt2)
     
     _mixt_data = ExtractData(mixt2)
     
@@ -263,13 +266,13 @@ def test1():
     #v = m.simulate(5000)
     #print v
 
-    #m.plot(variable=1, Title="Simulated mixture")
+    #Plot(m, variable=1, Title="Simulated mixture")
 
     #print "Estimation de melanges multivaries ", \
     #    "d'apres un modele initial : "
     #m_estim_model = v.mixture_estimation(m, 100,  [True, True])
       
-    #m_estim_model.plot(variable = 1, Title="Estimated mixture")
+    #Plot(m_estim_model, variable = 1, Title="Estimated mixture")
     
     #print "Estimation de melanges multivaries ", \
     #    "d'apres un nombre de composantes : "

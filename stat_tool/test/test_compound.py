@@ -1,5 +1,5 @@
 """Compound tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
@@ -31,7 +31,6 @@ class Test(interface):
     display                     ok    
     extract_data                ok
     file_ascii_write            ok
-    get_plotable                what is it for ?     
     plot                        ok                       
     save                        ok
     plot_print                  ok
@@ -49,9 +48,7 @@ class Test(interface):
  
     """
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = "compound1.cd"
-        self.structure = Compound  
+        interface.__init__(self, self.build_data(), "compound1.cd", Compound)
         
     def build_data(self):
         d1 = Binomial(2, 5, 0.5)
@@ -118,14 +115,15 @@ class Test(interface):
 
     
 def test1():
-    """Various tests on compound data 
+    """Various tests on compound data
     
-    .. todo:: to be cleaned
+    Those tests are done elsewhere:
+     * Estimate in test_estimate
+     * ExtractHistogram in test_data_transform
+     ...
     """
     cdist1 = Compound("compound1.cd")
-
     chisto1 = Simulate(cdist1, 200)
-
     _histo30 = ExtractHistogram(chisto1, "Sum")
 
     cdist2 = Estimate(chisto1, "COMPOUND",
@@ -142,8 +140,8 @@ def test1():
     _histo34 = Shift(histo33, -11)
 
     #_cdist3 = Estimate(histo34, "COMPOUND",
-    #                  Distribution("B", 0, 1, 0.7),
-    #                  ExtractDistribution(histo34, "Sum"))
+#                      Distribution("B", 0, 1, 0.7),
+#                      ExtractDistribution(histo34, "Sum"))
     #_cdist4 = Estimate(histo34, "COMPOUND",
     #                  Distribution("B", 0, 1, 0.7),
     #                  ExtractDistribution(histo34, "Sum"), MinInfBound=0)

@@ -1,5 +1,5 @@
 """Convolution tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 
 from openalea.stat_tool import Convolution, Distribution
@@ -46,10 +46,8 @@ class Test(interface):
     """
  
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = "convolution1.conv"
-        self.structure = Convolution
-        
+        interface.__init__(self, self.build_data(), "convolution1.conv", Convolution)
+    
     def build_data(self):
         d1 = Binomial(0, 10, 0.5)
         d2 = NegativeBinomial(0, 1, 0.1)

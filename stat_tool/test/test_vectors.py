@@ -1,5 +1,5 @@
 """vectors tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 from openalea.stat_tool.vectors import Vectors, VectorDistance, \
     VarianceAnalysis, ContingencyTable
@@ -10,7 +10,7 @@ from openalea.stat_tool.data_transform import ExtractHistogram, \
 from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.cluster import Clustering
-from openalea.stat_tool.output import Display, Plot, Save
+from openalea.stat_tool.output import Display, Plot
 from openalea.stat_tool.plot import DISABLE_PLOT
 
 from tools import interface
@@ -83,10 +83,10 @@ class Test(interface):
         self.structure = Vectors  
         
     def build_data(self):
-        v = Vectors([[1,2,3], [1,3,1]])
+        v = Vectors([[1, 2, 3], [1, 3, 1]])
         assert 2 == v.get_nb_vector()
         assert 3 == v.get_nb_variable()
-        assert [1,2] == v.get_identifiers()
+        assert [1, 2] == v.get_identifiers()
         assert v
         return v
         
@@ -171,7 +171,7 @@ class Test(interface):
              
     def test_vectors_container(self):
         """vector container : len"""
-        v = Vectors([[0,1,2,3], [4,5,6,7]])
+        v = Vectors([[0, 1, 2, 3], [4, 5, 6 , 7]])
         assert len(v) == 2
 
         for i in v:
@@ -185,7 +185,8 @@ class Test(interface):
         # todo: finalise and make method variance_analysis robust.
         vec10 = Vectors("chene_sessile.vec")
         va = VarianceAnalysis(vec10, 1, 4, "O")
-        assert vec10.variance_analysis(1,4,1, "whatever", "whatever")==str(va)
+        assert vec10.variance_analysis(1, 4, 1, "whatever", "whatever") == \
+            str(va)
     
     def test_contingency_table(self):
         """test contingency table"""
@@ -193,16 +194,16 @@ class Test(interface):
         ct = ContingencyTable(vec10, 1, 4)
         assert ct and str(ct)
         
-        ct2 = vec10.contingency_table(1,4, "what", "what")
+        ct2 = vec10.contingency_table(1, 4, "what", "what")
         assert ct == ct2
         
     def test_to_clean(self):
-         #########################################################################
-         #
-         #  vectors : contingency table, one-way variance analysis,
-         #  linear regression or nonparametric regression (loess smoother)
-         #
-         #  Oak trunk annual shoots
+        #######################################################################
+        #
+        #  vectors : contingency table, one-way variance analysis,
+        #  linear regression or nonparametric regression (loess smoother)
+        #
+        #  Oak trunk annual shoots
         #
         #  INDEX_PARAMETER : TIME  (year of growth - 1995, 1996, 1997)
         #  VARIABLE 1 : length of the annual shoot (cm)
@@ -211,11 +212,11 @@ class Test(interface):
         #  VARIABLE 4 : number of nodes
         #  VARIABLE 5 : number de branches
         #
-        #########################################################################
+        #######################################################################
         vec10 = Vectors("chene_sessile.vec")
     
         # plot of the pointwise averages
-        if DISABLE_PLOT==False:
+        if DISABLE_PLOT == False:
             Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
     
         vec95 = ValueSelect(vec10, 1, 1995)
@@ -223,64 +224,75 @@ class Test(interface):
         vec97 = ValueSelect(vec10, 1, 1997)
 
         VarianceAnalysis(vec10, 1, 2, "N")
-        Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec95, 2), "N")
-        if DISABLE_PLOT==False:
-            Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2))
+        Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), \
+                ExtractHistogram(vec95, 2), "N")
+        if DISABLE_PLOT == False:
+            Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), \
+                 ExtractHistogram(vec97, 2))
     
         ContingencyTable(vec10, 1, 4)
     
         # one-way variance analysis based on ranks
     
         VarianceAnalysis(vec10, 1, 4, "O")
-        Compare(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), ExtractHistogram(vec95, 4), "O")
-        if DISABLE_PLOT==False:
-            # Plot(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), ExtractHistogram(vec97, 4))
-    
-            # Plot(ExtractHistogram(vec95, 5), ExtractHistogram(vec96, 5), ExtractHistogram(vec97, 5))
-            # Plot(ExtractHistogram(vec95, 6), ExtractHistogram(vec96, 6), ExtractHistogram(vec97, 6))
+        Compare(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), \
+                ExtractHistogram(vec95, 4), "O")
+        
+        if DISABLE_PLOT == False:
+            # Plot(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), 
+                #ExtractHistogram(vec97, 4))
+            # Plot(ExtractHistogram(vec95, 5), ExtractHistogram(vec96, 5), 
+            #    ExtractHistogram(vec97, 5))
+            # Plot(ExtractHistogram(vec95, 6), ExtractHistogram(vec96, 6), 
+                #ExtractHistogram(vec97, 6))
             pass
     
-        vec11 = ValueSelect(vec10, 4, 1)
-        vec12 = ValueSelect(vec10, 4, 2)
-        vec13 = ValueSelect(vec10, 4, 3, 4)
+        _vec11 = ValueSelect(vec10, 4, 1)
+        _vec12 = ValueSelect(vec10, 4, 2)
+        _vec13 = ValueSelect(vec10, 4, 3, 4)
     
         # Plot(ExtractHistogram(vec11, 2), ExtractHistogram(vec12, 2), ExtractHistogram(vec13, 2))
         # Plot(ExtractHistogram(vec11, 5), ExtractHistogram(vec12, 5), ExtractHistogram(vec13, 5))
     
-        mixt20 = Estimate(ExtractHistogram(vec10, 2), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent="Estimated")
+        mixt20 = Estimate(ExtractHistogram(vec10, 2), \
+                          "MIXTURE", "NB", "NB", "NB", "NB", \
+                          NbComponent="Estimated")
         Display(mixt20)
-        if DISABLE_PLOT==False:
+        if DISABLE_PLOT == False:
             Plot(mixt20)
             Plot(ExtractDistribution(mixt20, "Mixture"))
     
-        mixt21 = Estimate(ExtractHistogram(vec10, 5), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent="Estimated")
+        _mixt21 = Estimate(ExtractHistogram(vec10, 5), \
+                          "MIXTURE", "NB", "NB", "NB", "NB", \
+                          NbComponent="Estimated")
     
         vec9596 = ValueSelect(vec10, 1, 1995, 1996)
-        if DISABLE_PLOT==False:
-            Plot(ExtractHistogram(ValueSelect(vec9596, 4, 1), 6), ExtractHistogram(ValueSelect(vec9596, 4, 2), 6), ExtractHistogram(ValueSelect(vec9596, 4, 3, 4), 6))
+        if DISABLE_PLOT == False:
+            Plot(ExtractHistogram(ValueSelect(vec9596, 4, 1), 6), \
+                 ExtractHistogram(ValueSelect(vec9596, 4, 2), 6), \
+                 ExtractHistogram(ValueSelect(vec9596, 4, 3, 4), 6))
     
         # linear regression
     
         regress10 = Regression(vec10, "Linear", 5, 2)
         Display(regress10)
-        if DISABLE_PLOT==False:
+        if DISABLE_PLOT == False:
             Plot(regress10)
     
         # nonparametric regression (loess smoother)
 
-        regress11 = Regression(vec10, "NearestNeighbours",  5, 2, 0.3)
-    
-        regress12 = Regression(vec9596, "Linear", 5, 6)
-        regress13 = Regression(vec9596, "NearestNeighbours", 5, 6, 0.5)
+        _regress11 = Regression(vec10, "NearestNeighbours",  5, 2, 0.3)
+        _regress12 = Regression(vec9596, "Linear", 5, 6)
+        _regress13 = Regression(vec9596, "NearestNeighbours", 5, 6, 0.5)
         
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 
 
-        #########################################################################
+        #######################################################################
         #
-        #  Distance matrix and clustering (partitioning or hierarchical methods) 
+        # Distance matrix and clustering (partitioning or hierarchical methods) 
         #
-        #########################################################################
+        #######################################################################
 
         # computation of a distance matrix using a standardization procedure
 
@@ -290,30 +302,31 @@ class Test(interface):
     
         # Display(Clustering(matrix10, "Partition", 2))
 
-        vec151 = SelectIndividual(vec10,  [69, 48, 41, 44, 32, 47, 81, 95, 11, 36, 75, 108, 56, 83, 38, 98, 113, 134, 110, 101, 77, 35, 74, 80, 50, 24, 89, 128, 5, 45, 8, 116, 119, 132, 61, 78, 53, 29, 131, 65, 90, 96, 104, 20, 86, 66, 42, 68, 125, 14, 23, 54, 33, 26, 71, 129, 102, 51, 70, 111, 138, 19, 127, 62, 117, 137, 2, 28, 17])
-        vec152 = SelectIndividual(vec10, [100, 13, 133, 105, 72, 9, 93, 109, 30, 115, 63, 7, 55, 37, 15, 114, 106, 46, 73, 18, 3, 87, 58, 43, 60, 76, 52, 6, 39, 31, 12, 99, 121, 123, 22, 79, 94, 88, 21, 97, 25, 40, 57, 136, 67, 49, 10, 4, 120, 92, 27, 91, 64, 124, 16, 130, 84, 107, 126, 103, 122, 112, 59, 1, 82, 34, 135, 118, 85])
+        _vec151 = SelectIndividual(vec10,  \
+                                  [69, 48, 41, 44, 32, 47, 81, 95, 11, 36, 75, 
+                                   108, 56, 83, 38, 98, 113, 134, 110, 101, 77,
+                                   35, 74, 80, 50, 24, 89, 128, 5, 45, 8, 116, 
+                                   119, 132, 61, 78, 53, 29, 131, 65, 90, 96, 
+                                   104, 20, 86, 66, 42, 68, 125, 14, 23, 54, 33,
+                                    26, 71, 129, 102, 51, 70, 111, 138, 19, 127,
+                                     62, 117, 137, 2, 28, 17])
+        _vec152 = SelectIndividual(vec10, [100, 13, 133, 105, 72, 9, 93, 109,
+                                           30, 115, 63, 7, 55, 37, 15, 114, 
+                                           106, 46, 73, 18, 3, 87, 58, 43, 60,
+                                           76, 52, 6, 39, 31, 12, 99, 121,
+                                           123, 22, 79, 94, 88, 21, 97, 25,
+                                           40, 57, 136, 67, 49, 10, 4, 120,
+                                           92, 27, 91, 64, 124, 16, 130,
+                                           84, 107, 126, 103, 122, 112, 59,
+                                           1, 82, 34, 135, 118, 85])
         # Plot(ExtractHistogram(vec151, 4), ExtractHistogram(vec152, 4))
 
-        matrix11 = Compare(vec15, VectorDistance("N", "O", "N"))
+        _matrix11 = Compare(vec15, VectorDistance("N", "O", "N"))
         
         Clustering(matrix10, "Hierarchy", Algorithm="Agglomerative")
         Clustering(matrix10, "Hierarchy", Algorithm="Divisive")
         
         vec16 = SelectVariable(vec9596, [1, 3], Mode="Reject")
-        matrix12 = Compare(vec16, VectorDistance("N", "N", "N", "N"))
-        matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
-    
-        
-
-if __name__=="__main__":
-    # perform all the test in the class Test (unit tests)
-    test = Test()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'
-    # and functional tests.    
+        _matrix12 = Compare(vec16, VectorDistance("N", "N", "N", "N"))
+        _matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
     

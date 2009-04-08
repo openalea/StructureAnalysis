@@ -1,5 +1,5 @@
 """simulate tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.convolution import Convolution
@@ -9,6 +9,9 @@ from openalea.stat_tool.distribution import Distribution
 
 
 class Test:
+    
+    def __init__(self):
+        pass
     
     def test_simulate_mixture(self):
         m = Mixture("mixture1.mixt")
@@ -30,15 +33,3 @@ class Test:
         s1 = Simulate(c, 1000)
         assert s1
 
-if __name__=="__main__":
-    # perform all the test in the class Test (unit tests)
-    test = Test()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'
-    # and functional tests.    
-    

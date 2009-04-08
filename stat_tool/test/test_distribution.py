@@ -1,20 +1,19 @@
 """Distribution tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 
 from openalea.stat_tool import _stat_tool
-from openalea.stat_tool.distribution import Distribution
-from openalea.stat_tool.distribution import Uniform
-from openalea.stat_tool.distribution import Binomial
-from openalea.stat_tool.distribution import NegativeBinomial
-from openalea.stat_tool.distribution import Poisson
-from openalea.stat_tool.distribution import ToHistogram
-from openalea.stat_tool.distribution import *
-#ToDistribution
+from openalea.stat_tool.distribution import Distribution, Uniform, Binomial
+from openalea.stat_tool.distribution import NegativeBinomial, Poisson
+from openalea.stat_tool.distribution import ToHistogram, ToDistribution
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.output import Display, Save
+from openalea.stat_tool.output import Display,  Plot
 from openalea.stat_tool import Estimate
 from openalea.stat_tool import Simulate
+
+from openalea.stat_tool import Cluster, \
+    Transcode, ValueSelect, Shift, Compare, ComparisonTest, Fit
+
 
 from tools import interface
 
@@ -33,7 +32,6 @@ class Test(interface):
     display                     ok
     extract_data                nothing to be done
     file_ascii_write            ok
-    get_plotable                what is it for ?     
     plot                        ok                       
     save                        ok
     plot_print                  ok
@@ -48,7 +46,7 @@ class Test(interface):
     sup_bound                   ok
     parameter                   ok
     inf_bound                   ok     
-    old_plot                    notdone   
+    old_plot                    ok   
     survival_get_plotable       notdone                                           
     survival_plot_write         what is the purpose?
     str                         ok
@@ -57,14 +55,15 @@ class Test(interface):
  
     """
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = "distribution1.dist"
-        self.structure = Distribution
+        interface.__init__(self,
+                           self.build_data(),
+                           "distribution1.dist",
+                           Distribution)
     
     def build_data(self):
-        d1 = Binomial(0,10,0.5)
+        d1 = Binomial(0, 10, 0.5)
         d2 = Distribution("BINOMIAL", 0, 10, 0.5)
-        assert d1==d2
+        assert d1 == d2
         return d1
 
     def test_empty(self):
@@ -113,28 +112,23 @@ class Test(interface):
         self.survival_spreadsheet_write()
         
     def test_extract(self):
-        """
-        .. note:: nothing to be done here"""
         pass
 
     def test_extract_data(self):
-        """run and test the extract_data methods
-        
-        .. todo:: check this test
-        """
         s = self.simulate()
         e = s.estimate_parametric("B")
         d = e.extract_data()
         assert d
-        eprime = Estimate(s, "Binomial")
+        _eprime = Estimate(s, "Binomial")
         
 
 class TestDistribution:
-    """Test the distribution (Unifor, Binomial, ...)
+    """Test the distribution (Uniform, Binomial, ...)
     
     test the sup_bound, inf_bound, probability, parameter,ident
     
-    test the ToDistribution and ToHistogram"""
+    test the ToDistribution and ToHistogram
+    """
     def test_to_histogram(self):
 
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
@@ -150,11 +144,11 @@ class TestDistribution:
 
         d = Distribution("UNIFORM", 0, 10)
         assert list(d.simulate(1000))
-        assert d.sup_bound==10
-        assert d.inf_bound==0
-        assert d.probability==-1
-        assert d.parameter==-1
-        assert d.ident==4
+        assert d.sup_bound == 10
+        assert d.inf_bound == 0
+        assert d.probability == -1
+        assert d.parameter == -1
+        assert d.ident == 4
         
         d = Uniform(0, 10)
         assert list(d.simulate(1000))
@@ -182,11 +176,11 @@ class TestDistribution:
 
         d = Distribution("POISSON", 0, 2)
         assert list(d.simulate(1000))
-        assert d.sup_bound==-1
-        assert d.inf_bound==0
-        assert d.probability==-1
-        assert d.parameter==2
-        assert d.ident==2
+        assert d.sup_bound == -1
+        assert d.inf_bound == 0
+        assert d.probability == -1
+        assert d.parameter == 2
+        assert d.ident == 2
 
         d = Poisson(0, 2)
         assert list(d.simulate(1000))
@@ -198,21 +192,23 @@ class TestDistribution:
         
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         assert list(d.simulate(1000))
-        assert d.sup_bound==-1
-        assert d.inf_bound==0
-        assert d.probability==0.5
-        assert d.parameter==1
-        assert d.ident==3
+        assert d.sup_bound == -1
+        assert d.inf_bound == 0
+        assert d.probability == 0.5
+        assert d.parameter == 1
+        assert d.ident == 3
         d = NegativeBinomial(0, 1, 0.5)
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
         assert isinstance(m, _stat_tool._ParametricModel)
 
+
 def test1():
-     #########################################################################
+    #########################################################################
     #
-    #  discrete distributions/histograms, comparison of histograms/frequency distributions
+    #  discrete distributions/histograms, comparison of histograms
+    # /frequency distributions
     #
     #  beech, Wild cherry tree: number of nodes per growth unit (GU)
     #
@@ -223,9 +219,9 @@ def test1():
     #  meri5.his: short shoots.
     #
     #########################################################################
-    from openalea.stat_tool import Display, Plot, Simulate, Estimate, Cluster, Transcode, ValueSelect, Shift,Compare, ComparisonTest, Fit
 
-    dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
+
+    _dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
     dist0 = Distribution("distribution1.dist")
 
     dist1 = Distribution("B", 0, 10, 0.3)
@@ -247,23 +243,23 @@ def test1():
     # InfBoundStatus->"Free" (default) / "Fixed"
     # MinInfBound->0 (default) / 1
 
-    dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
+    _dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
 
     fagus = Histogram("fagus1.his")
 
     # transformation of histograms, extraction/filter
 
-    histo2 = Cluster(fagus, "Step", 2)
-    histo3 = Cluster(fagus, "Information", 0.8)
-    histo4 = Cluster(fagus, "Limit", [2, 4, 6, 8, 10])
+    _histo2 = Cluster(fagus, "Step", 2)
+    _histo3 = Cluster(fagus, "Information", 0.8)
+    _histo4 = Cluster(fagus, "Limit", [2, 4, 6, 8, 10])
     histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, 4, 5])
     Display(histo5, Detail=2)
 
-    histo7 = Shift(fagus, -2)
+    _histo7 = Shift(fagus, -2)
 
-    histo8 = ValueSelect(fagus, 2, 8)
+    _histo8 = ValueSelect(fagus, 2, 8)
 
-    dist3 = Estimate(fagus, "B")
+    _dist3 = Estimate(fagus, "B")
 
     # comparison of histograms
 

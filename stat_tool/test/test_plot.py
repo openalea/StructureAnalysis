@@ -1,7 +1,5 @@
 """output tests"""
-__revision__ = "$Id: $"
-
-import sys
+__revision__ = "$Id$"
 
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import get_plotter, gnuplot 
@@ -9,6 +7,9 @@ from openalea.stat_tool.plot import DISABLE_PLOT
 
 
 class Test:
+    
+    def __init__(self):
+        pass
     
     def test_plotable(self):
 
@@ -27,12 +28,9 @@ class Test:
         assert p
         assert len(p) == 2
 
-
         p = _stat_tool.MultiPlotSet(3)
         assert len(p) == 3
         
-
-
     def test_plotable2(self):
 
         p = _stat_tool.MultiPlotSet(1)
@@ -43,7 +41,7 @@ class Test:
 
         # Test iterator
         multiset = p
-        for i, multiplot in enumerate(multiset):
+        for _i, multiplot in enumerate(multiset):
             assert multiplot
 
             for singleplot in multiplot:
@@ -51,10 +49,8 @@ class Test:
 
         # test plot
         plotter = get_plotter()
-        if DISABLE_PLOT==False:
+        if DISABLE_PLOT == False:
             plotter.plot(p, "test_plot")
-        
-
         
     def get_plotable(self):
 
@@ -105,8 +101,6 @@ class Test:
         p[2][0].color = "y"
         p[2][0].style = "linespoints"
         
-
-
         assert len(p) == 3
 
         return p
@@ -115,31 +109,15 @@ class Test:
 
         a = self.get_plotable()
         plotter = get_plotter()
-        if DISABLE_PLOT==False:
+        if DISABLE_PLOT == False:
             plotter.plot(a, "test_plot")
 
 
-    def _test_gnuplot(self):
+    def test_gnuplot(self):
         
-        if (DISABLE_PLOT) : return
+        if (DISABLE_PLOT):
+            return
         a = self.get_plotable()
         plotter = gnuplot()
-        if DISABLE_PLOT==False:
+        if DISABLE_PLOT == False:
             plotter.plot(a, "test_plot")
-
-        
-
-
-
-if __name__=="__main__":
-    # perform all the test in the class Test (unit tests)
-    test = Test()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'
-    # and functional tests.    
-    test1()

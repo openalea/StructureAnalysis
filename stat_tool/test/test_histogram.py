@@ -1,5 +1,5 @@
 """histogram tests"""
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 from openalea.stat_tool.distribution import ToHistogram, Binomial
 from openalea.stat_tool.distribution import ToDistribution
@@ -24,7 +24,6 @@ class Test(interface):
     display                     ok
     extract_data                nothing to be done
     file_ascii_write            ok
-    get_plotable                what is it for ?     
     plot                        ok                      
     save                        ok
     plot_print                  ok
