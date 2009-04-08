@@ -2,8 +2,6 @@
 __revision__ = "$Id$"
 
 import sys
-import os
-import glob
 
 DISABLE_PLOT = False
 
@@ -54,10 +52,10 @@ class gnuplot(plotter):
         # Title & border
         #multiset.border
         # nb subplot
-        nbx = len(multiset)
+        _nbx = len(multiset)
         
         # For each subplot
-        for i, multiplot in enumerate(multiset):
+        for _i, multiplot in enumerate(multiset):
             # Group filter
             if(groups and multiplot.group not in groups):
                 continue
@@ -77,7 +75,7 @@ class gnuplot(plotter):
 
                 style = singleplot.style 
                 legend = singleplot.legend
-                color = singleplot.color
+                _color = singleplot.color
 
                 x = []
                 y = []
@@ -93,9 +91,7 @@ class gnuplot(plotter):
                 if legend:
                     p.set_option(title=legend)
                 plot_list.append(p)
-                
 
-                
             # Range
             xrange = multiplot.xrange
             yrange = multiplot.yrange
@@ -129,6 +125,7 @@ class mplotlib(plotter):
         #matplotlib.use('Qt4Agg')
         import pylab
         self.pylab = pylab
+        self.matplotlib = matplotlib
 
     def plot(self, plotable, title, groups=[], show=True, *args, **kargs):
         """ 
@@ -136,13 +133,12 @@ class mplotlib(plotter):
         groups : list of group (int) to plot
         show=True by default will pop up the figure
         """
-        
         pylab = self.pylab
+        matplotlib = self.matplotlib
         multiset = plotable
 
         # Title & border
         #if title: pylab.suptitle(title) 
-
         #multiset.border
 
         # Configure figure
@@ -166,7 +162,7 @@ class mplotlib(plotter):
                 f.set_facecolor("w")
 
         # nb subplot
-        nbx = len(multiset)
+        _nbx = len(multiset)
         
         # For each subplot
         for i, multiplot in enumerate(multiset):
@@ -178,7 +174,6 @@ class mplotlib(plotter):
 
             # Select window
             pylab.figure(g+1)
-
             # Select Subplot
             pylab.subplot(group_size[g], 1, group_index[g] + 1)
             group_index[g] += 1
@@ -193,22 +188,44 @@ class mplotlib(plotter):
             legends = []
             # List of argument for the plot function
             for j, singleplot in enumerate(multiplot):
-
                 style = singleplot.style 
                 legend = singleplot.legend
                 color = singleplot.color
-
-                if(not color): color = self.colors[j%len(self.colors)]
+                label  = singleplot.label
+                
+                #for t in singleplot.data
+                #    print t
+                if(not color): 
+                    color = self.colors[j % len(self.colors)]
 
                 x = []
                 y = []
+                labels = []
                 for pt in singleplot:
                     x.append(pt.x)
                     y.append(pt.y)
-                
+                    
+                # no data available. check if label is on.
+                if len(x) == 0:
+                    if label == True:
+                        for i in range(0,singleplot.get_label_size()):
+                            x = singleplot.get_label_x(i)
+                            y = singleplot.get_label_y(i)
+                            labels = singleplot.get_label_text(i)
+                            matplotlib.pyplot.text(x, y, labels)
+                            pylab.hold(True)         
+                        break # nothing else to be done in principle
+                    else:
+                        print "Warning. Empty data."
+                        return
+                else:
+                    pass
+                    # continue to the normal plots
+                    
+                    
                 # Manage style
-                pointstyle = self.pointstyles[j%len(self.pointstyles)]
-
+                pointstyle = self.pointstyles[j % len(self.pointstyles)]
+                
                 if "impulses" in style:
                     l = pylab.vlines(x, 0, y)
                 elif "lines" and  "points" in style:
@@ -220,7 +237,7 @@ class mplotlib(plotter):
                     l = pylab.plot(x, y, '-')
                 else:
                     l = pylab.plot(x, y, style)
-                
+                    
                 if(color):
                     pylab.setp(l, color=color)
                     
@@ -242,7 +259,7 @@ class mplotlib(plotter):
                 a.set_xlim([round(xrange.min, 5), round(xrange.max, 5)])
 
             if(yrange.min != yrange.max):
-                a.set_ylim([round(yrange.min, 5), round(yrange.max,5)])
+                a.set_ylim([round(yrange.min, 5), round(yrange.max, 5)])
 
             # Tics
             xt = round(multiplot.xtics, 5)
@@ -255,7 +272,7 @@ class mplotlib(plotter):
                 ymin, ymax = pylab.ylim() 
                 pylab.yticks(pylab.arange(ymin, ymax, yt))
 
-        if show==True:
+        if show == True:
             pylab.show()
    
 
