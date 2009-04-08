@@ -1,7 +1,7 @@
 .. _stat_tool_description:
 
-7 The STAT_TOOL module
-######################
+Introduction to the STAT_TOOL module (to be translated)
+#######################################################
 
 Le module STAT d'AMAPmod propose un ensemble de méthodes d'analyse de données à base de probabilités discrètes et de processus stochastiques à temps discret et à espace d'états discret. Ces méthodes font appel soit à des techniques non-paramétriques (par exemple calcul d'une distance entre deux séquences) soit à des techniques paramétriques (par exemple estimation des paramètre d'un mélange fini de lois discrètes à partir d'un échantillon de valeurs discrètes). Le module STAT intègre ainsi un ensemble de méthodes exploratoires pour les échantillons de valeurs discrètes et les échantillons de séquences basé essentiellement sur des techniques non-paramétriques. L'approche paramétrique repose d'une part sur des algorithmes d'estimation efficaces et d'autre part sur des méthodes d'évaluation de l'adéquation du modèle estimé à l'échantillon de données utilisé pour l'estimation. Le coeur du module STAT réside dans l'inférence de processus stochastiques à temps discret et à espace d'états discret à partir d'échantillons de séquences discrètes éventuellement multivariées.
 

@@ -1,5 +1,6 @@
 .. _stat_tool_list:
 
+.. note:: Functions/Classes with a link have been included into the python module. Tests have also been done. 
 
 List of AML functions of the STAT module
 ########################################

@@ -3,6 +3,11 @@
 .. |leq|   unicode:: U+02264 
 .. |geq|   unicode:: U+02265 
 
+.. testsetup:: *
+      
+    from openalea.stat_tool import *
+
+
 .. .. include:: alias.rst
 
 File Syntax, STAT module
@@ -11,36 +16,36 @@ File Syntax, STAT module
 An ASCII file format is defined for each of the following object type of the STAT module:
 
 
-
-
-
 4.7.1 type COMPOUND
 ===================
 
-A compound (or stopped-sum) distribution is defined as the distribution of the sum of n independent and identically distributed random variables :math:`X_i` where :math:`n` is the value taken by the random variable :math:`N`. The distribution of :math:`N` is referred to as the sum distribution while the distribution of the :math:`X_i` is referred to as the elementary distribution. Consider the following example::
+A compound (or stopped-sum) distribution is defined as the distribution of the sum of n independent and identically distributed random variables :math:`X_i` where :math:`n` is the value taken by the random variable :math:`N`. The distribution of :math:`N` is referred to as the sum distribution while the distribution of the :math:`X_i` is referred to as the elementary distribution. Consider the following example:
 
-    COMPOUND_DISTRIBUTION
+.. literalinclude:: syntax_compound.dat
 
-    SUM_DISTRIBUTION
-    NEGATIVE_BINOMIAL  INF_BOUND : 5  PARAMETER : 3.2  PROBABILITY : 0.4
+you can load this data by using
 
-    ELEMENTARY_DISTRIBUTION
-    BINOMIAL  INF_BOUND : 0  SUP_BOUND : 5  PROBABILITY : 0.8
+
+.. doctest::
+    
+    >>> compound = Compound('doc/user/syntax_compound.dat')
 
 The first line gives the distribution type. The parametric sum distribution and the parametric elementary distribution are then defined in subsequent lines according to the syntactic form defined for the type DISTRIBUTION.
 
 4.7.2 type CONVOLUTION
 ======================
 
-The distribution of the sum of independent random variables is the convolution of the distributions of these elementary random variables. Consider the following example::
+The distribution of the sum of independent random variables is the convolution of the distributions of these elementary random variables. Consider the following example:
 
-    CONVOLUTION 2 DISTRIBUTIONS
+.. literalinclude:: syntax_convolution.dat
 
-    DISTRIBUTION 1
-    BINOMIAL  INF_BOUND : 2  SUP_BOUND : 5  PROBABILITY : 0.8
+you can load this data by using
 
-    DISTRIBUTION 2
-    NEGATIVE_BINOMIAL  INF_BOUND : 5  PARAMETER : 3.2  PROBABILITY : 0.4
+
+.. doctest::
+    
+    >>> convolution = Convolution('doc/user/syntax_convolution.dat')
+
 
 The first line gives the distribution type and the number of elementary distributions (2 or 3). The elementary parametric distributions are then defined in subsequent lines according to the syntactic form defined for the type DISTRIBUTION.
 
@@ -48,15 +53,16 @@ The first line gives the distribution type and the number of elementary distribu
 4.7.3 type DISTRIBUTION, type RENEWAL
 =====================================
 
-The available parametric discrete distributions are the binomial distribution, the Poisson distribution, the negative binomial distribution and the uniform (rectangular) distribution with an additional shift parameter which defines the lower bound to the range of possible values. The name of the distribution is first given, then the name of each parameter followed by its actual value as shown in the following examples::
+The available parametric discrete distributions are the binomial distribution, the Poisson distribution, the negative binomial distribution and the uniform (rectangular) distribution with an additional shift parameter which defines the lower bound to the range of possible values. The name of the distribution is first given, then the name of each parameter followed by its actual value as shown in the following examples:
 
-    BINOMIAL  INF_BOUND : 2  SUP_BOUND : 5  PROBABILITY : 0.8
+.. literalinclude:: syntax_distribution.dat
 
-    POISSON  INF_BOUND : 0  PARAMETER : 12.2
+you can load this data by using
 
-    NEGATIVE_BINOMIAL  INF_BOUND : 5  PARAMETER : 3.2  PROBABILITY : 0.4
 
-    UNIFORM  INF_BOUND : 2  SUP_BOUND : 5
+.. doctest::
+       
+    >>> binomial = Distribution('doc/user/syntax_distribution.dat')
 
 INF_BOUND and SUP_BOUND are integer-valued parameters while PARAMETER and PROBABILITY are real-valued parameters.
 
@@ -180,19 +186,16 @@ The first line gives the object type. The underlying semi-Markov chain (embedded
 
 4.7.6 type HISTOGRAM
 ====================
-The syntactic form of the type HISTOGRAM consists in giving, in a first column, the values in increasing order and, in a second column, the corresponding frequencies. If a value is not given, the corresponding frequency is assumed to be null. Consider the following example::
+The syntactic form of the type HISTOGRAM consists in giving, in a first column, the values in increasing order and, in a second column, the corresponding frequencies. If a value is not given, the corresponding frequency is assumed to be null. Consider the following example:
 
-    2   1
-    3   2
-    4   4
-    5   12
-    6   14
-    7   6
-    8   3
-    9   2
-    10  1
-    12  2
-    14  1
+.. literalinclude:: syntax_histogram.dat
+
+you can load this data by using
+
+
+.. doctest::
+
+    >>> histogram = Histogram('doc/user/syntax_histogram.dat')
 
 4.7.7 type MARKOV
 =================
@@ -407,6 +410,7 @@ The explicit index parameter of type TIME can be replaced by time intervals::
 The syntactic form of data of type {time interval between two observation dates, number of events occurring between these two observation dates} consists in giving, in a first column, the time interval between two observation dates (length of the observation period), in a second column, the number of events occurring between these two observation dates and, in a third column, the corresponding frequency. The time interval between two observation dates should be given in increasing order and then, for each possible time interval, the number of events should be given in increasing order. This is equivalent of giving successively the frequency distribution of the number of events for each possible time interval between two observation dates, ranked in increasing order.
 
 ::
+
     # frequency distribution of the number of events for an observation period of length 20
     20  2   1
     20  3   2
@@ -418,6 +422,7 @@ The syntactic form of data of type {time interval between two observation dates,
     20  9   1
 
 ::
+
     #frequency distribution of the number of events for an observation period of length 30
     30  3   1
     30  5   2
@@ -474,39 +479,31 @@ A model of 'tops' is defined by three parameters, namely the growth probability 
 
 4.7.14 type VECTOR_DISTANCE
 ===========================
-The parameters of definition of a distance between vectors are the number of variables, the distance type (ABSOLUTE_VALUE or QUADRATIC) if there is more than one variable, the variable types (NUMERIC, SYMBOLIC, ORDINAL or CIRCULAR), and eventually the weights of the variables (default behaviour: the variables have the same weight), and in the symbolic case, explicit distances between symbols (default behaviour: 0 / 1 for mismatch / match). Consider the following example::
+The parameters of definition of a distance between vectors are the number of variables, the distance type (ABSOLUTE_VALUE or QUADRATIC) if there is more than one variable, the variable types (NUMERIC, SYMBOLIC, ORDINAL or CIRCULAR), and eventually the weights of the variables (default behaviour: the variables have the same weight), and in the symbolic case, explicit distances between symbols (default behaviour: 0 / 1 for mismatch / match). Consider the following example:
 
-    4 VARIABLES
-    
-    DISTANCE : ABSOLUTE_VALUE
-    
-    VARIABLE 1 : NUMERIC  WEIGHT : 0.4
-    
-    VARIABLE 2 : ORDINAL  WEIGHT : 0.2
-    
-    VARIABLE 3 : SYMBOLIC  WEIGHT : 0.2
-    
-    4 SYMBOLS
-    0
-    1   0
-    1   1   0
-    2   2   2   0
+.. literalinclude:: syntax_vector_distance.dat
+
+you can load this data by using
+
+.. doctest::
+
+    >>> vector_distance = VectorDistance('doc/user/syntax_vector_distance.dat')
 
 4.7.15 type VECTORS
 ===================
-In the syntactic form of the type VECTORS, each row corresponds to an individual and each column corresponds to a variable. Consider the following example::
 
-    0   1   20
-    1   2   96
-    0   4   152
-    1   12  218
-    0   14  42
-    0   6   57
-    1   3   111
-    1   2   172
-    1   1   154
-    0   2   31
-    1   1   139
+.. warning:: Check this example and data files which can do be loaded.
+
+In the syntactic form of the type VECTORS, each row corresponds to an individual and each column corresponds to a variable. Consider the following example:
+
+.. literalinclude:: syntax_vectors.dat
+
+you can load this data by using
+
+.. doctest::
+    :options: +SKIP
+
+    >>> vector = Vectors('doc/user/syntax_vectors.dat')
 
 .. here below are aliases that won't appear in the output documents
 
