@@ -14,6 +14,7 @@ namespace plotable
 
   typedef std::pair<float, float> PlotPoint;
   typedef std::pair<float, float> Range;
+  typedef std::pair<PlotPoint, string> Label;
   
   /* Class SinglePlot */
   /* list of (X,Y) pair with properties */
@@ -22,9 +23,11 @@ namespace plotable
   {
     
     typedef std::list< PlotPoint > Points;
+    typedef std::vector< Label > Labels;
 
   public:
     Points data;
+    Labels data_and_text;
     string legend;
     string style;
 
@@ -34,7 +37,6 @@ namespace plotable
     /* marker : + , o . s v x > < ^ */
 
     string color; 
-
     /*   b  : blue */
     /*   g  : green */
     /*   r  : red */
@@ -44,13 +46,22 @@ namespace plotable
     /*   k  : black */
     /*   w  : white */
     
+    bool label;    
+    /* if True, then we are in the label mode and the variable label is used instead of data.*/ 
     
   public:
     SinglePlot() {};
 
     void add_point(float x, float y);
     void add_point(const PlotPoint&  p);
-    
+  
+    // related to the label mode
+    void add_text(float x, float y,const string&  p);   
+    float get_x(int);
+    float get_y(int);
+    std::string get_label(int);
+    int get_size(){return data_and_text.size();}
+ 
     int size()
     { return data.size(); };   
 
