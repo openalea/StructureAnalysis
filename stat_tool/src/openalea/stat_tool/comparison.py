@@ -34,13 +34,14 @@ def compare_histo(histo, *args, **kargs):
         
           
     """
+    
     type_dict = {
 	    "O" : _stat_tool.ORDINAL,
 	    "ORDINAL" : _stat_tool.ORDINAL,
 	    "N" : _stat_tool.NUMERIC,
 	    "NUMERIC" : _stat_tool.NUMERIC,
 	    "S" : _stat_tool.SYMBOLIC,
-	    "SYMBOLICL" : _stat_tool.SYMBOLIC,
+	    "SYMBOLIC" : _stat_tool.SYMBOLIC,
 	    }
 
     _type = args[-1]
@@ -59,7 +60,17 @@ def compare_histo(histo, *args, **kargs):
 
     filename = kargs.get("Filename", None)
     format = kargs.get("Format", "a")
-
+    
+    if format == 'a':
+        pass
+    elif format == 'ASCII': 
+        format = 'a'
+    elif format == 'SpreadSheet': 
+        format = 's'
+    else:
+        raise(TypeError, """The Format argument must be either 'ASCII' 
+            or 'SpreadSheet'.""")
+        
     ret = base.compare(histos, _type, filename, format)
     return ret
 
