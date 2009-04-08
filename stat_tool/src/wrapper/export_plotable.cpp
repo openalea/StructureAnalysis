@@ -33,33 +33,46 @@ using namespace plotable;
 using namespace std;
 
 
+class PlotableWrap
+{
 
+public:
 
+  static float get_x()
+  {
+    return 1.;
+  }
+
+};
 
 void class_plotable()
 {
-
   class_ < PlotPoint >("PlotPoint", init<float, float>())
     .def_readwrite("x", &PlotPoint::first )
     .def_readwrite("y", &PlotPoint::second )
-    
     .def_readwrite("min", &PlotPoint::first )
     .def_readwrite("max", &PlotPoint::second );
-
-//   class_ < Range >("Range", init<float, float>())
-//     .def_readwrite("min", &PlotPoint::first )
-//     .def_readwrite("max", &PlotPoint::second );
-
+  
 
   class_< SinglePlot >("SinglePlot")
     
     .def("add_point", (void (SinglePlot::*)(const PlotPoint&)) &SinglePlot::add_point)
     .def("add_point", (void (SinglePlot::*)(float, float)) &SinglePlot::add_point)
-    
+    .def("add_text", (void (SinglePlot::*)(float, float, const string&)) &SinglePlot::add_text)
     .def_readwrite("legend", &SinglePlot::legend)
     .def_readwrite("style", &SinglePlot::style)
     .def_readwrite("color", &SinglePlot::color)
-    
+
+    // surely the label needs to be refactored: it clashes with the data Point
+    // since it is only used by regression.cpp by now, we'll keep it as it is 
+    // for the time being.
+    .def_readwrite("label", &SinglePlot::label)
+    .def("get_label_size", &SinglePlot::get_size, "returns number of labels")
+    .def("get_label_x", &SinglePlot::get_x, "returns x position of label(i)")
+    .def("get_label_y", &SinglePlot::get_y, "returns y position of label(i)")
+    .def("get_label_text", &SinglePlot::get_label, "returns label text(i)")
+
+
     .def("__iter__", range(&SinglePlot::begin, &SinglePlot::end))
     .def("__len__", &SinglePlot::size)
     ;
