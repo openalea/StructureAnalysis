@@ -5,6 +5,7 @@ from openalea.stat_tool.plot import DISABLE_PLOT
 import os
 from openalea.stat_tool.output import Display, Save
 
+
 __revision__ = "$Id$"
 
 class interface():
@@ -157,7 +158,15 @@ class interface():
     def survival_ascii_write(self):
         d = self.data
         d.survival_ascii_write()
-        
+     
+    def survival_plot_write(self):
+        d = self.data
+        d.survival_plot_write('test','test')
+    
+    def survival_file_ascii_write(self):
+        d = self.data
+        d.survival_file_ascii_write()
+    
     def survival_spreadsheet_write(self):
         d = self.data
         d.survival_spreadsheet_write('test.xsl')
@@ -167,7 +176,10 @@ class interface():
         """Test the simulate method"""
         m = self.data
         s = m.simulate(1000)
+        s2 = Simulate(m, 1000)
         assert len(s) == 1000
+        assert len(s2) == 1000
+        assert str(s2)
         assert str(s)
         return s
     

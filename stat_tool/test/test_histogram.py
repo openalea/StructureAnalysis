@@ -35,7 +35,9 @@ class Test(interface):
 
     **others**
     extract_model               ok
-
+    len                         ok
+    str                         ok
+    
     ** see test_cluster**
     cluster_information         ok
     cluster_limit               ok
@@ -48,10 +50,7 @@ class Test(interface):
     t_comparison                ok
     wmw_comparison              ok
     f_comparison                ok
-    
-    
-    survival_get_plotable        ???
-    
+        
     **see test_estimate**
     estimate_compound            ok
     estimate_convolution         ok     
@@ -70,9 +69,10 @@ class Test(interface):
     value_select                   ok
     """
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = "peup1.his"
-        self.structure = Histogram
+        interface.__init__(self,
+                           self.build_data(),
+                           "peup1.his",
+                           Histogram)
         
     def build_data(self):
         v = Histogram([0, 1, 2, 3])
@@ -115,14 +115,11 @@ class Test(interface):
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
         
-    def test_plot_write(self):
-        self.plot_write()
-
-    def test_file_ascii_write(self):
-        self.file_ascii_write()
+    def test_survival_plot_write(self):
+        self.survival_plot_write()
       
-    def test_spreadsheet_write(self):
-        self.spreadsheet_write()
+    def test_survival_spreadsheet_write(self):
+        self.survival_spreadsheet_write()
     
     def test_simulate(self):
         pass
@@ -165,18 +162,4 @@ class Test(interface):
         d = Binomial(0,10,0.5)
         d == d.simulate(1000).extract_model()
         
-
-
-if __name__=="__main__":
-    # perform all the test in the class Test (unit tests)
-    test = Test()
-    for method in dir(test):
-        if method.startswith('_'):
-            continue
-        if callable(getattr(test, method)):
-            getattr(test, method)()
-        else:
-            print 'skipping'
-    # and functional tests.    
-
 

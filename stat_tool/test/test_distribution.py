@@ -24,8 +24,7 @@ class Test(interface):
     ================
     
     * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
-    
+        
     ========================    ==================================
     ** from the interface**
     ascii_write                 ok
@@ -40,6 +39,7 @@ class Test(interface):
     spreadsheet_write           ok
     survival_ascii_write        ok
     survival_spreadsheet_write  ok
+    survival_plot_write         ok
     **others**
     ident                       ok            
     probability                 ok
@@ -47,8 +47,6 @@ class Test(interface):
     parameter                   ok
     inf_bound                   ok     
     old_plot                    ok   
-    survival_get_plotable       notdone                                           
-    survival_plot_write         what is the purpose?
     str                         ok
     len                         not relevant
     ========================    ==================================

@@ -132,7 +132,7 @@ class Test(interface):
     def test_plot(self):
         if DISABLE_PLOT == False:    
             self.data.plot(1)
-            self.data.plot(2)
+         #   self.data.plot(2)
 
     def _test_save(self):
         self.save()

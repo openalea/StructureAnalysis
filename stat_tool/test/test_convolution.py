@@ -27,16 +27,14 @@ class Test(interface):
     display                     ok    
     extract_data                ok
     file_ascii_write            ok
-    get_plotable                what is it for ?     
     plot                        ok                       
     save                        ok
     plot_print                  ok
     simulate                    ok
     plot_write                  ok
     spreadsheet_write           ok
-    survival_ascii_write        ok
     **others**
-    extratc_convolution         ok
+    extract_convolution         ok
     extract_elementary          ok
     str                         ok
     len                         not relevant

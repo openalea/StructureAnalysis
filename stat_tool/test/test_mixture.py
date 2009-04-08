@@ -67,24 +67,21 @@ class Test(interface):
     ascii_write                 ok
     display                     ok    
     extract_data                ok
-    file_ascii_write            ok
-    get_plotable                what is it for ?     
+    file_ascii_write            ok     
     plot                        ok                       
     save                        ok
     plot_print                  ok
     simulate                    ok
     plot_write                  ok
     spreadsheet_write           ok
-    survival_ascii_write        ok
-    survival_spreadsheet_write  ok
     **others**
     extract_mixture             ok
-    extratc_component           ok
-    extra_weight                ok
+    extract_component           ok
+    extract_weight              ok
     str                         ok
-    len                         not relevant
+    len                         ok
     nb_component                ok
-    old_plot                    works   
+    old_plot                    ok   
     ========================    ==================================    
     """
 

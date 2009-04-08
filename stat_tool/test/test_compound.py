@@ -3,14 +3,12 @@ __revision__ = "$Id$"
 
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.distribution import Uniform
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
-from openalea.stat_tool.plot import DISABLE_PLOT
-from openalea.stat_tool.output import Display, Save
 
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.simulate import Simulate
-from openalea.stat_tool.data_transform import ExtractHistogram, ExtractData, Shift
+from openalea.stat_tool.data_transform import ExtractHistogram, ExtractData, \
+    Shift
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import ToHistogram
 
@@ -23,7 +21,6 @@ class Test(interface):
     ================
     
     * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
     
     ========================    ==================================
     ** from the interface**

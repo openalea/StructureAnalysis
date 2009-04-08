@@ -22,7 +22,6 @@ class Test(interface):
     ================
     
     * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
     
     ========================    ==================================
     ** from the interface**
@@ -30,7 +29,6 @@ class Test(interface):
     display                     ok
     extract_data                nothing to be done
     file_ascii_write            ok
-    get_plotable                what is it for ?     
     plot                        Not working                       
     save                        ok
     plot_print                  ok
