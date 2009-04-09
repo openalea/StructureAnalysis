@@ -1,1 +1,8 @@
- epydoc --html -o stat_tool ../src/openalea/stat_tool/
+To generate sphinx documentation:
+
+    1. go to root directory of this package
+    2. type "python setup.py build_sphinx"
+
+to generate the epydoc documentation:
+
+    epydoc --html -o stat_tool ../src/openalea/stat_tool/
