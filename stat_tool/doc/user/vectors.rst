@@ -1,5 +1,7 @@
 .. define some aliases:
 .. _vectors: syntax.html#type-vectors
+.. _histogram_tutorial: tutorial.html#id1
+.. _convolution_tutorial: tutorial.html#convolution
 
 .. define the setup for doctest:
 .. testsetup:: *
@@ -10,29 +12,31 @@
 
 
 
+
 Vectors
 =======
-Here is a brief description of the Vector type.
+Let us finish with a third type of objects, that are vectors, which contains 
+slighty more methods in addition to those already presented in the 
+`histogram_tutorial_ <test>` and `Convolution <convolution_tutorial_>` sections
 
 Constructor
 -----------
 
-Vectors can be generated either by loading an ascii file -- following the syntax given in vectors_ -- or with a list of values, that will be processed into a vectors.
-
-So, if you have an ASCII file, you can load it using the :func:`~openalea.stat_tool.vectors.Vectors` function as follows:
+Again, :class:`~openalea.stat_tool.vectors.Vectors` can be generated either by 
+loading an ASCII or directly using python lists as follows:
 
 .. filename with respect to the directory where sphinx is launch
 .. doctest::
 
     >>> v1 = Vectors('./test/chene_sessile.vec')
 
-Otherwise, if you have a list of values, provide it using python syntax as follows:
-
-.. doctest::
-
     >>> v2 = Vectors([[1,2], [3,4]])
 
 .. note:: Note the syntax, which is a list of lists
+
+Then, you can access to various information using:
+
+.. doctest::
 
     >>> v2.get_nb_variable()
     2
@@ -41,71 +45,122 @@ Otherwise, if you have a list of values, provide it using python syntax as follo
     >>> v2.get_identifiers()
     [1, 2]
 
-You can then access to the vectors usin indexes::
+Finally, container are available and you can access to the data as follows 
+(starting at 0):
 
     >>> v2[1]
-    [1, 2]
+    [3, 4]
     >>> v2[1][0]
     3
 
-display
--------
-The object `h` has a few methods, The `display` method :func:`~openalea.stat_tool.output.Display` returns information on the screen
-   
-.. doctest::
+Display, Save, str()  methods are available as in the previous cases. 
 
-    >>> v2.display() #doctest: +SKIP
-    >>> # equivalently
-    >>> Display(v2)
-    '2 vectors\n\n2 VARIABLES\n\nVARIABLE 1 : INT   (minimum value: 1, maximum value: 3)\n\nmarginal histogram - sample size: 2\nmean: 2   variance: 2   standard deviation: 1.41421\n\n   | marginal histogram\n0  0\n1  1\n2  0\n3  1\n\nVARIABLE 2 : INT   (minimum value: 2, maximum value: 4)\n\nmarginal histogram - sample size: 2\nmean: 3   variance: 2   standard deviation: 1.41421\n\n   | marginal histogram\n0  0\n1  0\n2  1\n3  0\n4  1\n\ncorrelation matrix\n\n   1  2\n1  1  1\n2  1  1\n\nreference t-value: 1e+37   reference critical probability: 0.05\nlimit correlation coefficient: 1\n\nreference t-value: 1e+37   reference critical probability: 0.01\nlimit correlation coefficient: 1\n'
+However, there is no plotting routines available.
     
-A nicer layout can be obtained: by swithcing the \n character to a return carriage using the **print** command:
+There are many more methods available, some of them are explained here below
+
+VarianceAnalysis
+----------------
+
+Here is the usage of One-way variance analysis.
+    
+.. doctest::
+
+    >>> print VarianceAnalysis(v2, 1,2,"O")
+    value                          1   3
+    sample size                    1   1
+    mean                           2   4
+    variance                       0   0
+    standard deviation             0   0
+    mean absolute deviation        0   0
+    coefficient of concentration   1   1
+    coefficient of skewness        0   0
+    coefficient of kurtosis       -2  -2
+    <BLANKLINE>
+       | histogram 1 | histogram 3 | cumulative histogram 1 function | cumulative histogram 3 function
+    0  0  0  0  0
+    1  0  0  0  0
+    2  1  0  1  0
+    3     0     0
+    4     1     1
+    <BLANKLINE>
+    Kruskal-Wallis test
+    chi-square test (1 degree of freedom)
+    chi-square value: 1   critical probability: 0.315013
+    reference chi-square value: 3.74866   reference critical probability: 0.05
+    <BLANKLINE>
+
+
+
+Compare
+-------
 
 .. doctest::
 
-    >>> print v2 #doctest: +SKIP
-    2 vectors
-
-    2 VARIABLES
-
-    VARIABLE 1 : INT   (minimum value: 1, maximum value: 3)
-
-    marginal histogram - sample size: 2
+    >>> print Compare(ExtractHistogram(v2, 1), ExtractHistogram(v2,2), "O")
+    histogram 1 - sample size: 2
     mean: 2   variance: 2   standard deviation: 1.41421
-
-       | marginal histogram
-    0  0
-    1  1
-    2  0
-    3  1
-
-    VARIABLE 2 : INT   (minimum value: 2, maximum value: 4)
-    ...
-
- 
-printing ASCII information (exhaustive output) on the screen or in a file:
+    coefficient of skewness: 0   coefficient of kurtosis: -2.5
+    mean absolute deviation: 1   coefficient of concentration: 0.25
+    information: -1.38629 (-0.693147)
+    <BLANKLINE>
+    histogram 2 - sample size: 2
+    mean: 3   variance: 2   standard deviation: 1.41421
+    coefficient of skewness: 0   coefficient of kurtosis: -2.5
+    mean absolute deviation: 1   coefficient of concentration: 0.166667
+    information: -1.38629 (-0.693147)
+    <BLANKLINE>
+       | histogram 1 | histogram 2 | cumulative histogram 1 function | cumulative histogram 2 function
+    0  0  0    0    0
+    1  1  0  0.5    0
+    2  0  1  0.5  0.5
+    3  1  0    1  0.5
+    4     1         1
+    <BLANKLINE>
+    dissimilarities between histograms
+    <BLANKLINE>
+                | histogram 1 | histogram 2
+    histogram 1      0   0.5
+    histogram 2   -0.5     0
+    <BLANKLINE>
+    Kruskal-Wallis test
+    chi-square test (1 degree of freedom)
+    chi-square value: 0.6   critical probability: 0.448429
+    reference chi-square value: 3.74866   reference critical probability: 0.05
+    <BLANKLINE>
+    
+    
+    
+ContingencyTable
+----------------
 
 .. doctest::
 
-    >>> print v2.ascii_write(True) #doctest: +SKIP
-    >>> print v2.file_ascii_write('output.dat', True) #doctest: +SKIP
-    >>> print v2.save('output.dat') #doctest: +SKIP
-
-The two last lines are equivalent.
-
-
-save in a gnuplot file with plot_write method::
-
-    >>> v1.plot_write('output', 'title')
-
-clustering
------------
-
-.. doctest::
-    :options: +SKIP
-
-    >>> h1.cluster_information()
-    >>> h1.cluster_limit([1,2])
-    >>> h1.cluster_step()
-
-
+    >>> print ContingencyTable(v2, 1, 2)
+    contingency table
+    <BLANKLINE>
+       2  3  4
+    1  1  0  0  1
+    2  0  0  0  0
+    3  0  0  1  1
+       1  0  1  2
+    <BLANKLINE>
+    deviation table
+    <BLANKLINE>
+          2     3     4
+    1   0.5     0  -0.5
+    2     0     0     0
+    3  -0.5     0   0.5
+    <BLANKLINE>
+    chi-square contribution table
+    <BLANKLINE>
+          2     3     4
+    1  0.25     0  0.25
+    2     0     0     0
+    3  0.25     0  0.25
+    <BLANKLINE>
+    chi-square test (1 degree of freedom)
+    chi-square value: 2   critical probability: 0.160475
+    reference chi-square value: 3.74866   reference critical probability: 0.05
+    <BLANKLINE>
+             

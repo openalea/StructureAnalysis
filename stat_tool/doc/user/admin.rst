@@ -7,6 +7,10 @@ Current Developments
 .. methodology (in french)
 .. include:: ../../methodo.txt
 
+.. digraph:: foo
+
+   "bar" -> "baz" -> "quux";
+
 
 Work in progress
 ================
@@ -51,6 +55,7 @@ In general there are two constructors from a filename or from distributions::
     Vectors(filename)  
 
 and
+
 ::
 
     Convolution(d1,d2)
@@ -236,7 +241,9 @@ ExtractDistribution         ok
 Other methods
 =============
 
+=================================================   ===
 **cluster** (histogram)
+=================================================   ===
 cluster_step==Cluster(step=...)                     ok
 cluster_information==Cluster(information=...)       ok
 cluster_limit==Cluster(limit=...)                   ok
@@ -244,14 +251,20 @@ cluster.ToDistanceMatrix
 transcode==Transcode                                ok
 cluster._Dendrogram       
 cluster.Clustering
+=================================================   ===
 
 
+=============================================================================   ===
 **regression**
+=============================================================================   ===
 Regression(v, "Linear")==v.linear_regression(...)                               ok
 Regression(v, "MovingAverage")==v.moving_average_regression(...)                ok
 Regression(v, "NearestNeighbours")==v.nearest_neighbours_regression(...)        ok
+=============================================================================   ===
 
+=================================================   ===
 **comparison**
+=================================================   ===
 comparison.compare_seq       
 comparison.compare_vectors   
 comparison.Compare   
@@ -259,6 +272,7 @@ comparison.ComparisonTest
 comparison.compare_histo     
 comparison.compare_markov  
 comparison.Histogram         
+=================================================   ===
 
 
 
@@ -269,8 +283,8 @@ Current issues
   uniform distribution. See test_save in test_mixture.
 * Issue with the Histogram distribution in test_save:
   if h = Histogram('mixture1.mixt/')
-    len(h) returns 76 but this seem to be the length of the original data set,
-     not the histogram itself. Is this what we want ? 
+  len(h) returns 76 but this seem to be the length of the original data set,
+  not the histogram itself. Is this what we want ? 
 * VarianceAnalysis works but variance_analysis wrapping is not robust, not well
   documented, leads to crashses.
 * what shall we do with markovian.cpp and chain.cpp ?

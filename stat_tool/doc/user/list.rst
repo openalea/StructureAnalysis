@@ -5,8 +5,8 @@
 List of AML functions of the STAT module
 ########################################
 
-4.1 List of AML functions from STAT: alphabetic order
-=====================================================
+List of AML functions from STAT: alphabetic order
+=================================================
 
 
 - :func:`~openalea.stat_tool.AddAbsorbingRun`
@@ -87,8 +87,8 @@ List of AML functions of the STAT module
 - :func:`~openalea.stat_tool.vectors.VectorDistance`
 - :class:`~openalea.stat_tool.vectors.Vectors`
 
-4.2 List of AML functions from STAT: by category
-================================================
+List of AML functions from STAT: by category
+============================================
 
 Input/output functions
 ----------------------
@@ -173,13 +173,13 @@ Statistical functions:
 Miscellaneous functions
 -----------------------
 - ComputeSelfTransition: computation of the self-transition probabilities as a function of the index parameter from discrete sequences,
-- :func:`~openalea.stat_tool.data_transform.ExtractDatar` extraction of the 'data' part of an object of type 'model',
+- :func:`~openalea.stat_tool.data_transform.ExtractData` extraction of the 'data' part of an object of type 'model',
 - :func:`~openalea.stat_tool.data_transform.ExtractDistribution` extraction of a distribution from an object of type 'model',
 - :func:`~openalea.stat_tool.data_transform.ExtractHistogram` extraction of a frequency distribution from an object of type 'data',
 - ExtractVectors: extraction of vectors from global characteristics of sequences (length or counting characteristics),
 - :func:`~openalea.stat_tool.cluster.ToDistanceMatrix` cast of an object of type CLUSTERS into an object of type DISTANCE-MATRIX
-- ToDistribution: cast of an object of type HISTOGRAM into an object of type DISTRIBUTION
-- ToHistogram: cast of an object of type DISTRIBUTION into an object of type HISTOGRAM
+- :func:`~openalea.stat_tool.distribution.ToDistribution`: cast of an object of type HISTOGRAM into an object of type DISTRIBUTION
+- :func:`~openalea.stat_tool.distribution.ToHistogram`: cast of an object of type DISTRIBUTION into an object of type HISTOGRAM
 - TransformPosition: discretization of inter-position intervals. 
 
 List by type
