@@ -158,8 +158,8 @@ def ExtractData(model):
 
     :Returns:
       - If mixt contains a 'data' part, an object of type `_MixtureData` is returned.
-      - If convol contains a 'data' part, an object of type `_ConvolutionData is returned.
-      - If compound contains a 'data' part, an object of type `_CompoundData is returned.
+      - If convol contains a 'data' part, an object of type `_ConvolutionData` is returned.
+      - If compound contains a 'data' part, an object of type `_CompoundData` is returned.
       - If hmc contains a 'data' part, an object of type `_MarkovData` is returned.
       - If hsmc contains a 'data' part, an object of type `_SemiMarkovData` is returned.
 

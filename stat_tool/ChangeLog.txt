@@ -1,0 +1,16 @@
+
+
+- finalise wrapping of the stat_tool cpp code with boost_python
+  (e.g., matplolib)
+- create the sphinx documentation:
+	+ user guide
+	+ reference guide
+	+ administration guide
+	+ tutorials.
+- add exhaustive tests in ./test
+
+release 0.6.2
+-------------
+
+
+
