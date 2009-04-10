@@ -9,7 +9,7 @@ Current Developments
 
 .. digraph:: foo
 
-   "bar" -> "baz" -> "quux";
+   "bar" <-> "baz" -> "quux";
 
 
 Work in progress

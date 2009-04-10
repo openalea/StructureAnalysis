@@ -618,6 +618,8 @@ Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , int nb_
     for (i = 0;i < nb_component;i++) {
       if ((weight[i] <= 0.) || (weight[i] > 1. - cumul + DOUBLE_ERROR)) {
         status = false;
+        cerr << "i="<<i << " and weight=" << weight[i]<< " cumul=" << cumul<<endl;
+        std::flush(cerr);
         error.update(STAT_parsing[STATP_WEIGHT_VALUE]);
       }
       else {
