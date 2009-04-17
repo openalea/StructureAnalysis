@@ -7,8 +7,6 @@ Current Developments
 .. methodology (in french)
 
 
-Methodology (in french)
-=======================
 
 .. include:: ../../methodo.txt
 

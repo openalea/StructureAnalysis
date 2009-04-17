@@ -40,11 +40,12 @@ Methodologie Ecriture wrapper Python
         - en Python si pas de wrapping necessaire
 
     * en pratique:
+
         * Ecriture de fonction Python pour les fonctions de compatibilite AML
           (parsing des arguments)
         * Ecriture de fonction Python pour les constructeurs ex : Histogram
         * Ecriture de wrappers pour les classe de base et leurs methodes utilisees.
-         (Il est inutile de tout wrapper)
+          (Il est inutile de tout wrapper)
         * Choix des noms
             - class wrapper : _Mixture, _MixtureData, _Sequences, _MarkovData...
             - fonctions AML :  Merge, ToHistogram...
