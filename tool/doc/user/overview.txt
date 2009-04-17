@@ -1,0 +1,2 @@
+The Tool package is a C++ library that is used directly by other packages such as stat_tool and  amlobj and indirectly by sequence_analysis, plantgl, tree_matching, aml, tree_statistic
+
