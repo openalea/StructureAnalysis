@@ -5,11 +5,13 @@ Current Developments
 .. contents::
 
 .. methodology (in french)
+
+
+Methodology (in french)
+=======================
+
 .. include:: ../../methodo.txt
 
-.. digraph:: foo
-
-   "bar" <-> "baz" -> "quux";
 
 
 Work in progress
@@ -42,8 +44,8 @@ either through the boost_python interface or directly from python.
 There are classes/modules related to data types like compound.py and modules
 related to functions like cluster.py. First, let us look at the data type
  
-Data types
-++++++++++
+**Data types**
+
 
 In general there are two constructors from a filename or from distributions::
 

@@ -47,11 +47,13 @@ be sufficient to allow you to declare and manipulate other objects such as
 
 
 .. just to prevent annoying warnings 
-.. toctree::
-    :hidden:
+.. htmlonly::
 
-    histogram.rst
-    convolution.rst
-    vectors.rst
+    .. toctree::
+        :hidden:
+    
+        convolution.rst
+        histogram.rst
+        vectors.rst
 
 .. todo:: regression, data_transform, comparison, cluster, estimate, simulate

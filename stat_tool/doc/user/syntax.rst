@@ -267,17 +267,17 @@ Consider the following example of a non-homogeneous Markov chain::
 
 The first line gives the object type. Then, the initial probabilities and the transition probabilities are given in the same way as for an homogeneous Markov chain. The non-homogeneous / homogeneous character is then defined state by state. In the case of a non-homogeneous transition distribution, the function :math:`p_{ii}(t)` represents the self-transition in state `i` as a function of the index parameter `t`. The corresponding transition distribution defined in the transition probability matrix gives the relative weights of the probabilities of leaving state `i`.
 
-For a MONOMOLECULAR function :math:`\left(p_{ii}(t)=a+b \exp{(-ct)}\right)`, the following constraints apply::
+For a MONOMOLECULAR function :math:`\left(p_{ii}(t)=a+b \exp{(-ct)}\right)`, the following constraints apply:
 
-    0 |leq| PARAMETER 1 |leq| 1
-    0 |leq| PARAMETER 1 + PARAMETER 2 |leq| 1
-    PARAMETER 3 > 0
+* 0 |leq| PARAMETER 1 |leq| 1
+* 0 |leq| PARAMETER 1 + PARAMETER 2 |leq| 1
+* PARAMETER 3 > 0
     
-For a MONOMOLECULAR function :math:`\left(p_{ii}(t)=a/ \{ 1+b \exp{(-ct)}\}\right)`, the following constraints apply::
+For a MONOMOLECULAR function :math:`\left(p_{ii}(t)=a/ \{ 1+b \exp{(-ct)}\}\right)`, the following constraints apply:
 
-    0 |leq| PARAMETER 1 |leq| 1
-    0 |leq| PARAMETER 1 / (1. + PARAMETER 2) |leq| 1
-    PARAMETER 3 > 0
+* 0 |leq| PARAMETER 1 |leq| 1
+* 0 |leq| PARAMETER 1 / (1. + PARAMETER 2) |leq| 1
+* PARAMETER 3 > 0
 
 4.7.8 type MIXTURE
 ==================
@@ -471,11 +471,11 @@ A model of 'tops' is defined by three parameters, namely the growth probability 
     AXILLARY_PROBABILITY : 0.6
     RYTHM_RATIO : 0.8
     
-    The following constraints apply to the parameters:
+The following constraints apply to the parameters:
     
-    0.05 |leq| PROBABILITY |leq| 1
-    0.05 |leq| AXILLARY_PROBABILITY |leq| 1
-    1/3 |leq| RYTHM_RATIO |leq| 3
+* 0.05 |leq| PROBABILITY |leq| 1
+* 0.05 |leq| AXILLARY_PROBABILITY |leq| 1
+* 1/3 |leq| RYTHM_RATIO |leq| 3
 
 4.7.14 type VECTOR_DISTANCE
 ===========================
