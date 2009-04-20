@@ -3446,13 +3446,28 @@ int Hidden_markov_tree::get_nb_values(int variable) const
   assert((variable >= 0) && (variable < _nb_ioutput_process));
   // the number of values for a float random variable does not make much sense
 
-  if (npprocess[variable] != NULL)
-     nb_values= npprocess[variable]->nb_value;
+  if (npprocess[variable+1] != NULL)
+     nb_values= npprocess[variable+1]->nb_value;
   else
-     nb_values= piprocess[variable]->nb_value;
+     nb_values= piprocess[variable+1]->nb_value;
 
   return nb_values;
 }
+
+/*****************************************************************
+ *
+ * Return "true" if and only if process ivariable is parametric
+ *
+ **/
+
+bool Hidden_markov_tree::is_parametric(int ivariable) const
+{
+  assert((ivariable >= 0) && (ivariable < _nb_ioutput_process));
+  // all float random processes are parametric
+
+  return (piprocess[ivariable+1] != NULL);
+}
+
 
 /*****************************************************************
  *

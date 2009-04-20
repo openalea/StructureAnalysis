@@ -862,7 +862,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) c
          while(it < end)
          {
             ivectors[vector_id]= new int[_nb_integral];
-            iidentifier[vector_id]= vector_id;
+            iidentifier[vector_id]= *it;
             val= trees[t]->get(*it);
             for (var= 0; var < _nb_integral; var++)
                ivectors[vector_id][var]= val.Int(var);

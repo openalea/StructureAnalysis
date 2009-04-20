@@ -568,6 +568,8 @@ public :
    int get_nb_doutput_process() const;
    /** return the number of values of a process with finite values*/
    int get_nb_values(int variable) const;
+   /** return "true" if process ivariable is parametric */
+   bool is_parametric(int ivariable) const;
    Nonparametric_tree_process** get_non_parametric_process() const;
    Nonparametric_tree_process* get_non_parametric_process(int variable) const;
    Parametric_process** get_iparametric_process() const;

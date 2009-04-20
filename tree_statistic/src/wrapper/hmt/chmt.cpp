@@ -694,6 +694,10 @@ BOOST_PYTHON_MODULE(chmt)
     ("CHmt", init< const Hidden_markov_tree&, optional< bool, bool> >())
         .def("ExtractData", &CHmt_wrapper_extract_data,
                             return_value_policy< manage_new_object >())
+        .def("IsParametric", &Hidden_markov_tree::is_parametric,
+                            "IsParametric(self, variable) -> bool \n\n"
+                            "Return True if process 'variable' "
+                            "is parametric")
         .def("Likelihood", &CHmt_wrapper_likelihood,
                             "Likelihood(self, trees) -> float \n\n"
                             "Return the likelihood of the parameters"

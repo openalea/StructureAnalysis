@@ -303,15 +303,17 @@ class HiddenMarkovTree:
                 raise IndexError, msg
             if not(is_observation):
                 nb_windows=w
-                
             # part of the filename which identifies the involved variable
             ref_file_id=str(variable+1)
             # part of the filename which identifies the graph to be displayed
             file_id=ref_file_id
+            # in the special case of observation distributions,
+            # the suffix can be "0" or void, depending on
+            # the number of values
             if not(is_observation):
                 file_id+=str(ftype+2)
-            # in the special case of observation distributions, 
-            # the suffix can be "0" or void, depending on the number of values
+            elif not(self.__chmt.IsParametric(variable)):
+                file_id+=str(0)
 ##            prefix="ftmp"
 ##            file_created=False
 ##            file_list=[]
@@ -454,6 +456,61 @@ class HiddenMarkovTree:
 ##            self.__plot=_PlotManager(file_list, 
 ##                                                prefix+str(variable+1), 1)
 
+    def Print(self, ViewPoint="Observation", variable=0, Title=""):
+        """Graphical output into a postscript file using Gnuplot.py.        
+        
+        Usage:  Print(ViewPoint="FirstOccurrenceRoot", variable=0)
+        Other possible values for ViewPoint: 
+            FirstOccurrenceLeaves
+            SojournSize
+            Counting
+            Observation
+            """
+        if type(ViewPoint)!=str:
+            msg='bad type for argument "ViewPoint": '\
+              +"type 'str' expected"
+            raise TypeError, msg
+        import os
+        is_observation=False
+        if ViewPoint.upper()=="FIRSTOCCURRENCEROOT":
+            ftype=CharacteristicType.FIRST_OCCURRENCE_ROOT
+        elif ViewPoint.upper()=="FIRSTOCCURRENCELEAVES":
+            ftype=CharacteristicType.FIRST_OCCURRENCE_LEAVES
+        elif ViewPoint.upper()=="SOJOURNSIZE":
+            ftype=CharacteristicType.SOJOURN_SIZE
+        elif ViewPoint.upper()=="COUNTING":
+            ftype=CharacteristicType.NB_ZONES
+        elif ViewPoint.upper()=="OBSERVATION":
+            ftype=0 #CharacteristicType.OBSERVATION
+            nb_windows=self.__chmt.NbStates()
+            is_observation=True
+        else:
+            msg='bad value for argument "ViewPoint": '+ViewPoint
+            raise ValueError, msg
+        try:
+            w=self.__chmt.NbValues(variable)
+        except RuntimeError:
+            msg="variable index out of range: "+str(variable)
+            raise IndexError, msg
+        if not(is_observation):
+            nb_windows=w
+            
+        # part of the filename which identifies the involved variable
+        ref_file_id=str(variable+1)
+        # part of the filename which identifies the graph to be displayed
+        file_id=ref_file_id
+        if not(is_observation):
+            file_id+=str(ftype+2)
+        elif not(self.__chmt.IsParametric(variable)):
+            file_id+=str(0)
+        # in the special case of observation distributions,
+        # the suffix can be "0" or void, depending on the number of values
+        try:
+            self.__chmt.plot_print(Title=Title, Suffix=file_id)
+        except RuntimeError, f:
+            raise FormatError, f
+
+
     def Save(self, file_name, format="ASCII", overwrite=False):
         """Save HiddenMarkovTree object into a file.
         
@@ -467,9 +524,10 @@ class HiddenMarkovTree:
             except IOError:
                 f=file(file_name, 'w+')
             else:
-                msg="File "+file_name+" already exist"
+                msg="File "+file_name+" already exists"
                 raise IOError, msg
             f.close()
+        import string
         if not (string.upper(format)=="ASCII" 
                 or string.upper(format)=="SPREADSHEET"):
             msg="unknown file format: "+str(format)
@@ -523,6 +581,16 @@ class HiddenMarkovTree:
         chmt_data=chmt_data.StateTrees()
         return HiddenMarkovTreeData(chmt_data, self, True)
 
+    def StatePermutation(self, perm):
+        """Permutation of the states of self.
+        perm[i]==j means that current state i will become new state j.
+        
+        Usage:  StatePermutation(list)"""
+        try:
+            self.__chmt.StatePermutation(perm)
+        except RuntimeError, e:
+            raise FormatError, e
+
     def _chmt(self):
         return self.__chmt
     
@@ -544,16 +612,6 @@ class HiddenMarkovTree:
                     if str(val).upper() != "NAN":
                         criteria[name]=val
         return criteria
-
-    def StatePermutation(self, perm):
-        """Permutation of the states of self.
-        perm[i]==j means that current state i will become new state j.
-        
-        Usage:  StatePermutation(list)"""
-        try:
-            self.__chmt.StatePermutation(perm)
-        except RuntimeError, e:
-            raise FormatError, e
     
     def _likelihood(self, trees):
         # compute the likelihood of a given set of trees
