@@ -18,7 +18,7 @@ int main(void) {
   bool *fparam = NULL;
   int* perm;
   Format_error error;
-  const char * mixpath= "./tmp.mix";
+  const char * mixpath= "./tmp.mix", * spmixpath= "./tmp_sp.mix";
   const char * gnupath = "./tmp_mix", * gnu_datapath = "./tmp_mix_data";
   const char * margpath= "./marg_mix", * gnu_tmppath = "./tmp_mix_d";
   const char * np_modelpath= "./np_model.mix", * gnu_tmpnppath = "./tmp_mix_d";
@@ -171,6 +171,8 @@ int main(void) {
   else {
     mv_estim->ascii_write(cout, true);
     mv_estim->plot_write(error, gnu_tmppath, "");
+    mv_estim->spreadsheet_write(error, spmixpath);
+    cout << error << endl;
     delete mv_estim;
     mv_estim = NULL;
   }
@@ -217,6 +219,8 @@ int main(void) {
   else {
     cout << "Value: " << endl;
     mv_np1->ascii_write(cout, false);
+    mv_np1->spreadsheet_write(error, spmixpath);
+    cout << error << endl;
   }
 
 
@@ -234,10 +238,21 @@ int main(void) {
   cout << endl;
 
   mv_data = mv_np1->simulation(error, nb_vector);
+
   if (mv_data == NULL) {
     cout << error;
     return 1;
   }
+
+  cout << "Extract marginal distribution for variable 2" << endl;
+  marginal = mv_np1->extract_distribution(error, 2);
+
+  if (marginal != NULL) {
+    marginal->ascii_print(cout, false, false, false);
+    delete marginal;
+  }
+  else
+    cout << error;
 
   cout << "Gnuplot output for Mv_Mixture_data ('" << gnu_tmpnppath << "' file)" << endl;
   mv_data->plot_write(error, gnu_tmpnppath, "");
