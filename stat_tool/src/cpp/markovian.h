@@ -281,6 +281,9 @@ public :
     std::ostream& ascii_print(std::ostream &os, Histogram **empirical_observation,
                   bool exhaustive, bool file_flag) const;
 
+    // affichage des lois d'observation dans un tableur
+    std::ostream& spreadsheet_print(std::ostream &os, Histogram **empirical_observation=NULL) const;
+  
     /** sortie gnuplot */
     bool plot_print(const char *prefix, const char *title,
             int process, Histogram **empirical_observation = NULL) const;

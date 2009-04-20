@@ -524,8 +524,9 @@ public:
 
     ret = new Parametric_model(*marginal, marginal_hist);
 
-    if (marginal_hist != NULL)
-      delete marginal_hist;
+    // margina_hist is only a reference, included in mixt_data
+    /* if (marginal_hist != NULL)
+      delete marginal_hist;*/
 
     if (marginal != NULL) {
       delete marginal;
@@ -679,6 +680,7 @@ void class_mv_mixture()
     .def("simulate", MvMixtureWrap::simulation,
      return_value_policy< manage_new_object >(),
      python::arg("nb_element"),
+	 "simulate(self, nb_element) -> _MvMixtureData. \n\n"
      "Simulate nb_element elements")
 
     .def("nb_component", &Mv_Mixture::get_nb_component,
@@ -693,6 +695,8 @@ void class_mv_mixture()
 
     .def("extract_mixture", MvMixtureWrap::extract_mixture,
      return_value_policy< manage_new_object >(),
+     python::args("variable"),
+	 "extract_mixture(self, variable) -> _Distribution. \n\n"
      "Return the _MvMixture distribution")
 
     .def("extract_data", MvMixtureWrap::extract_data,
@@ -702,14 +706,18 @@ void class_mv_mixture()
 
     .def("_is_parametric", MvMixtureWrap::_is_parametric,
      python::args("variable"),
+     "_is_parametric(self, variable) -> bool. \n\n"
      "Return True if the variable is parametric"
      )
 
     .def("file_ascii_write", MvMixtureWrap::file_ascii_write,
-     "Save _MvMixture into a file")
+     python::args("path", "exhaustive_flag"),
+     "file_ascii_write(self, path, exhaustive_flag) -> None. \n\n"
+	 "Save _MvMixture into a file")
 
     .def("plot_write", MvMixtureWrap::plot_write,
      python::args("prefix", "title"),
+     "plot_write(self, prefix, title) -> None. \n\n"
      "Write GNUPLOT files")
 
     .def("state_permutation", MvMixtureWrap::state_permutation,

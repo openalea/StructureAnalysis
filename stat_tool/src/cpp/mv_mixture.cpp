@@ -172,7 +172,7 @@ Mv_Mixture::Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag, int inb_var
  *--------------------------------------------------------------*/
 
 Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
-               const Parametric_process **ppcomponent,
+                       const Parametric_process **ppcomponent,
                const Nonparametric_process **pnpcomponent)
 
 {
@@ -211,7 +211,7 @@ Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
  *--------------------------------------------------------------*/
 
 Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
-               int *nb_value, bool *force_param) {
+                       int *nb_value, bool *force_param) {
 
 
   register int var, i;
@@ -389,7 +389,7 @@ Mv_Mixture& Mv_Mixture::operator=(const Mv_Mixture &mixt)
  *--------------------------------------------------------------*/
 
 Parametric_model* Mv_Mixture::extract_parametric_model(Format_error &error , int ivariable,
-                               int index) const
+                                                       int index) const
 
 {
   bool status = true;
@@ -437,7 +437,7 @@ Parametric_model* Mv_Mixture::extract_parametric_model(Format_error &error , int
  *--------------------------------------------------------------*/
 
 Distribution* Mv_Mixture::extract_nonparametric_model(Format_error &error ,
-                              int ivariable, int index) const
+                                                      int ivariable, int index) const
 
 {
   bool status = true;
@@ -490,59 +490,62 @@ Distribution* Mv_Mixture::extract_distribution(Format_error &error , int ivariab
     pDistribution = new Distribution();
     pDistribution->nb_value = 0;
 
-    if (pcomponent[variable] != NULL) {
+    if (pcomponent[variable] != NULL) { // parametric distribution
       for (i = 0;i < nb_component;i++) {
-    if (pcomponent[variable]->observation[i]->nb_value > pDistribution->nb_value) {
-      pDistribution->nb_value = pcomponent[variable]->observation[i]->nb_value;
-    }
-      }
+        if (pcomponent[variable]->observation[i]->nb_value > pDistribution->nb_value) {
+            pDistribution->nb_value = pcomponent[variable]->observation[i]->nb_value;
+            }
+        }
 
       pDistribution->offset = pDistribution->nb_value; // majorant
       for (i = 0;i < nb_component;i++) {
-    if (pcomponent[variable]->observation[i]->offset < pDistribution->offset) {
-      pDistribution->offset = pcomponent[variable]->observation[i]->offset;
-    }
-      }
+        if (pcomponent[variable]->observation[i]->offset < pDistribution->offset) {
+            pDistribution->offset = pcomponent[variable]->observation[i]->offset;
+            }
+        }
 
       pDistribution->mass = new double[pDistribution->nb_value];
       pDistribution->cumul = new double[pDistribution->nb_value];
       pmass = pDistribution->mass - 1;
       for (i = 0;i < pDistribution->nb_value;i++) {
-    pweight = weight->mass;
-    *++pmass = 0.;
-    for (j = 0;j < nb_component;j++) {
-      if (i < pcomponent[variable]->observation[j]->nb_value) {
-        *pmass += *pweight * pcomponent[variable]->observation[j]->mass[i];
-      }
-      pweight++;
-    }
+        pweight = weight->mass;
+        *++pmass = 0.;
+        for (j = 0;j < nb_component;j++) {// non-parametric distribution
+            if (i < pcomponent[variable]->observation[j]->nb_value) {
+                *pmass += *pweight * pcomponent[variable]->observation[j]->mass[i];
+                }
+            pweight++;
+            }
       }
     }
     else { // npcomponent[variable] != NULL)
-      for (i = 0;i < nb_component;i++) {
-    if (npcomponent[variable]->get_observation(i)->nb_value > pDistribution->nb_value) {
-      pDistribution->nb_value = npcomponent[variable]->get_observation(i)->nb_value;
-    }
-      }
+        for (i = 0;i < nb_component;i++) {
+            if (npcomponent[variable]->get_observation(i)->nb_value > pDistribution->nb_value) {
+                pDistribution->nb_value = npcomponent[variable]->get_observation(i)->nb_value;
+                }
+            }
 
-      pDistribution->offset = pDistribution->nb_value; // majorant
-      for (i = 0;i < nb_component;i++) {
-    if (npcomponent[variable]->get_observation(i)->offset < pDistribution->offset) {
-      pDistribution->offset = npcomponent[variable]->get_observation(i)->offset;
-    }
-      }
+        pDistribution->offset = pDistribution->nb_value; // majorant
+        for (i = 0;i < nb_component;i++) {
+            if (npcomponent[variable]->get_observation(i)->offset < pDistribution->offset) {
+                pDistribution->offset = npcomponent[variable]->get_observation(i)->offset;
+            }
+        }
 
-      pmass = pDistribution->mass - 1;
-      for (i = 0;i < pDistribution->nb_value;i++) {
-    pweight = weight->mass;
-    *++pmass = 0.;
-    for (j = 0;j < nb_component;j++) {
-      if (i < npcomponent[variable]->get_observation(j)->nb_value) {
-        *pmass += *pweight * npcomponent[variable]->get_observation(j)->mass[i];
-      }
-      pweight++;
-    }
-      }
+        pDistribution->mass = new double[pDistribution->nb_value];
+        pDistribution->cumul = new double[pDistribution->nb_value];
+
+        pmass = pDistribution->mass - 1;
+        for (i = 0;i < pDistribution->nb_value;i++) {
+            pweight = weight->mass;
+            *++pmass = 0.;
+            for (j = 0;j < nb_component;j++) {
+                if (i < npcomponent[variable]->get_observation(j)->nb_value) {
+                    *pmass += *pweight * npcomponent[variable]->get_observation(j)->mass[i];
+                }
+                pweight++;
+            }
+        }
     }
 
     pDistribution->cumul_computation();
@@ -594,8 +597,8 @@ Mv_Mixture_data* Mv_Mixture::extract_data(Format_error &error) const
  *--------------------------------------------------------------*/
 
 Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , int nb_variable ,
-                double *weight, Parametric_process **ppcomponent,
-                Nonparametric_process **pnpcomponent)
+                                double *weight, Parametric_process **ppcomponent,
+                                Nonparametric_process **pnpcomponent)
 
 {
   bool status;
@@ -647,7 +650,7 @@ Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , int nb_
  *--------------------------------------------------------------*/
 
 Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
-                  double cumul_threshold)
+                                  double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1217,7 +1220,7 @@ ostream& Mv_Mixture::line_write(ostream &os) const
  *--------------------------------------------------------------*/
 
 ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data ,
-                 bool exhaustive , bool file_flag) const
+                                 bool exhaustive , bool file_flag) const
 
 {
   register int i, var,
@@ -1469,7 +1472,7 @@ ostream& Mv_Mixture::ascii_write(ostream &os , bool exhaustive) const
  *--------------------------------------------------------------*/
 
 bool Mv_Mixture::ascii_write(Format_error &error , const char *path ,
-                          bool exhaustive) const
+                             bool exhaustive) const
 
 {
   bool status;
@@ -1495,145 +1498,155 @@ bool Mv_Mixture::ascii_write(Format_error &error , const char *path ,
 /*--------------------------------------------------------------*
  *
  *  Ecriture d'un melange et de la structure de donnees associee
- *  dans un fichier au format tableur.
+ *  dans un fichier au format tableur. Les probabilites sont
+ *  remises a l'echelle des effectifs dans les lois parametriques,
+ *  et aussi pour les lois non-parametriques mais au niveau
+ *  des histogrammes
  *
  *  arguments : stream, pointeur sur un objet Mv_Mixture_data.
  *
  *--------------------------------------------------------------*/
 
 ostream& Mv_Mixture::spreadsheet_write(ostream &os , const Mv_Mixture_data *mixt_data) const
-
 {
-  /*  register int i;
+  register int i, var,
+    data_var; // index that corresponds to var in mixt_data
   int bnb_parameter;
-  double scale[MIXTURE_NB_COMPONENT];
-  const Distribution *pcomponent[MIXTURE_NB_COMPONENT];
+  int *var_array = NULL;
+  Histogram **observation= NULL;
+  Format_error error;
+  Vectors *vect_data = NULL;
+
+  os << STAT_word[STATW_MIXTURE] << endl << endl;
+  os << nb_component << "\t" << STAT_word[STATW_DISTRIBUTIONS] << endl << endl;
+
+  os << STAT_word[STATW_WEIGHTS] << endl;
+  for (i = 0;i < nb_component;i++)
+    os << weight->mass[i] << "\t";
+  os << endl;
 
 
-  os << STAT_word[STATW_MIXTURE] << "\t" << nb_component << "\t" << STAT_word[STATW_DISTRIBUTIONS] << endl;
-  spreadsheet_characteristic_print(os);
+  if (nb_var > 0) {
+    os << "\n" << nb_var << "\t"
+       << STAT_word[nb_var == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
 
-  if (mixt_data) {
-    double likelihood , information;
-    Test test(CHI2);
+    for(var= 1; var <= nb_var; var++)
+      {
+    os << "\n" << STAT_word[STATW_VARIABLE];
+    os << "\t" << var;
 
+    if (npcomponent[var-1] != NULL)
+      os << "\t" << STAT_word[STATW_NONPARAMETRIC];
+    else
+      os << "\t" << STAT_word[STATW_PARAMETRIC];
 
-    os << "\n" << STAT_label[STATL_HISTOGRAM] << "\t";
-    mixt_data->spreadsheet_characteristic_print(os);
+    os << endl;
+    if (mixt_data != NULL) {
+      if (mixt_data->type[0] == STATE)
+        data_var = var;
+      else
+        data_var = var-1;
+      os << "\n";
 
-    likelihood = Distribution::likelihood_computation(*mixt_data);
-    information = mixt_data->Histogram::information_computation();
-
-    os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << likelihood << "\t"
-       << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / mixt_data->nb_vector << endl;
-    os << STAT_label[STATL_MAX_LIKELIHOOD] << "\t" << information << "\t"
-       << STAT_label[STATL_INFORMATION] << "\t" << information / mixt_data->nb_vector << endl;
-    os << STAT_label[STATL_DEVIANCE] << "\t" << 2 * (information - likelihood) << endl;
-
-    bnb_parameter = nb_parameter_computation();
-
-    os << "\n" << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
-       << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AIC] << ")\t"
-       << 2 * (likelihood - bnb_parameter) << endl;
-
-    if (0 < bnb_parameter < mixt_data->nb_vector - 1) {
-      os << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
-         << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AICc] << ")\t"
-         << 2 * (likelihood - (double)(bnb_parameter * mixt_data->nb_vector) /
-            (double)(mixt_data->nb_vector - bnb_parameter - 1)) << endl;
+      if (mixt_data->component != NULL)
+        observation= mixt_data->component[data_var];
+      else
+        observation= NULL;
     }
+    if (npcomponent[var-1] == NULL)
+      pcomponent[var-1]->spreadsheet_print(os, observation);
+    else
+      npcomponent[var-1]->spreadsheet_print(os, observation);
 
-    os << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
-       << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BIC] << ")\t"
-       << 2 * likelihood - bnb_parameter * log((double)mixt_data->nb_vector) << endl;
+      } // end for (var)
 
-    os << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
-       << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BICc] << ")\t"
-       << 2 * likelihood - penalty_computation() << endl;
+    if (mixt_data != NULL) {
+      double likelihood , information;
 
-    likelihood = likelihood_computation(*mixt_data);
-    information = mixt_data->information_computation();
-
-    os << "\n" << STAT_label[STATL_CLASSIFICATION_LIKELIHOOD] << "\t" << likelihood << "\t"
-       << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / mixt_data->nb_vector << endl;
-    os << STAT_label[STATL_MAX_CLASSIFICATION_LIKELIHOOD] << "\t" << information << "\t"
-       << STAT_label[STATL_INFORMATION] << "\t" << information / mixt_data->nb_vector << endl;
-
-    chi2_fit(*mixt_data , test);
-    os << "\n";
-    test.spreadsheet_print(os);
-  }
-
-  else {
-    for (i = 0;i < nb_component;i++) {
-      os << "\n" << STAT_word[STATW_DISTRIBUTION] << "\t" << i + 1 << "\t"
-         << STAT_word[STATW_WEIGHT] << "\t"  << weight->mass[i] << endl;
-      component[i]->spreadsheet_print(os);
-      component[i]->spreadsheet_characteristic_print(os , true);
+      bnb_parameter = nb_parameter_computation(MIN_PROBABILITY);
+      if (mixt_data->type[0] == STATE) {
+    var_array = new int[1];
+    var_array[0] = 1;
+    vect_data = mixt_data->select_variable(error, 1, var_array, false);
+    if (vect_data == NULL) {
+      cerr << error;
+      likelihood = D_INF;
     }
-  }
-
-  for (i = 0;i < nb_component;i++) {
-    pcomponent[i] = component[i];
-
-    if (mixt_data) {
-      scale[i] = mixt_data->nb_vector * weight->mass[i];
-    }
-    else {
-      scale[i] = weight->mass[i];
-    }
-  }
-
-  os << "\n";
-  if (mixt_data) {
-    os << "\t" << STAT_label[STATL_HISTOGRAM];
-  }
-  os << "\t" << STAT_label[STATL_MIXTURE];
-  for (i = 0;i < nb_component;i++) {
-    os << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
-  }
-  if (mixt_data) {
-    os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-       << STAT_label[STATL_FUNCTION];
-  }
-  os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE] << " "
-     << STAT_label[STATL_FUNCTION] << endl;
-
-  spreadsheet_print(os , nb_component , pcomponent , scale , true , mixt_data);
-
-  if (mixt_data) {
-    os << "\n" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
-    mixt_data->weight->spreadsheet_characteristic_print(os);
-
-    os << "\n\t" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << " "
-       << "\t" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
-
-    weight->Distribution::spreadsheet_print(os , false , false , false , mixt_data->weight);
-
-    for (i = 0;i < nb_component;i++) {
-      os << "\n" << STAT_word[STATW_DISTRIBUTION] << "\t" << i + 1 << "\t"
-         << STAT_word[STATW_WEIGHT] << "\t"  << weight->mass[i] << endl;
-      component[i]->spreadsheet_print(os);
-      component[i]->spreadsheet_characteristic_print(os , true);
-
-      os << "\n" << STAT_label[STATL_HISTOGRAM] << " " << i + 1 << "\t";
-      mixt_data->component[i]->spreadsheet_characteristic_print(os , true);
-
-      if (mixt_data->component[i]->nb_element > 0) {
-        os << "\n\t" << STAT_label[STATL_HISTOGRAM] << " " << i + 1
-           << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1
-           << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
-           << " " << i + 1 << " " << STAT_label[STATL_FUNCTION]
-           << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
-           << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
-
-        component[i]->Distribution::spreadsheet_print(os , true , false , false , mixt_data->component[i]);
+    else
+      likelihood = likelihood_computation(*vect_data, true);
       }
+      else
+    likelihood = likelihood_computation(*mixt_data, true);
+
+      information = mixt_data->information_computation();
+      os << "\n";
+
+      os << STAT_label[STATL_INFORMATION] << "\t" << information << " ("
+         << information / mixt_data->nb_vector << ")" << endl;
+
+      // print the likelihood
+
+      if (likelihood != D_INF)
+    {
+      os << "\n";
+      os << STAT_label[STATL_LIKELIHOOD] << "\t" << likelihood << "\t"
+         << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / mixt_data->nb_vector << "\t" << endl;
     }
+
+      // print AIC, AICc and BIC
+      if (likelihood != D_INF)
+    {
+      os << STAT_label[STATL_DEVIANCE] << "\t" << 2 * (information - likelihood) << endl;
+
+      bnb_parameter = nb_parameter_computation(MIN_PROBABILITY);
+
+      os << "\n";
+      }
+      os << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t 2 * "
+         << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AIC] << "): "
+         << 2 * (likelihood - bnb_parameter) << endl;
+
+      if (0 < bnb_parameter < mixt_data->nb_vector - 1) {
+        os << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t 2 * "
+           << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AICc] << "): "
+           << 2 * (likelihood - (double)(bnb_parameter * mixt_data->nb_vector) /
+               (double)(mixt_data->nb_vector - bnb_parameter - 1)) << endl;
+      }
+
+      os << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t 2 * "
+         << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BIC] << "): "
+         << 2 * likelihood - bnb_parameter * log((double)mixt_data->nb_vector) << endl;
+
+      os << bnb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t 2 * "
+         << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BICc] << "): "
+         << 2 * likelihood - penalty_computation() << endl;
+
+
+    } // end if (likelihood > 0)
+  } // end if (mixt_data != NULL)
+
+  if (mixt_data != NULL) {
+    os << "\n";
+    os << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_HISTOGRAM] << " - ";
+    mixt_data->weight->spreadsheet_print(os);
+
+    os << "\n";
+    os << "   | " << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_HISTOGRAM] << "\t"
+       << " | " << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_DISTRIBUTION] << endl;
+
+    weight->Distribution::spreadsheet_print(os, false , false , false , mixt_data->weight);
   }
-  */
+
+  if (var_array != NULL) {
+    delete [] var_array;
+    if (vect_data != NULL)
+      delete vect_data;
+  }
+
   return os;
+
 }
+
 
 
 /*--------------------------------------------------------------*

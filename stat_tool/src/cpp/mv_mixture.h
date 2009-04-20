@@ -160,7 +160,7 @@ public :
     Mv_Mixture_data* cluster(Format_error &error,  const Vectors &vec,
                              int algorithm=VITERBI) const;
 
-    /** return "true" if ith process is parametric */
+    /** return "true" if process ivariable is parametric */
     bool is_parametric(int ivariable) const;
 
     // acces membres de la classe

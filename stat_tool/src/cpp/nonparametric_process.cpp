@@ -1338,6 +1338,70 @@ std::ostream& Nonparametric_process::ascii_print(std::ostream &os,
   return os;
 
 }
+/*--------------------------------------------------------------*
+ *
+ *  Affichage des lois d'observation au format tableur 
+ *  a partir d'un flux de sortie et des histogrammes correspondant 
+ *  aux observations pour chaque etat.
+ *
+ *--------------------------------------------------------------*/
+
+std::ostream& Nonparametric_process::spreadsheet_print(std::ostream &os, 
+						       Histogram **empirical_observation) const {
+
+  register int i , j;
+  int buff , width[2];
+  double *pmass;
+
+  if (observation != NULL)
+    {
+      // affichage des lois d'observation
+      for(i= 0; i < nb_state; i++)
+      {
+         os << "\n" << STAT_word[STATW_STATE] << "\t" << i << "\t"
+            << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+         pmass= observation[i]->mass+observation[i]->offset;
+
+         for(j= observation[i]->offset; j < observation[i]->nb_value; j++)
+         {
+            if (*pmass > 0.)
+               os << STAT_word[STATW_OUTPUT] << "\t" << j << "\t" << *pmass << endl;
+            pmass++;
+         }
+
+	 // affichage des histogrammes correspondants
+         if ((empirical_observation != NULL))
+         {
+            os << "\n";
+
+            os << "   | " << STAT_label[STATL_STATE] << "\t" << i << "\t"
+               << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_HISTOGRAM]
+               << " | " << STAT_label[STATL_STATE] << "\t" << i << "\t"
+               << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_DISTRIBUTION] << endl;
+
+            observation[i]->spreadsheet_print(os, false, false, false, empirical_observation[i]);
+         }
+      }
+
+
+      // affichage de la matrice des probabilites d'observation
+      os << "\n";
+
+      os << STAT_label[STATL_OBSERVATION_PROBABILITIY_MATRIX] << endl;
+
+      os << "\n";
+
+      for(i= 0; i < nb_state; i++) {
+        for(j= 0; j < observation[i]->nb_value; j++) 
+	  os << observation[i]->mass[j] << "\t";
+	os << "\n";
+      }
+
+    }
+  
+  return os;
+
+}
 
 /*--------------------------------------------------------------*
  *
@@ -1444,7 +1508,7 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
 
             if (title != NULL)
                out_file << " \"" << title << " - " << STAT_label[STATL_OUTPUT_PROCESS]
-                        << " " << process << "\"";
+                        << "\t" << process << "\"";
             out_file << "\n\n";
 
             j= histo_index;
@@ -1460,12 +1524,12 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
                            << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
-                           << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
-                           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+                           << " title \"" << STAT_label[STATL_STATE] << "\t" << val << "\t"
+                           << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_HISTOGRAM]
                            << "\" with impulses,\\" << endl;
                   out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
-                           << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
-                           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
+                           << " title \"" << STAT_label[STATL_STATE] << "\t" << val << "\t"
+                           << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_DISTRIBUTION]
                            << "\" with linespoints" << endl;
                   j++;
                }
@@ -1474,8 +1538,8 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
                   out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                            << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
                            << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
-                           << " title \"" << STAT_label[STATL_STATE] << " " << val << " "
-                           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION]
+                           << " title \"" << STAT_label[STATL_STATE] << "\t" << val << "\t"
+                           << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_DISTRIBUTION]
                            << "\" with linespoints" << endl;
                }
 
