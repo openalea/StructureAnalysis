@@ -15,9 +15,14 @@ if env['compiler'] == 'mingw':
 
 # Build wrappers as shared libraries
 #sources = Split("""""")
+sources = env.ALEAGlob('*.h')
+sources = env.ALEAGlob('*.cpp')
 
 LIBS = ['vptool', 'vpstat_tool', 'vpsequence']
 env.AppendUnique(LIBS=LIBS)
 
-env.ALEAWrapper("../sequence_analysis", "csequence", ["csequence.cpp"])
+env.AppendUnique(CPPDEFINES=['MESSAGE'])
+env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
+
+env.ALEAWrapper("../openalea/sequence_analysis", "_sequence_analysis", sources)
 
