@@ -109,6 +109,15 @@ def _MvMixture_old_print(self, variable, Title=""):
         file_id += "0"
     interface.StatInterface.plot_print(self, Title=Title, Suffix=file_id)
 
+def _MvMixture_old_print(self, variable, Title=""):
+    """Print a given variable into .ps file"""
+    if ((variable < 0) or (variable >= self.nb_variable())):
+        raise IndexError, "variable index out of range: "+str(variable)
+    file_id = str(variable+1)
+    if (not self._is_parametric(variable)):
+        file_id += "0"
+    interface.StatInterface.plot_print(self, Title=Title, Suffix=file_id)
+
 def _MvMixture_get_plotable(self):
     """Return a plotable object (not yet implemented)"""
     return None
