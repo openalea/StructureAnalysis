@@ -15,6 +15,7 @@ from openalea.stat_tool.data_transform import Shift, Merge, Fit, ValueSelect, \
     SelectVariable, SelectIndividual, MergeVariable, ExtractDistribution, \
     ExtractHistogram, ExtractData
 
+
 class data():
     """Create some common data sets for the classes
     shift, fit, merge, ...
@@ -113,11 +114,6 @@ class TestShift(data):
         assert Shift(vn, 1, 2)        
         assert str(Shift(vn, 1, 2)) == str(vn.shift(1, 2))
         
-    def test_shift_sequence(self):
-        """not implemented - sequence"""
-        pass
-        #raise NotImplementedError()
-
 
 class TestFit:
     
@@ -195,10 +191,6 @@ class TestValueSelect(data):
         hist_data = self.hist_data()
         assert hist_data.value_select(1, 20, True)
     
-    def test_sequence_data(self):
-        """not implemented - sequence """
-        return None
-
 class TestSelectVariable(data):
     
     def __init__(self):
@@ -218,10 +210,6 @@ class TestSelectVariable(data):
             for j in range(3):
                 assert v1[j][0] == v[j][i]
                 
-    def test_sequence(self):
-        """not implemented - sequence"""
-        pass
-        
 
 class TestSelectIndividual(data):
     
@@ -240,10 +228,6 @@ class TestSelectIndividual(data):
         assert len(selection) == 2
         print selection[0] == [1, 3, 4]
         
-    def test_sequence(self):
-        """not implemented -  sequence"""
-        pass
-    
     def test_top(self):
         """not implemented - top"""
         pass
@@ -438,9 +422,7 @@ class TestMerge(data):
         
         assert str(a)==str(v)
 
-    def test_sequence(self):
-        """not implemented - sequence"""
-        pass
+        
     
     def test_markov(self):
         """not implemented - markov"""
@@ -478,8 +460,3 @@ class TestMergeVariable(data):
                 assert merged[i][j] == v[i][j]
                 
         assert str(merged) == str(merged2)
-        
-    def test_sequence(self):
-        """not implemented -  sequence"""
-        pass
-    

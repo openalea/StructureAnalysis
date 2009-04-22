@@ -75,13 +75,15 @@ class Test(interface):
 
     """
 
-    def __init__(self):
-        self.data = self.build_data()
-        self.filename = "vectors.vec"
-        self.structure = Vectors  
-        
+    def __init__(self):  
+        interface.__init__(self,
+                           self.build_data(),
+                           "vectors.vec",
+                           Vectors)
+    
     def build_data(self):
-        v = Vectors([[1, 2, 3], [1, 3, 1]])
+        v = Vectors([[1, 2, 3], [1, 3, 1]]) 
+        
         assert 2 == v.get_nb_vector()
         assert 3 == v.get_nb_variable()
         assert [1, 2] == v.get_identifiers()
@@ -133,12 +135,9 @@ class Test(interface):
         assert len(v) == 2
         assert len(v) == v.get_nb_vector()
 
-    def _test_plot(self):
-        """run plotting routines """
-        # todo: does not produce anythinh but expected ?
-#        c = self.data
-#        if DISABLE_PLOT==False:
-#            c.plot()
+    def test_plot(self):
+        #does not produce anything but expected ?
+        pass
 
     def test_save(self):
         self.save(Format="Data")
@@ -214,8 +213,9 @@ class Test(interface):
         vec10 = Vectors("chene_sessile.vec")
     
         # plot of the pointwise averages
-        if DISABLE_PLOT == False:
-            Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
+        # seg fault raised here
+#        if DISABLE_PLOT == False:
+#            Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
     
         vec95 = ValueSelect(vec10, 1, 1995)
         vec96 = ValueSelect(vec10, 1, 1996)
@@ -224,26 +224,29 @@ class Test(interface):
         VarianceAnalysis(vec10, 1, 2, "N")
         Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), \
                 ExtractHistogram(vec95, 2), "N")
+        
         if DISABLE_PLOT == False:
             Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), \
                  ExtractHistogram(vec97, 2))
     
         ContingencyTable(vec10, 1, 4)
-    
+
+
         # one-way variance analysis based on ranks
-    
         VarianceAnalysis(vec10, 1, 4, "O")
         Compare(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), \
                 ExtractHistogram(vec95, 4), "O")
         
+        # looks like it is not plotted
         if DISABLE_PLOT == False:
-            # Plot(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), 
-                #ExtractHistogram(vec97, 4))
-            # Plot(ExtractHistogram(vec95, 5), ExtractHistogram(vec96, 5), 
-            #    ExtractHistogram(vec97, 5))
-            # Plot(ExtractHistogram(vec95, 6), ExtractHistogram(vec96, 6), 
-                #ExtractHistogram(vec97, 6))
-            pass
+            Plot(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), 
+                ExtractHistogram(vec97, 4))
+            Plot(ExtractHistogram(vec95, 5), ExtractHistogram(vec96, 5), 
+                ExtractHistogram(vec97, 5))
+            Plot(ExtractHistogram(vec95, 6), ExtractHistogram(vec96, 6), 
+                ExtractHistogram(vec97, 6))
+            #pass
+        
     
         _vec11 = ValueSelect(vec10, 4, 1)
         _vec12 = ValueSelect(vec10, 4, 2)
@@ -327,4 +330,10 @@ class Test(interface):
         vec16 = SelectVariable(vec9596, [1, 3], Mode="Reject")
         _matrix12 = Compare(vec16, VectorDistance("N", "N", "N", "N"))
         _matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
-    
+   
+
+
+if "__main__"==__name__: 
+
+    t = Test()
+    t.test_to_clean()

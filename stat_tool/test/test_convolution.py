@@ -160,3 +160,6 @@ def test1():
     Save(convol31, "nothofagus_antartica_2.xls", Format="SpreadSheet")
 
 
+if __name__=="__main__":
+
+    test1()

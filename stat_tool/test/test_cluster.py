@@ -33,16 +33,12 @@ class Test:
         assert str(fagus.cluster_limit([2, 4, 6, 8, 10])) == str(histo4)
 
     def test_cluster_vectors(self):
-        """not yet implemented"""
         v = Vectors([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
         assert str(Cluster(v, "Step", 1, 2)) == str(v.cluster_step(1, 2))  
         assert str(Cluster(v, "Limit", 1, [2, 4, 6])) == \
             str(v.cluster_limit(1, [2, 4 ,6]))        
 
-    def test_cluster_sequence(self):
-        """not yet implemented"""
-        pass
-    
+
     def test_cluster_discrete_sequence(self):
         """not yet implemented"""
         pass
