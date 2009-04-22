@@ -132,12 +132,6 @@ def Cluster(obj, type, *args, **kargs):
                  "Limit": "cluster_limit",
                  "Information" : "cluster_information" }
 
-    # Get param : step, ratio or limits
-    try:
-        param = args[0]
-    except IndexError:
-        raise TypeError("Cluster expect an argument for '%s'"%(type))
-
     # Map type with a function name
     try:
         func_name = type_map[type]
@@ -148,22 +142,25 @@ def Cluster(obj, type, *args, **kargs):
     except AttributeError:
         raise AttributeError("Object doesn't support %s."%(func_name))
 
-
     # optional arg : variable 
     try:
-        if obj.get_nb_variable() == 1:
-            return func(param)
+        if obj.get_nb_variable() == 1:           
+            if len(args)!=1:
+                raise TypeError("Cluster expect only 1 argument after ('%s') because there is only 1 variable "%(type))
+            return func(1, args[0]) # 1 for the first and unique variable
         else:
+            if len(args)!=2:
+                raise TypeError("Cluster expect two arguments following the option (n-variable case) '%s': the variable id and the %s argument "%(type,type))
             try:
                 variable = args[0]
-                param = args[1]    
+                param = args[1]
             except KeyError:
                 raise KeyError("Number of variables > 1 but no variable argument provided")         
             return func(variable, param)
         
-
     except AttributeError: #no get_nb_variable
-        return func(param)
+        raise AttributeError("the method get_nb_variable was not found in the list of methods!")
+        return func(args[0])
     
     
 
