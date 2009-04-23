@@ -37,11 +37,11 @@ if __name__ == '__main__':
           url=url,
           license=license,
  
-          namespace_packages=['vplants'],
-          create_namespaces=True,
+#          namespace_packages=['vplants'],
+          create_namespaces=False,
 
           # Packages
-          packages=['vplants.tree_reduction',],
+          packages=find_packages('src'),
 
           package_dir={ "" : "src"  },
           
