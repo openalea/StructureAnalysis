@@ -828,9 +828,9 @@ void class_vectors()
      "Return the number of vectors")
     .def("__getitem__", VectorsWrap::get_item)
 
-    .def("get_nb_variable", &Vectors::get_nb_variable,
+    .def_readonly("get_nb_variable", &Vectors::get_nb_variable,
      "Return the number of variables")
-    .def("get_nb_vector", &Vectors::get_nb_vector,
+    .def_readonly("get_nb_vector", &Vectors::get_nb_vector,
      "Return the number of vectors")
 
     // Identifiers
@@ -1007,7 +1007,7 @@ public:
 
     return boost::shared_ptr<Vector_distance>(dist);
   }
-  
+
   static void file_ascii_write(const Vector_distance& d, const char* path, bool exhaustive)
   {
     bool result = true;
@@ -1040,7 +1040,7 @@ void class_vectordistance()
 
     .def(self_ns::str(self))
     .def("__len__", &Vector_distance::get_nb_variable)
-    
+
     .def("file_ascii_write", VectorDistanceWrap::file_ascii_write,
      "Save vector distance summary into a file")
 
@@ -1072,7 +1072,7 @@ void class_regression()
     ("_Regression", "Regression class")
     // Python Operators
     .def(self_ns::str(self)) // __str__
-    
+
     .def("file_ascii_write", RegressionWrap::file_ascii_write,
      "Save vector distance summary into a file")
     ;

@@ -84,8 +84,8 @@ class Test(interface):
     def build_data(self):
         v = Vectors([[1, 2, 3], [1, 3, 1]]) 
         
-        assert 2 == v.get_nb_vector()
-        assert 3 == v.get_nb_variable()
+        assert 2 == v.get_nb_vector
+        assert 3 == v.get_nb_variable
         assert [1, 2] == v.get_identifiers()
         assert v
         return v
@@ -133,7 +133,7 @@ class Test(interface):
     def test_len(self):
         v = self.data
         assert len(v) == 2
-        assert len(v) == v.get_nb_vector()
+        assert len(v) == v.get_nb_vector
 
     def test_plot(self):
         #does not produce anything but expected ?

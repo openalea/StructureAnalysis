@@ -322,7 +322,7 @@ def Extract(obj, *args):
 
         # _Vectors with one variable
         try:
-            nb_var = obj.get_nb_variable()
+            nb_var = obj.get_nb_variable
             if (nb_var>1):
                 try:
                     variable = args[0]
@@ -578,10 +578,9 @@ def ValueSelect(obj, *args, **kargs):
 
     keep = __get_mode__(kargs)
 
-    print keep
     # Test for vectors
     try:
-        nb_variable = obj.get_nb_variable()
+        nb_variable = obj.get_nb_variable
         variable = 1
     except AttributeError:
         nb_variable = 0
@@ -683,7 +682,7 @@ def Shift(obj, *args):
     
     try:
         # Try vector.shift
-        nb_var = obj.get_nb_variable()
+        nb_var = obj.get_nb_variable
 
         if(nb_var > 1):
 

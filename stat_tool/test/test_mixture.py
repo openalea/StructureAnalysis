@@ -97,7 +97,7 @@ class Test(interface):
         d3 = Binomial(0, 12, 0.8)
         
         data = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
-        assert data.nb_component() == 3
+        assert data.nb_component == 3
         return data
             
     def test_empty(self):

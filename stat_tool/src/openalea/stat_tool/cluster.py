@@ -144,7 +144,7 @@ def Cluster(obj, type, *args, **kargs):
 
     # optional arg : variable 
     try:
-        if obj.get_nb_variable() == 1:           
+        if obj.get_nb_variable == 1:           
             if len(args)!=1:
                 raise TypeError("Cluster expect only 1 argument after ('%s') because there is only 1 variable "%(type))
             return func(1, args[0]) # 1 for the first and unique variable
@@ -159,7 +159,7 @@ def Cluster(obj, type, *args, **kargs):
             return func(variable, param)
         
     except AttributeError: #no get_nb_variable
-        raise AttributeError("the method get_nb_variable was not found in the list of methods!")
+        #raise AttributeError("the method get_nb_variable was not found in the list of methods!")
         return func(args[0])
     
     
@@ -237,7 +237,7 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
 
     # Default variable value
     try:
-        nb_variable = obj.get_nb_variable()
+        nb_variable = obj.get_nb_variable
         if(nb_variable == 1 and not param2): 
             param2 = param1
             param1 = 1

@@ -228,7 +228,7 @@ void class_mixture()
      python::arg("nb_element"),
      "Simulate nb_element elements")
 
-    .def("nb_component", &Mixture::get_nb_component,
+    .def_readonly("nb_component", &Mixture::get_nb_component,
      "Return the number of components")
 
     .def("extract_component", MixtureWrap::extract,
