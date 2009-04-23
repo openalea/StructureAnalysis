@@ -20,7 +20,6 @@ license = 'Cecill-C'
 
 packages = [ namespace+"."+pkg for pkg in find_packages('src') if 'openalea' not in pkg]
 
-
 setup(
     name=name,
     version=version,
