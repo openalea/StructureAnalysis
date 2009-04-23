@@ -8,6 +8,7 @@ from openalea.sequence_analysis.sequences import Sequences
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
+from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
 
@@ -58,8 +59,11 @@ class Test(interface):
                      ,0 ,0 ,0 ,0 ,0]])
         assert data
 
-        assert data.get_nb_sequence() == 2
-        assert data.get_nb_variable() == 1
+        assert data.get_nb_sequence == 2
+        assert data.get_nb_variable == 1
+        assert data.get_cumul_length == 52
+        assert data.get_max_length == 30
+
         assert [0, 1] == data.get_identifiers()
         
         return data        
@@ -92,7 +96,7 @@ class Test(interface):
     def test_len(self):
         seq = self.data
         assert len(seq) == 2
-        assert len(seq) == seq.get_nb_sequence()
+        assert len(seq) == seq.get_nb_sequence
 
     def test_plot(self):        
         self.plot()
@@ -116,7 +120,10 @@ class Test(interface):
         
     def test_extract(self):
         #todo
-        pass
+        seqn = self.seqn
+        assert seqn.extract(1)
+        assert seqn.extract(2)
+        
 
     def test_extract_data(self):
         pass 
@@ -232,8 +239,8 @@ class Test(interface):
         
         sall = s1.merge([s2])
         
-        assert sall.get_nb_sequence() == 4
-        assert sall.get_nb_variable() == 2
+        assert sall.get_nb_sequence == 4
+        assert sall.get_nb_variable == 2
             
     def test_merge_and_Merge(self):
         s1 = self.seqn
@@ -261,12 +268,12 @@ class Test(interface):
         s3 = self.seq1
         
         sall = s1.merge_variable([s2],1) # why 1 ? same result with 2 !
-        assert sall.get_nb_sequence() == 2
-        assert sall.get_nb_variable() == 4
+        assert sall.get_nb_sequence == 2
+        assert sall.get_nb_variable == 4
         
         sall =  s1.merge_variable([s3],1)
-        assert sall.get_nb_sequence() == 2
-        assert sall.get_nb_variable() == 3 
+        assert sall.get_nb_sequence == 2
+        assert sall.get_nb_variable == 3 
 
     def test_merge_variable_and_MergeVariable(self):
         s1 = self.seqn
@@ -297,11 +304,23 @@ class Test(interface):
         assert str(Cluster(seqn, "Limit", 1, [2, 4, 6])) == \
             str(seqn.cluster_limit(1, [2, 4 ,6]))
     
+    def test_transcode(self):
+        """This functionality need to be checked. 
+        
+        See also the vector case!"""
+        seq = self.seqn
+        assert  str(seq.transcode(1, [1, 2]))==\
+            str(Transcode(seq, 1, [1, 2 ]))
+            
+    def reverse(self):
+        """reverse to be checked. seems to give same output as input"""
+        s = self.seqn
+        s.reverse()
         
         
     def _others(self):
-        #cluster, cumulate, difference, indexextract, lengthselect, merge
-        #mergevariable, moving average, reccurrenceTimeSequences, removerun
-        #reverse, segmentatoinExtravt, selectindividual, selectvariable, shift, 
-        #transcode, valueselect, variablescaling, transormposition
+        #, cumulate, difference, indexextract, lengthselect, 
+        #, moving average, reccurrenceTimeSequences, removerun
+        # segmentatoinExtravt, 
+        # variablescaling, transormposition
         pass
