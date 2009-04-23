@@ -18,6 +18,7 @@
  *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
  *
  *-----------------------------------------------------------------------------*/
+#include "wrapper_util.h"
 
 
 #include "stat_tool/stat_tools.h"
@@ -90,11 +91,11 @@ public:
 
     tops = tops_ascii_read(error, filename, old_format);
 
-/*    if(!top_parameters)
+    if(!tops)
     {
 	  stat_tool::wrap_util::throw_error(error);
     }
-*/
+
     return boost::shared_ptr<Tops>(tops);
   }
 
@@ -109,8 +110,12 @@ void class_tops()
   class_< Tops, bases< Sequences > >
     ("_Tops", "Tops")
     .def("__init__", make_constructor(TopsWrap::tops_from_file))
+    .def(self_ns::str(self)) //__str__
+
+    .def("get_max_position", &Tops::get_max_position)
     ;
 }
+
 
 
 
