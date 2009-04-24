@@ -24,6 +24,7 @@ how to use VPlants.Tree_reduction see :ref:`tree_reduction_user`.
 
 .. toctree::
     :maxdepth: 1
-            
-    openalea_tree_reduction_itr_ref.rst
-    openalea_tree_reduction_topological_sort_ref.rst
+
+    vplants_tree_reduction_graph_ref.rst
+    vplants_tree_reduction_itr_ref.rst
+    vplants_tree_reduction_topological_sort_ref.rst

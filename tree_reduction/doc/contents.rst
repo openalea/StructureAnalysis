@@ -3,7 +3,7 @@
 
 .. _tree_reduction:
 
-.. module:: tree_reduction
+.. module:: vplants.tree_reduction
 
 VPlants Tree_reduction documentation
 ####################################
