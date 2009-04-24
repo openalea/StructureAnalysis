@@ -72,9 +72,17 @@ void class_top_parameters()
 {
 
   class_< Top_parameters, bases< STAT_interface > >
-    ("_Top_parameters", "Top Parameters")
+    ("_Top_parameters", "Top parameters")
     .def("__init__", make_constructor(TopParametersWrap::top_parameters_from_file))
+    .def(self_ns::str(self)) //__str__
+    .def_readonly("get_probability", &Top_parameters::get_probability)
+    .def_readonly("get_axillary_probability", &Top_parameters::get_axillary_probability)
+    .def_readonly("get_rhythm_ratio", &Top_parameters::get_rhythm_ratio)
+    .def("get_max_position", &Top_parameters::get_max_position)
+
+
     ;
+
 }
 
 
@@ -99,6 +107,29 @@ public:
     return boost::shared_ptr<Tops>(tops);
   }
 
+
+//     stat_tool::wrap_util::auto_ptr_array<const Parametric *>
+//       dist(new const Parametric*[nb_dist]);
+
+//     for(int i=0; i<nb_dist; i++)
+//     dist[i] = boost::python::extract< Parametric *>(dists[i]);
+
+//     conv = convolution_building(error, nb_dist, dist.get());
+
+
+
+  static Histogram* get_nb_internode(const Tops& top)
+  {
+
+	  Histogram *h = NULL;
+
+	  h = top.get_nb_internode();
+
+	  return h;
+
+  }
+
+
 };
 
 
@@ -110,12 +141,18 @@ void class_tops()
   class_< Tops, bases< Sequences > >
     ("_Tops", "Tops")
     .def("__init__", make_constructor(TopsWrap::tops_from_file))
+    .def(init<Sequences&>())
+
+
     .def(self_ns::str(self)) //__str__
 
     .def("get_max_position", &Tops::get_max_position)
+    .def("get_nb_internode", TopsWrap::get_nb_internode,
+    		return_value_policy<manage_new_object> ())
+    .def("extract", &Tops::extract,
+    		return_value_policy<manage_new_object> ())
+    .def("shift", &Tops::shift,
+    		return_value_policy<manage_new_object> ())
+
     ;
 }
-
-
-
-
