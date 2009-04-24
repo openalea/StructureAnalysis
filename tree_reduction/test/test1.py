@@ -1,7 +1,5 @@
 # -*- coding: cp1252 -*-
-import sys
-sys.path+=[r'..']
-from ITR.rootedgraph import *
+from vplants.tree_reduction.graph import *
    
 def test1():
     edges=[(1,2),(2,3),(3,4),(3,5),(3,6)]

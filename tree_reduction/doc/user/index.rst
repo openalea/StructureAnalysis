@@ -26,3 +26,4 @@ how to use VPlants.Tree_reduction see :ref:`tree_reduction_reference`.
     :maxdepth: 1
             
     *rst
+    *txt

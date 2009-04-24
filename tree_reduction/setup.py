@@ -8,8 +8,8 @@ __revision__ = "$Id: setup.py 6086 2009-03-13 16:24:30Z cokelaer $"
 
 
 name = 'VPlants.tree_reduction'
-namespace = 'openalea'
-pkg_name = 'openalea.tree_reduction'
+namespace = 'vplants'
+pkg_name = 'vplants.tree_reduction'
 version = '0.6.2'
 description = 'tree reduction.'
 long_description = """"""
@@ -29,7 +29,7 @@ setup(
     url=url,
     license=license,
 
-    namespace_packages=['openalea'],
+    namespace_packages=['vplants'],
     create_namespaces = True,
     zip_safe = False,
 

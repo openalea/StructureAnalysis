@@ -66,3 +66,33 @@ def QPPs_compt(in1):
   
     return [out1]
 
+def signat_vert_comp(in1):
+    '''    
+    '''
+
+    return [out1]
+
+def signat_edg_comp(sv):
+    '''    
+    '''
+
+    return [se]
+
+def selected_QPP(in1, in2):
+    '''    
+    '''
+
+    return [out1]
+
+def rooted_graph():
+    '''    
+    '''
+
+    return [out1]
+
+def rooted_graph_representation(in1):
+    '''    
+    '''
+    
+    return []
+
