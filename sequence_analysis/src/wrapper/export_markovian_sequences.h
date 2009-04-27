@@ -15,42 +15,15 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: stat_tool_wrap.cpp 6080 2009-03-13 16:11:35Z cokelaer $
+ *        $Id: export_convolution.h 5235 2008-07-11 10:39:32Z dufourko $
  *
  *-----------------------------------------------------------------------------*/
 
+#ifndef __CLASS_MARKOVIAN_SEQUENCES__
+#define __CLASS_MARKOVIAN_SEQUENCES__
+
+// Boost.Python Wrapper export function
+void class_markovian_sequences();
 
 
-/* WRAPPER Boost.python for sequences class */
-#include "export_tops.h"
-#include "export_sequences.h"
-#include "export_correlation.h"
-#include "export_markovian_sequences.h"
-
-#include <boost/python.hpp>
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 103400
-#include <boost/python/docstring_options.hpp>
 #endif
-
-using namespace boost::python;
-
-
-// Define python module "_sequence_analysis"
-BOOST_PYTHON_MODULE(_sequence_analysis)
-{
-#if BOOST_VERSION >= 103400
-  docstring_options doc_options(true, false);
-#endif
-  class_sequences();
-  
-  class_markovian_sequences();
-  
-  class_correlation();
-
-  class_tops();
-  class_top_parameters();
-
-
-}
-

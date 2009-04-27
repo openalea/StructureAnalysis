@@ -24,6 +24,7 @@
 
 // Boost.Python Wrapper export function
 void class_sequences();
+void class_sequence_charateristics();
 
 
 #endif

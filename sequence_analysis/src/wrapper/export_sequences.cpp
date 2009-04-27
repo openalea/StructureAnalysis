@@ -955,60 +955,48 @@ void class_sequences() {
 	// Identifiers
 	.def("get_identifiers", &SequencesWrap::get_identifiers,
 			"Return list of identifiers")
-
 	// Select
 	.def("value_select", SequencesWrap::value_select,
 		return_value_policy<manage_new_object> (),
 		python::args("variable", "min", "max", "keep"),
 		"Selection of individuals according to the values taken by a variable")
-
 	.def("select_variable", SequencesWrap::select_variable,
-			return_value_policy<manage_new_object> (), python::args(
-					"variables", "keep"),
-			"select variable given a list of index")
-
+		return_value_policy<manage_new_object> (), 
+        python::args("variables", "keep"),
+    	"select variable given a list of index")
 	.def("select_individual", SequencesWrap::select_individual,
-			return_value_policy<manage_new_object> (),
-			python::args("identifiers", "keep"),
-			"Select individuals given a list of identifiers")
-
+		return_value_policy<manage_new_object> (),
+		python::args("identifiers", "keep"),
+		"Select individuals given a list of identifiers")
 	// parameters
 	.def("index_parameter_select", SequencesWrap::index_parameter_select,
-			return_value_policy<manage_new_object> (),
-			python::args("min_index_parameter", "max_index_parameter", "keep"),
-			"Select sequences in an index parameter range")
-
+		return_value_policy<manage_new_object> (),
+		python::args("min_index_parameter", "max_index_parameter", "keep"),
+		"Select sequences in an index parameter range")
 	.def("index_parameter_extract", SequencesWrap::index_parameter_extract,
-			return_value_policy<manage_new_object> (),
-			python::args("min_index_parameter", "max_index_parameter"),
-			"Select sequences in an index parameter range")
-
+		return_value_policy<manage_new_object> (),
+		python::args("min_index_parameter", "max_index_parameter"),
+		"Select sequences in an index parameter range")
     .def("remove_index_parameter", SequencesWrap::remove_index_parameter,
 		return_value_policy<manage_new_object> (),
 		"Remove index parameter")
-
 	// Reverse
 	.def("reverse", SequencesWrap::reverse,
-			return_value_policy<manage_new_object> (),
-			"reverse")
-
+		return_value_policy<manage_new_object> (),
+		"reverse")
 	// Extract
 	.def("extract", SequencesWrap::extract_histogram, return_value_policy<
-			manage_new_object> (), python::args("variable"),
-			"Extract histogram")
-
+		manage_new_object> (), python::args("variable"),
+		"Extract histogram")
 	// Merge
 	.def("merge", SequencesWrap::merge,
 			return_value_policy<manage_new_object> (), "Merge sequences")
-
 	.def("merge_variable", SequencesWrap::merge_variable, return_value_policy<
 			manage_new_object> (), "Merge variables")
-
 	// Cluster
 	.def("cluster_step", SequencesWrap::cluster_step, return_value_policy<
 			manage_new_object> (), python::args("variable", "step"),
 			"Cluster Step")
-
 	.def("cluster_limit", SequencesWrap::cluster_limit, return_value_policy<
 			manage_new_object> (), python::args("variable", "limits"),
 			"Cluster limit")
@@ -1016,97 +1004,80 @@ void class_sequences() {
 	.def("transcode", SequencesWrap::transcode, return_value_policy<
 			manage_new_object> (), python::args("variable", "symbols"),
 			"Transcode")
-
 	// Output
 	.def("ascii_data_write", SequencesWrap::ascii_data_write,
 			"Return a string with the object representation")
-
 	// save to file
 	.def("file_ascii_write", SequencesWrap::file_ascii_write,
 			"Save vector summary into a file")
-
 	.def("file_ascii_data_write", SequencesWrap::file_ascii_data_write,
 		"Save vector data into a file")
-
 	// Shift
 	.def("shift", SequencesWrap::shift,
 		return_value_policy<manage_new_object> (),
 		python::args("variable","param"),
 		"Shift")
-
 	//remove run
 	.def("remove_run",SequencesWrap::remove_run,
 			return_value_policy<manage_new_object> (),
 			python::args("variable","ivalue", "position", "max_run_length"),
 			"RemoveRun")
-
 	//length select
 	.def("length_select",SequencesWrap::length_select,
 		return_value_policy<manage_new_object> (),
 		python::args("min_length", "max_length", "keep"),
 		"RemoveRun")
-
 	//scaling
 	.def("scaling", SequencesWrap::scaling,
 		return_value_policy<manage_new_object> (),
 		python::args("variable", "scaling_coeff"),
 		"scaling variable")
-
 	//round
 	.def("round", SequencesWrap::round,
 		return_value_policy<manage_new_object> (),
 		python::args("variable", "mode"),
 		"round variable")
-
 	//segmentation extract
 	.def("segmentation_extract",SequencesWrap::segmentation_extract,
 		return_value_policy<manage_new_object> (),
 		python::args("variable", "nb_values", "values", "keep"),
 		"Segmentation extract")
-
 	//cumulate
 	.def("cumulate", SequencesWrap::cumulate,
 		return_value_policy<manage_new_object> (),
 		python::args("variable"),
 		"Cumulate")
-
 	//difference
 	.def("difference", SequencesWrap::difference,
 		return_value_policy<manage_new_object> (),
 		python::args("variable", "first_element"),
 		"Difference")
-
 	//moving average
 	//Filtrage de type moyenne mobile des sequences.
 	.def("moving average", SequencesWrap::moving_average,
 		return_value_policy<manage_new_object> (),
 		python::args("nb_point" ,"filter" , "variable" , "begin_end" , "output"),
 		"Moving average ")
-
 	//pointwise average
 	.def("pointwise_average", SequencesWrap::pointwise_average,
 		return_value_policy<manage_new_object> (),
 		python::args("standard_deviation", "output", "path", "format"),
 		"Pointwise average")
-
 	//recurrence time sequences
 	.def("recurrence_time_sequences", SequencesWrap::recurrence_time_sequences,
 		return_value_policy<manage_new_object> (),
 		python::args("variable", "value"),
 		"Recurrence time sequences")
-
 	//sojourn_time_sequences
 	.def("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences,
 		return_value_policy<manage_new_object> (),
 		python::args("variable"),
 		"Sojourn time sequences")
-
 	//transform position
 	.def("transform position", SequencesWrap::transform_position,
 		return_value_policy<manage_new_object> (),
 		python::args("step"),
 		"Transform position")
-
 	//cross
 	.def("cross", SequencesWrap::cross,
 		return_value_policy<manage_new_object> (),
@@ -1116,6 +1087,35 @@ void class_sequences() {
 }
 
 
+class SequenceCharacteristicsWrap {
 
+public:
 
+};
+
+void class_sequence_characteritics() {
+
+    class_<Sequence_characteristics> ("_SequenceCharacteristics", "SequenceCharacteristics")
+    .def(init<int>())
+    .def(init<Sequence_characteristics, bool>())
+    .def(init<Sequence_characteristics, char>())
+    .def("get_nb_value", &Sequence_characteristics::get_nb_value)
+    .def("get_index_value", &Sequence_characteristics::get_index_value,
+		return_value_policy<manage_new_object> (),	"get_index_value")
+    .def("get_first_occurrence", &Sequence_characteristics::get_first_occurrence,
+		return_value_policy<manage_new_object> (), "get first occurrence time")
+    .def("get_recurrence_time", &Sequence_characteristics::get_recurrence_time,
+		return_value_policy<manage_new_object> (), "get recurrence time")
+    .def("get_sojourn_time", &Sequence_characteristics::get_sojourn_time,
+		return_value_policy<manage_new_object> (), "")
+//todo
+//    .def("get_initial_run", &Sequence_characteristics::get_initial_run)
+    .def("get_final_run", &Sequence_characteristics::get_final_run,
+		return_value_policy<manage_new_object> (), "")
+    .def("get_nb_run", &Sequence_characteristics::get_nb_run,
+    	return_value_policy<manage_new_object> (), "")
+   .def("get_nb_occurrence", &Sequence_characteristics::get_nb_occurrence,
+		return_value_policy<manage_new_object> (), "")
+    ;
+}
 
