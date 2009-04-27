@@ -28,10 +28,11 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
         
           # Packages
-          namespace_packages = [namespace],
-          create_namespaces = False,
+          #namespace_packages = [namespace],
+          #create_namespaces = False,
 
-          packages=[namespace+".tree_statistic",
+          packages=[namespace,
+                    namespace+".tree_statistic",
                     namespace+".tree_statistic.trees",
                     namespace+".tree_statistic.hmt",
                     namespace+".tree_statistic.int_fl_containers",
