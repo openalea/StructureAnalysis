@@ -25,6 +25,7 @@
 #include "export_plotable.h"
 
 #include "export_base.h"
+#include "export_curves.h"
 #include "export_distribution.h"
 #include "export_histogram.h"
 #include "export_mixture.h"
@@ -33,6 +34,7 @@
 #include "export_compound.h"
 #include "export_distancematrix.h"
 #include "export_markovian.h"
+#include "export_regression.h"
 
 #include <boost/python.hpp>
 #include <boost/version.hpp>
@@ -52,13 +54,16 @@ BOOST_PYTHON_MODULE(_stat_tool)
   docstring_options doc_options(true, false);
 #endif
 
+
   class_constant();
   class_format_error();
   class_stat_interface();
 
   class_vectors();
   class_vectordistance();
+  
   class_regression();
+  class_regression_kernel();
 
   class_distance_matrix();
   class_clusters();
@@ -84,5 +89,6 @@ BOOST_PYTHON_MODULE(_stat_tool)
 
   class_plotable();
 
+  class_curves();
 }
 

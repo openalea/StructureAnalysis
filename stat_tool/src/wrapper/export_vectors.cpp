@@ -1049,35 +1049,3 @@ void class_vectordistance()
 
 }
 
-class RegressionWrap
-{
-public:
-
- static void file_ascii_write(const Regression& d, const char* path, bool exhaustive)
-  {
-    bool result = true;
-    Format_error error;
-
-    result = d.ascii_write(error, path, exhaustive);
-    if (!result)
-       stat_tool::wrap_util::throw_error(error);
-
-  }
-
-};
-
-void class_regression()
-{
-  class_< Regression, bases< STAT_interface > >
-    ("_Regression", "Regression class")
-    // Python Operators
-    .def(self_ns::str(self)) // __str__
-
-    .def("file_ascii_write", RegressionWrap::file_ascii_write,
-     "Save vector distance summary into a file")
-    ;
-}
-
-
-
-

@@ -15,16 +15,17 @@
  *                                                                              
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
  *       
- *        $Id$
+ *        $Id: export_vectors.h 5235 2008-07-11 10:39:32Z dufourko $
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_STAT_TOOL_VECTORS__
-#define __CLASS_STAT_TOOL_VECTORS__
+#ifndef __CLASS_STAT_TOOL_REGRESSION__
+#define __CLASS_STAT_TOOL_REGRESSION__
 
 // Boost.Python Wrapper export function
-void class_vectors();
-void class_vectordistance();
+
+void class_regression();
+void class_regression_kernel();
 
 
 #endif
