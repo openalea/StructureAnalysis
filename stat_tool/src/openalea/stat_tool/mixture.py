@@ -109,15 +109,6 @@ def _MvMixture_old_print(self, variable, Title=""):
         file_id += "0"
     interface.StatInterface.plot_print(self, Title=Title, Suffix=file_id)
 
-def _MvMixture_old_print(self, variable, Title=""):
-    """Print a given variable into .ps file"""
-    if ((variable < 0) or (variable >= self.nb_variable())):
-        raise IndexError, "variable index out of range: "+str(variable)
-    file_id = str(variable+1)
-    if (not self._is_parametric(variable)):
-        file_id += "0"
-    interface.StatInterface.plot_print(self, Title=Title, Suffix=file_id)
-
 def _MvMixture_get_plotable(self):
     """Return a plotable object (not yet implemented)"""
     return None
@@ -146,35 +137,36 @@ _stat_tool._MvMixture.save_backup = _stat_tool._MvMixture.save
 
 
 def _MvMixture_save(self, file_name, format="ASCII", overwrite=False):
-        """Save MvMixture object into a file.
+    """Save MvMixture object into a file.
 
-        Argument file_name is a string designing the file name and path.
-        String argument format must be "ASCII" or "SpreadSheet".
-        Boolean argument overwrite is false is the file should not
-        be overwritten.
-        """
-        if not overwrite:
-            try:
-                f = file(file_name, 'r')
-            except IOError:
-                f = file(file_name, 'w+')
-            else:
-                msg = "File " + file_name + " already exists"
-                raise IOError, msg
-            f.close()
-        import string
-        if not (string.upper(format)=="ASCII"
-                or string.upper(format)=="SPREADSHEET"):
-            msg = "unknown file format: " + str(format)
-            raise ValueError, msg
+    Argument file_name is a string designing the file name and path.
+    String argument format must be "ASCII" or "SpreadSheet".
+    Boolean argument overwrite is false is the file should not
+    be overwritten.
+    """
+    if not overwrite:
+        try:
+            f = file(file_name, 'r')
+        except IOError:
+            f = file(file_name, 'w+')
         else:
-            try:
-                _stat_tool._MvMixture.save_backup(self, file_name, Detail=1,
+            msg = "File " + file_name + " already exists"
+            raise IOError, msg
+        f.close()
+    import string
+    if not (string.upper(format)=="ASCII"
+           or string.upper(format)=="SPREADSHEET"):
+        msg = "unknown file format: " + str(format)
+        raise ValueError, msg
+    else:
+        try:
+            _stat_tool._MvMixture.save_backup(self, file_name, Detail=1,
                                                   ViewPoint='', Format=format)
-            except RuntimeError, error:
-                raise FormatError, error
+        except RuntimeError, error:
+            raise error
 
-_stat_tool._MvMixture.state_permutation_backup = _stat_tool._MvMixture.state_permutation
+_stat_tool._MvMixture.state_permutation_backup = \
+    _stat_tool._MvMixture.state_permutation
 
 
 def _MvMixture_state_permutation(self, perm):
