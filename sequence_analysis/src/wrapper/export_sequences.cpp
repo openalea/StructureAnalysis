@@ -1093,7 +1093,7 @@ public:
 
 };
 
-void class_sequence_characteritics() {
+void class_sequence_characteristics() {
 
     class_<Sequence_characteristics> ("_SequenceCharacteristics", "SequenceCharacteristics")
     .def(init<int>())

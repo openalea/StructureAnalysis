@@ -1,4 +1,4 @@
-/*------------------------------------------------------------------------------
+ /*------------------------------------------------------------------------------
  *
  *        VPlants.Stat_Tool : VPlants Statistics module
  *
@@ -19,12 +19,11 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_MARKOVIAN_SEQUENCES__
-#define __CLASS_MARKOVIAN_SEQUENCES__
+#ifndef __CLASS_SEQUENCE_ANALYSIS_FUNCTION__
+#define __CLASS_SEQUENCE_ANALYSIS_FUNCTION__
 
 // Boost.Python Wrapper export function
-void class_markovian_sequences();
-void class_self_transition();
+void class_function();
 
 
 #endif

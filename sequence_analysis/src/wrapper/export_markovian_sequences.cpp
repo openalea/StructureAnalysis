@@ -27,9 +27,9 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
-#include "sequence_analysis/renewal.h"
+#include "stat_tool/regression.h"
 #include "sequence_analysis/sequences.h"
-#include "sequence_analysis/tops.h"
+#include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
 #include <boost/python.hpp>
@@ -134,6 +134,44 @@ public:
   	}
 
 
+  	static Markovian_sequences* transcode(const Markovian_sequences& seq,
+		int variable, boost::python::list& symbol, bool add_flag = false) {
+
+  		Format_error error;
+
+  		int nb_symbol = len(symbol);
+  		stat_tool::wrap_util::auto_ptr_array<int> l(new int[nb_symbol]);
+
+  		//? needed ?
+  		int expected_nb_symbol = (int) (seq.get_max_value(variable - 1)
+  				- seq.get_min_value(variable - 1)) + 1;
+  		//? needed ?
+  		if (nb_symbol != expected_nb_symbol)
+  			stat_tool::wrap_util::throw_error("Bad number of Symbol");
+
+  		for (int i = 0; i < nb_symbol; i++)
+  			l[i] = boost::python::	extract<int> (symbol[i]);
+
+  		Markovian_sequences* ret = seq.transcode(error, variable, l.get(), add_flag);
+
+  		if (!ret)
+  			stat_tool::wrap_util::throw_error(error);
+
+  		return ret;
+	}
+
+	static Markovian_sequences* remove_index_parameter(const Markovian_sequences& seq)
+  	{
+  	    Format_error error;
+  	    Markovian_sequences* ret;
+  	    ret = seq.remove_index_parameter(error);
+  	    if (!ret)
+  	        stat_tool::wrap_util::throw_error(error);
+  	    return ret;
+  	}
+
+
+
 
 };
 
@@ -159,14 +197,15 @@ void class_markovian_sequences() {
 		return_value_policy<manage_new_object> (),
 		python::args("variable", "step", "mode"),
 	    "Cluster")
+	.def("transcode", &MarkovianSequencesWrap::transcode,
+		return_value_policy<manage_new_object> (),
+		python::args("variable", "symbol", "add_flag"),
+	    "Transcode")
+	 .def("remove_index_parameter", &MarkovianSequencesWrap::remove_index_parameter,
+	    return_value_policy<manage_new_object> (),
+	    "Remove index parameter")
 
 /*
-
-
-    Markovian_sequences* merge(Format_error &error , int nb_sample ,
-                               const Markovian_sequences **iseq) const;
-    Markovian_sequences* transcode(Format_error &error , int ivariable , int *symbol ,
-                                   bool add_flag = false) const;
     Markovian_sequences* consecutive_values(Format_error &error , std::ostream &os ,
                                             int ivariable , bool add_flag = false) const;
     Markovian_sequences* cluster(Format_error &error , int ivariable , int nb_class ,
@@ -174,7 +213,6 @@ void class_markovian_sequences() {
     Markovian_sequences* cluster(Format_error &error , int variable , int nb_class ,
                                  double *ilimit) const;
 
-    Markovian_sequences* remove_index_parameter(Format_error &error) const;
     Markovian_sequences* select_variable(Format_error &error , int inb_variable ,
                                          int *ivariable , bool keep = true) const;
     Markovian_sequences* merge_variable(Format_error &error , int nb_sample ,
@@ -189,12 +227,9 @@ void class_markovian_sequences() {
     Markovian_sequences* split(Format_error &error , int step) const;
 i Markovian_sequences* split(Format_error &error , int step) const;
 
-    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
-                                   bool exhaustive = false) const;
     bool ascii_data_write(Format_error &error , const char *path ,
                           char format = 'c' , bool exhaustive = false) const;
 
-    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(Format_error &error , const char *path ,
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
@@ -209,30 +244,25 @@ i Markovian_sequences* split(Format_error &error , int step) const;
                     int min_frequency = 1) const;
     bool mtg_write(Format_error &error , const char *path , int *itype) const;
 
-*/
-	// Python Operators
-//	.def(self_ns::str(self)) //__str__
-//	.def("__len__", &Markovian_sequences*::get_nb_sequence,"Returns number of sequences")
 
-/*
-	.def("__getitem__", MarkovianMarkovian_sequences*Wrap::get_item)
-	.def_readonly("get_nb_sequence", &Markovian_sequences*::get_nb_sequence, "Return the number of sequences")
-	.def_readonly("get_nb_variable",	&Markovian_sequences*::get_nb_variable, "Return the number of variables")
-	.def_readonly("get_max_length", &Markovian_sequences*::get_max_length,"Return max length")
-	.def_readonly("get_cumul_length", &Markovian_sequences*::get_cumul_length,"Return cumul length")
-*/
-/*
-	.def("get_length", &MarkovianMarkovian_sequences*Wrap::get_length,
-		python::args("index_seq"), "return length of a sequence")
-
-	.def("value_select", MarkovianMarkovian_sequences*Wrap::value_select,
-		return_value_policy<manage_new_object> (),
-		python::args("variable", "min", "max", "keep"),
-		"Selection of individuals according to the values taken by a variable")
-	;
 */
 
 ;
 }
 
 
+
+
+void class_self_transition() {
+
+	class_<Self_transition, bases<Curves> > ("_Self_transition", "Self_transition", no_init)
+	.def(init <int>())
+	.def("monomolecular_regression", &Self_transition::monomolecular_regression,
+	    return_value_policy<manage_new_object> (),
+	   "return function monomolecular regression")
+	.def("logistic regression", &Self_transition::logistic_regression,
+		return_value_policy<manage_new_object> (),
+		"return function logistic regression")
+    ;
+
+}

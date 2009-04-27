@@ -19,12 +19,13 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_MARKOVIAN_SEQUENCES__
-#define __CLASS_MARKOVIAN_SEQUENCES__
+#ifndef __CLASS_SEQUENCE_ANALYSIS_NONHOMOGENEOUS_MARKOV__
+#define __CLASS_SEQUENCE_ANALYSIS_NONHOMOGENEOUS_MARKOV__
 
 // Boost.Python Wrapper export function
-void class_markovian_sequences();
-void class_self_transition();
+void class_nonhomogeneous_markov();
+void class_nonhomogeneous_markov_data();
+
 
 
 #endif

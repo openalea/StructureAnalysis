@@ -19,12 +19,11 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_MARKOVIAN_SEQUENCES__
-#define __CLASS_MARKOVIAN_SEQUENCES__
+#ifndef __CLASS_TIMEEVENTS__
+#define __CLASS_TIMEEVENTS__
 
 // Boost.Python Wrapper export function
-void class_markovian_sequences();
-void class_self_transition();
+void class_time_events();
 
 
 #endif

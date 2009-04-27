@@ -19,12 +19,12 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_MARKOVIAN_SEQUENCES__
-#define __CLASS_MARKOVIAN_SEQUENCES__
+#ifndef __CLASS_RENEWAL__
+#define __CLASS_RENEWAL__
 
 // Boost.Python Wrapper export function
-void class_markovian_sequences();
-void class_self_transition();
+void class_renewal();
+void class_renewal_data();
 
 
 #endif

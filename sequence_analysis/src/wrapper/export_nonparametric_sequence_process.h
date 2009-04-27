@@ -19,12 +19,11 @@
  *
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_MARKOVIAN_SEQUENCES__
-#define __CLASS_MARKOVIAN_SEQUENCES__
+#ifndef __CLASS_SEQUENCE_ANALYSIS_NONPARAMETRIC_SEQUENCE_PROCESS__
+#define __CLASS_SEQUENCE_ANALYSIS_NONPARAMETRIC_SEQUENCE_PROCESS__
 
 // Boost.Python Wrapper export function
-void class_markovian_sequences();
-void class_self_transition();
+void class_nonparametric_sequence_process();
 
 
 #endif

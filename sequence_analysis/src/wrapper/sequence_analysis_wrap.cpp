@@ -22,10 +22,15 @@
 
 
 /* WRAPPER Boost.python for sequences class */
+#include "export_function.h"
 #include "export_tops.h"
 #include "export_sequences.h"
 #include "export_correlation.h"
 #include "export_markovian_sequences.h"
+#include "export_nonhomogeneous_markov.h"
+#include "export_nonparametric_sequence_process.h"
+#include "export_renewal.h"
+#include "export_time_events.h"
 
 #include <boost/python.hpp>
 #include <boost/version.hpp>
@@ -42,15 +47,27 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
 #if BOOST_VERSION >= 103400
   docstring_options doc_options(true, false);
 #endif
+
+  class_function();
+
   class_sequences();
-  
+
   class_markovian_sequences();
-  
+  class_self_transition();
+
   class_correlation();
 
   class_tops();
   class_top_parameters();
 
+  class_nonhomogeneous_markov();
+  class_nonhomogeneous_markov_data();
 
+  class_nonparametric_sequence_process();
+
+  class_renewal();    
+  class_renewal_data();    
+
+  class_time_events();
 }
 
