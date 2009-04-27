@@ -3,11 +3,12 @@ __revision__ = "$Id$"
 
 
 from openalea.stat_tool.regression import Regression
+from openalea.stat_tool._stat_tool import _Regression_kernel as RegressionKernel
 from openalea.stat_tool.vectors import Vectors
 
 from tools import interface
 
-class Test(interface):
+class TestRegression(interface):
     """a simple unittest class
     
     Integration test 
@@ -34,10 +35,21 @@ class Test(interface):
         interface.__init__(self, self.build_data(), None, Regression)
     
     def build_data(self):
-        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
-        r1 = Regression(v, "Linear", 1, 2)
+        self.v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
+        r1 = Regression(self.v, "Linear", 1, 2)
+
+        assert r1.get_nb_vector == 4
         return r1
-    
+   
+    def test_get_residuals(self):
+        for i in range(0,self.data.get_nb_vector):
+            assert self.data.get_residual(i) == 0
+
+    def tst_get_vectors(self):
+        v = self.data.get_vectors()
+        for i in range(0, self.data.get_nb_vector):
+            assert v[i] == self.v[i]
+
     def test_print(self):
         self.print_data()
         
@@ -48,6 +60,7 @@ class Test(interface):
         
     def test_len(self):
         """not implemented; irrelevant?"""
+        assert self.data.get_nb_vector == 4
         pass
     
     def test_plot(self):        
@@ -72,9 +85,11 @@ class Test(interface):
         pass
 
     def test_linear_regression(self):
-
-        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
-        r1 = Regression(v, "Linear", 1, 2)
+        #get back the original vectors
+        v = self.v
+        #and its regression
+        r1 = self.data
+        #compare with the direct usage of linear regression
         r = v.linear_regression(1, 2)
 
         assert r
@@ -83,8 +98,7 @@ class Test(interface):
 
     def test_moving_average(self):
         
-        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
-
+        v = self.v
         # Test algorithm
         try:
             r = v.moving_average_regression(1, 2, [1, ], 'n') 
@@ -100,7 +114,7 @@ class Test(interface):
        
     def test_nearest_neighbours(self):
         
-        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
+        v = self.v
 
         r1 = Regression(v, "NearestNeighbours", 1, 2, 1, Weighting=False)
         r = v.nearest_neighbours_regression(1, 2, 1., False) 
@@ -110,7 +124,7 @@ class Test(interface):
 
     def test_badtype(self):
 
-        v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
+        v = self.v
 
         try:
             Regression(v, "N", 1, 2, [1, ])
@@ -119,3 +133,29 @@ class Test(interface):
             assert True
 
 
+class TestRegressionKernel():
+
+    def __init__(self):
+        self.data =  RegressionKernel(4, 0, 10)
+
+    def test_max_value(self):
+        assert self.data.get_max_value == 10
+    
+    def test_min_value(self):
+        assert self.data.get_min_value == 0
+    
+    def test_max_value(self):
+        assert self.data.get_ident == 4
+
+    def others_to_be_done(self):
+        #there are other methods that need to be tested with an appropriate examples:
+        #get_point
+        #get_regression_df
+        #get_residual_df  
+        #get_nb_parameter
+        #get_parameter
+        pass
+
+
+
+    
