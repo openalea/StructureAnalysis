@@ -828,9 +828,9 @@ void class_vectors()
      "Return the number of vectors")
     .def("__getitem__", VectorsWrap::get_item)
 
-    .def_readonly("get_nb_variable", &Vectors::get_nb_variable,
+    .def("get_nb_variable", &Vectors::get_nb_variable,
      "Return the number of variables")
-    .def_readonly("get_nb_vector", &Vectors::get_nb_vector,
+    .def("get_nb_vector", &Vectors::get_nb_vector,
      "Return the number of vectors")
 
     // Identifiers

@@ -52,7 +52,7 @@ public:
 
     ostringstream error_message;
     try{
-      if (algorithm!=1 and algorithm!=2)
+      if (algorithm!=1 && algorithm!=2)
       {
         error_message << "Incorrect value for the algorithm argument (must be 1 or 2)"<<endl;
         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());

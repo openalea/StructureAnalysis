@@ -50,12 +50,12 @@ void class_regression_kernel()
 {
   class_< Regression_kernel  >("_Regression_kernel", "Regression kernel class")
     .def( init<int, int, int>())
-    .def_readonly("get_ident", &Regression_kernel::get_ident,"return ident")
-    .def_readonly("get_min_value", &Regression_kernel::get_min_value,"return min value")
-    .def_readonly("get_max_value", &Regression_kernel::get_max_value,"return max value")
-    .def_readonly("get_regression_df", &Regression_kernel::get_regression_df,"return regression df")
-    .def_readonly("get_residual_df", &Regression_kernel::get_residual_df,"return residual df")
-    .def_readonly("get_nb_parameter", &Regression_kernel::get_nb_parameter,"return nb parameter")
+    .def("get_ident", &Regression_kernel::get_ident,"return ident")
+    .def("get_min_value", &Regression_kernel::get_min_value,"return min value")
+    .def("get_max_value", &Regression_kernel::get_max_value,"return max value")
+    .def("get_regression_df", &Regression_kernel::get_regression_df,"return regression df")
+    .def("get_residual_df", &Regression_kernel::get_residual_df,"return residual df")
+    .def("get_nb_parameter", &Regression_kernel::get_nb_parameter,"return nb parameter")
     .def("get_parameter", &Regression_kernel::get_parameter,python::args("index"),"return parameter")
     .def("get_point", &Regression_kernel::get_point,python::args("index"),"return point")
     
@@ -93,7 +93,7 @@ void class_regression()
     .def(init <int, int, int, Vectors>())
     .def(self_ns::str(self)) // __str__
     .def("__len__", &Regression::get_nb_vector)  //__len__
-    .def_readonly("get_nb_vector", &Regression::get_nb_vector, "Return nb_vector")
+    .def("get_nb_vector", &Regression::get_nb_vector, "Return nb_vector")
     .def("get_residual", &Regression::get_residual, 
         python::args("int"), 
         "Return nb_vector")

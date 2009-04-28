@@ -126,7 +126,7 @@ void class_convolution()
     .def("__init__", make_constructor(WRAP::convolution_from_dists))
     .def("__init__", make_constructor(WRAP::convolution_from_file))
 
-    .def_readonly("nb_distribution", &Convolution::get_nb_distribution, "Return the number of components")
+    .def("nb_distribution", &Convolution::get_nb_distribution, "Return the number of components")
 
     DEF_LEN(Convolution, get_nb_distribution)
     DEF_STR()
@@ -181,7 +181,7 @@ void class_convolution_data()
     ("_ConvolutionData", "Convolution Data")
 
     DEF_STR()
-    .def_readonly("nb_histogram", &Convolution_data::get_nb_histogram)
+    .def("nb_histogram", &Convolution_data::get_nb_histogram)
 
     DEF_RETURN_VALUE("extract_elementary", ConvolutionDataWrap::extract,
     	python::arg("index"), "Extract a particular element. First index is 1")
