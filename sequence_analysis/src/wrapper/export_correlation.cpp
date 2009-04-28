@@ -75,7 +75,12 @@ public:
 
 void class_correlation() {
 
-	class_<Correlation, bases<STAT_interface, Curves > >
+	class_<Correlation, bases<STAT_interface 
+#ifdef __GNUC__
+#warning "This does not compile with msvc. Which look normal since Curves is inherited in protected mode for Correlation. To be fix"
+		, Curves 
+#endif
+	       > >
 	("_Correlation", "Correlation")
 	.def(init<int, int, int, int>())
 	.def(init<int, int, bool, int>())

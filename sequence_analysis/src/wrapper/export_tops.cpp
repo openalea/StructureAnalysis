@@ -110,9 +110,9 @@ void class_top_parameters() {
 	.def(self_ns::str(self)) //__str__
     // difference between add property  and readonly ?
 	.add_property("get_probability", &Top_parameters::get_probability)
-	.def_readonly("get_axillary_probability",&Top_parameters::get_axillary_probability)
-	.def_readonly("get_rhythm_ratio", &Top_parameters::get_rhythm_ratio)
-	.def_readonly("get_max_position", &Top_parameters::get_max_position)
+	.def("get_axillary_probability",&Top_parameters::get_axillary_probability)
+	.def("get_rhythm_ratio", &Top_parameters::get_rhythm_ratio)
+	.def("get_max_position", &Top_parameters::get_max_position)
 	.def("get_tops", &Top_parameters::get_tops,
 			return_value_policy<manage_new_object> (),
 			"returns tops")
@@ -255,7 +255,7 @@ void class_tops() {
     .def("__init__", make_constructor(TopsWrap::tops_from_lists))
 	.def(init<Sequences> ())
 	.def(self_ns::str(self)) //__str__
-	.def_readonly("get_max_position", &Tops::get_max_position)
+	.def("get_max_position", &Tops::get_max_position)
 	.def("get_nb_internode", &Tops::get_nb_internode,
 			return_value_policy<manage_new_object> (),
 			"returns histogram of nb internode")

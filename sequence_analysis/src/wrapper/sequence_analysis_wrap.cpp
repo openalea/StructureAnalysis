@@ -61,7 +61,7 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
   class_top_parameters();
 
   class_nonhomogeneous_markov();
-  class_nonhomogeneous_markov_data();
+  // class_nonhomogeneous_markov_data();
 
   class_nonparametric_sequence_process();
 

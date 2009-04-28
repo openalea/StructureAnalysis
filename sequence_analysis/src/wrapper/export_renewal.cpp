@@ -71,7 +71,7 @@ void class_renewal() {
     .def(init <char, Distribution, Parametric>())
 	// Python Operators
 
-    .def_readonly("get_nb_iterator", &Renewal::get_nb_iterator,"nb iterator")
+    .def("get_nb_iterator", &Renewal::get_nb_iterator,"nb iterator")
 	;
 /*
 
