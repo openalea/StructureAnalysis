@@ -35,6 +35,8 @@
 #include "export_distancematrix.h"
 #include "export_markovian.h"
 #include "export_regression.h"
+#include "export_chain.h"
+#include "export_chain_reestimation.h"
 
 #include <boost/python.hpp>
 #include <boost/version.hpp>
@@ -90,5 +92,8 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_plotable();
 
   class_curves();
+
+  class_chain();
+  class_chain_reestimation();
 }
 
