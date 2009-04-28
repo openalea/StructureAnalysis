@@ -18,11 +18,11 @@ namespace stat_tool
     template<int num, int id> 
       struct UniqueInt
       {
-	int v;
-	enum { value=num };
+    	int v;
+	    enum { value=num };
 	
-      UniqueInt(int _v) : v(_v) { }
-	operator int() const { return v; }
+        UniqueInt(int _v) : v(_v) { }
+	    operator int() const { return v; }
       };
     
     

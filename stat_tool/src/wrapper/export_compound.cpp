@@ -162,7 +162,7 @@ public:
 void class_compound()
 {
 	class_< Compound, bases<STAT_interface, Distribution> >
-    ("_Compound", "Compound")
+    ("_Compound", "Compound" )
     .def("__init__", make_constructor(CompoundWrap::compound_from_file),
     "Build from a filename")
     .def("__init__", make_constructor(CompoundWrap::compound_two_distributions),

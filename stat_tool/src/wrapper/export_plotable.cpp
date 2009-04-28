@@ -33,18 +33,6 @@ using namespace plotable;
 using namespace std;
 
 
-class PlotableWrap
-{
-
-public:
-
-  static float get_x()
-  {
-    return 1.;
-  }
-
-};
-
 void class_plotable()
 {
   class_ < PlotPoint >("PlotPoint", init<float, float>())
