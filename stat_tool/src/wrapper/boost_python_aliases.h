@@ -2,7 +2,7 @@
 
 
 
-#define ARGS python::args
+#define ARGS boost::python::args
 
 
  
@@ -12,7 +12,7 @@
 // :param var1: a variable 
 // :returns: OUTPUT_TYPE
 #define WRAP_METHOD1(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1) \
-static OUTPUT_TYPE* METHOD_NAME(const Convolution& input_class, VARTYPE1 var1) \
+static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1) \
 {\
     Format_error error; \
     OUTPUT_TYPE* ret = NULL; \
@@ -22,7 +22,7 @@ static OUTPUT_TYPE* METHOD_NAME(const Convolution& input_class, VARTYPE1 var1) \
 }
 // same but no arguments
 #define WRAP_METHOD0(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE) \
-static OUTPUT_TYPE* METHOD_NAME(const Convolution& input_class) \
+static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class) \
 {\
     Format_error error; \
     OUTPUT_TYPE* ret = NULL; \
@@ -32,24 +32,9 @@ static OUTPUT_TYPE* METHOD_NAME(const Convolution& input_class) \
 }
 
 
-// same but  cast the result !!!!! histo->getdata is too specifi
-#define  WRAP_METHOD0_CAST(Convolution, METHOD_NAME, Parametric_model); \
-  static Parametric_model* METHODS_NAME(const INPUT_CLASS& convol)\
-  {\
-    Parametric_model* ret;\
-    INPUT_CLASS_data* convol_histo = NULL;\
-    convol_histo = convol.METHOD_NAME_data();\
-    ret = new OUTPUT_CLASS(convol,(convol_histo ? convol_histo->METHOD_NAME() : NULL));\
-    return ret;\
-  }
-
-
-
-
 
 // Specific methods
-
-
+// ---------------------- file_ascii_write method ---------------------------------------
 #define WRAP_METHOD_FILE_ASCII_WRITE(INPUT_CLASS) \
   static void file_ascii_write(const INPUT_CLASS& m, const char* path, bool exhaustive)\
   {\
@@ -59,6 +44,57 @@ static OUTPUT_TYPE* METHOD_NAME(const Convolution& input_class) \
      if (!result)\
         stat_tool::wrap_util::throw_error(error);\
    }\
+
+// ---------------------- survival_get_plotable ---------------------------------------
+#define WRAP_METHOD_SURVIVAL_GET_PLOTABLE(INPUT_CLASS) \
+static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
+  { \
+    Format_error error; \
+    MultiPlotSet* ret = p.survival_get_plotable(error); \
+    if(!ret)\
+      stat_tool::wrap_util::throw_error(error);\
+    return ret;\
+  }
+
+// ---------------------- survival_plot_write ---------------------------------------
+#define WRAP_METHOD_SURVIVAL_PLOT_WRITE(INPUT_CLASS) \
+  static void survival_plot_write(const INPUT_CLASS& p, const std::string& prefix, const std::string& title) \
+  {\
+    Format_error error;\
+    if(!p.survival_plot_write(error, prefix.c_str(), title.c_str()))\
+      stat_tool::wrap_util::throw_error(error);\
+  }
+
+
+// ---------------------- survival_spreadsheet_write ---------------------------------------
+#define WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE(INPUT_CLASS) \
+ static void survival_spreadsheet_write(const INPUT_CLASS& p, const std::string& filename) \
+  {\
+    Format_error error;\
+    if(!p.survival_spreadsheet_write(error, filename.c_str()))\
+      stat_tool::wrap_util::throw_error(error);\
+  }
+
+// ---------------------- survival_ascii_write ---------------------------------------
+#define WRAP_METHOD_SURVIVAL_ASCII_WRITE(INPUT_CLASS) \
+static std::string survival_ascii_write(const INPUT_CLASS& p) \
+  {\
+    std::stringstream s; \
+    std::string res; \
+    p.survival_ascii_write(s);\
+    res = s.str();\
+    return res;\
+  }
+
+
+
+
+
+
+
+
+
+
 
 
 // boost python declarations -------------------------------------------
