@@ -37,7 +37,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self, 
                            self.build_data(), 
-                           "vector_distance.vd",
+                           "data/vector_distance.vd",
                            VectorDistance)        
     def build_data(self):
         v = VectorDistance('N', 'O', 'S') 

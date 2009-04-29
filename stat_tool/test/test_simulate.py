@@ -14,22 +14,22 @@ class Test:
         pass
     
     def test_simulate_mixture(self):
-        m = Mixture("mixture1.mixt")
+        m = Mixture("data/mixture1.mixt")
         s1 = Simulate(m, 1000)
         assert s1
     
     def test_simulate_convolution(self):
-        c = Convolution("convolution1.conv")
+        c = Convolution("data/convolution1.conv")
         s1 = Simulate(c, 1000)
         assert s1
     
     def test_simulate_compound(self):
-        c = Compound("compound1.cd")
+        c = Compound("data/compound1.cd")
         s1 = Simulate(c, 1000)
         assert s1
     
     def test_simulate_distribution(self):
-        c = Distribution("distribution1.dist")
+        c = Distribution("data/distribution1.dist")
         s1 = Simulate(c, 1000)
         assert s1
 

@@ -15,36 +15,13 @@ from tools import interface
 class Test(interface):
     """a simple unittest class
     
-    Integration test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok    
-    extract_data                ok
-    file_ascii_write            ok
-    plot                        ok                       
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    spreadsheet_write           ok
-    **others**
-    extract_convolution         ok
-    extract_elementary          ok
-    str                         ok
-    len                         not relevant
-    old_plot                    works   
-    nb_distribution             ok
-    ========================    ================================== 
     """
  
     def __init__(self):
-        interface.__init__(self, self.build_data(), "convolution1.conv", Convolution)
+        interface.__init__(self, 
+            self.build_data(), 
+            "data/convolution1.conv", 
+            Convolution)
     
     def build_data(self):
         d1 = Binomial(0, 10, 0.5)
@@ -122,7 +99,7 @@ def test1():
 
     _convol0 = Convolution(Distribution("B", 0, 10, 0.5), 
                            Distribution("NB", 0, 10, 0.5))
-    convol1 = Convolution("convolution1.conv")
+    convol1 = Convolution("data/convolution1.conv")
 
     convol_histo1 = Simulate(convol1, 200)
 
@@ -135,8 +112,8 @@ def test1():
     _histo21 = ExtractHistogram(ExtractData(convol2), 'Elementary', 1)
     _histo22 = ToHistogram(ExtractDistribution(convol2, 'Elementary', 1))
 
-    histo_b2 = Histogram("nothofagus_antarctica_bud_2.his")
-    histo_s2 = Histogram("nothofagus_antarctica_shoot_2.his")
+    histo_b2 = Histogram("data/nothofagus_antarctica_bud_2.his")
+    histo_s2 = Histogram("data/nothofagus_antarctica_shoot_2.his")
 
     # Estimator="Likelihood" (default) / "PenalizedLikelihood" / "Parametric"
     # Si Estimator="PenalizedLikelihood", options supplementaires possibles
@@ -157,9 +134,6 @@ def test1():
     if DISABLE_PLOT==False:
         Plot(convol31)
         Plot(ExtractDistribution(convol31, "Convolution"))
-    Save(convol31, "nothofagus_antartica_2.xls", Format="SpreadSheet")
+    Save(convol31, "data/nothofagus_antartica_2.xls", Format="SpreadSheet")
 
 
-if __name__=="__main__":
-
-    test1()

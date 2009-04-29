@@ -90,7 +90,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "mixture_mv1.mixt",
+                           "data/mixture_mv1.mixt",
                            _MvMixture)
         
     def build_data(self):

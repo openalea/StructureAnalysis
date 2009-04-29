@@ -12,66 +12,11 @@ from tools import interface
 class Test(interface):
     """a simple unittest class
     
-    Integration Test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok
-    extract_data                nothing to be done
-    file_ascii_write            ok
-    plot                        ok                      
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    spreadsheet_write           ok
-    survival_ascii_write        ok
-    survival_spreadsheet_write  ok
-
-    **others**
-    extract_model               ok
-    len                         ok
-    str                         ok
-    
-    ** see test_cluster**
-    cluster_information         ok
-    cluster_limit               ok
-    cluster_step                ok
-    transcode                   ok
-
-    **comparison**
-    compare                     ???
-    compare_histo               ok
-    t_comparison                ok
-    wmw_comparison              ok
-    f_comparison                ok
-        
-    **see test_estimate**
-    estimate_compound            ok
-    estimate_convolution         ok     
-    estimate_mixture             ok 
-    estimate_nonparametric       ok
-    estimate_parametric          ok
-    compound_estimation          equivalent to estimate_mixture and not tested
-    convolution_estimation       equivalent to estimate_mixture and not tested
-    mixture_estimation           equivalent to estimate_mixture and tested
-    parametric_estimation        equivalent to estimate_mixture and not tested
-      
-    **see data_transform**
-    fit                            ok
-    merge                          ok
-    shift                          ok
-    value_select                   ok
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "peup1.his",
+                           "data/peup1.his",
                            Histogram)
         
     def build_data(self):
@@ -129,7 +74,7 @@ class Test(interface):
     
     def test_extract_data(self):
         """todo : check if this test makes sense"""
-        h = Histogram("meri1.his")
+        h = Histogram("data/meri1.his")
         e = h.estimate_nonparametric()
         
         assert e
@@ -141,7 +86,7 @@ class Test(interface):
         
     def test_container(self):
         """ container / iterator"""
-        h = Histogram("meri1.his")
+        h = Histogram("data/meri1.his")
 
         assert h[0] == 0
         assert h[10] == 1

@@ -88,7 +88,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self, 
                            self.build_data(),
-                           "mixture1.mixt",
+                           "data/mixture1.mixt",
                            Mixture)
         
     def build_data(self):
@@ -158,7 +158,7 @@ class Test(interface):
     def test_extract_data(self):
         """run and test the extract_data methods""" 
 
-        h = Histogram("meri2.his")
+        h = Histogram("data/meri2.his")
         m = h.estimate_mixture(["B", "NB"])
 
         d = m.extract_data()
@@ -169,11 +169,11 @@ class Test(interface):
 def test1():
     plot.DISABLE_PLOT = DISABLE_PLOT
  
-    meri1 = Histogram("meri1.his")
-    meri2 = Histogram("meri2.his")
-    meri3 = Histogram("meri3.his")
-    meri4 = Histogram("meri4.his")
-    meri5 = Histogram("meri5.his")
+    meri1 = Histogram("data/meri1.his")
+    meri2 = Histogram("data/meri2.his")
+    meri3 = Histogram("data/meri3.his")
+    meri4 = Histogram("data/meri4.his")
+    meri5 = Histogram("data/meri5.his")
 
     #Plot(meri1, meri2, meri3, meri4, meri5)
     Compare(meri1, meri2, meri3, meri4, meri5, "N")
@@ -217,12 +217,12 @@ def test1():
     # Plot(histo5)
     
     
-    peup1 = Histogram("peup1.his")
-    peup2 = Histogram("peup2.his")
-    peup3 = Histogram("peup3.his")
-    peup4 = Histogram("peup4.his")
-    peup5 = Histogram("peup5.his")
-    peup6 = Histogram("peup6.his")
+    peup1 = Histogram("data/peup1.his")
+    peup2 = Histogram("data/peup2.his")
+    peup3 = Histogram("data/peup3.his")
+    peup4 = Histogram("data/peup4.his")
+    peup5 = Histogram("data/peup5.his")
+    peup6 = Histogram("data/peup6.his")
     
     mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
     

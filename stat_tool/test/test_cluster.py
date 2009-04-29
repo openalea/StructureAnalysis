@@ -13,12 +13,17 @@ class Test:
     """Test class to test cluster function and classes"""
     
     def __init__(self):
-        pass
+        self.data = self.build_data()
+
+    def build_data(self):
+        data = Histogram("data/fagus1.his")
+        return data
+
 
     def test_cluster_histo(self):
         """test cluster on histograms"""
 
-        fagus = Histogram("fagus1.his")
+        fagus = self.data
 
         histo2 = Cluster(fagus, "Step", 2)
         histo3 = Cluster(fagus, "Information", 0.8)
@@ -45,7 +50,7 @@ class Test:
 
     def test_transcode_histo(self):
         """test transcode on histograms"""
-        fagus = Histogram("fagus1.his")
+        fagus = self.data
         histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, 4, 5])
         assert str(histo5)==str(fagus.transcode([1, 2, 2, 3, 3, 4, 4, 5]))
 
@@ -55,11 +60,8 @@ class Test:
         assert  str(vec.transcode(1, [1, 2, 3, 4]))==\
             str(Transcode(vec, 1, [1, 2, 3, 4]))
         
-
-
-    
     def test_transcode_histo_err(self):
-        fagus = Histogram("fagus1.his")
+        fagus = self.data
         try:
             _histo5 = Transcode(fagus, [1, 2, 2, 3, 3, 4, ])
             assert False
@@ -67,8 +69,7 @@ class Test:
             assert True
 
     def test_clustering(self):        
-        """test clustering on matrices"""        
-        vec10 = Vectors("chene_sessile.vec")
+        vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 
         assert vec15

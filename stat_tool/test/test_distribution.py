@@ -20,42 +20,12 @@ from tools import interface
 class Test(interface):
     """a simple unittest class
 
-    Integration Test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-        
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok
-    extract_data                nothing to be done
-    file_ascii_write            ok
-    plot                        ok                       
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    spreadsheet_write           ok
-    survival_ascii_write        ok
-    survival_spreadsheet_write  ok
-    survival_plot_write         ok
-    **others**
-    get_ident                   ok
-    get_probability             ok
-    get_sup_bound               ok
-    get_parameter               ok
-    get_inf_bound               ok     
-    old_plot                    ok   
-    str                         ok
-    len                         not relevant
-    ========================    ==================================
  
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "distribution1.dist",
+                           "data/distribution1.dist",
                            Distribution)
     
     def build_data(self):
@@ -72,6 +42,20 @@ class Test(interface):
 
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
+        
+    def test_constructors(self):
+        h = Histogram([1,2,3,4,5,6,1,2,3])
+        assert h
+        
+        # from histogram
+        dist = Distribution(h)
+        assert dist
+        
+        #from parametric model
+        pm = _stat_tool._ParametricModel(h)
+        dist = Distribution(pm)
+        assert dist
+        
 
     def test_print(self):
         self.print_data()
@@ -119,6 +103,11 @@ class Test(interface):
         assert d
         _eprime = Estimate(s, "Binomial")
         
+    def test_truncate(self):
+        # todo:find a test
+        s = self.data
+        _res = s.truncate(4) 
+        
 
 class TestDistribution:
     """Test the distribution (Uniform, Binomial, ...)
@@ -158,11 +147,11 @@ class TestDistribution:
 
         d = Distribution("BINOMIAL", 0, 10, 0.5)
         assert list(d.simulate(1000))
-        assert d.get_sup_bound==10
-        assert d.get_inf_bound==0
-        assert d.get_probability==0.5
-        assert d.get_parameter==-1
-        assert d.get_ident==1
+        assert d.get_sup_bound == 10
+        assert d.get_inf_bound == 0
+        assert d.get_probability == 0.5
+        assert d.get_parameter == -1
+        assert d.get_ident == 1
 
         d = Binomial(0, 10, 0.5)
         assert list(d.simulate(1000))
@@ -200,6 +189,16 @@ class TestDistribution:
 
         m = d.simulate(1000).extract_model()
         assert isinstance(m, _stat_tool._ParametricModel)
+        
+    def test_multimodial(self):
+        pass
+    
+    def test_getters(self):
+        dist = Distribution(Histogram([1, 1, 1, 2, 2, 2, 3, 3, 3]))
+        assert dist.get_mean == 2
+        assert 0.3333 < dist.get_max < 0.3334 
+        assert dist.get_mean == 2
+        assert 0.6666 < dist.get_variance < 0.6667
 
 
 def test1():
@@ -220,7 +219,7 @@ def test1():
 
 
     _dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
-    dist0 = Distribution("distribution1.dist")
+    dist0 = Distribution("data/distribution1.dist")
 
     dist1 = Distribution("B", 0, 10, 0.3)
     dist1 = Distribution("NB", 0, 3.5, 0.3)
@@ -243,7 +242,7 @@ def test1():
 
     _dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
 
-    fagus = Histogram("fagus1.his")
+    fagus = Histogram("data/fagus1.his")
 
     # transformation of histograms, extraction/filter
 
@@ -261,11 +260,11 @@ def test1():
 
     # comparison of histograms
 
-    meri1 = Histogram("meri1.his")
-    meri2 = Histogram("meri2.his")
-    meri3 = Histogram("meri3.his")
-    meri4 = Histogram("meri4.his")
-    meri5 = Histogram("meri5.his")
+    meri1 = Histogram("data/meri1.his")
+    meri2 = Histogram("data/meri2.his")
+    meri3 = Histogram("data/meri3.his")
+    meri4 = Histogram("data/meri4.his")
+    meri5 = Histogram("data/meri5.his")
 
     ## Compare(meri1, meri2, meri3, meri4, meri5, "N", FileName="ASCII/meri.cmp")
     Compare(meri1, meri2, meri3, meri4, meri5, "O")

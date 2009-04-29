@@ -17,35 +17,12 @@ from tools import interface
 class Test(interface):
     """a simple unittest class
     
-    Integration test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok    
-    extract_data                ok
-    file_ascii_write            ok
-    plot                        ok                       
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    spreadsheet_write           ok
-    **others**
-    extract_compound            ok
-    extratc_elementary          ok
-    extra_sum                   ok
-    str                         ok
-    len                         not relevant
-    old_plot                    works   
-    ========================    ==================================
- 
     """
     def __init__(self):
-        interface.__init__(self, self.build_data(), "compound1.cd", Compound)
+        interface.__init__(self, 
+            self.build_data(), 
+            "data/compound1.cd", 
+            Compound)
         
     def build_data(self):
         d1 = Binomial(2, 5, 0.5)
@@ -119,7 +96,7 @@ def test1():
      * ExtractHistogram in test_data_transform
      ...
     """
-    cdist1 = Compound("compound1.cd")
+    cdist1 = Compound("data/compound1.cd")
     chisto1 = Simulate(cdist1, 200)
     _histo30 = ExtractHistogram(chisto1, "Sum")
 
@@ -131,7 +108,7 @@ def test1():
     _histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
     _histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
     
-    peup1 = Histogram("peup1.his")
+    peup1 = Histogram("data/peup1.his")
     mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
     histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
     _histo34 = Shift(histo33, -11)

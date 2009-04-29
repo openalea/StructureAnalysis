@@ -29,7 +29,7 @@ class Test:
 
     def get_mixture_2(self):
         """create another mixture data""" 
-        h = Histogram(("meri2.his"))
+        h = Histogram(("data/meri2.his"))
         m = h.estimate_mixture(["B", "NB"])
         return m
 
@@ -59,12 +59,12 @@ class Test:
 
     def test_plot_convolution(self):
         
-        convol1 = Convolution(("convolution1.conv"))
+        convol1 = Convolution("data/convolution1.conv")
         if DISABLE_PLOT == False:
             convol1.plot()
 
-        histo_b2 = Histogram(("nothofagus_antarctica_bud_2.his"))
-        histo_s2 = Histogram(("nothofagus_antarctica_shoot_2.his"))
+        histo_b2 = Histogram("data/nothofagus_antarctica_bud_2.his")
+        histo_s2 = Histogram("data/nothofagus_antarctica_shoot_2.his")
         
         convol31 = Estimate(Shift(histo_s2, 1), "CONVOLUTION",
                             Estimate(histo_b2, "NP"), 
@@ -76,7 +76,7 @@ class Test:
 
     def test_plot_convolution_data(self):
         
-        convol1 = Convolution(("convolution1.conv"))
+        convol1 = Convolution("data/convolution1.conv")
         convol_histo1 = Simulate(convol1, 200)
         if DISABLE_PLOT == False:
             convol_histo1.plot()

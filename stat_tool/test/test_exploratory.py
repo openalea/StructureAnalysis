@@ -12,11 +12,11 @@ class Test:
     def test_aml_1(self):
         """ Test AML Functions """
 
-        meri1 = Histogram("meri1.his")
-        meri2 = Histogram("meri2.his")
-        meri3 = Histogram("meri3.his")
-        meri4 = Histogram("meri4.his")
-        meri5 = Histogram("meri5.his")
+        meri1 = Histogram("data/meri1.his")
+        meri2 = Histogram("data/meri2.his")
+        meri3 = Histogram("data/meri3.his")
+        meri4 = Histogram("data/meri4.his")
+        meri5 = Histogram("data/meri5.his")
         
         # Plot(meri1, meri2, meri3, meri4, meri5)
         
@@ -47,12 +47,12 @@ class Test:
         # Plot(ExtractDistribution(mixt2, "Mixture"))
         # Display(mixt2)
         
-        peup1 = Histogram("peup1.his")
-        peup2 = Histogram("peup2.his")
-        peup3 = Histogram("peup3.his")
-        peup4 = Histogram("peup4.his")
-        peup5 = Histogram("peup5.his")
-        peup6 = Histogram("peup6.his")
+        peup1 = Histogram("data/peup1.his")
+        peup2 = Histogram("data/peup2.his")
+        peup3 = Histogram("data/peup3.his")
+        peup4 = Histogram("data/peup4.his")
+        peup5 = Histogram("data/peup5.his")
+        peup6 = Histogram("data/peup6.his")
         
         _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", 
                            NbComponent="Estimated")

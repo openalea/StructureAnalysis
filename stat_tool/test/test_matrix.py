@@ -38,7 +38,7 @@ class Test(interface):
         self.structure = None
 
     def build_data(self):
-        vec10 = Vectors("chene_sessile.vec")
+        vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         assert 138 == matrix10.get_nb_row()

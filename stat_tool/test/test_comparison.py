@@ -18,9 +18,9 @@ class TestHisto:
     """a simple unittest class"""
 
     def __init__(self):
-        self.meri1 = Histogram("meri1.his")
-        self.meri2 = Histogram("meri2.his")
-        self.meri3 = Histogram("meri3.his")
+        self.meri1 = Histogram("data/meri1.his")
+        self.meri2 = Histogram("data/meri2.his")
+        self.meri3 = Histogram("data/meri3.his")
         
     def test_comparisontest(self):
         meri1 = self.meri1
@@ -83,7 +83,7 @@ class TestVectors:
         
     def test_compare_vectors(self):
         
-        vec10 = Vectors("chene_sessile.vec")
+        vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         assert vec15
 

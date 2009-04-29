@@ -78,9 +78,11 @@ class Test(interface):
     def __init__(self):  
         interface.__init__(self,
                            self.build_data(),
-                           "vectors.vec",
+                           "data/vectors.vec",
                            Vectors)
-    
+        
+        self.vec10 = self.build_data_2()
+
     def build_data(self):
         v = Vectors([[1, 2, 3], [1, 3, 1]]) 
         
@@ -89,7 +91,10 @@ class Test(interface):
         assert [1, 2] == v.get_identifiers()
         assert v
         return v
-        
+
+    def build_data_2(self):
+        return Vectors("data/chene_sessile.vec")
+
     def test_empty(self):
         self.empty()
         
@@ -180,14 +185,14 @@ class Test(interface):
     def test_variance_analysis(self):
         """test VarianceAnalysis"""
         # todo: finalise and make method variance_analysis robust.
-        vec10 = Vectors("chene_sessile.vec")
+        vec10 = self.vec10
         va = VarianceAnalysis(vec10, 1, 4, "O")
         assert vec10.variance_analysis(1, 4, 1, "whatever", "whatever") == \
             str(va)
     
     def test_contingency_table(self):
         """test contingency table"""
-        vec10 = Vectors("chene_sessile.vec")
+        vec10 = self.vec10
         ct = ContingencyTable(vec10, 1, 4)
         assert ct and str(ct)
         
@@ -210,7 +215,7 @@ class Test(interface):
         #  VARIABLE 5 : number de branches
         #
         #######################################################################
-        vec10 = Vectors("chene_sessile.vec")
+        vec10 = self.vec10
     
         # plot of the pointwise averages
         # seg fault raised here
@@ -331,9 +336,3 @@ class Test(interface):
         _matrix12 = Compare(vec16, VectorDistance("N", "N", "N", "N"))
         _matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
    
-
-
-if "__main__"==__name__: 
-
-    t = Test()
-    t.test_to_clean()
