@@ -322,7 +322,7 @@ def Extract(obj, *args):
 
         # _Vectors with one variable
         try:
-            nb_var = obj.get_nb_variable
+            nb_var = obj.get_nb_variable()
             if (nb_var>1):
                 try:
                     variable = args[0]
@@ -682,7 +682,7 @@ def Shift(obj, *args):
     
     try:
         # Try vector.shift
-        nb_var = obj.get_nb_variable
+        nb_var = obj.get_nb_variable()
 
         if(nb_var > 1):
 

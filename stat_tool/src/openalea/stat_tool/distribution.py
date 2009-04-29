@@ -16,6 +16,7 @@ __all__ = ["_Distribution",
            "Poisson",
            "Uniform",
            "NegativeBinomial",
+           "Multinomial",
            "ToHistogram",
            "ToDistribution",
            "distribution_type",
@@ -32,11 +33,14 @@ distribution_type = \
     "NEGATIVE_BINOMIAL": _stat_tool.NEGATIVE_BINOMIAL,
     "U": _stat_tool.UNIFORM,
     "UNIFORM": _stat_tool.UNIFORM,
+    "M": _stat_tool.MULTINOMIAL,
+    "MULTINOMIAL": _stat_tool.MULTINOMIAL,
 
     _stat_tool.BINOMIAL: _stat_tool.BINOMIAL,
     _stat_tool.POISSON: _stat_tool.POISSON,
     _stat_tool.UNIFORM: _stat_tool.UNIFORM,
     _stat_tool.NEGATIVE_BINOMIAL: _stat_tool.NEGATIVE_BINOMIAL,
+    _stat_tool.MULTINOMIAL: _stat_tool.MULTINOMIAL,
     }
 
 
@@ -90,6 +94,7 @@ def Distribution(type_or_filename, *args):
         * "P" ("POISSON"),
         * "NB" ("NEGATIVE_BINOMIAL"),
         * "U" ("UNIFORM"),
+        * "M" ("MULTINOMIAL"),
 
 
     :Returns:
@@ -128,6 +133,9 @@ def Distribution(type_or_filename, *args):
 
     elif(typeid == _stat_tool.POISSON):
         return Poisson(*args)
+    
+    elif(typeid == _stat_tool.MULTINOMIAL):
+        return Multinomial(*args)
 
     elif(typeid == _stat_tool.NEGATIVE_BINOMIAL):
         return NegativeBinomial(*args)
@@ -219,6 +227,9 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
 
     return _ParametricModel(_stat_tool.UNIFORM, \
         inf_bound, sup_bound, param, proba)
+
+def Multinomial():
+    raise NotImplemented
 
 # Extend _ParametricModel
 interface.extend_class( _stat_tool._ParametricModel, interface.StatInterface)
