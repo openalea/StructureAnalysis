@@ -282,17 +282,18 @@ public:
   }
 
 
-  static Vectors* select_variable(const Vectors& v, const boost::python::list& variables,
+  static Vectors* select_variable(const Vectors& v,
+				  const boost::python::list& variables,
                   bool keep)
   {
     Format_error error;
     Vectors * ret = NULL;
 
     int nb_var = len(variables);
-    stat_tool::wrap_util::auto_ptr_array<int> vars(new int[nb_var]);
+		stat_tool::wrap_util::auto_ptr_array<int> vars(new int[nb_var]);
 
     for (int i=0; i<nb_var; i++)
-    vars[i] = extract<int>(variables[i]);
+    	vars[i] = extract<int>(variables[i]);
 
     ret = v.select_variable(error, nb_var, vars.get(), keep);
 
@@ -303,8 +304,9 @@ public:
   }
 
 
-  static Vectors* select_individual(const Vectors& v, const boost::python::list& identifiers,
-                    bool keep)
+  static Vectors* select_individual(const Vectors& v,
+		  const boost::python::list& identifiers,
+		  bool keep)
   {
     Format_error error;
     Vectors * ret = NULL;
@@ -313,7 +315,7 @@ public:
     stat_tool::wrap_util::auto_ptr_array<int> ids(new int[nb_id]);
 
     for (int i=0; i<nb_id; i++)
-      ids[i] = extract<int>(identifiers[i]);
+    	ids[i] = extract<int>(identifiers[i]);
 
     ret = v.select_individual(error, nb_id, ids.get(), keep);
 

@@ -233,9 +233,7 @@ void class_parametric()
     .def(init<const Parametric&, double>())
     .def(init<const Histogram& >())
     .def(init<const Parametric&, optional< char, int> >())
-
     .def(init<Distribution&>())
-
     .def(init<Parametric&>())
     //to remove
     .def(init<Distribution&>())

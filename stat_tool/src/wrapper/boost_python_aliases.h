@@ -1,15 +1,15 @@
- 
+
 
 
 
 #define ARGS boost::python::args
 
 
- 
+
 
 // calls METHOD_NAME of the INPUT_CLASS
 // :param input_class: a class instance
-// :param var1: a variable 
+// :param var1: a variable
 // :returns: OUTPUT_TYPE
 #define WRAP_METHOD1(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1) \
 static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1) \
@@ -91,6 +91,22 @@ static std::string survival_ascii_write(const INPUT_CLASS& p) \
 
 
 
+// INPUT PARAMETER VALIDATION -------------
+
+
+
+#define CHECK(VALUE, MIN, MAX) \
+	try{\
+		if (VALUE< MIN || VALUE>=MAX)\
+         { PyErr_SetString(PyExc_TypeError,\
+        		(error_message.str()).c_str());\
+        	berror = true;\
+		  }\
+		  }\
+		     catch(...)\
+		  {\
+			  berror = true;\
+           }
 
 
 
@@ -105,14 +121,15 @@ static std::string survival_ascii_write(const INPUT_CLASS& p) \
 
 #define DEF_RETURN_VALUE_NO_ARGS(NAME, REFERENCE, DOCSTRING) \
     .def(NAME, REFERENCE, return_value_policy< manage_new_object >(), DOCSTRING)
-     
 
+#define DEF_INIT_MAKE_CONSTRUCTOR(WRAPPED_FUNCTION, DOCSTRING) \
+	.def("__init__", make_constructor(WRAPPED_FUNCTION), DOCSTRING)
 
 
 
 // def("__len__", &Class::method, "docstring")
 #define DEF_LEN(CLASS, FUNCTION_NAME) \
-    .def("__len__", &CLASS::FUNCTION_NAME, "Return the size of the Class instance") 
+    .def("__len__", &CLASS::FUNCTION_NAME, "Return the size of the Class instance")
 
 #define DEF_STR() .def(self_ns::str(self)) // __str__
 

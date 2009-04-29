@@ -72,6 +72,10 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_dendrogram();
 
   class_distribution();
+  class_parametric();
+  class_parametric_model();
+ 
+  
   class_histogram();
   class_distribution_data();
 
