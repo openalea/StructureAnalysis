@@ -84,8 +84,8 @@ class Test(interface):
     def build_data(self):
         v = Vectors([[1, 2, 3], [1, 3, 1]]) 
         
-        assert 2 == v.get_nb_vector
-        assert 3 == v.get_nb_variable
+        assert 2 == v.get_nb_vector()
+        assert 3 == v.get_nb_variable()
         assert [1, 2] == v.get_identifiers()
         assert v
         return v
@@ -133,7 +133,7 @@ class Test(interface):
     def test_len(self):
         v = self.data
         assert len(v) == 2
-        assert len(v) == v.get_nb_vector
+        assert len(v) == v.get_nb_vector()
 
     def test_plot(self):
         #does not produce anything but expected ?
@@ -225,9 +225,9 @@ class Test(interface):
         Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), \
                 ExtractHistogram(vec95, 2), "N")
         
-        if DISABLE_PLOT == False:
-            Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), \
-                 ExtractHistogram(vec97, 2))
+       # if DISABLE_PLOT == False:
+       #    Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), \
+       #          ExtractHistogram(vec97, 2))
     
         ContingencyTable(vec10, 1, 4)
 

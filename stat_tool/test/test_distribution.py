@@ -41,11 +41,11 @@ class Test(interface):
     survival_spreadsheet_write  ok
     survival_plot_write         ok
     **others**
-    ident                       ok            
-    probability                 ok
-    sup_bound                   ok
-    parameter                   ok
-    inf_bound                   ok     
+    get_ident                   ok
+    get_probability             ok
+    get_sup_bound               ok
+    get_parameter               ok
+    get_inf_bound               ok     
     old_plot                    ok   
     str                         ok
     len                         not relevant
@@ -142,11 +142,11 @@ class TestDistribution:
 
         d = Distribution("UNIFORM", 0, 10)
         assert list(d.simulate(1000))
-        assert d.sup_bound == 10
-        assert d.inf_bound == 0
-        assert d.probability == -1
-        assert d.parameter == -1
-        assert d.ident == 4
+        assert d.get_sup_bound == 10
+        assert d.get_inf_bound == 0
+        assert d.get_probability == -1
+        assert d.get_parameter == -1
+        assert d.get_ident == 4
         
         d = Uniform(0, 10)
         assert list(d.simulate(1000))
@@ -158,11 +158,11 @@ class TestDistribution:
 
         d = Distribution("BINOMIAL", 0, 10, 0.5)
         assert list(d.simulate(1000))
-        assert d.sup_bound==10
-        assert d.inf_bound==0
-        assert d.probability==0.5
-        assert d.parameter==-1
-        assert d.ident==1
+        assert d.get_sup_bound==10
+        assert d.get_inf_bound==0
+        assert d.get_probability==0.5
+        assert d.get_parameter==-1
+        assert d.get_ident==1
 
         d = Binomial(0, 10, 0.5)
         assert list(d.simulate(1000))
@@ -174,11 +174,11 @@ class TestDistribution:
 
         d = Distribution("POISSON", 0, 2)
         assert list(d.simulate(1000))
-        assert d.sup_bound == -1
-        assert d.inf_bound == 0
-        assert d.probability == -1
-        assert d.parameter == 2
-        assert d.ident == 2
+        assert d.get_sup_bound == -1
+        assert d.get_inf_bound == 0
+        assert d.get_probability == -1
+        assert d.get_parameter == 2
+        assert d.get_ident == 2
 
         d = Poisson(0, 2)
         assert list(d.simulate(1000))
@@ -190,11 +190,11 @@ class TestDistribution:
         
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         assert list(d.simulate(1000))
-        assert d.sup_bound == -1
-        assert d.inf_bound == 0
-        assert d.probability == 0.5
-        assert d.parameter == 1
-        assert d.ident == 3
+        assert d.get_sup_bound == -1
+        assert d.get_inf_bound == 0
+        assert d.get_probability == 0.5
+        assert d.get_parameter == 1
+        assert d.get_ident == 3
         d = NegativeBinomial(0, 1, 0.5)
         assert list(d.simulate(1000))
 
