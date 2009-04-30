@@ -90,13 +90,20 @@ class Test(interface):
         
     def test_test_symmetry(self):
         data = self.data
-        assert data.test_symmetry()
+        assert data.test_symmetry() == False
         
     def test_get_distance(self):
         data = self.data
-        data.get_distance(0,0)
+        assert data.get_distance(0, 0)
 
     def test_get_length(self):
         data = self.data
-        data.get_length(0,0)
-
+        assert data.get_length(0, 0)
+ 
+    def test_get_length_outside_range(self):
+        data = self.data
+        try:
+            data.get_length(-1, 0)
+            assert False
+        except TypeError:
+            assert True

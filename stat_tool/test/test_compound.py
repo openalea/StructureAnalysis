@@ -39,6 +39,21 @@ class Test(interface):
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
 
+    def test_constructor_from_compound(self):
+        compound1 = self.data
+        compound2 = Compound(compound1)
+        assert str(compound1) == str(compound2)
+        
+    def test_constructor_from_dists_and_threshold(self):
+        # by default, the COMPOUND_THRESHOLD is harcoded to be 0.99999
+        compound1 = self.data
+        compound2 = Compound(Binomial(2, 5, 0.5),
+                             NegativeBinomial(0, 2, 0.5),
+                             0.99999)
+        assert str(compound1) == str(compound2)
+
+        
+        
     def test_print(self):
         self.print_data()
         
@@ -85,7 +100,8 @@ class Test(interface):
         e = s.estimate_compound(Binomial(2, 5, 0.5))
         d = e.extract_data()
         assert d
-        eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), NegativeBinomial(0, 2, 0.5))
+        _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), 
+                           NegativeBinomial(0, 2, 0.5))
 
     
 def test1():
