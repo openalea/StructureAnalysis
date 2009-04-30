@@ -78,7 +78,7 @@ void class_correlation() {
 	class_<Correlation, bases<STAT_interface 
 #ifdef __GNUC__
 #warning "This does not compile with msvc. Which look normal since Curves is inherited in protected mode for Correlation. To be fix"
-		, Curves 
+	//	, Curves 
 #endif
 	       > >
 	("_Correlation", "Correlation")

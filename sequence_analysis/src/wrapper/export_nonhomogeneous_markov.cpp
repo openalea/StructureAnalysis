@@ -70,7 +70,7 @@ void class_nonhomogeneous_markov() {
 	class_<Nonhomogeneous_markov, bases<STAT_interface 
 #ifdef __GNUC__
 #warning "This does not compile with msvc. Which look normal since Chain is inherited in protected mode for Nonhomogeneous_markov. To be fix"
-		, Chain 
+//		, Chain 
 #endif
 	> > ("_Nonhomogeneous_markov", "Nonhomogeneous_markov")
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_nb_state_and_ident_list))
