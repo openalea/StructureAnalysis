@@ -33,6 +33,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
+
 using namespace boost::python;
 using namespace boost;
 
@@ -128,30 +130,6 @@ public:
   }
 
 
-  static Mixture_data* simulation(const Mixture& mixt, int nb_element)
-  {
-    Format_error error;
-    Mixture_data* ret = NULL;
-
-    ret = mixt.simulation(error, nb_element);
-    if(!ret) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
-
-
-  static Parametric_model* extract(const Mixture& mixt, int index)
-  {
-    Format_error error;
-    Parametric_model* ret = NULL;
-
-    ret = mixt.extract(error, index);
-    if(!ret) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
-
-
   static Parametric_model* extract_weight(const Mixture& mixt)
   {
     Parametric_model* ret;
@@ -175,85 +153,68 @@ public:
     return ret;
   }
 
-
-  static Mixture_data* extract_data(const Mixture& mixt)
-  {
-    Format_error error;
-    Mixture_data* ret = NULL;
-
-    ret = mixt.extract_data(error);
-    if(!ret) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
-  static void file_ascii_write(const Mixture m, const char* path, bool exhaustive)
-    {
-    	bool result = true;
-    	Format_error error;
-
-    	result = m.ascii_write(error, path, exhaustive);
-    	if (!result)
-    	   stat_tool::wrap_util::throw_error(error);
-      }
-
+  WRAP_METHOD1(Mixture, simulation, Mixture_data, int);
+  WRAP_METHOD1(Mixture, extract, Parametric_model, int);
+  WRAP_METHOD0(Mixture, extract_data, Mixture_data);
+  WRAP_METHOD_FILE_ASCII_WRITE(Mixture);
+  WRAP_METHOD_SPREADSHEET_WRITE(Mixture);
 };
 
 
 
 // Boost declaration
-
+#define WRAP MixtureWrap
 void class_mixture()
 {
 
   class_< Mixture, bases< Distribution, STAT_interface > >
     ("_Mixture", "Mixture Distribution")
-    .def("__init__", make_constructor(MixtureWrap::mixture_from_file),
-     "Build from a filename"
-     )
-
-    .def("__init__", make_constructor(MixtureWrap::mixture_from_components),
-     "Build from a list of weights and a list of distributions")
-
-
-    .def("__init__", make_constructor(MixtureWrap::mixture_from_unknown_component),
-     "Build from unknown components") // internal use
-
-    .def("__len__", &Mixture::get_nb_component,
-    "Return the number of components") // __len__
-
+    .def("__init__", make_constructor(MixtureWrap::mixture_from_file),  "Build from a filename" )
+    .def("__init__", make_constructor(MixtureWrap::mixture_from_components),"Build from a list of weights and a list of distributions")
+    .def("__init__", make_constructor(MixtureWrap::mixture_from_unknown_component), "Build from unknown components") // internal use
+    .def("__len__", &Mixture::get_nb_component, "Return the number of components") // __len__
     .def(self_ns::str(self)) // __str__
 
-    .def("simulate", MixtureWrap::simulation,
-     return_value_policy< manage_new_object >(),
-     python::arg("nb_element"),
-     "Simulate nb_element elements")
+    .def("nb_component", &Mixture::get_nb_component,  "Return the number of components")
 
-    .def("nb_component", &Mixture::get_nb_component,
-     "Return the number of components")
+    DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate nb_element elements")
+    DEF_RETURN_VALUE("extract_component", WRAP::extract, ARGS("index"), "Get a particular component. First index is 1")
+    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return the weight distribution")
+    DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,"Return the Mixture distribution")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the associated _MixtureData object")
+    .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
+    .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
+    .def("get_plotable", &STAT_interface::get_plotable, return_value_policy<
+     manage_new_object> (), "Return a plotable (no parameters)");
+    ;
 
-    .def("extract_component", MixtureWrap::extract,
-     return_value_policy< manage_new_object >(),
-     python::arg("index"),
-     "Get a particular component. First index is 1")
+/*
 
-    .def("extract_weight", MixtureWrap::extract_weight,
-     return_value_policy< manage_new_object >(),
-     "Return the weight distribution")
+  Mixture();
+    Mixture(const Mixture &mixt , bool *component_flag , int inb_value);
+    Mixture(int inb_component , const Parametric **pcomponent);
+    Mixture(const Mixture &mixt , bool data_flag = true)    :Distribution(mixt) { copy(mixt , data_flag); }
 
-    .def("extract_mixture", MixtureWrap::extract_mixture,
-     return_value_policy< manage_new_object >(),
-     "Return the Mixture distribution")
+    Parametric_model* extract(Format_error &error , int index) const;
+    Mixture_data* extract_data(Format_error &error) const;
 
-    .def("extract_data", MixtureWrap::extract_data,
-     return_value_policy< manage_new_object >(),
-     "Return the associated _MixtureData object"
-     )
 
-    .def("file_ascii_write", MixtureWrap::file_ascii_write,
-    	     "Save Compound into a file")
-    	    ;
+    bool plot_write(Format_error &error , const char *prefix ,
+                    const char *title = 0) const;
+
+    void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
+                     bool component_flag = true);
+    double likelihood_computation(const Mixture_data &mixt_histo) const;
+
+    // acces membres de la classe
+
+    Mixture_data* get_mixture_data() const { return mixture_data; }
+    int get_nb_component() const { return nb_component; }
+    Parametric* get_weight() const { return weight; }
+    Parametric* get_component(int index) const { return component[index]; }
+*/
 }
-
+#undef WRAP
 
 
 ////////////////////////// Class Mixture_data //////////////////////////////////
@@ -263,24 +224,14 @@ class MixtureDataWrap
 
 public:
 
-  static Distribution_data* extract(const Mixture_data& d, int index)
-  {
-    Format_error error;
-    Distribution_data* ret = NULL;
-
-    ret = d.extract(error, index);
-    if(!ret) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
+  WRAP_METHOD1(Mixture_data, extract, Distribution_data, int);
+  WRAP_METHOD_FILE_ASCII_WRITE(Mixture_data);
 
   static Distribution_data* extract_weight(const Mixture_data& mixt_histo)
   {
     Distribution_data* ret;
-
     ret = new Distribution_data(*(mixt_histo.get_weight()) ,
                 mixt_histo.get_mixture()->get_weight());
-
     return ret;
   }
 
@@ -288,46 +239,47 @@ public:
   static Distribution_data* extract_mixture(const Mixture_data& mixt_histo)
   {
     Distribution_data* ret;
-
     ret = new Distribution_data(mixt_histo , mixt_histo.get_mixture());
-
     return ret;
   }
 
-  static void file_ascii_write(const Mixture_data m, const char* path, bool exhaustive)
-  {
-  	bool result = true;
-  	Format_error error;
-
-  	result = m.ascii_write(error, path, exhaustive);
-  	if (!result)
-  	   stat_tool::wrap_util::throw_error(error);
-    }
 
 
 };
 
+#define WRAP MixtureDataWrap
 void class_mixture_data()
 {
   class_< Mixture_data, bases< Histogram, STAT_interface > >
     ("_MixtureData",  "Mixture Data")
     .def(self_ns::str(self))
-    .def("nb_component", &Mixture_data::get_nb_component,
-     "Return the number of components.")
-    .def("extract_component", MixtureDataWrap::extract,
-     return_value_policy< manage_new_object >(),
-     python::arg("index"),
-     "Get a particular component. First index is 1")
-    .def("extract_weight", MixtureDataWrap::extract_weight,
-     return_value_policy< manage_new_object >(),
-     "Return a _DistributionData")
-    .def("extract_mixture", MixtureDataWrap::extract_mixture,
-     return_value_policy< manage_new_object >(),
-     "Return a _DistributionData")
-     .def("file_ascii_write", MixtureDataWrap::file_ascii_write,
-     "Save Compound into a file")
+    .def("nb_component", &Mixture_data::get_nb_component,"Return the number of components.")
+    DEF_RETURN_VALUE("get_component", &Mixture_data::get_component,ARGS("index"), "Return the number of components.")
+
+
+    .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
+    DEF_RETURN_VALUE("extract_component", WRAP::extract, ARGS("index"),"Get a particular component. First index is 1")
+    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return a _DistributionData")
+    DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,"Return a _DistributionData")
+
+
+    /*
+    Mixture_data(const Histogram &histo , int inb_component);
+    Mixture_data(const Mixture &mixt);
+    Mixture_data(const Mixture_data &mixt_histo , bool model_flag = true) :Histogram(mixt_histo) { copy(mixt_histo , model_flag); }
+
+    bool spreadsheet_write(Format_error &error , const char *path) const;
+    bool plot_write(Format_error &error , const char *prefix , const char *title = 0) const;
+    plotable::MultiPlotSet* get_plotable() const;
+
+    double information_computation() const;
+
+    Histogram* get_component(int index) const { return component[index]; }
+    */
     ;
 }
+
+#undef WRAP
 
 
 

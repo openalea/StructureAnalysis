@@ -94,8 +94,6 @@ public:
  WRAP_METHOD_FILE_ASCII_WRITE(Convolution);
 
 
- // This one may be replaced by this macro
- // WRAP_METHOD0_CAST(Convolution, get_convolution_data, Parametric_model); //extract_convolution
   static Parametric_model* get_convolution_data(const Convolution& convol)
   {
     Parametric_model* ret;
@@ -117,7 +115,6 @@ public:
 // Boost declaration
 
 #define WRAP ConvolutionWrap
-
 void class_convolution()
 {
 
@@ -125,19 +122,29 @@ void class_convolution()
     ("_Convolution", "Convolution Distribution")
     .def("__init__", make_constructor(WRAP::convolution_from_dists))
     .def("__init__", make_constructor(WRAP::convolution_from_file))
-
+    .def("__len__", &Convolution::get_nb_distribution, "Return the size of the Class instance")
+    .def(self_ns::str(self))
     .def("nb_distribution", &Convolution::get_nb_distribution, "Return the number of components")
-
-    DEF_LEN(Convolution, get_nb_distribution)
-    DEF_STR()
 
 	DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate elements")
     DEF_RETURN_VALUE("extract_elementary", WRAP::extract, ARGS("index"), "Extract a particular element. First index is 1")
-
 	DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::get_convolution_data, "Return a _ParametricModel object")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _ConvolutionData")
     DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Convolution into a file")
     ;
+
+/*
+
+   Convolution(const Convolution &convol , bool data_flag = true):Distribution(convol) { copy(convol , data_flag); }
+
+   void computation(int min_nb_value = 1 , double cumul_threshold = CONVOLUTION_THRESHOLD ,  bool *dist_flag = 0);
+   Convolution_data* simulation(Format_error &error , int nb_element) const;
+
+   Parametric* get_distribution(int index) const { return distribution[index]; }
+   */
+
+
+
 }
 #undef WRAP
 
@@ -179,16 +186,25 @@ void class_convolution_data()
 {
   class_< Convolution_data, bases< Histogram, STAT_interface > >
     ("_ConvolutionData", "Convolution Data")
-
-    DEF_STR()
+    .def(self_ns::str(self))
     .def("nb_histogram", &Convolution_data::get_nb_histogram)
-
-    DEF_RETURN_VALUE("extract_elementary", ConvolutionDataWrap::extract,
-    	python::arg("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", ConvolutionDataWrap::extract_convolution,
-    	"Return a _DistributionData")
-
+    .def("get_histogram", &Convolution_data::get_histogram,	return_value_policy< manage_new_object >(), ARGS("index"),"todo")
+    DEF_RETURN_VALUE("extract_elementary", ConvolutionDataWrap::extract, ARGS("index"), "Extract a particular element. First index is 1")
+    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", ConvolutionDataWrap::extract_convolution,"Return a _DistributionData")
     ;
+
+  /*
+    Convolution_data(const Histogram &histo , int nb_histo);
+    Convolution_data(const Convolution &convol);
+    Convolution_data(const Convolution_data &convol_histo , bool model_flag = true)
+    :Histogram(convol_histo) { copy(convol_histo , model_flag); }
+
+
+    Histogram* get_histogram(int index) const { return histogram[index]; }
+    */
+
+
+
 }
 
 #undef WRAP

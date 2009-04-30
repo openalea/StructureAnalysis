@@ -110,22 +110,11 @@ void class_distribution()
     .def_readonly("get_nb_parameter", &Distribution::nb_parameter, "number of unknown parameters")
 
     // no tested. is it useful ?
-    .def("get_plotable", DistributionWrap::get_plotable,
-    		return_value_policy< manage_new_object >(),
-    		"Return a plotable for a list of distribution")
-
-    .def("survival_ascii_write", WRAP::survival_ascii_write,
-    		"Return a string containing the object description (survival viewpoint)")
-    .def("survival_plot_write", WRAP::survival_plot_write,
-    		python::args("prefix", "title"),
-    		"Write GNUPLOT files (survival viewpoint)")
-    .def("survival_spreadsheet_write", WRAP::survival_spreadsheet_write,
-    		python::arg("filename"),
-    		"Write object to filename (spreadsheet format)")
-    .def("truncate", WRAP::truncate,
-    		return_value_policy< manage_new_object >(),
-    		python::args("index"),
-    		"truncate distributino and returns parametric model")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable for a list of distribution")
+    .def("survival_ascii_write", WRAP::survival_ascii_write,	"Return a string containing the object description (survival viewpoint)")
+    .def("survival_plot_write", WRAP::survival_plot_write,ARGS("prefix", "title"),"Write GNUPLOT files (survival viewpoint)")
+    .def("survival_spreadsheet_write", WRAP::survival_spreadsheet_write, ARGS("filename"),"Write object to filename (spreadsheet format)")
+    DEF_RETURN_VALUE("truncate", WRAP::truncate,ARGS("index"),"truncate distributino and returns parametric model")
 
 
     /*
@@ -243,7 +232,6 @@ void class_parametric()
     .def_readonly("get_parameter", &Parametric::parameter)
     .def_readonly("get_probability", &Parametric::probability)
     .def(self_ns::str(self))
-
     .def("simulate", &Parametric::simulation, "Simulation one value")
 
     ;

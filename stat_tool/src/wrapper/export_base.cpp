@@ -1,22 +1,22 @@
 /*------------------------------------------------------------------------------
- *                                                                              
+ *
  *        VPlants.Stat_Tool : VPlants Statistics module
- *                                                                              
- *        Copyright 2006-2007 INRIA - CIRAD - INRA                      
- *                                                                              
+ *
+ *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>         
- *                                                                              
- *        Distributed under the GPL 2.0 License.                               
- *        See accompanying file LICENSE.txt or copy at                          
+ *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *
+ *        Distributed under the GPL 2.0 License.
+ *        See accompanying file LICENSE.txt or copy at
  *           http://www.gnu.org/licenses/gpl-2.0.txt
- *                                                                              
- *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
- *       
+ *
+ *        OpenAlea WebSite : http://openalea.gforge.inria.fr
+ *
  *        $Id$
- *                                                                       
+ *
  *-----------------------------------------------------------------------------*/
 
 #include "export_base.h"
@@ -28,6 +28,7 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
 using namespace boost::python;
 using namespace boost;
 
@@ -38,7 +39,7 @@ using namespace boost;
 
 // Format_error
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Format_error_update_overloads_1_3, update, 1, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Format_error_correction_update_overloads_2_4, 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Format_error_correction_update_overloads_2_4,
 				       correction_update, 2, 4)
 
 
@@ -85,41 +86,13 @@ void class_format_error()
 
 }
 
-class StatInterfaceWrap 
+class StatInterfaceWrap
 {
 public:
 
-  static std::string ascii_write(const STAT_interface& d, bool exhaustive)
-  {
-    std::stringstream s;
-    std::string res;
-    
-    d.ascii_write(s, exhaustive);
-    res = s.str();
-    return res;
-  }
-
-
-  static void plot_write(const STAT_interface& d, 
-			 const std::string& prefix, const std::string& title)
-  {
-    Format_error error;
-
-    if(! d.plot_write(error, prefix.c_str(), title.c_str()))
-      stat_tool::wrap_util::throw_error(error);
-  }
-
-  
-  static void spreadsheet_write(const STAT_interface& d, 
-				const std::string& filename)
-  {
-    Format_error error;
-
-    if(! d.spreadsheet_write(error, filename.c_str()))
-       stat_tool::wrap_util::throw_error(error);
-  }
-
-
+  WRAP_METHOD_ASCII_WRITE(STAT_interface);
+  WRAP_METHOD_PLOT_WRITE(STAT_interface);
+  WRAP_METHOD_SPREADSHEET_WRITE(STAT_interface);
 };
 
 
@@ -128,20 +101,20 @@ void class_stat_interface()
 {
   class_< STAT_interface, boost::noncopyable > ("_StatInterface", no_init)
     .def("ascii_write", &StatInterfaceWrap::ascii_write,
-	 python::arg("exhaustive"),
-	 "Return a string containing the object description (exhaustive or not)")
-    
+    		ARGS("exhaustive"),
+    		"Return a string containing the object description (exhaustive or not)")
+
     .def("plot_write", &StatInterfaceWrap::plot_write,
-	 python::args("prefix", "title"),
-	  "Write GNUPLOT files (with prefix)")
+    		ARGS("prefix", "title"),
+    		"Write GNUPLOT files (with prefix)")
 
     .def("spreadsheet_write", &StatInterfaceWrap::spreadsheet_write,
-	 python::arg("filename"),
-	 "Write object to filename (spreadsheet format)")
-    
-    .def("get_plotable", &STAT_interface::get_plotable, 
-	 return_value_policy< manage_new_object >(),
-	 "Return a plotable object" )
+    		ARGS("filename"),
+    		"Write object to filename (spreadsheet format)")
+
+    .def("get_plotable", &STAT_interface::get_plotable,
+    		return_value_policy< manage_new_object >(),
+    		"Return a plotable object" )
     ;
 
 }

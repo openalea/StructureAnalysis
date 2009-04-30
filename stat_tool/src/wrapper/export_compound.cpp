@@ -53,29 +53,6 @@ public:
 	    return boost::shared_ptr<Compound>(compound);
 	}
 
-	static boost::shared_ptr<Compound> compound_two_distributions(
-			const Parametric &sum_dist,	const Parametric &dist)
-	{
-		Format_error error;
-		Compound *cmpnd = NULL;
-		cmpnd = new Compound(sum_dist, dist, COMPOUND_THRESHOLD);
-		if(!cmpnd)
-			stat_tool::wrap_util::throw_error(error);
-		return boost::shared_ptr<Compound>(cmpnd);
-	}
-
-	static boost::shared_ptr<Compound> compound_two_distributions_and_threshold(
-			const Parametric &sum_dist,	const Parametric &dist,	double threshold)
-	{
-		Format_error error;
-		Compound *cmpnd = NULL;
-		cmpnd = new Compound(sum_dist, dist, threshold);
-		if(!cmpnd)
-		    stat_tool::wrap_util::throw_error(error);
-		return boost::shared_ptr<Compound>(cmpnd);
-	}
-
-
 	static Parametric_model* extract_compound(const Compound& compound)
 	{
 	    Parametric_model* ret;
@@ -112,30 +89,33 @@ public:
 #define WRAP CompoundWrap
 void class_compound()
 {
-	class_< Compound, bases<STAT_interface, Distribution> >
-    ("_Compound", "Compound" )
-    DEF_INIT_MAKE_CONSTRUCTOR(WRAP::compound_from_file,
-    		"Build from a filename")
-    DEF_INIT_MAKE_CONSTRUCTOR(WRAP::compound_two_distributions,
-    		"Build from two distributions")
-    DEF_INIT_MAKE_CONSTRUCTOR(WRAP::compound_two_distributions_and_threshold,
-    		"Build from two distributions and a threshold")
+	class_< Compound, bases<STAT_interface, Distribution> >  ("_Compound", "Compound" )
+        //"constructor from 2 distribution and an optional cumul threshold")
+        .def(init<Parametric, Parametric, optional<double> >())
+        //, "constructor from compound")
+        .def(init<Compound>())
+        // constructor from file
+        DEF_INIT_MAKE_CONSTRUCTOR(WRAP::compound_from_file,	"Build from a filename")
 
-    DEF_STR()
-
-    DEF_RETURN_VALUE("simulate", WRAP::simulation,ARGS("nb_element"),
-    		"Simulate nb_element elements")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the data")
-    DEF_RETURN_VALUE_NO_ARGS("extract_compound", WRAP::extract_compound,
-    		"Return the compound distribution")
-    DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum_distribution,
-    		"Return the sum distribution")
-    DEF_RETURN_VALUE("extract_elementary", WRAP::extract_distribution,
-    		ARGS("index"),
-    		"Return the elementary distribution")
-	DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write,
-			"Save Compound into a file")
+        .def(self_ns::str(self)) // __str__
+    
+        DEF_RETURN_VALUE("simulate", WRAP::simulation,ARGS("nb_element"), "Simulate nb_element elements")
+        DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the data")
+        DEF_RETURN_VALUE_NO_ARGS("extract_compound", WRAP::extract_compound, "Return the compound distribution")
+        DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum_distribution,	"Return the sum distribution")
+        DEF_RETURN_VALUE("extract_elementary", WRAP::extract_distribution,	ARGS("index"),	"Return the elementary distribution")
+    	DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
 	;
+
+	/*
+	    Compound(const Parametric &sum_dist , const Parametric &dist , char type);
+	    Compound(const Compound &compound , bool data_flag = true)
+	    void computation(int min_nb_value = 1 ,
+	                     double cumul_threshold = COMPOUND_THRESHOLD ,
+	                     bool sum_flag = true , bool dist_flag = true);
+	    // done in compound_data so
+	    Compound_data* simulation(Format_error &error , int nb_element) const;
+	*/
 }
 #undef WRAP
 
@@ -155,7 +135,6 @@ public:
 	    return ret;
 	}
 
-
 	static Distribution_data* extract_distribution(const Compound_data& input)
 	{
 	    Distribution_data* ret;
@@ -169,12 +148,29 @@ public:
 #define WRAP CompoundDataWrap
 void class_compound_data()
 {
-  class_< Compound_data, bases< STAT_interface, Histogram > >
-	 ("_CompoundData", "Compound data")
-     DEF_RETURN_VALUE_NO_ARGS("extract", WRAP::extract, "Return the data")
-     DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum_distribution, "Return the sum distribution")
-     DEF_RETURN_VALUE("extract_elementary", WRAP::extract_distribution,ARGS("index"),"Return the elementary distribution")
+    class_< Compound_data, bases< STAT_interface, Histogram > > ("_CompoundData", "Compound data")
+        DEF_RETURN_VALUE_NO_ARGS("extract", WRAP::extract, "Return the data")
+        DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum_distribution, "Return the sum distribution")
+        DEF_RETURN_VALUE("extract_elementary", WRAP::extract_distribution,ARGS("index"), "Return the elementary distribution")
     ;
+
+
+  /*
+  Compound_data();
+    Compound_data(const Histogram &histo , const Compound &icompound);
+    Compound_data(const Compound &icompound);
+    Compound_data(const Compound_data &compound_histo , bool model_flag = true)    :Histogram(compound_histo) { copy(compound_histo , model_flag); }
+
+    std::ostream& line_write(std::ostream &os) const;
+    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
+    bool ascii_write(Format_error &error , const char *path ,  bool exhaustive = false) const;
+    bool spreadsheet_write(Format_error &error , const char *path) const;
+    bool plot_write(Format_error &error , const char *prefix ,  const char *title = 0) const;
+
+    Compound* get_compound() const { return compound; }
+*/
+
+
 }
 #undef WRAP
 
