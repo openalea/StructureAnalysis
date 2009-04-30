@@ -35,14 +35,14 @@ if __name__ == '__main__':
           #create_namespaces = True,
           
           # pure python  packages
-          packages= [ "openalea", 
-                      "openalea.tree_matching"
-                      ],
+          #packages= [ "openalea", 
+          #            "openalea.tree_matching"
+          #            ],
           
           # python packages directory
-          package_dir= { #pkg_name : pj('src','vplants'),
-                         '' : 'src',
-                         },
+          #package_dir= { #pkg_name : pj('src','vplants'),
+          #               '' : 'src',
+          #               },
 
           # Add package platform libraries if any
           include_package_data=True,
