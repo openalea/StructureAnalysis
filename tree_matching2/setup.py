@@ -12,13 +12,13 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # platform dependencies
-install_requires = []#[binary_deps('vplants.mtg'), binary_deps('vplants.stat_tool')]#, binary_deps("boostpython")]
+install_requires = [binary_deps("boostpython")]
 setup_requires = ['openalea.deploy']
 
 
 if __name__ == '__main__':
     
-    setup(name='VPlants.Tree_Matching',
+    setup(name='VPlants.Tree_Matching2',
           version='0.6.2',
           author='Pascal Ferraro, Aida Ouangraoua',
           description='Tree matching library',
