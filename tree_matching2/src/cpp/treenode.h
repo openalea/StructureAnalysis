@@ -131,11 +131,18 @@ class TreeNode
 
   /** Get Child Number */
   int getChildNumber() const;
-
+  int depth() const{
+    return _depth;
+  }
+  
+  void putDepth(int depth){
+    _depth = depth;
+  }
   
   private :
   int _id;
   int _father;
+  int _depth;
   vector<int> _childList;
   ValueVector _values;
 };

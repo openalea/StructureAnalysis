@@ -49,6 +49,7 @@ std::string treenode_str( TreeNode* tnode )
   stringstream ss; 
   ss<<"ID \t : "<<(int)tnode->getId()<<endl;
   ss<<"FATHER \t : "<<(int)tnode->father()<<endl;
+  ss<<"DEPTH \t : "<<(int)tnode->depth()<<endl;
   ss<<"CHILD LIST \t : [ ";
   for (int i=0;i<tnode->getChildNumber()-1;i++)
     ss<<tnode->getChild(i)<<" , ";

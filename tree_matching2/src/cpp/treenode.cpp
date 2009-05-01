@@ -44,6 +44,7 @@ TreeNode::TreeNode(int id, int father)
   _id   = id;
   _father   = father;
   _values   = ValueVector();
+  _depth = 0;
 }
 
 TreeNode::~TreeNode()
@@ -56,6 +57,7 @@ void TreeNode::print() const
 {
   cout<<"ID \t : "<<_id<<endl;
   cout<<"FATHER \t : "<<_father<<endl;
+  cout<<"DEPTH \t : "<<_depth<<endl;
   cout<<"CHILD LIST \t : [ ";
   for (int i=0;i<getChildNumber()-1;i++)
     cout<<getChild(i)<<" , ";

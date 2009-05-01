@@ -129,13 +129,14 @@ class TreeGraph
   /** Method for printing */
   void print() const;
   ostream& mtg_write(ostream &os) const;
-  bool mtg_write( const char *path ) const;   
+  bool mtg_write(  char *path ) ;   
 
 
 
   private :
   int _nbVertex;
   TreeNodeList _treenodes;
+  int _depth;
   int _degree;
   int _rootId;
 };

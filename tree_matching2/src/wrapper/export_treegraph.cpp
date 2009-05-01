@@ -61,6 +61,7 @@ void export_TreeGraph() {
     .def( "father", &TreeGraph::father,"Return the father of vertex",(bp::arg("vertex")))
     .def( "child", &TreeGraph::child,"Return the id of child_number th child of node",(bp::arg("node")),(bp::arg("child_number")))
     .def( "getNbChild", &TreeGraph::getNbChild,"Get the number of children",(bp::arg("vertex")))
+    .def("mtg_write",(bool (TreeGraph::*)( char *))&TreeGraph::mtg_write,"Save TreeGraph as MTG file",(bp::arg("path")))
     .def( "__repr__", treegraph_str )
     .def( "__str__", treegraph_str )
     .def( "__repr__", treegraph_str )

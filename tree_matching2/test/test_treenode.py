@@ -1,5 +1,8 @@
 from openalea.tree_matching import *
 
+from openalea.mtg.mtg import *
+import openalea.mtg.aml as wrap
+import openalea.aml as aml
 
 def test_treenode():
     t = TreeNode(1,-1)
@@ -70,6 +73,8 @@ def test_matching():
     
 #test_treenode_exists()
 test_matching()
+
+g = MTG("~/Documents/Travail/Aml/Pommier/B1001.mtg")
 
 #print tree.getTreeNode(0)
 #print tree.getTreeNode(1) 
