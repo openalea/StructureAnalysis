@@ -252,7 +252,7 @@ void class_tops() {
 	class_<Tops, bases<Sequences> > ("_Tops", "Tops")
 
 	.def("__init__", make_constructor(TopsWrap::tops_from_file))
-    .def("__init__", make_constructor(TopsWrap::tops_from_lists))
+        .def("__init__", make_constructor(TopsWrap::tops_from_lists))
 	.def(init<Sequences> ())
 	.def(self_ns::str(self)) //__str__
 	.def("get_max_position", &Tops::get_max_position)

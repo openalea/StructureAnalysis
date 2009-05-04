@@ -152,7 +152,7 @@ void class_nonparametric_sequence_process() {
     Nonparametric_sequence_process(int inb_state , Parametric **occupancy);
     Nonparametric_sequence_process(const Nonparametric_process &process);
     Nonparametric_sequence_process(const Nonparametric_sequence_process &process , char manip = 'c' , int param = true);
-   
+
 
     //
     Distribution** get_first_occurrence() const { return first_occurrence; }
@@ -160,7 +160,7 @@ void class_nonparametric_sequence_process() {
     Parametric** get_sojourn_time() const { return sojourn_time; }
     Distribution** get_nb_run() const { return nb_run; }
     Distribution** get_nb_occurrence() const { return nb_occurrence; }
-*/    
+*/
 
 
 }

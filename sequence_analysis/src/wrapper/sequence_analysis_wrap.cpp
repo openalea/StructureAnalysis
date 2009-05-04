@@ -31,6 +31,10 @@
 #include "export_nonparametric_sequence_process.h"
 #include "export_renewal.h"
 #include "export_time_events.h"
+#include "export_semi_markov.h"
+#include "export_hidden_semi_markov.h"
+#include "export_variable_order_markov.h"
+#include "export_hidden_variable_order_markov.h"
 
 #include <boost/python.hpp>
 #include <boost/version.hpp>
@@ -69,5 +73,15 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
   class_renewal_data();    
 
   class_time_events();
+
+  class_semi_markov();
+  class_semi_markov_data();
+  class_hidden_semi_markov();
+  
+  class_variable_order_markov();
+  class_variable_order_markov_data();
+
+  class_hidden_variable_order_markov();
+
 }
 

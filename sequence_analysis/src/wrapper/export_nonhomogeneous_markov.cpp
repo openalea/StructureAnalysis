@@ -67,20 +67,16 @@ public:
 
 void class_nonhomogeneous_markov() {
 
-	class_<Nonhomogeneous_markov, bases<STAT_interface 
-#ifdef __GNUC__
-#warning "This does not compile with msvc. Which look normal since Chain is inherited in protected mode for Nonhomogeneous_markov. To be fix"
-//		, Chain 
-#endif
-	> > ("_Nonhomogeneous_markov", "Nonhomogeneous_markov")
+	class_<Nonhomogeneous_markov, bases<STAT_interface> > ("_Nonhomogeneous_markov", "Nonhomogeneous_markov")
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_nb_state_and_ident_list))
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_chain_and_self_transition))
 
 
+
 	.def("extract", &NonHomogeneousMarkovWrap::extract,
 		return_value_policy<manage_new_object> (),
-        python::args("type", "state"),
-	   "Extract distribution data")
+                python::args("type", "state"),
+                "Extract distribution data")
 	.def("get_homogeneity", &Nonhomogeneous_markov::get_homogeneity,
 		python::args("index"),"return homogeneity")
 	.def("get_self_transition", &Nonhomogeneous_markov::get_self_transition,
@@ -125,3 +121,36 @@ void class_nonhomogeneous_markov() {
 ;
 }
 
+
+void class_nonhomogeneous_markov_data()
+{
+  class_<Nonhomogeneous_markov_data, bases<Markovian_sequences > >
+  ("_Nonhomogeneous_markov_data", "Nonhomogeneous_markov_data")
+
+  .def(init<Markovian_sequences & >())
+
+  ;
+  /*
+    Nonhomogeneous_markov_data();
+    Nonhomogeneous_markov_data(const Histogram &ihlength);
+    Nonhomogeneous_markov_data(const Nonhomogeneous_markov_data &seq , bool model_flag = true ,
+                               char transform = 'c') :Markovian_sequences(seq , transform) { copy(seq , model_flag); }
+
+    Distribution_data* extract(Format_error &error , int type , int state) const;
+    Nonhomogeneous_markov_data* remove_index_parameter(Format_error &error) const;
+
+    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
+    bool ascii_write(Format_error &error , const char *path ,
+                     bool exhaustive = false) const;
+    bool spreadsheet_write(Format_error &error , const char *path) const;
+    bool plot_write(Format_error &error , const char *prefix ,
+                    const char *title = 0) const;
+
+    void build_transition_count();
+
+    Nonhomogeneous_markov* get_markov() const { return markov; }
+    Chain_data* get_chain_data() const { return chain_data; }
+    double get_likelihood() const { return likelihood; }
+    */
+
+}

@@ -40,25 +40,15 @@ using namespace boost::python;
 using namespace boost;
 using namespace stat_tool;
 
-/*class TimeEventsWrap {
-
-public:
-
-
-
-};
-*/
-// Boost declaration
-
 void class_time_events() {
 
 
-	class_<Time_events, bases<STAT_interface> > ("_Time_events", "Time_events")
+     class_<Time_events, bases<STAT_interface> > ("_Time_events", "Time_events")
     .def(init <int>())
 	// Python Operators
 
-    .def("get_nb_element", &Time_events::get_nb_element,"nb elemente")
-    .def("get_nb_class", &Time_events::get_nb_class,"nb class")
+    .def_readonly("get_nb_element", &Time_events::get_nb_element,"nb elements")
+    .def_readonly("get_nb_class", &Time_events::get_nb_class,"nb class")
 	;
 
 

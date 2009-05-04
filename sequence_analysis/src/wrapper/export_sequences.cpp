@@ -38,6 +38,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
 
+
+#include "boost_python_aliases.h"
+
 using namespace boost::python;
 using namespace boost;
 using namespace stat_tool;
@@ -633,7 +636,7 @@ public:
 	}
 
 	static int get_type(const Sequences& seq, int index) {
-		if (index <0 || index>=seq.get_nb_variable()){
+		if (index <0 or index>=seq.get_nb_variable()){
 				PyErr_SetString(PyExc_IndexError,
 					"index must be positive and less than number of variables");
 					boost::python::throw_error_already_set();
@@ -643,7 +646,7 @@ public:
 	}
 
 	static int get_length(const Sequences& seq, int index) {
-		if (index <0 || index>=seq.get_nb_sequence()){
+		if (index <0 or index>=seq.get_nb_sequence()){
 				PyErr_SetString(PyExc_IndexError,
 					"index must be positive and less than number of sequences");
 					boost::python::throw_error_already_set();
@@ -653,7 +656,7 @@ public:
 	}
 
 	static double get_min_value(const Sequences& seq, int variable) {
-		if (variable <0 || variable>=seq.get_nb_variable()){
+		if (variable <0 or variable>=seq.get_nb_variable()){
 				PyErr_SetString(PyExc_IndexError,
 					"index must be positive and less than number of variables");
 					boost::python::throw_error_already_set();
@@ -662,7 +665,7 @@ public:
 	}
 
 	static double get_max_value(const Sequences& seq, int variable) {
-		if (variable <0 || variable>=seq.get_nb_variable()){
+		if (variable <0 or variable>=seq.get_nb_variable()){
 				PyErr_SetString(PyExc_IndexError,
 					"index must be positive and less than number of variables");
 					boost::python::throw_error_already_set();
@@ -903,7 +906,7 @@ void class_sequences() {
 	 .value("POSITION_INTERVAL", POSITION_INTERVAL)
 	 .export_values();
 
-    enum_<stat_tool::wrap_util::UniqueInt<6, 11> >("Type")
+        enum_<stat_tool::wrap_util::UniqueInt<6, 11> >("Type")
 	 .value("INT_VALUE", INT_VALUE)
 	 .value("REAL_VALUE", REAL_VALUE)
 	 .value("STATE", STATE)
@@ -913,6 +916,7 @@ void class_sequences() {
 	 .export_values();
 
 	class_<Sequences, bases<STAT_interface> > ("_Sequences", "Sequences")
+	.def(init <const Renewal_data&>())
 	.def("__init__", make_constructor(SequencesWrap::sequences_from_file))
 	.def("__init__", make_constructor(SequencesWrap::build_from_lists))
 
@@ -921,10 +925,10 @@ void class_sequences() {
 	.def("__len__", &Sequences::get_nb_sequence,"Returns number of sequences")
 	.def("__getitem__", SequencesWrap::get_item)
 
-	.def("get_nb_sequence", &Sequences::get_nb_sequence, "Return the number of sequences")
-	.def("get_nb_variable",	&Sequences::get_nb_variable, "Return the number of variables")
-	.def("get_max_length", &Sequences::get_max_length,"Return max length")
-	.def("get_cumul_length", &Sequences::get_cumul_length,"Return cumul length")
+	.def_readonly("get_nb_sequence", &Sequences::get_nb_sequence, "Return the number of sequences")
+	.def_readonly("get_nb_variable", &Sequences::get_nb_variable, "Return the number of variables")
+	.def_readonly("get_max_length", &Sequences::get_max_length,"Return max length")
+	.def_readonly("get_cumul_length", &Sequences::get_cumul_length,"Return cumul length")
 
 
 	.def("get_length", &SequencesWrap::get_length,
@@ -939,17 +943,7 @@ void class_sequences() {
 		python::args("index_var"), "return min value of variables")
 	.def("get_max_value", &Sequences::get_max_value,
 		python::args("index_var"), "return max value of variables")
-/*
 
-	Histogram* get_hlength() const { return hlength; }
-	Histogram* get_hindex_parameter() const { return hindex_parameter; }
-	Histogram* get_index_interval() const { return index_interval; }
-	Histogram* get_marginal(int variable) const { return marginal[variable]; }
-
-	int get_index_parameter(int iseq , int index) const
-	{ return index_parameter[iseq][index]; }
-
-*/
 
 
 	// Identifiers
@@ -961,10 +955,10 @@ void class_sequences() {
 		python::args("variable", "min", "max", "keep"),
 		"Selection of individuals according to the values taken by a variable")
 	.def("select_variable", SequencesWrap::select_variable,
-		return_value_policy<manage_new_object> (), 
-        python::args("variables", "keep"),
-    	"select variable given a list of index")
-	.def("select_individual", SequencesWrap::select_individual,
+		return_value_policy<manage_new_object> (),
+              python::args("variables", "keep"),
+                 "select variable given a list of index")
+        .def("select_individual", SequencesWrap::select_individual,
 		return_value_policy<manage_new_object> (),
 		python::args("identifiers", "keep"),
 		"Select individuals given a list of identifiers")
@@ -977,7 +971,7 @@ void class_sequences() {
 		return_value_policy<manage_new_object> (),
 		python::args("min_index_parameter", "max_index_parameter"),
 		"Select sequences in an index parameter range")
-    .def("remove_index_parameter", SequencesWrap::remove_index_parameter,
+        .def("remove_index_parameter", SequencesWrap::remove_index_parameter,
 		return_value_policy<manage_new_object> (),
 		"Remove index parameter")
 	// Reverse
@@ -1063,59 +1057,168 @@ void class_sequences() {
 		return_value_policy<manage_new_object> (),
 		python::args("standard_deviation", "output", "path", "format"),
 		"Pointwise average")
-	//recurrence time sequences
-	.def("recurrence_time_sequences", SequencesWrap::recurrence_time_sequences,
-		return_value_policy<manage_new_object> (),
-		python::args("variable", "value"),
-		"Recurrence time sequences")
-	//sojourn_time_sequences
-	.def("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences,
-		return_value_policy<manage_new_object> (),
-		python::args("variable"),
-		"Sojourn time sequences")
-	//transform position
-	.def("transform position", SequencesWrap::transform_position,
-		return_value_policy<manage_new_object> (),
-		python::args("step"),
-		"Transform position")
-	//cross
-	.def("cross", SequencesWrap::cross,
-		return_value_policy<manage_new_object> (),
-		"Cross")
+
+	DEF_RETURN_VALUE("recurrence_time_sequences", SequencesWrap::recurrence_time_sequences,ARGS("variable", "value"),"Recurrence time sequences")
+	DEF_RETURN_VALUE("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences, ARGS("variable"), "Sojourn time sequences")
+	DEF_RETURN_VALUE("transform position", SequencesWrap::transform_position, ARGS("step"), "Transform position")
+	DEF_RETURN_VALUE_NO_ARGS("cross", SequencesWrap::cross, "Cross")
 	;
 
+
+
+	/*
+	    Sequences(int inb_sequence , int inb_variable);
+	    Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,	              int inb_variable , int *itype , bool init_flag = false)	    { init(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,	           itype , init_flag); }
+	    Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable , int *itype , bool init_flag = false){ init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE , inb_variable ,	           itype , init_flag); }
+	    Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  bool init_flag = false)	    { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
+	    Sequences(const Histogram &ihlength , int inb_variable , bool init_flag = false);
+	    Sequences(const Sequences &seq , int inb_sequence , int *index);
+	    Sequences(const Sequences &seq , bool *segment_mean);
+	    Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
+
+
+	    Vectors* build_vectors(bool index_variable) const;
+	    Vectors* extract_vectors(Format_error &error , int feature_type , int variable = I_DEFAULT ,int value = I_DEFAULT) const;
+
+	    Markovian_sequences* markovian_sequences(Format_error &error) const;
+	    Tops* tops(Format_error &error) const;
+
+	    bool check(Format_error &error , const char *pattern_label);
+
+	    Time_events* extract_time_events(Format_error &error , int variable , int begin_date , int end_date ,  int previous_date = I_DEFAULT , int next_date = I_DEFAULT) const;
+	    Renewal_data* extract_renewal_data(Format_error &error , int variable , int begin_index , int end_index) const;
+
+	    Sequences* cluster(Format_error &error , int variable , int step ,int mode = FLOOR) const;
+	    Sequences* index_parameter_select(Format_error &error , int min_index_parameter ,    int max_index_parameter , bool keep) const;
+	    Sequences* remove_index_parameter(Format_error &error) const;
+	    Sequences* moving_average(Format_error &error , int nb_point , double *filter ,   int variable = I_DEFAULT , bool begin_end = false ,	                              int output = TREND) const;
+	    Sequences* moving_average(Format_error &error , const Distribution &dist ,   int variable = I_DEFAULT , bool begin_end = false ,int output = TREND) const;
+
+
+	    std::ostream& line_write(std::ostream &os) const;
+	    bool plot_data_write(Format_error &error , const char *prefix , const char *title = 0) const;
+	    bool spreadsheet_write(Format_error &error , const char *path) const;
+	    bool plot_write(Format_error &error , const char *prefix ,   const char *title = 0) const;
+
+	    int min_index_parameter_computation() const;
+	    int max_index_parameter_computation(bool last_position = false) const;
+
+	    void marginal_histogram_computation(int variable);
+	    double mean_computation(int variable) const;
+	    double variance_computation(int variable , double mean) const;
+	    double mean_absolute_deviation_computation(int variable , double mean) const;
+	    double mean_absolute_difference_computation(int variable) const;
+	    double skewness_computation(int variable , double mean , double variance) const;
+	    double kurtosis_computation(int variable , double mean , double variance) const;
+
+	    Histogram* value_index_interval_computation(Format_error &error , int variable , int value) const;
+
+	    Correlation* correlation_computation(Format_error &error , int variable1 , int variable2 ,
+	                                         int itype = PEARSON , int max_lag = I_DEFAULT ,
+	                                         int normalization = EXACT) const;
+	    Correlation* partial_autocorrelation_computation(Format_error &error , int variable ,
+	                                                     int itype = PEARSON , int max_lag = I_DEFAULT) const;
+
+	    Distance_matrix* alignment(Format_error &error , std::ostream *os , const Vector_distance &ivector_dist ,
+	                               int ref_identifier = I_DEFAULT , int test_identifier = I_DEFAULT ,
+	                               bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,
+	                               double indel_factor = INDEL_FACTOR_1 , bool transposition_flag = false ,
+	                               double transposition_factor = TRANSPOSITION_FACTOR ,
+	                               const char *result_path = 0 , char result_format = 'a' ,
+	                               const char *alignment_path = 0 , char alignment_format = 'a') const;
+	    Distance_matrix* alignment(Format_error &error , std::ostream *os , int ref_identifier = I_DEFAULT ,
+	                               int test_identifier = I_DEFAULT , bool begin_free = false , bool end_free = false ,
+	                               const char *result_path = 0 , char result_format = 'a' ,
+	                               const char *alignment_path = 0 , char alignment_format = 'a') const;
+
+	    Sequences* multiple_alignment(Format_error &error , std::ostream &os , const Vector_distance &ivector_dist ,
+	                                  bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,
+	                                  double indel_factor = INDEL_FACTOR_N , int algorithm = AGGLOMERATIVE ,
+	                                  const char *path = 0) const;
+
+	    Sequences* segmentation(Format_error &error , std::ostream &os , int iidentifier ,
+	                            int nb_segment , int *ichange_point , int *model_type ,
+	                            int output = SEQUENCE) const;
+	    Sequences* segmentation(Format_error &error , std::ostream &os , int *nb_segment ,
+	                            int *model_type , int iidentifier = I_DEFAULT ,
+	                            int output = SEQUENCE) const;
+	    Sequences* segmentation(Format_error &error , std::ostream &os , int iidentifier ,
+	                            int max_nb_segment , int *model_type) const;
+
+	    Sequences* hierarchical_segmentation(Format_error &error , std::ostream &os , int iidentifier ,
+	                                         int max_nb_segment , int *model_type) const;
+
+	    Sequences* segmentation(Format_error &error , int iidentifier , int nb_segment ,
+	                            const Vector_distance &ivector_dist , std::ostream &os ,
+	                            int output = SEGMENT) const;
+
+	    bool segment_profile_write(Format_error &error , std::ostream &os , int iidentifier ,
+	                               int nb_segment , int *model_type , int output = SEGMENT ,
+	                               char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
+	                               int nb_segmentation = NB_SEGMENTATION) const;
+	    bool segment_profile_write(Format_error &error , const char *path , int iidentifier ,
+	                               int nb_segment , int *model_type , int output = SEGMENT ,
+	                               char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
+	                               int nb_segmentation = NB_SEGMENTATION) const;
+	    bool segment_profile_plot_write(Format_error &error , const char *prefix ,
+	                                    int iidentifier , int nb_segment , int *model_type ,
+	                                    int output = SEGMENT , const char *title = 0) const;
+
+	    Histogram* get_hlength() const { return hlength; }
+	    int get_index_parameter_type() const { return index_parameter_type; }
+	    Histogram* get_hindex_parameter() const { return hindex_parameter; }
+	    Histogram* get_index_interval() const { return index_interval; }
+	    int get_index_parameter(int iseq , int index) const  { return index_parameter[iseq][index]; }
+	    Histogram* get_marginal(int variable) const { return marginal[variable]; }
+	    int get_int_sequence(int iseq , int variable , int index) const    { return int_sequence[iseq][variable][index]; }
+	    double get_real_sequence(int iseq , int variable , int index) const    { return real_sequence[iseq][variable][index]; }
+
+	    */
 }
 
 
-class SequenceCharacteristicsWrap {
-
+#define WRAP SequenceCharacteristicsWrap
+class WRAP {
 public:
+  static boost::python::list get_initial_run(Sequence_characteristics& input)
+  {
 
+    boost::python::list list;
+
+    for (int i=0; i< input.get_nb_value(); i++)
+      {
+        //list.append(  boost::python::extract<Histogram>(input.get_initial_run(i)));
+        list.append(  i);
+
+      }
+
+    return list;
+  }
+
+  static Histogram* get_initial_run_from_index(Sequence_characteristics& input, int index)
+  {
+      return input.get_initial_run(index);
+  }
 };
 
 void class_sequence_characteristics() {
 
     class_<Sequence_characteristics> ("_SequenceCharacteristics", "SequenceCharacteristics")
-    .def(init<int>())
-    .def(init<Sequence_characteristics, bool>())
-    .def(init<Sequence_characteristics, char>())
+    .def(init<optional<int> >())
+    .def(init<Sequence_characteristics, optional<bool> >())
+    .def(init<Sequence_characteristics, optional<char> >())
     .def("get_nb_value", &Sequence_characteristics::get_nb_value)
-    .def("get_index_value", &Sequence_characteristics::get_index_value,
-		return_value_policy<manage_new_object> (),	"get_index_value")
-    .def("get_first_occurrence", &Sequence_characteristics::get_first_occurrence,
-		return_value_policy<manage_new_object> (), "get first occurrence time")
-    .def("get_recurrence_time", &Sequence_characteristics::get_recurrence_time,
-		return_value_policy<manage_new_object> (), "get recurrence time")
-    .def("get_sojourn_time", &Sequence_characteristics::get_sojourn_time,
-		return_value_policy<manage_new_object> (), "")
-//todo
-//    .def("get_initial_run", &Sequence_characteristics::get_initial_run)
-    .def("get_final_run", &Sequence_characteristics::get_final_run,
-		return_value_policy<manage_new_object> (), "")
-    .def("get_nb_run", &Sequence_characteristics::get_nb_run,
-    	return_value_policy<manage_new_object> (), "")
-   .def("get_nb_occurrence", &Sequence_characteristics::get_nb_occurrence,
-		return_value_policy<manage_new_object> (), "")
+    DEF_RETURN_VALUE_NO_ARGS("get_index_value", &Sequence_characteristics::get_index_value, "get_index_value")
+    DEF_RETURN_VALUE_NO_ARGS("get_first_occurrence", &Sequence_characteristics::get_first_occurrence, "get first occurrence time")
+    DEF_RETURN_VALUE_NO_ARGS("get_recurrence_time", &Sequence_characteristics::get_recurrence_time, "get recurrence time")
+    DEF_RETURN_VALUE_NO_ARGS("get_sojourn_time", &Sequence_characteristics::get_sojourn_time,"returns sojourn time")
+    .def("get_initial_run", &WRAP::get_initial_run, "returns initial run")
+    DEF_RETURN_VALUE("get_initial_run_from_index", WRAP::get_initial_run_from_index,ARGS("index"), "returns initial run")
+    DEF_RETURN_VALUE_NO_ARGS("get_final_run", &Sequence_characteristics::get_final_run,"returns final run")
+    DEF_RETURN_VALUE_NO_ARGS("get_nb_run", &Sequence_characteristics::get_nb_run, "returns number of run")
+    DEF_RETURN_VALUE_NO_ARGS("get_nb_occurrence", &Sequence_characteristics::get_nb_occurrence, "returns number of ocurrences")
     ;
-}
 
+    /*      Histogram** get_initial_run() const { return initial_run; } */
+}
+#undef WRAP
