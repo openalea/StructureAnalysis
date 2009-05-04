@@ -17,58 +17,7 @@ from tools import interface
 
 class Test(interface):
     """a simple unittest class
-    
-    Integration Test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok
-    extract_data                nothing to be done
-    file_ascii_write            ok
-    plot                        Not working                       
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    spreadsheet_write           ok
-    survival_ascii_write        ok
-    survival_spreadsheet_write  ok
-    
-    **others**
-        
-    get_nb_vector               ok
-    get_nb_variable             ok
-    get_identifiers             ok
-    contingency_table           ok
-    variance_analysis           ok
-    extract                     fails e.g. str(v.extract(1))
 
-    ** see test_data_transform **
-    merge                    ok
-    shift                    ok
-    merge_variable           ok      
-    select_individual        ok
-    select_variable          ok
-    value_select             ok
-    
-    **see test_regression**
-    linear_regression        ok
-    moving_average_regression      ok
-    nearest_neighbours_regression  ok
-     
-    **see test_cluster**
-    cluster_limit             ok
-    cluster_step              ok
-    transcode                 to be done
-     
-    compare                        ok     
-    mixture_cluster                to be done
-    mixture_estimation             to be done
-    mixture_estimation_wrap        to be done
     
     .. todo:: possible issue with save where Format has to be set to "Data".
         in other words, Format=Data is not taken as the dafault value.

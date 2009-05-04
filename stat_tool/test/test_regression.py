@@ -144,11 +144,12 @@ class TestRegressionKernel():
     def test_min_value(self):
         assert self.data.get_min_value() == 0
     
-    def test_max_value(self):
+    def test_get_ident(self):
         assert self.data.get_ident() == 4
 
     def others_to_be_done(self):
-        #there are other methods that need to be tested with an appropriate examples:
+        #there are other methods that need to be tested with an 
+        #appropriate examples:
         #get_point
         #get_regression_df
         #get_residual_df  
