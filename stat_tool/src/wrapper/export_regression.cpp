@@ -34,6 +34,7 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
 using namespace boost::python;
 using namespace boost;
 
@@ -58,7 +59,7 @@ void class_regression_kernel()
     .def("get_nb_parameter", &Regression_kernel::get_nb_parameter,"return nb parameter")
     .def("get_parameter", &Regression_kernel::get_parameter,python::args("index"),"return parameter")
     .def("get_point", &Regression_kernel::get_point,python::args("index"),"return point")
-    
+
 /*
 Regression_kernel(const Regression_kernel &regression) { copy(regression); }
 */
@@ -69,18 +70,21 @@ class RegressionWrap
 {
 public:
 
- static void file_ascii_write(const Regression& d, const char* path, bool exhaustive)
-  {
-    bool result = true;
-    Format_error error;
 
-    result = d.ascii_write(error, path, exhaustive);
-    if (!result)
-       stat_tool::wrap_util::throw_error(error);
+  WRAP_METHOD_FILE_ASCII_WRITE(Regression);
+  WRAP_METHOD_SPREADSHEET_WRITE(Regression);
+
+
+  static double get_residual(Regression &input, int index)
+  {
+    double ret;
+    ostringstream error_message;
+    error_message << "index not in valid range" << endl;\
+    CHECK(index, 0, input.get_nb_vector());
+    ret = input.get_residual(index);
+    return ret;
   }
 
-
-  /* todo: get_residual check that index is in the proper range of indexes*/
 
 };
 
@@ -91,18 +95,16 @@ void class_regression()
     // Python Operators
     //
     .def(init <int, int, int, Vectors>())
+    .def(init <Regression>())
     .def(self_ns::str(self)) // __str__
     .def("__len__", &Regression::get_nb_vector)  //__len__
     .def("get_nb_vector", &Regression::get_nb_vector, "Return nb_vector")
-    .def("get_residual", &Regression::get_residual, 
-        python::args("int"), 
-        "Return nb_vector")
-    .def("file_ascii_write", RegressionWrap::file_ascii_write,
-        "Save vector distance summary into a file")
-    .def("get_vectors", &Regression::get_vectors,
-        return_value_policy<manage_new_object> (),
-        "return vectors")
+    .def("get_residual", RegressionWrap::get_residual, ARGS("int"),"Return nb_vector")
+    .def("file_ascii_write", RegressionWrap::file_ascii_write, "Save regression summary into a file")
+    .def("file_spreadsheet_write", RegressionWrap::spreadsheet_write, "Save regression summary into a CSV file")
+    DEF_RETURN_VALUE_NO_ARGS("get_vectors", &Regression::get_vectors, "return vectors")
     ;
+
 }
 
 

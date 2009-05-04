@@ -233,7 +233,7 @@ public:
     int column_max = input.get_nb_column();
 
     ostringstream error_message;
-    error_message << "index not in valid range" << endl;\
+    error_message << "index not in valid range" << endl;
 
     CHECK(i, 0, row_max);
     CHECK(j, 0, column_max);

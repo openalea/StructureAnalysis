@@ -34,6 +34,8 @@
 #include <boost/python/detail/api_placeholder.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
+
 using namespace boost::python;
 using namespace boost;
 
@@ -41,11 +43,20 @@ using namespace boost;
 
 
 // Vectors
-
-class VectorsWrap
+#define WRAP VectorsWrap
+class WRAP
 {
 
 public:
+
+
+  WRAP_METHOD2(Vectors,linear_regression, Regression, int, int);
+  WRAP_METHOD1(Vectors,comparison, Distance_matrix, Vector_distance);
+  WRAP_METHOD_SPREADSHEET_WRITE(Vectors);
+  WRAP_METHOD2(Vectors,scaling, Vectors, int, int);
+  WRAP_METHOD2(Vectors,round, Vectors, int, int);
+  WRAP_METHOD_FILE_ASCII_WRITE(Vectors)
+
   static Vectors* read_from_file(char *filename)
   {
     Vectors *vec;
@@ -221,26 +232,16 @@ public:
   }
 
   static std::string ascii_data_write(const Vectors& d, bool exhaustive)
-  {
-    std::stringstream s;
-    std::string res;
+   {
+     std::stringstream s;
+     std::string res;
 
+     d.ascii_data_write(s, exhaustive, true);
+     res = s.str();
 
-    d.ascii_data_write(s, exhaustive, true);
-    res = s.str();
-    return res;
-  }
+     return res;
 
-  static void file_ascii_write(const Vectors& d, const char* path, bool exhaustive)
-  {
-    bool result = true;
-    Format_error error;
-
-    result = d.ascii_write(error, path,exhaustive);
-    if (!result)
-       stat_tool::wrap_util::throw_error(error);
-
-  }
+   }
 
  static void file_ascii_data_write(const Vectors& d, const char* path, bool exhaustive)
   {
@@ -494,20 +495,6 @@ public:
     return ret;
   }
 
-  // Compare
-  static Distance_matrix* compare(const Vectors& v,
-                  const Vector_distance& distance)
-  {
-    Format_error error;
-    Distance_matrix* ret = NULL;
-
-    ret = v.comparison(error, distance);
-
-    if(!ret)
-      stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
 
   // Extract
   static Distribution_data* extract_histogram(const Vectors& v, int variable)
@@ -525,21 +512,6 @@ public:
 
 
 
-
-  // Regression
-  static Regression* linear_regression(const Vectors& v,
-                       int explanatory_var, int response_var)
-  {
-    Format_error error;
-    Regression * ret = NULL;
-
-    ret = v.linear_regression(error, explanatory_var, response_var);
-
-    if(!ret)
-      stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
 
 
   static Regression* moving_average_dist(const Vectors& v,
@@ -810,6 +782,10 @@ public:
 
      return s.str();
   }
+
+
+
+
 };
 
 
@@ -818,144 +794,74 @@ void class_vectors()
 {
 
   class_< Vectors, bases< STAT_interface > >
-    ("_Vectors", "Vectors (2 dimensions list)",
-     init<>())
+    ("_Vectors", "Vectors (2 dimensions list)", init<>())
     // constructors
     .def("__init__", make_constructor(VectorsWrap::build_from_lists))
     .def("__init__", make_constructor(VectorsWrap::read_from_file))
-
     // Python Operators
     .def(self_ns::str(self)) // __str__
-    .def("__len__", &Vectors::get_nb_vector,
-     "Return the number of vectors")
+    .def("__len__", &Vectors::get_nb_vector,"Return the number of vectors")
     .def("__getitem__", VectorsWrap::get_item)
 
-    .def("get_nb_variable", &Vectors::get_nb_variable,
-     "Return the number of variables")
-    .def("get_nb_vector", &Vectors::get_nb_vector,
-     "Return the number of vectors")
+    .def("get_nb_variable", &Vectors::get_nb_variable, "Return the number of variables")
+    .def("get_nb_vector", &Vectors::get_nb_vector,"Return the number of vectors")
+    .def("get_identifiers", VectorsWrap::get_identifiers, "Return the list of identifiers")
+    .def("get_min_value", &Vectors::get_min_value, ARGS("index"),"Return the min value of a variable")
+    .def("get_max_value", &Vectors::get_max_value, ARGS("index"),"Return the max value of a variable")
+    .def("get_mean", &Vectors::get_mean, ARGS("index"),"Return the mean value of a variable")
+    .def("get_type", &Vectors::get_type, ARGS("index"),"Return the type of a variable")
 
-    // Identifiers
-    .def("get_identifiers", VectorsWrap::get_identifiers,
-     "Return the list of identifiers")
-
-    // Select
-    .def("value_select", VectorsWrap::value_select,
-     return_value_policy< manage_new_object >(),
-     python::args("variable", "min", "max", "keep"),
-     "Selection of individuals according to the values taken by a variable")
-
-    .def("select_variable", VectorsWrap::select_variable,
-     return_value_policy< manage_new_object >(),
-     python::args("variables", "keep"),
-     "select variable given a list of index")
-
-    .def("select_individual", VectorsWrap::select_individual,
-     return_value_policy< manage_new_object >(),
-     python::args("identifiers", "keep"),
-     "Select individuals given a list of identifiers")
-
-    // Extract
-    .def("extract", VectorsWrap::extract_histogram,
-     return_value_policy< manage_new_object >(),
-     python::args("variable"),
-     "Extract histogram")
-
-    // Regression
-    .def("linear_regression", VectorsWrap::linear_regression,
-     return_value_policy< manage_new_object >(),
-     python::args("explanatory_var", "response_var"),
-     "Linear regression")
-
-    .def("moving_average_regression", VectorsWrap::moving_average_dist,
-     return_value_policy< manage_new_object >(),
-     python::args("explanatory_var", "response_var", "dist", "algo"),
-     "Linear regression (moving average)")
-
-    .def("moving_average_regression", VectorsWrap::moving_average_list,
-     return_value_policy< manage_new_object >(),
-     python::args("explanatory_var", "response_var", "filters", "algo"),
-     "Linear regression (moving average)")
-
-    .def("nearest_neighbours_regression", VectorsWrap::nearest_neighbours,
-     return_value_policy< manage_new_object >(),
-     python::args("explanatory_var", "response_var", "span", "weighting"),
-     "Linear regression (nearest neighbours)")
-
-    .def("mixture_estimation_wrap", VectorsWrap::mixture_estimation_1,
-     return_value_policy< manage_new_object >(),
-     python::args("initial_mixture", "nb_max_iteration", "force_param"),
-     "Mixture estimation (EM algorithm with initial model)")
-
-    .def("mixture_estimation_wrap", VectorsWrap::mixture_estimation_2,
-     return_value_policy< manage_new_object >(),
-     python::args("nb_component", "nb_max_iteration", "force_param"),
-     "Mixture estimation (EM algorithm with fixed number of components)")
-
-    // Merge
-    .def("merge", VectorsWrap::merge,
-     return_value_policy< manage_new_object >(),
-     "Merge vectors")
-
-    .def("merge_variable", VectorsWrap::merge_variable,
-     return_value_policy< manage_new_object >(),
-     "Merge variables" )
-
-    // Cluster
-    .def("cluster_step", VectorsWrap::cluster_step,
-     return_value_policy< manage_new_object >(),
-     python::args("variable", "step"),
-     "Cluster Step"
-     )
-
-    .def("cluster_limit", VectorsWrap::cluster_limit,
-     return_value_policy< manage_new_object >(),
-     python::args("variable", "limits"),
-     "Cluster limit")
-
-    .def("transcode", VectorsWrap::transcode,
-     return_value_policy< manage_new_object >(),
-     python::args("variable", "symbols"),
-     "Transcode")
-
-    // Mixture clustering
-    .def("mixture_cluster", VectorsWrap::mixture_cluster,
-     return_value_policy< manage_new_object >(),
-     python::args("model"),
-     "Cluster individuals using mixture model"
-     )
-
-    // Compare
-    .def("compare", VectorsWrap::compare,
-     return_value_policy< manage_new_object >(),
-     python::arg("distance"),
-     "Compare Vectors given a VectorDistance")
-
-    // Others
-    .def("contingency_table", VectorsWrap::contingency_table,
-     "Return a string with the contingency_table")
-
-    .def("variance_analysis", VectorsWrap::variance_analysis,
-     "Return a string with the variance analysis")
+    DEF_RETURN_VALUE("value_select", VectorsWrap::value_select, ARGS("variable", "min", "max", "keep"), "Selection of individuals according to the values taken by a variable")
+    DEF_RETURN_VALUE("select_variable", VectorsWrap::select_variable, ARGS("variables", "keep"),  "select variable given a list of index")
+    DEF_RETURN_VALUE("select_individual", VectorsWrap::select_individual, ARGS("identifiers", "keep"),  "Select individuals given a list of identifiers")
+    DEF_RETURN_VALUE("extract", VectorsWrap::extract_histogram,ARGS("variable"), "Extract histogram")
+    DEF_RETURN_VALUE("linear_regression", VectorsWrap::linear_regression,ARGS("explanatory_var", "response_var"), "Linear regression")
+    DEF_RETURN_VALUE("moving_average_regression", VectorsWrap::moving_average_dist, ARGS("explanatory_var", "response_var", "dist", "algo"), "Linear regression (moving average)")
+    DEF_RETURN_VALUE("moving_average_regression", VectorsWrap::moving_average_list, ARGS("explanatory_var", "response_var", "filters", "algo"), "Linear regression (moving average)")
+    DEF_RETURN_VALUE("nearest_neighbours_regression", VectorsWrap::nearest_neighbours, ARGS("explanatory_var", "response_var", "span", "weighting"), "Linear regression (nearest neighbours)")
+    DEF_RETURN_VALUE("mixture_estimation_wrap", VectorsWrap::mixture_estimation_1,  ARGS("initial_mixture", "nb_max_iteration", "force_param"),"Mixture estimation (EM algorithm with initial model)")
+    DEF_RETURN_VALUE("mixture_estimation_wrap", VectorsWrap::mixture_estimation_2, ARGS("nb_component", "nb_max_iteration", "force_param"),"Mixture estimation (EM algorithm with fixed number of components)")
+    DEF_RETURN_VALUE("shift", VectorsWrap::shift,ARGS("variable", "param"),"Shift")
+    DEF_RETURN_VALUE("cluster_step", VectorsWrap::cluster_step,  ARGS("variable", "step"), "Cluster Step"    )
+    DEF_RETURN_VALUE("cluster_limit", VectorsWrap::cluster_limit, ARGS("variable", "limits"), "Cluster limit")
+    DEF_RETURN_VALUE("transcode", VectorsWrap::transcode, ARGS("variable", "symbols"), "Transcode")
+    DEF_RETURN_VALUE("mixture_cluster", VectorsWrap::mixture_cluster, ARGS("model"), "Cluster individuals using mixture model"  )
+    DEF_RETURN_VALUE("compare", VectorsWrap::comparison,ARGS("distance"), "Compare Vectors given a VectorDistance")
+    DEF_RETURN_VALUE_NO_ARGS("merge", VectorsWrap::merge, "Merge vectors")
+    DEF_RETURN_VALUE("scaling", VectorsWrap::scaling,ARGS("variable", "scaling_coeff"), "Scales vectors")
+    DEF_RETURN_VALUE("round", VectorsWrap::scaling,ARGS("variable", "scaling_coeff"), "Scales vectors")
+    DEF_RETURN_VALUE_NO_ARGS("merge_variable", VectorsWrap::merge_variable,"Merge variables" )
+    .def("contingency_table", VectorsWrap::contingency_table, "Return a string with the contingency_table")
+    .def("variance_analysis", VectorsWrap::variance_analysis, "Return a string with the variance analysis")
+    .def("ascii_data_write", VectorsWrap::ascii_data_write, "Return a string with the object representation")
+    .def("file_ascii_write", VectorsWrap::file_ascii_write,"Save vector summary into a file")
+    .def("file_ascii_data_write", VectorsWrap::file_ascii_data_write, "Save vector data into a file")
+    .def("spreadsheet_write", VectorsWrap::spreadsheet_write, "Save data into CSV file")
 
 
-    // Output
-    .def("ascii_data_write", VectorsWrap::ascii_data_write,
-     "Return a string with the object representation")
-
-    // save to file
-    .def("file_ascii_write", VectorsWrap::file_ascii_write,
-     "Save vector summary into a file")
-
-   .def("file_ascii_data_write", VectorsWrap::file_ascii_data_write,
-     "Save vector data into a file")
-
-    // Shift
-    .def("shift", VectorsWrap::shift,
-     return_value_policy< manage_new_object >(),
-     python::args("variable", "param"),
-     "Shift")
     ;
+
+
+  /*
+
+  Vectors();
+  Vectors(const Vectors &vec , int inb_vector , int *index);
+
+  bool check(Format_error &error);
+
+  -->bool plot_write(Format_error &error , const char *prefix ,
+                  const char *title = 0) const;
+
+  double mean_absolute_deviation_computation(int variable) const;
+  double mean_absolute_difference_computation(int variable) const;
+  double skewness_computation(int variable) const;
+  double kurtosis_computation(int variable) const;
+
+  -->bool rank_correlation_computation(Format_error &error , std::ostream &os , int correlation_type , const char *path = 0) const;
+  // acces membres de la classe
+  --Histogram* get_marginal(int variable) const { return marginal[variable]; }
+  --double get_covariance(int variable1, int variable2) const { return covariance[variable1][variable2]; }
+  */
 
 }
 
@@ -1020,6 +926,7 @@ public:
        stat_tool::wrap_util::throw_error(error);
 
   }
+  WRAP_METHOD_SPREADSHEET_WRITE(Distance_matrix);
 
 };
 
@@ -1042,12 +949,34 @@ void class_vectordistance()
 
     .def(self_ns::str(self))
     .def("__len__", &Vector_distance::get_nb_variable)
-
-    .def("file_ascii_write", VectorDistanceWrap::file_ascii_write,
-     "Save vector distance summary into a file")
-
-
+    .def("file_ascii_write", VectorDistanceWrap::file_ascii_write, "Save vector distance summary into a file")
+    .def("get_nb_variable", &Vector_distance::get_nb_variable, "returns number of variable")
+    .def("get_distance_type", &Vector_distance::get_distance_type, "returns distance type")
+ //   .def("spreadsheet_write", VectorDistanceWrap::spreadsheet_write, "Save data into CSV file")
     ;
+
+  /*
+  Vector_distance();
+    Vector_distance(int inb_variable , int idistance_type , int *ivariable_type ,
+                    double *iweight , int *inb_value , double ***isymbol_distance ,
+                    int *iperiod);
+
+
+    // fonctions pour la compatibilite avec la classe STAT_interface
+
+    double* max_symbol_distance_computation(int variable) const;
+
+    void dispersion_computation(int variable , const Histogram *marginal , double *rank = 0) const;
+
+    // acces membres de la classe
+
+    int get_variable_type(int variable) const { return variable_type[variable]; }
+    double get_weight(int variable) const { return weight[variable]; }
+    double get_dispersion(int variable) const { return dispersion[variable]; }
+    int get_nb_value(int variable) const { return nb_value[variable]; }
+    double get_symbol_distance(int variable , int symbol1 , int symbol2) const    { return symbol_distance[variable][symbol1][symbol2]; }
+    int get_period(int variable) const { return period[variable]; }
+    */
 
 }
 

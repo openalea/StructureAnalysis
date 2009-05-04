@@ -158,6 +158,23 @@ public:
   WRAP_METHOD0(Mixture, extract_data, Mixture_data);
   WRAP_METHOD_FILE_ASCII_WRITE(Mixture);
   WRAP_METHOD_SPREADSHEET_WRITE(Mixture);
+
+
+  static MultiPlotSet* get_plotable(const Mixture& mixt)
+    {
+      Format_error error;
+      //error << "Problem while trying to get the plotable"<<endl;
+
+      MultiPlotSet* ret = mixt.get_plotable();
+
+      if(!ret)
+        stat_tool::wrap_util::throw_error(error);
+
+      return ret;
+    }
+
+
+
 };
 
 
@@ -184,8 +201,8 @@ void class_mixture()
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the associated _MixtureData object")
     .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
     .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
-    .def("get_plotable", &STAT_interface::get_plotable, return_value_policy<
-     manage_new_object> (), "Return a plotable (no parameters)");
+  //  DEF_RETURN_VALUE_NO_ARGS("get_plotable", &STAT_interface::get_plotable,"Return a plotable (no parameters)");
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "return plotable")
     ;
 
 /*
@@ -197,10 +214,6 @@ void class_mixture()
 
     Parametric_model* extract(Format_error &error , int index) const;
     Mixture_data* extract_data(Format_error &error) const;
-
-
-    bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
 
     void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
                      bool component_flag = true);
@@ -252,16 +265,24 @@ void class_mixture_data()
 {
   class_< Mixture_data, bases< Histogram, STAT_interface > >
     ("_MixtureData",  "Mixture Data")
+
+    // constructors
+
+    //python
     .def(self_ns::str(self))
+
+    //members
     .def("nb_component", &Mixture_data::get_nb_component,"Return the number of components.")
+
+    // return object, arguments required
     DEF_RETURN_VALUE("get_component", &Mixture_data::get_component,ARGS("index"), "Return the number of components.")
-
-
-    .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
     DEF_RETURN_VALUE("extract_component", WRAP::extract, ARGS("index"),"Get a particular component. First index is 1")
+
+    // return object and no arguments needed
     DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return a _DistributionData")
     DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,"Return a _DistributionData")
 
+    .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
 
     /*
     Mixture_data(const Histogram &histo , int inb_component);
@@ -436,16 +457,7 @@ public:
   }
 
 
-  static Mv_Mixture_data* simulation(const Mv_Mixture& mixt, int nb_element)
-  {
-    Format_error error;
-    Mv_Mixture_data* ret = NULL;
 
-    ret = mixt.simulation(error, nb_element);
-    if(ret == NULL) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
 
   static Parametric_model* extract_weight(const Mv_Mixture& mixt)
   {
@@ -488,16 +500,7 @@ public:
     return ret;
   }
 
-  static Mv_Mixture_data* extract_data(const Mv_Mixture& mixt)
-  {
-    Format_error error;
-    Mv_Mixture_data* ret = NULL;
 
-    ret = mixt.extract_data(error);
-    if(!ret) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
 
   static bool _is_parametric(const Mv_Mixture& mixt, int ivariable)
   {
@@ -512,28 +515,6 @@ public:
       return mixt.is_parametric(ivariable);
   }
 
-
-
-  static void file_ascii_write(const Mv_Mixture& m, const char* path, bool exhaustive)
-  {
-    bool result = true;
-    Format_error error;
-
-    result = m.ascii_write(error, path, exhaustive);
-    if (!result)
-       stat_tool::wrap_util::throw_error(error);
-
-  }
-
-  static void plot_write(const Mv_Mixture& m, const char* path,  const char* title)
-  {
-    bool result = true;
-    Format_error error;
-
-    result = m.plot_write(error, path, title);
-    if (!result)
-      stat_tool::wrap_util::throw_error(error);
-  }
 
   static void state_permutation(const Mv_Mixture& mix,
                                 boost::python::list perm)
@@ -602,88 +583,94 @@ public:
       }
    }
 
+
+  WRAP_METHOD0(Mv_Mixture, extract_data, Mv_Mixture_data);
+  WRAP_METHOD_FILE_ASCII_WRITE(Mv_Mixture);
+  WRAP_METHOD_PLOT_WRITE(Mv_Mixture);
+  WRAP_METHOD_SPREADSHEET_WRITE(Mv_Mixture);
+  WRAP_METHOD1(Mv_Mixture, simulation, Mv_Mixture_data, int);
+
+
+
 };
 
 
 
 // Boost declaration
 
+
+#define WRAP MvMixtureWrap
+
 void class_mv_mixture()
 {
   class_< Mv_Mixture, bases< STAT_interface > >
     ("_MvMixture", "Multivariate Mixture Distribution")
 
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_file),
-     "Build from a filename"
-     )
+    // constructors
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_file), "Build from a filename")
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_mixture), "Build from a _MvMixture object")
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_components), "Build from a list of weights and a list of list of distributions\n" "(components and variables)")
 
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_mixture),
-     "Build from a _MvMixture object"
-     )
-
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_components),
-     "Build from a list of weights and a list of list of distributions\n"
-     "(components and variables)")
-
+    // python
     .def(self_ns::str(self)) // __str__
-    .def("__len__", &Mv_Mixture::get_nb_component,
-    "Return the number of components") // __len__
+    .def("__len__", &Mv_Mixture::get_nb_component, "Return the number of components") // __len__
 
-    .def("simulate", MvMixtureWrap::simulation,
-     return_value_policy< manage_new_object >(),
-     python::arg("nb_element"),
-	 "simulate(self, nb_element) -> _MvMixtureData. \n\n"
-     "Simulate nb_element elements")
+    //readonly
+    .def("nb_component", &Mv_Mixture::get_nb_component, "Return the number of components")
+    .def("nb_variable", &Mv_Mixture::get_nb_variable, "Return the number of variables")
 
-    .def("nb_component", &Mv_Mixture::get_nb_component,
-     "Return the number of components")
+    // return object and no arguments needed
+    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return the weight distribution")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _MvMixtureData object")
 
-    .def("nb_variable", &Mv_Mixture::get_nb_variable,
-     "Return the number of variables")
 
-    .def("extract_weight", MvMixtureWrap::extract_weight,
-     return_value_policy< manage_new_object >(),
-     "Return the weight distribution")
+    // return object and arguments needed
+    DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "simulate(self, nb_element) -> _MvMixtureData. \n\n" "Simulate nb_element elements")
+    DEF_RETURN_VALUE("extract_mixture", WRAP::extract_mixture, ARGS("variable"), "extract_mixture(self, variable) -> _Distribution. \n\n" "Return the _MvMixture distribution")
 
-    .def("extract_mixture", MvMixtureWrap::extract_mixture,
-     return_value_policy< manage_new_object >(),
-     python::args("variable"),
-	 "extract_mixture(self, variable) -> _Distribution. \n\n"
-     "Return the _MvMixture distribution")
 
-    .def("extract_data", MvMixtureWrap::extract_data,
-     return_value_policy< manage_new_object >(),
-     "Return the associated _MvMixtureData object"
-     )
+    // no object returned, args required
+    .def("_is_parametric", WRAP::_is_parametric, ARGS("variable"),"_is_parametric(self, variable) -> bool. \n\n" "Return True if the variable is parametric")
+    .def("file_ascii_write", WRAP::file_ascii_write, ARGS("path", "exhaustive_flag"), "file_ascii_write(self, path, exhaustive_flag) -> None. \n\n""Save _MvMixture into a file")
+    .def("plot_write", WRAP::plot_write, ARGS("prefix", "title"),"plot_write(self, prefix, title) -> None. \n\n" "Write GNUPLOT files")
 
-    .def("_is_parametric", MvMixtureWrap::_is_parametric,
-     python::args("variable"),
-     "_is_parametric(self, variable) -> bool. \n\n"
-     "Return True if the variable is parametric"
-     )
-
-    .def("file_ascii_write", MvMixtureWrap::file_ascii_write,
-     python::args("path", "exhaustive_flag"),
-     "file_ascii_write(self, path, exhaustive_flag) -> None. \n\n"
-	 "Save _MvMixture into a file")
-
-    .def("plot_write", MvMixtureWrap::plot_write,
-     python::args("prefix", "title"),
-     "plot_write(self, prefix, title) -> None. \n\n"
-     "Write GNUPLOT files")
-
-    .def("state_permutation", MvMixtureWrap::state_permutation,
-     "permutation of the model states")
+    // no object returned, no arguments required
+    .def("state_permutation", WRAP::state_permutation, "permutation of the model states")
+    .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
 
      ;
 
+    /*
+
+      Mv_Mixture(int inb_component , double *pweight , int inb_variable, Parametric_process **ppcomponent, Nonparametric_process **pnpcomponent);
+      Mv_Mixture(int inb_component , int inb_variable, const Parametric_process **ppcomponent,  const Nonparametric_process **pnpcomponent);
+      Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag , int inb_variable);
+      Mv_Mixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
+
+      Parametric_model* extract_parametric_model(Format_error &error , int ivariable,
+                             int index) const;
+      Distribution* extract_nonparametric_model(Format_error &error , int ivariable,
+                            int index) const;
+
+      plotable::MultiPlotSet* get_plotable() const;
+
+      double likelihood_computation(const Vectors &mixt_data, bool log_computation=false) const;
+
+      Mv_Mixture_data* cluster(Format_error &error,  const Vectors &vec,int algorithm=VITERBI) const;
+
+      Mv_Mixture_data* get_mixture_data() const { return mixture_data; }
+      Parametric_process* get_parametric_process(int variable) const;
+      Nonparametric_process* get_nonparametric_process(int variable) const;
+      Parametric* get_parametric_component(int variable, int index) const;
+      Distribution* get_nonparametric_component(int variable, int index) const;*/
 }
 
-
+#undef WRAP
 
 ////////////////////////// Class Mv_Mixture_data //////////////////////////////////
 
-class MvMixtureDataWrap
+#define WRAP MvMixtureDataWrap
+class WRAP
 {
 
 public:
@@ -697,27 +684,7 @@ public:
     return boost::shared_ptr<Mv_Mixture_data>(mix_cp);
   }
 
-  static Distribution_data* extract(const Mv_Mixture_data& d, int ivariable, int index)
-  {
-    Format_error error;
-    Distribution_data* ret = NULL;
 
-    ret = d.extract(error, ivariable, index);
-    if(!ret) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
-
-  static Distribution_data* extract_marginal(const Mv_Mixture_data& d, int ivariable)
-  {
-    Format_error error;
-    Distribution_data* ret = NULL;
-
-    ret = d.extract_marginal(error, ivariable);
-    if(!ret) stat_tool::wrap_util::throw_error(error);
-
-    return ret;
-  }
 
   static Distribution_data* extract_weight(const Mv_Mixture_data& mixt_histo)
   {
@@ -744,28 +711,11 @@ public:
       stat_tool::wrap_util::throw_error("No mixture model available for Mixture Data");
     return ret;
   }
-
-  static void file_ascii_write(const Mv_Mixture_data& m, const char* path, bool exhaustive)
-  {
-    bool result = true;
-    Format_error error;
-
-    result = m.ascii_write(error, path, exhaustive);
-    if (!result)
-       stat_tool::wrap_util::throw_error(error);
-
-  }
-
-  static void plot_write(const Mv_Mixture_data& m, const char* path,
-             const char* title)
-  {
-    bool result = true;
-    Format_error error;
-
-    result = m.plot_write(error, path, title);
-    if (!result)
-      stat_tool::wrap_util::throw_error(error);
-  }
+  WRAP_METHOD2(Mv_Mixture_data, extract, Distribution_data, int, int);
+  WRAP_METHOD1(Mv_Mixture_data, extract_marginal, Distribution_data, int);
+  WRAP_METHOD_FILE_ASCII_WRITE(Mv_Mixture_data);
+  WRAP_METHOD_PLOT_WRITE(Mv_Mixture_data);
+  WRAP_METHOD_SPREADSHEET_WRITE(Mv_Mixture_data);
 
 };
 
@@ -774,42 +724,32 @@ void class_mv_mixture_data()
   class_< Mv_Mixture_data, bases< Vectors > >
     ("_MvMixtureData", "Multivariate Mixture Data")
 
-    .def("__init__", make_constructor(MvMixtureDataWrap::mv_mixture_data_from_mixture_data),
-     "Build from a _MvMixture_data object"
-     )
-
+    .def("__init__", make_constructor(WRAP::mv_mixture_data_from_mixture_data), "Build from a _MvMixture_data object")
     .def(self_ns::str(self))
+    //.def("__len__", &Mv_Mixture_data::get_nb_component)
+    .def("get_nb_component", &Mv_Mixture_data::get_nb_component, "Return the number of components.")
+    DEF_RETURN_VALUE("extract_component", WRAP::extract, ARGS("index"), "Get a particular component for a particular variable. First index is 1")
+    DEF_RETURN_VALUE_NO_ARGS("extract_marginal", WRAP::extract_marginal, "Return a _MvMixtureData for a particular variable.")
+    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight, "Return a _MvMixtureData for mixture weights.")
+    DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture, "Return a _MvMixtureData for mixture model")
+    .def("file_ascii_write", WRAP::file_ascii_write, "Save _MvMixtureData into a file")
+    .def("file_spreadsheet_write", WRAP::spreadsheet_write, "Save _MvMixtureData into a file")
+    .def("plot_write", WRAP::plot_write, ARGS("prefix", "title"), "Write GNUPLOT files")
+    .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
 
-    .def("nb_component", &Mv_Mixture_data::get_nb_component,
-     "Return the number of components."
-     )
-
-    .def("extract_component", MvMixtureDataWrap::extract,
-     return_value_policy< manage_new_object >(),
-     python::arg("index"),
-     "Get a particular component for a particular variable. First index is 1"
-     )
-
-    .def("extract_marginal", MvMixtureDataWrap::extract_marginal,
-     return_value_policy< manage_new_object >(),
-     "Return a _MvMixtureData for a particular variable."
-     )
-
-    .def("extract_weight", MvMixtureDataWrap::extract_weight,
-     return_value_policy< manage_new_object >(),
-     "Return a _MvMixtureData for mixture weights."
-     )
-
-    .def("extract_mixture", MvMixtureDataWrap::extract_mixture,
-     return_value_policy< manage_new_object >(),
-     "Return a _MvMixtureData for mixture model"
-     )
-
-    .def("file_ascii_write", MvMixtureDataWrap::file_ascii_write,
-     "Save _MvMixtureData into a file")
-
-    .def("plot_write", MvMixtureDataWrap::plot_write,
-     python::args("prefix", "title"),
-     "Write GNUPLOT files")
     ;
-}
+
+/*
+    Mv_Mixture_data(const Vectors &vec, int inb_component);
+    Mv_Mixture_data(const Mv_Mixture &mixt);
+    plotable::MultiPlotSet* get_plotable() const;
+
+    double information_computation() const;
+
+    Histogram* get_component(int variable, int index) const { return component[variable][index]; }
+*/
+
+};
+#undef WRAP
+
+
