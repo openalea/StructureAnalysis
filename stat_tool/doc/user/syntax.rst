@@ -469,13 +469,13 @@ A model of 'tops' is defined by three parameters, namely the growth probability 
     
     PROBABILITY : 0.7
     AXILLARY_PROBABILITY : 0.6
-    RYTHM_RATIO : 0.8
+    RHYTHM_RATIO : 0.8
     
 The following constraints apply to the parameters:
     
 * 0.05 |leq| PROBABILITY |leq| 1
 * 0.05 |leq| AXILLARY_PROBABILITY |leq| 1
-* 1/3 |leq| RYTHM_RATIO |leq| 3
+* 1/3 |leq| RHYTHM_RATIO |leq| 3
 
 4.7.14 type VECTOR_DISTANCE
 ===========================

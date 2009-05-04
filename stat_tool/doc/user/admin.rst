@@ -276,8 +276,9 @@ comparison.Histogram
 
 
 
-Current issues
-==============
+TODO
+====
+
 
 * Issue with the UNIFORM distribution while saving and loading a mixture of
   uniform distribution. See test_save in test_mixture.
@@ -287,4 +288,4 @@ Current issues
   not the histogram itself. Is this what we want ? 
 * VarianceAnalysis works but variance_analysis wrapping is not robust, not well
   documented, leads to crashses.
-* what shall we do with markovian.cpp and chain.cpp ?
+* plotable inside MvMixture(Data) ? 
