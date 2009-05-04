@@ -35,6 +35,7 @@
 #include "export_distancematrix.h"
 #include "export_markovian.h"
 #include "export_regression.h"
+#include "export_nonparametric_process.h"
 //#include "export_chain.h"
 //#include "export_chain_reestimation.h"
 
@@ -97,6 +98,7 @@ BOOST_PYTHON_MODULE(_stat_tool)
 
   class_curves();
 
+  class_non_parametric_process();
 //  class_chain();
 //  class_chain_reestimation();
 }
