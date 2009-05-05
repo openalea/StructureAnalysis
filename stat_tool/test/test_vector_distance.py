@@ -41,7 +41,7 @@ class Test(interface):
                            VectorDistance)        
     def build_data(self):
         v = VectorDistance('N', 'O', 'S') 
-        assert v.get_distance_type() == 0 
+        assert v.distance_type == 0 
         assert v 
         return v
         
@@ -65,7 +65,7 @@ class Test(interface):
     def test_len(self):
         v = self.data
         assert len(v) == 3
-        assert len(v) == v.get_nb_variable()
+        assert len(v) == v.nb_variable
 
     def _test_plot(self):
         pass

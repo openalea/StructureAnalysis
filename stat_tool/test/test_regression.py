@@ -38,16 +38,16 @@ class TestRegression(interface):
         self.v = Vectors([[0, 0], [1, 1], [2, 2], [3, 3]])
         r1 = Regression(self.v, "Linear", 1, 2)
 
-        assert r1.get_nb_vector() == 4
+        assert r1.nb_vector == 4
         return r1
    
     def test_get_residuals(self):
-        for i in range(0,self.data.get_nb_vector()):
+        for i in range(0,self.data.nb_vector):
             assert self.data.get_residual(i) == 0
 
     def tst_get_vectors(self):
         v = self.data.get_vectors()
-        for i in range(0, self.data.get_nb_vector()):
+        for i in range(0, self.data.nb_vector):
             assert v[i] == self.v[i]
 
     def test_print(self):
@@ -60,7 +60,7 @@ class TestRegression(interface):
         
     def test_len(self):
         """not implemented; irrelevant?"""
-        assert self.data.get_nb_vector() == 4
+        assert self.data.nb_vector == 4
         pass
     
     def test_plot(self):        
@@ -139,13 +139,13 @@ class TestRegressionKernel():
         self.data =  RegressionKernel(4, 0, 10)
 
     def test_max_value(self):
-        assert self.data.get_max_value() == 10
+        assert self.data.max_value == 10
     
     def test_min_value(self):
-        assert self.data.get_min_value() == 0
+        assert self.data.min_value == 0
     
     def test_get_ident(self):
-        assert self.data.get_ident() == 4
+        assert self.data.ident == 4
 
     def others_to_be_done(self):
         #there are other methods that need to be tested with an 

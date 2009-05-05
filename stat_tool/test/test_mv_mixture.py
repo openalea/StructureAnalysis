@@ -103,8 +103,8 @@ class Test(interface):
         d23 = Poisson(0, .20)
         
         data = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
-        assert data.nb_component()==3
-        assert data.nb_variable()==2
+        assert data.nb_component==3
+        assert data.nb_variable==2
         return data
        
     def _test_empty(self):
