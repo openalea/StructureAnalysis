@@ -53,16 +53,16 @@ class Test(interface):
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
         data = Sequences([
-                    [1, 0, 0, 0, 1, 1, 2, 0, 2, 2, 2, 1, 1, 0, 1, 0, \
+                    [1, 0, 0, 0, 1, 1, 2, 0, 2, 2, 2, 1, 1, 0, 1, 0, 
                      1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 2, 2, 2, 1],
-                    [0, 0, 0, 1, 1, 0, 2, 0, 2, 2 ,2 ,1 ,1 ,1 ,1 ,0 ,1 \
+                    [0, 0, 0, 1, 1, 0, 2, 0, 2, 2 ,2 ,1 ,1 ,1 ,1 ,0 ,1 
                      ,0 ,0 ,0 ,0 ,0]])
         assert data
 
-        assert data.get_nb_sequence == 2
-        assert data.get_nb_variable == 1
-        assert data.get_cumul_length == 52
-        assert data.get_max_length == 30
+        assert data.nb_sequence == 2
+        assert data.nb_variable == 1
+        assert data.cumul_length == 52
+        assert data.max_length == 30
 
         assert [0, 1] == data.get_identifiers()
         
@@ -96,7 +96,7 @@ class Test(interface):
     def test_len(self):
         seq = self.data
         assert len(seq) == 2
-        assert len(seq) == seq.get_nb_sequence
+        assert len(seq) == seq.nb_sequence
 
     def test_plot(self):        
         self.plot()
@@ -239,8 +239,8 @@ class Test(interface):
         
         sall = s1.merge([s2])
         
-        assert sall.get_nb_sequence == 4
-        assert sall.get_nb_variable == 2
+        assert sall.nb_sequence == 4
+        assert sall.nb_variable == 2
             
     def test_merge_and_Merge(self):
         s1 = self.seqn
@@ -268,12 +268,12 @@ class Test(interface):
         s3 = self.seq1
         
         sall = s1.merge_variable([s2],1) # why 1 ? same result with 2 !
-        assert sall.get_nb_sequence == 2
-        assert sall.get_nb_variable == 4
+        assert sall.nb_sequence == 2
+        assert sall.nb_variable == 4
         
         sall =  s1.merge_variable([s3],1)
-        assert sall.get_nb_sequence == 2
-        assert sall.get_nb_variable == 3 
+        assert sall.nb_sequence == 2
+        assert sall.nb_variable == 3 
 
     def test_merge_variable_and_MergeVariable(self):
         s1 = self.seqn
@@ -287,8 +287,6 @@ class Test(interface):
         assert str(a) == str(b)
         assert str(a) == str(v)
 
-    def test_cluster_limit(self):
-        "implemented but need a test"
         
     def test_cluster_step(self):
         seq1 = Sequences([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
