@@ -39,7 +39,7 @@
 
 using namespace boost::python;
 using namespace boost;
-using namespace stat_tool;
+//using namespace stat_tool;
 
 
 
@@ -56,7 +56,7 @@ public:
 	        Parametric_model* ret;
 	        ret = seq.extract(error, type, state);
 	        if (!ret)
-	            stat_tool::wrap_util::throw_error(error);
+	            sequence_analysis::wrap_util::throw_error(error);
 	        return ret;
 	    }
 

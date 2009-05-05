@@ -39,13 +39,15 @@
 
 using namespace boost::python;
 using namespace boost;
-using namespace stat_tool;
+using namespace sequence_analysis;
 
 class CorrelationWrap {
 
 public:
 
-/*	static Correlation* merge(int nb_correl, const boost::list::python& input_correlation)
+
+/*
+	static Correlation* merge(int nb_correl, const boost::list::python& input_correlation)
 	{
 		Format_error error;
 		Correlation **correlation = NULL;
@@ -58,7 +60,7 @@ public:
 
             boost::python::list one_correlation = extract<boost::python::list> (input_correlation[i]);
             int nb = boost::python::len(one_correlation);
-            
+
             correlation[i] = new Correlation[nb];
         }
 
@@ -66,43 +68,39 @@ public:
 
 		return correlation;
 	}
-
 */
+
 
 };
 
-// Boost declaration
 
 void class_correlation() {
 
-	class_<Correlation, bases<STAT_interface> >
-	("_Correlation", "Correlation")
-	.def(init<int, int, int, int>())
-	.def(init<int, int, bool, int>())
-	.def(init<Correlation>())
-	// Python Operators
-	.def(self_ns::str(self)) //__str__
-	.def("get_type", &Correlation::get_type)
-    .def("get_variable_type", &Correlation::get_variable_type,
-        python::args("index"))
-    .def("get_variable1", &Correlation::get_variable1,
-       python::args("index"))
-   .def("get_variable2", &Correlation::get_variable2,
-        python::args("index"))
-    .def("get_white_noise", &Correlation::get_white_noise,
-        python::args("lag"))
-	;
+  class_<Correlation, bases<STAT_interface> >
+  ("_Correlation", "Correlation")
+    .def(init<int, int, int, int>())
+    .def(init<int, int, bool, int>())
+    .def(init<Correlation>())
 
-    //todo
-	/*
-	    virtual ~Correlation();
-	    Correlation* merge(Format_error &error , int nb_correl , const Correlation **icorrel) const;
-	    std::ostream& line_write(std::ostream &os) const;
-	    bool white_noise_correlation(Format_error &error , int nb_point , double *filter ,
-	                                 int residual = true);
-	    bool white_noise_correlation(Format_error &error , const Distribution &dist);
-	    bool white_noise_correlation(Format_error &error , int order);
-    */
+    .def(self_ns::str(self)) //__str__
+
+    .add_property("get_type", &Correlation::get_type)
+
+    .def("get_variable_type", &Correlation::get_variable_type,args("index"))
+    .def("get_variable1", &Correlation::get_variable1,args("index"))
+    .def("get_variable2", &Correlation::get_variable2,args("index"))
+    .def("get_white_noise", &Correlation::get_white_noise,args("lag"))
+
+    ;
+
+//todo
+/*
+  Correlation* merge(Format_error &error , int nb_correl , const Correlation **icorrel) const;
+  std::ostream& line_write(std::ostream &os) const;
+  bool white_noise_correlation(Format_error &error , int nb_point , double *filter ,  int residual = true);
+  bool white_noise_correlation(Format_error &error , const Distribution &dist);
+  bool white_noise_correlation(Format_error &error , int order);
+*/
 }
 
 

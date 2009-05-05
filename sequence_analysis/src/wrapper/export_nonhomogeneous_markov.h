@@ -24,7 +24,7 @@
 
 // Boost.Python Wrapper export function
 void class_nonhomogeneous_markov();
-// void class_nonhomogeneous_markov_data();
+void class_nonhomogeneous_markov_data();
 
 
 

@@ -36,7 +36,7 @@
 
 using namespace boost::python;
 using namespace boost;
-using namespace stat_tool;
+//using namespace stat_tool;
 
 class NonParametricSequenceProcessWrap {
 
@@ -49,7 +49,7 @@ public:
         Distribution* ret;
         ret = input.get_first_occurrence(index);
         if (!ret)
-            stat_tool::wrap_util::throw_error(error);
+            sequence_analysis::wrap_util::throw_error(error);
         return ret;
     }
     static Distribution* get_recurrence_time(const Nonparametric_sequence_process& input, int index)
@@ -58,7 +58,7 @@ public:
         Distribution* ret;
         ret = input.get_recurrence_time(index);
         if (!ret)
-            stat_tool::wrap_util::throw_error(error);
+            sequence_analysis::wrap_util::throw_error(error);
         return ret;
     }
     static Distribution* get_nb_run(const Nonparametric_sequence_process& input, int index)
@@ -67,7 +67,7 @@ public:
         Distribution* ret;
         ret = input.get_nb_run(index);
         if (!ret)
-            stat_tool::wrap_util::throw_error(error);
+            sequence_analysis::wrap_util::throw_error(error);
         return ret;
     }
     static Distribution* get_nb_occurrence(const Nonparametric_sequence_process& input, int index)
@@ -76,7 +76,7 @@ public:
         Distribution* ret;
         ret = input.get_nb_occurrence(index);
         if (!ret)
-            stat_tool::wrap_util::throw_error(error);
+            sequence_analysis::wrap_util::throw_error(error);
         return ret;
     }
     static Parametric* get_sojourn_time(const Nonparametric_sequence_process& input, int index)
@@ -85,7 +85,7 @@ public:
         Parametric* ret;
         ret = input.get_sojourn_time(index);
         if (!ret)
-            stat_tool::wrap_util::throw_error(error);
+            sequence_analysis::wrap_util::throw_error(error);
         return ret;
     }
 

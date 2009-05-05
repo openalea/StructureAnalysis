@@ -46,7 +46,7 @@
 
 using namespace boost::python;
 using namespace boost;
-using namespace stat_tool;
+//using namespace stat_tool;
 
 ////////////////////// Export tops ////////////////////////////////////////
 
@@ -58,13 +58,13 @@ public:
   {
     Function *ret = NULL;
     double *parameter;
-    
+
     int nb_param = len(input_parameter);
     parameter = new double[nb_param];
 
     if (nb_param == 0)
     {
-        stat_tool::wrap_util::throw_error("input list cannot be empty");
+        sequence_analysis::wrap_util::throw_error("input list cannot be empty");
     }
 
     for (int i=0; i<nb_param; i++)
@@ -74,7 +74,7 @@ public:
 
     ret = new Function(ident, length, parameter);
     if (!ret)
-        stat_tool::wrap_util::throw_error("error while calling Function constructor.");
+        sequence_analysis::wrap_util::throw_error("error while calling Function constructor.");
 
     return boost::shared_ptr<Function>(ret);
   }
@@ -85,15 +85,14 @@ public:
 
 void class_function() {
 
-	class_<Function, bases<Regression_kernel> > ("_Function", "Function")
-	.def("__init__", make_constructor(FunctionWrap::function_from_list))
-	.def(init<int, int>())
-	.def("get_residual",	&Function::get_residual,
-			python::args("index"), "get residual")
-	.def("get_frequency",	&Function::get_frequency,
-			python::args("index"), "get frequency")
+  class_<Function, bases<Regression_kernel> > ("_Function", "Function")
+    .def("__init__", make_constructor(FunctionWrap::function_from_list))
+    .def(init<int, int>())
+    .def(init<const Function &>())
+    .def("get_residual",&Function::get_residual,args("index"), "get residual")
+    .def("get_frequency",&Function::get_frequency,args("index"), "get frequency")
 
-	;
-
-
+    ;
+  //DONE
+  //TODO : check validity of the input index on get_residual and get_frequency
 }

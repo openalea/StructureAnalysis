@@ -1,6 +1,31 @@
 
 
 
+// convert a boost python list into a CPP array
+// INPUT is the input variable name
+// TYPE is the type of the CPP array to be returned into the variable data
+// returns data, the list of object and size its length
+#define CREATE_ARRAY(INPUT, TYPE)\
+  int size = len(INPUT);\
+  sequence_analysis::wrap_util::auto_ptr_array<TYPE> data(new TYPE[size]);\
+  for (int i = 0; i < size; i++)\
+      data[i] = boost::python::extract<TYPE>(INPUT[i]);
+
+
+// prototype not included since the name cannot be overloaded
+// INPUT the input argument
+// METHOD_NAME: name of the method that will be called on INPUT
+// OUTPUT_TYPE: type returned by METHOD_NAME
+// optional list of arguments to be used by METHOD_NAME
+#define SIMPLE_METHOD_TEMPLATE_1(INPUT, METHOD_NAME, OUTPUT_TYPE, args...)\
+  Format_error error; \
+    OUTPUT_TYPE* ret;\
+    ret = INPUT.METHOD_NAME(error, ## args);\
+    if (!ret)\
+      sequence_analysis::wrap_util::throw_error(error);\
+    return ret;\
+
+
 
 #define ARGS boost::python::args
 
@@ -11,8 +36,9 @@
 		Format_error error; \
 		OUTPUT_TYPE* ret = NULL;\
 
+
 #define METHOD_FOOTER \
-	if(!ret) stat_tool::wrap_util::throw_error(error); \
+	if(!ret) sequence_analysis::wrap_util::throw_error(error); \
     return ret; \
 	}\
 
@@ -58,7 +84,7 @@ static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VA
      Format_error error;\
      result = m.ascii_write(error, path, exhaustive);\
      if (!result)\
-        stat_tool::wrap_util::throw_error(error);\
+        sequence_analysis::wrap_util::throw_error(error);\
    }
 
 // ---------------------- ascii_write method -----------------------------------
@@ -78,7 +104,7 @@ static std::string ascii_write(const INPUT_CLASS& input, bool exhaustive)\
   {\
 	  Format_error error;\
       if(! input.plot_write(error, prefix.c_str(), title.c_str()))\
-          stat_tool::wrap_util::throw_error(error);\
+          sequence_analysis::wrap_util::throw_error(error);\
   }
 
 // ---------------------- spreadshhet_write method -----------------------------
@@ -87,7 +113,7 @@ static std::string ascii_write(const INPUT_CLASS& input, bool exhaustive)\
   {\
     Format_error error;\
     if(! input.spreadsheet_write(error, filename.c_str()))\
-       stat_tool::wrap_util::throw_error(error);\
+       sequence_analysis::wrap_util::throw_error(error);\
   }
 
 
@@ -98,7 +124,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
     Format_error error; \
     MultiPlotSet* ret = p.survival_get_plotable(error); \
     if(!ret)\
-      stat_tool::wrap_util::throw_error(error);\
+      sequence_analysis::wrap_util::throw_error(error);\
     return ret;\
   }
 
@@ -108,7 +134,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
   {\
     Format_error error;\
     if(!p.survival_plot_write(error, prefix.c_str(), title.c_str()))\
-      stat_tool::wrap_util::throw_error(error);\
+      sequence_analysis::wrap_util::throw_error(error);\
   }
 
 
@@ -118,7 +144,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
   {\
     Format_error error;\
     if(!p.survival_spreadsheet_write(error, filename.c_str()))\
-      stat_tool::wrap_util::throw_error(error);\
+      sequence_analysis::wrap_util::throw_error(error);\
   }
 
 // ---------------------- survival_ascii_write ---------------------------------------

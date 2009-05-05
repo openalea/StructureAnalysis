@@ -1,8 +1,8 @@
 // WRAPPER COMMON CLASSES
+// copy of stat_tool/wrap_util.h
 
-
-#ifndef __WRAPPER_UTIL
-#define __WRAPPER_UTIL
+#ifndef __WRAPPER_UTIL_SEQUENCE_ANALYSIS
+#define __WRAPPER_UTIL_SEQUENCE_ANALYSIS
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -10,22 +10,22 @@
 #include "stat_tool/stat_tools.h"
 
 
-namespace stat_tool
+namespace sequence_analysis
 {
   namespace wrap_util
   {
 
-    template<int num, int id> 
+    template<int num, int id>
       struct UniqueInt
       {
 	int v;
 	enum { value=num };
-	
+
       UniqueInt(int _v) : v(_v) { }
 	operator int() const { return v; }
       };
-    
-    
+
+
 
     inline void throw_error(Format_error &error)
     {
@@ -35,7 +35,7 @@ namespace stat_tool
       boost::python::throw_error_already_set();
     };
 
-    
+
     inline void throw_error(const char* error_message)
     {
       PyErr_SetString(PyExc_Exception, error_message);
@@ -43,7 +43,19 @@ namespace stat_tool
     };
 
 
+   /* template<class T>
+    list_2_array(boost::python::list data)
+    {
+      int size = len(data);
+      sequence_analysis::wrap_util::auto_ptr_array<const T *>
+             sequens(new const T*[size]);
 
+      for (int i = 0; i < size; i++)
+        sequens[i] = boost::python::extract<T *>(data[i]);
+
+      return sequens;
+    }
+*/
     // Redefine auto_ptr for array (use delete[] instead)
     template<class T>
       class auto_ptr_array
@@ -124,7 +136,9 @@ namespace stat_tool
 
 
 
+
+
   };
 };
- 
+
 #endif

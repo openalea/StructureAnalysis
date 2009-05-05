@@ -38,7 +38,7 @@
 
 using namespace boost::python;
 using namespace boost;
-using namespace stat_tool;
+using namespace sequence_analysis;
 
 void class_time_events() {
 

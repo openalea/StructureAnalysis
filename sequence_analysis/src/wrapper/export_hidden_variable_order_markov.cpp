@@ -41,13 +41,7 @@
 
 using namespace boost::python;
 using namespace boost;
-using namespace stat_tool;
-
-
-
-
-
-
+//using namespace stat_tool;
 
 
 void class_hidden_variable_order_markov() {

@@ -36,7 +36,7 @@
 
 using namespace boost::python;
 using namespace boost;
-using namespace stat_tool;
+using namespace sequence_analysis;
 
 class RenewalWrap {
 
@@ -51,7 +51,7 @@ public:
 
 		/*    if(!top_parameters)
 		 {
-		 stat_tool::wrap_util::throw_error(error);
+		 sequence_analysis::wrap_util::throw_error(error);
 		 }
 		 */
 		return boost::shared_ptr<Renewal>(renewal);
