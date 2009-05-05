@@ -3,9 +3,7 @@ __revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface
-import _sequence_analysis
-
-from _sequence_analysis import _Top_parameters
+from openalea.sequence_analysis._sequence_analysis import _Top_parameters
 
 __all__ = ['Top_parameters',
            '_Top_parameters']
