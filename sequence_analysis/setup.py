@@ -13,7 +13,7 @@ from openalea.deploy.binary_deps import binary_deps
 name = 'VPlants.Sequence_analysis'
 namespace = 'openalea'
 # to get the version
-version="0.6.2"
+version="0.7.0"
 description = 'sequence analysis library',
 long_description = """"""
 authors = 'Y. Guédon',
@@ -62,10 +62,10 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
 
           namespace_packages=['openalea'],
-          create_namespaces=True,
+          #create_namespaces=True,
 
           # Packages
-          packages=['openalea.sequence_analysis'],
+          packages=['openalea', 'openalea.sequence_analysis'],
           
 
            #package_dir={'openalea.sequence_analysis' : 'src/openalea/sequence_analysis',

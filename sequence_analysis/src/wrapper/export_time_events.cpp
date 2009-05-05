@@ -44,12 +44,12 @@ void class_time_events() {
 
 
      class_<Time_events, bases<STAT_interface> > ("_Time_events", "Time_events")
-    .def(init <int>())
-	// Python Operators
+         .def(init <int>())
+    // Python Operators
 
-    .def_readonly("get_nb_element", &Time_events::get_nb_element,"nb elements")
-    .def_readonly("get_nb_class", &Time_events::get_nb_class,"nb class")
-	;
+         .def("get_nb_element", &Time_events::get_nb_element,"nb elements")
+         .def("get_nb_class", &Time_events::get_nb_class,"nb class")
+    ;
 
 
 /*

@@ -925,10 +925,10 @@ void class_sequences() {
 	.def("__len__", &Sequences::get_nb_sequence,"Returns number of sequences")
 	.def("__getitem__", SequencesWrap::get_item)
 
-	.def_readonly("get_nb_sequence", &Sequences::get_nb_sequence, "Return the number of sequences")
-	.def_readonly("get_nb_variable", &Sequences::get_nb_variable, "Return the number of variables")
-	.def_readonly("get_max_length", &Sequences::get_max_length,"Return max length")
-	.def_readonly("get_cumul_length", &Sequences::get_cumul_length,"Return cumul length")
+	.def("get_nb_sequence", &Sequences::get_nb_sequence, "Return the number of sequences")
+	.def("get_nb_variable", &Sequences::get_nb_variable, "Return the number of variables")
+	.def("get_max_length", &Sequences::get_max_length,"Return max length")
+	.def("get_cumul_length", &Sequences::get_cumul_length,"Return cumul length")
 
 
 	.def("get_length", &SequencesWrap::get_length,

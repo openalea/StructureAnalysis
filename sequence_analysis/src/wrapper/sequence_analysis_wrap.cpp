@@ -69,10 +69,10 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
 
   class_nonparametric_sequence_process();
 
+  class_time_events();
+
   class_renewal();    
   class_renewal_data();    
-
-  class_time_events();
 
   class_semi_markov();
   class_semi_markov_data();
