@@ -9,7 +9,7 @@ from os.path import join as pj
 name = 'VPlants.Stat_Tool'
 namespace = 'openalea'
 # to get the version
-version="0.6.2"
+version="0.7.0"
 description = 'statistics' 
 long_description = """"""
 author = 'Y. Guedon, JB. Durand',
