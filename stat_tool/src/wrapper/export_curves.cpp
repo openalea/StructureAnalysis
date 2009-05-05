@@ -39,19 +39,21 @@ class CurvesWrap
 
 void class_curves()
 {
-	class_< Curves >("_Curves", "Curves")
+  class_< Curves >("_Curves", "Curves")
     .def(init<int, int , optional<bool , bool> >())
-	.def(init<Distribution> ())
-	.def(init<Histogram> ())
-	.def_readonly("get_nb_curve", &Curves::nb_curve)
-	.def_readonly("get_length", &Curves::nb_curve)
+    .def(init<const Curves &, optional<char, int> >())
 
+    .def(init<Distribution> ())
+    .def(init<Histogram> ())
+
+    .def_readonly("nb_curve", &Curves::nb_curve)
+    .def_readonly("length", &Curves::nb_curve)
+    .def_readonly("offset", &Curves::nb_curve)
     ;
 
 
 
 	/*
-	    int offset;             // abscisse des premiers points definis
 	    int *frequency;         // effectifs correspondant a chaque abscisse
 	    double **point;         // points des courbes
 
@@ -71,10 +73,7 @@ void class_curves()
 	    int nb_element_computation() const;
 
 
-	   // int get_offset() const { return offset; }
-	    //int get_frequency(int ilength) const { return frequency[ilength]; }
-	    //double get_point(int index_curve , int ilength) const
-	    //{ return point[index_curve][ilength]; }
+
 	     * */
 
 

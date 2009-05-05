@@ -41,71 +41,79 @@ using namespace boost;
 
 
 
-class RegressionKernelWrap
-{
-public:
-
-};
-
 void class_regression_kernel()
 {
   class_< Regression_kernel  >("_Regression_kernel", "Regression kernel class")
     .def( init<int, int, int>())
-    .def("get_ident", &Regression_kernel::get_ident,"return ident")
-    .def("get_min_value", &Regression_kernel::get_min_value,"return min value")
-    .def("get_max_value", &Regression_kernel::get_max_value,"return max value")
-    .def("get_regression_df", &Regression_kernel::get_regression_df,"return regression df")
-    .def("get_residual_df", &Regression_kernel::get_residual_df,"return residual df")
-    .def("get_nb_parameter", &Regression_kernel::get_nb_parameter,"return nb parameter")
-    .def("get_parameter", &Regression_kernel::get_parameter,python::args("index"),"return parameter")
-    .def("get_point", &Regression_kernel::get_point,python::args("index"),"return point")
 
-/*
-Regression_kernel(const Regression_kernel &regression) { copy(regression); }
-*/
+    .add_property("ident", &Regression_kernel::get_ident, "returns ident")
+    .add_property("min_value", &Regression_kernel::get_min_value, "returns min value")
+    .add_property("max_value", &Regression_kernel::get_max_value, "returns max value")
+    .add_property("regression_df", &Regression_kernel::get_regression_df, "returns regression df")
+    .add_property("residual_df", &Regression_kernel::get_residual_df, "returns residual df")
+    .add_property("nb_parameter", &Regression_kernel::get_nb_parameter, "returns nb parameter")
+
+    .def("get_parameter", &Regression_kernel::get_parameter,args("index"), "returns parameter")
+    .def("get_point", &Regression_kernel::get_point,args("index"), "returns point")
+
+    //DONE
+    //TODO: check index validity of get_parameter and get_point
+    /*
+    Regression_kernel(const Regression_kernel &regression) { copy(regression); }
+    */
   ;
 }
 
-class RegressionWrap
+#define WRAP RegressionWrap
+class WRAP
 {
 public:
 
+  WRAP_METHOD_FILE_ASCII_WRITE( Regression);
+  WRAP_METHOD_SPREADSHEET_WRITE( Regression);
 
-  WRAP_METHOD_FILE_ASCII_WRITE(Regression);
-  WRAP_METHOD_SPREADSHEET_WRITE(Regression);
-
-
-  static double get_residual(Regression &input, int index)
+  static double
+  get_residual(Regression &input, int index)
   {
     double ret;
     ostringstream error_message;
     error_message << "index not in valid range" << endl;\
+
     CHECK(index, 0, input.get_nb_vector());
     ret = input.get_residual(index);
     return ret;
   }
-
 
 };
 
 void class_regression()
 {
   class_< Regression, bases< STAT_interface > >
-    ("_Regression", "Regression class")
-    // Python Operators
-    //
-    .def(init <int, int, int, Vectors>())
-    .def(init <Regression>())
+  ("_Regression", "Regression class")
+    .def(init <int, int, int, const Vectors&>())
+    .def(init <const Regression &>())
+
     .def(self_ns::str(self)) // __str__
     .def("__len__", &Regression::get_nb_vector)  //__len__
-    .def("get_nb_vector", &Regression::get_nb_vector, "Return nb_vector")
-    .def("get_residual", RegressionWrap::get_residual, ARGS("int"),"Return nb_vector")
-    .def("file_ascii_write", RegressionWrap::file_ascii_write, "Save regression summary into a file")
-    .def("file_spreadsheet_write", RegressionWrap::spreadsheet_write, "Save regression summary into a CSV file")
+
+    .add_property("nb_vector", &Regression::get_nb_vector, "Return nb_vector")
+
+    .def("get_residual", WRAP::get_residual, args("int"),"Return nb_vector")
+    .def("file_ascii_write", WRAP::file_ascii_write, "Save regression summary into a file")
+    .def("file_spreadsheet_write", WRAP::spreadsheet_write, "Save regression summary into a CSV file")
+
     DEF_RETURN_VALUE_NO_ARGS("get_vectors", &Regression::get_vectors, "return vectors")
     ;
 
+  //DONE
+  //TODO:check index validity in get_residual
+  /*
+
+    bool plot_write(Format_error &error , const char *prefix , const char *title = 0) const;
+    plotable::MultiPlotSet* get_plotable() const;
+    */
 }
+#undef WRAP
 
 
 

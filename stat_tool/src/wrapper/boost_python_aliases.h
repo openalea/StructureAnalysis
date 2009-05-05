@@ -1,7 +1,5 @@
 
 
-
-
 #define ARGS boost::python::args
 
 
@@ -11,8 +9,10 @@
 		Format_error error; \
 		OUTPUT_TYPE* ret = NULL;\
 
-#define METHOD_FOOTER \
-	if(!ret) stat_tool::wrap_util::throw_error(error); \
+#define ERROR \
+  stat_tool::wrap_util::throw_error(error); \
+
+#define METHOD_FOOTER\
     return ret; \
 	}\
 
@@ -27,24 +27,28 @@
 static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class) \
     METHOD_HEADER(OUTPUT_TYPE) \
     ret = input_class.METHOD_NAME(error); \
+    if(!ret) ERROR;\
     METHOD_FOOTER \
 // 1 variable
 #define WRAP_METHOD1(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1) \
 static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1) \
     METHOD_HEADER(OUTPUT_TYPE)\
     ret = input_class.METHOD_NAME(error, var1); \
+    if(!ret) ERROR;\
     METHOD_FOOTER \
 // 2 variables
 #define WRAP_METHOD2(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1, VARTYPE2) \
 static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VARTYPE2 var2) \
     METHOD_HEADER(OUTPUT_TYPE)\
     ret = input_class.METHOD_NAME(error, var1, var2); \
+    if(!ret) ERROR;\
     METHOD_FOOTER \
 // 3 variables
 #define WRAP_METHOD3(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1,VARTYPE2,VARTYPE3) \
 static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VARTYPE2 var2, VARTYPE3 var3) \
     METHOD_HEADER(OUTPUT_TYPE)\
     ret = input_class.METHOD_NAME(error, var1, var2, var3); \
+    if(!ret) ERROR;\
     METHOD_FOOTER \
 
 
@@ -57,8 +61,7 @@ static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VA
      bool result = true;\
      Format_error error;\
      result = m.ascii_write(error, path, exhaustive);\
-     if (!result)\
-        stat_tool::wrap_util::throw_error(error);\
+     if (!result) ERROR;\
    }
 
 // ---------------------- ascii_write method -----------------------------------
@@ -78,7 +81,7 @@ static std::string ascii_write(const INPUT_CLASS& input, bool exhaustive)\
   {\
 	  Format_error error;\
       if(! input.plot_write(error, prefix.c_str(), title.c_str()))\
-          stat_tool::wrap_util::throw_error(error);\
+         ERROR;\
   }
 
 // ---------------------- spreadshhet_write method -----------------------------
@@ -87,7 +90,7 @@ static std::string ascii_write(const INPUT_CLASS& input, bool exhaustive)\
   {\
     Format_error error;\
     if(! input.spreadsheet_write(error, filename.c_str()))\
-       stat_tool::wrap_util::throw_error(error);\
+       ERROR;\
   }
 
 
@@ -97,8 +100,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
   { \
     Format_error error; \
     MultiPlotSet* ret = p.survival_get_plotable(error); \
-    if(!ret)\
-      stat_tool::wrap_util::throw_error(error);\
+    if (!ret) ERROR;\
     return ret;\
   }
 
@@ -108,7 +110,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
   {\
     Format_error error;\
     if(!p.survival_plot_write(error, prefix.c_str(), title.c_str()))\
-      stat_tool::wrap_util::throw_error(error);\
+     ERROR;\
   }
 
 
@@ -118,7 +120,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
   {\
     Format_error error;\
     if(!p.survival_spreadsheet_write(error, filename.c_str()))\
-      stat_tool::wrap_util::throw_error(error);\
+      ERROR;\
   }
 
 // ---------------------- survival_ascii_write ---------------------------------------

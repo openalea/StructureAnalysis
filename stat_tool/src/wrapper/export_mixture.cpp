@@ -616,8 +616,8 @@ void class_mv_mixture()
     .def("__len__", &Mv_Mixture::get_nb_component, "Return the number of components") // __len__
 
     //readonly
-    .def("nb_component", &Mv_Mixture::get_nb_component, "Return the number of components")
-    .def("nb_variable", &Mv_Mixture::get_nb_variable, "Return the number of variables")
+    .add_property("nb_variable", &Mv_Mixture::get_nb_variable, "Return the number of variables")
+    .add_property("nb_component", &Mv_Mixture::get_nb_component, "Return the number of variables")
 
     // return object and no arguments needed
     DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return the weight distribution")

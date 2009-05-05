@@ -64,9 +64,9 @@ BOOST_PYTHON_MODULE(_stat_tool)
 
   class_vectors();
   class_vectordistance();
-  
-  class_regression();
+
   class_regression_kernel();
+  class_regression();
 
   class_distance_matrix();
   class_clusters();
@@ -75,8 +75,8 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_distribution();
   class_parametric();
   class_parametric_model();
- 
-  
+
+
   class_histogram();
   class_distribution_data();
 
