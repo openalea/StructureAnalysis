@@ -15,35 +15,12 @@ from tools import interface
 class Test(interface):
     """a simple unittest class
 
-    Integration Test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-        
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok
-    extract_data                nothing to be done
-    file_ascii_write            ok
-    plot                        ok                       
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    spreadsheet_write           ok
-
-    **others**
-    old_plot                    ok   
-    str                         ok
-    len                         not relevant
-    ========================    ==================================
  
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "sequences1.seq",
+                           "data/sequences1.seq",
                            Sequences)
         self.seqn = self.build_seqn()
         self.seq1 = self.build_seq1()
@@ -117,14 +94,12 @@ class Test(interface):
         #self.simulate()
         pass
         
-        
     def test_extract(self):
         #todo
         seqn = self.seqn
-        assert seqn.extract(1)
-        assert seqn.extract(2)
+        assert seqn.extract_histogram(1)
+        assert seqn.extract_histogram(2)
         
-
     def test_extract_data(self):
         pass 
 
@@ -310,10 +285,29 @@ class Test(interface):
         assert  str(seq.transcode(1, [1, 2]))==\
             str(Transcode(seq, 1, [1, 2 ]))
             
-    def reverse(self):
+    def test_reverse(self):
         """reverse to be checked. seems to give same output as input"""
         s = self.seqn
         s.reverse()
+        
+        
+    def test_max_length(self):
+        s = self.data
+        assert s.max_length==30
+    
+    def test_get_max_value(self):
+        s = self.data
+        assert s.get_max_value(0)==2
+        
+    def test_get_min_value(self):
+        s = self.data
+        assert s.get_min_value(0)==0
+        
+    def test_get_length(self):
+        s = self.data
+        assert s.get_length(0)==30
+        assert s.get_length(1)==22
+
         
         
     def _others(self):
@@ -322,3 +316,32 @@ class Test(interface):
         # segmentatoinExtravt, 
         # variablescaling, transormposition
         pass
+
+
+
+
+
+
+"""  seq.extract_vectors         
+      seq.index_parameter_select 
+         
+seq.segmentation_extract
+seq.ascii_write                
+seq.file_ascii_data_write     
+seq.pointwise_average  
+seq.length_select             
+seq.recurrence_time_sequences 
+seq.cross                    
+seq.get_index_parameter_type
+seq.sojourn_time_sequences
+seq.cumulate                                       
+seq.remove_index_parameter     
+seq.remove_run              
+seq.moving average                            
+seq.transform position
+seq.difference                
+seq.get_type
+seq.round                    
+eq.index_parameter_extract  
+seq.scaling                    
+"""
