@@ -57,16 +57,13 @@ ostream& TreeMatch::saveDistanceMatrix(ostream& out_fich) const
   int nb_tree ;
 
   nb_tree = _trees[0]->getNbVertex();
-  out_fich<<"[";
   for (int i_tree=0;i_tree<nb_tree;i_tree++){
-    out_fich<<"[";
     int j_tree;
-    for (j_tree=0;j_tree<nb_tree-1;j_tree++){
-      out_fich<<getDistance(i_tree,j_tree)<<",";
+    for (j_tree=0;j_tree<nb_tree;j_tree++){
+      out_fich<<getDistance(i_tree,j_tree)<<" ";
     }
-    out_fich<<getDistance(i_tree,j_tree)<<"],"<<endl;
+    out_fich<<endl;
   }
-  out_fich<<"]"<<endl;
  
   if (_fileName)
     {
