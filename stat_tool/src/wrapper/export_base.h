@@ -30,6 +30,7 @@ void class_format_error();
 class StatInterfaceWrap;
 
 void class_stat_interface();
+void class_forward();
 
 
 #endif

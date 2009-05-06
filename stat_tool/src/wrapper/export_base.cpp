@@ -76,9 +76,9 @@ void class_format_error()
     .def("init", &Format_error::init)
     .def("update", &Format_error::update, Format_error_update_overloads_1_3())
     .def("correction_update", (void (Format_error::*)(const char*, const char*, int, int) )
-	 &Format_error::correction_update, Format_error_correction_update_overloads_2_4())
+	    &Format_error::correction_update, Format_error_correction_update_overloads_2_4())
     .def("correction_update", (void (Format_error::*)(const char*, int, int, int) )
-	 &Format_error::correction_update, Format_error_correction_update_overloads_2_4())
+	    &Format_error::correction_update, Format_error_correction_update_overloads_2_4())
     .def("get_nb_error", &Format_error::get_nb_error)
     .def("get_max_nb_error", &Format_error::get_max_nb_error)
     .def(self_ns::str(self))
@@ -100,23 +100,34 @@ public:
 void class_stat_interface()
 {
   class_< STAT_interface, boost::noncopyable > ("_StatInterface", no_init)
-    .def("ascii_write", &StatInterfaceWrap::ascii_write,
-    		ARGS("exhaustive"),
-    		"Return a string containing the object description (exhaustive or not)")
+    .def("ascii_write", &StatInterfaceWrap::ascii_write, args("exhaustive"),
+    	"Return a string containing the object description (exhaustive or not)")
 
-    .def("plot_write", &StatInterfaceWrap::plot_write,
-    		ARGS("prefix", "title"),
-    		"Write GNUPLOT files (with prefix)")
+    .def("plot_write", &StatInterfaceWrap::plot_write,	args("prefix", "title"),
+  		"Write GNUPLOT files (with prefix)")
 
-    .def("spreadsheet_write", &StatInterfaceWrap::spreadsheet_write,
-    		ARGS("filename"),
-    		"Write object to filename (spreadsheet format)")
+    .def("spreadsheet_write", &StatInterfaceWrap::spreadsheet_write, args("filename"),
+   		"Write object to filename (spreadsheet format)")
 
-    .def("get_plotable", &STAT_interface::get_plotable,
-    		return_value_policy< manage_new_object >(),
-    		"Return a plotable object" )
+    .def("get_plotable", &STAT_interface::get_plotable, return_value_policy< manage_new_object >(),
+  		"Return a plotable object" )
     ;
 
+}
+
+
+void class_forward()
+{
+  class_<Forward , boost::noncopyable ,bases<Parametric> > ("_Forward", no_init)
+
+;
+/*
+    Forward(int inb_value = 0 , int iident = NONPARAMETRIC ,  int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT , double iparameter = D_DEFAULT , double iprobability = D_DEFAULT)    :Parametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
+    Forward(const Parametric &dist , int ialloc_nb_value = I_DEFAULT) :Parametric(dist , 'c' , ialloc_nb_value) { computation(dist); }
+    Forward(const Forward &forward , int ialloc_nb_value = I_DEFAULT)  :Parametric((Parametric&)forward , 'c' , ialloc_nb_value) {}
+
+    void computation(const Parametric &dist);
+*/
 }
 
 

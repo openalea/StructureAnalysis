@@ -61,7 +61,7 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_constant();
   class_format_error();
   class_stat_interface();
-
+  
   class_vectors();
   class_vectordistance();
 
@@ -75,6 +75,9 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_distribution();
   class_parametric();
   class_parametric_model();
+  
+  // depends on parametric
+  class_forward();
 
 
   class_histogram();
