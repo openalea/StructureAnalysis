@@ -59,7 +59,11 @@ def RemoveRun(obj, variable=1, value=None, position=None, MaxLength=4):
     # arguments : indice de la variable,
     #             valeur, position ('b' : begin, 'e' : end),
     #             longueur maximum de la serie supprimee.
-    if position!='b' and position!='e':
+    
+    if position == 'End': position = 'e'
+    if position == 'Begin': position = 'b'
+    
+    if position not in ['b','e']:
         raise "position must be 'e' for end or 'b' for begin"
     return obj.remove_run(variable, value, position, MaxLength)
 
