@@ -42,9 +42,21 @@ using namespace boost::python;
 using namespace boost;
 //using namespace stat_tool;
 
+#define WRAP VariableOrderMarkovWrap
 class VariableOrderMarkovWrap {
 
 public:
+
+  static void
+   file_ascii_write(const Variable_order_markov& d, const char* path, bool exhaustive)
+   {
+     bool result = true;
+     Format_error error;
+
+     result = d.ascii_write(error, path, exhaustive);
+     if (!result)
+       sequence_analysis::wrap_util::throw_error(error);
+   }
 
 
 };
@@ -56,23 +68,22 @@ void class_variable_order_markov() {
 	class_<Variable_order_markov, bases<STAT_interface > >
 	("_Variable_order_markov", "Variable_order_markov")
 
+        .def(self_ns::str(self)) //__str__
+        .def("file_ascii_write", WRAP::file_ascii_write,"Save vector summary into a file")
+
+        .add_property("nb_iterator", &Variable_order_markov::get_nb_iterator, "todo")
+
+;
 
 
 /*
   Variable_order_markov();
     Variable_order_markov(char itype , int inb_state , int inb_row);
-    Variable_order_markov(char itype , int inb_state , int inb_row ,
-                          int imax_order);
-    Variable_order_markov(char itype , int inb_state , int iorder , bool init_flag ,
-                          int inb_output_process = 0 , int nb_value = 0);
-    Variable_order_markov(const Variable_order_markov &markov ,
-                          int inb_output_process , int nb_value);
-    Variable_order_markov(const Variable_order_markov *pmarkov ,
-                          const Nonparametric_process *pobservation , int length);
-    Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)
-    :Chain(markov) { copy(markov , data_flag); }
-    virtual ~Variable_order_markov();
-    Variable_order_markov& operator=(const Variable_order_markov &markov);
+    Variable_order_markov(char itype , int inb_state , int inb_row ,  int imax_order);
+    Variable_order_markov(char itype , int inb_state , int iorder , bool init_flag ,   int inb_output_process = 0 , int nb_value = 0);
+    Variable_order_markov(const Variable_order_markov &markov ,   int inb_output_process , int nb_value);
+    Variable_order_markov(const Variable_order_markov *pmarkov ,      const Nonparametric_process *pobservation , int length);
+    Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)  :Chain(markov) { copy(markov , data_flag); }
 
     Parametric_model* extract(Format_error &error , int type ,
                               int variable , int value) const;
@@ -85,34 +96,21 @@ void characteristic_computation(int length , bool counting_flag , int variable =
 void characteristic_computation(const Variable_order_markov_data &seq , bool counting_flag ,
 int variable = I_DEFAULT , bool length_flag = true);
 
-    Correlation* state_autocorrelation_computation(Format_error &error , int istate ,
-    int max_lag = MAX_LAG) const;
-    Correlation* output_autocorrelation_computation(Format_error &error , int variable ,
-    int output , int max_lag = MAX_LAG) const;
+    Correlation* state_autocorrelation_computation(Format_error &error , int istate ,  int max_lag = MAX_LAG) const;
+    Correlation* output_autocorrelation_computation(Format_error &error , int variable ,  int output , int max_lag = MAX_LAG) const;
 
     double likelihood_computation(const Markovian_sequences &seq , int index) const;
     double likelihood_computation(const Variable_order_markov_data &seq) const;
 
-   Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength ,
-   bool counting_flag = true , bool divergence_flag = false) const;
-   Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-   int length , bool counting_flag = true) const;
-   Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-   const Markovian_sequences &iseq ,
-   bool counting_flag = true) const;
+   Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength , bool counting_flag = true , bool divergence_flag = false) const;
+   Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
+   Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
 
-  Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-  const Variable_order_markov **imarkov , Histogram **hlength ,
-  const char *path = 0) const;
-  Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-  const Variable_order_markov **markov , int nb_sequence ,
-  int length , const char *path = 0) const;
-  Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-  const Variable_order_markov **markov , int nb_sequence ,
-  const Markovian_sequences **seq , const char *path = 0) const;
+  Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **imarkov , Histogram **hlength ,  const char *path = 0) const;
+  Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **markov , int nb_sequence ,  int length , const char *path = 0) const;
+  Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model , const Variable_order_markov **markov , int nb_sequence ,  const Markovian_sequences **seq , const char *path = 0) const;
 
 
-int get_nb_iterator() const { return nb_iterator; }
 Variable_order_markov_data* get_markov_data() const { return markov_data; }
 int get_memory_type(int memory) const { return memory_type[memory]; }
 int get_order(int memory) const { return order[memory]; }
@@ -124,18 +122,16 @@ int get_next(int memory , int istate) const { return next[memory][istate]; }
 int get_nb_memory(int memory) const { return nb_memory[memory]; }
 int get_previous(int memory , int istate) const { return previous[memory][istate]; }
 int get_nb_output_process() const { return nb_output_process; }
-Nonparametric_sequence_process* get_nonparametric_process(int variable) const
-{ return nonparametric_process[variable]; }
+Nonparametric_sequence_process* get_nonparametric_process(int variable) const{ return nonparametric_process[variable]; }
 Parametric_process** get_parametric_process() const { return parametric_process; }
-Parametric_process* get_parametric_process(int variable)
-const { return parametric_process[variable]; }
+Parametric_process* get_parametric_process(int variable)const { return parametric_process[variable]; }
 */
-;
 
 
 
 
 }
+#undef WRAP
 
 
 void class_variable_order_markov_data() {

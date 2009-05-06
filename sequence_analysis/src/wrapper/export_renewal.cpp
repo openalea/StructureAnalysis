@@ -60,6 +60,33 @@ public:
 	}
 
 
+  static void
+  file_ascii_write(const Renewal& d, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = d.ascii_write(error, path, exhaustive);
+    if (!result)
+      sequence_analysis::wrap_util::throw_error(error);
+  }
+
+
+  static Distribution*
+  get_time(const Renewal& input)
+  {
+    Distribution* ret;
+    ret = new Distribution(*input.get_time());
+    return ret;
+  }
+
+  static Renewal_data*
+  get_renewal_data(const Renewal& input)
+  {
+    Renewal_data* ret;
+    ret = new Renewal_data(*input.get_renewal_data());
+    return ret;
+  }
 
 };
 
@@ -67,8 +94,8 @@ public:
 
 void class_renewal() {
 
-
-	class_<Renewal, bases<STAT_interface> > ("_Renewal", "Renewal")
+  class_<Renewal, bases<STAT_interface> > ("_Renewal", "Renewal")
+    //type = 'o' or 'e'
     .def(init <char, Histogram, Parametric>())
     .def(init <char, Distribution, Parametric>())
 	// Python Operators
@@ -76,15 +103,26 @@ void class_renewal() {
     .add_property("nb_iterator", &Renewal::get_nb_iterator,"nb iterator")
     .add_property("type", &Renewal::get_type,"type")
 
-    DEF_RETURN_VALUE_NO_ARGS("get_renewal_data", &Renewal::get_renewal_data,"returns renewal data")
-    DEF_RETURN_VALUE_NO_ARGS("get_time", &Renewal::get_time,"returns time")
-    ;
-/*
-Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_event);
-Renewal(const Renewal &renew , bool data_flag = true){ copy(renew , data_flag); }
-void conditional_delete();
+    .def("file_ascii_write", RenewalWrap::file_ascii_write,"Save vector summary into a file")
 
-Parametric_model* extract(Format_error &error , int dist_type , int itime = I_DEFAULT) const;
+    DEF_RETURN_VALUE_NO_ARGS("get_renewal_data", &RenewalWrap::get_renewal_data,"returns renewal data")
+    DEF_RETURN_VALUE_NO_ARGS("get_time", &RenewalWrap::get_time,"returns time")
+    ;
+
+/*
+   Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_event);
+   Renewal(const Renewal &renew , bool data_flag = true)   { copy(renew , data_flag); }
+
+   Parametric_model* extract(Format_error &error , int dist_type , int itime = I_DEFAULT) const;
+
+   std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
+   bool ascii_write(Format_error &error , const char *path ,
+	                     bool exhaustive = false) const;
+   bool spreadsheet_write(Format_error &error , const char *path) const;
+   bool plot_write(Format_error &error , const char *prefix ,
+	                    const char *title = 0) const;
+
+
 void computation(bool inter_event_flag = true , char itype = 'v' , const Distribution *dtime = 0);
 double likelihood_computation(const Time_events &timev) const;
 Renewal_data* simulation(Format_error &error , char itype , const Histogram &ihtime) const;

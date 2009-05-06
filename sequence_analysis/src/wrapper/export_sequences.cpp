@@ -505,7 +505,7 @@ public:
       sequens[i] = extract<Sequences*> (seqs[i]);
 
 
-    SIMPLE_METHOD_TEMPLATE_1(input_seq, merge_variable, Sequences,
+    SIMPLE_METHOD_TEMPLATE_1(input_seq, merge, Sequences,
         nb_seq, sequens.get());
   }
 

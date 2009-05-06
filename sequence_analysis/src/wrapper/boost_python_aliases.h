@@ -28,52 +28,6 @@
 
 
 
-
-// two internal macros used by other macros
-#define METHOD_HEADER(OUTPUT_TYPE) \
-	{\
-		Format_error error; \
-		OUTPUT_TYPE* ret = NULL;\
-
-
-#define METHOD_FOOTER \
-	if(!ret) sequence_analysis::wrap_util::throw_error(error); \
-    return ret; \
-	}\
-
-
-// wrapping of simple methods with variable number of arguments
-// :param INPUT_TYPE: self on a class
-// :param METHOD_NAME: the name of the method to be called on INPUT_TYPE class
-// :param OUTPUT_TYPE: type of the class that will be returned
-// :param var1: optional variables
-// no argument case
-#define WRAP_METHOD0(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE) \
-static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class) \
-    METHOD_HEADER(OUTPUT_TYPE) \
-    ret = input_class.METHOD_NAME(error); \
-    METHOD_FOOTER \
-// 1 variable
-#define WRAP_METHOD1(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1) \
-static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1) \
-    METHOD_HEADER(OUTPUT_TYPE)\
-    ret = input_class.METHOD_NAME(error, var1); \
-    METHOD_FOOTER \
-// 2 variables
-#define WRAP_METHOD2(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1, VARTYPE2) \
-static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VARTYPE2 var2) \
-    METHOD_HEADER(OUTPUT_TYPE)\
-    ret = input_class.METHOD_NAME(error, var1, var2); \
-    METHOD_FOOTER \
-// 3 variables
-#define WRAP_METHOD3(INPUT_TYPE, METHOD_NAME, OUTPUT_TYPE, VARTYPE1,VARTYPE2,VARTYPE3) \
-static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VARTYPE2 var2, VARTYPE3 var3) \
-    METHOD_HEADER(OUTPUT_TYPE)\
-    ret = input_class.METHOD_NAME(error, var1, var2, var3); \
-    METHOD_FOOTER \
-
-
-
 // Specific methods
 // ---------------------- file_ascii_write (ascii_write) method ----------------
 #define WRAP_METHOD_FILE_ASCII_WRITE(INPUT_CLASS) \
@@ -174,8 +128,6 @@ static std::string survival_ascii_write(const INPUT_CLASS& p) \
      }\
 
 
-
-
 // boost python declarations -------------------------------------------
 //
 // quick alias to avoid writting the return_value_policy...
@@ -189,12 +141,4 @@ static std::string survival_ascii_write(const INPUT_CLASS& p) \
 
 #define DEF_INIT_MAKE_CONSTRUCTOR(WRAPPED_FUNCTION, DOCSTRING) \
 	.def("__init__", make_constructor(WRAPPED_FUNCTION), DOCSTRING)
-
-
-
-// def("__len__", &Class::method, "docstring")
-//#define DEF_LEN(CLASS, FUNCTION_NAME) \
- //   .def("__len__", &CLASS::FUNCTION_NAME, "Return the size of the Class instance")
-
-//#define DEF_STR() .def(self_ns::str(self)) // __str__
 

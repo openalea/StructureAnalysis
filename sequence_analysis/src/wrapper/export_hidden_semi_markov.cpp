@@ -43,12 +43,48 @@ using namespace boost::python;
 using namespace boost;
 //using namespace stat_tool;
 
-class HiddenSemiMarkovWrap {
+
+#define WRAP HiddenSemiMarkovWrap
+class WRAP {
 
 public:
 
+  static boost::shared_ptr<Hidden_semi_markov>
+   hidden_semi_markov_from_file(char* filename, int length, bool counting_flag,
+       double cumul_threshold, bool old_format)
+   {
+     //olf_format should be true
+     Format_error error;
+     Hidden_semi_markov *hidden_semi_markov = NULL;
+     hidden_semi_markov = hidden_semi_markov_ascii_read(error, filename, length,
+         counting_flag, cumul_threshold, old_format);
+     if(!hidden_semi_markov)
+     {
+       sequence_analysis::wrap_util::throw_error(error);
+     }
+     return boost::shared_ptr<Hidden_semi_markov>(hidden_semi_markov);
+   }
+
+
+  static void
+  file_ascii_write(const Hidden_semi_markov& d, const char* path, bool exhaustive)
+  {
+    bool result = true;
+    Format_error error;
+
+    result = d.ascii_write(error, path, exhaustive);
+    if (!result)
+      sequence_analysis::wrap_util::throw_error(error);
+  }
+
 
 };
+
+/*
+int length,  bool counting_flag ,
+double cumul_threshold ,
+bool old_format
+  */
 
 // Boost declaration
 
@@ -60,12 +96,34 @@ void class_hidden_semi_markov() {
     .value("OUT_STATE", OUT_STATE)
     .export_values();
 
-	class_<Hidden_semi_markov, bases<Semi_markov > >
-	("_Hidden_semi_markov", "Hidden_semi_markov")
+  class_<Hidden_semi_markov, bases<Semi_markov > >
+    ("_Hidden_semi_markov", "Hidden_semi_markov")
     .def(init <Hidden_semi_markov, bool, int>())
+    .def("__init__", make_constructor(WRAP::hidden_semi_markov_from_file))
+
+    .def(self_ns::str(self)) //__str__
+    .def("file_ascii_write", WRAP::file_ascii_write,"Save vector summary into a file")
 
 
 /*
+ *
+    Hidden_semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
+                       int inb_output_process , Nonparametric_process **pobservation ,
+                       int length , bool counting_flag)
+      :Semi_markov(pchain , poccupancy , inb_output_process , pobservation , length ,
+                 counting_flag) {}
+    Hidden_semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
+                       int inb_output_process , Nonparametric_process **nonparametric_observation ,
+                       Parametric_process **parametric_observation , int length , bool counting_flag)
+      :Semi_markov(pchain , poccupancy , inb_output_process , nonparametric_observation ,
+                 parametric_observation , length , counting_flag) {}
+    Hidden_semi_markov(const Hidden_semi_markov &hsmarkov , bool data_flag = true ,
+                       int param = I_DEFAULT)
+
+    Hidden_semi_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
+
+    bool spreadsheet_write(Format_error &error , const char *path) const;
+ *
  *
     Hidden_semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
                        int inb_output_process , Nonparametric_process **pobservation ,
@@ -105,12 +163,9 @@ void class_hidden_semi_markov() {
                                                  const Markovian_sequences &seq ,
                                                  bool characteristic_flag = true) const;
 
-    Semi_markov_data* simulation(Format_error &error , const Histogram &hlength ,
-                                 bool counting_flag = true , bool divergence_flag = false) const;
-    Semi_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                 int length , bool counting_flag = true) const;
-    Semi_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                 const Markovian_sequences &iseq , bool counting_flag = true) const;
+    Semi_markov_data* simulation(Format_error &error , const Histogram &hlength ,  bool counting_flag = true , bool divergence_flag = false) const;
+    Semi_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
+    Semi_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
 
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Hidden_semi_markov **ihsmarkov , Histogram **hlength ,
@@ -126,4 +181,4 @@ void class_hidden_semi_markov() {
 }
 
 
-
+#undef WRAP
