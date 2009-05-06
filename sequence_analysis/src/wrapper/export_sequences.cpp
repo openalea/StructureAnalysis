@@ -878,9 +878,9 @@ void class_sequences() {
     DEF_RETURN_VALUE("difference", SequencesWrap::difference,args("variable", "first_element"),"Difference")
     DEF_RETURN_VALUE("moving average", SequencesWrap::moving_average,args("nb_point" ,"filter" , "variable" , "begin_end" , "output"),"Moving average ")
     DEF_RETURN_VALUE("pointwise_average", SequencesWrap::pointwise_average,	args("standard_deviation", "output", "path", "format"),	"Pointwise average")
-    DEF_RETURN_VALUE("recurrence_time_sequences", SequencesWrap::recurrence_time_sequences,ARGS("variable", "value"),"Recurrence time sequences")
-    DEF_RETURN_VALUE("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences, ARGS("variable"), "Sojourn time sequences")
-    DEF_RETURN_VALUE("transform position", SequencesWrap::transform_position, ARGS("step"), "Transform position")
+    DEF_RETURN_VALUE("recurrence_time_sequences", SequencesWrap::recurrence_time_sequences,args("variable", "value"),"Recurrence time sequences")
+    DEF_RETURN_VALUE("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences, args("variable"), "Sojourn time sequences")
+    DEF_RETURN_VALUE("transform position", SequencesWrap::transform_position, args("step"), "Transform position")
     DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step, args("variable", "step"),"Cluster Step")
     DEF_RETURN_VALUE("cluster_limit", SequencesWrap::cluster_limit,  args("variable", "limits"),"Cluster limit")
     DEF_RETURN_VALUE("transcode", SequencesWrap::transcode, args("variable", "symbols"),"Transcode")
@@ -908,21 +908,15 @@ void class_sequences() {
 	    Sequences(const Sequences &seq , bool *segment_mean);
 	    Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
 
-
 	    Vectors* build_vectors(bool index_variable) const;
-
 	    Markovian_sequences* markovian_sequences(Format_error &error) const;
 	    Tops* tops(Format_error &error) const;
-
 	    bool check(Format_error &error , const char *pattern_label);
-
 	    Time_events* extract_time_events(Format_error &error , int variable , int begin_date , int end_date ,  int previous_date = I_DEFAULT , int next_date = I_DEFAULT) const;
 	    Renewal_data* extract_renewal_data(Format_error &error , int variable , int begin_index , int end_index) const;
 
-\
 	    Sequences* moving_average(Format_error &error , int nb_point , double *filter ,   int variable = I_DEFAULT , bool begin_end = false ,	                              int output = TREND) const;
 	    Sequences* moving_average(Format_error &error , const Distribution &dist ,   int variable = I_DEFAULT , bool begin_end = false ,int output = TREND) const;
-
 
 	    std::ostream& line_write(std::ostream &os) const;
 	    bool plot_data_write(Format_error &error , const char *prefix , const char *title = 0) const;
@@ -941,7 +935,6 @@ void class_sequences() {
 	    double kurtosis_computation(int variable , double mean , double variance) const;
 
 	    Histogram* value_index_interval_computation(Format_error &error , int variable , int value) const;
-
 	    Correlation* correlation_computation(Format_error &error , int variable1 , int variable2 ,
 	                                         int itype = PEARSON , int max_lag = I_DEFAULT ,
 	                                         int normalization = EXACT) const;
@@ -1041,7 +1034,7 @@ void class_sequence_characteristics() {
 
     .def("get_initial_run", &WRAP::get_initial_run, "returns initial run")
 
-    DEF_RETURN_VALUE("get_initial_run_from_index", WRAP::get_initial_run_from_index,ARGS("index"), "returns initial run")
+    DEF_RETURN_VALUE("get_initial_run_from_index", WRAP::get_initial_run_from_index,args("index"), "returns initial run")
 
     DEF_RETURN_VALUE_NO_ARGS("get_index_value", &Sequence_characteristics::get_index_value, "get_index_value")
     DEF_RETURN_VALUE_NO_ARGS("get_first_occurrence", &Sequence_characteristics::get_first_occurrence, "get first occurrence time")

@@ -34,6 +34,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
+
 using namespace boost::python;
 using namespace boost;
 using namespace sequence_analysis;
@@ -71,26 +73,24 @@ void class_renewal() {
     .def(init <char, Distribution, Parametric>())
 	// Python Operators
 
-    .def("get_nb_iterator", &Renewal::get_nb_iterator,"nb iterator")
-	;
-/*
+    .add_property("nb_iterator", &Renewal::get_nb_iterator,"nb iterator")
+    .add_property("type", &Renewal::get_type,"type")
 
+    DEF_RETURN_VALUE_NO_ARGS("get_renewal_data", &Renewal::get_renewal_data,"returns renewal data")
+    DEF_RETURN_VALUE_NO_ARGS("get_time", &Renewal::get_time,"returns time")
+    ;
+/*
 Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_event);
 Renewal(const Renewal &renew , bool data_flag = true){ copy(renew , data_flag); }
 void conditional_delete();
 
 Parametric_model* extract(Format_error &error , int dist_type , int itime = I_DEFAULT) const;
-
-void computation(bool inter_event_flag = true , char itype = 'v' ,                     const Distribution *dtime = 0);
+void computation(bool inter_event_flag = true , char itype = 'v' , const Distribution *dtime = 0);
 double likelihood_computation(const Time_events &timev) const;
-Renewal_data* simulation(Format_error &error , char itype ,                             const Histogram &ihtime) const;
-Renewal_data* simulation(Format_error &error , char itype ,                             int nb_element , int itime) const;
-Renewal_data* simulation(Format_error &error , char itype ,                             int nb_element , const Time_events &itimev) const;
+Renewal_data* simulation(Format_error &error , char itype , const Histogram &ihtime) const;
+Renewal_data* simulation(Format_error &error , char itype , int nb_element , int itime) const;
+Renewal_data* simulation(Format_error &error , char itype , int nb_element , const Time_events &itimev) const;
 
-int get_nb_iterator() const { return nb_iterator; }
-Renewal_data* get_renewal_data() const { return renewal_data; }
-char get_type() const { return type; }
-Distribution* get_time() const { return time; }
 Parametric* get_inter_event() const { return inter_event; }
 Length_bias* get_length_bias() const { return length_bias; }
 Backward* get_backward() const { return backward; }
@@ -111,7 +111,7 @@ void class_renewal_data() {
     .def(init <int, Renewal>())
     .def(init <Time_events, int>())
 	// Python Operators
-    .def("get_renewal", &Renewal_data::get_renewal, 
+    .def("get_renewal", &Renewal_data::get_renewal,
         return_value_policy<manage_new_object> (),"get renewal")
     .def("get_type", &Renewal_data::get_type, "get type")
 
@@ -133,7 +133,7 @@ void class_renewal_data() {
                         double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
                         int outside = ZERO) const;
 
-    
+
    int get_length(int index_seq) const { return length[index_seq]; }
    int get_sequence(int index_seq , int index) const
    { return sequence[index_seq][index]; }

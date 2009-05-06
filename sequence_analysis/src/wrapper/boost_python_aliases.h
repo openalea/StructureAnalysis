@@ -27,7 +27,6 @@
 
 
 
-#define ARGS boost::python::args
 
 
 // two internal macros used by other macros
