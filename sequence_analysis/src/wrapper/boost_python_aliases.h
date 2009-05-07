@@ -17,10 +17,18 @@
 // METHOD_NAME: name of the method that will be called on INPUT
 // OUTPUT_TYPE: type returned by METHOD_NAME
 // optional list of arguments to be used by METHOD_NAME
-#define SIMPLE_METHOD_TEMPLATE_1(INPUT, METHOD_NAME, OUTPUT_TYPE, args...)\
+#define SIMPLE_METHOD_TEMPLATE_1(INPUT, METHOD_NAME, OUTPUT_TYPE, ...)\
   Format_error error; \
     OUTPUT_TYPE* ret;\
-    ret = INPUT.METHOD_NAME(error, ## args);\
+    ret = INPUT.METHOD_NAME(error, __VA_ARGS__ );\
+    if (!ret)\
+      sequence_analysis::wrap_util::throw_error(error);\
+    return ret;\
+
+#define SIMPLE_METHOD_TEMPLATE_0(INPUT, METHOD_NAME, OUTPUT_TYPE)\
+  Format_error error; \
+    OUTPUT_TYPE* ret;\
+    ret = INPUT.METHOD_NAME(error);\
     if (!ret)\
       sequence_analysis::wrap_util::throw_error(error);\
     return ret;\

@@ -151,6 +151,7 @@ public:
       {
         real_sequence = new double**[nb_sequences];
         type = REAL_VALUE;
+
       }
     if (is_int)
       {
@@ -629,7 +630,7 @@ public:
   static int
   get_type(const Sequences& seq, int index)
   {
-    if (index < 0 or index >= seq.get_nb_variable())
+    if (index < 0 || index >= seq.get_nb_variable())
       {
         PyErr_SetString(PyExc_IndexError,
             "index must be positive and less than number of variables");
@@ -642,7 +643,7 @@ public:
   static int
   get_length(const Sequences& seq, int index)
   {
-    if (index < 0 or index >= seq.get_nb_sequence())
+    if (index < 0 ||  index >= seq.get_nb_sequence())
       {
         PyErr_SetString(PyExc_IndexError,
             "index must be positive and less than number of sequences");
@@ -655,7 +656,7 @@ public:
   static double
   get_min_value(const Sequences& seq, int variable)
   {
-    if (variable < 0 or variable >= seq.get_nb_variable())
+    if (variable < 0 ||  variable >= seq.get_nb_variable())
       {
         PyErr_SetString(PyExc_IndexError,
             "index must be positive and less than number of variables");
@@ -667,7 +668,7 @@ public:
   static double
   get_max_value(const Sequences& seq, int variable)
   {
-    if (variable < 0 or variable >= seq.get_nb_variable())
+    if (variable < 0 ||  variable >= seq.get_nb_variable())
       {
         PyErr_SetString(PyExc_IndexError,
             "index must be positive and less than number of variables");

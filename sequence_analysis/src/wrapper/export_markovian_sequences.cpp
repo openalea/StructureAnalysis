@@ -144,7 +144,7 @@ public:
   static Markovian_sequences*
   remove_index_parameter(const Markovian_sequences& input)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, remove_index_parameter, Markovian_sequences);
+     SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, Markovian_sequences);
   }
 
 
