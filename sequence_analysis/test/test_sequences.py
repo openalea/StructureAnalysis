@@ -97,8 +97,8 @@ class Test(interface):
     def test_extract(self):
         #todo
         seqn = self.seqn
-        assert seqn.extract_histogram(1)
-        assert seqn.extract_histogram(2)
+        assert seqn.extract_value(1)
+        assert seqn.extract_value(2)
         
     def test_extract_data(self):
         pass 

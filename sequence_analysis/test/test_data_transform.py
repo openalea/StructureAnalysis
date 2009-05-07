@@ -12,7 +12,7 @@ class TestRemoveRun():
         
         seq1 = self.data
         seq2 = seq1.remove_run(1, 0,"e",2)
-        seq3 = RemoveRun(seq1,1, 0,"e",2)
+        seq3 = RemoveRun(seq1,1, 0,"e", MaxLength=2)
         assert str(seq3)==str(seq2)
 
     def test_incorrect_value(self):
