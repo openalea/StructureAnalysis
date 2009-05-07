@@ -147,6 +147,6 @@ static std::string survival_ascii_write(const INPUT_CLASS& p) \
 #define DEF_RETURN_VALUE_NO_ARGS(NAME, REFERENCE, DOCSTRING) \
     .def(NAME, REFERENCE, return_value_policy< manage_new_object >(), DOCSTRING)
 
-#define DEF_INIT_MAKE_CONSTRUCTOR(WRAPPED_FUNCTION, DOCSTRING) \
-	.def("__init__", make_constructor(WRAPPED_FUNCTION), DOCSTRING)
+//#define DEF_INIT_MAKE_CONSTRUCTOR(WRAPPED_FUNCTION, DOCSTRING) \
+//.def("__init__", make_constructor(WRAPPED_FUNCTION), DOCSTRING)
 

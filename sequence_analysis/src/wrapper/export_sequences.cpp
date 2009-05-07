@@ -320,7 +320,7 @@ public:
   }
 
   static Distribution_data*
-  extract_histogram(const Sequences& seq, int variable)
+  extract_value(const Sequences& seq, int variable)
   {
     Format_error error;
     Distribution_data *ret = NULL;
@@ -354,6 +354,7 @@ public:
   {
     std::stringstream s;
     std::string res;
+
 
     d.ascii_data_write(s, exhaustive, true);
     res = s.str();
@@ -609,7 +610,7 @@ public:
   static Sequences*
   reverse(const Sequences& seq)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, reverse, Sequences);
+    SIMPLE_METHOD_TEMPLATE_0(seq, reverse, Sequences);
   }
 
   static Sequences*
@@ -713,7 +714,7 @@ public:
   static Sequences*
   remove_index_parameter(const Sequences& seq)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, remove_index_parameter, Sequences);
+    SIMPLE_METHOD_TEMPLATE_0(seq, remove_index_parameter, Sequences);
   }
 
   static Sequences*
@@ -725,9 +726,12 @@ public:
   }
 
   static Sequences*
-  segmentation_extract(const Sequences& seq, int variable, int nb_value,
+  segmentation_extract(const Sequences& seq, int variable,
       boost::python::list& input_values, bool keep)
   {
+
+    int nb_value;
+    nb_value = len(input_values);
     int *values;
     values = new int[nb_value];
     for (int i = 0; i < nb_value; i++)
@@ -780,13 +784,14 @@ public:
   static Sequences*
   recurrence_time_sequences(const Sequences& seq, int variable, int value)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, recurrence_time_sequences, Sequences, variable, value);
+    SIMPLE_METHOD_TEMPLATE_1(seq, recurrence_time_sequences, Sequences,
+        variable, value);
   }
 
   static Sequences*
   cross(const Sequences& seq)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, cross, Sequences);
+    SIMPLE_METHOD_TEMPLATE_0(seq, cross, Sequences);
   }
 
   static Sequences*
@@ -801,13 +806,38 @@ public:
     SIMPLE_METHOD_TEMPLATE_1(seq, sojourn_time_sequences, Sequences, variable);
   }
 
+
+
   static Vectors*
-  extract_vectors(const Sequences& seq, int feature_type, int variable= I_DEFAULT ,int value = I_DEFAULT)
+  extract_vectors(const Sequences& seq, int feature_type,
+      int variable= I_DEFAULT ,int value = I_DEFAULT)
    {
      SIMPLE_METHOD_TEMPLATE_1(seq, extract_vectors, Vectors, feature_type,
          variable, value);
    }
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extract_vectors_overloads, SequencesWrap::extract_vectors,2,4);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extract_vectors_overloads,
+      SequencesWrap::extract_vectors,2,4);
+
+
+  static Distribution_data*
+  extract_length(const Sequences& input)
+  {
+    Distribution_data *res;
+    res = new Distribution_data(*(input.get_hlength()));
+    return res;
+  }
+
+  static Markovian_sequences*
+  markovian_sequences(const Sequences& input)
+  {
+    Format_error error;
+    Markovian_sequences *res;
+    res = input.markovian_sequences(error);
+
+    if (!res)
+      sequence_analysis::wrap_util::throw_error(error);
+    return res;
+  }
 
 };
 
@@ -831,6 +861,11 @@ void class_sequences() {
     .value("NB_INTERNODE", NB_INTERNODE)
     .value("AUXILIARY",   AUXILIARY)
     .export_values();
+
+
+
+
+
 
 
   class_<Sequences, bases<STAT_interface> > ("_Sequences", "Sequences")
@@ -869,10 +904,10 @@ void class_sequences() {
     DEF_RETURN_VALUE("select_individual", SequencesWrap::select_individual,	args("identifiers", "keep"),"Select individuals given a list of identifiers")
     DEF_RETURN_VALUE("index_parameter_select", SequencesWrap::index_parameter_select,args("min_index_parameter", "max_index_parameter", "keep"),"Select sequences in an index parameter range")
     DEF_RETURN_VALUE("index_parameter_extract", SequencesWrap::index_parameter_extract,args("min_index_parameter", "max_index_parameter"),"Select sequences in an index parameter range")
-    DEF_RETURN_VALUE("extract", SequencesWrap::extract_histogram, args("variable"),"Extract histogram")
+    DEF_RETURN_VALUE("extract_value", SequencesWrap::extract_value, args("variable"),"Extract histogram")
     DEF_RETURN_VALUE("shift", SequencesWrap::shift, args("variable","param"),"Shift")
-    DEF_RETURN_VALUE("remove_run",SequencesWrap::remove_run, args("variable","ivalue", "position", "max_run_length"), "RemoveRun")
-    DEF_RETURN_VALUE("length_select",SequencesWrap::length_select, args("min_length", "max_length", "keep"),"RemoveRun")
+    DEF_RETURN_VALUE("remove_run",SequencesWrap::remove_run, args("variable","ivalue", "position", "max_run_length"), "see RemoveRun")
+    DEF_RETURN_VALUE("length_select",SequencesWrap::length_select, args("min_length", "max_length", "keep"),"see LengthSelect")
     DEF_RETURN_VALUE("scaling", SequencesWrap::scaling, args("variable", "scaling_coeff"),"scaling variable")
     DEF_RETURN_VALUE("round", SequencesWrap::round,	args("variable", "mode"),"round variable")
     DEF_RETURN_VALUE("segmentation_extract",SequencesWrap::segmentation_extract, args("variable", "nb_values", "values", "keep"),"Segmentation extract")
@@ -887,13 +922,23 @@ void class_sequences() {
     DEF_RETURN_VALUE("transcode", SequencesWrap::transcode, args("variable", "symbols"),"Transcode")
     //DEF_RETURN_VALUE("extract_vectors", SequencesWrap::extract_vectors, args("feature_type", "variable, value"),SequencesWrap::extract_vectors_overloads(),"test")
     // does not seem to work properly : extract_vectors(i,j,k) works but extract_vectors(i) is not recognized...
-    .def("extract_vectors", SequencesWrap::extract_vectors,  return_value_policy< manage_new_object >(), SequencesWrap::extract_vectors_overloads())
+    .def("extract_vectors",   (Vectors *(*)(const Sequences&, int,int,int)) SequencesWrap::extract_vectors,  return_value_policy< manage_new_object >(), SequencesWrap::extract_vectors_overloads())
+    .def("extract_vectors",   (Vectors *(*)(const Sequences&,int)) SequencesWrap::extract_vectors,  return_value_policy< manage_new_object >(), SequencesWrap::extract_vectors_overloads())
+
+
+ //   DEF_RETURN_VALUE("extract_nb_occurrence", SequencesWrap::extract_nb_occurrence, args("variable","value"), "extract nb occurrence")
+ //   DEF_RETURN_VALUE("extract_nb_run", SequencesWrap::extract_nb_run, args("variable","value"), "extract nb run")
+    DEF_RETURN_VALUE_NO_ARGS("extract_length", SequencesWrap::extract_length, "extract length of the sequences and returns a vector")
     DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", SequencesWrap::remove_index_parameter,"Remove index parameter")
     DEF_RETURN_VALUE_NO_ARGS("reverse", SequencesWrap::reverse,"reverse")
     DEF_RETURN_VALUE_NO_ARGS("cross", SequencesWrap::cross, "Cross")
     DEF_RETURN_VALUE_NO_ARGS("cumulate", SequencesWrap::cumulate,"Cumulate")
     DEF_RETURN_VALUE_NO_ARGS("merge", SequencesWrap::merge, "Merge sequences")
     DEF_RETURN_VALUE_NO_ARGS("merge_variable", SequencesWrap::merge_variable, "Merge variables")
+    DEF_RETURN_VALUE_NO_ARGS("markovian_sequences", SequencesWrap::markovian_sequences , "returns markovian sequence")
+
+
+    DEF_RETURN_VALUE_NO_ARGS("extract_sequence_length", SequencesWrap::extract_length , "todo")
 
     ;
 
@@ -959,21 +1004,14 @@ void class_sequences() {
 	                                  double indel_factor = INDEL_FACTOR_N , int algorithm = AGGLOMERATIVE ,
 	                                  const char *path = 0) const;
 
-	    Sequences* segmentation(Format_error &error , std::ostream &os , int iidentifier ,
-	                            int nb_segment , int *ichange_point , int *model_type ,
-	                            int output = SEQUENCE) const;
-	    Sequences* segmentation(Format_error &error , std::ostream &os , int *nb_segment ,
-	                            int *model_type , int iidentifier = I_DEFAULT ,
-	                            int output = SEQUENCE) const;
-	    Sequences* segmentation(Format_error &error , std::ostream &os , int iidentifier ,
-	                            int max_nb_segment , int *model_type) const;
+	    Sequences* segmentation(Format_error &error , std::ostream &os, int iidentifier , int nb_segment , int *ichange_point , int *model_type , int output = SEQUENCE) const;
+	    Sequences* segmentation(Format_error &error , std::ostream &os, int *nb_segment , int *model_type , int iidentifier = I_DEFAULT ,  int output = SEQUENCE) const;
+	    Sequences* segmentation(Format_error &error , std::ostream &os, int iidentifier , int max_nb_segment , int *model_type) const;
+            Sequences* segmentation(Format_error &error , int iidentifier , int nb_segment ,  const Vector_distance &ivector_dist , std::ostream &os , int output = SEGMENT) const;
 
-	    Sequences* hierarchical_segmentation(Format_error &error , std::ostream &os , int iidentifier ,
-	                                         int max_nb_segment , int *model_type) const;
+	    Sequences* hierarchical_segmentation(Format_error &error , std::ostream &os , int iidentifier , int max_nb_segment , int *model_type) const;
 
-	    Sequences* segmentation(Format_error &error , int iidentifier , int nb_segment ,
-	                            const Vector_distance &ivector_dist , std::ostream &os ,
-	                            int output = SEGMENT) const;
+
 
 	    bool segment_profile_write(Format_error &error , std::ostream &os , int iidentifier ,
 	                               int nb_segment , int *model_type , int output = SEGMENT ,

@@ -51,6 +51,8 @@ class MarkovianSequencesWrap {
 
 public:
 
+
+
   static Markovian_sequences*
   markovian_sequences1(int nb_sequence, boost::python::list& input_identifiers,
       boost::python::list& input_ilength, int input_index_parameter_type,
@@ -84,7 +86,8 @@ public:
   static Distribution_data*
   extract(const Markovian_sequences& input, int type, int variable, int value)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, Distribution_data, type, variable, value);
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, Distribution_data, type,
+        variable, value);
   }
 
   // Merge
@@ -155,12 +158,29 @@ public:
 
 void class_markovian_sequences() {
 
+  enum_<sequence_analysis::wrap_util::UniqueInt<11, 102> >("MarkovianSequenceType")
+      .value("OBSERVATION",OBSERVATION)
+      .value("FIRST_OCCURRENCE",FIRST_OCCURRENCE)
+      .value("RECURRENCE_TIME",RECURRENCE_TIME)
+      .value("SOJOURN_TIME",SOJOURN_TIME)
+      .value("INITIAL_RUN",INITIAL_RUN)
+      .value("FINAL_RUN",FINAL_RUN)
+      .value("NB_RUN",NB_RUN)
+      .value("NB_OCCURRENCE",NB_OCCURRENCE)
+      .value("LENGTH",LENGTH)
+      .value("SEQUENCE_CUMUL",SEQUENCE_CUMUL)
+      .value("SEQUENCE_MEAN",SEQUENCE_MEAN)
+      .export_values();
+
   class_<Markovian_sequences, bases<Sequences> > ("_Markovian_sequences", "Markovian_sequences")
+
     .def("__init__", make_constructor(MarkovianSequencesWrap::markovian_sequences1))
     .def("__init__", make_constructor(MarkovianSequencesWrap::markovian_sequences2))
     .def("__init__", make_constructor(MarkovianSequencesWrap::markovian_sequences3))
     .def(init <Sequences>())
     .def(init <Markovian_sequences, optional<char, int> >())
+
+    .def(self_ns::str(self)) //__str__
 
     DEF_RETURN_VALUE("extract", MarkovianSequencesWrap::extract,args("type", "variable","value"), "Extract distribution data")
     DEF_RETURN_VALUE("split", &MarkovianSequencesWrap::split,args("step"),  "Split")

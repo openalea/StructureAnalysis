@@ -199,7 +199,7 @@ public:
   static Tops*
   reverse(const Tops& top)
   {
-    SIMPLE_METHOD_TEMPLATE_1(top, reverse, Tops);
+    SIMPLE_METHOD_TEMPLATE_0(top, reverse, Tops);
   }
 
   static Top_parameters*

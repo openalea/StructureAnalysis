@@ -211,7 +211,7 @@ public:
    static Semi_markov_data*
    remove_index_parameter(const Semi_markov_data& input)
    {
-     SIMPLE_METHOD_TEMPLATE_1(input, remove_index_parameter, Semi_markov_data);
+     SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, Semi_markov_data);
    }
 
    static Distribution_data*
