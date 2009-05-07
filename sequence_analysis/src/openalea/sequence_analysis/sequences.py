@@ -110,20 +110,22 @@ def Sequences(*args, **kargs):
     if len(args)==1 and isinstance(args[0], str):
         filename = args[0]
         if os.path.isfile(filename):
-            return _Sequences(filename)
+            sequence =  _Sequences(filename)
         else:
             raise IOError("bad file name")
     # otherwise, we switch to a list constructor that requires a list of sequences
     # and a list of identifiers. The latter being optional
-    elif len(args)==1 and isinstance(args[0], list):
-        return _Sequences(args[0], range(0,len(args[0])), index_parameter_type)
+    elif len(args)==1 and isinstance(args[0], list):        
+        sequence = _Sequences(args[0], range(0,len(args[0])), index_parameter_type)
     # or may be provided by the user.
     elif len(args)==2 and isinstance(args[0], list) and isinstance(args[1], list):
         #if len(args[0])!=len(args[1]):
         #    raise TypeError("Expect the list of sequences and list of identifiers to have the same length")
-        return _Sequences(args[0], args[1], index_parameter_type)
+        sequence = _Sequences(args[0], args[1], index_parameter_type)
     else:
         raise TypeError("Expected a valid filename or a list of lists (e.g., [[1,0],[0,1]])")
+    
+    return sequence.markovian_sequences()
     
     
 
