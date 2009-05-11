@@ -7,17 +7,15 @@ import _sequence_analysis
 
 from _sequence_analysis import _Correlation
 
-__all__ = ['Correlation',
-           '_Correlation']
+__all__ = ['_Correlation','ComputeCorrelation', 'ComputeAutoCorrelation']
 
 
 # Extend dynamically class
 interface.extend_class( _Correlation, interface.StatInterface)
 
-# Add methods to _Vectors
 
 
-def ComputeCorrelation(*args, **kargs):
+def ComputeCorrelation(obj, *args, **kargs):
     """Computation of sample autocorrelation or cross-correlation functions.
    
     :Examples:
@@ -47,3 +45,63 @@ def ComputeCorrelation(*args, **kargs):
     	:class:`ComputePartialAutoCorrelation`
 	    :class:`ComputeWhiteNoiseAutoCorrelation`
 """
+    if obj.nb_variable==1:
+        variable1 = 1
+        variable2 = 1
+    else:
+        variable1 = args[0]
+        if len(args)==1:
+            variable2 = variable1
+        elif len(args)==2:
+            variable2 = args[1]
+        else:
+            raise TypeError("1 or 2  non-optional arguments required")
+    #check validit of the arguments
+    max_lag = kargs.get("MaxLag", -1) #todo set default values
+    user_type = kargs.get("Type", "Pearson")
+    user_normalization = kargs.get("Normalization", "Exact")
+    #todo check it is valid, i.e. in Pearson, SpearMan,Kendall,Spearman2
+    
+    type_dict = {"Pearson": 0,
+                 "Spearman": 1,
+                 "Kendall":2,
+                 "Spearman2":3}
+    
+    norm_type = {"Approximated": 0,
+                 "Exact": 1, }
+    
+    itype = type_dict[user_type]
+    normalization = norm_type[user_normalization]
+    
+    return obj.correlation_computation(variable1, variable2, 
+                                   itype, max_lag, normalization)
+    
+    
+
+def ComputeAutoCorrelation(obj, *args, **kargs):
+    """
+    ComputeAutoCorrelation
+    """
+
+    #if obj.nb_variable==1 and len(args)==1:
+    if len(args) == 1:
+        variable = 1
+        value = args[0]
+    #elif obj.nb_variable!=1 and len(args)==2:
+    elif len(args)==2:
+        variable = args[0]
+        value = args[1]
+    
+    MAXLAG = 100    
+    max_lag = kargs.get("MaxLag", MAXLAG) 
+    
+    
+    if len(args) == 1:
+        if isinstance(obj, _sequence_analysis._Variable_order_markov):
+            return obj.state_autocorrelation_computation(
+                value, max_lag)
+    elif len(args)==2:
+        return obj.output_autocorrelation_computation(
+                variable, value, max_lag)
+
+    

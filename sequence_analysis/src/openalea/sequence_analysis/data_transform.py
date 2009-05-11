@@ -381,6 +381,34 @@ def RecurrenceTimeSequences(obj, *args):
     sequence = obj.recurrence_time_sequences(variable, value)
     return sequence.markovian_sequences()
 
+def WordCount(obj, *args, **kargs):
+    """
+    *args = variable, value,word_length
+    **kargs = begin state, end_state, min_frequency
+    """
+    
+    if len(args)==1:
+        variable = 1
+        word_length = args[0]
+    elif len(args)==2:
+        variable = args[0]
+        word_length = args[1]
+    begin_state = kargs.get("BeginState", -1)
+    end_state = kargs.get("EndState", -1)
+    min_frequency = kargs.get("MinFrequency", 1)
+    
+    return obj.word_count(variable, word_length, begin_state, 
+                          end_state, min_frequency)
+    
+   
+def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
+    """AddAbsorbingRun
+    """
+    #todo possibly : set default Length to -1 and add SequenceLength or RunLength optional arguments
+    return obj.add_absorbing_run(SequenceLength, RunLength)
+
+def Reverse(obj):
+    return obj.reverse().markovian_sequences()
 
 def vec2list(vector):
     """
