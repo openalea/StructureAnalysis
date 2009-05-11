@@ -403,13 +403,90 @@ def WordCount(obj, *args, **kargs):
    
 def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
     """AddAbsorbingRun
+    
+      Addition of a run of absorbing vectors at the end of sequences.
+
+      Usage
+    
+      AddAbsorbingRun(seq, Length->50)
+    
+      Arguments
+    seq (distance_sequences, markov_data, semi-markov_data)
+    
+      Optional Arguments 
+    Length (int): length of the sequences. A default value is computer from the maximum sequence length.
+    
+      Returned Object
+    An object of type discrete_sequences is returned.
+
+    See Also
+    
+    Cluster, 
+    Cumulate, 
+    IndexExtract,
+    LengthSelect,
+    Merge,
+    MergeVariable,
+    MovingAverage,
+    RecurrenceTimeSequences,
+    Reverse,
+    SegmentationExtract,
+    SelectIndividual,
+    SlectVariable,
+    Shift,
+    Transcode,
+    ValueSelect,
+    VariableScaling.
     """
     #todo possibly : set default Length to -1 and add SequenceLength or RunLength optional arguments
     return obj.add_absorbing_run(SequenceLength, RunLength)
 
 def Reverse(obj):
+    """
+    Reverse
+    Reversing of sequences or 'tops'.
+    
+    :Usage:
+    
+    Reverse(seq)
+    Reverse(discrete_seq)
+    
+    Reverse(top)    
+      
+    :Arguments:
+    
+    seq (sequences),
+    discrete_seq (discrete_sequences, markov_data, semi-markov_data),
+    
+    top (tops).
+    
+  Returned Object
+    If the argument is of type sequences, an object of type sequences is returned. If the argument is of type discrete_sequences, markov_data, semi-markov_data, an object of type discrete_sequences is returned. If the argument is of type tops, an object of type tops is returned.
+    
+  See Also
+    
+    AddAbsorbingRun,
+    Cluster, 
+    Cumulate, 
+    Difference, 
+    Indexextract, 
+    LengthSelect, 
+    Merge, 
+    MergeVariable, 
+    MovingAverage, 
+    RecurrenceTimeSequences, 
+    RemoveRun, 
+    RemoveApicalInternodes, 
+    SegmentationExtract, 
+    SelectIndividual, 
+    SelectVariable, 
+    Shift, 
+    Transcode, 
+    ValueSelect,
+    VariableScaling.
     return obj.reverse().markovian_sequences()
-
+    """
+    
 def vec2list(vector):
     """
     transform a vector from stat_tool vector into a python list
