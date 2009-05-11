@@ -145,9 +145,13 @@ def Cluster(obj, type, *args, **kargs):
     # optional arg : variable 
     try:
         if obj.nb_variable == 1:           
-            if len(args)!=1:
-                raise TypeError("Cluster expect only 1 argument after ('%s') because there is only 1 variable "%(type))
-            return func(1, args[0]) # 1 for the first and unique variable
+            if len(args)==1:
+                return func(1, args[0]) # 1 for the first and unique variable
+            elif len(args)==2:
+                return func(1, args[0], args[1]) # 1 for the first and unique variable
+            else:
+                raise TypeError("Cluster expect only 1 or 2 arguments after ('%s') because there is only 1 variable "%(type))
+            
         else:
             if len(args)!=2:
                 raise TypeError("Cluster expect two arguments following the option (n-variable case) '%s': the variable id and the %s argument "%(type,type))
@@ -241,6 +245,9 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
         if(nb_variable == 1 and not param2): 
             param2 = param1
             param1 = 1
+        else:
+            pass
+            #todo raise an error
     except AttributeError:
         pass
 
@@ -248,6 +255,7 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
     params = [param1]
     if(param2):
         params.append(param2)
+    #todo: check that this make sense: if AddVariable is False, nothing is passed. It assumes that by defualt in the export boost function, the addVariable is false by default. Is it true ? 
     if(AddVariable):
         params.append(AddVariable)
 
