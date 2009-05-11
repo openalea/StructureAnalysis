@@ -768,7 +768,7 @@ public:
     SIMPLE_METHOD_TEMPLATE_1(seq, moving_average, Sequences,
         nb_value, values, variable, begin_end, output);
 
-   // delete[] values;
+   delete[] values;
 
     return ret;
   }
@@ -839,6 +839,18 @@ public:
     return res;
   }
 
+  static Correlation*
+  correlation_computation(const Sequences& input,int variable1, int variable2,
+		  int itype, int max_lag, int normalization)
+  {
+	// default values
+	// int itype = PEARSON , int max_lag = I_DEFAULT ,
+	// int normalization = EXACT)
+    SIMPLE_METHOD_TEMPLATE_1(input, correlation_computation,
+    		Correlation, variable1, variable2, itype, max_lag, normalization)
+  }
+
+
 };
 
 // Boost declaration
@@ -863,7 +875,20 @@ void class_sequences() {
     .export_values();
 
 
+  enum_<sequence_analysis::wrap_util::UniqueInt<4,102> >("Algorithm")
+    .value("CTM_BIC", CTM_BIC)
+    .value("CTM_KT" , CTM_KT)
+    .value("LOCAL_BIC" , LOCAL_BIC)
+    .value("CONTEXT", CONTEXT)
+    .export_values();
 
+  enum_<sequence_analysis::wrap_util::UniqueInt<4,103> >("Estimator")
+    .value("MAXIMUM_LIKELIHOOD", MAXIMUM_LIKELIHOOD)
+    .value("LAPLACE", LAPLACE)
+    .value("ADAPTATIVE_LAPLACE", ADAPTATIVE_LAPLACE)
+    .value("UNIFORM_SUBSET", UNIFORM_SUBSET)
+    .value("UNIFORM_CARDINALITY", UNIFORM_CARDINALITY)
+    .export_values();
 
 
 
@@ -898,7 +923,7 @@ void class_sequences() {
     .def("file_ascii_data_write", SequencesWrap::file_ascii_data_write,"Save vector data into a file")
 
 
-
+    DEF_RETURN_VALUE("correlation_computation", SequencesWrap::correlation_computation, args("variable1", "variable2", "type","max_lag", "normalization"),"compute correlation")
     DEF_RETURN_VALUE("value_select", SequencesWrap::value_select,args("variable", "min", "max", "keep"),"Selection of individuals according to the values taken by a variable")
     DEF_RETURN_VALUE("select_variable", SequencesWrap::select_variable, args("variables", "keep"), "select variable given a list of index")
     DEF_RETURN_VALUE("select_individual", SequencesWrap::select_individual,	args("identifiers", "keep"),"Select individuals given a list of identifiers")
@@ -955,7 +980,7 @@ void class_sequences() {
 	    Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
 
 	    Vectors* build_vectors(bool index_variable) const;
-	    Markovian_sequences* markovian_sequences(Format_error &error) const;
+
 	    Tops* tops(Format_error &error) const;
 	    bool check(Format_error &error , const char *pattern_label);
 	    Time_events* extract_time_events(Format_error &error , int variable , int begin_date , int end_date ,  int previous_date = I_DEFAULT , int next_date = I_DEFAULT) const;

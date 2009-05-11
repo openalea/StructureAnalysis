@@ -50,7 +50,8 @@ class WRAP {
 public:
 
   static boost::shared_ptr<Hidden_semi_markov>
-   hidden_semi_markov_from_file(char* filename, int length, bool counting_flag,
+   hidden_semi_markov_from_file(char* filename,
+	int length, bool counting_flag,
        double cumul_threshold, bool old_format)
    {
      //olf_format should be true

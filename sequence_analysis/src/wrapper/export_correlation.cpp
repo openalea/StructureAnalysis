@@ -37,6 +37,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
+
 using namespace boost::python;
 using namespace boost;
 using namespace sequence_analysis;
@@ -44,6 +46,21 @@ using namespace sequence_analysis;
 class CorrelationWrap {
 
 public:
+
+  // Merge
+  static Correlation*
+  merge(const Correlation& input_cor, const boost::python::list& correlations)
+  {
+    int nb_cor = len(correlations);
+    sequence_analysis::wrap_util::auto_ptr_array<const Correlation *> sequens(
+        new const Correlation*[nb_cor]);
+    for (int i = 0; i < nb_cor; i++)
+      sequens[i] = extract<Correlation*> (correlations[i]);
+
+    SIMPLE_METHOD_TEMPLATE_1(input_cor, merge, Correlation,
+        nb_cor, sequens.get());
+  }
+
 
 
 /*
@@ -90,7 +107,7 @@ void class_correlation() {
     .def("get_variable1", &Correlation::get_variable1,args("index"))
     .def("get_variable2", &Correlation::get_variable2,args("index"))
     .def("get_white_noise", &Correlation::get_white_noise,args("lag"))
-
+    DEF_RETURN_VALUE("merge", &CorrelationWrap::merge, args("list"),"todo")
     ;
 
 //todo

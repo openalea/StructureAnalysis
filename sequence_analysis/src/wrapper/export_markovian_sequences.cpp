@@ -23,13 +23,14 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
-#include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/stat_label.h"
+#include "stat_tool/vectors.h"
 #include "stat_tool/regression.h"
+#include "stat_tool/stat_label.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
+#include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
 #include <boost/python.hpp>
@@ -45,7 +46,7 @@ using namespace boost;
 
 using namespace sequence_analysis;
 
-
+#define WRAP MarkovianSequencesWrap
 
 class MarkovianSequencesWrap {
 
@@ -104,12 +105,62 @@ public:
   }
 
   static Markovian_sequences*
-  cluster(const Markovian_sequences& input, int variable, int step, int mode =
-      FLOOR)
+  cluster_step(const Markovian_sequences& input, int variable, int step,
+		  int mode = FLOOR)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, cluster, Markovian_sequences, variable, step, mode);
+    SIMPLE_METHOD_TEMPLATE_1(input, cluster, Markovian_sequences,
+    		variable, step, mode);
   }
+  static Markovian_sequences*
+  cluster_limit(const Markovian_sequences& seq,
+		  int variable, boost::python::list& limit, bool add_flag = false)
+  {
 
+     Format_error error;
+
+     int nb_limit = len(limit);
+     bool is_float = true;
+     int *lint = NULL;
+     double *ldouble = NULL;
+     Markovian_sequences* ret;
+     // Test type
+     boost::python::extract<int> get_int(limit[0]);
+     if (get_int.check())
+       {
+         is_float = false;
+         lint = new int[nb_limit];
+       }
+     else
+       {
+         ldouble = new double[nb_limit];
+       }
+
+     // Convert list
+     for (int i = 0; i < nb_limit; i++)
+       {
+         if (is_float)
+           ldouble[i] = boost::python::extract<int> (limit[i]);
+         else
+           lint[i] = boost::python::extract<double> (limit[i]);
+       }
+
+     // Call correct function
+     if (is_float)
+       {
+         ret = seq.cluster(error, variable, nb_limit, ldouble);
+         delete[] ldouble;
+       }
+     else
+       {
+         ret = seq.cluster(error, variable, nb_limit, lint, add_flag);
+         delete[] lint;
+       }
+
+     if (!ret)
+       sequence_analysis::wrap_util::throw_error(error);
+
+     return ret;
+   }
   static Markovian_sequences*
   transcode(const Markovian_sequences& input, int variable,
       boost::python::list& input_list, bool add_flag = false)
@@ -122,7 +173,8 @@ public:
     //for (int i = 0; i < size; i++)
     //  l[i] = boost::python::extract<int>(input_list[i]);
 
-    SIMPLE_METHOD_TEMPLATE_1(input, transcode, Markovian_sequences, variable, data.get(), add_flag);
+    SIMPLE_METHOD_TEMPLATE_1(input, transcode, Markovian_sequences,
+    		variable, data.get(), add_flag);
   }
 
 
@@ -150,7 +202,120 @@ public:
      SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, Markovian_sequences);
   }
 
+  static Markovian_sequences*
+  add_absorbing_run(const Markovian_sequences& input ,int sequence_length
+		, int run_length)
+  {
+	  //sequence_length = I_DEFAULT , int run_length = I_DEFAULT)
+     SIMPLE_METHOD_TEMPLATE_1(input, add_absorbing_run,
+    		 Markovian_sequences, sequence_length, run_length);
+  }
 
+
+  static std::string
+  word_count(const Markovian_sequences& input, int variable, int word_length,
+		  int begin_state, int end_state, int min_frequency)
+  {
+	  //default values for begin_state=I_DEFAULT
+	  //default values for end_state=I_DEFAULT
+	  //default values for min_frequency=1
+	Format_error error;
+	std::stringstream s;
+
+
+	bool res = true;
+	res = input.word_count(error, s ,variable, word_length,
+			begin_state, end_state,  min_frequency);
+	if (!res)
+		sequence_analysis::wrap_util::throw_error(error);
+
+	return s.str();
+  }
+
+
+  static Variable_order_markov*
+  variable_order_markov_estimation1(const Markovian_sequences& input,
+		  char model_type, int min_order, int max_order, int algorithm,
+		  double threshold, int estimator, bool global_initial_transition,
+		  bool global_sample, bool counting_flag)
+  {
+	  Format_error error;
+	  Variable_order_markov *vom;
+	  std::stringstream os;
+
+	  vom = input.variable_order_markov_estimation(error, os, model_type, min_order,
+			  max_order, algorithm, threshold, estimator, global_initial_transition,
+			  global_sample, counting_flag);
+
+	  if (!vom)
+	  		sequence_analysis::wrap_util::throw_error(error);
+	  return vom;
+  }
+
+  static Variable_order_markov*
+  variable_order_markov_estimation2(const Markovian_sequences& input,
+		  char type, int max_order, bool global_initial_transition,
+		  bool counting_flag)
+  {
+	  Format_error error;
+	  Variable_order_markov *vom;
+	  std::stringstream os;
+
+	  vom = input.variable_order_markov_estimation(error, type,
+			  max_order, global_initial_transition, counting_flag);
+
+	  if (!vom)
+	  		sequence_analysis::wrap_util::throw_error(error);
+	  return vom;
+  }
+
+  static Variable_order_markov*
+  variable_order_markov_estimation3(const Markovian_sequences& input,
+		  const Variable_order_markov &markov,
+		  bool global_initial_transition,
+		  bool counting_flag)
+  {
+	  Format_error error;
+	  Variable_order_markov *vom;
+	  std::stringstream os;
+
+	  vom = input.variable_order_markov_estimation(error, markov,
+			  global_initial_transition, counting_flag);
+
+	  if (!vom)
+	  		sequence_analysis::wrap_util::throw_error(error);
+	  return vom;
+  }
+
+  static Variable_order_markov*
+  lumpability_estimation(const Markovian_sequences& input,
+		  boost::python::list& input_symbol,
+		  int penalty_type,
+		  int order,
+		  bool counting_flag)
+  {
+    Format_error error;
+    Variable_order_markov *vom;
+    std::stringstream os;
+
+    int nb_value = len(input_symbol);
+    int *symbol;
+    symbol = new int[nb_value];
+
+    for (int i = 0; i < nb_value; i++)
+    {
+      symbol[i] = boost::python::extract<int> (input_symbol[i]);
+    }
+
+    vom = input.lumpability_estimation(error, os, symbol,
+		  penalty_type, order, counting_flag);
+
+    if (!vom)
+  		sequence_analysis::wrap_util::throw_error(error);
+
+    delete[] symbol;
+    return vom;
+  }
 
 };
 
@@ -185,12 +350,23 @@ void class_markovian_sequences() {
     DEF_RETURN_VALUE("extract", MarkovianSequencesWrap::extract,args("type", "variable","value"), "Extract distribution data")
     DEF_RETURN_VALUE("split", &MarkovianSequencesWrap::split,args("step"),  "Split")
     DEF_RETURN_VALUE("merge", &MarkovianSequencesWrap::merge,args("sequences"),  "Merge")
-    DEF_RETURN_VALUE("cluster", &MarkovianSequencesWrap::cluster,args("variable", "step", "mode"), "Cluster")
+    DEF_RETURN_VALUE("cluster_step", &MarkovianSequencesWrap::cluster_step,args("variable", "step", "mode"), "Cluster")
+    DEF_RETURN_VALUE("cluster_limit", &MarkovianSequencesWrap::cluster_limit,args("variable", "limit", "bool_add_flag"), "Cluster")
     DEF_RETURN_VALUE("transcode", &MarkovianSequencesWrap::transcode,args("variable", "symbol", "add_flag"), "Transcode")
     DEF_RETURN_VALUE("select_variable", &MarkovianSequencesWrap::select_variable,args("nb_variable", "list variables", "keep"), "select variable")
-
+    DEF_RETURN_VALUE("add_absorbing_run", &MarkovianSequencesWrap::add_absorbing_run,args("sequence_length", "run_length"), "todo")
+    .def("word_count", &MarkovianSequencesWrap::word_count, args("variable", "word_length","begin_state", "end_state","min_frequency"), "todo" )
     DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", &MarkovianSequencesWrap::remove_index_parameter, "Remove index parameter")
-;
+
+
+
+
+    DEF_RETURN_VALUE("variable_order_markov_estimation1", &MarkovianSequencesWrap::variable_order_markov_estimation1, args("model_type", "min_order", "max_order", "algorithm", "threshold", "estimator","global_initial_transition","global_sample", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("variable_order_markov_estimation2", &WRAP::variable_order_markov_estimation2, args("type","max_order","global_initial_transition","counting_flag"), "todo")
+    DEF_RETURN_VALUE("variable_order_markov_estimation3",&WRAP::variable_order_markov_estimation3,args("markov","global_initial_transition","counting_flag"), "todo")
+    DEF_RETURN_VALUE("lumpability_estimation", &WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")//
+
+    ;
 	/*
 
 
@@ -198,12 +374,12 @@ void class_markovian_sequences() {
    Markovian_sequences* cluster(Format_error &error , int ivariable , int nb_class , int *ilimit , bool add_flag = false) const;
    Markovian_sequences* cluster(Format_error &error , int variable , int nb_class , double *ilimit) const;
 
-   Markovian_sequences* select_variable(Format_error &error , int inb_variable , int *ivariable , bool keep = true) const;
+
    Markovian_sequences* merge_variable(Format_error &error , int nb_sample , const Markovian_sequences **iseq , int ref_sample = I_DEFAULT) const;
    Markovian_sequences* remove_variable_1() const;
 
    Markovian_sequences* initial_run_computation(Format_error &error) const;
-   Markovian_sequences* add_absorbing_run(Format_error &error ,int sequence_length = I_DEFAULT , int run_length = I_DEFAULT) const;
+
 
    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,   bool exhaustive = false) const;
    bool ascii_data_write(Format_error &error , const char *path , char format = 'c' , bool exhaustive = false) const;
@@ -213,9 +389,7 @@ void class_markovian_sequences() {
    bool plot_write(Format_error &error , const char *prefix ,   const char *title = 0) const;
 
    bool transition_count(Format_error &error , std::ostream &os , int max_order , bool begin = false , int estimator = MAXIMUM_LIKELIHOOD ,  const char *path = 0) const;
-   bool word_count(Format_error &error , std::ostream &os , int variable , int word_length , int begin_state = I_DEFAULT , int end_state = I_DEFAULT ,  int min_frequency = 1) const;
    bool mtg_write(Format_error &error , const char *path , int *itype) const;
-
 
    double iid_information_computation() const;
 
@@ -229,27 +403,11 @@ void class_markovian_sequences() {
 
    Nonhomogeneous_markov* nonhomogeneous_markov_estimation(Format_error &error , int *ident ,  bool counting_flag = true) const;
 
-   Variable_order_markov* variable_order_markov_estimation(Format_error &error , std::ostream &os ,
-                                                           char model_type , int min_order = 0 ,
-                                                           int max_order = ORDER ,
-                                                           int algorithm = LOCAL_BIC ,
-                                                           double threshold = LOCAL_BIC_THRESHOLD ,
-                                                           int estimator = LAPLACE ,
-                                                           bool global_initial_transition = true ,
-                                                           bool global_sample = true ,
-                                                           bool counting_flag = true) const;
-   Variable_order_markov* variable_order_markov_estimation(Format_error &error ,
-                                                           const Variable_order_markov &imarkov ,
-                                                           bool global_initial_transition = true ,
-                                                           bool counting_flag = true) const;
-   Variable_order_markov* variable_order_markov_estimation(Format_error &error ,
-                                                           char model_type , int order = 1 ,
-                                                           bool global_initial_transition = true ,
-                                                           bool counting_flag = true) const;
 
-   Variable_order_markov* lumpability_estimation(Format_error &error , std::ostream &os , int *symbol ,
-                                                 int penalty_type = BIC , int order = 1 ,
-                                                 bool counting_flag = true) const;
+
+
+
+
 
    Semi_markov* semi_markov_estimation(Format_error &error , std::ostream &os , char model_type ,
                                        int estimator = COMPLETE_LIKELIHOOD , bool counting_flag = true ,
@@ -323,7 +481,7 @@ void class_markovian_sequences() {
 
 }
 
-
+#undef WRAP
 
 
 void class_self_transition() {

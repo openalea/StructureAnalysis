@@ -73,6 +73,29 @@ public:
   }
 
 
+  static Correlation*
+  output_autocorrelation_computation(const Variable_order_markov& input,
+		  int variable, int output, int max_lag)
+  {
+	 SIMPLE_METHOD_TEMPLATE_1(input, output_autocorrelation_computation,
+			 Correlation, variable, output, max_lag);
+  }
+
+  static Correlation*
+  state_autocorrelation_computation(const Variable_order_markov& input,
+		  int state, int max_lag)
+  {
+	 SIMPLE_METHOD_TEMPLATE_1(input, output_autocorrelation_computation,
+			 Correlation, state, max_lag);
+  }
+
+
+  static double
+  likelihood_computation(const Variable_order_markov& input, const Markovian_sequences& ms, int index)
+  {
+	return input.likelihood_computation(ms, index);
+  }
+
 };
 
 // Boost declaration
@@ -95,6 +118,8 @@ void class_variable_order_markov() {
     .def(self_ns::str(self)) //__str__
 
     .def("file_ascii_write", WRAP::file_ascii_write,"Save vector summary into a file")
+//    .def("ascii_data_write", WRAP::ascii_data_write,"Return a string with the object representation")
+//    .def("file_ascii_data_write", WRAP::file_ascii_data_write,"Save vector data into a file")
 
     .add_property("nb_iterator", &Variable_order_markov::get_nb_iterator, "todo")
     .add_property("max_order", &Variable_order_markov::get_max_order, "todo")
@@ -109,36 +134,35 @@ void class_variable_order_markov() {
     .def("get_nb_memory", &Variable_order_markov::get_nb_memory, args("memory"),"todo")
     .def("get_previous", &Variable_order_markov::get_previous,args("memory", "state"), "todo")
 
-
     DEF_RETURN_VALUE("extract", &WRAP::extract, args("type","variable","value"), "returns parametric model")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", &WRAP::extract_data, "returns variable_order_markov_data")
+    DEF_RETURN_VALUE("output_autocorrelation_computation", &WRAP::output_autocorrelation_computation, args("variable", "output", "max_lag"), "todo")
+    DEF_RETURN_VALUE("state_autocorrelation_computation", &WRAP::state_autocorrelation_computation, args("state", "max_lag"), "todo")
 
-;
+    .def("likelihood_computation", &WRAP::likelihood_computation, args("seq", "index"),"todo")
+    ;
 
 
 /*
   Variable_order_markov();
-    Variable_order_markov(const Variable_order_markov &markov , int inb_output_process , int nb_value);
-    Variable_order_markov(const Variable_order_markov *pmarkov ,  const Nonparametric_process *pobservation , int length);
-    Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)  :Chain(markov) { copy(markov , data_flag); }
+  Variable_order_markov(const Variable_order_markov &markov , int inb_output_process , int nb_value);
+  Variable_order_markov(const Variable_order_markov *pmarkov ,  const Nonparametric_process *pobservation , int length);
+  Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)  :Chain(markov) { copy(markov , data_flag); }
 
-    Parametric_model* extract(Format_error &error , int type , int variable , int value) const;
-    Variable_order_markov_data* extract_data(Format_error &error) const;
-    Variable_order_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
+  Parametric_model* extract(Format_error &error , int type , int variable , int value) const;
+  Variable_order_markov_data* extract_data(Format_error &error) const;
+  Variable_order_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
   void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
   void characteristic_computation(const Variable_order_markov_data &seq , bool counting_flag ,
-    int variable = I_DEFAULT , bool length_flag = true);
+  int variable = I_DEFAULT , bool length_flag = true);
 
-    Correlation* state_autocorrelation_computation(Format_error &error , int istate ,  int max_lag = MAX_LAG) const;
-    Correlation* output_autocorrelation_computation(Format_error &error , int variable ,  int output , int max_lag = MAX_LAG) const;
+  double likelihood_computation(const Markovian_sequences &seq , int index) const;
+  double likelihood_computation(const Variable_order_markov_data &seq) const;
 
-    double likelihood_computation(const Markovian_sequences &seq , int index) const;
-    double likelihood_computation(const Variable_order_markov_data &seq) const;
-
-   Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength , bool counting_flag = true , bool divergence_flag = false) const;
-   Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
-   Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
+  Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength , bool counting_flag = true , bool divergence_flag = false) const;
+  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
+  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
 
   Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **imarkov , Histogram **hlength ,  const char *path = 0) const;
   Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **markov , int nb_sequence ,  int length , const char *path = 0) const;
