@@ -46,6 +46,8 @@
 #ifndef SB_CHOICE_TABLE_HEADER
 #define SB_CHOICE_TABLE_HEADER
 
+#include "treematch_config.h"
+
 #include <iostream>
 #include <list>
 #include <vector>
@@ -55,7 +57,7 @@ typedef std::vector<ChoiceList> ChoiceListVector;
 typedef std::vector<ChoiceListVector> ChoiceListArray;
 
 
-class ChoiceTable
+class TREEMATCH_API  ChoiceTable
 {
   public :
 

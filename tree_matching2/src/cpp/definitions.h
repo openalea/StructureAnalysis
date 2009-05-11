@@ -39,6 +39,7 @@
 #ifndef SB_DEFINITIONS_HEADER
 #define SB_DEFINITIONS_HEADER
 
+#include "treematch_config.h"
 #include <iostream>
 #include <assert.h>
 #include <math.h>
@@ -75,17 +76,17 @@ typedef enum { TM_RELATION=414,TM_SEQUENCE,TM_TREENODE,TM_TREEGRAPH,TM_TREEMATCH
 /**\par Tarjan's functions */
 
 /** Return the smallest integer not less than val. */
-int SINLT(float );
+TREEMATCH_API int SINLT(float );
 
 /** Return the largest integer not greater than val */
-int LINGT(float);
+TREEMATCH_API int LINGT(float);
 
 /** Absolute value */
-DistanceType ABS(DistanceType );
+TREEMATCH_API DistanceType ABS(DistanceType );
 
-Symbolic readSymbol(const char* );
+TREEMATCH_API Symbolic readSymbol(const char* );
 
-Numeric readNumber(const char* );
+TREEMATCH_API Numeric readNumber(const char* );
 
 #endif
 

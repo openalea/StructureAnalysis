@@ -57,7 +57,7 @@ typedef std::vector<DistanceType> ValueVector;
  */
 
 
-class TreeNode
+class TREEMATCH_API TreeNode
 {
 
   public :

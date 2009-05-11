@@ -50,7 +50,7 @@
  *\date 1999
  */
 
-class Heap  :public VectorOfItem
+class TREEMATCH_API Heap  : public VectorOfItem
 {
 
 public :

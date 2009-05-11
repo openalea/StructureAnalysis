@@ -56,7 +56,7 @@ typedef std::vector<int> IntVector;
 typedef std::vector<int> VertexVector;
 typedef std::vector<int> EdgeList;
 
-class MatchPath
+class TREEMATCH_API MatchPath
 {
   public :
     //Constructor

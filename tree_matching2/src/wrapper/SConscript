@@ -13,8 +13,8 @@ lib_env=env.Clone()
 #lib_env.AppendUnique( CPPPATH = ['$QT4_CPPPATH/Qt'] )
 
 # Install headers
-includes = lib_env.ALEAGlob("*.h")
-lib_env.ALEAIncludes("tree_matching2", includes)
+#includes = lib_env.ALEAGlob("*.h")
+#lib_env.ALEAIncludes("tree_matching2", includes)
 
 sources= lib_env.ALEAGlob( '*.cpp' )
 

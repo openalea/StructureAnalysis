@@ -55,7 +55,7 @@
 typedef std::vector<double> DistanceVector;
 typedef std::vector<DistanceVector> DistanceTable;
 
-class MatchingDistanceTable
+class TREEMATCH_API MatchingDistanceTable
 {
 //   friend class Matching;
 //   friend class MatchPath;

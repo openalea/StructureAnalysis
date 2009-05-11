@@ -50,7 +50,7 @@
  *\date 2009
  */
 
-class Item
+class TREEMATCH_API Item
 {
   public :
     Item(){};

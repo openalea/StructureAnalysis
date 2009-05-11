@@ -64,7 +64,7 @@
  *\date 2009
  */
 
-class Matching
+class TREEMATCH_API Matching
 {
 
 public :

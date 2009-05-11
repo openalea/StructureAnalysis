@@ -67,7 +67,7 @@ using namespace std;
  *\date 2009
  */
 
-class TreeGraph
+class TREEMATCH_API TreeGraph
 {
 
   public :

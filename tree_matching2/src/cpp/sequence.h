@@ -48,7 +48,7 @@
  *\date 2009
  */
 
-class Sequence 
+class TREEMATCH_API Sequence 
 {
   public :
     Sequence();

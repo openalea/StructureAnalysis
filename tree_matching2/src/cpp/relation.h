@@ -41,7 +41,7 @@
 #define SB_RELATION_HEADER
 
 #include <iostream>
-#include"definitions.h"
+#include "definitions.h"
 
 /**
  *\class Relation
@@ -50,7 +50,7 @@
  *\date 1999
  */
 
-class Relation 
+class TREEMATCH_API Relation 
 {
   friend class Sequence;
   public :

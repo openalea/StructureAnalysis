@@ -61,7 +61,7 @@ enum Norm {L1, L2};
  *\date 2009
  */
 
-class NodeCost
+class TREEMATCH_API NodeCost
 {
 public :
 
