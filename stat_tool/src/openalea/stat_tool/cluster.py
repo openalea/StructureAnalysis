@@ -256,10 +256,17 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
     if(param2):
         params.append(param2)
     #todo: check that this make sense: if AddVariable is False, nothing is passed. It assumes that by defualt in the export boost function, the addVariable is false by default. Is it true ? 
-    if(AddVariable):
+#    try:
+#        return obj.transcode(*params)
+#    except:
+#        return obj.transcode(*params)
+    try:
+        return obj.transcode(*params)
+    except:
         params.append(AddVariable)
-
-    return obj.transcode(*params)
+        return obj.transcode(*params)
+    
+    
 
 
 def Clustering(matrix, type, *args, **kargs):

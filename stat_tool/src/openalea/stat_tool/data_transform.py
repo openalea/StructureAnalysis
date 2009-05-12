@@ -315,6 +315,7 @@ def Extract(obj, *args):
         "Convolution" : "extract_convolution",
         "Sum" : "extract_sum",
         "Compound" : "extract_compound",
+        "Recurrence": "extract",
         }
 
     # Test without "string" command (ex for _Vecotors)
@@ -352,6 +353,14 @@ def Extract(obj, *args):
         raise
 
     # Call function
+    seq_map = {"Recurrence":2}
+    if key in seq_map.keys():        
+        if obj.nb_variable == 1:
+            return f(seq_map[args[0]], 1, *args[1:])
+        else:
+            return f(seq_map[args[0]], 1, *args[1:])
+    
+        
     return f(*args[1:])
 
 

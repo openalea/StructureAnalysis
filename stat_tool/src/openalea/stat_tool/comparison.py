@@ -110,17 +110,6 @@ def compare_vectors(vec, vector_distance):
     return vec.compare(vector_distance)
 
 
-def compare_seq(seq, *args, **kargs):
-    """not implemented"""
-    raise NotImplementedError()
-
-
-def compare_markov(mc, *args, **kargs):
-    """not implemented"""
-    raise NotImplementedError()
-
-
-
 def Compare(arg1, *args, **kargs):
     """Comparison functions factory
 
