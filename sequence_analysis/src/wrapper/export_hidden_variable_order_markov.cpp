@@ -39,18 +39,73 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
 using namespace boost::python;
 using namespace boost;
 //using namespace stat_tool;
+
+#define WRAP HiddenVariableOrderMarkovWrap
+class HiddenVariableOrderMarkovWrap {
+
+public:
+
+  static boost::shared_ptr<Hidden_variable_order_markov>
+  hidden_variable_order_markov_from_file(char* filename, int length,
+		  double cumul_threshold)
+  {
+    Format_error error;
+
+	Hidden_variable_order_markov *hvom = NULL;
+
+	hvom = hidden_variable_order_markov_ascii_read(error, filename,
+			length,  cumul_threshold);
+
+	return boost::shared_ptr<Hidden_variable_order_markov>(hvom);
+  }
+
+  static Hidden_variable_order_markov*
+  thresholding(const Hidden_variable_order_markov& input, double min_probability = MIN_PROBABILITY)
+  {
+	  //todo check this function
+	Hidden_variable_order_markov *ret = NULL;
+    ret =  input.thresholding(min_probability);
+    return ret;
+  }
+
+  static Variable_order_markov_data*
+  simulation(const Hidden_variable_order_markov &input, int nb_sequence,
+		  const Markovian_sequences input_seq)
+  {
+	Format_error error;
+	Variable_order_markov_data* ret = NULL;
+	bool counting=true;
+
+	ret = input.simulation(error, nb_sequence,
+			input_seq, counting);
+
+    if (!ret)
+        sequence_analysis::wrap_util::throw_error(error);
+
+	return ret;
+  }
+
+};
+
 
 
 void class_hidden_variable_order_markov() {
 
         class_<Hidden_variable_order_markov, bases<Variable_order_markov > >
         ("_Hidden_variable_order_markov", "Hidden_variable_order_markov")
-        //,def(init <const Hidden_variable_order_markov &, optional<bool> >())
-;
+        .def("__init__", make_constructor(WRAP::hidden_variable_order_markov_from_file))
 
+
+        .def(self_ns::str(self)) //__str__
+
+		DEF_RETURN_VALUE("thresholding", &WRAP::thresholding, args("probability"), "todo")
+		DEF_RETURN_VALUE("simulate", &WRAP::simulation, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+
+        ;
       /*
         Hidden_variable_order_markov() {}
           Hidden_variable_order_markov(const Variable_order_markov *pmarkov , int inb_output_process ,
@@ -60,16 +115,14 @@ void class_hidden_variable_order_markov() {
 
           Hidden_variable_order_markov(const Hidden_variable_order_markov &hmarkov , bool data_flag = true)
 
-
-          Hidden_variable_order_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
-
           std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
           bool ascii_write(Format_error &error , const char *path ,
                            bool exhaustive = false) const;
           bool spreadsheet_write(Format_error &error , const char *path) const;
 
-          double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = 0 ,
-                                        int index = I_DEFAULT) const;
+ double likelihood_computation(const Markovian_sequences &seq ,
+  double *posterior_probability = 0 ,
+     int index = I_DEFAULT) const;
 
           bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,
                                    int identifier = I_DEFAULT , char format = 'a' ,
@@ -111,11 +164,10 @@ void class_hidden_variable_order_markov() {
           Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                                   const Hidden_variable_order_markov **hmarkov , int nb_sequence ,
                                                   int length , const char *path = 0) const;
-          Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                                  const Hidden_variable_order_markov **hmarkov , int nb_sequence ,
-                                                  const Markovian_sequences **seq , const char *path = 0) const;
+          Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model, const Hidden_variable_order_markov **hmarkov , int nb_sequence ,  const Markovian_sequences **seq , const char *path = 0) const;
 
 */
 }
 
 
+#undef WRAP

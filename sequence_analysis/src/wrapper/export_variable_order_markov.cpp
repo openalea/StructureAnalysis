@@ -27,6 +27,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+#include "stat_tool/distance_matrix.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/sequence_label.h"
@@ -42,7 +43,7 @@
 
 using namespace boost::python;
 using namespace boost;
-//using namespace stat_tool;
+
 
 #define WRAP VariableOrderMarkovWrap
 class VariableOrderMarkovWrap {
@@ -85,7 +86,7 @@ public:
   state_autocorrelation_computation(const Variable_order_markov& input,
 		  int state, int max_lag)
   {
-	 SIMPLE_METHOD_TEMPLATE_1(input, output_autocorrelation_computation,
+	 SIMPLE_METHOD_TEMPLATE_1(input, state_autocorrelation_computation,
 			 Correlation, state, max_lag);
   }
 
@@ -94,6 +95,47 @@ public:
   likelihood_computation(const Variable_order_markov& input, const Markovian_sequences& ms, int index)
   {
 	return input.likelihood_computation(ms, index);
+  }
+
+  static Variable_order_markov*
+  thresholding(const Variable_order_markov& input, double min_probability = MIN_PROBABILITY)
+  {
+	return input.thresholding(min_probability);
+  }
+
+  static Distance_matrix*
+  divergence_computation(const Variable_order_markov &input,
+		  boost::python::list &input_markov,
+		  boost::python::list &input_sequence,
+		  int nb_seq,
+		  char *filename)
+  {
+	// there is as much Variable_order_markov elmts as Markovian elts
+	// 1 for input and N-1 for input_markov and N input_sequence
+
+	Distance_matrix *ret = NULL;
+	Format_error error;
+    std::stringstream os;
+    int nb_markov = len(input_markov);
+    int nb_sequence = len(input_sequence);
+
+    sequence_analysis::wrap_util::auto_ptr_array<const Variable_order_markov *>
+		markov(new const Variable_order_markov*[nb_markov]);
+    for (int i = 0; i < nb_markov; i++)
+        markov[i] = boost::python::extract<Variable_order_markov*> (input_markov[i]);
+
+    sequence_analysis::wrap_util::auto_ptr_array<const Markovian_sequences *>
+   		sequence(new const Markovian_sequences*[nb_sequence]);
+    for (int i = 0; i < nb_sequence; i++)
+        sequence[i] = boost::python::extract<Markovian_sequences*> (input_sequence[i]);
+
+	ret = input.divergence_computation(error, os, nb_markov+1, markov.get(),
+			nb_seq, sequence.get(), filename);
+    cerr << os.str() <<endl;
+	if (!ret)
+		sequence_analysis::wrap_util::throw_error(error);
+
+	return ret;
   }
 
 };
@@ -140,6 +182,10 @@ void class_variable_order_markov() {
     DEF_RETURN_VALUE("state_autocorrelation_computation", &WRAP::state_autocorrelation_computation, args("state", "max_lag"), "todo")
 
     .def("likelihood_computation", &WRAP::likelihood_computation, args("seq", "index"),"todo")
+    DEF_RETURN_VALUE("divergence_computation", &WRAP::divergence_computation, args("input", "input_markov", "input_sequence", "filename"), "todo")
+    DEF_RETURN_VALUE("thresholding", &WRAP::thresholding, args("index"), "todo")
+
+
     ;
 
 
@@ -151,13 +197,12 @@ void class_variable_order_markov() {
 
   Parametric_model* extract(Format_error &error , int type , int variable , int value) const;
   Variable_order_markov_data* extract_data(Format_error &error) const;
-  Variable_order_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
+
 
   void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
   void characteristic_computation(const Variable_order_markov_data &seq , bool counting_flag ,
   int variable = I_DEFAULT , bool length_flag = true);
 
-  double likelihood_computation(const Markovian_sequences &seq , int index) const;
   double likelihood_computation(const Variable_order_markov_data &seq) const;
 
   Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength , bool counting_flag = true , bool divergence_flag = false) const;
@@ -166,7 +211,6 @@ void class_variable_order_markov() {
 
   Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **imarkov , Histogram **hlength ,  const char *path = 0) const;
   Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **markov , int nb_sequence ,  int length , const char *path = 0) const;
-  Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model , const Variable_order_markov **markov , int nb_sequence ,  const Markovian_sequences **seq , const char *path = 0) const;
 
   Variable_order_markov_data* get_markov_data() const { return markov_data; }
   Nonparametric_sequence_process* get_nonparametric_process(int variable) const{ return nonparametric_process[variable]; }

@@ -31,6 +31,8 @@
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/variable_order_markov.h"
+#include "sequence_analysis/hidden_variable_order_markov.h"
+//#include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
 #include <boost/python.hpp>
@@ -317,6 +319,130 @@ public:
     return vom;
   }
 
+  static Hidden_variable_order_markov*
+  hidden_variable_order_markov_estimation(const Markovian_sequences& input,
+		  const Hidden_variable_order_markov &hvom,
+		  bool global_initial_transition = true ,
+		  bool counting_flag =true,
+		  bool state_sequence = true ,
+		  int nb_iter = I_DEFAULT)
+  {
+	Format_error error;
+	std::stringstream os;
+
+	Hidden_variable_order_markov* ret=NULL;
+
+    ret = input.hidden_variable_order_markov_estimation(error, os, hvom,
+    		global_initial_transition, counting_flag, state_sequence, nb_iter);
+
+    return ret;
+  }
+
+  static Hidden_variable_order_markov*
+  hidden_variable_order_markov_stochastic_estimation(const Markovian_sequences &input,
+		  const Hidden_variable_order_markov &hvom,
+		  bool global_initial_transition = true ,
+		  int min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
+		  int max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
+		  double parameter = NB_STATE_SEQUENCE_PARAMETER ,
+		  bool counting_flag = true ,
+		  bool state_sequence = true ,
+		  int nb_iter = I_DEFAULT)
+  {
+	 Format_error error;
+	 std::stringstream os;
+	 Hidden_variable_order_markov* ret=NULL;
+
+	 ret = input.hidden_variable_order_markov_stochastic_estimation(error, os,
+			 hvom, global_initial_transition, min_nb_state_sequence,
+			 max_nb_state_sequence, parameter, counting_flag, state_sequence,
+             nb_iter);
+
+	 return ret;
+  }
+
+  static bool
+  comparison_variable_order_markov(const Markovian_sequences &input,
+		  boost::python::list &input_markov, char *filename)
+  {
+	  Format_error error;
+	  std::stringstream os;
+	  bool ret = false;
+
+	  int nb_markov = len(input_markov);
+
+	  sequence_analysis::wrap_util::auto_ptr_array<const Variable_order_markov *>
+	 	  markov(new const Variable_order_markov*[nb_markov]);
+	  for (int i = 0; i < nb_markov; i++)
+	      markov[i] = boost::python::extract<Variable_order_markov*> (input_markov[i]);
+
+	  ret = input.comparison(error, os, nb_markov, markov.get(), filename);
+	  cerr << os.str()<<endl;
+	  return ret;
+  }
+/*
+  static bool
+  comparison_semi_markov(const Markovian_sequences &input,
+		  boost::python::list &input_markov, char *filename)
+  {
+	  Format_error error;
+	  std::stringstream os;
+	  bool ret = false;
+
+	  int nb_markov = len(input_markov);
+
+	  sequence_analysis::wrap_util::auto_ptr_array<const Semi_markov *>
+	 	  markov(new const Semi_markov*[nb_markov]);
+	  for (int i = 0; i < nb_markov; i++)
+	      markov[i] = boost::python::extract<Semi_markov*> (input_markov[i]);
+
+	  ret = input.comparison(error, os, nb_markov, markov.get(), filename);
+	  cerr << os.str()<<endl;
+	  return ret;
+  }
+*/
+  static bool
+  comparison_hidden_variable_order_markov(const Markovian_sequences &input,
+		  boost::python::list &input_markov, int algorithm= FORWARD, const char *filename=0)
+  {
+	  Format_error error;
+	  std::stringstream os;
+	  bool ret = false;
+
+	  int nb_markov = len(input_markov);
+
+	  sequence_analysis::wrap_util::auto_ptr_array<const Hidden_variable_order_markov *>
+	 	  markov(new const Hidden_variable_order_markov*[nb_markov]);
+	  for (int i = 0; i < nb_markov; i++)
+	      markov[i] = boost::python::extract<Hidden_variable_order_markov*> (input_markov[i]);
+
+	  ret = input.comparison(error, os, nb_markov, markov.get(), algorithm, filename);
+	  cerr << os.str()<<endl;
+	  return ret;
+  }
+
+  /*static bool
+  comparison_hidden_semi_markov(const Markovian_sequences &input,
+  		  boost::python::list &input_markov, int algorithm= FORWARD,const char *filename=0)
+  {
+     Format_error error;
+     std::stringstream os;
+  	  bool ret = false;
+
+  	  int nb_markov = len(input_markov);
+
+  	  sequence_analysis::wrap_util::auto_ptr_array<const Hidden_semi_markov *>
+  	 	  markov(new const Hidden_semi_markov*[nb_markov]);
+  	  for (int i = 0; i < nb_markov; i++)
+  	      markov[i] = boost::python::extract<Hidden_semi_markov*> (input_markov[i]);
+
+  	  ret = input.comparison(error, os, nb_markov, markov.get(), algorithm , filename);
+  	  cerr << os.str()<<endl;
+  	  return ret;
+    }
+
+*/
+
 };
 
 // Boost declaration
@@ -358,15 +484,21 @@ void class_markovian_sequences() {
     .def("word_count", &MarkovianSequencesWrap::word_count, args("variable", "word_length","begin_state", "end_state","min_frequency"), "todo" )
     DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", &MarkovianSequencesWrap::remove_index_parameter, "Remove index parameter")
 
-
-
-
     DEF_RETURN_VALUE("variable_order_markov_estimation1", &MarkovianSequencesWrap::variable_order_markov_estimation1, args("model_type", "min_order", "max_order", "algorithm", "threshold", "estimator","global_initial_transition","global_sample", "counting_flag"), "todo")
     DEF_RETURN_VALUE("variable_order_markov_estimation2", &WRAP::variable_order_markov_estimation2, args("type","max_order","global_initial_transition","counting_flag"), "todo")
     DEF_RETURN_VALUE("variable_order_markov_estimation3",&WRAP::variable_order_markov_estimation3,args("markov","global_initial_transition","counting_flag"), "todo")
-    DEF_RETURN_VALUE("lumpability_estimation", &WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")//
+    DEF_RETURN_VALUE("lumpability_estimation", &WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")
 
-    ;
+    // todo add the args()
+    DEF_RETURN_VALUE("hidden_variable_order_markov_estimation", &WRAP::hidden_variable_order_markov_estimation, args(""), "todo")
+    DEF_RETURN_VALUE("hidden_variable_order_markov_stochastic_estimation", &WRAP::hidden_variable_order_markov_stochastic_estimation, args(""), "todo")
+
+    .def("comparison_variable_order_markov", &WRAP::comparison_variable_order_markov, args("markov list","filename"), "todo")
+ //   .def("comparison_semi_markov", &WRAP::comparison_semi_markov, args("markov list","filename"), "todo")
+    .def("comparison_hidden_variable_order_markov", &WRAP::comparison_hidden_variable_order_markov, args("markov list","algo","filename"), "todo")
+  //  .def("comparison_hidden_semi_markov", &WRAP::comparison_hidden_semi_markov, args("markov list","algo","filename"), "todo")
+
+;
 	/*
 
 
@@ -379,7 +511,6 @@ void class_markovian_sequences() {
    Markovian_sequences* remove_variable_1() const;
 
    Markovian_sequences* initial_run_computation(Format_error &error) const;
-
 
    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,   bool exhaustive = false) const;
    bool ascii_data_write(Format_error &error , const char *path , char format = 'c' , bool exhaustive = false) const;
@@ -413,23 +544,7 @@ void class_markovian_sequences() {
                                        int estimator = COMPLETE_LIKELIHOOD , bool counting_flag = true ,
                                        int nb_iter = I_DEFAULT , int mean_computation = COMPUTED) const;
 
-   Hidden_variable_order_markov* hidden_variable_order_markov_estimation(Format_error &error , std::ostream &os ,
-                                                                         const Hidden_variable_order_markov &ihmarkov ,
-                                                                         bool global_initial_transition = true ,
-                                                                         bool counting_flag = true ,
-                                                                         bool state_sequence = true ,
-                                                                         int nb_iter = I_DEFAULT) const;
-   Hidden_variable_order_markov* hidden_variable_order_markov_stochastic_estimation(Format_error &error , std::ostream &os ,
-                                                                                    const Hidden_variable_order_markov &ihmarkov ,
-                                                                                    bool global_initial_transition = true ,
-                                                                                    int min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
-                                                                                    int max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
-                                                                                    double parameter = NB_STATE_SEQUENCE_PARAMETER ,
-                                                                                    bool counting_flag = true ,
-                                                                                    bool state_sequence = true ,
-                                                                                    int nb_iter = I_DEFAULT) const;
-
-   Hidden_semi_markov* hidden_semi_markov_estimation(Format_error &error , std::ostream &os ,
+  _markov* hidden_semi_markov_estimation(Format_error &error , std::ostream &os ,
                                                      const Hidden_semi_markov &ihsmarkov ,
                                                      int estimator = COMPLETE_LIKELIHOOD ,
                                                      bool counting_flag = true ,
@@ -465,10 +580,6 @@ void class_markovian_sequences() {
                                                                 int nb_iter = I_DEFAULT) const;
 
    bool lumpability_test(Format_error &error , std::ostream &os , int *symbol , int order = 1) const;
-   bool comparison(Format_error &error , std::ostream &os , int nb_model ,   const Variable_order_markov **imarkov , const char *path = 0) const;
-   bool comparison(Format_error &error , std::ostream &os , int nb_model , const Semi_markov **ismarkov , const char *path = 0) const
-   bool comparison(Format_error &error , std::ostream &os , int nb_model ,  const Hidden_variable_order_markov **ihmarkov , int algorithm = FORWARD , const char *path = 0) const;
-   bool comparison(Format_error &error , std::ostream &os , int nb_model ,  const Hidden_semi_markov **ihsmarkov ,int algorithm = FORWARD , const char *path = 0) const;
 
    // acces membres de la classe
 
