@@ -1,10 +1,14 @@
+
+
 import os
 from openalea.sequence_analysis.data_transform import *
 from openalea.sequence_analysis.sequences import *
 from openalea.sequence_analysis.correlation import *
 from openalea.stat_tool import *
-from openalea.sequence_analysis.estimate import Estimate2 as Estimate
 
+from openalea.sequence_analysis.estimate import Estimate
+from openalea.sequence_analysis.compare import Compare
+from openalea.sequence_analysis.hidden_variable_order_markov import *
 
 
 #path = 'test' + os.sep + 'data' +os.sep
@@ -13,8 +17,8 @@ path = 'data' + os.sep
 seq1 = Sequences(path + 'dupreziana_20a2.seq')   # correct
 seq2 = RemoveRun(seq1, 1, 0, "End")              # correct
 
-#histo21 = ExtractHistogram(seq2, "Recurrence", 1)  # correct
-#histo22 = ExtractHistogram(seq2, "Recurrence", 2)  # correct
+histo21 = ExtractHistogram(seq2, "Recurrence", 1)  # correct
+histo22 = ExtractHistogram(seq2, "Recurrence", 2)  # correct
 
 seq3 = Sequences(path + 'dupreziana_40a2.seq')   #correct
 seq4_0 = RemoveRun(seq3, 2, 0, "End")            #correct
@@ -58,12 +62,13 @@ WordCount(seq10, 4, BeginState=2, EndState=1)
 
 
 mc10 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=5, GlobalInitialTransition=True)
+
 mc11 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=5, GlobalInitialTransition=False)
 
 
-# Algorithm->"LocalBIC" / "BIC" / "Context" (private option : not documented)
 mc12 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", Algorithm="LocalBIC", Threshold=10., MaxOrder=5, GlobalInitialTransition=False, GlobalSample=False)
 mc13 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", Algorithm="Context", Threshold=1., MaxOrder=5, GlobalInitialTransition=False, GlobalSample=False)
+
 
 acf11 = ComputeAutoCorrelation(mc11, 1, MaxLag=20)
 acf12 = ComputeAutoCorrelation(mc11, 2, MaxLag=20)
@@ -73,18 +78,18 @@ mc4 = Estimate(seq4, "VARIABLE_ORDER_MARKOV", mc11, GlobalInitialTransition=Fals
 mc6 = Estimate(seq6, "VARIABLE_ORDER_MARKOV", mc11, GlobalInitialTransition=False)
 mc8 = Estimate(seq8, "VARIABLE_ORDER_MARKOV", mc11, GlobalInitialTransition=False)
 
-#matrix1 = Compare(Thresholding(mc2, MinProbability->0.001), seq10, Thresholding(mc4, MinProbability->0.001), seq10, Thresholding(mc6, MinProbability->0.001), seq10, Thresholding(mc8, MinProbability->0.001), seq10, 10000)
+matrix1 = Compare(Thresholding(mc2, MinProbability=0.001), seq10, Thresholding(mc4, MinProbability=0.001), seq10, Thresholding(mc6, MinProbability=0.001), seq10, Thresholding(mc8, MinProbability=0.001), seq10, 10000)
+
+matrix2 = Compare(Thresholding(mc2, MinProbability=0.001), seq2, Thresholding(mc4, MinProbability=0.001), seq4,	Thresholding(mc6, MinProbability=0.001), seq6,	Thresholding(mc8, MinProbability=0.001), seq8, 10000)
+
+Compare(seq10, Thresholding(mc2, MinProbability=0.001), Thresholding(mc4, MinProbability=.001), Thresholding(mc6, MinProbability=0.001), Thresholding(mc8, MinProbability=0.001))
+
+hmc9 = HiddenVariableOrderMarkov(path + "dupreziana21.hc")
+hmc10 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition=True, NbIteration=80)
+hmc11 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition=False, NbIteration=80)
 
 
-#matrix2 = Compare(Thresholding(mc2, MinProbability->0.001), seq2, Thresholding(mc4, MinProbability->0.001), seq4, Thresholding(mc6, MinProbability->0.001), seq6, Thresholding(mc8, MinProbability->0.001), seq8, 10000)
+acf21 = ComputeAutoCorrelation(hmc11, 1, 1, MaxLag=20)
+acf22 = ComputeAutoCorrelation(hmc11, 1, 2, MaxLag=20)
 
-#Compare(seq10, Thresholding(mc2, MinProbability->0.001), Thresholding(mc4, MinProbability->0.001), Thresholding(mc6, MinProbability->0.001), Thresholding(mc8, MinProbability->0.001))
-
-#hmc9 = HiddenVariableOrderMarkov("Model/Markov/dupreziana21.hc")
-#hmc10 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition->True, NbIteration->80)
-#hmc11 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition->False, NbIteration->80)
-
-#acf21 = ComputeAutoCorrelation(hmc11, 1, 1, MaxLag->20)
-#acf22 = ComputeAutoCorrelation(hmc11, 1, 2, MaxLag->20)
-
-#seq15 = Simulate(hmc11, 10000, seq10)
+seq15 = Simulate(hmc11, 10000, seq10)
