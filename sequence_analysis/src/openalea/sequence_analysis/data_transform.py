@@ -487,6 +487,13 @@ def Reverse(obj):
     return obj.reverse().markovian_sequences()
     """
     
+    
+def Thresholding(obj, MinProbability=1e-5):
+    
+    return obj.thresholding(MinProbability)
+    
+    
+    
 def vec2list(vector):
     """
     transform a vector from stat_tool vector into a python list
