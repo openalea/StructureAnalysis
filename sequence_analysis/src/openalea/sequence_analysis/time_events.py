@@ -72,6 +72,8 @@ def TimeEvents(filename=None):
         raise TypeError("invalid filename")
 
 
+def NbEventSelect(obj, min, max):
 
+    return obj.nb_event_select(min, max)
 
 

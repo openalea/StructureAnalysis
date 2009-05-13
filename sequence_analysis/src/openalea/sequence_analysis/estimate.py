@@ -132,17 +132,12 @@ def estimate_variable_order_markov(obj, *args, **kargs):
         Penalty = likelihood_penalty_type[Penalty]
     except:
         pass
-    
-#    Estimator = estimator[Estimator]
-    #Algorithm = algorithm[Algorithm]        
-    #Penalty = likelihood_penalty_type[Penalty]
-    
-    
        
     if isinstance(args[0], str):
         order_estimation = True
         if Order is not None:
             order_estimation = False
+            MaxOrder = Order
         try:
             if (args[0]):
                 Type = stochastic_process_type[args[0]]
@@ -169,6 +164,7 @@ def estimate_variable_order_markov(obj, *args, **kargs):
     
 
     elif isinstance(args[0], list):
+        print "estimation4"
         symbol = args[0]
         markov = obj.lumpability_estimation(symbol, Penalty,
                                          Order, CountingFlag)

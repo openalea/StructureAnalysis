@@ -1,6 +1,13 @@
 """data transform"""
 __revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
-import openalea.sequence_analysis._sequence_analysis as _sequence_analysis
+
+
+#import os
+import openalea.stat_tool.interface as interface
+import _sequence_analysis
+
+
+#import openalea.sequence_analysis._sequence_analysis as _sequence_analysis
 
 
 def __get_mode__(kargs):
@@ -278,7 +285,7 @@ def SegmentationExtract(obj, variable, values , Mode="Keep"):
     sequence = obj.segmentation_extract(variable, list(values), keep)
     return sequence.markovian_sequences()
 
-def LengthSelect(obj, min_length=-1, max_length=-1, Mode="Keep"):
+def LengthSelect(obj, minLength, *args, **kargs):
     """LengthSelect
     
     Selection of sequences according to a length criterion.
@@ -327,11 +334,15 @@ def LengthSelect(obj, min_length=-1, max_length=-1, Mode="Keep"):
     ValueSelect,
     VariableScaling.
     """
-    
-    keep = bool(Mode == "Keep" or Mode == "keep")
-    if max_length==-1:
-        max_length = min_length
-    sequence =  obj.length_select(min_length, max_length, keep)
+    mode = __get_mode__(kargs)
+    if len(args) == 0:
+        maxLength = minLength
+    elif len(args)==1:
+        maxLength = args[0]
+    else:
+        raise KeyError("one or two arguments required and one optional arguments (Mode). see usage")
+
+    sequence =  obj.length_select(minLength, maxLength, mode)
     return sequence.markovian_sequences()
 
 
@@ -469,7 +480,7 @@ def Reverse(obj):
     Cluster, 
     Cumulate, 
     Difference, 
-    Indexextract, 
+    IndexExtract, 
     LengthSelect, 
     Merge, 
     MergeVariable, 
@@ -484,15 +495,82 @@ def Reverse(obj):
     Transcode, 
     ValueSelect,
     VariableScaling.
-    return obj.reverse().markovian_sequences()
     """
     
+    ret = obj.reverse()
+    
+    try:
+        return ret.markovian_sequences()
+    except TypeError:
+        return ret
+
     
 def Thresholding(obj, MinProbability=1e-5):
     
     return obj.thresholding(MinProbability)
     
     
+def Cumulate(obj, Variable=1):
+    #todo check that it is 
+    #SEQUENCES :, MARKOVIAN_SEQUENCES,VARIABLE_ORDER_MARKOV_DATA, SEMI_MARKOV_DATA,NONHOMOGENEOUS_MARKOV_DATA :    
+    return obj.cumulate(Variable)
+    
+def Difference(obj, Variable=1, FirstElement=False):
+    #SEQUENCES :, MARKOVIAN_SEQUENCES,VARIABLE_ORDER_MARKOV_DATA, SEMI_MARKOV_DATA,NONHOMOGENEOUS_MARKOV_DATA :
+    return obj.difference(Variable, FirstElement)
+    
+    
+def IndexParameterExtract(obj, minIndex, maxIndex=40):    
+    """cf IndexExtract"""
+    return obj.index_parameter_extract(minIndex, maxIndex)
+    
+def IndexParameterSelect(obj, minIndex, *args, **kargs):    
+    """cf IndexExtract"""
+    mode = __get_mode__(kargs)
+    if len(args) == 0:
+        maxIndex = minIndex
+    elif len(args)==1:
+        maxIndex = args[0]
+    else:
+        raise KeyError("one or two arguments required and one optional arguments (Mode). see usage")
+
+    return obj.index_parameter_select(minIndex, maxIndex, mode)
+    
+    
+def ComputeStateSequences(obj, data, Characteristics=True):
+    
+    return data.compute_state_sequences(obj, Characteristics)
+    
+
+def MovingAverage(obj, itype, Variable=1, BeginEnd=False, output="Trend"):
+    """
+    itype is list of vlaues or a distribution
+    
+    put Moving Average doc here 
+    """
+    func_map = {
+                 "Sequence":0,
+                 "Trend":1,
+                 "SubtractionResidual":2,
+                 "Residual":2,
+                 "DivisionResidual":3
+                 }
+    if output not in func_map.keys():
+        raise KeyError("output choice must be in %s" % func_map.keys())
+    
+    if isinstance(itype, list):
+        #todo build a 2*N+1 filter here or inside moving_average function ?  
+        return obj.moving_average(itype, Variable, BeginEnd, func_map[output])
+    else: #distribution
+        return obj.moving_average(itype, Variable, BeginEnd, func_map[output])
+        
+def ComputeSelfTransition(obj):
+    """ """
+    obj.self_transition_computation()
+    
+    
+def Cross(obj):
+    return obj.cross();
     
 def vec2list(vector):
     """

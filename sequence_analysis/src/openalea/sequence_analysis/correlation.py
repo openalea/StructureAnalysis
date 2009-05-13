@@ -13,7 +13,10 @@ __all__ = ['_Correlation','ComputeCorrelation', 'ComputeAutoCorrelation']
 # Extend dynamically class
 interface.extend_class( _Correlation, interface.StatInterface)
 
-
+type_dict = {"Pearson": 0,
+                 "Spearman": 1,
+                 "Kendall":2,
+                 "Spearman2":3}
 
 def ComputeCorrelation(obj, *args, **kargs):
     """Computation of sample autocorrelation or cross-correlation functions.
@@ -62,10 +65,7 @@ def ComputeCorrelation(obj, *args, **kargs):
     user_normalization = kargs.get("Normalization", "Exact")
     #todo check it is valid, i.e. in Pearson, SpearMan,Kendall,Spearman2
     
-    type_dict = {"Pearson": 0,
-                 "Spearman": 1,
-                 "Kendall":2,
-                 "Spearman2":3}
+   
     
     norm_type = {"Approximated": 0,
                  "Exact": 1, }
@@ -105,3 +105,42 @@ def ComputeAutoCorrelation(obj, *args, **kargs):
                 variable, value, max_lag)
 
     
+
+def ComputewhiteNoiseCorrelation(obj, itype):
+     
+    if isinstance(itype, int):
+        obj.white_noise_correlation_order(itype)
+    elif isinstance(itype, list):
+        obj.white_noise_correlation_filter(itype)
+    else:
+        try:
+            obj.white_noise_correlation_dist(itype)
+        except TypeError:
+            raise TypeError("second argument must be either an integer, a list or a Distribution type")
+        
+        
+        
+def ComputePartialCorrelation(obj, *args, **kargs):
+    """
+    ComputeAutoCorrelation
+    """
+
+    #if obj.nb_variable==1 and len(args)==1:
+    if len(args) == 1:
+        variable = 1
+        value = args[0]
+    #elif obj.nb_variable!=1 and len(args)==2:
+    elif len(args)==2:
+        variable = args[0]
+        value = args[1]
+    
+    MAXLAG = 100    
+    max_lag = kargs.get("MaxLag", MAXLAG) 
+   
+    Type = kargs.get("Type", "Pearson")
+    Type = type_dict[Type]
+    
+    if len(args) == 1:
+        return obj.partial_autocorrelation_computation(
+                variable, Type, max_lag)
+            
