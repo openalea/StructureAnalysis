@@ -783,6 +783,15 @@ public:
      return s.str();
   }
 
+  static bool
+  rank_correlation_computation(const Vectors& input, int type, const char* path)
+  {
+	  Format_error error;
+	  std::stringstream os;
+	  bool ret;
+	  ret = input.rank_correlation_computation(error, os, type, path);
+	  return ret;
+  }
 
 
 
@@ -839,6 +848,7 @@ void class_vectors()
     .def("file_ascii_write", VectorsWrap::file_ascii_write,"Save vector summary into a file")
     .def("file_ascii_data_write", VectorsWrap::file_ascii_data_write, "Save vector data into a file")
     .def("spreadsheet_write", VectorsWrap::spreadsheet_write, "Save data into CSV file")
+    .def("rank_correlation_computation", VectorsWrap::rank_correlation_computation, args("type", "filename"), "Rank correlation computation")
 
 
     ;
@@ -859,7 +869,6 @@ void class_vectors()
   double skewness_computation(int variable) const;
   double kurtosis_computation(int variable) const;
 
-  -->bool rank_correlation_computation(Format_error &error , std::ostream &os , int correlation_type , const char *path = 0) const;
   // acces membres de la classe
   --Histogram* get_marginal(int variable) const { return marginal[variable]; }
   --double get_covariance(int variable1, int variable2) const { return covariance[variable1][variable2]; }
