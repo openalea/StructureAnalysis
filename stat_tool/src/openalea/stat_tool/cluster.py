@@ -126,45 +126,74 @@ def Cluster(obj, type, *args, **kargs):
         :func:`~openalea.stat_tool.data_transform.VariableScaling`. 
     """
     
-    AddVariable = kargs.get("AddVariable", False)
-
     type_map = { "Step": "cluster_step", 
                  "Limit": "cluster_limit",
                  "Information" : "cluster_information" }
-
-    # Map type with a function name
-    try:
-        func_name = type_map[type]
-        func = getattr(obj, func_name)
+    
+    AddVariable = kargs.get("AddVariable", False)
+    
+    # check the type
+    try:     
+        func = getattr(obj, type_map[type])
     except KeyError:
         raise KeyError("Possible action are : 'Step' or 'Information' or 'Limit'")
-
-    except AttributeError:
-        raise AttributeError("Object doesn't support %s."%(func_name))
-
-    # optional arg : variable 
-    try:
-        if obj.nb_variable == 1:           
-            if len(args)==1:
-                return func(1, args[0]) # 1 for the first and unique variable
-            elif len(args)==2:
-                return func(1, args[0], args[1]) # 1 for the first and unique variable
-            else:
-                raise TypeError("Cluster expect only 1 or 2 arguments after ('%s') because there is only 1 variable "%(type))
-            
+    
+    # check the arguments
+    if len(args)<1 or len(args)>2:
+        raise KeyError("expect 1, 2 or 3 arguments after the type ")
+    
+    try: #sequence case
+        if obj.nb_variable == 1:
+            variable = 1
+            parameter = args[0]
+            if len(args)>2:
+                raise KeyError("expect 1, 2 arguments after the type ")
         else:
-            if len(args)!=2:
-                raise TypeError("Cluster expect two arguments following the option (n-variable case) '%s': the variable id and the %s argument "%(type,type))
-            try:
-                variable = args[0]
-                param = args[1]
-            except KeyError:
-                raise KeyError("Number of variables > 1 but no variable argument provided")         
-            return func(variable, param)
+            variable = args[0]
+            parameter = args[1]
+            if len(args)>3:
+                raise KeyError("expect 1, 2 or 3arguments after the type ")
+     
+    except: #histo case
+        variable = None
+        parameter = args[0]
+        if len(args)>1:
+            raise KeyError("expect 1 argument only")
+    
+    
+    
+    if type == "Step" or type == 'Information':        
+        if (isinstance(parameter, int) or isinstance(parameter,float)):
+            pass
+        else:
+            raise TypeError("with Step or Information, the first argument must be float or integer")
+    if type == 'Limit':
+        if (isinstance(parameter, list)):
+            pass
+        else:
+            raise TypeError("with Limit, the first argument must be an array")
+    
+    if variable: 
         
-    except AttributeError: #no nb_variable
-        #raise AttributeError("the method nb_variable was not found in the list of methods!")
-        return func(args[0])
+        param = []
+        param.append(variable)
+        param.append(parameter)
+        #if len(kargs)>0:
+            # todo : add this flag only if we have integers. if reals, then no flag should be provided
+            # quite tricky here. AddVariable should be added only if integer and obj is 
+            # MarkovianSequences or markov_data or semi_markov_data 
+#            param.append(AddVariable)
+                                
+        if isinstance(obj, _stat_tool._Vectors):
+            return func(*param)
+        try:
+            parambis = param
+            parambis.append(AddVariable)
+            return func(*parambis)
+        except:
+            return func(*param)
+    else:
+        return func(parameter)
     
     
 
