@@ -89,6 +89,20 @@ public:
 	return ret;
   }
 
+
+  static Variable_order_markov_data*
+  state_sequence_computation(const Hidden_variable_order_markov& input,
+  		  const Markovian_sequences &seq , bool characteristic_flag = true)
+  {
+
+    SIMPLE_METHOD_TEMPLATE_1(input, state_sequence_computation,
+  		Variable_order_markov_data,  seq, characteristic_flag);
+  }
+
+
+
+
+
 };
 
 
@@ -104,6 +118,7 @@ void class_hidden_variable_order_markov() {
 
 		DEF_RETURN_VALUE("thresholding", &WRAP::thresholding, args("probability"), "todo")
 		DEF_RETURN_VALUE("simulate", &WRAP::simulation, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+		DEF_RETURN_VALUE("state_sequence_computation", WRAP::state_sequence_computation, args(""),"")
 
         ;
       /*
@@ -146,9 +161,6 @@ void class_hidden_variable_order_markov() {
           bool state_profile_plot_write(Format_error &error , const char *prefix ,
                                         int identifier , const char *title = 0) const;
 
-          Variable_order_markov_data* state_sequence_computation(Format_error &error ,
-                                                                 const Markovian_sequences &seq ,
-                                                                 bool characteristic_flag = true) const;
 
           Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength ,
                                                  bool counting_flag = true , bool divergence_flag = false) const;

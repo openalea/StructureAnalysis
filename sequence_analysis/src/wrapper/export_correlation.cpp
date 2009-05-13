@@ -43,6 +43,7 @@ using namespace boost::python;
 using namespace boost;
 using namespace sequence_analysis;
 
+#define WRAP CorrelationWrap
 class CorrelationWrap {
 
 public:
@@ -87,6 +88,53 @@ public:
 	}
 */
 
+  static bool
+  white_noise_correlation_order(Correlation& input, int order)
+
+  {
+	  Format_error error;
+	  bool ret;
+	  ret = input.white_noise_correlation(error, order);
+	  //if (!ret) throw error
+  }
+
+  static bool
+  white_noise_correlation_filter(Correlation& input,
+		  boost::python::list input_filter)
+
+  {
+   Format_error error;
+   bool ret;
+   int nb_point = len(input_filter);
+   double *filter;
+   filter = new double[2*nb_point+1];
+
+   for (int i = 0; i < nb_point; i++)
+   {
+     filter[i] = boost::python::extract<double> (input_filter[i]);
+     filter[2*nb_point -i] = filter[i];
+   }
+   filter[nb_point] = 0; //todo check that!!
+
+   ret = input.white_noise_correlation(error, 2 * nb_point +1, filter);
+   //if (!ret) throw error
+  }
+
+  static bool
+  white_noise_correlation_dist(Correlation& input,
+ 		  const Distribution& dist)
+  {
+    Format_error error;
+    bool ret;
+    ret = input.white_noise_correlation(error, dist);
+    //if (!ret) throw error
+   }
+
+
+
+
+
+
 
 };
 
@@ -108,17 +156,21 @@ void class_correlation() {
     .def("get_variable2", &Correlation::get_variable2,args("index"))
     .def("get_white_noise", &Correlation::get_white_noise,args("lag"))
     DEF_RETURN_VALUE("merge", &CorrelationWrap::merge, args("list"),"todo")
+    .def("white_noise_correlation_dist", WRAP::white_noise_correlation_dist, args("dist"), "todo")
+    .def("white_noise_correlation_order", WRAP::white_noise_correlation_order, args("order"), "todo")
+    .def("white_noise_correlation_filter", WRAP::white_noise_correlation_filter, args("filter"), "todo")
+
     ;
 
 //todo
 /*
   Correlation* merge(Format_error &error , int nb_correl , const Correlation **icorrel) const;
   std::ostream& line_write(std::ostream &os) const;
-  bool white_noise_correlation(Format_error &error , int nb_point , double *filter ,  int residual = true);
+
   bool white_noise_correlation(Format_error &error , const Distribution &dist);
-  bool white_noise_correlation(Format_error &error , int order);
 */
 }
 
 
 
+#undef WRAP

@@ -23,6 +23,7 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
@@ -563,9 +564,9 @@ public:
     for (int i = 0; i < nb_limit; i++)
       {
         if (is_float)
-          ldouble[i] = extract<int> (limit[i]);
+          ldouble[i] = extract<double> (limit[i]);
         else
-          lint[i] = extract<double> (limit[i]);
+          lint[i] = extract<int> (limit[i]);
       }
 
     // Call correct function
@@ -750,27 +751,44 @@ public:
     return ret;
   }
 
+
   static Sequences*
-  moving_average(const Sequences& seq, int nb_value,
-      boost::python::list& input_values, int variable, bool begin_end,
+  moving_average(const Sequences& seq,
+      boost::python::list& input_values,
+      int variable, bool begin_end,
       int output)
   {
 
-
+	int nb_value = len(input_values);
     double *values;
-    values = new double[nb_value];
-
+    values = new double[nb_value*2+1];
     for (int i = 0; i < nb_value; i++)
-      {
+    {
         values[i] = extract<double> (input_values[i]);
-      }
+        values[2*nb_value - i] = values[i];
+    }
+    values[nb_value] = 0; //todo check that!!
 
-    SIMPLE_METHOD_TEMPLATE_1(seq, moving_average, Sequences,
-        nb_value, values, variable, begin_end, output);
+    Format_error error;
+    Sequences* ret;
+    ret = seq.moving_average(error, nb_value, values, variable,
+    		begin_end, output);
+    if (!ret)
+        sequence_analysis::wrap_util::throw_error(error);
 
    delete[] values;
 
     return ret;
+  }
+
+  static Sequences*
+  moving_average_from_distribution(const Sequences& seq,
+        const Distribution& dist,
+        int variable, bool begin_end,
+        int output)
+  {
+    SIMPLE_METHOD_TEMPLATE_1(seq, moving_average, Sequences,
+          dist, variable, begin_end, output);
   }
 
   static Sequences*
@@ -805,6 +823,17 @@ public:
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, sojourn_time_sequences, Sequences, variable);
   }
+
+  static Correlation*
+  partial_autocorrelation_computation(const Sequences& seq, int variable,
+		  int itype, int max_lag)
+  {
+	SIMPLE_METHOD_TEMPLATE_1(seq, partial_autocorrelation_computation, Correlation,
+			variable, itype, max_lag);
+  }
+
+
+
 
 
 
@@ -850,6 +879,45 @@ public:
     		Correlation, variable1, variable2, itype, max_lag, normalization)
   }
 
+  static Distance_matrix*
+  alignment_vector_distance(const Sequences& input, const Vector_distance &ivector_dist ,
+		  int ref_identifier = I_DEFAULT , int test_identifier = I_DEFAULT ,
+	      bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,
+	      double indel_factor = INDEL_FACTOR_1 , bool transposition_flag = false ,
+	      double transposition_factor = TRANSPOSITION_FACTOR ,
+	      const char *result_path = 0 , char result_format = 'a' ,
+	      const char *alignment_path = 0 , char alignment_format = 'a')
+  {
+	Distance_matrix* ret=NULL;
+	Format_error error;
+	std::stringstream os;
+	ret = input.alignment(error, &os, ivector_dist, ref_identifier, test_identifier, begin_free,
+			end_free, indel_cost, indel_factor, transposition_flag,
+			transposition_factor, result_path, result_format, alignment_path,
+			alignment_format );
+	cerr <<os.str()<<endl;
+	if (!ret)
+		sequence_analysis::wrap_util::throw_error(error);
+	return ret;
+  }
+
+  static Distance_matrix*
+  alignment(const Sequences& input,int ref_identifier = I_DEFAULT ,
+          int test_identifier = I_DEFAULT , bool begin_free = false , bool end_free = false ,
+          const char *result_path = 0 , char result_format = 'a' ,
+          const char *alignment_path = 0 , char alignment_format = 'a')
+  {
+  	Distance_matrix* ret=NULL;
+  	Format_error error;
+  	std::stringstream os;
+  	ret = input.alignment(error, &os, ref_identifier, test_identifier, begin_free,
+  			end_free, result_path, result_format, alignment_path,
+  			alignment_format );
+  	cerr <<os.str()<<endl;
+  	if (!ret)
+  		sequence_analysis::wrap_util::throw_error(error);
+  	return ret;
+  }
 
 };
 
@@ -890,8 +958,24 @@ void class_sequences() {
     .value("UNIFORM_CARDINALITY", UNIFORM_CARDINALITY)
     .export_values();
 
+  enum_<sequence_analysis::wrap_util::UniqueInt<11, 104> >("MarkovianSequenceType")
+     .value("OBSERVATION",OBSERVATION)
+     .value("FIRST_OCCURRENCE",FIRST_OCCURRENCE)
+     .value("RECURRENCE_TIME",RECURRENCE_TIME)
+     .value("SOJOURN_TIME",SOJOURN_TIME)
+     .value("INITIAL_RUN",INITIAL_RUN)
+     .value("FINAL_RUN",FINAL_RUN)
+     .value("NB_RUN",NB_RUN)
+     .value("NB_OCCURRENCE",NB_OCCURRENCE)
+     .value("LENGTH",LENGTH)
+     .value("SEQUENCE_CUMUL",SEQUENCE_CUMUL)
+     .value("SEQUENCE_MEAN",SEQUENCE_MEAN)
+     .export_values();
 
-
+  enum_<sequence_analysis::wrap_util::UniqueInt<2,105> >("IndelCost")
+    .value("ADAPTATIVE", ADAPTATIVE)
+    .value("FIXED", FIXED)
+    .export_values();
 
   class_<Sequences, bases<STAT_interface> > ("_Sequences", "Sequences")
     .def(init <const Renewal_data&>())
@@ -945,6 +1029,7 @@ void class_sequences() {
     DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step, args("variable", "step"),"Cluster Step")
     DEF_RETURN_VALUE("cluster_limit", SequencesWrap::cluster_limit,  args("variable", "limits"),"Cluster limit")
     DEF_RETURN_VALUE("transcode", SequencesWrap::transcode, args("variable", "symbols"),"Transcode")
+    DEF_RETURN_VALUE("partial_autocorrelation_computation", SequencesWrap::partial_autocorrelation_computation, args("variable", "itype", "max_lag"),"Transcode")
     //DEF_RETURN_VALUE("extract_vectors", SequencesWrap::extract_vectors, args("feature_type", "variable, value"),SequencesWrap::extract_vectors_overloads(),"test")
     // does not seem to work properly : extract_vectors(i,j,k) works but extract_vectors(i) is not recognized...
     .def("extract_vectors",   (Vectors *(*)(const Sequences&, int,int,int)) SequencesWrap::extract_vectors,  return_value_policy< manage_new_object >(), SequencesWrap::extract_vectors_overloads())
@@ -965,6 +1050,8 @@ void class_sequences() {
 
     DEF_RETURN_VALUE_NO_ARGS("extract_sequence_length", SequencesWrap::extract_length , "todo")
 
+    DEF_RETURN_VALUE("alignment_vector_distance", SequencesWrap::alignment_vector_distance, args(""), "todo")
+    DEF_RETURN_VALUE("alignment", SequencesWrap::alignment,  args(""), "todo")
     ;
 
 
@@ -985,9 +1072,6 @@ void class_sequences() {
 	    bool check(Format_error &error , const char *pattern_label);
 	    Time_events* extract_time_events(Format_error &error , int variable , int begin_date , int end_date ,  int previous_date = I_DEFAULT , int next_date = I_DEFAULT) const;
 	    Renewal_data* extract_renewal_data(Format_error &error , int variable , int begin_index , int end_index) const;
-
-	    Sequences* moving_average(Format_error &error , int nb_point , double *filter ,   int variable = I_DEFAULT , bool begin_end = false ,	                              int output = TREND) const;
-	    Sequences* moving_average(Format_error &error , const Distribution &dist ,   int variable = I_DEFAULT , bool begin_end = false ,int output = TREND) const;
 
 	    std::ostream& line_write(std::ostream &os) const;
 	    bool plot_data_write(Format_error &error , const char *prefix , const char *title = 0) const;
@@ -1011,18 +1095,6 @@ void class_sequences() {
 	                                         int normalization = EXACT) const;
 	    Correlation* partial_autocorrelation_computation(Format_error &error , int variable ,
 	                                                     int itype = PEARSON , int max_lag = I_DEFAULT) const;
-
-	    Distance_matrix* alignment(Format_error &error , std::ostream *os , const Vector_distance &ivector_dist ,
-	                               int ref_identifier = I_DEFAULT , int test_identifier = I_DEFAULT ,
-	                               bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,
-	                               double indel_factor = INDEL_FACTOR_1 , bool transposition_flag = false ,
-	                               double transposition_factor = TRANSPOSITION_FACTOR ,
-	                               const char *result_path = 0 , char result_format = 'a' ,
-	                               const char *alignment_path = 0 , char alignment_format = 'a') const;
-	    Distance_matrix* alignment(Format_error &error , std::ostream *os , int ref_identifier = I_DEFAULT ,
-	                               int test_identifier = I_DEFAULT , bool begin_free = false , bool end_free = false ,
-	                               const char *result_path = 0 , char result_format = 'a' ,
-	                               const char *alignment_path = 0 , char alignment_format = 'a') const;
 
 	    Sequences* multiple_alignment(Format_error &error , std::ostream &os , const Vector_distance &ivector_dist ,
 	                                  bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,

@@ -41,7 +41,6 @@
 
 using namespace boost::python;
 using namespace boost;
-//using namespace stat_tool;
 
 class SemiMarkovWrap
 {

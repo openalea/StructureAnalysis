@@ -239,11 +239,11 @@ void class_tops() {
 	DEF_RETURN_VALUE("get_axillary_nb_internode", &Tops::get_axillary_nb_internode, args("position"), "returns histogram of axillary nb internode")
 	DEF_RETURN_VALUE("select_individual", TopsWrap::select_individual,args("identifiers", "keep"), "select individual")
 	DEF_RETURN_VALUE("extract",TopsWrap::extract,args("position"), "extract method")
-        DEF_RETURN_VALUE("shift", TopsWrap::shift, args("nb_internode"), "shift method")
-        DEF_RETURN_VALUE("estimation1", &TopsWrap::estimation1, args("min_position","max_position", "neighborhood", "equal_probability"), "estimation method 1")
-        DEF_RETURN_VALUE("estimation2", &TopsWrap::estimation2, args("neighborhood", "equal_probability"), "estimation method 2")
+    DEF_RETURN_VALUE("shift", TopsWrap::shift, args("nb_internode"), "shift method")
+    DEF_RETURN_VALUE("estimation1", &TopsWrap::estimation1, args("min_position","max_position", "neighborhood", "equal_probability"), "estimation method 1")
+    DEF_RETURN_VALUE("estimation2", &TopsWrap::estimation2, args("neighborhood", "equal_probability"), "estimation method 2")
 
-        DEF_RETURN_VALUE_NO_ARGS("reverse", TopsWrap::reverse,"reverse method")
+    DEF_RETURN_VALUE_NO_ARGS("reverse", TopsWrap::reverse,"reverse method")
 	DEF_RETURN_VALUE_NO_ARGS("get_nb_internode", &Tops::get_nb_internode, "returns histogram of nb internode")
 	DEF_RETURN_VALUE_NO_ARGS("get_top_parameters", &Tops::get_top_parameters, "returns top parameters")
 	;

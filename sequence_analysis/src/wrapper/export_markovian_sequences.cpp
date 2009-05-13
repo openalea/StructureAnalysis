@@ -115,7 +115,7 @@ public:
   }
   static Markovian_sequences*
   cluster_limit(const Markovian_sequences& seq,
-		  int variable, boost::python::list& limit, bool add_flag = false)
+		  int variable, boost::python::list& limit, bool add_flag)
   {
 
      Format_error error;
@@ -141,20 +141,32 @@ public:
      for (int i = 0; i < nb_limit; i++)
        {
          if (is_float)
-           ldouble[i] = boost::python::extract<int> (limit[i]);
+           {
+        	 ldouble[i] = boost::python::extract<double> (limit[i]);
+        	 cerr << ldouble[i]<<endl;
+           }
          else
-           lint[i] = boost::python::extract<double> (limit[i]);
+         {
+        	 lint[i] = boost::python::extract<int> (limit[i]);
+        	 cerr << lint[i]<<endl;
+         }
+
+
+
        }
 
+     cerr << "here"<<endl;
      // Call correct function
      if (is_float)
        {
-         ret = seq.cluster(error, variable, nb_limit, ldouble);
+    	 cerr << "here1"<<endl;
+         ret = seq.cluster(error, variable, nb_limit+1, ldouble);
          delete[] ldouble;
        }
      else
        {
-         ret = seq.cluster(error, variable, nb_limit, lint, add_flag);
+    	 cerr << "here2"<<endl;
+         ret = seq.cluster(error, variable, nb_limit+1, lint, add_flag);
          delete[] lint;
        }
 
@@ -338,6 +350,7 @@ public:
     return ret;
   }
 
+
   static Hidden_variable_order_markov*
   hidden_variable_order_markov_stochastic_estimation(const Markovian_sequences &input,
 		  const Hidden_variable_order_markov &hvom,
@@ -443,25 +456,22 @@ public:
 
 */
 
+
+  static void
+  self_transition_computation(Markovian_sequences& input)
+  {
+	  //todo do we want to overload this function with an int or bool as first argument ?
+	  input.self_transition_computation();
+  }
+
 };
 
 // Boost declaration
 
 void class_markovian_sequences() {
 
-  enum_<sequence_analysis::wrap_util::UniqueInt<11, 102> >("MarkovianSequenceType")
-      .value("OBSERVATION",OBSERVATION)
-      .value("FIRST_OCCURRENCE",FIRST_OCCURRENCE)
-      .value("RECURRENCE_TIME",RECURRENCE_TIME)
-      .value("SOJOURN_TIME",SOJOURN_TIME)
-      .value("INITIAL_RUN",INITIAL_RUN)
-      .value("FINAL_RUN",FINAL_RUN)
-      .value("NB_RUN",NB_RUN)
-      .value("NB_OCCURRENCE",NB_OCCURRENCE)
-      .value("LENGTH",LENGTH)
-      .value("SEQUENCE_CUMUL",SEQUENCE_CUMUL)
-      .value("SEQUENCE_MEAN",SEQUENCE_MEAN)
-      .export_values();
+
+
 
   class_<Markovian_sequences, bases<Sequences> > ("_Markovian_sequences", "Markovian_sequences")
 
@@ -485,19 +495,20 @@ void class_markovian_sequences() {
     DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", &MarkovianSequencesWrap::remove_index_parameter, "Remove index parameter")
 
     DEF_RETURN_VALUE("variable_order_markov_estimation1", &MarkovianSequencesWrap::variable_order_markov_estimation1, args("model_type", "min_order", "max_order", "algorithm", "threshold", "estimator","global_initial_transition","global_sample", "counting_flag"), "todo")
-    DEF_RETURN_VALUE("variable_order_markov_estimation2", &WRAP::variable_order_markov_estimation2, args("type","max_order","global_initial_transition","counting_flag"), "todo")
-    DEF_RETURN_VALUE("variable_order_markov_estimation3",&WRAP::variable_order_markov_estimation3,args("markov","global_initial_transition","counting_flag"), "todo")
-    DEF_RETURN_VALUE("lumpability_estimation", &WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")
+    DEF_RETURN_VALUE("variable_order_markov_estimation2", WRAP::variable_order_markov_estimation2, args("type","max_order","global_initial_transition","counting_flag"), "todo")
+    DEF_RETURN_VALUE("variable_order_markov_estimation3",WRAP::variable_order_markov_estimation3,args("markov","global_initial_transition","counting_flag"), "todo")
+    DEF_RETURN_VALUE("lumpability_estimation", WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")
 
     // todo add the args()
-    DEF_RETURN_VALUE("hidden_variable_order_markov_estimation", &WRAP::hidden_variable_order_markov_estimation, args(""), "todo")
-    DEF_RETURN_VALUE("hidden_variable_order_markov_stochastic_estimation", &WRAP::hidden_variable_order_markov_stochastic_estimation, args(""), "todo")
+    DEF_RETURN_VALUE("hidden_variable_order_markov_estimation", WRAP::hidden_variable_order_markov_estimation, args(""), "todo")
+    DEF_RETURN_VALUE("hidden_variable_order_markov_stochastic_estimation", WRAP::hidden_variable_order_markov_stochastic_estimation, args(""), "todo")
 
-    .def("comparison_variable_order_markov", &WRAP::comparison_variable_order_markov, args("markov list","filename"), "todo")
+    .def("comparison_variable_order_markov", WRAP::comparison_variable_order_markov, args("markov list","filename"), "todo")
  //   .def("comparison_semi_markov", &WRAP::comparison_semi_markov, args("markov list","filename"), "todo")
-    .def("comparison_hidden_variable_order_markov", &WRAP::comparison_hidden_variable_order_markov, args("markov list","algo","filename"), "todo")
+    .def("comparison_hidden_variable_order_markov", WRAP::comparison_hidden_variable_order_markov, args("markov list","algo","filename"), "todo")
   //  .def("comparison_hidden_semi_markov", &WRAP::comparison_hidden_semi_markov, args("markov list","algo","filename"), "todo")
 
+    .def("self_transition_computation", WRAP::self_transition_computation )
 ;
 	/*
 
@@ -524,8 +535,7 @@ void class_markovian_sequences() {
 
    double iid_information_computation() const;
 
-   void self_transition_computation();
-   void self_transition_computation(bool *homogeneity);
+
    void sojourn_time_histogram_computation(int variable);
    void create_observation_histogram(int nb_state);
    void observation_histogram_computation();
@@ -534,23 +544,12 @@ void class_markovian_sequences() {
 
    Nonhomogeneous_markov* nonhomogeneous_markov_estimation(Format_error &error , int *ident ,  bool counting_flag = true) const;
 
-
-
-
-
-
-
-   Semi_markov* semi_markov_estimation(Format_error &error , std::ostream &os , char model_type ,
-                                       int estimator = COMPLETE_LIKELIHOOD , bool counting_flag = true ,
-                                       int nb_iter = I_DEFAULT , int mean_computation = COMPUTED) const;
+   Semi_markov* semi_markov_estimation(Format_error &error , std::ostream &os , char model_type ,imator = COMPLETE_LIKELIHOOD , bool counting_flag = true ,int nb_iter = I_DEFAULT , int mean_computation = COMPUTED) const;
 
   _markov* hidden_semi_markov_estimation(Format_error &error , std::ostream &os ,
-                                                     const Hidden_semi_markov &ihsmarkov ,
-                                                     int estimator = COMPLETE_LIKELIHOOD ,
-                                                     bool counting_flag = true ,
-                                                     bool state_sequence = true ,
-                                                     int nb_iter = I_DEFAULT ,
-                                                     int mean_computation = COMPUTED) const;
+   const Hidden_semi_markov &ihsmarkov ,
+    estimator = COMPLETE_LIKELIHOOD ,
+              bool counting_flag = true ,bool state_sequence = true ,int nb_iter = I_DEFAULT , int mean_computation = COMPUTED) const;
    Hidden_semi_markov* hidden_semi_markov_estimation(Format_error &error , std::ostream &os ,
                                                      char model_type , int nb_state , bool left_right ,
                                                      int estimator = COMPLETE_LIKELIHOOD ,
