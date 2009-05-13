@@ -133,11 +133,11 @@ class TestRegression(interface):
             assert True
 
 
-class TestRegressionKernel():
+class _TestRegressionKernel():
 
     def __init__(self):
-        self.data =  RegressionKernel(4, 0, 10)
-
+        self.data = RegressionKernel(4, 0, 10)
+    
     def test_max_value(self):
         assert self.data.max_value == 10
     
@@ -158,5 +158,10 @@ class TestRegressionKernel():
         pass
 
 
-
+if __name__=="__main__":
+    for i in range(10000):
+        for i in range(10000):
+            test = TestRegressionKernel()
+            data  = test.data()
+    
     
