@@ -163,11 +163,23 @@ def VectorDistance(*args, **kargs):
         :func:`~openalea.stat_tool.comparison.Compare`
     """
 
+    distance = None
+    if(not distance) : distance = kargs.get("Distance", None)
+    if(not distance) : distance = _stat_tool.ABSOLUTE_VALUE
+    else: distance = distance_type[distance]
+    
     # filename
     if(len(args)==1 and isinstance(args[0], str)):
-        filename = args[0]
-    #    return _stat_tool._VectorDistance.__init__(self, filename)
-        return _stat_tool._VectorDistance(filename)
+        
+        if args[0] in vector_distance_type.keys():
+            
+            print vector_distance_type[args[0]], type(vector_distance_type[args[0]])
+            print [1], type([1])
+            print distance, type(distance)
+            return _stat_tool._VectorDistance([vector_distance_type[args[0]]],[1], distance )
+        else:
+            filename = args[0]
+            return _stat_tool._VectorDistance(filename)
 
     # Get keyword parameters
     distance = None
@@ -290,4 +302,12 @@ def ContingencyTable(vec, variable1, variable2,
     return vec.contingency_table(variable1, variable2, FileName, Format)
 
 
+def ComputeRankCorrelation(vec, Type="Spearman", FileName=None):
 
+
+    func_map = {
+            "Spearman": 0, 
+            "Kendall": 1 
+            }
+
+    vec.rank_correlation_computation(func_map[Type], FileName)
