@@ -47,7 +47,7 @@ def compare_histo(histo, *args, **kargs):
     _type = args[-1]
     # check the last argument's type
     if type('O')!=type(_type):
-        raise(TypeError, """The last argument must be a string (e.g., 
+        raise TypeError("""The last argument must be a string (e.g., 
         "O", "ORDINAL." See the documentation""")
     try:
         _type = type_dict[_type.upper()]
@@ -68,7 +68,7 @@ def compare_histo(histo, *args, **kargs):
     elif format == 'SpreadSheet': 
         format = 's'
     else:
-        raise(TypeError, """The Format argument must be either 'ASCII' 
+        raise TypeError( """The Format argument must be either 'ASCII' 
             or 'SpreadSheet'.""")
         
     ret = base.compare(histos, _type, filename, format)
@@ -139,14 +139,6 @@ def Compare(arg1, *args, **kargs):
     elif(isinstance(p1, _stat_tool._Vectors)):
         return compare_vectors(arg1, *args, **kargs)
     
-    elif(isinstance(p1, _stat_tool._Sequence)):
-        return compare_seq(arg1, *args, **kargs)
-
-    elif(isinstance(p1, _stat_tool._Markovian)):
-        return compare_markov(arg1, *args, **kargs)
-    
-
-
 
 def ComparisonTest(type, histo1, histo2):
     r"""
@@ -231,7 +223,7 @@ def ComparisonTest(type, histo1, histo2):
 	    }
 
     if(not type_dict.has_key(type)):
-	    raise TypeError()
+	    raise TypeError("to be done")
 
     func = getattr(histo1, type_dict[type])
     ret = func(histo2)
