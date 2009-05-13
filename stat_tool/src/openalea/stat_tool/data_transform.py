@@ -316,6 +316,7 @@ def Extract(obj, *args):
         "Sum" : "extract_sum",
         "Compound" : "extract_compound",
         "Recurrence": "extract",
+        "Sojourn": "extract",
         }
 
     # Test without "string" command (ex for _Vecotors)
@@ -351,9 +352,21 @@ def Extract(obj, *args):
 
     except AttributeError:
         raise
+ 
+ #OBSERVATION ,
+#  FIRST_OCCURRENCE ,
+  #                       RECURRENCE_TIME ,
+#                         SOJOURN_TIME ,
+  #INITIAL_RUN ,
+  #FINAL_RUN ,
+  #NB_RUN ,
+  #NB_OCCURRENCE ,
+#  LENGTH ,
+#  SEQUENCE_CUMUL ,
+  #SEQUENCE_MEAN
 
     # Call function
-    seq_map = {"Recurrence":2}
+    seq_map = {"Recurrence":2, "Sojourn":3}
     if key in seq_map.keys():        
         if obj.nb_variable == 1:
             return f(seq_map[args[0]], 1, *args[1:])
