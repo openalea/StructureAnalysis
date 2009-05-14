@@ -8,7 +8,8 @@ from openalea.sequence_analysis._sequence_analysis import _Tops
 import openalea.sequence_analysis._sequence_analysis as _sequence_analysis
 
 __all__ = ['Tops',
-           '_Tops']
+           '_Tops', 
+           'RemoveApicalInternodes']
 
 
 # Extend dynamically class
@@ -114,7 +115,7 @@ def Tops(*args, **kargs):
     
     
 
-def RemoveApicalInternodes(obj, internode)
+def RemoveApicalInternodes(obj, internode):
 
     return obj.shift(internode) 
     

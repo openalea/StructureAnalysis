@@ -30,9 +30,10 @@
 #include "stat_tool/stat_label.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
+#include "sequence_analysis/semi_markov.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/hidden_variable_order_markov.h"
-//#include "sequence_analysis/hidden_semi_markov.h"
+#include "sequence_analysis/hidden_semi_markov.h"
 #include "sequence_analysis/sequence_label.h"
 
 #include <boost/python.hpp>
@@ -191,6 +192,22 @@ public:
     		variable, data.get(), add_flag);
   }
 
+  static Markovian_sequences*
+  merge_variable(const Markovian_sequences& input_seq, const boost::python::list& seqs,
+        int ref_sample)
+  {
+    int nb_seq = len(seqs);
+    sequence_analysis::wrap_util::auto_ptr_array<const Markovian_sequences *> sequences(
+        new const Markovian_sequences*[nb_seq]);
+
+    for (int i = 0; i < nb_seq; i++)
+      sequences[i] = boost::python::extract<Markovian_sequences*> (seqs[i]);
+
+
+    SIMPLE_METHOD_TEMPLATE_1(input_seq, merge_variable, Markovian_sequences,
+        nb_seq, sequences.get(), ref_sample);
+    }
+
 
   static Markovian_sequences*
   select_variable(const Markovian_sequences& input, int inb_variable,
@@ -211,6 +228,23 @@ public:
   }
 
   static Markovian_sequences*
+  consecutive_values(const Markovian_sequences& input,
+      int ivariable , bool add_flag )
+  {
+    Format_error error;
+    std::stringstream os;
+    Markovian_sequences* ret;
+
+    ret = input.consecutives_values(error, os, variable, add_flag);
+
+    cerr <<os.str<<endl;
+    return ret;
+  }
+
+
+
+
+  static Markovian_sequences*
   remove_index_parameter(const Markovian_sequences& input)
   {
      SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, Markovian_sequences);
@@ -224,6 +258,23 @@ public:
      SIMPLE_METHOD_TEMPLATE_1(input, add_absorbing_run,
     		 Markovian_sequences, sequence_length, run_length);
   }
+
+  static bool
+  transition_count(const Markovian_sequences &input, int max_order,
+		  bool begin = false , int estimator = MAXIMUM_LIKELIHOOD ,
+		  const char *path = 0)
+  {
+	Format_error error;
+	std:stringstream os;
+	bool ret;
+
+	ret = input.transition_count(error, os,
+			max_order, begin, estimator);
+
+	return ret;
+  }
+
+
 
 
   static std::string
@@ -393,7 +444,7 @@ public:
 	  cerr << os.str()<<endl;
 	  return ret;
   }
-/*
+
   static bool
   comparison_semi_markov(const Markovian_sequences &input,
 		  boost::python::list &input_markov, char *filename)
@@ -413,7 +464,7 @@ public:
 	  cerr << os.str()<<endl;
 	  return ret;
   }
-*/
+
   static bool
   comparison_hidden_variable_order_markov(const Markovian_sequences &input,
 		  boost::python::list &input_markov, int algorithm= FORWARD, const char *filename=0)
@@ -434,7 +485,7 @@ public:
 	  return ret;
   }
 
-  /*static bool
+  static bool
   comparison_hidden_semi_markov(const Markovian_sequences &input,
   		  boost::python::list &input_markov, int algorithm= FORWARD,const char *filename=0)
   {
@@ -454,7 +505,7 @@ public:
   	  return ret;
     }
 
-*/
+
 
 
   static void
@@ -464,6 +515,114 @@ public:
 	  input.self_transition_computation();
   }
 
+  static Hidden_semi_markov*
+  hidden_semi_markov_estimation(const Markovian_sequences &input,
+		   const Hidden_semi_markov &ihsmarkov, int estimator,
+		   bool counting_flag, bool state_sequence,
+		   int nb_iter, int mean_computation)
+  {
+    Format_error error;
+  	std::stringstream os;
+  	Hidden_semi_markov* ret=NULL;
+
+  	ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov,	estimator,
+  			counting_flag, state_sequence, nb_iter, mean_computation);
+  	cerr << os.str()<<endl;
+    return ret;
+  }
+
+  static Hidden_semi_markov*
+  hidden_semi_markov_estimation_model(const Markovian_sequences &input,
+		  char model_type, int nb_state, bool left_right,
+ 		   int estimator, bool counting_flag, bool state_sequence,
+           double occupancy_mean, int nb_iter, int mean_computation )
+  {
+    Format_error error;
+   	std::stringstream os;
+   	Hidden_semi_markov* ret=NULL;
+
+   	ret = input.hidden_semi_markov_estimation(error, os,
+   			model_type, nb_state,left_right, estimator,
+   			counting_flag, state_sequence, occupancy_mean,
+   			nb_iter, mean_computation);
+
+   	cerr << os.str()<<endl;
+    return ret;
+  }
+
+
+  static Hidden_semi_markov*
+  hidden_semi_markov_stochastic_estimation(const Markovian_sequences &input,
+ 		   const Hidden_semi_markov &ihsmarkov, int min_nb_state_sequence,
+ 		   int max_nb_state_sequence, double parameter, int estimator,
+ 		   bool counting_flag, bool state_sequence, int nb_iter)
+  {
+    Format_error error;
+   	std::stringstream os;
+   	Hidden_semi_markov* ret=NULL;
+
+   	ret = input.hidden_semi_markov_stochastic_estimation(error, os, ihsmarkov,
+   			min_nb_state_sequence, max_nb_state_sequence, parameter,
+   			estimator, counting_flag, state_sequence, nb_iter);
+   	cerr << os.str()<<endl;
+    return ret;
+  }
+
+  static Hidden_semi_markov*
+  hidden_semi_markov_stochastic_estimation_model(const Markovian_sequences &input,
+  		  char model_type, int nb_state, bool left_right,
+  		  int min_nb_state_sequence, int max_nb_state_sequence, double parameter,
+   		  int estimator, bool counting_flag, bool state_sequence,
+          double occupancy_mean, int nb_iter )
+  {
+    Format_error error;
+    std::stringstream os;
+    Hidden_semi_markov* ret=NULL;
+
+    ret = input.hidden_semi_markov_stochastic_estimation(error, os,
+    			model_type, nb_state,left_right,
+    	  		min_nb_state_sequence, max_nb_state_sequence, parameter,
+    			estimator, counting_flag, state_sequence, occupancy_mean,
+     			nb_iter);
+    cerr << os.str()<<endl;
+    return ret;
+  }
+
+  static Semi_markov*
+  semi_markov_estimation(const Markovian_sequences & input,
+		  char model_type, int estimator, bool counting_flag,
+		  int nb_iter, int mean_computation)
+  {
+	Format_error error;
+	std::stringstream os;
+	Semi_markov *ret;
+
+	ret = input.semi_markov_estimation(error, os,
+			model_type, estimator, counting_flag, nb_iter,
+			mean_computation);
+
+	return ret;
+  }
+
+  static Nonhomogeneous_markov*
+  nonhomogeneous_markov_estimation(const Markovian_sequences & input,
+		  boost::python::list list_ident,  bool counting_flag)
+  {
+    Format_error error;
+	Nonhomogeneous_markov* ret;
+
+	int nb_value = len(list_ident);
+	int *ident;
+	ident = new int[nb_value];
+	for (int i = 0; i < nb_value; i++)
+	{
+	  ident[i] = boost::python::extract<int> (list_ident[i]);
+	}
+
+	ret = input.nonhomogeneous_markov_estimation(error, ident, counting_flag);
+
+	return ret;
+  }
 };
 
 // Boost declaration
@@ -504,23 +663,28 @@ void class_markovian_sequences() {
     DEF_RETURN_VALUE("hidden_variable_order_markov_stochastic_estimation", WRAP::hidden_variable_order_markov_stochastic_estimation, args(""), "todo")
 
     .def("comparison_variable_order_markov", WRAP::comparison_variable_order_markov, args("markov list","filename"), "todo")
- //   .def("comparison_semi_markov", &WRAP::comparison_semi_markov, args("markov list","filename"), "todo")
+    .def("comparison_semi_markov", &WRAP::comparison_semi_markov, args("markov list","filename"), "todo")
     .def("comparison_hidden_variable_order_markov", WRAP::comparison_hidden_variable_order_markov, args("markov list","algo","filename"), "todo")
-  //  .def("comparison_hidden_semi_markov", &WRAP::comparison_hidden_semi_markov, args("markov list","algo","filename"), "todo")
+    .def("comparison_hidden_semi_markov", &WRAP::comparison_hidden_semi_markov, args("markov list","algo","filename"), "todo")
 
+    .def("transition_count", WRAP::transition_count, args("todo"), "todo")
     .def("self_transition_computation", WRAP::self_transition_computation )
-;
+    DEF_RETURN_VALUE_NO_ARGS("merge_variable",WRAP::merge_variable, "Merge variables")
+    DEF_RETURN_VALUE("consecutive_values",WRAP::consecutive_values, args("variable", "AddVariable_flag"), "Consecutive values")
+
+
+    DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation_model", WRAP::hidden_semi_markov_stochastic_estimation_model, args("tobedone"), "todo")
+    DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation", WRAP::hidden_semi_markov_stochastic_estimation, args("tobedone"), "todo")
+    DEF_RETURN_VALUE("hidden_semi_markov_estimation_model", WRAP::hidden_semi_markov_estimation_model, args("tobedone"), "todo")
+    DEF_RETURN_VALUE("hidden_semi_markov_estimation", WRAP::hidden_semi_markov_estimation, args("tobedone"), "todo")
+    DEF_RETURN_VALUE("semi_markov_estimation", WRAP::semi_markov_estimation, args("tobedone"), "todo")
+    DEF_RETURN_VALUE("nonhomogeneous_markov_estimation", WRAP::semi_markov_estimation, args("tobedone"), "todo")
+    ;
 	/*
 
 
-   Markovian_sequences* consecutive_values(Format_error &error , std::ostream &os , int ivariable , bool add_flag = false) const;
-   Markovian_sequences* cluster(Format_error &error , int ivariable , int nb_class , int *ilimit , bool add_flag = false) const;
-   Markovian_sequences* cluster(Format_error &error , int variable , int nb_class , double *ilimit) const;
 
-
-   Markovian_sequences* merge_variable(Format_error &error , int nb_sample , const Markovian_sequences **iseq , int ref_sample = I_DEFAULT) const;
    Markovian_sequences* remove_variable_1() const;
-
    Markovian_sequences* initial_run_computation(Format_error &error) const;
 
    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,   bool exhaustive = false) const;
@@ -530,11 +694,9 @@ void class_markovian_sequences() {
    bool spreadsheet_write(Format_error &error , const char *path) const;
    bool plot_write(Format_error &error , const char *prefix ,   const char *title = 0) const;
 
-   bool transition_count(Format_error &error , std::ostream &os , int max_order , bool begin = false , int estimator = MAXIMUM_LIKELIHOOD ,  const char *path = 0) const;
    bool mtg_write(Format_error &error , const char *path , int *itype) const;
 
    double iid_information_computation() const;
-
 
    void sojourn_time_histogram_computation(int variable);
    void create_observation_histogram(int nb_state);
@@ -542,41 +704,6 @@ void class_markovian_sequences() {
    void build_observation_histogram();
    void build_characteristic(int variable = I_DEFAULT , bool sojourn_time_flag = true ,  bool initial_run_flag = false);
 
-   Nonhomogeneous_markov* nonhomogeneous_markov_estimation(Format_error &error , int *ident ,  bool counting_flag = true) const;
-
-   Semi_markov* semi_markov_estimation(Format_error &error , std::ostream &os , char model_type ,imator = COMPLETE_LIKELIHOOD , bool counting_flag = true ,int nb_iter = I_DEFAULT , int mean_computation = COMPUTED) const;
-
-  _markov* hidden_semi_markov_estimation(Format_error &error , std::ostream &os ,
-   const Hidden_semi_markov &ihsmarkov ,
-    estimator = COMPLETE_LIKELIHOOD ,
-              bool counting_flag = true ,bool state_sequence = true ,int nb_iter = I_DEFAULT , int mean_computation = COMPUTED) const;
-   Hidden_semi_markov* hidden_semi_markov_estimation(Format_error &error , std::ostream &os ,
-                                                     char model_type , int nb_state , bool left_right ,
-                                                     int estimator = COMPLETE_LIKELIHOOD ,
-                                                     bool counting_flag = true ,
-                                                     bool state_sequence = true ,
-                                                     double occupancy_mean = D_DEFAULT ,
-                                                     int nb_iter = I_DEFAULT ,
-                                                     int mean_computation = COMPUTED) const;
-   Hidden_semi_markov* hidden_semi_markov_stochastic_estimation(Format_error &error , std::ostream &os ,
-                                                                const Hidden_semi_markov &ihsmarkov ,
-                                                                int min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
-                                                                int max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
-                                                                double parameter = NB_STATE_SEQUENCE_PARAMETER ,
-                                                                int estimator = COMPLETE_LIKELIHOOD ,
-                                                                bool counting_flag = true ,
-                                                                bool state_sequence = true ,
-                                                                int nb_iter = I_DEFAULT) const;
-   Hidden_semi_markov* hidden_semi_markov_stochastic_estimation(Format_error &error , std::ostream &os ,
-                                                                char model_type , int nb_state , bool left_right ,
-                                                                int min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
-                                                                int max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
-                                                                double parameter = NB_STATE_SEQUENCE_PARAMETER ,
-                                                                int estimator = COMPLETE_LIKELIHOOD ,
-                                                                bool counting_flag = true ,
-                                                                bool state_sequence = true ,
-                                                                double occupancy_mean = D_DEFAULT ,
-                                                                int nb_iter = I_DEFAULT) const;
 
    bool lumpability_test(Format_error &error , std::ostream &os , int *symbol , int order = 1) const;
 

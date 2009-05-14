@@ -16,42 +16,81 @@ stochastic_process_type = {
     }
 
 markovian_algorithms = {
-'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
-'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
-'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
-'ForwardBackwardSampling':_stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
-'GeneralizedViterbi':_stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
-'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,             
-'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,             
-'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
+    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
+    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
+    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
+    'ForwardBackwardSampling':_stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
+    'GeneralizedViterbi':_stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
+    'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,             
+    'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,             
+    'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
 }
-                       
+
+sub_markovian_algorithms = {                    
+    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
+    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
+}               
 
 algorithm = {
-  'CTM_BIC':_sequence_analysis.Algorithm.CTM_BIC , # // algorithme Context Tree Maximizing/BIC
-  'CTM_KT': _sequence_analysis.Algorithm.CTM_KT,   # // algorithme Context Tree Maximizing/Krichevsky-Trofimov
-  'LocalBIC': _sequence_analysis.Algorithm.LOCAL_BIC , # // algorithme d'elagage recursif/BIC 
-  'Context': _sequence_analysis.Algorithm.CONTEXT # // algorithme Context
-};
+    'CTM_BIC':_sequence_analysis.Algorithm.CTM_BIC , # // algorithme Context Tree Maximizing/BIC
+    'CTM_KT': _sequence_analysis.Algorithm.CTM_KT,   # // algorithme Context Tree Maximizing/Krichevsky-Trofimov
+    'LocalBIC': _sequence_analysis.Algorithm.LOCAL_BIC , # // algorithme d'elagage recursif/BIC 
+    'Context': _sequence_analysis.Algorithm.CONTEXT # // algorithme Context
+}
 
 
 estimator = {
-  'MaximumLikelihood' : _sequence_analysis.Estimator.MAXIMUM_LIKELIHOOD ,
-  'Laplace' :_sequence_analysis.Estimator.LAPLACE ,
-  'AdaptativeLaplace' :_sequence_analysis.Estimator.ADAPTATIVE_LAPLACE ,
-  'UniformSubset' :_sequence_analysis.Estimator.UNIFORM_SUBSET ,
-  'UniformCardinality':_sequence_analysis.Estimator.UNIFORM_CARDINALITY
+    'MaximumLikelihood' : _sequence_analysis.Estimator.MAXIMUM_LIKELIHOOD ,
+    'Laplace' :_sequence_analysis.Estimator.LAPLACE ,
+    'AdaptativeLaplace' :_sequence_analysis.Estimator.ADAPTATIVE_LAPLACE ,
+    'UniformSubset' :_sequence_analysis.Estimator.UNIFORM_SUBSET ,
+    'UniformCardinality':_sequence_analysis.Estimator.UNIFORM_CARDINALITY
  
 }
 
 likelihood_penalty_type = {
-    'AIC': _stat_tool.AIC,
-    'AICc': _stat_tool.AICc,
-    'BIC': _stat_tool.BIC,
-    'BICc': _stat_tool.BICc,
-    'ICL' : _stat_tool.ICL,
-    'ICLc': _stat_tool.ICLc,
+    'AIC': _stat_tool.LikelihoodPenaltyType.AIC,
+    'AICc': _stat_tool.LikelihoodPenaltyType.AICc,
+    'BIC': _stat_tool.LikelihoodPenaltyType.BIC,
+    'BICc': _stat_tool.LikelihoodPenaltyType.BICc,
+    'ICL' : _stat_tool.LikelihoodPenaltyType.ICL,
+    'ICLc': _stat_tool.LikelihoodPenaltyType.ICLc,
     }
+#todo add this enumerate in boost_python 
+
+COMPUTED = 0
+ESTIMATED = 1
+ONE_STEP_LATE = 2
+
+mean_computation_map = {
+    "Computed" : COMPUTED,
+    "Estimated" : ESTIMATED,
+    "OneStepLate" : ONE_STEP_LATE        
+}
+
+#todo add this enumerate in boost_python 
+PARTIAL_LIKELIHOOD =0
+COMPLETE_LIKELIHOOD =1
+KAPLAN_MEIER =2
+
+estimator_hidden_semi_markov = {
+    "CompleteLikelihood" : COMPLETE_LIKELIHOOD,
+    "PartialLikelihood" :  PARTIAL_LIKELIHOOD,
+    "KaplanMeier" : KAPLAN_MEIER
+}
+
+
+def __parse_kargs__(kargs, key, default=None, map=None):
+    """
+    convert the key (string) into appropriate enumerate value
+    map is a required dictionary 
+    """
+    user_choice = kargs.get(key, default)
+    try:
+        return map[user_choice]
+    except KeyError:    
+        raise KeyError("Wrong choice for %. Possible choices are %s " % (key, map.keys()))
+
 
 def estimate_hidden_variable_order_markov(obj, *args, **kargs):
     """
@@ -93,6 +132,107 @@ def estimate_hidden_variable_order_markov(obj, *args, **kargs):
     return hmarkov
       
        
+def estimate_hidden_semi_markov(obj, *args, **kargs):
+    """
+    >>> hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
+    
+    """
+
+    """  nb_required , 
+         
+                
+         mean_computation = COMPUTED
+         
+    """
+    
+    MIN_NB_STATE_SEQUENCE = 1
+    MAX_NB_STATE_SEQUENCE = 10  
+    NB_STATE_SEQUENCE_PARAMETER = 1
+   
+    Algorithm = kargs.get("Algorithm", "EM") #FORWARD_BACKWARD
+    
+    _AlgorithmCheck = __parse_kargs__(kargs, "Algorithm", default='EM',
+                                map=sub_markovian_algorithms)
+    Estimator = __parse_kargs__(kargs, "Estimator",
+                                default='CompleteLikelihood',
+                                map=estimator_hidden_semi_markov)
+    MeanComputation = __parse_kargs__(kargs, "OccupancyMean",
+                                      default='Computed',
+                                      map=mean_computation_map)
+        
+    StateSequence = kargs.get("StateSequence", True)
+    Counting = kargs.get("Counting", True)
+    InitialOccupancyMean = kargs.get("InitialOccupancyMean", None)
+    OccupancyMean = kargs.get("InitialOccupancyMean", None)
+    NbIteration = kargs.get("NbIteration", -1)
+    MinNbSequence = kargs.get("MinNbSequence", MIN_NB_STATE_SEQUENCE)
+    MaxNbSequence = kargs.get("MaxNbSequence", MAX_NB_STATE_SEQUENCE)
+    Parameter = kargs.get("Parameter",NB_STATE_SEQUENCE_PARAMETER )
+     
+
+#todo check this ?? not really needed for now      
+#if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (min_nb_state_sequence_option)) {
+      #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbStateSequence");
+#if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (max_nb_state_sequence_option)) {
+    #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MaxNbStateSequence");
+#if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (parameter_option)) {
+     #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
+
+   
+    if isinstance(args[0], str) or isinstance(args[0], int):  
+        #note : do we really need the second isinstance ? 
+        #this is the case in the AML code but later there is an error raised 
+        #if args[0] is not a string... 
+        
+        if args[0] == "Ordinary":
+            Type = 'o'
+        elif args[0] == "Equilibrium":
+            Type = 'e'
+        else:
+            raise AttributeError("type must be Ordinary or Equilibrium")
+        
+        if not isinstance(args[1], int):
+            raise AttributeError("nb_state nnot provided. expected an integer after the type.")
+        
+        NbState = args[1]
+        
+        if Type == 'o':
+            if args[2] not in ["LeftRight", "Irreducible"]:
+                raise AttributeError("third arguments must be a strin : LeftRight or Irreducible.")
+            if args[2] == "LeftRight":
+                LeftRight = True
+        elif Type == 'e':
+            LeftRight = False
+                 
+      #todo traise error if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != FORWARD_BACKWARD)) &&(occupancy_mean_option)) {
+    
+        if Algorithm == "EM":
+            hsmarkov = obj.hidden_semi_markov_estimation_model( Type , NbState ,
+                         LeftRight , Estimator , Counting , StateSequence ,
+                         OccupancyMean ,NbIteration , MeanComputation)
+
+        elif Algorithm == "MCEM": #FORWARD_BACKWARD_SAMPLING : 
+            #if Estimator == KAPLAN_MEIER:
+            #    Estimator = COMPLETE_LIKELIHOOD
+
+            hsmarkov = obj.hidden_semi_markov_stochastic_estimation_model(
+                Type, NbState, LeftRight, MinNbSequence, MaxNbSequence,
+                Parameter, Estimator, Counting, StateSequence,
+                OccupancyMean, NbIteration)
+        
+
+    
+    if isinstance(args[0], _sequence_analysis._Hidden_semi_markov):
+        hsmarkov = args[0] 
+        if Algorithm == 'EM':
+            return obj.hidden_semi_markov_estimation(hsmarkov,
+                                Estimator, Counting, StateSequence,
+                                NbIteration, MeanComputation)
+        elif Algorithm == 'MCEM':
+            return obj.hidden_semi_markov_stochastic_estimation(hsmarkov,
+                            MinNbSequence, MaxNbSequence,
+                            Parameter, Estimator, Counting,
+                            StateSequence, NbIteration)
 
 
 
@@ -180,19 +320,22 @@ def Estimate(obj, itype, *args, **kargs):
     """
     
     """
-    fct_map = {
+    """    fct_map = {
         "VARIABLE_ORDER_MARKOV": "estimate_variable_order_markov",
-        "HIDDEN_VARIABLE_ORDER_MARKOV": "estimate_hidden_variable_order_markov"
+        "HIDDEN_VARIABLE_ORDER_MARKOV": "estimate_hidden_variable_order_markov",
+        "HIDDEN_SEMI-MARKOV": "estimate_hidden_semi_markov"
         }
-    
+    """
     #fct = getattr(obj, "estimate_%s" % fct_map[type] )
     
     
-    if itype in fct_map.keys():
-        if itype == "VARIABLE_ORDER_MARKOV":    
-            return estimate_variable_order_markov(obj, *args, **kargs)
-        elif itype == "HIDDEN_VARIABLE_ORDER_MARKOV":
-            return estimate_hidden_variable_order_markov(obj, *args, **kargs)
+    #if itype in fct_map.keys():
+    if itype == "VARIABLE_ORDER_MARKOV":    
+        return estimate_variable_order_markov(obj, *args, **kargs)
+    elif itype == "HIDDEN_VARIABLE_ORDER_MARKOV":
+        return estimate_hidden_variable_order_markov(obj, *args, **kargs)
+    elif itype == "HIDDEN_SEMI-MARKOV":
+        return estimate_hidden_semi_markov(obj, *args, **kargs)
     else:
         from openalea.stat_tool.estimate import Estimate as HistoEstimate
         return HistoEstimate(obj, itype, *args, **kargs)

@@ -40,6 +40,8 @@ using namespace boost::python;
 using namespace boost;
 using namespace sequence_analysis;
 
+
+#define WRAP RenewalWrap
 class RenewalWrap {
 
 public:
@@ -88,6 +90,46 @@ public:
     return ret;
   }
 
+
+  static Renewal_data*
+  simulation_histogram(const Renewal& input, char itype, const Histogram & ihtime)
+  {
+	 Format_error error;
+	 Renewal_data* ret;
+	 ret = input.simulation(error, itype , ihtime);
+	 return ret;
+  }
+
+  static Renewal_data*
+  simulation_nb_elements(const Renewal& input, char itype , int nb_element , int itime)
+  {
+	Format_error error;
+	Renewal_data* ret;
+	ret = input.simulation(error, itype , nb_element, itime);
+	return ret;
+  }
+
+  static Renewal_data*
+  simulation_time_events(const Renewal& input, char itype , int nb_element,
+		  const Time_events &timev)
+  {
+  	Format_error error;
+  	Renewal_data* ret;
+  	ret = input.simulation(error, itype , nb_element, timev);
+  	return ret;
+  }
+
+  static Parametric_model*
+      extract(const Renewal& seq, int type, int state)
+      {
+        Format_error error;
+        Parametric_model* ret;
+        ret = seq.extract(error, type, state);
+        if (!ret)
+          sequence_analysis::wrap_util::throw_error(error);
+        return ret;
+      }
+
 };
 
 // Boost declaration
@@ -105,15 +147,18 @@ void class_renewal() {
 
     .def("file_ascii_write", RenewalWrap::file_ascii_write,"Save vector summary into a file")
 
-    DEF_RETURN_VALUE_NO_ARGS("get_renewal_data", &RenewalWrap::get_renewal_data,"returns renewal data")
-    DEF_RETURN_VALUE_NO_ARGS("get_time", &RenewalWrap::get_time,"returns time")
+    DEF_RETURN_VALUE_NO_ARGS("get_renewal_data", RenewalWrap::get_renewal_data,"returns renewal data")
+    DEF_RETURN_VALUE_NO_ARGS("get_time", RenewalWrap::get_time, "returns time")
+    DEF_RETURN_VALUE("simulation_histogram", RenewalWrap::simulation_histogram, args("todo"), "simulation")
+    .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
+
+    DEF_RETURN_VALUE("simulation_nb_elements", RenewalWrap::simulation_nb_elements, args("todo"), "simulation")
+	DEF_RETURN_VALUE("simulation_time_events", RenewalWrap::simulation_time_events, args("todo"), "simulation")
     ;
 
 /*
    Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_event);
    Renewal(const Renewal &renew , bool data_flag = true)   { copy(renew , data_flag); }
-
-   Parametric_model* extract(Format_error &error , int dist_type , int itime = I_DEFAULT) const;
 
    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
    bool ascii_write(Format_error &error , const char *path ,
@@ -123,20 +168,17 @@ void class_renewal() {
 	                    const char *title = 0) const;
 
 
-void computation(bool inter_event_flag = true , char itype = 'v' , const Distribution *dtime = 0);
-double likelihood_computation(const Time_events &timev) const;
-Renewal_data* simulation(Format_error &error , char itype , const Histogram &ihtime) const;
-Renewal_data* simulation(Format_error &error , char itype , int nb_element , int itime) const;
-Renewal_data* simulation(Format_error &error , char itype , int nb_element , const Time_events &itimev) const;
+	void computation(bool inter_event_flag = true , char itype = 'v' , const Distribution *dtime = 0);
+	double likelihood_computation(const Time_events &timev) const;
 
-Parametric* get_inter_event() const { return inter_event; }
-Length_bias* get_length_bias() const { return length_bias; }
-Backward* get_backward() const { return backward; }
-Forward* get_forward() const { return forward; }
-Parametric* get_nevent_time(int inb_event) const { return nevent_time[inb_event]; }
-Nb_event* get_nb_event(int itime) const { return nb_event[itime]; }
-Distribution* get_mixture() const { return mixture; }
-Curves* get_index_event() const { return index_event; }
+	Parametric* get_inter_event() const { return inter_event; }
+	Length_bias* get_length_bias() const { return length_bias; }
+	Backward* get_backward() const { return backward; }
+	Forward* get_forward() const { return forward; }
+	Parametric* get_nevent_time(int inb_event) const { return nevent_time[inb_event]; }
+	Nb_event* get_nb_event(int itime) const { return nb_event[itime]; }
+	Distribution* get_mixture() const { return mixture; }
+	Curves* get_index_event() const { return index_event; }
 */
 }
 

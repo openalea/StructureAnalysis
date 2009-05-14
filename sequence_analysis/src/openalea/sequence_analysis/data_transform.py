@@ -568,9 +568,64 @@ def ComputeSelfTransition(obj):
     """ """
     obj.self_transition_computation()
     
+def TransitionCount(obj, max_order, begin=False, 
+                    estimator="MAXIMUM_LIKELIHOOD", filename=None):
+    
+    estimator_map = {
+                     "MaximumLikelihood": 0, # MAXIMUM_LIKELIHOOD;
+                     "Laplace": 1, # LAPLACE;
+                     "AdaptativeLaplace": 2, # ADAPTATIVE_LAPLACE;
+                     "UniformSubset": 3, # UNIFORM_SUBSET;
+                     "UniformCardinality" :4 #estimator = UNIFORM_CARDINALITY;
+                     }
+    estimator_int = estimator_map[estimator]
+    obj.transition_count(max_order, begin, estimator_int, filename)
     
 def Cross(obj):
     return obj.cross();
+    
+    
+def PointwiseAverage(obj, *args, **kargs):
+    
+    SEQUENCE = 0
+    SUBTRACTION_RESIDUAL = 1
+    STANDARDIZED_RESIDUAL = 2
+    
+    output_map = {
+       "Sequence": SEQUENCE,
+       "SubtractionResidual": SUBTRACTION_RESIDUAL,
+       "Residual": SUBTRACTION_RESIDUAL,
+       "StandardizedResidual":  STANDARDIZED_RESIDUAL
+       }
+            
+    StandardDeviation = kargs.get("StandardDeviation", False)
+    Output = kargs.get("Output", "Sequence")
+    Output = output_map[Output]
+    Filename = kargs.get("Filename", None)
+    Format = kargs.get("Format", 'a')
+    
+    return obj.pointwise_average(StandardDeviation, Output,
+                                 Filename, Format);
+
+    
+def ConsecutiveValues(obj, *args, **kargs):    
+        
+        
+    StandardDeviation = kargs.get("AddVariable", False)
+
+    if len(args)==1:
+        variable = variable
+    else:
+        variable = 1
+     
+    variable = check_nb_variable(obj, variable)
+    
+    sequence = obj.consecutive_values(variable, AddVariable)
+    
+    return sequence.markovian_sequences()
+
+    
+    
     
 def vec2list(vector):
     """

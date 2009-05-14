@@ -832,11 +832,6 @@ public:
 			variable, itype, max_lag);
   }
 
-
-
-
-
-
   static Vectors*
   extract_vectors(const Sequences& seq, int feature_type,
       int variable= I_DEFAULT ,int value = I_DEFAULT)
@@ -918,6 +913,49 @@ public:
   		sequence_analysis::wrap_util::throw_error(error);
   	return ret;
   }
+
+
+  static Renewal_data*
+  extract_renewal_data(const Sequences & input,
+		  int variable , int begin_index , int end_index)
+  {
+	  Format_error error;
+	  Renewal_data * ret;
+	  ret = input.extract_renewal_data(error, variable, begin_index, end_index);
+	  if (!ret)
+	    	sequence_analysis::wrap_util::throw_error(error);
+	  return ret;
+  }
+
+  static Time_events*
+  extract_time_events(const Sequences & input,
+		  int variable , int begin_date , int end_date ,
+		  int previous_date = I_DEFAULT , int next_date = I_DEFAULT)
+
+  {
+	  Format_error error;
+	  Time_events * ret;
+	  ret = input.extract_time_events(error, variable, begin_date, end_date,
+			  previous_date, next_date);
+	  if (!ret)
+	    	sequence_analysis::wrap_util::throw_error(error);
+	  return ret;
+  }
+
+  static Vectors*
+  build_vectors(const Sequences & input,
+      bool index_variable)
+  {
+    Vectors * ret;
+
+    ret = input.build_vectors(index_variable);
+
+    return ret;
+  }
+
+
+
+
 
 };
 
@@ -1006,7 +1044,7 @@ void class_sequences() {
     .def("file_ascii_write", SequencesWrap::file_ascii_write,"Save vector summary into a file")
     .def("file_ascii_data_write", SequencesWrap::file_ascii_data_write,"Save vector data into a file")
 
-
+    DEF_RETURN_VALUE("build_vectors", SequencesWrap::build_vectors, args("index_variable"), "build a vector from sequence")
     DEF_RETURN_VALUE("correlation_computation", SequencesWrap::correlation_computation, args("variable1", "variable2", "type","max_lag", "normalization"),"compute correlation")
     DEF_RETURN_VALUE("value_select", SequencesWrap::value_select,args("variable", "min", "max", "keep"),"Selection of individuals according to the values taken by a variable")
     DEF_RETURN_VALUE("select_variable", SequencesWrap::select_variable, args("variables", "keep"), "select variable given a list of index")
@@ -1014,6 +1052,8 @@ void class_sequences() {
     DEF_RETURN_VALUE("index_parameter_select", SequencesWrap::index_parameter_select,args("min_index_parameter", "max_index_parameter", "keep"),"Select sequences in an index parameter range")
     DEF_RETURN_VALUE("index_parameter_extract", SequencesWrap::index_parameter_extract,args("min_index_parameter", "max_index_parameter"),"Select sequences in an index parameter range")
     DEF_RETURN_VALUE("extract_value", SequencesWrap::extract_value, args("variable"),"Extract histogram")
+    DEF_RETURN_VALUE("extract_renewal_data", SequencesWrap::extract_renewal_data, args("todo"),"Extract renewal_data")
+    DEF_RETURN_VALUE("extract_time_events", SequencesWrap::extract_time_events, args("todo"),"Extract time events")
     DEF_RETURN_VALUE("shift", SequencesWrap::shift, args("variable","param"),"Shift")
     DEF_RETURN_VALUE("remove_run",SequencesWrap::remove_run, args("variable","ivalue", "position", "max_run_length"), "see RemoveRun")
     DEF_RETURN_VALUE("length_select",SequencesWrap::length_select, args("min_length", "max_length", "keep"),"see LengthSelect")
@@ -1070,8 +1110,6 @@ void class_sequences() {
 
 	    Tops* tops(Format_error &error) const;
 	    bool check(Format_error &error , const char *pattern_label);
-	    Time_events* extract_time_events(Format_error &error , int variable , int begin_date , int end_date ,  int previous_date = I_DEFAULT , int next_date = I_DEFAULT) const;
-	    Renewal_data* extract_renewal_data(Format_error &error , int variable , int begin_index , int end_index) const;
 
 	    std::ostream& line_write(std::ostream &os) const;
 	    bool plot_data_write(Format_error &error , const char *prefix , const char *title = 0) const;
@@ -1090,37 +1128,19 @@ void class_sequences() {
 	    double kurtosis_computation(int variable , double mean , double variance) const;
 
 	    Histogram* value_index_interval_computation(Format_error &error , int variable , int value) const;
-	    Correlation* correlation_computation(Format_error &error , int variable1 , int variable2 ,
-	                                         int itype = PEARSON , int max_lag = I_DEFAULT ,
-	                                         int normalization = EXACT) const;
-	    Correlation* partial_autocorrelation_computation(Format_error &error , int variable ,
-	                                                     int itype = PEARSON , int max_lag = I_DEFAULT) const;
 
-	    Sequences* multiple_alignment(Format_error &error , std::ostream &os , const Vector_distance &ivector_dist ,
-	                                  bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,
-	                                  double indel_factor = INDEL_FACTOR_N , int algorithm = AGGLOMERATIVE ,
-	                                  const char *path = 0) const;
+	    Sequences* multiple_alignment(Format_error &error , std::ostream &os , const Vector_distance &ivector_dist ,	                                  bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,double indel_factor = INDEL_FACTOR_N , int algorithm = AGGLOMERATIVE , const char *path = 0) const;
 
 	    Sequences* segmentation(Format_error &error , std::ostream &os, int iidentifier , int nb_segment , int *ichange_point , int *model_type , int output = SEQUENCE) const;
 	    Sequences* segmentation(Format_error &error , std::ostream &os, int *nb_segment , int *model_type , int iidentifier = I_DEFAULT ,  int output = SEQUENCE) const;
 	    Sequences* segmentation(Format_error &error , std::ostream &os, int iidentifier , int max_nb_segment , int *model_type) const;
-            Sequences* segmentation(Format_error &error , int iidentifier , int nb_segment ,  const Vector_distance &ivector_dist , std::ostream &os , int output = SEGMENT) const;
+        Sequences* segmentation(Format_error &error , int iidentifier , int nb_segment ,  const Vector_distance &ivector_dist , std::ostream &os , int output = SEGMENT) const;
 
 	    Sequences* hierarchical_segmentation(Format_error &error , std::ostream &os , int iidentifier , int max_nb_segment , int *model_type) const;
 
-
-
-	    bool segment_profile_write(Format_error &error , std::ostream &os , int iidentifier ,
-	                               int nb_segment , int *model_type , int output = SEGMENT ,
-	                               char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
-	                               int nb_segmentation = NB_SEGMENTATION) const;
-	    bool segment_profile_write(Format_error &error , const char *path , int iidentifier ,
-	                               int nb_segment , int *model_type , int output = SEGMENT ,
-	                               char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
-	                               int nb_segmentation = NB_SEGMENTATION) const;
-	    bool segment_profile_plot_write(Format_error &error , const char *prefix ,
-	                                    int iidentifier , int nb_segment , int *model_type ,
-	                                    int output = SEGMENT , const char *title = 0) const;
+	    bool segment_profile_write(Format_error &error , std::ostream &os , int iidentifier ,int nb_segment , int *model_type , int output = SEGMENT , char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING , int nb_segmentation = NB_SEGMENTATION) const;
+	    bool segment_profile_write(Format_error &error , const char *path , int iidentifier , int nb_segment , int *model_type , int output = SEGMENT , char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING , int nb_segmentation = NB_SEGMENTATION) const;
+	    bool segment_profile_plot_write(Format_error &error , const char *prefix , int iidentifier , int nb_segment , int *model_type ,    int output = SEGMENT , const char *title = 0) const;
 
 	    Histogram* get_hlength() const { return hlength; }
 	    int get_index_parameter_type() const { return index_parameter_type; }

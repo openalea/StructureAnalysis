@@ -117,10 +117,7 @@ void class_top_parameters() {
     bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,  const char *title = 0) const;
-  */
 
-  //shall we move this function to private in the header ? or do we need to expose it ?
-  /*
     void axillary_nb_internode_computation(int imax_position);
   */
 
@@ -228,7 +225,7 @@ void class_tops() {
 	class_<Tops, bases<Sequences> > ("_Tops", "Tops")
 	.def(init<Sequences> ())
 	.def("__init__", make_constructor(TopsWrap::tops_from_file))
-        .def("__init__", make_constructor(TopsWrap::tops_from_lists))
+    .def("__init__", make_constructor(TopsWrap::tops_from_lists))
 
 	.def(self_ns::str(self)) //__str__
 

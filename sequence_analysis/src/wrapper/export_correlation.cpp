@@ -63,31 +63,6 @@ public:
   }
 
 
-
-/*
-	static Correlation* merge(int nb_correl, const boost::list::python& input_correlation)
-	{
-		Format_error error;
-		Correlation **correlation = NULL;
-
-        int nb_correlation = boost::python::len(input_correlation);
-        correlation = new Correlation*[nb_correlation];
-
-        for (i=0; i<nb_correlation; i++)
-        {
-
-            boost::python::list one_correlation = extract<boost::python::list> (input_correlation[i]);
-            int nb = boost::python::len(one_correlation);
-
-            correlation[i] = new Correlation[nb];
-        }
-
-		correlation = merge(error, nb_correl, old_format);
-
-		return correlation;
-	}
-*/
-
   static bool
   white_noise_correlation_order(Correlation& input, int order)
 
@@ -131,11 +106,6 @@ public:
    }
 
 
-
-
-
-
-
 };
 
 
@@ -155,19 +125,17 @@ void class_correlation() {
     .def("get_variable1", &Correlation::get_variable1,args("index"))
     .def("get_variable2", &Correlation::get_variable2,args("index"))
     .def("get_white_noise", &Correlation::get_white_noise,args("lag"))
-    DEF_RETURN_VALUE("merge", &CorrelationWrap::merge, args("list"),"todo")
+    DEF_RETURN_VALUE("merge", WRAP::merge, args("list"),"todo")
     .def("white_noise_correlation_dist", WRAP::white_noise_correlation_dist, args("dist"), "todo")
     .def("white_noise_correlation_order", WRAP::white_noise_correlation_order, args("order"), "todo")
     .def("white_noise_correlation_filter", WRAP::white_noise_correlation_filter, args("filter"), "todo")
+
 
     ;
 
 //todo
 /*
-  Correlation* merge(Format_error &error , int nb_correl , const Correlation **icorrel) const;
   std::ostream& line_write(std::ostream &os) const;
-
-  bool white_noise_correlation(Format_error &error , const Distribution &dist);
 */
 }
 

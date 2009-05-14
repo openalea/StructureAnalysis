@@ -138,6 +138,52 @@ public:
 	return ret;
   }
 
+
+  /*Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength , bool counting_flag = true , bool divergence_flag = false) const;
+  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
+  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
+  */
+
+  static Variable_order_markov_data*
+    simulation_markovian_sequences(const Variable_order_markov &input, int nb_sequence,
+  		  const Markovian_sequences input_seq, bool counting_flag)
+    {
+  	Format_error error;
+  	Variable_order_markov_data* ret = NULL;
+
+  	ret = input.simulation(error, nb_sequence,
+  			input_seq, counting_flag);
+
+      if (!ret)
+          sequence_analysis::wrap_util::throw_error(error);
+
+  	return ret;
+    }
+  static Variable_order_markov_data*
+   simulation_histogram(const Variable_order_markov &input,
+ 		  const Histogram &hlength,  bool counting_flag, bool divergence_flag)
+   {
+ 	Format_error error;
+ 	Variable_order_markov_data* ret;
+
+ 	ret = input.simulation(error, hlength, counting_flag, divergence_flag);
+
+ 	return ret;
+   }
+
+   static Variable_order_markov_data*
+   simulation_nb_sequences(const Variable_order_markov &input,
+ 		  int nb_sequence, int length, bool counting_flag)
+   {
+ 	Format_error error;
+ 	Variable_order_markov_data* ret;
+
+ 	ret = input.simulation(error,nb_sequence, length, counting_flag);
+
+ 	return ret;
+   }
+
+
 };
 
 // Boost declaration
@@ -176,14 +222,20 @@ void class_variable_order_markov() {
     .def("get_nb_memory", &Variable_order_markov::get_nb_memory, args("memory"),"todo")
     .def("get_previous", &Variable_order_markov::get_previous,args("memory", "state"), "todo")
 
-    DEF_RETURN_VALUE("extract", &WRAP::extract, args("type","variable","value"), "returns parametric model")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", &WRAP::extract_data, "returns variable_order_markov_data")
-    DEF_RETURN_VALUE("output_autocorrelation_computation", &WRAP::output_autocorrelation_computation, args("variable", "output", "max_lag"), "todo")
-    DEF_RETURN_VALUE("state_autocorrelation_computation", &WRAP::state_autocorrelation_computation, args("state", "max_lag"), "todo")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "returns variable_order_markov_data")
 
-    .def("likelihood_computation", &WRAP::likelihood_computation, args("seq", "index"),"todo")
-    DEF_RETURN_VALUE("divergence_computation", &WRAP::divergence_computation, args("input", "input_markov", "input_sequence", "filename"), "todo")
-    DEF_RETURN_VALUE("thresholding", &WRAP::thresholding, args("index"), "todo")
+    DEF_RETURN_VALUE("extract", WRAP::extract, args("type","variable","value"), "returns parametric model")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "returns variable_order_markov_data")
+    DEF_RETURN_VALUE("output_autocorrelation_computation", WRAP::output_autocorrelation_computation, args("variable", "output", "max_lag"), "todo")
+    DEF_RETURN_VALUE("state_autocorrelation_computation", WRAP::state_autocorrelation_computation, args("state", "max_lag"), "todo")
+
+    .def("likelihood_computation", WRAP::likelihood_computation, args("seq", "index"),"todo")
+    DEF_RETURN_VALUE("divergence_computation", WRAP::divergence_computation, args("input", "input_markov", "input_sequence", "filename"), "todo")
+    DEF_RETURN_VALUE("thresholding", WRAP::thresholding, args("index"), "todo")
+
+    DEF_RETURN_VALUE("simulation_markovian_sequences", WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("simulation_nb_sequences", WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
 
 
     ;
@@ -195,19 +247,12 @@ void class_variable_order_markov() {
   Variable_order_markov(const Variable_order_markov *pmarkov ,  const Nonparametric_process *pobservation , int length);
   Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)  :Chain(markov) { copy(markov , data_flag); }
 
-  Parametric_model* extract(Format_error &error , int type , int variable , int value) const;
-  Variable_order_markov_data* extract_data(Format_error &error) const;
-
-
   void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
   void characteristic_computation(const Variable_order_markov_data &seq , bool counting_flag ,
   int variable = I_DEFAULT , bool length_flag = true);
 
   double likelihood_computation(const Variable_order_markov_data &seq) const;
 
-  Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength , bool counting_flag = true , bool divergence_flag = false) const;
-  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
-  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
 
   Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **imarkov , Histogram **hlength ,  const char *path = 0) const;
   Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,const Variable_order_markov **markov , int nb_sequence ,  int length , const char *path = 0) const;

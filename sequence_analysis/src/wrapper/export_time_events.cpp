@@ -146,6 +146,23 @@ public:
       sequence_analysis::wrap_util::throw_error(error);
    }
 
+  static Time_events*
+  merge(Time_events& input_seq, const boost::python::list& seqs)
+   {
+     int nb_seq = len(seqs);
+     sequence_analysis::wrap_util::auto_ptr_array<const Time_events *> sequens(
+         new const Time_events*[nb_seq]);
+
+     for (int i = 0; i < nb_seq; i++)
+       sequens[i] = boost::python::extract<Time_events *> (seqs[i]);
+
+       //todo does not compile because merge is protected
+     //Time_events *ret;
+     //ret = input_seq.merge(nb_seq, sequens.get());
+     //return ret;
+   }
+
+
 
 
 };
@@ -177,6 +194,7 @@ void class_time_events() {
     DEF_RETURN_VALUE("time_scaling", TimeEventsWrap::time_scaling, args("scaling"),"returns a time-scaled TimeEvents")
     DEF_RETURN_VALUE("time_select", TimeEventsWrap::time_select, args("min index", "max index" ),"returns a time-selectd TimeEvents")
     DEF_RETURN_VALUE("nb_event_select", TimeEventsWrap::nb_event_select, args("nb_event_select"),"returns a nb_event-selected TimeEvents")
+    DEF_RETURN_VALUE_NO_ARGS("merge", TimeEventsWrap::merge, "Merge sequences")
 
     ;
 
@@ -198,18 +216,20 @@ Time_events(int inb_element , int *itime , int *inb_event){ build(inb_element , 
 Time_events(int nb_sample , const Time_events **ptimev) { merge(nb_sample , ptimev); }
 Time_events(const Time_events &timev) { copy(timev); }
 
+  Renewal* estimation(Format_error &error , std::ostream &os , char type ,
+                       const Parametric &iinter_event , int estimator = LIKELIHOOD ,
+                          int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
+                          int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                          int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+  Renewal* estimation(Format_error &error , std::ostream &os , char type , int estimator = LIKELIHOOD ,
+                          int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
+                          int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                          int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+
+
 
 double information_computation() const;
 
-Renewal* estimation(Format_error &error , std::ostream &os , char type ,
-                        const Parametric &iinter_event , int estimator = LIKELIHOOD ,
-                        int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
-Renewal* estimation(Format_error &error , std::ostream &os , char type , int estimator = LIKELIHOOD ,
-                        int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
 */
 

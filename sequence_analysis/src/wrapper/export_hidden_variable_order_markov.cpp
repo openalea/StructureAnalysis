@@ -26,6 +26,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+#include "stat_tool/distance_matrix.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/variable_order_markov.h"
 #include "sequence_analysis/hidden_variable_order_markov.h"
@@ -73,15 +74,14 @@ public:
   }
 
   static Variable_order_markov_data*
-  simulation(const Hidden_variable_order_markov &input, int nb_sequence,
-		  const Markovian_sequences input_seq)
+  simulation_markovian_sequences(const Hidden_variable_order_markov &input, int nb_sequence,
+		  const Markovian_sequences input_seq, bool counting_flag)
   {
 	Format_error error;
 	Variable_order_markov_data* ret = NULL;
-	bool counting=true;
 
 	ret = input.simulation(error, nb_sequence,
-			input_seq, counting);
+			input_seq, counting_flag);
 
     if (!ret)
         sequence_analysis::wrap_util::throw_error(error);
@@ -99,10 +99,72 @@ public:
   		Variable_order_markov_data,  seq, characteristic_flag);
   }
 
+  static Variable_order_markov_data*
+  simulation_histogram(const Hidden_variable_order_markov &input,
+		  const Histogram &hlength,  bool counting_flag, bool divergence_flag)
+  {
+	Format_error error;
+	Variable_order_markov_data* ret;
+
+	ret = input.simulation(error, hlength, counting_flag, divergence_flag);
+
+	return ret;
+  }
+
+  static Variable_order_markov_data*
+  simulation_nb_sequences(const Hidden_variable_order_markov &input,
+		  int nb_sequence, int length, bool counting_flag)
+  {
+	Format_error error;
+	Variable_order_markov_data* ret;
+
+	ret = input.simulation(error,nb_sequence, length, counting_flag);
+
+	return ret;
+  }
+
+
+  //Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,st Hidden_variable_order_markov **ihmarkov , Histogram **hlength , const char *path = 0) const;
+
+  //Distance_matrix* divergence_computation(Format_error &error , std::ostream &os ,int nb_model ,const Hidden_variable_order_markov **hmarkov , int nb_sequence ,   int length , const char *path = 0) const;
 
 
 
+  static Distance_matrix*
+  divergence_computation(const Hidden_variable_order_markov &input,
+      boost::python::list &input_markov, boost::python::list &input_sequence,
+      int nb_seq, char *filename)
+  {
+    // there is as much Variable_order_markov elmts as Markovian elts
+    // 1 for input and N-1 for input_markov and N input_sequence
 
+    Distance_matrix *ret = NULL;
+    Format_error error;
+    std::stringstream os;
+    int nb_markov = len(input_markov);
+    int nb_sequence = len(input_sequence);
+
+    sequence_analysis::wrap_util::auto_ptr_array<
+        const Hidden_variable_order_markov *> markov(
+        new const Hidden_variable_order_markov*[nb_markov]);
+    for (int i = 0; i < nb_markov; i++)
+      markov[i] = boost::python::extract<Hidden_variable_order_markov*>(
+          input_markov[i]);
+
+    sequence_analysis::wrap_util::auto_ptr_array<const Markovian_sequences *>
+        sequence(new const Markovian_sequences*[nb_sequence]);
+    for (int i = 0; i < nb_sequence; i++)
+      sequence[i] = boost::python::extract<Markovian_sequences*>(
+          input_sequence[i]);
+
+    ret = input.divergence_computation(error, os, nb_markov + 1, markov.get(),
+        nb_seq, sequence.get(), filename);
+    cerr << os.str() << endl;
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+
+    return ret;
+  }
 };
 
 
@@ -116,9 +178,12 @@ void class_hidden_variable_order_markov() {
 
         .def(self_ns::str(self)) //__str__
 
-		DEF_RETURN_VALUE("thresholding", &WRAP::thresholding, args("probability"), "todo")
-		DEF_RETURN_VALUE("simulate", &WRAP::simulation, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+		DEF_RETURN_VALUE("thresholding", WRAP::thresholding, args("probability"), "todo")
+		DEF_RETURN_VALUE("simulation_markovian_sequences", WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+		DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+		DEF_RETURN_VALUE("simulation_nb_sequences", WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
 		DEF_RETURN_VALUE("state_sequence_computation", WRAP::state_sequence_computation, args(""),"")
+		DEF_RETURN_VALUE("divergence_computation", WRAP::divergence_computation, args("input", "input_markov", "input_sequence", "filename"), "todo")
 
         ;
       /*
@@ -127,56 +192,23 @@ void class_hidden_variable_order_markov() {
                                        Nonparametric_process **nonparametric_observation ,
                                        Parametric_process **parametric_observation , int length)
 
-
           Hidden_variable_order_markov(const Hidden_variable_order_markov &hmarkov , bool data_flag = true)
 
           std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-          bool ascii_write(Format_error &error , const char *path ,
-                           bool exhaustive = false) const;
+          bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
           bool spreadsheet_write(Format_error &error , const char *path) const;
 
- double likelihood_computation(const Markovian_sequences &seq ,
-  double *posterior_probability = 0 ,
-     int index = I_DEFAULT) const;
+		 double likelihood_computation(const Markovian_sequences &seq ,double *posterior_probability = 0 ,  int index = I_DEFAULT) const;
 
-          bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,
-                                   int identifier = I_DEFAULT , char format = 'a' ,
-                                   int state_sequence = GENERALIZED_VITERBI ,
-                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
-          bool state_profile_write(Format_error &error , const char *path , const Markovian_sequences &iseq ,
-                                   int identifier = I_DEFAULT , char format = 'a' ,
-                                   int state_sequence = GENERALIZED_VITERBI ,
-                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
-          bool state_profile_ascii_write(Format_error &error , std::ostream &os , int identifier ,
-                                         int state_sequence = GENERALIZED_VITERBI ,
-                                         int nb_state_sequence = NB_STATE_SEQUENCE) const;
-          bool state_profile_write(Format_error &error , const char *path ,
-                                   int identifier = I_DEFAULT , char format = 'a' ,
-                                   int state_sequence = GENERALIZED_VITERBI ,
-                                   int nb_state_sequence = NB_STATE_SEQUENCE) const;
-
-          bool state_profile_plot_write(Format_error &error , const char *prefix ,
-                                        const Markovian_sequences &iseq ,
-                                        int identifier , const char *title = 0) const;
-          bool state_profile_plot_write(Format_error &error , const char *prefix ,
-                                        int identifier , const char *title = 0) const;
+          bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,int identifier = I_DEFAULT , char format = 'a' ,int state_sequence = GENERALIZED_VITERBI ,            int nb_state_sequence = NB_STATE_SEQUENCE) const;
+          bool state_profile_write(Format_error &error , const char *path , const Markovian_sequences &iseq ,int identifier = I_DEFAULT , char format = 'a' ,int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
+          bool state_profile_ascii_write(Format_error &error , std::ostream &os , int identifier ,int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
+          bool state_profile_write(Format_error &error , const char *path ,int identifier = I_DEFAULT , char format = 'a' ,int state_sequence = GENERALIZED_VITERBI ,    int nb_state_sequence = NB_STATE_SEQUENCE) const;
+          bool state_profile_plot_write(Format_error &error , const char *prefix ,  const Markovian_sequences &iseq ,    int identifier , const char *title = 0) const;
+          bool state_profile_plot_write(Format_error &error , const char *prefix ,   int identifier , const char *title = 0) const;
 
 
-          Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength ,
-                                                 bool counting_flag = true , bool divergence_flag = false) const;
-          Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                                 int length , bool counting_flag = true) const;
-          Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                                 const Markovian_sequences &iseq ,
-                                                 bool counting_flag = true) const;
 
-          Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                                  const Hidden_variable_order_markov **ihmarkov ,
-                                                  Histogram **hlength , const char *path = 0) const;
-          Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                                  const Hidden_variable_order_markov **hmarkov , int nb_sequence ,
-                                                  int length , const char *path = 0) const;
-          Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model, const Hidden_variable_order_markov **hmarkov , int nb_sequence ,  const Markovian_sequences **seq , const char *path = 0) const;
 
 */
 }

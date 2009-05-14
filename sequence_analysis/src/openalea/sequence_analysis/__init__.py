@@ -10,5 +10,7 @@ from time_events import *
 #from top_parameters import *
 #from tops import *
 from sequences import *
+from hidden_semi_markov import *
+from semi_markov import *
 from data_transform  import *
 

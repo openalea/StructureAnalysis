@@ -25,6 +25,7 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+#include "stat_tool/distance_matrix.h"
 #include "stat_tool/stat_label.h"
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/semi_markov.h"
@@ -36,12 +37,12 @@
 #include <boost/python/list.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
-
 #include "boost_python_aliases.h"
 
 using namespace boost::python;
 using namespace boost;
 
+#define WRAP SemiMarkovWrap
 class SemiMarkovWrap
 {
 
@@ -57,16 +58,12 @@ public:
     semi_markov = semi_markov_ascii_read(error, filename, length,
         counting_flag, cumul_threshold);
 
-    /*    if(!top_parameters)
-     {
-     sequence_analysis::wrap_util::throw_error(error);
-     }
-     */
+
     return boost::shared_ptr<Semi_markov>(semi_markov);
   }
 
   static Semi_markov_data*
-  extact_data(const Semi_markov& input)
+  extract_data(const Semi_markov& input)
   {
     Format_error err;
     Semi_markov_data *ret;
@@ -116,13 +113,78 @@ public:
 
 
 
+  static Semi_markov*
+  thresholding(const Semi_markov& input, double min_probability)
+  {
+	return input.thresholding(min_probability);
+  }
 
-  /*
-  static Time_events*
-    nb_event_select(const Time_events& input, int min, int max){
-      SIMPLE_METHOD_TEMPLATE_1(input, nb_event_select, Time_events, min, max);
-    }
-*/
+  static Semi_markov_data*
+  simulation_histogram(const Semi_markov& input,
+	   const Histogram &hlength , bool counting_flag, bool divergence_flag)
+  {
+   	Format_error error;
+   	Semi_markov_data* ret;
+   	ret = input.simulation(error, hlength, counting_flag, divergence_flag);
+   	return ret;
+  }
+
+  static Semi_markov_data*
+  simulation_nb_elements(const Semi_markov& input,
+		 int nb_sequence , int length , bool counting_flag)
+  {
+   	Format_error error;
+   	Semi_markov_data* ret;
+   	ret = input.simulation(error, nb_sequence, length, counting_flag);
+   	return ret;
+  }
+
+  static Semi_markov_data*
+  simulation_markovian_sequences(const Semi_markov& input,
+		  int nb_sequence , const Markovian_sequences &iseq , bool counting_flag)
+  {
+   	Format_error error;
+   	Semi_markov_data* ret;
+   	ret = input.simulation(error, nb_sequence, iseq, counting_flag);
+   	return ret;
+  }
+
+
+  static Distance_matrix*
+  divergence_computation(const Semi_markov &input,
+      boost::python::list &input_markov, boost::python::list &input_sequence,
+      int nb_seq, char *filename)
+  {
+    // there is as much Variable_order_markov elmts as Markovian elts
+    // 1 for input and N-1 for input_markov and N input_sequence
+
+    Distance_matrix *ret = NULL;
+    Format_error error;
+    std::stringstream os;
+    int nb_markov = len(input_markov);
+    int nb_sequence = len(input_sequence);
+
+    sequence_analysis::wrap_util::auto_ptr_array<const Semi_markov *> markov(
+        new const Semi_markov*[nb_markov]);
+    for (int i = 0; i < nb_markov; i++)
+      markov[i] = boost::python::extract<Semi_markov*>(input_markov[i]);
+
+    sequence_analysis::wrap_util::auto_ptr_array<const Markovian_sequences *>
+        sequence(new const Markovian_sequences*[nb_sequence]);
+    for (int i = 0; i < nb_sequence; i++)
+      sequence[i] = boost::python::extract<Markovian_sequences*>(
+          input_sequence[i]);
+
+    ret = input.divergence_computation(error, os, nb_markov + 1, markov.get(),
+        nb_seq, sequence.get(), filename);
+    cerr << os.str() << endl;
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+
+    return ret;
+  }
+
+
 };
 
 // Boost declaration
@@ -150,9 +212,15 @@ class_semi_markov()
     .def("get_forward", (Forward *(*)(const Semi_markov&, int)) SemiMarkovWrap::get_forward, return_value_policy< manage_new_object >(), SemiMarkovWrap::get_forward_overloads())
 
     DEF_RETURN_VALUE_NO_ARGS("get_semi_markov_data", &Semi_markov::get_semi_markov_data, "returns semi_markov_data")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", &Semi_markov::extract_data, "returns semi_markov_data")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", SemiMarkovWrap::extract_data, "returns semi_markov_data")
 
     .def("file_ascii_write", SemiMarkovWrap::file_ascii_write,"Save vector summary into a file")
+    DEF_RETURN_VALUE("thresholding", SemiMarkovWrap::thresholding, args("index"), "todo")
+
+    DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("todo"), "simulation")
+    DEF_RETURN_VALUE("simulation_nb_elements",WRAP::simulation_nb_elements, args("todo"), "simulation")
+    DEF_RETURN_VALUE("simulation_markovian_sequences", WRAP::simulation_markovian_sequences, args("todo"), "simulation")
+    DEF_RETURN_VALUE("divergence_computation", WRAP::divergence_computation, args("input", "input_markov", "input_sequence", "filename"), "todo")
 
     ;
 
@@ -165,30 +233,17 @@ class_semi_markov()
    Semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy , const Nonparametric_process *pobservation , int length ,  bool counting_flag);
    Semi_markov(const Semi_markov &smarkov , bool data_flag = true ,  int param = I_DEFAULT)  :Chain(smarkov) { copy(smarkov , data_flag , param); }
 
-    std::ostream& line_write(std::ostream &os) const;
-
-    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
-                     bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+    bool plot_write(Format_error &error , const char *prefix ,const char *title = 0) const;
 
-
-   Semi_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
    void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
    void characteristic_computation(const Semi_markov_data &seq , bool counting_flag, int variable = I_DEFAULT , bool length_flag = true);
 
    double likelihood_computation(const Markovian_sequences &seq , int index) const;
    double likelihood_computation(const Semi_markov_data &seq) const;
 
-   Semi_markov_data* simulation(Format_error &error , const Histogram &hlength ,   bool counting_flag = true , bool divergence_flag = false) const;
-   Semi_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
-   Semi_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
-
    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,   const Semi_markov **ismarkov , Histogram **hlength ,   const char *path = 0) const;
    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,   const Semi_markov **smarkov , int nb_sequence ,   int length , const char *path = 0) const;
-   Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,   const Semi_markov **smarkov , int nb_sequence ,   const Markovian_sequences **seq , const char *path = 0) const;
 
    Forward** get_forward() const { return forward; }
 
@@ -200,6 +255,7 @@ class_semi_markov()
 
   ;
 }
+#undef WRAP
 
 
 class SemiMarkovDataWrap
