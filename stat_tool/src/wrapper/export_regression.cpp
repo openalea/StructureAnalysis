@@ -39,12 +39,31 @@ using namespace boost::python;
 using namespace boost;
 
 
+#define WRAP RegressionKernelWrap
+
+class RegressionKernelWrap
+{
+
+public:
+
+  static boost::shared_ptr<Regression_kernel>
+  regression_constructor(int ident, int min_value, int max_value)
+  {
+    Regression_kernel *ret = NULL;
+    ret = new Regression_kernel(ident, min_value, max_value);
+
+    return boost::shared_ptr<Regression_kernel>(ret);
+  }
+
+};
+
 
 
 void class_regression_kernel()
 {
-  class_< Regression_kernel  >("_Regression_kernel", "Regression kernel class")
-    .def( init<int, int, int>())
+  class_< Regression_kernel>("_Regression_kernel", "Regression kernel class")
+    //.def( init<int, int, int>()) // seems to cause memory problem inside python
+    .def("__init__", make_constructor(WRAP::regression_constructor),  "Build from 3 ints" )
 
     .add_property("ident", &Regression_kernel::get_ident, "returns ident")
     .add_property("min_value", &Regression_kernel::get_min_value, "returns min value")
@@ -63,6 +82,10 @@ void class_regression_kernel()
     */
   ;
 }
+#undef WRAP
+
+
+
 
 #define WRAP RegressionWrap
 class WRAP
@@ -106,9 +129,7 @@ void class_regression()
     ;
 
   //DONE
-  //TODO:check index validity in get_residual
   /*
-
     bool plot_write(Format_error &error , const char *prefix , const char *title = 0) const;
     plotable::MultiPlotSet* get_plotable() const;
     */

@@ -83,6 +83,7 @@ public:
     ret = dm.partitioning(error, output, nb_cluster, protos.get(),
         initialization, algorithm);
 
+    cerr << output.str()<<endl;
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
