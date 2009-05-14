@@ -355,8 +355,8 @@ def Extract(obj, *args):
  
  #OBSERVATION ,
 #  FIRST_OCCURRENCE ,
-  #                       RECURRENCE_TIME ,
-#                         SOJOURN_TIME ,
+  #                       RECURRENCE_TIME , done
+#                         SOJOURN_TIME , done
   #INITIAL_RUN ,
   #FINAL_RUN ,
   #NB_RUN ,
@@ -527,11 +527,14 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
 
     keep = bool(Mode == "Keep")
 
-    return obj.select_individual(identifiers, keep)
+    ret = obj.select_individual(identifiers, keep)
+    try:
+        # if obj is a sequence, returns markovian_sequences
+        return ret.markovian_sequences()
+    except:
+        return ret
+        
 
-    
-
-    
 def ValueSelect(obj, *args, **kargs):
     """ 
     Selection of individuals according to the values taken by a variable
