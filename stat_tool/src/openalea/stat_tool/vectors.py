@@ -33,7 +33,7 @@ def _Vectors_mixture_estimation(self, model, nb_iteration=_stat_tool.I_DEFAULT,
 _Vectors.mixture_estimation = _Vectors_mixture_estimation
 
 
-def Vectors(*args):
+def Vectors(*args, **kargs):
     """
     Construction of a set of vectors from a multidimensional array, 
     from a set of sequences or from an ASCII file.
@@ -85,11 +85,20 @@ def Vectors(*args):
         :func:`~openalea.stat_tool.comparison.Regression`, 
         :func:`~openalea.stat_tool.comparison.VarianceAnalysis`
     """
+    
     if (len(args)==0):
         raise TypeError("Expected a list or filename argument")
     else:
-        return _Vectors(*args)
-
+        # build from a sequence
+        
+        obj = args[0]
+        IndexVariable = kargs.get("IndexVariable", False)
+        try:            
+            temp = obj.build_vectors(IndexVariable)
+        except:
+            temp =  _Vectors(*args)
+        
+    return temp
 
 
 ############### VectorDistance #################################################
