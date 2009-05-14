@@ -87,8 +87,14 @@ def Regression(vec, type,
 
     elif(type == "MovingAverage"):
         # param is a list of float or a Distribution
-        return vec.moving_average_regression(explanatory_variable, response_variable, 
-                                             param, Algorithm)
+        if isinstance(param[0], int):
+            return vec.moving_average_regression_values(explanatory_variable, 
+                            response_variable, param, Algorithm)
+        else:
+            return vec.moving_average_regression_distribution(explanatory_variable, 
+                            response_variable, param, Algorithm)
+            
+            
 
     elif(type == "NearestNeighbours"):
         span = param
