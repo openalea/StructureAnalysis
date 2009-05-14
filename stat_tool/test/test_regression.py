@@ -101,13 +101,13 @@ class TestRegression(interface):
         v = self.v
         # Test algorithm
         try:
-            r = v.moving_average_regression(1, 2, [1, ], 'n') 
+            r = v.moving_average_regression_values(1, 2, [1, ], 'n') 
             assert False
         except:
             assert True
 
         r1 = Regression(v, "MovingAverage" , 1, 2, [1, ])
-        r = v.moving_average_regression(1, 2, [1, ], 'a') 
+        r = v.moving_average_regression_values(1, 2, [1, ], 'a') 
         assert r
         assert r1
         assert str(r)==str(r1)
