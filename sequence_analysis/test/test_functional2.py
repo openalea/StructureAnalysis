@@ -1,9 +1,7 @@
 import os
-from openalea.sequence_analysis.data_transform import *
-from openalea.sequence_analysis.sequences import *
-from openalea.sequence_analysis.correlation import *
-from openalea.stat_tool import *
-from openalea.sequence_analysis.estimate import Estimate2 as Estimate
+from openalea.sequence_analysis import *
+from openalea.sequence_analysis.estimate import  Estimate
+from openalea.sequence_analysis.compare import  Compare
 
 seq20 = Sequences("data//belren1.seq")
 seq21 = Sequences("data//elstar1.seq")
@@ -44,22 +42,22 @@ mc31 = Estimate(seq31, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=2, GlobalIniti
 seq32 = Merge(seq20, seq25)
 matrix30 = Compare(seq32)
 matrix31 = Compare(seq32, VectorDistance("S"))
-matrix32 = Compare(seq32, VectorDistance("S"), Transposition->True)
-matrix33 = Compare(seq32, VectorDistance("Model/align1.a"), Transposition->True)
+matrix32 = Compare(seq32, VectorDistance("S"), Transposition=True)
+matrix33 = Compare(seq32, VectorDistance("data/align1.a"), Transposition=True)
 
 Display(Clustering(matrix33, "Partition", 2))
-Clustering(matrix33, "Hierarchy", Algorithm->"Agglomerative")
-Clustering(matrix33, "Hierarchy", Algorithm->"Divisive")
+Clustering(matrix33, "Hierarchy", Algorithm="Agglomerative")
+Clustering(matrix33, "Hierarchy", Algorithm="Divisive")
 
 # multiple alignment
 
-seq33 = Compare(SelectIndividual(seq25, [10, 11, 12, 14, 15]), VectorDistance("S"), Output->"Sequences", Algorithm->"Agglomerative")
-seq34 = Compare(SelectIndividual(seq25, [10, 11, 12, 14, 15]), VectorDistance("S"), Output->"Sequences", Algorithm->"Divisive")
-seq35 = Compare(SelectIndividual(seq25, [10, 11, 12, 14, 15]), VectorDistance("S"), Output->"Sequences", Algorithm->"Ordering")
+seq33 = Compare(SelectIndividual(seq25, [10, 11, 12, 14, 15]), VectorDistance("S"), Output="Sequences", Algorithm="Agglomerative")
+seq34 = Compare(SelectIndividual(seq25, [10, 11, 12, 14, 15]), VectorDistance("S"), Output="Sequences", Algorithm="Divisive")
+seq35 = Compare(SelectIndividual(seq25, [10, 11, 12, 14, 15]), VectorDistance("S"), Output="Sequences", Algorithm="Ordering")
 
-Compare(seq25, TestSequence->9, RefSequence->1)
-Compare(seq25, VectorDistance("S"), TestSequence->9, RefSequence->1)
-Compare(seq25, VectorDistance("S"), TestSequence->9, RefSequence->1, Transposition->True)
+Compare(seq25, TestSequence=9, RefSequence=1)
+Compare(seq25, VectorDistance("S"), TestSequence=9, RefSequence=1)
+Compare(seq25, VectorDistance("S"), TestSequence=9, RefSequence=1, Transposition=True)
 
 # multiple change-point models
 
@@ -69,22 +67,22 @@ Compare(seq25, VectorDistance("S"), TestSequence->9, RefSequence->1, Transpositi
 # Plot(seq25, 14, 6, "Multinomial", ViewPoint->"SegmentProfile", Output->"ChangePoint")
 # hidden semi-Markov chains
 
-hsmc0 = HiddenSemiMarkov("Model/Markov/belren1.hsc")
+hsmc0 = HiddenSemiMarkov("data/belren1.hsc")
 hsmc20 = Estimate(seq20, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("Model/Markov/elstar1.hsc")
+hsmc0 = HiddenSemiMarkov("data/elstar1.hsc")
 hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("Model/Markov/fuji1.hsc")
+hsmc0 = HiddenSemiMarkov("data/fuji1.hsc")
 hsmc22 = Estimate(seq22, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("Model/Markov/gala1.hsc")
+hsmc0 = HiddenSemiMarkov("data/gala1.hsc")
 hsmc23 = Estimate(seq23, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("Model/Markov/granny1.hsc")
+hsmc0 = HiddenSemiMarkov("data/granny1.hsc")
 hsmc24 = Estimate(seq24, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("Model/Markov/reinet1.hsc")
+hsmc0 = HiddenSemiMarkov("data/reinet1.hsc")
 hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 
 # Display(hsmc25)
@@ -101,13 +99,15 @@ hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 seq25_1 = ExtractData(hsmc25)
 # Display(seq25_1, ViewPoint->Data, Format->Line)
 
-hsmc0 = HiddenSemiMarkov("Model/Markov/wij1.hsc")
+hsmc0 = HiddenSemiMarkov("data/wij1.hsc")
 hsmc26 = Estimate(seq26, "HIDDEN_SEMI-MARKOV", hsmc0)
 
 # model comparison
 
-Thresholding(hsmc20, MinProbability->0.001)
-matrix20 = Compare(Thresholding(hsmc20, MinProbability->0.001), seq20, Thresholding(hsmc21, MinProbability->0.001), seq21, Thresholding(hsmc22, MinProbability->0.001), seq22, Thresholding(hsmc23, MinProbability->0.001), seq23, Thresholding(hsmc24, MinProbability->0.001), seq24, Thresholding(hsmc25, MinProbability->0.001), seq25, Thresholding(hsmc26, MinProbability->0.001), seq26, 10000)
+Thresholding(hsmc20, MinProbability=0.001)
+
+#to be done :::::::::::::::::::::::::::::::::::::::::::::::::::
+jmatrix20 = Compare(Thresholding(hsmc20, MinProbability->0.001), seq20, Thresholding(hsmc21, MinProbability->0.001), seq21, Thresholding(hsmc22, MinProbability->0.001), seq22, Thresholding(hsmc23, MinProbability->0.001), seq23, Thresholding(hsmc24, MinProbability->0.001), seq24, Thresholding(hsmc25, MinProbability->0.001), seq25, Thresholding(hsmc26, MinProbability->0.001), seq26, 10000)
 # matrix20 = Compare(Thresholding(hsmc20, MinProbability->0.001), seq20, Thresholding(hsmc21, MinProbability->0.001), seq21, Thresholding(hsmc22, MinProbability->0.001), seq22, Thresholding(hsmc23, MinProbability->0.001), seq23, Thresholding(hsmc24, MinProbability->0.001), seq24, Thresholding(hsmc25, MinProbability->0.001), seq25, Thresholding(hsmc26, MinProbability->0.001), seq26, 10000, FileName->"ASCII/cultivar1_models.txt")
 
 matrix21 = Compare(Thresholding(hsmc20, MinProbability->0.001), Thresholding(hsmc21, MinProbability->0.001), Thresholding(hsmc22, MinProbability->0.001), Thresholding(hsmc23, MinProbability->0.001), Thresholding(hsmc24, MinProbability->0.001), Thresholding(hsmc25, MinProbability->0.001), Thresholding(hsmc26, MinProbability->0.001), 10000, 90)
