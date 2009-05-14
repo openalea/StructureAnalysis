@@ -350,20 +350,20 @@ def Clustering(matrix, type, *args, **kargs):
                    }
 
     criterion_map = {
-        "FarthestNeighbor" : _stat_tool.FARTHEST_NEIGHBOR,
-        "Averaging" : _stat_tool.AVERAGING,
+        "FarthestNeighbor" : _stat_tool.CriterionType.FARTHEST_NEIGHBOR,
+        "Averaging" : _stat_tool.CriterionType.AVERAGING,
         }
 
     algorithm_map = {
-        "Agglomerative" : _stat_tool.AGGLOMERATIVE,
-        "Divisive": _stat_tool.DIVISIVE,
-        "Ordering": _stat_tool.ORDERING,
+        "Agglomerative" : _stat_tool.AlgoType.AGGLOMERATIVE,
+        "Divisive": _stat_tool.AlgoType.DIVISIVE,
+        "Ordering": _stat_tool.AlgoType.ORDERING,
         }
  
 
 
     # Get Keywords (set default values)
-    Prototypes = kargs.get("Prototypes", [])
+    Prototypes = kargs.get("Prototypes", [0])
     FileName = kargs.get("Filename", "")
     Algorithm = kargs.get("Algorithm", "Agglomerative")
     Criterion = kargs.get("Criterion", "Averaging")
@@ -371,22 +371,27 @@ def Clustering(matrix, type, *args, **kargs):
     Format = kargs.get("Format", "")
 
     
+    
     # Swith for each type of clustering
 
     if(type == "Partition"):
+        Algorithm = kargs.get("Algorithm", "Divisive")
         if(isinstance(args[0], int)):
-
+            Prototypes = kargs.get("Prototypes", range(1,args[0]))
+            Prototypes = list(range(1, args[0]+1))
+            print Prototypes
             nb_cluster = args[0]
             
+            #if Algorithm=='Agglomerative':
+            #    raise TypeError("Algorithm must be Divisive or Ordering")
             
             try:
                 Algorithm = algorithm_map[Algorithm]
             except KeyError:
                 raise KeyError("Invalid Algorithm. Possible values are : "
                            + str(algorithm_map.keys()))
-            if Algorithm=='Agglomerative':
-                raise TypeError("Algorithm must be Divisive or Ordering")
             
+                
             # WARNING : in this case, algorithm is an int (default is 1)
 #            if(not isinstance(Algorithm, int)):
 #                if(kargs.has_key("Algorithm")):
@@ -395,9 +400,12 @@ def Clustering(matrix, type, *args, **kargs):
 #                    Algorithm = 1
 #            if (Algorithm!=1 and Algorithm!=2):
 #                    raise TypeError("Algorithm must be an int set to 1 or 2")
-            if(len(Prototypes) != nb_cluster):
-                raise TypeError("Prototypes must have %i values"%(nb_cluster))
+#            if(len(Prototypes) != nb_cluster):
+#                raise TypeError("Prototypes must have %i values"%(nb_cluster))
+    
+
             
+                    
             return matrix.partitioning_prototype(nb_cluster, Prototypes, 
                                                  Initialization, Algorithm)
         else:
