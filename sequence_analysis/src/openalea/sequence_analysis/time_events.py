@@ -4,6 +4,7 @@ __revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
 import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Time_events
+from openalea.sequence_analysis._sequence_analysis import _Sequences
 
 import _sequence_analysis
 
@@ -17,7 +18,7 @@ interface.extend_class( _Time_events, interface.StatInterface)
 # Add methods to _Vectors
 
 
-def TimeEvents(filename=None):
+def TimeEvents(*args, **kargs):
     """TimeEvents
     
     Construction of data of type {time interval between two observation dates,
@@ -30,6 +31,9 @@ def TimeEvents(filename=None):
     >>> TimeEvents(seqn, variable, begin_date, end_date, PreviousDate->3, NextDate->8)   
     >>> TimeEvents(histo, time)
     >>> TimeEvents(file_name)
+    
+    >>> h = Histogram([1,1,1,2,2,2])
+    >>> t = TimeEvents(h, 2)
         
     :Arguments:
     
@@ -65,11 +69,49 @@ def TimeEvents(filename=None):
     NbEventSelect, 
     TimeScaling, 
     TimeSelect.
+    
+    .. todo:: fix the build_time_events method to allows constructor with histogram
+        issue: this method is in stat_tool and returns a time events so stat_tool requires to know sequence_analysis...
     """ 
-    if filename !=None:
-        return _Time_events(filename)
+    
+    PreviousDate = kargs.get("PreviousDate", -1)
+    NextDate = kargs.get("NextDate", -1)
+     
+    if len(args)==1 and isinstance(args[0], str):
+        filename = args[0]
+        if os.path.isfile(filename):
+            time_events =  _Time_events(filename)
+        else:
+            raise IOError("bad file name")
+    elif isinstance(args[0], _Sequences):
+        seq = args[0]
+        nb_variable = seq.nb_variable()
+        if nb_variable != 1:
+            variable = args[0]
+            begin_date = args[1]
+            end_date = args[2]
+        else:
+            begin_date = args[0]
+            end_date = args[1]
+        
+            
+        time_events = seq.extract_time_events(variable, begin_date, end_date,
+                                     PreviousDate, NextDate)
+
     else:
-        raise TypeError("invalid filename")
+        #todo finish this code with examples ? 
+        distribution = args[0]
+        time = args[1]
+        
+        time_events = _Time_events(distribution, time)
+        
+             
+        
+        
+    return time_events
+
+
+
 
 
 def NbEventSelect(obj, min, max):

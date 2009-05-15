@@ -3,12 +3,12 @@ __revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _Sequences
+from openalea.sequence_analysis._sequence_analysis import _Sequences, _Renewal_data
 
 import _sequence_analysis
 
-__all__ = ['Sequences',
-           '_Sequences']
+__all__ = ['Sequences','_Sequences', 'LumpabilityTest', 'RemoveIndexParameter',
+           'TransformPosition']
 
 
 # Extend dynamically class
@@ -74,6 +74,8 @@ def Sequences(*args, **kargs):
         `Estimate` (Markovian models), 
         `ComputeStateSequences`, 
         `Simulate` (Markovian models).
+        
+        .. todo:: refactoring using AML original code
     """ 
     
     type_map = {
@@ -122,13 +124,45 @@ def Sequences(*args, **kargs):
         #if len(args[0])!=len(args[1]):
         #    raise TypeError("Expect the list of sequences and list of identifiers to have the same length")
         sequence = _Sequences(args[0], args[1], index_parameter_type)
+    elif len(args)==1 and isinstance(args[0], _Renewal_data):
+        sequence = _Sequences(args[0])
     else:
         raise TypeError("Expected a valid filename or a list of lists (e.g., [[1,0],[0,1]])")
     
     return sequence.markovian_sequences()
     
     
+def LumpabilityTest(obj, *args, **kargs):    
+  
+  
+  symbol = args[0]
+  Order = kargs.get("Order", 1)
+  if isinstance(symbol, list):
+    #nb_symbol = obj.get_marginal(0).nb_value;
+    #todo: test if nb_symbol == len(symbol) ? ?
+    
+    status = obj.lumpability_test(symbol, Order);
+    if status is False:
+        #todo: not a type error, but anyway
+        raise TypeError("warning: false status returned by lumpability test")
+  else:
+       raise TypeError("error expect list as second argument")
+        
+  
+def RemoveIndexParameter(obj):
+    """"input can be sequence, markovian_sequences, nonhomogeneous_markov, variable_order_markov"""
+    return obj.remove_index_parameter()
 
+def TransformPosition(obj, step=None):
+    """input is a sequence only"""
+    if step == None:
+        raise AttributeError("second arguments (step) must be provided")
+    
+    return obj.transform_position(step)
 
+def ComputeInitialRun(obj):
+    """"input can be sequence, markovian_sequences, nonhomogeneous_markov, variable_order_markov"""
+    return obj.initial_run_computation()
 
-
+    
+        

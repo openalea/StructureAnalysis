@@ -17,7 +17,7 @@ interface.extend_class( _Hidden_semi_markov, interface.StatInterface)
 # Add methods to _Vectors
 
 
-def HiddenSemiMarkov(filename=None, length=40, counting=True, cumul_threshold=0):
+def HiddenSemiMarkov(*args, **kargs):
     """HiddenSemiMarkov
    
     Construction of an object of type hidden_semi-markov from an ASCII file.
@@ -56,15 +56,25 @@ def HiddenSemiMarkov(filename=None, length=40, counting=True, cumul_threshold=0)
     ComputeStateSequences, 
     Simulate (Markovian models).
     """ 
-#cumul_threshold=0
-    if filename==None:
-        raise TypeError('invalid filename')
-    else:
-        #todo: check old_format, cumulthreshold
-        old_format = False
-        cumul_threshold = 1 #???
-        return _Hidden_semi_markov(filename, length, counting, cumul_threshold, 
-                            old_format)
+
+    OCCUPANCY_THRESHOLD = 0.99999 
+     
+    Length = kargs.get("Length", 40)
+    CountingFlag = kargs.get("CountingFlag", True)
+    
+    OldFormat = kargs.get("Format", False)
+    
+    if isinstance(args[0], str):
+        filename = args[0]
+        if os.path.isfile(filename):
+            
+            hsm = _Hidden_semi_markov(filename, Length, CountingFlag,
+                                   OCCUPANCY_THRESHOLD, OldFormat)
+        else:
+            raise IOError("bad file name")
+        
+        
+    return hsm
 
 
 

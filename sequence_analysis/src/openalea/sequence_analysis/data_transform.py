@@ -5,6 +5,7 @@ __revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
 #import os
 import openalea.stat_tool.interface as interface
 import _sequence_analysis
+from openalea.stat_tool._stat_tool import _VectorDistance
 
 
 #import openalea.sequence_analysis._sequence_analysis as _sequence_analysis
@@ -102,7 +103,7 @@ def RemoveRun(obj, *args, **kargs):
 	Merge, 
 	MergeVariable, 
 	MovingAverage, 
-	RecurrenceTimeSequences, 
+	RecurrenceSequences, 
 	Reverse, 
 	SegmentationExtract, 
 	SelectIndividual, 
@@ -515,7 +516,7 @@ def Cumulate(obj, Variable=1):
     #SEQUENCES :, MARKOVIAN_SEQUENCES,VARIABLE_ORDER_MARKOV_DATA, SEMI_MARKOV_DATA,NONHOMOGENEOUS_MARKOV_DATA :    
     return obj.cumulate(Variable)
     
-def Difference(obj, Variable=1, FirstElement=False):
+def Difference(obj, Variable=-1, FirstElement=False):
     #SEQUENCES :, MARKOVIAN_SEQUENCES,VARIABLE_ORDER_MARKOV_DATA, SEMI_MARKOV_DATA,NONHOMOGENEOUS_MARKOV_DATA :
     return obj.difference(Variable, FirstElement)
     
@@ -542,8 +543,12 @@ def ComputeStateSequences(obj, data, Characteristics=True):
     return data.compute_state_sequences(obj, Characteristics)
     
 
-def MovingAverage(obj, itype, Variable=1, BeginEnd=False, output="Trend"):
-    """
+def MovingAverage(obj, itype, Variable=1, BeginEnd=False, Output="Trend"):
+    """ 
+    
+    .. todo:: seq79 = MovingAverage(seq70, [1, 1, 1], BeginEnd=True, Output="Residual")
+        returns wrong results. comapre with aml
+    
     itype is list of vlaues or a distribution
     
     put Moving Average doc here 
@@ -555,14 +560,14 @@ def MovingAverage(obj, itype, Variable=1, BeginEnd=False, output="Trend"):
                  "Residual":2,
                  "DivisionResidual":3
                  }
-    if output not in func_map.keys():
+    if Output not in func_map.keys():
         raise KeyError("output choice must be in %s" % func_map.keys())
     
     if isinstance(itype, list):
         #todo build a 2*N+1 filter here or inside moving_average function ?  
-        return obj.moving_average(itype, Variable, BeginEnd, func_map[output])
+        return obj.moving_average(itype, Variable, BeginEnd, func_map[Output])
     else: #distribution
-        return obj.moving_average(itype, Variable, BeginEnd, func_map[output])
+        return obj.moving_average_from_distribution(itype, Variable, BeginEnd, func_map[Output])
         
 def ComputeSelfTransition(obj):
     """ """
@@ -611,10 +616,10 @@ def PointwiseAverage(obj, *args, **kargs):
 def ConsecutiveValues(obj, *args, **kargs):    
         
         
-    StandardDeviation = kargs.get("AddVariable", False)
+    AddVariable = kargs.get("AddVariable", False)
 
     if len(args)==1:
-        variable = variable
+        variable = args[0]
     else:
         variable = 1
      
@@ -624,8 +629,186 @@ def ConsecutiveValues(obj, *args, **kargs):
     
     return sequence.markovian_sequences()
 
+def Round(obj, *args, **kargs):
+    
+    CEIL =  2
+    FLOOR = 0
+    ROUND = 1
+    
+    mode_map = {
+            "Floor":FLOOR,
+            "Ceil":CEIL,
+            "Round":ROUND
+            }
+    Variable = kargs.get("Variable", -1)
+    Mode = kargs.get("Mode", "Round")
+    Mode = mode_map[Mode]
     
     
+    return obj.round(Variable, Mode) 
+    
+    
+def TimeScaling(obj, scaling_factor=0):
+    
+    return obj.tim_scaling(scaling_factor)    
+   
+def TimeSelect(obj, *args):
+    
+    if len(args) == 2:
+        min_time = args[0]
+        min_time = args[1]
+    elif len(args) == 1:
+        min_time = args[0]
+        max_time = min_time
+        
+    return obj.time_select(min_time, max_time)
+
+
+def Segmentation(obj, *args, **kargs):
+    """ 
+
+    USAGE
+    
+    >>> Segmentation(seq, 1,2, VectorDistance("N"), Output="Segment")
+    >>> S
+    """
+    SEQUENCE = 0
+    SUBTRACTION_RESIDUAL = 1
+    STANDARDIZED_RESIDUAL = 2
+    
+    output_sequence_map = {
+       "Sequence": SEQUENCE,
+       "SubtractionResidual": SUBTRACTION_RESIDUAL,
+       "Residual": SUBTRACTION_RESIDUAL,
+       "StandardizedResidual":  STANDARDIZED_RESIDUAL
+       }
+            
+    
+    MULTINOMIAL_CHANGE =0
+    POISSON_CHANGE =1
+    ORDINAL_GAUSSIAN_CHANGE =2
+    GAUSSIAN_CHANGE =3
+    MEAN_CHANGE =4
+    VARIANCE_CHANGE =5
+    MEAN_VARIANCE_CHANGE=6
+
+    model_type = {
+                      "Multinomial":MULTINOMIAL_CHANGE,
+                      "Poisson":POISSON_CHANGE,
+                      "Ordinal": ORDINAL_GAUSSIAN_CHANGE,
+                      "Gaussian": GAUSSIAN_CHANGE,        
+                      "Mean": MEAN_CHANGE,
+                      "Variance": VARIANCE_CHANGE,
+                      "MeanVariance": MEAN_VARIANCE_CHANGE
+                      }
+
+    CHANGE_POINT = 0
+    SEGMENT = 1
+    
+    output_type = { 
+            "ChangePoint" : CHANGE_POINT,
+             "Segment" : SEGMENT
+          }
+    
+    nb_variable = obj.nb_variable
+
+    #from an array, and a string
+    if isinstance(args[0], list) and isinstance(args[1], str):
+        nb_sequence = obj.nb_sequence
+        nb_segment = args[0]
+        
+        Model = __get_model__(args[1:], nb_variable)
+        
+        Output = kargs.get("Output", "Sequence")
+        Output = output_sequence_map[Output] 
+        identifier = -1
+        
+        seq = obj.segmentation_array(nb_segment, Model, identifier , Output)
+    #from 2 ints, a vectordistance and the output 
+    elif isinstance(args[0], int) and  isinstance(args[1], int) \
+        and isinstance(args[2], _VectorDistance):
+        Output = kargs.get("Output", "Segment")
+        Output = output_type[Output] 
+        seq = obj.segmentation_vector_distance(args[0], args[1], args[2], Output)
+    #from 2 ints, and model_type
+    elif isinstance(args[0], int) and isinstance(args[1], int) and isinstance(args[2], str):
+        nb_sequence = obj.nb_sequence
+        
+        Model = __get_model__(args[2:], nb_variable)
+
+        Output = kargs.get("Output", "Sequence")
+        Output = output_sequence_map[Output]
+        
+        nb_segment_map = {
+                          "Fixed": False,
+                          "Estimated":True 
+                          }
+        NbSegment = kargs.get("NbSegment", "Estimated")
+        nb_segment_estimation =  nb_segment_map[NbSegment]
+        
+        if nb_segment_estimation is False:
+            if args[2] == 1 :
+               seq = obj.segmentation_int_int(args[0] , args[1] ,
+                                        Model, Output);
+            else:   
+                nb_segment = args[0]
+                seq = obj.segmentation_array(nb_segment, Model,
+                                                args[0], Output);
+        else:
+            seq = obj.segmentation_model(args[0], args[1], Model);
+        
+    #from int and a list
+    elif isinstance(args[0], int) and isinstance(args[1], list):
+        
+        Model = __get_model__(args[2:], nb_variable)
+                
+        change_point = args[1]
+        Output = kargs.get("Output", "Sequence")
+        Output = output_sequence_map[Output]
+        nb_segment = args[0]
+
+        seq = obj.segmentation_change_point(args[0] , nb_segment ,
+                            change_point , Model , Output);
+
+ 
+
+    return seq
+ 
+ 
+def SojournTimeSequences(obj, Variable = 1):
+    return obj.sojourn_time_sequences(Variable).markovian_sequences()
+
+ 
+ 
+def __get_model__(data, nb_variable): 
+    """ """
+    MULTINOMIAL_CHANGE =0
+    POISSON_CHANGE =1
+    ORDINAL_GAUSSIAN_CHANGE =2
+    GAUSSIAN_CHANGE =3
+    MEAN_CHANGE =4
+    VARIANCE_CHANGE =5
+    MEAN_VARIANCE_CHANGE=6
+
+    model_type = {
+                      "Multinomial":MULTINOMIAL_CHANGE,
+                      "Poisson":POISSON_CHANGE,
+                      "Ordinal": ORDINAL_GAUSSIAN_CHANGE,
+                      "Gaussian": GAUSSIAN_CHANGE,        
+                      "Mean": MEAN_CHANGE,
+                      "Variance": VARIANCE_CHANGE,
+                      "MeanVariance": MEAN_VARIANCE_CHANGE
+                      }
+    Model = []
+    for i in range(0, nb_variable):
+        Model.append(model_type[data[i]])
+
+        if i==0 and (model_type[data[i]] == MEAN_CHANGE) or (model_type[data[i]] == MEAN_VARIANCE_CHANGE):
+            for j in range(1, nb_variable):
+                Model.append(model_type[i])
+            break #todo check that it break the main for i in range() loop
+
+    return Model 
     
 def vec2list(vector):
     """

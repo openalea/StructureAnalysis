@@ -7,7 +7,10 @@ import _sequence_analysis
 
 from _sequence_analysis import _Correlation
 
-__all__ = ['_Correlation','ComputeCorrelation', 'ComputeAutoCorrelation']
+__all__ = ['_Correlation','ComputeCorrelation',
+            'ComputeAutoCorrelation',
+            'ComputeWhiteNoiseCorrelation',
+            'ComputePartialCorrelation']
 
 
 # Extend dynamically class
@@ -106,7 +109,7 @@ def ComputeAutoCorrelation(obj, *args, **kargs):
 
     
 
-def ComputewhiteNoiseCorrelation(obj, itype):
+def ComputeWhiteNoiseCorrelation(obj, itype):
      
     if isinstance(itype, int):
         obj.white_noise_correlation_order(itype)
@@ -118,6 +121,7 @@ def ComputewhiteNoiseCorrelation(obj, itype):
         except TypeError:
             raise TypeError("second argument must be either an integer, a list or a Distribution type")
         
+    return obj        
         
         
 def ComputePartialCorrelation(obj, *args, **kargs):
