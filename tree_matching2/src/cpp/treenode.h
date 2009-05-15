@@ -121,21 +121,26 @@ class TREEMATCH_API TreeNode
   inline const ValueVector& getValueList() const {  return _values; }
   inline ValueVector& getValueList() {  return _values; }
 
-  // Return untyped value 
+  /// Return untyped value 
   inline boost::any getAnyValue(size_t index) const 
   { assert(index<_values.size()); return _values[index]; }
 
-  // Return value of a given type
+  /// check if value at index is of type T
+  template <class T>
+  inline bool isValueOfType(size_t index) const 
+  { assert(index<_values.size()); return _values[index].type() == typeid(T); }
+
+  /// Return value of a given type
   template <class T>
   T getTypedValue(size_t index) const 
   { assert(index<_values.size()); return boost::any_cast<T>(_values[index]); }
 
-  // Set a value of any type at index
+  /// Set a value of any type at index
   template <class T>
   void setTypedValue(size_t index, const T& value) 
   { assert(index<_values.size()); _values[index]=boost::any(value); }
 
-  // Append a value of any type
+  /// Append a value of any type
   template <class T>
   void appendTypedValue(const T& value) 
   { _values.push_back(boost::any(value)); }
