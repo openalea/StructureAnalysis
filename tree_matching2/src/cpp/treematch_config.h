@@ -91,6 +91,20 @@
 #endif
 
 
+#if defined( _MSC_VER )
+ // Make deprecated warning more important
+ #   pragma warning ( 1 : 4996)
+#endif
+
+/// deprecated attribute definition
+#ifdef __GNUC__
+#define attribute_deprecated __attribute__((deprecated))
+#elif defined( _MSC_VER )
+#define attribute_deprecated __declspec(deprecated)
+#else
+#define attribute_deprecated
+#endif
+
 /* ----------------------------------------------------------------------- */
 
 // __config_h__

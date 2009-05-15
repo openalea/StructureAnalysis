@@ -49,6 +49,7 @@ void export_Matching() {
   class_<Matching>
     ("Matching", init<TreeGraphPtr, TreeGraphPtr, NodeCostPtr>("Matching(TreeGraph, TreeGraph, NodeCost)"))
     .def( "match", &Matching::match,"Comparison of tree graph")
+    .def( "__call__", &Matching::match,"Comparison of tree graph")
     .def( "getDBT", &Matching::getDBT,"Get Distance Between Trees",(bp::arg("index")),(bp::arg("index")))
     .def( "getDistanceTable", &py_getDistanceTable,"Get DistanceTable Between Trees")
 	;

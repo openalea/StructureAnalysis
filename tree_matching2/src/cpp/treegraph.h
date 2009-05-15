@@ -71,17 +71,20 @@ class TREEMATCH_API TreeGraph
 
   public :
   typedef TreeNodeList::const_iterator const_iterator;
-    /** Constructor */
-    TreeGraph();
-    /** Destructor */
-    ~TreeGraph();
+
+  /** Constructor */
+  TreeGraph();
+  
+  /** Destructor */
+  ~TreeGraph();
 
   void addNode(int, int);
 
   void addNode(TreeNodePtr);
 
   /** return TreeNode corresponding to vertex */
-  TreeNodePtr getTreeNode(int vertex) ;
+  inline TreeNodePtr getTreeNode(int vertex) { return getNode(vertex); }
+  TreeNodePtr getNode(int vertex);
 
    /** Return the father of a node */
   int father(int ) const;
@@ -92,7 +95,6 @@ class TREEMATCH_API TreeGraph
   void addValue(int, DistanceType);
   DistanceType getValue(int, int) const;
 
-
   /** Give the SonsList */
   const NodeList childList(const int ) const ;
 
@@ -101,29 +103,19 @@ class TREEMATCH_API TreeGraph
   int getNbDesc(int ) const;
 
   /** Return the number of node in the tree */
-  int getNbVertex() const;
+  inline int getNbVertex() const { return _treenodes.size(); }
 
   /** Return the root id */
-  int getRoot() const{
-    return _rootId;
-  }
+  inline int getRoot() const { return _rootId; }
 
   /** Return the root id */
-  int getDegree() const{
-    return _degree;
-  }
+  inline int getDegree() const{ return _degree; }
   
   /** Return whether the node is a leaf or not          */
-  int isLeaf(int ) const;
-
-  /** Return a node */
-  TreeNodePtr getNode(int );
-
-  int getNumber(int vertex) const;
-
+  inline bool isLeaf(int node) const { return (getNbChild(node)==0); }
 
   /** Return wheter the tree is null or not  */
-  int isNull();
+  inline bool isNull() {  return _treenodes.empty(); }
 
   /** Method for printing */
   void print() const;

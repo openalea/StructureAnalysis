@@ -12,6 +12,7 @@ def test_treegraph():
     tree.addNode(2,1)
     tree.addNode(3,1)
     tree.addNode(4,0)
+    print "init"
     for i in range(5):
         print tree.getNode(i)    
     node = tree.getNode(4)
@@ -19,8 +20,10 @@ def test_treegraph():
     print node
     print tree.getNode(4)
 
-test_treegraph()
+
 test_treenode()
+test_treegraph()
+
 
 
 def test_treenode_exists():

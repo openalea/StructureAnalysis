@@ -39,17 +39,13 @@
 using namespace std;
 
 
-TreeNode::TreeNode(int id, int father)
+TreeNode::TreeNode(IdType id, IdType father):
+  _id(id), _father(father), _values(), _depth(0)
 {
-  _id   = id;
-  _father   = father;
-  _values   = ValueVector();
-  _depth = 0;
 }
 
 TreeNode::~TreeNode()
 {
-
 }
 
 
@@ -59,67 +55,53 @@ void TreeNode::print() const
   cout<<"FATHER \t : "<<_father<<endl;
   cout<<"DEPTH \t : "<<_depth<<endl;
   cout<<"CHILD LIST \t : [ ";
-  for (int i=0;i<getChildNumber()-1;i++)
-    cout<<getChild(i)<<" , ";
-  if (getChildNumber()>0)
-    cout<<getChild(getChildNumber()-1)<<" ] "<<endl;
-  else
-    cout<<"]"<<endl;
+  if(hasChild()){
+	  for (size_t i=0; i < getChildNumber();i++){
+		if (i>0) cout <<" , ";
+		cout << getChild(i);
+	  }
+  }
+  cout<<" ]"<<endl;
 
    for (int i=0;i<_values.size();i++)
      cout<<"ARG["<<i<<"] \t : "<<getValue(i)<<endl;
 }
 
 
-int TreeNode::getValueSize() const
-{
-  return(_values.size());
-}
 
 DistanceType TreeNode::getValue(int index) const
 {
-  if (_values.size())
+  if (!_values.empty())
   {
+    return getTypedValue<DistanceType>(index);
     assert((index>=0)&&(index<_values.size()));
-    return(_values[index]);
+	return boost::any_cast<DistanceType>(_values[index]);
   }
-  else
-  {
-    return(DIST_UNDEF);
-  }
+  else  return(DIST_UNDEF);
 }
 
-void TreeNode::addValue(DistanceType new_value)
-{
-  _values.push_back(new_value);
-}
 
-void TreeNode::putValue(int index, DistanceType new_value)
-{
-  assert((index>=0)&&(index<_values.size()));
-  if (_values.size()) 
-    _values[index]=new_value;
-  
-}
-
-void TreeNode::addChild(int child_id){
-  _childList.push_back(child_id);
-}
-
-void TreeNode::setChildList(vector<int> child_list){
-  _childList = child_list;
-}
-
-vector<int> TreeNode::getChildList() const{
-  return _childList;
-}
-
-int TreeNode::getChild(int id) const{
+TreeNode::IdType TreeNode::getChild(int id) const{
   assert ((id>=0) && (id<_childList.size()));
   return _childList[id];
 }
 
-int TreeNode::getChildNumber() const{
-  return _childList.size();
+
+/* ----------------------------------------------------------------------- */
+
+static TreeNode::Factory * TREENODEFACTORY = NULL;
+
+TreeNode::Factory::Factory(): __builder(NULL) { }
+
+
+TreeNodePtr TreeNode::Factory::build(IdType id, IdType father_id)
+{
+	if(!__builder) return TreeNodePtr(new TreeNode(id, father_id));
+	else return (*__builder)(id, father_id);
 }
 
+TreeNode::Factory& TreeNode::factory() {
+	if(!TREENODEFACTORY) TREENODEFACTORY = new TreeNode::Factory();
+	return *TREENODEFACTORY;
+}
+/* ----------------------------------------------------------------------- */
