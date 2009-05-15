@@ -51,6 +51,22 @@ class NonHomogeneousMarkovWrap
 
 public:
 
+
+  static boost::shared_ptr<Nonhomogeneous_markov>
+    nonhomogeneous_markov_from_file(char* filename, int length)
+    {
+      //olf_format should be true
+      Format_error error;
+      Nonhomogeneous_markov *nonhomo = NULL;
+      nonhomo = nonhomogeneous_markov_ascii_read(error,
+          filename, length);
+      if(!nonhomo)
+      {
+        sequence_analysis::wrap_util::throw_error(error);
+      }
+      return boost::shared_ptr<Nonhomogeneous_markov>(nonhomo);
+    }
+
   static Nonhomogeneous_markov_data*
   simulation_markovian_sequences(const Nonhomogeneous_markov &input,
       int nb_sequence, const Markovian_sequences input_seq, bool counting_flag)
@@ -110,14 +126,15 @@ void class_nonhomogeneous_markov() {
   class_<Nonhomogeneous_markov, bases<STAT_interface> > ("_Nonhomogeneous_markov", "Nonhomogeneous_markov")
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_nb_state_and_ident_list))
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_chain_and_self_transition))
+    .def("__init__", make_constructor(WRAP::nonhomogeneous_markov_from_file))
 
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
     .def("get_homogeneity", &Nonhomogeneous_markov::get_homogeneity, python::args("index"),"return homogeneity")
     .def("get_self_transition", &Nonhomogeneous_markov::get_self_transition, return_value_policy<manage_new_object> (),	python::args("index"),"return Function* of self transition")
 
-    DEF_RETURN_VALUE("simulation_histogram", &WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
-    DEF_RETURN_VALUE("simulation_nb_sequences", &WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
-    DEF_RETURN_VALUE("simulation_markovian_sequences", &WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("simulation_nb_sequences", WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("simulation_markovian_sequences", WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
 
 	//.def("get_process", &Nonhomogeneous_markov::get_process,
 	//	"return non parametric sequence process")

@@ -49,19 +49,6 @@ class TimeEventsWrap
 
 public:
 
-  static Time_events*
-  build_from_lists(int nb_element,
-      boost::python::list& input_time,
-      boost::python::list& input_nb_event)
-  {
-    Time_events *ret;
-
-    //todo
-    //Time_events(int inb_element , int *itime , int *inb_event)
-    //{ build(inb_element , itime , inb_event); }
-
-    return ret;
-  }
 
 
   static boost::shared_ptr<Time_events>
@@ -77,8 +64,23 @@ public:
     return boost::shared_ptr<Time_events>(time_events);
   }
 
+
+  static boost::shared_ptr<Time_events>
+  time_events_from_histogram(const Histogram& input, int itime)
+  {
+    Format_error error;
+    Time_events *time_events = NULL;
+    time_events = input.build_time_events(error, itime);
+    if(!time_events)
+    {
+      sequence_analysis::wrap_util::throw_error(error);
+    }
+    return boost::shared_ptr<Time_events>(time_events);
+  }
+
+
   static Distribution_data*
-  extract(const Time_events& input, int histo_type , int itime = I_DEFAULT)
+  extract(const Time_events& input, int histo_type, int itime)
   {
 
     // to finish !!. This function does not work. core dumped,seg fault!!
@@ -172,7 +174,7 @@ void class_time_events() {
 
   class_<Time_events, bases<STAT_interface> > ("_Time_events", "Time_events")
     .def("__init__", make_constructor(TimeEventsWrap::time_events_from_file))
-    //.def("__init__", make_constructor(TimeEventsWrap::time_events_from_lists))
+    .def("__init__", make_constructor(TimeEventsWrap::time_events_from_histogram))
 
     .def(init <int>())
     // Python Operators

@@ -50,6 +50,20 @@ class VariableOrderMarkovWrap {
 
 public:
 
+  static boost::shared_ptr<Variable_order_markov>
+  variable_order_markov_from_file(char* filename)
+  {
+    Format_error error;
+    Variable_order_markov *vom = NULL;
+    vom = variable_order_markov_ascii_read(error, filename);
+    if(!vom)
+    {
+      sequence_analysis::wrap_util::throw_error(error);
+    }
+    return boost::shared_ptr<Variable_order_markov>(vom);
+  }
+
+
   static void
    file_ascii_write(const Variable_order_markov& d, const char* path, bool exhaustive)
    {
@@ -197,6 +211,9 @@ void class_variable_order_markov() {
       "constructor(type(char in ['o','e']), nb_state(int), order(int), init_flag(bool), output_process=0, nb_value=0\n"
 
   )
+    .def("__init__", make_constructor(VariableOrderMarkovWrap::variable_order_markov_from_file))
+
+
 
       // type = 'o' : ordinaire, or 'e' : en equilibre des probabilites de transition
     .def(init <char, int, int>())
@@ -242,6 +259,13 @@ void class_variable_order_markov() {
 
 
 /*
+ *
+ *  friend Variable_order_markov* variable_order_markov_parsing(Format_error &error ,
+                                                                ifstream &in_file ,
+                                                                int &line , char type);
+    friend Variable_order_markov* variable_order_markov_ascii_read(Format_error &error ,
+                                                                   const char *path ,
+                                                                   int length);
   Variable_order_markov();
   Variable_order_markov(const Variable_order_markov &markov , int inb_output_process , int nb_value);
   Variable_order_markov(const Variable_order_markov *pmarkov ,  const Nonparametric_process *pobservation , int length);

@@ -73,12 +73,19 @@ public:
   }
 
   static Parametric_model*
-  extract_histogram(const Semi_markov& input, int state, int histogram_type = FINAL_RUN)
+  extract_histogram(const Semi_markov& input, int state, int histogram_type)
   {
-    // does not work issue with sojourn...
     SIMPLE_METHOD_TEMPLATE_1(input, extract, Parametric_model, state, histogram_type);
   }
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extract_histogram_overloads, SemiMarkovWrap::extract_histogram, 1, 2);
+
+  static Parametric_model*
+  extract_type(const Semi_markov& input, int type, int variable, int value)
+  {
+
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, Parametric_model, type, variable,
+        value);
+  }
+
 
 
   static Parametric_model*
@@ -206,8 +213,8 @@ class_semi_markov()
     .def("get_state_subtype", &Semi_markov::get_state_subtype, args("index"), "returns state subtype")
 
     //DEF_RETURN_VALUE("get_parametric_process", &Semi_markov::get_parametric_process, args("variable_index"), "returns parametric process corresponding to the given variable")
-    .def("extract_histogram", (Parametric_model *(*)(const Semi_markov&, int, int))  SemiMarkovWrap::extract_histogram, return_value_policy< manage_new_object >(), SemiMarkovWrap::extract_histogram_overloads())
-    .def("extract_histogram", (Parametric_model *(*)(const Semi_markov& , int))  SemiMarkovWrap::extract_histogram, return_value_policy< manage_new_object >(), SemiMarkovWrap::extract_histogram_overloads())
+    .def("extract_histogram", SemiMarkovWrap::extract_histogram, return_value_policy< manage_new_object >(), "todo")
+    .def("extract_type", SemiMarkovWrap::extract_type, return_value_policy< manage_new_object >(), "todo")
 
     .def("get_forward", (Forward *(*)(const Semi_markov&, int)) SemiMarkovWrap::get_forward, return_value_policy< manage_new_object >(), SemiMarkovWrap::get_forward_overloads())
 

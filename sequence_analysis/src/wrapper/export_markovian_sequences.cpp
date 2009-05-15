@@ -210,15 +210,15 @@ public:
 
 
   static Markovian_sequences*
-  select_variable(const Markovian_sequences& input, int inb_variable,
-      boost::python::list& input_list , bool keep = true)
+  select_variable(const Markovian_sequences& input,
+      boost::python::list& input_list , bool keep)
   {
     int size = len(input_list);
     sequence_analysis::wrap_util::auto_ptr_array<int> l(new int[size]);
     for (int i = 0; i < size; i++)
       l[i] = boost::python::extract<int>(input_list[i]);
 
-    SIMPLE_METHOD_TEMPLATE_1(input, select_variable, Markovian_sequences, inb_variable, l.get(), keep);
+    SIMPLE_METHOD_TEMPLATE_1(input, select_variable, Markovian_sequences, size, l.get(), keep);
   }
 
   static Markovian_sequences*
@@ -229,20 +229,17 @@ public:
 
   static Markovian_sequences*
   consecutive_values(const Markovian_sequences& input,
-      int ivariable , bool add_flag )
+      int variable , bool add_flag )
   {
     Format_error error;
     std::stringstream os;
     Markovian_sequences* ret;
 
-    ret = input.consecutives_values(error, os, variable, add_flag);
+    ret = input.consecutive_values(error, os, variable, add_flag);
 
-    cerr <<os.str<<endl;
+    cerr <<os.str()<<endl;
     return ret;
   }
-
-
-
 
   static Markovian_sequences*
   remove_index_parameter(const Markovian_sequences& input)
@@ -273,9 +270,6 @@ public:
 
 	return ret;
   }
-
-
-
 
   static std::string
   word_count(const Markovian_sequences& input, int variable, int word_length,
@@ -609,19 +603,40 @@ public:
 		  boost::python::list list_ident,  bool counting_flag)
   {
     Format_error error;
-	Nonhomogeneous_markov* ret;
+    Nonhomogeneous_markov* ret;
 
-	int nb_value = len(list_ident);
-	int *ident;
-	ident = new int[nb_value];
-	for (int i = 0; i < nb_value; i++)
-	{
-	  ident[i] = boost::python::extract<int> (list_ident[i]);
-	}
+    int nb_value = len(list_ident);
+    int *ident;
+    ident = new int[nb_value];
+    for (int i = 0; i < nb_value; i++)
+    {
+      ident[i] = boost::python::extract<int> (list_ident[i]);
+    }
 
-	ret = input.nonhomogeneous_markov_estimation(error, ident, counting_flag);
+    ret = input.nonhomogeneous_markov_estimation(error, ident, counting_flag);
 
-	return ret;
+    return ret;
+  }
+
+
+  static bool
+  lumpability_test(const Markovian_sequences & input,
+      boost::python::list input_values , int order)
+  {
+    Format_error error;
+    bool ret;
+    std::stringstream os;
+    int nb_value = len(input_values);
+    int *values;
+    values = new int[nb_value];
+    for (int i = 0; i < nb_value; i++)
+    {
+      values[i] = boost::python::extract<int> (input_values[i]);
+    }
+
+    ret = input.lumpability_test(error , os , values , order);
+
+    return ret;
   }
 };
 
@@ -672,6 +687,8 @@ void class_markovian_sequences() {
     DEF_RETURN_VALUE_NO_ARGS("merge_variable",WRAP::merge_variable, "Merge variables")
     DEF_RETURN_VALUE("consecutive_values",WRAP::consecutive_values, args("variable", "AddVariable_flag"), "Consecutive values")
 
+    .def("lumpability_test",WRAP::lumpability_test, args("symbols", "order"), "test lumpability and returns status. See LumpabilityTest in sequence_analysis.")
+
 
     DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation_model", WRAP::hidden_semi_markov_stochastic_estimation_model, args("tobedone"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation", WRAP::hidden_semi_markov_stochastic_estimation, args("tobedone"), "todo")
@@ -703,9 +720,6 @@ void class_markovian_sequences() {
    void observation_histogram_computation();
    void build_observation_histogram();
    void build_characteristic(int variable = I_DEFAULT , bool sojourn_time_flag = true ,  bool initial_run_flag = false);
-
-
-   bool lumpability_test(Format_error &error , std::ostream &os , int *symbol , int order = 1) const;
 
    // acces membres de la classe
 

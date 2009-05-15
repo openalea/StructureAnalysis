@@ -46,20 +46,28 @@ class RenewalWrap {
 
 public:
 
-	static boost::shared_ptr<Renewal> renewal_from_file(char* filename) {
-		Format_error error;
-		Renewal *renewal = NULL;
-		bool old_format = false;
+  static boost::shared_ptr<Renewal>
+  constructor_from_file(char* filename)
+  {
+    Format_error error;
+    Renewal *renewal = NULL;
+    bool old_format = false;
 
-		renewal = renewal_ascii_read(error, filename, old_format);
+    renewal = renewal_ascii_read(error, filename, old_format);
 
-		/*    if(!top_parameters)
-		 {
-		 sequence_analysis::wrap_util::throw_error(error);
-		 }
-		 */
-		return boost::shared_ptr<Renewal>(renewal);
-	}
+    return boost::shared_ptr<Renewal>(renewal);
+  }
+
+  static boost::shared_ptr<Renewal>
+  constructor_from_inter_event(const Parametric &inter_event, char type, int time)
+  {
+    Format_error error;
+    Renewal *renewal = NULL;
+
+    renewal = renewal_building(error, inter_event, type, time);
+
+    return boost::shared_ptr<Renewal>(renewal);
+  }
 
 
   static void
@@ -138,9 +146,14 @@ void class_renewal() {
 
   class_<Renewal, bases<STAT_interface> > ("_Renewal", "Renewal")
     //type = 'o' or 'e'
+    .def("__init__", make_constructor(RenewalWrap::constructor_from_file))
+    .def("__init__", make_constructor(RenewalWrap::constructor_from_inter_event))
+
     .def(init <char, Histogram, Parametric>())
     .def(init <char, Distribution, Parametric>())
-	// Python Operators
+
+    // Python Operators
+    .def(self_ns::str(self)) //__str__
 
     .add_property("nb_iterator", &Renewal::get_nb_iterator,"nb iterator")
     .add_property("type", &Renewal::get_type,"type")
@@ -153,19 +166,17 @@ void class_renewal() {
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
 
     DEF_RETURN_VALUE("simulation_nb_elements", RenewalWrap::simulation_nb_elements, args("todo"), "simulation")
-	DEF_RETURN_VALUE("simulation_time_events", RenewalWrap::simulation_time_events, args("todo"), "simulation")
+    DEF_RETURN_VALUE("simulation_time_events", RenewalWrap::simulation_time_events, args("todo"), "simulation")
     ;
 
 /*
-   Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_event);
-   Renewal(const Renewal &renew , bool data_flag = true)   { copy(renew , data_flag); }
+    friend Renewal* renewal_building(Format_error &error ,
+    const Parametric &inter_event ,   char type, int time);
 
    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-   bool ascii_write(Format_error &error , const char *path ,
-	                     bool exhaustive = false) const;
+   bool ascii_write(Format_error &error , const char *path ,     bool exhaustive = false) const;
    bool spreadsheet_write(Format_error &error , const char *path) const;
-   bool plot_write(Format_error &error , const char *prefix ,
-	                    const char *title = 0) const;
+   bool plot_write(Format_error &error , const char *prefix ,  const char *title = 0) const;
 
 
 	void computation(bool inter_event_flag = true , char itype = 'v' , const Distribution *dtime = 0);
