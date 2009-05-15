@@ -37,49 +37,31 @@
 
 #include"nodecost.h"
 
-NodeCost::NodeCost(string type){
-  _type = TOPOLOGIC;
-  _norm = L1;
-}
+/* ----------------------------------------------------------------------- */
+NodeCost::~NodeCost(){ }
 
-NodeCost::NodeCost( NodeCostType type){
-  _type=type;
-  _norm = L1;
-}
+DistanceType NodeCost::getInsertionCost(const TreeNodePtr node) const
+{ return 1; }
 
-NodeCost::NodeCost( NodeCostType type,Norm norm){
-  _type=type;
-  _norm = norm;
-}
+DistanceType NodeCost::getDeletionCost(const TreeNodePtr node) const
+{ return 1; }
 
-DistanceType NodeCost::getInsertionCost(TreeNode* node){
-  DistanceType cost;
+DistanceType NodeCost::getChangingCost(const TreeNodePtr i_node,const TreeNodePtr r_node) const
+{ return 0; }
 
-  if (_type != SCORE)
-    cost = 1;
-  else
-    cost= -1;
-  return(cost);
-}
-
-DistanceType NodeCost::getDeletionCost(TreeNode* node)
-{
-  DistanceType cost;
-   if (_type != SCORE)
-     cost = 1;
-   else
-     cost= -1;
-    return(cost);
-}
-
-DistanceType NodeCost::getChangingCost(TreeNode* i_node,TreeNode* r_node)
-{
-  DistanceType cost;
-   if (_type != SCORE)
-     cost = 0;
-   else
-     cost = 2;
-  return(cost);
-}
+/* ----------------------------------------------------------------------- */
 
 
+ScoreNodeCost::ScoreNodeCost( ):
+NodeCost() { }
+
+DistanceType ScoreNodeCost::getInsertionCost(const TreeNodePtr node) const
+{ return -1; }
+
+DistanceType ScoreNodeCost::getDeletionCost(const TreeNodePtr node) const
+{ return -1; }
+
+DistanceType ScoreNodeCost::getChangingCost(const TreeNodePtr i_node,const TreeNodePtr r_node) const
+{ return 2; }
+
+/* ----------------------------------------------------------------------- */

@@ -71,8 +71,8 @@ public :
   //Constructor
   Matching() {};
 
-  Matching(const TreeGraph& , const TreeGraph& ,const NodeCost& ) ;
-  void make(TreeGraph& , TreeGraph& ,NodeCost& ) ;
+  Matching(const TreeGraphPtr& , const TreeGraphPtr& ,const NodeCostPtr& ) ;
+
   //Destructor
   ~Matching();
   
@@ -84,9 +84,8 @@ public :
   
   
   //Operator
-  DistanceTable getDistanceTable(){
-    return _distances.getDistanceTable();
-  }
+  inline DistanceTable getDistanceTable(){ return _distances.getDistanceTable(); }
+
   DistanceType getDBT(int ,int ) const;
   DistanceType getDBF(int ,int ) const;
   DistanceType  match();
@@ -97,11 +96,11 @@ public :
   int Lat(ChoiceList* L, int vertex);
   
 protected :
-  TreeGraph T1;
-  TreeGraph T2;
+  TreeGraphPtr T1;
+  TreeGraphPtr T2;
   MatchingDistanceTable _distances;
   ChoiceTable _choices;
-  NodeCost ND;
+  NodeCostPtr ND;
   MatchPath _restrMapp;
   VertexVector _restrMappList;
   int M(int,int);

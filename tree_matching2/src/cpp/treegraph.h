@@ -44,11 +44,10 @@
 #include <vector>
 #include <iterator>
 
-
 /**
  * List of TreeNode
  */
-typedef std::vector<TreeNode> TreeNodeList;
+typedef std::vector<TreeNodePtr> TreeNodeList;
 
 /**
  * List of Children
@@ -79,10 +78,10 @@ class TREEMATCH_API TreeGraph
 
   void addNode(int, int);
 
-  void addNode(TreeNode);
+  void addNode(TreeNodePtr);
 
   /** return TreeNode corresponding to vertex */
-  TreeNode* getTreeNode(int vertex) ;
+  TreeNodePtr getTreeNode(int vertex) ;
 
    /** Return the father of a node */
   int father(int ) const;
@@ -118,7 +117,7 @@ class TREEMATCH_API TreeGraph
   int isLeaf(int ) const;
 
   /** Return a node */
-  TreeNode& getNode(int );
+  TreeNodePtr getNode(int );
 
   int getNumber(int vertex) const;
 
@@ -141,6 +140,10 @@ class TREEMATCH_API TreeGraph
   int _rootId;
 };
 
+// A smart pointer on a TreeGraph
+typedef boost::shared_ptr<TreeGraph> TreeGraphPtr;
+// A weak reference to avoid loop.
+typedef boost::weak_ptr<TreeGraph> TreeGraphWeakPtr;
 
 #endif
 

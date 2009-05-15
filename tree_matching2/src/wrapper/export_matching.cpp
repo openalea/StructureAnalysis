@@ -39,7 +39,7 @@ using namespace boost::python;
 #define bp boost::python
 
 object py_getDistanceTable(Matching* m){
-  return make_list<DistanceTable,list_converter<DistanceTable::value_type> >(m->getDistanceTable())(); //ou value_type ???
+  return make_list<DistanceTable,list_converter<DistanceTable::value_type> >(m->getDistanceTable())();
 }
 
  
@@ -47,7 +47,7 @@ object py_getDistanceTable(Matching* m){
 void export_Matching() {
 
   class_<Matching>
-    ("Matching", init<TreeGraph, TreeGraph, NodeCost>("Matching(TreeGraph, TreeGraph, NodeCost)"))
+    ("Matching", init<TreeGraphPtr, TreeGraphPtr, NodeCostPtr>("Matching(TreeGraph, TreeGraph, NodeCost)"))
     .def( "match", &Matching::match,"Comparison of tree graph")
     .def( "getDBT", &Matching::getDBT,"Get Distance Between Trees",(bp::arg("index")),(bp::arg("index")))
     .def( "getDistanceTable", &py_getDistanceTable,"Get DistanceTable Between Trees")

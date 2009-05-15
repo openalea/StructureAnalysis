@@ -62,10 +62,31 @@ std::string treenode_str( TreeNode* tnode )
   return ss.str(); 
 } 
 
+std::string treenode_repr( TreeNode* tnode ) 
+{ 
+  stringstream ss; 
+  ss<<"<TreeNode(id="<< tnode->getId();
+  if( tnode->father() != -1)
+	ss<<",father_id="<<tnode->father();
+  ss<<",depth="<<(int)tnode->depth();
+  ss<<",children=[";
+  for (int i=0;i<tnode->getChildNumber();++i){
+    if (i>0) ss << ",";
+    ss<<tnode->getChild(i)<<",";
+  }
+  ss<<"],values=[";
+  for (int i=0;i<tnode->getValueSize();++i){
+    if (i>0) ss << ",";
+    ss <<tnode->getValue(i);
+  }
+  ss<<"]) at 0x" << tnode << ">";
+  return ss.str(); 
+} 
+
 void export_TreeNode() {
 
-  class_<TreeNode>
-    ("TreeNode", init<int,int>("TreeNode(id,father_id)",args("id","father_id")))
+  class_<TreeNode,TreeNodePtr,boost::noncopyable>
+	  ("TreeNode", init<int,int>("TreeNode(id,father_id)",(bp::arg("id"),bp::arg("father_id")=-1)))
     .add_property("father",&TreeNode::father,&TreeNode::putFather)
     .add_property("id",&TreeNode::getId,&TreeNode::putId)
     .def( "putValue", &TreeNode::putValue,"Set the Values",(bp::arg("index"),bp::arg("new_value")=0.))
@@ -75,9 +96,8 @@ void export_TreeNode() {
     .def( "setChildList", &py_setchildlist,"Set the ChildList",(bp::arg("child_list")))
     .def( "getChildList", &py_getchildlist,"Get the ChildList")
     .def( "getChildListSize", &TreeNode::getChildNumber,"Id of Children")
-    .def( "__repr__", treenode_str )
+    .def( "__repr__", treenode_repr )
     .def( "__str__", treenode_str )
-    .def( "__repr__", treenode_str )
 	;
 
 }

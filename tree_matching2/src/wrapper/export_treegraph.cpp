@@ -44,20 +44,22 @@ std::string treegraph_str( TreeGraph* tree )
   ss<<"TREE SIZE\t: "<<(int)tree->getNbVertex()<<endl;
   ss<<"DEGREE\t = "<<(int)tree->getDegree()<<endl;
   for (int i = 0; i < tree->getNbVertex() ; i++)
-    tree->getNode(i).print();
+    tree->getNode(i)->print();
 
 //   TreeNode* tnode = tree->getTreeNode(tree->getRoot());
 //   ss<<treenode_str(tnode);
   return ss.str(); 
 } 
 
+
 void export_TreeGraph() {
 
-  class_<TreeGraph>
+	class_<TreeGraph,TreeGraphPtr,boost::noncopyable>
     ("TreeGraph", init<>("TreeGraph()"))
-    .def( "addNode", (void (TreeGraph::*)(int,int))&TreeGraph::addNode,"Add a new node",(bp::arg("id")),(bp::arg("father")))
+    .def( "addNode", (void (TreeGraph::*)(int,int))&TreeGraph::addNode,"Add a new node",(bp::arg("id")),(bp::arg("father")=-1))
+    .def( "addNode", (void (TreeGraph::*)(TreeNodePtr))&TreeGraph::addNode,"Add a new node",bp::args("node"))
     .def( "addValue", &TreeGraph::addValue,"Add a new value to an existing node",(bp::arg("index")),(bp::arg("new_value")))
-    .def( "getNode", &TreeGraph::getNode,"Return the node referenced by id",(bp::arg("vertex")),return_internal_reference<>())
+    .def( "getNode", &TreeGraph::getNode,"Return the node referenced by id",(bp::arg("vertex")))
     .def( "father", &TreeGraph::father,"Return the father of vertex",(bp::arg("vertex")))
     .def( "child", &TreeGraph::child,"Return the id of child_number th child of node",(bp::arg("node")),(bp::arg("child_number")))
     .def( "getNbChild", &TreeGraph::getNbChild,"Get the number of children",(bp::arg("vertex")))

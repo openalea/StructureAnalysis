@@ -62,7 +62,7 @@ class TREEMATCH_API MatchingDistanceTable
 
   public :
   MatchingDistanceTable(){};
-  MatchingDistanceTable(TreeGraph& ,TreeGraph& ,NodeCost&);
+  MatchingDistanceTable(const TreeGraphPtr& ,const TreeGraphPtr& ,const NodeCostPtr);
   ~MatchingDistanceTable(){};
   DistanceType getDBT(int ,int ) const;
   DistanceType getDBF(int ,int ) const;
@@ -81,15 +81,14 @@ class TREEMATCH_API MatchingDistanceTable
   DistanceType getICost(int& ) const;
   DistanceType getDCost(int& ) const;
   DistanceType getCCost(int ,int ) const;
-  NodeCostType getCostType() { return(ND->type()); };
   DistanceTable &getDistanceTable() {return(_treeDistTable);};
 
   private :
   int _n1;
   int _n2;
-  TreeGraph* T1;
-  TreeGraph* T2;
-  NodeCost* ND;
+  TreeGraphPtr T1;
+  TreeGraphPtr T2;
+  NodeCostPtr ND;
 
   protected :
   DistanceVector _inputTreeToEmpty;

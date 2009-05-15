@@ -40,6 +40,8 @@
 
 #include <list>
 #include <iostream>
+#include <boost/shared_ptr.hpp>
+
 #include "definitions.h"
 using namespace std;
 typedef DistanceType ValueType;
@@ -112,9 +114,9 @@ class TREEMATCH_API TreeNode
   int getValueSize() const;
   DistanceType getValue(int index) const;
 
-  /** Puts a value /e new_value at teh index /e index to a TreeNode.*/
+  /** Puts a value /e new_value at the index /e index to a TreeNode.*/
   void putValue(int index, DistanceType new_value = 0.);
- /** Puts a value /e new_value at teh index /e index to a TreeNode.*/
+ /** Puts a value /e new_value at the index /e index to a TreeNode.*/
   void addValue( DistanceType new_value = 0.);
 
   /** Add a child in child list, a child is referenced by is id only */
@@ -146,6 +148,11 @@ class TREEMATCH_API TreeNode
   vector<int> _childList;
   ValueVector _values;
 };
+
+// A smart pointer on a TreeNode
+typedef boost::shared_ptr<TreeNode> TreeNodePtr;
+// A weak reference to avoid loop.
+typedef boost::weak_ptr<TreeNode> TreeNodeWeakPtr;
 
 #endif
 

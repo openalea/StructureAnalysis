@@ -59,19 +59,19 @@ TreeGraph::~TreeGraph()
 
 void TreeGraph::addNode(int id, int father)
 {
-  TreeNode tree_node(id,father);
+  TreeNodePtr tree_node(new TreeNode(id,father));
   if (father == -1){
-    _rootId = tree_node.getId();
-    tree_node.putDepth(1);
+    _rootId = tree_node->getId();
+    tree_node->putDepth(1);
     _depth = 1;
   }
   else{
-    _treenodes[father].addChild(id);
-    int nb_child = _treenodes[father].getChildNumber();
+    _treenodes[father]->addChild(id);
+    int nb_child = _treenodes[father]->getChildNumber();
     if ( nb_child >_degree)
       _degree++;
-    int depth = (_treenodes[father]).depth()+1;
-    tree_node.putDepth(depth);
+    int depth = (_treenodes[father])->depth()+1;
+    tree_node->putDepth(depth);
     if (depth > _depth)
       _depth = depth ;
   }
@@ -79,41 +79,41 @@ void TreeGraph::addNode(int id, int father)
 }
 
 
-void TreeGraph::addNode(TreeNode tree_node)
+void TreeGraph::addNode(TreeNodePtr tree_node)
 {
-  int father = tree_node.father();
+  int father = tree_node->father();
   if (father == -1){
-    _rootId = tree_node.getId();
-    tree_node.putDepth(1);
+    _rootId = tree_node->getId();
+    tree_node->putDepth(1);
     _depth = 1;
   }    
   else{
-    _treenodes[father].addChild(tree_node.getId());
-    if (_treenodes[father].getChildNumber() >_degree)
+    _treenodes[father]->addChild(tree_node->getId());
+    if (_treenodes[father]->getChildNumber() >_degree)
       _degree++;
-    int depth = _treenodes[father].depth()+1;
-    tree_node.putDepth(depth);
+    int depth = _treenodes[father]->depth()+1;
+    tree_node->putDepth(depth);
     if (depth > _depth)
       _depth = depth ;
   }
   _treenodes.push_back(tree_node);
 }
 
-TreeNode* TreeGraph::getTreeNode(int vertex) 
+TreeNodePtr TreeGraph::getTreeNode(int vertex) 
 {
-  assert((index>=0)&&(index<_treenodes.size()));
-  return &_treenodes[vertex];
+  assert((vertex>=0)&&(vertex<_treenodes.size()));
+  return _treenodes[vertex];
 }
 
 void TreeGraph::addValue(int index, DistanceType new_value){
   assert((index>=0)&&(index<_treenodes.size()));
-  _treenodes[index].addValue(new_value);
+  _treenodes[index]->addValue(new_value);
 }
 
 DistanceType TreeGraph::getValue(int index, int index_value) const {
   assert((index>=0)&&(index<_treenodes.size()));
-  assert((index_value>=0)&&(index_value<_treenodes[index].getValueSize()));
-  return _treenodes[index].getValue(index_value);
+  assert((index_value>=0)&&(index_value<_treenodes[index]->getValueSize()));
+  return _treenodes[index]->getValue(index_value);
 }
 
 
@@ -125,7 +125,7 @@ int TreeGraph::isLeaf(int node) const
 
 int TreeGraph::father(int node) const
 {
-  return (_treenodes[node]).father();
+  return (_treenodes[node])->father();
 }
 
 int TreeGraph::child(const int node,const int child_number) const
@@ -134,14 +134,14 @@ int TreeGraph::child(const int node,const int child_number) const
     return(-1);
   else{
     //   _treenodes[node].print();
-    return (_treenodes[node].getChild(child_number));
+    return (_treenodes[node]->getChild(child_number));
   }
 }
 
 
 const NodeList TreeGraph::childList(const int vertex) const
 {
-  return (_treenodes[vertex].getChildList());
+  return (_treenodes[vertex]->getChildList());
 }
 
 int TreeGraph::getNbChild(int vertex) const
@@ -174,9 +174,9 @@ int TreeGraph::getNbVertex() const
 }
 
 
-TreeNode& TreeGraph::getNode(int i)
+TreeNodePtr TreeGraph::getNode(int i)
 {
-  return(*getTreeNode(i));
+  return getTreeNode(i);
 }
 
 
@@ -190,7 +190,7 @@ void TreeGraph::print() const
   cerr<<"Degre = "<<_degree<<endl;
   cerr<<"Vertex Number = "<<getNbVertex()<<endl;
   for (int i = 0; i < getNbVertex() ; i++)
-    _treenodes[i].print();
+    _treenodes[i]->print();
 }
 
 bool TreeGraph::mtg_write(  char *path ) 
@@ -211,8 +211,7 @@ bool TreeGraph::mtg_write(  char *path )
 
 ostream& TreeGraph::mtg_write(ostream &os) const
 {
-  vector<TreeNode>::const_iterator itreenode;
-  itreenode = _treenodes.begin();
+  // print hearder of mtg file
   os<<"CODE:	FORM-A			"<<endl;
   os<<endl;
   os<<endl;
@@ -237,17 +236,20 @@ ostream& TreeGraph::mtg_write(ostream &os) const
   for (i=0;i<_depth;i++)
     os<<"\t";
   os<<"VId"<<endl;
+
+  // print nodes
+  TreeNodeList::const_iterator itreenode = _treenodes.begin();
   os<<"P1/";
-  os<<"E"<<(itreenode->getId());
-  for (i=0;i<_depth-itreenode->depth()+1;i++)
+  os<<"E"<< ((*itreenode)->getId());
+  for (i=0;i<_depth-(*itreenode)->depth()+1;i++)
     os<<"\t";
   os<<"XX"<<endl;
   itreenode++;
   while (itreenode != _treenodes.end()){
-    for (i=0;i<itreenode->depth()-1;i++)
+    for (i=0;i<(*itreenode)->depth()-1;i++)
       os<<"\t";
-    os<<"+E"<<itreenode->getId();
-    for (i=0;i<_depth-itreenode->depth()+1;i++)
+    os<<"+E"<<(*itreenode)->getId();
+    for (i=0;i<_depth-(*itreenode)->depth()+1;i++)
       os<<"\t";
     os<<"XX"<<endl;
     itreenode++;

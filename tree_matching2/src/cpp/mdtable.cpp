@@ -41,12 +41,15 @@
 // --------------
 // Constructeur
 // --------------
-MatchingDistanceTable::MatchingDistanceTable(TreeGraph& input_tree, TreeGraph& reference_tree, NodeCost& node_distance)
+MatchingDistanceTable::MatchingDistanceTable(const TreeGraphPtr& input_tree, 
+											 const TreeGraphPtr& reference_tree, 
+											 const NodeCostPtr node_distance):
+  T1(input_tree),T2(reference_tree), ND(node_distance)
 {
-  T1 = &input_tree;
-  T2 = &reference_tree;
-  ND = &node_distance;
-  
+  assert(T1);
+  assert(T2);
+  assert(ND);
+
   _n1 = T1->getNbVertex();
   _n2 = T2->getNbVertex();
 
@@ -213,63 +216,20 @@ void  MatchingDistanceTable::putDBT(int input_vertex,int reference_vertex ,Dista
 // Renvoie le cout d'insertion d'un noeud
 // ----------------------------------------
 DistanceType MatchingDistanceTable::getICost(int& vertex) const
-{
-  TreeNode node=T2->getNode(vertex);
-  DistanceType cost;
-  
-  switch(ND->type())
-  { 
-  case TOPOLOGIC  : 
-    cost=ND->getInsertionCost(&node);
-    break;
-  default         : 
-    assert(0);
-    break;
-  }
-	
-  return(cost);
+{  
+	return ND->getInsertionCost(T2->getNode(vertex)); 
 }
+
 // ----------------------------------------
 // Renvoie le cout d'effacement d'un noeud
 // ----------------------------------------
 DistanceType MatchingDistanceTable::getDCost(int& vertex ) const
-{
-  TreeNode node=T1->getNode(vertex);
-  DistanceType cost;
-  
-  switch(ND->type())
-  { 
-  case TOPOLOGIC  :
-    cost = ND->getDeletionCost(&node); 
-    break;
-  default :
-    assert(0);
-    break;
-  }
-  
-  return(cost);
+{  
+	return ND->getDeletionCost(T1->getNode(vertex)); 
 }
 
 // ----------------------------------------------
 // Renvoie le cout de substitution de deux noeuds
 // ----------------------------------------------
 DistanceType MatchingDistanceTable::getCCost(int vertex1 ,int vertex2) const
-{
-// node1 et node2 recoivent les noeuds correspondant aux indices
-  TreeNode node1=T1->getNode(vertex1);
-  TreeNode node2=T2->getNode(vertex2);
-  DistanceType cost;
-
-  switch(ND->type())
-    { 
-// le cout est donne par la classe nodecost et le node cost ND
-    case TOPOLOGIC  : 
-      cost=ND->getChangingCost(&node1,&node2);
-      break;
-    default         : 
-      assert(0);
-      break;
-    }
-  
-  return(cost);
-}
+{  return ND->getChangingCost(T1->getNode(vertex1),T2->getNode(vertex2)); }

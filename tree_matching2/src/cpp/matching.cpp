@@ -41,15 +41,12 @@
   // -------------
   // Constructeur
   // -------------
-Matching::Matching(const TreeGraph& input,const TreeGraph& reference,const NodeCost& nodeDistance)
+Matching::Matching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance):
+  T1(input), T2(reference), ND(nodeDistance),_distances(input,reference,nodeDistance)
 {
-  T1=input;
-  T2=reference;
-  ND=nodeDistance;
-  _distances = MatchingDistanceTable(T1,T2,ND);
-  _choices.resize(T1.getNbVertex(),T2.getNbVertex());
+  _choices.resize(T1->getNbVertex(),T2->getNbVertex());
   // constante qui va permettre de calculer l'alignement restreint
-  _restrMapp.link(I_MAX(T1.getDegree(),T2.getDegree()),_distances.getDistanceTable());
+  _restrMapp.link(I_MAX(T1->getDegree(),T2->getDegree()),_distances.getDistanceTable());
 }
 // -------------
 // Destructeur
@@ -64,8 +61,8 @@ Matching::~Matching()
 DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex)
 {
   // On stocke dans ni et nj le nombre d'enfants de T1[i] et T2[j]
-  int ni=T1.getNbChild(input_vertex);
-  int nj=T2.getNbChild(reference_vertex);
+  int ni=T1->getNbChild(input_vertex);
+  int nj=T2->getNbChild(reference_vertex);
 
   DistanceType cost1,cost2,cost3,dist1,dist2;
   DistanceType min,MIN=2*MAXDIST;
@@ -84,7 +81,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
   for (i=0;i<ni;i++)
     {
       // On cherche parmi tous les fils de input_vertex celui dont l'arbre est le plus ressemblant a T2
-      int input_child=T1.child(input_vertex,i);
+      int input_child=T1->child(input_vertex,i);
       // la distance est donc le passage de T1[iam] en T2[j] - l'effacement de T[iam] qui a ete
       // compte precedemment
       dist1=getDBT(input_child,reference_vertex)-getDBT(input_child,EMPTY_TREE);
@@ -107,7 +104,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
   for (i=0;i<nj;i++)
     {
       // On recherche parmi tous les fils de T2 celui qui ressemble le plus a T1
-      int reference_child=T2.child(reference_vertex,i);
+      int reference_child=T2->child(reference_vertex,i);
       dist2=getDBT(input_vertex,reference_child)-getDBT(EMPTY_TREE,reference_child);
       if (dist2<min) { min=dist2;jm=reference_child; };
     }
@@ -161,8 +158,8 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
 DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vertex)
 {
 // ni et nj representent le nombre de forets a comparees
-  int ni=T1.getNbChild(input_vertex);
-  int nj=T2.getNbChild(reference_vertex);
+  int ni=T1->getNbChild(input_vertex);
+  int nj=T2->getNbChild(reference_vertex);
   DistanceType cost1,cost2,cost3,dist1,dist2;
   DistanceType min,DIST;
   int im=0,jm=0,MFC=0;
@@ -177,7 +174,7 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
   cost1=getDBF(input_vertex,EMPTY_TREE);
   for (i=0;i<ni;i++)
     {
-      int input_child=T1.child(input_vertex,i);
+      int input_child=T1->child(input_vertex,i);
       dist1=getDBF(input_child,reference_vertex)-getDBF(input_child,EMPTY_TREE);
       if (dist1<min) {
 	min=dist1;
@@ -199,7 +196,7 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
   cost2=getDBF(EMPTY_TREE,reference_vertex);
   for (i=0;i<nj;i++)
     {
-      int reference_child=T2.child(reference_vertex,i);
+      int reference_child=T2->child(reference_vertex,i);
       dist2=getDBF(input_vertex,reference_child)-getDBF(EMPTY_TREE,reference_child);
       if (dist2<min) { min=dist2;jm=reference_child;}
     }
@@ -219,9 +216,9 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
   NodeList* input_list=new NodeList();
   NodeList* reference_list=new NodeList();
    for (int s1=0;s1<ni;s1++)
-    input_list->push_back(T1.child(input_vertex,s1)); 
+    input_list->push_back(T1->child(input_vertex,s1)); 
    for (int s2=0;s2<nj;s2++) 
-    reference_list->push_back(T2.child(reference_vertex,s2)); 
+    reference_list->push_back(T2->child(reference_vertex,s2)); 
    _restrMapp.make(*input_list,*reference_list);
    _restrMappList.resize(ni+nj+3,EMPTY_NODE);
   // THE INPUT FOREST IS EMPTY_TREE
@@ -277,7 +274,7 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
         _choices.putLast(input_vertex,reference_vertex,jm);
 	break;
       case 3 :
-	for (int i=0;i<T1.getNbChild(input_vertex);i++)
+	for (int i=0;i<T1->getNbChild(input_vertex);i++)
 	  _choices.putLast(input_vertex,reference_vertex,_restrMapp.who(_restrMappList[i]));
         break;
     default :   break;
@@ -306,7 +303,7 @@ int Matching::Lat(ChoiceList* L, int vertex){
 
 
 void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence){
-  if ((!T1.isNull())&&(!T2.isNull()))
+  if ((!T1->isNull())&&(!T2->isNull()))
     {
       ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
       int tree_choice=L->front();
@@ -341,9 +338,9 @@ void Matching::ForestList(int input_vertex,int reference_vertex,Sequence& sequen
     case 1: ForestList(Lat(L,3),reference_vertex,sequence);break;
     case 2: ForestList(input_vertex,Lat(L,3),sequence);break;
     case 3: {
-      for (int i=0;i<T1.getNbChild(input_vertex);i++)
+      for (int i=0;i<T1->getNbChild(input_vertex);i++)
         {
-          int i_node=T1.child(input_vertex,i);
+          int i_node=T1->child(input_vertex,i);
           int r_node=Lat(L,2+i);
           if (r_node!=-1) TreeList(i_node,r_node,sequence);
         }
@@ -354,47 +351,47 @@ void Matching::ForestList(int input_vertex,int reference_vertex,Sequence& sequen
 
 DistanceType Matching::match()
 {
-  const int size1 = T1.getNbVertex();
-  const int size2 = T2.getNbVertex();
-  DistanceType D=0;
-   cerr << "\x0d" << "Already computed : 0% matched ...                                   " << flush;
-  if ((!T1.isNull())&&(!T2.isNull()))
-    {
-      for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
-        {
-	  _distances.inputForestToEmpty(input_vertex);
-	  _distances.inputTreeToEmpty(input_vertex);
-	}
-      for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
+	DistanceType D=0;
+	cerr << "\x0d" << "Already computed : 0% matched ...                                   " << flush;
+	if ((!T1->isNull())&&(!T2->isNull()))
 	{
-	  _distances.referenceForestFromEmpty(reference_vertex);
-	  _distances.referenceTreeFromEmpty(reference_vertex);
+		const int size1 = T1->getNbVertex();
+		const int size2 = T2->getNbVertex();
+		for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
+		{
+			_distances.inputForestToEmpty(input_vertex);
+			_distances.inputTreeToEmpty(input_vertex);
+		}
+		for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
+		{
+			_distances.referenceForestFromEmpty(reference_vertex);
+			_distances.referenceTreeFromEmpty(reference_vertex);
+		}
+		for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
+		{
+			for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
+			{
+				distanceBetweenForest(input_vertex,reference_vertex);
+				DistanceType d =distanceBetweenTree(input_vertex,reference_vertex);
+			}
+			if (int(100. - 100*input_vertex/size1)%5 == 0)
+				cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
+		}
+		D=getDBT(0,0);
 	}
-      for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
-        {
-          for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
-            {
-	      distanceBetweenForest(input_vertex,reference_vertex);
-              DistanceType d =distanceBetweenTree(input_vertex,reference_vertex);
-            }
-	  if (int(100. - 100*input_vertex/size1)%5 == 0)
-	    cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
-        }
-      D=getDBT(0,0);
-    }
-  else
-    {
-      if (T1.isNull())
-        {
-          if (!T2.isNull()) {D=_distances.referenceTreeFromEmpty(0);}
-        }
-      else
-        {
-          D=_distances.inputTreeToEmpty(0);
-        }
-    }
-  cerr<<"\x0d"<<endl;
-  return(D);
+	else
+	{
+		if (T1->isNull())
+		{
+			if (!T2->isNull()) {D=_distances.referenceTreeFromEmpty(0);}
+		}
+		else
+		{
+			D=_distances.inputTreeToEmpty(0);
+		}
+	}
+	cerr<<"\x0d"<<endl;
+	return(D);
 }
 
 

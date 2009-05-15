@@ -1,8 +1,5 @@
 from openalea.tree_matching import *
 
-from openalea.mtg.mtg import *
-import openalea.mtg.aml as wrap
-import openalea.aml as aml
 
 def test_treenode():
     t = TreeNode(1,-1)
@@ -54,7 +51,7 @@ def test_matching():
     print "#############"
     print tree2
 
-    node_cost = NodeCost("Topology")
+    node_cost = NodeCost()
     
     m = Matching(tree1,tree1,node_cost)
     m.match()
@@ -74,7 +71,9 @@ def test_matching():
 #test_treenode_exists()
 test_matching()
 
-g = MTG("~/Documents/Travail/Aml/Pommier/B1001.mtg")
+#from openalea.mtg.mtg import *
+#import openalea.mtg.aml as wrap
+#import openalea.aml as aml
 
-#print tree.getTreeNode(0)
-#print tree.getTreeNode(1) 
+#g = MTG("~/Documents/Travail/Aml/Pommier/B1001.mtg")
+

@@ -38,13 +38,67 @@
 using namespace boost::python;
 #define bp boost::python
 
+#define treenode2python(node) bp::object(node)
+
+class PyNodeCost : public NodeCost, public bp::wrapper<NodeCost>
+{
+public:
+
+	//Constructor
+    PyNodeCost() :  NodeCost(), bp::wrapper<NodeCost>() {   }
+
+   virtual ~PyNodeCost() {}
+
+   /** Returns the insertion cost of /e node */
+   virtual DistanceType getInsertionCost(const TreeNodePtr node) const
+    { 
+	  if(bp::override f = this->get_override("getInsertionCost"))
+		return bp::call<DistanceType>(f.ptr(), treenode2python(node));
+	  else return default_getInsertionCost(node);
+	}
+
+    /** Default implementation of insertion cost method. Required for boost python*/
+    DistanceType default_getInsertionCost(const TreeNodePtr node) const
+    {  return NodeCost::getInsertionCost(node); }
+
+    /** Returns the deletion cost of /e node */
+    virtual DistanceType getDeletionCost(const TreeNodePtr node) const
+	{ 
+	  if(bp::override f = this->get_override("getDeletionCost"))
+		return bp::call<DistanceType>(f.ptr(), treenode2python(node));
+	  else return default_getDeletionCost(node);
+	}
+
+    /** Default implementation of deletion cost method. Required for boost python*/
+    DistanceType default_getDeletionCost(const TreeNodePtr node) const
+    {  return NodeCost::getDeletionCost(node); }
+
+    /** Returns the changing cost between /e i_node and /e r_node*/
+    virtual DistanceType getChangingCost(const TreeNodePtr node1, const TreeNodePtr node2) const
+    { 
+	  if(bp::override f = this->get_override("getChangingCost"))
+		return bp::call<DistanceType>(f.ptr(), treenode2python(node1), treenode2python(node2));
+	  else return default_getChangingCost(node1,node2);
+	}
+
+    /** Default implementation of changing cost method. Required for boost python*/
+    DistanceType default_getChangingCost(const TreeNodePtr node1, const TreeNodePtr node2) const
+    {  return NodeCost::getChangingCost(node1, node2); }
+
+};
+
+// A smart pointer on a PyNodeCost
+typedef boost::shared_ptr<PyNodeCost> PyNodeCostPtr;
 
  
 
 void export_NodeCost() {
 
-  class_<NodeCost>
-    ("NodeCost", init<string>("NodeCost()")) 
+	class_<PyNodeCost,PyNodeCostPtr,boost::noncopyable>
+    ("NodeCost", init<>("Constructor of NodeCost")) 
+    .def("getInsertionCost", &NodeCost::getInsertionCost, &PyNodeCost::default_getInsertionCost)
+    .def("getDeletionCost", &NodeCost::getDeletionCost, &PyNodeCost::default_getDeletionCost)
+    .def("getChangingCost", &NodeCost::getChangingCost, &PyNodeCost::default_getChangingCost)
 	;
 
 }

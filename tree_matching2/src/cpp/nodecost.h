@@ -38,20 +38,12 @@
 #ifndef SB_NODE_COST_HEADER
 #define SB_NODE_COST_HEADER
 
-#include <string>
-using std::string;
-#include <iostream>
-#include <map>
-using namespace std;
 
 #include "definitions.h"
 #include "treenode.h"
+#include <boost/shared_ptr.hpp>
 
-/** Type of  Node Cost */
-enum NodeCostType { MATRIX, WEIGTH , TOPOLOGIC, LOCAL_TOPO, LOCAL_WEIGHT , SCORE};
-
-/** Two type of Norms for computing the Node Cost */
-enum Norm {L1, L2};
+/* ----------------------------------------------------------------------- */
 
 
 /**
@@ -68,35 +60,53 @@ public :
   /** Default constructor. */
   NodeCost(){}
 
-    /** Constructs a NodeCost with the type /e type and the default norm /e L1. */
-  NodeCost(string );
-  NodeCost(NodeCostType );
-
-
-    /** Constructs a NodeCost with the type /e type and the default norm /e norm . */
-  NodeCost(NodeCostType,Norm );
-
   /** Destructor. */
-  ~NodeCost(){}
+  virtual ~NodeCost();
   
   /** Returns the insertion cost of /e node */
-  virtual DistanceType getInsertionCost(TreeNode* );
+  virtual DistanceType getInsertionCost(const TreeNodePtr ) const ;
   
   /** Returns the deletion cost of /e node */
-  virtual DistanceType getDeletionCost(TreeNode* );
+  virtual DistanceType getDeletionCost( const TreeNodePtr ) const ;
   
   /** Returns the changing cost between /e i_node and /e r_node*/
-  virtual DistanceType getChangingCost(TreeNode* ,TreeNode* );
-  
-  /** Returns the type of the node cost*/
-  NodeCostType type() const { return(_type); }
-  
-protected :
-  
-  NodeCostType _type;
-  Norm         _norm;
-     
+  virtual DistanceType getChangingCost( const TreeNodePtr , const TreeNodePtr ) const ;
+       
 };
+
+
+// A smart pointer on a NodeCost
+typedef boost::shared_ptr<NodeCost> NodeCostPtr;
+// A weak reference to avoid loop.
+typedef boost::weak_ptr<NodeCost> NodeCostWeakPtr;
+
+
+/* ----------------------------------------------------------------------- */
+
+
+class TREEMATCH_API ScoreNodeCost : public NodeCost
+{
+public :
+
+    /** Constructs a NodeCost with the type /e type and the default norm /e norm . */
+  ScoreNodeCost();
+
+  /** Destructor. */
+  virtual ~ScoreNodeCost(){}
+  
+  /** Returns the insertion cost of /e node */
+  virtual DistanceType getInsertionCost(const TreeNodePtr ) const ;
+  
+  /** Returns the deletion cost of /e node */
+  virtual DistanceType getDeletionCost(const TreeNodePtr ) const ;
+  
+  /** Returns the changing cost between /e i_node and /e r_node*/
+  virtual DistanceType getChangingCost(const TreeNodePtr ,const TreeNodePtr ) const ;
+         
+};
+
+/* ----------------------------------------------------------------------- */
+
 
 #endif
 
