@@ -44,60 +44,6 @@ object py_getchildlist(TreeNode* tnode){
   return make_list(tnode->getChildList())();
 }
 
-std::string treenode_str( TreeNode* tnode ) 
-{ 
-  stringstream ss; 
-  ss<<"ID \t : "<<(int)tnode->getId()<<endl;
-  ss<<"FATHER \t : "<<(int)tnode->getFather()<<endl;
-  ss<<"DEPTH \t : "<<(int)tnode->getDepth()<<endl;
-  ss<<"CHILD LIST \t : [ ";
-  if(tnode->hasChild()){
-	  for (size_t i=0; i < tnode->getChildNumber();i++){
-		if (i>0) ss <<" , ";
-		ss << tnode->getChild(i);
-	  }
-  }
-  ss<<"]"<<endl;
-  for (int i=0;i<tnode->getValueSize();i++) {
-    ss << "ARG["<<i<<"] \t : ";
-	ss << extract<std::string>(str(tnode->getTypedValue<boost::python::object>(i)))() ;
-	ss << endl;
-  }
-  return ss.str(); 
-} 
-
-std::string treenode_repr( TreeNode* tnode ) 
-{ 
-  stringstream ss; 
-  ss<<"<TreeNode(id="<< tnode->getId();
-  if( tnode->getFather() != -1)
-	ss<<",father_id="<<tnode->getFather();
-  ss<<",depth="<<(int)tnode->getDepth();
-  ss<<",children=[";
-  for (int i=0;i<tnode->getChildNumber();++i){
-    if (i>0) ss << ",";
-    ss<<tnode->getChild(i)<<",";
-  }
-  ss<<"],values=[";
-  for (int i=0;i<tnode->getValueSize();++i){
-    if (i>0) ss << ",";
-	ss << extract<std::string>(str(tnode->getTypedValue<boost::python::object>(i)))();
-  }
-  ss<<"]) at 0x" << tnode << ">";
-  return ss.str(); 
-} 
-
-static boost::python::object TreeNodeBuilder;
-
-TreeNodePtr py_factory_build(int id, int father) {
-	return call<TreeNodePtr>(TreeNodeBuilder.ptr(),id,father);
-}
-
-void py_factory_setBuilder(TreeNode::Factory * factory, boost::python::object b){
-	TreeNodeBuilder = b;
-	factory->setBuilder(&py_factory_build);
-}
-
 
 boost::python::object  py_getValue(TreeNode * n, size_t index)
 {
@@ -121,6 +67,61 @@ boost::python::object  py_getValues(TreeNode * n)
 		l.append(boost::any_cast<boost::python::object>(*it));
 	return l; 
 }
+
+std::string treenode_str( TreeNode* tnode ) 
+{ 
+  stringstream ss; 
+  ss<<"ID \t : "<<(int)tnode->getId()<<endl;
+  ss<<"FATHER \t : "<<(int)tnode->getFather()<<endl;
+  ss<<"DEPTH \t : "<<(int)tnode->getDepth()<<endl;
+  ss<<"CHILD LIST \t : [ ";
+  if(tnode->hasChild()){
+	  for (size_t i=0; i < tnode->getChildNumber();i++){
+		if (i>0) ss <<" , ";
+		ss << tnode->getChild(i);
+	  }
+  }
+  ss<<"]"<<endl;
+  for (int i=0;i<tnode->getValueSize();i++) {
+    ss << "ARG["<<i<<"] \t : ";
+	ss << extract<std::string>(str(py_getValue(tnode,i)))() ;
+	ss << endl;
+  }
+  return ss.str(); 
+} 
+
+std::string treenode_repr( TreeNode* tnode ) 
+{ 
+  stringstream ss; 
+  ss<<"<TreeNode(id="<< tnode->getId();
+  if( tnode->getFather() != -1)
+	ss<<",father_id="<<tnode->getFather();
+  ss<<",depth="<<(int)tnode->getDepth();
+  ss<<",children=[";
+  for (int i=0;i<tnode->getChildNumber();++i){
+    if (i>0) ss << ",";
+    ss<<tnode->getChild(i)<<",";
+  }
+  ss<<"],values=[";
+  for (int i=0;i<tnode->getValueSize();++i){
+    if (i>0) ss << ",";
+	ss << extract<std::string>(str(py_getValue(tnode,i)))();
+  }
+  ss<<"]) at 0x" << tnode << ">";
+  return ss.str(); 
+} 
+
+static boost::python::object TreeNodeBuilder;
+
+TreeNodePtr py_factory_build(int id, int father) {
+	return call<TreeNodePtr>(TreeNodeBuilder.ptr(),id,father);
+}
+
+void py_factory_setBuilder(TreeNode::Factory * factory, boost::python::object b){
+	TreeNodeBuilder = b;
+	factory->setBuilder(&py_factory_build);
+}
+
 
 void export_TreeNode() {
 
