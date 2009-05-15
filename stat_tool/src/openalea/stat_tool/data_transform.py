@@ -236,7 +236,7 @@ def ExtractDistribution(model, *args):
     return Extract(model, *args)
     
 
-def ExtractHistogram(data, *args):
+def ExtractHistogram(data, *args, **kargs):
     """  
     Extraction of a frequency distribution from an object of type 'data'.
   
@@ -298,15 +298,21 @@ def ExtractHistogram(data, *args):
         :func:`~openalea.stat_tool.simulate.Simulate`.
     """
     
-    return Extract(data, *args)
+    return Extract(data, *args, **kargs)
 
 
-def Extract(obj, *args):
+def Extract(obj, *args, **kargs):
     """ 
     Common method to redirect extract function call
     See`ExtractHistogram` or `ExtractDistribution`
     """
 
+
+    #arg 0 is misture : Wiegth, Component, Mixture
+    #arg0 is convol: Elementary and convolution
+    #arg0 is compound : compoubd
+    #arg0 is markov: recurrence, sojourn, ...
+     
     func_map = { 
         "Weight" : "extract_weight",
         "Component"  : "extract_component",
@@ -317,18 +323,45 @@ def Extract(obj, *args):
         "Compound" : "extract_compound",
         "Recurrence": "extract",
         "Sojourn": "extract",
+        "NbEvent": "extract"
         }
+  
+    #todo add a enumerate fro m boost python here
+    INTER_EVENT = 0 
+    WITHIN_OBSERVATION_PERIOD =1
+    LENGTH_BIAS =2
+    BACKWARD_RECURRENCE_TIME =3
+    FORWARD_RECURRENCE_TIME =4
+    NB_EVENT =5
+    MIXTURE =6
 
-    # Test without "string" command (ex for _Vecotors)
-    if(len(args) == 0 or not isinstance(args[0], str)):
-
+     
+    renewal_nb_event_map = { 
+            "InterEvent" : INTER_EVENT,
+            "LengthBias" : LENGTH_BIAS,
+            "Backward" : BACKWARD_RECURRENCE_TIME,
+            "Forward" : FORWARD_RECURRENCE_TIME,
+            "Mixture" : MIXTURE,
+            "Within": WITHIN_OBSERVATION_PERIOD,
+            
+            }
+    
+    NbEvent = kargs.get("NbEvent", NB_EVENT)  
+    
+    #todo renewal and time events case here 
+    
+    #top parameters
+    if len(args)==1 and isinstance(args[0], int):
+        position = args[0]
+        return obj.extract(position)
+    # vectors case (only 1 compulsary argument that is an int (variable)
+    elif (not isinstance(args[0], str)):
         # _Vectors with one variable
         try:
             nb_var = obj.nb_variable
             if (nb_var>1):
                 try:
-                    variable = args[0]
-                    
+                    variable = args[0]                    
                 except IndexError:
                     raise TypeError("Extract with vectors object need 1 arguments (variable) if nb variable>1")
             else:
@@ -339,42 +372,53 @@ def Extract(obj, *args):
         except AttributeError:
             raise TypeError("Expect an extract command as first argument." + \
                                 "Possible command are : %s"%(str(func_map.keys())))
-
-    # Others cases
-    key = args[0]
+    else:
+    
+        # Others cases
+        key = args[0]
            
-    try:
-        func_name = func_map[key]
-        f = getattr(obj, func_name)
+        try:
+            func_name = func_map[key]
+            f = getattr(obj, func_name)
+        except KeyError:
+            raise AttributeError("Object has no attribute '%s'"%(key))
 
-    except KeyError:
-        raise AttributeError("Object has no attribute '%s'"%(key))
-
-    except AttributeError:
-        raise
- 
- #OBSERVATION ,
-#  FIRST_OCCURRENCE ,
-  #                       RECURRENCE_TIME , done
-#                         SOJOURN_TIME , done
-  #INITIAL_RUN ,
-  #FINAL_RUN ,
-  #NB_RUN ,
-  #NB_OCCURRENCE ,
-#  LENGTH ,
-#  SEQUENCE_CUMUL ,
-  #SEQUENCE_MEAN
-
-    # Call function
-    seq_map = {"Recurrence":2, "Sojourn":3}
-    if key in seq_map.keys():        
-        if obj.nb_variable == 1:
-            return f(seq_map[args[0]], 1, *args[1:])
-        else:
-            return f(seq_map[args[0]], 1, *args[1:])
+        INITIAL_RUN= 4
+        FINAL_RUN= 5
+        LENGTH= 8
+        SEQUENCE_CUMUL= 9
+        SEQUENCE_MEAN= 10
+   
+        histogram_type = {
+                      "FinalRun":5,
+                      "InitialRun":4,
+                      } 
+        #todo finish the mrkov case. with oprional arguments
+     
+        # Markov/sequence case
+        seq_map = {"Observation":0, 
+               "FirstOccurrence":1,
+               "Recurrence":2, 
+               "Sojourn":3,
+               "NbRun":6,
+               "NbOccurrence":7,
+               "Forward": -1}
+    
+        if key in seq_map.keys():
+            if key == "Forward":
+                histogram_type = "FinalRun"
+                HistogramType = kargs.get("HistogramType", histogram_type)
+                HistogramType = histogram_type[HistogramType]
+            
+                    
+            if obj.nb_variable == 1:
+                return f(seq_map[args[0]], *args[1:])
+            else:
+                #variable = ?
+                return f(seq_map[args[0]], 1, *args[1:])
     
         
-    return f(*args[1:])
+        return f(*args[1:])
 
 
 ################################################################################
@@ -455,13 +499,12 @@ def SelectVariable(obj, variables, Mode="Keep"):
     keep = bool(Mode == "Keep" or Mode == "keep")
     
 
-    # Test if variables is a list
-    try:
-        v = variables[0]
-    except TypeError:
-        variables = [variables,]
-
-    return obj.select_variable(list(variables), keep)
+    if isinstance(variables, int):
+        variables = [variables]
+        
+    return obj.select_variable(variables, keep)
+    
+        
 
 
 def SelectIndividual(obj, identifiers, Mode="Keep"):
@@ -771,4 +814,28 @@ def Fit(histo, dist):
     """
 
     return histo.fit(dist)
+
+
+    
+def Unnormalize(obj):
+    
+    ret = None
+    try:
+        ret = obj.unnormalize()
+    except:
+        pass
+    if ret:
+        return ret    
+
+
+    
+def Symmetrize(obj):
+    
+    ret = None
+    try:
+        ret = obj.symmetrize()
+    except:
+        pass
+    if ret:
+        return ret    
 
