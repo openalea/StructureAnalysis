@@ -1,14 +1,10 @@
-
-
 import os
-from openalea.sequence_analysis.data_transform import *
-from openalea.sequence_analysis.sequences import *
-from openalea.sequence_analysis.correlation import *
 from openalea.stat_tool import *
+from openalea.sequence_analysis import *
 
 from openalea.sequence_analysis.estimate import Estimate
 from openalea.sequence_analysis.compare import Compare
-from openalea.sequence_analysis.hidden_variable_order_markov import *
+from openalea.sequence_analysis.simulate import Simulate
 
 
 #path = 'test' + os.sep + 'data' +os.sep
@@ -92,4 +88,5 @@ hmc11 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTrans
 acf21 = ComputeAutoCorrelation(hmc11, 1, 1, MaxLag=20)
 acf22 = ComputeAutoCorrelation(hmc11, 1, 2, MaxLag=20)
 
-seq15 = Simulate(hmc11, 10000, seq10)
+def test_todo():
+    seq15 = Simulate(hmc11, 10000, seq10)

@@ -17,10 +17,13 @@
 #  VARIABLE 2 : number of  branches per annual shoot / tier.
 #
 #########################################################################
+
+
 import os
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import  Estimate
 from openalea.sequence_analysis.compare import  Compare
+
 
 seq69 = Sequences("data//pin_laricio_7x.seq")
 seq70 = Cluster(seq69, "Step", 1, 10)
@@ -154,11 +157,11 @@ mixt62 = Mixture(0.0497296, ExtractDistribution(hsmc6, "Observation", 2, 0), 0.0
 
 # comparason with the segmentations deduced from the 6-state hidden semi-Markov chain
 
-seq46 = Merge(Segmentation(seq70, 1, [1935, 1961, 1972, 1990], "Gaussian", "Gaussian"),\
-Segmentation(seq70, 2, [1932, 1936, 1961, 1984, 1986], "Gaussian", "Gaussian"),\
-Segmentation(seq70, 3, [1932, 1949, 1971, 1985, 1990], "Gaussian", "Gaussian"),\
-Segmentation(seq70, 4, [1930, 1953, 1963, 1977], "Gaussian", "Gaussian"),\
-Segmentation(seq70, 5, [1931, 1963, 1975, 1991], "Gaussian", "Gaussian"),\
+seq46 = Merge( Segmentation(seq70, 1, [1935, 1961, 1972, 1990], "Gaussian", "Gaussian"),
+Segmentation(seq70, 2, [1932, 1936, 1961, 1984, 1986], "Gaussian", "Gaussian"),
+Segmentation(seq70, 3, [1932, 1949, 1971, 1985, 1990], "Gaussian", "Gaussian"),
+Segmentation(seq70, 4, [1930, 1953, 1963, 1977], "Gaussian", "Gaussian"),
+Segmentation(seq70, 5, [1931, 1963, 1975, 1991], "Gaussian", "Gaussian"),
 Segmentation(seq70, 6, [1931, 1943, 1960, 1976], "Gaussian", "Gaussian"))
 
 seq47 = SelectVariable(seq46, [3, 5])
