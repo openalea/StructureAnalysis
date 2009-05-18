@@ -673,17 +673,19 @@ def Segmentation(obj, *args, **kargs):
     >>> S
     """
     SEQUENCE = 0
-    SUBTRACTION_RESIDUAL = 1
-    STANDARDIZED_RESIDUAL = 2
+    TREND = 1
+    SUBTRACTION_RESIDUAL = 2
+    DIVISION_RESIDUAL = 3
+    STANDARDIZED_RESIDUAL = 4
     
     output_sequence_map = {
        "Sequence": SEQUENCE,
        "SubtractionResidual": SUBTRACTION_RESIDUAL,
        "Residual": SUBTRACTION_RESIDUAL,
-       "StandardizedResidual":  STANDARDIZED_RESIDUAL
+       "StandardizedResidual":  STANDARDIZED_RESIDUAL,
+       "DivisionResidual": DIVISION_RESIDUAL
        }
             
-    
     MULTINOMIAL_CHANGE =0
     POISSON_CHANGE =1
     ORDINAL_GAUSSIAN_CHANGE =2
@@ -716,12 +718,17 @@ def Segmentation(obj, *args, **kargs):
     if isinstance(args[0], list) and isinstance(args[1], str):
         nb_sequence = obj.nb_sequence
         nb_segment = args[0]
-        
+        print "seqarray"
         Model = __get_model__(args[1:], nb_variable)
         
         Output = kargs.get("Output", "Sequence")
         Output = output_sequence_map[Output] 
         identifier = -1
+        
+        print nb_segment
+        print Model
+        print identifier
+        print Output
         
         seq = obj.segmentation_array(nb_segment, Model, identifier , Output)
     #from 2 ints, a vectordistance and the output 
@@ -731,7 +738,7 @@ def Segmentation(obj, *args, **kargs):
         Output = output_type[Output] 
         seq = obj.segmentation_vector_distance(args[0], args[1], args[2], Output)
     #from 2 ints, and model_type
-    elif isinstance(args[0], int) and isinstance(args[1], int) and isinstance(args[2], str):
+    elif isinstance(args[0], int) and isinstance(args[1], int)  and isinstance(args[2], str):
         nb_sequence = obj.nb_sequence
         
         Model = __get_model__(args[2:], nb_variable)
@@ -747,25 +754,31 @@ def Segmentation(obj, *args, **kargs):
         nb_segment_estimation =  nb_segment_map[NbSegment]
         
         if nb_segment_estimation is False:
-            if args[2] == 1 :
-               seq = obj.segmentation_int_int(args[0] , args[1] ,
+            if args[1] == 1 :
+                print "segfalse1"
+                #.. todo:: which call ?????????????????
+                seq = obj.segmentation_int_int(args[0] , args[1] ,
                                         Model, Output);
             else:   
                 nb_segment = args[0]
+                print "segfalse2"
                 seq = obj.segmentation_array(nb_segment, Model,
                                                 args[0], Output);
         else:
+            # correct a priori given the aml example seq80
+            print "segtrue"
+            
             seq = obj.segmentation_model(args[0], args[1], Model);
         
     #from int and a list
     elif isinstance(args[0], int) and isinstance(args[1], list):
-        
+        print "int and list change point"
         Model = __get_model__(args[2:], nb_variable)
                 
         change_point = args[1]
         Output = kargs.get("Output", "Sequence")
         Output = output_sequence_map[Output]
-        nb_segment = args[0]
+        nb_segment = len(args[1])+1 #.. todo:: to be checked
 
         seq = obj.segmentation_change_point(args[0] , nb_segment ,
                             change_point , Model , Output);
@@ -778,7 +791,18 @@ def Segmentation(obj, *args, **kargs):
 def SojournTimeSequences(obj, Variable = 1):
     return obj.sojourn_time_sequences(Variable).markovian_sequences()
 
- 
+def VariableScaling(obj, *args): 
+
+    if len(args) == 2:
+        variable = args[0]
+        scaling = args[1]
+    elif len(args) == 1:
+        variable = 1
+        scaling = args[0]
+        
+    if obj.nb_variable == 1 and variable != 1:
+        raise TypeError("nb_variable is 1 but your provided a different value. Check the arguments.")
+    return obj.scaling(variable, scaling)
  
 def __get_model__(data, nb_variable): 
     """ """
