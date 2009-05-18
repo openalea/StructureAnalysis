@@ -263,10 +263,7 @@ void class_variable_order_markov() {
  *  friend Variable_order_markov* variable_order_markov_parsing(Format_error &error ,
                                                                 ifstream &in_file ,
                                                                 int &line , char type);
-    friend Variable_order_markov* variable_order_markov_ascii_read(Format_error &error ,
-                                                                   const char *path ,
-                                                                   int length);
-  Variable_order_markov();
+
   Variable_order_markov(const Variable_order_markov &markov , int inb_output_process , int nb_value);
   Variable_order_markov(const Variable_order_markov *pmarkov ,  const Nonparametric_process *pobservation , int length);
   Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)  :Chain(markov) { copy(markov , data_flag); }

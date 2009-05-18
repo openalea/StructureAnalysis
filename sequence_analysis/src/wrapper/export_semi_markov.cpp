@@ -79,7 +79,7 @@ public:
   }
 
   static Parametric_model*
-  extract_type(const Semi_markov& input, int type, int variable, int value)
+  extract(const Semi_markov& input, int type, int variable, int value)
   {
 
     SIMPLE_METHOD_TEMPLATE_1(input, extract, Parametric_model, type, variable,
@@ -214,7 +214,7 @@ class_semi_markov()
 
     //DEF_RETURN_VALUE("get_parametric_process", &Semi_markov::get_parametric_process, args("variable_index"), "returns parametric process corresponding to the given variable")
     .def("extract_histogram", SemiMarkovWrap::extract_histogram, return_value_policy< manage_new_object >(), "todo")
-    .def("extract_type", SemiMarkovWrap::extract_type, return_value_policy< manage_new_object >(), "todo")
+    .def("extract", SemiMarkovWrap::extract, return_value_policy< manage_new_object >(), "todo")
 
     .def("get_forward", (Forward *(*)(const Semi_markov&, int)) SemiMarkovWrap::get_forward, return_value_policy< manage_new_object >(), SemiMarkovWrap::get_forward_overloads())
 

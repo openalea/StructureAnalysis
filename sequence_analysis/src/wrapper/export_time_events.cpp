@@ -212,8 +212,7 @@ void class_time_events() {
 
       void nb_element_computation();
       double min_inter_event_computation() const;
-      /*
-/*
+
 Time_events(int inb_element , int *itime , int *inb_event){ build(inb_element , itime , inb_event); }
 Time_events(int nb_sample , const Time_events **ptimev) { merge(nb_sample , ptimev); }
 Time_events(const Time_events &timev) { copy(timev); }

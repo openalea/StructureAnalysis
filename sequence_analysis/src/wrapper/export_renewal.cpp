@@ -128,15 +128,15 @@ public:
   }
 
   static Parametric_model*
-      extract(const Renewal& seq, int type, int state)
-      {
-        Format_error error;
-        Parametric_model* ret;
-        ret = seq.extract(error, type, state);
-        if (!ret)
-          sequence_analysis::wrap_util::throw_error(error);
-        return ret;
-      }
+  extract(const Renewal& seq, int type, int state)
+  {
+    Format_error error;
+    Parametric_model* ret;
+    ret = seq.extract(error, type, state);
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+    return ret;
+  }
 
 };
 
@@ -197,13 +197,13 @@ void class_renewal() {
 void class_renewal_data() {
 
 
-	class_<Renewal_data, bases<Time_events> > ("_Renewal_data", "Renewal_data")
+  class_<Renewal_data, bases<Time_events> > ("_Renewal_data", "Renewal_data")
     .def(init <int, int>())
     .def(init <int, Renewal>())
     .def(init <Time_events, int>())
-	// Python Operators
-    .def("get_renewal", &Renewal_data::get_renewal,
-        return_value_policy<manage_new_object> (),"get renewal")
+
+    // Python Operators
+    .def("get_renewal", &Renewal_data::get_renewal, return_value_policy<manage_new_object> (),"get renewal")
     .def("get_type", &Renewal_data::get_type, "get type")
 
 

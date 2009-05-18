@@ -65,7 +65,7 @@ public:
     }
 
   static Tops*
-  simulation1(const Top_parameters& top, int nb_top,
+  simulation_dists(const Top_parameters& top, int nb_top,
       const Distribution &nb_trial, const Distribution &nb_axillary)
   {
     SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops,
@@ -73,8 +73,8 @@ public:
   }
 
   static Tops*
-  simulation2(const Top_parameters& top, int nb_top, int nb_trial,
-      int nb_axillary = 1)
+  simulation(const Top_parameters& top, int nb_top, int nb_trial,
+      int nb_axillary)
   {
     SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops,
         nb_top, nb_trial, nb_axillary);
@@ -103,8 +103,8 @@ void class_top_parameters() {
 
     DEF_RETURN_VALUE("get_axillary_nb_internode", &Top_parameters::get_axillary_nb_internode,args("position"), "returns axillary nb internode distribution")
     DEF_RETURN_VALUE("extract", &TopParametersWrap::extract, args("position"), "extract parametric model")
-    DEF_RETURN_VALUE("simulation1", &TopParametersWrap::simulation1,args("position"), "simulation type1")
-    DEF_RETURN_VALUE("simulation2", &TopParametersWrap::simulation2,args("position"), "simulation type2")
+    DEF_RETURN_VALUE("simulation_dists", &TopParametersWrap::simulation_dists,args("position"), "simulation type1")
+    DEF_RETURN_VALUE("simulation", &TopParametersWrap::simulation,args("position"), "simulation ")
 
     DEF_RETURN_VALUE_NO_ARGS("get_tops", &Top_parameters::get_tops,     "returns tops")
     ;
