@@ -148,22 +148,25 @@ public:
       sequence_analysis::wrap_util::throw_error(error);
    }
 
+
   static Time_events*
-  merge(Time_events& input_seq, const boost::python::list& seqs)
-   {
-     int nb_seq = len(seqs);
-     sequence_analysis::wrap_util::auto_ptr_array<const Time_events *> sequens(
-         new const Time_events*[nb_seq]);
+  merge(const Time_events& input, const boost::python::list input_timev)
+  {
+    int nb = len(input_timev);
+    sequence_analysis::wrap_util::auto_ptr_array<const Time_events *>
+        timev(new const Time_events*[nb]);
 
-     for (int i = 0; i < nb_seq; i++)
-       sequens[i] = boost::python::extract<Time_events *> (seqs[i]);
+    for (int i = 0; i < nb; i++)
+        timev[i] = boost::python::extract<Time_events *> (input_timev[i]);
 
-       //todo does not compile because merge is protected
-     //Time_events *ret;
-     //ret = input_seq.merge(nb_seq, sequens.get());
-     //return ret;
-   }
+    Time_events *res;
 
+    res = new Time_events(nb, timev.get());
+
+//delete [] *timev;
+
+    return res;
+  }
 
 
 
@@ -205,7 +208,7 @@ void class_time_events() {
       int *nb_event;          // nombre d'evenements
       int *frequency;         // effectif de chacune des classes
                               // {temps, nombre d'evenements}
-      void merge(int nb_sample , const Time_events **ptimev);
+
 
       std::ostream& ascii_file_write(std::ostream &os , bool exhaustive , char type = 'v') const;
       std::ostream& spreadsheet_write(std::ostream &os , char type = 'v') const;
@@ -213,9 +216,8 @@ void class_time_events() {
       void nb_element_computation();
       double min_inter_event_computation() const;
 
-Time_events(int inb_element , int *itime , int *inb_event){ build(inb_element , itime , inb_event); }
-Time_events(int nb_sample , const Time_events **ptimev) { merge(nb_sample , ptimev); }
-Time_events(const Time_events &timev) { copy(timev); }
+      Time_events(int inb_element , int *itime , int *inb_event){ build(inb_element , itime , inb_event); }
+    Time_events(const Time_events &timev) { copy(timev); }
 
   Renewal* estimation(Format_error &error , std::ostream &os , char type ,
                        const Parametric &iinter_event , int estimator = LIKELIHOOD ,

@@ -3,12 +3,13 @@ __revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _Sequences, _Renewal_data
+from openalea.sequence_analysis._sequence_analysis import _Sequences
+from openalea.sequence_analysis._sequence_analysis import _Renewal_data
 
 import _sequence_analysis
 
-__all__ = ['Sequences','_Sequences', 'LumpabilityTest', 'RemoveIndexParameter',
-           'TransformPosition']
+__all__ = ['Sequences','_Sequences',
+           'LumpabilityTest', 'RemoveIndexParameter', 'TransformPosition']
 
 
 # Extend dynamically class
@@ -112,7 +113,7 @@ def Sequences(*args, **kargs):
     if len(args)==1 and isinstance(args[0], str):
         filename = args[0]
         if os.path.isfile(filename):
-            sequence =  _Sequences(filename)
+            sequence = _Sequences(filename)
         else:
             raise IOError("bad file name")
     # otherwise, we switch to a list constructor that requires a list of sequences
@@ -129,7 +130,10 @@ def Sequences(*args, **kargs):
     else:
         raise TypeError("Expected a valid filename or a list of lists (e.g., [[1,0],[0,1]])")
     
-    return sequence.markovian_sequences()
+    try:
+        return sequence.markovian_sequences()
+    except:
+        return sequence
     
     
 def LumpabilityTest(obj, *args, **kargs):    

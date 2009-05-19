@@ -8,7 +8,7 @@ class TestRemoveRun():
     def __init__(self):
         self.data = Sequences("data/sequences1.seq")
         
-    def test_sequences_1(self):
+    def _test_sequences_1(self):
         
         seq1 = self.data
         seq2 = seq1.remove_run(1, 0,"e",2)

@@ -57,9 +57,10 @@ def SemiMarkov(filename=None, length=40, counting=True, cumul_threshold=0):
     Simulate (Markovian models).
  
     """ 
-#cumul_threshold=0
     if filename==None:
-        raise TypeError('invalid filename')
+        raise TypeError('No filename provided.')
+    elif not os.path.isfile(filename):
+        raise OSError("Invalid filename")
     else:
         return _Semi_markov(filename, length, counting, cumul_threshold)
 

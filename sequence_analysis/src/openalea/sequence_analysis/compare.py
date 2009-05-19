@@ -1,10 +1,11 @@
 """
 compare tools for sequences
 """
-import openalea.sequence_analysis._sequence_analysis as _sequence_analysis
+
+
 import openalea.stat_tool._stat_tool as _stat_tool
-#from distribution import Distribution
 from openalea.stat_tool.comparison import compare_histo, compare_vectors
+import _sequence_analysis
 
 def compare_markovian_sequences_and_variable_order_markov(obj, *args, **kargs):
 

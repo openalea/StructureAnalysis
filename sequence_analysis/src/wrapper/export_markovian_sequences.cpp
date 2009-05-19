@@ -51,7 +51,7 @@ using namespace sequence_analysis;
 
 #define WRAP MarkovianSequencesWrap
 
-class MarkovianSequencesWrap {
+class WRAP {
 
 public:
 
@@ -144,29 +144,26 @@ public:
          if (is_float)
            {
         	 ldouble[i] = boost::python::extract<double> (limit[i]);
-        	 cerr << ldouble[i]<<endl;
+        	 cout << ldouble[i]<<endl;
            }
          else
          {
         	 lint[i] = boost::python::extract<int> (limit[i]);
-        	 cerr << lint[i]<<endl;
+        	 cout << lint[i]<<endl;
          }
 
 
 
        }
 
-     cerr << "here"<<endl;
      // Call correct function
      if (is_float)
        {
-    	 cerr << "here1"<<endl;
          ret = seq.cluster(error, variable, nb_limit+1, ldouble);
          delete[] ldouble;
        }
      else
        {
-    	 cerr << "here2"<<endl;
          ret = seq.cluster(error, variable, nb_limit+1, lint, add_flag);
          delete[] lint;
        }
@@ -237,7 +234,7 @@ public:
 
     ret = input.consecutive_values(error, os, variable, add_flag);
 
-    cerr <<os.str()<<endl;
+    cout <<os.str()<<endl;
     return ret;
   }
 
@@ -251,7 +248,6 @@ public:
   add_absorbing_run(const Markovian_sequences& input ,int sequence_length
 		, int run_length)
   {
-	  //sequence_length = I_DEFAULT , int run_length = I_DEFAULT)
      SIMPLE_METHOD_TEMPLATE_1(input, add_absorbing_run,
     		 Markovian_sequences, sequence_length, run_length);
   }
@@ -267,7 +263,7 @@ public:
 
 	ret = input.transition_count(error, os,
 			max_order, begin, estimator);
-
+    cout << os.str()<<endl;
 	return ret;
   }
 
@@ -308,6 +304,7 @@ public:
 
 	  if (!vom)
 	  		sequence_analysis::wrap_util::throw_error(error);
+      cout << os.str()<<endl;
 	  return vom;
   }
 
@@ -343,6 +340,7 @@ public:
 
 	  if (!vom)
 	  		sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str()<<endl;
 	  return vom;
   }
 
@@ -371,6 +369,7 @@ public:
 
     if (!vom)
   		sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str()<<endl;
 
     delete[] symbol;
     return vom;
@@ -391,6 +390,9 @@ public:
 
     ret = input.hidden_variable_order_markov_estimation(error, os, hvom,
     		global_initial_transition, counting_flag, state_sequence, nb_iter);
+    if (!ret)
+  	      sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str()<<endl;
 
     return ret;
   }
@@ -415,6 +417,9 @@ public:
 			 hvom, global_initial_transition, min_nb_state_sequence,
 			 max_nb_state_sequence, parameter, counting_flag, state_sequence,
              nb_iter);
+    if (!ret)
+  		sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str()<<endl;
 
 	 return ret;
   }
@@ -435,7 +440,10 @@ public:
 	      markov[i] = boost::python::extract<Variable_order_markov*> (input_markov[i]);
 
 	  ret = input.comparison(error, os, nb_markov, markov.get(), filename);
-	  cerr << os.str()<<endl;
+      if (!ret)
+  	      sequence_analysis::wrap_util::throw_error(error);
+	  
+      cout << os.str()<<endl;
 	  return ret;
   }
 
@@ -455,7 +463,9 @@ public:
 	      markov[i] = boost::python::extract<Semi_markov*> (input_markov[i]);
 
 	  ret = input.comparison(error, os, nb_markov, markov.get(), filename);
-	  cerr << os.str()<<endl;
+      if (!ret)
+          sequence_analysis::wrap_util::throw_error(error);
+	  cout << os.str()<<endl;
 	  return ret;
   }
 
@@ -475,7 +485,9 @@ public:
 	      markov[i] = boost::python::extract<Hidden_variable_order_markov*> (input_markov[i]);
 
 	  ret = input.comparison(error, os, nb_markov, markov.get(), algorithm, filename);
-	  cerr << os.str()<<endl;
+      if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
+	  cout << os.str()<<endl;
 	  return ret;
   }
 
@@ -495,7 +507,9 @@ public:
   	      markov[i] = boost::python::extract<Hidden_semi_markov*> (input_markov[i]);
 
   	  ret = input.comparison(error, os, nb_markov, markov.get(), algorithm , filename);
-  	  cerr << os.str()<<endl;
+      if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
+  	  cout << os.str()<<endl;
   	  return ret;
     }
 
@@ -521,7 +535,9 @@ public:
 
   	ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov,	estimator,
   			counting_flag, state_sequence, nb_iter, mean_computation);
-  	cerr << os.str()<<endl;
+    if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
+  	cout << os.str()<<endl;
     return ret;
   }
 
@@ -539,8 +555,10 @@ public:
    			model_type, nb_state,left_right, estimator,
    			counting_flag, state_sequence, occupancy_mean,
    			nb_iter, mean_computation);
+    if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
 
-   	cerr << os.str()<<endl;
+   	cout << os.str()<<endl;
     return ret;
   }
 
@@ -558,7 +576,9 @@ public:
    	ret = input.hidden_semi_markov_stochastic_estimation(error, os, ihsmarkov,
    			min_nb_state_sequence, max_nb_state_sequence, parameter,
    			estimator, counting_flag, state_sequence, nb_iter);
-   	cerr << os.str()<<endl;
+    if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
+   	cout << os.str()<<endl;
     return ret;
   }
 
@@ -578,7 +598,9 @@ public:
     	  		min_nb_state_sequence, max_nb_state_sequence, parameter,
     			estimator, counting_flag, state_sequence, occupancy_mean,
      			nb_iter);
-    cerr << os.str()<<endl;
+    if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str()<<endl;
     return ret;
   }
 
@@ -594,6 +616,9 @@ public:
 	ret = input.semi_markov_estimation(error, os,
 			model_type, estimator, counting_flag, nb_iter,
 			mean_computation);
+    if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
+	  cout << os.str()<<endl;
 
 	return ret;
   }
@@ -614,6 +639,8 @@ public:
     }
 
     ret = input.nonhomogeneous_markov_estimation(error, ident, counting_flag);
+    if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
 
     return ret;
   }
@@ -635,6 +662,9 @@ public:
     }
 
     ret = input.lumpability_test(error , os , values , order);
+    if (!ret)
+  	    sequence_analysis::wrap_util::throw_error(error);
+	cout << os.str()<<endl;
 
     return ret;
   }
@@ -649,58 +679,55 @@ void class_markovian_sequences() {
 
   class_<Markovian_sequences, bases<Sequences> > ("_Markovian_sequences", "Markovian_sequences")
 
-    .def("__init__", make_constructor(MarkovianSequencesWrap::markovian_sequences1))
-    .def("__init__", make_constructor(MarkovianSequencesWrap::markovian_sequences2))
-    .def("__init__", make_constructor(MarkovianSequencesWrap::markovian_sequences3))
+    .def("__init__", make_constructor(WRAP::markovian_sequences1))
+    .def("__init__", make_constructor(WRAP::markovian_sequences2))
+    .def("__init__", make_constructor(WRAP::markovian_sequences3))
     .def(init <Sequences>())
     .def(init <Markovian_sequences, optional<char, int> >())
 
     .def(self_ns::str(self)) //__str__
 
-    DEF_RETURN_VALUE("extract", MarkovianSequencesWrap::extract,args("type", "variable","value"), "Extract distribution data")
-    DEF_RETURN_VALUE("split", &MarkovianSequencesWrap::split,args("step"),  "Split")
-    DEF_RETURN_VALUE("merge", &MarkovianSequencesWrap::merge,args("sequences"),  "Merge")
-    DEF_RETURN_VALUE("cluster_step", &MarkovianSequencesWrap::cluster_step,args("variable", "step", "mode"), "Cluster")
-    DEF_RETURN_VALUE("cluster_limit", &MarkovianSequencesWrap::cluster_limit,args("variable", "limit", "bool_add_flag"), "Cluster")
-    DEF_RETURN_VALUE("transcode", &MarkovianSequencesWrap::transcode,args("variable", "symbol", "add_flag"), "Transcode")
-    DEF_RETURN_VALUE("select_variable", &MarkovianSequencesWrap::select_variable,args("nb_variable", "list variables", "keep"), "select variable")
-    DEF_RETURN_VALUE("add_absorbing_run", &MarkovianSequencesWrap::add_absorbing_run,args("sequence_length", "run_length"), "todo")
-    .def("word_count", &MarkovianSequencesWrap::word_count, args("variable", "word_length","begin_state", "end_state","min_frequency"), "todo" )
-    DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", &MarkovianSequencesWrap::remove_index_parameter, "Remove index parameter")
-
-    DEF_RETURN_VALUE("variable_order_markov_estimation1", &MarkovianSequencesWrap::variable_order_markov_estimation1, args("model_type", "min_order", "max_order", "algorithm", "threshold", "estimator","global_initial_transition","global_sample", "counting_flag"), "todo")
-    DEF_RETURN_VALUE("variable_order_markov_estimation2", WRAP::variable_order_markov_estimation2, args("type","max_order","global_initial_transition","counting_flag"), "todo")
-    DEF_RETURN_VALUE("variable_order_markov_estimation3",WRAP::variable_order_markov_estimation3,args("markov","global_initial_transition","counting_flag"), "todo")
-    DEF_RETURN_VALUE("lumpability_estimation", WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")
+    DEF_RETURN_VALUE("add_absorbing_run", WRAP::add_absorbing_run, args("sequence_length", "run_length"), "addition of a run of absorbing vectors at the end of sequences")
+    DEF_RETURN_VALUE("cluster_step", WRAP::cluster_step, args("variable", "step", "mode"), "Cluster")
+    DEF_RETURN_VALUE("cluster_limit", WRAP::cluster_limit, args("variable", "limit", "bool_add_flag"), "Cluster")
+    DEF_RETURN_VALUE("consecutive_values", WRAP::consecutive_values, args("variable", "AddVariable_flag"), "Consecutive values")
+    DEF_RETURN_VALUE("extract", WRAP::extract, args("type", "variable","value"), "Extract distribution data")
+    DEF_RETURN_VALUE("split", WRAP::split, args("step"),  "Split")
+    DEF_RETURN_VALUE("merge", WRAP::merge, args("sequences"),  "Merge")
+    DEF_RETURN_VALUE_NO_ARGS("merge_variable", WRAP::merge_variable, "Merge variables")
+    DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", WRAP::remove_index_parameter, "Remove index parameter")
+    DEF_RETURN_VALUE("select_variable", WRAP::select_variable, args("nb_variable", "list variables", "keep"), "select variable")
+    DEF_RETURN_VALUE("transcode", WRAP::transcode, args("variable", "symbol", "add_flag"), "Transcode")
 
     // todo add the args()
     DEF_RETURN_VALUE("hidden_variable_order_markov_estimation", WRAP::hidden_variable_order_markov_estimation, args(""), "todo")
     DEF_RETURN_VALUE("hidden_variable_order_markov_stochastic_estimation", WRAP::hidden_variable_order_markov_stochastic_estimation, args(""), "todo")
 
+    //comparison
     .def("comparison_variable_order_markov", WRAP::comparison_variable_order_markov, args("markov list","filename"), "todo")
-    .def("comparison_semi_markov", &WRAP::comparison_semi_markov, args("markov list","filename"), "todo")
+    .def("comparison_semi_markov", WRAP::comparison_semi_markov, args("markov list","filename"), "todo")
     .def("comparison_hidden_variable_order_markov", WRAP::comparison_hidden_variable_order_markov, args("markov list","algo","filename"), "todo")
-    .def("comparison_hidden_semi_markov", &WRAP::comparison_hidden_semi_markov, args("markov list","algo","filename"), "todo")
+    .def("comparison_hidden_semi_markov", WRAP::comparison_hidden_semi_markov, args("markov list","algo","filename"), "todo")
 
-    .def("transition_count", WRAP::transition_count, args("todo"), "todo")
+    //others
+    .def("lumpability_test", WRAP::lumpability_test, args("symbols", "order"), "test lumpability and returns status. See LumpabilityTest in sequence_analysis.")
     .def("self_transition_computation", WRAP::self_transition_computation )
-    DEF_RETURN_VALUE_NO_ARGS("merge_variable",WRAP::merge_variable, "Merge variables")
-    DEF_RETURN_VALUE("consecutive_values",WRAP::consecutive_values, args("variable", "AddVariable_flag"), "Consecutive values")
+    .def("transition_count", WRAP::transition_count, args("todo"), "todo")
+    .def("word_count", WRAP::word_count, args("variable", "word_length","begin_state", "end_state","min_frequency"), "todo" )
 
-    .def("lumpability_test",WRAP::lumpability_test, args("symbols", "order"), "test lumpability and returns status. See LumpabilityTest in sequence_analysis.")
-
-
+    //estimation
+    DEF_RETURN_VALUE("variable_order_markov_estimation1", WRAP::variable_order_markov_estimation1, args("model_type", "min_order", "max_order", "algorithm", "threshold", "estimator","global_initial_transition","global_sample", "counting_flag"), "todo")
+    DEF_RETURN_VALUE("variable_order_markov_estimation2", WRAP::variable_order_markov_estimation2, args("type","max_order","global_initial_transition","counting_flag"), "todo")
+    DEF_RETURN_VALUE("variable_order_markov_estimation3", WRAP::variable_order_markov_estimation3, args("markov","global_initial_transition","counting_flag"), "todo")
+    DEF_RETURN_VALUE("lumpability_estimation", WRAP::lumpability_estimation, args("input_symbol", "penalty_type","order","counting_flag"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation_model", WRAP::hidden_semi_markov_stochastic_estimation_model, args("tobedone"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_stochastic_estimation", WRAP::hidden_semi_markov_stochastic_estimation, args("tobedone"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_estimation_model", WRAP::hidden_semi_markov_estimation_model, args("tobedone"), "todo")
     DEF_RETURN_VALUE("hidden_semi_markov_estimation", WRAP::hidden_semi_markov_estimation, args("tobedone"), "todo")
     DEF_RETURN_VALUE("semi_markov_estimation", WRAP::semi_markov_estimation, args("tobedone"), "todo")
-    DEF_RETURN_VALUE("nonhomogeneous_markov_estimation", WRAP::semi_markov_estimation, args("tobedone"), "todo")
+    DEF_RETURN_VALUE("nonhomogeneous_markov_estimation", WRAP::nonhomogeneous_markov_estimation, args("tobedone"), "todo")
     ;
 	/*
-
-
-
    Markovian_sequences* remove_variable_1() const;
    Markovian_sequences* initial_run_computation(Format_error &error) const;
 
@@ -739,9 +766,9 @@ void class_self_transition() {
 
   class_<Self_transition, bases<Curves> > ("_Self_transition", "Self_transition", no_init)
     .def(init <int>())
-
-    DEF_RETURN_VALUE_NO_ARGS("monomolecular_regression", &Self_transition::monomolecular_regression, "return function monomolecular regression")
-    DEF_RETURN_VALUE_NO_ARGS("logistic_regression", &Self_transition::logistic_regression,"return function logistic regression")
+    DEF_RETURN_VALUE_NO_ARGS("monomolecular_regression", &Self_transition::monomolecular_regression, "returns monomolecular regression")
+    DEF_RETURN_VALUE_NO_ARGS("logistic_regression", &Self_transition::logistic_regression,"returns logistic regression")
     ;
     //Done
 }
+

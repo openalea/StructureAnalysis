@@ -200,8 +200,8 @@ public:
   }
 
   static Top_parameters*
-  estimation1(const Tops& top, int imin_position, int imax_position,
-      int neighborhood, bool equal_probability = false)
+  estimation(const Tops& top, int imin_position, int imax_position,
+      int neighborhood, bool equal_probability)
   {
     SIMPLE_METHOD_TEMPLATE_1(top, estimation, Top_parameters, imin_position,
         imax_position, neighborhood, equal_probability);
@@ -237,7 +237,7 @@ void class_tops() {
 	DEF_RETURN_VALUE("select_individual", TopsWrap::select_individual,args("identifiers", "keep"), "select individual")
 	DEF_RETURN_VALUE("extract",TopsWrap::extract,args("position"), "extract method")
     DEF_RETURN_VALUE("shift", TopsWrap::shift, args("nb_internode"), "shift method")
-    DEF_RETURN_VALUE("estimation1", &TopsWrap::estimation1, args("min_position","max_position", "neighborhood", "equal_probability"), "estimation method 1")
+    DEF_RETURN_VALUE("estimation", &TopsWrap::estimation, args("min_position","max_position", "neighborhood", "equal_probability"), "estimation method 1")
     DEF_RETURN_VALUE("estimation2", &TopsWrap::estimation2, args("neighborhood", "equal_probability"), "estimation method 2")
 
     DEF_RETURN_VALUE_NO_ARGS("reverse", TopsWrap::reverse,"reverse method")

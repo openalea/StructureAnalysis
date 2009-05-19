@@ -1,8 +1,8 @@
-"""data transform"""
+"""Data transform methods
+"""
 __revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
 
 
-#import os
 import openalea.stat_tool.interface as interface
 import _sequence_analysis
 from openalea.stat_tool._stat_tool import _VectorDistance
@@ -193,31 +193,26 @@ def ExtractVectors(obj, key, *args):
         "Cumul"             : _sequence_analysis.SEQUENCE_CUMUL
         }        
 
-    #.value("OBSERVATION",OBSERVATION)
-    #.value("RECURRENCE_TIME",RECURRENCE_TIME)
-    #.value("SOJOURN_TIME",SOJOURN_TIME)
-    #.value("INITIAL_RUN",INITIAL_RUN)
-    #.value("FINAL_RUN",FINAL_RUN)
-    
     if key not in type_dict.keys():
         raise TypeError("key must be in %s" % type_dict.keys())
+     
     
-    key = type_dict[key]
-    
-    variable = -1 
-    
-    
-    if len(args)==2:
+    if obj.nb_variable == 1: 
+        variable = 1
+    else:
+        variable = obj.nb_variable
+        
+    if key == "Length":
+        sequence = obj.extract_vectors(type_dict[key],-1,-1)
+    elif key in ["Cumul", "Mean"]:
+        sequence = obj.extract_vectors(type_dict[key], variable, -1)
+    elif len(args)==2:
         variable = args[0]
         value = args[1]
-        sequence = obj.extract_vectors(key, variable, value)
+        sequence = obj.extract_vectors(type_dict[key], variable, value)
     elif len(args)==1 and obj.nb_variable==1:
         value = args[0]
-        sequence = obj.extract_vectors(key, 1,value)
-    elif len(args)==0:
-        # why the overloading in export_markovian does not work ? 
-        #here variable is 1 and whatever value given, the results is the same
-        sequence = obj.extract_vectors(key,1,0)
+        sequence = obj.extract_vectors(type_dict[key], 1,value)
     else:
         raise TypeError("nb_variable =1 so varaible must be 1")
     
@@ -416,43 +411,61 @@ def WordCount(obj, *args, **kargs):
 def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
     """AddAbsorbingRun
     
-      Addition of a run of absorbing vectors at the end of sequences.
+    Addition of a run of absorbing vectors at the end of sequences.
 
-      Usage
+    :Usage:
     
-      AddAbsorbingRun(seq, Length->50)
+    >>> AddAbsorbingRun(seq, RunLength=20)
+    >>> AddAbsorbingRun(seq, SequenceLength=30, RunLength=20)
+      
+    :Arguments:
+    * seq (distance_sequences, markov_data, semi-markov_data)
     
-      Arguments
-    seq (distance_sequences, markov_data, semi-markov_data)
+    :Optional Arguments: 
+    * SequenceLength (int): length of the sequences. A default value is 
+        computed from the maximum sequence length. must be less than 
+        max_length + 20.
+    * RunLength (int): length of the runs. A default value is computed from 
+      the maximum sequence length. must be less than 20.
     
-      Optional Arguments 
-    Length (int): length of the sequences. A default value is computer from the maximum sequence length.
-    
-      Returned Object
+    :Returns:
     An object of type discrete_sequences is returned.
 
-    See Also
+    .. seealso::
     
-    Cluster, 
-    Cumulate, 
-    IndexExtract,
-    LengthSelect,
-    Merge,
-    MergeVariable,
-    MovingAverage,
-    RecurrenceTimeSequences,
-    Reverse,
-    SegmentationExtract,
-    SelectIndividual,
-    SlectVariable,
-    Shift,
-    Transcode,
-    ValueSelect,
-    VariableScaling.
-    """
-    #todo possibly : set default Length to -1 and add SequenceLength or RunLength optional arguments
-    return obj.add_absorbing_run(SequenceLength, RunLength)
+    :func:`~openalea.stat_tool.cluster.Cluster`, 
+    :func:`~openalea.sequence_analysis.data_transform.Cumulate`, 
+    :func:`IndexExtract`,
+    :func:`~openalea.sequence_analysis.data_transform.LengthSelect`,
+    :func:`~openalea.stat_tool.data_transform.Merge`,
+    :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+    :func:`~openalea.sequence_analysis.data_transform.MovingAverage`,
+    :func:`~openalea.sequence_analysis.data_transform.RecurrenceTimeSequences`,
+    :func:`~openalea.sequence_analysis.data_transform.Reverse`,
+    :func:`~openalea.sequence_analysis.data_transform.SegmentationExtract`,
+    :func:`~openalea.stat_tool.data_transform.SelectIndividual`,
+    :func:`~openalea.stat_tool.data_transform.SelectVariable`,
+    :func:`~openalea.stat_tool.data_transform.Shift`,
+    :func:`~openalea.stat_tool.cluster.Transcode`,
+    :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+    :func:`~openalea.sequence_analysis.data_transform.VariableScaling`.
+    
+    .. todo:: wrap the constant values
+    """                                  
 
+    MAX_ABSORBING_RUN_LENGTH = 20
+        
+    try:
+        return obj.add_absorbing_run(SequenceLength, RunLength)
+    except:
+        
+        max_max_length = obj.max_length + MAX_ABSORBING_RUN_LENGTH
+        raise ValueError("abnormal termination. " 
+                         "Check the arguments."
+                         "RunLength must be positive and  less than %s" % MAX_ABSORBING_RUN_LENGTH,
+                         "SequenceLength must be positive, larger than max_length (%s) and less than max_length + MAX_RUN_LENGTH (%s)" 
+                         % (obj.max_length, max_max_length))
+        
 def Reverse(obj):
     """
     Reverse

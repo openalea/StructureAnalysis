@@ -5,6 +5,7 @@ __revision__ = "$Id: test_distribution.py 6219 2009-04-08 14:11:08Z cokelaer $"
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.hidden_semi_markov import HiddenSemiMarkov
+from openalea.sequence_analysis.simulate import Simulate
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
@@ -29,7 +30,8 @@ class Test(interface):
         return HiddenSemiMarkov('data/hidden_semi_markov.dat')
    
     def test_empty(self):
-        self.empty()
+        pass
+        #self.empty()
 
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -68,14 +70,35 @@ class Test(interface):
         #self.simulate()
         pass
         
+    def test_simulate(self):
+        sm = self.data
+        sm.simulation_nb_elements(1, 10000, True)
+        Simulate(sm,1, 10000, True)
+        pass
         
+    def test_thresholding(self):
+        self.data.thresholding(1)
+     
     def test_extract(self):
-        """todo"""
-        pass 
+        self.data.extract(1,1,1)
 
     def test_extract_data(self):
-        """todo"""
-        pass 
+        self.data.extract_data()
+         
 
-    def test_output_process(self):
-        assert self.data.nb_output_process == 1
+"""
+hsm.nb_output_process
+hsm.ascii_write                                            
+hsm.divergence_computation          
+hsm.simulation_histogram
+hsm.extract_histogram               
+hsm.simulation_markovian_sequences
+hsm.file_ascii_write                
+hsm.get_forward  
+hsm.simulation_nb_sequences
+hsm.get_plotable                    
+hsm.get_semi_markov_data
+hsm.state_sequence_computation
+hsm.get_state_subtype               
+hsm.nb_iterator                     
+"""

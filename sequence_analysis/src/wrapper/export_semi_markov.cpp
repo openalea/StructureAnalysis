@@ -191,7 +191,6 @@ public:
     return ret;
   }
 
-
 };
 
 // Boost declaration

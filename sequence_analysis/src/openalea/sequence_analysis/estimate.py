@@ -7,6 +7,7 @@ import openalea.stat_tool._stat_tool as _stat_tool
 import _sequence_analysis
 import sequences
 
+__all__ = ['Estimate']
 # to be checked or improve. Maybe the c++ code could be more explicit, i.e.,
 # e switched to elementary and so on.
 
@@ -45,8 +46,8 @@ estimator = {
     'AdaptativeLaplace' :_sequence_analysis.Estimator.ADAPTATIVE_LAPLACE ,
     'UniformSubset' :_sequence_analysis.Estimator.UNIFORM_SUBSET ,
     'UniformCardinality':_sequence_analysis.Estimator.UNIFORM_CARDINALITY
- 
 }
+
 
 likelihood_penalty_type = {
     'AIC': _stat_tool.LikelihoodPenaltyType.AIC,
@@ -91,6 +92,24 @@ def __parse_kargs__(kargs, key, default=None, map=None):
     except KeyError:    
         raise KeyError("Wrong choice for %. Possible choices are %s " % (key, map.keys()))
 
+def estimate_non_homogeneous_markov(obj, *args, **kargs):
+ 
+    STAT_LINEAR = 0
+    STAT_LOGISTIC = 1
+    STAT_MONOMOLECULAR =2
+    STAT_NONPARAMETRIC = 3
+
+    ident_map = {
+                 "VOID" :-1,
+                 "MONOMOLECULAR":STAT_MONOMOLECULAR,
+                 "LOGISTIC":STAT_LOGISTIC,
+                 }
+    CountingFlag = kargs.get("CountingFlag", True)
+    
+    ident = [ident_map[x] for x in args]
+    
+    return obj.nonhomogeneous_markov_estimation(ident, CountingFlag);
+
 
 def estimate_hidden_variable_order_markov(obj, *args, **kargs):
     """
@@ -131,6 +150,40 @@ def estimate_hidden_variable_order_markov(obj, *args, **kargs):
 
     return hmarkov
       
+      
+def estimate_semi_markov(obj, *args, **kargs):
+ 
+    PARTIAL_LIKELIHOOD = 0 
+    COMPLETE_LIKELIHOOD  =1
+    KAPLAN_MEIER=2
+    estimator_semi_markov_map = {
+        "PartialLikelihood": PARTIAL_LIKELIHOOD,
+        "CompleteLikelihood": COMPLETE_LIKELIHOOD,
+        "KaplanMeier": KAPLAN_MEIER           
+                             }
+    if isinstance(args[0], str):  
+        
+        if args[0] == "Ordinary":
+            Type = 'o'
+        elif args[0] == "Equilibrium":
+            Type = 'e'
+        else:
+            raise AttributeError("type must be Ordinary or Equilibrium")
+    else:
+        raise AttributeError("type must be Ordinary or Equilibrium")
+        
+    NbIteration = kargs.get("NbIteration", -1)
+    Counting = kargs.get("Counting", True)
+    Estimator = kargs.get("Estimator", COMPLETE_LIKELIHOOD)
+    
+    Estimator = estimator_semi_markov_map[Estimator]
+    MeanComputation = __parse_kargs__(kargs, "OccupancyMean",
+                                      default='Computed',
+                                      map=mean_computation_map)
+    return obj.semi_markov_estimation(Type , Estimator , Counting,
+                                        NbIteration , MeanComputation)
+
+
        
 def estimate_hidden_semi_markov(obj, *args, **kargs):
     """
@@ -162,8 +215,7 @@ def estimate_hidden_semi_markov(obj, *args, **kargs):
         
     StateSequence = kargs.get("StateSequence", True)
     Counting = kargs.get("Counting", True)
-    InitialOccupancyMean = kargs.get("InitialOccupancyMean", None)
-    OccupancyMean = kargs.get("InitialOccupancyMean", None)
+    OccupancyMean = kargs.get("InitialOccupancyMean", -1)
     NbIteration = kargs.get("NbIteration", -1)
     MinNbSequence = kargs.get("MinNbSequence", MIN_NB_STATE_SEQUENCE)
     MaxNbSequence = kargs.get("MaxNbSequence", MAX_NB_STATE_SEQUENCE)
@@ -207,34 +259,53 @@ def estimate_hidden_semi_markov(obj, *args, **kargs):
       #todo traise error if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != FORWARD_BACKWARD)) &&(occupancy_mean_option)) {
     
         if Algorithm == "EM":
+            print 'hidden semi markov 1'
             hsmarkov = obj.hidden_semi_markov_estimation_model( Type , NbState ,
                          LeftRight , Estimator , Counting , StateSequence ,
                          OccupancyMean ,NbIteration , MeanComputation)
+            return hsmarkov
 
         elif Algorithm == "MCEM": #FORWARD_BACKWARD_SAMPLING : 
             #if Estimator == KAPLAN_MEIER:
             #    Estimator = COMPLETE_LIKELIHOOD
-
+            print 'hidden semi markov 2'
             hsmarkov = obj.hidden_semi_markov_stochastic_estimation_model(
                 Type, NbState, LeftRight, MinNbSequence, MaxNbSequence,
                 Parameter, Estimator, Counting, StateSequence,
                 OccupancyMean, NbIteration)
+            return hsmarkov
         
 
     
-    if isinstance(args[0], _sequence_analysis._Hidden_semi_markov):
+    elif isinstance(args[0], _sequence_analysis._Hidden_semi_markov):
+        
         hsmarkov = args[0] 
         if Algorithm == 'EM':
-            return obj.hidden_semi_markov_estimation(hsmarkov,
+            print 'hidden semi markov 3'
+            print hsmarkov
+            print Estimator
+            print Counting
+            print StateSequence
+            print NbIteration
+            print MeanComputation
+            output = obj.hidden_semi_markov_estimation(hsmarkov,
                                 Estimator, Counting, StateSequence,
                                 NbIteration, MeanComputation)
+            print 'we are here'
+            output
+            print type(output)
+            return output
         elif Algorithm == 'MCEM':
+            print 'hidden semi markov 4'
             return obj.hidden_semi_markov_stochastic_estimation(hsmarkov,
                             MinNbSequence, MaxNbSequence,
                             Parameter, Estimator, Counting,
                             StateSequence, NbIteration)
-
-
+    else:
+        raise TypeError("should not reach this part of the code.check the usage")
+    
+    raise TypeError("should not reach this part of the code. check the usage")
+    
 
 def estimate_variable_order_markov(obj, *args, **kargs):
     """
@@ -273,7 +344,13 @@ def estimate_variable_order_markov(obj, *args, **kargs):
     except:
         pass
        
-    if isinstance(args[0], str):
+
+    
+    
+    if len(args)>0 and isinstance(args[0], str):
+        print "Type"
+        
+        
         order_estimation = True
         if Order is not None:
             order_estimation = False
@@ -308,15 +385,31 @@ def estimate_variable_order_markov(obj, *args, **kargs):
         symbol = args[0]
         markov = obj.lumpability_estimation(symbol, Penalty,
                                          Order, CountingFlag)
-   
+
     else:
         raise KeyError("jfjf")
     
     return markov
 
+def estimate_top(obj, *args, **kargs):
+    """
+    
+    """
+    MinPosition = kargs.get("MinPosition",1)
+    MaxPosition = kargs.get("MaxPosition", obj.max_position)
+    Neighbourhood = kargs.get("Neighbourhood", 1)
+    if kargs.get("Neighborhood", None):
+        Neighbourhood = kargs.get("Neighborhood", None)
+    EqualProbability = kargs.get("EqualProbability", False)
+    
+    return obj.estimation(MinPosition, MaxPosition, Neighbourhood, 
+                          EqualProbability)
+     
+    return None
 
 
-def Estimate(obj, itype, *args, **kargs):
+
+def estimate_dispatch(obj, itype, *args, **kargs):
     """
     
     """
@@ -327,19 +420,59 @@ def Estimate(obj, itype, *args, **kargs):
         }
     """
     #fct = getattr(obj, "estimate_%s" % fct_map[type] )
-    
-    
-    #if itype in fct_map.keys():
+    fct_map_distribution = [
+        "NONPARAMETRIC" ,
+        "NP" ,
+        "B" ,
+        "BINOMIAL" ,
+        "P" ,
+        "POISSON" ,
+        "NB" ,
+        "NEGATIVE_BINOMIAL" ,
+        "U" ,
+        "UNIFORM" ,
+        "MIXTURE" ,
+        "CONVOLUTION" ,
+        "COMPOUND",
+        ]
+    fct_map = ["VARIABLE_ORDER_MARKOV",
+               "HIDDEN_VARIABLE_ORDER_MARKOV",
+               "HIDDEN_SEMI-MARKOV",
+               "SEMI-MARKOV",
+               "NON-HOMOGENEOUS_MARKOV",
+               "MARKOV"
+               ]
+    if (itype not in fct_map_distribution) and (itype not in fct_map):
+        raise KeyError("Valid type are %s or %s" 
+                       % (str(fct_map),
+                          str(fct_map_distribution)))
+
+        
+        
     if itype == "VARIABLE_ORDER_MARKOV":    
+        return estimate_variable_order_markov(obj, *args, **kargs)
+    elif itype == "MARKOV":    
         return estimate_variable_order_markov(obj, *args, **kargs)
     elif itype == "HIDDEN_VARIABLE_ORDER_MARKOV":
         return estimate_hidden_variable_order_markov(obj, *args, **kargs)
     elif itype == "HIDDEN_SEMI-MARKOV":
         return estimate_hidden_semi_markov(obj, *args, **kargs)
+    elif itype == "SEMI-MARKOV":
+        return estimate_semi_markov(obj, *args, **kargs)
+    elif itype == "NON-HOMOGENEOUS_MARKOV":
+        return estimate_non_homogeneous_markov(obj, *args, **kargs)
     else:
         from openalea.stat_tool.estimate import Estimate as HistoEstimate
         return HistoEstimate(obj, itype, *args, **kargs)
     
     
     
+def Estimate(obj, *args, **kargs):
+    """
+    
+    """
+    if isinstance(args[0], str):
+        return estimate_dispatch(obj, args[0], *args[1:], **kargs)
+    else:
+        return estimate_top(obj, *args, **kargs) 
     

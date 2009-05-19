@@ -88,5 +88,4 @@ hmc11 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTrans
 acf21 = ComputeAutoCorrelation(hmc11, 1, 1, MaxLag=20)
 acf22 = ComputeAutoCorrelation(hmc11, 1, 2, MaxLag=20)
 
-def test_todo():
-    seq15 = Simulate(hmc11, 10000, seq10)
+seq15 = Simulate(hmc11, 10000, seq10)

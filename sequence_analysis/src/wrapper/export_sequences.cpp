@@ -56,14 +56,16 @@ public:
     Format_error error;
     Sequences *sequences = NULL;
     bool old_format = false;
-
     sequences = sequences_ascii_read(error, filename, old_format);
-
-    /*    if(!top_parameters)
-     {
-     sequence_analysis::wrap_util::throw_error(error);
-     }
-     */
+    return boost::shared_ptr<Sequences>(sequences);
+  }
+  
+  static boost::shared_ptr<Sequences>
+  sequences_from_file_old(char* filename, bool old_format)
+  {
+    Format_error error;
+    Sequences *sequences = NULL;
+    sequences = sequences_ascii_read(error, filename, old_format);
     return boost::shared_ptr<Sequences>(sequences);
   }
 
@@ -814,14 +816,11 @@ public:
   }
 
   static Vectors*
-  extract_vectors(const Sequences& seq, int feature_type, int variable =
-      I_DEFAULT, int value = I_DEFAULT)
+  extract_vectors(const Sequences& seq, int feature_type, int variable, int value)
   {
     SIMPLE_METHOD_TEMPLATE_1(seq, extract_vectors, Vectors, feature_type,
         variable, value);
   }
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extract_vectors_overloads,
-      SequencesWrap::extract_vectors,2,4);
 
   static Distribution_data*
   extract_length(const Sequences& input)
@@ -917,7 +916,7 @@ extract_time_events(const Sequences & input,
   ret = input.extract_time_events(error, variable, begin_date, end_date,
       previous_date, next_date);
   if (!ret)
-  sequence_analysis::wrap_util::throw_error(error);
+    sequence_analysis::wrap_util::throw_error(error);
   return ret;
 }
 
@@ -925,9 +924,12 @@ static Vectors*
 build_vectors(const Sequences & input,
   bool index_variable)
 {
+  Format_error error;
   Vectors * ret;
 
   ret = input.build_vectors(index_variable);
+  if (!ret)
+    sequence_analysis::wrap_util::throw_error(error);
 
   return ret;
 }
@@ -1073,8 +1075,8 @@ class_sequences()
       "ADAPTATIVE", ADAPTATIVE) .value("FIXED", FIXED) .export_values();
 
   class_<Sequences, bases<STAT_interface> > ("_Sequences", "Sequences")
-    .def(init <const Renewal_data&>())
     .def("__init__", make_constructor(SequencesWrap::sequences_from_file))
+    .def("__init__", make_constructor(SequencesWrap::sequences_from_file_old))
     .def("__init__", make_constructor(SequencesWrap::build_from_lists))
     .def(init <const Renewal_data&>())
 
@@ -1102,7 +1104,6 @@ class_sequences()
    .def("ascii_data_write", SequencesWrap::ascii_data_write,"Return a string with the object representation")
    .def("file_ascii_write", SequencesWrap::file_ascii_write,"Save vector summary into a file")
    .def("file_ascii_data_write", SequencesWrap::file_ascii_data_write,"Save vector data into a file")
-
 
 
    DEF_RETURN_VALUE("alignment_vector_distance", SequencesWrap::alignment_vector_distance, args(""), "todo")
@@ -1136,17 +1137,11 @@ class_sequences()
    DEF_RETURN_VALUE("shift", SequencesWrap::shift, args("variable","param"),"Shift")
    DEF_RETURN_VALUE("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences, args("variable"), "Sojourn time sequences")
    DEF_RETURN_VALUE("transcode", SequencesWrap::transcode, args("variable", "symbols"),"Transcode")
-   DEF_RETURN_VALUE("transform position", SequencesWrap::transform_position, args("step"), "Transform position")
+   DEF_RETURN_VALUE("transform_position", SequencesWrap::transform_position, args("step"), "Transform position")
    DEF_RETURN_VALUE("value_select", SequencesWrap::value_select,args("variable", "min", "max", "keep"),"Selection of individuals according to the values taken by a variable")
 
-   //overloading
-   //DEF_RETURN_VALUE("extract_vectors", SequencesWrap::extract_vectors, args("feature_type", "variable, value"),SequencesWrap::extract_vectors_overloads(),"test")
-   // does not seem to work properly : extract_vectors(i,j,k) works but extract_vectors(i) is not recognized...
-   .def("extract_vectors", (Vectors *(*)(const Sequences&, int,int,int)) SequencesWrap::extract_vectors, return_value_policy< manage_new_object>(), SequencesWrap::extract_vectors_overloads())
-   .def("extract_vectors", (Vectors *(*)(const Sequences&,int)) SequencesWrap::extract_vectors, return_value_policy< manage_new_object>(), SequencesWrap::extract_vectors_overloads())
+   DEF_RETURN_VALUE("extract_vectors", SequencesWrap::extract_vectors, args("type","variable","value"), "extract vectors")
 
-   //   DEF_RETURN_VALUE("extract_nb_occurrence", SequencesWrap::extract_nb_occurrence, args("variable","value"), "extract nb occurrence")
-   //   DEF_RETURN_VALUE("extract_nb_run", SequencesWrap::extract_nb_run, args("variable","value"), "extract nb run")
    DEF_RETURN_VALUE_NO_ARGS("extract_length", SequencesWrap::extract_length, "extract length of the sequences and returns a vector")
    DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", SequencesWrap::remove_index_parameter,"Remove index parameter")
    DEF_RETURN_VALUE_NO_ARGS("reverse", SequencesWrap::reverse,"reverse")

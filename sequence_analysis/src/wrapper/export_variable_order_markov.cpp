@@ -153,11 +153,6 @@ public:
   }
 
 
-  /*Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength , bool counting_flag = true , bool divergence_flag = false) const;
-  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , int length , bool counting_flag = true) const;
-  Variable_order_markov_data* simulation(Format_error &error , int nb_sequence , const Markovian_sequences &iseq , bool counting_flag = true) const;
-  */
-
   static Variable_order_markov_data*
     simulation_markovian_sequences(const Variable_order_markov &input, int nb_sequence,
   		  const Markovian_sequences input_seq, bool counting_flag)
@@ -209,11 +204,8 @@ void class_variable_order_markov() {
       "constructor(type(char in ['o','e']), nb_state(int), nb_row(int)\n"
       "constructor(type(char in ['o','e']), nb_state(int), nb_row(int), max_order(int)\n"
       "constructor(type(char in ['o','e']), nb_state(int), order(int), init_flag(bool), output_process=0, nb_value=0\n"
-
   )
     .def("__init__", make_constructor(VariableOrderMarkovWrap::variable_order_markov_from_file))
-
-
 
       // type = 'o' : ordinaire, or 'e' : en equilibre des probabilites de transition
     .def(init <char, int, int>())
@@ -263,7 +255,7 @@ void class_variable_order_markov() {
  *  friend Variable_order_markov* variable_order_markov_parsing(Format_error &error ,
                                                                 ifstream &in_file ,
                                                                 int &line , char type);
-
+j
   Variable_order_markov(const Variable_order_markov &markov , int inb_output_process , int nb_value);
   Variable_order_markov(const Variable_order_markov *pmarkov ,  const Nonparametric_process *pobservation , int length);
   Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)  :Chain(markov) { copy(markov , data_flag); }

@@ -14,7 +14,7 @@ def Simulate(obj, *args, **kargs):
     # switch input obj argument: 
     
     # standard distribution case
-    if len(args)==1 and len(kargs==0) and isinstance(args[0], int):
+    if len(args)==1  and isinstance(args[0], int):
         return SimulateDistribution(obj, args[0])
     # top parameters case
     elif isinstance(obj, _sequence_analysis._Top_parameters):
@@ -53,9 +53,9 @@ def Simulate(obj, *args, **kargs):
         #order of the if statements is important ! Keep it that way
         if isinstance(args[0], int) and isinstance(args[1], int):
             if isinstance(obj, _sequence_analysis._Semi_markov) or isinstance(obj, _sequence_analysis._Hidden_semi_markov):
-                return obj.simulation_nb_sequences(args[0], args[1], CountingFlag)
+                return obj.simulation_nb_elements(args[0], args[1], CountingFlag)
             else:
-                return obj.simulation_nb_sequences(args[0], args[1], True)
+                return obj.simulation_nb_elements(args[0], args[1], True)
         #here the second arguments is data structure such as Sequences
         elif isinstance(args[0], int):
             if isinstance(obj, _sequence_analysis._Semi_markov) or isinstance(obj, _sequence_analysis._Hidden_semi_markov):

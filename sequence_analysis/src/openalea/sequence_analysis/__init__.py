@@ -4,8 +4,8 @@ import openalea.stat_tool.interface as interface
 
 
 from correlation import *
-#from simulate import *
-#from compare import *
+from simulate import *
+from compare import *
 
 
 from time_events import *

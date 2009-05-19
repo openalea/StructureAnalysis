@@ -18,7 +18,7 @@ Top_parameters                  80%             partly      partly
 Self_transition                 100%            no          no
 Correlation                     100%            no          no
 Function                        100%            no          no
-Markovian_sequences             50%             no          no
+Markovian_sequences             90%             no          no
 Time_events                     80%             partly      80%
 renewal                         10%
 renewal_data                    10%
@@ -32,12 +32,12 @@ semi_markov                     60%             partly      partly
 semi_markov_data                100%
 =============================== =========================== ==========
 
-Functional test
-===============
 
-test1 50%
-test2 0%
-test3 0%
 
+=================== =========== =========== =========== ============
+Function name       boost       module      test        doc
+=================== =========== =========== =========== ============
+AddAbsorbingRun     done        done        done        to finalise
+=================== =========== =========== =========== ============
 
 
