@@ -5,6 +5,7 @@ __revision__ = "$Id: test_distribution.py 6219 2009-04-08 14:11:08Z cokelaer $"
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.sequences import Sequences
+from openalea.sequence_analysis.data_transform import Cumulate, Difference
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
@@ -304,8 +305,23 @@ class Test(interface):
         assert s.get_length(0)==30
         assert s.get_length(1)==22
 
-        
-        
+    def test_difference(self):
+        """difference test to finalise"""
+        data = self.data
+        str(Difference(data, 1))==str(data.difference(1, False))
+
+        res = Difference(data,1)
+        assert res.cumul_length == 50
+
+    def test_cumulate(self):
+        s = self.data
+        res = Cumulate(s)
+        assert res.cumul_length == 52
+
+
+    def test_extract_vectors():
+        """see text_extract_vectors"""
+        pass
     def _others(self):
         #, cumulate, difference, indexextract, lengthselect, 
         #, moving average, reccurrenceTimeSequences, removerun
@@ -318,9 +334,8 @@ class Test(interface):
 
 
 
-"""  seq.extract_vectors         
+"""           
       seq.index_parameter_select 
-         
 seq.segmentation_extract
 seq.ascii_write                
 seq.file_ascii_data_write     
@@ -330,12 +345,10 @@ seq.recurrence_time_sequences
 seq.cross                    
 seq.get_index_parameter_type
 seq.sojourn_time_sequences
-seq.cumulate                                       
 seq.remove_index_parameter     
 seq.remove_run              
 seq.moving average                            
 seq.transform position
-seq.difference                
 seq.get_type
 seq.round                    
 eq.index_parameter_extract  

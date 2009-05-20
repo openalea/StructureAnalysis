@@ -2,10 +2,6 @@ import os
 from openalea.stat_tool import *
 from openalea.sequence_analysis import *
 
-from openalea.sequence_analysis.estimate import Estimate
-from openalea.sequence_analysis.compare import Compare
-from openalea.sequence_analysis.simulate import Simulate
-
 
 #path = 'test' + os.sep + 'data' +os.sep
 path = 'data' + os.sep
