@@ -1,0 +1,4 @@
+Yann Guédon (Original code ; AML)
+
+Thomas Cokelaer (Boost python wrapping, python modules, tests)
+

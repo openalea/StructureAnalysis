@@ -1,0 +1,6 @@
+20 May 2009
+===========
+
+* Sequence Analysis major update to wrap CPP classes with boost python
+* Add python modules 
+* add Tests
