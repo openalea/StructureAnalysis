@@ -49,17 +49,11 @@
      }\
 
 
-// boost python declarations -------------------------------------------
-//
 // quick alias to avoid writting the return_value_policy...
-
-
 #define DEF_RETURN_VALUE(NAME, REFERENCE, ARGS, DOCSTRING) \
     .def(NAME, REFERENCE, return_value_policy< manage_new_object >(), ARGS, DOCSTRING)
 
 #define DEF_RETURN_VALUE_NO_ARGS(NAME, REFERENCE, DOCSTRING) \
     .def(NAME, REFERENCE, return_value_policy< manage_new_object >(), DOCSTRING)
 
-//#define DEF_INIT_MAKE_CONSTRUCTOR(WRAPPED_FUNCTION, DOCSTRING) \
-//.def("__init__", make_constructor(WRAPPED_FUNCTION), DOCSTRING)
 

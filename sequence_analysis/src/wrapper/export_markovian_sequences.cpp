@@ -442,7 +442,7 @@ public:
 	  ret = input.comparison(error, os, nb_markov, markov.get(), filename);
       if (!ret)
   	      sequence_analysis::wrap_util::throw_error(error);
-	  
+
       cout << os.str()<<endl;
 	  return ret;
   }
@@ -519,8 +519,9 @@ public:
   static void
   self_transition_computation(Markovian_sequences& input)
   {
-	  //todo do we want to overload this function with an int or bool as first argument ?
-	  input.self_transition_computation();
+      //todo this functio is protected so only the case with no arguments is wrapped for now
+      int order = 2
+      input.self_transition_computation();
   }
 
   static Hidden_semi_markov*
