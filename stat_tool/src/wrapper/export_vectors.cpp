@@ -197,7 +197,8 @@ static  Vectors* build_from_lists (boost::python::list& array)
 
 };
 
-static boost::python::list get_item(const Vectors* vec, int index)
+static boost::python::list
+get_item(const Vectors* vec, int index)
 {
   // Test index
   if(index<0 || index>=vec->get_nb_vector())
@@ -220,7 +221,8 @@ static boost::python::list get_item(const Vectors* vec, int index)
   return l;
 }
 
-static boost::python::list get_identifiers(const Vectors& vec)
+static boost::python::list
+get_identifiers(const Vectors& vec)
 {
   boost::python::list l;
 
@@ -233,7 +235,8 @@ static boost::python::list get_identifiers(const Vectors& vec)
   return l;
 }
 
-static std::string ascii_data_write(const Vectors& d, bool exhaustive)
+static std::string
+ascii_data_write(const Vectors& d, bool exhaustive)
 {
   std::stringstream s;
   std::string res;
@@ -245,7 +248,8 @@ static std::string ascii_data_write(const Vectors& d, bool exhaustive)
 
 }
 
-static void file_ascii_data_write(const Vectors& d, const char* path, bool exhaustive)
+static void
+file_ascii_data_write(const Vectors& d, const char* path, bool exhaustive)
 {
   bool result = true;
   Format_error error;

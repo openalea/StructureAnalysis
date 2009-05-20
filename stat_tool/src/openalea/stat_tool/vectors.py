@@ -182,9 +182,9 @@ def VectorDistance(*args, **kargs):
         
         if args[0] in vector_distance_type.keys():
             
-            print vector_distance_type[args[0]], type(vector_distance_type[args[0]])
-            print [1], type([1])
-            print distance, type(distance)
+            #print vector_distance_type[args[0]], type(vector_distance_type[args[0]])
+#            print [1], type([1])
+#            print distance, type(distance)
             return _stat_tool._VectorDistance([vector_distance_type[args[0]]],[1], distance )
         else:
             filename = args[0]
@@ -312,7 +312,26 @@ def ContingencyTable(vec, variable1, variable2,
 
 
 def ComputeRankCorrelation(vec, Type="Spearman", FileName=None):
+    """ComputeRankCorrelation
 
+    Computation of the rank correlation matrix.
+    
+    :Usage:
+    
+    >>> ComputeRankCorrelation(vec, Type->"Spearman")   
+
+    :Arguments:
+ 
+    * vec (vectors).
+    
+    :Optional Arguments:
+
+    *Type (string): type of rank correlation coefficient: "Spearman" (the default) or "Kendall".
+    
+    :Returned Object:
+
+    No object returned.
+    """
 
     func_map = {
             "Spearman": 0, 

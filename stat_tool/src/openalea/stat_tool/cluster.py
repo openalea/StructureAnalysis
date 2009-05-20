@@ -161,7 +161,6 @@ def Cluster(obj, type, *args, **kargs):
             raise KeyError("expect 1 argument only")
     
     
-    
     if type == "Step" or type == 'Information':        
         if (isinstance(parameter, int) or isinstance(parameter,float)):
             pass
@@ -174,7 +173,6 @@ def Cluster(obj, type, *args, **kargs):
             raise TypeError("with Limit, the first argument must be an array")
     
     if variable: 
-        
         param = []
         param.append(variable)
         param.append(parameter)
@@ -182,13 +180,12 @@ def Cluster(obj, type, *args, **kargs):
             # todo : add this flag only if we have integers. if reals, then no flag should be provided
             # quite tricky here. AddVariable should be added only if integer and obj is 
             # MarkovianSequences or markov_data or semi_markov_data 
-#            param.append(AddVariable)
-                                
+#            param.append(AddVariable)                          
         if isinstance(obj, _stat_tool._Vectors):
             return func(*param)
         try:
             parambis = param
-            parambis.append(AddVariable)
+            parambis.append(AddVariable)    
             return func(*parambis)
         except:
             return func(*param)

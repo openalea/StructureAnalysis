@@ -27,7 +27,6 @@
 #include "stat_tool/convolution.h"
 #include "stat_tool/mixture.h"
 #include "stat_tool/compound.h"
-
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -38,6 +37,7 @@ using namespace boost::python;
 using namespace boost;
 
 ////////////////////// Export Histogram ////////////////////////////////////////
+
 
 // Wrapper class class
 class HistogramWrap
@@ -374,6 +374,7 @@ public:
     return ret;
   }
 
+
 };
 
 
@@ -502,7 +503,9 @@ void class_histogram()
       manage_new_object> (), "Return a plotable for a list of histograms")
 
   .def("get_plotable", &STAT_interface::get_plotable, return_value_policy<
-      manage_new_object> (), "Return a plotable (no parameters)");
+      manage_new_object> (), "Return a plotable (no parameters)")
+
+  ;
 
   /*
 
@@ -534,16 +537,11 @@ void class_histogram()
    void update(const Reestimation<double> *reestim , int inb_element);
    Histogram* frequency_scale(int inb_element) const;
 
-   Parametric* parametric_estimation(int ident , int min_inf_bound = 0 , bool flag = true , double cumul_threshold = CUMUL_THRESHOLD) const;
-
-
    Histogram(int inb_value = 0)      :Reestimation<int>(inb_value) {}
    Histogram(const Distribution &dist)      :Reestimation<int>(dist.nb_value) {}
    Histogram(int inb_element , int *pelement);
    Histogram(const Histogram &histo , char transform , int param , int mode = FLOOR);
 
-
-   Time_events* build_time_events(Format_error &error , int itime) const;  // sequence_analysis
 
    bool comparison(Format_error &error , std::ostream &os , int nb_histo ,
    const Histogram **ihisto , int type , const char *path = 0 ,   char format = 'a') const;
@@ -627,17 +625,26 @@ void class_distribution_data()
     .def(self_ns::str(self)) // __str__
 
     // Output
-    .def("survival_ascii_write", DistributionDataWrap::survival_ascii_write,
-    	 "Return a string containing the object description (survival viewpoint)")
-    .def("survival_plot_write", DistributionDataWrap::survival_plot_write,
-	 python::args("prefix", "title"), "Write GNUPLOT files (survival viewpoint)")
-    .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write,
-	 python::arg("filename"), "Write object to filename (spreadsheet format)")
+    .def("survival_ascii_write", DistributionDataWrap::survival_ascii_write, "Return a string containing the object description (survival viewpoint)")
+    .def("survival_plot_write", DistributionDataWrap::survival_plot_write, python::args("prefix", "title"), "Write GNUPLOT files (survival viewpoint)")
+    .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write, python::arg("filename"), "Write object to filename (spreadsheet format)")
     DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", DistributionDataWrap::survival_get_plotable, "Return a plotable object")
-    DEF_RETURN_VALUE_NO_ARGS("extract_model", DistributionDataWrap::extract_model, "Return the 'model' part of the histogram")
     .def("file_ascii_write", DistributionDataWrap::file_ascii_write, "Save histogram into a file")
+    
+    DEF_RETURN_VALUE_NO_ARGS("extract_model", DistributionDataWrap::extract_model, "Return the 'model' part of the histogram")
 
     ;
 
+/*
+    Distribution_data(const Distribution &dist)    :Histogram(dist) { distribution = 0; }
+    Distribution_data(const Histogram &histo)    :Histogram(histo) { distribution = 0; }
+    Distribution_data(int inb_element , int *pelement)    :Histogram(inb_element , pelement) { distribution = 0; }
+    Distribution_data(const Histogram &histo , char transform , int param , int mode = FLOOR)    :Histogram(histo , transform , param , mode) { distribution = 0; }
+    Distribution_data(int nb_histo , const Histogram **phisto)    :Histogram(nb_histo , phisto) { distribution = 0; }
+    Distribution_data(const Histogram &histo , const Distribution *dist);
+    Distribution_data(const Histogram &histo , const Parametric *dist);
+    Distribution_data(const Distribution_data &histo , bool model_flag = true);
+    Parametric* get_distribution() const { return distribution; }
+*/
 
 }

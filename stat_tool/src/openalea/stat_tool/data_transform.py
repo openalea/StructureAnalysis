@@ -321,9 +321,8 @@ def Extract(obj, *args, **kargs):
         "Convolution" : "extract_convolution",
         "Sum" : "extract_sum",
         "Compound" : "extract_compound",
-        "Recurrence": "extract",
-        "Sojourn": "extract",
-        "NbEvent": "extract"
+        "Value": "extract_value",
+        "Length":"extract_length"
         }
   
     #todo add a enumerate fro m boost python here
@@ -376,12 +375,37 @@ def Extract(obj, *args, **kargs):
     
         # Others cases
         key = args[0]
-           
-        try:
-            func_name = func_map[key]
-            f = getattr(obj, func_name)
-        except KeyError:
-            raise AttributeError("Object has no attribute '%s'"%(key))
+        
+        seq_map = {"Observation":0, 
+               "FirstOccurrence":1,
+               "Recurrence":2, 
+               "Sojourn":3,
+               "NbRun":6,
+               "NbOccurrence":7,
+               "Forward": -1}
+        
+        
+        if key in seq_map:
+            f = getattr(obj, "extract")
+        else:
+            try:
+                func_name = func_map[key]
+                f = getattr(obj, func_name)
+            except KeyError:
+            
+                raise AttributeError("Object has no attribute '%s'"%(key))
+
+
+        #case sequences with Value
+        if key=="Value":
+            if obj.nb_variable == 1:
+                variable=1
+            else:
+                variable = args[1]
+            return obj.extract_value(variable) 
+        if key=="Length":
+            return obj.extract_length()
+        #case extract related to semimarkov, vom, hsom, ....
 
         INITIAL_RUN= 4
         FINAL_RUN= 5
@@ -393,29 +417,25 @@ def Extract(obj, *args, **kargs):
                       "FinalRun":5,
                       "InitialRun":4,
                       } 
-        #todo finish the mrkov case. with oprional arguments
-     
-        # Markov/sequence case
-        seq_map = {"Observation":0, 
-               "FirstOccurrence":1,
-               "Recurrence":2, 
-               "Sojourn":3,
-               "NbRun":6,
-               "NbOccurrence":7,
-               "Forward": -1}
     
         if key in seq_map.keys():
             if key == "Forward":
                 histogram_type = "FinalRun"
                 HistogramType = kargs.get("HistogramType", histogram_type)
                 HistogramType = histogram_type[HistogramType]
-            
+                return f(seq_map[args[0]], args[1], HistogramType)
                     
-            if obj.nb_variable == 1:
-                return f(seq_map[args[0]], *args[1:])
+            if len(args) == 2:
+                variable = 1
+                value = args[1]
+            elif len(args)==3: 
+                variable = args[1]
+                value = args[2]
             else:
-                #variable = ?
-                return f(seq_map[args[0]], 1, *args[1:])
+                raise KeyError("expect only 1 or 2 arguments after the type")
+                
+            return f(seq_map[args[0]], variable, value)
+            
     
         
         return f(*args[1:])
@@ -432,7 +452,7 @@ def __get_mode__(kargs):
 
     mode = kargs.get("mode", None)
     if(not mode): 
-        mode = kargs.get("Mode", None)
+        mode = kargs.get("Mode", True)
     if(mode == "Keep" or mode == "keep") : keep = True
     else : keep = False
 
@@ -643,24 +663,22 @@ def ValueSelect(obj, *args, **kargs):
         SegmentationExtract`,
         VariableScaling`. 
     """
-
-    keep = __get_mode__(kargs)
+    Mode = kargs.get("Mode", "Keep")
+    keep = bool(Mode == "Keep" or Mode == "keep")
 
     # Test for vectors
     try:
-        nb_variable = obj.nb_variable
-        variable = 1
+        nb_variable = obj.nb_variable      
     except AttributeError:
         nb_variable = 0
-
 
     # Parse args
     l = len(args)
     
-    if(l == 3):
+    if l == 3 :
         variable, min, max = args
 
-    elif(l == 2):
+    elif l == 2:
         # 2 cases (min_value, max_value) or (variable, value)
         if(nb_variable):
             variable, min = args
@@ -669,18 +687,18 @@ def ValueSelect(obj, *args, **kargs):
            min, max = args
 
     elif(l == 1):
-        v = args[0]
-        if(isinstance(v, tuple) and len(v) == 2):
-            min, max = v
+        value = args[0]
+        if(isinstance(value, tuple) and len(value) == 2):
+            min, max = value
         else:
-            min = max = v
+            min = max = value
 
     # Check variable
-    if(nb_variable and variable > len(obj)):
-        raise ValueError("Variable is greater than object size")
+    #if(nb_variable and variable > len(obj)):
+        #raise ValueError("Variable is greater than object size")
 
     
-    if(nb_variable):    # Vectors
+    if(nb_variable):    # Vectors, sequences
         return obj.value_select(variable, min, max, keep)
     else:
         return obj.value_select(min, max, keep)
@@ -839,3 +857,9 @@ def Symmetrize(obj):
     if ret:
         return ret    
 
+def TruncateDistribution(obj, variable):
+    """
+    .. todo:: to be tests
+    
+    """
+    return obj.truncate(variable)
