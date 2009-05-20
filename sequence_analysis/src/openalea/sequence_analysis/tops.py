@@ -1,5 +1,5 @@
 """Tops"""
-__revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
+__revision__ = "$Id:  $"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -24,56 +24,59 @@ def Tops(*args, **kargs):
     The data structure of type array(array(array(int))) should be constituted at the most internal level of arrays of constant size. If the optional argument IndexParameter is set at "Position" or "Time", the data structure of type array(array(array(int))) is constituted at the most internal level of arrays of size 1+n (index parameter, n variables attached to the explicit index parameter). If the optional argument IndexParameter is set at "Position", only the index parameter of the last array of size 1+n is considered and the first component of successive elementary arrays (representing the index parameter) should be increasing. If the optional argument IndexParameter is set at "Time", the first component of successive elementary arrays should be strictly increasing.
   
     :Parameters:
-        array1 (array(array(int))): input data for univariate sequences
-        arrayn (array(array(array(int)))): input data for multivariate sequences,
-        timev (renewal_data),
-        file_name (string).
+
+    * array1 (array(array(int))): input data for univariate sequences
+    * arrayn (array(array(array(int)))): input data for multivariate sequences,
+    * timev (renewal_data), file_name (string).
     
     :Optional Parameters:
+
     Identifiers (array(int)): explicit identifiers of sequences. This optional argument can only be used if the first argument is of type array(array(int/array(int))).
     IndexParameter (string): type of the explicit index parameter: "Position" or "Time" (the default: implicit discrete index parameter starting at 0). This optional argument can only be used if the first argument is of type array(array(int/array(int))).
     
     :Returns:
-        If the construction succeeds, an object of type sequences or discrete_sequences is returned, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
+
+    If the construction succeeds, an object of type sequences or discrete_sequences is returned, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
 
     :Examples:
-        >>> Tops(array1, Identifiers->[1, 8, 12])
-        >>> Tops(arrayn, Identifiers->[1, 8, 12], IndexParameter->"Position")
-        >>> Tops(timev)
-        >>> Tops(file_name)    
+
+    >>> Tops(array1, Identifiers=[1, 8, 12])
+    >>> Tops(arrayn, Identifiers=[1, 8, 12], IndexParameter="Position")
+    >>> Tops(timev)
+    >>> Tops(file_name)    
     
     .. seealso::    
+
+
         :class:`~openalea.stat_tool.output.Save`,
-        `ExtractHistogram`, 
-        `ExtractVectors`, 
-        `AddAbsorbingRun`,
-        `Cluster`, 
-        `Cumulate`, 
-        `Difference`, 
-        `Indexextract`, 
-        `Lengthselect`, 
-        `Merge`, 
-        `MergeVariable`, 
-        `MovingAverage`, 
-        `RecurrenceTimeTops`, 
-        `RemoveRun`, 
-        `Reverse`, 
-        `SegmentationExtract`, 
-        `SelectIndividual`, 
-        `SelectVariable`, 
-        `Shift`, 
-        `Transcode`, 
-        `ValueSelect`,
-        `VariableScaling`, 
-        `ComputeCorrelation`, 
-        `ComputePartialAutoCorrelation`, 
-        `ComputeSelfTransition`, 
-        `Compare` (sequences), 
-        `Compare` (Markovian models of seuqences), 
-        `Compare` (Markovian models), 
-        `Estimate` (Markovian models), 
-        `ComputeStateTops`, 
-        `Simulate` (Markovian models).
+        :func:`~openalea.sequence_analysis.data_transform.AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`~openalea.sequence_analysis.data_transform.Cumulate`,
+        :func:`~openalea.sequence_analysis.data_transform.Difference`,
+        :func:`~openalea.sequence_analysis.data_transform.IndexParameterExtract`, 
+        :func:`~openalea.sequence_analysis.data_transform.LengthSelect`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+        :func:`~openalea.sequence_analysis.data_transform.MovingAverage`,
+        :func:`~openalea.sequence_analysis.data_transform.RecurrenceTimeSequences`,
+        :func:`~openalea.sequence_analysis.data_transform.RemoveRun`,
+        :func:`~openalea.sequence_analysis.data_transform.Reverse`,
+        :func:`~openalea.sequence_analysis.data_transform.SegmentationExtract`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`~openalea.sequence_analysis.data_transform.VariableScaling`.
+        :func:`~openalea.stat_tool.data_transform.ExtractHistogram`, 
+        :func:`~openalea.sequence_analysis.data_transform.ExtractVectors`, 
+        :func:`~openalea.sequence_analysis.correlation.ComputeCorrelation`, 
+        :func:`~openalea.sequence_analysis.correlation.ComputePartialAutoCorrelation`, 
+        :func:`~openalea.sequence_analysis.data_transform.ComputeSelfTransition`, 
+        :func:`~openalea.sequence_analysis.compare.Compare`, 
+        :func:`~openalea.sequence_analysis.estimate.Estimate`, 
+        :func:`ComputeStateTops`, 
+        :func:`~openalea.sequence_analysis.simulate.Simulate`.
     """
     
     index_parameter_type_map = {
@@ -105,10 +108,10 @@ def Tops(*args, **kargs):
         elif isinstance(args[0], _sequence_analysis._Sequences):
                 return _Tops(args[0])
     #list case
-    elif len(args)==1 and isinstance(args[0], list):
-        return _Tops(args[0], range(0,len(args[0])), index_parameter_type)
+    elif len(args) == 1 and isinstance(args[0], list):
+        return _Tops(args[0], range(0, len(args[0])), index_parameter_type)
     #list and identifiesr case
-    elif len(args)==2 and isinstance(args[0], list) and isinstance(args[1], list):
+    elif len(args) == 2 and isinstance(args[0], list) and isinstance(args[1], list):
         return _Tops(args[0], args[1], index_parameter_type)
     else:
         raise TypeError("Expected a valid filename or a list of lists (e.g., [[1,0],[0,1]])")
@@ -116,7 +119,29 @@ def Tops(*args, **kargs):
     
 
 def RemoveApicalInternodes(obj, internode):
+    """RemoveApicalInternodes
+    
+    Removal of the apical internodes of the parent shoot of a 'top'.
 
+    :Usage:
+
+    >>> RemoveApicalInternodes(top, nb_internode)    
+
+    :Arguments:
+    
+    * top (tops),
+    * nb_internode (int): number of removed internodes.
+    
+    :Returned Object:
+
+    If nb_internode >  0 and if the removed internodes do not bear offspring shoots, an object of type tops is returned, otherwise no object is returned.
+    
+    .. seealso::
+    
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.sequence_analysis.data_transform.Reverse`.
+    """
     return obj.shift(internode) 
     
 

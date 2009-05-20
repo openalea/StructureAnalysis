@@ -1,11 +1,10 @@
-"""Sequences"""
-__revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
+"""NonhomogeneousMarkov"""
+__revision__ = "$Id:  $"
 
 import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Nonhomogeneous_markov
 
-import _sequence_analysis
 
 __all__ = ['NonhomogeneousMarkov',
            '_Nonhomogeneous_markov']
@@ -33,7 +32,6 @@ def NonhomogeneousMarkov(*args, **kargs):
 
         else:
             raise IOError("bad file name")
-        
         
     return output
 

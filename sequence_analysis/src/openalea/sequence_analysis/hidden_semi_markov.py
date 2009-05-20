@@ -1,11 +1,10 @@
-"""Sequences"""
-__revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
+"""hidden Semi Markov"""
+__revision__ = "$Id:  $"
 
 import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Hidden_semi_markov
 
-import _sequence_analysis
 
 __all__ = ['HiddenSemiMarkov',
            '_Hidden_semi_markov']
@@ -21,24 +20,29 @@ def HiddenSemiMarkov(*args, **kargs):
     """HiddenSemiMarkov
    
     Construction of an object of type hidden_semi-markov from an ASCII file.
-    
+
     :Usage:
-    HiddenSemiMarkov(file_name, Length->40, Counting->False)    
-   
+
+    >>> HiddenSemiMarkov(file_name, Length=40, Counting=False)
+
     :Arguments:
+
     file_name (string)
-    
+
     :Optional Arguments: 
+
     * Length (int): length of sequences for the computation of the intensity 
       and counting characteristic distributions (default value: 20),
     * Counting (bool): computation of counting characteristic distributions 
       (default value: True).
     
     :Returned Object:
+
     If the construction succeeds, an object of type hidden_semi-markov is 
-    returned, otherwise no object is returned.    
-  
+    returned, otherwise no object is returned. 
+
     :Background:
+
     A hidden semi-Markov chain is constructed from an underlying semi-Markov
     chain (first-order Markov chain representing transition between distinct 
     states and state occupancy distributions associated to the nonabsorbing
@@ -46,15 +50,13 @@ def HiddenSemiMarkov(*args, **kargs):
     The state occupancy distributions are defined as object of type distribution 
     with the additional constraint that the minimum time spent in a given 
     state is 1 (inf_bound <= 1).
-     
-    
+ 
     .. seealso::
-    Save, 
-    Compare (Markovian models for sequences), 
-    Compare (Markovian models), 
-    Estimate (Markovian models), 
-    ComputeStateSequences, 
-    Simulate (Markovian models).
+
+        :func:`~openalea.sequence_analysis.compare.Compare` (Markovian models for sequences),  
+        :func:`~openalea.sequence_analysis.estimate.Estimate` (Markovian models), 
+        :func:`~openalea.sequence_analysis.data_transform.ComputeStateSequences`, 
+        :func:`~openalea.sequence_analysis.simulate.Simulate` (Markovian models).
     """ 
 
     OCCUPANCY_THRESHOLD = 0.99999 

@@ -1,5 +1,5 @@
-"""Sequences"""
-__revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
+"""TimeEvents"""
+__revision__ = "$Id: $"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -22,16 +22,15 @@ def TimeEvents(*args, **kargs):
     """TimeEvents
     
     Construction of data of type {time interval between two observation dates,
-     number of events occurring between these two observation dates} from time 
-     sequences, from an object of type HISTOGRAM or from an ASCII file.
+    number of events occurring between these two observation dates} from time 
+    sequences, from an object of type HISTOGRAM or from an ASCII file.
      
     :Usage:
     
-    >>> TimeEvents(seq1, begin_date, end_date, PreviousDate->3, NextDate->8)   
-    >>> TimeEvents(seqn, variable, begin_date, end_date, PreviousDate->3, NextDate->8)   
+    >>> TimeEvents(seq1, begin_date, end_date, PreviousDate=3, NextDate=8)   
+    >>> TimeEvents(seqn, variable, begin_date, end_date, PreviousDate=3, NextDate=8)   
     >>> TimeEvents(histo, time)
     >>> TimeEvents(file_name)
-    
     >>> h = Histogram([1,1,1,2,2,2])
     >>> t = TimeEvents(h, 2)
         
@@ -63,12 +62,13 @@ def TimeEvents(*args, **kargs):
     otherwise no object is returned.
     
     .. seealso::
-    Save, 
-    ExtractHistogram, 
-    Merge, 
-    NbEventSelect, 
-    TimeScaling, 
-    TimeSelect.
+       
+        :func:`Save`, 
+        :func:`~openalea.stat_tool.data_transform.ExtractHistogram`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.sequence_analysis.data_transform.NbEventSelect`, 
+        :func:`~openalea.sequence_analysis.data_transform.TimeScaling`, 
+        :func:`~openalea.sequence_analysis.data_transform.TimeSelect`.
     
     .. todo:: fix the build_time_events method to allows constructor with histogram
         issue: this method is in stat_tool and returns a time events so stat_tool requires to know sequence_analysis...
@@ -105,17 +105,37 @@ def TimeEvents(*args, **kargs):
         
         time_events = _Time_events(distribution, time)
         
-             
-        
         
     return time_events
 
 
 
+def NbEventSelect(obj, imin, imax):
+    """NbEventSelect
+    
+    Selection of data item of type {time interval between two observation dates, number of events occurring between these two observation dates} according to a number of events criterion.
+    
+    :Usage:
+    
+    * NbEventSelect(timev, min_nb_event, max_nb_event)    
+  
+    :Arguments:
+    
+    * timev (time_events, renewal_data),
+    * min_nb_event (int): minimum number of events,
+    * max_nb_event (int): maximum number of events.
+    
+    :Returned Object:
+    
+    If 0 <= min_nb_event < max_nb_event and if the range of number of events defined by min_nb_event and max_nb_event enables to select data items of type {time interval between two observation dates, number of events}, an object of type time_events is returned, otherwise no object is returned.
+    
+    .. seealso::
+    
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.sequence_analysis.data_transform.TimeScaling`,
+        :func:`~openalea.sequence_analysis.data_transform.TimeSelect`.
+    """
 
-
-def NbEventSelect(obj, min, max):
-
-    return obj.nb_event_select(min, max)
+    return obj.nb_event_select(imin, imax)
 
 

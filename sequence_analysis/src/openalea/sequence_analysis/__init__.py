@@ -15,7 +15,9 @@ from sequences import *
 from hidden_semi_markov import *
 from hidden_variable_order_markov import *
 from semi_markov import *
-
-
 from data_transform  import *
 
+from estimate import *
+from nonhomogeneous_markov import *
+from renewal import *
+from variable_order_markov import *

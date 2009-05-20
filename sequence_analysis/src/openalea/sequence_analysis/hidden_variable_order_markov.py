@@ -1,5 +1,5 @@
-"""Sequences"""
-__revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
+"""HiddenVariableOrderMarkov"""
+__revision__ = "$Id: r $"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -20,9 +20,10 @@ interface.extend_class( _Hidden_variable_order_markov, interface.StatInterface)
 def HiddenVariableOrderMarkov(Filename=None, Length=40,  CumulThreshold=0):
     """HiddenVariableOrderMarkov
    
+   .. todo:: documentation
     """ 
 #cumul_threshold=0
-    if Filename==None:
+    if Filename == None:
         raise TypeError('invalid filename')
     else:
         #todo: check old_format, cumulthreshold

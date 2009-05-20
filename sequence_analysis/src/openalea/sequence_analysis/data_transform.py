@@ -1,14 +1,8 @@
-"""Data transform methods
-"""
-__revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
+"""Data transform methods"""
+__revision__ = "$Id: $"
 
-
-import openalea.stat_tool.interface as interface
 import _sequence_analysis
 from openalea.stat_tool._stat_tool import _VectorDistance
-
-
-#import openalea.sequence_analysis._sequence_analysis as _sequence_analysis
 
 
 def __get_mode__(kargs):
@@ -17,13 +11,14 @@ def __get_mode__(kargs):
     mode = kargs.get("mode", None)
     if(not mode):
         mode = kargs.get("Mode", None)
-    if(mode == "Keep" or mode == "keep") : keep = True
+    if(mode == "Keep" or mode == "keep"):
+        keep = True
     else : keep = False
 
     return keep
 
 
-def check_nb_variable(obj, variable):
+def _check_nb_variable(obj, variable):
     """checks that nb_variable of an object is compatible with user variable
     
     
@@ -59,59 +54,59 @@ def check_nb_variable(obj, variable):
 def RemoveRun(obj, *args, **kargs):
     """RemoveRun
 
-	Removal of the first or last run of a given value (for a given variable) in a sequence.
+    Removal of the first or last run of a given value (for a given variable) in a sequence.
 
     :Usage:
 
-	RemoveRun(seq1, value, position, MaxLength->4)
-	RemoveRun(seqn, variable, value, position, MaxLength->4)	
+    >>> RemoveRun(seq1, value, position, MaxLength=4)
+    >>> RemoveRun(seqn, variable, value, position, MaxLength=4)    
 
     :Arguments:
-	    * seq1 (sequences, discrete_sequences, markov_data, semi-markov_data): univariate sequences,
-	    * seqn (sequences, discrete_sequences, markov_data, semi-markov_data): multivariate sequences,
-	    * variable (int): variable index, (optional if only one variable 
-	    * value (int): value,
-	    * position (string): position of the removed run: "Begin" (or "b") or 
-	      "End" (or "e").
-	
+
+    * seq1 (sequences, discrete_sequences, markov_data, semi-markov_data): univariate sequences,
+    * seqn (sequences, discrete_sequences, markov_data, semi-markov_data): multivariate sequences,
+    * variable (int): variable index, (optional if only one variable 
+    * value (int): value,
+    * position (string): position of the removed run: "Begin" (or "b") or "End" (or "e").
+    
     :Optional Arguments:
-    	* MaxLength (int): maximum length of the removed run (default behaviour: 
-    	  the entire run is removed).
-	
+
+    * MaxLength (int): maximum length of the removed run (default behaviour: the entire run is removed).
+    
     :Returned Object:
 
-	If variable is a valid index of variable, if value is a possible value and
-	 if MaxLength > 0, an object of type sequences or discrete_sequences is 
-	 returned, otherwise no object is returned. The returned object is of type
-	  discrete_sequences if all the variables are of type STATE, if the possible 
-	  values for each variable are consecutive from 0 and if the number of 
-	  possible values for each variable is <= 15.
+    * If variable is a valid index of variable, if value is a possible value and
+      if MaxLength > 0, an object of type sequences or discrete_sequences is 
+      returned, otherwise no object is returned. The returned object is of type
+      discrete_sequences if all the variables are of type STATE, if the possible 
+      values for each variable are consecutive from 0 and if the number of 
+      possible values for each variable is <= 15.
 
     :Examples:
     
-    >>> RemoveRun(seq1, 0, "End") 	
+    >>> RemoveRun(seq1, 0, "End")     
     >>> RemoveRun(seq5, 2, 0, "End")
 
-    :See Also:
-	
-	AddAbsorbingRun,
-	Cluster, 
-	Cumulate, 
-	Difference, 
-	IndexExtract, 
-	LengthSelect, 
-	Merge, 
-	MergeVariable, 
-	MovingAverage, 
-	RecurrenceSequences, 
-	Reverse, 
-	SegmentationExtract, 
-	SelectIndividual, 
-	SelectVariable, 
-	Shift, 
-	Transcode, 
-	ValueSelect,
-	VariableScaling.
+    .. seealso::    
+
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`,
+        :func:`Cumulate`,
+        :func:`Difference`,
+        :func:`IndexParameterExtract`, 
+        :func:`LengthSelect`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+        :func:`MovingAverage`,
+        :func:`RecurrenceTimeSequences`,
+        :func:`Reverse`,
+        :func:`SegmentationExtract`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
     """
     
     MaxLength = kargs.get("MaxLength", -1) # max length will be used
@@ -130,15 +125,17 @@ def RemoveRun(obj, *args, **kargs):
     # remove_run method takes as its first argument a char in ['e','b'] that 
     # corresponds to BEGIN and END. The user can use both notation so we need
     # to convert the position to the expected character if neeeded.
-    if position == 'End': position = 'e'
-    if position == 'Begin': position = 'b'
-    if position not in ['b','e']:
+    if position == 'End':
+        position = 'e'
+    if position == 'Begin':
+        position = 'b'
+    if position not in ['b', 'e']:
         raise TypeError("position must be 'e' for end or 'b' for begin")
     if value is None:
         raise TypeError("value must be provided")
 
    # variable argument
-    variable = check_nb_variable(obj, variable)
+    variable = _check_nb_variable(obj, variable)
     
     # value must be provided
     if value is None:
@@ -151,9 +148,11 @@ def RemoveRun(obj, *args, **kargs):
 
 def ExtractVectors(obj, key, *args):
     """ExtractVectors
+
     Extraction of vectors from global characteristics of sequences (length or counting characteristics).
     
     :Usage:
+
     >>> ExtractVectors(seq, "Length")
     >>> ExtractVectors(seq1, "NbRun", value)
     >>> ExtractVectors(seq1, "NbOccurrence", value)
@@ -161,6 +160,7 @@ def ExtractVectors(obj, key, *args):
     >>> ExtractVectors(seqn, "NbOccurrence", variable, value)    
   
     :Arguments:
+
     * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
     * seq1 (discrete_sequences, markov_data, semi-markov_data): univariate sequences,
     * seqn (discrete_sequences, markov_data, semi-markov_data): multivariate sequences,
@@ -168,20 +168,22 @@ def ExtractVectors(obj, key, *args):
     * variable (int): variable index.
     
     :Returned Object:
+
     An object of type vectors is returned.
   
     :Description:
+
     The type of global characteristic is given by a key word chosen among "Length", "NbRun" or "NbOccurrence". In the case of counting characteristics, the key word "NbRun" or "NbOccurrence" should be followed by a variable index in the case of multivariate sequences, and by the value of interest.
     
     .. seealso::
     
-    ExtractHistogram, 
-    Plot, 
-    MergeVariable, 
-    Compare (renewal process), 
-    ContingencyTable, 
-    Regression, 
-    Varianceanalysis.
+        :func:`~openalea.stat_tool.data_transform.ExtractHistogram`, 
+        :func:`~openalea.stat_tool.output.Plot`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`~openalea.sequence_analysis.compare.Compare` (renewal process), 
+        :func:`~openalea.stat_tool.vectors.ContingencyTable`,, 
+        :func:`~openalea.stat_tool.regression.Regression`, 
+        :func:`~openalea.stat_tool.vectors.VarianceAnalysis`.
     """
     
     type_dict = {
@@ -203,7 +205,7 @@ def ExtractVectors(obj, key, *args):
         variable = obj.nb_variable
         
     if key == "Length":
-        sequence = obj.extract_vectors(type_dict[key],-1,-1)
+        sequence = obj.extract_vectors(type_dict[key], -1, -1)
     elif key in ["Cumul", "Mean"]:
         sequence = obj.extract_vectors(type_dict[key], variable, -1)
     elif len(args)==2:
@@ -212,7 +214,7 @@ def ExtractVectors(obj, key, *args):
         sequence = obj.extract_vectors(type_dict[key], variable, value)
     elif len(args)==1 and obj.nb_variable==1:
         value = args[0]
-        sequence = obj.extract_vectors(type_dict[key], 1,value)
+        sequence = obj.extract_vectors(type_dict[key], 1, value)
     else:
         raise TypeError("nb_variable =1 so varaible must be 1")
     
@@ -228,45 +230,60 @@ def SegmentationExtract(obj, variable, values , Mode="Keep"):
     
     Extraction by segmentation of sub-sequences.
   
-    :Usage
-    SegmentationExtract(seqn, variable, value, Mode->"Reject")
-    SegmentationExtract(seqn, variable, values, Mode->"Reject")    
+    :Usage:
+
+    >>> SegmentationExtract(seqn, variable, value, Mode="Reject")
+    >>> SegmentationExtract(seqn, variable, values, Mode="Reject")    
   
     :Arguments:
-    seqn (sequences, discrete_sequences, markov_data, semi-markov_data): multivariate sequences,
-    variable (int): variable index,
-    value (int): value,
-    values (ARRAY(int)): values.
+    
+    * seqn (sequences, discrete_sequences, markov_data, semi-markov_data): 
+      multivariate sequences,
+    * variable (int): variable index,
+    * value (int): value,
+    * values (ARRAY(int)): values.
     
     :Optional Arguments: 
-    Mode (string): conservation or rejection of the selected sub-sequences: "Keep" (the default) or "Reject".
+    
+    Mode (string): conservation or rejection of the selected sub-sequences: 
+    "Keep" (the default) or "Reject".
     
     :Returned Object:
-    If all the variables are of type STATE, if variable is a valid index of variable and if either value or values@1, ..., values@n are possible values, an object of type sequences or discrete_sequences is returned, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
+    
+    If all the variables are of type STATE, if variable is a valid index of 
+    variable and if either value or values[1], ..., values[n] are possible values, 
+    an object of type sequences or discrete_sequences is returned, otherwise no
+    object is returned. The returned object is of type discrete_sequences if 
+    all the variables are of type STATE, if the possible values for each variable
+    are consecutive from 0 and if the number of possible values for each
+    variable is <= 15.
     
     :Description:
-    Sub-sequences corresponding to run of value or values@1, ..., values@n are extracted (or to all the possible values except value or values@1, ..., values@n) are extracted.
+    
+    Sub-sequences corresponding to run of value or values[1], ..., values[n] are
+    extracted (or to all the possible values except value or
+    values[1], ..., values[n]) are extracted.
     
     .. seealso::
     
-    AddAbsorbingRun,
-    Cluster, 
-    Cumulate, 
-    Difference, 
-    IndexExtract, 
-    LengthSelect, 
-    Merge, 
-    MergeVariable, 
-    MovingAverage, 
-    RecurrenceTimeSequences, 
-    RemoveRun, 
-    Reverse, 
-    SelectIndividual, 
-    SelectVariable, 
-    Shift, 
-    Transcode, 
-    ValueSelect,
-    VariableScaling.
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`IndexParameterExtract`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveRun`, 
+        :func:`Reverse`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
 """
 
     keep = bool(Mode == "Keep" or Mode == "keep")
@@ -274,9 +291,9 @@ def SegmentationExtract(obj, variable, values , Mode="Keep"):
 
     # Test if variables is a list
     try:
-        v = values[0]
+        _v = values[0]
     except TypeError:
-        values = [values,]
+        values = [values, ]
 
     sequence = obj.segmentation_extract(variable, list(values), keep)
     return sequence.markovian_sequences()
@@ -287,20 +304,24 @@ def LengthSelect(obj, minLength, *args, **kargs):
     Selection of sequences according to a length criterion.
     
     :Usage:
-    >>> LengthSelect(seq, length, Mode->"Reject")
-    >>> LengthSelect(seq, min_length, max_length, Mode->"Reject")    
+
+    >>> LengthSelect(seq, length, Mode="Reject")
+    >>> LengthSelect(seq, min_length, max_length, Mode="Reject")    
   
     :Arguments:
+
     * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
     * length (int): length,
     * min_length (int): minimum length,
     * max_length (int): maximum length.
     
-    :Optional Arguments: 
+    :Optional Arguments:
+
     Mode (string): conservation or rejection of the selected sequences: "Keep" 
     (the default) or "Reject".
     
     :Returned Object:
+
     If length > 0 or if 0 < min_length < max_length and if the range of lengths
     defined either by length or by min_length and max_length enables to select
     sequences, an object of type sequences or discrete_sequences is returned,
@@ -311,24 +332,24 @@ def LengthSelect(obj, minLength, *args, **kargs):
     
     .. seealso::
     
-    AddAbsorbingRun,
-    Cluster, 
-    Cumulate, 
-    Difference, 
-    IndexExtract, 
-    Merge, 
-    MergeVariable, 
-    MovingAverage, 
-    RecurrenceTimeSequences, 
-    RemoveRun, 
-    Reverse, 
-    SegmentationExtract, 
-    SelectIndividual, 
-    SelectVariable, 
-    Shift, 
-    Transcode, 
-    ValueSelect,
-    VariableScaling.
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`IndexParameterExtract`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveRun`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
     """
     mode = __get_mode__(kargs)
     if len(args) == 0:
@@ -344,39 +365,45 @@ def LengthSelect(obj, minLength, *args, **kargs):
 
 def RecurrenceTimeSequences(obj, *args):
     """RecurrenceTimeSequences
+
     Computation of recurrence time sequences for a given value (and for a given variable).
-    Usage
-    RecurrenceTimeSequences(seq1, value)
-    RecurrenceTimeSequences(seqn, variable, value)    
-    Arguments
-    seq1 (sequences, discrete_sequences, markov_data, semi-markov_data): univariate sequences,
-    seqn (sequences, discrete_sequences, markov_data, semi-markov_data): multivariate sequences,
-    variable (int): variable index,
-    value (int): value.
+
+    :Usage:
+
+    >>> RecurrenceTimeSequences(seq1, value)
+    >>> RecurrenceTimeSequences(seqn, variable, value)
+
+    :Arguments:
+
+    * seq1 (sequences, discrete_sequences, markov_data, semi-markov_data): univariate sequences,
+    * seqn (sequences, discrete_sequences, markov_data, semi-markov_data): multivariate sequences,
+    * variable (int): variable index,
+    * value (int): value.
     
-    Returned Object
+    :Returned Object:
+    
     If the selected variable is of type STATE and if value is a possible value, an object of type sequences or discrete_sequences is returned, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
     
-    See Also
+    .. seealso::
     
-    AddAbsorbingRun,
-    Cluster, 
-    Cumulate, 
-    Difference, 
-    IndexExtract, 
-    LengthSelect, 
-    Merge, 
-    MergeVariable, 
-    MovingAverage, 
-    RemoveRun, 
-    Reverse, 
-    SegmentationExtract, 
-    SelectIndividual, 
-    SelectVariable, 
-    Shift, 
-    Transcode, 
-    ValueSelect,
-    VariableScaling.
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`IndexParameterExtract`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RemoveRun`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
     """
     if len(args)==1:
         variable = 1
@@ -389,9 +416,14 @@ def RecurrenceTimeSequences(obj, *args):
     return sequence.markovian_sequences()
 
 def WordCount(obj, *args, **kargs):
-    """
-    *args = variable, value,word_length
-    **kargs = begin state, end_state, min_frequency
+    """WordCount
+
+    .. note::
+
+        * args = variable, value,word_length
+        * kargs = begin state, end_state, min_frequency
+    
+    .. todo:: the documentation...
     """
     
     if len(args)==1:
@@ -419,36 +451,39 @@ def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
     >>> AddAbsorbingRun(seq, SequenceLength=30, RunLength=20)
       
     :Arguments:
+    
     * seq (distance_sequences, markov_data, semi-markov_data)
     
-    :Optional Arguments: 
+    :Optional Arguments:
+    
     * SequenceLength (int): length of the sequences. A default value is 
-        computed from the maximum sequence length. must be less than 
-        max_length + 20.
+      computed from the maximum sequence length. must be less than 
+      max_length + 20.
     * RunLength (int): length of the runs. A default value is computed from 
       the maximum sequence length. must be less than 20.
     
     :Returns:
+    
     An object of type discrete_sequences is returned.
 
     .. seealso::
     
-    :func:`~openalea.stat_tool.cluster.Cluster`, 
-    :func:`~openalea.sequence_analysis.data_transform.Cumulate`, 
-    :func:`IndexExtract`,
-    :func:`~openalea.sequence_analysis.data_transform.LengthSelect`,
-    :func:`~openalea.stat_tool.data_transform.Merge`,
-    :func:`~openalea.stat_tool.data_transform.MergeVariable`,
-    :func:`~openalea.sequence_analysis.data_transform.MovingAverage`,
-    :func:`~openalea.sequence_analysis.data_transform.RecurrenceTimeSequences`,
-    :func:`~openalea.sequence_analysis.data_transform.Reverse`,
-    :func:`~openalea.sequence_analysis.data_transform.SegmentationExtract`,
-    :func:`~openalea.stat_tool.data_transform.SelectIndividual`,
-    :func:`~openalea.stat_tool.data_transform.SelectVariable`,
-    :func:`~openalea.stat_tool.data_transform.Shift`,
-    :func:`~openalea.stat_tool.cluster.Transcode`,
-    :func:`~openalea.stat_tool.data_transform.ValueSelect`,
-    :func:`~openalea.sequence_analysis.data_transform.VariableScaling`.
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`IndexParameterExtract`,
+        :func:`LengthSelect`,
+        :func:`~openalea.stat_tool.data_transform.Merge`,
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`,
+        :func:`MovingAverage`,
+        :func:`RecurrenceTimeSequences`,
+        :func:`~openalea.sequence_analysis.data_transform.Reverse`,
+        :func:`~openalea.sequence_analysis.data_transform.SegmentationExtract`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`,
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`,
+        :func:`~openalea.stat_tool.data_transform.Shift`,
+        :func:`~openalea.stat_tool.cluster.Transcode`,
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`~openalea.sequence_analysis.data_transform.VariableScaling`.
     
     .. todo:: wrap the constant values
     """                                  
@@ -467,48 +502,47 @@ def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
                          % (obj.max_length, max_max_length))
         
 def Reverse(obj):
-    """
-    Reverse
+    """Reverse
+
     Reversing of sequences or 'tops'.
     
     :Usage:
     
-    Reverse(seq)
-    Reverse(discrete_seq)
-    
-    Reverse(top)    
+    >>> Reverse(seq)
+    >>> Reverse(discrete_seq)
+    >>> Reverse(top)    
       
     :Arguments:
     
-    seq (sequences),
-    discrete_seq (discrete_sequences, markov_data, semi-markov_data),
+    * seq (sequences),
+    * discrete_seq (discrete_sequences, markov_data, semi-markov_data),
+    * top (tops).
     
-    top (tops).
-    
-  Returned Object
+    :Returned Object:
+
     If the argument is of type sequences, an object of type sequences is returned. If the argument is of type discrete_sequences, markov_data, semi-markov_data, an object of type discrete_sequences is returned. If the argument is of type tops, an object of type tops is returned.
     
-  See Also
+    .. seealso::
     
-    AddAbsorbingRun,
-    Cluster, 
-    Cumulate, 
-    Difference, 
-    IndexExtract, 
-    LengthSelect, 
-    Merge, 
-    MergeVariable, 
-    MovingAverage, 
-    RecurrenceTimeSequences, 
-    RemoveRun, 
-    RemoveApicalInternodes, 
-    SegmentationExtract, 
-    SelectIndividual, 
-    SelectVariable, 
-    Shift, 
-    Transcode, 
-    ValueSelect,
-    VariableScaling.
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`IndexParameterExtract`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveRun`, 
+        :func:`~openalea.sequence_analysis.tops.RemoveApicalInternodes`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
     """
     
     ret = obj.reverse()
@@ -520,26 +554,202 @@ def Reverse(obj):
 
     
 def Thresholding(obj, MinProbability=1e-5):
+    """
     
+    .. todo:: documentation
+    """
     return obj.thresholding(MinProbability)
     
     
 def Cumulate(obj, Variable=1):
-    #todo check that it is 
-    #SEQUENCES :, MARKOVIAN_SEQUENCES,VARIABLE_ORDER_MARKOV_DATA, SEMI_MARKOV_DATA,NONHOMOGENEOUS_MARKOV_DATA :    
+    """Cumulate
+    
+    Sum of successive values along sequences.
+  
+    :Usage:
+
+    Cumulate(seq, Variable=1)    
+    
+    :Arguments:
+
+    * seq (sequences, discrete_sequences, markov_data, semi-markov_data).
+    
+    :Optional Arguments:
+
+    * Variable (int): variable index.
+    
+    :Returned Object:
+
+    The returned object is of type sequences or discrete_sequences. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is < 15.
+  
+    :Background:
+
+    Cumulate is the inverse function of Difference with the optional argument FirstValue set at True.
+    
+    .. seealso::
+    
+        :func:`AddAbsorbingRun`, 
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Difference`, 
+        :func:`IndexParameterSelect`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveSeries`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
+    """
     return obj.cumulate(Variable)
     
+
 def Difference(obj, Variable=-1, FirstElement=False):
-    #SEQUENCES :, MARKOVIAN_SEQUENCES,VARIABLE_ORDER_MARKOV_DATA, SEMI_MARKOV_DATA,NONHOMOGENEOUS_MARKOV_DATA :
+    """Difference
+    
+    First-order differencing of sequences.
+  
+    :Usage:
+
+    Difference(seq, Variable=1, FirstElement=True)    
+  
+    :Arguments:
+
+    * seq (sequences, discrete_sequences, markov_data, semi-markov_data).
+    
+    :Optional Arguments:
+    
+    * Variable (int): variable index,
+    * FirstElement (bool): first element of sequences kept or not (default value: False).
+    
+    :Returned Object:
+
+    The returned object is of type sequences or discrete_sequences. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is < 15.
+        
+    :Background:
+    
+    If the first element of sequences are kept (FirstValue=True), Difference is the inverse function of Cumulate.
+  
+    .. seealso::
+    
+        :func:`AddAbsorbingRun`, 
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`IndexParameterExtract`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveSeries`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
+    """
     return obj.difference(Variable, FirstElement)
     
     
 def IndexParameterExtract(obj, minIndex, maxIndex=40):    
-    """cf IndexExtract"""
+    """IndexExtract
+    
+    Extraction of sub-sequences corresponding to a range of index parameters.
+  
+    :Usage:
+    
+    >>> IndexParameterExtract(seq, min_index, MaxIndex=40)    
+  
+    :Arguments:
+    
+    * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
+    * min_index (int): minimum index parameter.
+
+    :Optional Arguments:
+
+    * MaxIndex (int): maximum index parameter (default behaviour: the end of sequences is kept).
+    
+    :Returned Object:
+
+    If 0 < min_index < (maximum index parameter if the optional argument MaxIndex is set) < (maximum length of sequences), the returned object is of type sequences or discrete_sequences, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is < 15.
+    
+    .. seealso::
+    
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveRun`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        :func:`VariableScaling`.
+    """
+
     return obj.index_parameter_extract(minIndex, maxIndex)
     
 def IndexParameterSelect(obj, minIndex, *args, **kargs):    
-    """cf IndexExtract"""
+    """IndexExtract
+    
+    Extraction of sub-sequences corresponding to a range of index parameters.
+
+    :Usage:
+
+    >>> IndexParameterSelect(seq, min_index, MaxIndex=40)    
+
+    :Arguments:
+
+    * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
+    * min_index (int): minimum index parameter.
+    
+    :Optional Arguments:
+    
+    * MaxIndex (int): maximum index parameter (default behaviour: the end of sequences is kept).
+    
+    :Returned Object:
+    
+    If 0 < min_index < (maximum index parameter if the optional argument MaxIndex is set) < (maximum length of sequences), the returned object is of type sequences or discrete_sequences, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is < 15.
+    
+    .. seealso::
+    
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveRun`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
+        :func:`VariableScaling`.
+    """
+
     mode = __get_mode__(kargs)
     if len(args) == 0:
         maxIndex = minIndex
@@ -552,19 +762,104 @@ def IndexParameterSelect(obj, minIndex, *args, **kargs):
     
     
 def ComputeStateSequences(obj, data, Characteristics=True):
+    """ComputeStateSequences
     
-    return data.compute_state_sequences(obj, Characteristics)
+    Computation of the optimal state sequences corresponding to the observed sequences using a hidden Markov chain or a hidden semi-Markov chain.
+  
+    :Usage:
+    
+    >>> ComputeStateSequences(seq, hmc, Algorithm="ForwardBackward", Characteristics=True)
+    >>> ComputeStateSequences(seq, hsmc, Algorithm="ForwardBackward", Characteristics=True)
+    
+    :Arguments:
+    
+    * hc (hidden_markov),
+    * hsmc (hidden_semi-markov),
+    * seq (discrete_sequences, markov_data, semi-markov_data).
+    
+    :Optional Arguments:
+    
+    * Algorithm (string): type of algorithm: "Viterbi" (the default) or "ForwardBackward".
+    * Characteristics (bool): computation of the characteristic distributions of the model taking into account the lengths of the segmented sequences (default value: False).
+    
+    :Returned Object:
+    
+    If the second mandatory argument is of type hidden_markov, an object of type markov_data is returned. If the second mandatory argument is of type hidden_semi-markov, an object of type semi-markov_data is returned. The returned object contains both the sequences (including the optimal state sequences as a supplementary variable) and the model.    
+    
+    :Background:
+    
+    This restoration of the state sequence is either performed by a dynamic 
+    programming algorithm referred to as Viterbi algorithm which maximizes
+    the joint probability of the state and output sequence  (global criterion) 
+    or by a forward-backward algorithm which chooses state j at time t to maximize  (local criterion).
+
+    .. seealso::
+    
+        :func:`~openalea.stat_tool.data_transform.ExtractHistogram`.
+
+"""
+
+    return data.state_sequence_computation(obj, Characteristics)
     
 
 def MovingAverage(obj, itype, Variable=1, BeginEnd=False, Output="Trend"):
-    """ 
+    """MovingAverage
+
+    Extraction of trends or residuals using a symmetric smoothing filter.
+
+    :Usage:
     
+    >>> MovingAverage(seq, filter, Variable=1, BeginEnd=True, Output="Residual", FileName="filtered_sequences")
+    >>> MovingAverage(seq, frequencies, Variable=1, BeginEnd=True,  Output="Residual", FileName="filtered_sequences")
+    >>> MovingAverage(seq, dist, Variable=1, BeginEnd=True,  Output="Residual", FileName="filtered_sequences")
+    
+    :Arguments:
+    
+    * seq (sequences, discrete_sequences, markov_data, semi-markov_data)
+    * filter (array(real)): filter values on the half width i.e. from one extremity to the central value (with the constraintfilter@i + filter@m = 1),
+    * frequencies (array(int)): frequencies defining the filter,
+    * dist (distribution, mixture, convolution, compound): symmetric distribution, whose size of the support is even, defining the filter (for instance Distribution("BINOMIAL", 0, 4, 0.5)),
+    
+    :Optional Arguments:
+
+    * Variable (int): variable index,
+    * BeginEnd (bool): begin and end of sequences filtered or suppresses (default value: False),
+    * Output (string): "Trend" (the default), "Residual" or "DivisionResidual",
+    * FileName (string): name of file of non-rounded filtered sequences.
+    
+    :Background:
+  
+    Consider a symmetric smoothing filter of half width q applied to a sequence of length t. Whenever a symmetric smoothing filter is chosen, there is likely to be an end-effect problem for t<q or t>t - q - 1. We chose to apply the following solution to the first and the last q terms of the sequences: we define Xt:=X0 for t<0 and Xt:=Xt-1 for t>t-1.
+    
+    :Returned Object:
+    
+    An object of type sequences or discrete_sequences is returned. An object of type discrete_sequences is returned if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
+    
+    .. seealso::
+    
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`IndexParameterExtract`, 
+        :func:`IndexParameterSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveRun`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`, 
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`,
+        :func:`VariableScaling`.
+
+
     .. todo:: seq79 = MovingAverage(seq70, [1, 1, 1], BeginEnd=True, Output="Residual")
         returns wrong results. comapre with aml
     
-    itype is list of vlaues or a distribution
-    
-    put Moving Average doc here 
     """
     func_map = {
                  "Sequence":0,
@@ -580,15 +875,36 @@ def MovingAverage(obj, itype, Variable=1, BeginEnd=False, Output="Trend"):
         #todo build a 2*N+1 filter here or inside moving_average function ?  
         return obj.moving_average(itype, Variable, BeginEnd, func_map[Output])
     else: #distribution
-        return obj.moving_average_from_distribution(itype, Variable, BeginEnd, func_map[Output])
+        return obj.moving_average_from_distribution(itype, Variable, 
+                                                    BeginEnd, func_map[Output])
         
-def ComputeSelfTransition(obj):
-    """ """
+def ComputeSelfTransition(obj, Order=1):
+    """ComputeSelfTransition
+    
+    Computation of the self-transition probabilities as a function of the index parameter from discrete sequences.
+    
+    :Usage:
+
+    >>> ComputeSelfTransition(seq, Order=2)    
+    
+    :Arguments:
+    
+    * seq (discrete_sequences, markov_data, semi-markov_data).
+    
+    :Optional Arguments:
+    
+    * Order (int): Markov chain order (default value: 1).
+    
+    :Returned Object:
+    
+    No object returned.
+    """
+
     obj.self_transition_computation()
     
 def TransitionCount(obj, max_order, begin=False, 
                     estimator="MAXIMUM_LIKELIHOOD", filename=None):
-    
+    """.. todo:: documentation"""
     estimator_map = {
                      "MaximumLikelihood": 0, # MAXIMUM_LIKELIHOOD;
                      "Laplace": 1, # LAPLACE;
@@ -599,12 +915,14 @@ def TransitionCount(obj, max_order, begin=False,
     estimator_int = estimator_map[estimator]
     obj.transition_count(max_order, begin, estimator_int, filename)
     
-def Cross(obj):
-    return obj.cross();
+def Cross(obj):    
+    """.. todo:: documentation"""
+    return obj.cross()
     
     
 def PointwiseAverage(obj, *args, **kargs):
-    
+    """.. todo:: documentation"""
+
     SEQUENCE = 0
     SUBTRACTION_RESIDUAL = 1
     STANDARDIZED_RESIDUAL = 2
@@ -623,11 +941,11 @@ def PointwiseAverage(obj, *args, **kargs):
     Format = kargs.get("Format", 'a')
     
     return obj.pointwise_average(StandardDeviation, Output,
-                                 Filename, Format);
+                                 Filename, Format)
 
     
 def ConsecutiveValues(obj, *args, **kargs):    
-        
+    """ConsecutiveValues"""
         
     AddVariable = kargs.get("AddVariable", False)
 
@@ -636,14 +954,15 @@ def ConsecutiveValues(obj, *args, **kargs):
     else:
         variable = 1
      
-    variable = check_nb_variable(obj, variable)
+    variable = _check_nb_variable(obj, variable)
     
     sequence = obj.consecutive_values(variable, AddVariable)
     
     return sequence.markovian_sequences()
 
-def Round(obj, *args, **kargs):
-    
+def Round(obj,  **kargs):
+    """Round"""
+
     CEIL =  2
     FLOOR = 0
     ROUND = 1
@@ -657,16 +976,64 @@ def Round(obj, *args, **kargs):
     Mode = kargs.get("Mode", "Round")
     Mode = mode_map[Mode]
     
-    
     return obj.round(Variable, Mode) 
     
     
 def TimeScaling(obj, scaling_factor=0):
+    """TimeScaling
     
+    Change of the time unit of data of type {time interval between two observation dates, number of events occurring between these two observation dates}.
+
+    :Usage:
+
+    >>> TimeScaling(timev, scaling_factor)    
+
+    :Arguments:
+
+    * timev (time_events, renewal_data),
+    * scaling_factor (int): scaling factor.
+    
+    :Returned Object:
+
+    If scaling_factor > 0, an object of type time_events is returned, otherwise no object is returned.
+    
+    .. seealso::
+    
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.sequence_analysis.time_events.NbEventSelect`, 
+        :func:`TimeSelect`.
+    """
+
     return obj.tim_scaling(scaling_factor)    
    
 def TimeSelect(obj, *args):
+    """TimeSelect
     
+    Selection of data item of type {time interval between two observation dates, number of events occurring between these two observation dates} according to a length of the observation period criterion.
+  
+    :Usage:
+
+    >>> TimeSelect(timev, time)
+    >>> TimeSelect(timev, min_time, max_time)    
+
+    :Arguments:
+
+    * timev (time_events, renewal_data),
+    * time (int): time interval between two observation dates,
+    * min_time (int): minimum time interval between two observation dates,
+    * max_time (int): maximum time interval between two observation dates.
+    
+    :Returned Object:
+
+    If either time > 0 or if 0 < min_time < max_time and if the range of lengths of the observation period defined either by time or by min_time and max_time enables to select data items of type {time interval between two observation dates, number of events}, an object of type time_events is returned, otherwise no object is returned.
+    
+    .. seealso::
+    
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.sequence_analysis.time_events.NbEventSelect`, 
+        :func:`TimeScaling`.
+    """
+
     if len(args) == 2:
         min_time = args[0]
         min_time = args[1]
@@ -678,15 +1045,15 @@ def TimeSelect(obj, *args):
 
 
 def Segmentation(obj, *args, **kargs):
-    """ 
+    """Segmentation
 
-    USAGE
+    :Usage:
     
     >>> Segmentation(seq, 1,2, VectorDistance("N"), Output="Segment")
     >>> S
     """
     SEQUENCE = 0
-    TREND = 1
+    #TREND = 1
     SUBTRACTION_RESIDUAL = 2
     DIVISION_RESIDUAL = 3
     STANDARDIZED_RESIDUAL = 4
@@ -699,24 +1066,6 @@ def Segmentation(obj, *args, **kargs):
        "DivisionResidual": DIVISION_RESIDUAL
        }
             
-    MULTINOMIAL_CHANGE =0
-    POISSON_CHANGE =1
-    ORDINAL_GAUSSIAN_CHANGE =2
-    GAUSSIAN_CHANGE =3
-    MEAN_CHANGE =4
-    VARIANCE_CHANGE =5
-    MEAN_VARIANCE_CHANGE=6
-
-    model_type = {
-                      "Multinomial":MULTINOMIAL_CHANGE,
-                      "Poisson":POISSON_CHANGE,
-                      "Ordinal": ORDINAL_GAUSSIAN_CHANGE,
-                      "Gaussian": GAUSSIAN_CHANGE,        
-                      "Mean": MEAN_CHANGE,
-                      "Variance": VARIANCE_CHANGE,
-                      "MeanVariance": MEAN_VARIANCE_CHANGE
-                      }
-
     CHANGE_POINT = 0
     SEGMENT = 1
     
@@ -731,17 +1080,11 @@ def Segmentation(obj, *args, **kargs):
     if isinstance(args[0], list) and isinstance(args[1], str):
         nb_sequence = obj.nb_sequence
         nb_segment = args[0]
-        print "seqarray"
         Model = __get_model__(args[1:], nb_variable)
         
         Output = kargs.get("Output", "Sequence")
         Output = output_sequence_map[Output] 
         identifier = -1
-        
-        print nb_segment
-        print Model
-        print identifier
-        print Output
         
         seq = obj.segmentation_array(nb_segment, Model, identifier , Output)
     #from 2 ints, a vectordistance and the output 
@@ -749,9 +1092,12 @@ def Segmentation(obj, *args, **kargs):
         and isinstance(args[2], _VectorDistance):
         Output = kargs.get("Output", "Segment")
         Output = output_type[Output] 
-        seq = obj.segmentation_vector_distance(args[0], args[1], args[2], Output)
+        seq = obj.segmentation_vector_distance(args[0], 
+                                               args[1], args[2], Output)
     #from 2 ints, and model_type
-    elif isinstance(args[0], int) and isinstance(args[1], int)  and isinstance(args[2], str):
+    elif isinstance(args[0], int) and isinstance(args[1], int)  \
+        and isinstance(args[2], str):
+        
         nb_sequence = obj.nb_sequence
         
         Model = __get_model__(args[2:], nb_variable)
@@ -768,24 +1114,20 @@ def Segmentation(obj, *args, **kargs):
         
         if nb_segment_estimation is False:
             if args[1] == 1 :
-                print "segfalse1"
                 #.. todo:: which call ?????????????????
                 seq = obj.segmentation_int_int(args[0] , args[1] ,
-                                        Model, Output);
+                                        Model, Output)
             else:   
                 nb_segment = args[0]
-                print "segfalse2"
                 seq = obj.segmentation_array(nb_segment, Model,
-                                                args[0], Output);
+                                                args[0], Output)
         else:
             # correct a priori given the aml example seq80
-            print "segtrue"
             
-            seq = obj.segmentation_model(args[0], args[1], Model);
+            seq = obj.segmentation_model(args[0], args[1], Model)
         
     #from int and a list
     elif isinstance(args[0], int) and isinstance(args[1], list):
-        print "int and list change point"
         Model = __get_model__(args[2:], nb_variable)
                 
         change_point = args[1]
@@ -794,17 +1136,61 @@ def Segmentation(obj, *args, **kargs):
         nb_segment = len(args[1])+1 #.. todo:: to be checked
 
         seq = obj.segmentation_change_point(args[0] , nb_segment ,
-                            change_point , Model , Output);
-
- 
-
+                            change_point , Model , Output)
     return seq
  
  
 def SojournTimeSequences(obj, Variable = 1):
+    """.. todo:: documentation"""
+    
     return obj.sojourn_time_sequences(Variable).markovian_sequences()
 
 def VariableScaling(obj, *args): 
+    """VariableScaling
+    
+    Change of the unit of a variable.
+  
+    :Usage:
+    
+    * VariableScaling(seq1, scaling_factor)
+    * VariableScaling(seqn, variable, scaling_factor)    
+  
+    :Arguments:
+    
+    * seq1 (sequences, discrete_sequences, markov_data, semi-markov_data): univariate sequences,
+    * seqn (sequences, discrete_sequences, markov_data, semi-markov_data): multivariate sequences.
+    * variable (int): variable index,
+    * scaling_factor (int): scaling factor.
+    
+    :Returned Object:
+    
+    If scaling_factor > 0, an object of type sequences is returned, otherwise no object is returned.    
+    
+    :Background:
+    
+    The function VariableScaling is mainly useful as a preprocessing when one wants to study the correlation structure of residual sequences. This function enables by an appropriate scaling to control the rounding of the residual sequences and hence to obtain exact sample correlation functions.
+    
+    .. seealso::
+    
+        :func:`AddAbsorbingRun`,
+        :func:`~openalea.stat_tool.cluster.Cluster`, 
+        :func:`Cumulate`, 
+        :func:`Difference`, 
+        :func:`IndexParameterExtract`, 
+        :func:`LengthSelect`, 
+        :func:`~openalea.stat_tool.data_transform.Merge`, 
+        :func:`~openalea.stat_tool.data_transform.MergeVariable`, 
+        :func:`MovingAverage`, 
+        :func:`RecurrenceTimeSequences`, 
+        :func:`RemoveRun`, 
+        :func:`Reverse`, 
+        :func:`SegmentationExtract`,
+        :func:`~openalea.stat_tool.data_transform.SelectIndividual`, 
+        :func:`~openalea.stat_tool.data_transform.SelectVariable`, 
+        :func:`~openalea.stat_tool.data_transform.Shift`, 
+        :func:`~openalea.stat_tool.cluster.Transcode`, 
+        :func:`~openalea.stat_tool.data_transform.ValueSelect`.
+    """
 
     if len(args) == 2:
         variable = args[0]
@@ -819,13 +1205,13 @@ def VariableScaling(obj, *args):
  
 def __get_model__(data, nb_variable): 
     """ """
-    MULTINOMIAL_CHANGE =0
-    POISSON_CHANGE =1
-    ORDINAL_GAUSSIAN_CHANGE =2
-    GAUSSIAN_CHANGE =3
-    MEAN_CHANGE =4
-    VARIANCE_CHANGE =5
-    MEAN_VARIANCE_CHANGE=6
+    MULTINOMIAL_CHANGE = 0
+    POISSON_CHANGE = 1
+    ORDINAL_GAUSSIAN_CHANGE = 2
+    GAUSSIAN_CHANGE = 3
+    MEAN_CHANGE = 4
+    VARIANCE_CHANGE = 5
+    MEAN_VARIANCE_CHANGE= 6
 
     model_type = {
                       "Multinomial":MULTINOMIAL_CHANGE,
@@ -840,7 +1226,9 @@ def __get_model__(data, nb_variable):
     for i in range(0, nb_variable):
         Model.append(model_type[data[i]])
 
-        if i==0 and (model_type[data[i]] == MEAN_CHANGE) or (model_type[data[i]] == MEAN_VARIANCE_CHANGE):
+        if (i == 0) and (model_type[data[i]] == MEAN_CHANGE) or \
+        (model_type[data[i]] == MEAN_VARIANCE_CHANGE):
+        
             for j in range(1, nb_variable):
                 Model.append(model_type[i])
             break #todo check that it break the main for i in range() loop
