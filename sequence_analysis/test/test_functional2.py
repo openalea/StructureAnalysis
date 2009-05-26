@@ -1,6 +1,5 @@
 """ functional tests
 
-.. todo:: to be done
 """
 __revision__ = "$Id:  $"
 
@@ -11,13 +10,15 @@ from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import  Estimate
 from openalea.sequence_analysis.compare import  Compare
 
-seq20 = Sequences("data//belren1.seq")
-seq21 = Sequences("data//elstar1.seq")
-seq22 = Sequences("data//fuji1.seq")
-seq23 = Sequences("data//gala1.seq")
-seq24 = Sequences("data//granny1.seq")
-seq25 = Sequences("data//reinet1.seq")
-seq26 = Sequences("data//wij1.seq")
+path = 'data' + os.sep
+
+seq20 = Sequences(path + "belren1.seq")
+seq21 = Sequences(path + "elstar1.seq")
+seq22 = Sequences(path + "fuji1.seq")
+seq23 = Sequences(path + "gala1.seq")
+seq24 = Sequences(path + "granny1.seq")
+seq25 = Sequences(path + "reinet1.seq")
+seq26 = Sequences(path + "wij1.seq")
 
 # Display(seq25, ViewPoint="Data")
 # Plot(seq25, "Intensity")
@@ -51,7 +52,7 @@ seq32 = Merge(seq20, seq25)
 matrix30 = Compare(seq32)
 matrix31 = Compare(seq32, VectorDistance("S"))
 matrix32 = Compare(seq32, VectorDistance("S"), Transposition=True)
-matrix33 = Compare(seq32, VectorDistance("data/align1.a"), Transposition=True)
+matrix33 = Compare(seq32, VectorDistance(path + "align1.a"), Transposition=True)
 
 Display(Clustering(matrix33, "Partition", 2))
 Clustering(matrix33, "Hierarchy", Algorithm="Agglomerative")
@@ -75,22 +76,22 @@ Compare(seq25, VectorDistance("S"), TestSequence=9, RefSequence=1, Transposition
 # Plot(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile", Output="ChangePoint")
 # hidden semi-Markov chains
 
-hsmc0 = HiddenSemiMarkov("data/belren1.hsc")
+hsmc0 = HiddenSemiMarkov(path + "belren1.hsc")
 hsmc20 = Estimate(seq20, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("data/elstar1.hsc")
+hsmc0 = HiddenSemiMarkov(path + "elstar1.hsc")
 hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("data/fuji1.hsc")
+hsmc0 = HiddenSemiMarkov(path  + "fuji1.hsc")
 hsmc22 = Estimate(seq22, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("data/gala1.hsc")
+hsmc0 = HiddenSemiMarkov(path + "gala1.hsc")
 hsmc23 = Estimate(seq23, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("data/granny1.hsc")
+hsmc0 = HiddenSemiMarkov(path + "granny1.hsc")
 hsmc24 = Estimate(seq24, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov("data/reinet1.hsc")
+hsmc0 = HiddenSemiMarkov(path + "reinet1.hsc")
 hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 
 # Display(hsmc25)
@@ -107,14 +108,13 @@ hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 seq25_1 = ExtractData(hsmc25)
 # Display(seq25_1, ViewPoint=Data, Format=Line)
 
-hsmc0 = HiddenSemiMarkov("data/wij1.hsc")
+hsmc0 = HiddenSemiMarkov(path + "wij1.hsc")
 hsmc26 = Estimate(seq26, "HIDDEN_SEMI-MARKOV", hsmc0)
 
 # model comparison
 
 Thresholding(hsmc20, MinProbability=0.001)
 
-#to be done :::::::::::::::::::::::::::::::::::::::::::::::::::
 matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholding(hsmc21, MinProbability=0.001), seq21, Thresholding(hsmc22, MinProbability=0.001), seq22, Thresholding(hsmc23, MinProbability=0.001), seq23, Thresholding(hsmc24, MinProbability=0.001), seq24, Thresholding(hsmc25, MinProbability=0.001), seq25, Thresholding(hsmc26, MinProbability=0.001), seq26, 10000)
 # matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholding(hsmc21, MinProbability=0.001), seq21, Thresholding(hsmc22, MinProbability=0.001), seq22, Thresholding(hsmc23, MinProbability=0.001), seq23, Thresholding(hsmc24, MinProbability=0.001), seq24, Thresholding(hsmc25, MinProbability=0.001), seq25, Thresholding(hsmc26, MinProbability=0.001), seq26, 10000, FileName="ASCII/cultivar1_models.txt")
 
