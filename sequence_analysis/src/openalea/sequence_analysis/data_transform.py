@@ -1,4 +1,8 @@
-"""Data transform methods"""
+"""Data transform methods
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id: $"
 
 import _sequence_analysis
@@ -877,7 +881,8 @@ def MovingAverage(obj, itype, Variable=1, BeginEnd=False, Output="Trend"):
     else: #distribution
         return obj.moving_average_from_distribution(itype, Variable, 
                                                     BeginEnd, func_map[Output])
-        
+    
+    
 def ComputeSelfTransition(obj, Order=1):
     """ComputeSelfTransition
     
@@ -899,8 +904,8 @@ def ComputeSelfTransition(obj, Order=1):
     
     No object returned.
     """
-
     obj.self_transition_computation()
+    
     
 def TransitionCount(obj, max_order, begin=False, 
                     estimator="MAXIMUM_LIKELIHOOD", filename=None):
@@ -1004,7 +1009,7 @@ def TimeScaling(obj, scaling_factor=0):
         :func:`TimeSelect`.
     """
 
-    return obj.tim_scaling(scaling_factor)    
+    return obj.time_scaling(scaling_factor)    
    
 def TimeSelect(obj, *args):
     """TimeSelect
@@ -1036,7 +1041,7 @@ def TimeSelect(obj, *args):
 
     if len(args) == 2:
         min_time = args[0]
-        min_time = args[1]
+        max_time = args[1]
     elif len(args) == 1:
         min_time = args[0]
         max_time = min_time

@@ -1,4 +1,7 @@
-"""Simulate"""
+"""Simulate
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr 
+"""
 __revision__ = "$Id:  $"
 
 import openalea.stat_tool._stat_tool as _stat_tool

@@ -1,4 +1,9 @@
-"""extract_distribution tests"""
+"""extract_distribution tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__revision__ = "$Id:  $"
 
 
 from openalea.stat_tool.data_transform import ExtractDistribution
@@ -12,9 +17,9 @@ def test_hidden_semi_markov():
             ExtractDistribution(hsmc6, "Observation", process, state)
 
 
-def test_renewal()
-    """not implemented"""
-def test_semi_markov()
-    """not implemented"""
-def test_top_param()
-    """not implemented"""
+def test_renewal():
+    """tests not yet implemented"""
+def test_semi_markov():
+    """tests not yet implemented"""
+def test_top_param():
+    """tests not yet implemented"""

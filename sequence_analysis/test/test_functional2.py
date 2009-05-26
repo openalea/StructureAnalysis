@@ -1,3 +1,11 @@
+""" functional tests
+
+.. todo:: to be done
+"""
+__revision__ = "$Id:  $"
+
+
+
 import os
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import  Estimate

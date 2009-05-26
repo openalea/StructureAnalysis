@@ -1,4 +1,8 @@
-"""hidden Semi Markov"""
+"""hidden Semi Markov
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id:  $"
 
 import os

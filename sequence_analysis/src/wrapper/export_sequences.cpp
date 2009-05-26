@@ -1,13 +1,12 @@
 /*------------------------------------------------------------------------------
  *
- *        VPlants.Stat_Tool : VPlants Statistics module
+ *
+ *        VPlants.Sequence_analysis : VPlants Statistics module
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
- *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -15,7 +14,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id:  $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -59,7 +58,7 @@ public:
     sequences = sequences_ascii_read(error, filename, old_format);
     return boost::shared_ptr<Sequences>(sequences);
   }
-  
+
   static boost::shared_ptr<Sequences>
   sequences_from_file_old(char* filename, bool old_format)
   {
@@ -230,20 +229,17 @@ public:
                 length[seqi] = N;
 
                 //real_sequence[seqi][vari] = new double[N];
-                //		cerr << "---"<<N<< endl;
 
                 // before extracting the vector of the
 
                 if (is_float)
                   {
-                    //		cerr << " is float validated"<<endl;
                     if (vari == 0)
                       real_sequence[seqi] = new double*[N_var]; // only once
                     real_sequence[seqi][vari] = new double[N];
                   }
                 if (is_int)
                   {
-                    //		cerr << " is int chjosen"<<endl;
                     if (vari == 0)
                       int_sequence[seqi] = new int*[N_var]; // only once
                     int_sequence[seqi][vari] = new int[N];
@@ -318,18 +314,9 @@ public:
   }
 
   static Distribution_data*
-  extract_value(const Sequences& seq, int variable)
+  extract_value(const Sequences& input, int variable)
   {
-    Format_error error;
-    Distribution_data *ret = NULL;
-
-    ret = seq.extract(error, variable);
-
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-
-    return ret;
-
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, Distribution_data, variable);
   }
 
   static boost::python::list
@@ -350,11 +337,11 @@ public:
   static std::string
   ascii_data_write(const Sequences& d, bool exhaustive)
   {
-    std::stringstream s;
+    std::stringstream os;
     std::string res;
 
-    d.ascii_data_write(s, exhaustive, true);
-    res = s.str();
+    d.ascii_data_write(os, exhaustive, true);
+    res = os.str();
     return res;
   }
 
@@ -420,8 +407,7 @@ public:
   value_select(const Sequences& seq, int variable, const object& min,
       const object& max, bool keep)
   {
-    Format_error error;
-    Sequences * ret = NULL;
+    HEADER(Sequences);
 
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
@@ -439,21 +425,17 @@ public:
         ret = seq.value_select(error, variable, mi, ma, keep);
       }
 
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-    return ret;
+    FOOTER;
   }
 
   static Sequences*
   select_variable(const Sequences& seq, const boost::python::list& variables,
       bool keep)
   {
-    int nb_var = len(variables);
-    sequence_analysis::wrap_util::auto_ptr_array<int> vars(new int[nb_var]);
-    for (int i = 0; i < nb_var; i++)
-      vars[i] = extract<int> (variables[i]);
 
-    SIMPLE_METHOD_TEMPLATE_1(seq, select_variable, Sequences, nb_var,
+    CREATE_ARRAY(variables, int, vars);
+
+    SIMPLE_METHOD_TEMPLATE_1(seq, select_variable, Sequences, vars_size,
         vars.get(), keep);
 
   }
@@ -462,46 +444,34 @@ public:
   select_individual(const Sequences& seq,
       const boost::python::list& identifiers, bool keep)
   {
-    int nb_id = len(identifiers);
-    sequence_analysis::wrap_util::auto_ptr_array<int> ids(new int[nb_id]);
-    for (int i = 0; i < nb_id; i++)
-      ids[i] = extract<int> (identifiers[i]);
+    CREATE_ARRAY(identifiers, int, ids);
 
-    SIMPLE_METHOD_TEMPLATE_1(seq, select_individual, Sequences, nb_id,
+    SIMPLE_METHOD_TEMPLATE_1(seq, select_individual, Sequences, ids_size,
         ids.get(), keep);
-
   }
 
   // Shift
   static Sequences*
   shift(const Sequences& seq, int var, double param)
   {
-    Format_error error;
-    Sequences * ret = NULL;
+    HEADER(Sequences);
 
     if (seq.get_type(var - 1) == REAL_VALUE)
       ret = seq.shift(error, var, (double) param);
     else
       ret = seq.shift(error, var, (int) param);
 
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-
-    return ret;
+    FOOTER(ret);
   }
 
   // Merge
   static Sequences*
   merge(const Sequences& input_seq, const boost::python::list& seqs)
   {
-    int nb_seq = len(seqs);
-    sequence_analysis::wrap_util::auto_ptr_array<const Sequences *> sequens(
-        new const Sequences*[nb_seq]);
 
-    for (int i = 0; i < nb_seq; i++)
-      sequens[i] = extract<Sequences*> (seqs[i]);
+    CREATE_ARRAY(seqs, const Sequences *, sequens)
 
-    SIMPLE_METHOD_TEMPLATE_1(input_seq, merge, Sequences, nb_seq, sequens.get());
+    SIMPLE_METHOD_TEMPLATE_1(input_seq, merge, Sequences, sequens_size, sequens.get());
   }
 
   static Sequences*
@@ -509,15 +479,10 @@ public:
       int ref_sample)
   {
 
-    int nb_seq = len(seqs);
-    sequence_analysis::wrap_util::auto_ptr_array<const Sequences *> sequences(
-        new const Sequences*[nb_seq]);
+    CREATE_ARRAY(seqs, const Sequences *, data);
 
-    for (int i = 0; i < nb_seq; i++)
-      sequences[i] = extract<Sequences*> (seqs[i]);
-
-    SIMPLE_METHOD_TEMPLATE_1(input_seq, merge_variable, Sequences, nb_seq,
-        sequences.get(), ref_sample);
+    SIMPLE_METHOD_TEMPLATE_1(input_seq, merge_variable, Sequences,data_size,
+        data.get(), ref_sample);
   }
 
   // Cluster
@@ -572,10 +537,7 @@ public:
         delete[] lint;
       }
 
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-
-    return ret;
+    FOOTER;
   }
 
   static Sequences*
@@ -719,24 +681,9 @@ public:
   segmentation_extract(const Sequences& seq, int variable,
       boost::python::list& input_values, bool keep)
   {
-
-    int nb_value;
-    nb_value = len(input_values);
-    int *values;
-    values = new int[nb_value];
-    for (int i = 0; i < nb_value; i++)
-      values[i] = extract<double> (input_values[i]);
-
-    Format_error error;
-    Sequences* ret;
-    ret = seq.segmentation_extract(error, variable, nb_value, values, keep);
-
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-
-    delete[] values;
-
-    return ret;
+    CREATE_ARRAY(input_values, int, values);
+    SIMPLE_METHOD_TEMPLATE_1(seq, segmentation_extract, Sequences,
+        variable, values_size, values.get(), keep);
   }
 
   static Sequences*
@@ -754,16 +701,9 @@ public:
       }
     values[nb_value] = 0; //todo check that!!
 
-    Format_error error;
-    Sequences* ret;
-    ret = seq.moving_average(error, nb_value, values, variable, begin_end,
-        output);
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
+    SIMPLE_METHOD_TEMPLATE_1(seq, moving_average, Sequences,
+            nb_value, values, variable, begin_end,  output);
 
-    delete[] values;
-
-    return ret;
   }
 
   static Sequences*
@@ -833,26 +773,16 @@ public:
   static Markovian_sequences*
   markovian_sequences(const Sequences& input)
   {
-    Format_error error;
-    Markovian_sequences *res;
-    res = input.markovian_sequences(error);
-
-    if (!res)
-      sequence_analysis::wrap_util::throw_error(error);
-    return res;
+    SIMPLE_METHOD_TEMPLATE_0(input, markovian_sequences, Markovian_sequences);
   }
 
   static Correlation*
-  correlation_computation(const Sequences& input, int variable1, int variable2,
-      int itype, int max_lag, int normalization)
-  {
-    // default values
-    // int itype = PEARSON , int max_lag = I_DEFAULT ,
-    // int normalization = EXACT)
-
-    SIMPLE_METHOD_TEMPLATE_1  (input, correlation_computation,
+correlation_computation(const Sequences& input, int variable1, int variable2,
+  int itype, int max_lag, int normalization)
+{
+  SIMPLE_METHOD_TEMPLATE_1 (input, correlation_computation,
       Correlation, variable1, variable2, itype, max_lag, normalization)
-  }
+}
 
   static Distance_matrix*
   alignment_vector_distance(const Sequences& input,
@@ -862,47 +792,36 @@ public:
       double transposition_factor, const char *result_path, char result_format,
       const char *alignment_path, char alignment_format)
   {
-    Distance_matrix* ret=NULL;
-    Format_error error;
-    std::stringstream os;
+    HEADER_OS(Distance_matrix);
+
     ret = input.alignment(error, &os, ivector_dist, ref_identifier, test_identifier, begin_free,
         end_free, indel_cost, indel_factor, transposition_flag,
         transposition_factor, result_path, result_format, alignment_path,
         alignment_format );
-    cerr <<os.str()<<endl;
-   if (!ret)
-        sequence_analysis::wrap_util::throw_error(error);
-   return ret;
+
+   FOOTER_OS;
   }
 
-static Distance_matrix*
-alignment(const Sequences& input,int ref_identifier = I_DEFAULT ,
-  int test_identifier = I_DEFAULT , bool begin_free = false , bool end_free = false ,
-  const char *result_path = 0 , char result_format = 'a' ,
-  const char *alignment_path = 0 , char alignment_format = 'a')
+  static Distance_matrix*
+alignment(const Sequences& input,int ref_identifier,
+  int test_identifier, bool begin_free, bool end_free,
+  const char *result_path, char result_format,
+  const char *alignment_path, char alignment_format)
 {
-  Distance_matrix* ret=NULL;
-  Format_error error;
-  std::stringstream os;
+  HEADER_OS(Distance_matrix);
+
   ret = input.alignment(error, &os, ref_identifier, test_identifier, begin_free,
       end_free, result_path, result_format, alignment_path,
       alignment_format );
-  cerr <<os.str()<<endl;
-  if (!ret)
-  sequence_analysis::wrap_util::throw_error(error);
-  return ret;
+  FOOTER_OS;
 }
 
 static Renewal_data*
 extract_renewal_data(const Sequences & input,
   int variable , int begin_index , int end_index)
 {
-  Format_error error;
-  Renewal_data * ret;
-  ret = input.extract_renewal_data(error, variable, begin_index, end_index);
-  if (!ret)
-  sequence_analysis::wrap_util::throw_error(error);
-  return ret;
+  SIMPLE_METHOD_TEMPLATE_1(input, extract_renewal_data, Renewal_data,
+      variable, begin_index, end_index);
 }
 
 static Time_events*
@@ -911,25 +830,18 @@ extract_time_events(const Sequences & input,
   int previous_date, int next_date)
 
 {
-  Format_error error;
-  Time_events * ret;
-  ret = input.extract_time_events(error, variable, begin_date, end_date,
-      previous_date, next_date);
-  if (!ret)
-    sequence_analysis::wrap_util::throw_error(error);
-  return ret;
+  SIMPLE_METHOD_TEMPLATE_1(input, extract_time_events, Time_events,
+      variable, begin_date, end_date, previous_date, next_date);
+
 }
 
 static Vectors*
 build_vectors(const Sequences & input,
   bool index_variable)
 {
-  Format_error error;
-  Vectors * ret;
+  Vectors* ret;
 
   ret = input.build_vectors(index_variable);
-  if (!ret)
-    sequence_analysis::wrap_util::throw_error(error);
 
   return ret;
 }
@@ -939,9 +851,7 @@ segmentation_change_point(const Sequences &input, int iidentifier,
     int nb_segment , boost::python::list input_change_point ,
     boost::python::list input_model_type , int output)
 {
-  Format_error error;
-  std::stringstream os;
-  Sequences *ret;
+  HEADER_OS(Sequences);
 
   int nb = len(input_change_point);
   int *change_point;
@@ -958,18 +868,15 @@ segmentation_change_point(const Sequences &input, int iidentifier,
   ret = input.segmentation(error, os, iidentifier, nb_segment,
       change_point, model_type, output);
 
-  cerr << os.str()<<endl;
-
-  return ret;
+  FOOTER_OS;
 }
+
 
 static Sequences*
 segmentation_array(const Sequences &input, boost::python::list input_nb_segment,
     boost::python::list input_model_type , int iidentifier,  int output)
 {
-  Format_error error;
-  std::stringstream os;
-  Sequences *ret;
+  HEADER_OS(Sequences);
 
 
   int nb = len(input_nb_segment);
@@ -984,19 +891,17 @@ segmentation_array(const Sequences &input, boost::python::list input_nb_segment,
   for (int i = 0; i < nb; i++)
     model_type[i] = extract<int> (input_model_type[i]);
 
+
   ret = input.segmentation(error, os, nb_segment, model_type, iidentifier,
       output);
-  cerr << os.str()<<endl;
-  return ret;
+  FOOTER_OS;
 }
 
 static Sequences*
 segmentation_model(const Sequences &input, int iidentifier,
     int max_nb_segment , boost::python::list input_model_type)
 {
-  Format_error error;
-  std::stringstream os;
-  Sequences *ret;
+  HEADER_OS(Sequences);
 
   int nb = len(input_model_type);
   int *model_type;
@@ -1005,22 +910,17 @@ segmentation_model(const Sequences &input, int iidentifier,
       model_type[i] = extract<int> (input_model_type[i]);
 
   ret = input.segmentation(error, os, iidentifier, max_nb_segment, model_type);
-  cerr << os.str()<<endl;
-  return ret;
+  FOOTER_OS;
 }
 
 static Sequences*
 segmentation_vector_distance(const Sequences &input,  int iidentifier,
     int nb_segment ,  const Vector_distance &ivector_dist, int output)
 {
-  Format_error error;
-  Sequences *ret;
-  std::stringstream os;
-
+  HEADER_OS(Sequences);
   ret = input.segmentation(error,iidentifier,  nb_segment,
       ivector_dist, os, output);
-  cerr << os.str()<<endl;
-  return ret;
+  FOOTER_OS;
 }
 
 

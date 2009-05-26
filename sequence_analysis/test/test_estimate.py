@@ -1,9 +1,8 @@
-"""tests on the method AddAbsorbingRun
+"""tests on the method estimate
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
-.. todo:: test the optional arguments in  Test_Compare_Sequences and
-Test_Compare_Sequences_VectorDistance ?
+.. todo:: finalise
 """
 __revision__ = "$Id: $"
 
@@ -65,21 +64,24 @@ class Test_Estimate_VARIABLE_ORDER_MARKOV():
 
 
 class Test_Estimate_VARIABLE_ORDER_MARKOV_from_markovian():
-    
     def test_estimate(self):
         mc11 = Estimate(seq10 , "VARIABLE_ORDER_MARKOV", "Ordinary",
                         MaxOrder=5, GlobalInitialTransition=False)
         mc2 = Estimate(seq2, "VARIABLE_ORDER_MARKOV", 
                        mc11, GlobalInitialTransition=False)
 
-class Test_Estimate_HIDDEN_VARIABLE_ORDER():
-    
-    def test_estimate(self):  
-        import os  
-        path = 'data' + os.sep
-        hmc9 = HiddenVariableOrderMarkov(path + "dupreziana21.hc")
-        hmc10 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9,
+class Test_Estimate_HIDDEN_VARIABLE_ORDER_MARKOV():
+    def test_estimate(self):    
+        from data import hvom_sample, seq1
+        hmc_estimated = Estimate(seq1, "HIDDEN_VARIABLE_ORDER_MARKOV", hvom_sample,
                          GlobalInitialTransition=True, NbIteration=80)
+        assert hmc_estimated
+        
+class Test_Estimate_time_events():
+    """test not yet implemented"""
+    pass
 
-    
+class Test_Estimate_tops():
+    """tests not yet implemented"""
+    pass
     

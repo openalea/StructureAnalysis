@@ -1,5 +1,9 @@
-"""Sequences"""
-__revision__ = "$Id: vectors.py 6217 2009-04-08 12:40:15Z cokelaer $"
+"""Sequences
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__revision__ = "$Id: $"
 
 import os
 import openalea.stat_tool.interface as interface

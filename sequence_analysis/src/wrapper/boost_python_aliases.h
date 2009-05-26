@@ -1,15 +1,16 @@
 
 
 
-// convert a boost python list into a CPP array
+// synopsis: converts a boost python list into a CPP array
 // INPUT is the input variable name
 // TYPE is the type of the CPP array to be returned into the variable data
-// returns data, the list of object and size its length
-#define CREATE_ARRAY(INPUT, TYPE)\
-  int size = len(INPUT);\
-  sequence_analysis::wrap_util::auto_ptr_array<TYPE> data(new TYPE[size]);\
-  for (int i = 0; i < size; i++)\
-      data[i] = boost::python::extract<TYPE>(INPUT[i]);
+// VARIABLE_NAME allows to use this macros several time inside the same function
+#define CREATE_ARRAY(INPUT, TYPE, VARIABLE_NAME)\
+  int VARIABLE_NAME##_size = len(INPUT);\
+  sequence_analysis::wrap_util::auto_ptr_array<TYPE> \
+      VARIABLE_NAME(new TYPE[VARIABLE_NAME##_size]);\
+  for (int i = 0; i < VARIABLE_NAME##_size; i++)\
+      VARIABLE_NAME[i] = boost::python::extract<TYPE>(INPUT[i]);
 
 
 // prototype not included since the name cannot be overloaded
@@ -18,7 +19,7 @@
 // OUTPUT_TYPE: type returned by METHOD_NAME
 // optional list of arguments to be used by METHOD_NAME
 #define SIMPLE_METHOD_TEMPLATE_1(INPUT, METHOD_NAME, OUTPUT_TYPE, ...)\
-  Format_error error; \
+    Format_error error; \
     OUTPUT_TYPE* ret;\
     ret = INPUT.METHOD_NAME(error, __VA_ARGS__ );\
     if (!ret)\
@@ -26,14 +27,34 @@
     return ret;\
 
 #define SIMPLE_METHOD_TEMPLATE_0(INPUT, METHOD_NAME, OUTPUT_TYPE)\
-  Format_error error; \
+    Format_error error; \
     OUTPUT_TYPE* ret;\
     ret = INPUT.METHOD_NAME(error);\
     if (!ret)\
       sequence_analysis::wrap_util::throw_error(error);\
     return ret;\
 
+#define FOOTER_OS \
+    if (!ret) \
+      sequence_analysis::wrap_util::throw_error(error);\
+    cout << os.str() << endl;\
+    return ret;\
 
+#define FOOTER \
+    if (!ret) \
+      sequence_analysis::wrap_util::throw_error(error);\
+    return ret;\
+
+// !! don't use if TYPE=bool
+#define HEADER(TYPE) \
+    Format_error error; \
+    TYPE* ret;\
+
+
+#define HEADER_OS(TYPE) \
+    Format_error error; \
+    TYPE* ret;\
+    std::stringstream os;\
 
 
 

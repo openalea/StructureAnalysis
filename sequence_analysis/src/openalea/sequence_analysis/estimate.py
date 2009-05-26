@@ -1,4 +1,8 @@
-""" Estimation functions """
+""" Estimation functions 
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id:  $"
 
 import sys,os
@@ -6,6 +10,7 @@ import sys,os
 import openalea.stat_tool._stat_tool as _stat_tool
 import _sequence_analysis
 import sequences
+from tools import __parse_kargs__
 
 __all__ = ['Estimate']
 # to be checked or improve. Maybe the c++ code could be more explicit, i.e.,
@@ -80,17 +85,6 @@ estimator_hidden_semi_markov = {
     "KaplanMeier" : KAPLAN_MEIER
 }
 
-
-def __parse_kargs__(kargs, key, default=None, map=None):
-    """
-    convert the key (string) into appropriate enumerate value
-    map is a required dictionary 
-    """
-    user_choice = kargs.get(key, default)
-    try:
-        return map[user_choice]
-    except KeyError:    
-        raise KeyError("Wrong choice for %. Possible choices are %s " % (key, map.keys()))
 
 def _estimate_non_homogeneous_markov(obj, *args, **kargs):
  
@@ -179,7 +173,7 @@ def _estimate_semi_markov(obj, *args, **kargs):
     Estimator = estimator_semi_markov_map[Estimator]
     MeanComputation = __parse_kargs__(kargs, "OccupancyMean",
                                       default='Computed',
-                                      map=mean_computation_map)
+                                      dict_map=mean_computation_map)
     return obj.semi_markov_estimation(Type , Estimator , Counting,
                                         NbIteration , MeanComputation)
 
@@ -205,13 +199,13 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
     Algorithm = kargs.get("Algorithm", "EM") #FORWARD_BACKWARD
     
     _AlgorithmCheck = __parse_kargs__(kargs, "Algorithm", default='EM',
-                                map=sub_markovian_algorithms)
+                                dict_map=sub_markovian_algorithms)
     Estimator = __parse_kargs__(kargs, "Estimator",
                                 default='CompleteLikelihood',
-                                map=estimator_hidden_semi_markov)
+                                dict_map=estimator_hidden_semi_markov)
     MeanComputation = __parse_kargs__(kargs, "OccupancyMean",
                                       default='Computed',
-                                      map=mean_computation_map)
+                                      dict_map=mean_computation_map)
         
     StateSequence = kargs.get("StateSequence", True)
     Counting = kargs.get("Counting", True)

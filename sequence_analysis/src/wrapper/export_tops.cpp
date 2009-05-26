@@ -1,13 +1,11 @@
 /*------------------------------------------------------------------------------
  *
- *        VPlants.Stat_Tool : VPlants Statistics module
+ *        VPlants.Sequence_analysis : VPlants Statistics module
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
- *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -15,9 +13,10 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id:  $
  *
  *-----------------------------------------------------------------------------*/
+
 #include "wrapper_util.h"
 
 #include "stat_tool/stat_tools.h"
@@ -140,30 +139,15 @@ public:
   }
 
   static boost::shared_ptr<Tops>
-  tops_from_lists(const boost::python::list& identifiers,
-      const boost::python::list& nb_position, bool init_flag)
+  tops_from_lists(const boost::python::list& input_identifiers,
+      const boost::python::list& input_position, bool init_flag)
   {
-    Format_error error;
-    Tops * ret = NULL;
-    int *ids;
-    int *pos;
+    HEADER(Tops);
 
-    int nb_id = len(identifiers);
-    int nb_pos = len(nb_position);
+    CREATE_ARRAY(input_identifiers, int, ids);
+    CREATE_ARRAY(input_position, int, pos);
 
-    ids = new int[nb_id];
-    pos = new int[nb_pos];
-
-    for (int i = 0; i < nb_id; i++)
-      {
-        ids[i] = boost::python::extract<int>(identifiers[i]);
-      }
-    for (int i = 0; i < nb_pos; i++)
-      {
-        pos[i] = boost::python::extract<int>(nb_position[i]);
-      }
-
-    ret = new Tops(nb_id, ids, pos, init_flag);
+    ret = new Tops(ids_size, ids.get(), pos.get(), init_flag);
 
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
@@ -188,8 +172,8 @@ public:
   select_individual(const Tops& top, const boost::python::list& identifiers,
       bool keep)
   {
-    CREATE_ARRAY(identifiers, int);
-    SIMPLE_METHOD_TEMPLATE_1(top, select_individual, Tops, size, data.get(),
+    CREATE_ARRAY(identifiers, int, data);
+    SIMPLE_METHOD_TEMPLATE_1(top, select_individual, Tops, data_size, data.get(),
         keep);
   }
 
@@ -220,30 +204,30 @@ public:
 
 void class_tops() {
 
-	//TODO constrcuctors from sequences (seg fault),
+  //TODO constrcuctors from sequences (seg fault),
 
-	class_<Tops, bases<Sequences> > ("_Tops", "Tops")
-	.def(init<Sequences> ())
-	.def("__init__", make_constructor(TopsWrap::tops_from_file))
+  class_<Tops, bases<Sequences> > ("_Tops", "Tops")
+    .def(init<Sequences> ())
+    .def("__init__", make_constructor(TopsWrap::tops_from_file))
     .def("__init__", make_constructor(TopsWrap::tops_from_lists))
 
-	.def(self_ns::str(self)) //__str__
+    .def(self_ns::str(self)) //__str__
 
-	.add_property("max_position", &Tops::get_max_position, "returns max position attribute")
+    .add_property("max_position", &Tops::get_max_position, "returns max position attribute")
 
-	.def("build_nb_internode_histogram", &Tops::build_nb_internode_histogram)
+    .def("build_nb_internode_histogram", &Tops::build_nb_internode_histogram)
 
-	DEF_RETURN_VALUE("get_axillary_nb_internode", &Tops::get_axillary_nb_internode, args("position"), "returns histogram of axillary nb internode")
-	DEF_RETURN_VALUE("select_individual", TopsWrap::select_individual,args("identifiers", "keep"), "select individual")
-	DEF_RETURN_VALUE("extract",TopsWrap::extract,args("position"), "extract method")
+    DEF_RETURN_VALUE("get_axillary_nb_internode", &Tops::get_axillary_nb_internode, args("position"), "returns histogram of axillary nb internode")
+    DEF_RETURN_VALUE("select_individual", TopsWrap::select_individual,args("identifiers", "keep"), "select individual")
+    DEF_RETURN_VALUE("extract",TopsWrap::extract,args("position"), "extract method")
     DEF_RETURN_VALUE("shift", TopsWrap::shift, args("nb_internode"), "shift method")
     DEF_RETURN_VALUE("estimation", &TopsWrap::estimation, args("min_position","max_position", "neighborhood", "equal_probability"), "estimation method 1")
     DEF_RETURN_VALUE("estimation2", &TopsWrap::estimation2, args("neighborhood", "equal_probability"), "estimation method 2")
 
     DEF_RETURN_VALUE_NO_ARGS("reverse", TopsWrap::reverse,"reverse method")
-	DEF_RETURN_VALUE_NO_ARGS("get_nb_internode", &Tops::get_nb_internode, "returns histogram of nb internode")
-	DEF_RETURN_VALUE_NO_ARGS("get_top_parameters", &Tops::get_top_parameters, "returns top parameters")
-	;
+    DEF_RETURN_VALUE_NO_ARGS("get_nb_internode", &Tops::get_nb_internode, "returns histogram of nb internode")
+    DEF_RETURN_VALUE_NO_ARGS("get_top_parameters", &Tops::get_top_parameters, "returns top parameters")
+    ;
 
 //herits from Stat interface the following functions. Do we need to expose them ?
 /*

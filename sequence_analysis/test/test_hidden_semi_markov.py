@@ -1,11 +1,16 @@
-"""Distribution tests"""
-__revision__ = "$Id: test_distribution.py 6219 2009-04-08 14:11:08Z cokelaer $"
+"""hidden semi markov data structure  tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__revision__ = "$Id:  $"
 
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.hidden_semi_markov import HiddenSemiMarkov
 from openalea.sequence_analysis.simulate import Simulate
+from openalea.sequence_analysis.data_transform import Thresholding
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
@@ -27,7 +32,8 @@ class Test(interface):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        return HiddenSemiMarkov('data/hidden_semi_markov.dat')
+        hsm = HiddenSemiMarkov('data/hidden_semi_markov.dat')
+        return hsm
    
     def test_empty(self):
         pass
@@ -49,7 +55,6 @@ class Test(interface):
         
     def test_len(self):
         seq = self.data
-        pass
 
     def _test_plot(self):        
         self.plot()
@@ -66,10 +71,6 @@ class Test(interface):
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
         
-    def _test_simulate(self):
-        #self.simulate()
-        pass
-        
     def test_simulate(self):
         sm = self.data
         sm.simulation_nb_elements(1, 10000, True)
@@ -77,8 +78,10 @@ class Test(interface):
         pass
         
     def test_thresholding(self):
-        self.data.thresholding(1)
-     
+        a = self.data.thresholding(0.01)
+        b = Thresholding(self.data, MinProbability=0.01)
+        #assert str(a)==str(b) 
+
     def test_extract(self):
         self.data.extract(1,1,1)
 

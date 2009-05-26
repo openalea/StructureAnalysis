@@ -1,4 +1,4 @@
-#########################################################################
+"""
 #########################################################################
 #
 #  Sequence samples
@@ -20,6 +20,9 @@
 #  VARIABLE 1 : number of offspring shoots per node.
 #
 #########################################################################
+"""
+__revision__ = "$Id:  $"
+
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import Estimate as Estimate
 

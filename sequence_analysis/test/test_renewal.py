@@ -1,14 +1,15 @@
-"""Hidden variable order markov tests
+""" Test renewal data structure
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+.. todo:: to be done
 """
 __revision__ = "$Id:  $"
 
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
-from openalea.sequence_analysis.hidden_variable_order_markov import HiddenVariableOrderMarkov
-from openalea.sequence_analysis.simulate import Simulate
+from openalea.sequence_analysis.renewal import Renewal
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
@@ -16,25 +17,23 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 
 from tools import interface
 
-class Test(interface):
-    """a simple unittest class
-    
+class _Test(interface):
+    """to be done
+
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/dupreziana21.hc",
-                           HiddenVariableOrderMarkov)
+                           "???",
+                           Renewal)
         
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        hvom =  HiddenVariableOrderMarkov('data/dupreziana21.hc')
-
-        return hvom
+        return TimeEvents('data/time_events.dat')
    
-    def test_empty(self):
+    def _test_empty(self):
         self.empty()
 
     def test_constructor_from_file(self):
@@ -49,10 +48,12 @@ class Test(interface):
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
-        self.display_versus_str()
+        #self.display_versus_str()
         
     def test_len(self):
         seq = self.data
+        assert seq.nb_element==42
+        assert seq.nb_class==8
         pass
 
     def _test_plot(self):        
@@ -60,6 +61,7 @@ class Test(interface):
     
     def test_save(self):
         self.save(skip_reading=True)
+        self.save()
                     
     def test_plot_write(self):
         self.plot_write()
@@ -71,28 +73,57 @@ class Test(interface):
         self.spreadsheet_write()
         
     def _test_simulate(self):
-        sm = self.data
-        sm.simulation_nb_elements(1, 10000, True)
-        Simulate(sm,1, 10000, True)
+        #self.simulate()
         pass
-        
-    def _test_merge (self):
-        s1 = self.data
-        s2 = self.data
-        
-        sall = s1.merge([s2])
-        
-        #assert sall.nb_sequence == 4
-        #assert sall.nb_variable == 2
-        
-        
-    def test_thresholding(self):
-        self.data.thresholding(1)
         
     def test_extract(self):
-        #self.data.extract(1,0,0)
-        pass
+        """todo"""
+        pass 
 
     def test_extract_data(self):
-        pass
-        #self.data.extract_data()
+        """todo"""
+        pass 
+
+    def test_get_htime(self):
+        data = self.data
+        histo = data.get_htime()
+
+
+    def test_get_hnb_event(self):
+        data = self.data
+        histo = data.get_hnb_event(20)
+    
+    def test_get_hmixture(self):
+        data = self.data
+        histo = data.get_hmixture()
+
+    def test_nb_event_select(self):
+        time = self.data
+        res = time.nb_event_select(1, 4)
+        assert res.nb_element == 7
+        assert res.nb_class == 3
+
+        res2 = NbEventSelect(time, 1, 4)
+        assert str(res) == str(res2)
+
+    def test_time_scaling(self):
+        aml = self.data.time_scaling(2)
+        mod = TimeScaling(self.data, 2)
+        assert str(aml) == str(mod)
+        
+        
+    def test_merge(self):
+        time1 = self.data
+        time2 = self.data
+        assert str(Merge(time1,time2)) == str(time1.merge([time2]))
+
+    def test_time_select(self):
+        #max value must be greater than the offset.
+        data= self.data
+        data.time_select(3,35)
+"""
+
+time.extract            
+   
+
+"""

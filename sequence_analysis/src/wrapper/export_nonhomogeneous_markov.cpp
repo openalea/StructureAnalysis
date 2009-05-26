@@ -1,13 +1,11 @@
 /*------------------------------------------------------------------------------
  *
- *        VPlants.Stat_Tool : VPlants Statistics module
+ *        VPlants.Sequence_analysis : VPlants Statistics module
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
- *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -15,7 +13,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id:  $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -43,78 +41,55 @@ using namespace boost::python;
 using namespace boost;
 
 
-
-
 #define WRAP NonHomogeneousMarkovWrap
 class NonHomogeneousMarkovWrap
 {
 
 public:
 
-
   static boost::shared_ptr<Nonhomogeneous_markov>
-    nonhomogeneous_markov_from_file(char* filename, int length)
-    {
-      //olf_format should be true
-      Format_error error;
-      Nonhomogeneous_markov *nonhomo = NULL;
-      nonhomo = nonhomogeneous_markov_ascii_read(error,
-          filename, length);
-      if(!nonhomo)
+  nonhomogeneous_markov_from_file(char* filename, int length)
+  {
+    //olf_format should be true
+    Format_error error;
+    Nonhomogeneous_markov *nonhomo = NULL;
+    nonhomo = nonhomogeneous_markov_ascii_read(error, filename, length);
+    if (!nonhomo)
       {
         sequence_analysis::wrap_util::throw_error(error);
       }
-      return boost::shared_ptr<Nonhomogeneous_markov>(nonhomo);
-    }
+    return boost::shared_ptr<Nonhomogeneous_markov>(nonhomo);
+  }
 
   static Nonhomogeneous_markov_data*
   simulation_markovian_sequences(const Nonhomogeneous_markov &input,
       int nb_sequence, const Markovian_sequences input_seq, bool counting_flag)
   {
-    Format_error error;
-    Nonhomogeneous_markov_data* ret = NULL;
-
-    ret = input.simulation(error, nb_sequence, input_seq, counting_flag);
-
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-
-    return ret;
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Nonhomogeneous_markov_data,
+        nb_sequence, input_seq, counting_flag);
   }
 
   static Nonhomogeneous_markov_data*
   simulation_histogram(const Nonhomogeneous_markov &input,
       const Histogram &hlength, bool counting_flag)
   {
-    Format_error error;
-    Nonhomogeneous_markov_data* ret;
-
-    ret = input.simulation(error, hlength, counting_flag);
-
-    return ret;
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Nonhomogeneous_markov_data,
+        hlength, counting_flag);
   }
 
   static Nonhomogeneous_markov_data*
   simulation_nb_sequences(const Nonhomogeneous_markov &input, int nb_sequence,
       int length, bool counting_flag)
   {
-    Format_error error;
-    Nonhomogeneous_markov_data* ret;
-
-    ret = input.simulation(error, nb_sequence, length, counting_flag);
-
-    return ret;
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Nonhomogeneous_markov_data,
+        nb_sequence, length, counting_flag);
   }
 
   static Parametric_model*
-    extract(const Nonhomogeneous_markov& seq, int type, int state)
-    {
-      Format_error error;
-      Parametric_model* ret;
-      ret = seq.extract(error, type, state);
-      if (!ret)
-        sequence_analysis::wrap_util::throw_error(error);
-      return ret;
+  extract(const Nonhomogeneous_markov& input, int type, int state)
+  {
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, Parametric_model,
+        type, state);
     }
 
 };
@@ -136,6 +111,8 @@ void class_nonhomogeneous_markov() {
     DEF_RETURN_VALUE("simulation_nb_sequences", WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
     DEF_RETURN_VALUE("simulation_markovian_sequences", WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
 
+    ;
+
 	//.def("get_process", &Nonhomogeneous_markov::get_process,
 	//	"return non parametric sequence process")
 
@@ -154,10 +131,6 @@ void class_nonhomogeneous_markov() {
     Nonhomogeneous_markov_data* get_markov_data() const { return markov_data; }
     Nonparametric_sequence_process* get_process() const { return process; }
    */
-
-
-
-;
 }
 #undef WRAP
 
@@ -169,20 +142,17 @@ class NonHomogeneousMarkovDataWrap
 
 public:
   static Distribution_data*
-  extract(const Nonhomogeneous_markov_data& seq, int type, int state)
+  extract(const Nonhomogeneous_markov_data& input, int type, int state)
   {
-    Format_error error;
-    Distribution_data* ret;
-    ret = seq.extract(error, type, state);
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-    return ret;
+    SIMPLE_METHOD_TEMPLATE_1(input, extract,
+        Distribution_data, type, state);
   }
 
   static Nonhomogeneous_markov_data*
-  remove_index_parameter(const Nonhomogeneous_markov_data& seq)
+  remove_index_parameter(const Nonhomogeneous_markov_data& input)
   {
-    SIMPLE_METHOD_TEMPLATE_0(seq, remove_index_parameter, Nonhomogeneous_markov_data);
+    SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter,
+        Nonhomogeneous_markov_data);
   }
 
 };

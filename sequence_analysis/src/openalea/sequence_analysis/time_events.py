@@ -1,4 +1,8 @@
-"""TimeEvents"""
+"""TimeEvents
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id: $"
 
 import os
@@ -9,7 +13,7 @@ from openalea.sequence_analysis._sequence_analysis import _Sequences
 import _sequence_analysis
 
 __all__ = ['TimeEvents',
-           '_Time_events']
+           '_Time_events', 'NbEventSelect']
 
 
 # Extend dynamically class

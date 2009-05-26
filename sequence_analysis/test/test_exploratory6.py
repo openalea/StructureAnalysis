@@ -1,3 +1,4 @@
+"""
 #########################################################################
 #
 #  Objective: analyzing the apical growth and the branching of Corsican pines,
@@ -15,6 +16,10 @@
 #  VARIABLE 3 : number of  branches per annual shoot / tier.
 #
 #########################################################################
+"""
+__revision__ = "$Id:  $"
+
+
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare
 

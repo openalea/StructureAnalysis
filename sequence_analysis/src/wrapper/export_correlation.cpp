@@ -1,13 +1,11 @@
 /*------------------------------------------------------------------------------
  *
- *        VPlants.Stat_Tool : VPlants Statistics module
+ *        VPlants.Sequence_analysis : VPlants Statistics module
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
- *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -15,9 +13,10 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id:  $
  *
- *-----------------------------------------------------------------------------*/
+ *----------------------------------------------------------------------------*/
+
 
 #include "wrapper_util.h"
 
@@ -50,16 +49,11 @@ public:
 
   // Merge
   static Correlation*
-  merge(const Correlation& input_cor, const boost::python::list& correlations)
+  merge(const Correlation& input, const boost::python::list& input_cor)
   {
-    int nb_cor = len(correlations);
-    sequence_analysis::wrap_util::auto_ptr_array<const Correlation *> sequens(
-        new const Correlation*[nb_cor]);
-    for (int i = 0; i < nb_cor; i++)
-      sequens[i] = extract<Correlation*> (correlations[i]);
-
-    SIMPLE_METHOD_TEMPLATE_1(input_cor, merge, Correlation,
-        nb_cor, sequens.get());
+    CREATE_ARRAY(input_cor, const Correlation *, data);
+    SIMPLE_METHOD_TEMPLATE_1(input, merge, Correlation,
+        data_size, data.get());
   }
 
 
@@ -67,10 +61,10 @@ public:
   white_noise_correlation_order(Correlation& input, int order)
 
   {
-	  Format_error error;
-	  bool ret;
-	  ret = input.white_noise_correlation(error, order);
-	  //if (!ret) throw error
+    Format_error error;
+    bool ret;
+    ret = input.white_noise_correlation(error, order);
+    FOOTER;
   }
 
   static bool
@@ -119,24 +113,19 @@ void class_correlation() {
 
     .def(self_ns::str(self)) //__str__
 
-    .add_property("type", &Correlation::type)
+    .add_property("type", &Correlation::get_type)
 
     .def("get_variable_type", &Correlation::get_variable_type, args("index"))
     .def("get_variable1", &Correlation::get_variable1, args("index"))
     .def("get_variable2", &Correlation::get_variable2, args("index"))
     .def("get_white_noise", &Correlation::get_white_noise, args("lag"))
-    DEF_RETURN_VALUE("merge", WRAP::merge, args("list"),"todo")
+
     .def("white_noise_correlation_dist", WRAP::white_noise_correlation_dist, args("dist"), "todo")
     .def("white_noise_correlation_order", WRAP::white_noise_correlation_order, args("order"), "todo")
     .def("white_noise_correlation_filter", WRAP::white_noise_correlation_filter, args("filter"), "todo")
 
-
+    DEF_RETURN_VALUE("merge", WRAP::merge, args("list"),"todo")
     ;
-
-//todo
-/*
-  std::ostream& line_write(std::ostream &os) const;
-*/
 }
 
 

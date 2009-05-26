@@ -1,4 +1,8 @@
-"""Top parameters"""
+"""Top parameters
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id: $"
 
 import os

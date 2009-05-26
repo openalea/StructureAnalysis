@@ -1,13 +1,11 @@
 /*------------------------------------------------------------------------------
  *
- *        VPlants.Stat_Tool : VPlants Statistics module
+ *        VPlants.Sequence_analysis : VPlants Statistics module
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
- *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -15,7 +13,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id:  $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -88,7 +86,7 @@ public:
     Distribution* ret;
     ret = new Distribution(*input.get_time());
     return ret;
-  }
+}
 
   static Renewal_data*
   get_renewal_data(const Renewal& input)
@@ -102,40 +100,35 @@ public:
   static Renewal_data*
   simulation_histogram(const Renewal& input, char itype, const Histogram & ihtime)
   {
-	 Format_error error;
-	 Renewal_data* ret;
-	 ret = input.simulation(error, itype , ihtime);
-	 return ret;
+    HEADER(Renewal_data);
+    ret = input.simulation(error, itype , ihtime);
+    FOOTER;
+
   }
 
   static Renewal_data*
   simulation_nb_elements(const Renewal& input, char itype , int nb_element , int itime)
   {
-	Format_error error;
-	Renewal_data* ret;
-	ret = input.simulation(error, itype , nb_element, itime);
-	return ret;
+    HEADER(Renewal_data);
+    ret = input.simulation(error, itype , nb_element, itime);
+    FOOTER;
   }
 
   static Renewal_data*
   simulation_time_events(const Renewal& input, char itype , int nb_element,
 		  const Time_events &timev)
   {
-  	Format_error error;
-  	Renewal_data* ret;
-  	ret = input.simulation(error, itype , nb_element, timev);
-  	return ret;
+    HEADER(Renewal_data);
+    ret = input.simulation(error, itype , nb_element, timev);
+    FOOTER;
   }
 
   static Parametric_model*
   extract(const Renewal& seq, int type, int state)
   {
-    Format_error error;
-    Parametric_model* ret;
+    HEADER(Parametric_model);
     ret = seq.extract(error, type, state);
-    if (!ret)
-      sequence_analysis::wrap_util::throw_error(error);
-    return ret;
+    FOOTER;
   }
 
 };

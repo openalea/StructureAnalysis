@@ -1,13 +1,11 @@
 /*------------------------------------------------------------------------------
  *
- *        VPlants.Stat_Tool : VPlants Statistics module
+ *        VPlants.Sequence_analysis : VPlants Statistics module
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
- *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -15,7 +13,7 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id:  $
  *
  *-----------------------------------------------------------------------------*/
 
@@ -152,20 +150,12 @@ public:
   static Time_events*
   merge(const Time_events& input, const boost::python::list input_timev)
   {
-    int nb = len(input_timev);
-    sequence_analysis::wrap_util::auto_ptr_array<const Time_events *>
-        timev(new const Time_events*[nb]);
+    HEADER(Time_events);
+    CREATE_ARRAY(input_timev, const Time_events *, timev)
 
-    for (int i = 0; i < nb; i++)
-        timev[i] = boost::python::extract<Time_events *> (input_timev[i]);
+    ret = new Time_events(timev_size, timev.get());
 
-    Time_events *res;
-
-    res = new Time_events(nb, timev.get());
-
-//delete [] *timev;
-
-    return res;
+    FOOTER;
   }
 
 
@@ -208,8 +198,6 @@ void class_time_events() {
       int *nb_event;          // nombre d'evenements
       int *frequency;         // effectif de chacune des classes
                               // {temps, nombre d'evenements}
-
-
       std::ostream& ascii_file_write(std::ostream &os , bool exhaustive , char type = 'v') const;
       std::ostream& spreadsheet_write(std::ostream &os , char type = 'v') const;
 

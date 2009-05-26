@@ -1,3 +1,10 @@
+""" Test extract vectors
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__revision__ = "$Id:  $"
+
 
 from data import seq20 as data
 from openalea.sequence_analysis.data_transform import ExtractVectors

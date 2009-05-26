@@ -5,7 +5,17 @@ WRAPPING
 
 .. todo:: check all wrapper with optional arguments and switch to BOOST_OVERLOAD ? 
 
-100% means either fully done or check the comments in the wrapping files. Maybe some functions have not been exported because irrelevant or not enough information.
+
+wrapping to be done
+===================
+
+
+* Remains to be done or check carefully: Estimation, Simulate and Extract*
+* Fully done : Compare and all other "simple" functions.
+
+* time_events: estimation ? 
+* renewal: function to extct forward, backward and so on.
+* renewal_data: estimation ?
 
 known issues
 ============

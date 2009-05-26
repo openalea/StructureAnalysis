@@ -1,8 +1,8 @@
-""" Cluster tests
+""" extract parameter functions
 
-.. todo:: check the AddVariable option (sequences) and sequences cases
+
 """
-__revision__ = "$Id: test_cluster.py 6325 2009-04-29 16:20:55Z cokelaer $"
+__revision__ = "$Id: $"
 
 
 from openalea.sequence_analysis.data_transform import IndexParameterExtract

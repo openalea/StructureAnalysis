@@ -1,3 +1,10 @@
+"""various function tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__revision__ = "$Id:  $"
+
 
 
 from openalea.sequence_analysis.data_transform import *

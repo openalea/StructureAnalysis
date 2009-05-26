@@ -1,3 +1,4 @@
+"""
 #########################################################################
 #
 #  Objective: analyzing the apical growth and the branching of Corsican pines,
@@ -17,6 +18,8 @@
 #  VARIABLE 2 : number of  branches per annual shoot / tier.
 #
 #########################################################################
+"""
+__revision__ = "$Id:  $"
 
 
 import os

@@ -1,10 +1,15 @@
-"""Distribution tests"""
-__revision__ = "$Id: test_distribution.py 6219 2009-04-08 14:11:08Z cokelaer $"
+"""TimeEvents tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__revision__ = "$Id:  $"
 
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
-from openalea.sequence_analysis.time_events import TimeEvents
+from openalea.sequence_analysis.time_events import TimeEvents, NbEventSelect
+from openalea.sequence_analysis.data_transform import TimeScaling, TimeSelect
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
@@ -98,9 +103,13 @@ class Test(interface):
         assert res.nb_element == 7
         assert res.nb_class == 3
 
+        res2 = NbEventSelect(time, 1, 4)
+        assert str(res) == str(res2)
+
     def test_time_scaling(self):
-        self.data.time_scaling(2)
-        
+        aml = self.data.time_scaling(2)
+        mod = TimeScaling(self.data, 2)
+        assert str(aml) == str(mod)
         
     def test_merge(self):
         time1 = self.data
@@ -109,8 +118,11 @@ class Test(interface):
 
     def test_time_select(self):
         #max value must be greater than the offset.
-        data= self.data
-        data.time_select(3,35)
+        aml = self.data.time_select(3, 35)
+        mod = TimeSelect(self.data, 3, 35)
+        assert str(aml) == str(mod)
+        
+        
 """
 
 time.extract            

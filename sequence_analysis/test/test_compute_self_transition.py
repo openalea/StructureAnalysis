@@ -1,8 +1,8 @@
-""" Cluster tests
+""" ComputeSelfTransition tests
 
-.. todo:: check the AddVariable option (sequences) and sequences cases
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
-__revision__ = "$Id: test_cluster.py 6325 2009-04-29 16:20:55Z cokelaer $"
+__revision__ = "$Id: $"
 
 
 from openalea.sequence_analysis.data_transform import ComputeSelfTransition
@@ -16,6 +16,7 @@ def test_ComputeSelfTransition():
     ComputeSelfTransition(seqn)
 
 def test_ComputeSelfTransition_order():
-    """not implemented"""
+    """not implemented see export_markovian_sequences code
+    the order arguments is protected..."""
     ComputeSelfTransition(seqn, Order=2)
 

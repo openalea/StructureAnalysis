@@ -1,8 +1,10 @@
-""" Cluster tests
+""" Tests on ComputeAutoCorrelation, ComputeParialAutoCorrelation, 
+ComputewhiteNoiseCorrelation 
 
-.. todo:: check the AddVariable option (sequences) and sequences cases
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
 """
-__revision__ = "$Id: test_cluster.py 6325 2009-04-29 16:20:55Z cokelaer $"
+__revision__ = "$Id:  $"
 
 
 from openalea.sequence_analysis.sequences import Sequences
@@ -41,7 +43,7 @@ class test_ComputeCorrelation(Data):
         seq = self.sequence
         cf = ComputeCorrelation(seq, variable, 
                                Type=type, MaxLag=MaxLag, Normalization=Normalization)
-        assert cf.get_type == self.type_map[type]
+        assert cf.type == self.type_map[type]
         return cf
         
     def test_correlation_no_optional_arguments(self):
@@ -75,7 +77,6 @@ class test_ComputeWhiteNoiseCorrelation(test_ComputeCorrelation):
     def __init__(self):
         test_ComputeCorrelation.__init__(self)
         self.correlation = self.test_pearson()
-        
         
     def test_filter(self):
         data = self.correlation        

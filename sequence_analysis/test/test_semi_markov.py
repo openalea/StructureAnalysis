@@ -1,5 +1,8 @@
-"""Distribution tests"""
-__revision__ = "$Id: test_distribution.py 6219 2009-04-08 14:11:08Z cokelaer $"
+"""Semi markov tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+"""
+__revision__ = "$Id:  $"
 
 
 from openalea.stat_tool import _stat_tool

@@ -1,4 +1,4 @@
-
+"""
 #########################################################################
 #
 #  Oak trunk annual shoots
@@ -13,6 +13,9 @@
 #  VARIABLE 6 : number de branches
 #
 #########################################################################
+"""
+__revision__ = "$Id:  $"
+
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import  Estimate
 

@@ -1,3 +1,12 @@
+""" Test extract histogram
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+.. todo:: to be done
+"""
+__revision__ = "$Id:  $"
+
+
 from openalea.stat_tool.data_transform import ValueSelect, ExtractHistogram
 
 from data import *

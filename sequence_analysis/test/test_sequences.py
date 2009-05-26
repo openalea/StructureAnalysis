@@ -1,11 +1,16 @@
-"""Distribution tests"""
-__revision__ = "$Id: test_distribution.py 6219 2009-04-08 14:11:08Z cokelaer $"
+"""Sequences tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__revision__ = "$Id:  $"
 
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.sequences import Sequences
-from openalea.sequence_analysis.data_transform import Cumulate, Difference
+from openalea.sequence_analysis.data_transform import Cumulate, Difference, \
+    ExtractVectors, IndexParameterExtract, IndexParameterSelect, RecurrenceTimeSequences  
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
@@ -220,7 +225,7 @@ class Test(interface):
         
         a = s1.merge([s2])
         b = s2.merge([s1])
-        v = Merge(s1,s2)
+        v = Merge(s1, s2)
 
         assert str(a) == str(b)
         assert str(a) == str(v)
@@ -306,51 +311,58 @@ class Test(interface):
         assert s.get_length(1)==22
 
     def test_difference(self):
-        """difference test to finalise"""
         data = self.data
-        str(Difference(data, 1))==str(data.difference(1, False))
-
+        assert str(Difference(data, 1)) == str(data.difference(1, False))
         res = Difference(data,1)
         assert res.cumul_length == 50
 
     def test_cumulate(self):
+        #see also test_cumulate for more tests
         s = self.data
         res = Cumulate(s)
         assert res.cumul_length == 52
 
 
-    def test_extract_vectors():
-        """see text_extract_vectors"""
+    def test_extract_vectors(self):
+        """see test_extract_vectors"""
+        ExtractVectors(self.data, "Length")
+    
+    def test_index_parameter_extract(self):
+        
+        aml = self.data.index_parameter_extract(0, 29)
+        mod = IndexParameterExtract(self.data, 0, 29)
+        assert str(aml) == str(mod)
+
+    
+    def test_index_parameter_select(self):
+        """test to be done"""
         pass
-    def _others(self):
-        #, cumulate, difference, indexextract, lengthselect, 
-        #, moving average, reccurrenceTimeSequences, removerun
-        # segmentatoinExtravt, 
-        # variablescaling, transormposition
+    
+    def test_recurrence_time_sequences(self):
+        aml = self.data.recurrence_time_sequences(1, 1)
+        mod = RecurrenceTimeSequences(self.data, 1, 1)
+        assert str(aml.markovian_sequences()) == str(mod)
+        
+    def test_remove_run(self):
+        """test to be done"""
         pass
-
-
-
-
-
-
+    def test_transform_position(self):
+        """test to be done"""
+        pass
+    def test_segmentation_extract(self):
+        """test to be done"""
+        pass
+    def test_variable_scaling(self):
+        """test to be done"""
+        pass
+    
 """           
-      seq.index_parameter_select 
+ 
 seq.segmentation_extract
-seq.ascii_write                
-seq.file_ascii_data_write     
-seq.pointwise_average  
-seq.length_select             
-seq.recurrence_time_sequences 
+seq.pointwise_average   
 seq.cross                    
 seq.get_index_parameter_type
 seq.sojourn_time_sequences
-seq.remove_index_parameter     
-seq.remove_run              
-seq.moving average                            
-seq.transform position
-seq.get_type
+seq.remove_index_parameter                   
 seq.round                    
-eq.index_parameter_extract  
-seq.scaling                    
 """

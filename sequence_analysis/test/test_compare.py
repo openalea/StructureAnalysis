@@ -1,9 +1,8 @@
-"""tests on the method AddAbsorbingRun
+"""tests on comparison methods
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
-.. todo:: test the optional arguments in  Test_Compare_Sequences and
-Test_Compare_Sequences_VectorDistance ?
+.. todo:: systematic tests
 """
 __revision__ = "$Id: $"
 
@@ -16,6 +15,7 @@ from openalea.stat_tool.data_transform import ValueSelect, ExtractHistogram
 from openalea.sequence_analysis.estimate import Estimate
 from openalea.sequence_analysis.data_transform import Thresholding
 
+from data import path
 
 class _Compare():
     """
@@ -39,7 +39,7 @@ class Test_Compare_Histograms(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        seq0 = Sequences("data/chene_sessile_15pa.seq")
+        seq0 = Sequences(path + "chene_sessile_15pa.seq")
         vec10 = Vectors(seq0)
         vec95 = ValueSelect(vec10, 1, 95)
         vec96 = ValueSelect(vec10, 1, 96)
@@ -51,9 +51,8 @@ class Test_Compare_Histograms(_Compare):
         res = Compare(ExtractHistogram(seq[0], 2),
                       ExtractHistogram(seq[1], 2),
                       ExtractHistogram(seq[2], 2), "N")
+        assert res
 
-        
-    
         
 class Test_Compare_Sequences(_Compare):
 
@@ -62,12 +61,13 @@ class Test_Compare_Sequences(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        seq = Sequences('data/dupreziana_a1.seq')
+        seq = Sequences(path + 'dupreziana_a1.seq')
         return seq
 
     def test_compare(self):
         seq = self.data
         matrix20 = Compare(seq)
+        assert matrix20
     
 
 class Test_Compare_Sequences_VectorDistance(_Compare):
@@ -77,12 +77,14 @@ class Test_Compare_Sequences_VectorDistance(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        seq = Sequences('data/dupreziana_a1.seq')
+        seq = Sequences(path + 'dupreziana_a1.seq')
         return seq
 
     def test_compare(self):
         seq = self.data
         matrix20 = Compare(seq, VectorDistance("N", "N"))
+        assert matrix20
+
 
 class Test_Compare_Vectors_VectorDistance(_Compare):
     
@@ -108,16 +110,17 @@ class Test_Compare_hsmc_with_sequences(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        hsmc0 = HiddenSemiMarkov("data/belren1.hsc")
-        hsmc1 = HiddenSemiMarkov("data/elstar1.hsc")
-        seq0 = Sequences("data//belren1.seq")
-        seq1 = Sequences("data//elstar1.seq")
+        hsmc0 = HiddenSemiMarkov(path + "belren1.hsc")
+        hsmc1 = HiddenSemiMarkov(path +"elstar1.hsc")
+        seq0 = Sequences(path + "belren1.seq")
+        seq1 = Sequences(path + "elstar1.seq")
         data0 = Estimate(seq0, "HIDDEN_SEMI-MARKOV", hsmc0)
         data1 = Estimate(seq1, "HIDDEN_SEMI-MARKOV", hsmc1)
         return [seq0, seq1, data0, data1]
-
+    
     def test_compare(self):
         data = self.data
         matrix20 = Compare(Thresholding(data[2], MinProbability=0.001), data[0],
                            Thresholding(data[3], MinProbability=0.001), data[1],
                            10000)
+        assert matrix20

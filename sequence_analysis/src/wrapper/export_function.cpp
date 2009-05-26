@@ -1,13 +1,11 @@
 /*------------------------------------------------------------------------------
  *
- *        VPlants.Stat_Tool : VPlants Statistics module
+ *        VPlants.Sequence_analysis : VPlants Statistics module
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
- *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
- *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -15,9 +13,10 @@
  *
  *        OpenAlea WebSite : http://openalea.gforge.inria.fr
  *
- *        $Id: export_tops.cpp 6169 2009-04-01 16:42:59Z cokelaer $
+ *        $Id:  $
  *
  *-----------------------------------------------------------------------------*/
+
 #include "wrapper_util.h"
 
 #include <math.h>
@@ -44,6 +43,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
 
+#include "boost_python_aliases.h"
+
 using namespace boost::python;
 using namespace boost;
 //using namespace stat_tool;
@@ -54,25 +55,21 @@ class FunctionWrap {
 
 public:
 
-  static boost::shared_ptr<Function> function_from_list(int ident, int length, boost::python::list& input_parameter)
+  static boost::shared_ptr<Function> function_from_list(int ident, int length,
+      boost::python::list& input_parameter)
   {
     Function *ret = NULL;
-    double *parameter;
 
+    CREATE_ARRAY(input_parameter, double, parameter);
+    /*double *parameter;
     int nb_param = len(input_parameter);
     parameter = new double[nb_param];
-
-    if (nb_param == 0)
-    {
-        sequence_analysis::wrap_util::throw_error("input list cannot be empty");
-    }
-
     for (int i=0; i<nb_param; i++)
     {
         parameter[i] = boost::python::extract<double> (input_parameter[i]);
     }
-
-    ret = new Function(ident, length, parameter);
+*/
+    ret = new Function(ident, length, parameter.get());
     if (!ret)
         sequence_analysis::wrap_util::throw_error("error while calling Function constructor.");
 

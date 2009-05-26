@@ -1,6 +1,8 @@
 """tests on the method AddAbsorbingRun
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr 
+
+.. todo:: markov case ? 
 """
 __revision__ = "$Id: $"
 
@@ -13,6 +15,7 @@ class _AddAbsorbingRun():
     """
     a main class to test the AddAbsorbingrun function on different type of 
     data structure.
+    
     """
 
     def __init__(self):
@@ -84,28 +87,3 @@ class Test_AddAbsorbingRun_SemiMarkov(_AddAbsorbingRun):
         semi_markov_data = markov.simulation_nb_elements(1, 1000, True)
         return semi_markov_data
     
-class _Test_AddAbsorbingRun_Markov(_AddAbsorbingRun):
-    """ 
-    .. todo:: find a markov example
-    """
-    def __init__(self):
-        _AddAbsorbingRun.__init__(self)
-        self.data = self.create_data()
-        self.max_length = 1000
-
-    def create_data(self):
-        raise NotImplemented
-        
-    
-class _Test_AddAbsorbingRun_VariableOrderMarkov(_AddAbsorbingRun):
-    """
-    
-    .. todo:: find a variable order markov example
-    """
-    def __init__(self):
-        _AddAbsorbingRun.__init__(self)
-        self.data = self.create_data()
-        self.max_length = 1000
-
-    def create_data(self):
-        raise NotImplemented

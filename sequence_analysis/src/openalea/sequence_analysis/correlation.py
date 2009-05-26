@@ -1,4 +1,8 @@
-"""Correlation methods"""
+"""Correlation methods
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id: $"
 
 

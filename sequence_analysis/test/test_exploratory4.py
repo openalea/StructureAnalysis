@@ -1,3 +1,4 @@
+"""
 #########################################################################
 #
 #  Objective: analyzing jointly the phyllotaxis and the number of offspring shoots
@@ -15,6 +16,9 @@
 #  VARIABLE 2 : number of offspring shoots per node.
 #
 #########################################################################
+"""
+__revision__ = "$Id:  $"
+
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare
 

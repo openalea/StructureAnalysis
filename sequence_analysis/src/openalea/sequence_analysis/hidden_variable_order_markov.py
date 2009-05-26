@@ -1,4 +1,8 @@
-"""HiddenVariableOrderMarkov"""
+"""HiddenVariableOrderMarkov
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id: r $"
 
 import os

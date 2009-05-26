@@ -1,3 +1,23 @@
+/*------------------------------------------------------------------------------
+ *
+ *        VPlants.Sequence_analysis : VPlants Statistics module
+ *
+ *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *
+ *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+ *
+ *        Distributed under the GPL 2.0 License.
+ *        See accompanying file LICENSE.txt or copy at
+ *           http://www.gnu.org/licenses/gpl-2.0.txt
+ *
+ *        OpenAlea WebSite : http://openalea.gforge.inria.fr
+ *
+ *        $Id:  $
+ *
+ *-----------------------------------------------------------------------------*/
+
+
 // WRAPPER COMMON CLASSES
 // copy of stat_tool/wrap_util.h
 
@@ -42,20 +62,6 @@ namespace sequence_analysis
       boost::python::throw_error_already_set();
     };
 
-
-   /* template<class T>
-    list_2_array(boost::python::list data)
-    {
-      int size = len(data);
-      sequence_analysis::wrap_util::auto_ptr_array<const T *>
-             sequens(new const T*[size]);
-
-      for (int i = 0; i < size; i++)
-        sequens[i] = boost::python::extract<T *>(data[i]);
-
-      return sequens;
-    }
-*/
     // Redefine auto_ptr for array (use delete[] instead)
     template<class T>
       class auto_ptr_array

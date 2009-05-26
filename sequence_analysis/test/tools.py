@@ -194,3 +194,4 @@ class interface():
     def test_extract_data(self):
         raise NotImplementedError()
 
+        

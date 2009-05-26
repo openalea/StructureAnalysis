@@ -1,49 +1,128 @@
-"""Compare module on vectors, sequences, renewal, distributions..."""
+"""Compare module on vectors, sequences, renewal, distributions...
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+"""
+
 __revision__ = "$Id: $"
 
 
 import openalea.stat_tool._stat_tool as _stat_tool
 from openalea.stat_tool.comparison import compare_histo, compare_vectors
 import _sequence_analysis
+from tools import __parse_kargs__
 
-def _compare_markovian_sequences_and_variable_order_markov(obj, *args, **kargs):
-    """compare function related to markovian models"""
-    filename = kargs.get("Filename", None)
-    markov_list = []
+markovian_algorithms = {
+    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
+    'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
+}
+
+histogram_types = (_stat_tool._Histogram,
+                   _stat_tool._MixtureData,
+                   _stat_tool._CompoundData,
+                   _stat_tool._ConvolutionData)
     
-    for arg in args:
-        if (isinstance(arg, _sequence_analysis._Variable_order_markov)):
-            markov_list.append(arg)
+sequence_alignment_first_arg = (_sequence_analysis._Sequences,
+                                _sequence_analysis._Markovian_sequences,
+                                _sequence_analysis._Variable_order_markov_data,
+                                _sequence_analysis._Semi_markov_data,
+                                _sequence_analysis._Nonhomogeneous_markov_data)
+    
+markov_model_comparison_first_arg = (_sequence_analysis._Variable_order_markov,
+                                     _sequence_analysis._Hidden_variable_order_markov,
+                                     _sequence_analysis._Hidden_semi_markov,
+                                     _sequence_analysis._Semi_markov)
+    
+markov_model_for_sequences_first_arg = (_sequence_analysis._Markovian_sequences,
+                                        _sequence_analysis._Variable_order_markov_data,
+                                        _sequence_analysis._Semi_markov_data,
+                                        _sequence_analysis._Nonhomogeneous_markov_data)
+   
+markov_model_for_sequences_second_arg = (_sequence_analysis._Variable_order_markov,
+                                         _sequence_analysis._Semi_markov,
+                                         _sequence_analysis._Hidden_variable_order_markov,
+                                         _sequence_analysis._Hidden_semi_markov)
 
-    if(isinstance(obj, _sequence_analysis._Markovian_sequences)):
-        return obj.comparison_variable_order_markov(markov_list, filename)
 
-
-def _compare_variable_order_markov_and_sequences(obj, *args, **kargs):
-    """compare function related to markovian for sequences"""
-    variable_order_markov = []
-    markov_sequence = []
+def _compare_markovian_sequences(obj, *args, **kargs):
+    """
+    :Example:
+    
+    >>> Compare(mc1, length_histo1, mc2, length_histo2,...,  FileName->"result")
+    >>> Compare(mc1, mc2,..., nb_seq, length, FileName->"result")
+    >>> Compare(mc1, seqm1, mc2, seqm2,..., nb_seq, FileName->"result")
+    >>> Compare(smc1, length_histo1, smc2, length_histo2,...,   FileName->"result")
+    >>> Compare(smc1, smc2,..., nb_seq, length, FileName->"result")
+    >>> Compare(smc1, seqm1, smc2, seqm2,..., nb_seq, FileName->"result")
+    >>> Compare(hmc1, length_histo1, hmc2, length_histo2,...,    FileName->"result")
+    >>> Compare(hmc1, hmc2,..., nb_seq, length, FileName->"result")
+    >>> Compare(hmc1, seqm1, hmc2, seqm2,..., nb_seq, FileName->"result")
+    >>> Compare(hsmc1, length_histo1, hsmc2, length_histo2,...,    FileName->"result")
+    >>> Compare(hsmc1, hsmc2,..., nb_seq, length, FileName->"result")
+    >>> Compare(hsmc1, seqm1, hsmc2, seqm2,..., nb_seq,  FileName->"result")
+    """
+    filename = kargs.get("Filename", None)
+   
+   
+    first_list = []
+    second_list = []
+    
     nb_seq = None
+    length = None
     filename = kargs.get("Filename", None)
     
-    if(isinstance(obj, _sequence_analysis._Variable_order_markov)):
+    # The Compare function already check the type of obj.
+    
+    # Type of arg0 is same as type of obj. 
+    if type(args[0]) == type(obj):
+
+        #first_list.append(obj)
         for arg in args:
-            if (isinstance(arg, _sequence_analysis._Variable_order_markov)):
-                variable_order_markov.append(arg)
-            elif (isinstance(arg, _sequence_analysis._Markovian_sequences)):
-                markov_sequence.append(arg)
-            elif (isinstance(arg, int)):
+            if (isinstance(arg, int)) and nb_seq is None:
                 nb_seq = arg
+            elif (isinstance(arg, int)) and length is None:
+                length = arg
             else:
-                raise KeyError("arguments must be alternance of Variable_order_markov and Markovian_sequences %s provided", type(arg))
-                
+                first_list.append(arg)
+         
+        return obj.divergence_computation_length(first_list, nb_seq,
+                                                 length, filename)
+    # Case where second arguments is Markovian and alternates with obj's type
+    elif (isinstance(args[0], _sequence_analysis._Markovian_sequences)) or \
+        (isinstance(args[0], _sequence_analysis._Variable_order_markov_data)) or \
+        (isinstance(args[0], _sequence_analysis._Semi_markov_data)):
+
+    
+        #first_list.append(obj)
+ 
+        for arg in args:
+            if (isinstance(arg, int)) and nb_seq is None:
+                nb_seq = arg
+            elif type(arg) == type(obj):
+                first_list.append(arg)
+            else:
+                second_list.append(arg)
+        print first_list
+        print second_list
+        print nb_seq        
+        return obj.divergence_computation_sequences(first_list, second_list,
+                                                     nb_seq, filename)
+            
+    # Case where second arguments is histogram and then alternates with obj's type
+    elif (isinstance(arg[0], histogram_types)):
+
+        for arg in args:
+            if type(arg) == type(obj):
+                first_list.append(arg)
+            else:
+                second_list.append(arg)
+        return obj.divergence_computation_histogram(first_list, second_list, filename)
+    
+    else:
+        raise Exception("case not handled. ")
         
-        if nb_seq is None:
-            raise KeyError("number of sequences must be provided")
-        return obj.divergence_computation(variable_order_markov, 
-                                          markov_sequence, nb_seq, filename)
-
-
+        
+    
+        
 def _compare_sequences(seq, *args, **kargs):
     """compare function related to sequences"""
     #int indel_cost = ADAPTATIVE , algorithm = AGGLOMERATIVE;
@@ -97,6 +176,29 @@ def _compare_sequences(seq, *args, **kargs):
     return dist_matrix
         
 
+def _compare_markovian_models_for_sequences(obj, *args, **kargs):
+
+    Filename = kargs.get("Filename", None)
+    Algorithm = __parse_kargs__(kargs, "Algorithm",
+                                      default='Forward',
+                                      dict_map=markovian_algorithms)    
+    markov_list = []
+    
+    for arg in args:
+        if (isinstance(arg, markov_model_for_sequences_second_arg)):
+            markov_list.append(arg)
+
+    if isinstance(args[0], _sequence_analysis.Hidden_variable_order_markov):
+        return obj.comparison_hidden_variable_order_markov(markov_list,
+                                                            Algorithm, Filename)
+    if isinstance(args[0], _sequence_analysis.Hidden_semi_markov):
+        return obj.comparison_hidden_semi_markov(markov_list,
+                                                  Algorithm, Filename)
+    elif isinstance(args[0], _sequence_analysis.Variable_order_markov):
+        return obj.comparison_variable_order_markov(markov_list, Filename)
+    elif isinstance(args[0], _sequence_analysis.Semi_markov):
+        return obj.comparison_semi_markov(markov_list, Filename)
+    
 
 def Compare(arg1, *args, **kargs):
     """Comparison functions factory
@@ -275,26 +377,30 @@ def Compare(arg1, *args, **kargs):
 
     p1 = arg1
     
-    if (isinstance(p1, _stat_tool._Histogram)):
-        return compare_histo(arg1, *args, **kargs)
     
+    # COMPARE 1
+    if (isinstance(p1, histogram_types)):
+        return compare_histo(arg1, *args, **kargs)
+    # COMPARE 2
     elif (isinstance(p1, _stat_tool._Vectors)):
         return compare_vectors(arg1, *args, **kargs)
-    
-    elif (isinstance(p1, _sequence_analysis._Variable_order_markov)):
-        return _compare_variable_order_markov_and_sequences(arg1, 
-                                                            *args, **kargs)
-
-    elif (isinstance(p1, _sequence_analysis._Markovian_sequences)):
-         
-        if len(args) == 0:
-            return _compare_sequences(arg1, *args, **kargs)
-        if len(args) > 0:
-            if (isinstance(args[0], _sequence_analysis._Variable_order_markov)):
-                return _compare_markovian_sequences_and_variable_order_markov(
-                                                        arg1, *args, **kargs)
-            elif  (isinstance(args[0], _stat_tool._VectorDistance)):
-                return _compare_sequences(arg1, *args, **kargs)
-    
+    #COMPARE 3
+    elif (isinstance(p1, sequence_alignment_first_arg)) and len(args)==0:
+        return _compare_sequences(arg1, *args, **kargs)
+    #COMPARE3 bis   
+    elif (isinstance(p1, sequence_alignment_first_arg)) and \
+            (isinstance(args[0], _stat_tool._VectorDistance)):
+        return _compare_sequences(arg1, *args, **kargs)
+    #Compare 4
+    elif (isinstance(p1, markov_model_for_sequences_first_arg)) and \
+            (isinstance(args[0], markov_model_for_sequences_second_arg)):
+        return _compare_markovian_models_for_sequences(arg1, *args, **kargs)
+    #COMPARE 5
+    elif (isinstance(p1, markov_model_comparison_first_arg)):
+        return _compare_markovian_sequences(arg1, *args, **kargs)
+              
+            
+    raise Exception("Error in Compare. No case corresponding to your command." 
+                    "Check your arguments.")
     
     
