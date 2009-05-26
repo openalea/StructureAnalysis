@@ -803,7 +803,18 @@ def ComputeStateSequences(obj, data, Characteristics=True):
 
 """
 
-    return data.state_sequence_computation(obj, Characteristics)
+    if isinstance(obj, (_sequence_analysis._Markovian_sequences, 
+                        _sequence_analysis._Variable_order_markov_data,
+                        _sequence_analysis._Semi_markov_data)) and \
+            isinstance(data, (_sequence_analysis._Hidden_variable_order_markov, 
+                           _sequence_analysis._Hidden_semi_markov
+                           )):
+            try:            
+                return data.state_sequence_computation(obj, Characteristics)
+            except:
+                raise Exception('call to state_sequence failed')
+    else:
+        raise Exception("first or second argument has the wrong type")
     
 
 def MovingAverage(obj, itype, Variable=1, BeginEnd=False, Output="Trend"):

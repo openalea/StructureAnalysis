@@ -188,15 +188,15 @@ def _compare_markovian_models_for_sequences(obj, *args, **kargs):
         if (isinstance(arg, markov_model_for_sequences_second_arg)):
             markov_list.append(arg)
 
-    if isinstance(args[0], _sequence_analysis.Hidden_variable_order_markov):
+    if isinstance(args[0], _sequence_analysis._Hidden_variable_order_markov):
         return obj.comparison_hidden_variable_order_markov(markov_list,
                                                             Algorithm, Filename)
-    if isinstance(args[0], _sequence_analysis.Hidden_semi_markov):
+    if isinstance(args[0], _sequence_analysis._Hidden_semi_markov):
         return obj.comparison_hidden_semi_markov(markov_list,
                                                   Algorithm, Filename)
-    elif isinstance(args[0], _sequence_analysis.Variable_order_markov):
+    elif isinstance(args[0], _sequence_analysis._Variable_order_markov):
         return obj.comparison_variable_order_markov(markov_list, Filename)
-    elif isinstance(args[0], _sequence_analysis.Semi_markov):
+    elif isinstance(args[0], _sequence_analysis._Semi_markov):
         return obj.comparison_semi_markov(markov_list, Filename)
     
 
