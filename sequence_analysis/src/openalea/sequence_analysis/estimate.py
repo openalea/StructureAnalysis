@@ -463,38 +463,38 @@ def Estimate(obj, *args, **kargs):
     :Usage:
     
     >>> Estimate(histo, "NON-PARAMETRIC")
-    >>> Estimate(histo, "NB", MinInfBound->1, InfBoundStatus->"Fixed")
-    >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound->1, InfBoundStatus->"Fixed", 
-        DistInfBoundStatus->"Fixed") 
-    >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound->1, InfBoundStatus->"Fixed", 
-        DistInfBoundStatus->"Fixed", NbComponent->"Estimated", Penalty->"AIC") 
-    >>> Estimate(histo, "CONVOLUTION", dist,MinInfBound->1, Parametric->False) 
-    >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution->initial_dist, Parametric->False) 
-    >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric->False, MinInfBound->0) 
-    >>> Estimate(histo, "COMPOUND", dist, unknown, InitialDistribution->initial_dist, Parametric->False) 
+    >>> Estimate(histo, "NB", MinInfBound=1, InfBoundStatus="Fixed")
+    >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound=1, InfBoundStatus="Fixed", 
+        DistInfBoundStatus="Fixed") 
+    >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound=1, InfBoundStatus="Fixed", 
+        DistInfBoundStatus="Fixed", NbComponent="Estimated", Penalty="AIC") 
+    >>> Estimate(histo, "CONVOLUTION", dist,MinInfBound=1, Parametric=False) 
+    >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution=initial_dist, Parametric=False) 
+    >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric=False, MinInfBound=0) 
+    >>> Estimate(histo, "COMPOUND", dist, unknown, InitialDistribution=initial_dist, Parametric=False) 
     
-    >>> Estimate(top, MinPosition->1, MaxPosition->5, Neighbourhood->2,    EqualProba->True)
+    >>> Estimate(top, MinPosition=1, MaxPosition=5, Neighbourhood=2,    EqualProba=True)
     
-    >>> Estimate(timev, type, NbIteration->10,Parametric->True)
-    >>> Estimate(timev, type, InitialInterEvent->initial_dist,    NbIteration->10, Parametric->True)      
+    >>> Estimate(timev, type, NbIteration=10,Parametric=True)
+    >>> Estimate(timev, type, InitialInterEvent=initial_dist,    NbIteration=10, Parametric=True)      
     
-    >>> Estimate(seq, "MARKOV", Order->2, Counting->False)
-    >>> Estimate(seq, "MARKOV", MaxOrder->3, Penalty->"AIC", Counting->False) 
-    >>> Estimate(seq, "MARKOV", states, Penalty->"AIC", Order->2, Counting->False) 
-    >>> Estimate(seq, "NON-HOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting->False) 
-    >>> Estimate(seq, "SEMI-MARKOV", Counting->False)
-    >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, SelfTransition->0.9, NbIteration->10, 
-        StateSequences->"Viterbi", Counting->False) 
-    >>> Estimate(seq, "HIDDEN_MARKOV", hmc, Algorithm->"Viterbi",
-        NbIteration->10, Order->2, Counting->False) 
+    >>> Estimate(seq, "MARKOV", Order=2, Counting=False)
+    >>> Estimate(seq, "MARKOV", MaxOrder=3, Penalty="AIC", Counting=False) 
+    >>> Estimate(seq, "MARKOV", states, Penalty="AIC", Order=2, Counting=False) 
+    >>> Estimate(seq, "NON-HOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting=False) 
+    >>> Estimate(seq, "SEMI-MARKOV", Counting=False)
+    >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, SelfTransition=0.9, NbIteration=10, 
+        StateSequences="Viterbi", Counting=False) 
+    >>> Estimate(seq, "HIDDEN_MARKOV", hmc, Algorithm="Viterbi",
+        NbIteration=10, Order=2, Counting=False) 
     >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", min_nb_state,
-        max_nb_state, Penalty->"AIC", Order->2, Counting->False) 
+        max_nb_state, Penalty="AIC", Order=2, Counting=False) 
     >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", hmc, state,
-        max_nb_state, Penalty->"AIC", SelfTransition->0.9, Counting->False) 
+        max_nb_state, Penalty="AIC", SelfTransition=0.9, Counting=False) 
     >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", nb_state, structure,
-        OccupancyMean->20, NbIteration->10, Estimator->"PartialLikelihood",
-        StateSequences->"Viterbi", Counting->False) 
-    >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm->"Viterbi", NbIteration->10, Counting->False) 
+        OccupancyMean=20, NbIteration=10, Estimator="PartialLikelihood",
+        StateSequences="Viterbi", Counting=False) 
+    >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm="Viterbi", NbIteration=10, Counting=False) 
     
     :Arguments:
     
