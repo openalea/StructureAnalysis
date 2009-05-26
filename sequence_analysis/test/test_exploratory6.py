@@ -88,5 +88,6 @@ acf13 = Merge(ComputeCorrelation(seq71, 2, MaxLag=10, Normalization="Exact"),\
 ComputeWhiteNoiseCorrelation(acf13, [1, 1, 1])
 # Plot(acf13)
 
-seq80 = Sequences("data/laricio_position66.seq")
+#todo: error while reading this file
+#seq80 = Sequences("data/laricio_position66.seq")
 # Plot(Cumulate(seq80), ViewPoint="Data")
