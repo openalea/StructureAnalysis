@@ -15,8 +15,9 @@ scons_parameters=["build_prefix="+build_prefix]
 install_requires = []
 setup_requires = ['openalea.deploy']
 if sys.platform.startswith('win'):
+    pass
     #setup_requires += ['MinGW','boostpython','openalea.sconsx']
-    install_requires += [binary_deps('boostpython')]
+    #install_requires += [binary_deps('boostpython')]
 else:
     install_requires = []
     setup_requires = []

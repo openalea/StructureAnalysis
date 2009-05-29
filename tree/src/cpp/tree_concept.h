@@ -47,7 +47,7 @@ class TreeConcept
 
   virtual vertex_descriptor root() = 0;
   virtual vertex_descriptor parent(vertex_descriptor v) = 0;
-  virtual std::pair<chrildren_iterator,chrildren_iterator>
+  virtual std::pair<children_iterator,children_iterator>
     children(vertex_descriptor v) = 0;
 }
 
