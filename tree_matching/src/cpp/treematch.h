@@ -289,7 +289,7 @@ class TreeMatch
 
   std::ostream& viewOneMatching(std::ostream& out_info,int imp_tree,int ref_tree) const;
 
-  ostream& TreeMatch::saveDistanceMatrix(ostream& out_fich) const;
+  ostream& saveDistanceMatrix(ostream& out_fich) const;
 
   DistanceType viewDistanceMatching(std::ostream& out_info,int imp_tree,int ref_tree) const;
   DistanceType viewNormalizedDistance(std::ostream& out_info,int imp_tree,int ref_tree);
