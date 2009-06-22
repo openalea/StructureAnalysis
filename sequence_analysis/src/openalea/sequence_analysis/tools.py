@@ -1,6 +1,7 @@
 """ common tools to all modules
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr 
+uthor:/
 """
 __revision__ = "$Id:  $"
 

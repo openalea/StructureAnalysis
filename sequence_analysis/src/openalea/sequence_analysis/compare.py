@@ -1,6 +1,7 @@
 """Compare module on vectors, sequences, renewal, distributions...
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+uthor:/
 """
 
 __revision__ = "$Id: $"

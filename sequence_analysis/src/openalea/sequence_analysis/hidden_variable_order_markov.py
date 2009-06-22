@@ -1,6 +1,7 @@
 """HiddenVariableOrderMarkov
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+uthor:/
 
 """
 __revision__ = "$Id: r $"
