@@ -1,4 +1,8 @@
-"""Compound tests"""
+"""Compound tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id$"
 
 from openalea.stat_tool.compound import Compound
@@ -15,9 +19,7 @@ from openalea.stat_tool.distribution import ToHistogram
 from tools import interface
 
 class Test(interface):
-    """a simple unittest class
-    
-    """
+    """a simple unittest class"""
     def __init__(self):
         interface.__init__(self, 
             self.build_data(), 

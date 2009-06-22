@@ -28,7 +28,9 @@ def _Vectors_mixture_estimation(self, model, nb_iteration=_stat_tool.I_DEFAULT,
     components, the maximal number of iterations and a flag for using parametric
     observation distributions or not, within a given family
     """
-    return _stat_tool._Vectors.mixture_estimation_wrap(self, model, nb_iteration, force_param);
+    return _stat_tool._Vectors.mixture_estimation_wrap(self, model,
+                                                       nb_iteration,
+                                                       force_param)
 
 _Vectors.mixture_estimation = _Vectors_mixture_estimation
 
@@ -96,7 +98,7 @@ def Vectors(*args, **kargs):
         try:            
             temp = obj.build_vectors(IndexVariable)
         except:
-            temp =  _Vectors(*args)
+            temp = _Vectors(*args)
         
     return temp
 
@@ -173,27 +175,34 @@ def VectorDistance(*args, **kargs):
     """
 
     distance = None
-    if(not distance) : distance = kargs.get("Distance", None)
-    if(not distance) : distance = _stat_tool.ABSOLUTE_VALUE
-    else: distance = distance_type[distance]
+    if(not distance):
+        distance = kargs.get("Distance", None)
+    if(not distance):
+        distance = _stat_tool.ABSOLUTE_VALUE
+    else:
+        distance = distance_type[distance]
     
     # filename
     if(len(args)==1 and isinstance(args[0], str)):
         
         if args[0] in vector_distance_type.keys():
             
-            #print vector_distance_type[args[0]], type(vector_distance_type[args[0]])
+            #print vector_distance_type[args[0]], 
+            #type(vector_distance_type[args[0]])
 #            print [1], type([1])
 #            print distance, type(distance)
-            return _stat_tool._VectorDistance([vector_distance_type[args[0]]],[1], distance )
+            return _stat_tool._VectorDistance([vector_distance_type[args[0]]],
+                                              [1], distance )
         else:
             filename = args[0]
             return _stat_tool._VectorDistance(filename)
 
     # Get keyword parameters
     distance = None
-    if(not distance) : distance = kargs.get("Distance", None)
-    if(not distance) : distance = _stat_tool.ABSOLUTE_VALUE
+    if(not distance):
+        distance = kargs.get("Distance", None)
+    if(not distance):
+        distance = _stat_tool.ABSOLUTE_VALUE
     else: distance = distance_type[distance]
 
     # Parse arguments
@@ -208,7 +217,7 @@ def VectorDistance(*args, **kargs):
         if(isinstance(arg, float) or isinstance(arg, int) ):
             weigths.append(arg)
             types.append(vector_distance_type[args[cindex+1]])
-            cindex +=1 
+            cindex += 1 
 
         elif(isinstance(arg, str)):
             weigths.append(0.)
@@ -274,7 +283,8 @@ def VarianceAnalysis(vec, class_variable, response_variable,
     except KeyError:
         raise KeyError("Possible type are : " + str(variance_type.keys()))
 
-    return vec.variance_analysis(class_variable, response_variable, type, FileName, Format)
+    return vec.variance_analysis(class_variable, response_variable, type,
+                                 FileName, Format)
 
 
 

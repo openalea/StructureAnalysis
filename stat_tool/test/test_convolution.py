@@ -1,4 +1,8 @@
-"""Convolution tests"""
+"""Convolution tests
+
+.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
 __revision__ = "$Id$"
 
 

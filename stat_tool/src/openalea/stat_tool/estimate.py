@@ -49,7 +49,7 @@ class EstimateFunctions(object):
     This class must not be used alone, but through an histogram object
     """
 
-    def estimate_nonparametric(histo):
+    def estimate_nonparametric(self, histo):
         """
         Estimate a non parametric distribution
 
@@ -65,7 +65,8 @@ class EstimateFunctions(object):
         """
         return  _stat_tool._ParametricModel(histo)
 
-    def estimate_parametric(histo, ident, MinInfBound=0, InfBoundStatus="Free"):
+    def estimate_parametric(self, histo, ident, MinInfBound=0, 
+                            InfBoundStatus="Free"):
         """ Estimate a parametric distribution
 
         :Parameters:
@@ -98,7 +99,7 @@ class EstimateFunctions(object):
 
 
 
-    def estimate_mixture(histo, distributions,
+    def estimate_mixture(self, histo, distributions,
                          MinInfBound=0, InfBoundStatus="Free",
                          DistInfBoundStatus="Free",
                          NbComponent = "Fixed", Penalty='AIC'):
@@ -200,9 +201,9 @@ class EstimateFunctions(object):
 
         else:  # "ESTIMATED"
             return histo.mixture_estimation(ident, MinInfBound, flag,
-                                            component_flag, Penalty)
+                                            component_flag, Penalty) 
 
-    def estimate_compound(histo,
+    def estimate_compound(self, histo,
                           known_distribution,
                           InitialDistribution=None,
                           MinInfBound=0,
@@ -217,25 +218,29 @@ class EstimateFunctions(object):
             if (Type):
                 Type = compound_type[Type]
         except KeyError:
-            raise AttributeError("Bad type. Possible types are %s"%(str(compound_type.keys())))
+            raise AttributeError("Bad type. Possible types are %s"
+                                 % (str(compound_type.keys())))
 
         try:
             if(Estimator):
                 Estimator = estimator_type[Estimator]
         except KeyError:
-            raise AttributeError("Bad estimator. Possible estimator are %s"%(str(estimator_type.keys())))
+            raise AttributeError("Bad estimator. Possible estimator are %s"
+                                 % (str(estimator_type.keys())))
 
         try:
             if(Penalty):
                 Penalty = smoothing_penalty_type[Penalty]
         except KeyError:
-            raise AttributeError("Bad penalty. Possible penalty are %s"%(str(smoothing_penalty_type.keys())))
+            raise AttributeError("Bad penalty. Possible penalty are %s"
+                                 % (str(smoothing_penalty_type.keys())))
 
         try:
             if(Outside):
                 Outside = outside_type[Outside]
         except KeyError:
-            raise AttributeError("Bad side effect management type: should be %s"%(str(outside_type.keys())))
+            raise AttributeError("Bad side effect management type: should be %s"
+                                 % (str(outside_type.keys())))
 
 
         #print InitialDistribution
@@ -254,9 +259,11 @@ class EstimateFunctions(object):
                             NbIteration, Weight, Penalty, Outside)
 
 
-    def estimate_convolution(histo, known_distribution, InitialDistribution=None,
-                             MinInfBound=0, Estimator="Likelihood", NbIteration=-1,
-                             Weight=-1. , Penalty="SecondDifference", Outside="Zero"):
+    def estimate_convolution(self, histo, known_distribution,
+                             InitialDistribution=None,
+                             MinInfBound=0, Estimator="Likelihood",
+                             NbIteration=-1, Weight=-1.,
+                             Penalty="SecondDifference", Outside="Zero"):
 
         """ Estimate a convolution
 
@@ -268,30 +275,36 @@ class EstimateFunctions(object):
                 Estimator = estimator_type[Estimator]
 
         except KeyError:
-            raise AttributeError("Bad estimator. Possible estimator are %s"%(str(estimator_type.keys())))
+            raise AttributeError("Bad estimator. Possible estimator are %s"
+                                 % (str(estimator_type.keys())))
 
         try:
             if(Penalty):
                 Penalty = smoothing_penalty_type[Penalty]
 
         except KeyError:
-            raise AttributeError("Bad penalty. Possible penalty are %s"%(str(smoothing_penalty_type.keys())))
+            raise AttributeError("Bad penalty. Possible penalty are %s"
+                                 % (str(smoothing_penalty_type.keys())))
 
         try:
             if(Outside):
                 Outside = outside_type[Outside]
 
         except KeyError:
-            raise AttributeError("Bad side effect management type: should be %s"%(str(outside_type.keys())))
+            raise AttributeError("Bad side effect management type: should be %s"
+                                 % (str(outside_type.keys())))
 
 
         if (InitialDistribution) :
-            return histo.convolution_estimation(known_distribution, InitialDistribution, Estimator,
-                                                NbIteration, Weight, Penalty, Outside)
+            return histo.convolution_estimation(known_distribution, 
+                                                InitialDistribution, Estimator,
+                                                NbIteration, Weight, Penalty, 
+                                                Outside)
 
         else :
-            return histo.convolution_estimation(known_distribution, MinInfBound, Estimator,
-                                                NbIteration, Weight, Penalty, Outside)
+            return histo.convolution_estimation(known_distribution, MinInfBound,
+                                                Estimator, NbIteration, Weight,
+                                                Penalty, Outside)
 
 
 # Extend _Histogram class
@@ -300,7 +313,7 @@ _Histogram = interface.extend_class( _stat_tool._Histogram, EstimateFunctions)
 
 
 
-def Estimate(histo, type, *args, **kargs):
+def Estimate(histo, itype, *args, **kargs):
     """
     Estimation function for AML compatibility
 
@@ -328,12 +341,12 @@ def Estimate(histo, type, *args, **kargs):
         "COMPOUND": _Histogram.estimate_compound,
         }
 
-    type = type.upper()
+    itype = itype.upper()
 
     try:
         fct = fct_map[type]
         if (fct == _Histogram.estimate_parametric):
-            return fct(histo, type, *args, **kargs)
+            return fct(histo, itype, *args, **kargs)
         elif (fct == _Histogram.estimate_mixture):
             return fct(histo, args, **kargs)
 #        elif (fct == _Histogram.estimate_compound):
@@ -342,7 +355,7 @@ def Estimate(histo, type, *args, **kargs):
             return fct(histo, *args, **kargs)
 
     except KeyError:
-        raise KeyError("Valid type are %s"%(str(fct_map.keys())))
+        raise KeyError("Valid type are %s" % (str(fct_map.keys())))
 
 
 

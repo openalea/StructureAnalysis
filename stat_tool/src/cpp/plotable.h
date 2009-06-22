@@ -31,7 +31,7 @@ namespace plotable
     string legend;
     string style;
 
-    /* Combination with
+    /* Combination with */
     /* impulse or linepoints*/
     /* linestyle : -- : -. - */
     /* marker : + , o . s v x > < ^ */

@@ -25,9 +25,11 @@ from openalea.misc import sphinx_tools
 
 
 filenames = [
-    'stat_tool/openalea_stat_tool_old_error_ref.rst',
-     'stat_tool/openalea_stat_tool_old_stat_tool_ref.rst',
-    'stat_tool/openalea_stat_tool_old_error_src.rst', 'stat_tool/openalea_stat_tool_old_stat_tool_src.rst']
+    'stat_tool/vplants_stat_tool_old_error_ref.rst',
+     'stat_tool/vplants_stat_tool_old_stat_tool_ref.rst',
+    'stat_tool/vplants_stat_tool_old_error_src.rst',
+     'stat_tool/vplants_stat_tool_old_stat_tool_src.rst']
+
 
 
 for file in filenames:
