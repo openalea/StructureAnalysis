@@ -27,8 +27,9 @@ from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import  Estimate
 from openalea.sequence_analysis.compare import  Compare
 
+path = 'data' + os.sep
 
-seq69 = Sequences("data//pin_laricio_7x.seq")
+seq69 = Sequences(path + "pin_laricio_7x.seq")
 seq70 = Cluster(seq69, "Step", 1, 10)
 # seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 27, MaxIndex=92)
 
@@ -129,10 +130,10 @@ seq83 = SelectVariable(seq82, 1, Mode="Reject")
 
 # estimation of a hidden semi-Markov chain
 
-hmc60 = HiddenSemiMarkov("data/pin_laricio_6.hsc")
+hmc60 = HiddenSemiMarkov(path + "pin_laricio_6.hsc")
 hmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hmc60)
 
-hsmc60 = HiddenSemiMarkov("data/pin_laricio_6.hsc")
+hsmc60 = HiddenSemiMarkov(path + "pin_laricio_6.hsc")
 hsmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hsmc60)
 # hsmc61 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", "Ordinary", 6, "LeftRight")
 
