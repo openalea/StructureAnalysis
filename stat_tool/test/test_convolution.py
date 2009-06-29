@@ -78,8 +78,8 @@ class Test(interface):
 
         m = self.data
         assert m.extract_convolution() == ExtractDistribution(m, "Convolution")
-        assert m.extract_elementary(1) == Binomial(0, 10, 0.5)
-        assert m.extract_elementary(2) == NegativeBinomial(0, 1, 0.1)
+        assert m.extract(1) == Binomial(0, 10, 0.5)
+        assert m.extract(2) == NegativeBinomial(0, 1, 0.1)
         assert ExtractDistribution(m, "Elementary", 1) == Binomial(0, 10, 0.5)
         assert ExtractDistribution(m, "Elementary", 2) == NegativeBinomial(0, 1, 0.1)
 

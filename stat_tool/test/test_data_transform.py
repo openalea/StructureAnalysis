@@ -287,7 +287,7 @@ class TestExtractDistribution(data):
         convol = self.conv()
 
         assert ExtractDistribution(convol, "Convolution") == \
-            convol.extract_convolution()
+            convol.extract()
         assert ExtractDistribution(convol, "Elementary", 1) == \
             convol.extract_elementary(1)
         assert ExtractDistribution(convol, "Elementary", 2) == \
