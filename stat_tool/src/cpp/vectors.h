@@ -199,10 +199,10 @@ public :
     Vectors* round(Format_error &error , int variable = I_DEFAULT ,
                    int mode = ROUND) const;
 
-    Vectors* value_select(Format_error &error , int variable , int imin_value ,
-                          int imax_value , bool keep = true) const;
-    Vectors* value_select(Format_error &error , int variable , double imin_value ,
-                          double imax_value , bool keep = true) const;
+    Vectors* value_select(Format_error &error , std::ostream &os , int variable ,
+                          int imin_value , int imax_value , bool keep = true) const;
+    Vectors* value_select(Format_error &error , std::ostream &os , int variable ,
+                          double imin_value , double imax_value , bool keep = true) const;
 
     Vectors* select_individual(Format_error &error , int inb_vector , int *iidentifier ,
                                bool keep = true) const;
