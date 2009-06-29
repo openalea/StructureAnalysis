@@ -463,10 +463,10 @@ void class_histogram()
   .def("convolution_estimation", HistogramWrap::convolution_estimation_2,
       return_value_policy<manage_new_object> (), "Convolution Estimation")
 
-  .def("compound_estimation", HistogramWrap::compound_estimation_1,
+  .def("compound_estimation1", HistogramWrap::compound_estimation_1,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
 
-  .def("compound_estimation", HistogramWrap::compound_estimation_2,
+  .def("compound_estimation2", HistogramWrap::compound_estimation_2,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
 
   // Select

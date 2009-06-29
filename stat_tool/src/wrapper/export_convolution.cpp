@@ -127,6 +127,7 @@ void class_convolution()
     .def("nb_distribution", &Convolution::get_nb_distribution, "Return the number of components")
 
 	DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate elements")
+    DEF_RETURN_VALUE("extract", WRAP::extract, ARGS("index"), "Extract a particular element. First index is 1")
     DEF_RETURN_VALUE("extract_elementary", WRAP::extract, ARGS("index"), "Extract a particular element. First index is 1")
 	DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::get_convolution_data, "Return a _ParametricModel object")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _ConvolutionData")
@@ -189,8 +190,9 @@ void class_convolution_data()
     .def(self_ns::str(self))
     .def("nb_histogram", &Convolution_data::get_nb_histogram)
     .def("get_histogram", &Convolution_data::get_histogram,	return_value_policy< manage_new_object >(), ARGS("index"),"todo")
+    DEF_RETURN_VALUE("extract", ConvolutionDataWrap::extract, ARGS("index"), "Extract a particular element. First index is 1")
     DEF_RETURN_VALUE("extract_elementary", ConvolutionDataWrap::extract, ARGS("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", ConvolutionDataWrap::extract_convolution,"Return a _DistributionData")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", ConvolutionDataWrap::extract_convolution,"Return a _DistributionData")
     ;
 
   /*
