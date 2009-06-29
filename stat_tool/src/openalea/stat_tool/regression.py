@@ -21,7 +21,7 @@ def Regression(vec, type,
       * vec : vectors
         vectors
       * type : string
-        `"Linear"` or `"MovingAverage"` or `"NearestNeighbours"`
+        `"Linear"` or `"MovingAverage"` or `"NearestNeighbors"`
       * explanatory_variable : int
         index of the explanatory variable
       * response_variable : int 
@@ -47,10 +47,10 @@ def Regression(vec, type,
         specifying the regression type is "MovingAverage".
 
       * Weighting : bool 
-        weighting or not of the neighbours according to their distance to the 
+        weighting or not of the neighbors according to their distance to the 
         computed point (default value: True). This optional argument can only
         be used if the second mandatory argument specifying the regression type 
-        is "NearestNeighbours". 
+        is "NearestNeighbors". 
 
     :Returns:
     
@@ -65,7 +65,7 @@ def Regression(vec, type,
         >>> Regression(vec, "MovingAverage", explanatory_variable, response_variable, filter, Algorithm="LeastSquares")
         >>> Regression(vec, "MovingAverage", explanatory_variable, response_variable, frequencies, Algorithm="LeastSquares")
         >>> Regression(vec, "MovingAverage", explanatory_variable, response_variable, dist, Algorithm="LeastSquares")
-        >>> Regression(vec, "NearestNeighbours", explanatory_variable, response_variable, span, Weighting=False)
+        >>> Regression(vec, "NearestNeighbors", explanatory_variable, response_variable, span, Weighting=False)
     
     .. seealso::
         :func:`~openalea.stat_tool.output.Plot`
@@ -96,14 +96,14 @@ def Regression(vec, type,
             
             
 
-    elif(type == "NearestNeighbours"):
+    elif(type == "NearestNeighbors"):
         span = param
         return vec.nearest_neighbours_regression(explanatory_variable, response_variable, 
                                                  float(span), bool(Weighting))
 
     else:
         raise TypeError("Bad Regression type. Must be 'Linear' or " +
-                        "'MovingAverage' or 'NearestNeighbours'" )
+                        "'MovingAverage' or 'NearestNeighbors'" )
 
 
 

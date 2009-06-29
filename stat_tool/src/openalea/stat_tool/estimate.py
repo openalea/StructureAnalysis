@@ -11,8 +11,8 @@ import distribution
 # to be checked or improve. Maybe the c++ code could be more explicit, i.e.,
 # e switched to elementary and so on.
 compound_type = {
-    'e': 'e',
-    's': 's',
+    'Elementary': 'e',
+    'Sum': 's',
     }
 
 likelihood_penalty_type = {
@@ -49,7 +49,7 @@ class EstimateFunctions(object):
     This class must not be used alone, but through an histogram object
     """
 
-    def estimate_nonparametric(self, histo):
+    def estimate_nonparametric( histo):
         """
         Estimate a non parametric distribution
 
@@ -65,9 +65,9 @@ class EstimateFunctions(object):
         """
         return  _stat_tool._ParametricModel(histo)
 
-    def estimate_parametric(self, histo, ident, MinInfBound=0, 
+    def estimate_parametric(histo, ident, MinInfBound=0, 
                             InfBoundStatus="Free"):
-        """ Estimate a parametric distribution
+        """ Estimate a parametric discrete distribution (binomial, Poisson or negative binomial distribution with an additional shit parameter)
 
         :Parameters:
           * histo (histogram, mixture_data, convolution_data, compound_data),
@@ -99,11 +99,11 @@ class EstimateFunctions(object):
 
 
 
-    def estimate_mixture(self, histo, distributions,
+    def estimate_mixture(histo, distributions,
                          MinInfBound=0, InfBoundStatus="Free",
                          DistInfBoundStatus="Free",
                          NbComponent = "Fixed", Penalty='AIC'):
-        """ Estimate a mixture distribution
+        """ Estimate a finite  mixture of discrete distributions
 
 
         :Parameters:
@@ -128,8 +128,9 @@ class EstimateFunctions(object):
                                   (all of these distributions are assumed to be unknown).
           * Penalty (string): type of Penalty function for model selection: \
                               "AIC" (Akaike Information Criterion), \
-                              "AICc" (corrected Akaike Information Criterion - default value) \
-                              "BIC" (Bayesian Information Criterion). \
+                              "AICc" (corrected Akaike Information Criterion) \
+                              "BIC" (Bayesian Information Criterion - default value). \
+                              "BICc" (corrected Bayesian Information Criterion). \
 
                               This optional argument can only be used if the optional argument
                               NbComponent is set at "Estimated".
@@ -203,17 +204,15 @@ class EstimateFunctions(object):
             return histo.mixture_estimation(ident, MinInfBound, flag,
                                             component_flag, Penalty) 
 
-    def estimate_compound(self, histo,
-                          known_distribution,
+    def estimate_compound(histo, known_distribution, Type,
                           InitialDistribution=None,
-                          MinInfBound=0,
-                          Type='e',
-                          Weight=-1. ,
-                          NbIteration=-1,
-                          Penalty="SecondDifference",
-                          Outside="Zero",
+                          MinInfBound=0,  Weight=-1. , NbIteration=-1,
+                          Penalty="SecondDifference", Outside="Zero",
                           Estimator="Likelihood"):
         """estimate a compound"""
+
+
+ 
         try:
             if (Type):
                 Type = compound_type[Type]
@@ -247,19 +246,19 @@ class EstimateFunctions(object):
         #print known_distribution
 
         if (InitialDistribution):
+            raise("to be checked carefully")
             print InitialDistribution
-            return histo.compound_estimation(
-                            known_distribution, InitialDistribution, Type,
-                            Estimator,
-                            NbIteration, Weight, Penalty, Outside)
+            return histo.compound_estimation1(
+                            known_distribution, unknown_distribution, Type,
+                            Estimator, NbIteration, Weight, Penalty, Outside)
 
-        else :
-            return histo.compound_estimation(
+        else:
+            return histo.compound_estimation2(
                             known_distribution, Type, MinInfBound,  Estimator,
                             NbIteration, Weight, Penalty, Outside)
 
 
-    def estimate_convolution(self, histo, known_distribution,
+    def estimate_convolution( histo, known_distribution,
                              InitialDistribution=None,
                              MinInfBound=0, Estimator="Likelihood",
                              NbIteration=-1, Weight=-1.,
@@ -344,12 +343,12 @@ def Estimate(histo, itype, *args, **kargs):
     itype = itype.upper()
 
     try:
-        fct = fct_map[type]
+        fct = fct_map[itype]
         if (fct == _Histogram.estimate_parametric):
             return fct(histo, itype, *args, **kargs)
         elif (fct == _Histogram.estimate_mixture):
             return fct(histo, args, **kargs)
-#        elif (fct == _Histogram.estimate_compound):
+#       elif (fct == _Histogram.estimate_compound):
 #            return fct(histo, *args, **kargs)
         else:
             return fct(histo, *args, **kargs)
