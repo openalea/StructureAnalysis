@@ -1769,7 +1769,7 @@ ostream& Distance_matrix::ascii_write(ostream &os , bool exhaustive) const
     delete [] cumul_length;
   }
 
-  if ((exhaustive) && (nb_row > 1) && (nb_row == nb_column) && (nb_row <= ASCII_NB_PATTERN) &&
+  if ((exhaustive) && (nb_row > 1) && (nb_row == nb_column) && (nb_row <= ASCII_NB_INDIVIDUAL) &&
       (nb_deletion) && (nb_insertion) && (nb_match)) {
     os << "\n" << label << " " << STAT_label[STATL_DISTANCE] << endl;
     for (i = 0;i < nb_row;i++) {
