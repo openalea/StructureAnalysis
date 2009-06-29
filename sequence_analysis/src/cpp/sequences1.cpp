@@ -1374,61 +1374,6 @@ Sequences& Sequences::operator=(const Sequences &seq)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des sequences reelles pour les variables entieres.
- *
- *  argument : indice de la variable.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::build_real_sequence(int variable)
-
-{
-  register int i , j , k;
-  int *pisequence;
-  double *prsequence;
-
-
-  for (i = 0;i < nb_variable;i++) {
-    if (((variable == I_DEFAULT) || (variable == i)) &&
-        (type[i] == INT_VALUE) && (!real_sequence[0][i])) {
-      for (j = 0;j < nb_sequence;j++) {
-        real_sequence[j][i] = new double[length[j]];
-
-        prsequence = real_sequence[j][i];
-        pisequence = int_sequence[j][i];
-        for (k = 0;k < length[j];k++) {
-          *prsequence++ = *pisequence++;
-        }
-      }
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Destruction des sequences reelles pour les variables entieres.
- *
- *--------------------------------------------------------------*/
-
-void Sequences::remove_real_sequence()
-
-{
-  register int i , j;
-
-  for (i = 0;i < nb_variable;i++) {
-    if (type[i] == INT_VALUE) {
-      for (j = 0;j < nb_sequence;j++) {
-        delete [] real_sequence[j][i];
-        real_sequence[j][i] = 0;
-      }
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Extraction de la loi marginale empirique pour une variable entiere.
  *
  *  arguments : reference sur un objet Format_error, variable.
@@ -3839,18 +3784,20 @@ Sequences* Sequences::round(Format_error &error , int variable , int mode) const
  *
  *  Selection de sequences sur les valeurs prises par le parametre d'index.
  *
- *  arguments : reference sur un objet Format_error, bornes sur les parametres d'index,
+ *  arguments : reference sur un objet Format_error, stream,
+ *              bornes sur les parametres d'index,
  *              flag pour conserver ou rejeter les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::index_parameter_select(Format_error &error , int min_index_parameter ,
+Sequences* Sequences::index_parameter_select(Format_error &error , ostream &os ,
+                                             int min_index_parameter ,
                                              int max_index_parameter , bool keep) const
 
 {
   bool status = true;
   register int i , j;
-  int inb_sequence , *index;
+  int inb_sequence , *index , *iidentifier;
   Sequences *seq;
 
 
@@ -3879,6 +3826,7 @@ Sequences* Sequences::index_parameter_select(Format_error &error , int min_index
 
     // selection des sequences
 
+    iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
     inb_sequence = 0;
 
@@ -3887,6 +3835,7 @@ Sequences* Sequences::index_parameter_select(Format_error &error , int min_index
         if ((index_parameter[i][j] >= min_index_parameter) &&
             (index_parameter[i][j] <= max_index_parameter)) {
           if (keep) {
+            iidentifier[inb_sequence] = identifier[i];
             index[inb_sequence++] = i;
           }
           break;
@@ -3894,6 +3843,7 @@ Sequences* Sequences::index_parameter_select(Format_error &error , int min_index
       }
 
       if ((!keep) && (j == (index_parameter_type == POSITION ? length[i] + 1 : length[i]))) {
+        iidentifier[inb_sequence] = identifier[i];
         index[inb_sequence++] = i;
       }
     }
@@ -3906,9 +3856,18 @@ Sequences* Sequences::index_parameter_select(Format_error &error , int min_index
     // copie des sequences
 
     if (status) {
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+        for (i = 0;i < inb_sequence;i++) {
+          os << iidentifier[i] << ", ";
+        }
+        os << endl;
+      }
+
       seq = new Sequences(*this , inb_sequence , index);
     }
 
+    delete [] iidentifier;
     delete [] index;
   }
 
@@ -3920,19 +3879,19 @@ Sequences* Sequences::index_parameter_select(Format_error &error , int min_index
  *
  *  Selection de sequences sur les valeurs prises par une variable.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet Format_error, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(Format_error &error , int variable , int imin_value ,
-                                   int imax_value , bool keep) const
+Sequences* Sequences::value_select(Format_error &error , ostream &os , int variable ,
+                                   int imin_value , int imax_value , bool keep) const
 
 {
   bool status = true;
   register int i , j;
-  int inb_sequence , *index , *pisequence;
+  int inb_sequence , *index , *iidentifier , *pisequence;
   double *prsequence;
   Sequences *seq;
 
@@ -3973,6 +3932,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , int imin
 
     // selection des sequences
 
+    iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
     inb_sequence = 0;
 
@@ -3982,6 +3942,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , int imin
         for (j = 0;j < length[i];j++) {
           if ((*pisequence >= imin_value) && (*pisequence <= imax_value)) {
             if (keep) {
+              iidentifier[inb_sequence] = identifier[i];
               index[inb_sequence++] = i;
             }
             break;
@@ -3991,6 +3952,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , int imin
         }
 
         if ((!keep) && (j == length[i])) {
+          iidentifier[inb_sequence] = identifier[i];
           index[inb_sequence++] = i;
         }
       }
@@ -4002,6 +3964,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , int imin
         for (j = 0;j < length[i];j++) {
           if ((*prsequence >= imin_value) && (*prsequence <= imax_value)) {
             if (keep) {
+              iidentifier[inb_sequence] = identifier[i];
               index[inb_sequence++] = i;
             }
             break;
@@ -4011,6 +3974,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , int imin
         }
 
         if ((!keep) && (j == length[i])) {
+          iidentifier[inb_sequence] = identifier[i];
           index[inb_sequence++] = i;
         }
       }
@@ -4024,9 +3988,18 @@ Sequences* Sequences::value_select(Format_error &error , int variable , int imin
     // copie des sequences
 
     if (status) {
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+        for (i = 0;i < inb_sequence;i++) {
+          os << iidentifier[i] << ", ";
+        }
+        os << endl;
+      }
+
       seq = new Sequences(*this , inb_sequence , index);
     }
 
+    delete [] iidentifier;
     delete [] index;
   }
 
@@ -4038,19 +4011,19 @@ Sequences* Sequences::value_select(Format_error &error , int variable , int imin
  *
  *  Selection de sequences sur les valeurs prises par une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet Format_error, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(Format_error &error , int variable , double imin_value ,
-                                   double imax_value , bool keep) const
+Sequences* Sequences::value_select(Format_error &error , ostream &os , int variable ,
+                                   double imin_value , double imax_value , bool keep) const
 
 {
   bool status = true;
   register int i , j;
-  int inb_sequence , *index;
+  int inb_sequence , *index , *iidentifier;
   double *prsequence;
   Sequences *seq;
 
@@ -4087,6 +4060,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , double i
 
     // selection des sequences
 
+    iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
     inb_sequence = 0;
 
@@ -4095,6 +4069,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , double i
       for (j = 0;j < length[i];j++) {
         if ((*prsequence >= imin_value) && (*prsequence <= imax_value)) {
           if (keep) {
+            iidentifier[inb_sequence] = identifier[i];
             index[inb_sequence++] = i;
           }
           break;
@@ -4104,6 +4079,7 @@ Sequences* Sequences::value_select(Format_error &error , int variable , double i
       }
 
       if ((!keep) && (j == length[i])) {
+        iidentifier[inb_sequence] = identifier[i];
         index[inb_sequence++] = i;
       }
     }
@@ -4116,9 +4092,18 @@ Sequences* Sequences::value_select(Format_error &error , int variable , double i
     // copie des sequences
 
     if (status) {
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+        for (i = 0;i < inb_sequence;i++) {
+          os << iidentifier[i] << ", ";
+        }
+        os << endl;
+      }
+
       seq = new Sequences(*this , inb_sequence , index);
     }
 
+    delete [] iidentifier;
     delete [] index;
   }
 
@@ -4572,18 +4557,18 @@ Sequences* Sequences::reverse(Format_error &error) const
  *
  *  Selection des sequences sur un critere de longueur.
  *
- *  arguments : reference sur un objet Format_error, bornes sur la longueur,
+ *  arguments : reference sur un objet Format_error, stream, bornes sur la longueur,
  *              flag pour conserver ou rejeter les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::length_select(Format_error &error , int min_length ,
+Sequences* Sequences::length_select(Format_error &error , ostream &os , int min_length ,
                                     int imax_length , bool keep) const
 
 {
   bool status = true;
   register int i;
-  int inb_sequence , *index;
+  int inb_sequence , *index , *iidentifier;
   Sequences *seq;
 
 
@@ -4603,17 +4588,20 @@ Sequences* Sequences::length_select(Format_error &error , int min_length ,
 
     // selection des sequences
 
+    iidentifier = new int[nb_sequence];
     index = new int[nb_sequence];
     inb_sequence = 0;
 
     for (i = 0;i < nb_sequence;i++) {
       if ((length[i] >= min_length) && (length[i] <= imax_length)) {
         if (keep) {
+          iidentifier[inb_sequence] = identifier[i];
           index[inb_sequence++] = i;
         }
       }
 
       else if (!keep) {
+        iidentifier[inb_sequence] = identifier[i];
         index[inb_sequence++] = i;
       }
     }
@@ -4626,9 +4614,18 @@ Sequences* Sequences::length_select(Format_error &error , int min_length ,
     // copie des sequences selectionnees
 
     if (status) {
+      if (inb_sequence <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << SEQ_label[inb_sequence == 1 ? SEQL_SEQUENCE : SEQL_SEQUENCES] << ": ";
+        for (i = 0;i < inb_sequence;i++) {
+          os << iidentifier[i] << ", ";
+        }
+        os << endl;
+      }
+
       seq = new Sequences(*this , inb_sequence , index);
     }
 
+    delete [] iidentifier;
     delete [] index;
   }
 
@@ -6621,23 +6618,27 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
           prsequence = seq->real_sequence[0][j];
           if (type[j] != REAL_VALUE) {
             cisequence = int_sequence[i][j];
-            for (k = 0;k < seq->length[0];k++) {
-              if (*pindex_param++ == *cindex_param) {
-                cindex_param++;
-                *prsequence += *cisequence++;
+            for (k = 0;k < length[i];k++) {
+              while (*pindex_param < *cindex_param) {
+                pindex_param++;
+                prsequence++;
               }
-              prsequence++;
+              pindex_param++;
+              cindex_param++;
+              *prsequence++ += *cisequence++;
             }
           }
 
           else {
             crsequence = real_sequence[i][j];
-            for (k = 0;k < seq->length[0];k++) {
-              if (*pindex_param++ == *cindex_param) {
-                cindex_param++;
-                *prsequence += *crsequence++;
+            for (k = 0;k < length[i];k++) {
+              while (*pindex_param < *cindex_param) {
+                pindex_param++;
+                prsequence++;
               }
-              prsequence++;
+              pindex_param++;
+              cindex_param++;
+              *prsequence++ += *crsequence++;
             }
           }
         }
@@ -6690,27 +6691,31 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
             pmean = seq->real_sequence[0][j];
             if (type[j] != REAL_VALUE) {
               cisequence = int_sequence[i][j];
-              for (k = 0;k < seq->length[seq->nb_sequence - 1];k++) {
-                if (*pindex_param++ == *cindex_param) {
-                  cindex_param++;
-                  diff = *cisequence++ - *pmean;
-                  *prsequence += diff * diff;
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < *cindex_param) {
+                  pindex_param++;
+                  prsequence++;
+                  pmean++;
                 }
-                prsequence++;
-                pmean++;
+                pindex_param++;
+                cindex_param++;
+                diff = *cisequence++ - *pmean++;
+                *prsequence++ += diff * diff;
               }
             }
 
             else {
               crsequence = real_sequence[i][j];
-              for (k = 0;k < seq->length[seq->nb_sequence - 1];k++) {
-                if (*pindex_param++ == *cindex_param) {
-                  cindex_param++;
-                  diff = *crsequence++ - *pmean;
-                  *prsequence += diff * diff;
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < *cindex_param) {
+                  pindex_param++;
+                  prsequence++;
+                  pmean++;
                 }
-                prsequence++;
-                pmean++;
+                pindex_param++;
+                cindex_param++;
+                diff = *crsequence++ - *pmean++;
+                *prsequence++ += diff * diff;
               }
             }
           }
@@ -6789,23 +6794,27 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
             pmean = seq->real_sequence[0][j];
             if (type[j] != REAL_VALUE) {
               cisequence = int_sequence[i][j];
-              for (k = 0;k < seq->length[0];k++) {
-                if (*pindex_param++ == *cindex_param) {
-                  cindex_param++;
-                  *prsequence++ = *cisequence++ - *pmean;
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < *cindex_param) {
+                  pindex_param++;
+                  pmean++;
                 }
-                pmean++;
+                pindex_param++;
+                cindex_param++;
+                *prsequence++ = *cisequence++ - *pmean++;
               }
             }
 
             else {
               crsequence = real_sequence[i][j];
-              for (k = 0;k < seq->length[0];k++) {
-                if (*pindex_param++ == *cindex_param) {
-                  cindex_param++;
-                  *prsequence++ = *crsequence++ - *pmean;
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < *cindex_param) {
+                  pindex_param++;
+                  pmean++;
                 }
-                pmean++;
+                pindex_param++;
+                cindex_param++;
+                *prsequence++ = *crsequence++ - *pmean++;
               }
             }
           }
@@ -6849,17 +6858,21 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
             pstandard_deviation = seq->real_sequence[seq->nb_sequence - 1][j];
             if (type[j] != REAL_VALUE) {
               cisequence = int_sequence[i][j];
-              for (k = 0;k < seq->length[0];k++) {
-                if (*pindex_param++ == *cindex_param) {
-                  cindex_param++;
-                  if (*pstandard_deviation > 0.) {
-                    *prsequence++ = (*cisequence++ - *pmean) / *pstandard_deviation;
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                    cisequence++;
-                  }
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < *cindex_param) {
+                  pindex_param++;
+                  pmean++;
+                  pstandard_deviation++;
                 }
+                pindex_param++;
+                cindex_param++;
+                if (*pstandard_deviation > 0.) {
+                  *prsequence++ = (*cisequence - *pmean) / *pstandard_deviation;
+                }
+                else {
+                  *prsequence++ = 0.;
+                }
+                cisequence++;
                 pmean++;
                 pstandard_deviation++;
               }
@@ -6867,17 +6880,21 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
 
             else {
               crsequence = real_sequence[i][j];
-              for (k = 0;k < seq->length[0];k++) {
-                if (*pindex_param++ == *cindex_param) {
-                  cindex_param++;
-                  if (*pstandard_deviation > 0.) {
-                    *prsequence++ = (*crsequence++ - *pmean) / *pstandard_deviation;
-                  }
-                  else {
-                    *prsequence++ = 0.;
-                    crsequence++;
-                  }
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < *cindex_param) {
+                  pindex_param++;
+                  pmean++;
+                  pstandard_deviation++;
                 }
+                pindex_param++;
+                cindex_param++;
+                if (*pstandard_deviation > 0.) {
+                  *prsequence++ = (*crsequence - *pmean) / *pstandard_deviation;
+                }
+                else {
+                  *prsequence++ = 0.;
+                }
+                crsequence++;
                 pmean++;
                 pstandard_deviation++;
               }
@@ -6896,12 +6913,13 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
               cisequence = int_sequence[i][j];
               for (k = 0;k < length[i];k++) {
                 if (*pstandard_deviation > 0.) {
-                  *prsequence++ = (*cisequence++ - *pmean++) / *pstandard_deviation;
+                  *prsequence++ = (*cisequence - *pmean) / *pstandard_deviation;
                 }
                 else {
                   *prsequence++ = 0.;
-                  cisequence++;
                 }
+                cisequence++;
+                pmean++;
                 pstandard_deviation++;
               }
             }
@@ -6910,12 +6928,13 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
               crsequence = real_sequence[i][j];
               for (k = 0;k < length[i];k++) {
                 if (*pstandard_deviation > 0.) {
-                  *prsequence++ = (*crsequence++ - *pmean++) / *pstandard_deviation;
+                  *prsequence++ = (*crsequence - *pmean) / *pstandard_deviation;
                 }
                 else {
                   *prsequence++ = 0.;
-                  crsequence++;
                 }
+                crsequence++;
+                pmean++;
                 pstandard_deviation++;
               }
             }
