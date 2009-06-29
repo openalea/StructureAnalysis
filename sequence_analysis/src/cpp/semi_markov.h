@@ -247,7 +247,7 @@ public :
     ~Semi_markov_iterator();
     Semi_markov_iterator& operator=(const Semi_markov_iterator &it);
 
-    void simulation(int **seq , int length = 1 , bool initialization = false);
+    bool simulation(int **seq , int length = 1 , bool initialization = false);
     int** simulation(int length = 1 , bool initialization = false);
 
     // acces membres de la classe
