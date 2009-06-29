@@ -279,7 +279,7 @@ comparison.Histogram
 TODO
 ====
 
-
+* Choose a language once for all (english versus American) in the syntax=> American
 * Issue with the UNIFORM distribution while saving and loading a mixture of
   uniform distribution. See test_save in test_mixture.
 * Issue with the Histogram distribution in test_save:
