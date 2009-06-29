@@ -302,7 +302,7 @@ public :
     ~Variable_order_markov_iterator();
     Variable_order_markov_iterator& operator=(const Variable_order_markov_iterator &it);
 
-    void simulation(int **seq , int ilength = 1 , bool initialization = false);
+    bool simulation(int **seq , int ilength = 1 , bool initialization = false);
     int** simulation(int ilength = 1 , bool initialization = false);
 
     // acces membres de la classe
