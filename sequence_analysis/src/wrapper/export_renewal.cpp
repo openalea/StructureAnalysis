@@ -232,3 +232,41 @@ void class_renewal_data() {
 ;
 
 }
+
+
+
+class RenewalIteratorWrap 
+{
+
+public:
+
+  static boost::python::list
+  simulation(Renewal_iterator& input, int nb_sequence=1, char type='v')
+  {
+    int *sequence;
+  
+    input.simulation(nb_sequence, type);
+    boost::python::list output_sequence;
+   
+    for (int i=0; i < input.get_length(); i++)
+    {
+        output_sequence.append(input.get_sequence(i));
+    }
+    return output_sequence;
+ } 
+};
+
+void 
+class_renewal_iterator()
+{
+
+  class_<Renewal_iterator > ("_Renewal_iterator", "Renewal_iterator", init<Renewal* ,optional<int> >())
+    .def(init<const Renewal_iterator&>())
+    .add_property("get_interval", &Renewal_iterator::get_interval)
+    .add_property("get_length", &Renewal_iterator::get_length)
+    .add_property("get_counter", &Renewal_iterator::get_counter)
+    .def("get_sequence", &Renewal_iterator::get_sequence, args("index"))  // to be done 
+    .def("simulation", RenewalIteratorWrap::simulation,  "simulation")
+;
+}
+

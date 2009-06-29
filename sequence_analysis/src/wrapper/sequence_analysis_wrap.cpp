@@ -71,13 +71,16 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
 
   class_renewal();
   class_renewal_data();
+  class_renewal_iterator();
 
   class_semi_markov();
   class_semi_markov_data();
+  class_semi_markov_iterator();
   class_hidden_semi_markov();
 
   class_variable_order_markov();
   class_variable_order_markov_data();
+  class_variable_order_markov_iterator();
 
   class_hidden_variable_order_markov();
 

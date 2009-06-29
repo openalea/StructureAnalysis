@@ -23,6 +23,7 @@
 // Boost.Python Wrapper export function
 void class_renewal();
 void class_renewal_data();
+void class_renewal_iterator();
 
 
 #endif

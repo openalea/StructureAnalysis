@@ -23,6 +23,7 @@
 // Boost.Python Wrapper export function
 void class_semi_markov();
 void class_semi_markov_data();
+void class_semi_markov_iterator();
 
 
 #endif

@@ -23,6 +23,7 @@
 // Boost.Python Wrapper export function
 void class_variable_order_markov();
 void class_variable_order_markov_data();
+void class_variable_order_markov_iterator();
 
 
 #endif

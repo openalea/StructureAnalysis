@@ -325,3 +325,46 @@ void class_variable_order_markov_data() {
 }
 
 
+class VariableOrderMarkovIteratorWrap
+{
+
+public:
+
+  static boost::python::list
+  simulation(Variable_order_markov_iterator& input, int nb_sequence=1, bool initialisation=false)
+  {
+    Format_error error;
+    int **sequence;
+
+    Variable_order_markov * sm;
+    sm = input.get_markov();
+
+    sequence = input.simulation(nb_sequence, initialisation);
+    boost::python::list output_sequence;
+
+
+    for (int j=0; j < sm->get_nb_output_process(); j++)
+    {
+        boost::python::list line;
+        for (int i=0; i < nb_sequence; i++)
+        {
+            line.append(sequence[j][i]);
+        }
+        output_sequence.append(line);
+    }
+    return output_sequence;
+ }
+};
+
+
+void
+class_variable_order_markov_iterator()
+{
+
+  class_<Variable_order_markov_iterator > ("_Variable_order_markov_iterator", "Variable_order_markov_iterator", init<Variable_order_markov*>())
+    .def(init<const Variable_order_markov_iterator&>())
+    .add_property("get_nb_variable", &Variable_order_markov_iterator::get_nb_variable)
+    .add_property("get_memory", &Variable_order_markov_iterator::get_memory)
+    .def("simulation", VariableOrderMarkovIteratorWrap::simulation,  "simulation")
+    ;
+}
