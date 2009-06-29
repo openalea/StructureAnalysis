@@ -46,7 +46,7 @@
  *  Constantes :
  */
 
-const int ASCII_NB_PATTERN = 10;       // nombre de formes maximum pour afficher sous forme
+const int ASCII_NB_INDIVIDUAL = 10;    // nombre d'individus maximum pour afficher sous forme
                                        // de resultats d'alignement
 const double DISTANCE_ROUNDNESS = 1.e-12;  // arrondi sur une distance
 
@@ -342,7 +342,7 @@ public :
     bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-		    const char *title = 0) const { return false; }
+                    const char *title = 0) const { return false; }
     // acces membres de la classe
 
     Distance_matrix* get_distance_matrix() { return distance_matrix; }
