@@ -2414,81 +2414,94 @@ Semi_markov_iterator& Semi_markov_iterator::operator=(const Semi_markov_iterator
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov_iterator::simulation(int **seq , int length , bool initialization)
+bool Semi_markov_iterator::simulation(int **seq , int length , bool initialization)
 
 {
-  register int i , j;
-  int *pstate , **poutput;
+  bool status;
 
 
-  if (semi_markov->nb_output_process > 0) {
-    poutput = new int*[semi_markov->nb_output_process];
+  if ((state == I_DEFAULT) && (!initialization)) {
+    status = false;
   }
 
-  if (initialization) {
-    state = cumul_method(semi_markov->nb_state , semi_markov->cumul_initial);
+  else {
+    register int i , j;
+    int *pstate , **poutput;
 
-    switch (semi_markov->state_subtype[state]) {
 
-    case SEMI_MARKOVIAN : {
-      switch (semi_markov->type) {
-      case 'o' :
-        occupancy = semi_markov->nonparametric_process[0]->sojourn_time[state]->simulation();
-        break;
-      case 'e' :
-        occupancy = semi_markov->forward[state]->simulation();
-        break;
-      }
-      break;
+    status = true;
+
+    if (semi_markov->nb_output_process > 0) {
+      poutput = new int*[semi_markov->nb_output_process];
     }
 
-    case MARKOVIAN : {
-      if (semi_markov->transition[state][state] < 1.) {
-        occupancy = 1;
-      }
-      break;
-    }
-    }
-
-    counter = 0;
-  }
-
-  pstate = seq[0];
-  for (i = 0;i < semi_markov->nb_output_process;i++) {
-    poutput[i] = seq[i + 1];
-  }
-
-  for (i = 0;i < length;i++) {
-    counter++;
-    *pstate++ = state;
-    for (j = 0;j < semi_markov->nb_output_process;j++) {
-      if (semi_markov->nonparametric_process[j + 1]) {
-        *poutput[j]++ = semi_markov->nonparametric_process[j + 1]->observation[state]->simulation();
-      }
-      else {
-        *poutput[j]++ = semi_markov->parametric_process[j + 1]->observation[state]->simulation();
-      }
-    }
-
-    if ((semi_markov->transition[state][state] < 1.) && (counter == occupancy)) {
-      state = cumul_method(semi_markov->nb_state , semi_markov->cumul_transition[state]);
+    if (initialization) {
+      state = cumul_method(semi_markov->nb_state , semi_markov->cumul_initial);
 
       switch (semi_markov->state_subtype[state]) {
-      case SEMI_MARKOVIAN :
-        occupancy = semi_markov->nonparametric_process[0]->sojourn_time[state]->simulation();
+
+      case SEMI_MARKOVIAN : {
+        switch (semi_markov->type) {
+        case 'o' :
+          occupancy = semi_markov->nonparametric_process[0]->sojourn_time[state]->simulation();
+          break;
+        case 'e' :
+          occupancy = semi_markov->forward[state]->simulation();
+          break;
+        }
         break;
-      case MARKOVIAN :
-        occupancy = 1;
+      }
+
+      case MARKOVIAN : {
+        if (semi_markov->transition[state][state] < 1.) {
+          occupancy = 1;
+        }
         break;
+      }
       }
 
       counter = 0;
     }
+
+    pstate = seq[0];
+    for (i = 0;i < semi_markov->nb_output_process;i++) {
+      poutput[i] = seq[i + 1];
+    }
+
+    for (i = 0;i < length;i++) {
+      counter++;
+      *pstate++ = state;
+      for (j = 0;j < semi_markov->nb_output_process;j++) {
+        if (semi_markov->nonparametric_process[j + 1]) {
+          *poutput[j]++ = semi_markov->nonparametric_process[j + 1]->observation[state]->simulation();
+        }
+        else {
+          *poutput[j]++ = semi_markov->parametric_process[j + 1]->observation[state]->simulation();
+        }
+      }
+
+      if ((semi_markov->transition[state][state] < 1.) && (counter == occupancy)) {
+        state = cumul_method(semi_markov->nb_state , semi_markov->cumul_transition[state]);
+
+        switch (semi_markov->state_subtype[state]) {
+        case SEMI_MARKOVIAN :
+          occupancy = semi_markov->nonparametric_process[0]->sojourn_time[state]->simulation();
+          break;
+        case MARKOVIAN :
+          occupancy = 1;
+          break;
+        }
+
+        counter = 0;
+      }
+    }
+
+    if (semi_markov->nb_output_process > 0) {
+      delete [] poutput;
+    }
   }
 
-  if (semi_markov->nb_output_process > 0) {
-    delete [] poutput;
-  }
+  return status;
 }
 
 
@@ -2507,12 +2520,18 @@ int** Semi_markov_iterator::simulation(int length , bool initialization)
   int **seq;
 
 
-  seq = new int*[semi_markov->nb_output_process + 1];
-  for (i = 0;i <= semi_markov->nb_output_process;i++) {
-    seq[i] = new int[length];
+  if ((state == I_DEFAULT) && (!initialization)) {
+    seq = 0;
   }
 
-  simulation(seq , length , initialization);
+  else {
+    seq = new int*[semi_markov->nb_output_process + 1];
+    for (i = 0;i <= semi_markov->nb_output_process;i++) {
+      seq[i] = new int[length];
+    }
+
+    simulation(seq , length , initialization);
+  }
 
   return seq;
 }
