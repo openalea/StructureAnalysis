@@ -449,9 +449,6 @@ protected :
     void remove_index_parameter(const Sequences &seq);
     void remove();
 
-    void build_real_sequence(int variable = I_DEFAULT);
-    void remove_real_sequence();
-
     bool increasing_index_parameter_checking(Format_error &error , bool strict ,
                                              const char *pattern_label) const;
     bool increasing_sequence_checking(Format_error &error , int variable , bool strict ,
@@ -509,8 +506,8 @@ protected :
                                   double **rank , double **max_symbol_distance , bool begin_free ,
                                   bool end_free , int indel_cost , double indel_factor) const;
 
-    void correlation_computation(Correlation &correl , int variable1 ,
-                                 int variable2 , int normalization) const;
+    void correlation_computation(Correlation &correl , int variable1 , int variable2 ,
+                                 int normalization , bool individual_mean = false) const;
 
     std::ostream& profile_ascii_print(std::ostream &os , int index , int nb_segment ,
                                       double **profiles , const char *label ,
@@ -615,12 +612,13 @@ public :
     Sequences* round(Format_error &error , int variable = I_DEFAULT ,
                      int mode = ROUND) const;
 
-    Sequences* index_parameter_select(Format_error &error , int min_index_parameter ,
+    Sequences* index_parameter_select(Format_error &error , std::ostream &os ,
+                                      int min_index_parameter ,
                                       int max_index_parameter , bool keep) const;
-    Sequences* value_select(Format_error &error , int variable , int imin_value ,
-                            int imax_value , bool keep = true) const;
-    Sequences* value_select(Format_error &error , int variable , double imin_value ,
-                            double imax_value , bool keep = true) const;
+    Sequences* value_select(Format_error &error , std::ostream &os , int variable ,
+                            int imin_value , int imax_value , bool keep = true) const;
+    Sequences* value_select(Format_error &error , std::ostream &os , int variable ,
+                            double imin_value , double imax_value , bool keep = true) const;
     Sequences* select_individual(Format_error &error , int inb_sequence , int *iidentifier ,
                                  bool keep = true) const;
 
@@ -631,8 +629,8 @@ public :
                               int ref_sample = I_DEFAULT) const;
 
     Sequences* reverse(Format_error &error) const;
-    Sequences* length_select(Format_error &error , int min_length , int imax_length ,
-                             bool keep = true) const;
+    Sequences* length_select(Format_error &error , std::ostream &os , int min_length ,
+                             int imax_length , bool keep = true) const;
     Sequences* remove_run(Format_error &error , int variable , int ivalue ,
                           char position , int max_run_length = I_DEFAULT) const;
     Sequences* index_parameter_extract(Format_error &error , int min_parameter_index ,
@@ -700,7 +698,7 @@ public :
 
     Correlation* correlation_computation(Format_error &error , int variable1 , int variable2 ,
                                          int itype = PEARSON , int max_lag = I_DEFAULT ,
-                                         int normalization = EXACT) const;
+                                         int normalization = EXACT , bool individual_mean = false) const;
     Correlation* partial_autocorrelation_computation(Format_error &error , int variable ,
                                                      int itype = PEARSON , int max_lag = I_DEFAULT) const;
 
