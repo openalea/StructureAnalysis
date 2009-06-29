@@ -3589,6 +3589,8 @@ Variable_order_markov_iterator::Variable_order_markov_iterator(Variable_order_ma
     markov->create_cumul();
     markov->cumul_computation();
   }
+
+  memory = I_DEFAULT;
 }
 
 
@@ -3645,77 +3647,90 @@ Variable_order_markov_iterator& Variable_order_markov_iterator::operator=(const 
 
 /*--------------------------------------------------------------*
  *
- *  Simulation par une chaine de Variable_order_markov.
+ *  Simulation par une chaine de Markov d'ordre variable.
  *
  *  arguments : sequence, longueur de la sequence, flag initialisation.
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov_iterator::simulation(int **seq , int length , bool initialization)
+bool Variable_order_markov_iterator::simulation(int **int_seq , int length , bool initialization)
 
 {
-  register int i , j;
-  int offset = 0 , *pstate , **poutput;
+  bool status;
 
 
-  if (markov->nb_output_process > 0) {
-    poutput = new int*[markov->nb_output_process];
+  if ((memory == I_DEFAULT) && (!initialization)) {
+    status = false;
   }
 
-  pstate = seq[0];
-  for (i = 0;i < markov->nb_output_process;i++) {
-    poutput[i] = seq[i + 1];
-  }
+  else {
+    register int i , j;
+    int offset = 0 , *pstate , **poutput;
 
-  if (initialization) {
-    switch (markov->type) {
-    case 'o' :
-      *pstate = cumul_method(markov->nb_state , markov->cumul_initial);
-      memory = markov->child[0][*pstate];
-      break;
-    case 'e' :
-      memory = cumul_method(markov->nb_row , markov->cumul_initial);
-      *pstate = markov->state[memory][0];
-      break;
+
+    status = true;
+
+    if (markov->nb_output_process > 0) {
+      poutput = new int*[markov->nb_output_process];
     }
 
+    pstate = int_seq[0];
     for (i = 0;i < markov->nb_output_process;i++) {
-      if (markov->nonparametric_process[i + 1]) {
-        *poutput[i]++ = markov->nonparametric_process[i + 1]->observation[*pstate]->simulation();
-      }
-      else {
-        *poutput[i]++ = markov->parametric_process[i + 1]->observation[*pstate]->simulation();
-      }
+      poutput[i] = int_seq[i + 1];
     }
 
-    pstate++;
-    offset++;
-  }
-
-  for (i = offset;i < length;i++) {
-    *pstate = cumul_method(markov->nb_state , markov->cumul_transition[memory]);
-
-    for (j = 0;j < markov->nb_output_process;j++) {
-      if (markov->nonparametric_process[j + 1]) {
-        *poutput[j]++ = markov->nonparametric_process[j + 1]->observation[*pstate]->simulation();
+    if (initialization) {
+      switch (markov->type) {
+      case 'o' :
+        *pstate = cumul_method(markov->nb_state , markov->cumul_initial);
+        memory = markov->child[0][*pstate];
+        break;
+      case 'e' :
+        memory = cumul_method(markov->nb_row , markov->cumul_initial);
+        *pstate = markov->state[memory][0];
+        break;
       }
-      else {
-        *poutput[j]++ = markov->parametric_process[j + 1]->observation[*pstate]->simulation();
+
+      for (i = 0;i < markov->nb_output_process;i++) {
+        if (markov->nonparametric_process[i + 1]) {
+          *poutput[i]++ = markov->nonparametric_process[i + 1]->observation[*pstate]->simulation();
+        }
+        else {
+          *poutput[i]++ = markov->parametric_process[i + 1]->observation[*pstate]->simulation();
+        }
       }
+
+      pstate++;
+      offset++;
     }
 
-    memory = markov->next[memory][*pstate++];
+    for (i = offset;i < length;i++) {
+      *pstate = cumul_method(markov->nb_state , markov->cumul_transition[memory]);
+
+      for (j = 0;j < markov->nb_output_process;j++) {
+        if (markov->nonparametric_process[j + 1]) {
+          *poutput[j]++ = markov->nonparametric_process[j + 1]->observation[*pstate]->simulation();
+        }
+        else {
+          *poutput[j]++ = markov->parametric_process[j + 1]->observation[*pstate]->simulation();
+        }
+      }
+
+      memory = markov->next[memory][*pstate++];
+    }
+
+    if (markov->nb_output_process > 0) {
+      delete [] poutput;
+    }
   }
 
-  if (markov->nb_output_process > 0) {
-    delete [] poutput;
-  }
+  return status;
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Simulation par une chaine de Variable_order_markov.
+ *  Simulation par une chaine de Markov d'ordre variable.
  *
  *  arguments : longueur de la sequence, flag initialisation.
  *
@@ -3725,17 +3740,23 @@ int** Variable_order_markov_iterator::simulation(int length , bool initializatio
 
 {
   register int i;
-  int **seq;
+  int **int_seq;
 
 
-  seq = new int*[markov->nb_output_process + 1];
-  for (i = 0;i <= markov->nb_output_process;i++) {
-    seq[i] = new int[length];
+  if ((memory == I_DEFAULT) && (!initialization)) {
+    int_seq = 0;
   }
 
-  simulation(seq , length , initialization);
+  else {
+    int_seq = new int*[markov->nb_output_process + 1];
+    for (i = 0;i <= markov->nb_output_process;i++) {
+      int_seq[i] = new int[length];
+    }
 
-  return seq;
+    simulation(int_seq , length , initialization);
+  }
+
+  return int_seq;
 }
 
 
