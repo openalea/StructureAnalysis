@@ -1193,29 +1193,24 @@ void Correlation::saveGuts(RWFile &file) const
  *  Calcul d'une fonction de correlation a partir d'un objet Sequences.
  *
  *  arguments : reference sur un objet Correlation, indices des variables,
- *              normalisation (APPROXIMATED/EXACT).
+ *              normalisation (APPROXIMATED/EXACT), calcul des moyennes par individu ou non.
  *
  *--------------------------------------------------------------*/
 
-void Sequences::correlation_computation(Correlation &correl , int variable1 ,
-                                        int variable2 , int normalization) const
+void Sequences::correlation_computation(Correlation &correl , int variable1 , int variable2 ,
+                                        int normalization , bool individual_mean) const
 
 {
   if (correl.type == PEARSON) {
     register int i , j , k;
     int max_lag = correl.length - 1 , *pisequence1 , *pisequence2 , *pfrequency;
     double *prsequence1 , *prsequence2;
-    double mean1 , mean2 , norm , *ppoint;
+    double variance1 , variance2 , diff , norm , *mean1 , *mean2 , *ppoint;
 
-
-/*    build_real_sequence(variable1);
-    if (variable2 != variable1) {
-      build_real_sequence(variable2);
-    } */
 
     // calcul des moyennes et des variances
 
-    mean1 = mean_computation(variable1);
+/*    mean1 = mean_computation(variable1);
 
     if (variable1 == variable2) {
       mean2 = mean1;
@@ -1223,10 +1218,124 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
     }
     else {
       mean2 = mean_computation(variable2);
-      norm = sqrt(variance_computation(variable1 , mean1) * variance_computation(variable2 , mean2));
+      norm = sqrt(variance_computation(variable1 , mean1) *
+                  variance_computation(variable2 , mean2));
     }
 
-    norm *= (cumul_length - 1);
+    norm *= (cumul_length - 1); */
+
+    mean1 = new double[nb_sequence];
+    mean2 = new double[nb_sequence];
+
+    if (individual_mean) {
+      variance1 = 0.;
+
+      if (type[variable1] != REAL_VALUE) {
+        for (i = 0;i < nb_sequence;i++) {
+          pisequence1 = int_sequence[i][variable1];
+          mean1[i] = 0.;
+          for (j = 0;j < length[i];j++) {
+            mean1[i] += *pisequence1++;
+          }
+          mean1[i] /= length[i];
+
+          pisequence1 = int_sequence[i][variable1];
+          for (j = 0;j < length[i];j++) {
+            diff = *pisequence1++ - mean1[i];
+            variance1 += diff * diff;
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          prsequence1 = real_sequence[i][variable1];
+          mean1[i] = 0.;
+          for (j = 0;j < length[i];j++) {
+            mean1[i] += *prsequence1++;
+          }
+          mean1[i] /= length[i];
+
+          prsequence1 = real_sequence[i][variable1];
+          for (j = 0;j < length[i];j++) {
+            diff = *prsequence1++ - mean1[i];
+            variance1 += diff * diff;
+          }
+        }
+      }
+
+      if (variable1 == variable2) {
+        for (i = 0;i < nb_sequence;i++) {
+          mean2[i] = mean1[i];
+        }
+        norm = variance1;
+      }
+
+      else {
+        variance2 = 0.;
+
+        if (type[variable2] != REAL_VALUE) {
+          for (i = 0;i < nb_sequence;i++) {
+            pisequence2 = int_sequence[i][variable2];
+            mean2[i] = 0.;
+            for (j = 0;j < length[i];j++) {
+              mean2[i] += *pisequence2++;
+            }
+            mean2[i] /= length[i];
+
+            pisequence2 = int_sequence[i][variable2];
+            for (j = 0;j < length[i];j++) {
+              diff = *pisequence2++ - mean2[i];
+              variance2 += diff * diff;
+            }
+          }
+        }
+
+        else {
+          for (i = 0;i < nb_sequence;i++) {
+            prsequence2 = real_sequence[i][variable2];
+            mean2[i] = 0.;
+            for (j = 0;j < length[i];j++) {
+              mean2[i] += *prsequence2++;
+            }
+            mean2[i] /= length[i];
+
+            prsequence2 = real_sequence[i][variable2];
+            for (j = 0;j < length[i];j++) {
+              diff = *prsequence2++ - mean2[i];
+              variance2 += diff * diff;
+            }
+          }
+        }
+
+        norm = sqrt(variance1 * variance2);
+      }
+    }
+
+    else {
+      mean1[0] = mean_computation(variable1);
+      for (i = 1;i < nb_sequence;i++) {
+        mean1[i] = mean1[0];
+      }
+
+      if (variable1 == variable2) {
+        for (i = 0;i < nb_sequence;i++) {
+          mean2[i] = mean1[i];
+        }
+        norm = variance_computation(variable1 , mean1[0]);
+      }
+
+      else {
+        mean2[0] = mean_computation(variable2);
+        for (i = 1;i < nb_sequence;i++) {
+          mean2[i] = mean2[0];
+        }
+        norm = sqrt(variance_computation(variable1 , mean1[0]) *
+                    variance_computation(variable2 , mean2[0]));
+      }
+
+      norm *= (cumul_length - 1);
+    }
 
     // calcul des coefficients de correlation
 
@@ -1239,12 +1348,6 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
 
       for (j = 0;j < nb_sequence;j++) {
         if (length[j] > i) {
-/*          prsequence1 = real_sequence[j][variable1];
-          prsequence2 = real_sequence[j][variable2] + i;
-          for (k = 0;k < length[j] - i;k++) {
-            *ppoint += (*prsequence1++ - mean1) * (*prsequence2++ - mean2);
-          } */
-
           if (type[variable1] != REAL_VALUE) {
             pisequence1 = int_sequence[j][variable1];
           }
@@ -1261,23 +1364,23 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
 
           if ((type[variable1] != REAL_VALUE) && (type[variable2] != REAL_VALUE)) {
             for (k = 0;k < length[j] - i;k++) {
-              *ppoint += (*pisequence1++ - mean1) * (*pisequence2++ - mean2);
+              *ppoint += (*pisequence1++ - mean1[j]) * (*pisequence2++ - mean2[j]);
             }
           }
           else if ((type[variable1] != REAL_VALUE) && (type[variable2] == REAL_VALUE)) {
             for (k = 0;k < length[j] - i;k++) {
-              *ppoint += (*pisequence1++ - mean1) * (*prsequence2++ - mean2);
+              *ppoint += (*pisequence1++ - mean1[j]) * (*prsequence2++ - mean2[j]);
             }
           }
           else if ((type[variable1] == REAL_VALUE) && (type[variable2] != REAL_VALUE)) {
             for (k = 0;k < length[j] - i;k++) {
-              *ppoint += (*prsequence1++ - mean1) * (*pisequence2++ - mean2);
+              *ppoint += (*prsequence1++ - mean1[j]) * (*pisequence2++ - mean2[j]);
             }
           }
 //          else if ((type[variable1] == REAL_VALUE) && (type[variable2] == REAL_VALUE)) {
           else {
             for (k = 0;k < length[j] - i;k++) {
-              *ppoint += (*prsequence1++ - mean1) * (*prsequence2++ - mean2);
+              *ppoint += (*prsequence1++ - mean1[j]) * (*prsequence2++ - mean2[j]);
             }
           }
      
@@ -1308,7 +1411,8 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
       }
     }
 
-//    remove_real_sequence();
+    delete [] mean1;
+    delete [] mean2;
   }
 
   else if (correl.type == SPEARMAN) {
@@ -1419,7 +1523,8 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
 
   else {
     register int i , j , k;
-    int max_lag = correl.length - 1 , nb_vector , *pisequence1 , *pisequence2 , *pfrequency , itype[2];
+    int max_lag = correl.length - 1 , nb_vector , *pisequence1 , *pisequence2 ,
+        *pfrequency , itype[2];
     double *ppoint;
     Vectors *vec;
 
@@ -1488,13 +1593,13 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 ,
  *
  *  arguments : reference sur un objet Format_error, indices des variables,
  *              type de coefficient (PEARSON/SPEARMAN/KENDALL), decalage maximum,
- *              normalisation (APPROXIMATED/EXACT).
+ *              normalisation (APPROXIMATED/EXACT), calcul des moyennes par individu ou non.
  *
  *--------------------------------------------------------------*/
 
 Correlation* Sequences::correlation_computation(Format_error &error , int variable1 ,
                                                 int variable2 , int itype , int max_lag ,
-                                                int normalization) const
+                                                int normalization , bool individual_mean) const
 
 {
   bool status = true;
@@ -1588,7 +1693,7 @@ Correlation* Sequences::correlation_computation(Format_error &error , int variab
 
 //    correl = new Correlation(itype , max_lag , variable1 + 1 , variable2 + 1);
     correl = new Correlation((itype == SPEARMAN2 ? SPEARMAN : itype) , max_lag , variable1 + 1 , variable2 + 1);
-    correlation_computation(*correl , variable1 , variable2 , normalization);
+    correlation_computation(*correl , variable1 , variable2 , normalization , individual_mean);
   }
 
   return correl;
