@@ -992,11 +992,11 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int step , int mo
               break;
             case ROUND :
               vec->int_vector[i][j] = (int_vector[i][j] + step / 2) / step;
-//	      vec->int_vector[i][j] = (int)::round((double)int_vector[i][j] / (double)step);
+//              vec->int_vector[i][j] = (int)::round((double)int_vector[i][j] / (double)step);
               break;
             case CEIL :
               vec->int_vector[i][j] = (int_vector[i][j] + step - 1) / step;
-//	      vec->int_vector[i][j] = (int)ceil((double)int_vector[i][j] / (double)step);
+//              vec->int_vector[i][j] = (int)ceil((double)int_vector[i][j] / (double)step);
               break;
             }
           }
@@ -1031,13 +1031,13 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int step , int mo
           switch (mode) {
           case FLOOR :
             vec->min_value[i] = (int)min_value[i] / step;
-	    vec->max_value[i] = (int)max_value[i] / step;
+            vec->max_value[i] = (int)max_value[i] / step;
 //            vec->min_value[i] = floor(min_value[i] / step);
 //            vec->max_value[i] = floor(max_value[i] / step);
             break;
           case ROUND :
             vec->min_value[i] = ((int)min_value[i] + step / 2) / step;
-	    vec->max_value[i] = ((int)max_value[i] + step / 2) / step;
+            vec->max_value[i] = ((int)max_value[i] + step / 2) / step;
 //            vec->min_value[i] = ::round(min_value[i] / step);
 //            vec->max_value[i] = ::round(max_value[i] / step);
             break;
@@ -1776,19 +1776,19 @@ Vectors* Vectors::round(Format_error &error , int variable , int mode) const
  *
  *  Selection de vecteurs sur les valeurs prises par une variable.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet Format_error, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les vecteurs selectionnes.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(Format_error &error , int variable , int imin_value ,
-                               int imax_value , bool keep) const
+Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable ,
+                               int imin_value , int imax_value , bool keep) const
 
 {
   bool status = true;
   register int i;
-  int inb_vector , *index;
+  int inb_vector , *index , *iidentifier;
   Vectors *vec;
 
 
@@ -1817,6 +1817,7 @@ Vectors* Vectors::value_select(Format_error &error , int variable , int imin_val
 
     // selection des vecteurs
 
+    iidentifier = new int[nb_vector];
     index = new int[nb_vector];
     inb_vector = 0;
 
@@ -1824,11 +1825,13 @@ Vectors* Vectors::value_select(Format_error &error , int variable , int imin_val
       for (i = 0;i < nb_vector;i++) {
         if ((int_vector[i][variable] >= imin_value) && (int_vector[i][variable] <= imax_value)) {
           if (keep) {
+            iidentifier[inb_vector] = identifier[i];
             index[inb_vector++] = i;
           }
         }
 
         else if (!keep) {
+          iidentifier[inb_vector] = identifier[i];
           index[inb_vector++] = i;
         }
       }
@@ -1838,11 +1841,13 @@ Vectors* Vectors::value_select(Format_error &error , int variable , int imin_val
       for (i = 0;i < nb_vector;i++) {
         if ((real_vector[i][variable] >= imin_value) && (real_vector[i][variable] <= imax_value)) {
           if (keep) {
+            iidentifier[inb_vector] = identifier[i];
             index[inb_vector++] = i;
           }
         }
 
         else if (!keep) {
+          iidentifier[inb_vector] = identifier[i];
           index[inb_vector++] = i;
         }
       }
@@ -1856,9 +1861,18 @@ Vectors* Vectors::value_select(Format_error &error , int variable , int imin_val
     // copie des vecteurs
 
     if (status) {
+      if (inb_vector <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+        for (i = 0;i < inb_vector;i++) {
+          os << iidentifier[i] << ", ";
+        }
+        os << endl;
+      }
+
       vec = new Vectors(*this , inb_vector , index);
     }
 
+    delete [] iidentifier;
     delete [] index;
   }
 
@@ -1870,19 +1884,19 @@ Vectors* Vectors::value_select(Format_error &error , int variable , int imin_val
  *
  *  Selection de vecteurs sur les valeurs prises par une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet Format_error, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les vecteurs selectionnes.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(Format_error &error , int variable , double imin_value ,
-                               double imax_value , bool keep) const
+Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable ,
+                               double imin_value , double imax_value , bool keep) const
 
 {
   bool status = true;
   register int i;
-  int inb_vector , *index;
+  int inb_vector , *index , *iidentifier;
   Vectors *vec;
 
 
@@ -1916,17 +1930,20 @@ Vectors* Vectors::value_select(Format_error &error , int variable , double imin_
 
     // selection des vecteurs
 
+    iidentifier = new int[nb_vector];
     index = new int[nb_vector];
     inb_vector = 0;
 
     for (i = 0;i < nb_vector;i++) {
       if ((real_vector[i][variable] >= imin_value) && (real_vector[i][variable] <= imax_value)) {
         if (keep) {
+          iidentifier[inb_vector] = identifier[i];
           index[inb_vector++] = i;
         }
       }
 
       else if (!keep) {
+        iidentifier[inb_vector] = identifier[i];
         index[inb_vector++] = i;
       }
     }
@@ -1939,9 +1956,18 @@ Vectors* Vectors::value_select(Format_error &error , int variable , double imin_
     // copie des vecteurs
 
     if (status) {
+      if (inb_vector <= DISPLAY_NB_INDIVIDUAL) {
+        os << "\n" << STAT_label[inb_vector == 1 ? STATL_VECTOR : STATL_VECTORS] << ": ";
+        for (i = 0;i < inb_vector;i++) {
+          os << iidentifier[i] << ", ";
+        }
+        os << endl;
+      }
+
       vec = new Vectors(*this , inb_vector , index);
     }
 
+    delete [] iidentifier;
     delete [] index;
   }
 
