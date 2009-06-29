@@ -226,6 +226,8 @@ const double ASCII_ROUNDNESS = 1.e-5;  // arrondi sur la fonction de repartition
 const double SPREADSHEET_ROUNDNESS = 1.e-7;  // arrondi sur la fonction de repartition
                                              // pour borner une loi (sortie tableur)
 
+const int DISPLAY_NB_INDIVIDUAL = 50;  // nombre maximum d'individus selectionnes affiches
+
 const int PLOT_NB_DISTRIBUTION = 10;   // nombre maximum de lois affichees (sortie graphique)
 const int PLOT_NB_HISTOGRAM = 10;      // nombre maximum d'histogrammes affiches (sortie graphique)
 const double PLOT_ROUNDNESS = 1.e-5;   // arrondi sur la fonction de repartition
