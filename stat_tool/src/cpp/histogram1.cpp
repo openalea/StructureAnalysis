@@ -1539,13 +1539,13 @@ void Histogram::plotable_survivor_write(SinglePlot &plot) const
 MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
 
 {
-  MultiPlotSet *plotset;
+  MultiPlotSet *plot_set;
 
 
   error.init();
 
   if (variance == 0.) {
-    plotset = 0;
+    plot_set = 0;
     error.update(STAT_error[STATR_PLOT_NULL_VARIANCE]);
   }
 
@@ -1553,87 +1553,91 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
     register int i , j;
     int xmax;
     Curves *survival_rate;
-    std::ostringstream legend;
+    ostringstream legend;
 
 
-    plotset = new MultiPlotSet(3);
-    MultiPlotSet &set = *plotset;
+    plot_set = new MultiPlotSet(3);
+    MultiPlotSet &plot = *plot_set;
 
-    set.title = "Survival analysis";
-    set.border = "15 lw 0";
+    plot.title = "Survival analysis";
+    plot.border = "15 lw 0";
 
     // 1ere vue : histogramme
 
     if (nb_value - 1 < TIC_THRESHOLD) {
-      set[0].xtics = 1;
+      plot[0].xtics = 1;
     }
 
-    set[0].xrange = Range(0 , nb_value - 1);
-    set[0].yrange = Range(0 , ceil(max * YSCALE));
+    plot[0].xrange = Range(0 , nb_value - 1);
+    plot[0].yrange = Range(0 , ceil(max * YSCALE));
 
-    set[0].resize(1);
+    plot[0].resize(1);
 
-    set[0][0].legend = STAT_label[STATL_HISTOGRAM];
-    set[0][0].style = "impulses";
+    plot[0][0].legend = STAT_label[STATL_HISTOGRAM];
 
-    plotable_frequency_write(set[0][0]);
+    plot[0][0].style = "impulses";
+
+    plotable_frequency_write(plot[0][0]);
 
     // 2eme vue : loi et fonction de survie
 
     if (nb_value - 1 < TIC_THRESHOLD) {
-      set[1].xtics = 1;
+      plot[1].xtics = 1;
     }
 
     xmax = nb_value - 1;
     if ((double)frequency[xmax] / (double)nb_element > PLOT_MASS_THRESHOLD) {
       xmax++;
     }
-    set[1].xrange = Range(0 , xmax);
+    plot[1].xrange = Range(0 , xmax);
 
-    set[1].yrange = Range(0. , 1.);
+    plot[1].yrange = Range(0. , 1.);
 
-    set[1].resize(2);
+    plot[1].resize(2);
 
-    set[1][0].legend = STAT_label[STATL_DISTRIBUTION];
-    set[1][0].style = "linespoints";
+    plot[1][0].legend = STAT_label[STATL_DISTRIBUTION];
 
-    plotable_mass_write(set[1][0]);
+    plot[1][0].style = "linespoints";
+
+    plotable_mass_write(plot[1][0]);
 
     legend.str("");
     legend << STAT_label[STATL_SURVIVOR] << " " << STAT_label[STATL_FUNCTION];
-    set[1][1].legend = legend.str();
+    plot[1][1].legend = legend.str();
 
-    set[1][1].style = "linespoints";
+    plot[1][1].style = "linespoints";
 
-    plotable_survivor_write(set[1][1]);
+    plotable_survivor_write(plot[1][1]);
 
-    // 3eme vue : loi et fonction de survie
+    // 3eme vue : taux de survie
 
     survival_rate = new Curves(*this);
 
     if (survival_rate->length - 1 < TIC_THRESHOLD) {
-      set[2].xtics = 1;
+      plot[2].xtics = 1;
     }
 
-    set[2].resize(2);
+    plot[2].resize(2);
 
-    set[2].xrange = Range(survival_rate->offset , survival_rate->length - 1);
-    set[2].yrange = Range(0. , 1.);
+    plot[2].xrange = Range(survival_rate->offset , survival_rate->length - 1);
+    plot[2].yrange = Range(0. , 1.);
 
-    set[2][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
-    set[2][0].style = "linespoints";
+    plot[2][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
 
-    survival_rate->plotable_print(0 , set[2][0]);
+    plot[2][0].style = "linespoints";
 
-    set[2][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
-    set[2][1].style = "linespoints";
+    survival_rate->plotable_print(0 , plot[2][0]);
 
-    survival_rate->plotable_print(1 , set[2][1]);
+    plot[2][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
+
+    plot[2][1].style = "linespoints";
+
+    survival_rate->plotable_print(1 , plot[2][1]);
 
     delete survival_rate;
   }
 
-  return plotset;
+  return plot_set;
 }
 
 
