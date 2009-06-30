@@ -1067,21 +1067,27 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
   register int i;
   int xmax;
   double ymax;
-  std::ostringstream legend;
+  ostringstream title , legend;
 
 
   // nombre de fenetres : nb_distribution + 2 si ajustement
 
-  MultiPlotSet *plotset = new MultiPlotSet(convol_histo ? nb_distribution + 2 : 1);
-  MultiPlotSet &set = *plotset;
+  MultiPlotSet *plot_set = new MultiPlotSet(convol_histo ? nb_distribution + 2 : 1);
+  MultiPlotSet &plot = *plot_set;
 
-  set.title = "Convolution fit";
-  set.border = "15 lw 0";
+  title.str("");
+  title << STAT_label[STATL_CONVOLUTION];
+  if (convol_histo) {
+    title << " " << STAT_label[STATL_FIT];
+  }
+  plot.title = title.str();
+
+  plot.border = "15 lw 0";
 
   // 1ere vue : produit de convolution
 
   if (nb_value - 1 < TIC_THRESHOLD) {
-    set[0].xtics = 1;
+    plot[0].xtics = 1;
   }
 
   xmax = nb_value - 1;
@@ -1089,7 +1095,7 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
       (mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
-  set[0].xrange = Range(0 , xmax);
+  plot[0].xrange = Range(0 , xmax);
 
   ymax = distribution[0]->max;
   for (i = 1;i < nb_distribution;i++) {
@@ -1097,25 +1103,27 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
       ymax = distribution[i]->max;
     }
   }
-  set[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
+  plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
 
   // definition du nombre de SinglePlot 
 
-  set[0].resize(nb_distribution + 1);
+  plot[0].resize(nb_distribution + 1);
 
-  set[0][0].legend = STAT_label[STATL_CONVOLUTION];
-  set[0][0].style = "linespoints";
+  plot[0][0].legend = STAT_label[STATL_CONVOLUTION];
 
-  plotable_mass_write(set[0][0]);
+  plot[0][0].style = "linespoints";
+
+  plotable_mass_write(plot[0][0]);
 
   for (i = 0;i < nb_distribution;i++) {
     legend.str("");
     legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
-    set[0][i + 1].legend = legend.str();
+    distribution[i]->plot_title_print(legend);
+    plot[0][i + 1].legend = legend.str();
 
-    set[0][i + 1].style = "linespoints";
+    plot[0][i + 1].style = "linespoints";
 
-    distribution[i]->plotable_mass_write(set[0][i + 1]);
+    distribution[i]->plotable_mass_write(plot[0][i + 1]);
   }
 
   if (convol_histo) {
@@ -1123,31 +1131,33 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     // 2eme vue : produit de convolution ajuste
 
     if (nb_value - 1 < TIC_THRESHOLD) {
-      set[1].xtics = 1;
+      plot[1].xtics = 1;
     }
 
-    set[1].xrange = Range(0 , xmax);
-    set[1].yrange = Range(0 , ceil(MAX(convol_histo->max ,
-				   max * convol_histo->nb_element) * YSCALE));
+    plot[1].xrange = Range(0 , xmax);
+    plot[1].yrange = Range(0 , ceil(MAX(convol_histo->max ,
+                                    max * convol_histo->nb_element) * YSCALE));
 
-    set[1].resize(2);
+    plot[1].resize(2);
 
-    set[1][0].legend = STAT_label[STATL_HISTOGRAM];
-    set[1][0].style = "impulses";
+    plot[1][0].legend = STAT_label[STATL_HISTOGRAM];
 
-    convol_histo->plotable_frequency_write(set[1][0]);
+    plot[1][0].style = "impulses";
 
-    set[1][1].legend = STAT_label[STATL_CONVOLUTION];
-    set[1][1].style = "linespoints";
+    convol_histo->plotable_frequency_write(plot[1][0]);
 
-    plotable_mass_write(set[1][1] , convol_histo->nb_element);
+    plot[1][1].legend = STAT_label[STATL_CONVOLUTION];
+
+    plot[1][1].style = "linespoints";
+
+    plotable_mass_write(plot[1][1] , convol_histo->nb_element);
 
     for (i = 0;i < nb_distribution;i++) {
 
       // vues suivantes : distributions ajustees
 
       if (distribution[i]->nb_value - 1 < TIC_THRESHOLD) {
-        set[i + 2].xtics = 1;
+        plot[i + 2].xtics = 1;
       }
 
       xmax = distribution[i]->nb_value - 1;
@@ -1155,30 +1165,33 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
           (distribution[i]->mass[xmax] > PLOT_MASS_THRESHOLD)) {
         xmax++;
       }
-      set[i + 2].xrange = Range(0 , xmax);
+      plot[i + 2].xrange = Range(0 , xmax);
 
-      set[i + 2].yrange = Range(0 , ceil(MAX(convol_histo->histogram[i]->max ,
-                                         distribution[i]->max * convol_histo->histogram[i]->nb_element)
-                                         * YSCALE));
+      plot[i + 2].yrange = Range(0 , ceil(MAX(convol_histo->histogram[i]->max ,
+                                          distribution[i]->max * convol_histo->histogram[i]->nb_element)
+                                          * YSCALE));
 
-      set[i + 2].resize(2);
+      plot[i + 2].resize(2);
 
       legend.str("");
       legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
-      set[i + 2][0].legend = legend.str();
-      set[i + 2][0].style = "impulses";
+      plot[i + 2][0].legend = legend.str();
+
+      plot[i + 2][0].style = "impulses";
 
       legend.str("");
       legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
-      set[i + 2][1].legend = legend.str();
-      set[i + 2][1].style = "linespoints";
+      distribution[i]->plot_title_print(legend);
+      plot[i + 2][1].legend = legend.str();
 
-      convol_histo->histogram[i]->plotable_frequency_write(set[i + 2][0]);
-      distribution[i]->plotable_mass_write(set[i + 2][1] , convol_histo->histogram[i]->nb_element);
+      plot[i + 2][1].style = "linespoints";
+
+      convol_histo->histogram[i]->plotable_frequency_write(plot[i + 2][0]);
+      distribution[i]->plotable_mass_write(plot[i + 2][1] , convol_histo->histogram[i]->nb_element);
     }
   }
 
-  return plotset;
+  return plot_set;
 }
 
 
@@ -1653,17 +1666,17 @@ bool Convolution_data::plot_write(Format_error &error , const char *prefix ,
 MultiPlotSet* Convolution_data::get_plotable() const
 
 {
-  MultiPlotSet *set;
+  MultiPlotSet *plot_set;
 
 
   if (convolution) {
-    set = convolution->get_plotable(this);
+    plot_set = convolution->get_plotable(this);
   }
   else {
-    set = 0;
+    plot_set = 0;
   }
 
-  return set;
+  return plot_set;
 }
 
 
