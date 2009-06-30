@@ -61,7 +61,7 @@ public:
      const Distribution** d = hists.get();
 
 
-     MultiPlotSet* ret = p.get_plotable_dists(error, nb_hist, d);
+     MultiPlotSet* ret = p.get_plotable_distributions(error, nb_hist, d);
      if(!ret)
        stat_tool::wrap_util::throw_error(error);
 
@@ -340,7 +340,7 @@ public:
 
     const Distribution** d = dists.get();
 
-    MultiPlotSet* ret = p.get_plotable_dists(error, nb_dist, d);
+    MultiPlotSet* ret = p.get_plotable_distributions(error, nb_dist, d);
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
 
