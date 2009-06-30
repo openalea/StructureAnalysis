@@ -1081,10 +1081,8 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
     int max_nb_value , max_frequency , max_range , reference_matching ,
         reference_concentration , *poffset , *pnb_value;
     double max_mass , shift , **cumul , **concentration;
-    const Histogram *phisto[2];
-    const Histogram **merged_histo;
+    const Histogram **histo , *phisto[2] , **merged_histo;
     ostringstream *data_file_name;
-    const Histogram **histo;
 
 
     nb_histo++;
@@ -1339,18 +1337,18 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
           }
 
           out_file << "plot [0:" << max_nb_value - 1 << "] [0:1] ";
-          k = 0;
-          for (j = 0;j < nb_histo;j++) {
-            if (((histo[j]->variance == D_DEFAULT) && (histo[j]->nb_value > histo[j]->offset + 1)) ||
-                (histo[j]->variance > 0.)) {
-              if (k > 0) {
+          j = 0;
+          for (k = 0;k < nb_histo;k++) {
+            if (((histo[k]->variance == D_DEFAULT) && (histo[k]->nb_value > histo[k]->offset + 1)) ||
+                (histo[k]->variance > 0.)) {
+              if (j > 0) {
                 out_file << ",\\\n";
               }
-              k++;
-              out_file << "\"" << label((data_file_name[j + 1].str()).c_str()) << "\" using 1:5 title \""
+              j++;
+              out_file << "\"" << label((data_file_name[k + 1].str()).c_str()) << "\" using 1:5 title \""
                        << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM];
               if (nb_histo > 1) {
-                out_file << " " << j + 1;
+                out_file << " " << k + 1;
               }
               out_file << " " << STAT_label[STATL_FUNCTION] << "\" with linespoints";
             }
@@ -1381,18 +1379,18 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
             out_file << "set grid\n" << "set xtics 0,0.1\n" << "set ytics 0,0.1" << endl;
 
             out_file << "plot [0:1] [0:1] ";
-            k = 0;
-            for (j = 0;j < nb_histo;j++) {
-              if (((histo[j]->variance == D_DEFAULT) && (histo[j]->nb_value > histo[j]->offset + 1)) ||
-                  (histo[j]->variance > 0.)) {
-                if (k > 0) {
+            j = 0;
+            for (k = 0;k < nb_histo;k++) {
+              if (((histo[k]->variance == D_DEFAULT) && (histo[k]->nb_value > histo[k]->offset + 1)) ||
+                  (histo[k]->variance > 0.)) {
+                if (j > 0) {
                   out_file << ",\\\n";
                 }
-                k++;
+                j++;
                 out_file << "\"" << label((data_file_name[nb_histo + 1].str()).c_str()) << "\" using "
-                         << reference_matching + 1 << ":" << j + 1 << " title \""
+                         << reference_matching + 1 << ":" << k + 1 << " title \""
                          << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-                         << j + 1 << " " << STAT_label[STATL_FUNCTION] << "\" with linespoints";
+                         << k + 1 << " " << STAT_label[STATL_FUNCTION] << "\" with linespoints";
               }
             }
             out_file << endl;
@@ -1417,7 +1415,8 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
 
           out_file << "plot [0:1] [0:1] ";
           for (j = 0;j < nb_histo;j++) {
-            if ((histo[j]->variance != D_DEFAULT) && (histo[j]->variance > 0.)) {
+            if (((histo[j]->variance == D_DEFAULT) && (histo[j]->nb_value > histo[j]->offset + 1)) ||
+                (histo[j]->variance > 0.)) {
               out_file << "\"" << label((data_file_name[j + 1].str()).c_str()) << "\" using 5:6 title \""
                        << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_CURVE];
               if (nb_histo > 1) {
@@ -1456,6 +1455,353 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'une famille d'histogrammes :
+ *  - histogrammes seuls et histogrammes etages,
+ *  - lois et fonctions de repartition deduites des histogrammes,
+ *  - mise en correspondance des fonctions de repartition,
+ *  - courbes de concentration.
+ *
+ *  arguments : reference sur un objet Format_error, nombre d'histogrammes,
+ *              pointeurs sur les histogrammes, titre des figures.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_histo ,
+                                                 const Histogram **ihisto) const
+
+{
+  MultiPlotSet *plot_set;
+
+
+  error.init();
+
+  if (nb_histo > PLOT_NB_HISTOGRAM) {
+    plot_set = 0;
+    error.update(STAT_error[STATR_PLOT_NB_HISTOGRAM]);
+  }
+
+  else {
+    register int i , j , k;
+    int max_nb_value , max_frequency , cumul_concentration_nb_histo , max_range ,
+        reference_matching , nb_plot_set;
+    double max_mass , shift , **cumul;
+    const Histogram **histo , *phisto[2] , **merged_histo;
+    ostringstream legend , title;
+
+
+    nb_histo++;
+    histo = new const Histogram*[nb_histo];
+
+    histo[0] = this;
+    for (i = 1;i < nb_histo;i++) {
+      histo[i] = ihisto[i - 1];
+    }
+
+    cumul = new double*[nb_histo];
+
+    max_nb_value = 0;
+    max_frequency = 0;
+    max_mass = 0.;
+    cumul_concentration_nb_histo = 0;
+    max_range = 0;
+
+    for (i = 0;i < nb_histo;i++) {
+
+      // calcul des fonctions de repartition
+
+      cumul[i] = histo[i]->cumul_computation();
+
+      // calcul du nombre de valeurs maximum, de l'etendue maximum,
+      // de la frequence maximum et de la probabilite maximum
+
+      if (histo[i]->nb_value > max_nb_value) {
+        max_nb_value = histo[i]->nb_value;
+      }
+      if (histo[i]->max > max_frequency) {
+        max_frequency = histo[i]->max;
+      }
+      if ((double)histo[i]->max / (double)histo[i]->nb_element > max_mass) {
+        max_mass = (double)histo[i]->max / (double)histo[i]->nb_element;
+      }
+
+      if (((histo[i]->variance == D_DEFAULT) && (histo[i]->nb_value > histo[i]->offset + 1)) ||
+          (histo[i]->variance > 0.)) {
+        cumul_concentration_nb_histo++;
+        if (histo[i]->nb_value - histo[i]->offset > max_range) {
+          max_range = histo[i]->nb_value - histo[i]->offset;
+          reference_matching = i;
+        }
+      }
+    }
+
+    nb_plot_set = 3;
+    if (nb_histo == 1) {
+      nb_plot_set -= 2;
+    }
+    if (cumul_concentration_nb_histo > 0) {
+      nb_plot_set += 3;
+      if (nb_histo == 1) {
+        nb_plot_set -= 1;
+      }
+    }
+
+    // nombre de fenetres
+
+    plot_set = new MultiPlotSet(nb_plot_set);
+    MultiPlotSet &plot = *plot_set;
+
+    title.str("");
+    title << STAT_label[STATL_FREQUENCY];
+    if (nb_histo == 1) {
+      title << " " << STAT_label[STATL_DISTRIBUTION];
+    }
+    else {
+      title << " " << STAT_label[STATL_DISTRIBUTIONS];
+    }
+    plot.title = title.str();
+
+    plot.border = "15 lw 0";
+
+    // 1ere vue : histogrammes decales
+
+    if (MAX(max_nb_value , 2) < TIC_THRESHOLD) {
+      plot[0].xtics = 1;
+    }
+    if ((int)(max_frequency * YSCALE) + 1 < TIC_THRESHOLD) {
+      plot[0].ytics = 1;
+    }
+
+    plot[0].xrange = Range(0 , MAX(max_nb_value , 2));
+    plot[0].yrange = Range(0 , ceil(max_frequency * YSCALE));
+    plot[0].resize(nb_histo);
+
+    shift = 0.;
+
+    for (i = 0;i < nb_histo;i++) {
+      legend.str("");
+      legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      plot[0][i].legend = legend.str();
+
+      plot[0][i].style = "impulses";
+
+      for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
+        plot[0][i].add_point(j + shift , histo[i]->frequency[j]);
+      }
+
+      if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+        shift += PLOT_SHIFT;
+      }
+      else {
+        shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+      }
+    }
+
+    if (nb_histo > 1) {
+
+      // 2eme vue : histogrammes etages
+
+      merged_histo = new const Histogram*[nb_histo];
+      merged_histo[nb_histo - 1] = new Histogram(*histo[nb_histo - 1]);
+
+      for (i = nb_histo - 2;i >= 0;i--) {
+        phisto[0] = merged_histo[i + 1];
+        phisto[1] = histo[i];
+        merged_histo[i] = new Histogram(2 , phisto);
+      }
+
+      if (MAX(merged_histo[0]->nb_value , 2) - 1 < TIC_THRESHOLD) {
+        plot[1].xtics = 1;
+      }
+      if ((int)(merged_histo[0]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        plot[1].ytics = 1;
+      }
+
+      plot[1].xrange = Range(0 , MAX(merged_histo[0]->nb_value , 2) - 1);
+      plot[1].yrange = Range(0 , ceil(merged_histo[0]->max * YSCALE));
+      plot[1].resize(nb_histo);
+
+      for (i = 0;i < nb_histo;i++) {
+        legend.str("");
+        legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+        plot[1][i].legend = legend.str();
+
+        plot[1][i].style = "impulses";
+
+        merged_histo[i]->plotable_frequency_write(plot[1][i]);
+      }
+
+      for (i = 0;i < nb_histo;i++) {
+        delete merged_histo[i];
+      }
+      delete [] merged_histo;
+
+      // 3eme vue : lois deduite des histogrammes
+
+      if (MAX(max_nb_value , 2) - 1 < TIC_THRESHOLD) {
+        plot[2].xtics = 1;
+      }
+
+      plot[2].xrange = Range(0 , MAX(max_nb_value , 2) - 1);
+      plot[2].yrange = Range(0 , MIN(max_mass * YSCALE , 1.));
+      plot[2].resize(nb_histo);
+
+      for (i = 0;i < nb_histo;i++) {
+        legend.str("");
+        legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
+        plot[2][i].legend = legend.str();
+
+        plot[2][i].style = "linespoints";
+
+        histo[i]->plotable_mass_write(plot[2][i]);
+      }
+
+      i = 3;
+    }
+
+    else {
+      i = 1;
+    }
+
+    if (cumul_concentration_nb_histo > 0) {
+
+      // 4eme vue : fonctions de repartition deduites des histogrammes
+
+      if (max_nb_value - 1 < TIC_THRESHOLD) {
+        plot[i].xtics = 1;
+      }
+
+      plot[i].xrange = Range(0 , max_nb_value - 1);
+      plot[i].yrange = Range(0 , 1);
+      plot[i].resize(cumul_concentration_nb_histo);
+
+      j = 0;
+      for (k = 0;k < nb_histo;k++) {
+        if (((histo[k]->variance == D_DEFAULT) && (histo[k]->nb_value > histo[k]->offset + 1)) ||
+            (histo[k]->variance > 0.)) {
+          legend.str("");
+          legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM];
+          if (nb_histo > 1) {
+            legend << " " << k + 1;
+          }
+          legend << " " << STAT_label[STATL_FUNCTION];
+          plot[i][j].legend = legend.str();
+
+          plot[i][j].style = "linespoints";
+
+          histo[k]->plotable_cumul_write(plot[i][j] , cumul[k]);
+          j++;
+        }
+      }
+
+      i++;
+
+      // 5eme vue : mise en correspondance des fonctions de repartition en prenant
+      // comme reference l'histogramme dont l'etendue est la plus grande
+
+      if (nb_histo > 1) {
+        title.str("");
+        title << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+              << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
+        plot[i].title = title.str();
+
+        plot[i].grid = true;
+
+        plot[i].xtics = 0.1;
+        plot[i].ytics = 0.1;
+
+        plot[i].xrange = Range(0. , 1.);
+        plot[i].yrange = Range(0. , 1.);
+
+        // definition du nombre de SinglePlot 
+
+        plot[i].resize(cumul_concentration_nb_histo);
+
+        j = 0;
+        for (k = 0;k < nb_histo;k++) {
+          if (((histo[k]->variance == D_DEFAULT) && (histo[k]->nb_value > histo[k]->offset + 1)) ||
+              (histo[k]->variance > 0.)) {
+            legend.str("");
+            legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+                   << " " << k + 1 << " " << STAT_label[STATL_FUNCTION];
+            plot[i][j].legend = legend.str();
+
+            plot[i][j].style = "linespoints";
+
+            histo[k]->plotable_cumul_matching_write(plot[i][j] , histo[reference_matching]->offset ,
+                                                    histo[reference_matching]->nb_value , cumul[k]);
+            j++;
+          }
+        }
+
+        i++;
+      }
+
+      // 6eme vue : courbes de concentration
+
+      plot[i].xtics = 0.1;
+      plot[i].ytics = 0.1;
+      plot[i].grid = true;
+
+      plot[i].xrange = Range(0. , 1.);
+      plot[i].yrange = Range(0. , 1.);
+
+      // definition du nombre de SinglePlot 
+
+      plot[i].resize(cumul_concentration_nb_histo + 1);
+
+      j = 0;
+      for (k = 0;k < nb_histo;k++) {
+        if (((histo[k]->variance == D_DEFAULT) && (histo[k]->nb_value > histo[k]->offset + 1)) ||
+            (histo[k]->variance > 0.)) {
+          legend.str("");
+          legend << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_CURVE];
+          if (nb_histo > 1) {
+            legend << " " << k + 1;
+          }
+          plot[i][j].legend = legend.str();
+
+          plot[i][j].style = "linespoints";
+
+          histo[k]->plotable_concentration_write(plot[i][j] , cumul[k]);
+          j++;
+        }
+      }
+
+      plot[i][j].style = "lines";
+
+      plot[i][j].add_point(0. , 0.);
+      plot[i][j].add_point(1. , 1.);
+    }
+
+    for (i = 0;i < nb_histo;i++) {
+      delete [] cumul[i];
+    }
+    delete [] cumul;
+
+    delete [] histo;
+  }
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un histogramme.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Histogram::get_plotable() const
+
+{
+  Format_error error;
+
+  return get_plotable_histograms(error , 0 , 0);
 }
 
 
@@ -1946,7 +2292,6 @@ bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
 }
 
 
-
 /*--------------------------------------------------------------*
  *
  *  Sortie graphique d'un objet Distribution_data.
@@ -1956,225 +2301,19 @@ bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
 MultiPlotSet* Distribution_data::get_plotable() const
 
 {
-  MultiPlotSet *set;
+  MultiPlotSet *plot_set;
+
 
   if (distribution) {
-    set = distribution->get_plotable(this);
+    plot_set = distribution->get_plotable(this);
   }
   else {
     Format_error error;
-    set = Histogram::get_plotable_hists(error , 0 , 0);
+    plot_set = Histogram::get_plotable_histograms(error , 0 , 0);
 
   }
 
-  return set;
-}
-
-/*--------------------------------------------------------------*
- *
- *  Sortie Matplotlib d'une famille d'histogrammes :
- *  - histogrammes seuls et histogrammes etages,
- *  - lois et fonctions de repartition deduites des histogrammes,
- *  - mise en correspondance des fonctions de repartition,
- *  - courbes de concentration.
- *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
- *              nombre d'histogrammes, pointeurs sur les histogrammes, titre des figures.
- *
- *--------------------------------------------------------------*/
-
-MultiPlotSet* Histogram::get_plotable_hists(Format_error &error, int nb_hist,
-											const Histogram **ihist) const
-{
-  MultiPlotSet *plotset;
-
-  error.init();
-
-  if (nb_hist > PLOT_NB_HISTOGRAM) {
-    plotset = 0;
-    error.update(STAT_error[STATR_PLOT_NB_HISTOGRAM]);
-  }
-  else{
-    bool cumul_concentration_flag;
-	register int i , j , k;
-    const Histogram **hist;
-    std::ostringstream legend , title;
-    int max_nb_value , max_frequency , max_range , reference_matching ,
-        reference_concentration , *poffset , *pnb_value, nb_plot_set;
-    double max_mass , shift , **cumul , **concentration;
-    double min_complement = 0;
-
-
-	nb_hist++;
-	hist = new const Histogram*[nb_hist];
-
-	hist[0] = this;
-	for (i = 1;i < nb_hist;i++) {
-	      hist[i] = ihist[i - 1];
-	}
-
-    cumul = new double*[nb_hist];
-    concentration = new double*[nb_hist];
-    for (i = 0;i < nb_hist;i++) {
-      cumul[i] = 0;
-      concentration[i] = 0;
-    }
-
-	max_nb_value = 0;
-	max_frequency = 0;
-	max_mass = 0.;
-	cumul_concentration_flag = false;
-	max_range = 0;
-	shift = 0.;
-
-    for (i = 0;i < nb_hist;i++) {
-
-      // calcul des fonctions de repartition et de concentration
-
-	  cumul[i] = hist[i]->cumul_computation();
-	  concentration[i] = hist[i]->concentration_function_computation();
-
-      // calcul du nombre de valeurs maximum, de l'etendue maximum,
-	  // de la frequence maximum et de la probabilite maximum
-
-	  if (hist[i]->nb_value > max_nb_value) {
-	    max_nb_value = hist[i]->nb_value;
-	  }
-	  if (hist[i]->max > max_frequency) {
-		max_frequency = hist[i]->max;
-	  }
-	  if ((double)hist[i]->max / (double)hist[i]->nb_element > max_mass) {
-	    max_mass = (double)hist[i]->max / (double)hist[i]->nb_element;
-	  }
-
-	  if (((hist[i]->variance == D_DEFAULT) && (hist[i]->nb_value > hist[i]->offset + 1)) ||
-		 (hist[i]->variance > 0.)) {
-		 cumul_concentration_flag = true;
-		 if (hist[i]->nb_value - hist[i]->offset > max_range) {
-		   max_range = hist[i]->nb_value - hist[i]->offset;
-		   reference_matching = i;
-		 }
-		 reference_concentration = i;
-	  }
-	}
-
-	nb_plot_set = 1;
-
-	if (nb_hist > 0) {
-	  nb_plot_set += 3;
-	}
-	if (nb_hist == 1) {
-	  nb_plot_set--;
-	}
-
-    plotset = new MultiPlotSet(nb_plot_set);
-    MultiPlotSet &set = *plotset;
-    set.title = "Distribution set";
-    set.border = "15 lw 0";
-
-	// 1ere vue : lois
-
-	if (MAX(max_nb_value , 2) - 1 < TIC_THRESHOLD) {
-	  set[0].xtics = 1;
-	}
-
-	set[0].xrange = Range(0 , MAX(max_nb_value , 2) - 1);
-	set[0].yrange = Range(0. , MIN(max_frequency * YSCALE , 1.));
-
-    // definition du nombre de SinglePlot
-
-	set[0].resize(nb_hist);
-
-	for (i = 0;i < nb_hist;i++) {
-	  legend.str("");
-	  legend << STAT_label[STATL_HISTOGRAM];
-	  if (nb_hist > 1) {
-	    legend << " " << i + 1;
-	  }
-	  hist[i]->plot_title_print(legend);
-	  set[0][i].legend = legend.str();
-
-	  set[0][i].style = "linespoints";
-
-	  hist[i]->plotable_mass_write(set[0][i]);
-	}
-	if (nb_hist > 0) {
-
-	  // 2eme vue : fonctions de repartition
-
-	  if (max_nb_value - 1 < TIC_THRESHOLD) {
-	    set[1].xtics = 1;
-	  }
-
-	  set[1].xrange = Range(0 , max_nb_value - 1);
-	  set[1].yrange = Range(0. , 1. - min_complement);
-
-	  // definition du nombre de SinglePlot
-
-	  set[1].resize(nb_hist);
-
-	  i = 0;
-	  for (j = 0;j < nb_hist;j++) {
-	    if (hist[j]->variance > 0.) {
-	      legend.str("");
-	      legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM];
-	      if (nb_hist > 1) {
-	        legend << " " << j + 1;
-	      }
-	      legend << " " << STAT_label[STATL_FUNCTION];
-	      set[1][i].legend = legend.str();
-          set[1][i].style = "linespoints";
-
-          hist[j]->plotable_cumul_write(set[1][i]);
-          i++;
-        }
-      }
-    }
-
-	if (nb_hist == 1) {
-	  i = 2;
-	}
-	else {
-	  i = 3;
-	}
-
-	set[i].xtics = 0.1;
-	set[i].ytics = 0.1;
-	set[i].grid = true;
-
-	set[i].xrange = Range(0. , 1. - min_complement);
-	set[i].yrange = Range(0. , 1. - min_complement);
-	// definition du nombre de SinglePlot
-
-	set[i].resize(nb_hist + 1);
-
-	j = 0;
-	for (k = 0;k < nb_hist;k++) {
-	  if (hist[k]->variance > 0.) {
-	    legend.str("");
-	    legend << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_CURVE];
-	    if (nb_hist > 1) {
-	      legend << " " << k + 1;
-	    }
-	    set[i][j].legend = legend.str();
-        set[i][j].style = "linespoints";
-
-        hist[k]->plotable_concentration_write(set[i][j]);
-        j++;
-      }
-    }
-
-    set[i][j].style = "lines";
-    set[i][j].add_point(0. , 0.);
-    set[i][j].add_point(1. - min_complement , 1. - min_complement);
-
-    delete [] hist;
-
-  }
-
-  // to be done
-  return plotset;
-
+  return plot_set;
 }
 
 
