@@ -974,19 +974,25 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
   register int i;
   int xmax;
   double scale = 1.;
-  std::ostringstream legend;
+  ostringstream title , legend;
 
 
-  MultiPlotSet *plotset = new MultiPlotSet(3);
-  MultiPlotSet &set = *plotset;
+  MultiPlotSet *plot_set = new MultiPlotSet(3);
+  MultiPlotSet &plot = *plot_set;
 
-  set.title = "Compound distribution fit";
-  set.border = "15 lw 0";
+  title.str("");
+  title << STAT_label[STATL_COMPOUND] << " " << STAT_label[STATL_DISTRIBUTION];
+  if (compound_histo) {
+    title << " " << STAT_label[STATL_FIT];
+  }
+  plot.title = title.str();
+
+  plot.border = "15 lw 0";
 
   // 1ere vue : loi composee
 
   if (nb_value - 1 < TIC_THRESHOLD) {
-    set[0].xtics = 1;
+    plot[0].xtics = 1;
   }
 
   xmax = nb_value - 1;
@@ -994,40 +1000,42 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
       (mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
-  set[0].xrange = Range(0 , xmax);
+  plot[0].xrange = Range(0 , xmax);
 
   i = 0;
 
   if (compound_histo) {
-    set[0].yrange = Range(0 , ceil(MAX(compound_histo->max ,
-                                       max * compound_histo->nb_element) * YSCALE));
+    plot[0].yrange = Range(0 , ceil(MAX(compound_histo->max ,
+                                        max * compound_histo->nb_element) * YSCALE));
 
-    set[0].resize(2);
-    set[0][i].legend = STAT_label[STATL_HISTOGRAM];
-    set[0][i].style = "impulses";
+    plot[0].resize(2);
+    plot[0][i].legend = STAT_label[STATL_HISTOGRAM];
 
-    compound_histo->plotable_frequency_write(set[0][i++]);
+    plot[0][i].style = "impulses";
+
+    compound_histo->plotable_frequency_write(plot[0][i++]);
 
     scale = compound_histo->nb_element;
   }
 
   else {
-    set[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
+    plot[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
 
-    set[0].resize(1);
+    plot[0].resize(1);
   }
 
   legend.str("");
   legend << STAT_label[STATL_COMPOUND] << " " << STAT_label[STATL_DISTRIBUTION];
-  set[0][i].legend = legend.str();
-  set[0][i].style = "linespoints";
+  plot[0][i].legend = legend.str();
 
-  plotable_mass_write(set[0][i] , scale);
+  plot[0][i].style = "linespoints";
+
+  plotable_mass_write(plot[0][i] , scale);
 
   // 2eme vue : loi de la somme
 
   if (sum_distribution->nb_value - 1 < TIC_THRESHOLD) {
-    set[1].xtics = 1;
+    plot[1].xtics = 1;
   }
 
   xmax = sum_distribution->nb_value - 1;
@@ -1035,42 +1043,45 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
       (sum_distribution->mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
-  set[1].xrange = Range(0 , xmax);
+  plot[1].xrange = Range(0 , xmax);
 
   i = 0;
 
   if (compound_histo) {
-    set[1].yrange = Range(0 , ceil(MAX(compound_histo->sum_histogram->max ,
-                                       sum_distribution->max * compound_histo->sum_histogram->nb_element) * YSCALE));
+    plot[1].yrange = Range(0 , ceil(MAX(compound_histo->sum_histogram->max ,
+                                        sum_distribution->max * compound_histo->sum_histogram->nb_element) * YSCALE));
 
-    set[1].resize(2);
+    plot[1].resize(2);
     legend.str("");
     legend << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM];
-    set[1][i].legend = legend.str();
-    set[1][i].style = "impulses";
+    plot[1][i].legend = legend.str();
 
-    compound_histo->plotable_frequency_write(set[1][i++]);
+    plot[1][i].style = "impulses";
+
+    compound_histo->sum_histogram->plotable_frequency_write(plot[1][i++]);
 
     scale = compound_histo->sum_histogram->nb_element;
   }
 
   else {
-    set[1].yrange = Range(0. , MIN(sum_distribution->max * YSCALE , 1.));
+    plot[1].yrange = Range(0. , MIN(sum_distribution->max * YSCALE , 1.));
 
-    set[1].resize(1);
+    plot[1].resize(1);
   }
 
   legend.str("");
   legend << STAT_label[STATL_SUM] << " " << STAT_label[STATL_DISTRIBUTION];
-  set[1][i].legend = legend.str();
-  set[1][i].style = "linespoints";
+  sum_distribution->plot_title_print(legend);
+  plot[1][i].legend = legend.str();
 
-  plotable_mass_write(set[1][i] , scale);
+  plot[1][i].style = "linespoints";
+
+  sum_distribution->plotable_mass_write(plot[1][i] , scale);
 
   // 3eme vue : loi elementaire
 
   if (distribution->nb_value - 1 < TIC_THRESHOLD) {
-    set[2].xtics = 1;
+    plot[2].xtics = 1;
   }
 
   xmax = distribution->nb_value - 1;
@@ -1078,41 +1089,44 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
       (distribution->mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
-  set[2].xrange = Range(0 , xmax);
+  plot[2].xrange = Range(0 , xmax);
 
   i = 0;
 
   if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
-    set[2].yrange = Range(0 , ceil(MAX(compound_histo->histogram->max ,
-                                       distribution->max * compound_histo->histogram->nb_element) * YSCALE));
+    plot[2].yrange = Range(0 , ceil(MAX(compound_histo->histogram->max ,
+                                        distribution->max * compound_histo->histogram->nb_element) * YSCALE));
 
-    set[2].resize(2);
+    plot[2].resize(2);
     legend.str("");
     legend << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM];
-    set[2][i].legend = legend.str();
-    set[2][i].style = "impulses";
+    plot[2][i].legend = legend.str();
 
-    compound_histo->plotable_frequency_write(set[2][i++]);
+    plot[2][i].style = "impulses";
+
+    compound_histo->histogram->plotable_frequency_write(plot[2][i++]);
 
     scale = compound_histo->histogram->nb_element;
   }
 
   else {
-    set[2].yrange = Range(0. , MIN(distribution->max * YSCALE , 1.));
+    plot[2].yrange = Range(0. , MIN(distribution->max * YSCALE , 1.));
 
-    set[2].resize(1);
+    plot[2].resize(1);
 
     scale = 1.;
   }
 
   legend.str("");
   legend << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_DISTRIBUTION];
-  set[2][i].legend = legend.str();
-  set[2][i].style = "linespoints";
+  distribution->plot_title_print(legend);
+  plot[2][i].legend = legend.str();
 
-  plotable_mass_write(set[2][i] , scale);
+  plot[2][i].style = "linespoints";
 
-  return plotset;
+  distribution->plotable_mass_write(plot[2][i] , scale);
+
+  return plot_set;
 }
 
 
@@ -1544,17 +1558,17 @@ bool Compound_data::plot_write(Format_error &error , const char *prefix ,
 MultiPlotSet* Compound_data::get_plotable() const
 
 {
-  MultiPlotSet *set;
+  MultiPlotSet *plot_set;
 
 
   if (compound) {
-    set = compound->get_plotable(this);
+    plot_set = compound->get_plotable(this);
   }
   else {
-    set = 0;
+    plot_set = 0;
   }
 
-  return set;
+  return plot_set;
 }
 
 
