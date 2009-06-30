@@ -25,6 +25,11 @@ section).
 All docstrings are currently compatible with the sphinx requirements (reST
  syntax).
 
+aml syntax
+----------
+Syntax shoudl stick to English or American over all the functions.
+
+
 Wrapper and validation 
 ----------------------
 

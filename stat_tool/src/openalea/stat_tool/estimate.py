@@ -211,8 +211,10 @@ class EstimateFunctions(object):
                           Estimator="Likelihood"):
         """estimate a compound"""
 
-
- 
+	#The second argument is either a string (e.g.,"Sum") or an unknown 
+	#distribution.
+	unknown_distribution = None
+	
         try:
             if (Type):
                 Type = compound_type[Type]
@@ -242,16 +244,21 @@ class EstimateFunctions(object):
                                  % (str(outside_type.keys())))
 
 
-        #print InitialDistribution
-        #print known_distribution
 
         if (InitialDistribution):
-            raise("to be checked carefully")
-            print InitialDistribution
-            return histo.compound_estimation1(
-                            known_distribution, unknown_distribution, Type,
-                            Estimator, NbIteration, Weight, Penalty, Outside)
+	    unknown_distribution = InitialDistribution
 
+	    print Estimator, NbIteration, Weight, Penalty, Outside
+            if Type=='s':
+                return histo.compound_estimation1(
+                    unknown_distribution, known_distribution, Type,
+                    Estimator, NbIteration, Weight, Penalty, Outside)
+	    elif Type=='e':
+                return histo.compound_estimation1(
+                           known_distribution, unknown_distribution, Type,
+                           Estimator, NbIteration, Weight, Penalty, Outside)  
+            else:
+	    	raise KeyError("should not enter here.")	
         else:
             return histo.compound_estimation2(
                             known_distribution, Type, MinInfBound,  Estimator,

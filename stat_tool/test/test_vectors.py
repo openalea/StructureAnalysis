@@ -236,9 +236,9 @@ class Test(interface):
     
         # nonparametric regression (loess smoother)
 
-        _regress11 = Regression(vec10, "NearestNeighbours",  5, 2, 0.3)
+        _regress11 = Regression(vec10, "NearestNeighbors",  5, 2, 0.3)
         _regress12 = Regression(vec9596, "Linear", 5, 6)
-        _regress13 = Regression(vec9596, "NearestNeighbours", 5, 6, 0.5)
+        _regress13 = Regression(vec9596, "NearestNeighbors", 5, 6, 0.5)
         
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 

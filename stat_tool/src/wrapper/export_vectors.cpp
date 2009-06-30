@@ -265,6 +265,7 @@ static Vectors* value_select(const Vectors& v, int variable,
 {
   Format_error error;
   Vectors * ret = NULL;
+  std::stringstream s;
 
   boost::python::extract<int> get_min(min);
   boost::python::extract<int> get_max(max);
@@ -274,17 +275,19 @@ static Vectors* value_select(const Vectors& v, int variable,
     {
       int mi = get_min();
       int ma = get_max();
-      ret = v.value_select(error, variable, mi, ma, keep);
+      ret = v.value_select(error, s, variable, mi, ma, keep);
     }
   else
     {
       double mi = extract<double>(min);
       double ma = extract<double>(max);
-      ret = v.value_select(error, variable, mi, ma, keep);
+      ret = v.value_select(error, s, variable, mi, ma, keep);
     }
 
   if(!ret)
-  stat_tool::wrap_util::throw_error(error);
+      stat_tool::wrap_util::throw_error(error);
+
+  cout << s.str() << endl;
 
   return ret;
 }
@@ -305,7 +308,7 @@ static Vectors* select_variable(const Vectors& v,
   ret = v.select_variable(error, nb_var, vars.get(), keep);
 
   if(!ret)
-  stat_tool::wrap_util::throw_error(error);
+    stat_tool::wrap_util::throw_error(error);
 
   return ret;
 }
@@ -343,7 +346,7 @@ static Vectors* shift(const Vectors& v, int var, double param)
   ret = v.shift(error, var, (int)param);
 
   if(!ret)
-  stat_tool::wrap_util::throw_error(error);
+    stat_tool::wrap_util::throw_error(error);
 
   return ret;
 }

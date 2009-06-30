@@ -88,20 +88,26 @@ class Test:
         assert convol1 and convol2
         assert convol1 == convol2
 
-    def test_compound(self):
+    def test_compound_two_distribution(self):
         
         cdist1 = Compound("data/compound1.cd")
         chisto1 = Simulate(cdist1, 200)
         cdist2 = Estimate(chisto1, "COMPOUND",
-                      ExtractDistribution(cdist1, "Elementary"),
-                      ExtractDistribution(cdist1, "Sum"),
-                      MinInfBound=0)
+                      ExtractDistribution(cdist1, "Elementary"), "Sum",
+                      ExtractDistribution(cdist1, "Sum"))
     
-        cdist3 = chisto1.estimate_compound(
-                                  ExtractDistribution(cdist1, "Elementary"), 
-                                  ExtractDistribution(cdist1, "Sum"))
-        
-        assert cdist2 == cdist3
+    	#If we call the method directly, we need to provide 
+        #the default values and perform a conversion.
+	    #Default is LIKELIHOOD -1 -1.0 SECOND_DIFFERENCE ZERO, which corresponds to 
+	    #0, -1,-1,1,0
+	    #In addition because the type is 's', the 2 distributions must be reversed.
+	        
+        cdist3 = chisto1.compound_estimation1(
+                    ExtractDistribution(cdist1, "Sum"),
+        	        ExtractDistribution(cdist1, "Elementary"),
+		            's', 0, -1, -1, 1,0)
+	
+        assert str(cdist2) == str(cdist3)
         
 
 

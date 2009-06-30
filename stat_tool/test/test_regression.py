@@ -116,7 +116,7 @@ class TestRegression(interface):
         
         v = self.v
 
-        r1 = Regression(v, "NearestNeighbours", 1, 2, 1, Weighting=False)
+        r1 = Regression(v, "NearestNeighbors", 1, 2, 1, Weighting=False)
         r = v.nearest_neighbours_regression(1, 2, 1., False) 
         assert r
         assert r1

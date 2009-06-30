@@ -99,10 +99,10 @@ class Test(interface):
         """todo : check if this test makes sense"""
         
         s = self.simulate()
-        e = s.estimate_compound(Binomial(2, 5, 0.5))
-        d = e.extract_data()
+        #e = Estimate(s, "Compound",  Binomial(2, 5, 0.5), "Sum")
+        d = s.extract_sum()
         assert d
-        _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), 
+        _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5),"Sum", 
                            NegativeBinomial(0, 2, 0.5))
 
     
@@ -119,9 +119,8 @@ def test1():
     _histo30 = ExtractHistogram(chisto1, "Sum")
 
     cdist2 = Estimate(chisto1, "COMPOUND",
-                      ExtractDistribution(cdist1, "Elementary"),
-                      ExtractDistribution(cdist1, "Sum"),
-                      MinInfBound=0)
+                      ExtractDistribution(cdist1, "Elementary"),"Sum",
+                      ExtractDistribution(cdist1, "Sum"))
     
     _histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
     _histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
