@@ -375,7 +375,7 @@ def Clustering(matrix, type, *args, **kargs):
         Algorithm = kargs.get("Algorithm", "Divisive")
         if(isinstance(args[0], int)):
             Prototypes = kargs.get("Prototypes", range(1,args[0]))
-            Prototypes = list(range(1, args[0]+1))
+#            Prototypes = list(range(1, args[0]+1))
             nb_cluster = args[0]
             
             #if Algorithm=='Agglomerative':

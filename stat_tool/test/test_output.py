@@ -61,7 +61,7 @@ class Test:
         
         convol1 = Convolution("data/convolution1.conv")
         if DISABLE_PLOT == False:
-            convol1.plot()
+            convol1.plot(convol1.extract_elementary(1), convol1.extract_elementary(2))
 
         histo_b2 = Histogram("data/nothofagus_antarctica_bud_2.his")
         histo_s2 = Histogram("data/nothofagus_antarctica_shoot_2.his")
@@ -72,7 +72,7 @@ class Test:
                             Estimator="PenalizedLikelihood", 
                             Weight=0.5)
         if DISABLE_PLOT == False:
-            convol31.plot()
+            convol31.plot(convol31.extract_elementary(1))
 
     def test_plot_convolution_data(self):
         

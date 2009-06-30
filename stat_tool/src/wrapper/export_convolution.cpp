@@ -192,7 +192,7 @@ void class_convolution_data()
     .def("get_histogram", &Convolution_data::get_histogram,	return_value_policy< manage_new_object >(), ARGS("index"),"todo")
     DEF_RETURN_VALUE("extract", ConvolutionDataWrap::extract, ARGS("index"), "Extract a particular element. First index is 1")
     DEF_RETURN_VALUE("extract_elementary", ConvolutionDataWrap::extract, ARGS("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", ConvolutionDataWrap::extract_convolution,"Return a _DistributionData")
+    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", ConvolutionDataWrap::extract_convolution,"Return a _DistributionData")
     ;
 
   /*

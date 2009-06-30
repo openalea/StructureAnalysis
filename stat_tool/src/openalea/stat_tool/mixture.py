@@ -93,7 +93,7 @@ interface.extend_class(_stat_tool._MvMixtureData, interface.StatInterface)
 
 def _MvMixture_old_plot(self, variable, Title=""):
     """Plot a given variable"""
-    if ((variable < 0) or (variable >= self.nb_variable())):
+    if ((variable < 0) or (variable >= self.nb_variable)):
         raise IndexError, "variable index out of range: " + str(variable)
     file_id = str(variable + 1)
     if (not self._is_parametric(variable)):
@@ -102,7 +102,7 @@ def _MvMixture_old_plot(self, variable, Title=""):
 
 def _MvMixture_old_print(self, variable, Title=""):
     """Print a given variable into .ps file"""
-    if ((variable < 0) or (variable >= self.nb_variable())):
+    if ((variable < 0) or (variable >= self.nb_variable)):
         raise IndexError, "variable index out of range: "+str(variable)
     file_id = str(variable+1)
     if (not self._is_parametric(variable)):
