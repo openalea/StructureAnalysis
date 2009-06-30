@@ -367,7 +367,7 @@ public:
 
     const Histogram** d = hists.get();
 
-    MultiPlotSet* ret = p.get_plotable_hists(error, nb_hist, d);
+    MultiPlotSet* ret = p.get_plotable_histograms(error, nb_hist, d);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
