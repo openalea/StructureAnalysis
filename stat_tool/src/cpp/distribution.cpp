@@ -1531,17 +1531,17 @@ bool Distribution::plot_write(Format_error &error , const char *prefix , int nb_
           }
 
           out_file << "plot [0:" << max_nb_value - 1 << "] [0:" << 1. - min_complement << "] ";
-          k = 0;
-          for (j = 0;j < nb_dist;j++) {
-            if (dist[j]->variance > 0.) {
-              if (k > 0) {
+          j = 0;
+          for (k = 0;k < nb_dist;k++) {
+            if (dist[k]->variance > 0.) {
+              if (j > 0) {
                 out_file << ",\\\n";
               }
-              k++;
-              out_file << "\"" << label((data_file_name[j].str()).c_str()) << "\" using 1:3 title \""
+              j++;
+              out_file << "\"" << label((data_file_name[k].str()).c_str()) << "\" using 1:3 title \""
                        << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION];
               if (nb_dist > 1) {
-                out_file << " " << j + 1;
+                out_file << " " << k + 1;
               }
               out_file << " " << STAT_label[STATL_FUNCTION] << "\" with linespoints";
             }
@@ -1572,17 +1572,17 @@ bool Distribution::plot_write(Format_error &error , const char *prefix , int nb_
             out_file << "set grid\n" << "set xtics 0,0.1\n" << "set ytics 0,0.1" << endl;
 
             out_file << "plot [0:" << 1. - min_complement << "] [0:" << 1. - min_complement << "] ";
-            k = 0;
-            for (j = 0;j < nb_dist;j++) {
-              if (dist[j]->variance > 0.) {
-                if (k > 0) {
+            j = 0;
+            for (k = 0;k < nb_dist;k++) {
+              if (dist[k]->variance > 0.) {
+                if (j > 0) {
                   out_file << ",\\\n";
                 }
-                k++;
+                j++;
                 out_file << "\"" << label((data_file_name[nb_dist].str()).c_str()) << "\" using "
-                         << reference_matching + 1 << ":" << j + 1 << " title \""
+                         << reference_matching + 1 << ":" << k + 1 << " title \""
                          << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
-                         << j + 1 << " " << STAT_label[STATL_FUNCTION] << "\" with linespoints";
+                         << k + 1 << " " << STAT_label[STATL_FUNCTION] << "\" with linespoints";
               }
             }
             out_file << endl;
@@ -1743,18 +1743,6 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
 
 
 /*--------------------------------------------------------------*
- *  Sortie graphique de la loi
- *--------------------------------------------------------------*/
-
-
-MultiPlotSet* Distribution::get_plotable() const
-{
-  Format_error error;
-  return get_plotable_dists(error , 0 , 0);
-}
-
-
-/*--------------------------------------------------------------*
  *
  *  Sortie graphique d'une famille de lois :
  *  - lois et fonctions de repartition,
@@ -1767,17 +1755,17 @@ MultiPlotSet* Distribution::get_plotable() const
  *--------------------------------------------------------------*/
 
 
-MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist ,
-                                               const Distribution **idist) const
+MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int nb_dist ,
+                                                       const Distribution **idist) const
 
 {
-  MultiPlotSet *plotset;
+  MultiPlotSet *plot_set;
 
 
   error.init();
 
   if (nb_dist > PLOT_NB_DISTRIBUTION) {
-    plotset = 0;
+    plot_set = 0;
     error.update(STAT_error[STATR_PLOT_NB_DISTRIBUTION]);
   }
 
@@ -1787,7 +1775,7 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
         nb_plot_set , reference_matching;
     double ymax , min_complement;
     const Distribution **dist;
-    std::ostringstream legend , title;
+    ostringstream legend , title;
 
 
     nb_dist++;
@@ -1832,29 +1820,32 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
     nb_plot_set = 1;
     if (cumul_concentration_nb_dist > 0) {
       nb_plot_set += 3;
+      if (nb_dist == 1) {
+        nb_plot_set--;
+      }
     }
-    if (nb_dist == 1) {
-      nb_plot_set--;
-    }
- 
-    plotset = new MultiPlotSet(nb_plot_set);
-    MultiPlotSet &set = *plotset;
 
-    set.title = "Distribution set";
-    set.border = "15 lw 0";
+    plot_set = new MultiPlotSet(nb_plot_set);
+    MultiPlotSet &plot = *plot_set;
+
+    if (nb_dist == 1) {
+      plot.title = STAT_label[STATL_DISTRIBUTION];
+    }
+    else {
+      plot.title = STAT_label[STATL_DISTRIBUTIONS];
+    }
+    plot.border = "15 lw 0";
 
     // 1ere vue : lois
 
     if (MAX(xmax , 2) - 1 < TIC_THRESHOLD) {
-      set[0].xtics = 1;
+      plot[0].xtics = 1;
     }
 
-    set[0].xrange = Range(0 , MAX(xmax , 2) - 1);
-    set[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
+    plot[0].xrange = Range(0 , MAX(xmax , 2) - 1);
+    plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
 
-    // definition du nombre de SinglePlot 
-
-    set[0].resize(nb_dist);
+    plot[0].resize(nb_dist);
 
     for (i = 0;i < nb_dist;i++) {
       legend.str("");
@@ -1863,11 +1854,11 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
         legend << " " << i + 1;
       }
       dist[i]->plot_title_print(legend);
-      set[0][i].legend = legend.str();
+      plot[0][i].legend = legend.str();
 
-      set[0][i].style = "linespoints";
+      plot[0][i].style = "linespoints";
 
-      dist[i]->plotable_mass_write(set[0][i]);
+      dist[i]->plotable_mass_write(plot[0][i]);
     }
 
     if (cumul_concentration_nb_dist > 0) {
@@ -1875,15 +1866,13 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
       // 2eme vue : fonctions de repartition
 
       if (xmax - 1 < TIC_THRESHOLD) {
-        set[1].xtics = 1;
+        plot[1].xtics = 1;
       }
 
-      set[1].xrange = Range(0 , xmax - 1);
-      set[1].yrange = Range(0. , 1. - min_complement);
+      plot[1].xrange = Range(0 , xmax - 1);
+      plot[1].yrange = Range(0. , 1. - min_complement);
 
-      // definition du nombre de SinglePlot 
-
-      set[1].resize(cumul_concentration_nb_dist);
+      plot[1].resize(cumul_concentration_nb_dist);
 
       i = 0;
       for (j = 0;j < nb_dist;j++) {
@@ -1894,11 +1883,11 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
             legend << " " << j + 1;
           }
           legend << " " << STAT_label[STATL_FUNCTION];
-          set[1][i].legend = legend.str();
+          plot[1][i].legend = legend.str();
 
-          set[1][i].style = "linespoints";
+          plot[1][i].style = "linespoints";
 
-          dist[j]->plotable_cumul_write(set[1][i]);
+          dist[j]->plotable_cumul_write(plot[1][i]);
           i++;
         }
       }
@@ -1910,19 +1899,17 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
         title.str("");
         title << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
               << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
-        set[2].title = title.str();
+        plot[2].title = title.str();
 
-        set[2].grid = true;
+        plot[2].grid = true;
 
-        set[2].xtics = 0.1;
-        set[2].ytics = 0.1;
+        plot[2].xtics = 0.1;
+        plot[2].ytics = 0.1;
 
-        set[2].xrange = Range(0. , 1. - min_complement);
-        set[2].yrange = Range(0. , 1. - min_complement);
+        plot[2].xrange = Range(0. , 1. - min_complement);
+        plot[2].yrange = Range(0. , 1. - min_complement);
 
-        // definition du nombre de SinglePlot 
-
-        set[2].resize(cumul_concentration_nb_dist);
+        plot[2].resize(cumul_concentration_nb_dist);
 
         i = 0;
         for (j = 0;j < nb_dist;j++) {
@@ -1930,11 +1917,11 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
             legend.str("");
             legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
                    << " " << j + 1 << " " << STAT_label[STATL_FUNCTION];
-            set[2][i].legend = legend.str();
+            plot[2][i].legend = legend.str();
 
-            set[2][i].style = "linespoints";
+            plot[2][i].style = "linespoints";
 
-            dist[j]->plotable_cumul_matching_write(set[2][i] , *dist[reference_matching]);
+            dist[j]->plotable_cumul_matching_write(plot[2][i] , *dist[reference_matching]);
             i++;
           }
         }
@@ -1949,16 +1936,14 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
         i = 3;
       }
 
-      set[i].xtics = 0.1;
-      set[i].ytics = 0.1;
-      set[i].grid = true;
+      plot[i].xtics = 0.1;
+      plot[i].ytics = 0.1;
+      plot[i].grid = true;
 
-      set[i].xrange = Range(0. , 1. - min_complement);
-      set[i].yrange = Range(0. , 1. - min_complement);
+      plot[i].xrange = Range(0. , 1. - min_complement);
+      plot[i].yrange = Range(0. , 1. - min_complement);
 
-      // definition du nombre de SinglePlot 
-
-      set[i].resize(cumul_concentration_nb_dist + 1);
+      plot[i].resize(cumul_concentration_nb_dist + 1);
 
       j = 0;
       for (k = 0;k < nb_dist;k++) {
@@ -1968,25 +1953,41 @@ MultiPlotSet* Distribution::get_plotable_dists(Format_error &error , int nb_dist
           if (nb_dist > 1) {
             legend << " " << k + 1;
           }
-          set[i][j].legend = legend.str();
+          plot[i][j].legend = legend.str();
 
-          set[i][j].style = "linespoints";
+          plot[i][j].style = "linespoints";
 
-          dist[k]->plotable_concentration_write(set[i][j]);
+          dist[k]->plotable_concentration_write(plot[i][j]);
           j++;
         }
       }
 
-      set[i][j].style = "lines";
+      plot[i][j].style = "lines";
 
-      set[i][j].add_point(0. , 0.);
-      set[i][j].add_point(1. - min_complement , 1. - min_complement);
+      plot[i][j].add_point(0. , 0.);
+      plot[i][j].add_point(1. - min_complement , 1. - min_complement);
     }
 
     delete [] dist;
   }
 
-  return plotset;
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'une loi
+ *
+ *--------------------------------------------------------------*/
+
+
+MultiPlotSet* Distribution::get_plotable() const
+
+{
+  Format_error error;
+
+  return get_plotable_distributions(error , 0 , 0);
 }
 
 
@@ -2296,13 +2297,13 @@ void Distribution::plotable_survivor_write(SinglePlot &plot) const
 MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
 
 {
-  MultiPlotSet *plotset;
+  MultiPlotSet *plot_set;
 
 
   error.init();
 
   if (variance == 0.) {
-    plotset = 0;
+    plot_set = 0;
     error.update(STAT_error[STATR_PLOT_NULL_VARIANCE]);
   }
 
@@ -2310,19 +2311,19 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
     register int i , j;
     int xmax;
     Curves *survival_rate;
-    std::ostringstream legend;
+    ostringstream legend;
 
 
-    plotset = new MultiPlotSet(2);
-    MultiPlotSet &set = *plotset;
+    plot_set = new MultiPlotSet(2);
+    MultiPlotSet &plot = *plot_set;
 
-    set.title = "Survival analysis";
-    set.border = "15 lw 0";
+    plot.title = "Survival analysis";
+    plot.border = "15 lw 0";
 
     // 1ere vue : loi et fonction de survie
 
     if (nb_value - 1 < TIC_THRESHOLD) {
-      set[0].xtics = 1;
+      plot[0].xtics = 1;
     }
 
     xmax = nb_value - 1;
@@ -2330,52 +2331,58 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
         (mass[xmax] > PLOT_MASS_THRESHOLD)) {
       xmax++;
     }
-    set[0].xrange = Range(0 , xmax);
+    plot[0].xrange = Range(0 , xmax);
 
-    set[0].yrange = Range(0. , 1. - complement);
+    plot[0].yrange = Range(0. , 1. - complement);
 
-    set[0].resize(2);
+    plot[0].resize(2);
 
-    set[0][0].legend = STAT_label[STATL_DISTRIBUTION];
-    set[0][0].style = "linespoints";
+    legend.str("");
+    legend << STAT_label[STATL_DISTRIBUTION];
+    plot_title_print(legend);
+    plot[0][0].legend = legend.str();
 
-    plotable_mass_write(set[0][0]);
+    plot[0][0].style = "linespoints";
+
+    plotable_mass_write(plot[0][0]);
 
     legend.str("");
     legend << STAT_label[STATL_SURVIVOR] << " " << STAT_label[STATL_FUNCTION];
-    set[0][1].legend = legend.str();
+    plot[0][1].legend = legend.str();
 
-    set[0][1].style = "linespoints";
+    plot[0][1].style = "linespoints";
 
-    plotable_survivor_write(set[0][1]);
+    plotable_survivor_write(plot[0][1]);
 
-    // 2eme vue : loi et fonction de survie
+    // 2eme vue : taux de survie
 
     survival_rate = new Curves(*this);
 
     if (survival_rate->length - 1 < TIC_THRESHOLD) {
-      set[1].xtics = 1;
+      plot[1].xtics = 1;
     }
 
-    set[1].resize(2);
+    plot[1].resize(2);
 
-    set[1].xrange = Range(survival_rate->offset , survival_rate->length - 1);
-    set[1].yrange = Range(0. , 1.);
+    plot[1].xrange = Range(survival_rate->offset , survival_rate->length - 1);
+    plot[1].yrange = Range(0. , 1.);
 
-    set[1][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
-    set[1][0].style = "linespoints";
+    plot[1][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
 
-    survival_rate->plotable_print(0 , set[1][0]);
+    plot[1][0].style = "linespoints";
 
-    set[1][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
-    set[1][1].style = "linespoints";
+    survival_rate->plotable_print(0 , plot[1][0]);
 
-    survival_rate->plotable_print(1 , set[1][1]);
+    plot[1][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
+
+    plot[1][1].style = "linespoints";
+
+    survival_rate->plotable_print(1 , plot[1][1]);
 
     delete survival_rate;
   }
 
-  return plotset;
+  return plot_set;
 }
 
 
