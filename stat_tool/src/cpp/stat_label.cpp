@@ -203,6 +203,7 @@ const char *STAT_label[] = {
   "P(X1 = X2)" ,
   "P(X1 > X2)" ,
 
+  "fit" ,
   "log-likelihood" ,
   "normalized" ,
   "maximum possible log-likelihood" ,
