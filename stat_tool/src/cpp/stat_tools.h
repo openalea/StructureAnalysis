@@ -539,10 +539,9 @@ class Distribution {    // loi de probabilite discrete
 
     bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
                     const Distribution **idist , const char *title) const;
-
     MultiPlotSet* get_plotable() const;
-    MultiPlotSet* get_plotable_dists(Format_error &error , int nb_dist ,
-                                     const Distribution **idist) const;
+    MultiPlotSet* get_plotable_distributions(Format_error &error , int nb_dist ,
+                                             const Distribution **idist) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
     bool survival_ascii_write(Format_error &error , const char *path) const;
@@ -887,14 +886,16 @@ public :
     bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
                     const Histogram **ihisto , const char *title) const;
 
+    MultiPlotSet* get_plotable() const;
+    MultiPlotSet* get_plotable_histograms(Format_error &error , int nb_histo ,
+                                          const Histogram **ihisto) const;
+
     std::ostream& survival_ascii_write(std::ostream &os) const;
     bool survival_ascii_write(Format_error &error , const char *path) const;
     bool survival_spreadsheet_write(Format_error &error , const char *path) const;
     bool survival_plot_write(Format_error &error , const char *prefix ,
                              const char *title = 0) const;
     MultiPlotSet* survival_get_plotable(Format_error &error) const;
-    MultiPlotSet* get_plotable_hists(Format_error &error , int nb_hist ,
-                                     const Histogram **ihist) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_histo ,
                     const Histogram **ihisto , int type , const char *path = 0 ,
