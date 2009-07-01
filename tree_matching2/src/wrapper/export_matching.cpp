@@ -49,7 +49,9 @@ boost::python::object py_getList(Matching * m, int i_tree,int r_tree)
   list_vtx.reset();
   boost::python::list result;
   do {
-	  result.append(make_tuple(list_vtx.getCurrent()->getIV(),list_vtx.getCurrent()->getRV()));
+	  result.append(make_tuple(list_vtx.getCurrent()->getIV(),
+		                       list_vtx.getCurrent()->getRV(),
+							   list_vtx.getCurrent()->getCost()));
     } while(list_vtx.next());
   return result;
 }
