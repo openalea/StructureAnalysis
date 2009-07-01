@@ -173,6 +173,14 @@ public:
       return ret;
     }
 
+  static MultiPlotSet* survival_get_plotable(const Mixture& p) 
+  { 
+    Format_error error; 
+    MultiPlotSet* ret = p.survival_get_plotable(error); 
+    if (!ret) ERROR;
+    return ret;
+  }
+
 
 
 };
@@ -203,6 +211,8 @@ void class_mixture()
     .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
   //  DEF_RETURN_VALUE_NO_ARGS("get_plotable", &STAT_interface::get_plotable,"Return a plotable (no parameters)");
     DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "return plotable")
+    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
+
     ;
 
 /*

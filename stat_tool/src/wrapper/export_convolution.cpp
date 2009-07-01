@@ -106,6 +106,13 @@ public:
     return ret;
   }
 
+ static MultiPlotSet* survival_get_plotable(const Convolution& p)
+  {
+    Format_error error;
+    MultiPlotSet* ret = p.survival_get_plotable(error);
+    if (!ret) ERROR;
+    return ret;
+  }
 
 
 };
@@ -132,8 +139,8 @@ void class_convolution()
 	DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::get_convolution_data, "Return a _ParametricModel object")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _ConvolutionData")
     DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Convolution into a file")
+    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
     ;
-
 /*
 
    Convolution(const Convolution &convol , bool data_flag = true):Distribution(convol) { copy(convol , data_flag); }

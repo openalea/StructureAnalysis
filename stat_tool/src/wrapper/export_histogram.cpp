@@ -176,8 +176,11 @@ public:
     ret = h.mixture_estimation(error, output, 1, nb_component, ident,
         min_inf_bound, flag, component_flag, penalty);
 
+    
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
+
+    cout << output.str()<<endl;
 
     return ret;
   }
@@ -322,7 +325,7 @@ public:
     for (int i = 0; i < nb_limit; i++)
       l[i] = extract<int> (limit[i]);
 
-    Distribution_data* ret = h.cluster(error, nb_limit, l.get());
+    Distribution_data* ret = h.cluster(error, nb_limit+1, l.get());
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -483,7 +486,7 @@ void class_histogram()
       "Cluster with information")
 
   .def("cluster_limit", HistogramWrap::cluster_limit, return_value_policy<
-      manage_new_object> (), python::arg("limites"), "Cluster with limits")
+      manage_new_object> (), python::arg("limits"), "Cluster with limits")
 
   .def("transcode", HistogramWrap::transcode, return_value_policy<
       manage_new_object> (), "Transcode")
