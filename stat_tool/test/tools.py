@@ -43,6 +43,7 @@ class interface():
         self.data = data
         self.filename = filename
         self.structure = Structure
+        self.N = 1000
         
     def build_data(self):
         raise NotImplementedError()
@@ -172,16 +173,18 @@ class interface():
         d.survival_spreadsheet_write('test.xsl')
         os.remove('test.xsl')
         
-    def simulate(self):
+    def simulate(self, N=-1):
         """Test the simulate method"""
+        if N==-1:
+             N = self.N
         m = self.data
-        s = m.simulate(1000)
-        s2 = Simulate(m, 1000)
-        assert len(s) == 1000
-        assert len(s2) == 1000
+        s = m.simulate(N)
+        s2 = Simulate(m, N)
+        assert len(s) == N
+        assert len(s2) == N
         assert str(s2)
         assert str(s)
-        return s
+        return s        
     
     def test_len(self):
         raise NotImplementedError() 

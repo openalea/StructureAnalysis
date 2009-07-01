@@ -55,8 +55,12 @@ class Test(interface):
         assert len(c) == 2
         assert len(c) == c.nb_distribution()
 
-    def test_plot(self):        
-        self.plot()
+    def test_plot(self):
+        d = self.data
+        d1 = d.extract_elementary(1)
+        d2 = d.extract_elementary(2)
+        d.plot(d1, d2)
+        
 
     def test_save(self):
         self.save()
@@ -135,9 +139,9 @@ def test1():
                         Estimate(histo_b2, "NP"),
                         Estimator="Parametric")
     Display(convol31)
-    if DISABLE_PLOT==False:
-        Plot(convol31)
-        Plot(ExtractDistribution(convol31, "Convolution"))
+    #if DISABLE_PLOT==False:
+        #Plot(convol31)
+        #Plot(ExtractDistribution(convol31, "Convolution"))
     Save(convol31, "data/nothofagus_antartica_2.xls", Format="SpreadSheet")
 
 

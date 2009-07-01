@@ -47,11 +47,10 @@ class Test(interface):
         assert str(compound1) == str(compound2)
         
     def test_constructor_from_dists_and_threshold(self):
-        # by default, the COMPOUND_THRESHOLD is harcoded to be 0.99999
         compound1 = self.data
         compound2 = Compound(Binomial(2, 5, 0.5),
                              NegativeBinomial(0, 2, 0.5),
-                             0.99999)
+                             Threshold=0.99999)
         assert str(compound1) == str(compound2)
 
         
@@ -84,8 +83,9 @@ class Test(interface):
         self.spreadsheet_write()
     
     def test_simulate(self):
-        self.simulate()
-
+        sim = self.simulate()
+        sim.plot()
+        
     def test_extract(self):
         """run and test the extract methods"""
         m = self.data

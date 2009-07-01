@@ -1,37 +1,3 @@
-"""Mixture tests
-#
-#  Frequency distributions
-#
-#  Objective: Analyzing the number of nodes of growth units in selected architectural
-#             position considering the respective roles of preformation and neoformation,
-#
-#  Methods: comparison tests, one-way variance analysis,
-#           estimation of finite mixture of distributions.
-#
-#  Wild cherry tree: number of nodes per growth unit (GU)
-#
-#  Data: Dominique Fournier
-#
-#  meri1.his: order 1,
-#  meri1.his: order 2,
-#  meri1.his: order 3, GU 1,
-#  meri1.his: order 3, GU 2,
-#  meri5.his: short shoots.
-#
-#
-#  Poplar: number of nodes per growth unit
-#
-#  Data: Yves Caraglio and Herve Rey
-#
-#  peup1.his: order 2,
-#  peup2.his: order 3,
-#  peup3.his: order 4,
-#  peup4.his: order 5,
-#  peup5.his: order 3, GU 4,
-#  peup6.his: order 3, acrotony.
-#
-#########################################################################
-"""
 __revision__ = "$Id$"
 
 import os
@@ -54,36 +20,7 @@ from openalea.stat_tool.cluster import Cluster
 from tools import interface
 
 class Test(interface):
-    """a simple unittest class
-    
-    Integration test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok    
-    extract_data                ok
-    file_ascii_write            ok     
-    plot                        ok                       
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    spreadsheet_write           ok
-    **others**
-    extract_mixture             ok
-    extract_component           ok
-    extract_weight              ok
-    str                         ok
-    len                         ok
-    nb_component                ok
-    old_plot                    ok   
-    ========================    ==================================    
-    """
+    """a simple unittest class"""
 
     def __init__(self):
         interface.__init__(self, 
@@ -96,9 +33,9 @@ class Test(interface):
         d2 = Binomial(0, 12, 0.5)
         d3 = Binomial(0, 12, 0.8)
         
-        data = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
-        assert data.nb_component() == 3
-        return data
+        mixt = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
+        assert mixt.nb_component() == 3
+        return mixt
             
     def test_empty(self):
         self.empty()
@@ -137,8 +74,16 @@ class Test(interface):
         self.spreadsheet_write()
     
     def test_simulate(self):
-        self.simulate()     
+        sim = self.simulate()     
+        sim.plot()
         
+    def test_estimate(self):
+        sim = self.simulate()
+        # 3 Binomial distribution to match th original data
+        est = Estimate(sim, "Mixture", "B","B","B")
+        est.plot()
+       
+ 
     def test_extract(self):
         """run and test the extract methods"""
 
@@ -163,119 +108,3 @@ class Test(interface):
 
         d = m.extract_data()
         assert d
-
-
-
-def test1():
-    plot.DISABLE_PLOT = DISABLE_PLOT
- 
-    meri1 = Histogram("data/meri1.his")
-    meri2 = Histogram("data/meri2.his")
-    meri3 = Histogram("data/meri3.his")
-    meri4 = Histogram("data/meri4.his")
-    meri5 = Histogram("data/meri5.his")
-
-    #Plot(meri1, meri2, meri3, meri4, meri5)
-    Compare(meri1, meri2, meri3, meri4, meri5, "N")
-
-
-    ComparisonTest("F", meri1, meri2)
-    ComparisonTest("T", meri1, meri2)
-    ComparisonTest("W", meri1, meri2)
-
-    ComparisonTest("F", meri1, meri3)
-    ComparisonTest("T", meri1, meri3)
-    ComparisonTest("W", meri1, meri3)
-
-    # estimation of a mixture of two distributions assuming a first 
-    # sub-population of GUs
-    # made only of a preformed part and a second sub-population made of 
-    # both a preformed part
-    # and a neoformed part
-    
-    _mixt1 = Estimate(meri2, "MIXTURE", "B", "B")
-    
-    meri = Merge(meri1, meri2, meri3, meri4, meri5)
-    
-    # model selection approach: estimation of both the mixture parameters and
-    # the number of components 
-    
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  NbComponent="Estimated")
-    # mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
-    Plot(ExtractDistribution(mixt2, "Mixture"))
-    Display(mixt2)
-    
-    _mixt_data = ExtractData(mixt2)
-    
-    
-    dist5 = Estimate(meri5, "BINOMIAL")
-    # Display(dist5, Detail->2)
-    # Plot(dist5)
-    
-    histo5 = Simulate(dist5, 100)
-    # Display(histo5, Detail->2)
-    # Plot(histo5)
-    
-    
-    peup1 = Histogram("data/peup1.his")
-    peup2 = Histogram("data/peup2.his")
-    peup3 = Histogram("data/peup3.his")
-    peup4 = Histogram("data/peup4.his")
-    peup5 = Histogram("data/peup5.his")
-    peup6 = Histogram("data/peup6.his")
-    
-    mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
-    
-    peup = Merge(peup1, peup2, peup3, peup4, peup5, peup6)
-    
-    histo1 = Shift(peup, -1)
-    histo2 = Cluster(peup, "Information", 0.8)
-    histo3 = Cluster(peup, "Step", 10)
-    histo4 = Cluster(peup, "Limit", [13, 24])
-    # Display(histo4, Detail->2)
-    # Plot(histo4)
-
-
-    mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
-    # mixt11 = Estimate(peup, "MIXTURE", "B", "NB")
-
-    d11 = distribution.Binomial(0, 12, 0.1)
-    d12 = distribution.Binomial(2, 13, 0.6)
-    d13 = distribution.Binomial(3, 15, 0.9)
-    
-    d21 = distribution.Poisson(0, 25.0)
-    d22 = distribution.Poisson(0, 5.0)
-    d23 = distribution.Poisson(0, 0.2)
-
-    m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
-    print m
-
-    #m2 = _MvMixture("mixture_mv1.mixt")
-    #print m2
-
-    #print "Egalite des melanges construits par liste ",\
-    #  "de distributions et par fichiers : ", str(str(m)==str(m2))
-
-    #m = _MvMixture("mixture_mv_nonparam.mixt")
-   # print m
-
-    #print "Simulation de melanges multivaries : "
-    #v = m.simulate(5000)
-    #print v
-
-    #Plot(m, variable=1, Title="Simulated mixture")
-
-    #print "Estimation de melanges multivaries ", \
-    #    "d'apres un modele initial : "
-    #m_estim_model = v.mixture_estimation(m, 100,  [True, True])
-      
-    #Plot(m_estim_model, variable = 1, Title="Estimated mixture")
-    
-    #print "Estimation de melanges multivaries ", \
-    #    "d'apres un nombre de composantes : "
-        
-    #m_estim_nbcomp = v.mixture_estimation(3, 100, [True, True])
-    
-    #m_estim_nbcomp.plot(variable = 1, Title="Estimated mixture")
-
-
