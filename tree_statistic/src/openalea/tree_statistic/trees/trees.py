@@ -1,5 +1,6 @@
-"""Trees with integral and floating attributes and Tree-related objects
-"""
+# -*- coding: utf-8 -*-
+"""Trees with integral and floating attributes and Tree-related objects"""
+__revision__ = "$Id$"
 
 import string
 import openalea.stat_tool as stat_tool
@@ -10,56 +11,64 @@ from openalea.stat_tool import interface
 interface.extend_class(ctrees.CTrees, interface.StatInterface)
 
 # _PlotManager=stat_tool.stat_tool._PlotManager
-I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
-I_DEFAULT_TREE_SIZE=ctree.I_DEFAULT_TREE_SIZE()
-I_DEFAULT_TREE_DEPTH=ctree.I_DEFAULT_TREE_DEPTH()
-VariableType=stat_tool.VariableTypeBis
-FormatError=stat_tool.StatToolError
-CharacteristicType=ctree.Characteristic
+I_DEFAULT_TREE_SIZE = ctree.I_DEFAULT_TREE_SIZE()
+I_DEFAULT_TREE_SIZE = ctree.I_DEFAULT_TREE_SIZE()
+I_DEFAULT_TREE_DEPTH = ctree.I_DEFAULT_TREE_DEPTH()
+VariableType = stat_tool.VariableTypeBis
+FormatError = stat_tool.StatToolError
+CharacteristicType = ctree.Characteristic
 
-VariableTypeDict=VariableType.values
+VariableTypeDict = VariableType.values
 
 class TreeValue:
     """A class for handling the attributes of class Tree, like a list of int
     and double with type checking."""
 
     def __init__(self, list_of_values):
-        """Initialize a container of integral and floating values.
+        """
+        Initialize a container of integral and floating values.
 
-        Argument list_of_values determines the type and the actual value
-        of each variable.
-        Example: v=TreeValue([0, 0., 1])"""
-        self.__values=[]
-        self.__types=[]
-        self.__nb_integral=0
-        self.__nb_float=0
-        nb_variables=0
+        :Parameters:
+          `list_of_values` (list) - determines the type and the actual value \
+            of each variable.
+
+        :Examples:
+        
+        .. doctest::
+        
+            >>> v = TreeValue([0, 0., 1])
+        """
+        self.__values = []
+        self.__types = []
+        self.__nb_integral = 0
+        self.__nb_float = 0
+        nb_variables = 0
         if ((not hasattr(list_of_values, "__getitem__")) and 
             (not issubclass(list_of_values.__class__, TreeValue))):
             msg="bad type for attribute list: "+str(type(list_of_values))
             raise TypeError, msg
         for index in range(len(list_of_values)):
-            o=list_of_values[index]
+            o = list_of_values[index]
             if issubclass(o.__class__, VariableType):
                 self.__types.append(o)
-                if (o==VariableType.REAL_VALUE):
-                    val=0.
+                if (o == VariableType.REAL_VALUE):
+                    val = 0.
                 else:
-                    val=0
+                    val = 0
                 self.__values.append(val)
-                nb_variables+=1
-            elif type(o)==int:
+                nb_variables += 1
+            elif type(o) == int:
                 self.__types.append(VariableType.INT_VALUE)
                 self.__values.append(o)
-                self.__nb_integral+=1
-                nb_variables+=1
-            elif type(o)==float:
+                self.__nb_integral += 1
+                nb_variables += 1
+            elif type(o) == float:
                 self.__types.append(VariableType.REAL_VALUE)
                 self.__values.append(o)
-                self.__nb_float+=1
-                nb_variables+=1
+                self.__nb_float += 1
+                nb_variables += 1
             else:
-                s="element %d of the list of values must be of type int or "\
+                s = "element %d of the list of values must be of type int or "\
                 "double"%nb_variables
                 raise TypeError, s
                 # STAT_error[STATR_VARIABLE_TYPE];
@@ -77,10 +86,24 @@ class TreeValue:
         return self.__types
 
     def Type(self, index):
-        """Return the type of one given variable.
+        """
+        Return the type of one given variable.
 
-        Argument, with must be in the range [0, len(self)], refers to the
-        concerned variable."""
+        :Parameters:
+          `index` (int) - refers to the concerned variable. \
+            `index` must be in the range [0, len(self)].
+
+        :Returns:
+            If `index` must be in the range [0, len(self)], a variable type
+            among :ref:`openalea.stat_tool._stat_tool.VariableTypeBis` is returned.
+            
+        :Examples:
+
+        .. doctest::
+        
+            >>> v = TreeValue([0, 0., 1])
+            >>> v.Type(0) == VariableTypeBis.INT_VALUE
+        """
         return self.__types[index]
 
     def Values(self):
@@ -91,19 +114,19 @@ class TreeValue:
         return self.__values[index]
 
     def __setitem__(self, index, valeur):
-        if type(valeur)==int:
-            if self.__types[index]==VariableType.INT_VALUE:
+        if type(valeur) == int:
+            if self.__types[index] == VariableType.INT_VALUE:
                 # or other integral types
-                self.__values[index]=valeur
-            elif self.__types[index]==VariableType.REAL_VALUE:
-                self.__values[index]=valeur+0.
+                self.__values[index] = valeur
+            elif self.__types[index] == VariableType.REAL_VALUE:
+                self.__values[index] = valeur+0.
                 # conversion from int to double is allowed
             else:
                 raise TypeError, "expected type: INT_VALUE or REAL_VALUE"
                 # should not happen if self has been created properly
-        elif type(valeur)==float:
-            if self.__types[index]==VariableType.REAL_VALUE:
-                self.__values[index]=valeur
+        elif type(valeur) == float:
+            if self.__types[index] == VariableType.REAL_VALUE:
+                self.__values[index] = valeur
             else:
                 raise TypeError, "expected type: INT_VALUE"
         else:
@@ -130,38 +153,38 @@ class Tree:
         - a Tree object;
         - a MTG file, a filter on the vertices, a list of attribute names,
           a list of attribute functions and the considered scale.
-        Example: T=Tree([0, 1.], TreeStructure(TS))"""
-        self.__mtg_to_tree_vid=None
-        self.__tree_to_mtg_vid=None
-        self.__mtg_tid=None
+        Example: T = Tree([0, 1.], TreeStructure(TS))"""
+        self.__mtg_to_tree_vid = None
+        self.__tree_to_mtg_vid = None
+        self.__mtg_tid = None
         if attribute_names is None:
             attributes=[]
         else:
-            attributes=list(attribute_names)
+            attributes = list(attribute_names)
         if issubclass(arg.__class__, Tree):
             # arg is supposed to be a Tree...
-            self.__ctree=ctree.CTree(arg.__ctree)
-            self.__types=list(arg.__types)
+            self.__ctree = ctree.CTree(arg.__ctree)
+            self.__types = list(arg.__types)
             if len(attributes) > 0:
-                attributes=list(attribute_names)
+                attributes = list(attribute_names)
             else:
-                attributes=list(arg.__attributes)
+                attributes = list(arg.__attributes)
             self._copy_vid_conversion(arg.__mtg_to_tree_vid, 
                                       arg.__tree_to_mtg_vid)
-            self.__mtg_tid=arg.__mtg_tid
+            self.__mtg_tid = arg.__mtg_tid
         elif type(arg)==str:
             # ... or the name of a MTG...
-            trees_object=Trees(arg, arg2, attribute_names, attribute_def, scale)
-            tree_object=trees_object.Tree(0)
-            self.__ctree=ctree.CTree(tree_object.__ctree)
-            self.__types=list(tree_object.__types)
+            trees_object = Trees(arg, arg2, attribute_names, attribute_def, scale)
+            tree_object = trees_object.Tree(0)
+            self.__ctree = ctree.CTree(tree_object.__ctree)
+            self.__types = list(tree_object.__types)
             self._copy_vid_conversion(trees_object.TreeVertexId(0),
                                       trees_object.MTGVertexId(0))
-            self.__mtg_tid=trees_object.MTGComponentRoot(0)
+            self.__mtg_tid = trees_object.MTGComponentRoot(0)
             if len(attributes) == 0:
-                self.__attributes=list(tree_object.Attributes())
-                attributes=list(self.__attributes)
-            if trees_object.NbTrees() > 1:
+                self.__attributes = list(tree_object.Attributes())
+                attributes = list(self.__attributes)
+            if treestvalue_object.NbTrees() > 1:
                 msg="MTG "+str(arg)+" corresponds to a forest, not to a single"\
                     + " tree structure.\n Use constructor trees.Trees()" \
                     + " instead of trees.Tree()"
@@ -173,30 +196,36 @@ class Tree:
                 raise TypeError, "argument 1 must have a __getitem__ method"
             if issubclass(arg[0].__class__, VariableType):
                 #... or a list of types
-                self.__types=list(arg)
-                default_value=TreeValue(arg)
+                self.__types = list(arg)
+                default_value = TreeValue(arg)
             else:
                 #... or a list of values
-                default_value=TreeValue(arg)
-                self.__types=list(default_value.Types())
+                default_value = TreeValue(arg)
+                self.__types = list(default_value.Types())
             self.__attributes=[]
             # arg2 is supposed to be a tree structure...
-            i=int_fl_containers.Int_fl_container(default_value)
+            i = int_fl_containers.Int_fl_container(default_value)
             if arg2 is None:
-                arg2=TreeStructure()
+                arg2 = TreeStructure()
             elif issubclass(arg2.__class__, ctree.CTree):
                 # ... or a ctree.CTree object
-                self.__ctree=ctree.CTree(arg2)
+                self.__ctree = ctree.CTree(arg2)
             else:
-                self.__ctree=ctree.CTree(arg2._tree(), i)
+                self.__ctree = ctree.CTree(arg2._tree(), i)
         if len(attributes) == 0:
             # Default attribute name : "Variable0", etc.
             for var in range(self.NbVariables()):
                 attributes.append("Variable"+str(var))
-        self.__attributes=list(attributes)
+        self.__attributes = list(attributes)
         
     def Attributes(self):
-        """Return the name of the tree attributes."""
+        """
+        Return the name of the tree attributes.
+
+        :Returns:
+            A list of `str` is returned
+        """
+       
         return self.__attributes
 
     def Depth(self):
@@ -204,47 +233,84 @@ class Tree:
         return self.__ctree.Depth()
 
     def Display(self, vids=True, attributes=True, mtg_vids=False):
-        """Display the tree with or without the vertex identifiers (vids)
+        """
+        Display the tree with or without the vertex identifiers (vids)
         and the attributes.
 
-        The attributes are displayed (after the vids) if and only if
-        boolean argument attributes is True. If attributes is False, only the
-        vids are displayed, else the vids are displayed if and only if
-        vids is True. If mtg_vids and vids are both true, the MTG vids are
-        displayed instead of the tree vids"""
+        :Parameters:
+          * `vids` (bool) - If attributes is True, the vids are displayed iif
+            vids is True,
+          * `attributes` (bool) - the attributes are displayed (after the vids) \
+            iif `attributes` is True. If attributes is False, only the vids \
+            are displayed,
+          * `mtg_vids` (bool) -  if mtg_vids and vids are both True, the MTG \
+            vids are displayed instead of the tree vids.
+        """
         print self._display(self.Root(), vids, attributes, mtg_vids)
 
     def EdgeType(self, parent, child):
-        """Return the type of one given edge (parent, child)."""
+        """
+        Return the type of one given edge (parent, child).
+
+        :Parameters:
+          `parent` (int) and `child` (int) - two vertex identifiers \
+            that define an edge of self.
+
+        :Returns:
+           If (parent, child) defines a valid edge of self, \
+           its type is returned (str '+' or '<').
+        """
         self.__valid_edge(parent, child)
-        btype=self.__ctree.EdgeType(parent, child)
+        btype = self.__ctree.EdgeType(parent, child)
         if btype:
             return "<"
         else:
             return "+"
 
     def Get(self, vid):
-        """Return the attribute values of a given vertex.
+        """
+        Return the values of the attributes at a given vertex.
 
-        Argument vid must be a valid vertex identifier (vid).
-        Example: T.Get(T.Root())"""
+        :Parameters:
+          `vid` (int) - a valid vertex identifier (vid).
+
+        :Returns:
+            If `vid` defines a valid vertex of self, a :ref:`openalea.tree_statistic.trees.TreeValue` \
+            object is returned.
+            
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> T.Get(T.Root())
+        """
         self.__valid_vid(vid)
-        i=self.__ctree.Get(vid)
-        values=[]
-        nb_integral=0
-        nb_float=0
+        i = self.__ctree.Get(vid)
+        values = []
+        nb_integral = 0
+        nb_float = 0
         for v in range(i.NbInt()+i.NbFloat()):
-            if self.__types[v]==VariableType.REAL_VALUE:
+            if self.__types[v] == VariableType.REAL_VALUE:
                 values.append(i.Double(nb_float))
-                nb_float+=1
+                nb_float += 1
             else:
                 values.append(i.Int(nb_integral))
-                nb_integral+=1
-        res=TreeValue(values)
+                nb_integral += 1
+        res = TreeValue(values)
         return res
 
     def MTGVertex(self, treevid=None):
-        """Return the MTG vid of a Tree vertex"""
+        """
+        Return the MTG vertex identifier (vid) of a Tree vertex
+
+        :Parameters:
+          `treevid` (int) - a valid vertex identifier (vid).
+
+        :Returns:
+            If `treevid` defines a valid vertex of self, and that self
+            was obtained from a MTG, a MTG vid (int) is returned.
+        """
         if self.__tree_to_mtg_vid is None:
             raise Warning, "Current Trees object has not been obtained from " \
                 "a MTG"
@@ -252,6 +318,7 @@ class Tree:
             return dict(self.__tree_to_mtg_vid)
         else:
             return self.__tree_to_mtg_vid[treevid]
+        Argument 
 
     def NbFloat(self):
         """Return the number of variables with floating type."""
@@ -266,15 +333,23 @@ class Tree:
         return len(self.__types)
 
     def Put(self, vid, value):
-        """Set the attribute values of a given vertex.
+        """
+        Set the attribute values of a given vertex.
 
-        Argument vid must be a valid vertex identifier (vid).
-        Argument value can be either a list of integral and floating
-        values or a TreeValue object.
-        Example: T.Put(R.Root(), [0])
+        :Parameters:
+          * `vid` (int) - a valid vertex identifier (vid),
+          * `value` (:ref:`TreeValue` object or list of int and float) - \
+            future value of the attributes of self at vertex `vid`
+
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> T.Put(R.Root(), [0])
         """
         self.__valid_vid(vid)
-        tvalue=self.__valid_value(value)
+        tvalue = self.__valid_value(value)
         self.__ctree.Put(vid, tvalue)
 
     def Round(self, ndigits=0):
@@ -1372,12 +1447,14 @@ class Trees(object):
 
     def ComputeStateTrees(self, model, algorithm="Viterbi", characteristics=True):
         """Compute the optimal state trees corresponding to the observed trees.
-        
-        Argument model is the hidden Markov tree model used for the computation.
-        Argument algorithm is the type of algorithm 
-                ("Viterbi" or "ForwardBackward").
-        Argument characteristics controls the computation of the characteristic
-                distributions."""
+
+        :Parameters:
+
+          * `model` (`hiddenMarkovtree`) - model used for the computation,
+          * `algorithm` (str) - type of algorithm ("Viterbi" or "ForwardBackward"),
+          * `characteristics` (bool) - characteristic distributions are computed iif \
+            argument is True.
+        """
         import openalea.tree_statistic.hmt, openalea.tree_statistic.hmt.chmt
         hmt=openalea.tree_statistic.hmt
         chmt=openalea.tree_statistic.hmt.chmt
@@ -1463,16 +1540,19 @@ class Trees(object):
                  arg5=None, arg6=None, Algorithm="ForwardBackward", Saem=1., 
                  ForceParametric=[]):
         """Estimate a (hidden) Markov tree.
+        
         Algorithm correspond to the type of restoration/maximisation algorithm:
-            'ForwardBackward', 'Viterbi', 'ForwardBackwardSampling' 
-            or 'GibbsSampling'
+        'ForwardBackward', 'Viterbi', 'ForwardBackwardSampling'
+        or 'GibbsSampling'
         Saem correspond to the rate of decay of the part corresponding 
         to restored states. Saem=0. for pure SEM or CEM algorithms.
         
-        Usage:  Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, 
+        :Usage:
+
+            Estimate("HIDDEN_MARKOV_TREE", nb_state, structure,
                           InitialSelfTransition, NbIteration, StateTrees, 
                           Algorithm, Saem, Counting, ForceParametric)
-                Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Algorithm, 
+            Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Algorithm, 
                           Saem, Counting)"""
         import openalea.tree_statistic.hmt, openalea.tree_statistic.hmt.chmt
         hmt=openalea.tree_statistic.hmt

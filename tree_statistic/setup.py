@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
 import os, sys
 from os.path import join as pj
@@ -16,7 +17,7 @@ setup_requires = install_requires + ['openalea.deploy']
 if __name__ == '__main__':
     
     setup(name='VPlants.Tree_Statistic',
-          version='0.6.0',
+          version='0.7.0',
           author='JB durand',
           description='Tree statistic library',
           url='',
@@ -36,6 +37,7 @@ if __name__ == '__main__':
                     namespace+".tree_statistic.trees",
                     namespace+".tree_statistic.hmt",
                     namespace+".tree_statistic.int_fl_containers",
+                    namespace+".treestat_wralea",
                     ],
 
           package_dir={
@@ -56,5 +58,12 @@ if __name__ == '__main__':
           setup_requires = setup_requires,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
+          entry_points = {
+            "wralea": ["tree_statistic = openalea.treestat_wralea",
+                        "macro = openalea.treestat_wralea.macro",
+                        "demo = openalea.treestat_wralea.demo",
+                       ]
+            },
+
           )
     

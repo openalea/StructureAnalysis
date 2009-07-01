@@ -1,5 +1,5 @@
-"""Hidden Markov tree models
-"""
+# -*- coding: utf-8 -*-
+"""Hidden Markov tree models"""
 import string
 import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
 import chmt
