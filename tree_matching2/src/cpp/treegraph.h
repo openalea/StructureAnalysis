@@ -125,7 +125,7 @@ class TREEMATCH_API TreeGraph
 
 
   private :
-  int _nbVertex;
+  // int _nbVertex;
   TreeNodeList _treenodes;
   int _depth;
   int _degree;

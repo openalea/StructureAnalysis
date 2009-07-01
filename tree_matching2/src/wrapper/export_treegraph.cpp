@@ -56,7 +56,7 @@ void export_TreeGraph() {
 
 	class_<TreeGraph,TreeGraphPtr,boost::noncopyable>
     ("TreeGraph", init<>("TreeGraph()"))
-    .def( "addNode", (void (TreeGraph::*)(int,int))&TreeGraph::addNode,"Add a new node",(bp::arg("id")),(bp::arg("father")=-1))
+    .def( "addNode", (void (TreeGraph::*)(int,int))&TreeGraph::addNode,"Add a new node",(bp::arg("id"),bp::arg("father")=-1))
     .def( "addNode", (void (TreeGraph::*)(TreeNodePtr))&TreeGraph::addNode,"Add a new node",bp::args("node"))
     .def( "addValue", &TreeGraph::addValue,"Add a new value to an existing node",(bp::arg("index")),(bp::arg("new_value")))
     .def( "getNode", &TreeGraph::getNode,"Return the node referenced by id",(bp::arg("vertex")))

@@ -42,7 +42,18 @@ object py_getDistanceTable(Matching* m){
   return make_list<DistanceTable,list_converter<DistanceTable::value_type> >(m->getDistanceTable())();
 }
 
- 
+boost::python::object py_getList(Matching * m, int i_tree,int r_tree)
+{
+  Sequence list_vtx;  
+  m->getList(i_tree,r_tree,&list_vtx);
+  list_vtx.reset();
+  boost::python::list result;
+  do {
+	  result.append(make_tuple(list_vtx.getCurrent()->getIV(),list_vtx.getCurrent()->getRV()));
+    } while(list_vtx.next());
+  return result;
+}
+
 
 void export_Matching() {
 
@@ -52,6 +63,7 @@ void export_Matching() {
     .def( "__call__", &Matching::match,"Comparison of tree graph")
     .def( "getDBT", &Matching::getDBT,"Get Distance Between Trees",(bp::arg("index")),(bp::arg("index")))
     .def( "getDistanceTable", &py_getDistanceTable,"Get DistanceTable Between Trees")
+    .def( "getList", &py_getList,"Get Matching  list between Trees")
 	;
 
 }

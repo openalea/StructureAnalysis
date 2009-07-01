@@ -60,51 +60,55 @@ void MatchPath::link(int deg_max,DistanceTable& tree_distances)
 		
 void MatchPath::make(NodeList& input_list,NodeList& reference_list)
 {
-  
-  _inputList=&input_list;
-  _referenceList=&reference_list;
+
+	_inputList=&input_list;
+	_referenceList=&reference_list;
 
 
-  // On recupere le nombre d'arbres des forets initiales et finales
-  int ni=_inputList->size();
-  int nj=_referenceList->size();
-  
-  if (ni!=nj) 
-    {
-  // Les sommets du graphe de flot sont ni + nj + 3:
-  // Une source et un puit, ni sommets representant les arbres initiaux,
-  // nj sommets representant les arbres finaux plus un noeud representant
-  // l'arbre vide.
-      nbVertex=ni+nj+3;
-      if (ni<nj) 
+	// On recupere le nombre d'arbres des forets initiales et finales
+	int ni=_inputList->size();
+	int nj=_referenceList->size();
+
+	if (ni!=nj) 
 	{
-  // Si ni<nj, le noeud representant l'arbre vide est du cote des noeuds 
-  // initiaux donc le nombre d'arc est:
-  //    ni entre la source et les init,
-  // +  ni*nj entre les init et les ref,
-  // +  nj entre les ref et le puits,
-  // +  1 entre la source et le vide,
-  // +  nj entre le vide et les ref. 
-  // d'ou nbEdge = ni+nj*ni+nj+nj+1 = ni + ni*nj + 2*nj +1 !!!!!
+		// Les sommets du graphe de flot sont ni + nj + 3:
+		// Une source et un puit, ni sommets representant les arbres initiaux,
+		// nj sommets representant les arbres finaux plus un noeud representant
+		// l'arbre vide.
+		nbVertex=ni+nj+3;
+		if (ni<nj) 
+		{
+			// Si ni<nj, le noeud representant l'arbre vide est du cote des noeuds 
+			// initiaux donc le nombre d'arc est:
+			//    ni entre la source et les init,
+			// +  ni*nj entre les init et les ref,
+			// +  nj entre les ref et le puits,
+			// +  1 entre la source et le vide,
+			// +  nj entre le vide et les ref. 
+			// d'ou nbEdge = ni+nj*ni+nj+nj+1 = ni + ni*nj + 2*nj +1 !!!!!
 
-	  nbEdge=ni+ni*nj+2*nj;
+			nbEdge=ni+ni*nj+2*nj;
+		}
+		else
+		{
+			nbEdge=2*ni+ni*nj+nj;
+		}
+
 	}
-      else
+	else
 	{
-	  nbEdge=2*ni+ni*nj+nj;
+		nbVertex=ni+nj+2;
+		nbEdge=(ni+(ni*nj)+nj);
+#ifdef __GNUC__
+#warning !!! Big hack de Fred pour faire marcher TreeMatching. A revoir
+#endif
+		if(ni == 1 && nj ==1)++nbEdge;
 	}
-      
-    }
-  else
-    {
-      nbVertex=ni+nj+2;
-      nbEdge=(ni+ni*nj+nj);
-    }
 
-  // On initialise le flot et le cout a 0
+	// On initialise le flot et le cout a 0
 
-  flow = CapacityVector(flow.size(),0);
-  cost = CostVector(cost.size(),0.0);
+	flow = CapacityVector(flow.size(),0);
+	cost = CostVector(cost.size(),0.0);
 }
 
 
@@ -250,7 +254,9 @@ bool MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 	      // On met a jour la valeur du noeud,
 	      distance[current_out_vertex]=tmp_dist;
 	      // et on met le sommet et l'arc dans la liste du chemin. 
+		  assert(VertexOnThePath.size() > current_out_vertex);
 	      VertexOnThePath[current_out_vertex]=current_vertex;
+		  assert(EdgeOnThePath.size() > current_out_vertex);
 	      EdgeOnThePath[current_out_vertex]=current_out_edge;
 	      
 	      // Si de plus, l'index dans le tas du sommet est faux, alors
@@ -515,28 +521,22 @@ int MatchPath::who(int vertex)
 int MatchPath::nbOut(int n)
 {
 
-  int ni=_inputList->size();
-  int nj=_referenceList->size();
-  if (ni<nj) 
-    ni++;
-  if (ni>nj)
-    nj++;
-  if (n==0) 
-    return(ni);
-  else
-    {
-      if (n<=ni) 
-	return(nj+1);
-      else
+	int ni=_inputList->size();
+	int nj=_referenceList->size();
+	if (ni<nj)  ni++;
+	if (ni>nj)  nj++;
+	if (n==0)  return(ni); 
+	else
 	{
-	  if (n<=ni+nj) 
-	    return(ni+1);
-	  else
-	    return(nj);
+		if (n <= ni) 	return(nj+1);
+		else
+		{
+			if (n<=ni+nj)  return(ni+1);
+			else           return(nj);
+		}
+		//  if (n==ni+nj+1) {return(nj);}
 	}
-      //  if (n==ni+nj+1) {return(nj);}
-    }
- 
+
 }
 
 int MatchPath::next_edge(int n,int i)

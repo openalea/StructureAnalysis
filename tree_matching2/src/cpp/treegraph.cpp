@@ -43,7 +43,7 @@ using namespace std;
 
 TreeGraph::TreeGraph( )
 {
-  _nbVertex = 0;
+  // _nbVertex = 0;
   _rootId = 0;
   _degree = 0;
   _depth = 0;
