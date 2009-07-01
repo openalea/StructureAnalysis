@@ -408,7 +408,8 @@ public:
       const object& max, bool keep)
   {
     HEADER(Sequences);
-
+    std::stringstream s;
+ 
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
 
@@ -416,15 +417,16 @@ public:
       {
         int mi = get_min();
         int ma = get_max();
-        ret = seq.value_select(error, variable, mi, ma, keep);
+        ret = seq.value_select(error, s, variable, mi, ma, keep);
       }
     else
       {
         double mi = extract<double> (min);
         double ma = extract<double> (max);
-        ret = seq.value_select(error, variable, mi, ma, keep);
+        ret = seq.value_select(error, s, variable, mi, ma, keep);
       }
 
+    cout << s.str() << endl;
     FOOTER;
   }
 
@@ -566,10 +568,18 @@ public:
   }
 
   static Sequences*
-  length_select(const Sequences& seq, int min_length, int max_length, bool keep)
+  length_select(const Sequences& input,  int min_length, int max_length, bool keep)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, length_select, Sequences, min_length,
-        max_length, keep);
+     Format_error error; 
+    Sequences* ret;
+    std::ostringstream os;
+
+    ret = input.length_select(error, os,
+		min_length, max_length, keep);
+    if (!ret) 
+      sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str() << endl;
+    return ret;
   }
 
   static Sequences*
@@ -656,11 +666,20 @@ public:
   }
 
   static Sequences*
-  index_parameter_select(const Sequences& seq, int min_index_parameter,
+  index_parameter_select(const Sequences& input, int min_index_parameter,
       int max_index_parameter, bool keep)
   {
-    SIMPLE_METHOD_TEMPLATE_1(seq, index_parameter_select, Sequences,
-        min_index_parameter, max_index_parameter, keep);
+    Format_error error; 
+    Sequences* ret;
+    std::ostringstream os;
+    
+    ret = input.index_parameter_select(error,  os,
+		min_index_parameter, max_index_parameter, keep);
+    if (!ret) 
+      sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str() << endl;
+    return ret;
+
   }
 
   static Sequences*
@@ -777,12 +796,12 @@ public:
   }
 
   static Correlation*
-correlation_computation(const Sequences& input, int variable1, int variable2,
+  correlation_computation(const Sequences& input, int variable1, int variable2,
   int itype, int max_lag, int normalization)
-{
-  SIMPLE_METHOD_TEMPLATE_1 (input, correlation_computation,
+  {
+    SIMPLE_METHOD_TEMPLATE_1 (input, correlation_computation,
       Correlation, variable1, variable2, itype, max_lag, normalization)
-}
+  }
 
   static Distance_matrix*
   alignment_vector_distance(const Sequences& input,
@@ -803,125 +822,124 @@ correlation_computation(const Sequences& input, int variable1, int variable2,
   }
 
   static Distance_matrix*
-alignment(const Sequences& input,int ref_identifier,
+  alignment(const Sequences& input,int ref_identifier,
   int test_identifier, bool begin_free, bool end_free,
   const char *result_path, char result_format,
   const char *alignment_path, char alignment_format)
-{
-  HEADER_OS(Distance_matrix);
+  {
+    HEADER_OS(Distance_matrix);
 
-  ret = input.alignment(error, &os, ref_identifier, test_identifier, begin_free,
+    ret = input.alignment(error, &os, ref_identifier, test_identifier, begin_free,
       end_free, result_path, result_format, alignment_path,
       alignment_format );
-  FOOTER_OS;
-}
+    FOOTER_OS;
+  }
 
-static Renewal_data*
-extract_renewal_data(const Sequences & input,
-  int variable , int begin_index , int end_index)
-{
-  SIMPLE_METHOD_TEMPLATE_1(input, extract_renewal_data, Renewal_data,
+  static Renewal_data*
+  extract_renewal_data(const Sequences & input,
+    int variable , int begin_index , int end_index)
+  {
+    SIMPLE_METHOD_TEMPLATE_1(input, extract_renewal_data, Renewal_data,
       variable, begin_index, end_index);
-}
+  }
 
-static Time_events*
-extract_time_events(const Sequences & input,
-  int variable , int begin_date , int end_date ,
-  int previous_date, int next_date)
+  static Time_events*
+  extract_time_events(const Sequences & input,
+    int variable , int begin_date , int end_date ,
+    int previous_date, int next_date)
 
-{
-  SIMPLE_METHOD_TEMPLATE_1(input, extract_time_events, Time_events,
+  {
+    SIMPLE_METHOD_TEMPLATE_1(input, extract_time_events, Time_events,
       variable, begin_date, end_date, previous_date, next_date);
 
-}
+  }
 
-static Vectors*
-build_vectors(const Sequences & input,
+  static Vectors*
+  build_vectors(const Sequences & input,
   bool index_variable)
-{
-  Vectors* ret;
+  {
+    Vectors* ret;
 
-  ret = input.build_vectors(index_variable);
+    ret = input.build_vectors(index_variable);
 
-  return ret;
-}
+    return ret;
+  }
 
-static Sequences*
-segmentation_change_point(const Sequences &input, int iidentifier,
+  static Sequences*
+  segmentation_change_point(const Sequences &input, int iidentifier,
     int nb_segment , boost::python::list input_change_point ,
     boost::python::list input_model_type , int output)
-{
-  HEADER_OS(Sequences);
+  {
+    HEADER_OS(Sequences);
 
-  int nb = len(input_change_point);
-  int *change_point;
-  change_point = new int[nb];
-  for (int i = 0; i < nb; i++)
+    int nb = len(input_change_point);
+    int *change_point;
+    change_point = new int[nb];
+    for (int i = 0; i < nb; i++)
       change_point[i] = boost::python::extract<int> (input_change_point[i]);
 
-  nb = len(input_model_type);
-  int *model_type;
-  model_type = new int[nb];
-  for (int i = 0; i < nb; i++)
+    nb = len(input_model_type);
+    int *model_type;
+    model_type = new int[nb];
+    for (int i = 0; i < nb; i++)
       model_type[i] = extract<int> (input_model_type[i]);
 
-  ret = input.segmentation(error, os, iidentifier, nb_segment,
+    ret = input.segmentation(error, os, iidentifier, nb_segment,
       change_point, model_type, output);
 
-  FOOTER_OS;
-}
+    FOOTER_OS;
+  }
 
 
-static Sequences*
-segmentation_array(const Sequences &input, boost::python::list input_nb_segment,
-    boost::python::list input_model_type , int iidentifier,  int output)
-{
-  HEADER_OS(Sequences);
+  static Sequences*
+  segmentation_array(const Sequences &input, boost::python::list input_nb_segment,
+      boost::python::list input_model_type , int iidentifier,  int output)
+  {
+    HEADER_OS(Sequences);
+
+    int nb = len(input_nb_segment);
+    int *nb_segment;
+    nb_segment = new int[nb];
+    for (int i = 0; i < nb; i++)
+        nb_segment[i] = extract<int> (input_nb_segment[i]);
+
+    nb = len(input_model_type);
+    int *model_type;
+    model_type = new int[nb];
+    for (int i = 0; i < nb; i++)
+        model_type[i] = extract<int> (input_model_type[i]);
 
 
-  int nb = len(input_nb_segment);
-  int *nb_segment;
-  nb_segment = new int[nb];
-  for (int i = 0; i < nb; i++)
-      nb_segment[i] = extract<int> (input_nb_segment[i]);
+    ret = input.segmentation(error, os, nb_segment, model_type, iidentifier,
+        output);
+    FOOTER_OS;
+  }
 
-  nb = len(input_model_type);
-  int *model_type;
-  model_type = new int[nb];
-  for (int i = 0; i < nb; i++)
-    model_type[i] = extract<int> (input_model_type[i]);
-
-
-  ret = input.segmentation(error, os, nb_segment, model_type, iidentifier,
-      output);
-  FOOTER_OS;
-}
-
-static Sequences*
-segmentation_model(const Sequences &input, int iidentifier,
+  static Sequences*
+  segmentation_model(const Sequences &input, int iidentifier,
     int max_nb_segment , boost::python::list input_model_type)
-{
-  HEADER_OS(Sequences);
+  {
+    HEADER_OS(Sequences);
 
-  int nb = len(input_model_type);
-  int *model_type;
-  model_type = new int[nb];
-  for (int i = 0; i < nb; i++)
-      model_type[i] = extract<int> (input_model_type[i]);
+    int nb = len(input_model_type);
+    int *model_type;
+    model_type = new int[nb];
+    for (int i = 0; i < nb; i++)
+        model_type[i] = extract<int> (input_model_type[i]);
 
-  ret = input.segmentation(error, os, iidentifier, max_nb_segment, model_type);
-  FOOTER_OS;
-}
+    ret = input.segmentation(error, os, iidentifier, max_nb_segment, model_type);
+    FOOTER_OS;
+  }
 
-static Sequences*
-segmentation_vector_distance(const Sequences &input,  int iidentifier,
+  static Sequences*
+  segmentation_vector_distance(const Sequences &input,  int iidentifier,
     int nb_segment ,  const Vector_distance &ivector_dist, int output)
-{
-  HEADER_OS(Sequences);
-  ret = input.segmentation(error,iidentifier,  nb_segment,
+  {
+    HEADER_OS(Sequences);
+    ret = input.segmentation(error,iidentifier,  nb_segment,
       ivector_dist, os, output);
-  FOOTER_OS;
-}
+    FOOTER_OS;
+  } 
 
 
 
