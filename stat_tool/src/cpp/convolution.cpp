@@ -1070,9 +1070,9 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
   ostringstream title , legend;
 
 
-  // nombre de fenetres : nb_distribution + 2 si ajustement
+  // nombre de graphiques : nb_distribution + 3 si ajustement
 
-  MultiPlotSet *plot_set = new MultiPlotSet(convol_histo ? nb_distribution + 2 : 1);
+  MultiPlotSet *plot_set = new MultiPlotSet(convol_histo ? nb_distribution + 3 : 1);
   MultiPlotSet &plot = *plot_set;
 
   title.str("");
@@ -1105,8 +1105,6 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
   }
   plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
 
-  // definition du nombre de SinglePlot 
-
   plot[0].resize(nb_distribution + 1);
 
   plot[0][0].legend = STAT_label[STATL_CONVOLUTION];
@@ -1135,8 +1133,8 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     }
 
     plot[1].xrange = Range(0 , xmax);
-    plot[1].yrange = Range(0 , ceil(MAX(convol_histo->max ,
-                                    max * convol_histo->nb_element) * YSCALE));
+    plot[1].yrange = Range(0. , ceil(MAX(convol_histo->max ,
+                                     max * convol_histo->nb_element) * YSCALE));
 
     plot[1].resize(2);
 
@@ -1152,12 +1150,41 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
     plotable_mass_write(plot[1][1] , convol_histo->nb_element);
 
+    // 3eme vue : fonctions de repartition
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      plot[2].xtics = 1;
+    }
+
+    plot[2].xrange = Range(0 , xmax);
+    plot[2].yrange = Range(0. , 1.);
+
+    plot[2].resize(2);
+
+    legend.str("");
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+           << STAT_label[STATL_FUNCTION];
+    plot[2][0].legend = legend.str();
+
+    plot[2][0].style = "linespoints";
+
+    convol_histo->plotable_cumul_write(plot[2][0]);
+
+    legend.str("");
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+           << STAT_label[STATL_FUNCTION];
+    plot[2][1].legend = legend.str();
+
+    plot[2][1].style = "linespoints";
+
+    plotable_cumul_write(plot[2][1]);
+
     for (i = 0;i < nb_distribution;i++) {
 
       // vues suivantes : distributions ajustees
 
       if (distribution[i]->nb_value - 1 < TIC_THRESHOLD) {
-        plot[i + 2].xtics = 1;
+        plot[i + 3].xtics = 1;
       }
 
       xmax = distribution[i]->nb_value - 1;
@@ -1165,29 +1192,30 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
           (distribution[i]->mass[xmax] > PLOT_MASS_THRESHOLD)) {
         xmax++;
       }
-      plot[i + 2].xrange = Range(0 , xmax);
+      plot[i + 3].xrange = Range(0 , xmax);
 
-      plot[i + 2].yrange = Range(0 , ceil(MAX(convol_histo->histogram[i]->max ,
-                                          distribution[i]->max * convol_histo->histogram[i]->nb_element)
-                                          * YSCALE));
+      plot[i + 3].yrange = Range(0. , ceil(MAX(convol_histo->histogram[i]->max ,
+                                           distribution[i]->max * convol_histo->histogram[i]->nb_element)
+                                           * YSCALE));
 
-      plot[i + 2].resize(2);
+      plot[i + 3].resize(2);
 
       legend.str("");
       legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
-      plot[i + 2][0].legend = legend.str();
+      plot[i + 3][0].legend = legend.str();
 
-      plot[i + 2][0].style = "impulses";
+      plot[i + 3][0].style = "impulses";
+
+      convol_histo->histogram[i]->plotable_frequency_write(plot[i + 3][0]);
 
       legend.str("");
       legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
       distribution[i]->plot_title_print(legend);
-      plot[i + 2][1].legend = legend.str();
+      plot[i + 3][1].legend = legend.str();
 
-      plot[i + 2][1].style = "linespoints";
+      plot[i + 3][1].style = "linespoints";
 
-      convol_histo->histogram[i]->plotable_frequency_write(plot[i + 2][0]);
-      distribution[i]->plotable_mass_write(plot[i + 2][1] , convol_histo->histogram[i]->nb_element);
+      distribution[i]->plotable_mass_write(plot[i + 3][1] , convol_histo->histogram[i]->nb_element);
     }
   }
 
