@@ -6441,7 +6441,7 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
   double likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
   ostringstream data_file_name[2];
-  ofstream *data_out_file;
+  ofstream *out_data_file;
 
 
   error.init();
@@ -6541,9 +6541,9 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 
     i = (model_type[0] == MEAN_CHANGE ? 0 : 1);
     data_file_name[i] << prefix << i << ".dat";
-    data_out_file = new ofstream((data_file_name[i].str()).c_str());
+    out_data_file = new ofstream((data_file_name[i].str()).c_str());
 
-    if (!data_out_file) {
+    if (!out_data_file) {
       status = false;
       error.update(STAT_error[STATR_FILE_PREFIX]);
     }
@@ -6566,12 +6566,12 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 
       if (model_type[0] != MEAN_CHANGE) {
         likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
-                                           data_out_file , output , 'g');
-        data_out_file->close();
-        delete data_out_file;
+                                           out_data_file , output , 'g');
+        out_data_file->close();
+        delete out_data_file;
 
         data_file_name[0] << prefix << 0 << ".dat";
-        data_out_file = new ofstream((data_file_name[0].str()).c_str());
+        out_data_file = new ofstream((data_file_name[0].str()).c_str());
       }
 
 #     ifdef DEBUG
@@ -6579,10 +6579,10 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 #     endif
 
       segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
-                                                                          rank , *data_out_file ,
+                                                                          rank , *out_data_file ,
                                                                           output , 'g' , likelihood);
-      data_out_file->close();
-      delete data_out_file;
+      out_data_file->close();
+      delete out_data_file;
 
       if (segmentation_likelihood == D_INF) {
         status = false;
