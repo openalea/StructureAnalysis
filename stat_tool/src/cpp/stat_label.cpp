@@ -453,7 +453,7 @@ const char *STAT_error[] = {
   "bad maximum value" ,
   "empty histogram" ,
 
-  "not present" , // STATR_NOT_PRESENT
+  "not present" ,
 
   "marginal histogram not built" ,
   "bad" ,
@@ -475,6 +475,7 @@ const char *STAT_error[] = {
   "regression failure" ,
 
   "bad matrix dimensions" ,
+  "only infinite distances" ,
   "matrix already symmetrical" ,
   "unsymmetrical matrix" ,
   "dissimilarity measures not normalized by lengths" ,
@@ -484,6 +485,7 @@ const char *STAT_error[] = {
 
   "bad matrix structure" ,
   "a square matrix with dimension greater than 1" ,
+  "only clusters with a single element" ,
   "bad number of clusters" ,
   "bad pattern type" ,
   "bad prototype identifier" ,
