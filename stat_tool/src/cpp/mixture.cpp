@@ -1325,14 +1325,24 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
 {
   register int i , j;
-  int xmax;
+  int nb_plot_set , xmax;
   double scale;
   ostringstream title , legend;
 
 
-  // nombre de fenetres : nb_component + 2 si ajustement
+  // calcul du nombre de graphiques
 
-  MultiPlotSet *plot_set = new MultiPlotSet(mixt_histo ? nb_component + 2 : 1);
+  nb_plot_set = 1;
+  if (mixt_histo) {
+    nb_plot_set += 2;
+    for (i = 0;i < nb_component;i++) {
+      if (mixt_histo->component[i]->nb_element > 0) {
+        nb_plot_set++;
+      }
+    }
+  }
+
+  MultiPlotSet *plot_set = new MultiPlotSet(nb_plot_set);
   MultiPlotSet &plot = *plot_set;
 
   title.str("");
@@ -1360,8 +1370,8 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
   i = 0;
 
   if (mixt_histo) {
-    plot[0].yrange = Range(0 , ceil(MAX(mixt_histo->max , max * mixt_histo->nb_element)
-                                    * YSCALE));
+    plot[0].yrange = Range(0. , ceil(MAX(mixt_histo->max , max * mixt_histo->nb_element)
+                                     * YSCALE));
 
     plot[0].resize(nb_component + 2);
 
@@ -1406,35 +1416,65 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
   if (mixt_histo) {
 
-    // 2eme vue : poids
+    // 2eme vue : fonctions de repartition
 
-    if (weight->nb_value - 1 < TIC_THRESHOLD) {
+    if (nb_value - 1 < TIC_THRESHOLD) {
       plot[1].xtics = 1;
     }
 
-    plot[1].xrange = Range(0 , weight->nb_value - 1);
-    plot[1].yrange = Range(0 , ceil(MAX(mixt_histo->weight->max ,
-                                    weight->max * mixt_histo->weight->nb_element) 
-                                    * YSCALE));
+    plot[1].xrange = Range(0 , xmax);
+    plot[1].yrange = Range(0. , 1.);
 
     plot[1].resize(2);
 
     legend.str("");
-    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+           << STAT_label[STATL_FUNCTION];
     plot[1][0].legend = legend.str();
 
-    plot[1][0].style = "impulses";
+    plot[1][0].style = "linespoints";
+
+    mixt_histo->plotable_cumul_write(plot[1][0]);
 
     legend.str("");
-    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+           << STAT_label[STATL_FUNCTION];
     plot[1][1].legend = legend.str();
 
     plot[1][1].style = "linespoints";
 
-    mixt_histo->weight->plotable_frequency_write(plot[1][0]);
-    weight->plotable_mass_write(plot[1][1] , mixt_histo->weight->nb_element);
+    plotable_cumul_write(plot[1][1]);
 
-    i = 2;
+    // 3eme vue : poids
+
+    if (weight->nb_value - 1 < TIC_THRESHOLD) {
+      plot[2].xtics = 1;
+    }
+
+    plot[2].xrange = Range(0 , weight->nb_value - 1);
+    plot[2].yrange = Range(0 , ceil(MAX(mixt_histo->weight->max ,
+                                    weight->max * mixt_histo->weight->nb_element) 
+                                    * YSCALE));
+
+    plot[2].resize(2);
+
+    legend.str("");
+    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[2][0].legend = legend.str();
+
+    plot[2][0].style = "impulses";
+
+    mixt_histo->weight->plotable_frequency_write(plot[2][0]);
+
+    legend.str("");
+    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION];
+    plot[2][1].legend = legend.str();
+
+    plot[2][1].style = "linespoints";
+
+    weight->plotable_mass_write(plot[2][1] , mixt_histo->weight->nb_element);
+
+    i = 3;
     for (j = 0;j < nb_component;j++) {
       if (mixt_histo->component[j]->nb_element > 0) {
 
@@ -1449,9 +1489,8 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
             (component[j]->mass[xmax] > PLOT_MASS_THRESHOLD)) {
           xmax++;
         }
-        plot[0].xrange = Range(0 , xmax);
+        plot[i].xrange = Range(0 , xmax);
 
-        plot[i].xrange = Range(0 , component[j]->nb_value - 1);
         plot[i].yrange = Range(0 , ceil(MAX(mixt_histo->component[j]->max ,
                                         component[j]->max * mixt_histo->component[j]->nb_element)
                                         * YSCALE));
@@ -1464,13 +1503,14 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
         plot[i][0].style = "impulses";
 
+        mixt_histo->component[j]->plotable_frequency_write(plot[i][0]);
+
         legend.str("");
         legend << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
         plot[i][1].legend = legend.str();
 
         plot[i][1].style = "linespoints";
 
-        mixt_histo->component[j]->plotable_frequency_write(plot[i][0]);
         component[j]->plotable_mass_write(plot[i][1] , mixt_histo->component[j]->nb_element);
   
         i++;
