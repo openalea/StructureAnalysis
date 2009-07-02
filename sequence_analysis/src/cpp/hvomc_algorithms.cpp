@@ -4203,7 +4203,7 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
   Hidden_variable_order_markov *hmarkov;
   Variable_order_markov_data *seq;
   ostringstream data_file_name[2];
-  ofstream *data_out_file;
+  ofstream *out_data_file;
 
 
   error.init();
@@ -4267,9 +4267,9 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
     // ecriture des fichiers de donnees
 
     data_file_name[0] << prefix << 0 << ".dat";
-    data_out_file = new ofstream((data_file_name[0].str()).c_str());
+    out_data_file = new ofstream((data_file_name[0].str()).c_str());
 
-    if (!data_out_file) {
+    if (!out_data_file) {
       status = false;
       error.update(STAT_error[STATR_FILE_PREFIX]);
     }
@@ -4282,10 +4282,10 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
         seq = new Variable_order_markov_data(iseq , 'c' , (type == 'e' ? true : false));
       }
 
-      seq_likelihood = forward_backward(*seq , index , *data_out_file , 'g' ,
+      seq_likelihood = forward_backward(*seq , index , *out_data_file , 'g' ,
                                         max_marginal_entropy , entropy);
-      data_out_file->close();
-      delete data_out_file;
+      out_data_file->close();
+      delete out_data_file;
 
       if (seq_likelihood == D_INF) {
         status = false;
@@ -4294,16 +4294,16 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
 
       else {
         data_file_name[1] << prefix << 1 << ".dat";
-        data_out_file = new ofstream((data_file_name[1].str()).c_str());
+        out_data_file = new ofstream((data_file_name[1].str()).c_str());
 
         hmarkov = new Hidden_variable_order_markov(*this , false);
 
         hmarkov->create_cumul();
         hmarkov->log_computation();
-        state_seq_likelihood = hmarkov->viterbi_forward_backward(*seq , index , *data_out_file ,
+        state_seq_likelihood = hmarkov->viterbi_forward_backward(*seq , index , *out_data_file ,
                                                                  'g' , seq_likelihood);
-        data_out_file->close();
-        delete data_out_file;
+        out_data_file->close();
+        delete out_data_file;
 
         // ecriture du fichier de commandes et du fichier d'impression
 
