@@ -2414,7 +2414,7 @@ Semi_markov_iterator& Semi_markov_iterator::operator=(const Semi_markov_iterator
  *
  *--------------------------------------------------------------*/
 
-bool Semi_markov_iterator::simulation(int **seq , int length , bool initialization)
+bool Semi_markov_iterator::simulation(int **int_seq , int length , bool initialization)
 
 {
   bool status;
@@ -2463,9 +2463,9 @@ bool Semi_markov_iterator::simulation(int **seq , int length , bool initializati
       counter = 0;
     }
 
-    pstate = seq[0];
+    pstate = int_seq[0];
     for (i = 0;i < semi_markov->nb_output_process;i++) {
-      poutput[i] = seq[i + 1];
+      poutput[i] = int_seq[i + 1];
     }
 
     for (i = 0;i < length;i++) {
@@ -2517,21 +2517,21 @@ int** Semi_markov_iterator::simulation(int length , bool initialization)
 
 {
   register int i;
-  int **seq;
+  int **int_seq;
 
 
   if ((state == I_DEFAULT) && (!initialization)) {
-    seq = 0;
+    int_seq = 0;
   }
 
   else {
-    seq = new int*[semi_markov->nb_output_process + 1];
+    int_seq = new int*[semi_markov->nb_output_process + 1];
     for (i = 0;i <= semi_markov->nb_output_process;i++) {
-      seq[i] = new int[length];
+      int_seq[i] = new int[length];
     }
 
-    simulation(seq , length , initialization);
+    simulation(int_seq , length , initialization);
   }
 
-  return seq;
+  return int_seq;
 }
