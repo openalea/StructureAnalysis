@@ -48,6 +48,8 @@
 
 const int ASCII_NB_INDIVIDUAL = 10;    // nombre d'individus maximum pour afficher sous forme
                                        // de resultats d'alignement
+const double PLOT_YMARGIN = 0.1;       // marge en Y pour l'affichage des distances
+
 const double DISTANCE_ROUNDNESS = 1.e-12;  // arrondi sur une distance
 
 const int GLOBAL_NB_ITER = 20;         // nombre d'iterations ou les groupes
@@ -114,7 +116,8 @@ protected :
 
     int cumul_length_computation(bool *row_flag , bool *column_flag) const;
     double cumul_distance_computation(bool *row_flag , bool *column_flag) const;
-    plotable::MultiPlotSet* get_plotable(Format_error &) const;
+
+    MultiPlotSet* get_plotable(Format_error &error) const;
 
 public :
 
@@ -146,7 +149,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
-    plotable::MultiPlotSet* get_plotable() const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Distance_matrix);
 
@@ -231,6 +234,8 @@ private :
     void copy(const Clusters &clusters);
     void remove();
 
+    MultiPlotSet* get_plotable(Format_error &error) const;
+
     int* pattern_sort(int cluster) const;
 
     int most_distant_pattern_selection(double **normalized_distance , int ipattern) const;
@@ -268,6 +273,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Clusters);
 
