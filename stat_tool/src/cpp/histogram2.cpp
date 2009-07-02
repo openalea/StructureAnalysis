@@ -1578,6 +1578,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
     plot[0].xrange = Range(0 , MAX(max_nb_value , 2));
     plot[0].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
     plot[0].resize(nb_histo);
 
     shift = 0.;
@@ -1676,7 +1677,8 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
       }
 
       plot[i].xrange = Range(0 , max_nb_value - 1);
-      plot[i].yrange = Range(0 , 1);
+      plot[i].yrange = Range(0. , 1.);
+
       plot[i].resize(cumul_concentration_nb_histo);
 
       j = 0;
@@ -1749,8 +1751,6 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
       plot[i].xrange = Range(0. , 1.);
       plot[i].yrange = Range(0. , 1.);
-
-      // definition du nombre de SinglePlot 
 
       plot[i].resize(cumul_concentration_nb_histo + 1);
 
