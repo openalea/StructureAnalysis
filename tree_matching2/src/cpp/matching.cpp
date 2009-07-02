@@ -229,7 +229,7 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
   if (ni==0)
     {
       _restrMappList[1]=2;
-      for (i=0;i<nj;i++) { _restrMappList[i+1]=1; }
+      for (i=1;i<=nj;i++) { _restrMappList[i+1]=1; }
       cost3=getDBF(EMPTY_TREE,reference_vertex);
     }
   else
@@ -243,7 +243,7 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
       if (nj==0)
         {
           _restrMappList[2]=1;
-          for (i=0;i<ni;i++) { _restrMappList[i]=ni+1; }
+          for (i=1;i<=ni;i++) { _restrMappList[i]=ni+1; }
           cost3=getDBF(input_vertex,EMPTY_TREE);
         }
       else
@@ -273,10 +273,11 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
     case 2 :
         _choices.putLast(input_vertex,reference_vertex,jm);
 	break;
-      case 3 :
-	for (int i=0;i<T1->getNbChild(input_vertex);i++)
-	  _choices.putLast(input_vertex,reference_vertex,_restrMapp.who(_restrMappList[i]));
-        break;
+    case 3 :
+      for (int i=1;i<=T1->getNbChild(input_vertex);i++){
+	_choices.putLast(input_vertex,reference_vertex,_restrMapp.who(_restrMappList[i]));
+      }
+      break;
     default :   break;
     }
 
@@ -341,7 +342,7 @@ void Matching::ForestList(int input_vertex,int reference_vertex,Sequence& sequen
       for (int i=0;i<T1->getNbChild(input_vertex);i++)
         {
           int i_node=T1->child(input_vertex,i);
-          int r_node=Lat(L,2+i);
+          int r_node=Lat(L,3+i);
           if (r_node!=-1) TreeList(i_node,r_node,sequence);
         }
     }break;

@@ -35,11 +35,12 @@ def test_matching():
   m = Matching(tree1,tree2,node_cost)
   val = m.match()
   print 'match =',val
-  for i in xrange(6):
-    print m.getList(i,0)[0]
-  print
-  for i in xrange(6):
-    print m.getList(0,i)[0]
+  print m.getList(0,0)
+  #for i in xrange(6):
+  #  print m.getList(i,0)[0]
+  #print
+  #for i in xrange(6):
+  #  print m.getList(0,i)[0]
 
 
 test_matching()

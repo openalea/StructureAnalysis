@@ -99,10 +99,10 @@ void MatchPath::make(NodeList& input_list,NodeList& reference_list)
 	{
 		nbVertex=ni+nj+2;
 		nbEdge=(ni+(ni*nj)+nj);
-#ifdef __GNUC__
-#warning !!! Big hack de Fred pour faire marcher TreeMatching. A revoir
-#endif
-		if(ni == 1 && nj ==1)++nbEdge;
+// #ifdef __GNUC__
+// #warning !!! Big hack de Fred pour faire marcher TreeMatching. A revoir
+// #endif
+//		if(ni == 1 && nj ==1)++nbEdge;
 	}
 
 	// On initialise le flot et le cout a 0
@@ -137,7 +137,7 @@ bool MatchPath::saturated(int flow_edge)
   
   if ((ni>nj)&&(flow_edge==(2*ni+ni*nj))) { return(flow[flow_edge]==ni-nj); } 
   
-  return(flow[flow_edge]==true);
+  return(flow[flow_edge]==1);
 }
 
 
@@ -256,7 +256,9 @@ bool MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 	      // et on met le sommet et l'arc dans la liste du chemin. 
 		  assert(VertexOnThePath.size() > current_out_vertex);
 	      VertexOnThePath[current_out_vertex]=current_vertex;
-		  assert(EdgeOnThePath.size() > current_out_vertex);
+	      if (EdgeOnThePath.size() <= current_out_vertex)
+		cout<<"Probleme acces memoire"<<endl;
+	      assert(EdgeOnThePath.size() > current_out_vertex);
 	      EdgeOnThePath[current_out_vertex]=current_out_edge;
 	      
 	      // Si de plus, l'index dans le tas du sommet est faux, alors
@@ -344,7 +346,7 @@ DistanceType MatchPath::minCostFlow(VertexVector& map_list)
 {
   int current_vertex;
   VertexVector PredOnThePath(nbVertex,-1);
-  EdgeList EdgeOfThePath(nbEdge,-1);
+  EdgeList EdgeOfThePath(nbVertex,-1);
 
   int ni=_inputList->size();
   int nj=_referenceList->size();
