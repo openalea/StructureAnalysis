@@ -1754,7 +1754,6 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
  *
  *--------------------------------------------------------------*/
 
-
 MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int nb_dist ,
                                                        const Distribution **idist) const
 
@@ -1841,8 +1840,8 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
     if (MAX(xmax , 2) - 1 < TIC_THRESHOLD) {
       plot[0].xtics = 1;
     }
-
     plot[0].xrange = Range(0 , MAX(xmax , 2) - 1);
+
     plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
 
     plot[0].resize(nb_dist);
@@ -1925,16 +1924,15 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
             i++;
           }
         }
+
+        i = 3;
+      }
+
+      else {
+        i = 2;
       }
 
       // 4eme vue : courbes de concentration
-
-      if (nb_dist == 1) {
-        i = 2;
-      }
-      else {
-        i = 3;
-      }
 
       plot[i].xtics = 0.1;
       plot[i].ytics = 0.1;
@@ -1980,7 +1978,6 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
  *  Sortie graphique d'une loi
  *
  *--------------------------------------------------------------*/
-
 
 MultiPlotSet* Distribution::get_plotable() const
 
