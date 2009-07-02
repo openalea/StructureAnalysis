@@ -913,17 +913,20 @@ bool Clusters::plot_write(Format_error &error , const char *prefix ,
                           const char *title) const
 
 {
-  bool status;
+  bool status = true;
   register int i , j , k;
-  int max_nb_pattern , start , *plot_nb_pattern , **index;
-  double max , **normalized_distance;
-  ostringstream data_file_name;
+  int max_nb_pattern , plot_nb_cluster , *plot_nb_pattern , **index;
+  double min_distance , max_distance , **normalized_distance;
+  ostringstream *data_file_name;
+  ofstream *out_data_file;
 
 
-  // ecriture du fichier de donnees
+  // ecriture des fichiers de donnees
 
-  data_file_name << prefix << ".dat";
-  ofstream out_data_file((data_file_name.str()).c_str());
+  data_file_name = new ostringstream[nb_cluster];
+
+  data_file_name[0] << prefix << 1 << ".dat";
+  out_data_file = new ofstream((data_file_name[0].str()).c_str());
 
   if (!out_data_file) {
     status = false;
@@ -931,8 +934,6 @@ bool Clusters::plot_write(Format_error &error , const char *prefix ,
   }
 
   else {
-    status = true;
-
     index = new int*[nb_cluster];
     normalized_distance = new double*[nb_cluster];
     plot_nb_pattern = new int[nb_cluster];
@@ -964,29 +965,54 @@ bool Clusters::plot_write(Format_error &error , const char *prefix ,
       }
     }
 
-    for (i = 0;i < max_nb_pattern;i++) {
-      out_data_file << i + 1;
-      for (j = 0;j < nb_cluster;j++) {
-        if (i < plot_nb_pattern[j]) {
-          out_data_file << " " << normalized_distance[j][i];
-        }
-        else {
-          out_data_file << " " << 0.;
-        }
-      }
-      out_data_file << endl;
+    if (max_nb_pattern == 1) {
+      status = false;
+      error.update(STAT_error[STATR_SINGLE_ELEMENT_CLUSTERS]);
     }
 
-    // ecriture du fichier de commandes et du fichier d'impression
+    else {
+      plot_nb_cluster = 0;
+      i = 0;
 
-    if (max_nb_pattern > 1) {
+      for (j = 0;j < nb_cluster;j++) {
+        if (plot_nb_pattern[j] > 1) {
+          plot_nb_cluster++;
+
+          if (i == 0) {
+            min_distance = normalized_distance[j][0];
+            max_distance = normalized_distance[j][plot_nb_pattern[j] - 1];
+          }
+
+          else {
+            if (normalized_distance[j][0] < min_distance) {
+              min_distance = normalized_distance[j][0];
+            }
+            if (normalized_distance[j][plot_nb_pattern[j] - 1] > max_distance) {
+              max_distance = normalized_distance[j][plot_nb_pattern[j] - 1];
+            }
+
+            data_file_name[i] << prefix << i + 1 << ".dat";
+            out_data_file = new ofstream((data_file_name[i].str()).c_str());
+          }
+
+          for (k = 0;k < plot_nb_pattern[j];k++) {
+            *out_data_file << k + 1 << " " << normalized_distance[j][k] << endl;
+          }
+          out_data_file->close();
+          delete out_data_file;
+
+          i++;
+        }
+      }
+
+      // ecriture du fichier de commandes et du fichier d'impression
+
       for (i = 0;i < 2;i++) {
         ostringstream file_name[2];
 
         switch (i) {
         case 0 :
           file_name[0] << prefix << ".plot";
-          start = false;
           break;
         case 1 :
           file_name[0] << prefix << ".print";
@@ -1003,47 +1029,51 @@ bool Clusters::plot_write(Format_error &error , const char *prefix ,
 
         out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n";
 
+        out_file << "set title" << " \"";
+        if (title) {
+          out_file << title << " - ";
+        }
+        out_file << nb_cluster << " " << STAT_label[STATL_CLUSTERS] << "\"\n\n";
+
         for (j = 0;j < nb_cluster;j++) {
           if (plot_nb_pattern[j] > 1) {
-            if (i == 0) {
-              if (!start) {
-                start = true;
-              }
-              else {
-                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-              }
-            }
-            out_file << endl;
-
-            out_file << "set title" << " \"";
-            if (title) {
-              out_file << title << " - ";
-            }
-            out_file << STAT_label[STATL_CLUSTER] << " " << j + 1 << "\"\n\n";
-
             for (k = 0;k < plot_nb_pattern[j];k++) {
-              out_file << "set label \"" << distance_matrix->row_identifier[index[j][k]] << "\" at " << k + 1 << ","
-                       << normalized_distance[j][k] << endl;
+              out_file << "set label \"" << distance_matrix->row_identifier[index[j][k]] << "\" at "
+                       << k + 1 << ", " << normalized_distance[j][k] << endl;
+            }
+            out_file << endl;
+          }
+        }
+
+        if (max_nb_pattern < TIC_THRESHOLD) {
+          out_file << "set xtics 1,1" << endl;
+        }
+
+        out_file << "plot [1:" << max_nb_pattern << "] ["
+                 << min_distance * (1. - PLOT_YMARGIN)  << ":"
+                 << max_distance * (1. + PLOT_YMARGIN) << "] ";
+
+        j = 0;
+        for (k = 0;k < nb_cluster;k++) {
+          if (plot_nb_pattern[k] > 1) {
+            out_file << "\"" << ::label((data_file_name[j].str()).c_str())
+                     << "\" using 1:2 title \"" << STAT_label[STATL_CLUSTER] << " " << k + 1
+                     << "\" with linespoints";
+
+            if (j < plot_nb_cluster - 1) {
+              out_file << ",\\";
             }
             out_file << endl;
 
-            max = normalized_distance[j][plot_nb_pattern[j] - 1];
-
-            if (plot_nb_pattern[j] < TIC_THRESHOLD) {
-              out_file << "set xtics 1,1" << endl;
-            }
-
-            out_file << "plot [1:" << plot_nb_pattern[j] << "] [0:" << max * YSCALE
-                     << "] \"" << ::label((data_file_name.str()).c_str()) << "\" using 1:" << j + 2
-                     << " title \"" << distance_matrix->label << "\" with linespoints" << endl;
-
-            if (plot_nb_pattern[j] < TIC_THRESHOLD) {
-              out_file << "set xtics autofreq" << endl;
-            }
+            j++;
           }
-
-          out_file << "\nunset label" << endl;
         }
+
+        if (max_nb_pattern < TIC_THRESHOLD) {
+          out_file << "set xtics autofreq" << endl;
+        }
+
+        out_file << "\nunset label" << endl;
 
         if (i == 1) {
           out_file << "\nset terminal x11" << endl;
@@ -1061,9 +1091,165 @@ bool Clusters::plot_write(Format_error &error , const char *prefix ,
     delete [] normalized_distance;
 
     delete [] plot_nb_pattern;
+
   }
+  delete [] data_file_name;
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Clusters.
+ *
+ *  argument : reference sur un objet Format_error.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Clusters::get_plotable(Format_error &error) const
+
+{
+  register int i , j , k;
+  int max_nb_pattern , plot_nb_cluster , *plot_nb_pattern , **index;
+  double min_distance , max_distance , **normalized_distance;
+  ostringstream title , legend , identifier;
+  MultiPlotSet *plot_set;
+
+
+  index = new int*[nb_cluster];
+  normalized_distance = new double*[nb_cluster];
+  plot_nb_pattern = new int[nb_cluster];
+
+  max_nb_pattern = 0;
+
+  for (i = 0;i < nb_cluster;i++) {
+
+    // tri par distance croissante
+
+    index[i] = pattern_sort(i);
+
+    plot_nb_pattern[i] = cluster_nb_pattern[i];
+
+    normalized_distance[i] = new double[cluster_nb_pattern[i]];
+    for (j = 0;j < cluster_nb_pattern[i];j++) {
+      normalized_distance[i][j] = pattern_distance[index[i][j]][i];
+      if (normalized_distance[i][j] == -D_INF) {
+        plot_nb_pattern[i] = j;
+        break;
+      }
+      else if (pattern_length[index[i][j]][i] > 1) {
+        normalized_distance[i][j] /= pattern_length[index[i][j]][i];
+      }
+    }
+
+    if (plot_nb_pattern[i] > max_nb_pattern) {
+      max_nb_pattern = plot_nb_pattern[i];
+    }
+  }
+
+  if (max_nb_pattern == 1) {
+    plot_set = 0;
+    error.update(STAT_error[STATR_SINGLE_ELEMENT_CLUSTERS]);
+  }
+
+  else {
+    plot_set = new MultiPlotSet(1);
+    MultiPlotSet &plot = *plot_set;
+
+    title.str("");
+    title << nb_cluster << " " << STAT_label[STATL_CLUSTERS];
+    plot.title = title.str();
+
+    plot.border = "15 lw 0";
+
+    plot_nb_cluster = 0;
+    i = 0;
+
+    for (j = 0;j < nb_cluster;j++) {
+      if (plot_nb_pattern[j] > 1) {
+        plot_nb_cluster++;
+
+        if (i == 0) {
+          min_distance = normalized_distance[j][0];
+          max_distance = normalized_distance[j][plot_nb_pattern[j] - 1];
+        }
+
+        else {
+          if (normalized_distance[j][0] < min_distance) {
+            min_distance = normalized_distance[j][0];
+          }
+          if (normalized_distance[j][plot_nb_pattern[j] - 1] > max_distance) {
+            max_distance = normalized_distance[j][plot_nb_pattern[j] - 1];
+          }
+        }
+
+        i++;
+      }
+    }
+
+    if (max_nb_pattern < TIC_THRESHOLD) {
+      plot[0].xtics = 1;
+
+//      out_file << "set xtics 1,1" << endl;
+    }
+
+    plot[0].xrange = Range(1 , max_nb_pattern);
+    plot[0].yrange = Range(min_distance * (1. - PLOT_YMARGIN) ,
+                           max_distance * (1. + PLOT_YMARGIN));
+
+    plot[0].resize(plot_nb_cluster);
+
+    i = 0;
+    for (j = 0;j < nb_cluster;j++) {
+      if (plot_nb_pattern[j] > 1) {
+        legend.str("");
+        legend << STAT_label[STATL_CLUSTER] << " " << j + 1;
+        plot[0][i].legend = legend.str();
+
+        plot[0][i].style = "linespoints";
+        plot[0][i].label = "true";
+
+        for (k = 0;k < plot_nb_pattern[j];k++) {
+          plot[0][i].add_point(k + 1 , normalized_distance[j][k]);
+
+          identifier.str("");
+          identifier << row_identifier[index[j][k]];
+          plot[0][i].add_text(k + 1 , normalized_distance[j][k] , identifier.str());
+        }
+
+        i++;
+      }
+    }
+  }
+
+  for (i = 0;i < nb_cluster;i++) {
+    delete [] index[i];
+    delete [] normalized_distance[i];
+  }
+  delete [] index;
+  delete [] normalized_distance;
+
+  delete [] plot_nb_pattern;
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Clusters.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Clusters::get_plotable() const
+
+{
+  MultiPlotSet *plot_set;
+  Format_error error;
+
+
+  return get_plotable(error);
 }
 
 
