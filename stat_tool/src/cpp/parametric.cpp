@@ -1628,7 +1628,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
           out_file << "set xtics 0,1" << endl;
         }
 
-        out_file << "plot [0:" << MAX(plot_nb_value , 2) - 1 << "] [0:"
+        out_file << "plot [0:" << MAX(plot_nb_value - 1 , 1) << "] [0:"
                  << (int)(MAX(histo->max , max * scale) * YSCALE) + 1
                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using 1:3 title \""
                  << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
