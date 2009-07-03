@@ -991,16 +991,16 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
 
   // 1ere vue : loi composee
 
-  if (nb_value - 1 < TIC_THRESHOLD) {
-    plot[0].xtics = 1;
-  }
-
   xmax = nb_value - 1;
   if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
       (mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
   plot[0].xrange = Range(0 , xmax);
+
+  if (nb_value - 1 < TIC_THRESHOLD) {
+    plot[0].xtics = 1;
+  }
 
   i = 0;
 
@@ -1038,12 +1038,12 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
 
     // 2eme vue : fonctions de repartition
 
+    plot[1].xrange = Range(0 , xmax);
+    plot[1].yrange = Range(0. , 1.);
+
     if (nb_value - 1 < TIC_THRESHOLD) {
       plot[1].xtics = 1;
     }
-
-    plot[1].xrange = Range(0 , xmax);
-    plot[1].yrange = Range(0. , 1.);
 
     plot[1].resize(2);
 
@@ -1074,16 +1074,16 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
 
   // 2eme vue : loi de la somme
 
-  if (sum_distribution->nb_value - 1 < TIC_THRESHOLD) {
-    plot[i].xtics = 1;
-  }
-
   xmax = sum_distribution->nb_value - 1;
   if ((sum_distribution->cumul[xmax] > 1. - DOUBLE_ERROR) &&
       (sum_distribution->mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
   plot[i].xrange = Range(0 , xmax);
+
+  if (sum_distribution->nb_value - 1 < TIC_THRESHOLD) {
+    plot[i].xtics = 1;
+  }
 
   j = 0;
 
@@ -1124,16 +1124,16 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
 
   // 3eme vue : loi elementaire
 
-  if (distribution->nb_value - 1 < TIC_THRESHOLD) {
-    plot[i].xtics = 1;
-  }
-
   xmax = distribution->nb_value - 1;
   if ((distribution->cumul[xmax] > 1. - DOUBLE_ERROR) &&
       (distribution->mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
   plot[i].xrange = Range(0 , xmax);
+
+  if (distribution->nb_value - 1 < TIC_THRESHOLD) {
+    plot[i].xtics = 1;
+  }
 
   j = 0;
 
