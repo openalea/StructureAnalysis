@@ -1437,7 +1437,7 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
     mixt_histo->plotable_cumul_write(plot[1][0]);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE] << " "
            << STAT_label[STATL_FUNCTION];
     plot[1][1].legend = legend.str();
 
