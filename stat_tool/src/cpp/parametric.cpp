@@ -1813,13 +1813,13 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
     plot_nb_value = plot_nb_value_computation(histo);
 
-    if (plot_nb_value - 1 < TIC_THRESHOLD) {
-      plot[0].xtics = 1;
-    }
-
     plot[0].xrange = Range(0 , MAX(plot_nb_value - 1 , 1));
     plot[0].yrange = Range(0 , ceil(MAX(histo->max ,
                                     max * histo->nb_element) * YSCALE));
+
+    if (plot_nb_value - 1 < TIC_THRESHOLD) {
+      plot[0].xtics = 1;
+    }
 
     plot[0].resize(2);
 
@@ -1847,12 +1847,12 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
       // 2eme vue : fonctions de repartition
 
+      plot[1].xrange = Range(0 , plot_nb_value - 1);
+      plot[1].yrange = Range(0. , 1. - complement);
+
       if (plot_nb_value - 1 < TIC_THRESHOLD) {
         plot[1].xtics = 1;
       }
-
-      plot[1].xrange = Range(0 , plot_nb_value - 1);
-      plot[1].yrange = Range(0. , 1. - complement);
 
       plot[1].resize(histo->variance > 0. ? 2 : 1);
 
@@ -1887,11 +1887,13 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
               << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
         plot[2].title = title.str();
 
-        plot[2].xtics = 0.1;
-        plot[2].ytics = 0.1;
-
         plot[2].xrange = Range(0. , 1. - complement);
         plot[2].yrange = Range(0. , 1. - complement);
+
+        plot[2].grid = true;
+
+        plot[2].xtics = 0.1;
+        plot[2].ytics = 0.1;
 
         plot[2].resize(2);
 
@@ -1923,11 +1925,13 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
         i = 3;
       }
 
-      plot[i].xtics = 0.1;
-      plot[i].ytics = 0.1;
-
       plot[i].xrange = Range(0. , 1. - complement);
       plot[i].yrange = Range(0. , 1. - complement);
+
+      plot[i].grid = true;
+
+      plot[i].xtics = 0.1;
+      plot[i].ytics = 0.1;
 
       plot[i].resize(histo->variance > 0. ? 3 : 2);
 
