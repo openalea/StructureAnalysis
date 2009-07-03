@@ -282,6 +282,8 @@ const char *STAT_label[] = {
   "regression variation / total variation" ,
   "residual" ,
   "standardized residual" ,
+  "linear" ,
+  "nonparametric" ,
   "regression" ,
   "estimation" ,
 
