@@ -1188,13 +1188,13 @@ MultiPlotSet* Clusters::get_plotable(Format_error &error) const
       }
     }
 
-    if (max_nb_pattern < TIC_THRESHOLD) {
-      plot[0].xtics = 1;
-    }
-
     plot[0].xrange = Range(1 , max_nb_pattern);
     plot[0].yrange = Range(min_distance * (1. - PLOT_YMARGIN) ,
                            max_distance * (1. + PLOT_YMARGIN));
+
+    if (max_nb_pattern < TIC_THRESHOLD) {
+      plot[0].xtics = 1;
+    }
 
     plot[0].resize(plot_nb_cluster * 2);
 
@@ -1213,7 +1213,7 @@ MultiPlotSet* Clusters::get_plotable(Format_error &error) const
           plot[0][i * 2].add_point(k + 1 , normalized_distance[j][k]);
 
           identifier.str("");
-          identifier << row_identifier[index[j][k]];
+          identifier << distance_matrix->row_identifier[index[j][k]];
           plot[0][i * 2 + 1].add_text(k + 1 , normalized_distance[j][k] , identifier.str());
         }
 
