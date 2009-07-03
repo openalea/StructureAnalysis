@@ -1564,12 +1564,12 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
 
     // 1ere vue : histogramme
 
+    plot[0].xrange = Range(0 , nb_value - 1);
+    plot[0].yrange = Range(0 , ceil(max * YSCALE));
+
     if (nb_value - 1 < TIC_THRESHOLD) {
       plot[0].xtics = 1;
     }
-
-    plot[0].xrange = Range(0 , nb_value - 1);
-    plot[0].yrange = Range(0 , ceil(max * YSCALE));
 
     plot[0].resize(1);
 
@@ -1581,10 +1581,6 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
 
     // 2eme vue : loi et fonction de survie
 
-    if (nb_value - 1 < TIC_THRESHOLD) {
-      plot[1].xtics = 1;
-    }
-
     xmax = nb_value - 1;
     if ((double)frequency[xmax] / (double)nb_element > PLOT_MASS_THRESHOLD) {
       xmax++;
@@ -1592,6 +1588,10 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
     plot[1].xrange = Range(0 , xmax);
 
     plot[1].yrange = Range(0. , 1.);
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      plot[1].xtics = 1;
+    }
 
     plot[1].resize(2);
 
@@ -1613,14 +1613,14 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
 
     survival_rate = new Curves(*this);
 
+    plot[2].xrange = Range(survival_rate->offset , survival_rate->length - 1);
+    plot[2].yrange = Range(0. , 1.);
+
     if (survival_rate->length - 1 < TIC_THRESHOLD) {
       plot[2].xtics = 1;
     }
 
     plot[2].resize(2);
-
-    plot[2].xrange = Range(survival_rate->offset , survival_rate->length - 1);
-    plot[2].yrange = Range(0. , 1.);
 
     plot[2][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
 
