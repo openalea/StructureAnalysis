@@ -1057,8 +1057,8 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     compound_histo->plotable_cumul_write(plot[1][0]);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
-           << STAT_label[STATL_FUNCTION];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_COMPOUND] << " "
+           << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
     plot[1][1].legend = legend.str();
 
     plot[1][1].style = "linespoints";
