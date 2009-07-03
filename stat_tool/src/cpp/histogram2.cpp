@@ -1735,7 +1735,8 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
             plot[i][j].style = "linespoints";
 
             histo[k]->plotable_cumul_matching_write(plot[i][j] , histo[reference_matching]->offset ,
-                                                    histo[reference_matching]->nb_value , cumul[k]);
+                                                    histo[reference_matching]->nb_value ,
+                                                    cumul[reference_matching] , cumul[k]);
             j++;
           }
         }
