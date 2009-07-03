@@ -1837,12 +1837,12 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
 
     // 1ere vue : lois
 
+    plot[0].xrange = Range(0 , MAX(xmax , 2) - 1);
+    plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
+
     if (MAX(xmax , 2) - 1 < TIC_THRESHOLD) {
       plot[0].xtics = 1;
     }
-    plot[0].xrange = Range(0 , MAX(xmax , 2) - 1);
-
-    plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
 
     plot[0].resize(nb_dist);
 
@@ -1864,12 +1864,12 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
 
       // 2eme vue : fonctions de repartition
 
+      plot[1].xrange = Range(0 , xmax - 1);
+      plot[1].yrange = Range(0. , 1. - min_complement);
+
       if (xmax - 1 < TIC_THRESHOLD) {
         plot[1].xtics = 1;
       }
-
-      plot[1].xrange = Range(0 , xmax - 1);
-      plot[1].yrange = Range(0. , 1. - min_complement);
 
       plot[1].resize(cumul_concentration_nb_dist);
 
@@ -1900,13 +1900,13 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
               << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
         plot[2].title = title.str();
 
+        plot[2].xrange = Range(0. , 1. - min_complement);
+        plot[2].yrange = Range(0. , 1. - min_complement);
+
         plot[2].grid = true;
 
         plot[2].xtics = 0.1;
         plot[2].ytics = 0.1;
-
-        plot[2].xrange = Range(0. , 1. - min_complement);
-        plot[2].yrange = Range(0. , 1. - min_complement);
 
         plot[2].resize(cumul_concentration_nb_dist);
 
@@ -1934,12 +1934,13 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
 
       // 4eme vue : courbes de concentration
 
-      plot[i].xtics = 0.1;
-      plot[i].ytics = 0.1;
-      plot[i].grid = true;
-
       plot[i].xrange = Range(0. , 1. - min_complement);
       plot[i].yrange = Range(0. , 1. - min_complement);
+
+      plot[i].grid = true;
+
+      plot[i].xtics = 0.1;
+      plot[i].ytics = 0.1;
 
       plot[i].resize(cumul_concentration_nb_dist + 1);
 
@@ -2319,10 +2320,6 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
 
     // 1ere vue : loi et fonction de survie
 
-    if (nb_value - 1 < TIC_THRESHOLD) {
-      plot[0].xtics = 1;
-    }
-
     xmax = nb_value - 1;
     if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
         (mass[xmax] > PLOT_MASS_THRESHOLD)) {
@@ -2331,6 +2328,10 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
     plot[0].xrange = Range(0 , xmax);
 
     plot[0].yrange = Range(0. , 1. - complement);
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      plot[0].xtics = 1;
+    }
 
     plot[0].resize(2);
 
@@ -2359,10 +2360,10 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
       plot[1].xtics = 1;
     }
 
-    plot[1].resize(2);
-
     plot[1].xrange = Range(survival_rate->offset , survival_rate->length - 1);
     plot[1].yrange = Range(0. , 1.);
+
+    plot[1].resize(2);
 
     plot[1][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
 
