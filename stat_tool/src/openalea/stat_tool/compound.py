@@ -21,7 +21,7 @@ __all__ = ['Compound',
             ]
 
 
-def Compound(*args):
+def Compound(*args, **kargs):
     """
     Construction of a compound of distributions from a sum distribution and an
     elementary distribution or from an ASCII file.
@@ -48,6 +48,7 @@ def Compound(*args):
         :options: +SKIP
 
         >>> Compound(sum_dist, dist)
+        >>> Compound(sum_dist, dist, Threshold=0.999)
         >>> Compound(filename)
 
     .. seealso::
@@ -55,6 +56,9 @@ def Compound(*args):
         :func:`~openalea.stat_tool.estimate.Estimate`,
         :func:`~openalea.stat_tool.simulate.Simulate`
     """
+
+    Threshold = kargs.get("Threshold", None)
+
     if((len(args)==0) or (len(args)>3)) : 
         raise TypeError("Bad number of arguments")
 
@@ -64,10 +68,11 @@ def Compound(*args):
 
     # build list of distributions
     if(len(args)==2) :    
-        return _stat_tool._Compound(args[0], args[1])
+        if Threshold:
+            return _stat_tool._Compound(args[0], args[1]) 
+        else:
+            return _stat_tool._Compound(args[0], args[1])
     
-    if(len(args)==3) :    
-        return _stat_tool._Compound(args[0], args[1], args[2])
     
     
 
