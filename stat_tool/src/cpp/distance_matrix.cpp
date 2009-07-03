@@ -2443,13 +2443,13 @@ MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
         plot[0][1].add_text(i + 1 , plot_distance[index[i]] , identifier.str());
       }
 
-      if (plot_nb_pattern < TIC_THRESHOLD) {
-        plot[0].xtics = 1;
-      }
-
       plot[0].xrange = Range(1 , plot_nb_pattern);
       plot[0].yrange = Range(plot_distance[index[0]] * (1. - PLOT_YMARGIN) ,
                              plot_distance[index[plot_nb_pattern - 1]] * (1. + PLOT_YMARGIN));
+
+      if (plot_nb_pattern < TIC_THRESHOLD) {
+        plot[0].xtics = 1;
+      }
     }
 
     delete [] plot_distance;
