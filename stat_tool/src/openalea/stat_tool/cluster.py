@@ -374,12 +374,13 @@ def Clustering(matrix, type, *args, **kargs):
     if(type == "Partition"):
         Algorithm = kargs.get("Algorithm", "Divisive")
         if(isinstance(args[0], int)):
-            Prototypes = kargs.get("Prototypes", range(1,args[0]))
-#            Prototypes = list(range(1, args[0]+1))
+            # if Prototypes is empty, the wrapping will send an
+            # int * = 0 to the prototyping function, as expected
+            Prototypes = kargs.get("Prototypes", [])
             nb_cluster = args[0]
             
-            #if Algorithm=='Agglomerative':
-            #    raise TypeError("Algorithm must be Divisive or Ordering")
+            if Algorithm=='Agglomerative':
+                raise TypeError("Algorithm must be Divisive or Ordering")
             
             try:
                 Algorithm = algorithm_map[Algorithm]
@@ -388,20 +389,6 @@ def Clustering(matrix, type, *args, **kargs):
                            + str(algorithm_map.keys()))
             
                 
-            # WARNING : in this case, algorithm is an int (default is 1)
-#            if(not isinstance(Algorithm, int)):
-#                if(kargs.has_key("Algorithm")):
-#                    raise TypeError("Algorithm must be an int")
-#                else:
-#                    Algorithm = 1
-#            if (Algorithm!=1 and Algorithm!=2):
-#                    raise TypeError("Algorithm must be an int set to 1 or 2")
-#            if(len(Prototypes) != nb_cluster):
-#                raise TypeError("Prototypes must have %i values"%(nb_cluster))
-    
-
-            
-                    
             return matrix.partitioning_prototype(nb_cluster, Prototypes, 
                                                  Initialization, Algorithm)
         else:
