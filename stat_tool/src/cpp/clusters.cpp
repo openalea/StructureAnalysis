@@ -1190,32 +1190,31 @@ MultiPlotSet* Clusters::get_plotable(Format_error &error) const
 
     if (max_nb_pattern < TIC_THRESHOLD) {
       plot[0].xtics = 1;
-
-//      out_file << "set xtics 1,1" << endl;
     }
 
     plot[0].xrange = Range(1 , max_nb_pattern);
     plot[0].yrange = Range(min_distance * (1. - PLOT_YMARGIN) ,
                            max_distance * (1. + PLOT_YMARGIN));
 
-    plot[0].resize(plot_nb_cluster);
+    plot[0].resize(plot_nb_cluster * 2);
 
     i = 0;
     for (j = 0;j < nb_cluster;j++) {
       if (plot_nb_pattern[j] > 1) {
         legend.str("");
         legend << STAT_label[STATL_CLUSTER] << " " << j + 1;
-        plot[0][i].legend = legend.str();
+        plot[0][i * 2].legend = legend.str();
 
-        plot[0][i].style = "linespoints";
-        plot[0][i].label = "true";
+        plot[0][i * 2].style = "linespoints";
+
+        plot[0][i * 2 + 1].label = "true";
 
         for (k = 0;k < plot_nb_pattern[j];k++) {
-          plot[0][i].add_point(k + 1 , normalized_distance[j][k]);
+          plot[0][i * 2].add_point(k + 1 , normalized_distance[j][k]);
 
           identifier.str("");
           identifier << row_identifier[index[j][k]];
-          plot[0][i].add_text(k + 1 , normalized_distance[j][k] , identifier.str());
+          plot[0][i * 2 + 1].add_text(k + 1 , normalized_distance[j][k] , identifier.str());
         }
 
         i++;
