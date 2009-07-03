@@ -1171,7 +1171,7 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     convol_histo->plotable_cumul_write(plot[2][0]);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION] << " "
            << STAT_label[STATL_FUNCTION];
     plot[2][1].legend = legend.str();
 
