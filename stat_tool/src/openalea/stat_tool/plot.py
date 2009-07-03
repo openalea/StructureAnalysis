@@ -136,13 +136,14 @@ class mplotlib(plotter):
         pylab = self.pylab
         matplotlib = self.matplotlib
         multiset = plotable
-
         # Title & border
         #if title: pylab.suptitle(title) 
         #multiset.border
 
         # Configure figure
         f1 = pylab.figure(1)
+        f1.clf()     
+
         f1.set_facecolor("w")
 
         # Count group
@@ -164,9 +165,10 @@ class mplotlib(plotter):
         # nb subplot
         _nbx = len(multiset)
         
+        if title:
+            pylab.suptitle(title) 
         # For each subplot
         for i, multiplot in enumerate(multiset):
-            
             g = multiplot.group
             # Group filter
             if(groups and g not in groups):
@@ -174,10 +176,10 @@ class mplotlib(plotter):
 
             # Select window
             pylab.figure(g+1)
+
             # Select Subplot
             pylab.subplot(group_size[g], 1, group_index[g] + 1)
             group_index[g] += 1
-
             pylab.title(multiplot.title)
             
             # Labels
@@ -192,9 +194,6 @@ class mplotlib(plotter):
                 legend = singleplot.legend
                 color = singleplot.color
                 label  = singleplot.label
-                
-                #for t in singleplot.data
-                #    print t
                 if(not color): 
                     color = self.colors[j % len(self.colors)]
 
@@ -214,7 +213,7 @@ class mplotlib(plotter):
                             labels = singleplot.get_label_text(i)
                             matplotlib.pyplot.text(x, y, labels)
                             pylab.hold(True)         
-                        break # nothing else to be done in principle
+                #        break # nothing else to be done in principle
                     else:
                         print "Warning. Empty data."
                         return
@@ -223,27 +222,26 @@ class mplotlib(plotter):
                     # continue to the normal plots
                     
                     
-                # Manage style
-                pointstyle = self.pointstyles[j % len(self.pointstyles)]
+                    # Manage style
+                    pointstyle = self.pointstyles[j % len(self.pointstyles)]
                 
-                if "impulses" in style:
-                    l = pylab.vlines(x, 0, y)
-                elif "lines" and  "points" in style:
-                    #l = pylab.plot(x, y, '-', x, y, pointstyle)
-                    l = pylab.plot(x, y, pointstyle + '-')
-                elif "points" in style:
-                    l = pylab.plot(x, y, pointstyle)
-                elif "lines" in style:
-                    l = pylab.plot(x, y, '-')
-                else:
-                    l = pylab.plot(x, y, style)
+                    if "impulses" in style:
+                        l = pylab.vlines(x, 0, y)
+                    elif "lines" and  "points" in style:
+                        #l = pylab.plot(x, y, '-', x, y, pointstyle)
+                        l = pylab.plot(x, y, pointstyle + '-')
+                    elif "points" in style:
+                        l = pylab.plot(x, y, pointstyle)
+                    elif "lines" in style:
+                        l = pylab.plot(x, y, '-')
+                    else:
+                        l = pylab.plot(x, y, style)
                     
-                if(color):
-                    pylab.setp(l, color=color)
+                    if(color):
+                        pylab.setp(l, color=color)
                     
-                lines.append(l)
-                legends.append(legend)
-
+                    lines.append(l)
+                    legends.append(legend)
             # Legend
             lg = pylab.legend(lines, legends)
             lg.legendPatch.set_alpha(0.1) # transparency
@@ -274,6 +272,7 @@ class mplotlib(plotter):
 
         if show == True:
             pylab.show()
+            
    
 
 PLOTTER = None
