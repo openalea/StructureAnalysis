@@ -89,6 +89,7 @@ protected :
     std::ostream& ascii_print(std::ostream &os) const;
     std::ostream& spreadsheet_print(std::ostream &os) const;
     bool plot_print(const char *path) const;
+    void plotable_write(SinglePlot &plot) const;
 
 /*    RWspace binaryStoreSize() const;
     void restoreGuts(RWvistream&);
@@ -147,7 +148,6 @@ private :
     double residual_mean_computation() const;
     double residual_variance_computation(double residual_mean) const;
     double residual_square_sum_computation() const;
-    plotable::MultiPlotSet* get_plotable(Format_error &) const;
     
 public :
 
@@ -165,6 +165,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Regression);
 
@@ -175,7 +176,6 @@ public :
     void saveGuts(RWFile&) const; */
 
     // acces membres de la classe
-    plotable::MultiPlotSet* get_plotable() const;
 
     Vectors* get_vectors() const { return vectors; }
     int get_nb_vector() const { return nb_vector; }
