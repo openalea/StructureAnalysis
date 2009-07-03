@@ -2405,7 +2405,7 @@ MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
 
       plot.border = "15 lw 0";
 
-      plot[0].resize(1);
+      plot[0].resize(2);
 
       legend.str("");
       if (nb_row == 1) {
@@ -2420,7 +2420,8 @@ MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
       plot[0][0].legend = legend.str();
 
       plot[0][0].style = "linespoints";
-      plot[0][0].label = "true";
+
+      plot[0][1].label = "true";
 
       for (i = 0;i < plot_nb_pattern;i++) {
         if (plot_distance[index[i]] == -D_INF) {
@@ -2439,13 +2440,11 @@ MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
           identifier << column_identifier[index[i]];
         }
 
-        plot[0][0].add_text(i + 1 , plot_distance[index[i]] , identifier.str());
+        plot[0][1].add_text(i + 1 , plot_distance[index[i]] , identifier.str());
       }
 
       if (plot_nb_pattern < TIC_THRESHOLD) {
         plot[0].xtics = 1;
-
-//        out_file << "set xtics 1,1" << endl;
       }
 
       plot[0].xrange = Range(1 , plot_nb_pattern);
