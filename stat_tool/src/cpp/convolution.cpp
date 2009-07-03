@@ -1086,10 +1086,6 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
   // 1ere vue : produit de convolution
 
-  if (nb_value - 1 < TIC_THRESHOLD) {
-    plot[0].xtics = 1;
-  }
-
   xmax = nb_value - 1;
   if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
       (mass[xmax] > PLOT_MASS_THRESHOLD)) {
@@ -1104,6 +1100,10 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     }
   }
   plot[0].yrange = Range(0. , MIN(ymax * YSCALE , 1.));
+
+  if (nb_value - 1 < TIC_THRESHOLD) {
+    plot[0].xtics = 1;
+  }
 
   plot[0].resize(nb_distribution + 1);
 
@@ -1128,13 +1128,13 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
     // 2eme vue : produit de convolution ajuste
 
-    if (nb_value - 1 < TIC_THRESHOLD) {
-      plot[1].xtics = 1;
-    }
-
     plot[1].xrange = Range(0 , xmax);
     plot[1].yrange = Range(0. , ceil(MAX(convol_histo->max ,
                                      max * convol_histo->nb_element) * YSCALE));
+
+    if (nb_value - 1 < TIC_THRESHOLD) {
+      plot[1].xtics = 1;
+    }
 
     plot[1].resize(2);
 
@@ -1152,12 +1152,12 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
     // 3eme vue : fonctions de repartition
 
+    plot[2].xrange = Range(0 , xmax);
+    plot[2].yrange = Range(0. , 1.);
+
     if (nb_value - 1 < TIC_THRESHOLD) {
       plot[2].xtics = 1;
     }
-
-    plot[2].xrange = Range(0 , xmax);
-    plot[2].yrange = Range(0. , 1.);
 
     plot[2].resize(2);
 
@@ -1183,10 +1183,6 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
       // vues suivantes : distributions ajustees
 
-      if (distribution[i]->nb_value - 1 < TIC_THRESHOLD) {
-        plot[i + 3].xtics = 1;
-      }
-
       xmax = distribution[i]->nb_value - 1;
       if ((distribution[i]->cumul[xmax] > 1. - DOUBLE_ERROR) &&
           (distribution[i]->mass[xmax] > PLOT_MASS_THRESHOLD)) {
@@ -1197,6 +1193,10 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
       plot[i + 3].yrange = Range(0. , ceil(MAX(convol_histo->histogram[i]->max ,
                                            distribution[i]->max * convol_histo->histogram[i]->nb_element)
                                            * YSCALE));
+
+      if (distribution[i]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[i + 3].xtics = 1;
+      }
 
       plot[i + 3].resize(2);
 
