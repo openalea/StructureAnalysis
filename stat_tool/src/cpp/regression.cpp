@@ -55,6 +55,7 @@ extern int column_width(int value);
 extern int column_width(int min_value , int max_value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
+extern double standard_normal_value_computation(double critical_probability);
 
 
 
@@ -402,6 +403,34 @@ bool Regression_kernel::plot_print(const char *path) const
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture de la fonction de regression.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Regression_kernel::plotable_write(SinglePlot &plot) const
+
+{
+  if (ident == STAT_LINEAR) {
+    plot.add_point(min_value , point[0]);
+    plot.add_point(max_value , point[max_value - min_value]);
+  }
+
+  else {
+    register int i;
+    double *ppoint;
+
+    ppoint = point;
+    for (i = min_value;i <= max_value;i++) {
+      plot.add_point(i , *ppoint++);
+    }
+  }
 }
 
 
@@ -1020,7 +1049,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
       *presponse++ = point[vectors->int_vector[i][0] - min_value];
     }
 
-    // calcul des residus reduits
+    // calcul des residus standardises
 
     standard_residual = new double[nb_vector];
 
@@ -1053,7 +1082,7 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     width[3] = column_width(nb_vector , residual) + ASCII_SPACE;
     width[4] = column_width(nb_vector , standard_residual) + ASCII_SPACE;
 
-    // ecriture des reponses observees et theoriques, des residus et des residus reduits
+    // ecriture des reponses observees et theoriques, des residus et des residus standardises
 
     os << "\n" << STAT_label[STATL_EXPLANATORY_VARIABLE] << " | " << STAT_label[STATL_RESPONSE_VARIABLE]
        << " | " << STAT_label[STATL_ESTIMATION] << " | " << STAT_label[STATL_RESIDUAL]
@@ -1303,7 +1332,7 @@ bool Regression::spreadsheet_write(Format_error &error , const char *path) const
     out_file << STAT_label[STATL_RESIDUAL] << " " << STAT_label[STATL_STANDARD_DEVIATION] << "\t"
              << residual_standard_deviation << endl;
 
-    // ecriture des reponses observees et theoriques, des residus et des residus reduits
+    // ecriture des reponses observees et theoriques, des residus et des residus standardises
 
     out_file << "\n" << STAT_label[STATL_EXPLANATORY_VARIABLE] << "\t" << STAT_label[STATL_RESPONSE_VARIABLE]
              << "\t" << STAT_label[STATL_ESTIMATION] << "\t" << STAT_label[STATL_RESIDUAL]
@@ -1327,118 +1356,6 @@ bool Regression::spreadsheet_write(Format_error &error , const char *path) const
 }
 
 
-MultiPlotSet* Regression::get_plotable() const
-
-{
-  MultiPlotSet *set;
-
-  Format_error error;
-  set = Regression::get_plotable(error);
-
-  return set;
-}
-
-
-MultiPlotSet* Regression::get_plotable(Format_error &error) const
-{
-  
-    bool status;
-  register int i , j , k;
-  int **frequency;
-  double residual_mean , residual_standard_deviation , min_standard_residual , max_standard_residual ,
-         min_response , max_response , *standard_residual , *presidual , *pstandard_residual, *ppoint;
-  ostringstream data_file_name[2];
-
-  ppoint = point;
-  const int nb_vector = vectors->get_nb_vector();
-  error.init();
-
-  MultiPlotSet *plotset = new MultiPlotSet(2);
-  MultiPlotSet &set = *plotset;
-
-  set.title = "Regression";
-  set.border = "15 lw 0";
-
-
-  residual_mean = residual_mean_computation();
-  residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
-
-  standard_residual = new double[nb_vector];
-  presidual = residual;
-  pstandard_residual = standard_residual;
-  min_standard_residual = 0.;
-  max_standard_residual = 0.;
-
-  for (i = 0;i < nb_vector;i++) {
-    *pstandard_residual = *presidual++ / residual_standard_deviation;
-    if (*pstandard_residual < min_standard_residual) {
-      min_standard_residual = *pstandard_residual;
-    }
-    if (*pstandard_residual > max_standard_residual) {
-      max_standard_residual = *pstandard_residual;
-    }
-    pstandard_residual++;
-  }
-
-  min_response = MIN(min_computation() , vectors->min_value[1]);
-  max_response = MAX(max_computation() , vectors->max_value[1]);
-
-  // ---------------- regression plot + original data ----------------------------------
-  ostringstream oss (ostringstream::out);
- 
-  // get the regression parameter to plot the formula in the legend
-  ascii_formal_print(oss);
-  set[0][0].legend = oss.str();
-
-  set[0][0].style = "linespoints";
-  set[0].grid = "true";
-
-  // plot original data
-  for (i = 0;i < vectors->nb_vector;i++) {
-    set[0][0].add_point(vectors->int_vector[i][0] , vectors->int_vector[i][1]);
-    set[0][0].add_point(vectors->int_vector[i][0] , ppoint[i]);
-  }
-
-  // allow a new curve to be plotted (the regression)
-  set[0].resize(2);
-  for (i = 0;i < vectors->nb_vector;i++) {
-    set[0][1].add_point(vectors->int_vector[i][0] , parameter[0] + parameter[1]*vectors->int_vector[i][0]);
-  }
-  set[0][1].style = "-";
-  switch (ident) {
-  case STAT_LINEAR : {
-    set[0][1].legend = "Linear regression";
-    break;
-    }
-  case STAT_MONOMOLECULAR : {
-    set[0][1].legend = "Monomolecular regression";
-    break;
-    }
-  case STAT_LOGISTIC : {
-    set[0][1].legend = "Logistic regression";
-    break;
-    }
-  }
-  set[0][1].color = "g";
-  
-  plotset[0][0].ylabel = STAT_label[STATL_RESPONSE_VARIABLE]; 
-
-  // ------------------------ residual plot---------------------------
-  set[1][0].legend = "residuals";
-  set[1][0].style = "o";
-  set[0][1].color = "r";
-  for (i = 0;i < vectors->nb_vector;i++) {
-    set[1][0].add_point(vectors->int_vector[i][0] , standard_residual[i]);
-  }
-  plotset[0][1].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
-  plotset[0][1].ylabel = STAT_label[STATL_STANDARDIZED_RESIDUAL];
-  set[1].grid = "true";
-
-
-
-  return plotset;
-
-}
 /*--------------------------------------------------------------*
  *
  *  Sortie Gnuplot d'un objet Regression.
@@ -1455,8 +1372,9 @@ bool Regression::plot_write(Format_error &error , const char *prefix ,
   bool status;
   register int i , j , k;
   int **frequency;
-  double residual_mean , residual_standard_deviation , min_standard_residual , max_standard_residual ,
-         min_response , max_response , *standard_residual , *presidual , *pstandard_residual;
+  double residual_mean , residual_standard_deviation , min_standard_residual ,
+         max_standard_residual , min_response , max_response , threshold ,
+         *standard_residual , *presidual , *pstandard_residual;
   ostringstream data_file_name[2];
 
 
@@ -1473,7 +1391,7 @@ bool Regression::plot_write(Format_error &error , const char *prefix ,
 
   else {
 
-    // calcul des residus reduits
+    // calcul des residus standardises
 
     residual_mean = residual_mean_computation();
     residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
@@ -1608,14 +1526,16 @@ bool Regression::plot_write(Format_error &error , const char *prefix ,
         out_file << "set xtics 0,1" << endl;
       }
 
-      out_file << "plot [" << min_value << ":" << MAX(max_value , min_value + 1)
-               << "] [" << MIN(min_standard_residual , -2.) << ":" << MAX(max_standard_residual , 2.)
+      threshold = standard_normal_value_computation(0.025);
+
+      out_file << "plot [" << vectors->min_value[0] << ":" << MAX(vectors->max_value[0] , vectors->min_value[0] + 1)
+               << "] [" << MIN(min_standard_residual , -threshold) << ":" << MAX(max_standard_residual , threshold)
                << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using 1:3 notitle with points";
-      if (min_standard_residual < -2.) {
-        out_file << ",\\\n" << -2. << " notitle with lines";
+      if (min_standard_residual < -threshold) {
+        out_file << ",\\\n" << -threshold << " notitle with lines";
       }
-      if (max_standard_residual > 2.) {
-        out_file << ",\\\n" << 2. << " notitle with lines";
+      if (max_standard_residual > threshold) {
+        out_file << ",\\\n" << threshold << " notitle with lines";
       }
       out_file << endl;
 
@@ -1635,6 +1555,190 @@ bool Regression::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Regression.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Regression::get_plotable() const
+
+{
+  register int i , j;
+  int xmin , nb_plot , **frequency;
+  double ymin , residual_mean , threshold , residual_standard_deviation , min_standard_residual ,
+         max_standard_residual , min_response , max_response , *standard_residual ,
+         *presidual , *pstandard_residual;
+  ostringstream title , legend , frequency_label;
+  MultiPlotSet *plot_set;
+
+
+  plot_set = new MultiPlotSet(2);
+  MultiPlotSet &plot = *plot_set;
+
+  title.str("");
+  title << STAT_label[ident == STAT_LINEAR ? STATL_LINEAR : STATL_NONPARAMETRIC] << " "
+        << STAT_label[STATL_REGRESSION];
+  plot.title = title.str();
+
+  plot.border = "15 lw 0";
+
+  // 1ere vue : fonction de regression et donnees
+
+  if ((min_value >= 0) && (max_value - min_value > min_value * PLOT_RANGE_RATIO)) {
+    xmin = 0.;
+  }
+  else {
+    xmin = min_value;
+  }
+
+  plot[0].xrange = Range(xmin , MAX(max_value , min_value + 1));
+
+  min_response = MIN(min_computation() , vectors->min_value[1]);
+  max_response = MAX(max_computation() , vectors->max_value[1]);
+
+  if ((min_response >= 0.) && (max_response - min_response > min_response * PLOT_RANGE_RATIO)) {
+    ymin = 0.;
+  }
+  else {
+    ymin = min_response;
+  }
+
+  plot[0].yrange = Range(ymin , MAX(max_response , min_response + 1));
+
+  plot[0].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
+  plot[0].ylabel = STAT_label[STATL_RESPONSE_VARIABLE];
+
+  if (max_value - min_value < TIC_THRESHOLD) {
+    plot[0].xtics = 1;
+  }
+  if (max_response - min_response < TIC_THRESHOLD) {
+    plot[0].ytics = 1;
+  }
+
+  if (((vectors->marginal[0]) && (vectors->marginal[0]->nb_value <= PLOT_NB_VALUE)) &&
+      ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
+    plot[0].resize(3);
+  }
+  else {
+    plot[0].resize(2);
+  }
+
+  plot[0][0].style = "points";
+
+  for (i = 0;i < vectors->nb_vector;i++) {
+    if (vectors->type[1] == INT_VALUE) {
+      plot[0][0].add_point(vectors->int_vector[i][0] , vectors->int_vector[i][1]);
+    }
+    else {
+      plot[0][0].add_point(vectors->int_vector[i][0] , vectors->real_vector[i][1]);
+    }
+  }
+
+  if (ident == STAT_LINEAR) {
+    legend.str("");
+    ascii_formal_print(legend);
+    plot[0][1].legend = legend.str();
+  }
+
+  plot[0][1].style = "lines";
+
+  plotable_write(plot[0][1]);
+
+  if (((vectors->marginal[0]) && (vectors->marginal[0]->nb_value <= PLOT_NB_VALUE)) &&
+      ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
+    plot[0][3].label = "true";
+
+    frequency = vectors->joint_frequency_computation(0 , 1);
+
+    for (i = vectors->marginal[0]->offset;i < vectors->marginal[0]->nb_value;i++) {
+      for (j = vectors->marginal[1]->offset;j < vectors->marginal[1]->nb_value;j++) {
+        if (frequency[i][j] > 0) {
+          frequency_label.str("");
+          frequency_label << frequency[i][j];
+
+          plot[0][3].add_text(i , j , frequency_label.str());
+        }
+      }
+    }
+
+    for (i = 0;i < vectors->marginal[0]->nb_value;i++) {
+      delete [] frequency[i];
+    }
+    delete [] frequency;
+  }
+
+  // 2eme vue : residus standardises
+
+  residual_mean = residual_mean_computation();
+  residual_standard_deviation = sqrt(residual_variance_computation(residual_mean));
+
+  standard_residual = new double[nb_vector];
+  presidual = residual;
+  pstandard_residual = standard_residual;
+  min_standard_residual = 0.;
+  max_standard_residual = 0.;
+
+  for (i = 0;i < nb_vector;i++) {
+    *pstandard_residual = *presidual++ / residual_standard_deviation;
+    if (*pstandard_residual < min_standard_residual) {
+      min_standard_residual = *pstandard_residual;
+    }
+    if (*pstandard_residual > max_standard_residual) {
+      max_standard_residual = *pstandard_residual;
+    }
+    pstandard_residual++;
+  }
+
+  threshold = standard_normal_value_computation(0.025);
+
+  plot[0].xrange = Range(vectors->min_value[0] ,
+                         MAX(vectors->max_value[0] , vectors->min_value[0] + 1));
+  plot[0].yrange = Range(MIN(min_standard_residual , -threshold) ,
+                         MAX(max_standard_residual , threshold));
+
+  plot[1].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
+  plot[1].ylabel = STAT_label[STATL_STANDARDIZED_RESIDUAL];
+
+  if (max_value - min_value < TIC_THRESHOLD) {
+    plot[1].xtics = 1;
+  }
+
+  nb_plot = 1;
+  if (min_standard_residual < -threshold) {
+    nb_plot++;
+  }
+  if (max_standard_residual > threshold) {
+    nb_plot++;
+  }
+  plot[1].resize(nb_plot);
+
+  for (i = 0;i < vectors->nb_vector;i++) {
+    plot[1][0].add_point(vectors->int_vector[i][0] , standard_residual[i]);
+  }
+
+  i = 1;
+  if (min_standard_residual < -threshold) {
+    plot[1][i].style = "lines";
+
+    plot[1][i].add_point(min_value , -threshold);
+    plot[1][i].add_point(max_value , -threshold);
+    i++;
+  }
+
+  if (max_standard_residual > threshold) {
+    plot[1][i].style = "lines";
+
+    plot[1][i].add_point(min_value , threshold);
+    plot[1][i].add_point(max_value , threshold);
+  }
+
+  delete [] standard_residual;
+
+  return plot_set;
 }
 
 
@@ -1941,7 +2045,7 @@ Regression* Vectors::linear_regression(Format_error &error , int explanatory_var
     regression = new Regression(STAT_LINEAR , explanatory_variable , response_variable , *this);
 
     regression->regression_df = 1.;
-    regression->residual_df = nb_vector - 2.;
+    regression->residual_df = nb_vector - 2;
 
     // estimation des parametres
 
