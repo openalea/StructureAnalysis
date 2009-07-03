@@ -75,13 +75,20 @@ public:
         berror = true;
       }
 
-    stat_tool::wrap_util::auto_ptr_array<int> protos(new int[nb_proto]);
-
-    for (int i = 0; i < nb_proto; i++)
-      protos[i] = extract<int> (prototype[i]);
-
-    ret = dm.partitioning(error, output, nb_cluster, protos.get(),
+    if (nb_proto !=0)
+    {
+      stat_tool::wrap_util::auto_ptr_array<int> protos(new int[nb_proto]);
+      for (int i = 0; i < nb_proto; i++)
+        protos[i] = extract<int> (prototype[i]);
+      ret = dm.partitioning(error, output, nb_cluster, protos.get(),
         initialization, algorithm);
+    }
+    else 
+    {
+      int *protos = 0;  
+      ret = dm.partitioning(error, output, nb_cluster, protos,
+          initialization, algorithm);
+    }
 
     cerr << output.str()<<endl;
     if (!ret)
@@ -234,13 +241,15 @@ public:
     int column_max = input.get_nb_column();
 
     ostringstream error_message;
-    error_message << "index not in valid range" << endl;
-
-    CHECK(i, 0, row_max);
-    CHECK(j, 0, column_max);
-
-    ret = input.get_distance(i, j);
-
+    error_message << "index not in valid range" << "i must be less than "<< row_max<< " and j less than " << column_max <<endl;
+ 
+    if (i < row_max && j < column_max && i>=0 && j>=0)
+        ret = input.get_distance(i, j);
+    else
+    {   
+        cout << error_message.str()<<endl;
+        ret = -1;
+    }
     return ret;
   }
 
@@ -273,7 +282,7 @@ class_distance_matrix()
   .def("get_nb_column", &CLASS::get_nb_column, "get number of columns")
   .def("test_symmetry", &CLASS::test_symmetry, "returns True if symmetric")
   // test the validity of the arguments by using a wrapped function
-  .def("get_distance", &CLASS::get_distance, ARGS("irow", "icolumn"), "todo")
+  .def("get_distance", &WRAP::get_distance, ARGS("irow", "icolumn"), "todo")
   .def("get_length", WRAP::get_length,ARGS("irow", "icolumn"), "todo")
   .def("get_row_identifier", &CLASS::get_row_identifier,ARGS("index"), "todo")
   .def("get_column_identifier", &CLASS::get_column_identifier,ARGS("index"), "todo")
