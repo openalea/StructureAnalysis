@@ -1569,15 +1569,15 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
     // 1ere vue : histogrammes decales
 
+    plot[0].xrange = Range(0 , MAX(max_nb_value , 2));
+    plot[0].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
     if (MAX(max_nb_value , 2) < TIC_THRESHOLD) {
       plot[0].xtics = 1;
     }
     if ((int)(max_frequency * YSCALE) + 1 < TIC_THRESHOLD) {
       plot[0].ytics = 1;
     }
-
-    plot[0].xrange = Range(0 , MAX(max_nb_value , 2));
-    plot[0].yrange = Range(0 , ceil(max_frequency * YSCALE));
 
     plot[0].resize(nb_histo);
 
@@ -1615,6 +1615,9 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
         merged_histo[i] = new Histogram(2 , phisto);
       }
 
+      plot[1].xrange = Range(0 , MAX(merged_histo[0]->nb_value , 2) - 1);
+      plot[1].yrange = Range(0 , ceil(merged_histo[0]->max * YSCALE));
+
       if (MAX(merged_histo[0]->nb_value , 2) - 1 < TIC_THRESHOLD) {
         plot[1].xtics = 1;
       }
@@ -1622,8 +1625,6 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
         plot[1].ytics = 1;
       }
 
-      plot[1].xrange = Range(0 , MAX(merged_histo[0]->nb_value , 2) - 1);
-      plot[1].yrange = Range(0 , ceil(merged_histo[0]->max * YSCALE));
       plot[1].resize(nb_histo);
 
       for (i = 0;i < nb_histo;i++) {
@@ -1643,12 +1644,13 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
       // 3eme vue : lois deduite des histogrammes
 
+      plot[2].xrange = Range(0 , MAX(max_nb_value , 2) - 1);
+      plot[2].yrange = Range(0 , MIN(max_mass * YSCALE , 1.));
+
       if (MAX(max_nb_value , 2) - 1 < TIC_THRESHOLD) {
         plot[2].xtics = 1;
       }
 
-      plot[2].xrange = Range(0 , MAX(max_nb_value , 2) - 1);
-      plot[2].yrange = Range(0 , MIN(max_mass * YSCALE , 1.));
       plot[2].resize(nb_histo);
 
       for (i = 0;i < nb_histo;i++) {
@@ -1672,12 +1674,12 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
       // 4eme vue : fonctions de repartition deduites des histogrammes
 
+      plot[i].xrange = Range(0 , max_nb_value - 1);
+      plot[i].yrange = Range(0. , 1.);
+
       if (max_nb_value - 1 < TIC_THRESHOLD) {
         plot[i].xtics = 1;
       }
-
-      plot[i].xrange = Range(0 , max_nb_value - 1);
-      plot[i].yrange = Range(0. , 1.);
 
       plot[i].resize(cumul_concentration_nb_histo);
 
@@ -1711,13 +1713,13 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
               << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
         plot[i].title = title.str();
 
+        plot[i].xrange = Range(0. , 1.);
+        plot[i].yrange = Range(0. , 1.);
+
         plot[i].grid = true;
 
         plot[i].xtics = 0.1;
         plot[i].ytics = 0.1;
-
-        plot[i].xrange = Range(0. , 1.);
-        plot[i].yrange = Range(0. , 1.);
 
         // definition du nombre de SinglePlot 
 
@@ -1746,12 +1748,13 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
       // 6eme vue : courbes de concentration
 
-      plot[i].xtics = 0.1;
-      plot[i].ytics = 0.1;
-      plot[i].grid = true;
-
       plot[i].xrange = Range(0. , 1.);
       plot[i].yrange = Range(0. , 1.);
+
+      plot[i].grid = true;
+
+      plot[i].xtics = 0.1;
+      plot[i].ytics = 0.1;
 
       plot[i].resize(cumul_concentration_nb_histo + 1);
 
