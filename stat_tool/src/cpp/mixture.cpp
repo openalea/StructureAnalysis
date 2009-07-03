@@ -1356,16 +1356,16 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
   // 1ere vue : melange ajuste
 
-  if (nb_value - 1 < TIC_THRESHOLD) {
-    plot[0].xtics = 1;
-  }
-
   xmax = nb_value - 1;
   if ((cumul[xmax] > 1. - DOUBLE_ERROR) &&
       (mass[xmax] > PLOT_MASS_THRESHOLD)) {
     xmax++;
   }
   plot[0].xrange = Range(0 , xmax);
+
+  if (nb_value - 1 < TIC_THRESHOLD) {
+    plot[0].xtics = 1;
+  }
 
   i = 0;
 
@@ -1418,12 +1418,12 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
     // 2eme vue : fonctions de repartition
 
+    plot[1].xrange = Range(0 , xmax);
+    plot[1].yrange = Range(0. , 1.);
+
     if (nb_value - 1 < TIC_THRESHOLD) {
       plot[1].xtics = 1;
     }
-
-    plot[1].xrange = Range(0 , xmax);
-    plot[1].yrange = Range(0. , 1.);
 
     plot[1].resize(2);
 
@@ -1447,14 +1447,14 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
     // 3eme vue : poids
 
-    if (weight->nb_value - 1 < TIC_THRESHOLD) {
-      plot[2].xtics = 1;
-    }
-
     plot[2].xrange = Range(0 , weight->nb_value - 1);
     plot[2].yrange = Range(0 , ceil(MAX(mixt_histo->weight->max ,
                                     weight->max * mixt_histo->weight->nb_element) 
                                     * YSCALE));
+
+    if (weight->nb_value - 1 < TIC_THRESHOLD) {
+      plot[2].xtics = 1;
+    }
 
     plot[2].resize(2);
 
@@ -1480,10 +1480,6 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
         // vues suivantes : composantes ajustees
 
-        if (component[j]->nb_value - 1 < TIC_THRESHOLD) {
-          plot[i].xtics = 1;
-        }
-
         xmax = component[j]->nb_value - 1;
         if ((component[j]->cumul[xmax] > 1. - DOUBLE_ERROR) &&
             (component[j]->mass[xmax] > PLOT_MASS_THRESHOLD)) {
@@ -1494,6 +1490,10 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
         plot[i].yrange = Range(0 , ceil(MAX(mixt_histo->component[j]->max ,
                                         component[j]->max * mixt_histo->component[j]->nb_element)
                                         * YSCALE));
+
+        if (component[j]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[i].xtics = 1;
+        }
 
         plot[i].resize(2);
 
