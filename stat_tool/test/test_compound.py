@@ -29,8 +29,8 @@ class Test(interface):
     def build_data(self):
         d1 = Binomial(2, 5, 0.5)
         d2 = NegativeBinomial(0, 2, 0.5)
-        data = Compound(d1, d2) 
-        return data
+        comp = Compound(d1, d2) 
+        return comp
         
     def test_empty(self):
         self.empty()
@@ -107,7 +107,7 @@ class Test(interface):
 
     
 def test1():
-    """Various tests on compound data
+    """Various tests on compound data to be cleaned ?
     
     Those tests are done elsewhere:
      * Estimate in test_estimate

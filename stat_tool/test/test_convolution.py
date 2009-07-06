@@ -30,8 +30,8 @@ class Test(interface):
     def build_data(self):
         d1 = Binomial(0, 10, 0.5)
         d2 = NegativeBinomial(0, 1, 0.1)
-        data = Convolution(d1, d2) 
-        return data
+        conv = Convolution(d1, d2) 
+        return conv
     
     def test_empty(self):
         self.empty()
@@ -57,9 +57,7 @@ class Test(interface):
 
     def test_plot(self):
         d = self.data
-        d1 = d.extract_elementary(1)
-        d2 = d.extract_elementary(2)
-        d.plot(d1, d2)
+        d.plot()
         
 
     def test_save(self):
@@ -101,6 +99,7 @@ class Test(interface):
 
 
 def test1():
+    """to be cleaned"""
     from openalea.stat_tool import ExtractHistogram, ExtractData
     from openalea.stat_tool import ToHistogram
     from openalea.stat_tool import Histogram, Shift, Display, Save, Plot

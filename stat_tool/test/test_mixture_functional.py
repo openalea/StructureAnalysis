@@ -122,7 +122,7 @@ def test1():
     histo3 = Cluster(peup, "Step", 10)
     histo4 = Cluster(peup, "Limit", [13, 24])
     Display(histo4, Detail=2)
-    Plot(histo4)
+    #Plot(histo4)
 
 
     mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB", NbComponent="Estimated")
