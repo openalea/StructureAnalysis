@@ -1569,8 +1569,8 @@ MultiPlotSet* Regression::get_plotable() const
 {
   register int i , j;
   int xmin , nb_plot , **frequency;
-  double ymin , residual_mean , threshold , residual_standard_deviation , min_standard_residual ,
-         max_standard_residual , min_response , max_response , *standard_residual ,
+  double ymin , min_response , max_response , residual_mean , residual_standard_deviation ,
+         min_standard_residual , max_standard_residual , threshold , *standard_residual ,
          *presidual , *pstandard_residual;
   ostringstream title , legend , frequency_label;
   MultiPlotSet *plot_set;
@@ -1650,7 +1650,7 @@ MultiPlotSet* Regression::get_plotable() const
 
   if (((vectors->marginal[0]) && (vectors->marginal[0]->nb_value <= PLOT_NB_VALUE)) &&
       ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
-    plot[0][3].label = "true";
+    plot[0][2].label = "true";
 
     frequency = vectors->joint_frequency_computation(0 , 1);
 
@@ -1660,7 +1660,7 @@ MultiPlotSet* Regression::get_plotable() const
           frequency_label.str("");
           frequency_label << frequency[i][j];
 
-          plot[0][3].add_text(i , j , frequency_label.str());
+          plot[0][2].add_text(i , j , frequency_label.str());
         }
       }
     }
@@ -1695,9 +1695,9 @@ MultiPlotSet* Regression::get_plotable() const
 
   threshold = standard_normal_value_computation(0.025);
 
-  plot[0].xrange = Range(vectors->min_value[0] ,
+  plot[1].xrange = Range(vectors->min_value[0] ,
                          MAX(vectors->max_value[0] , vectors->min_value[0] + 1));
-  plot[0].yrange = Range(MIN(min_standard_residual , -threshold) ,
+  plot[1].yrange = Range(MIN(min_standard_residual , -threshold) ,
                          MAX(max_standard_residual , threshold));
 
   plot[1].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
