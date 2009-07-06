@@ -133,51 +133,76 @@ public:
   static Parametric_model* extract_weight(const Mixture& mixt)
   {
     Parametric_model* ret;
-    Mixture_data* mixt_histo = NULL;
+    Mixture_data* mixt_data = NULL;
 
-    mixt_histo = mixt.get_mixture_data();
+    mixt_data = mixt.get_mixture_data();
     ret = new Parametric_model(*(mixt.get_weight()),
-                   (mixt_histo ? mixt_histo->get_weight() : NULL));
+                   (mixt_data ? mixt_data->get_weight() : NULL));
     return ret;
   }
 
 
-  static Parametric_model* extract_mixture(const Mixture& mixt)
+  static Parametric_model* extract_mixture(Mixture& mixture_input)
   {
     Parametric_model* ret;
-    Mixture_data* mixt_histo = NULL;
+    Mixture_data* mixture_data = NULL;
 
-    mixt_histo = mixt.get_mixture_data();
-    ret = new Parametric_model(mixt,
-                   (mixt_histo ? mixt_histo->get_mixture() : NULL));
+    mixture_data = mixture_input.get_mixture_data();
+
+    ret = new Parametric_model(*((Distribution*)(&mixture_input)) , 
+            (Histogram*)mixture_data);
+
     return ret;
   }
 
+  static Parametric_model* extract_component(const Mixture& input, int var1) 
+  {
+    Format_error error;
+    Parametric_model* ret = NULL;
+
+    
+    ret = input.extract(error, var1); 
+    if(!ret) 
+        stat_tool::wrap_util::throw_error(error);
+    
+    return ret;
+  }
+ 
+  // component case 
+  static Mixture_data* extract_data(const Mixture& input) 
+  {
+    Format_error error;
+    Mixture_data* ret = NULL;
+
+    
+    ret = input.extract_data(error);
+    if(!ret) 
+      stat_tool::wrap_util::throw_error(error);
+    
+    return ret;
+  }
+
+
   WRAP_METHOD1(Mixture, simulation, Mixture_data, int);
-  WRAP_METHOD1(Mixture, extract, Parametric_model, int);
-  WRAP_METHOD0(Mixture, extract_data, Mixture_data);
   WRAP_METHOD_FILE_ASCII_WRITE(Mixture);
   WRAP_METHOD_SPREADSHEET_WRITE(Mixture);
 
 
   static MultiPlotSet* get_plotable(const Mixture& mixt)
-    {
-      Format_error error;
-      //error << "Problem while trying to get the plotable"<<endl;
-
-      MultiPlotSet* ret = mixt.get_plotable();
-
-      if(!ret)
-        stat_tool::wrap_util::throw_error(error);
-
-      return ret;
-    }
+  {
+    Format_error error;
+    MultiPlotSet* ret = mixt.get_plotable();
+    if(!ret)
+      stat_tool::wrap_util::throw_error(error);
+    return ret;
+  }
 
   static MultiPlotSet* survival_get_plotable(const Mixture& p) 
   { 
     Format_error error; 
     MultiPlotSet* ret = p.survival_get_plotable(error); 
-    if (!ret) ERROR;
+    if (!ret) 
+      ERROR;
     return ret;
   }
 
@@ -203,7 +228,7 @@ void class_mixture()
     .def("nb_component", &Mixture::get_nb_component,  "Return the number of components")
 
     DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate nb_element elements")
-    DEF_RETURN_VALUE("extract_component", WRAP::extract, ARGS("index"), "Get a particular component. First index is 1")
+    DEF_RETURN_VALUE("extract_component", WRAP::extract_component, ARGS("index"), "Get a particular component. First index is 1")
     DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return the weight distribution")
     DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,"Return the Mixture distribution")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the associated _MixtureData object")

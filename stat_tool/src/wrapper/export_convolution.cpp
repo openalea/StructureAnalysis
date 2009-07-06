@@ -94,26 +94,50 @@ public:
  WRAP_METHOD_FILE_ASCII_WRITE(Convolution);
 
 
-  static Parametric_model* get_convolution_data(const Convolution& convol)
+
+  static Parametric_model* extract_elementary(const Convolution& input, int index) 
+  {
+    Format_error error;
+    Parametric_model* ret = NULL;
+    
+    ret = input.extract(error, index); 
+    if(!ret) 
+        stat_tool::wrap_util::throw_error(error);
+    
+    return ret;
+  }
+  
+  static Parametric_model* extract_convolution(const Convolution& convolution_input)
   {
     Parametric_model* ret;
-
-    Convolution_data* convol_histo = NULL;
-
-    convol_histo = convol.get_convolution_data();
-    ret = new Parametric_model(convol,
-			       (convol_histo ? convol_histo->get_convolution() : NULL));
+    Convolution_data* convolution_data = NULL;
+    
+    convolution_data = convolution_input.get_convolution_data();
+    
+    //ret = new Parametric_model(convolution_input,
+	//		       (convolution_data ? convolution_data->get_convolution() : NULL));
+			       
+    ret = new Parametric_model(*((Distribution*)(&convolution_input)), 
+            (Histogram*)convolution_data);			       
+    		       
     return ret;
   }
 
- static MultiPlotSet* survival_get_plotable(const Convolution& p)
+  static MultiPlotSet* survival_get_plotable(const Convolution& p)
   {
     Format_error error;
     MultiPlotSet* ret = p.survival_get_plotable(error);
     if (!ret) ERROR;
     return ret;
   }
-
+ 
+  static MultiPlotSet* get_plotable(const Convolution& p)
+  {
+    Format_error error;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret) ERROR;
+    return ret;
+  }
 
 };
 
@@ -134,12 +158,14 @@ void class_convolution()
     .def("nb_distribution", &Convolution::get_nb_distribution, "Return the number of components")
 
 	DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate elements")
+	// check extract and extract_data 
     DEF_RETURN_VALUE("extract", WRAP::extract, ARGS("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE("extract_elementary", WRAP::extract, ARGS("index"), "Extract a particular element. First index is 1")
-	DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::get_convolution_data, "Return a _ParametricModel object")
+    DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary, ARGS("index"), "Extract a particular element. First index is 1")
+	DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::extract_convolution, "Return a _ParametricModel object")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _ConvolutionData")
     DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Convolution into a file")
     DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
     ;
 /*
 

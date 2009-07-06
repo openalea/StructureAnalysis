@@ -56,30 +56,33 @@ class CompoundWrap
 	static Parametric_model* extract_compound(const Compound& compound)
 	{
 	    Parametric_model* ret;
-	    Compound_data* compound_hist = NULL;
-	    compound_hist = compound.get_compound_data();
-	    ret = new Parametric_model(compound,
-				(compound_hist ? compound_hist->get_compound() : NULL));
+	    Compound_data* compound_data = NULL;
+	    compound_data = compound.get_compound_data();
+	    ret = new Parametric_model(*((Distribution*)(&compound)), 
+            (Histogram*)compound_data);
+        //ret = new Parametric_model(compound,
+		//		(compound_data ? compound_data->get_compound() : NULL));
 	    return ret;
 	}
 
-	static Parametric_model* extract_sum_distribution(const Compound& compound)
+	static Parametric_model* extract_sum(const Compound& compound)
 	{
 	    Parametric_model* ret;
-	    Compound_data* compound_hist = NULL;
-	    compound_hist = compound.get_compound_data();
+	    Compound_data* compound_data = NULL;
+	    compound_data = compound.get_compound_data();
 	    ret = new Parametric_model(*(compound.get_sum_distribution()),
-	            (compound_hist ? compound_hist->get_sum_histogram() : NULL));
+	            (compound_data ? compound_data->get_sum_histogram() : NULL));
 	    return ret;
 	}
 
-	static Parametric_model* extract_distribution(const Compound& compound)
+	static Parametric_model* extract_elementary(const Compound& compound)
 	{
 	    Parametric_model* ret;
-	    Compound_data* compound_hist = NULL;
-	    compound_hist = compound.get_compound_data();
+	    Compound_data* compound_data = NULL;
+	    compound_data = compound.get_compound_data();
+	    
 	    ret = new Parametric_model(*(compound.get_distribution()),
-	    		(compound_hist ? compound_hist->get_histogram() : NULL));
+	    		(compound_data ? compound_data->get_histogram() : NULL));
 	    return ret;
 	}
 
@@ -112,8 +115,8 @@ void class_compound()
         DEF_RETURN_VALUE("simulate", WRAP::simulation,ARGS("nb_element"), "Simulate nb_element elements")
         DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the data")
         DEF_RETURN_VALUE_NO_ARGS("extract_compound", WRAP::extract_compound, "Return the compound distribution")
-        DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum_distribution,	"Return the sum distribution")
-        DEF_RETURN_VALUE("extract_elementary", WRAP::extract_distribution,	ARGS("index"),	"Return the elementary distribution")
+        DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum,	"Return the sum distribution")
+        DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary,	ARGS("index"),	"Return the elementary distribution")
     	DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
         DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
 
@@ -130,7 +133,6 @@ void class_compound()
 	                     double cumul_threshold = COMPOUND_THRESHOLD ,
 	                     bool sum_flag = true , bool dist_flag = true);
 	    // done in compound_data so
-	    Compound_data* simulation(Format_error &error , int nb_element) const;
 	*/
 }
 #undef WRAP
