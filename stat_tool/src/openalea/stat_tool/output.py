@@ -81,8 +81,8 @@ def Display(obj, *args, **kargs):
         :func:`~openalea.stat_tool.output.Save`.
 
     """
-
     return obj.display(*args, **kargs)
+    
 
 
 def Plot(obj, *args, **kargs):
@@ -428,7 +428,6 @@ class StatInterface(object):
 
     def plot(self, *args, **kargs):
         __doc__ = Plot.__doc__
-        
 
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
@@ -467,8 +466,7 @@ class StatInterface(object):
         
             
     def display(self, Detail=1, ViewPoint="", Format=""):
-        __doc__ = Plot.__doc__
-
+        __doc__ = Display.__doc__
         # Detail level
         if(Detail>1):
             exhaustive = True
@@ -480,7 +478,7 @@ class StatInterface(object):
         # Survival
         if(ViewPoint.lower() == "survival"):
             try:
-                return self.survival_ascii_write()
+                output = self.survival_ascii_write()
             except AttributeError:
                 raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
 
@@ -488,11 +486,11 @@ class StatInterface(object):
         elif(ViewPoint.lower() == "data"):
             try:
                 # try with format argument
-                return self.ascii_data_write(exhaustive, format)
+                output = self.ascii_data_write(exhaustive, format)
 
             except Exception, e:
                 try:
-                    return self.ascii_data_write(exhaustive)
+                    output = self.ascii_data_write(exhaustive)
 
                 except AttributeError:
                     raise AttributeError("%s has not 'data' viewpoint"%(str(type(self))))
@@ -500,12 +498,14 @@ class StatInterface(object):
         # StatProfile
         elif(ViewPoint.lower() == "stateprofile"):
             try:
-                return self.state_profile_ascii_write() # A completer
+                output = self.state_profile_ascii_write() # A completer
             except AttributeError:
                 raise AttributeError("%s has not 'stateprofile' viewpoint"%(str(type(self))))
                 
         else:
-            return self.ascii_write(exhaustive)
+            output = self.ascii_write(exhaustive)
+
+        return output 
 
     def save(self, filename, Detail=2, ViewPoint="", Format="ASCII" ):
         __doc__ = Save.__doc__
