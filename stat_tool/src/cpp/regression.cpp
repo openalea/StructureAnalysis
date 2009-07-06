@@ -1716,6 +1716,8 @@ MultiPlotSet* Regression::get_plotable() const
   }
   plot[1].resize(nb_plot);
 
+  plot[1][0].style = "points";
+
   for (i = 0;i < vectors->nb_vector;i++) {
     plot[1][0].add_point(vectors->int_vector[i][0] , standard_residual[i]);
   }
