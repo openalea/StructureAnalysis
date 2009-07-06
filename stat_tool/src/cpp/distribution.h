@@ -62,7 +62,7 @@ private :
     std::ostream& spreadsheet_write(std::ostream &os , const Distribution_data *histo) const;
     bool plot_write(Format_error &error , const char *prefix , const char *title ,
                     const Distribution_data *histo) const;
-    plotable::MultiPlotSet* get_plotable(const Distribution_data *histo) const;
+    MultiPlotSet* get_plotable(const Distribution_data *histo) const;
 
 public :
 
@@ -96,7 +96,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
-    plotable::MultiPlotSet* get_plotable() const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Parametric_model);
 
@@ -161,7 +161,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
-    plotable::MultiPlotSet* get_plotable() const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Distribution_data);
 
