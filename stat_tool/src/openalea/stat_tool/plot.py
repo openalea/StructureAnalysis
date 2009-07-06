@@ -127,12 +127,15 @@ class mplotlib(plotter):
         self.pylab = pylab
         self.matplotlib = matplotlib
 
-    def plot(self, plotable, title, groups=[], show=True, *args, **kargs):
+    def plot(self, plotable, title, groups=[], *args, **kargs):
         """ 
         Plot a plotable with title 
         groups : list of group (int) to plot
         show=True by default will pop up the figure
         """
+
+        show = kargs.get("Show", True)
+
         pylab = self.pylab
         matplotlib = self.matplotlib
         multiset = plotable
