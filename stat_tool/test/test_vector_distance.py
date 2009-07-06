@@ -7,33 +7,8 @@ from openalea.stat_tool.vectors import  VectorDistance
 from tools import interface
 
 class Test(interface):
-    """a simple unittest class
-    
-    Integration Test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-    * 'works' means that the output has b=not been tested yet
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok
-    file_ascii_write            ok
-    get_plotable                no purpose     
-    plot                        no purpose                       
-    save                        ok
-    plot_print                  no purpose
-    plot_write                  ok
-    spreadsheet_write           not implemented in the cpp code
+    """a simple unittest class"""
    
-    str                         ok
-    len                         ok 
-    """
-   
-        
-
-
     def __init__(self):
         interface.__init__(self, 
                            self.build_data(), 

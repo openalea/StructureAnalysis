@@ -1,3 +1,37 @@
+ """Mixture tests from exploratory.aml
+#
+#  Frequency distributions
+#
+#  Objective: Analyzing the number of nodes of growth units in selected architectural
+#                 position considering the respective roles of preformation and neoformation,
+#
+#  Methods: comparison tests, one-way variance analysis,
+#           estimation of finite mixture of distributions.
+#
+#  Wild cherry tree: number of nodes per growth unit (GU)
+#
+#  Data: Dominique Fournier
+#
+#  meri1.his: order 1,
+#  meri1.his: order 2,
+#  meri1.his: order 3, GU 1,
+#  meri1.his: order 3, GU 2,
+#  meri5.his: short shoots.
+#
+#
+#  Poplar: number of nodes per growth unit
+#
+#  Data: Yves Caraglio and Herve Rey
+#
+#  peup1.his: order 2,
+#  peup2.his: order 3,
+#  peup3.his: order 4,
+#  peup4.his: order 5,
+#  peup5.his: order 3, GU 4,
+#  peup6.his: order 3, acrotony.
+#
+#########################################################################
+"""
 __revision__ = "$Id: test_mixture.py 6325 2009-04-29 16:20:55Z cokelaer $"
 
 import os
@@ -20,40 +54,7 @@ from openalea.stat_tool.cluster import Cluster
 from tools import interface
 
 def test1():
-    """Mixture tests from exploratory.aml
-    #
-    #  Frequency distributions
-    #
-    #  Objective: Analyzing the number of nodes of growth units in selected architectural
-    #                 position considering the respective roles of preformation and neoformation,
-    #
-    #  Methods: comparison tests, one-way variance analysis,
-    #           estimation of finite mixture of distributions.
-    #
-    #  Wild cherry tree: number of nodes per growth unit (GU)
-    #
-    #  Data: Dominique Fournier
-    #
-    #  meri1.his: order 1,
-    #  meri1.his: order 2,
-    #  meri1.his: order 3, GU 1,
-    #  meri1.his: order 3, GU 2,
-    #  meri5.his: short shoots.
-    #
-    #
-    #  Poplar: number of nodes per growth unit
-    #
-    #  Data: Yves Caraglio and Herve Rey
-    #
-    #  peup1.his: order 2,
-    #  peup2.his: order 3,
-    #  peup3.his: order 4,
-    #  peup4.his: order 5,
-    #  peup5.his: order 3, GU 4,
-    #  peup6.his: order 3, acrotony.
-    #
-    #########################################################################
-    """
+   
     plot.DISABLE_PLOT = DISABLE_PLOT
  
     meri1 = Histogram("data/meri1.his")
