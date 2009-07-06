@@ -96,7 +96,7 @@ def Regression(vec, type,
             
             
 
-    elif(type == "NearestNeighbors"):
+    elif(type == "NearestNeighbors" or type == "NearestNeighbours"):
         span = param
         return vec.nearest_neighbours_regression(explanatory_variable, response_variable, 
                                                  float(span), bool(Weighting))
