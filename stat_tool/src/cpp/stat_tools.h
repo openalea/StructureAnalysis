@@ -401,7 +401,7 @@ public :
     virtual bool plot_write(Format_error &error , const char *prefix ,
                             const char *title = 0) const = 0;
 
-    virtual plotable::MultiPlotSet* get_plotable() const { return NULL; };
+    virtual MultiPlotSet* get_plotable() const { return 0; };
 
 //    bool binary_write(Format_error &error , const char *path) const;
 };
