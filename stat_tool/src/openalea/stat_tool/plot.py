@@ -232,7 +232,7 @@ class mplotlib(plotter):
                         l = pylab.vlines(x, 0, y)
                     elif "lines" and  "points" in style:
                         #l = pylab.plot(x, y, '-', x, y, pointstyle)
-                        l = pylab.plot(x, y, pointstyle + '-')
+                        l = pylab.plot(x, y, pointstyle)
                     elif "points" in style:
                         l = pylab.plot(x, y, pointstyle)
                     elif "lines" in style:
