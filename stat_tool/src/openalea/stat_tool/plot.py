@@ -193,7 +193,7 @@ class mplotlib(plotter):
             legends = []
             # List of argument for the plot function
             for j, singleplot in enumerate(multiplot):
-                style = singleplot.style 
+                style = singleplot.style
                 legend = singleplot.legend
                 color = singleplot.color
                 label  = singleplot.label
@@ -230,9 +230,9 @@ class mplotlib(plotter):
                 
                     if "impulses" in style:
                         l = pylab.vlines(x, 0, y)
-                    elif "lines" and  "points" in style:
+                    elif "linespoints" in style:
                         #l = pylab.plot(x, y, '-', x, y, pointstyle)
-                        l = pylab.plot(x, y, pointstyle)
+                        l = pylab.plot(x, y, pointstyle + '-')
                     elif "points" in style:
                         l = pylab.plot(x, y, pointstyle)
                     elif "lines" in style:
