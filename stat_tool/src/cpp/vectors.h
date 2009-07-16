@@ -124,6 +124,8 @@ protected :
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , bool comment_flag) const;
     bool plot_print(const char *path , double *standard_residual = 0) const;
+    void plotable_write(SinglePlot &plot , int variable1 , int variable2) const;
+    void plotable_frequency_write(SinglePlot &plot , int variable1 , int variable2) const;
 
     void min_value_computation(int variable);
     void max_value_computation(int variable);
@@ -223,6 +225,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Vectors);
 
