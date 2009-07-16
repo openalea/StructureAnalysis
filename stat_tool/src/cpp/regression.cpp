@@ -1567,12 +1567,12 @@ bool Regression::plot_write(Format_error &error , const char *prefix ,
 MultiPlotSet* Regression::get_plotable() const
 
 {
-  register int i , j;
-  int xmin , nb_plot , **frequency;
+  register int i;
+  int xmin , nb_plot;
   double ymin , min_response , max_response , residual_mean , residual_standard_deviation ,
          min_standard_residual , max_standard_residual , threshold , *standard_residual ,
          *presidual , *pstandard_residual;
-  ostringstream title , legend , frequency_label;
+  ostringstream title , legend;
   MultiPlotSet *plot_set;
 
 
@@ -1594,7 +1594,6 @@ MultiPlotSet* Regression::get_plotable() const
   else {
     xmin = min_value;
   }
-
   plot[0].xrange = Range(xmin , MAX(max_value , min_value + 1));
 
   min_response = MIN(min_computation() , vectors->min_value[1]);
@@ -1606,7 +1605,6 @@ MultiPlotSet* Regression::get_plotable() const
   else {
     ymin = min_response;
   }
-
   plot[0].yrange = Range(ymin , MAX(max_response , min_response + 1));
 
   plot[0].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
@@ -1629,14 +1627,7 @@ MultiPlotSet* Regression::get_plotable() const
 
   plot[0][0].style = "points";
 
-  for (i = 0;i < vectors->nb_vector;i++) {
-    if (vectors->type[1] == INT_VALUE) {
-      plot[0][0].add_point(vectors->int_vector[i][0] , vectors->int_vector[i][1]);
-    }
-    else {
-      plot[0][0].add_point(vectors->int_vector[i][0] , vectors->real_vector[i][1]);
-    }
-  }
+  vectors->plotable_write(plot[0][0] , 0 , 1);
 
   if (ident == STAT_LINEAR) {
     legend.str("");
@@ -1652,23 +1643,7 @@ MultiPlotSet* Regression::get_plotable() const
       ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
     plot[0][2].label = "true";
 
-    frequency = vectors->joint_frequency_computation(0 , 1);
-
-    for (i = vectors->marginal[0]->offset;i < vectors->marginal[0]->nb_value;i++) {
-      for (j = vectors->marginal[1]->offset;j < vectors->marginal[1]->nb_value;j++) {
-        if (frequency[i][j] > 0) {
-          frequency_label.str("");
-          frequency_label << frequency[i][j];
-
-          plot[0][2].add_text(i , j , frequency_label.str());
-        }
-      }
-    }
-
-    for (i = 0;i < vectors->marginal[0]->nb_value;i++) {
-      delete [] frequency[i];
-    }
-    delete [] frequency;
+    vectors->plotable_frequency_write(plot[0][2] , 0 , 1);
   }
 
   // 2eme vue : residus standardises
