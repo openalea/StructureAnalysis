@@ -1,4 +1,5 @@
-"""
+""" extract from exploratoty.aml
+
 #########################################################################
 #########################################################################
 #
@@ -33,26 +34,27 @@ from openalea.sequence_analysis import *
 
 vec1 = Vectors(Sequences("../examples/Sample/Sequences/hetre.seq"))
 
-Plot(ExtractHistogram(ValueSelect(vec1, 1, 0), 4), ExtractHistogram(ValueSelect(vec1, 1, 1), 4), ExtractHistogram(ValueSelect(vec1, 1, 2), 4), ExtractHistogram(ValueSelect(vec1, 1, 3), 4), ExtractHistogram(ValueSelect(vec1, 1, 4), 4))
+#Plot(ExtractHistogram(ValueSelect(vec1, 1, 0), 4), ExtractHistogram(ValueSelect(vec1, 1, 1), 4), ExtractHistogram(ValueSelect(vec1, 1, 2), 4), ExtractHistogram(ValueSelect(vec1, 1, 3), 4), ExtractHistogram(ValueSelect(vec1, 1, 4), 4))
 
 VarianceAnalysis(vec1, 2, 4, "N")
-Plot(ExtractHistogram(ValueSelect(vec1, 2, 1), 4), ExtractHistogram(ValueSelect(vec1, 2, 2), 4))
+#Plot(ExtractHistogram(ValueSelect(vec1, 2, 1), 4), ExtractHistogram(ValueSelect(vec1, 2, 2), 4))
 
 mixt10 = Estimate(ExtractHistogram(vec1, 4), "MIXTURE", "B", "B", "B", "B", NbComponent="Estimated")
 
-Plot(Estimate(ExtractHistogram(ValueSelect(vec1, 2, 1), 4), "NP"), ExtractDistribution(mixt10, "Component", 1))
-Plot(Estimate(ExtractHistogram(ValueSelect(vec1, 2, 2, 3), 4), "NP"), ExtractDistribution(mixt10, "Component", 2))
+#Plot(Estimate(ExtractHistogram(ValueSelect(vec1, 2, 1), 4), "NP"), ExtractDistribution(mixt10, "Component", 1))
+#Plot(Estimate(ExtractHistogram(ValueSelect(vec1, 2, 2, 3), 4), "NP"), ExtractDistribution(mixt10, "Component", 2))
 
-Plot(ExtractHistogram(ValueSelect(vec1, 2, 1), 5), ExtractHistogram(ValueSelect(vec1, 2, 2), 5))
+#Plot(ExtractHistogram(ValueSelect(vec1, 2, 1), 5), ExtractHistogram(ValueSelect(vec1, 2, 2), 5))
 
-Plot(ExtractHistogram(ValueSelect(vec1, 3, 1), 4), ExtractHistogram(ValueSelect(vec1, 3, 2), 4))
-Plot(ExtractHistogram(ValueSelect(vec1, 3, 3), 4), ExtractHistogram(ValueSelect(vec1, 3, 4, 6), 4))
+#Plot(ExtractHistogram(ValueSelect(vec1, 3, 1), 4), ExtractHistogram(ValueSelect(vec1, 3, 2), 4))
+#Plot(ExtractHistogram(ValueSelect(vec1, 3, 3), 4), ExtractHistogram(ValueSelect(vec1, 3, 4, 6), 4))
 
 regress1 = Regression(vec1,"Linear", 4, 5)
 Display(regress1)
 Plot(regress1)
 
 regress2 = Regression(vec1, "NearestNeighbors", 4, 5, 0.1)
+Plot(regress2)
 # regress2 = Regression(vec1, "NearestNeighbors", 4, 5, 0.2)
 
 matrix1 = Compare(Transcode(vec1, 3, [1, 0, 1, 0, 0, 0]), VectorDistance("S", "O", "S", "N", "N"))

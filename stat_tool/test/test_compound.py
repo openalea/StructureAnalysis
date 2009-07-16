@@ -102,38 +102,6 @@ class Test(interface):
         #e = Estimate(s, "Compound",  Binomial(2, 5, 0.5), "Sum")
         d = s.extract_sum()
         assert d
-        _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5),"Sum", 
-                           NegativeBinomial(0, 2, 0.5))
+        _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5),"Sum")
 
     
-def test1():
-    """Various tests on compound data to be cleaned ?
-    
-    Those tests are done elsewhere:
-     * Estimate in test_estimate
-     * ExtractHistogram in test_data_transform
-     ...
-    """
-    cdist1 = Compound("data/compound1.cd")
-    chisto1 = Simulate(cdist1, 200)
-    _histo30 = ExtractHistogram(chisto1, "Sum")
-
-    cdist2 = Estimate(chisto1, "COMPOUND",
-                      ExtractDistribution(cdist1, "Elementary"),"Sum",
-                      ExtractDistribution(cdist1, "Sum"))
-    
-    _histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
-    _histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
-    
-    peup1 = Histogram("data/peup1.his")
-    mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
-    histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
-    _histo34 = Shift(histo33, -11)
-
-    #_cdist3 = Estimate(histo34, "COMPOUND",
-#                      Distribution("B", 0, 1, 0.7),
-#                      ExtractDistribution(histo34, "Sum"))
-    #_cdist4 = Estimate(histo34, "COMPOUND",
-    #                  Distribution("B", 0, 1, 0.7),
-    #                  ExtractDistribution(histo34, "Sum"), MinInfBound=0)
-

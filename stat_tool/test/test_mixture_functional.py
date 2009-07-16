@@ -1,4 +1,4 @@
- """Mixture tests from exploratory.aml
+"""Mixture tests from exploratory.aml
 #
 #  Frequency distributions
 #
