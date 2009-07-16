@@ -197,7 +197,7 @@ public:
     Format_error error;
     Distribution_data* ret = NULL;
 
-    ret = convol.extract(error, index+1);
+    ret = convol.extract(error, index);
     if(!ret) stat_tool::wrap_util::throw_error(error);
 
     return ret;
