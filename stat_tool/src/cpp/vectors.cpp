@@ -3557,14 +3557,14 @@ bool Vectors::plot_write(Format_error &error , const char *prefix ,
               delete [] frequency;
             }
 
-            if ((min_value[i] >= 0) && (max_value[i] - min_value[i] > min_value[i] * PLOT_RANGE_RATIO)) {
+            if ((min_value[i] >= 0.) && (max_value[i] - min_value[i] > min_value[i] * PLOT_RANGE_RATIO)) {
               out_file << "plot [" << 0;
             }
             else {
               out_file << "plot [" << min_value[i];
             }
             out_file << ":" << MAX(max_value[i] , min_value[i] + 1) << "] [";
-            if ((min_value[k] >= 0) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
+            if ((min_value[k] >= 0.) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
               out_file << 0;
             }
             else {
@@ -3608,6 +3608,205 @@ bool Vectors::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture des vecteurs.
+ *
+ *  arguments : reference sur un objet SinglePlot, indices des 2 variables.
+ *
+ *--------------------------------------------------------------*/
+
+void Vectors::plotable_write(SinglePlot &plot , int variable1 , int variable2) const
+
+{
+  register int i;
+
+
+  if (type[variable1] == INT_VALUE) {
+    if (type[variable2] == INT_VALUE) {
+      for (i = 0;i < nb_vector;i++) {
+        plot.add_point(int_vector[i][variable1] , int_vector[i][variable2]);
+      }
+    }
+    else {
+      for (i = 0;i < nb_vector;i++) {
+        plot.add_point(int_vector[i][variable1] , real_vector[i][variable2]);
+      }
+    }
+  }
+
+  else {
+    if (type[variable2] == INT_VALUE) {
+      for (i = 0;i < nb_vector;i++) {
+        plot.add_point(real_vector[i][variable1] , int_vector[i][variable2]);
+      }
+    }
+    else {
+      for (i = 0;i < nb_vector;i++) {
+        plot.add_point(real_vector[i][variable1] , real_vector[i][variable2]);
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture des frequences associees aux vecteurs.
+ *
+ *  arguments : reference sur un objet SinglePlot, indice des 2 variables.
+ *
+ *--------------------------------------------------------------*/
+
+void Vectors::plotable_frequency_write(SinglePlot &plot , int variable1 , int variable2) const
+
+{
+  register int i , j;
+  int **frequency;
+  ostringstream label;
+
+
+  frequency = joint_frequency_computation(variable1 , variable2);
+
+  for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+    for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+      if (frequency[i][j] > 0) {
+        label.str("");
+        label << frequency[i][j];
+
+        plot.add_text(i , j , label.str());
+      }
+    }
+  }
+
+  for (i = 0;i < marginal[variable1]->nb_value;i++) {
+    delete [] frequency[i];
+  }
+  delete [] frequency;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Vectors.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Vectors::get_plotable() const
+
+{
+  register int i , j , k;
+  int nb_plot_set;
+  double xmin , ymin;
+  ostringstream legend , label;
+  MultiPlotSet *plot_set;
+
+
+  nb_plot_set = nb_variable * (nb_variable - 1);
+  for (i = 0;i < nb_variable;i++) {
+    if (marginal[i]) {
+      nb_plot_set++;
+    }
+  }
+
+  plot_set = new MultiPlotSet(nb_plot_set);
+  MultiPlotSet &plot = *plot_set;
+
+  plot.border = "15 lw 0";
+
+  i = 0;
+  for (j = 0;j < nb_variable;j++) {
+    if (marginal[j]) {
+
+      // vue : loi marginale empirique
+
+      plot[i].xrange = Range(0 , MAX(marginal[j]->nb_value - 1 , 1));
+      plot[i].yrange = Range(0 , ceil(marginal[j]->max * YSCALE));
+
+      if (marginal[j]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[i].xtics = 1;
+      }
+      if (ceil(marginal[j]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(1);
+
+      legend.str("");
+      legend << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
+             << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][0].legend = legend.str();
+
+      plot[i][0].style = "impulses";
+
+      marginal[j]->plotable_frequency_write(plot[i][0]);
+      i++;
+    }
+
+    for (k = 0;k < nb_variable;k++) {
+      if (k != j) {
+
+         // vue : loi jointe empirique de deux variables
+
+        if ((min_value[j] >= 0.) && (max_value[j] - min_value[j] > min_value[j] * PLOT_RANGE_RATIO)) {
+          xmin = 0.;
+        }
+        else {
+          xmin = min_value[j];
+        }
+        plot[i].xrange = Range(xmin , MAX(max_value[j] , min_value[j] + 1));
+
+        if ((min_value[k] >= 0.) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
+          ymin = 0.;
+        }
+        else {
+          ymin = min_value[k];
+        }
+        plot[i].yrange = Range(ymin , MAX(max_value[k] , min_value[k] + 1));
+
+        label.str("");
+        label << STAT_label[STATL_VARIABLE] << " " << j + 1;
+        plot[i].xlabel = label.str();
+
+        label.str("");
+        label << STAT_label[STATL_VARIABLE] << " " << k + 1;
+        plot[i].ylabel = label.str();
+
+        if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
+          plot[i].xtics = 1;
+        }
+        if (max_value[k] - min_value[k] < TIC_THRESHOLD) {
+          plot[i].ytics = 1;
+        }
+
+        if (((marginal[j]) && (marginal[j]->nb_value <= PLOT_NB_VALUE)) &&
+            ((marginal[k]) && (marginal[k]->nb_value <= PLOT_NB_VALUE))) {
+          plot[i].resize(2);
+        }
+        else {
+          plot[i].resize(1);
+        }
+
+        plot[i][0].style = "points";
+
+        plotable_write(plot[i][0] , j , k);
+
+        if (((marginal[j]) && (marginal[j]->nb_value <= PLOT_NB_VALUE)) &&
+            ((marginal[k]) && (marginal[k]->nb_value <= PLOT_NB_VALUE))) {
+          plot[i][1].label = "true";
+
+          plotable_frequency_write(plot[i][1] , j , k);
+        }
+
+        i++;
+      }
+    }
+  }
+
+  return plot_set;
 }
 
 
