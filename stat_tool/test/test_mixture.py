@@ -1,6 +1,5 @@
 __revision__ = "$Id$"
 
-import os
 
 from openalea.stat_tool.plot import DISABLE_PLOT
 
@@ -9,13 +8,7 @@ from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
 from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.comparison import Compare, ComparisonTest
 
-from openalea.stat_tool.output import plot, Plot, Display
-from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
-from openalea.stat_tool.simulate import Simulate
-import openalea.stat_tool.distribution as distribution 
-from openalea.stat_tool.cluster import Cluster
 
 from tools import interface
 
@@ -37,9 +30,6 @@ class Test(interface):
         assert mixt.nb_component() == 3
         return mixt
             
-    def test_empty(self):
-        self.empty()
-
     def test_constructor_from_file(self):
         self.constructor_from_file()
 

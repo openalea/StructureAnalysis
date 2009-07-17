@@ -1,23 +1,32 @@
-"""Abstract base class used by test_mixture, test_compound, etc"""
+"""Abstract base class used by test_mixture, test_compound, etc
 
-from openalea.stat_tool import *
+author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+"""
+__revision__ = "$Id$"
+
+#from openalea.stat_tool import *
+from openalea.stat_tool import Simulate
 from openalea.stat_tool.plot import DISABLE_PLOT
 import os
 from openalea.stat_tool.output import Display, Save
 
+def _remove_file(filename):
+    try:
+        os.remove(filename)
+    except:
+        pass
 
-__revision__ = "$Id$"
 
 class interface():
-    """Interface to be used by test file that perform tests on the following
-    data structure: compound, convolution, mixture, histogram, vector
+    """Interface to be used by test files related to data structure such as 
+    compound, convolution, mixture, histogram, vectors.
     
     :param data: a data that will be filled using the build_data structure
-    :para filename: a filename to a file containing the relevant data structure
+    :param filename: a filename to a file containing the relevant data structure
     :param structure: reference to a data structure Class that is not instantiated.
     
     :Usage:
-    In you test file, add ::
+    In you test file, add::
         
         >>> from tools import interface
         
@@ -35,11 +44,15 @@ class interface():
                 data = Compound(d1, d2) 
                 return data
         
-            def test_empty(self):
-                self.empty()
-        
     """
     def __init__(self, data=None, filename=None, Structure=None):
+        
+        if data is None:
+            raise AttributeError("data must be provided")
+        if Structure is None:
+            raise AttributeError("Structure  must be provided")
+        
+        
         self.data = data
         self.filename = filename
         self.structure = Structure
@@ -47,14 +60,6 @@ class interface():
         
     def build_data(self):
         raise NotImplementedError()
-    
-    def empty(self):
-        """Test that empty constructor fails"""
-        try:
-            _m = self.structure()
-            assert False
-        except TypeError:
-            assert True
     
     def constructor_from_file(self):
         """Test constructor from file"""
@@ -100,7 +105,7 @@ class interface():
             self.data.plot()
             
     def save(self, Format=None, skip_reading=False):
-        """In the Vector case, Format should be Data. 
+        """In the Vector case, Format should be set to Data. 
         :param skip_reading: some class do not have Filename Constructor; 
             skip_reading can be set to False to prevent code to be run.
             
@@ -109,14 +114,8 @@ class interface():
         
         c1 = self.data  
 
-        try:
-            os.remove('test1.dat')
-        except:
-            pass
-        try:
-            os.remove('test2.dat')
-        except:
-            pass
+        _remove_file('test1.dat')
+        _remove_file('test2.dat')
         
         if Format is None:
             c1.save('test1.dat')
@@ -133,28 +132,30 @@ class interface():
         
             assert c1 and c1_read and c2_read
             assert str(c1_read) == str(c2_read)
-        
-        os.remove('test1.dat')
-        os.remove('test2.dat')
-    
+                
+        _remove_file('test1.dat')
+        _remove_file('test2.dat')
+
     def plot_write(self):
         h = self.data
         h.plot_write('test', 'title')
+        _remove_file('test.print')
+        _remove_file('test.plot')
 
     def file_ascii_write(self):
         h = self.data
         h.file_ascii_write('test.dat', True)
-        os.remove('test.dat')
+        _remove_file('test.dat')
         
     def file_ascii_data_write(self):
         h = self.data
         h.file_ascii_data_write('test.dat', True)
-        os.remove('test.dat')
+        _remove_file('test.dat')
         
     def spreadsheet_write(self):
         h = self.data
         h.spreadsheet_write('test.dat')
-        os.remove('test.dat')
+        _remove_file('test.dat')
         
     def survival_ascii_write(self):
         d = self.data
@@ -171,12 +172,12 @@ class interface():
     def survival_spreadsheet_write(self):
         d = self.data
         d.survival_spreadsheet_write('test.xsl')
-        os.remove('test.xsl')
+        _remove_file('test.xsl')
         
     def simulate(self, N=-1):
         """Test the simulate method"""
-        if N==-1:
-             N = self.N
+        if N == -1:
+            N = self.N
         m = self.data
         s = m.simulate(N)
         s2 = Simulate(m, N)

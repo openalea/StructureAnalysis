@@ -1,10 +1,9 @@
 """Convolution tests
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
 __revision__ = "$Id$"
-
 
 from openalea.stat_tool import Convolution, Distribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
@@ -17,8 +16,9 @@ from openalea.stat_tool import Simulate
 from tools import interface
 
 class Test(interface):
-    """a simple unittest class
+    """a simple unittest class 
     
+    See tools to get documentation of the following methods
     """
  
     def __init__(self):
@@ -32,9 +32,6 @@ class Test(interface):
         d2 = NegativeBinomial(0, 1, 0.1)
         conv = Convolution(d1, d2) 
         return conv
-    
-    def test_empty(self):
-        self.empty()
 
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -83,7 +80,8 @@ class Test(interface):
         assert m.extract(1) == Binomial(0, 10, 0.5)
         assert m.extract(2) == NegativeBinomial(0, 1, 0.1)
         assert ExtractDistribution(m, "Elementary", 1) == Binomial(0, 10, 0.5)
-        assert ExtractDistribution(m, "Elementary", 2) == NegativeBinomial(0, 1, 0.1)
+        assert ExtractDistribution(m, "Elementary", 2) == \
+            NegativeBinomial(0, 1, 0.1)
 
     def test_extract_data(self):
         """run and test the extract_data methods"""

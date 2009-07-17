@@ -1,4 +1,4 @@
-"""test extracted from exploratory.aml and slightly modified (plot, display)
+"""test extracted from stat_tool_test)
 
 .. todo:: try to remove the dependance over the sequences
 """

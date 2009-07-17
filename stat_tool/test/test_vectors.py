@@ -43,9 +43,6 @@ class Test(interface):
 
     def build_data_2(self):
         return Vectors("data/chene_sessile.vec")
-
-    def test_empty(self):
-        self.empty()
         
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -90,8 +87,7 @@ class Test(interface):
         assert len(v) == v.nb_vector
 
     def test_plot(self):
-        #does not produce anything but expected ?
-        pass
+        self.plot()
 
     def test_save(self):
         self.save(Format="Data")

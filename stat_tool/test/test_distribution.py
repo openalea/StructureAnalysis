@@ -34,9 +34,6 @@ class Test(interface):
         assert d1 == d2
         return d1
 
-    def test_empty(self):
-        self.empty()
-
     def test_constructor_from_file(self):
         self.constructor_from_file()
 
@@ -44,7 +41,7 @@ class Test(interface):
         self.constructor_from_file_failure()
         
     def test_constructors(self):
-        h = Histogram([1,2,3,4,5,6,1,2,3])
+        h = Histogram([1, 2, 3, 4, 5, 6, 1, 2, 3])
         assert h
         
         # from histogram
@@ -55,7 +52,6 @@ class Test(interface):
         pm = _stat_tool._ParametricModel(h)
         dist = Distribution(pm)
         assert dist
-        
 
     def test_print(self):
         self.print_data()

@@ -1,6 +1,6 @@
 """Compound tests
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
 __revision__ = "$Id$"
@@ -8,32 +8,31 @@ __revision__ = "$Id$"
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
-
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.simulate import Simulate
-from openalea.stat_tool.data_transform import ExtractHistogram, ExtractData, \
-    Shift
+from openalea.stat_tool.data_transform import *
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import ToHistogram
 
 from tools import interface
 
+
 class Test(interface):
-    """a simple unittest class"""
+    """a simple unittest class
+    
+    See tools to get documentation of the following methods
+    """
+    
     def __init__(self):
         interface.__init__(self, 
             self.build_data(), 
             "data/compound1.cd", 
             Compound)
-        
+
     def build_data(self):
         d1 = Binomial(2, 5, 0.5)
         d2 = NegativeBinomial(0, 2, 0.5)
         comp = Compound(d1, d2) 
         return comp
-        
-    def test_empty(self):
-        self.empty()
 
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -42,9 +41,11 @@ class Test(interface):
         self.constructor_from_file_failure()
 
     def test_constructor_from_compound(self):
-        compound1 = self.data
-        compound2 = Compound(compound1)
-        assert str(compound1) == str(compound2)
+        # to be removed
+        #compound1 = self.data
+        #compound2 = Compound(compound1)
+        #assert str(compound1) == str(compound2)
+        pass
         
     def test_constructor_from_dists_and_threshold(self):
         compound1 = self.data
@@ -53,8 +54,6 @@ class Test(interface):
                              Threshold=0.99999)
         assert str(compound1) == str(compound2)
 
-        
-        
     def test_print(self):
         self.print_data()
         
@@ -105,3 +104,4 @@ class Test(interface):
         _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5),"Sum")
 
     
+

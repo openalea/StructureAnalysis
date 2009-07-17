@@ -1,4 +1,4 @@
-""" Cluster tests"""
+""" Regression tests"""
 __revision__ = "$Id$"
 
 
@@ -11,24 +11,7 @@ from tools import interface
 class TestRegression(interface):
     """a simple unittest class
     
-    Integration test 
-    ================
-    
-    * 'ok' means works and tested 
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write(False)          ok
-    display                     ok
-    file_ascii_write            ok
-    old_plot                    ok
-    plot                        ok
-    plot_print()                ok
-    plot_write                  ok  
-    save                        ok
-    spreadsheet_write           ok
-    file_ascii_write            ok
-    str                         ok
+   
     """
       
     def __init__(self):

@@ -1,4 +1,4 @@
-""" Cluster tests"""
+""" distance matrix tests"""
 __revision__ = "$Id: test_cluster.py 6258 2009-04-22 15:27:12Z cokelaer $"
 
 

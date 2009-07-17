@@ -1,4 +1,4 @@
-"""vectors tests"""
+"""vectors functional test from stat_tool_test.aml"""
 __revision__ = "$Id: test_vectors.py 6354 2009-05-05 16:20:25Z cokelaer $"
 
 from openalea.stat_tool.vectors import Vectors, VectorDistance, \
@@ -33,7 +33,7 @@ def test1():
     #######################################################################
     """
     vec10 = Vectors("data/chene_sessile.vec")
-
+    Plot(vec10)
     # plot of the pointwise averages
     Plot(Regression(vec10, "MovingAverage", 1, 2, [1]))
 
@@ -103,48 +103,6 @@ def test1():
     _regress13 = Regression(vec9596, "NearestNeighbors", 5, 6, 0.5)
         
     vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
-
-
-    #######################################################################
-    #
-    # Distance matrix and clustering (partitioning or hierarchical methods) 
-    #
-    #######################################################################
-    # computation of a distance matrix using a standardization procedure
-    matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
-       
-    # clustering using a partitioning method
-    
-    Display(Clustering(matrix10, "Partition", 2))
-
-    vec151 = SelectIndividual(vec10,  \
-                                  [69, 48, 41, 44, 32, 47, 81, 95, 11, 36, 75, 
-                                   108, 56, 83, 38, 98, 113, 134, 110, 101, 77,
-                                   35, 74, 80, 50, 24, 89, 128, 5, 45, 8, 116, 
-                                   119, 132, 61, 78, 53, 29, 131, 65, 90, 96, 
-                                   104, 20, 86, 66, 42, 68, 125, 14, 23, 54, 33,
-                                    26, 71, 129, 102, 51, 70, 111, 138, 19, 127,
-                                     62, 117, 137, 2, 28, 17])
-    vec152 = SelectIndividual(vec10, [100, 13, 133, 105, 72, 9, 93, 109,
-                                           30, 115, 63, 7, 55, 37, 15, 114, 
-                                           106, 46, 73, 18, 3, 87, 58, 43, 60,
-                                           76, 52, 6, 39, 31, 12, 99, 121,
-                                           123, 22, 79, 94, 88, 21, 97, 25,
-                                           40, 57, 136, 67, 49, 10, 4, 120,
-                                           92, 27, 91, 64, 124, 16, 130,
-                                           84, 107, 126, 103, 122, 112, 59,
-                                           1, 82, 34, 135, 118, 85])
-    Plot(ExtractHistogram(vec151, 4), ExtractHistogram(vec152, 4))
-
-    _matrix11 = Compare(vec15, VectorDistance("N", "O", "N"))
-        
-    Clustering(matrix10, "Hierarchy", Algorithm="Agglomerative")
-    Clustering(matrix10, "Hierarchy", Algorithm="Divisive")
-        
-    vec16 = SelectVariable(vec9596, [1, 3], Mode="Reject")
-    _matrix12 = Compare(vec16, VectorDistance("N", "N", "N", "N"))
-    _matrix13 = Compare(vec16, VectorDistance("N", "O", "N", "N"))
-  
 
 
 if __name__=="__main__" :

@@ -1,28 +1,33 @@
-"""Convolution tests
-
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-
-"""
+"""Convolution functional test extracted from original version of
+stat_tool_test.aml"""
 __revision__ = "$Id: test_convolution.py 6609 2009-07-06 09:31:24Z cokelaer $"
 
 
-from openalea.stat_tool import *
-
-from tools import interface
+from openalea.stat_tool import Convolution, Histogram, Distribution
+from openalea.stat_tool import Simulate, ExtractHistogram, ToHistogram
+from openalea.stat_tool import Estimate,ExtractData,ExtractDistribution
+from openalea.stat_tool import Plot,Shift, Display, Save
 
 
 
 
 def test1():
 
-    convol1 = Convolution(Distribution("B", 0, 10, 0.5),
+    convol2 = Convolution(Distribution("B", 0, 10, 0.5),
         Distribution("NB", 0, 10, 0.5))
+    Plot(convol2, Title='convol2')
+    
     convol1 = Convolution('data/convolution1.conv')
-  
+    Plot(convol1, Title='Convol1 (from file data/convolution.conv)')
+    
+    Plot(convol1, convol2, Title='The two input convolutions')
+    
     convol_histo1 = Simulate(convol1, 200)
-
+    Plot(convol_histo1, Title='convol_histo1 from simulate')
+    
     histo20 = ExtractHistogram(convol_histo1, "Elementary", 1)
-
+    Plot(histo20)
+    
     convol2 = Estimate(convol_histo1, "CONVOLUTION", 
                        ExtractDistribution(convol1, "Elementary", 1),
                        MinInfBound=0)

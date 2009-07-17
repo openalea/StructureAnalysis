@@ -23,9 +23,6 @@ class Test(interface):
         v = Histogram([0, 1, 2, 3])
         assert v
         return v
-      
-    def test_empty(self):
-        self.empty()
         
     def test_constructor_from_file(self):
         self.constructor_from_file()
