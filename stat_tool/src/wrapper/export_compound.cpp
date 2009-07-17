@@ -39,7 +39,7 @@ class CompoundWrap
 
   public:
 
-  WRAP_METHOD1(Compound, simulation, Compound_data, int);
+    WRAP_METHOD1(Compound, simulation, Compound_data, int);
 	WRAP_METHOD0(Compound, extract_data, Compound_data);
 	WRAP_METHOD_FILE_ASCII_WRITE(Compound);
 
@@ -60,8 +60,6 @@ class CompoundWrap
 	    compound_data = compound.get_compound_data();
 	    ret = new Parametric_model(*((Distribution*)(&compound)), 
             (Histogram*)compound_data);
-        //ret = new Parametric_model(compound,
-		//		(compound_data ? compound_data->get_compound() : NULL));
 	    return ret;
 	}
 
@@ -87,12 +85,12 @@ class CompoundWrap
 	}
 
 
-  static MultiPlotSet* survival_get_plotable(const Compound& p) 
-  { 
-    Format_error error; 
-    MultiPlotSet* ret = p.survival_get_plotable(error); 
-    if (!ret) ERROR;
-    return ret;
+    static MultiPlotSet* survival_get_plotable(const Compound& p) 
+    { 
+        Format_error error; 
+        MultiPlotSet* ret = p.survival_get_plotable(error); 
+        if (!ret) ERROR;
+        return ret;
   }
 
 
@@ -105,8 +103,8 @@ void class_compound()
 	class_< Compound, bases<STAT_interface, Distribution> >  ("_Compound", "Compound" )
         //"constructor from 2 distribution and an optional cumul threshold")
         .def(init<Parametric, Parametric, optional<double> >())
-        //, "constructor from compound")
-        .def(init<Compound>())
+        //, "constructor from compound") no need for this constructor
+        // .def(init<Compound>())
         // constructor from file
         DEF_INIT_MAKE_CONSTRUCTOR(WRAP::compound_from_file,	"Build from a filename")
 
@@ -119,12 +117,7 @@ void class_compound()
         DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary,	ARGS("index"),	"Return the elementary distribution")
     	DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
         DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
-
 	;
-
-
-
-
 
 	/*
 	    Compound(const Parametric &sum_dist , const Parametric &dist , char type);

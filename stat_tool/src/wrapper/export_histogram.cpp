@@ -502,7 +502,7 @@ void class_histogram()
   .def("fit", HistogramWrap::fit, return_value_policy<manage_new_object> (),
       python::arg("parametric_model"), "Fit histogram")
 
-  .def("get_plotable", HistogramWrap::get_plotable, return_value_policy<
+  .def("get_plotable_list", HistogramWrap::get_plotable, return_value_policy<
       manage_new_object> (), "Return a plotable for a list of histograms")
 
   .def("get_plotable", &STAT_interface::get_plotable, return_value_policy<

@@ -139,6 +139,8 @@ public:
     return ret;
   }
 
+
+
 };
 
 
@@ -170,10 +172,7 @@ void class_convolution()
 /*
 
    Convolution(const Convolution &convol , bool data_flag = true):Distribution(convol) { copy(convol , data_flag); }
-
    void computation(int min_nb_value = 1 , double cumul_threshold = CONVOLUTION_THRESHOLD ,  bool *dist_flag = 0);
-   Convolution_data* simulation(Format_error &error , int nb_element) const;
-
    Parametric* get_distribution(int index) const { return distribution[index]; }
    */
 
@@ -231,10 +230,7 @@ void class_convolution_data()
   /*
     Convolution_data(const Histogram &histo , int nb_histo);
     Convolution_data(const Convolution &convol);
-    Convolution_data(const Convolution_data &convol_histo , bool model_flag = true)
-    :Histogram(convol_histo) { copy(convol_histo , model_flag); }
-
-
+    Convolution_data(const Convolution_data &convol_histo , bool model_flag = true):Histogram(convol_histo) { copy(convol_histo , model_flag); }
     Histogram* get_histogram(int index) const { return histogram[index]; }
     */
 

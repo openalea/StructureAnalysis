@@ -47,26 +47,40 @@ class DistributionWrap
 
 public:
 
-  static MultiPlotSet* get_plotable(const Distribution& p,
-                 const boost::python::list& hist_list)
+  static MultiPlotSet* get_plotable_dists(const Distribution& p,
+                 const boost::python::list& dist_list)
    {
      Format_error error;
-     int nb_hist = boost::python::len(hist_list);
+     int nb_dist = boost::python::len(dist_list);
      stat_tool::wrap_util::auto_ptr_array<const Distribution *>
-       hists(new const Distribution*[nb_hist]);
+       dists(new const Distribution*[nb_dist]);
 
-     for (int i = 0; i < nb_hist; i++)
-       hists[i] = extract<const Distribution*>(hist_list[i]);
+     for (int i = 0; i < nb_dist; i++)
+       dists[i] = extract<const Distribution*>(dist_list[i]);
 
-     const Distribution** d = hists.get();
+     const Distribution** d = dists.get();
 
 
-     MultiPlotSet* ret = p.get_plotable_distributions(error, nb_hist, d);
+     MultiPlotSet* ret = p.get_plotable_distributions(error, nb_dist, d);
      if(!ret)
        stat_tool::wrap_util::throw_error(error);
 
      return ret;
    }
+
+  static MultiPlotSet* survival_get_plotable(const Distribution& p)
+  {
+      Format_error error;
+      MultiPlotSet* ret = p.survival_get_plotable(error);
+      if (!ret) ERROR;
+      return ret;
+  }
+  
+  static MultiPlotSet* get_plotable(const Distribution& p)
+  {
+      MultiPlotSet* ret = p.get_plotable();
+      return ret;
+  }
 
   // survival_ascii_write wrapping
   WRAP_METHOD_SURVIVAL_ASCII_WRITE(Distribution);
@@ -110,7 +124,10 @@ void class_distribution()
     .def_readonly("get_nb_parameter", &Distribution::nb_parameter, "number of unknown parameters")
 
     // no tested. is it useful ?
-    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable for a list of distribution")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable_list", WRAP::get_plotable_dists, "Return a plotable for a list of distribution")
+    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
+
     .def("survival_ascii_write", WRAP::survival_ascii_write,	"Return a string containing the object description (survival viewpoint)")
     .def("survival_plot_write", WRAP::survival_plot_write,ARGS("prefix", "title"),"Write GNUPLOT files (survival viewpoint)")
     .def("survival_spreadsheet_write", WRAP::survival_spreadsheet_write, ARGS("filename"),"Write object to filename (spreadsheet format)")
@@ -170,7 +187,6 @@ void class_distribution()
                    const Distribution **idist , const char *title) const;
 
 
-   MultiPlotSet* survival_get_plotable(Format_error &error) const;
 
    double mean_absolute_deviation_computation() const;
    double skewness_computation() const;
