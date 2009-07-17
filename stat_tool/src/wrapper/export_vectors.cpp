@@ -802,15 +802,23 @@ static string variance_analysis(const Vectors& v, int class_variable,
   return s.str();
 }
 
-static bool
-rank_correlation_computation(const Vectors& input, int type, const char* path)
-{
-  Format_error error;
-  std::stringstream os;
-  bool ret;
-  ret = input.rank_correlation_computation(error, os, type, path);
-  return ret;
-}
+    static bool
+    rank_correlation_computation(const Vectors& input, int type, const char* path)
+    {
+        Format_error error;
+        std::stringstream os;
+        bool ret;
+        ret = input.rank_correlation_computation(error, os, type, path);
+        return ret;
+    }
+
+    static MultiPlotSet* get_plotable(const Vectors& p)
+    {
+        // to be checked
+        MultiPlotSet* ret = p.get_plotable();
+        return ret;
+    }
+
 
 };
 
@@ -859,6 +867,7 @@ void class_vectors()
     DEF_RETURN_VALUE("scaling", VectorsWrap::scaling,args("variable", "scaling_coeff"), "Scales vectors")
     DEF_RETURN_VALUE("round", VectorsWrap::scaling,args("variable", "scaling_coeff"), "Scales vectors")
     DEF_RETURN_VALUE_NO_ARGS("merge_variable", VectorsWrap::merge_variable,"Merge variables" )
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", VectorsWrap::get_plotable, "Return a plotable")
     .def("contingency_table", VectorsWrap::contingency_table, "Return a string with the contingency_table")
     .def("variance_analysis", VectorsWrap::variance_analysis, "Return a string with the variance analysis")
     .def("ascii_data_write", VectorsWrap::ascii_data_write, "Return a string with the object representation")
