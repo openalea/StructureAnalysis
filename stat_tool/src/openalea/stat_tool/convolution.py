@@ -1,12 +1,23 @@
-""" Convolution """
+""" Convolution module 
+
+:Status:
+  * constructors done
+  * test done
+  * error management done
+  * documentation to be checked
+  
+"""
 __revision__ = "$Id$"
 
 
 import interface
-import _stat_tool
+import error
+
+#import _stat_tool
 
 from _stat_tool import _Convolution
 from _stat_tool import _ConvolutionData
+from _stat_tool import _ParametricModel
 
 __all__ = ['Convolution',
            '_Convolution',
@@ -42,24 +53,32 @@ def Convolution(*args):
         :func:`~openalea.stat_tool.estimate.Estimate`,
         :func:`~openalea.stat_tool.simulate.Simulate`.
     """
-
-    if(len(args)==0):
-        raise TypeError()
+    error.CheckArgumentsLength(args, 1)
 
     # filename
     if(len(args)==1):
-        return _stat_tool._Convolution(args[0])
-
+        error.CheckType(args[0], str, arg_id=1)
+        result =  _Convolution(args[0])
     # build list of distributions
     else:
-        return _stat_tool._Convolution(list(args))
+        #check that all arguments are _parametric_model
+        for arg, i in zip(args, range(0, len(args))):
+            print 'check %s' %i
+            error.CheckType(arg, _ParametricModel, arg_id=i+1)
+        
+        result = _Convolution(list(args))
+        
+    if result is not None:
+        return result
+    else:
+        error.StatToolError('Unknown error in Convolution')
 
 
 
 # Extend _Convolution
-interface.extend_class( _stat_tool._Convolution, interface.StatInterface)
+interface.extend_class(_Convolution, interface.StatInterface)
 
 
 # Extend _ConvolutionData
-interface.extend_class( _stat_tool._ConvolutionData, interface.StatInterface)
+interface.extend_class(_ConvolutionData, interface.StatInterface)
 

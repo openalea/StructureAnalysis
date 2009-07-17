@@ -51,7 +51,6 @@ from regression import *
 from output import  *
 from data_transform import *
 from cluster import *
-        
 
 # Constant
 from _stat_tool import I_DEFAULT

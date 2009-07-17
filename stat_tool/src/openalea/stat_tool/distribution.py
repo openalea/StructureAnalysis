@@ -1,12 +1,21 @@
-__doc__ = """ Distributions module"""
+""" Distributions module
+
+:Status: 
+ * constructors done
+ * test done
+ * error management 
+     - Distribution done
+     - Binomial, and others to be checked
+ * documentation to be checked
+ """
 __revision__ = "$Id$"
 
-import _stat_tool
 import interface
+import error
 
-# Public members
+import _stat_tool
 from _stat_tool import _Distribution
-from _stat_tool import _ParametricModel
+from _stat_tool import _ParametricModel, _DistributionData, _ParametricModel
 from _stat_tool import DistributionIdentifier
 
 __all__ = ["_Distribution",
@@ -22,9 +31,8 @@ __all__ = ["_Distribution",
            "distribution_type",
            "DistributionIdentifier"]
 
-
-distribution_type = \
-    {
+# .. todo:: put this dict into common module ?  
+distribution_type = {
     "B": _stat_tool.BINOMIAL,
     "BINOMIAL": _stat_tool.BINOMIAL,
     "P": _stat_tool.POISSON,
@@ -35,18 +43,13 @@ distribution_type = \
     "UNIFORM": _stat_tool.UNIFORM,
     "M": _stat_tool.MULTINOMIAL,
     "MULTINOMIAL": _stat_tool.MULTINOMIAL,
-
-    _stat_tool.BINOMIAL: _stat_tool.BINOMIAL,
-    _stat_tool.POISSON: _stat_tool.POISSON,
-    _stat_tool.UNIFORM: _stat_tool.UNIFORM,
-    _stat_tool.NEGATIVE_BINOMIAL: _stat_tool.NEGATIVE_BINOMIAL,
-    _stat_tool.MULTINOMIAL: _stat_tool.MULTINOMIAL,
     }
-
 
 def get_distribution_type(typeid, filter=None):
     """ Return a distribution type constante corresponding to type
     typeid must be in filter list
+    
+    .. todo:: get rid of this function to simplify code 
     """
 
     # Convert distribution type
@@ -65,7 +68,7 @@ def get_distribution_type(typeid, filter=None):
         raise AttributeError(error)
 
 
-def Distribution(type_or_filename, *args):
+def Distribution(utype, *args):
     """
     Construction of a parametric discrete distribution (either binomial,
     Poisson, negative binomial or uniform) from the name and the parameters
@@ -117,31 +120,35 @@ def Distribution(type_or_filename, *args):
         :func:`~openalea.stat_tool.estimate.Estimate`
         :func:`~openalea.stat_tool.simulate.Simulate`.
     """
-
-    typeid = type_or_filename
-
-    # Filename
-    if(len(args) == 0):
-        filename = typeid
-        return _ParametricModel(filename)
-
-    # Convert distribution type
-    typeid = get_distribution_type(typeid)
-
-    if(typeid == _stat_tool.BINOMIAL):
-        return Binomial(*args)
-
-    elif(typeid == _stat_tool.POISSON):
-        return Poisson(*args)
     
-    elif(typeid == _stat_tool.MULTINOMIAL):
-        return Multinomial(*args)
+    # check there is at least 1 argument
+    
 
-    elif(typeid == _stat_tool.NEGATIVE_BINOMIAL):
-        return NegativeBinomial(*args)
+    # Constructor from Filename or Histogram or parametricmodel
+    if(len(args) == 0):  
+        error.CheckType(utype, str, _DistributionData, _ParametricModel, 
+                        arg_id=1)
+        result =  _ParametricModel(utype)
+    
+    if len(args)>0:
+        error.CheckArgumentsLength(args, 1)
+        if utype in ["B",  "BINOMIAL"]:
+            result = Binomial(*args)
+        elif utype in ["P", "POISSON"]:
+            result = Poisson(*args)    
+        elif utype in ["M", "MULTINOMIAL"]:
+            raise NotImplemented
+        elif utype in ["NB", "NEGATIVE_BINOMIAL"]:
+            result = NegativeBinomial(*args)
+        elif utype in ["U", "UNIFORM"]:
+            result = Uniform(*args)
+        else:
+            error.DictWrongKeys(distribution_type.keys(), utype)
 
-    elif(typeid == _stat_tool.UNIFORM):
-        return Uniform(*args)
+    if result is not None:
+        return result
+    else:
+        error.StatToolError('Unknown error in Distribution')
 
 
 def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT,\
@@ -154,8 +161,7 @@ def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT,\
         (shift parameter)
       * `sup_bound` (int) : upper bound to the range of possilbe values
       * `proba` (int, float) : probability of 'success'
-    """
-
+    """    
     # Check parameters
     assert inf_bound < sup_bound
     assert (sup_bound - inf_bound) < _stat_tool.MAX_DIFF_BOUND

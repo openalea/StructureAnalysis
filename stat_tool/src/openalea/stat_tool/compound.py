@@ -1,19 +1,20 @@
 """Compound module
 
+:Status: 
+ * constructors done
+ * test done
+ * error management done
+ * documentation to be checked
 
-.. todo:: 
-    - check the extract and extract_data functionalities.
-    - do we want the third constructor ?
-    - cleanup documentation.
 """
 __revision__ = "$Id$"
 
 import interface
-import _stat_tool
-
+import error
 
 from _stat_tool import _Compound
 from _stat_tool import _CompoundData
+from _stat_tool import _ParametricModel
 
 __all__ = ['Compound',
             '_Compound',
@@ -56,22 +57,29 @@ def Compound(*args, **kargs):
         :func:`~openalea.stat_tool.estimate.Estimate`,
         :func:`~openalea.stat_tool.simulate.Simulate`
     """
-
+    error.CheckArgumentsLength(args, 1, 2)
+    error.CheckOptionalArgumentsLength(kargs, 0, 1)
+    
     Threshold = kargs.get("Threshold", None)
 
-    if((len(args)==0) or (len(args)>3)) : 
-        raise TypeError("Bad number of arguments")
-
     # filename
-    if(len(args)==1) :
-        return _stat_tool._Compound(args[0])
-
+    if (len(args)==1):
+        error.CheckType(args[0], str, arg_id=1)
+        result =  _Compound(args[0])
+        
     # build list of distributions
-    if(len(args)==2) :    
+    if (len(args)==2):
+        error.CheckType(args[0], _ParametricModel, arg_id=1)
+        error.CheckType(args[1], _ParametricModel, arg_id=2)
         if Threshold:
-            return _stat_tool._Compound(args[0], args[1]) 
+            result =  _Compound(args[0], args[1]) 
         else:
-            return _stat_tool._Compound(args[0], args[1])
+            result =  _Compound(args[0], args[1])
+            
+    if result is not None:
+        return result
+    else:
+        error.StatToolError('Unknown error in Compound')
     
     
     

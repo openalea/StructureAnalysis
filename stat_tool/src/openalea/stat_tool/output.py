@@ -437,17 +437,32 @@ class StatInterface(object):
         survival = bool(ViewPoint.lower() == "survival")
         stateprofile = bool(ViewPoint.lower() == "stateprofile")
 
+        debug = kargs.get("Debug", False)
+        
         try:
-            if(survival):
+            if (survival):
+                if debug:
+                    print 'trying plotting survival mode'
                 plotable = self.survival_get_plotable(*params)
 
-            elif(stateprofile):
+            elif (stateprofile):
+                if debug:
+                    print 'trying plotting stateprofile mode'
+                
                 plotable = self.stateprofile_get_plotable(*params)
 
             else:
-                if(args):
-                    plotable = self.get_plotable(list(args), *params)
+                if (args):
+                    if debug:
+                        print 'trying plotable mode with arguments. E.g. plot(d1,d2)'
+                    if len(args)==1 and type(args[0])==int:
+                        # for vectrors. for the time being variable argument is not implemented
+                        # should be plotable = self.get_plotable_list(args[0]) but for now:
+                        plotable = self.get_plotable_list()
+                    else:
+                        plotable = self.get_plotable_list(list(args), *params)
                 else:
+                    print 'trying with Params'
                     plotable = self.get_plotable(*params)
             
             plotter = plot.get_plotter()
@@ -459,8 +474,10 @@ class StatInterface(object):
         if(plot.DISABLE_PLOT): return
 
         if(plotable is not None):
+            if debug: print 'plotable seems fine'
             plotter.plot(plotable, title, groups, *args, **kargs)
         else:
+            if debug: print 'plotable is None. using old_plot'
             self.old_plot(*args, **kargs)
             
         

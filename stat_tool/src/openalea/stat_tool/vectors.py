@@ -16,9 +16,6 @@ __all__ = ['Vectors',
            'VarianceAnalysis']
 
 
-# Extend dynamically class
-interface.extend_class( _Vectors, interface.StatInterface)
-interface.extend_class( _VectorDistance, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -101,6 +98,8 @@ def Vectors(*args, **kargs):
             temp = _Vectors(*args)
         
     return temp
+
+interface.extend_class( _Vectors, interface.StatInterface)
 
 
 ############### VectorDistance #################################################
@@ -239,6 +238,8 @@ def VectorDistance(*args, **kargs):
     return _stat_tool._VectorDistance(types, weigths, distance)
     
 
+# Extend dynamically class
+interface.extend_class( _VectorDistance, interface.StatInterface)
 ################################################################################
 
 def VarianceAnalysis(vec, class_variable, response_variable, 

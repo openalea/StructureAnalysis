@@ -1,16 +1,24 @@
-""" Mixture class"""
+""" Mixture class
+
+
+:Status: 
+ * constructors done
+ * test done
+ * error management done
+ * documentation to be checked
+"""
 __revision__ = "$Id$"
 
 
-import os
-
 import interface
-import _stat_tool
+import error
+#import _stat_tool
 
 from _stat_tool import _Mixture
 from _stat_tool import _MixtureData
 from _stat_tool import _MvMixture
 from _stat_tool import _MvMixtureData
+from _stat_tool import _ParametricModel
 
 __all__ = ['_Mixture',
            '_MixtureData',
@@ -53,40 +61,44 @@ def Mixture(*args):
 
     """
 
-    if (len(args)==0):
-        raise TypeError()
+    error.CheckArgumentsLength(args, 1)
 
-    # filename
+    # filename 
     if (len(args)==1):
-        return _stat_tool._Mixture(args[0])
-
+        error.CheckType(args[0], str, arg_id=1)
+        result =  _Mixture(args[0])
+    
     # build list of weights and distributions
     else:
         nb_param = len(args)
-
         if ((nb_param % 2) != 0):
             raise TypeError("Number of parameters must be pair")
 
+        # Extract weights ands distributions
         weights = []
         dists = []
-
         for i in xrange(nb_param / 2):
             weights.append(args[i * 2])
             dists.append(args[i * 2 + 1])
+            print type(args[i*2+1])
+            error.CheckType(args[i*2+1], _ParametricModel, arg_id=i*2+1)
+            error.CheckType(args[i*2], float, arg_id=i*2)
 
-        return _stat_tool._Mixture(weights, dists)
+        result = _Mixture(weights, dists)
+        
+    return result
 
 # Extend _Mixture
-interface.extend_class(_stat_tool._Mixture, interface.StatInterface)
+interface.extend_class(_Mixture, interface.StatInterface)
 
 # Extend _MixtureData
-interface.extend_class(_stat_tool._MixtureData, interface.StatInterface)
+interface.extend_class(_MixtureData, interface.StatInterface)
 
 # Extend _MvMixture
-interface.extend_class(_stat_tool._MvMixture, interface.StatInterface)
+interface.extend_class(_MvMixture, interface.StatInterface)
 
 # Extend _MvMixtureData
-interface.extend_class(_stat_tool._MvMixtureData, interface.StatInterface)
+interface.extend_class(_MvMixtureData, interface.StatInterface)
 
 # Add methods to _MvMixture
 
@@ -133,7 +145,7 @@ def _MvMixture_criteria(self):
                     criteria[name] = val
     return criteria
 
-_stat_tool._MvMixture.save_backup = _stat_tool._MvMixture.save
+_MvMixture.save_backup = _MvMixture.save
 
 
 def _MvMixture_save(self, file_name, format="ASCII", overwrite=False):
@@ -160,13 +172,12 @@ def _MvMixture_save(self, file_name, format="ASCII", overwrite=False):
         raise ValueError, msg
     else:
         try:
-            _stat_tool._MvMixture.save_backup(self, file_name, Detail=1,
+            _MvMixture.save_backup(self, file_name, Detail=1,
                                                   ViewPoint='', Format=format)
         except RuntimeError, error:
             raise error
 
-_stat_tool._MvMixture.state_permutation_backup = \
-    _stat_tool._MvMixture.state_permutation
+_MvMixture.state_permutation_backup = _MvMixture.state_permutation
 
 
 def _MvMixture_state_permutation(self, perm):
