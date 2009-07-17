@@ -284,7 +284,7 @@ comparison.Histogram
 TODO
 ====
 
-* Choose a language once for all (english versus American) in the syntax=> American
+* Check that tests run under windows
 * Issue with the UNIFORM distribution while saving and loading a mixture of
   uniform distribution. See test_save in test_mixture.
 * Issue with the Histogram distribution in test_save:
@@ -294,3 +294,11 @@ TODO
 * VarianceAnalysis works but variance_analysis wrapping is not robust, not well
   documented, leads to crashses.
 * plotable inside MvMixture(Data) ? 
+* plotable in vectors
+* check Display and Ploy functions (viewpoint, Details, ...)
+
+DONE
+====
+
+* language for the syntax is American
+* Comments all functional tests and add title to the Plot commands 
