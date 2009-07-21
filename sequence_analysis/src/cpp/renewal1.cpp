@@ -751,7 +751,7 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
       }
 
       case MIXTURE : {
-        phisto = renewal_data->hmixture;
+        phisto = renewal_data->mixture;
         break;
       }
       }
