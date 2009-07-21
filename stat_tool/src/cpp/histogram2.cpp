@@ -1575,7 +1575,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
     if (MAX(max_nb_value , 2) < TIC_THRESHOLD) {
       plot[0].xtics = 1;
     }
-    if ((int)(max_frequency * YSCALE) + 1 < TIC_THRESHOLD) {
+    if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
       plot[0].ytics = 1;
     }
 
@@ -1591,7 +1591,9 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
       plot[0][i].style = "impulses";
 
       for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
-        plot[0][i].add_point(j + shift , histo[i]->frequency[j]);
+        if (histo[i]->frequency[j] > 0) {
+          plot[0][i].add_point(j + shift , histo[i]->frequency[j]);
+        }
       }
 
       if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
@@ -1621,7 +1623,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
       if (MAX(merged_histo[0]->nb_value , 2) - 1 < TIC_THRESHOLD) {
         plot[1].xtics = 1;
       }
-      if ((int)(merged_histo[0]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+      if (ceil(merged_histo[0]->max * YSCALE) < TIC_THRESHOLD) {
         plot[1].ytics = 1;
       }
 
@@ -1720,8 +1722,6 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
         plot[i].xtics = 0.1;
         plot[i].ytics = 0.1;
-
-        // definition du nombre de SinglePlot 
 
         plot[i].resize(cumul_concentration_nb_histo);
 
