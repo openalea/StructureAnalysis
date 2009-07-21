@@ -1689,12 +1689,18 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
             out_file << "set grid\n" << "set xtics 0,0.1\n" << "set ytics 0,0.1" << endl;
 
             out_file << "plot [0:" << 1. - complement << "] [0:" << 1. - complement << "] \""
+                     << label((data_file_name[2].str()).c_str())
+                     << "\" using 2:1 notitle with linespoints,\\" << endl;
+            out_file << "\"" << label((data_file_name[2].str()).c_str())
+                     << "\" using 2:2 notitle with lines" << endl;
+
+/*            out_file << "plot [0:" << 1. - complement << "] [0:" << 1. - complement << "] \""
                      << label((data_file_name[2].str()).c_str()) << "\" using 2:1 title \""
                      << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
                      << STAT_label[STATL_FUNCTION] << "\" with linespoints,\\" << endl;
             out_file << "\"" << label((data_file_name[2].str()).c_str()) << "\" using 2:2 title \""
                      << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
-                     << STAT_label[STATL_FUNCTION] << "\" with linespoints" << endl;
+                     << STAT_label[STATL_FUNCTION] << "\" with linespoints" << endl; */
 
             out_file << "unset grid\n" << "set xtics autofreq\n" << "set ytics autofreq" << endl;
           }
@@ -1723,7 +1729,8 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
           out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using 3:4 title \""
                    << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_CONCENTRATION] << " "
                    << STAT_label[STATL_CURVE] << "\" with linespoints,\\" << endl;
-          out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using 3:3 notitle with lines" << endl;
+          out_file << "\"" << label((data_file_name[1].str()).c_str())
+                   << "\" using 3:3 notitle with lines" << endl;
 
           out_file << "unset grid\n" << "set xtics autofreq\n" << "set ytics autofreq" << endl;
         }
@@ -1856,17 +1863,20 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
       plot[1].resize(histo->variance > 0. ? 2 : 1);
 
-      i = 0;
       if (histo->variance > 0.) {
         legend.str("");
         legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
                << STAT_label[STATL_FUNCTION];
-        plot[1][i].legend = legend.str();
+        plot[1][0].legend = legend.str();
 
-        plot[1][i].style = "linespoints";
+        plot[1][0].style = "linespoints";
 
-        histo->plotable_cumul_write(plot[1][i] , pcumul);
-        i++;
+        histo->plotable_cumul_write(plot[1][0] , pcumul);
+        i = 1;
+      }
+
+      else {
+        i = 0;
       }
 
       legend.str("");
@@ -1897,23 +1907,28 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
         plot[2].resize(2);
 
-        legend.str("");
+/*        legend.str("");
         legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
                << STAT_label[STATL_FUNCTION];
-        plot[2][0].legend = legend.str();
+	       plot[2][0].legend = legend.str(); */
 
         plot[2][0].style = "linespoints";
 
         histo->plotable_cumul_matching_write(plot[2][0] , offset , nb_value , cumul , pcumul);
 
-        legend.str("");
+/*        legend.str("");
         legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
         plot[2][1].legend = legend.str();
 
         plot[2][1].style = "linespoints";
 
-        plotable_cumul_matching_write(plot[2][1] , *this);
+        plotable_cumul_matching_write(plot[2][1] , *this); */
+
+        plot[2][1].style = "lines";
+
+        plot[2][1].add_point(0. , 0.);
+        plot[2][1].add_point(1. - complement , 1. - complement);
       }
 
       // courbes de concentration
@@ -1935,17 +1950,20 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
       plot[i].resize(histo->variance > 0. ? 3 : 2);
 
-      j = 0;
       if (histo->variance > 0.) {
         legend.str("");
         legend << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_CONCENTRATION] << " "
                << STAT_label[STATL_CURVE];
-        plot[i][j].legend = legend.str();
+        plot[i][0].legend = legend.str();
 
-        plot[i][j].style = "linespoints";
+        plot[i][0].style = "linespoints";
 
-        histo->plotable_concentration_write(plot[i][j] , pcumul , scale);
-        j++;
+        histo->plotable_concentration_write(plot[i][0] , pcumul , scale);
+        j = 1;
+      }
+
+      else {
+        j = 0;
       }
 
       legend.str("");
