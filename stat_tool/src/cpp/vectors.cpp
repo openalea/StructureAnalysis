@@ -3749,7 +3749,7 @@ MultiPlotSet* Vectors::get_plotable() const
     for (k = 0;k < nb_variable;k++) {
       if (k != j) {
 
-         // vue : loi jointe empirique de deux variables
+         // vue : loi jointe empirique de 2 variables
 
         if ((min_value[j] >= 0.) && (max_value[j] - min_value[j] > min_value[j] * PLOT_RANGE_RATIO)) {
           xmin = 0.;
