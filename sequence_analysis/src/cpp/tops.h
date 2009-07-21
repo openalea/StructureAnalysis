@@ -98,6 +98,7 @@ private :
     std::ostream& spreadsheet_write(std::ostream &os , const Tops *itops) const;
     bool plot_write(const char *prefix , const char *title ,
                     const Tops *itops) const;
+    MultiPlotSet* get_plotable(const Tops *itops) const;
 
     void position_nb_internode_computation(int position);
 
@@ -120,6 +121,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Top_parameters);
 
@@ -207,6 +209,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Tops);
 
