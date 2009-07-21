@@ -219,6 +219,7 @@ private :
     std::ostream& spreadsheet_write(std::ostream &os , const Renewal_data *timev) const;
     bool plot_write(const char *prefix , const char *title ,
                     const Renewal_data *timev) const;
+    MultiPlotSet* get_plotable(const Renewal_data *timev) const;
 
     void index_event_computation();
 
@@ -249,6 +250,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Renewal);
 
@@ -349,7 +351,7 @@ protected :
     Histogram *htime;       // histogramme du temps d'observation
     Histogram **hnb_event;  // histogrammes du nombre d'evenements
                             // pour un temps d'observation donne
-    Histogram *hmixture;    // histogramme du nombre d'evenements
+    Histogram *mixture;     // histogramme du nombre d'evenements
 
     void build_histogram();
     void build_sample();
@@ -391,6 +393,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Time_events);
 
@@ -418,7 +421,7 @@ public :
     int get_nb_class() const { return nb_class; }
     Histogram* get_htime() const { return htime; }
     Histogram* get_hnb_event(int itime) const { return hnb_event[itime]; }
-    Histogram* get_hmixture() const { return hmixture; }
+    Histogram* get_mixture() const { return mixture; }
 };
 
 
@@ -479,6 +482,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Renewal_data);
 
