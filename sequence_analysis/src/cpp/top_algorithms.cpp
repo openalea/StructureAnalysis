@@ -572,6 +572,8 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
     delete tops->hlength;
     tops->build_length_histogram();
 
+    tops->build_index_parameter_histogram();
+
     tops->min_value_computation(0);
     tops->max_value_computation(0);
     tops->build_marginal_histogram(0);
