@@ -741,7 +741,7 @@ bool Top_parameters::plot_write(const char *prefix , const char *title ,
 {
   bool status;
   register int i , j , k;
-  int nb_histo , nb_dist , *index_dist;
+  int nb_dist , nb_histo , *index_dist;
   double *scale;
   const Distribution **pdist;
   const Histogram **phisto;
@@ -941,6 +941,144 @@ bool Top_parameters::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'une cime et de ces parametres.
+ *
+ *  argument : pointeur sur un objet Tops.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Top_parameters::get_plotable(const Tops *itops) const
+
+{
+  register int i , j;
+  int nb_dist , nb_histo;
+  ostringstream legend;
+  MultiPlotSet *plot_set;
+
+
+  nb_dist = MIN(max_position , PLOT_NB_AXILLARY);
+
+  if (itops) {
+    nb_histo = 0;
+    for (i = 1;i <= max_position;i++) {
+      if (itops->axillary_nb_internode[i]) {
+        nb_histo++;
+      }
+    }
+
+    plot_set = new MultiPlotSet(nb_histo + 2);
+  }
+
+  else {
+    plot_set = new MultiPlotSet(1);
+  }
+
+  MultiPlotSet &plot = *plot_set;
+
+  plot.border = "15 lw 0";
+
+  // 1ere vue : lois du nombre d'entrenoeuds des axes portes
+
+  plot[0].xrange = Range(0 , axillary_nb_internode[nb_dist]->nb_value - 1);
+  plot[0].yrange = Range(0. , MIN(1. , axillary_nb_internode[1]->max * YSCALE));
+
+  if (axillary_nb_internode[nb_dist]->nb_value - 1 < TIC_THRESHOLD) {
+    plot[0].xtics = 1;
+  }
+
+  plot[0].resize(nb_dist);
+
+  for (i = 1;i <= nb_dist;i++) {
+    legend.str("");
+    legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_DISTRIBUTION]
+           << " " << i;
+    plot[0][i].legend = legend.str();
+
+    plot[0][i].style = "linespoints";
+
+    axillary_nb_internode[i]->plotable_mass_write(plot[0][i]);
+  }
+
+  if (itops) {
+
+    // vue suivante : loi empirique du nombre d'entrenoeuds de l'axe porteur
+
+    plot[1].xrange = Range(0 , itops->nb_internode->nb_value - 1);
+    plot[1].yrange = Range(0 , ceil(itops->nb_internode->max * YSCALE));
+
+    if (itops->nb_internode->nb_value - 1 < TIC_THRESHOLD) {
+      plot[1].xtics = 1;
+    }
+    if (ceil(itops->nb_internode->max * YSCALE) < TIC_THRESHOLD) {
+      plot[1].ytics = 1;
+    }
+
+    plot[1].resize(1);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[1][0].legend = legend.str();
+
+    plot[1][0].style = "impulses";
+
+    itops->nb_internode->plotable_frequency_write(plot[1][0]);
+
+    // vues suivantes : ajustement des lois du nombre d'entrenoeuds des axes portes
+
+    i = 2;
+    for (j = 1;j <= max_position;j++) {
+      if (itops->axillary_nb_internode[j]) {
+        plot[i].xrange = Range(0 , axillary_nb_internode[j]->nb_value - 1);
+        plot[i].yrange = Range(0 , ceil(MAX(itops->axillary_nb_internode[j]->max ,
+                                            axillary_nb_internode[j]->max * itops->axillary_nb_internode[j]->nb_element) * YSCALE));
+
+        if (axillary_nb_internode[j]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[i].xtics = 1;
+        }
+
+        plot[i].resize(2);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+               << " " << j;
+        plot[i][0].legend = legend.str();
+
+        plot[i][0].style = "impulses";
+
+        itops->axillary_nb_internode[j]->plotable_frequency_write(plot[i][0]);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_DISTRIBUTION]
+               << " " << j;
+        plot[i][1].legend = legend.str();
+
+        plot[i][1].style = "linespoints";
+
+        axillary_nb_internode[j]->plotable_mass_write(plot[i][1] , itops->axillary_nb_internode[j]->nb_element);
+        i++;
+      }
+    }
+  }
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Top_parameters.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Top_parameters::get_plotable() const
+
+{
+  return get_plotable(tops);
 }
 
 
@@ -2106,6 +2244,150 @@ bool Tops::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Tops.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Tops::get_plotable() const
+
+{
+  MultiPlotSet *plot_set;
+
+
+  if (top_parameters) {
+    plot_set = top_parameters->get_plotable(this);
+  }
+
+  else {
+    register int i , j;
+    int nb_histo;
+    const Histogram *phisto[2] , **merged_histo;
+    ostringstream legend;
+
+
+    nb_histo = 0;
+    for (i = 1;i <= max_position;i++) {
+      if (axillary_nb_internode[i]) {
+        nb_histo++;
+      }
+    }
+
+    plot_set = new MultiPlotSet(nb_histo + 2);
+    MultiPlotSet &plot = *plot_set;
+
+    plot.border = "15 lw 0";
+
+    // 1ere vue : loi empirique du nombre d'entrenoeuds de l'axe porteur
+
+    plot[0].xrange = Range(0 , nb_internode->nb_value - 1);
+    plot[0].yrange = Range(0 , ceil(nb_internode->max * YSCALE));
+
+    if (nb_internode->nb_value - 1 < TIC_THRESHOLD) {
+      plot[0].xtics = 1;
+    }
+    if (ceil(nb_internode->max * YSCALE) < TIC_THRESHOLD) {
+      plot[0].ytics = 1;
+    }
+
+    plot[0].resize(1);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[0][0].legend = legend.str();
+
+    plot[0][0].style = "impulses";
+
+    nb_internode->plotable_frequency_write(plot[0][0]);
+
+    // 2eme vue : lois empiriques du nombre d'entrenoeuds des axes portes superposees
+
+    merged_histo = new const Histogram*[nb_histo];
+
+    i = nb_histo - 1;
+    for (j = max_position;j >= 1;j--) {
+      if (axillary_nb_internode[j]) {
+        if (i == nb_histo - 1) {
+          merged_histo[i] = new Histogram(*axillary_nb_internode[j]);
+        }
+
+        else {
+          phisto[0] = merged_histo[i + 1];
+          phisto[1] = axillary_nb_internode[j];
+          merged_histo[i] = new Histogram(2 , phisto);
+        }
+
+        i--;
+      }
+    }
+
+    plot[1].xrange = Range(0 , merged_histo[0]->nb_value - 1);
+    plot[1].yrange = Range(0 , ceil(merged_histo[0]->max * YSCALE));
+
+    if (merged_histo[0]->nb_value - 1 < TIC_THRESHOLD) {
+      plot[1].xtics = 1;
+    }
+    if (ceil(merged_histo[0]->max * YSCALE) < TIC_THRESHOLD) {
+      plot[1].ytics = 1;
+    }
+
+    plot[1].resize(nb_histo);
+
+    i = 0;
+    for (j = 1;j <= max_position;j++) {
+      if (axillary_nb_internode[j]) {
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+               << " " << j;
+        plot[1][i].legend = legend.str();
+
+        plot[1][i].style = "impulses";
+
+        merged_histo[i]->plotable_frequency_write(plot[1][i]);
+        i++;
+      }
+    }
+
+    for (i = 0;i < nb_histo;i++) {
+      delete merged_histo[i];
+    }
+    delete [] merged_histo;
+
+    // vues suivantes : lois empiriques du nombre d'entrenoeuds des axes portes
+
+    i = 2;
+    for (j = 1;j <= max_position;j++) {
+      if (axillary_nb_internode[j]) {
+        plot[i].xrange = Range(0 , axillary_nb_internode[j]->nb_value - 1);
+        plot[i].yrange = Range(0 , ceil(axillary_nb_internode[j]->max * YSCALE));
+
+        if (axillary_nb_internode[j]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[i].xtics = 1;
+        }
+        if (ceil(axillary_nb_internode[j]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[i].ytics = 1;
+        }
+
+        plot[i].resize(1);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+               << " " << j;
+        plot[i][0].legend = legend.str();
+
+        plot[i][0].style = "impulses";
+
+        axillary_nb_internode[j]->plotable_frequency_write(plot[i][0]);
+        i++;
+      }
+    }
+  }
+
+  return plot_set;
 }
 
 
