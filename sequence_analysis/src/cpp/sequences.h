@@ -380,6 +380,7 @@ public :
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
                     const char *title = 0) const;
+    MultiPlotSet* get_plotable() const;
 
 /*    RWDECLARE_COLLECTABLE(Correlation);
 
