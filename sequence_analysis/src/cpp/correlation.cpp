@@ -820,9 +820,8 @@ bool Correlation::plot_write(Format_error &error , const char *prefix ,
                              const char *title) const
 
 {
-  bool status;
+  bool status , autocorrelation , cross_correlation;
   register int i , j;
-  int autocorrelation , cross_correlation;
   double standard_normal_value , *confidence_limit = 0;
   ostringstream data_file_name;
 
@@ -1038,6 +1037,207 @@ bool Correlation::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Correlation.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Correlation::get_plotable() const
+
+{
+  bool autocorrelation , cross_correlation;
+  register int i , j;
+  int nb_plot;
+  double standard_normal_value , *confidence_limit = 0;
+  ostringstream title , legend;
+  MultiPlotSet *plot_set;
+
+
+  plot_set = new MultiPlotSet(frequency ? 2 : 1);
+  MultiPlotSet &plot = *plot_set;
+
+  title.str("");
+
+  switch (type) {
+  case SPEARMAN :
+    title << SEQ_label[SEQL_SPEARMAN] << " ";
+    break;
+  case KENDALL :
+    title << SEQ_label[SEQL_KENDALL] << " ";
+    break;
+  }
+
+  if (offset == 1) {
+    title << SEQ_label[SEQL_PARTIAL] << " ";
+  }
+
+  if ((type == SPEARMAN) || (type == KENDALL)) {
+    title << SEQ_label[SEQL_RANK] << " ";
+  }
+
+  autocorrelation = true;
+  cross_correlation = true;
+  for (j = 0;j < nb_curve;j++) {
+    if (variable_type[j] == OBSERVED_VALUE) {
+      if (variable1[j] != variable2[j]) {
+        autocorrelation = false;
+      }
+      else if (variable1[j] == variable2[j]) {
+        cross_correlation = false;
+      }
+    }
+
+    else {
+      cross_correlation = false;
+    }
+  }
+
+  if (autocorrelation) {
+    title << SEQ_label[SEQL_AUTO];
+  }
+  else if (cross_correlation) {
+    title << SEQ_label[SEQL_CROSS];
+  }
+  title << SEQ_label[SEQL_CORRELATION_FUNCTION];
+
+  plot.title = title.str();
+
+  plot.border = "15 lw 0";
+
+  // 1ere vue : fonctions de correlation
+
+  plot[0].xrange = Range(0 , length - 1);
+  plot[0].yrange = Range(-1., 1.);
+
+  plot[0].xlabel = SEQ_label[SEQL_LAG];
+
+  if (length - 1 < TIC_THRESHOLD) {
+    plot[0].xtics = 1;
+  }
+
+  nb_plot = nb_curve;
+  if (white_noise) {
+    nb_plot++;
+  }
+
+  // calcul des limites de confiance
+
+  if (frequency) {
+    standard_normal_value = standard_normal_value_computation(0.025);
+
+    confidence_limit = new double[length];
+
+    for (i = 0;i < length;i++) {
+      switch (type) {
+      case PEARSON :
+        confidence_limit[i] = standard_normal_value / sqrt((double)frequency[i]);
+        break;
+      case SPEARMAN :
+        confidence_limit[i] = standard_normal_value / sqrt((double)frequency[i]);
+        break;
+      case KENDALL :
+        confidence_limit[i] = standard_normal_value * sqrt((2 * (2 * (double)frequency[i] + 5)) /
+                               (9 * (double)frequency[i] * (double)(frequency[i] - 1)));
+        break;
+      }
+    }
+
+    nb_plot += 2;
+  }
+
+  plot[0].resize(nb_plot);
+
+  for (i = 0;i < nb_curve;i++) {
+    legend.str("");
+
+    if (variable_type[i] == OBSERVED_VALUE) {
+      legend << STAT_label[STATL_VARIABLE] << " " << variable1[i];
+      if (variable1[i] != variable2[i]) {
+        legend << " " << STAT_label[STATL_VARIABLE] << " " << variable2[i];
+      }
+    }
+
+    else {
+      switch (variable_type[i]) {
+      case OBSERVED_STATE :
+        legend << SEQ_label[SEQL_OBSERVED] << " " << STAT_label[STATL_STATE];
+        break;
+      case THEORETICAL_STATE :
+        legend << SEQ_label[SEQL_THEORETICAL] << " " << STAT_label[STATL_STATE];
+        break;
+      case OBSERVED_OUTPUT :
+        legend << SEQ_label[SEQL_OBSERVED] << " " << STAT_label[STATL_OUTPUT];
+        break;
+      case THEORETICAL_OUTPUT :
+        legend << SEQ_label[SEQL_THEORETICAL] << " " << STAT_label[STATL_OUTPUT];
+        break;
+      }
+
+      legend << " " << variable1[i];
+    }
+
+    plot[0][i].legend = legend.str();
+
+    plot[0][i].style = "linespoints";
+
+    plotable_write(i , plot[0][i]);
+  }
+
+  i = nb_curve;
+  if (white_noise) {
+    plot[0][i].legend = SEQ_label[SEQL_WHITE_NOISE];
+
+    plot[0][i].style = "linespoints";
+
+    for (j = 0;j < length;j++) {
+      plot[0][i].add_point(j , white_noise[j]);
+    }
+    i++;
+  }
+
+  if (frequency) {
+    plot[0][i].style = "lines";
+
+    for (j = 0;j < length;j++) {
+      plot[0][i].add_point(j , confidence_limit[j]);
+    }
+    i++;
+
+    plot[0][i].style = "lines";
+
+    for (j = 0;j < length;j++) {
+      plot[0][i].add_point(j , -confidence_limit[j]);
+    }
+
+    // 2eme vue : frequences
+
+    plot[1].xrange = Range(0 , length - 1);
+    plot[1].yrange = Range(0 , frequency[0]);
+
+    plot[1].xlabel = SEQ_label[SEQL_LAG];
+    plot[1].ylabel = SEQ_label[SEQL_PAIR_FREQUENCY];
+
+    if (length - 1 < TIC_THRESHOLD) {
+      plot[1].xtics = 1;
+    }
+    if (frequency[0] < TIC_THRESHOLD) {
+      plot[1].ytics = 1;
+    }
+
+    plot[1].resize(1);
+
+    plot[1][0].style = "impulses";
+
+    plotable_frequency_write(plot[1][0]);
+
+    delete [] confidence_limit;
+  }
+
+  return plot_set;
 }
 
 
