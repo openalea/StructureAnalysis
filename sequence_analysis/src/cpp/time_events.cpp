@@ -106,7 +106,7 @@ void Time_events::build_histogram()
   }
   htime->frequency[*ptime] += *pfrequency;
 
-  hmixture = new Histogram(max_nb_event + 1);
+  mixture = new Histogram(max_nb_event + 1);
 
   htime->offset_computation();
   htime->nb_element = nb_element;
@@ -122,7 +122,7 @@ void Time_events::build_histogram()
 
   for (i = 0;i < nb_class;i++) {
     hnb_event[*ptime++]->frequency[*pnb_event] += *pfrequency;
-    hmixture->frequency[*pnb_event++] += *pfrequency++;
+    mixture->frequency[*pnb_event++] += *pfrequency++;
   }
 
   for (i = htime->offset;i < htime->nb_value;i++) {
@@ -135,11 +135,11 @@ void Time_events::build_histogram()
     }
   }
 
-  hmixture->offset_computation();
-  hmixture->nb_element = nb_element;
-  hmixture->max_computation();
-  hmixture->mean_computation();
-  hmixture->variance_computation();
+  mixture->offset_computation();
+  mixture->nb_element = nb_element;
+  mixture->max_computation();
+  mixture->mean_computation();
+  mixture->variance_computation();
 }
 
 
@@ -378,7 +378,7 @@ Time_events::Time_events(int inb_class)
 
   htime = 0;
   hnb_event = 0;
-  hmixture = 0;
+  mixture = 0;
 }
 
 
@@ -438,7 +438,7 @@ void Time_events::copy(const Time_events &timev)
     }
   }
 
-  hmixture = new Histogram(*(timev.hmixture));
+  mixture = new Histogram(*(timev.mixture));
 }
 
 
@@ -498,9 +498,9 @@ void Time_events::merge(int nb_sample , const Time_events **ptimev)
   }
 
   for (i = 0;i < nb_sample;i++) {
-    phisto[i] = ptimev[i]->hmixture;
+    phisto[i] = ptimev[i]->mixture;
   }
-  hmixture = new Histogram(nb_sample , phisto);
+  mixture = new Histogram(nb_sample , phisto);
 
   delete [] phisto;
 
@@ -534,7 +534,7 @@ void Time_events::remove()
   }
 
   delete htime;
-  delete hmixture;
+  delete mixture;
 }
 
 
@@ -600,7 +600,7 @@ Distribution_data* Time_events::extract(Format_error &error , int histo_type , i
   }
 
   else if (histo_type == MIXTURE) {
-    histo = new Distribution_data(*hmixture);
+    histo = new Distribution_data(*mixture);
   }
 
   return histo;
@@ -773,7 +773,7 @@ Time_events* Time_events::nb_event_select(Format_error &error , int min_nb_event
     status = false;
     error.update(SEQ_error[SEQR_MIN_NB_EVENT]);
   }
-  if ((max_nb_event < hmixture->offset) || (max_nb_event < min_nb_event)) {
+  if ((max_nb_event < mixture->offset) || (max_nb_event < min_nb_event)) {
     status = false;
     error.update(SEQ_error[SEQR_MAX_NB_EVENT]);
   }
@@ -906,7 +906,7 @@ Time_events* Histogram::build_time_events(Format_error &error , int itime) const
     }
     timev->hnb_event[itime] = new Histogram(*this);
 
-    timev->hmixture = new Histogram(*this);
+    timev->mixture = new Histogram(*this);
   }
 
   return timev;
@@ -1256,7 +1256,7 @@ ostream& Time_events::line_write(ostream &os) const
 {
   os << STAT_label[STATL_SAMPLE_SIZE] << ": " << nb_element << "   "
      << SEQ_label[SEQL_OBSERVATION_TIME] << " " << STAT_label[STATL_MEAN] << ": " << htime->mean << "   "
-     << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_MEAN] << ": " << hmixture->mean;
+     << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_MEAN] << ": " << mixture->mean;
 
   return os;
 }
@@ -1339,40 +1339,40 @@ ostream& Time_events::ascii_write(ostream &os , bool exhaustive , char type) con
 
   if ((htime->variance > 0.) && (exhaustive)) {
     os << "\n" << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
-    hmixture->ascii_characteristic_print(os);
+    mixture->ascii_characteristic_print(os);
 
     switch (type) {
 
     case 'o' : {
-      os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << hmixture->nb_element
-         << " (" << 1. / (hmixture->mean + 1.) << ")" << endl;
+      os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << mixture->nb_element
+         << " (" << 1. / (mixture->mean + 1.) << ")" << endl;
 
-      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << hmixture->mean *
-            hmixture->nb_element << " ("
-         << hmixture->mean / (hmixture->mean + 1.) << ")" << endl;
+      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << mixture->mean *
+            mixture->nb_element << " ("
+         << mixture->mean / (mixture->mean + 1.) << ")" << endl;
       break;
     }
 
     case 'e' : {
-      os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << hmixture->frequency[0]
-         << " (" << hmixture->frequency[0] / (hmixture->nb_element * (hmixture->mean + 1.))
+      os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << mixture->frequency[0]
+         << " (" << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.))
          << ")" << endl;
 
-      os << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << (hmixture->nb_element -
-             hmixture->frequency[0]) * 2 << " ("
-         << (hmixture->nb_element - hmixture->frequency[0]) * 2. /
-            (hmixture->nb_element * (hmixture->mean + 1.)) << ")" << endl;
+      os << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << (mixture->nb_element -
+             mixture->frequency[0]) * 2 << " ("
+         << (mixture->nb_element - mixture->frequency[0]) * 2. /
+            (mixture->nb_element * (mixture->mean + 1.)) << ")" << endl;
 
-      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << (hmixture->mean - 1.) *
-            hmixture->nb_element + hmixture->frequency[0] << " ("
-         << (hmixture->mean - 1. + (double)hmixture->frequency[0] /
-             (double)hmixture->nb_element) / (hmixture->mean + 1.) << ")" << endl;
+      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << (mixture->mean - 1.) *
+            mixture->nb_element + mixture->frequency[0] << " ("
+         << (mixture->mean - 1. + (double)mixture->frequency[0] /
+             (double)mixture->nb_element) / (mixture->mean + 1.) << ")" << endl;
       break;
     }
     }
 
     os << "\n   | " << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM] << endl;
-    hmixture->ascii_print(os);
+    mixture->ascii_print(os);
   }
 
   return os;
@@ -1507,40 +1507,40 @@ ostream& Time_events::ascii_file_write(ostream &os , bool exhaustive , char type
 
   if ((htime->variance > 0.) && (exhaustive)) {
     os << "\n# " << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
-    hmixture->ascii_characteristic_print(os , false , true);
+    mixture->ascii_characteristic_print(os , false , true);
 
     switch (type) {
 
     case 'o' : {
-      os << "\n# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << hmixture->nb_element
-         << " (" << 1. / (hmixture->mean + 1.) << ")" << endl;
+      os << "\n# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << mixture->nb_element
+         << " (" << 1. / (mixture->mean + 1.) << ")" << endl;
 
-      os << "# " << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << hmixture->mean *
-            hmixture->nb_element << " ("
-         << hmixture->mean / (hmixture->mean + 1.) << ")" << endl;
+      os << "# " << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << mixture->mean *
+            mixture->nb_element << " ("
+         << mixture->mean / (mixture->mean + 1.) << ")" << endl;
       break;
     }
 
     case 'e' : {
-      os << "\n# " << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << hmixture->frequency[0]
-         << " (" << hmixture->frequency[0] / (hmixture->nb_element * (hmixture->mean + 1.))
+      os << "\n# " << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << ": " << mixture->frequency[0]
+         << " (" << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.))
          << ")" << endl;
 
-      os << "# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << (hmixture->nb_element -
-             hmixture->frequency[0]) * 2 << " ("
-         << (hmixture->nb_element - hmixture->frequency[0]) * 2. /
-            (hmixture->nb_element * (hmixture->mean + 1.)) << ")" << endl;
+      os << "# " << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << ": " << (mixture->nb_element -
+             mixture->frequency[0]) * 2 << " ("
+         << (mixture->nb_element - mixture->frequency[0]) * 2. /
+            (mixture->nb_element * (mixture->mean + 1.)) << ")" << endl;
 
-      os << "# " << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << (hmixture->mean - 1.) *
-            hmixture->nb_element + hmixture->frequency[0] << " ("
-         << (hmixture->mean - 1. + (double)hmixture->frequency[0] /
-             (double)hmixture->nb_element) / (hmixture->mean + 1.) << ")" << endl;
+      os << "# " << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << ": " << (mixture->mean - 1.) *
+            mixture->nb_element + mixture->frequency[0] << " ("
+         << (mixture->mean - 1. + (double)mixture->frequency[0] /
+             (double)mixture->nb_element) / (mixture->mean + 1.) << ")" << endl;
       break;
     }
     }
 
     os << "\n#    | " << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM] << endl;
-    hmixture->ascii_print(os , true);
+    mixture->ascii_print(os , true);
   }
 
   return os;
@@ -1654,39 +1654,39 @@ ostream& Time_events::spreadsheet_write(ostream &os , char type) const
 
   if (htime->variance > 0.) {
     os << "\n" << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
-    hmixture->spreadsheet_characteristic_print(os);
+    mixture->spreadsheet_characteristic_print(os);
 
     switch (type) {
 
     case 'o' : {
-      os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << hmixture->nb_element
-         << "\t" << 1. / (hmixture->mean + 1.) << endl;
+      os << "\n" << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << mixture->nb_element
+         << "\t" << 1. / (mixture->mean + 1.) << endl;
 
-      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << "\t" << hmixture->mean *
-            hmixture->nb_element << "\t"
-         << hmixture->mean / (hmixture->mean + 1.) << endl;
+      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << "\t" << mixture->mean *
+            mixture->nb_element << "\t"
+         << mixture->mean / (mixture->mean + 1.) << endl;
       break;
     }
 
     case 'e' : {
-      os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << hmixture->frequency[0] << "\t"
-         << hmixture->frequency[0] / (hmixture->nb_element * (hmixture->mean + 1.)) << endl;
+      os << "\n" << SEQ_label[SEQL_2_CENSORED_INTER_EVENT] << "\t" << mixture->frequency[0] << "\t"
+         << mixture->frequency[0] / (mixture->nb_element * (mixture->mean + 1.)) << endl;
 
-      os << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << (hmixture->nb_element -
-             hmixture->frequency[0]) * 2 << "\t"
-         << (hmixture->nb_element - hmixture->frequency[0]) * 2. /
-            (hmixture->nb_element * (hmixture->mean + 1.)) << endl;
+      os << SEQ_label[SEQL_1_CENSORED_INTER_EVENT] << "\t" << (mixture->nb_element -
+             mixture->frequency[0]) * 2 << "\t"
+         << (mixture->nb_element - mixture->frequency[0]) * 2. /
+            (mixture->nb_element * (mixture->mean + 1.)) << endl;
 
-      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << "\t" << (hmixture->mean - 1.) *
-            hmixture->nb_element + hmixture->frequency[0] << "\t"
-         << (hmixture->mean - 1. + (double)hmixture->frequency[0] /
-             (double)hmixture->nb_element) / (hmixture->mean + 1.) << endl;
+      os << SEQ_label[SEQL_COMPLETE_INTER_EVENT] << "\t" << (mixture->mean - 1.) *
+            mixture->nb_element + mixture->frequency[0] << "\t"
+         << (mixture->mean - 1. + (double)mixture->frequency[0] /
+             (double)mixture->nb_element) / (mixture->mean + 1.) << endl;
       break;
     }
     }
 
     os << "\n\t" << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM] << endl;
-    hmixture->spreadsheet_print(os);
+    mixture->spreadsheet_print(os);
   }
 
   return os;
@@ -1772,7 +1772,7 @@ bool Time_events::plot_write(Format_error &error , const char *prefix ,
     }
   }
   if (htime->variance > 0.) {
-    phisto[nb_histo++] = hmixture;
+    phisto[nb_histo++] = mixture;
   }
 
   status = hnb_event[htime->offset]->plot_print((data_file_name.str()).c_str() , nb_histo , phisto);
@@ -1873,23 +1873,23 @@ bool Time_events::plot_write(Format_error &error , const char *prefix ,
         }
         out_file << endl;
 
-        if (hmixture->nb_value - 1 < TIC_THRESHOLD) {
+        if (mixture->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
         }
-        if ((int)(hmixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(mixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics 0,1" << endl;
         }
 
-        out_file << "plot [0:" << hmixture->nb_value - 1 << "] [0:"
-                 << (int)(hmixture->max * YSCALE) + 1 << "] \""
+        out_file << "plot [0:" << mixture->nb_value - 1 << "] [0:"
+                 << (int)(mixture->max * YSCALE) + 1 << "] \""
                  << label((data_file_name.str()).c_str()) << "\" using " << j
                  << " title \"" << SEQ_label[SEQL_NB_EVENT] << " "
                  << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
 
-        if (hmixture->nb_value - 1 < TIC_THRESHOLD) {
+        if (mixture->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
         }
-        if ((int)(hmixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(mixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics autofreq" << endl;
         }
       }
@@ -1903,6 +1903,193 @@ bool Time_events::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Time_events.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Time_events::get_plotable() const
+
+{
+  register int i , j , k , m;
+  int nb_plot_set , nb_histo , max_nb_value , max_frequency;
+  double shift;
+  const Histogram *phisto[2] , **merged_histo;
+  ostringstream legend;
+  MultiPlotSet *plot_set;
+
+
+  nb_plot_set = 1;
+  if (htime->variance > 0.) {
+    nb_plot_set += 2;
+  }
+
+  plot_set = new MultiPlotSet(nb_plot_set);
+  MultiPlotSet &plot = *plot_set;
+
+  plot.border = "15 lw 0";
+
+  i = 0;
+  if (htime->variance > 0.) {
+
+    // vue : loi empirique des temps d'observation
+
+    plot[i].xrange = Range(0 , htime->nb_value - 1);
+    plot[i].yrange = Range(0 , ceil(htime->max * YSCALE));
+
+    if (htime->nb_value - 1 < TIC_THRESHOLD) {
+      plot[i].xtics = 1;
+    }
+    if (ceil(htime->max * YSCALE) < TIC_THRESHOLD) {
+      plot[i].ytics = 1;
+    }
+
+    plot[i].resize(1);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_OBSERVATION_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[i][0].legend = legend.str();
+
+    plot[i][0].style = "impulses";
+
+    htime->plotable_frequency_write(plot[i][0]);
+    i++;
+  }
+
+  // vue : lois de comptage pour chaque temps d'observation
+
+  max_nb_value = 0;
+  max_frequency = 0;
+  nb_histo = 0;
+
+  for (j = htime->offset;j < htime->nb_value;j++) {
+    if (htime->frequency[j] > 0) {
+      nb_histo++;
+
+      // calcul du nombre de valeurs maximum et de la frequence maximum
+
+      if (hnb_event[j]->nb_value > max_nb_value) {
+        max_nb_value = hnb_event[j]->nb_value;
+      }
+      if (hnb_event[j]->max > max_frequency) {
+        max_frequency = hnb_event[j]->max;
+      }
+    }
+  }
+
+  plot[i].xrange = Range(0 , max_nb_value);
+  plot[i].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+  if (max_nb_value < TIC_THRESHOLD) {
+    plot[i].xtics = 1;
+  }
+  if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+    plot[i].ytics = 1;
+  }
+
+  plot[i].resize(nb_histo);
+
+  shift = 0.;
+
+  j = 0;
+  for (k = htime->offset;k < htime->nb_value;k++) {
+    if (htime->frequency[k] > 0) {
+      legend.str("");
+      legend << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " " << k << " "
+             << SEQ_label[SEQL_TIME_UNIT] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][j].legend = legend.str();
+
+      plot[i][j].style = "impulses";
+
+      for (m = hnb_event[k]->offset;m < hnb_event[k]->nb_value;m++) {
+        if (hnb_event[k]->frequency[m] > 0) {
+          plot[i][j].add_point(m + shift , hnb_event[k]->frequency[m]);
+        }
+      }
+
+      if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+        shift += PLOT_SHIFT;
+      }
+      else {
+        shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+      }
+
+      j++;
+    }
+  }
+
+  if (htime->variance > 0.) {
+    i++;
+
+    // vue : lois empiriques de comptage superposees
+
+    merged_histo = new const Histogram*[nb_histo];
+
+    j = nb_histo - 1;
+    for (k = htime->nb_value - 1;k >= htime->offset;k--) {
+      if (htime->frequency[k] > 0) {
+        if (j == nb_histo - 1) {
+          merged_histo[j] = new Histogram(*hnb_event[k]);
+        }
+
+        else {
+          phisto[0] = merged_histo[j + 1];
+          phisto[1] = hnb_event[k];
+          merged_histo[j] = new Histogram(2 , phisto);
+        }
+
+        j--;
+      }
+    }
+
+    plot[i].xrange = Range(0 , merged_histo[0]->nb_value - 1);
+    plot[i].yrange = Range(0 , ceil(merged_histo[0]->max * YSCALE));
+
+    if (merged_histo[0]->nb_value - 1 < TIC_THRESHOLD) {
+      plot[i].xtics = 1;
+    }
+    if (ceil(merged_histo[0]->max * YSCALE) < TIC_THRESHOLD) {
+      plot[i].ytics = 1;
+    }
+
+    plot[i].resize(nb_histo);
+
+    j = 0;
+    for (k = htime->offset;k < htime->nb_value;k++) {
+      if (htime->frequency[k] > 0) {
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " " << k << " "
+               << SEQ_label[SEQL_TIME_UNIT] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[i][j].legend = legend.str();
+
+        plot[i][j].style = "impulses";
+
+        merged_histo[j]->plotable_frequency_write(plot[i][j]);
+        j++;
+      }
+    }
+
+    for (j = 0;j < nb_histo;j++) {
+      delete merged_histo[j];
+    }
+    delete [] merged_histo;
+
+/*    plot[i].resize(1);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[i][0].legend = legend.str();
+
+    plot[i][0].style = "impulses";
+
+    mixture->plotable_frequency_write(plot[i][0]); */
+  }
+
+  return plot_set;
 }
 
 
@@ -1966,7 +2153,7 @@ RWspace Time_events::binaryStoreSize() const
     }
   }
 
-  size += hmixture->binaryStoreSize();
+  size += mixture->binaryStoreSize();
 
   return size;
 }
@@ -2019,8 +2206,8 @@ void Time_events::restoreGuts(RWvistream &is)
     }
   }
 
-  hmixture = new Histogram();
-  hmixture->restoreGuts(is);
+  mixture = new Histogram();
+  mixture->restoreGuts(is);
 }
 
 
@@ -2060,8 +2247,8 @@ void Time_events::restoreGuts(RWFile &file)
     }
   }
 
-  hmixture = new Histogram();
-  hmixture->restoreGuts(file);
+  mixture = new Histogram();
+  mixture->restoreGuts(file);
 }
 
 
@@ -2097,7 +2284,7 @@ void Time_events::saveGuts(RWvostream &os) const
     }
   }
 
-  hmixture->saveGuts(os);
+  mixture->saveGuts(os);
 }
 
 
@@ -2122,7 +2309,7 @@ void Time_events::saveGuts(RWFile &file) const
     }
   }
 
-  hmixture->saveGuts(file);
+  mixture->saveGuts(file);
 } */
 
 
@@ -2621,7 +2808,7 @@ Distribution_data* Renewal_data::extract(Format_error &error , int histo_type , 
     }
 
     case MIXTURE : {
-      phisto = hmixture;
+      phisto = mixture;
       break;
     }
     }
@@ -3181,7 +3368,7 @@ bool Renewal_data::plot_write(Format_error &error , const char *prefix ,
       }
     }
     if (htime->variance > 0.) {
-      phisto[nb_histo++] = hmixture;
+      phisto[nb_histo++] = mixture;
     }
 
     status = phisto[0]->plot_print((data_file_name[0].str()).c_str() , nb_histo - 1 , phisto + 1);
@@ -3414,23 +3601,23 @@ bool Renewal_data::plot_write(Format_error &error , const char *prefix ,
           }
           out_file << endl;
 
-          if (hmixture->nb_value - 1 < TIC_THRESHOLD) {
+          if (mixture->nb_value - 1 < TIC_THRESHOLD) {
             out_file << "set xtics 0,1" << endl;
           }
-          if ((int)(hmixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          if ((int)(mixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
             out_file << "set ytics 0,1" << endl;
           }
 
-          out_file << "plot [0:" << hmixture->nb_value - 1 << "] [0:"
-                   << (int)(hmixture->max * YSCALE) + 1 << "] \""
+          out_file << "plot [0:" << mixture->nb_value - 1 << "] [0:"
+                   << (int)(mixture->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[0].str()).c_str()) << "\" using " << j
                    << " title \"" << SEQ_label[SEQL_NB_EVENT] << " "
                    << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
 
-          if (hmixture->nb_value - 1 < TIC_THRESHOLD) {
+          if (mixture->nb_value - 1 < TIC_THRESHOLD) {
             out_file << "set xtics autofreq" << endl;
           }
-          if ((int)(hmixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          if ((int)(mixture->max * YSCALE) + 1 < TIC_THRESHOLD) {
             out_file << "set ytics autofreq" << endl;
           }
         }
@@ -3470,6 +3657,387 @@ bool Renewal_data::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Renewal_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Renewal_data::get_plotable() const
+
+{
+  MultiPlotSet *plot_set;
+
+
+  if (renewal) {
+    plot_set = renewal->get_plotable(this);
+  }
+
+  else {
+    register int i , j , k , m;
+    int nb_plot_set , nb_histo , max_nb_value , max_frequency;
+    double shift;
+    const Histogram *phisto[2] , **merged_histo;
+    ostringstream legend;
+
+
+    nb_plot_set = 3;
+    if (inter_event) {
+      nb_plot_set++;
+    }
+    if ((within->nb_element > 0) || (length_bias)) {
+      nb_plot_set++;
+    }
+    if (htime->variance > 0.) {
+      nb_plot_set += 2;
+    }
+
+    plot_set = new MultiPlotSet(nb_plot_set);
+    MultiPlotSet &plot = *plot_set;
+
+    plot.border = "15 lw 0";
+
+    i = 0;
+    if (inter_event) {
+
+      // vue : loi inter-evenement empirique
+
+      plot[i].xrange = Range(0 , inter_event->nb_value - 1);
+      plot[i].yrange = Range(0 , ceil(inter_event->max * YSCALE));
+
+      if (inter_event->nb_value - 1 < TIC_THRESHOLD) {
+        plot[i].xtics = 1;
+      }
+      if (ceil(inter_event->max * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(within->nb_element > 0 ? 2 : 1);
+
+      legend.str("");
+      legend << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][0].legend = legend.str();
+
+      plot[i][0].style = "impulses";
+
+      inter_event->plotable_frequency_write(plot[i][0]);
+
+      if (within->nb_element > 0) {
+        legend.str("");
+        legend << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[i][1].legend = legend.str();
+
+        plot[i][1].style = "impulses";
+
+        within->plotable_frequency_write(plot[i][1]);
+      }
+
+      i++;
+    }
+
+    if ((within->nb_element > 0) || (length_bias)) {
+
+      // vue : lois empiriques de l'intervalle de temps entre 2 evenements a l'interieur
+      // de la periode d'observation et de l'intervalle de temps entre 2 evenements
+      // recouvrant une date d'observation
+
+      nb_histo = 0;
+      max_nb_value = 0;
+      max_frequency = 0;
+
+      if (within->nb_element > 0) {
+        nb_histo++;
+
+        if (within->nb_value > max_nb_value) {
+          max_nb_value = within->nb_value;
+        }
+        if (within->max > max_frequency) {
+          max_frequency = within->max;
+        }
+      }
+
+      if (length_bias) {
+        nb_histo++;
+
+        if (length_bias->nb_value > max_nb_value) {
+          max_nb_value = length_bias->nb_value;
+        }
+        if (length_bias->max > max_frequency) {
+          max_frequency = length_bias->max;
+        }
+      }
+
+      plot[i].xrange = Range(0 , max_nb_value);
+      plot[i].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+      if (max_nb_value < TIC_THRESHOLD) {
+        plot[i].xtics = 1;
+      }
+      if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(nb_histo);
+
+      j = 0;
+      if (within->nb_element > 0) {
+        legend.str("");
+        legend << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[i][j].legend = legend.str();
+
+        plot[i][j].style = "impulses";
+
+        within->plotable_frequency_write(plot[i][j]);
+        j++;
+      }
+
+      if (length_bias) {
+        legend.str("");
+        legend << SEQ_label[SEQL_LENGTH_BIASED] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[i][j].legend = legend.str();
+
+        plot[i][j].style = "impulses";
+
+        for (k = length_bias->offset;k < length_bias->nb_value;k++) {
+          if (length_bias->frequency[k] > 0) {
+            plot[i][j].add_point(k + j * PLOT_SHIFT , length_bias->frequency[k]);
+          }
+        }
+      }
+
+      i++;
+    }
+
+    // vue : lois empiriques de l'intervalle de temps apres le dernier evenement et
+    // de l'intervalle de temps residuel
+
+    max_nb_value = MAX(backward->nb_value , forward->nb_value);
+    max_frequency = MAX(backward->max , forward->max);
+
+    plot[i].xrange = Range(0 , max_nb_value);
+    plot[i].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+    if (max_nb_value < TIC_THRESHOLD) {
+      plot[i].xtics = 1;
+    }
+    if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+      plot[i].ytics = 1;
+    }
+
+    plot[i].resize(2);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_BACKWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+           << STAT_label[STATL_HISTOGRAM];
+    plot[i][0].legend = legend.str();
+
+    plot[i][0].style = "impulses";
+
+    backward->plotable_frequency_write(plot[i][0]);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_FORWARD] << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+           << STAT_label[STATL_HISTOGRAM];
+    plot[i][1].legend = legend.str();
+
+    plot[i][1].style = "impulses";
+
+    for (j = forward->offset;j < forward->nb_value;j++) {
+      if (forward->frequency[j] > 0) {
+        plot[i][1].add_point(j + PLOT_SHIFT , forward->frequency[j]);
+      }
+    }
+    i++;
+
+    if (htime->variance > 0.) {
+
+      // vue : loi empirique des temps d'observation
+
+      plot[i].xrange = Range(0 , htime->nb_value - 1);
+      plot[i].yrange = Range(0 , ceil(htime->max * YSCALE));
+
+      if (htime->nb_value - 1 < TIC_THRESHOLD) {
+        plot[i].xtics = 1;
+      }
+      if (ceil(htime->max * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(1);
+
+      legend.str("");
+      legend << SEQ_label[SEQL_OBSERVATION_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][0].legend = legend.str();
+
+      plot[i][0].style = "impulses";
+
+      htime->plotable_frequency_write(plot[i][0]);
+      i++;
+    }
+
+    // vue : lois de comptage pour chaque temps d'observation
+
+    max_nb_value = 0;
+    max_frequency = 0;
+    nb_histo = 0;
+
+    for (j = htime->offset;j < htime->nb_value;j++) {
+      if (htime->frequency[j] > 0) {
+        nb_histo++;
+
+        // calcul du nombre de valeurs maximum et de la frequence maximum
+
+        if (hnb_event[j]->nb_value > max_nb_value) {
+          max_nb_value = hnb_event[j]->nb_value;
+        }
+        if (hnb_event[j]->max > max_frequency) {
+          max_frequency = hnb_event[j]->max;
+        }
+      }
+    }
+
+    plot[i].xrange = Range(0 , max_nb_value);
+    plot[i].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+    if (max_nb_value < TIC_THRESHOLD) {
+      plot[i].xtics = 1;
+    }
+    if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+      plot[i].ytics = 1;
+    }
+
+    plot[i].resize(nb_histo);
+
+    shift = 0.;
+
+    j = 0;
+    for (k = htime->offset;k < htime->nb_value;k++) {
+      if (htime->frequency[k] > 0) {
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " " << k << " "
+               << SEQ_label[SEQL_TIME_UNIT] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[i][j].legend = legend.str();
+
+        plot[i][j].style = "impulses";
+
+        for (m = hnb_event[k]->offset;m < hnb_event[k]->nb_value;m++) {
+          if (hnb_event[k]->frequency[m] > 0) {
+            plot[i][j].add_point(m + shift , hnb_event[k]->frequency[m]);
+          }
+        }
+
+        if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+          shift += PLOT_SHIFT;
+        }
+        else {
+          shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+        }
+
+        j++;
+      }
+    }
+    i++;
+
+    if (htime->variance > 0.) {
+
+      // vue : lois empiriques de comptage superposees
+
+      merged_histo = new const Histogram*[nb_histo];
+
+      j = nb_histo - 1;
+      for (k = htime->nb_value - 1;k >= htime->offset;k--) {
+        if (htime->frequency[k] > 0) {
+          if (j == nb_histo - 1) {
+            merged_histo[j] = new Histogram(*hnb_event[k]);
+          }
+
+          else {
+            phisto[0] = merged_histo[j + 1];
+            phisto[1] = hnb_event[k];
+            merged_histo[j] = new Histogram(2 , phisto);
+          }
+
+          j--;
+        }
+      }
+
+      plot[i].xrange = Range(0 , merged_histo[0]->nb_value - 1);
+      plot[i].yrange = Range(0 , ceil(merged_histo[0]->max * YSCALE));
+
+      if (merged_histo[0]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[i].xtics = 1;
+      }
+      if (ceil(merged_histo[0]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(nb_histo);
+
+      j = 0;
+      for (k = htime->offset;k < htime->nb_value;k++) {
+        if (htime->frequency[k] > 0) {
+          legend.str("");
+          legend << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " " << k << " "
+                 << SEQ_label[SEQL_TIME_UNIT] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[i][j].legend = legend.str();
+
+          plot[i][j].style = "impulses";
+
+          merged_histo[j]->plotable_frequency_write(plot[i][j]);
+          j++;
+        }
+      }
+
+      for (j = 0;j < nb_histo;j++) {
+        delete merged_histo[j];
+      }
+      delete [] merged_histo;
+
+/*      plot[i].resize(1);
+
+      legend.str("");
+      legend << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][0].legend = legend.str();
+
+      plot[i][0].style = "impulses";
+
+      mixture->plotable_frequency_write(plot[i][0]); */
+
+      i++;
+    }
+
+    // vue : probabilites de non-evenement/evenement fonction du temps
+
+    plot[i].xrange = Range(0 , index_event->length - 1);
+    plot[i].yrange = Range(0. , 1.);
+
+    if (index_event->length - 1 < TIC_THRESHOLD) {
+      plot[i].xtics = 1;
+    }
+
+    plot[i].resize(2);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_NO_EVENT_PROBABILITY];
+    plot[i][0].legend = legend.str();
+
+    plot[i][0].style = "linespoints";
+
+    index_event->plotable_write(0 , plot[i][0]);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_EVENT_PROBABILITY];
+    plot[i][1].legend = legend.str();
+
+    plot[i][1].style = "linespoints";
+
+    index_event->plotable_write(1 , plot[i][1]);
+  }
+
+  return plot_set;
 }
 
 
