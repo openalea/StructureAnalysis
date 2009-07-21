@@ -620,11 +620,11 @@ bool Curves::plot_print(const char *path , int ilength ,
  *
  *  Ecriture d'une courbe.
  *
- *  arguments : indicede la courbe, reference sur un objet SinglePlot.
+ *  arguments : indice de la courbe, reference sur un objet SinglePlot.
  *
  *--------------------------------------------------------------*/
 
-void Curves::plotable_print(int index , SinglePlot &plot) const
+void Curves::plotable_write(int index , SinglePlot &plot) const
 
 {
   register int i;
@@ -632,6 +632,26 @@ void Curves::plotable_print(int index , SinglePlot &plot) const
 
   for (i = offset;i < length;i++) {
     plot.add_point(i , point[index][i]);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture des frequences.
+ *
+ *  argument : reference sur un objet SinglePlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Curves::plotable_frequency_write(SinglePlot &plot) const
+
+{
+  register int i;
+
+
+  for (i = offset;i < length;i++) {
+    plot.add_point(i , frequency[i]);
   }
 }
 
