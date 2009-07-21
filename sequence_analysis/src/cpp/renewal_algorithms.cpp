@@ -241,7 +241,7 @@ void Renewal::expectation_step(const Time_events &timev ,
   inter_event_reestim->variance_computation();
 
 # ifdef DEBUG
-  cout << "\n" << (timev.hmixture->mean + 1) * timev.nb_element << " | "
+  cout << "\n" << (timev.mixture->mean + 1) * timev.nb_element << " | "
        << " " << inter_event_reestim->nb_element << endl;
 
   cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
@@ -525,7 +525,7 @@ void Renewal::expectation_step(const Time_events &timev ,
     length_bias_reestim->variance_computation();
 
     cout << "\n" << timev.nb_element << " | "  << length_bias_reestim->nb_element << " || "
-         << timev.hmixture->mean * timev.nb_element << " | " << " " << inter_event_reestim->nb_element << endl;
+         << timev.mixture->mean * timev.nb_element << " | " << " " << inter_event_reestim->nb_element << endl;
 
     cout << "\nquantites de reestimation loi inter_evenement :" << *inter_event_reestim << endl;
     cout << "\nquantites de reestimation loi biaisee par la longueur :" << *length_bias_reestim << endl;
@@ -537,7 +537,7 @@ void Renewal::expectation_step(const Time_events &timev ,
   if ((estimator == COMPLETE_LIKELIHOOD) && (combination)) {
     switch (mean_computation) {
     case ESTIMATED :
-      inter_event_mean = timev.htime->mean / timev.hmixture->mean;
+      inter_event_mean = timev.htime->mean / timev.mixture->mean;
       break;
     case COMPUTED :
       inter_event_mean = interval_bisection(inter_event_reestim , length_bias_reestim);
@@ -550,7 +550,7 @@ void Renewal::expectation_step(const Time_events &timev ,
 #   ifdef DEBUG
     if (mean_computation != ESTIMATED) {
       cout << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_MEAN] << ": "
-           << inter_event_mean << " (" << timev.htime->mean / timev.hmixture->mean << ") | ";
+           << inter_event_mean << " (" << timev.htime->mean / timev.mixture->mean << ") | ";
     }
 #   endif
 
@@ -607,11 +607,11 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
   renew = 0;
   error.init();
 
-  if (hmixture->nb_value <= 2) {
+  if (mixture->nb_value <= 2) {
     status = false;
     error.update(SEQ_error[SEQR_MAX_NB_EVENT_TOO_SMALL]);
   }
-  if (hmixture->mean < MIN_NB_EVENT) {
+  if (mixture->mean < MIN_NB_EVENT) {
     status = false;
     error.update(SEQ_error[SEQR_NB_EVENT_TOO_SMALL]);
   }
@@ -654,10 +654,10 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
       }
 
       if (equilibrium_estimator == PARTIAL_LIKELIHOOD) {
-        weight *= hmixture->mean * nb_element;
+        weight *= mixture->mean * nb_element;
       }
       else {
-        weight *= (hmixture->mean + 1) * nb_element;
+        weight *= (mixture->mean + 1) * nb_element;
       }
     }
 
@@ -698,7 +698,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
         else {
           switch (mean_computation) {
           case ESTIMATED :
-            inter_event_mean = htime->mean / hmixture->mean;
+            inter_event_mean = htime->mean / mixture->mean;
             break;
           case COMPUTED :
             inter_event_mean = interval_bisection(inter_event_reestim , length_bias_reestim);
@@ -723,7 +723,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
         else {
           switch (mean_computation) {
           case ESTIMATED :
-            inter_event_mean = htime->mean / hmixture->mean;
+            inter_event_mean = htime->mean / mixture->mean;
             break;
           case ONE_STEP_LATE :
             inter_event_mean = pinter_ev->mean;
@@ -917,7 +917,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
   Renewal *renew;
 
 
-  proba = hmixture->mean / htime->mean;
+  proba = mixture->mean / htime->mean;
   if (proba > 1. - RENEWAL_INIT_PROBABILITY) {
     proba = 1. - RENEWAL_INIT_PROBABILITY;
   }
@@ -1685,7 +1685,7 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , const Para
 
   inter_event = within->estimation(error , os , *within_backward , *within_forward , no_event ,
                                    iinter_event , estimator , nb_iter , mean_computation ,
-                                   weight , penalty_type , outside , htime->mean / hmixture->mean);
+                                   weight , penalty_type , outside , htime->mean / mixture->mean);
 
   delete within_backward;
   delete within_forward;
@@ -1726,7 +1726,7 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , int estima
   Renewal *renew;
 
 
-  proba = hmixture->mean / htime->mean;
+  proba = mixture->mean / htime->mean;
   if (proba > 1. - RENEWAL_INIT_PROBABILITY) {
     proba = 1. - RENEWAL_INIT_PROBABILITY;
   }
