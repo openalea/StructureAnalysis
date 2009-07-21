@@ -1367,21 +1367,20 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
     plot[0].xtics = 1;
   }
 
-  i = 0;
-
   if (mixt_histo) {
     plot[0].yrange = Range(0. , ceil(MAX(mixt_histo->max , max * mixt_histo->nb_element)
                                      * YSCALE));
 
     plot[0].resize(nb_component + 2);
 
-    plot[0][i].legend = STAT_label[STATL_HISTOGRAM];
+    plot[0][0].legend = STAT_label[STATL_HISTOGRAM];
 
-    plot[0][i].style = "impulses";
+    plot[0][0].style = "impulses";
 
-    mixt_histo->plotable_frequency_write(plot[0][i++]);
+    mixt_histo->plotable_frequency_write(plot[0][0]);
 
     scale = mixt_histo->nb_element;
+    i = 1;
   }
 
   else {
@@ -1389,7 +1388,8 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
     plot[0].resize(nb_component + 1);
 
-    scale = 1;
+    scale = 1.;
+    i = 0;
   }
 
   plot[0][i].legend = STAT_label[STATL_MIXTURE];
@@ -1449,7 +1449,7 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
     plot[2].xrange = Range(0 , weight->nb_value - 1);
     plot[2].yrange = Range(0 , ceil(MAX(mixt_histo->weight->max ,
-                                    weight->max * mixt_histo->weight->nb_element) 
+                                    weight->max * mixt_histo->weight->nb_element)
                                     * YSCALE));
 
     if (weight->nb_value - 1 < TIC_THRESHOLD) {
