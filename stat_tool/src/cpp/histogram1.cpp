@@ -1066,7 +1066,9 @@ void Histogram::plotable_frequency_write(SinglePlot &plot) const
 
 
   for (i = offset;i < nb_value;i++) {
-    plot.add_point(i , frequency[i]);
+    if (frequency[i] > 0) {
+      plot.add_point(i , frequency[i]);
+    }
   }
 }
 
@@ -1626,13 +1628,13 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
 
     plot[2][0].style = "linespoints";
 
-    survival_rate->plotable_print(0 , plot[2][0]);
+    survival_rate->plotable_write(0 , plot[2][0]);
 
     plot[2][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
 
     plot[2][1].style = "linespoints";
 
-    survival_rate->plotable_print(1 , plot[2][1]);
+    survival_rate->plotable_write(1 , plot[2][1]);
 
     delete survival_rate;
   }
