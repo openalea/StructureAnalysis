@@ -1002,28 +1002,27 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     plot[0].xtics = 1;
   }
 
-  i = 0;
-
   if (compound_histo) {
     plot[0].yrange = Range(0. , ceil(MAX(compound_histo->max ,
                                          max * compound_histo->nb_element) * YSCALE));
 
     plot[0].resize(2);
 
-    plot[0][i].legend = STAT_label[STATL_HISTOGRAM];
+    plot[0][0].legend = STAT_label[STATL_HISTOGRAM];
 
-    plot[0][i].style = "impulses";
+    plot[0][0].style = "impulses";
 
-    compound_histo->plotable_frequency_write(plot[0][i]);
+    compound_histo->plotable_frequency_write(plot[0][0]);
 
     scale = compound_histo->nb_element;
-    i++;
+    i = 1;
   }
 
   else {
     plot[0].yrange = Range(0. , MIN(max * YSCALE , 1.));
 
     plot[0].resize(1);
+    i = 0;
   }
 
   legend.str("");
@@ -1085,8 +1084,6 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     plot[i].xtics = 1;
   }
 
-  j = 0;
-
   if (compound_histo) {
     plot[i].yrange = Range(0. , ceil(MAX(compound_histo->sum_histogram->max ,
                                          sum_distribution->max * compound_histo->sum_histogram->nb_element) * YSCALE));
@@ -1095,20 +1092,21 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
 
     legend.str("");
     legend << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM];
-    plot[i][j].legend = legend.str();
+    plot[i][0].legend = legend.str();
 
-    plot[i][j].style = "impulses";
+    plot[i][0].style = "impulses";
 
-    compound_histo->sum_histogram->plotable_frequency_write(plot[i][j]);
+    compound_histo->sum_histogram->plotable_frequency_write(plot[i][0]);
 
     scale = compound_histo->sum_histogram->nb_element;
-    j++;
+    j = 1;
   }
 
   else {
     plot[i].yrange = Range(0. , MIN(sum_distribution->max * YSCALE , 1.));
 
     plot[i].resize(1);
+    j = 0;
   }
 
   legend.str("");
@@ -1135,8 +1133,6 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     plot[i].xtics = 1;
   }
 
-  j = 0;
-
   if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
     plot[i].yrange = Range(0. , ceil(MAX(compound_histo->histogram->max ,
                                          distribution->max * compound_histo->histogram->nb_element) * YSCALE));
@@ -1144,14 +1140,14 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     plot[i].resize(2);
     legend.str("");
     legend << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM];
-    plot[i][j].legend = legend.str();
+    plot[i][0].legend = legend.str();
 
-    plot[i][j].style = "impulses";
+    plot[i][0].style = "impulses";
 
-    compound_histo->histogram->plotable_frequency_write(plot[i][j]);
+    compound_histo->histogram->plotable_frequency_write(plot[i][0]);
 
     scale = compound_histo->histogram->nb_element;
-    j++;
+    j = 1;
   }
 
   else {
@@ -1160,6 +1156,7 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     plot[i].resize(1);
 
     scale = 1.;
+    j = 0;
   }
 
   legend.str("");
