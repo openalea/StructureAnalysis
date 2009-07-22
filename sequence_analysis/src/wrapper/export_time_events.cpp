@@ -94,10 +94,10 @@ public:
 
 
   static Histogram*
-  get_hmixture(const Time_events& input)
+  get_mixture(const Time_events& input)
   {
     Histogram* ret;
-    ret = new Histogram(*input.get_hmixture());
+    ret = new Histogram(*input.get_mixture());
     return ret;
    }
 
@@ -178,7 +178,7 @@ void class_time_events() {
     .add_property("nb_class", &Time_events::get_nb_class,"nb class")
 
     DEF_RETURN_VALUE_NO_ARGS("get_htime", &TimeEventsWrap::get_htime, "returns htime histogram")
-    DEF_RETURN_VALUE_NO_ARGS("get_hmixture", &TimeEventsWrap::get_hmixture, "returns hmixture Mixture histogram")
+    DEF_RETURN_VALUE_NO_ARGS("get_mixture", &TimeEventsWrap::get_mixture, "returns mixture Mixture histogram")
     DEF_RETURN_VALUE("get_hnb_event", &TimeEventsWrap::get_hnb_event, args("itime"),"returns hmixture Mixture histogram")
 
     .def("extract", (Distribution_data *(*)(const Time_events&, int, int))  TimeEventsWrap::extract, return_value_policy< manage_new_object >(), TimeEventsWrap::extract_overloads(), "todo")

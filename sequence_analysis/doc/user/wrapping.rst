@@ -10,7 +10,7 @@ wrapping to be done
 ===================
 
 
-* Remains to be done or check carefully: Estimation, Simulate and Extract*
+* Functions that remain to be done or check carefully: Estimation, Simulate and Extract*, Display, Save, Plot
 * Fully done : Compare and all other "simple" functions.
 
 * time_events: estimation ? 
