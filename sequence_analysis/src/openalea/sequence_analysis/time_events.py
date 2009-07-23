@@ -83,31 +83,34 @@ def TimeEvents(*args, **kargs):
     NextDate = kargs.get("NextDate", -1)
      
     if len(args)==1 and isinstance(args[0], str):
+        print 'time events filename case '
         filename = args[0]
         if os.path.isfile(filename):
             time_events =  _Time_events(filename)
         else:
             raise IOError("bad file name")
     elif isinstance(args[0], _Sequences):
+        print 'time events Sequece case '
         seq = args[0]
-        nb_variable = seq.nb_variable()
+        nb_variable = seq.nb_variable
         if nb_variable != 1:
             variable = args[0]
             begin_date = args[1]
             end_date = args[2]
         else:
-            begin_date = args[0]
-            end_date = args[1]
+            variable = 1
+            begin_date = args[1]
+            end_date = args[2]
         
             
         time_events = seq.extract_time_events(variable, begin_date, end_date,
                                      PreviousDate, NextDate)
 
     else:
+        print 'time events other case '
         #todo finish this code with examples ? 
         distribution = args[0]
         time = args[1]
-        
         time_events = _Time_events(distribution, time)
         
         
