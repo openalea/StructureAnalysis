@@ -13,6 +13,8 @@ import _sequence_analysis
 import sequences
 from tools import __parse_kargs__
 
+from openalea.stat_tool.estimate import estimator_type
+
 __all__ = ['Estimate']
 # to be checked or improve. Maybe the c++ code could be more explicit, i.e.,
 # e switched to elementary and so on.
@@ -145,11 +147,75 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
 
     return hmarkov
       
-      
+def _estimate_renewal_count_data(obj, itype, *args, **kargs):
+   
+    
+    
+    if isinstance(itype, str):  
+        if itype == "Ordinary":
+            Type = 'o'
+        elif itype == "Equilibrium":
+            Type = 'e'
+        else:
+            raise AttributeError("type must be Ordinary or Equilibrium")
+    else:
+        raise AttributeError("type must be Ordinary or Equilibrium")
+        
+
+    Estimator = __parse_kargs__(kargs, "Estimator",
+                                      default='Likelihood',
+                                      dict_map=estimator_type)
+    print Estimator
+    NbIteration = kargs.get("NbIteration", -1)
+
+    initial_inter_event_option = False
+    InitialInterEvent = kargs.get("InitialInterEvent", None)
+
+    EquilibriumEstimator = __parse_kargs__(kargs, "EquilibriumEstimator",
+                                                default='CompleteLikelihood',
+                                                dict_map=estimator_hidden_semi_markov)
+
+#    Penalty
+#    Weight
+#    Outside
+    inter_event = False
+    InterEventMean = kargs.get("InterEventMean", False) # to be done, todo
+    mean_computation = mean_computation_map['Computed']
+    Penalty = kargs.get("Penalty",  _stat_tool.SECOND_DIFFERENCE)
+    Outside = kargs.get("Outside", _stat_tool.ZERO)
+    Weight = kargs.get("Weight", -1.)
+
+#    if type != 'e':
+#        if equilibrium_estimator_option:
+            #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Equilibrium_Estimator");
+#        if inter_event_mean_option:
+            #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "InterEventMean");
+    if Estimator == estimator_type['PenalizedLikelihood']:
+        if InterEventMean is False:
+             mean_computation = ONE_STEP_LATE;
+        elif mean_computation == mean_computation_map['Computed']:
+            raise ValueError("INCOMPATIBLE_OPTIONS_sss  Estimator and InterEventMean");
+    else:
+        #if (penalty_option):
+        #    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Penalty")
+        #if weight_option:
+        #    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Weight");
+        #if outside_option:
+        #    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Outside");
+        pass
+
+    if InitialInterEvent:
+        renew = obj.estimation_inter_event(Type, InitialInterEvent, Estimator,  NbIteration , EquilibriumEstimator , mean_computation , Weight , Penalty , Outside)
+    else:
+        renew = obj.estimation(Type, Estimator, NbIteration, EquilibriumEstimator , mean_computation , Weight ,  Penalty , Outside);
+    
+    return renew
+
+
 def _estimate_semi_markov(obj, *args, **kargs):
  
     PARTIAL_LIKELIHOOD = 0 
-    COMPLETE_LIKELIHOOD  =1
+    COMPLETE_LIKELIHOOD  = 1
     KAPLAN_MEIER=2
     estimator_semi_markov_map = {
         "PartialLikelihood": PARTIAL_LIKELIHOOD,
@@ -157,7 +223,6 @@ def _estimate_semi_markov(obj, *args, **kargs):
         "KaplanMeier": KAPLAN_MEIER           
                              }
     if isinstance(args[0], str):  
-        
         if args[0] == "Ordinary":
             Type = 'o'
         elif args[0] == "Equilibrium":
@@ -420,6 +485,8 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
         "MIXTURE" ,
         "CONVOLUTION" ,
         "COMPOUND",
+        "Equilibrium",
+        "Ordinary",
         ]
     fct_map = ["VARIABLE_ORDER_MARKOV",
                "HIDDEN_VARIABLE_ORDER_MARKOV",
@@ -447,6 +514,8 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
         return _estimate_semi_markov(obj, *args, **kargs)
     elif itype == "NON-HOMOGENEOUS_MARKOV":
         return _estimate_non_homogeneous_markov(obj, *args, **kargs)
+    elif itype == "Equilibrium" or itype == "Ordinary":
+        return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
     else:
         from openalea.stat_tool.estimate import Estimate as HistoEstimate
         return HistoEstimate(obj, itype, *args, **kargs)
@@ -659,8 +728,14 @@ def Estimate(obj, *args, **kargs):
         :func:`ModelSelectionTest`.
 
     """
-    if isinstance(args[0], str):
+   
+    # top case (no type specified and args  may be empty) 
+    if isinstance(obj, _sequence_analysis._Tops):
+        return _estimate_top(obj, *args, **kargs) 
+    # generic case
+    elif isinstance(args[0], str):
         return _estimate_dispatch(obj, args[0], *args[1:], **kargs)
     else:
-        return _estimate_top(obj, *args, **kargs) 
+        raise NotImplemented
+    #renewal/time events case: if second argument is InitialInterEvent, the type can be only Equilibrium ? For genericity we ask the user to give the type equilibrium 
     
