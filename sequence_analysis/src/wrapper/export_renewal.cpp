@@ -131,6 +131,16 @@ public:
     FOOTER;
   }
 
+  static MultiPlotSet* get_plotable(const Renewal& p)
+  {
+    Format_error error;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret) ERROR;
+    return ret;
+  }
+
+
+
 };
 
 // Boost declaration
@@ -160,6 +170,9 @@ void class_renewal() {
 
     DEF_RETURN_VALUE("simulation_nb_elements", RenewalWrap::simulation_nb_elements, args("todo"), "simulation")
     DEF_RETURN_VALUE("simulation_time_events", RenewalWrap::simulation_time_events, args("todo"), "simulation")
+
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", RenewalWrap::get_plotable, "Return a plotable")
+
     ;
 
 /*
@@ -186,6 +199,21 @@ void class_renewal() {
 */
 }
 
+#undef WRAP
+
+#define WRAP RenewalDataWrap
+class RenewalDataWrap {
+
+public:
+  static Distribution_data*
+  extract(const Renewal_data& seq, int histo_type, int itime)
+  {
+    HEADER(Distribution_data);
+    ret = seq.extract(error, histo_type, itime);
+    FOOTER;
+  }
+
+};
 
 void class_renewal_data() {
 
@@ -194,19 +222,19 @@ void class_renewal_data() {
     .def(init <int, int>())
     .def(init <int, Renewal>())
     .def(init <Time_events, int>())
+    .def(init <Renewal_data, optional<bool> >())
 
     // Python Operators
     .def("get_renewal", &Renewal_data::get_renewal, return_value_policy<manage_new_object> (),"get renewal")
     .def("get_type", &Renewal_data::get_type, "get type")
+    .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
 
 
 
 /*
     Renewal_data(int nb_sample , const Renewal_data **itimev);
-    Renewal_data(const Renewal_data &timev , bool model_flag = true)    :Time_events(timev) { copy(timev , model_flag); }
 
     Renewal_data* merge(Format_error &error , int nb_sample , const Renewal_data **itimev) const;
-    Distribution_data* extract(Format_error &error , int histo_type , int itime = I_DEFAULT) const;
 
     Renewal* estimation(Format_error &error , std::ostream &os , const Parametric &iinter_event ,
                         int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
