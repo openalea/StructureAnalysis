@@ -158,6 +158,40 @@ public:
     FOOTER;
   }
 
+  static Renewal*
+  estimation(const Time_events& input, char type, int estimator, int nb_iter,
+                 int equilibrium_estimator, int mean_computation, double weight,
+                 int penalty_type, int outside)
+  {
+    HEADER_OS(Renewal);
+    ret = input.estimation(error, os, type, estimator, nb_iter, equilibrium_estimator,
+                          mean_computation, weight, penalty_type, outside);
+    
+    FOOTER_OS;
+  }
+  
+  static Renewal*
+  estimation_inter_event(const Time_events& input, char type, const Parametric &iinter_event, 
+                int estimator, int nb_iter,
+                int equilibrium_estimator, int mean_computation, double weight,
+                int penalty_type, int outside)
+  {
+    HEADER_OS(Renewal);
+    ret = input.estimation(error, os, type, iinter_event, estimator, nb_iter, equilibrium_estimator,
+                          mean_computation, weight, penalty_type, outside);
+    
+    FOOTER_OS;
+  }
+
+  static MultiPlotSet* get_plotable(const Time_events& p)
+  {
+    Format_error error;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret) ERROR;
+    return ret;
+  }
+
+
 
 
 };
@@ -191,6 +225,11 @@ void class_time_events() {
     DEF_RETURN_VALUE("nb_event_select", TimeEventsWrap::nb_event_select, args("nb_event_select"),"returns a nb_event-selected TimeEvents")
     DEF_RETURN_VALUE_NO_ARGS("merge", TimeEventsWrap::merge, "Merge sequences")
 
+    DEF_RETURN_VALUE("estimation", TimeEventsWrap::estimation, args("tobedone"), "estimation")
+    DEF_RETURN_VALUE("estimation_inter_event", TimeEventsWrap::estimation_inter_event, args("tobedone"), "estimation")
+
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", TimeEventsWrap::get_plotable, "Return a plotable")
+
     ;
 
 /*protected
@@ -206,16 +245,6 @@ void class_time_events() {
 
       Time_events(int inb_element , int *itime , int *inb_event){ build(inb_element , itime , inb_event); }
     Time_events(const Time_events &timev) { copy(timev); }
-
-  Renewal* estimation(Format_error &error , std::ostream &os , char type ,
-                       const Parametric &iinter_event , int estimator = LIKELIHOOD ,
-                          int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-                          int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-                          int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
-  Renewal* estimation(Format_error &error , std::ostream &os , char type , int estimator = LIKELIHOOD ,
-                          int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-                          int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-                          int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
 
 
