@@ -163,8 +163,8 @@ def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT,\
       * `proba` (int, float) : probability of 'success'
     """    
     # Check parameters
-    assert inf_bound < sup_bound
-    assert (sup_bound - inf_bound) < _stat_tool.MAX_DIFF_BOUND
+    assert inf_bound <= sup_bound
+    assert (sup_bound - inf_bound) <= _stat_tool.MAX_DIFF_BOUND
     assert proba <=1. and proba >=0
 
     param = _stat_tool.D_DEFAULT
@@ -225,7 +225,7 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
 
     # Check parameters
 
-    assert inf_bound < sup_bound
+    assert inf_bound <= sup_bound
     assert (sup_bound - inf_bound) < _stat_tool.MAX_DIFF_BOUND
 
     param = _stat_tool.D_DEFAULT
