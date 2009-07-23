@@ -665,7 +665,7 @@ def Difference(obj, Variable=-1, FirstElement=False):
     return obj.difference(Variable, FirstElement)
     
     
-def IndexParameterExtract(obj, minIndex, maxIndex=40):    
+def IndexParameterExtract(obj, minIndex, MaxIndex=40):
     """IndexExtract
     
     Extraction of sub-sequences corresponding to a range of index parameters.
