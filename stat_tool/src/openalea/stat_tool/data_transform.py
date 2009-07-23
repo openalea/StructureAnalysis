@@ -342,6 +342,7 @@ def Extract(obj, *args, **kargs):
             "Forward" : FORWARD_RECURRENCE_TIME,
             "Mixture" : MIXTURE,
             "Within": WITHIN_OBSERVATION_PERIOD,
+            "NbEvent": 1000,
             
             }
     
@@ -385,7 +386,7 @@ def Extract(obj, *args, **kargs):
                "Forward": -1}
         
         
-        if key in seq_map:
+        if key in seq_map or key in renewal_nb_event_map:
             f = getattr(obj, "extract")
         else:
             try:
@@ -405,6 +406,17 @@ def Extract(obj, *args, **kargs):
             return obj.extract_value(variable) 
         if key=="Length":
             return obj.extract_length()
+        
+        # case extract related to Renewal:
+        if key in renewal_nb_event_map.keys():
+            if key=="NbEvent":
+                NbEvent = kargs.get("NbEvent", NB_EVENT)  
+                time = args[1]
+                return obj.extract(NbEvent, time)
+            else:
+                time = -1
+                return obj.extract(renewal_nb_event_map[key], time)
+        
         #case extract related to semimarkov, vom, hsom, ....
 
         INITIAL_RUN= 4
