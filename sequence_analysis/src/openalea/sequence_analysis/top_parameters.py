@@ -9,7 +9,7 @@ import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Top_parameters
 
-__all__ = ['Top_parameters',
+__all__ = ['TopParameters',
            '_Top_parameters']
 
 
@@ -19,7 +19,7 @@ interface.extend_class( _Top_parameters, interface.StatInterface)
 # Add methods to _Vectors
 
 
-def Top_parameters(*args, **kargs):
+def TopParameters(*args, **kargs):
     """TopParameters
 
     Construction of 'top' parameters from the three parameters or from an ASCII file.
@@ -55,18 +55,20 @@ def Top_parameters(*args, **kargs):
         :func:`~openalea.sequence_analysis.simulate.Simulate`.
 
     """
+    MaxPosition = kargs.get("MaxPosition", 40)
     
     if len(args)==1: 
         #filename case
         if isinstance(args[0], str):
             filename = args[0]
             if os.path.isfile(filename):
-                return _Top_parameters(filename, True)
+                return _Top_parameters(filename, MaxPosition)
             else:
                 raise IOError("bad file name")
         #sequences case
     else:
-        raise TypeError("Expected a valid filename or a list of lists (e.g., [[1,0],[0,1]])")
+        MaxPosition = kargs.get("MaxPosition", 40)
+        return _Top_parameters(args[0], args[1], args[2], MaxPosition)
     
     
 
