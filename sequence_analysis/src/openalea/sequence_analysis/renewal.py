@@ -9,14 +9,15 @@ __revision__ = "$Id:  $"
 import os
 import openalea.stat_tool.interface as interface
 from openalea.stat_tool._stat_tool import _Parametric
-from openalea.sequence_analysis._sequence_analysis import _Renewal
+from openalea.sequence_analysis._sequence_analysis import _Renewal, _Renewal_data, _Sequences, _Markovian_sequences
 
 __all__ = ['Renewal',
-           '_Renewal']
+           '_Renewal', '_Renewal_data', 'RenewalData']
 
 
 # Extend dynamically class
 interface.extend_class( _Renewal, interface.StatInterface)
+interface.extend_class( _Renewal_data, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -117,3 +118,14 @@ def Renewal(*args, **kargs):
 
 
 
+def RenewalData(*args, **kargs):
+
+    if isinstance(args[0], _Sequences) or isinstance(args[0], _Markovian_sequences):
+        seq = args[0]
+        variable = seq.nb_variable
+        begin_index = args[1]
+        end_index = args[2]
+        timev = seq.extract_renewal_data(variable, begin_index, end_index);
+        return _Renewal_data(timev)
+    else:
+        raise Notimplemented
