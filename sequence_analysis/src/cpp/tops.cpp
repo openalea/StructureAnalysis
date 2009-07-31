@@ -997,11 +997,11 @@ MultiPlotSet* Top_parameters::get_plotable(const Tops *itops) const
     legend.str("");
     legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_DISTRIBUTION]
            << " " << i;
-    plot[0][i].legend = legend.str();
+    plot[0][i - 1].legend = legend.str();
 
-    plot[0][i].style = "linespoints";
+    plot[0][i - 1].style = "linespoints";
 
-    axillary_nb_internode[i]->plotable_mass_write(plot[0][i]);
+    axillary_nb_internode[i]->plotable_mass_write(plot[0][i - 1]);
   }
 
   if (itops) {
