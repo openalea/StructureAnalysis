@@ -1,18 +1,17 @@
 """Compound module
 
-:Status: 
- * constructors done
- * test done
- * error management done
- * documentation to be checked
+:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+
 
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 import interface
 import error
 
 from _stat_tool import _Compound
+from _stat_tool import _Convolution
+from _stat_tool import _Mixture
 from _stat_tool import _CompoundData
 from _stat_tool import _ParametricModel
 
@@ -58,31 +57,30 @@ def Compound(*args, **kargs):
         :func:`~openalea.stat_tool.simulate.Simulate`
     """
     error.CheckArgumentsLength(args, 1, 2)
-    error.CheckOptionalArgumentsLength(kargs, 0, 1)
-    
+    error.CheckKargs(kargs, possible_kargs = ["Threshold"])
+
     Threshold = kargs.get("Threshold", None)
 
     # filename
-    if (len(args)==1):
-        error.CheckType(args[0], str, arg_id=1)
+    if len(args)==1:
+        error.CheckType([args[0]], [str], arg_id=[1])
         result =  _Compound(args[0])
-        
-    # build list of distributions
-    if (len(args)==2):
-        error.CheckType(args[0], _ParametricModel, arg_id=1)
-        error.CheckType(args[1], _ParametricModel, arg_id=2)
+
+    possible_types = [_ParametricModel, _Mixture, _Compound, _Convolution]
+
+    # build from two objects and optional threshold
+    if len(args)==2:
+        error.CheckType([args[0], args[1]],
+                        [possible_types, possible_types], 
+                        variable_id=[1,2])
+       
         if Threshold:
-            result =  _Compound(args[0], args[1]) 
+            result =  _Compound([args[0], args[1]], Threshold)
         else:
-            result =  _Compound(args[0], args[1])
-            
-    if result is not None:
-        return result
-    else:
-        error.StatToolError('Unknown error in Compound')
-    
-    
-    
+            result =  _Compound([args[0], args[1]])
+   
+    return result
+
 
 # Extend _Compound
 interface.extend_class(_Compound, interface.StatInterface)

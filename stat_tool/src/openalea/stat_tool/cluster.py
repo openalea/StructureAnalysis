@@ -1,29 +1,39 @@
-"""Cluster functions and classes"""
-__revision__ = "$Id$"
+"""Cluster functions and classes
 
-import _stat_tool
+:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+
+"""
+__version__ = "$Id$"
+
+import error
 import interface
+
 from _stat_tool import _DistanceMatrix
-from _stat_tool import _Clusters
+from _stat_tool import _Cluster
 from _stat_tool import _Dendrogram
+
+from enumerate import format_type
+from enumerate import criterion_type
+from enumerate import algorithm_type
+from enumerate import cluster_type
 
 __all__ = [
      "_DistanceMatrix",
-     "_Clusters",
+     "_Cluster",
      "_Dendrogram",
      "Cluster",
      "Transcode",
      "Clustering",
-     "ToDistanceMatrix",]
+     "ToDistanceMatrix", ]
 
 
 # Extend classes dynamically
-interface.extend_class( _DistanceMatrix, interface.StatInterface)
-interface.extend_class( _Clusters, interface.StatInterface)
-interface.extend_class( _Dendrogram, interface.StatInterface)
+interface.extend_class(_DistanceMatrix, interface.StatInterface)
+interface.extend_class(_Cluster, interface.StatInterface)
+interface.extend_class(_Dendrogram, interface.StatInterface)
 
 
-def Cluster(obj, type, *args, **kargs):
+def Cluster(obj, utype, *args, **kargs):
     """Clustering of values.
     
     In the case of the clustering of values of a frequency distribution on the
@@ -126,75 +136,61 @@ def Cluster(obj, type, *args, **kargs):
         :func:`~openalea.stat_tool.data_transform.VariableScaling`. 
     """
     
-    type_map = { "Step": "cluster_step", 
-                 "Limit": "cluster_limit",
-                 "Information" : "cluster_information" }
+    # fixme: what about the Mode in the Step case ? 
+    # check markovian_sequences call in Sequences
+    AddVariable = error.ParseKargs(kargs, "AddVariable", False, 
+                                   possible=[False, True])
     
-    AddVariable = kargs.get("AddVariable", False)
+    error.CheckArgumentsLength(args, 1, 2)
     
-    # check the type
-    try:     
-        func = getattr(obj, type_map[type])
-    except KeyError:
-        raise KeyError("Possible action are : 'Step' or 'Information' or 'Limit'")
-    
-    # check the arguments
-    if len(args)<1 or len(args)>2:
-        raise KeyError("expect 1, 2 or 3 arguments after the type ")
-    
-    try: #sequence case
-        if obj.nb_variable == 1:
-            variable = 1
-            parameter = args[0]
-            if len(args)>2:
-                raise KeyError("expect 1, 2 arguments after the type ")
-        else:
-            variable = args[0]
-            parameter = args[1]
-            if len(args)>3:
-                raise KeyError("expect 1, 2 or 3arguments after the type ")
-     
-    except: #histo case
-        variable = None
-        parameter = args[0]
-        if len(args)>1:
-            raise KeyError("expect 1 argument only")
-    
-    
-    if type == "Step" or type == 'Information':        
-        if (isinstance(parameter, int) or isinstance(parameter,float)):
-            pass
-        else:
-            raise TypeError("with Step or Information, the first argument must be float or integer")
-    if type == 'Limit':
-        if (isinstance(parameter, list)):
-            pass
-        else:
-            raise TypeError("with Limit, the first argument must be an array")
-    
-    if variable: 
-        param = []
-        param.append(variable)
-        param.append(parameter)
-        #if len(kargs)>0:
-            # todo : add this flag only if we have integers. if reals, then no flag should be provided
-            # quite tricky here. AddVariable should be added only if integer and obj is 
-            # MarkovianSequences or markov_data or semi_markov_data 
-#            param.append(AddVariable)                          
-        if isinstance(obj, _stat_tool._Vectors):
-            return func(*param)
-        try:
-            parambis = param
-            parambis.append(AddVariable)    
-            return func(*parambis)
-        except:
-            return func(*param)
+    # search for the function name
+    if hasattr(obj, cluster_type[utype]):
+        func = getattr(obj, cluster_type[utype])
     else:
-        return func(parameter)
+        raise KeyError("""Possible action are : 'Step', 'Information' or 
+        'Limit'. Information cannot be used with Vectors objects""")
+        
+    # check if nb_variable is available (vectors, sequences)
+    if hasattr(obj, 'nb_variable'):
+        nb_variable = obj.nb_variable
+    else:
+        nb_variable = 1
+        
+    #check types
+    if nb_variable == 1:
+        if len(args) == 1:
+            if utype == "Step":
+                error.CheckType([args[0]], [int])
+            if utype == "Limit":
+                error.CheckType([args[0]], [list])
+            if utype == "Information":
+                error.CheckType([args[0]], [[int, float]])
+        else:
+            raise ValueError(error.STAT_TOOL_NB_VARIABLE_ERROR)
+    else:
+        if len(args) == 2:
+            if utype == "Step":
+                error.CheckType([args[0]], [int])
+                error.CheckType([args[1]], [[int, float]])
+            if utype == "Limit":
+                error.CheckType([args[0]], [int])
+                error.CheckType([args[1]], [list])
     
     
+    #calling the function    
+    try:
+        ret = func(*args.append(AddVariable))
+    except:
+        ret = func(*args)
+     
+    if hasattr(ret, 'markovian_sequences'):
+        func = getattr(ret, 'markovian_sequences')
+        ret = func()
+    
+    return ret
+   
 
-def Transcode(obj, param1, param2=None, AddVariable=False):
+def Transcode(obj, *args, **kargs):
     """    
     Transcoding of values.
     
@@ -264,38 +260,45 @@ def Transcode(obj, param1, param2=None, AddVariable=False):
         :func:`~openalea.stat_tool.data_transform.SegmentationExtract`,
         :func:`~openalea.stat_tool.data_transform.VariableScaling`. 
     """
-
-    # Default variable value
-    try:
+    AddVariable = error.ParseKargs(kargs, "AddVariable", False, 
+                                   possible=[False, True])
+    
+    myerror = "Arguments do not seem to be correct"
+    
+    if hasattr(obj, 'nb_variable'):# case sequence, vectors
         nb_variable = obj.nb_variable
-        if(nb_variable == 1 and not param2): 
-            param2 = param1
-            param1 = 1
-        else:
+        if len(args)==1 and nb_variable == 1:
             pass
-            #todo raise an error
-    except AttributeError:
-        pass
-
-    # Manager Parameters
-    params = [param1]
-    if(param2):
-        params.append(param2)
-    #todo: check that this make sense: if AddVariable is False, nothing is passed. It assumes that by defualt in the export boost function, the addVariable is false by default. Is it true ? 
-#    try:
-#        return obj.transcode(*params)
-#    except:
-#        return obj.transcode(*params)
-    try:
-        return obj.transcode(*params)
-    except:
-        params.append(AddVariable)
-        return obj.transcode(*params)
+        elif len(args)==2 and nb_variable!=1:
+            pass
+        else:
+            raise ValueError(myerror)
+        try:
+            ret = obj.transcode(*args.append(AddVariable))
+        except:
+            ret = obj.transcode(*args)
+    else:# case histogram and co
+        nb_variable = None
+        new_values = args[0]
+        if len(args)>1:
+            raise ValueError(myerror)
+        ret  = obj.transcode(new_values)
     
     
+    if ret is None:
+        raise Exception("transcode function did not return anything...")
+    else: 
+        #Sequence case to be converted to Markovian_sequences
+        # todo: test and checks
+        if hasattr(ret, 'markovian_sequences'):
+            func = getattr(ret, 'markovian_sequences')
+            ret = func()
+        return ret
 
 
-def Clustering(matrix, type, *args, **kargs):
+
+
+def Clustering(matrix, utype, *args, **kargs):
     """    
     Application of clustering methods (either partitioning methods or hierarchical methods) 
     to dissimilarity matrices between patterns.
@@ -318,7 +321,8 @@ def Clustering(matrix, type, *args, **kargs):
 
     :Returns:
         If the second mandatory argument is "Partitioning" and 
-        if 2 < nb_cluster < (number of patterns), an object of type clusters is returned
+        if 2 < nb_cluster < (number of patterns), an object of type clusters
+        is returned
         
     :Examples:
 
@@ -340,99 +344,84 @@ def Clustering(matrix, type, *args, **kargs):
     
     .. note:: if type!=Divisive criterion must be provided 
     """
+    #TODO: check this case : 
+    #Clustering(dissimilarity_matrix, "Partition", clusters)
     
-    format_map = { "ASCII" :'a',
-                   "SpreadSheet": 's',
-                   "" : 'n'
-                   }
-
-    criterion_map = {
-        "FarthestNeighbor" : _stat_tool.CriterionType.FARTHEST_NEIGHBOR,
-        "Averaging" : _stat_tool.CriterionType.AVERAGING,
-        }
-
-    algorithm_map = {
-        "Agglomerative" : _stat_tool.AlgoType.AGGLOMERATIVE,
-        "Divisive": _stat_tool.AlgoType.DIVISIVE,
-        "Ordering": _stat_tool.AlgoType.ORDERING,
-        }
- 
-
-
-    # Get Keywords (set default values)
-    Prototypes = kargs.get("Prototypes", [0])
-    FileName = kargs.get("Filename", "")
-    Algorithm = kargs.get("Algorithm", "Agglomerative")
-    Criterion = kargs.get("Criterion", "Averaging")
-    Initialization = kargs.get("Initialization", 1)
-    Format = kargs.get("Format", "")
-
-    
-    
-    # Swith for each type of clustering
-
-    if(type == "Partition"):
-        Algorithm = kargs.get("Algorithm", "Divisive")
-        if(isinstance(args[0], int)):
+    error.CheckType([matrix], [_DistanceMatrix])
+       
+    Algorithm = error.ParseKargs(kargs, "Algorithm", 
+                                 default="Divisive",
+                                 possible=algorithm_type)
+    # Switch for each type of clustering
+    # first the partition case
+    if utype == "Partition":
+        error.CheckArgumentsLength(args, 1, 1)
+        error.CheckKargs(kargs, 
+                         ["Algorithm", "Prototypes", "Initialization"])
+        Initialization = error.ParseKargs(kargs, "Initialization", 1,
+                                          possible=[1, 2])
+        
+        if Algorithm == algorithm_type["Agglomerative"]:
+            raise ValueError("""If partition is on, Algorithm cannot 
+                    be agglomerative""")                             
+        
+        
+        if(isinstance(args[0], int)): #int case
             # if Prototypes is empty, the wrapping will send an
-            # int * = 0 to the prototyping function, as expected
+            # int * = 0 to the prototyping function, as expected        
             Prototypes = kargs.get("Prototypes", [])
-            nb_cluster = args[0]
-            
-            if Algorithm=='Agglomerative':
-                raise TypeError("Algorithm must be Divisive or Ordering")
-            
-            try:
-                Algorithm = algorithm_map[Algorithm]
-            except KeyError:
-                raise KeyError("Invalid Algorithm. Possible values are : "
-                           + str(algorithm_map.keys()))
-            
-                
-            return matrix.partitioning_prototype(nb_cluster, Prototypes, 
+            nb_cluster = args[0]            
+            return matrix.partitioning_prototype(nb_cluster, Prototypes,
                                                  Initialization, Algorithm)
-        else:
+        elif isinstance(args[0], list): # array case 
+            #todo:: array of what kind of object?
+            #need a test
             return matrix.partitioning_clusters(args[0])
+        else:
+            raise TypeError("""
+            With Partition as second argument, the third one must be either 
+            an int or an array.""")
 
-    elif(type == "Hierarchy"):
+    elif utype == "Hierarchy":
+        error.CheckKargs(kargs, 
+                        ["Algorithm",  "FileName", "Criterion", "Format"])
         
-        # Transform Keywords to value
-        try:
-            Algorithm = algorithm_map[Algorithm]
-        except KeyError:
-            raise KeyError("Invalid Algorithm. Possible values are : "
-                           + str(algorithm_map.keys()))
-
-        try:
-            Criterion = criterion_map[Criterion]
-        except KeyError:
-            raise KeyError("Invalid Criterion. Possible values are : " 
-                           + str(criterion_map.keys()))
-
-        try:
-            Format = format_map[Format]
-        except KeyError:
-            raise KeyError("Invalid Format. Possible values are : "
-                           + str(format_map.keys()))
-
-
+        Algorithm = error.ParseKargs(kargs, "Algorithm", 
+                                             default="Agglomerative",
+                                             possible=algorithm_type)
+        
+        Criterion = error.ParseKargs(kargs, "Criterion", "Averaging", 
+                                     possible=criterion_type)
+        
+        # fixme: is it correct to set "" to the filename by defautl ? 
+        # if set to None, the prototype does not match
+        filename = kargs.get("Filename", None)
+        format = error.ParseKargs(kargs, "Format", "ASCII", 
+                                  possible=format_type)
+        #check options
+        if Algorithm != algorithm_type["Agglomerative"] and \
+            kargs.get("Criterion"):
+            
+            raise ValueError("""
+                In the Hierarchy case, if Algorithm is different from 
+                AGGLOMERATIVE, then Criterion cannot be used.""")
         return matrix.hierarchical_clustering(Algorithm, Criterion,
-                                              FileName, Format)
-        
-        
+                                            filename, format)
+
+
     else:
-        raise KeyError("Possible action are : 'Partitioning' or 'Hierarchy'")
-                 
-        
+        raise KeyError("Second argument must be 'Partitioning' or 'Hierarchy'")
 
 
-def ToDistanceMatrix(clusters):
+
+
+def ToDistanceMatrix(distance_matrix):
     """    
-    Cast and object of type CLUSTERS into an object of type DISTANCE_MATRIX.
+    Cast and object of type CLUSTER into an object of type DISTANCE_MATRIX.
  
     
     :Parameters:
-      * clusters (clusters) 
+      * distance_matrix 
 
     :Returns:    
         An object of type distance_matrix is returned. 
@@ -442,13 +431,16 @@ def ToDistanceMatrix(clusters):
     .. doctest::
         :options: +SKIP
     
-        >>> ToDistanceMatrix(clusters)
+        >>> ToDistanceMatrix(distance_matrix)
 
     .. seealso::
         :func:`~openalea.stat_tool.cluster.Clustering`,
     
-    .. todo:: provide concrete example(s).
     """
+    error.CheckType([distance_matrix], [[_Cluster, _DistanceMatrix]])
     
-    return _DistanceMatrix(clusters)
+    try:
+        return _DistanceMatrix(distance_matrix)
+    except:
+        raise TypeError("Input arguments must be of type Cluster")
 

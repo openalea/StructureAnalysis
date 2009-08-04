@@ -1,22 +1,19 @@
 """ Distributions module
 
-:Status: 
- * constructors done
- * test done
- * error management 
-     - Distribution done
-     - Binomial, and others to be checked
- * documentation to be checked
+:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 import interface
 import error
 
 import _stat_tool
+
+from _stat_tool import _ParametricModel
+from _stat_tool import _DistributionData
 from _stat_tool import _Distribution
-from _stat_tool import _ParametricModel, _DistributionData, _ParametricModel
-from _stat_tool import DistributionIdentifier
+
+from enumerate import distribution_identifier_type
 
 __all__ = ["_Distribution",
            "_ParametricModel",
@@ -27,46 +24,7 @@ __all__ = ["_Distribution",
            "NegativeBinomial",
            "Multinomial",
            "ToHistogram",
-           "ToDistribution",
-           "distribution_type",
-           "DistributionIdentifier"]
-
-# .. todo:: put this dict into common module ?  
-distribution_type = {
-    "B": _stat_tool.BINOMIAL,
-    "BINOMIAL": _stat_tool.BINOMIAL,
-    "P": _stat_tool.POISSON,
-    "POISSON": _stat_tool.POISSON,
-    "NB": _stat_tool.NEGATIVE_BINOMIAL,
-    "NEGATIVE_BINOMIAL": _stat_tool.NEGATIVE_BINOMIAL,
-    "U": _stat_tool.UNIFORM,
-    "UNIFORM": _stat_tool.UNIFORM,
-    "M": _stat_tool.MULTINOMIAL,
-    "MULTINOMIAL": _stat_tool.MULTINOMIAL,
-    }
-
-def get_distribution_type(typeid, filter=None):
-    """ Return a distribution type constante corresponding to type
-    typeid must be in filter list
-    
-    .. todo:: get rid of this function to simplify code 
-    """
-
-    # Convert distribution type
-    if(isinstance(typeid, str)):
-        typeid = typeid.upper()
-
-    try:
-        typeid = distribution_type[typeid]
-        if(filter and not typeid in filter):
-            raise TypeError("Bad distribution type %s. Should be %s"
-                %(typeid, str(filter)))
-        return typeid
-    except KeyError:
-        error = "Invalid Distribution type, possible type are %s" \
-            % (str(distribution_type.keys()), )
-        raise AttributeError(error)
-
+           "ToDistribution"]
 
 def Distribution(utype, *args):
     """
@@ -120,16 +78,13 @@ def Distribution(utype, *args):
         :func:`~openalea.stat_tool.estimate.Estimate`
         :func:`~openalea.stat_tool.simulate.Simulate`.
     """
-    
-    # check there is at least 1 argument
-    
-
     # Constructor from Filename or Histogram or parametricmodel
     if(len(args) == 0):  
-        error.CheckType(utype, str, _DistributionData, _ParametricModel, 
-                        arg_id=1)
+        error.CheckType([utype], 
+                        [[str, _DistributionData, _ParametricModel]], 
+                        arg_id=[1])
         result =  _ParametricModel(utype)
-    
+    # from parameters 
     if len(args)>0:
         error.CheckArgumentsLength(args, 1)
         if utype in ["B",  "BINOMIAL"]:
@@ -143,15 +98,13 @@ def Distribution(utype, *args):
         elif utype in ["U", "UNIFORM"]:
             result = Uniform(*args)
         else:
-            error.DictWrongKeys(distribution_type.keys(), utype)
+            raise KeyError(" %s not found. Allowed keys are %s" 
+                           % (utype, distribution_identifier_type.keys()))
 
-    if result is not None:
-        return result
-    else:
-        error.StatToolError('Unknown error in Distribution')
+    return result
 
 
-def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT,\
+def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT, \
              proba=_stat_tool.D_DEFAULT):
     """
     Construction of a binomial distribution
@@ -162,13 +115,21 @@ def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT,\
       * `sup_bound` (int) : upper bound to the range of possilbe values
       * `proba` (int, float) : probability of 'success'
     """    
-    # Check parameters
-    assert inf_bound <= sup_bound
+    # todo: seg fault when passing -1 as first arguments if there 
+    # is no assert here below
+    # memory leak ? 
+    # todo:  returns error if ((inf_bound < min_inf_bound) || 
+    # (inf_bound > MAX_INF_BOUND)) {
+    
+    error.CheckType([inf_bound, sup_bound, proba], [int, int, [int, float]])
+    assert inf_bound >= 0
+    assert inf_bound < sup_bound
     assert (sup_bound - inf_bound) <= _stat_tool.MAX_DIFF_BOUND
-    assert proba <=1. and proba >=0
+    assert proba <= 1. and proba > 0
 
     param = _stat_tool.D_DEFAULT
-    return _ParametricModel(_stat_tool.BINOMIAL,\
+    
+    return _ParametricModel(_stat_tool.BINOMIAL, \
         inf_bound, sup_bound, param, proba)
 
 
@@ -182,6 +143,8 @@ def Poisson(inf_bound, param=_stat_tool.D_DEFAULT):
       * `param` (int, float) : parameter of the Poisson distribution
     """
 
+    assert inf_bound >= 0
+    assert param > inf_bound
     assert param > 0. and param < _stat_tool.MAX_MEAN
 
     sup_bound = _stat_tool.I_DEFAULT
@@ -204,8 +167,10 @@ def NegativeBinomial(inf_bound, param=_stat_tool.D_DEFAULT, \
     """
 
     # Check parameters
-    assert proba <= 1. and proba >= 0
-    assert (param * (1. - proba) / proba) < _stat_tool.MAX_MEAN
+    assert inf_bound >= 0
+    assert param > 0
+    assert proba <= 1. and proba > 0
+    assert (param * (1. - proba) / proba) <= _stat_tool.MAX_MEAN
 
     sup_bound = _stat_tool.I_DEFAULT
 
@@ -224,21 +189,25 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
     """
 
     # Check parameters
-
+    #todo:  returns error if ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND)) {
+    assert inf_bound >= 0
+    assert sup_bound >= 0
     assert inf_bound <= sup_bound
     assert (sup_bound - inf_bound) < _stat_tool.MAX_DIFF_BOUND
 
     param = _stat_tool.D_DEFAULT
     proba = _stat_tool.D_DEFAULT
-
+    cumul_threshold = _stat_tool.CUMUL_THRESHOLD
     return _ParametricModel(_stat_tool.UNIFORM, \
-        inf_bound, sup_bound, param, proba)
+        inf_bound, sup_bound, param, proba, cumul_threshold)
+
 
 def Multinomial():
+    """to be done"""
     raise NotImplemented
 
 # Extend _ParametricModel
-interface.extend_class( _stat_tool._ParametricModel, interface.StatInterface)
+interface.extend_class( _ParametricModel, interface.StatInterface)
 
 # Cast Functions
 

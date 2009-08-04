@@ -1,33 +1,50 @@
-"""Vectors function and class"""
-__revision__ = "$Id$"
+"""Vectors function and class
 
+:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
 
+"""
+__version__ = "$Id$"
+
+# .. todo:: check vectors from sequences, markovian_sequences, ....
 import _stat_tool
 import interface
+import error
 
 from _stat_tool import _Vectors
 from _stat_tool import _VectorDistance
+from enumerate import format_type
+from enumerate import variable_type
+from enumerate import variance_type
+from enumerate import distance_type
 
 __all__ = ['Vectors',
            '_Vectors',
            'VectorDistance',
            '_VectorDistance',
            'ContingencyTable',
-           'VarianceAnalysis']
+           'VarianceAnalysis',
+           'ComputeRankCorrelation']
 
+
+############### VectorDistance #################################################
+
+    
 
 
 # Add methods to _Vectors
 
-def _Vectors_mixture_estimation(self, model, nb_iteration=_stat_tool.I_DEFAULT,
-                                force_param=[]):
+def _Vectors_mixture_estimation(self, model, 
+                                nb_iteration=_stat_tool.I_DEFAULT,
+                                force_param=None):
     """Estimate a mixture from _Vectors given initial model or number of 
     components, the maximal number of iterations and a flag for using parametric
     observation distributions or not, within a given family
     """
-    return _stat_tool._Vectors.mixture_estimation_wrap(self, model,
-                                                       nb_iteration,
-                                                       force_param)
+    if force_param is None:
+        force_param = []
+        
+    return _Vectors.mixture_estimation_wrap(self, model,
+                                            nb_iteration, force_param)
 
 _Vectors.mixture_estimation = _Vectors_mixture_estimation
 
@@ -84,52 +101,41 @@ def Vectors(*args, **kargs):
         :func:`~openalea.stat_tool.comparison.Regression`, 
         :func:`~openalea.stat_tool.comparison.VarianceAnalysis`
     """
+    error.CheckArgumentsLength(args, 1, 1)
+    error.CheckKargs(kargs, possible_kargs = ["Identifiers", "IndexVariable"])
     
-    if (len(args)==0):
-        raise TypeError("Expected a list or filename argument")
+    obj = args[0]
+    ret = None
+    
+    if isinstance(obj, str):
+        # constructor from a filename
+        ret = _Vectors(args[0])
+    elif isinstance(obj, list):
+        # from a list and an optional argument
+        
+        # first, get the Identifiers and check its type
+        identifiers = error.ParseKargs(kargs, "Identifiers")
+        if identifiers:
+            error.CheckType([identifiers], [[list]], variable_id=[2])
+
+            if len(identifiers) != len(args[0]):
+                raise ValueError("""Identifiers must be a list, 
+                which size equals vectors's length""") #IGNORE:C0301
+            
+            ret = _Vectors(args[0], identifiers)
+        else:
+            ret = _Vectors(args[0], [])
     else:
-        # build from a sequence
-        
-        obj = args[0]
-        IndexVariable = kargs.get("IndexVariable", False)
-        try:            
-            temp = obj.build_vectors(IndexVariable)
-        except:
-            temp = _Vectors(*args)
-        
-    return temp
+        # from a sequence
+        index_variable = error.ParseKargs(kargs, "IndexVariable", False, 
+                                          [True, False])
+        error.CheckType([index_variable], [bool], variable_id=[2])
+        ret = obj.build_vectors(index_variable)
+    
+
+    return ret
 
 interface.extend_class( _Vectors, interface.StatInterface)
-
-
-############### VectorDistance #################################################
-
-vector_distance_type = \
-    {
-    "S":  _stat_tool.SYMBOLIC,
-    "SYMBOLIC" : _stat_tool.SYMBOLIC,
-    "N": _stat_tool.NUMERIC, 
-    "NUMERIC" : _stat_tool.NUMERIC,
-    "O": _stat_tool.ORDINAL,
-    "ORDINAL":  _stat_tool.ORDINAL,
-    "C":  _stat_tool.CIRCULAR,
-    "CIRCULAR" : _stat_tool.CIRCULAR,
-
-    _stat_tool.SYMBOLIC: _stat_tool.SYMBOLIC,
-    _stat_tool.NUMERIC : _stat_tool.NUMERIC,
-    _stat_tool.ORDINAL : _stat_tool.ORDINAL,
-    _stat_tool.CIRCULAR : _stat_tool.CIRCULAR,
-    }
-
-
-distance_type = \
-    {
-    "ABSOLUTE_VALUE" : _stat_tool.ABSOLUTE_VALUE,
-    "QUADRATIC" : _stat_tool.QUADRATIC,
-
-    _stat_tool.ABSOLUTE_VALUE: _stat_tool.ABSOLUTE_VALUE,
-    _stat_tool.QUADRATIC : _stat_tool.QUADRATIC,
-    }
 
 
 
@@ -167,83 +173,61 @@ def VectorDistance(*args, **kargs):
         >>> VectorDistance(weight1, type1, weight2, type2,..., Distance="QUADRATIC")
         >>> VectorDistance(file_name)
 
-
-
     .. seealso::
         :func:`~openalea.stat_tool.comparison.Compare`
     """
-
-    distance = None
-    if(not distance):
-        distance = kargs.get("Distance", None)
-    if(not distance):
-        distance = _stat_tool.ABSOLUTE_VALUE
-    else:
-        distance = distance_type[distance]
     
-    # filename
-    if(len(args)==1 and isinstance(args[0], str)):
+    error_arguments = ["",
+                       """If first argument is a number, following 
+    argument must be in ["N", "O", "S"]. Check documentation by typing 
+    VectorDistance? .""",
+    ""]
+    
+    distance = error.ParseKargs(kargs, "Distance", "ABSOLUTE_VALUE",
+                                distance_type)
+
+
+    # Case VectorDistance("O", "N", "S")
+    if args[0] in variable_type.keys():
+        # check that all following arguments (if any) are correct
+        types = []
+        for arg, index in zip(args, range(0, len(args))):
+            # check that the arguments are correct
+            if arg not in variable_type.keys():
+                raise ValueError(error_arguments[1])
+            else:
+                types.append(variable_type[arg])
+        # assign a uniform weights since none were provided
+        weights = [1./len(types) for _elem in types]
         
-        if args[0] in vector_distance_type.keys():
-            
-            #print vector_distance_type[args[0]], 
-            #type(vector_distance_type[args[0]])
-#            print [1], type([1])
-#            print distance, type(distance)
-            return _stat_tool._VectorDistance([vector_distance_type[args[0]]],
-                                              [1], distance )
-        else:
-            filename = args[0]
-            return _stat_tool._VectorDistance(filename)
-
-    # Get keyword parameters
-    distance = None
-    if(not distance):
-        distance = kargs.get("Distance", None)
-    if(not distance):
-        distance = _stat_tool.ABSOLUTE_VALUE
-    else: distance = distance_type[distance]
-
-    # Parse arguments
-    weigths = []
-    types = []
-    
-    cindex = 0
-    while cindex < len(args):
-        arg = args[cindex]
-
-        # (weigth, type)
-        if(isinstance(arg, float) or isinstance(arg, int) ):
-            weigths.append(arg)
-            types.append(vector_distance_type[args[cindex+1]])
-            cindex += 1 
-
-        elif(isinstance(arg, str)):
-            weigths.append(0.)
-            types.append(vector_distance_type[arg])
-            
-        elif(isinstance(arg, tuple) and len(arg) == 2):             
-            weigths.append(arg[0])
-            types.append(vector_distance_type[arg[1]])
-
-        else:
-            raise TypeError("Unexpected argument" + str(arg))
-
-        cindex += 1
-
-
-    if sum(weigths)==0:
-        weigths = [1./len(weigths) for _elem in weigths]
+        return _VectorDistance(types, weights, distance)
+    # same as above but with weights VectorDistance(0.5, "N", 0.5, "S")
+    if isinstance(args[0], int) or isinstance(args[0], float):
+        types = list(args[1:len(args):2])
+        weights = list(args[0:len(args):2])
+        assert len(types)==len(weights)
+                    
+        # check that types are strings
+        error.CheckType(types, [str]*len(types))
+        # check that weights are integer or floats 
+        error.CheckType(weights, [[int, float]]*len(weights))
         
-    return _stat_tool._VectorDistance(types, weigths, distance)
-    
+        # convert to vector_distance_type
+        for arg, index in zip(types, range(0, len(types))):
+            types[index] = variable_type[types[index]]
+        
+        return _VectorDistance(types, weights, distance)
+    # filename case
+    elif isinstance(args[0], str) and len(args)==1 and \
+            args[0] not in variable_type.keys():
+        return _VectorDistance(args[0])
+   
 
 # Extend dynamically class
 interface.extend_class( _VectorDistance, interface.StatInterface)
-################################################################################
 
-def VarianceAnalysis(vec, class_variable, response_variable, 
-                     type, FileName="result", Format="ASCII"):
+
+def VarianceAnalysis(*args, **kargs):
     """
     One-way variance analysis.
     
@@ -252,45 +236,56 @@ def VarianceAnalysis(vec, class_variable, response_variable,
     .. doctest::
         :options: +SKIP
 
-        >>> VarianceAnalysis(vec, class_variable, response_variable, type, FileName="result", Format="SpreadSheet")
+        >>> VarianceAnalysis(vec, class_variable, response_variable, 
+        ... type, FileName="result", Format="SpreadSheet")
       
     :Parameters:
 
       * vec (_Vectors),
       * class_variable (int): index of the class or group variable,
       * response_variable (int): index of the response variable,
-      * type (string): type of the response variable ("NUMERIC" ("N") or "ORDINAL" ("O")). 
+      * type (string): type of the response variable ("NUMERIC" ("N") or
+        "ORDINAL" ("O")). 
 
     :Keywords:
     
       * FileName (string): name of the result file,
-      * Format (string): format of the result file: "ASCII" (default format) or "SpreadSheet". This optional argument can only be used in conjunction with the optional argument FileName. 
+      * Format (string): format of the result file: "ASCII" (default format) 
+        or "SpreadSheet". This optional argument can only be used in conjunction with the optional argument FileName. 
 
     :Returns:
     
         The variance analysis result as a string
 
     """
+    error.CheckArgumentsLength(args, 4, 4)
+    error.CheckKargs(kargs, possible_kargs = ["FileName", "Format"])
 
-    variance_type = {
-        "N": _stat_tool.NUMERIC, 
-        "NUMERIC" : _stat_tool.NUMERIC,
-        "O": _stat_tool.ORDINAL,
-        "ORDINAL":  _stat_tool.ORDINAL,
-        }
-
+    #kargs
+    filename = error.ParseKargs(kargs, "FileName", default="result")
+    format = error.ParseKargs(kargs, "Format", default="ASCII", 
+                              possible=format_type)
+    
+    #args
+    vec = args[0]
+    class_variable = args[1]
+    response_variable = args[2]
+    utype = args[3]
+    error.CheckType([vec, class_variable, response_variable, utype],
+                    [_Vectors, int, int, str])
+    
     try:
-        type = variance_type[type]
+        utype = variance_type[args[3]]
     except KeyError:
         raise KeyError("Possible type are : " + str(variance_type.keys()))
+    
+    
+    return vec.variance_analysis(class_variable, response_variable, utype,
+                                 filename, format)
 
-    return vec.variance_analysis(class_variable, response_variable, type,
-                                 FileName, Format)
 
 
-
-def ContingencyTable(vec, variable1, variable2, 
-                     FileName="result", Format="ASCII"):
+def ContingencyTable(*args, **kargs):
     """
     Computation of a contingency table.
 
@@ -318,11 +313,24 @@ def ContingencyTable(vec, variable1, variable2,
       
   
     """
+    error.CheckArgumentsLength(args, 3, 3)
+    error.CheckKargs(kargs, possible_kargs = ["FileName", "Format"])
+    
+    #kargs
+    filename = error.ParseKargs(kargs, "FileName", default="result")
+    format = error.ParseKargs(kargs, "Format", default="ASCII",
+                              possible=format_type)
+    
+    #args
+    vec = args[0]
+    variable1 = args[1]
+    variable2 = args[2]
+    error.CheckType([vec, variable1, variable2], [_Vectors, int, int])
+    
+    return vec.contingency_table(variable1, variable2, filename, format)
 
-    return vec.contingency_table(variable1, variable2, FileName, Format)
 
-
-def ComputeRankCorrelation(vec, Type="Spearman", FileName=None):
+def ComputeRankCorrelation(*args, **kargs):
     """ComputeRankCorrelation
 
     Computation of the rank correlation matrix.
@@ -337,16 +345,30 @@ def ComputeRankCorrelation(vec, Type="Spearman", FileName=None):
     
     :Optional Arguments:
 
-    *Type (string): type of rank correlation coefficient: "Spearman" (the default) or "Kendall".
+    * Type (string): type of rank correlation coefficient: 
+      "Spearman" (the default) or "Kendall".
     
     :Returned Object:
 
     No object returned.
     """
-
+    
     func_map = {
             "Spearman": 0, 
             "Kendall": 1 
             }
+    
+    error.CheckArgumentsLength(args, 1, 1)
+    error.CheckKargs(kargs, possible_kargs = ["Type", "FileName"])
+    
+    #kargs
+    utype = error.ParseKargs(kargs, "Type", default="Spearman",
+                             possible=func_map)
+    filename = error.ParseKargs(kargs, "FileName", default=None)
+    
+    #args
+    vec = args[0]
+    
+    error.CheckType([vec], [_Vectors])
 
-    vec.rank_correlation_computation(func_map[Type], FileName)
+    vec.rank_correlation_computation(utype, filename)

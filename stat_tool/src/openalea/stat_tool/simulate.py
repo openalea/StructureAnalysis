@@ -1,13 +1,12 @@
 """ Simulation functions 
 
-author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
+:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
 
 """
 
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
-
+__all__ = ["Simulate"]
 
 def Simulate(obj, *args):
     """ Simulate
@@ -50,14 +49,8 @@ def Simulate(obj, *args):
     Compound,
     ExtractHistogram.
     
-    Generation of a random sample from a distribution """
+    Generation of a random sample from a distribution 
+    """
 
 
     return obj.simulate(*args)
-    
-    
-    
-    
-
-        
-

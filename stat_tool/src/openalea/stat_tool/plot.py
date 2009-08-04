@@ -1,5 +1,9 @@
-""" Plot functions """
-__revision__ = "$Id$"
+""" Plot functions 
+
+Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+
+"""
+__version__ = "$Id$"
 
 import sys
 

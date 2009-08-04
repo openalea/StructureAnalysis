@@ -1,5 +1,9 @@
-"""Output functions"""
-__revision__ = "$Id$"
+"""Output functions
+
+:Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+
+"""
+__version__ = "$Id$"
 
 import plot
 import os
@@ -189,8 +193,8 @@ def Plot(obj, *args, **kargs):
     .. seealso::
         :func:`~openalea.stat_tool.output.Display`,
         :func:`~openalea.stat_tool.output.Save`.
-        """
-
+    """
+    
     return obj.plot(*args, **kargs)
 
 
@@ -308,13 +312,15 @@ class StatInterface(object):
             try:
                 self.survival_plot_write(prefix, title)
             except AttributeError:
-                raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
+                raise AttributeError("%s has not 'survival' viewpoint"
+                                     % (str(type(self))))
 
         elif(stateprofile):
             try:
                 self.state_profile_plot_write(prefix, title, *params)
             except AttributeError:
-                raise AttributeError("%s has not 'state_profile' viewpoint"%(str(type(self))))
+                raise AttributeError("%s has not 'state_profile' viewpoint"
+                                     % (str(type(self))))
 
         elif(args):
             self.plot_write(prefix, title, list(args))
@@ -371,13 +377,15 @@ class StatInterface(object):
             try:
                 self.survival_plot_write(prefix, title)
             except AttributeError:
-                raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
+                raise AttributeError("%s has not 'survival' viewpoint"
+                                     % (str(type(self))))
 
         elif(stateprofile):
             try:
                 self.state_profile_plot_write(prefix, title, *params)
             except AttributeError:
-                raise AttributeError("%s has not 'state_profile' viewpoint"%(str(type(self))))
+                raise AttributeError("%s has not 'state_profile' viewpoint"
+                                     % (str(type(self))))
 
 
         elif(args):
@@ -427,6 +435,7 @@ class StatInterface(object):
                 os.remove(f)
 
     def plot(self, *args, **kargs):
+        # todo: check effect of the following line 
         __doc__ = Plot.__doc__
 
         title = kargs.get("Title", "")
@@ -436,33 +445,21 @@ class StatInterface(object):
 
         survival = bool(ViewPoint.lower() == "survival")
         stateprofile = bool(ViewPoint.lower() == "stateprofile")
-
-        debug = kargs.get("Debug", False)
         
         try:
             if (survival):
-                if debug:
-                    print 'trying plotting survival mode'
                 plotable = self.survival_get_plotable(*params)
 
             elif (stateprofile):
-                if debug:
-                    print 'trying plotting stateprofile mode'
-                
                 plotable = self.stateprofile_get_plotable(*params)
 
             else:
                 if (args):
-                    if debug:
-                        print 'trying plotable mode with arguments. E.g. plot(d1,d2)'
                     if len(args)==1 and type(args[0])==int:
-                        # for vectrors. for the time being variable argument is not implemented
-                        # should be plotable = self.get_plotable_list(args[0]) but for now:
                         plotable = self.get_plotable_list()
                     else:
                         plotable = self.get_plotable_list(list(args), *params)
                 else:
-                    print 'trying with Params'
                     plotable = self.get_plotable(*params)
             
             plotter = plot.get_plotter()
@@ -474,13 +471,9 @@ class StatInterface(object):
         if(plot.DISABLE_PLOT): return
 
         if(plotable is not None):
-            if debug: print 'plotable seems fine'
             plotter.plot(plotable, title, groups, *args, **kargs)
         else:
-            if debug: print 'plotable is None. using old_plot'
             self.old_plot(*args, **kargs)
-            
-        
             
     def display(self, Detail=1, ViewPoint="", Format=""):
         __doc__ = Display.__doc__
@@ -503,7 +496,7 @@ class StatInterface(object):
         elif(ViewPoint.lower() == "data"):
             try:
                 # try with format argument
-                output = self.ascii_data_write(exhaustive, format)
+                output = self.ascii_data_write(exhaustive, Format)
 
             except Exception, e:
                 try:

@@ -1,29 +1,23 @@
 """ Mixture class
 
-
-:Status: 
- * constructors done
- * test done
- * error management done
- * documentation to be checked
+:Authors: Thomas Cokelaer <Thomas.Cokelaer@inria.fr> 
+ 
+todo: MixtureData ?
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 
 import interface
 import error
-#import _stat_tool
 
 from _stat_tool import _Mixture
 from _stat_tool import _MixtureData
-from _stat_tool import _MvMixture
-from _stat_tool import _MvMixtureData
 from _stat_tool import _ParametricModel
+from _stat_tool import _Compound
+from _stat_tool import _Convolution
 
 __all__ = ['_Mixture',
            '_MixtureData',
-           '_MvMixture',
-           '_MvMixtureData',
            'Mixture', ]
 
 
@@ -60,14 +54,15 @@ def Mixture(*args):
         :func:`~openalea.stat_tool.simulate.Simulate`.
 
     """
-
     error.CheckArgumentsLength(args, 1)
 
+    types = [_ParametricModel, _Mixture, _Compound, _Convolution]
+
     # filename 
-    if (len(args)==1):
-        error.CheckType(args[0], str, arg_id=1)
-        result =  _Mixture(args[0])
-    
+    if (len(args) == 1):
+        error.CheckType([args[0]], [str], arg_id=[1])
+        result = _Mixture(args[0])
+
     # build list of weights and distributions
     else:
         nb_param = len(args)
@@ -79,13 +74,13 @@ def Mixture(*args):
         dists = []
         for i in xrange(nb_param / 2):
             weights.append(args[i * 2])
-            dists.append(args[i * 2 + 1])
-            print type(args[i*2+1])
-            error.CheckType(args[i*2+1], _ParametricModel, arg_id=i*2+1)
-            error.CheckType(args[i*2], float, arg_id=i*2)
+            error.CheckType([args[i * 2 + 1]], [types], arg_id=[i * 2 + 1])
+            error.CheckType([args[i * 2]], [float], arg_id=[i * 2])
+            #dists.append(_Distribution(args[i * 2 + 1]))
+            dists.append((args[i * 2 + 1]))
 
         result = _Mixture(weights, dists)
-        
+
     return result
 
 # Extend _Mixture
@@ -94,121 +89,4 @@ interface.extend_class(_Mixture, interface.StatInterface)
 # Extend _MixtureData
 interface.extend_class(_MixtureData, interface.StatInterface)
 
-# Extend _MvMixture
-interface.extend_class(_MvMixture, interface.StatInterface)
 
-# Extend _MvMixtureData
-interface.extend_class(_MvMixtureData, interface.StatInterface)
-
-# Add methods to _MvMixture
-
-
-def _MvMixture_old_plot(self, variable, Title=""):
-    """Plot a given variable"""
-    if ((variable < 0) or (variable >= self.nb_variable)):
-        raise IndexError, "variable index out of range: " + str(variable)
-    file_id = str(variable + 1)
-    if (not self._is_parametric(variable)):
-        file_id += "0"
-    interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)
-
-def _MvMixture_old_print(self, variable, Title=""):
-    """Print a given variable into .ps file"""
-    if ((variable < 0) or (variable >= self.nb_variable)):
-        raise IndexError, "variable index out of range: "+str(variable)
-    file_id = str(variable+1)
-    if (not self._is_parametric(variable)):
-        file_id += "0"
-    interface.StatInterface.plot_print(self, Title=Title, Suffix=file_id)
-
-def _MvMixture_get_plotable(self):
-    """Return a plotable object (not yet implemented)"""
-    return None
-
-
-def _MvMixture_criteria(self):
-    """Extract the value of each selection criterion"""
-    disp = self.display()
-    criteria = {}
-    names = ["AIC", "AICc", "BIC", "BICc"]
-    for name in names:
-        f = disp.find("(" + name + "):")
-        if (f != -1):
-            pos = f + len(name) + 3
-            i = disp.find("\n", pos)
-            try:
-                val = float(disp[pos:i])
-            except ValueError:
-                pass
-            else:
-                if str(val).upper() != "NAN":
-                    criteria[name] = val
-    return criteria
-
-_MvMixture.save_backup = _MvMixture.save
-
-
-def _MvMixture_save(self, file_name, format="ASCII", overwrite=False):
-    """Save MvMixture object into a file.
-
-    Argument file_name is a string designing the file name and path.
-    String argument format must be "ASCII" or "SpreadSheet".
-    Boolean argument overwrite is false is the file should not
-    be overwritten.
-    """
-    if not overwrite:
-        try:
-            f = file(file_name, 'r')
-        except IOError:
-            f = file(file_name, 'w+')
-        else:
-            msg = "File " + file_name + " already exists"
-            raise IOError, msg
-        f.close()
-    import string
-    if not (string.upper(format)=="ASCII"
-           or string.upper(format)=="SPREADSHEET"):
-        msg = "unknown file format: " + str(format)
-        raise ValueError, msg
-    else:
-        try:
-            _MvMixture.save_backup(self, file_name, Detail=1,
-                                                  ViewPoint='', Format=format)
-        except RuntimeError, error:
-            raise error
-
-_MvMixture.state_permutation_backup = _MvMixture.state_permutation
-
-
-def _MvMixture_state_permutation(self, perm):
-    """Permutation of the states of self.
-    perm[i]==j means that current state i will become new state j.
-
-    Usage:  state_permutation(list)
-    """
-    self.state_permutation_backup(perm)
-
-_MvMixture.old_plot = _MvMixture_old_plot
-_MvMixture.plot_print = _MvMixture_old_print
-_MvMixture.get_plotable = _MvMixture_get_plotable
-_MvMixture._criteria = _MvMixture_criteria
-_MvMixture.save = _MvMixture_save
-_MvMixture.state_permutation = _MvMixture_state_permutation
-
-# Add methods to _MvMixtureData
-
-
-def _MvMixtureData_old_plot(self, variable, Title=""):
-    """Plot a given variable"""
-    if ((variable < 0) or (variable >= self.get_nb_variable())):
-        raise IndexError, "variable index out of range: "+str(variable)
-    file_id = str(variable+1)
-    interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)
-
-
-def _MvMixtureData_get_plotable(self):
-    """Return a plotable object (not yet implemented)"""
-    return None
-
-_MvMixtureData.old_plot = _MvMixtureData_old_plot
-_MvMixtureData.get_plotable = _MvMixtureData_get_plotable

@@ -1,12 +1,12 @@
 """ Interfaces for stat_tool objects """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
-from output import StatInterface    
+from output import StatInterface
 
 
 
 def extend_class(cls, *base_class):
-    """ Extend boost python class 
+    """ Extend boost python class    
     
     :Parameters:
     
@@ -16,7 +16,7 @@ def extend_class(cls, *base_class):
     :returns:
         the modified cls
     """
-    
+
     b = list(cls.__bases__)
     for c in base_class:
         if (c not in b):
@@ -24,5 +24,3 @@ def extend_class(cls, *base_class):
     cls.__bases__ = tuple(b)
 
     return cls
-
-        

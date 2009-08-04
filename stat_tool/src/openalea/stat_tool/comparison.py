@@ -1,9 +1,23 @@
-"""Comparison functions"""
-__revision__ = "$Id$"
+"""Comparison functions
 
-import _stat_tool
-#from distribution import Distribution
-from histogram import Histogram
+:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+"""
+__version__ = "$Id$"
+
+import error
+
+from enumerate import variable_type 
+from enumerate import format_type
+
+from openalea.stat_tool._stat_tool import _CompoundData
+from openalea.stat_tool._stat_tool import _DistributionData
+from openalea.stat_tool._stat_tool import _MixtureData
+from openalea.stat_tool._stat_tool import _ConvolutionData
+from openalea.stat_tool._stat_tool import _Vectors
+from openalea.stat_tool._stat_tool import _VectorDistance
+from openalea.stat_tool._stat_tool import _Histogram
+
+__all__ = ['Compare', 'ComparisonTest']
 
 
 def compare_histo(histo, *args, **kargs):
@@ -31,54 +45,38 @@ def compare_histo(histo, *args, **kargs):
     
     .. seealso:: 
         :func:`~openalea.stat_tool.comparison.Compare`
-        
-          
+           
     """
+    utype = args[-1]
+    if utype not in variable_type.keys():
+        raise KeyError("%s not found. Allowed keys are %s" 
+                       % (utype, variable_type.keys()))
     
-    type_dict = {
-	    "O" : _stat_tool.ORDINAL,
-	    "ORDINAL" : _stat_tool.ORDINAL,
-	    "N" : _stat_tool.NUMERIC,
-	    "NUMERIC" : _stat_tool.NUMERIC,
-	    "S" : _stat_tool.SYMBOLIC,
-	    "SYMBOLIC" : _stat_tool.SYMBOLIC,
-	    }
+    
+    utype = variable_type[args[-1]]
+    
+    error.CheckType([histo],
+                        [[_DistributionData, _MixtureData,
+                          _ConvolutionData, _CompoundData]])
 
-    _type = args[-1]
-    # check the last argument's type
-    if type('O')!=type(_type):
-        raise TypeError("""The last argument must be a string (e.g., 
-        "O", "ORDINAL." See the documentation""")
-    try:
-        _type = type_dict[_type.upper()]
-    except KeyError:
-        print "Type not recognized."
-        return
-
-    base = histo
     histos = args[0:-1]
-
+    for h in histos:
+        error.CheckType([h],
+                        [[_DistributionData, _MixtureData,
+                          _ConvolutionData, _CompoundData]])
     filename = kargs.get("Filename", None)
-    format = kargs.get("Format", "a")
-    
-    if format == 'a':
-        pass
-    elif format == 'ASCII': 
-        format = 'a'
-    elif format == 'SpreadSheet': 
-        format = 's'
-    else:
-        raise TypeError( """The Format argument must be either 'ASCII' 
-            or 'SpreadSheet'.""")
+    format = error.ParseKargs(kargs, "Format", "ASCII", 
+                                  possible=format_type)
         
-    ret = base.compare(histos, _type, filename, format)
+    ret = histo.compare(histos, utype, filename, format)
+
     return ret
 
 
-_stat_tool._Histogram.compare_histo = compare_histo	    
+_Histogram.compare_histo = compare_histo	    
 
 
-def compare_vectors(vec, vector_distance):
+def compare_vectors(vec, vector_distance, Standardization=True):
     """Comparison of vectors.
 
     The type _VectorDistance implements standardization procedures. 
@@ -106,8 +104,10 @@ def compare_vectors(vec, vector_distance):
         :func:`~openalea.stat_tool.cluster.Clustering`, 
         :func:`~openalea.stat_tool.comparison.Compare` 
      """
-
-    return vec.compare(vector_distance)
+    error.CheckType([vec, vector_distance], [_Vectors, _VectorDistance])
+    error.CheckType([Standardization], [bool])
+    
+    return vec.compare(vector_distance, Standardization)
 
 
 def Compare(arg1, *args, **kargs):
@@ -132,15 +132,21 @@ def Compare(arg1, *args, **kargs):
     """
 
     p1 = arg1
+     
+    if isinstance(p1, _Vectors):
+        ret = compare_vectors(arg1, *args, **kargs)
+    elif isinstance(p1, _Histogram):
+        ret = compare_histo(arg1, *args, **kargs)
+    else:
+        raise NotImplemented
     
-    if(isinstance(p1, _stat_tool._Histogram)):
-        return compare_histo(arg1, *args, **kargs)
-    
-    elif(isinstance(p1, _stat_tool._Vectors)):
-        return compare_vectors(arg1, *args, **kargs)
+    if ret:
+        return ret
+    else:
+        raise Exception(error.STAT_TOOL_ERROR_MSG_RETURN_NONE)
     
 
-def ComparisonTest(type, histo1, histo2):
+def ComparisonTest(utype, histo1, histo2):
     r"""
     Test of comparaison of frequency distributions.
     
@@ -214,19 +220,24 @@ def ComparisonTest(type, histo1, histo2):
         >>> ComparisonTest(type, histo1, histo2)
     
     """
-
-    type = type.lower()
+    error.CheckType([histo1, histo2],
+                        [[_DistributionData, _MixtureData,
+                          _ConvolutionData, _CompoundData]]*2)
+    
+    utype = utype.lower()
+    #todo: move this dict to enumerate.py ? 
     type_dict = { 
 	    "f": "f_comparison",
 	    "t": "t_comparison",
 	    "w": "wmw_comparison",
 	    }
 
-    if(not type_dict.has_key(type)):
-	    raise TypeError("to be done")
+    if not type_dict.has_key(utype):
+        raise TypeError("to be done")
 
-    func = getattr(histo1, type_dict[type])
+    func = getattr(histo1, type_dict[utype])
     ret = func(histo2)
+    
     return ret
 
 

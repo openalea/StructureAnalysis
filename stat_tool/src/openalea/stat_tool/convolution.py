@@ -1,13 +1,8 @@
 """ Convolution module 
 
-:Status:
-  * constructors done
-  * test done
-  * error management done
-  * documentation to be checked
-  
+:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr> 
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 
 import interface
@@ -16,6 +11,8 @@ import error
 #import _stat_tool
 
 from _stat_tool import _Convolution
+from _stat_tool import _Mixture
+from _stat_tool import _Compound
 from _stat_tool import _ConvolutionData
 from _stat_tool import _ParametricModel
 
@@ -55,24 +52,23 @@ def Convolution(*args):
     """
     error.CheckArgumentsLength(args, 1)
 
+    possible_types = [_ParametricModel, _Mixture,
+                      _Compound, _Convolution]        
+
     # filename
     if(len(args)==1):
-        error.CheckType(args[0], str, arg_id=1)
+        error.CheckType([args[0]], [str], arg_id=[1])
         result =  _Convolution(args[0])
-    # build list of distributions
+    # build from list of distributions
     else:
-        #check that all arguments are _parametric_model
+        arguments = []
+        #check that all arguments are correct
         for arg, i in zip(args, range(0, len(args))):
-            print 'check %s' %i
-            error.CheckType(arg, _ParametricModel, arg_id=i+1)
+            error.CheckType([arg], [possible_types], variable_id=[i+1])
+            arguments.append(arg)
+        result = _Convolution(arguments)
         
-        result = _Convolution(list(args))
-        
-    if result is not None:
-        return result
-    else:
-        error.StatToolError('Unknown error in Convolution')
-
+    return result
 
 
 # Extend _Convolution

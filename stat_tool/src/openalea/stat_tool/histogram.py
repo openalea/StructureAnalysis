@@ -1,24 +1,26 @@
-"""Histogram functions and classes"""
-__revision__ = "$Id$"
+"""Histogram functions and classes
 
-import sys
-import os
-sys.path.append(os.path.abspath("."))
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+"""
+__version__ = "$Id$"
 
-import _stat_tool
+#import sys
+#import os
+#sys.path.append(os.path.abspath("."))
+
 import interface
 
 from _stat_tool import _DistributionData
 
 # Extend _DistributionData class dynamically
-interface.extend_class(_stat_tool._DistributionData, interface.StatInterface)
+interface.extend_class(_DistributionData, interface.StatInterface)
 
 __all__ = ["_DistributionData",
            "Histogram",
            ]
 
 
-def Histogram(arg):
+def Histogram(*args):
     """Construction of a frequency distribution from an object of type
     list(int) or from an ASCII file.
 
@@ -55,10 +57,16 @@ def Histogram(arg):
 
     """
 
-    return _DistributionData(arg)
-
-
-
+    ret = None
+    # Histogram(filename)
+    if len(args)==1 and isinstance(args[0], str):
+        ret = _DistributionData(args[0])
         
-
-
+    # Histogram([1,2,3])
+    elif len(args)==1 and isinstance(args[0], list):
+        ret = _DistributionData(args[0])
+    # Histogram(1,2,3)
+    else:
+        ret = _DistributionData(list(args))
+        
+    return ret

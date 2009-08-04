@@ -12,16 +12,15 @@
 #       See accompanying file LICENSE.txt or copy at
 #           http://www.gnu.org/licenses/gpl-2.0.txt
 # 
-
-__doc__="""
-Stat_Tool
-"""
+"""Stat_Tool"""
 
 # Test prefix
 
 def get_test_file(filename=""):
+    """
+    look for data in different directories
+    """
  
-    import os
     path1 = os.path.abspath("../../../test/")
     path2 = os.path.abspath("./test/")
     path3 = os.path.abspath("./")
@@ -62,6 +61,4 @@ from _stat_tool import VariableType
 from _stat_tool import VariableTypeBis
 from _stat_tool import RestorationAlgorithm
 
-# Exception
-from error import StatToolError
 #

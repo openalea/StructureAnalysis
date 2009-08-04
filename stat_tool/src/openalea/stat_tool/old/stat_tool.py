@@ -1,16 +1,16 @@
 """Classes shared by most statistical modules"""
 
 
-import cstat_tool, os
+#import cstat_tool, os
 
-DistributionIdentifier=cstat_tool.DistributionIdentifier
-VariableType=cstat_tool.VariableType
-Parametric=cstat_tool._Parametric
-Distribution=cstat_tool.Distribution
-D_DEFAULT=cstat_tool.D_DEFAULT()
-I_DEFAULT=cstat_tool.I_DEFAULT()
-SELF_TRANSITION=cstat_tool.SELF_TRANSITION()
-RestorationAlgorithm=cstat_tool.RestorationAlgorithm
+#DistributionIdentifier=cstat_tool.DistributionIdentifier
+#VariableType=cstat_tool.VariableType
+#Parametric=cstat_tool._Parametric
+#Distribution=cstat_tool.Distribution
+#D_DEFAULT=cstat_tool.D_DEFAULT()
+#I_DEFAULT=cstat_tool.I_DEFAULT()
+#SELF_TRANSITION=cstat_tool.SELF_TRANSITION()
+#RestorationAlgorithm=cstat_tool.RestorationAlgorithm
 
 class _PlotManager:
     """Manage the graphical outputs using Gnuplot.py."""

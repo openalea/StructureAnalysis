@@ -90,6 +90,43 @@ def MergeVariable(obj, *args, **kargs):
 
     :Returns:
 
+        :func:`~openalea.stat_tool.cluster.IndexExtract`,
+        :func:`~openalea.stat_tool.cluster.LengthSelect`, 
+        :func:`~openalea.stat_tool.cluster.MovingAverage`, 
+        :func:`~openalea.stat_tool.cluster.RecurrenceTimeSequences`,
+        :func:`~openalea.stat_tool.cluster.RemoveRun`,
+        :func:`~openalea.stat_tool.cluster.Reverse`, 
+        :func:`~openalea.stat_tool.cluster.SegmentationExtract`, 
+        :func:`~openalea.stat_tool.cluster.VariableScaling`, 
+        :func:`~openalea.stat_tool.cluster.RemoveApicalInternodes` 
+    """
+    # remains to do test for vom, nonhomogeneous, sequences 
+    # (take care of markovian_sequences conversion). See sequence_analysis/test
+    
+    # check that all arguments have the same type
+    arg1 = args[0]
+    for arg in args:
+        error.CheckType( [arg], [type(arg1)])
+    
+    return obj.merge(list(args))
+    
+
+def MergeVariable(obj, *args, **kargs):    
+    """     
+    Merging of variables.
+
+    :Parameters:
+    
+        * vec1, vec2, ... (_Vectors),
+        * seq1, seq2, ... (_Sequences, _DiscreteSequences, _MarkovData, _SemiMarkovData). 
+
+    :Keywords:
+    
+      * RefSample (int): reference sample to define individual identifiers 
+        (the default: no reference sample).
+
+    :Returns:
+
         If the arguments are of type _Vectors and if the number of vectors is the same 
         for each sample, an object of type _Vectors is returned.
 
@@ -130,15 +167,17 @@ def MergeVariable(obj, *args, **kargs):
         :func:`~openalea.stat_tool.cluster.SegmentationExtract`, 
         :func:`~openalea.stat_tool.cluster.VariableScaling`, 
     """
-
-    RefSample = kargs.get("RefSample", -1)
+    #todo:manage the marjkovian_sequences conversion if input is made os Sequences
+    arg1 = args[0]
+    for arg in args:
+        error.CheckType( [arg], [type(arg1)])
     
-    return obj.merge_variable(list(args), RefSample)
+    RefSample = kargs.get("RefSample", -1)
+    error.CheckType([RefSample],  [int])
+    
+    return obj.merge_variable(list(args), RefSample)    
 
-
-
-################################################################################
-
+    
 def ExtractData(model):
     """Extraction of the 'data' part of an object of type 'model'.
 
@@ -179,7 +218,6 @@ def ExtractData(model):
     """
 
     return model.extract_data()
-
 
 
 def ExtractDistribution(model, *args):
@@ -290,188 +328,93 @@ def ExtractHistogram(data, *args, **kargs):
         >>> ExtractHistogram(tops, "Main")
         >>> ExtractHistogram(top, "NbAxillary", position)
       
-    
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Plot`,
         :func:`~openalea.stat_tool.data_transform.Fit`, 
         :func:`~openalea.stat_tool.simulate.Simulate`.
     """
-    
     return Extract(data, *args, **kargs)
 
-
+          
 def Extract(obj, *args, **kargs):
-    """ 
-    Common method to redirect extract function call
-    See`ExtractHistogram` or `ExtractDistribution`
     """
-
-
-    #arg 0 is misture : Wiegth, Component, Mixture
-    #arg0 is convol: Elementary and convolution
-    #arg0 is compound : compoubd
-    #arg0 is markov: recurrence, sojourn, ...
-     
-    func_map = { 
-        "Weight" : "extract_weight",
-        "Component"  : "extract_component",
-        "Mixture" : "extract_mixture",
-        "Elementary" : "extract_elementary",
-        "Convolution" : "extract_convolution",
-        "Sum" : "extract_sum",
-        "Compound" : "extract_compound",
-        "Value": "extract_value",
-        "Length":"extract_length"
-        }
-  
-    #todo add a enumerate fro m boost python here
-    INTER_EVENT = 0 
-    WITHIN_OBSERVATION_PERIOD =1
-    LENGTH_BIAS =2
-    BACKWARD_RECURRENCE_TIME =3
-    FORWARD_RECURRENCE_TIME =4
-    NB_EVENT =5
-    MIXTURE =6
-
-     
-    renewal_nb_event_map = { 
-            "InterEvent" : INTER_EVENT,
-            "LengthBias" : LENGTH_BIAS,
-            "Backward" : BACKWARD_RECURRENCE_TIME,
-            "Forward" : FORWARD_RECURRENCE_TIME,
-            "Mixture" : MIXTURE,
-            "Within": WITHIN_OBSERVATION_PERIOD,
-            "NbEvent": 1000,
-            
-            }
+    Common method to redirect extract function call
+    See`ExtractHistogram` or `ExtractDistribution`    
+    """
     
-    NbEvent = kargs.get("NbEvent", NB_EVENT)  
+    ret = None
+
+    if type(obj) in [_Mixture, _MixtureData]:
+        assert len(args)>=1
+        error.CheckType([args[0]], [str])
+        if args[0] == 'Mixture':
+            assert len(args) == 1
+            ret = obj.extract_mixture()
+        elif args[0] == 'Component':
+            assert len(args) == 2
+            error.CheckType([args[1]], [int])
+            ret = obj.extract_component(args[1])
+        elif args[0] == 'Weight':
+            assert len(args) == 1
+            ret = obj.extract_weight()
+        else:
+            raise ValueError("Excepted Component, Weight or Mixture")
+    elif type(obj) in [_Convolution, _ConvolutionData]:
+        assert len(args)>=1
+        error.CheckType([args[0]], [[str, int]])
+        if args[0] == 'Elementary' or isinstance(args[0], int):
+            if len(args) == 1:                
+                error.CheckType([args[0]], [int])
+                ret = obj.extract_elementary(args[0])
+            elif len(args)==2:
+                error.CheckType([args[0], args[1]], [str, int])
+                ret = obj.extract_elementary(args[1])
+        elif args[0] == 'Convolution':
+            error.CheckType([args[0]], [[str, int]])
+            ret = obj.extract_convolution()
+        else:
+            raise ValueError("Excepted \"Elementaty\", or index")
+        
+    elif type(obj) in [_Compound, _CompoundData]:
+        assert len(args) == 1
+        if args[0] == 'Sum':
+            ret = obj.extract_sum()
+        elif args[0] == 'Elementary':
+            ret = obj.extract_elementary()
+        elif args[0] == 'Compound':
+            ret = obj.extract_compound()
+        else:
+            raise ValueError("Excepted Sum, Elementary or Compound")
     
-    #todo renewal and time events case here 
-    
-    #top parameters
-    if len(args)==1 and isinstance(args[0], int):
-        position = args[0]
-        return obj.extract(position)
-    # vectors case (only 1 compulsary argument that is an int (variable)
-    elif (not isinstance(args[0], str)):
+    elif isinstance(obj, _Vectors):
         # _Vectors with one variable
+        
         try:
             nb_var = obj.nb_variable
             if (nb_var>1):
                 try:
                     variable = args[0]                    
                 except IndexError:
-                    raise TypeError("Extract with vectors object need 1 arguments (variable) if nb variable>1")
+                    raise TypeError("""Extract with vectors object need 1
+                     arguments (variable) if nb variable>1""")
             else:
                 variable = 1
                 
             return obj.extract(variable)
 
         except AttributeError:
-            raise TypeError("Expect an extract command as first argument." + \
-                                "Possible command are : %s"%(str(func_map.keys())))
+            raise ValueError("unknown issue while extracting vectors")
     else:
+        # related to Top, Renewal, Markov , ...
+        try:
+            from openalea.sequence_analysis.data_transform import Extract as newExtract
+            ret = newExtract(obj, *args, **kargs)
+        except:
+            pass
     
-        # Others cases
-        key = args[0]
-        
-        seq_map = {"Observation":0, 
-               "FirstOccurrence":1,
-               "Recurrence":2, 
-               "Sojourn":3,
-               "NbRun":6,
-               "NbOccurrence":7,
-               "Forward": -1}
-        
-        
-        if key in seq_map or key in renewal_nb_event_map:
-            f = getattr(obj, "extract")
-        else:
-            try:
-                func_name = func_map[key]
-                f = getattr(obj, func_name)
-            except KeyError:
+    return ret
             
-                raise AttributeError("Object has no attribute '%s'"%(key))
-
-
-        #case sequences with Value
-        if key=="Value":
-            if obj.nb_variable == 1:
-                variable=1
-            else:
-                variable = args[1]
-            return obj.extract_value(variable) 
-        if key=="Length":
-            return obj.extract_length()
-        
-        # case extract related to Renewal:
-        if key in renewal_nb_event_map.keys():
-            if key=="NbEvent":
-                NbEvent = kargs.get("NbEvent", NB_EVENT)  
-                time = args[1]
-                return obj.extract(NbEvent, time)
-            else:
-                time = -1
-                return obj.extract(renewal_nb_event_map[key], time)
-        
-        #case extract related to semimarkov, vom, hsom, ....
-
-        INITIAL_RUN= 4
-        FINAL_RUN= 5
-        LENGTH= 8
-        SEQUENCE_CUMUL= 9
-        SEQUENCE_MEAN= 10
-   
-        histogram_type = {
-                      "FinalRun":5,
-                      "InitialRun":4,
-                      } 
-    
-        if key in seq_map.keys():
-            if key == "Forward":
-                histogram_type = "FinalRun"
-                HistogramType = kargs.get("HistogramType", histogram_type)
-                HistogramType = histogram_type[HistogramType]
-                return f(seq_map[args[0]], args[1], HistogramType)
-                    
-            if len(args) == 2:
-                variable = 1
-                value = args[1]
-            elif len(args)==3: 
-                variable = args[1]
-                value = args[2]
-            else:
-                raise KeyError("expect only 1 or 2 arguments after the type")
-                
-            return f(seq_map[args[0]], variable, value)
-            
-    
-        
-        return f(*args[1:])
-
-
-################################################################################
-
-
-
-# Utility function
-
-def __get_mode__(kargs):
-    """ Return True if kargs has "keep" for the "mode" key """
-
-    mode = kargs.get("mode", None)
-    if(not mode): 
-        mode = kargs.get("Mode", True)
-    if(mode == "Keep" or mode == "keep") : keep = True
-    else : keep = False
-
-    return keep
-
-
-
 
 def SelectVariable(obj, variables, Mode="Keep"):
     """ 
@@ -527,17 +470,23 @@ def SelectVariable(obj, variables, Mode="Keep"):
         `SegmentationExtract`, 
         `VariableScaling`. 
     """
+    
+    error.CheckType([variables, Mode] , [[int, list], str])
+    #todo: check that Mode is in ["Keep", "Reject"]
 
     keep = bool(Mode == "Keep" or Mode == "keep")
     
-
     if isinstance(variables, int):
         variables = [variables]
-        
-    return obj.select_variable(variables, keep)
+       
+    ret = None
+    try:
+        ret = obj.select_variable(variables, keep)
+    except:
+        raise Exception("Could not run extract_data on the input variable. ")
     
-        
-
+    return ret
+    
 
 def SelectIndividual(obj, identifiers, Mode="Keep"):
     """    
@@ -599,15 +548,26 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
         `Symmetrize`.
         
     """
+    error.CheckType([identifiers, Mode] , [list, str])
 
+    #todo: CHECK THAT Mode is in ["Keep", "Reject"]
     keep = bool(Mode == "Keep")
 
-    ret = obj.select_individual(identifiers, keep)
+    ret = None
     try:
-        # if obj is a sequence, returns markovian_sequences
-        return ret.markovian_sequences()
+        ret = obj.select_individual(identifiers, keep)
     except:
-        return ret
+        raise Exception("Could not run extract_data on the input variable. ")
+    
+    if ret:
+        try:
+            # if obj is a sequence, returns markovian_sequences
+            return ret.markovian_sequences()
+        except AttributeError:
+            return ret
+    else:
+        raise Exception(error.STAT_TOOL_ERROR_MSG_RETURN_NONE)
+    
         
 
 def ValueSelect(obj, *args, **kargs):
@@ -675,53 +635,40 @@ def ValueSelect(obj, *args, **kargs):
         SegmentationExtract`,
         VariableScaling`. 
     """
-    Mode = kargs.get("Mode", "Keep")
-    keep = bool(Mode == "Keep" or Mode == "keep")
-
+    error.CheckArgumentsLength(args, 1, 3)
+    keep = error.ParseKargs(kargs, "Mode", "Keep", keep_dict)
+    
     # Test for vectors
     try:
         nb_variable = obj.nb_variable      
     except AttributeError:
         nb_variable = 0
 
-    # Parse args
-    l = len(args)
-    
-    if l == 3 :
-        variable, min, max = args
+        
+    if len(args) == 3 :
+        variable, umin, umax = args
 
-    elif l == 2:
+    elif len(args) == 2:
         # 2 cases (min_value, max_value) or (variable, value)
-        if(nb_variable):
-            variable, min = args
-            max = min
+        if nb_variable:
+            variable, umin = args
+            umax = umin
         else:
-           min, max = args
+            umin, umax = args
 
-    elif(l == 1):
+    elif len(args) == 1:
         value = args[0]
-        if(isinstance(value, tuple) and len(value) == 2):
-            min, max = value
+        error.CheckType([value], [[int, tuple, list]])
+        if isinstance(value, tuple) and len(value) == 2:
+            umin, umax = value
         else:
-            min = max = value
-
-    # Check variable
-    #if(nb_variable and variable > len(obj)):
-        #raise ValueError("Variable is greater than object size")
-
+            umin = umax = value
     
     if(nb_variable):    # Vectors, sequences
-        return obj.value_select(variable, min, max, keep)
+        return obj.value_select(variable, umin, umax, keep)
     else:
-        return obj.value_select(min, max, keep)
+        return obj.value_select(umin, umax, keep)
 
-
-
-
-################################################################################
-
-
-    
 
 def Shift(obj, *args):
     """ 
@@ -777,30 +724,25 @@ def Shift(obj, *args):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
         :func:`~openalea.stat_tool.data_transform.VariableScaling`.
     """
+    error.CheckArgumentsLength(args, 1, 3)
     
     try:
-        # Try vector.shift
-        nb_var = obj.nb_variable
-
-        if(nb_var > 1):
-
-            try:
-                variable = args[0] 
-                param = args[1]
-            except IndexError:
-                raise TypeError("Shift with vectors object need 2 arguments (variable, param)")
-            
-        else:
-            variable = 1 
-            param = args[0]
-
-        return obj.shift(variable, param)
-
-
+        nb_variable = obj.nb_variable      
     except AttributeError:
-        return obj.shift(*args)
-
-
+        nb_variable = 0
+        
+    if nb_variable == 1:
+        param = args[0]
+        ret = obj.shift(1, param)
+    elif nb_variable > 1:
+        variable = args[0]
+        param = args[1]
+        ret = obj.shift(variable, param)
+    else:
+        param = args[0]
+        ret = obj.shift(param)
+        
+    return ret
 
 
 def Fit(histo, dist):
@@ -814,6 +756,62 @@ def Fit(histo, dist):
     The difference between the information measure and the log-likelihood is the 
     Kullback-Leibler divergence from the observed distribution to the theoretical distribution. 
     It is also one-half the deviance of the theoretical distribution.
+
+    Assume that a sample of size n is generated by a given random variable. 
+    The statistic measures the random deviation between the observed frequencies fi and the 
+    theoretical frequencies npi:
+
+           
+    .. math::
+    
+        D^2 = \sum_{i=0}^k \frac{\left(f_i - n p_i\right)^2}{n p_i} 
+        \textrm{with}  \sum_{i=0}^k f_i = n
+                 
+
+    If each theoretical frequency npi is greater than a given threshold (between 1 and 5 
+    according to the authors), has a c2 with k - 1 degrees of freedom.
+       
+    :Parameters:
+    
+      * histo (histogram, mixture_data, convolution_data, compound_data),
+      * dist (distribution, mixture, convolution, compound). 
+
+    :Returns:
+    
+       Distribution
+
+    
+    :Examples:
+
+    .. doctest::
+        :options: +SKIP
+    
+        >>> Fit(histo, dist)
+        
+    .. todo:: documenation: get back the latex equations
+
+    """
+    return histo.fit(dist)
+
+
+    
+def Unnormalize(obj):
+    """Unnormalize
+        
+    :Parameters:
+        
+        * dist_matrix (distance_matrix).
+        
+     :Returns:
+    
+        An object of type distance_matrix is returned.
+    
+    :Examples:
+  
+        >>>  Unnormalize(dist_matrix)
+        
+    """
+    return obj.unnormalize()
 
     Assume that a sample of size n is generated by a given random variable. 
     The statistic measures the random deviation between the observed frequencies fi and the 
