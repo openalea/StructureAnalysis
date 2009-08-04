@@ -40,16 +40,16 @@ class CurvesWrap
 void class_curves()
 {
   class_< Curves >("_Curves", "Curves")
-    .def(init<int, int , optional<bool , bool> >())
-    .def(init<const Curves &, optional<char, int> >())
+  .def(init<int, int , optional<bool , bool> >())
+  .def(init<const Curves &, optional<char, int> >())
 
-    .def(init<Distribution> ())
-    .def(init<Histogram> ())
+  .def(init<Distribution> ())
+  .def(init<Histogram> ())
 
-    .def_readonly("nb_curve", &Curves::nb_curve)
-    .def_readonly("length", &Curves::nb_curve)
-    .def_readonly("offset", &Curves::nb_curve)
-    ;
+  .def_readonly("nb_curve", &Curves::nb_curve)
+  .def_readonly("length", &Curves::nb_curve)
+  .def_readonly("offset", &Curves::nb_curve)
+  ;
 
 
 

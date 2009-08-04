@@ -4,7 +4,8 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Thomas.Cokelaer@inria.fr
+ *        File author(s): Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+ *
  *
  *
  *        Distributed under the GPL 2.0 License.
@@ -38,14 +39,14 @@ using namespace stat_tool;
 
 void class_non_parametric_process() {
 
-        class_<Nonparametric_process >
-        ("_Nonparametric_process", "Non parametric process")
+   class_<Nonparametric_process >
+   ("_Nonparametric_process", "Non parametric process")
 
-        .def(init< optional< int, int, int> > ())
-        .def("get_nb_value", &Nonparametric_process::get_nb_value, "returns number of values")
-        .def("get_nb_state", &Nonparametric_process::get_nb_state, "returns number of states")
+   .def(init< optional< int, int, int> > ())
+   .def("get_nb_value", &Nonparametric_process::get_nb_value, "returns number of values")
+   .def("get_nb_state", &Nonparametric_process::get_nb_state, "returns number of states")
 
-       ;
+   ;
         /*
    Nonparametric_process(int inb_state , int inb_value , double **observation_probability);
    Nonparametric_process(int inb_state , Distribution **pobservation);

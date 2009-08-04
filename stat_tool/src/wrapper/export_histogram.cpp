@@ -8,6 +8,7 @@
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -23,10 +24,12 @@
 #include "export_base.h"
 
 #include "stat_tool/stat_tools.h"
+
 #include "stat_tool/distribution.h"
 #include "stat_tool/convolution.h"
 #include "stat_tool/mixture.h"
 #include "stat_tool/compound.h"
+
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -135,7 +138,7 @@ public:
   // Estimation functions
 
   static Mixture*
-  mixture_estimation_1(const Histogram& h, const Mixture& imixt,
+  mixture_estimation1(const Histogram& h, const Mixture& imixt,
       boost::python::list& estimate_tuple, int min_inf_bound, bool flag,
       bool component_flag)
   {
@@ -160,33 +163,32 @@ public:
   }
 
   static Mixture*
-  mixture_estimation_2(const Histogram& h, boost::python::list& ident_tuple,
+  mixture_estimation2(const Histogram& h, boost::python::list& ident_list,
       int min_inf_bound, bool flag, bool component_flag, int penalty)
   {
     Mixture* ret;
     ostringstream output;
     Format_error error;
 
-    int nb_component = boost::python::len(ident_tuple);
+    int nb_component = boost::python::len(ident_list);
     int ident[MIXTURE_NB_COMPONENT];
 
     for (int i = 0; i < nb_component; i++)
-      ident[i] = boost::python::extract<int>(ident_tuple[i]);
+      ident[i] = boost::python::extract<int>(ident_list[i]);
 
     ret = h.mixture_estimation(error, output, 1, nb_component, ident,
         min_inf_bound, flag, component_flag, penalty);
 
-    
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
-    cout << output.str()<<endl;
+    cout << output.str() << endl;
 
     return ret;
   }
 
   static Convolution*
-  convolution_estimation_1(const Histogram& h, const Parametric &known_dist,
+  convolution_estimation1(const Histogram& h, const Parametric &known_dist,
       const Parametric &unknown_dist, int estimator, int nb_iter,
       double weight, int penalty_type, int outside)
   {
@@ -204,7 +206,7 @@ public:
   }
 
   static Convolution*
-  convolution_estimation_2(const Histogram& h, const Parametric &known_dist,
+  convolution_estimation2(const Histogram& h, const Parametric &known_dist,
       int min_inf_bound, int estimator, int nb_iter, double weight,
       int penalty_type, int outside)
   {
@@ -222,7 +224,7 @@ public:
   }
 
   static Compound*
-  compound_estimation_1(const Histogram& h, const Parametric &sum_dist,
+  compound_estimation1(const Histogram& h, const Parametric &sum_dist,
       const Parametric &dist, char type, int estimator, int nb_iter,
       double weight, int penalty_type, int outside)
   {
@@ -240,7 +242,7 @@ public:
   }
 
   static Compound*
-  compound_estimation_2(const Histogram& h, const Parametric &known_dist,
+  compound_estimation2(const Histogram& h, const Parametric &known_dist,
       char type, int min_inf_bound, int estimator, int nb_iter, double weight,
       int penalty_type, int outside)
   {
@@ -325,7 +327,7 @@ public:
     for (int i = 0; i < nb_limit; i++)
       l[i] = extract<int> (limit[i]);
 
-    Distribution_data* ret = h.cluster(error, nb_limit+1, l.get());
+    Distribution_data* ret = h.cluster(error, nb_limit + 1, l.get());
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -377,7 +379,6 @@ public:
     return ret;
   }
 
-
 };
 
 
@@ -387,50 +388,8 @@ public:
 void class_histogram()
 {
 
-    enum_<stat_tool::wrap_util::UniqueInt<4, 1> >("VariableType")
-      .value("ORDINAL", ORDINAL)
-      .value("NUMERIC", NUMERIC)
-      .value("SYMBOLIC", SYMBOLIC)
-      .value("CIRCULAR", CIRCULAR)
-      .export_values()
-      ;
-
-    enum_<stat_tool::wrap_util::UniqueInt<6, 2> >("LikelihoodPenaltyType")
-      .value("AIC", AIC)
-      .value("AICc", AICc)
-      .value("BIC", BIC)
-      .value("BICc", BICc)
-      .value("ICL", ICL)
-      .value("ICLc", ICLc)
-      .export_values()
-      ;
-
-    enum_<stat_tool::wrap_util::UniqueInt<3, 3> >("SmoothingPenaltyType")
-      .value("FIRST_DIFFERENCE", FIRST_DIFFERENCE)
-      .value("SECOND_DIFFERENCE", SECOND_DIFFERENCE)
-      .value("ENTROPY", ENTROPY)
-      .export_values()
-      ;
-
-    enum_<stat_tool::wrap_util::UniqueInt<2, 4> >("OutsideType")
-      .value("ZERO", ZERO)
-      .value("CONTINUATION", CONTINUATION)
-      .export_values()
-      ;
-
-
-    enum_<stat_tool::wrap_util::UniqueInt<4, 5> >("EstimatorType")
-      .value("ZERO", ZERO)
-      .value("LIKELIHOOD", LIKELIHOOD)
-      .value("PENALIZED_LIKELIHOOD", PENALIZED_LIKELIHOOD)
-      .value("PARAMETRIC_REGULARIZATION", PARAMETRIC_REGULARIZATION)
-      .export_values()
-      ;
-
-
-
-    // _Histogram
-  class_<Histogram> ("_Histogram", no_init)
+   // _Histogram
+   class_<Histogram> ("_Histogram", no_init)
   .def(self == self)
   .def(self != self) .def(self_ns::str(self))
   .def("__len__", HistogramWrap::histo_get_nb_element)
@@ -454,22 +413,22 @@ void class_histogram()
   .def("parametric_estimation", HistogramWrap::parametric_estimation,
       return_value_policy<manage_new_object> (), "Parametric model estimation")
 
-  .def("mixture_estimation", HistogramWrap::mixture_estimation_1,
+  .def("mixture_estimation1", HistogramWrap::mixture_estimation1,
       return_value_policy<manage_new_object> (), "Mixture Estimation")
 
-  .def("mixture_estimation", HistogramWrap::mixture_estimation_2,
+  .def("mixture_estimation2", HistogramWrap::mixture_estimation2,
       return_value_policy<manage_new_object> (), "Mixture Estimation")
 
-  .def("convolution_estimation", HistogramWrap::convolution_estimation_1,
+  .def("convolution_estimation1", HistogramWrap::convolution_estimation1,
       return_value_policy<manage_new_object> (), "Convolution Estimation")
 
-  .def("convolution_estimation", HistogramWrap::convolution_estimation_2,
+  .def("convolution_estimation2", HistogramWrap::convolution_estimation2,
       return_value_policy<manage_new_object> (), "Convolution Estimation")
 
-  .def("compound_estimation1", HistogramWrap::compound_estimation_1,
+  .def("compound_estimation1", HistogramWrap::compound_estimation1,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
 
-  .def("compound_estimation2", HistogramWrap::compound_estimation_2,
+  .def("compound_estimation2", HistogramWrap::compound_estimation2,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
 
   // Select
@@ -633,7 +592,7 @@ void class_distribution_data()
     .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write, python::arg("filename"), "Write object to filename (spreadsheet format)")
     DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", DistributionDataWrap::survival_get_plotable, "Return a plotable object")
     .def("file_ascii_write", DistributionDataWrap::file_ascii_write, "Save histogram into a file")
-    
+
     DEF_RETURN_VALUE_NO_ARGS("extract_model", DistributionDataWrap::extract_model, "Return the 'model' part of the histogram")
 
     ;

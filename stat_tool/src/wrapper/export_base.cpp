@@ -8,6 +8,7 @@
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -23,6 +24,12 @@
 #include "wrapper_util.h"
 
 #include "stat_tool/stat_tools.h"
+
+// related to the enumerates
+#include "stat_tool/regression.h"
+#include "stat_tool/vectors.h"
+#include "stat_tool/distribution.h"
+#include "stat_tool/distance_matrix.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -54,16 +61,242 @@ void class_constant()
   scope().attr("MAX_DIFF_BOUND") = MAX_DIFF_BOUND;
   scope().attr("MAX_MEAN") = MAX_MEAN;
 
-  enum_<stat_tool::wrap_util::UniqueInt<6, 0> >("VariableTypeBis")
-    .value("INT_VALUE", INT_VALUE)
-    .value("REAL_VALUE", REAL_VALUE)
-    .value("STATE", STATE)
-    .value("OLD_INT_VALUE", OLD_INT_VALUE)
-    .value("NB_INTERNODE", NB_INTERNODE)
-    .value("AUXILIARY", AUXILIARY)
-    .export_values()
+  // constants in stat_tool
+
+  /*
+  MAX_INF_BOUND
+  MAX_DIFF_BOUND
+  MAX_MEAN
+  B_PROBABILITY
+  B_THRESHOLD
+  P_THRESHOLD
+  NB_THRESHOLD
+  SAMPLE_NB_VALUE_COEFF
+  INF_BOUND_MARGIN
+  SUP_BOUND_MARGIN
+  POISSON_RATIO
+  POISSON_RANGE
+  NB_VALUE_COEFF
+  MIN_RANGE
+  MAX_SURFACE
+  DIST_NB_ELEMENT
+  CHI2_FREQUENCY
+  MIN_T_VALUE
+  MARGINAL_MAX_VALUE
+  SKEWNESS_ROUNDNESS
+  NB_ERROR
+  LINE_NB_CHARACTER
+  ASCII_NB_VALUE
+  ASCII_SPACE
+  ASCII_ROUNDNESS
+  SPREADSHEET_ROUNDNESS
+  DISPLAY_NB_INDIVIDUAL
+  PLOT_NB_DISTRIBUTION
+  PLOT_NB_HISTOGRAM
+  PLOT_ROUNDNESS
+  PLOT_SHIFT
+  PLOT_MAX_SHIFT
+  TIC_THRESHOLD
+  PLOT_MASS_THRESHOLD
+  YSCALE = 1.4;
+  */
+
+  // constants in regression
+  //REGRESSION_NB_VECTOR
+  //NEIGHBORHOOD
+
+  // constants in mixture
+  /*
+    MIXTURE_NB_COMPONENT
+    MIXTURE_PARAMETER
+    MIN_WEIGHT_STEP
+    MAX_WEIGHT_STEP
+    MIXTURE_COEFF
+    MIXTURE_LIKELIHOOD_DIFF
+    MIXTURE_NB_ITER
+
+   */
+  //constant in reestimation
+  scope().attr("CUMUL_THRESHOLD") = CUMUL_THRESHOLD;
+  //BISECTION_RATIO_THRESHOLD
+  //BISECTION_NB_ITER
+
+  // constants in distance_matrix
+  /*
+  ASCII_NB_INDIVIDUAL
+  PLOT_YMARGIN
+  DISTANCE_ROUNDNESS
+  GLOBAL_NB_ITER
+  PARTITIONING_NB_ITER_1
+  PARTITIONING_NB_ITER_2
+  */
+
+  // constants in curves
+  /*
+  MAX_FREQUENCY
+  MAX_RANGE
+  PLOT_NB_CURVE
+  PLOT_MIN_FREQUENCY
+    */
+
+  //cosntants compound
+  /*COMPOUND_THRESHOLD = 0.99999;  // seuil sur la fonction de repartition
+  COMPOUND_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
+  COMPOUND_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  COMPOUND_NB_ITER = 10000;    // nombre maximum d'iterations EM
+  COMPOUND_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+  COMPOUND_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
+  COMPOUND_COEFF = 10;         // coefficient arrondi estimateur
+*/
+//constants convolution.h
+/*
+  CONVOLUTION_NB_DISTRIBUTION = 10;  // nombre maximum de lois elementaires
+  CONVOLUTION_THRESHOLD = 0.9999;  // seuil sur la fonction de repartition
+  CONVOLUTION_INIT_PROBABILITY = 0.001;  // seuil pour l'initialisation de la probabilite
+  CONVOLUTION_LIKELIHOOD_DIFF = 1.e-5;  // seuil pour stopper les iterations EM
+  CONVOLUTION_NB_ITER = 10000;  // nombre maximum d'iterations EM
+  CONVOLUTION_DIFFERENCE_WEIGHT = 0.5;  // poids par defaut de la penalisation
+  CONVOLUTION_ENTROPY_WEIGHT = 0.1;  // poids par defaut de la penalisation (cas de l'entropie)
+  CONVOLUTION_COEFF = 10;      // coefficient arrondi estimateur
+*/
+  // constants in vector
+  scope().attr("VECTOR_NB_VARIABLE") = VECTOR_NB_VARIABLE;
+  scope().attr("DISTANCE_NB_VECTOR") = DISTANCE_NB_VECTOR;
+  scope().attr("CONTINGENCY_NB_VALUE") = CONTINGENCY_NB_VALUE;
+  scope().attr("DISPLAY_CONTINGENCY_NB_VALUE") = DISPLAY_CONTINGENCY_NB_VALUE;
+  scope().attr("VARIANCE_ANALYSIS_NB_VALUE") = VARIANCE_ANALYSIS_NB_VALUE;
+  scope().attr("DISPLAY_CONDITIONAL_NB_VALUE") = DISPLAY_CONDITIONAL_NB_VALUE;
+  scope().attr("PLOT_NB_VALUE") = PLOT_NB_VALUE;
+  scope().attr("PLOT_RANGE_RATIO") = PLOT_RANGE_RATIO;
+  scope().attr("NB_SYMBOL") = NB_SYMBOL;
+
+
+  // distance_matrix
+  enum_<stat_tool::wrap_util::UniqueInt<3, 1> > ("CriterionType")
+  .value("NEAREST_NEIGHBOR", NEAREST_NEIGHBOR)
+  .value("FARTHEST_NEIGHBOR",FARTHEST_NEIGHBOR)
+  .value("AVERAGING", AVERAGING)
+  .export_values();
+
+
+  // from vectors.h
+  enum_<stat_tool::wrap_util::UniqueInt<2, 2> >("DistanceType")
+  .value("ABSOLUTE_VALUE", ABSOLUTE_VALUE)
+  .value("QUADRATIC", QUADRATIC)
+  .export_values()
   ;
 
+  // from stat_tools.h
+  enum_<stat_tool::wrap_util::UniqueInt<4, 3> > ("FittingType")
+  .value("STANDARD_NORMAL", STANDARD_NORMAL)
+  .value("CHI2" ,CHI2)
+  .value("FISHER", FISHER)
+  .value("STUDENT", STUDENT)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<5, 4> >("RoundType")
+  .value("FLOOR", FLOOR)
+  .value("ROUND", ROUND)
+  .value("CEIL", CEIL)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<6, 5> >("DistributionIdentifierType")
+  .value("NON_PARAMETRIC", NONPARAMETRIC)
+  .value("BINOMIAL",BINOMIAL)
+  .value("POISSON",POISSON)
+  .value("NEGATIVE_BINOMIAL",NEGATIVE_BINOMIAL)
+  .value("UNIFORM",UNIFORM)
+  .value("MULTINOMIAL", MULTINOMIAL)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<4, 6> >("VariableType")
+  .value("SYMBOLIC", SYMBOLIC)
+  .value("ORDINAL", ORDINAL)
+  .value("NUMERIC", NUMERIC)
+  .value("CIRCULAR", CIRCULAR)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<3, 7> >("PearsonType")
+  .value("PEARSON", PEARSON)
+  .value("SPEARMAN", SPEARMAN)
+  .value("KENDALL", KENDALL)
+  .value("SPEARMAN2", SPEARMAN2)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<3, 8> >("SmoothingPenaltyType")
+  .value("FIRST_DIFFERENCE", FIRST_DIFFERENCE)
+  .value("SECOND_DIFFERENCE", SECOND_DIFFERENCE)
+  .value("ENTROPY", ENTROPY)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<4, 9> >("EstimatorType")
+  .value("ZERO", ZERO)
+  .value("LIKELIHOOD", LIKELIHOOD)
+  .value("PENALIZED_LIKELIHOOD", PENALIZED_LIKELIHOOD)
+  .value("PARAMETRIC_REGULARIZATION", PARAMETRIC_REGULARIZATION)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<2, 10> >("OutsideType")
+  .value("ZERO", ZERO)
+  .value("CONTINUATION", CONTINUATION)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("TOBEDONEType")
+  .value("PARTIAL_LIKELIHOOD", PARTIAL_LIKELIHOOD)
+  .value("COMPLETE_LIKELIHOOD", COMPLETE_LIKELIHOOD)
+  .value("KAPLAN_MEIER", KAPLAN_MEIER)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<3, 12> >("ClusterType")
+  .value("COMPUTED", COMPUTED)
+  .value("ESTIMATED", ESTIMATED)
+  .value("ONE_STEP_LATE", ONE_STEP_LATE)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<6, 13> >("LikelihoodPenaltyType")
+  .value("AIC", AIC)
+  .value("AICc", AICc)
+  .value("BIC", BIC)
+  .value("BICc", BICc)
+  .value("ICL", ICL)
+  .value("ICLc", ICLc)
+  .export_values()
+  ;
+
+  enum_<stat_tool::wrap_util::UniqueInt<3, 13> > ("AlgoType")
+  .value("AGGLOMERATIVE", AGGLOMERATIVE)
+  .value("DIVISIVE", DIVISIVE)
+  .value("ORDERING", ORDERING)
+  .export_values();
+
+  enum_<stat_tool::wrap_util::UniqueInt<6, 14> >("VariableTypeBis")
+  .value("INT_VALUE", INT_VALUE)
+  .value("REAL_VALUE", REAL_VALUE)
+  .value("STATE", STATE)
+  .value("OLD_INT_VALUE", OLD_INT_VALUE)
+  .value("NB_INTERNODE", NB_INTERNODE)
+  .value("AUXILIARY", AUXILIARY)
+  .export_values()
+  ;
+
+  // regression
+  enum_<stat_tool::wrap_util::UniqueInt<4, 15> >("RegressionType")
+  .value("STAT_LINEAR", STAT_LINEAR)
+  .value("STAT_LOGISTIC", STAT_LOGISTIC)
+  .value("STAT_MONOMOLECULAR", STAT_MONOMOLECULAR)
+  .value("STAT_NONPARAMETRIC", STAT_NONPARAMETRIC)
+  .export_values()
+  ;
 
 }
 

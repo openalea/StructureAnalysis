@@ -8,6 +8,7 @@
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -45,101 +46,112 @@ class ConvolutionWrap
 
 public:
 
-  static boost::shared_ptr<Convolution> convolution_from_file(char* filename)
+  static boost::shared_ptr<Convolution>
+  convolution_from_file(char* filename)
   {
     Format_error error;
     Convolution *conv = NULL;
     conv = convolution_ascii_read(error, filename);
 
-    if(!conv)
-    {
-	  stat_tool::wrap_util::throw_error(error);
-    }
+    if (!conv)
+      {
+        stat_tool::wrap_util::throw_error(error);
+      }
 
     return boost::shared_ptr<Convolution>(conv);
   }
 
-  static boost::shared_ptr<Convolution> convolution_from_dists(boost::python::list& dists)
+  static boost::shared_ptr<Convolution>
+  convolution_from_dists(boost::python::list& dists)
   {
     Format_error error;
     Convolution *conv = NULL;
     int nb_dist = 0;
 
     nb_dist = boost::python::len(dists);
-    if(nb_dist == 0){
-      stat_tool::wrap_util::throw_error("Input list cannot be empty");
-    }
+    if (nb_dist == 0)
+      {
+        stat_tool::wrap_util::throw_error("Input list cannot be empty");
+      }
 
-    stat_tool::wrap_util::auto_ptr_array<const Parametric *>
-      dist(new const Parametric*[nb_dist]);
+    stat_tool::wrap_util::auto_ptr_array<const Parametric *> dist(
+        new const Parametric*[nb_dist]);
 
-    for(int i=0; i<nb_dist; i++){
-    	dist[i] = boost::python::extract< Parametric *>(dists[i]);
-    }
+    int i = 0;
+    for (i = 0; i < nb_dist; i++)
+      {
+
+        boost::python::extract<Parametric*> get_param(dists[i]);
+        if (get_param.check())
+          {
+            dist[i] = new Parametric(*get_param());
+          }
+        else
+          {
+            dist[i] = new Parametric(*boost::python::extract<Distribution*>(
+                dists[i])());
+          }
+      }
 
     conv = convolution_building(error, nb_dist, dist.get());
 
-    if(!conv)
-    	stat_tool::wrap_util::throw_error(error);
+    if (!conv)
+      stat_tool::wrap_util::throw_error(error);
 
+    for (i = 0; i < nb_dist; i++)
+      {
+        delete dist[i];
+      }
 
     return boost::shared_ptr<Convolution>(conv);
   }
 
+  WRAP_METHOD1(Convolution, simulation, Convolution_data, int); // simulate
+  WRAP_METHOD1(Convolution, extract, Parametric_model, int); //extract_elementary
+  WRAP_METHOD0(Convolution, extract_data, Convolution_data); //extract_data
+  WRAP_METHOD_FILE_ASCII_WRITE( Convolution);
 
-
- WRAP_METHOD1(Convolution, simulation, Convolution_data, int);  // simulate
- WRAP_METHOD1(Convolution, extract, Parametric_model, int); 	//extract_elementary
- WRAP_METHOD0(Convolution, extract_data, Convolution_data);		//extract_data
- WRAP_METHOD_FILE_ASCII_WRITE(Convolution);
-
-
-
-  static Parametric_model* extract_elementary(const Convolution& input, int index) 
+  static Parametric_model*
+  extract_elementary(const Convolution& input, int index)
   {
     Format_error error;
     Parametric_model* ret = NULL;
-    
-    ret = input.extract(error, index); 
-    if(!ret) 
-        stat_tool::wrap_util::throw_error(error);
-    
+    ret = input.extract(error, index);
+    if (!ret)
+      stat_tool::wrap_util::throw_error(error);
     return ret;
   }
-  
-  static Parametric_model* extract_convolution(const Convolution& convolution_input)
+
+  static Parametric_model*
+  extract_convolution(const Convolution& convolution_input)
   {
     Parametric_model* ret;
     Convolution_data* convolution_data = NULL;
-    
     convolution_data = convolution_input.get_convolution_data();
-    
-    //ret = new Parametric_model(convolution_input,
-	//		       (convolution_data ? convolution_data->get_convolution() : NULL));
-			       
-    ret = new Parametric_model(*((Distribution*)(&convolution_input)), 
-            (Histogram*)convolution_data);			       
-    		       
+    ret = new Parametric_model(*((Distribution*) (&convolution_input)),
+        (Histogram*) convolution_data);
     return ret;
   }
 
-  static MultiPlotSet* survival_get_plotable(const Convolution& p)
+  static MultiPlotSet*
+  survival_get_plotable(const Convolution& p)
   {
     Format_error error;
     MultiPlotSet* ret = p.survival_get_plotable(error);
-    if (!ret) ERROR;
+    if (!ret)
+      ERROR;
     return ret;
   }
- 
-  static MultiPlotSet* get_plotable(const Convolution& p)
+
+  static MultiPlotSet*
+  get_plotable(const Convolution& p)
   {
     Format_error error;
     MultiPlotSet* ret = p.get_plotable();
-    if (!ret) ERROR;
+    if (!ret)
+      ERROR;
     return ret;
   }
-
-
 
 };
 
@@ -159,11 +171,11 @@ void class_convolution()
     .def(self_ns::str(self))
     .def("nb_distribution", &Convolution::get_nb_distribution, "Return the number of components")
 
-	DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate elements")
-	// check extract and extract_data 
+    DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate elements")
+    // check extract and extract_data
     DEF_RETURN_VALUE("extract", WRAP::extract, ARGS("index"), "Extract a particular element. First index is 1")
     DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary, ARGS("index"), "Extract a particular element. First index is 1")
-	DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::extract_convolution, "Return a _ParametricModel object")
+    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::extract_convolution, "Return a _ParametricModel object")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _ConvolutionData")
     DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Convolution into a file")
     DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")

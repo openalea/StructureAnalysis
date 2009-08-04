@@ -1,22 +1,23 @@
 /*------------------------------------------------------------------------------
- *                                                                              
+ *
  *        VPlants.Stat_Tool : VPlants Statistics module
- *                                                                              
- *        Copyright 2006-2007 INRIA - CIRAD - INRA                      
- *                                                                              
+ *
+ *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>         
- *                                                                              
- *        Distributed under the GPL 2.0 License.                               
- *        See accompanying file LICENSE.txt or copy at                          
+ *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+ *
+ *        Distributed under the GPL 2.0 License.
+ *        See accompanying file LICENSE.txt or copy at
  *           http://www.gnu.org/licenses/gpl-2.0.txt
- *                                                                              
- *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
- *       
+ *
+ *        OpenAlea WebSite : http://openalea.gforge.inria.fr
+ *
  *        $Id: export_base.cpp 5432 2008-08-25 16:51:24Z jbdurand $
- *                                                                       
+ *
  *-----------------------------------------------------------------------------*/
 
 #include "export_markovian.h"
@@ -46,7 +47,6 @@ void class_markovian()
       .value("FORWARD_BACKWARD_SAMPLING", FORWARD_BACKWARD_SAMPLING)
       .value("GIBBS_SAMPLING", GIBBS_SAMPLING)
       .value("FORWARD_DYNAMIC_PROGRAMMING", FORWARD_DYNAMIC_PROGRAMMING)
-      
       .export_values()
     ;
 

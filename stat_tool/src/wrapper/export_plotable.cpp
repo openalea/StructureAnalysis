@@ -1,22 +1,23 @@
 /*------------------------------------------------------------------------------
- *                                                                              
+ *
  *        VPlants.Stat_Tool : VPlants Statistics module
- *                                                                              
- *        Copyright 2006-2007 INRIA - CIRAD - INRA                      
- *                                                                              
+ *
+ *        Copyright 2006-2007 INRIA - CIRAD - INRA
+ *
  *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
- *                        Christophe Pradal <christophe.prada@cirad.fr>         
- *                                                                              
- *        Distributed under the GPL 2.0 License.                               
- *        See accompanying file LICENSE.txt or copy at                          
+ *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+ *
+ *        Distributed under the GPL 2.0 License.
+ *        See accompanying file LICENSE.txt or copy at
  *           http://www.gnu.org/licenses/gpl-2.0.txt
- *                                                                              
- *        OpenAlea WebSite : http://openalea.gforge.inria.fr                    
- *       
+ *
+ *        OpenAlea WebSite : http://openalea.gforge.inria.fr
+ *
  *        $Id$
- *                                                                       
+ *
  *-----------------------------------------------------------------------------*/
 
 #include "export_plotable.h"
@@ -40,10 +41,10 @@ void class_plotable()
     .def_readwrite("y", &PlotPoint::second )
     .def_readwrite("min", &PlotPoint::first )
     .def_readwrite("max", &PlotPoint::second );
-  
+
 
   class_< SinglePlot >("SinglePlot")
-    
+
     .def("add_point", (void (SinglePlot::*)(const PlotPoint&)) &SinglePlot::add_point)
     .def("add_point", (void (SinglePlot::*)(float, float)) &SinglePlot::add_point)
     .def("add_text", (void (SinglePlot::*)(float, float, const string&)) &SinglePlot::add_text)
@@ -52,7 +53,7 @@ void class_plotable()
     .def_readwrite("color", &SinglePlot::color)
 
     // surely the label needs to be refactored: it clashes with the data Point
-    // since it is only used by regression.cpp by now, we'll keep it as it is 
+    // since it is only used by regression.cpp by now, we'll keep it as it is
     // for the time being.
     .def_readwrite("label", &SinglePlot::label)
     .def("get_label_size", &SinglePlot::get_size, "returns number of labels")

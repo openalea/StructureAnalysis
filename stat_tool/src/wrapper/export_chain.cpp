@@ -39,7 +39,7 @@ class ChainWrap
 
 void class_chain()
 {
-	class_< Chain >("_Chain", "Chain")
+    class_< Chain >("_Chain", "Chain")
     .def(init<char, int , bool>())
     .def(init<char, int, int , bool>())
     .def(init< optional<char, int, bool> >())

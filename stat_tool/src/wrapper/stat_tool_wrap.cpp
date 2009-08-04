@@ -8,6 +8,7 @@
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -61,21 +62,22 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_constant();
   class_format_error();
   class_stat_interface();
-  
-  class_vectors();
-  class_vectordistance();
 
   class_regression_kernel();
   class_regression();
 
+  class_vectors();
+  class_vectordistance();
+
+
   class_distance_matrix();
-  class_clusters();
+  class_cluster();
   class_dendrogram();
 
   class_distribution();
   class_parametric();
   class_parametric_model();
-  
+
   // depends on parametric
   class_forward();
 

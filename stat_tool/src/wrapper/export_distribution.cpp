@@ -8,6 +8,7 @@
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -42,57 +43,62 @@ using namespace boost;
 
 
 
-class DistributionWrap
-{
+class DistributionWrap {
 
 public:
 
-  static MultiPlotSet* get_plotable_dists(const Distribution& p,
-                 const boost::python::list& dist_list)
-   {
-     Format_error error;
-     int nb_dist = boost::python::len(dist_list);
-     stat_tool::wrap_util::auto_ptr_array<const Distribution *>
-       dists(new const Distribution*[nb_dist]);
-
-     for (int i = 0; i < nb_dist; i++)
-       dists[i] = extract<const Distribution*>(dist_list[i]);
-
-     const Distribution** d = dists.get();
-
-
-     MultiPlotSet* ret = p.get_plotable_distributions(error, nb_dist, d);
-     if(!ret)
-       stat_tool::wrap_util::throw_error(error);
-
-     return ret;
-   }
-
-  static MultiPlotSet* survival_get_plotable(const Distribution& p)
+  static MultiPlotSet*
+  get_plotable_dists(const Distribution& p,
+      const boost::python::list& dist_list)
   {
-      Format_error error;
-      MultiPlotSet* ret = p.survival_get_plotable(error);
-      if (!ret) ERROR;
-      return ret;
-  }
-  
-  static MultiPlotSet* get_plotable(const Distribution& p)
-  {
-      MultiPlotSet* ret = p.get_plotable();
-      return ret;
+    cout << "multiplot get_plotable_dists" << endl;
+    Format_error error;
+    int nb_dist = boost::python::len(dist_list);
+    stat_tool::wrap_util::auto_ptr_array<const Distribution *> dists(
+        new const Distribution*[nb_dist]);
+
+    for (int i = 0; i < nb_dist; i++)
+      dists[i] = extract<const Distribution*> (dist_list[i]);
+
+    const Distribution** d = dists.get();
+
+    MultiPlotSet* ret = p.get_plotable_distributions(error, nb_dist, d);
+    if (!ret)
+      stat_tool::wrap_util::throw_error(error);
+//    for (int i = 0; i < nb_dist; i++)
+ //       delete dists[i];
+
+    return ret;
   }
 
-  // survival_ascii_write wrapping
-  WRAP_METHOD_SURVIVAL_ASCII_WRITE(Distribution);
+  static MultiPlotSet*
+  survival_get_plotable(const Distribution& p)
+  {
+    Format_error error;
+    MultiPlotSet* ret = p.survival_get_plotable(error);
+    if (!ret)
+      ERROR;
+    return ret;
+  }
 
-  //survival_spreadsheet_write wrapping
-  WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE(Distribution);
+  static MultiPlotSet*
+  get_plotable(const Distribution& p)
+  {
+    MultiPlotSet* ret = p.get_plotable();
+    return ret;
+  }
 
-  // survival_plot_write wrapping
-  WRAP_METHOD_SURVIVAL_PLOT_WRITE(Distribution);
+    // survival_ascii_write wrapping
+    WRAP_METHOD_SURVIVAL_ASCII_WRITE( Distribution);
 
-  //truncate
-  WRAP_METHOD1(Distribution, truncate, Parametric_model, int);
+    //survival_spreadsheet_write wrapping
+    WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE( Distribution);
+
+    // survival_plot_write wrapping
+    WRAP_METHOD_SURVIVAL_PLOT_WRITE( Distribution);
+
+    //truncate
+    WRAP_METHOD1(Distribution, truncate, Parametric_model, int);
 
 };
 
@@ -106,10 +112,10 @@ void class_distribution()
 #define WRAP DistributionWrap
   // Distribution base class
   class_< Distribution>("_Distribution")
-	.def(init< optional< int > > ())
-	.def(init<const Histogram&>())
-	.def(init<const Distribution&, double>())
-	.def(init<const Distribution&, optional< char, int > >())
+    .def(init< optional< int > > ())
+    .def(init<const Histogram&>())
+    .def(init<const Distribution&, double>())
+    .def(init<const Distribution&, optional< char, int > >())
 
     .def(self_ns::str(self)) // __str__
     .def( self == self )
@@ -346,6 +352,8 @@ public:
   static MultiPlotSet* get_plotable(const Parametric_model& p,
 				const boost::python::list& dist_list)
   {
+
+    cout << "get_plotable" << endl;
     Format_error error;
     int nb_dist = boost::python::len(dist_list);
     stat_tool::wrap_util::auto_ptr_array<const Distribution *>
@@ -359,6 +367,9 @@ public:
     MultiPlotSet* ret = p.get_plotable_distributions(error, nb_dist, d);
     if(!ret)
       stat_tool::wrap_util::throw_error(error);
+
+    //for (int i = 0; i < nb_dist; i++)
+    //    delete dists[i];
 
     return ret;
   }
@@ -380,32 +391,21 @@ void class_parametric_model()
 #define WRAP ParametricModelWrap
 
 
-  enum_<stat_tool::wrap_util::UniqueInt<5, 0> >("DistributionIdentifier")
-    .value("NON_PARAMETRIC", NONPARAMETRIC)
-    .value("BINOMIAL",BINOMIAL)
-    .value("POISSON",POISSON)
-    .value("NEGATIVE_BINOMIAL",NEGATIVE_BINOMIAL)
-    .value("UNIFORM",UNIFORM)
-    .value("MULTINOMIAL", MULTINOMIAL)
-    .export_values()
-    ;
-
-
   // _Parametric Model
   class_< Parametric_model, bases< Parametric, STAT_interface > >
-    ("_ParametricModel", "Parametric model", init <const Histogram& >())
+  ("_ParametricModel", "Parametric model", init <const Histogram& >())
 
-    .def(init< int, int, int, double, double, optional< double > >())
-    // this constructor clashes with the previous one and fail to pass tests.
-    //.def(init< int, optional <int, int, int, double, double > >())
-    .def(init <const Distribution& >())
-    .def(init <const Parametric& >())
-    .def(init <const Parametric_model& ,optional< bool> >())
+  .def(init< int, int, int, double, double, optional< double > >())
+  // this constructor clashes with the previous one and fail to pass tests.
+  //.def(init< int, optional <int, int, int, double, double > >())
+  .def(init <const Distribution& >())
+  .def(init <const Parametric& >())
+  .def(init <const Parametric_model& ,optional< bool> >())
 
-    .def("__init__", make_constructor(ParametricModelWrap::parametric_model_from_file))
-    .def(self_ns::str(self)) // __str__
+  .def("__init__", make_constructor(ParametricModelWrap::parametric_model_from_file))
+  .def(self_ns::str(self)) // __str__
 
-    /*.def("get_histogram", &Parametric_model::get_histogram,
+  /*.def("get_histogram", &Parametric_model::get_histogram,
     	return_value_policy< manage_new_object >(),
     	"returns histogram")
 */

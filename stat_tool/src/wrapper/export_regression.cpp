@@ -8,7 +8,7 @@
  *                        Jean-Baptiste Dur&& <Jean-Baptiste.Dur&&@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
- *
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
  *           http://www.gnu.org/licenses/gpl-2.0.txt
@@ -100,8 +100,7 @@ public:
   {
     double ret;
     ostringstream error_message;
-    error_message << "index not in valid range" << endl;\
-
+    error_message << "index not in valid range" << endl;
     CHECK(index, 0, input.get_nb_vector());
     ret = input.get_residual(index);
     return ret;

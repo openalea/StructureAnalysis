@@ -169,9 +169,3 @@ static std::string survival_ascii_write(const INPUT_CLASS& p) \
 
 
 
-// def("__len__", &Class::method, "docstring")
-//#define DEF_LEN(CLASS, FUNCTION_NAME) \
- //   .def("__len__", &CLASS::FUNCTION_NAME, "Return the size of the Class instance")
-
-//#define DEF_STR() .def(self_ns::str(self)) // __str__
-

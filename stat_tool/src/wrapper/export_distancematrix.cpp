@@ -8,6 +8,7 @@
  *                        Jean-Baptiste Durand <Jean-Baptiste.Durand@imag.fr>
  *                        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
  *                        Christophe Pradal <christophe.prada@cirad.fr>
+ *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
  *        See accompanying file LICENSE.txt or copy at
@@ -23,7 +24,6 @@
 #include "export_base.h"
 
 #include "stat_tool/stat_tools.h"
-
 #include "stat_tool/distance_matrix.h"
 
 #include <boost/python.hpp>
@@ -59,38 +59,23 @@ public:
     int nb_proto = len(prototype);
 
     ostringstream error_message;
-    try
+
+    if (nb_proto != 0)
       {
-        if (algorithm != 1 && algorithm != 2)
-          {
-            error_message
-                << "Incorrect value for the algorithm argument (must be 1 or 2)"
-                << endl;
-            PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-            berror = true;
-          }
+        stat_tool::wrap_util::auto_ptr_array<int> protos(new int[nb_proto]);
+        for (int i = 0; i < nb_proto; i++)
+          protos[i] = extract<int> (prototype[i]);
+        ret = dm.partitioning(error, output, nb_cluster, protos.get(),
+            initialization, algorithm);
       }
-    catch (...)
+    else
       {
-        berror = true;
+        int *protos = 0;
+        ret = dm.partitioning(error, output, nb_cluster, protos,
+            initialization, algorithm);
       }
 
-    if (nb_proto !=0)
-    {
-      stat_tool::wrap_util::auto_ptr_array<int> protos(new int[nb_proto]);
-      for (int i = 0; i < nb_proto; i++)
-        protos[i] = extract<int> (prototype[i]);
-      ret = dm.partitioning(error, output, nb_cluster, protos.get(),
-        initialization, algorithm);
-    }
-    else 
-    {
-      int *protos = 0;  
-      ret = dm.partitioning(error, output, nb_cluster, protos,
-          initialization, algorithm);
-    }
-
-    cerr << output.str()<<endl;
+    cout << output.str() << endl;
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
@@ -125,7 +110,9 @@ public:
             cluster_pattern[i] = new int[nb_item];
 
             for (int j = 0; j < cluster_nb_pattern[i]; j++)
-              cluster_pattern[i][j] = extract<int> ((*l)[j]);
+              {
+                cluster_pattern[i][j] = extract<int> ((*l)[j]);
+              }
           }
       }
     catch (...)
@@ -156,14 +143,14 @@ public:
 
   static std::string
   hierarchical_clustering(const Distance_matrix& dm, int algorithm,
-      int criterion, const string &path, char format)
+      int criterion, const char*path, char format)
   {
     Format_error error;
     std::stringstream output;
     bool ret;
 
-    ret = dm.hierarchical_clustering(error, output, algorithm, criterion,
-        path.c_str(), format);
+    ret = dm.hierarchical_clustering(error, output, algorithm, criterion, path,
+        format);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -223,7 +210,7 @@ public:
     int column_max = input.get_nb_column();
 
     ostringstream error_message;
-    error_message << "index not in valid range" << endl;\
+    error_message << "index not in valid range" << endl;
 
     CHECK(i, 0, row_max);
     CHECK(j, 0, column_max);
@@ -241,15 +228,16 @@ public:
     int column_max = input.get_nb_column();
 
     ostringstream error_message;
-    error_message << "index not in valid range" << "i must be less than "<< row_max<< " and j less than " << column_max <<endl;
- 
-    if (i < row_max && j < column_max && i>=0 && j>=0)
-        ret = input.get_distance(i, j);
+    error_message << "index not in valid range" << "i must be less than "
+        << row_max << " and j less than " << column_max << endl;
+
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+      ret = input.get_distance(i, j);
     else
-    {   
-        cout << error_message.str()<<endl;
+      {
+        cout << error_message.str() << endl;
         ret = -1;
-    }
+      }
     return ret;
   }
 
@@ -261,17 +249,7 @@ public:
 void
 class_distance_matrix()
 {
-  enum_<stat_tool::wrap_util::UniqueInt<3, 0> > ("AlgoType")
-    .value("AGGLOMERATIVE", AGGLOMERATIVE)
-    .value("DIVISIVE", DIVISIVE)
-    .value("ORDERING", ORDERING)
-    .export_values();
 
-  enum_<stat_tool::wrap_util::UniqueInt<2, 0> > ("CriterionType")
-    .value("NEAREST_NEIGHBOR", NEAREST_NEIGHBOR)
-    .value("FARTHEST_NEIGHBOR",FARTHEST_NEIGHBOR)
-    .value("AVERAGING", AVERAGING)
-    .export_values();
 
   class_< Distance_matrix, bases< STAT_interface> >
   ("_DistanceMatrix", "Distance Matrix", init< const Distance_matrix&>())
@@ -331,14 +309,84 @@ class_distance_matrix()
 #undef CLASS
 
 void
-class_clusters()
+class_cluster()
 {
-  class_<Clusters, bases<Distance_matrix> > ("_Clusters", "Cluster");
+  class_<Clusters, bases<Distance_matrix> > ("_Cluster", "Cluster", no_init)
+  .def(init <const Distance_matrix &, int>())
+
+  .def(self_ns::str(self)) // __str__
+
+  ;
+
+  /*
+  Clusters();
+     Clusters(const Distance_matrix &dist_matrix , int inb_cluster ,
+              int *icluster_nb_pattern , int **cluster_pattern);
+     Clusters(const Clusters &clusters):Distance_matrix(clusters) { copy(clusters); }
+
+
+     std::ostream& line_write(std::ostream &os) const;
+
+     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
+     bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
+     bool spreadsheet_write(Format_error &error , const char *path) const;
+     bool plot_write(Format_error &error , const char *prefix ,
+                     const char *title = 0) const;
+     MultiPlotSet* get_plotable() const;
+
+
+     void cluster_nb_pattern_computation();
+     void pattern_distance_computation();
+     void cluster_distance_computation_1();
+     void cluster_distance_computation_2();
+
+     // acces membres de la classe
+
+     Distance_matrix* get_distance_matrix() { return distance_matrix; }
+     int get_nb_pattern() const { return nb_pattern; }
+     int get_nb_cluster() const { return nb_cluster; }
+     int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
+     int get_assignment(int pattern) const { return assignment[pattern]; }
+     double get_pattern_distance(int pattern , int cluster) const
+     { return pattern_distance[pattern][cluster]; }
+     int get_pattern_length(int pattern , int cluster) const
+     { return pattern_length[pattern][cluster]; }
+     */
 }
 
 void
 class_dendrogram()
 {
-  class_<Dendrogram, bases<STAT_interface> > ("_Dendrogram", "Dendrogram");
+  class_<Dendrogram, bases<STAT_interface> > ("_Dendrogram", "Dendrogram", no_init)
+  .def(init <const Distance_matrix &, int>())
+
+  .def(self_ns::str(self)) // __str__
+;
 }
 
+/*
+Dendrogram();
+   Dendrogram(const Dendrogram &dendrogram) { copy(dendrogram); }
+
+   std::ostream& line_write(std::ostream &os) const;
+
+   std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
+   bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
+   bool spreadsheet_write(Format_error &error , const char *path) const;
+   bool plot_write(Format_error &error , const char *prefix ,
+                   const char *title = 0) const { return false; }
+   // acces membres de la classe
+
+   Distance_matrix* get_distance_matrix() { return distance_matrix; }
+   int get_scale() const { return scale; }
+   int get_nb_cluster() const { return nb_cluster; }
+   int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
+   int get_cluster_pattern(int cluster , int index) const { return cluster_pattern[cluster][index]; }
+   int get_parent(int cluster) const { return parent[cluster]; }
+   int get_child(int cluster , int index) const { return child[cluster][index]; }
+   double get_child_distance(int cluster) const { return child_distance[cluster]; }
+   double get_intra_cluster_distance(int cluster) const { return intra_cluster_distance[cluster]; }
+   double get_inter_cluster_distance(int cluster) const { return inter_cluster_distance[cluster]; }
+   double get_max_intra_cluster_distance(int cluster) const { return max_intra_cluster_distance[cluster]; }
+   double get_min_inter_cluster_distance(int cluster) const { return min_inter_cluster_distance[cluster]; }
+*/
