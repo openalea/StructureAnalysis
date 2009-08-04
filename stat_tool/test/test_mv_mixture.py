@@ -2,8 +2,9 @@
 #
 #  Frequency distributions
 #
-#  Objective: Analyzing the number of nodes of growth units in selected architectural
-#             position considering the respective roles of preformation and neoformation,
+#  Objective: 
+    Analyzing the number of nodes of growth units in selected architectural
+    position considering the respective roles of preformation and neoformation,
 #
 #  Methods: comparison tests, one-way variance analysis,
 #           estimation of finite mixture of distributions.
@@ -32,60 +33,21 @@
 #
 #########################################################################
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
-import os
 
 from openalea.stat_tool.plot import DISABLE_PLOT
 
-from openalea.stat_tool.mixture import Mixture, _MvMixture
-from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
-from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.comparison import Compare, ComparisonTest
+from openalea.stat_tool.mvmixture import _MvMixture
+from openalea.stat_tool.distribution import Binomial
+from openalea.stat_tool.distribution import Poisson
 
 from tools import interface
- 
+from tools import runTestClass
+
 
 class Test(interface):
-    """a simple unittest class
-    
-    Integration test 
-    ================
-    
-    * 'ok' means works and testedPerform test on 
-    
-    ========================    ==================================
-    ** from the interface**
-    ascii_write                 ok
-    display                     ok    
-    extract_data                ok
-    file_ascii_write            ok
-    get_plotable                ?     
-    plot                        ok  but only gnuplot implemented                     
-    save                        ok
-    plot_print                  ok
-    simulate                    ok
-    plot_write                  ok
-    
-    extraxt_mixture
-    extract_data        
-    extract_weight              ok but does it make sense?
-    
-    str                         ok
-    len                         ok
-    nb_component                ok
-    old_plot                    ok   
-    state_permutation           ok
-    
-    _criteria                   need a test
-    _is_parametric              need a test
-    
-    save_backup                 same as save
-    ========================    ==================================    
-    """
-   
+    """a simple unittest class"""
    
     def __init__(self):
         interface.__init__(self,
@@ -103,13 +65,15 @@ class Test(interface):
         d23 = Poisson(0, .20)
         
         data = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
-        assert data.nb_component==3
-        assert data.nb_variable==2
+        assert data.nb_component == 3
+        assert data.nb_variable == 2
         return data
        
-    def _test_empty(self):
-        """there is an empty constructor in MvMixture!"""
-        self.empty()
+    def test_empty(self):
+        """skip test_empty
+        
+        because there is an empty constructor in VectorDistance; """
+        pass
         
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -176,7 +140,11 @@ class Test(interface):
     def _test_permutation(self):
         data1 = self.data
         
-        data2 = data1.state_permutation([0,2,1])
-        data3 = data2.state_permutation([0,1,2])
+        data2 = data1.state_permutation([0, 2, 1])
+        _data3 = data2.state_permutation([0, 1, 2])
         
         assert str(data1)==str(data2)
+
+
+if __name__ == "__main__":
+    runTestClass(Test())

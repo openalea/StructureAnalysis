@@ -1,5 +1,5 @@
 """output tests"""
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 from openalea.stat_tool.distribution import Uniform, Distribution
 from openalea.stat_tool.histogram import Histogram 
@@ -11,6 +11,7 @@ from openalea.stat_tool.data_transform import Shift
 from openalea.stat_tool.output import Plot
 from openalea.stat_tool.plot import DISABLE_PLOT
 
+from tools import runTestClass
 
 
 class Test:
@@ -30,7 +31,7 @@ class Test:
     def get_mixture_2(self):
         """create another mixture data""" 
         h = Histogram(("data/meri2.his"))
-        m = h.estimate_mixture(["B", "NB"])
+        m = h.estimate_mixture("B", "NB")
         return m
 
     def test_old_plot(self):
@@ -112,3 +113,9 @@ class Test:
         dist2 = Estimate(histo1, "NB", MinInfBound=0, InfBoundStatus="Fixed")
         if DISABLE_PLOT == False:
             Plot(dist2) 
+
+
+ 
+if __name__ == "__main__":
+    runTestClass(Test())
+

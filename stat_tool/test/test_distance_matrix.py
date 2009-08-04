@@ -1,15 +1,20 @@
-""" distance matrix tests"""
-__revision__ = "$Id: test_cluster.py 6258 2009-04-22 15:27:12Z cokelaer $"
+""" distance matrix tests
 
 
-from openalea.stat_tool.histogram import Histogram
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__version__ = "$Id$"
+
+
 from openalea.stat_tool.vectors import Vectors, VectorDistance
 from openalea.stat_tool.comparison import Compare
 from openalea.stat_tool.data_transform import SelectVariable
-from openalea.stat_tool.cluster import Transcode, Clustering, \
-    ToDistanceMatrix, Cluster
+from openalea.stat_tool.cluster import Clustering, ToDistanceMatrix
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     
@@ -25,12 +30,6 @@ class Test(interface):
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         c1 = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12],
                         Algorithm="Divisive")
-       # c1_bis = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12],
-#                            Algorithm="Ordering")
-
-#        c2 = Clustering(matrix10, "Hierarchy", Algorithm="Agglomerative")
-#        c3 = Clustering(matrix10, "Hierarchy", Algorithm="Divisive")
-#        c4 = Clustering(matrix10, "Hierarchy", Algorithm="Ordering")
         return ToDistanceMatrix(c1)
 
     def test_len(self):
@@ -107,3 +106,9 @@ class Test(interface):
             assert False
         except TypeError:
             assert True
+
+
+
+if __name__ == "__main__":
+    runTestClass(Test())
+

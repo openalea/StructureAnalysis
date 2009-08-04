@@ -1,16 +1,16 @@
-__revision__ = "$Id$"
+"""mixture tests"""
+__version__ = "$Id$"
 
 
-from openalea.stat_tool.plot import DISABLE_PLOT
-
-from openalea.stat_tool.mixture import Mixture, _MvMixture
+from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
+from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.estimate import Estimate
 
-
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class"""
@@ -35,6 +35,15 @@ class Test(interface):
 
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
+
+    def test_constructor_from_dists_failure(self):
+        d1 = Binomial(0, 12, 0.1)
+        d2 = Binomial(0, 12, 0.5)
+        try:
+            _mixt = Mixture(0.1, d1, d2)
+            assert False
+        except TypeError:
+            assert True
 
     def test_print(self):
         self.print_data()
@@ -94,7 +103,17 @@ class Test(interface):
         """run and test the extract_data methods""" 
 
         h = Histogram("data/meri2.his")
-        m = h.estimate_mixture(["B", "NB"])
+        m = h.estimate_mixture("B", "NB")
 
         d = m.extract_data()
         assert d
+
+    def test_truncate(self):
+        s = self.data
+        _res = s.truncate(4) 
+        
+
+
+if __name__ == "__main__":
+    runTestClass(Test())
+

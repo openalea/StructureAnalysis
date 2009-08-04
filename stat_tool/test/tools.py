@@ -2,15 +2,23 @@
 
 author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
-#from openalea.stat_tool import *
+
 from openalea.stat_tool import Simulate
 from openalea.stat_tool.plot import DISABLE_PLOT
 import os
 from openalea.stat_tool.output import Display, Save
 
+
+def runTestClass(myclass):
+    functions = [x for x in dir(myclass) if x.startswith('test')]
+    for function in functions:
+        getattr(myclass, function)()
+        
+
 def _remove_file(filename):
+    """alias to remove a file"""
     try:
         os.remove(filename)
     except:
@@ -113,9 +121,8 @@ class interface():
         
         
         c1 = self.data  
-
-        _remove_file('test1.dat')
-        _remove_file('test2.dat')
+        #_remove_file('test1.dat')
+        #_remove_file('test2.dat')
         
         if Format is None:
             c1.save('test1.dat')
@@ -133,8 +140,8 @@ class interface():
             assert c1 and c1_read and c2_read
             assert str(c1_read) == str(c2_read)
                 
-        _remove_file('test1.dat')
-        _remove_file('test2.dat')
+        #_remove_file('test1.dat')
+        #_remove_file('test2.dat')
 
     def plot_write(self):
         h = self.data

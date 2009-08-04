@@ -3,17 +3,16 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
-from openalea.stat_tool import Convolution, Distribution
+from openalea.stat_tool import Convolution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.data_transform import ExtractDistribution
-from openalea.stat_tool.plot import DISABLE_PLOT
-from openalea.stat_tool.output import Display, Save
 from openalea.stat_tool import Estimate
-from openalea.stat_tool import Simulate
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class 
@@ -30,6 +29,7 @@ class Test(interface):
     def build_data(self):
         d1 = Binomial(0, 10, 0.5)
         d2 = NegativeBinomial(0, 1, 0.1)
+        conv = Convolution(d1, d2, d1, d2) 
         conv = Convolution(d1, d2) 
         return conv
 
@@ -92,9 +92,16 @@ class Test(interface):
         d = e.extract_data()
         assert d        
         eprime = Estimate(s, "CONVOLUTION", Binomial(0, 10, 0.5))
-        # todo: check that e and eprime are similar
+        
+        # todo: find robust assert ? 
+        print eprime.get_mean
+
+    def test_truncate(self):
+        s = self.data
+        _res = s.truncate(4) 
 
 
 
-
+if __name__ == "__main__":
+    runTestClass(Test())
 

@@ -1,28 +1,37 @@
-"""vectors tests"""
-__revision__ = "$Id$"
+"""vectors tests
 
-from openalea.stat_tool.vectors import  VectorDistance
-    
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+"""
+__version__ = "$Id$"
+
+
+from openalea.stat_tool.vectors import VectorDistance
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class"""
-   
+
     def __init__(self):
-        interface.__init__(self, 
-                           self.build_data(), 
+        interface.__init__(self,
+                           self.build_data(),
                            "data/vector_distance.vd",
-                           VectorDistance)        
+                           VectorDistance)
     def build_data(self):
-        v = VectorDistance('N', 'O', 'S') 
-        assert v.distance_type == 0 
-        assert v 
+        v = VectorDistance('N', 'O', 'S')
+        assert v.distance_type == 0
+        assert v
         return v
+
+    def test_empty(self):
+        """skip test_empty
         
-    def _test_empty(self):
-        self.empty()
-        
+        because there is an empty constructor in VectorDistance; """
+        pass
+
     def test_constructor_from_file(self):
         self.constructor_from_file()
 
@@ -31,12 +40,12 @@ class Test(interface):
 
     def test_print(self):
         self.print_data()
-        
+
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
         self.display_versus_str()
-        
+
     def test_len(self):
         v = self.data
         assert len(v) == 3
@@ -44,7 +53,7 @@ class Test(interface):
 
     def _test_plot(self):
         pass
-    
+
     def test_save(self):
         self.save()
 
@@ -53,20 +62,20 @@ class Test(interface):
 
     def test_file_ascii_write(self):
         self.file_ascii_write()
-      
+
     def _test_spreadsheet_write(self):
         #not implemented
         self.spreadsheet_write()
-    
+
     def test_simulate(self):
         pass
-        
+
     def test_extract(self):
         pass
-    
+
     def test_extract_data(self):
         pass
-    
+
     def test_vector_distance(self):
         """ test vector distance constructors"""
         v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC')
@@ -75,16 +84,19 @@ class Test(interface):
         v = VectorDistance(2.3, 'N', 4, 'O', 6, 'S')
         assert v and len(v) == 3
 
-        v = VectorDistance( (2.3, 'N'),  (4, 'O'), (6, 'S'))
+        # wrapper should work. needs python interface ?
+        #v = VectorDistance( (2.3, 'N'),  (4, 'O'), (6, 'S'))
+        #assert v and len(v) == 3
+
+        v = VectorDistance(2.3, 'N', 4, 'O', 6, 'S', Distance="QUADRATIC")
         assert v and len(v) == 3
 
-        v = VectorDistance(2.3, 'N', 4, 'O', 6, 'S', distance = "QUADRATIC")
-        assert v and len(v) == 3
-
-        v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC', \
+        v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC',
                            Distance="QUADRATIC")
         assert v and len(v) == 3
 
         assert str(VectorDistance('N', 'O', 'S'))
 
 
+if __name__ == "__main__":
+    runTestClass(Test())

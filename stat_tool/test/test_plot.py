@@ -1,9 +1,11 @@
 """output tests"""
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.plot import get_plotter, gnuplot 
 from openalea.stat_tool.plot import DISABLE_PLOT
+
+from tools import runTestClass
 
 
 class Test:
@@ -121,3 +123,9 @@ class Test:
         plotter = gnuplot()
         if DISABLE_PLOT == False:
             plotter.plot(a, "test_plot")
+            
+            
+
+
+if __name__ == "__main__":
+    runTestClass(Test())

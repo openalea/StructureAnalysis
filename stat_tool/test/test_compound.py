@@ -3,17 +3,15 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.data_transform import ExtractDistribution
 from openalea.stat_tool.distribution import Binomial, NegativeBinomial
 from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.simulate import Simulate
-from openalea.stat_tool.data_transform import *
-from openalea.stat_tool.histogram import Histogram
 
 from tools import interface
+from tools import runTestClass
 
 
 class Test(interface):
@@ -101,7 +99,12 @@ class Test(interface):
         #e = Estimate(s, "Compound",  Binomial(2, 5, 0.5), "Sum")
         d = s.extract_sum()
         assert d
-        _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5),"Sum")
+        _eprime = Estimate(s, "COMPOUND", Binomial(0, 10, 0.5), "Sum")
 
-    
+    def test_truncate(self):
+        s = self.data
+        _res = s.truncate(4) 
 
+
+if __name__ == "__main__":
+    runTestClass(Test())

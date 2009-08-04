@@ -1,14 +1,14 @@
-"""Functional test"""
-__revision__ = "$Id$"
+"""Functional test
+
+add any extra functional tests here
+"""
+__version__ = "$Id$"
 
 
-from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.comparison import Compare, ComparisonTest
-from openalea.stat_tool.data_transform import Merge
-
-class Test:
-    
+class Test():
+    """add functional tests here"""
+    def __init__(self):
+        pass
     def test_aml_1(self):
         """ Test AML Functions """
 

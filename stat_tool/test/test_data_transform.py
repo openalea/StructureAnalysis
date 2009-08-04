@@ -1,7 +1,11 @@
-"""test data_transform methods and compare them with class members methods"""
-__revision__ = "$Id$"
+"""test data_transform methods and compare them with class members methods
 
-from openalea.stat_tool import vectors, histogram, distribution, mixture, convolution, simulate
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
+.. todo:: to be clean
+"""
+__version__ = "$Id$"
+
 from openalea.stat_tool.vectors import Vectors
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Distribution, Uniform, Binomial, \
@@ -10,10 +14,12 @@ from openalea.stat_tool.mixture import Mixture
 from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.compound import Compound
-
+from openalea.stat_tool.output import Plot
 from openalea.stat_tool.data_transform import Shift, Merge, Fit, ValueSelect, \
     SelectVariable, SelectIndividual, MergeVariable, ExtractDistribution, \
     ExtractHistogram, ExtractData
+
+from tools import runTestClass
 
 
 class data():
@@ -152,7 +158,6 @@ class TestValueSelect(data):
         v3 =  ValueSelect(v, 3, 1.0, 2.0, Mode="keep")
             
         assert v and v1b and v2 and v3
-        print len(v1b)
         assert len(v1b) == 1
         
         assert str(ValueSelect(v, 1, 0.2, 2, mode="Keep")) == \
@@ -226,7 +231,6 @@ class TestSelectIndividual(data):
         assert str(selection)==str(selection2)
         
         assert len(selection) == 2
-        print selection[0] == [1, 3, 4]
         
     def test_top(self):
         """not implemented - top"""
@@ -237,20 +241,26 @@ class TestSelectIndividual(data):
         pass
 
 
-class TestExtract:
+class TestExtract():
     """
     Extract("Compound") see test_compound
     Extract("Convolution") see test_convolution
     Extract("Mixture") see test_mixture
     Sum, elementary, component, weight see test_compound, and so on.
     """
-    pass
+    def __init__(self):
+        pass
+    
 
 
-class TestExtractData:
+class TestExtractData():
     """
     See other test file.
     """
+    
+    def __init__(self):
+        pass
+    
     def test_histo_extract_data(self):
 
         h = Histogram("data/meri2.his")
@@ -390,6 +400,7 @@ class TestMerge(data):
         histo12 = Merge(histo10, histo11)
 
         assert histo12
+        Plot(histo12)
 
     def test_merge_histo(self):
         meri1 = Histogram("data/meri1.his")
@@ -403,7 +414,7 @@ class TestMerge(data):
         meri_bis = meri1.merge([meri2, meri3, meri4, meri5])
         assert meri_bis
         assert str(meri)==str(meri_bis)
-        
+        Plot(meri)
 
     def test_merge_vectors(self):
         
@@ -421,23 +432,28 @@ class TestMerge(data):
         assert str(a)==str(b)
         
         assert str(a)==str(v)
-
+        Plot(v)
         
+    def test_time_events(self):
+        """implemented in sequence_analysis/test/test_merge"""
     
+    def test_renewal(self):
+        """implemented in sequence_analysis/test/test_merge"""
+        
     def test_markov(self):
         """not implemented - markov"""
         pass
     
     def test_top(self):
-        """not implemented -  top"""
+        """implemented in sequence_analysis/test/test_merge"""
         pass
     
     def test_time(self):
-        """not implemented - time"""
+        """implemented in sequence_analysis/test/test_merge"""
         pass
     
     def test_correlation(self):
-        """not implemented - correlation"""
+        """implemented in sequence_analysis/test/test_merge"""
         pass
         
 
@@ -460,3 +476,19 @@ class TestMergeVariable(data):
                 assert merged[i][j] == v[i][j]
                 
         assert str(merged) == str(merged2)
+
+
+
+if __name__ == "__main__":
+    runTestClass(TestSelectHist())
+    runTestClass(TestFit())
+    runTestClass(TestShift())
+    runTestClass(TestExtractHistogram())
+    runTestClass(TestMerge())
+    runTestClass(TestMergeVariable())
+    runTestClass(TestValueSelect())
+    runTestClass(TestSelectVariable())
+    runTestClass(TestSelectIndividual())
+    runTestClass(TestExtract())
+    runTestClass(TestExtractData())
+    runTestClass(TestExtractDistribution())

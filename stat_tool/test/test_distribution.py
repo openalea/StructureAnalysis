@@ -1,5 +1,5 @@
 """Distribution tests"""
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 
 from openalea.stat_tool import _stat_tool
@@ -7,15 +7,15 @@ from openalea.stat_tool.distribution import Distribution, Uniform, Binomial
 from openalea.stat_tool.distribution import NegativeBinomial, Poisson
 from openalea.stat_tool.distribution import ToHistogram, ToDistribution
 from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.output import Display,  Plot
 from openalea.stat_tool import Estimate
-from openalea.stat_tool import Simulate
 
-from openalea.stat_tool import Cluster, \
-    Transcode, ValueSelect, Shift, Compare, ComparisonTest, Fit
 
+
+from openalea.stat_tool._stat_tool import _ParametricModel
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class
@@ -49,9 +49,16 @@ class Test(interface):
         assert dist
         
         #from parametric model
-        pm = _stat_tool._ParametricModel(h)
+        pm = _ParametricModel(h)
         dist = Distribution(pm)
         assert dist
+        
+    def test_constructor_failure(self):
+        try:
+            _h = Distribution("Whatever", 1, 1)
+            assert False
+        except KeyError:
+            assert True
 
     def test_print(self):
         self.print_data()
@@ -105,13 +112,16 @@ class Test(interface):
         _res = s.truncate(4) 
         
 
-class TestDistribution:
+class TestDistribution():
     """Test the distribution (Uniform, Binomial, ...)
     
     test the sup_bound, inf_bound, probability, parameter,ident
     
     test the ToDistribution and ToHistogram
     """
+    def __init__(self):
+        pass
+    
     def test_to_histogram(self):
 
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
@@ -137,7 +147,7 @@ class TestDistribution:
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _stat_tool._ParametricModel)
+        assert isinstance(m, _ParametricModel)
 
     def test_binomial(self):
 
@@ -153,7 +163,7 @@ class TestDistribution:
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _stat_tool._ParametricModel)
+        assert isinstance(m, _ParametricModel)
 
     def test_poisson(self):
 
@@ -169,7 +179,7 @@ class TestDistribution:
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _stat_tool._ParametricModel)
+        assert isinstance(m, _ParametricModel)
 
     def test_neg_binomial(self):
         
@@ -184,7 +194,7 @@ class TestDistribution:
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _stat_tool._ParametricModel)
+        assert isinstance(m, _ParametricModel)
         
     def test_multimodial(self):
         pass
@@ -200,3 +210,7 @@ class TestDistribution:
 
     
     
+
+if __name__ == "__main__":
+    runTestClass(Test())
+    runTestClass(TestDistribution())

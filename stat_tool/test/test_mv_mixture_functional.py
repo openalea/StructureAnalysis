@@ -1,23 +1,12 @@
-__revision__ = "$Id: test_mixture.py 6325 2009-04-29 16:20:55Z cokelaer $"
+"""tests on mv_mixture"""
+__version__ = "$Id$"
 
-import os
 
-from openalea.stat_tool.plot import DISABLE_PLOT
+from openalea.stat_tool.mvmixture import _MvMixture
+from openalea.stat_tool.distribution import Binomial, Poisson
 
-from openalea.stat_tool.mixture import Mixture, _MvMixture
-#from openalea.stat_tool.data_transform import ExtractDistribution
-#from openalea.stat_tool.histogram import Histogram
-from openalea.stat_tool.distribution import Uniform, Binomial, Poisson
-#from openalea.stat_tool.estimate import Estimate
-#from openalea.stat_tool.comparison import Compare, ComparisonTest
+from openalea.stat_tool.output import Plot
 
-from openalea.stat_tool.output import plot, Plot, Display
-#from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
-#from openalea.stat_tool.simulate import Simulate
-#import openalea.stat_tool.distribution as distribution 
-#from openalea.stat_tool.cluster import Cluster
-
-#from tools import interface
 
 def test1():
 
@@ -64,5 +53,5 @@ def test1():
     m_estim_nbcomp.plot(variable = 1, Title="Estimated mixture")
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     test1()

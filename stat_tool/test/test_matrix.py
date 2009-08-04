@@ -1,42 +1,23 @@
 """vectors tests"""
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 from openalea.stat_tool.vectors import Vectors, VectorDistance
 from openalea.stat_tool.data_transform import SelectVariable
 from openalea.stat_tool.comparison import Compare
 
 from tools import interface
+from tools import runTestClass
 
 
 class Test(interface):
-    """a simple unittest class
-
-    ** from the interface**
-    Constructors from file to be done
-    ascii_write                 ok
-    display                     ok    
-    file_ascii_write            ok
-    plot                        no                  
-    save                        ok
-    plot_print                  ok
-    plot_write                  ok
-    spreadsheet_write           ok
-    **others**
-    str                         ok
-    len                         no 
-    old_plot                    ok
-    hierarchical_clustering     ok
-    partitioning_clusters       ok
-    partitioning_prototype      ok
-    get_nb_row                  ok
-    get_nb_column               ok
-
-    """
+    """a simple unittest class for distance matrix"""
     def __init__(self):
-        self.data = self.build_data()
-        self.filename = None
-        self.structure = None
-
+        interface.__init__(self,
+                           self.build_data(),
+                           None,
+                           Vectors)
+        # init expect the 4th argument to be provided.
+        # vectors is therefore passed as dummy structure
     def build_data(self):
         vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
@@ -97,26 +78,7 @@ class Test(interface):
         """no such method"""
         pass
 
-    def test_vector_distance(self):
-        v = VectorDistance('N', 'O', 'S') 
-        assert v and len(v) == 3
 
-        v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC')
-        assert v and len(v) == 3
-
-        v = VectorDistance(2.3, 'N', 4, 'O', 6, 'S')
-        assert v and len(v) == 3
-
-        v = VectorDistance( (2.3, 'N'),  (4, 'O'), (6, 'S'))
-        assert v and len(v) == 3
-
-        v = VectorDistance(2.3, 'N', 4, 'O', 6, 'S', distance = "QUADRATIC")
-        assert v and len(v) == 3
-
-        v = VectorDistance('NUMERIC', 'ORDINAL', 'SYMBOLIC', \
-                           Distance="QUADRATIC")
-        assert v and len(v) == 3
-
-        assert str(VectorDistance('N', 'O', 'S'))
-
-
+ 
+if __name__ == "__main__":
+    runTestClass(Test())  

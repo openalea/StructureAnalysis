@@ -1,19 +1,12 @@
 """vectors tests"""
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
-from openalea.stat_tool.vectors import Vectors, VectorDistance, \
-    VarianceAnalysis, ContingencyTable
-from openalea.stat_tool.data_transform import ValueSelect
-from openalea.stat_tool.regression import Regression
-from openalea.stat_tool.data_transform import ExtractHistogram, \
-    SelectIndividual, SelectVariable, ExtractDistribution
-from openalea.stat_tool.comparison import Compare
-from openalea.stat_tool.estimate import Estimate
-from openalea.stat_tool.cluster import Clustering
-from openalea.stat_tool.output import Display, Plot
-from openalea.stat_tool.plot import DISABLE_PLOT
+from openalea.stat_tool import Vectors
+from openalea.stat_tool import VarianceAnalysis
+from openalea.stat_tool import ContingencyTable
 
 from tools import interface
+from tools import runTestClass
 
 class Test(interface):
     """a simple unittest class
@@ -43,6 +36,10 @@ class Test(interface):
 
     def build_data_2(self):
         return Vectors("data/chene_sessile.vec")
+    
+    def test_identifiers(self):
+        v = Vectors([[1, 2, 3], [4, 5, 6], [7, 8, 9]], Identifiers=[1, 2, 4])
+        assert v.get_identifiers() == [1, 2, 4]
         
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -144,4 +141,7 @@ class Test(interface):
         ct2 = vec10.contingency_table(1, 4, "what", "what")
         assert ct == ct2
         
-   
+ 
+if __name__ == "__main__":
+    test = Test()
+    runTestClass(test)  

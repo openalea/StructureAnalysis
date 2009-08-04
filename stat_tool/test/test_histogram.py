@@ -1,13 +1,14 @@
 """histogram tests"""
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 from openalea.stat_tool.distribution import ToHistogram, Binomial
 from openalea.stat_tool.distribution import ToDistribution
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.distribution import Distribution
-from openalea.stat_tool.output  import Display, Save
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class
@@ -23,6 +24,14 @@ class Test(interface):
         v = Histogram([0, 1, 2, 3])
         assert v
         return v
+
+    def test_constructor_from_list(self):
+        v = Histogram([0, 1, 2, 3])
+        assert v
+    
+    def test_constructor_from_integers(self):
+        v = Histogram(0, 1, 2, 3)
+        assert v
         
     def test_constructor_from_file(self):
         self.constructor_from_file()
@@ -101,7 +110,10 @@ class Test(interface):
         assert h == h2
 
     def test_extract_model(self):    
-        d = Binomial(0,10,0.5)
+        d = Binomial(0, 10, 0.5)
         d == d.simulate(1000).extract_model()
         
 
+
+if __name__ == "__main__":
+    runTestClass(Test())

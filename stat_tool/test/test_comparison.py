@@ -1,20 +1,26 @@
 """comparison test
 
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+
 histo done
 vector done
 
 .. todo:: sequence and markov
 """
-__revision__ = "$Id$"
+__version__ = "$Id$"
+
+
+import os
 
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.vectors import Vectors, VectorDistance
 from openalea.stat_tool.data_transform import SelectVariable
 from openalea.stat_tool.comparison import Compare, ComparisonTest
 
-import os
+from tools import runTestClass
 
-class TestHisto:
+
+class TestHisto():
     """a simple unittest class"""
 
     def __init__(self):
@@ -61,22 +67,23 @@ class TestHisto:
         meri2 = self.meri2
         meri3 = self.meri3
         
-        c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat')
+        _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat')
         os.remove('result.dat')
-        c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
+        _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
                      Format='ASCII')
         os.remove('result.dat')
-        c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
+        _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
                      Format='SpreadSheet')
         os.remove('result.dat')
         try:
-            c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
+            _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
                          Format='badname')
             assert False
-        except TypeError:
+        except ValueError:
             assert True
-    
-class TestVectors:
+
+
+class TestVectors():
     
     def __init__(self):
         pass
@@ -89,16 +96,28 @@ class TestVectors:
 
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         assert matrix10
-        assert str(vec15.compare(VectorDistance("N", "N", "N"))) == str(matrix10)
+        assert str(vec15.compare(VectorDistance("N", "N", "N"), 
+                                 True)) == str(matrix10)
 
 
-class TestSequence:
+class TestSequence():
+    """not yet implemented"""
+    def __init__(self):
+        pass
     def test_compare_sequence(self):
         pass
         
-class TestMarkov:
+
+class TestMarkov():
+    """not yet implemented"""
+    def __init__(self):
+        pass
     def test_compare_markov(self):
         pass
 
 
 
+ 
+if __name__ == "__main__":
+    runTestClass(TestHisto())
+    runTestClass(TestVectors())  
