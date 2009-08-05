@@ -143,5 +143,10 @@ variance_type = {
     "ORDINAL":  _stat_tool.ORDINAL,
     }
 
-
-
+keep_type = {
+             "keep": "Keep",
+             "Keep": "Keep",
+             "reject": "Reject",
+             "Reject": "Reject",
+             "Rejected": "Reject"
+             }

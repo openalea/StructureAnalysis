@@ -153,18 +153,18 @@ class TestValueSelect(data):
     
         v = self.float_vector_data()
         
-        v1b = ValueSelect(v, 1, 0.2, 2.0, Mode="keep")
-        v2 =  ValueSelect(v, 2, 1.0, 6.0, Mode="keep")
-        v3 =  ValueSelect(v, 3, 1.0, 2.0, Mode="keep")
+        v1b = ValueSelect(v, 1, 0.2, 2.0, Mode="Keep")
+        v2 =  ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")
+        v3 =  ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")
             
         assert v and v1b and v2 and v3
         assert len(v1b) == 1
         
-        assert str(ValueSelect(v, 1, 0.2, 2, mode="Keep")) == \
+        assert str(ValueSelect(v, 1, 0.2, 2, Mode="Keep")) == \
                 str(v.value_select(1, 0.2, 2, keep=True))
-        assert str(ValueSelect(v, 2, 1.0, 6.0, mode="Keep")) == \
+        assert str(ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")) == \
                 str(v.value_select(2, 1.0, 6.0, keep=True))
-        assert str(ValueSelect(v, 3, 1.0, 2.0, mode="Keep")) == \
+        assert str(ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")) == \
                 str(v.value_select(3, 1.0, 2., keep=True))
                          
     def test_value_select_int(self):

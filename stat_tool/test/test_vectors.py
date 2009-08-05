@@ -46,6 +46,19 @@ class Test(interface):
 
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
+    
+    def test_constructor_one_variable(self):
+        
+        v = Vectors([1,2,3])
+        assert v.nb_variable == 3
+
+    def test_constructor_identifiers_failure(self):
+        try:
+            # should be Vectors([[1,2,3], Identifiers=[1])
+            v = Vectors([1,2,3], Identifiers=[1,2])
+            assert False
+        except ValueError:
+            assert True
 
     def test_print(self):
         self.print_data()

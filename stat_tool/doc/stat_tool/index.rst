@@ -36,6 +36,7 @@ how to use VPlants.Stat_tool see :ref:`stat_tool_user`.
     vplants_stat_tool_histogram_ref.rst
     vplants_stat_tool_interface_ref.rst
     vplants_stat_tool_mixture_ref.rst
+    vplants_stat_tool_mvmixture_ref.rst
     vplants_stat_tool_old_error_ref.rst
     vplants_stat_tool_old_stat_tool_ref.rst
     vplants_stat_tool_output_ref.rst

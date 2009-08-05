@@ -1,4 +1,4 @@
-""" Error class for stat_tool """
+""" Error class to manage standard errors in stat_tool """
 __version__ = "$Id$"
 
 
@@ -15,10 +15,11 @@ arguments_labels = {1:'first',
 
 
 def CheckArgumentsLength(args, min_nargs=0, max_nargs=1e6, optional=False):
-    """Check that the number of arguments is in the expected range.
+    """Check that input's length (tuple) is within a given range
 
-    :param: min is the minimum number of arguments expected.
-    :param: max is the maximum number of arguments expected (strict).
+    :param args: a tuple containing user arguments
+    :param min: minimum number of arguments expected.
+    :param max: maximum number of arguments expected (strict).
     
     if max is not provided, we assume that it can be any value
     """
@@ -37,24 +38,21 @@ def CheckArgumentsLength(args, min_nargs=0, max_nargs=1e6, optional=False):
         raise Exception(msg)
 
 
-def CheckOptionalArgumentsLength(args, min_nargs=None, max_nargs=None):
-    """Check that the number of arguments is expected range.
-
-    See CheckArgumentsLength function.
-    """
-    CheckArgumentsLength(args, min_nargs, max_nargs, optional=True)
-
 
 def CheckType(variables, types, **kargs):
-    """
+    """Check types of input variables
     
-    :param variable: a variable to test
-    :param types: list of types or unique type (e.g., int, str)
+    :param variables: a list of variables to be checked 
+    :param types: list of types 
     
-    optional argument: variable_id corresponding to position of variable
+    :optional argument: variable_id corresponding to the position of each 
+    variable.
+
+    :example:
     
-    #CheckType(1, int, variable_index=0) NOT IMPLEMENTED 
-    CheckType([1,'a'], [[int, float],str], variable_index=[0,1])
+        >>> #CheckType(1, int, variable_index=0) NOT IMPLEMENTED 
+        >>> CheckType([1,'a'], [int,str], variable_id=[0,1])
+        >>> CheckType([1,'a'], [[int, float],str], variable_id=[0,1])
 
     """
     
@@ -97,23 +95,34 @@ def CheckType(variables, types, **kargs):
     
 
 def CheckDictKeys(key, udict):
+    """check that a key is contained in a dictionary and raise error otherwise.
+    
+    .. seealso:: ParseKargs 
+    """
     if key not in udict.keys():
         raise KeyError('Key %s not found. Possible choices are %s.' % 
                             (key, udict.keys()))
 
 
 def ParseKargs(kargs, keyword, default=None, possible=None):
-    """
-    :param possible: a list of possible values that kargs[keyword] can take
+    """Parse and check presence of a key in a dictionary 
+    
+    Enhanced version of kargs.get
+    
+    :param kargs: a dictionary
+    :param keyword: a key to look for
+    :param default: value to assigned to keyword if keyword not found in kargs
+    :param possible: values that kargs[keyword] can take (either a list or dict)
     
     :Example:
-        distance = error.ParseKargs(kargs, "Distance", "ABSOLUTE_VALUE", 
+    
+        >>> distance = error.ParseKargs(kargs, "Distance", "ABSOLUTE_VALUE", 
                                 distance_type.keys())
-        distance = distance_type[distance]
+        >>> distance = distance_type[distance]
         
-        or simply (if a dictionary is used as fourth argument)
+    or simply (if a dictionary is used as fourth argument)
         
-        distance = error.ParseKargs(kargs, "Distance", "ABSOLUTE_VALUE", 
+        >>>distance = error.ParseKargs(kargs, "Distance", "ABSOLUTE_VALUE", 
                                 distance_type)
         
         
@@ -136,31 +145,24 @@ def ParseKargs(kargs, keyword, default=None, possible=None):
     
 
 def CheckKargs(kargs, possible_kargs, dicts=None):
-    """Parse kargs argument and check that it belongs to possible_kargs
+    """Check that a list of keywords are present in kargs
     
-    :param kargs: list of arguments
-    :param possible_kargs: list of values that can take kargs
+    :param kargs: dictionary containing a set of keys
+    :param possible_kargs: a list containing a keywords
     :param dicts: list of dictionaries possible for each kargs
     
-    :Usage:
-        Let us assume a function which prototypes is::
     
-            def TestFunction(kargs):
+    :Usage:
+    
+        if kargs is {"key1", None, "key2": True, "key3": "dummy"}
+        
+        If a function requires "key1" and "key2" to work properly,
+        we will use:
+        
+            CheckKargs(kargs, ["key1", "key2"])
             
-        Then, we called it as follows::
-            
-            TestFunction(firstname="James", surname="Brown")
-        
-        This function only accept *firstname* in ["James", "Roger"] and
-        *surname* in ["Brown", "Moore"].
-        
-        We would add the following code:: 
-        
-            allowed_firstmame = ["James", "Roger"]
-            allowed_surname = ["Brown", "Moore"]
-            CheckArgs(kargs, ["firstname", "surname"], 
-                        allowed=[allowed_firstname, allowed_surname])
-    """
+         
+        """
     # check that number of arguments is correct
     CheckArgumentsLength(kargs, 0, len(possible_kargs))
 
@@ -174,34 +176,17 @@ def CheckKargs(kargs, possible_kargs, dicts=None):
                                 karg, possible_kargs)
     
     # check that values of the arguments are allowed
-    if dicts:
-        for karg, mydict in zip(possible_kargs, dicts):
-            if kargs.get(karg) not in mydict.keys() and \
-                kargs.get(karg) is not None:
-                raise ValueError("""
-                    Value of the Argument \"%s\" (given %s) not found in 
-                    the list of allowed values (%s)""" 
-                    % (karg, kargs.get(karg), mydict.keys()))
+    #if dicts:
+    #    for karg, mydict in zip(possible_kargs, dicts):
+    #        if kargs.get(karg) not in mydict.keys() and \
+    #            kargs.get(karg) is not None:
+    #            raise ValueError("""
+    #                Value of the Argument \"%s\" (given %s) not found in 
+    #                the list of allowed values (%s)""" 
+    #                % (karg, kargs.get(karg), mydict.keys()))
                 
-                
-def _myreturn(ret, func_name, msg=None):
-    """ specialized version of *return*
-    
-    Check if the object to be returned is None. 
-    If so, returns the calling function (func_name) and an error message.
-    
-    """
-    
-    if msg == None:
-        msg = "Function %s did not return anything. Check your arguments" \
-            % func_name
-    if ret:
-        return ret
-    else:
-        raise Exception(msg)                
+        
                     
-                    
-STAT_TOOL_ERROR_MSG_RETURN_NONE = "Function did not return anything. Check your arguments"
 STAT_TOOL_NB_VARIABLE_ERROR = \
-    """Extra arguments provided (to specify variable value ?). Consider removing 
-    it. Be aware that nb_variable equals 1"""
+    """Extra arguments provided (to specify variable value ?). 
+    Consider removing it. Be aware that nb_variable equals 1"""

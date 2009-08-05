@@ -14,7 +14,6 @@ from openalea.stat_tool.cluster import Transcode, Clustering, \
 
 from tools import runTestClass
 
-from openalea.aml import *
 
 class Test:
     """Test class to test cluster function and classes"""

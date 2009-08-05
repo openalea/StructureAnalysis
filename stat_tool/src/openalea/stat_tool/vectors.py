@@ -111,6 +111,13 @@ def Vectors(*args, **kargs):
         # constructor from a filename
         ret = _Vectors(args[0])
     elif isinstance(obj, list):
+        # Normal usage is Vectors([ [1,2,3],  [1,2,3], [4,5,6]])
+        # If only one variable is requited, then Normal usage is 
+        # Vectors([ [1,2,3] ]). Yet, to simplify usage, if there is only
+        # one variable, the followin if allows us to use Vectors([1,2,3])
+        if type(obj[0])!=list:
+            obj = [obj]
+            
         # from a list and an optional argument
         
         # first, get the Identifiers and check its type
@@ -118,13 +125,13 @@ def Vectors(*args, **kargs):
         if identifiers:
             error.CheckType([identifiers], [[list]], variable_id=[2])
 
-            if len(identifiers) != len(args[0]):
+            if len(identifiers) != len(obj):
                 raise ValueError("""Identifiers must be a list, 
-                which size equals vectors's length""") #IGNORE:C0301
+                which size equals vectors's length""") 
             
-            ret = _Vectors(args[0], identifiers)
+            ret = _Vectors(obj, identifiers)
         else:
-            ret = _Vectors(args[0], [])
+            ret = _Vectors(obj, [])
     else:
         # from a sequence
         index_variable = error.ParseKargs(kargs, "IndexVariable", False, 

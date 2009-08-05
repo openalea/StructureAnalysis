@@ -356,8 +356,7 @@ def Clustering(matrix, utype, *args, **kargs):
     # first the partition case
     if utype == "Partition":
         error.CheckArgumentsLength(args, 1, 1)
-        error.CheckKargs(kargs, 
-                         ["Algorithm", "Prototypes", "Initialization"])
+        error.CheckKargs(kargs, ["Algorithm", "Prototypes", "Initialization"])
         Initialization = error.ParseKargs(kargs, "Initialization", 1,
                                           possible=[1, 2])
         
