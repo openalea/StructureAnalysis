@@ -9,6 +9,10 @@ __revision__ = "$Id:  $"
 
 from openalea.sequence_analysis.data_transform import *
 from openalea.sequence_analysis.sequences import Sequences
+from openalea.stat_tool import Mixture
+from openalea.stat_tool import Distribution
+from openalea.stat_tool import Simulate
+from openalea.stat_tool import Merge
 
 class TestRemoveRun():
 
@@ -61,3 +65,25 @@ def test_semi_markov_data():
 def test_discrete_sequences():
     """not implemented"""
     pass
+
+
+
+class TestMerge():
+    
+    def __init__(self):
+        pass
+        #data.__init__(self)
+        
+    def test_merge(self):
+        
+        mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 
+                        0.4, Distribution("NB", 10, 10, 0.5))
+
+        mixt_histo1 = Simulate(mixt1, 200)
+
+        histo10 = mixt_histo1.extract_component(1)
+        histo11 = mixt_histo1.extract_component(2)
+
+        histo12 = Merge(histo10, histo11)
+
+        assert histo12

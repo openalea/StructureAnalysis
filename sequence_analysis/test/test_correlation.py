@@ -32,7 +32,15 @@ class Data():
                           Output="Residual")
         return seq69
     
+def CorrelationData(index=1):
+    """Returns a correlation
+    
+    index from 1 to 3"""
+    seq66 = Sequences("data/laricio_date66.seq")
+    ret = ComputeCorrelation(seq66, index)
+    return ret
 
+   
 class test_ComputeCorrelation(Data):
         
     def __init__(self):
@@ -88,7 +96,7 @@ class test_ComputeWhiteNoiseCorrelation(test_ComputeCorrelation):
      
     def test_distribution(self): 
         data = self.correlation
-        ComputeWhiteNoiseCorrelation(data , Distribution("Binomial", 0,4,0.5))
+        ComputeWhiteNoiseCorrelation(data , Distribution("BINOMIAL", 0,4,0.5))
      
 class test_ComputePartialAutoCorrelation(Data):
     

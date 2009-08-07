@@ -46,7 +46,7 @@ seq8_0 = RemoveRun(seq7, 2, 0, "End")
 seq8 = SegmentationExtract(seq8_0, 1, 2)
 
 seq10 = Merge(seq2, seq4, seq6, seq8)
-
+print seq10.nb_variable
 seq11 = Transcode(seq10, [0, 1, 0])
 
 

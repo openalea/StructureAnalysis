@@ -16,6 +16,13 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 
 from tools import interface
 
+
+def SemiMarkovData():
+    sm =  SemiMarkov('data/semi_markov.dat')
+    ret = Simulate(sm, 1, 1000, True)
+    return sm
+
+    
 class Test(interface):
     """a simple unittest class
     

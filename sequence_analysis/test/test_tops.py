@@ -10,11 +10,21 @@ __revision__ = "$Id:  $"
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.tops import Tops
+from openalea.sequence_analysis.simulate import Simulate
+from openalea.sequence_analysis.top_parameters import TopParameters
 from openalea.sequence_analysis.data_transform import *
   
 
 
 from tools import interface
+
+
+def TopsData():
+    """Returns simulated top"""
+    param1 = TopParameters("data/param1.p", MaxPosition=20)
+    tops = Simulate(param1, 100, 30)
+    return tops
+
 
 class Test(interface):
     """a simple unittest class

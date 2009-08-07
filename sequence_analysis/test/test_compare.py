@@ -16,6 +16,7 @@ from openalea.sequence_analysis.estimate import Estimate
 from openalea.sequence_analysis.data_transform import Thresholding
 
 from data import path
+from tools import runTestClass
 
 class _Compare():
     """
@@ -124,3 +125,11 @@ class Test_Compare_hsmc_with_sequences(_Compare):
                            Thresholding(data[3], MinProbability=0.001), data[1],
                            10000)
         assert matrix20
+
+
+if __name__ ==  "__main__":
+    runTestClass(Test_Compare_Histograms())
+    runTestClass(Test_Compare_Sequences())
+    runTestClass(Test_Compare_Sequences_VectorDistance())
+    runTestClass(Test_Compare_Vectors_VectorDistance())
+    runTestClass(Test_Compare_hsmc_with_sequences())

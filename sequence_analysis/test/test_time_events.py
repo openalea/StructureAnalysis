@@ -93,7 +93,7 @@ class Test(interface):
         data = self.data
         histo = data.get_hnb_event(20)
     
-    def test_get_hmixture(self):
+    def _test_get_hmixture(self):
         data = self.data
         histo = data.get_hmixture()
 

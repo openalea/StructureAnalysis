@@ -15,6 +15,7 @@ from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.vectors import Vectors
 
+from tools import runTestClass
 
 
 class _Cluster():
@@ -136,7 +137,7 @@ class TestVectors1(_Cluster):
     def test_cluster_limit(self):
         data = self.data
         cluster1 = data.cluster_limit(1, [2, 4, 6])
-        cluster2 = Cluster(data, "Limit", [2, 4, 6])
+        cluster2 = Cluster(data, "Limit",  [2, 4, 6])
         assert str(cluster1) == str(cluster2)
 
 
@@ -159,8 +160,9 @@ class TestSequences1(_Cluster):
         
     def test_cluster_limit(self):
         data = self.data
+        print data.nb_variable
         cluster1 = data.cluster_limit(1,[2], False)
-        cluster2 = Cluster(data,"Limit",[2])
+        cluster2 = Cluster(data,"Limit", [2] , AddVariable=False)
         assert str(cluster1) == str(cluster2)
         
         
@@ -186,4 +188,12 @@ class TestSequencesn(_Cluster):
         cluster1 = data.cluster_limit(1, [2 ], False)
         cluster2 = Cluster(data, "Limit", 1, [2])
         assert str(cluster1) == str(cluster2)
-        
+       
+if __name__ ==  "__main__":
+    runTestClass(TestVectors1())
+    runTestClass(TestVectorsn())
+    runTestClass(TestSequences1())
+    runTestClass(TestSequencesn())
+    runTestClass(TestConvolution())
+    runTestClass(TestCompound())
+    runTestClass(TestHistogram())

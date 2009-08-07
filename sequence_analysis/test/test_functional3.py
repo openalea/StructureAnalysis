@@ -150,6 +150,7 @@ seq61 = SojournTimeSequences(seq60, 1)
 # Display(seq61, ViewPoint=Data, Format=Line)
 
 
+
 mixt61 = Mixture(21. / 406., ExtractDistribution(hsmc6, "Observation", 1, 0), 29. / 406., ExtractDistribution(hsmc6, "Observation", 1, 1), 140. / 406., ExtractDistribution(hsmc6, "Observation", 1, 2), 87. / 406., ExtractDistribution(hsmc6, "Observation", 1, 3), 71. / 406., ExtractDistribution(hsmc6, "Observation", 1, 4), 58. / 406., ExtractDistribution(hsmc6, "Observation", 1, 5))
 mixt61 = Mixture(0.0497296, ExtractDistribution(hsmc6, "Observation", 1, 0), 0.0750034, ExtractDistribution(hsmc6, "Observation", 1, 1), 0.3416, ExtractDistribution(hsmc6, "Observation", 1, 2), 0.207806, ExtractDistribution(hsmc6, "Observation", 1, 3), 0.159426, ExtractDistribution(hsmc6, "Observation", 1, 4), 0.166434, ExtractDistribution(hsmc6, "Observation", 1, 5))
 # Plot(Fit(ExtractHistogram(seq70, "Value", 1), ExtractDistribution(mixt61, "Mixture")))

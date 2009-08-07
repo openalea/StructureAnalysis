@@ -17,6 +17,8 @@ from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class
@@ -366,3 +368,6 @@ seq.sojourn_time_sequences
 seq.remove_index_parameter                   
 seq.round                    
 """
+
+if __name__ == "__main__":
+    runTestClass(Test())

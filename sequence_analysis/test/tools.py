@@ -8,6 +8,11 @@ from openalea.stat_tool.output import Display, Save
 
 __revision__ = "$Id: tools.py 6219 2009-04-08 14:11:08Z cokelaer $"
 
+def runTestClass(myclass):
+    functions = [x for x in dir(myclass) if x.startswith('test')]
+    for function in functions:
+        getattr(myclass, function)()
+
 class interface():
     """Interface to be used by test file that perform tests on the following
     data structure: compound, convolution, mixture, histogram, vector
