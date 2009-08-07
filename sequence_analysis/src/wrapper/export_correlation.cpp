@@ -45,6 +45,7 @@ using namespace sequence_analysis;
 #define WRAP CorrelationWrap
 class CorrelationWrap {
 
+
 public:
 
   // Merge

@@ -304,8 +304,6 @@ public:
         symbol[i] = boost::python::extract<int>(input_symbol[i]);
       }
 */
-    // todo : check that this macros does what we want. auto_ptr_array may not
-    // be needed here.
     CREATE_ARRAY(input_symbol, int, symbol);
     ret = input.lumpability_estimation(error, os, symbol.get(), penalty_type,
         order, counting_flag);

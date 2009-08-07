@@ -153,6 +153,8 @@ public:
     HEADER(Time_events);
     CREATE_ARRAY(input_timev, const Time_events *, timev)
 
+     cout << "HERE in tim evemtes"<<endl;
+
     ret = new Time_events(timev_size, timev.get());
 
     FOOTER;
@@ -166,12 +168,12 @@ public:
     HEADER_OS(Renewal);
     ret = input.estimation(error, os, type, estimator, nb_iter, equilibrium_estimator,
                           mean_computation, weight, penalty_type, outside);
-    
+
     FOOTER_OS;
   }
-  
+
   static Renewal*
-  estimation_inter_event(const Time_events& input, char type, const Parametric &iinter_event, 
+  estimation_inter_event(const Time_events& input, char type, const Parametric &iinter_event,
                 int estimator, int nb_iter,
                 int equilibrium_estimator, int mean_computation, double weight,
                 int penalty_type, int outside)
@@ -179,7 +181,7 @@ public:
     HEADER_OS(Renewal);
     ret = input.estimation(error, os, type, iinter_event, estimator, nb_iter, equilibrium_estimator,
                           mean_computation, weight, penalty_type, outside);
-    
+
     FOOTER_OS;
   }
 
@@ -223,7 +225,7 @@ void class_time_events() {
     DEF_RETURN_VALUE("time_scaling", TimeEventsWrap::time_scaling, args("scaling"),"returns a time-scaled TimeEvents")
     DEF_RETURN_VALUE("time_select", TimeEventsWrap::time_select, args("min index", "max index" ),"returns a time-selectd TimeEvents")
     DEF_RETURN_VALUE("nb_event_select", TimeEventsWrap::nb_event_select, args("nb_event_select"),"returns a nb_event-selected TimeEvents")
-    DEF_RETURN_VALUE_NO_ARGS("merge", TimeEventsWrap::merge, "Merge sequences")
+    DEF_RETURN_VALUE_NO_ARGS("merge", TimeEventsWrap::merge, "Merge tim events")
 
     DEF_RETURN_VALUE("estimation", TimeEventsWrap::estimation, args("tobedone"), "estimation")
     DEF_RETURN_VALUE("estimation_inter_event", TimeEventsWrap::estimation_inter_event, args("tobedone"), "estimation")

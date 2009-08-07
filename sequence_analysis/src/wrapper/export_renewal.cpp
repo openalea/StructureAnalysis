@@ -213,12 +213,35 @@ public:
     FOOTER;
   }
 
+  //merge inherited from TimeEvents
+
+  static Renewal_data*
+  merge(const Renewal_data& v, const boost::python::list& vecs)
+  {
+    Format_error error;
+    Renewal_data * ret = NULL;
+
+     cout << "HERE"<<endl;
+    int nb_vec = len(vecs);
+    sequence_analysis::wrap_util::auto_ptr_array<const Renewal_data *> vects(
+        new const Renewal_data*[nb_vec]);
+
+    for (int i = 0; i < nb_vec; i++)
+      vects[i] = boost::python::extract<Renewal_data*> (vecs[i]);
+
+    ret = v.merge(error, nb_vec, vects.get());
+
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+
+    return ret;
+  }
 };
 
 void class_renewal_data() {
 
 
-  class_<Renewal_data, bases<Time_events> > ("_Renewal_data", "Renewal_data")
+  class_<Renewal_data, bases<Time_events> > ("_Renewal_data", "Renewal_data", no_init)
     .def(init <int, int>())
     .def(init <int, Renewal>())
     .def(init <Time_events, int>())
@@ -228,13 +251,12 @@ void class_renewal_data() {
     .def("get_renewal", &Renewal_data::get_renewal, return_value_policy<manage_new_object> (),"get renewal")
     .def("get_type", &Renewal_data::get_type, "get type")
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
+    DEF_RETURN_VALUE_NO_ARGS("merge", WRAP::merge, "Merge renewal_data. Type Merge? for more information")
 
 
 
 /*
     Renewal_data(int nb_sample , const Renewal_data **itimev);
-
-    Renewal_data* merge(Format_error &error , int nb_sample , const Renewal_data **itimev) const;
 
     Renewal* estimation(Format_error &error , std::ostream &os , const Parametric &iinter_event ,
                         int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
@@ -263,7 +285,7 @@ void class_renewal_data() {
 
 
 
-class RenewalIteratorWrap 
+class RenewalIteratorWrap
 {
 
 public:
@@ -272,19 +294,19 @@ public:
   simulation(Renewal_iterator& input, int nb_sequence=1, char type='v')
   {
     int *sequence;
-  
+
     input.simulation(nb_sequence, type);
     boost::python::list output_sequence;
-   
+
     for (int i=0; i < input.get_length(); i++)
     {
         output_sequence.append(input.get_sequence(i));
     }
     return output_sequence;
- } 
+ }
 };
 
-void 
+void
 class_renewal_iterator()
 {
 
@@ -293,7 +315,7 @@ class_renewal_iterator()
     .add_property("get_interval", &Renewal_iterator::get_interval)
     .add_property("get_length", &Renewal_iterator::get_length)
     .add_property("get_counter", &Renewal_iterator::get_counter)
-    .def("get_sequence", &Renewal_iterator::get_sequence, args("index"))  // to be done 
+    .def("get_sequence", &Renewal_iterator::get_sequence, args("index"))  // to be done
     .def("simulation", RenewalIteratorWrap::simulation,  "simulation")
 ;
 }

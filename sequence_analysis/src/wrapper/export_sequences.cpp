@@ -409,7 +409,7 @@ public:
   {
     HEADER(Sequences);
     std::stringstream s;
- 
+
     boost::python::extract<int> get_min(min);
     boost::python::extract<int> get_max(max);
 
@@ -559,6 +559,9 @@ public:
       l[i] = extract<int> (symbol[i]);
 
     SIMPLE_METHOD_TEMPLATE_1(seq, transcode, Sequences, variable, l.get());
+
+    //TODO in aml, if seq.transcode is correct, there is an additional call
+    // to seq.markovian_sequences()
   }
 
   static Sequences*
@@ -570,13 +573,13 @@ public:
   static Sequences*
   length_select(const Sequences& input,  int min_length, int max_length, bool keep)
   {
-     Format_error error; 
+     Format_error error;
     Sequences* ret;
     std::ostringstream os;
 
     ret = input.length_select(error, os,
 		min_length, max_length, keep);
-    if (!ret) 
+    if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     cout << os.str() << endl;
     return ret;
@@ -669,13 +672,13 @@ public:
   index_parameter_select(const Sequences& input, int min_index_parameter,
       int max_index_parameter, bool keep)
   {
-    Format_error error; 
+    Format_error error;
     Sequences* ret;
     std::ostringstream os;
-    
+
     ret = input.index_parameter_select(error,  os,
 		min_index_parameter, max_index_parameter, keep);
-    if (!ret) 
+    if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     cout << os.str() << endl;
     return ret;
@@ -797,10 +800,10 @@ public:
 
   static Correlation*
   correlation_computation(const Sequences& input, int variable1, int variable2,
-  int itype, int max_lag, int normalization)
+  int itype, int max_lag, int normalization, bool individual_mean)
   {
     SIMPLE_METHOD_TEMPLATE_1 (input, correlation_computation,
-      Correlation, variable1, variable2, itype, max_lag, normalization)
+      Correlation, variable1, variable2, itype, max_lag, normalization, individual_mean)
   }
 
   static Distance_matrix*
@@ -939,7 +942,7 @@ public:
     ret = input.segmentation(error,iidentifier,  nb_segment,
       ivector_dist, os, output);
     FOOTER_OS;
-  } 
+  }
 
 
 
@@ -1068,7 +1071,6 @@ class_sequences()
    DEF_RETURN_VALUE_NO_ARGS("merge", SequencesWrap::merge, "Merge sequences")
    DEF_RETURN_VALUE_NO_ARGS("merge_variable", SequencesWrap::merge_variable, "Merge variables")
    DEF_RETURN_VALUE_NO_ARGS("markovian_sequences", SequencesWrap::markovian_sequences , "returns markovian sequence")
-   DEF_RETURN_VALUE_NO_ARGS("extract_sequence_length", SequencesWrap::extract_length , "todo")
 
 ;
 

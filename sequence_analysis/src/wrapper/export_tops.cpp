@@ -38,7 +38,8 @@ using namespace boost;
 
 ////////////////////// Export tops ////////////////////////////////////////
 
-class TopParametersWrap
+#define WRAP TopParametersWrap
+class WRAP
 {
 
 public:
@@ -50,7 +51,6 @@ public:
     Top_parameters *top_parameters = NULL;
 
     top_parameters = top_parameters_ascii_read(error, filename, max_position);
-
     if (!top_parameters)
         sequence_analysis::wrap_util::throw_error(error);
 
@@ -61,23 +61,34 @@ public:
   extract(const Top_parameters& top, int position)
   {
     SIMPLE_METHOD_TEMPLATE_1(top, extract, Parametric_model, position);
-    }
+  }
 
   static Tops*
   simulation_dists(const Top_parameters& top, int nb_top,
       const Distribution &nb_trial, const Distribution &nb_axillary)
   {
-    SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops,
-          nb_top, nb_trial, nb_axillary);
+    SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops, nb_top, nb_trial,
+        nb_axillary);
   }
 
   static Tops*
-  simulation(const Top_parameters& top, int nb_top, int nb_trial,
+  simulate(const Top_parameters& top, int nb_top, int nb_trial,
       int nb_axillary)
   {
-    SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops,
-        nb_top, nb_trial, nb_axillary);
+    SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops, nb_top, nb_trial,
+        nb_axillary);
   }
+
+  static MultiPlotSet*
+  get_plotable(const Top_parameters& p)
+  {
+    Format_error error;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret)
+      ERROR;
+    return ret;
+  }
+
 
 };
 
@@ -101,11 +112,14 @@ void class_top_parameters() {
     .add_property("max_position", &Top_parameters::get_max_position)
 
     DEF_RETURN_VALUE("get_axillary_nb_internode", &Top_parameters::get_axillary_nb_internode,args("position"), "returns axillary nb internode distribution")
-    DEF_RETURN_VALUE("extract", &TopParametersWrap::extract, args("position"), "extract parametric model")
-    DEF_RETURN_VALUE("simulation_dists", &TopParametersWrap::simulation_dists,args("position"), "simulation type1")
-    DEF_RETURN_VALUE("simulation", &TopParametersWrap::simulation,args("position"), "simulation ")
+    DEF_RETURN_VALUE("extract", WRAP::extract, args("position"), "extract parametric model")
+    DEF_RETURN_VALUE("simulation_dists", WRAP::simulation_dists,args("position"), "simulation type1")
+    DEF_RETURN_VALUE("simulate", WRAP::simulate,args("position"), "simulate ")
 
     DEF_RETURN_VALUE_NO_ARGS("get_tops", &Top_parameters::get_tops,     "returns tops")
+
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
+
     ;
 
 
@@ -121,6 +135,7 @@ void class_top_parameters() {
   */
 
 }
+#undef WRAP
 
 class TopsWrap
 {
@@ -198,6 +213,17 @@ public:
         equal_probability);
   }
 
+  static Tops*
+  merge(const Tops& input, const boost::python::list input_timev)
+   {
+     HEADER(Tops);
+     CREATE_ARRAY(input_timev, const Tops *, timev)
+     ret = new Tops(timev_size, timev.get());
+     FOOTER;
+   }
+
+
+
 };
 
 // Boost declaration
@@ -227,13 +253,14 @@ void class_tops() {
     DEF_RETURN_VALUE_NO_ARGS("reverse", TopsWrap::reverse,"reverse method")
     DEF_RETURN_VALUE_NO_ARGS("get_nb_internode", &Tops::get_nb_internode, "returns histogram of nb internode")
     DEF_RETURN_VALUE_NO_ARGS("get_top_parameters", &Tops::get_top_parameters, "returns top parameters")
+    DEF_RETURN_VALUE("merge", &TopsWrap::merge, args("list of top instances"), "returns top parameters")
+
     ;
 
 //herits from Stat interface the following functions. Do we need to expose them ?
 /*
   Tops(const Tops &tops , int inb_sequence , int *index);
   Tops(const Tops &tops , bool model_flag = true , bool reverse_flag = false);
-  Tops(int nb_sample , const Tops **ptops);
 
   std::ostream& line_write(std::ostream &os) const;
   std::ostream& ascii_data_write(std::ostream &os , char format = 'c' , bool exhaustive = false) const;
