@@ -141,7 +141,9 @@ def Cluster(obj, utype, *args, **kargs):
     AddVariable = error.ParseKargs(kargs, "AddVariable", False, 
                                    possible=[False, True])
     
+    
     error.CheckArgumentsLength(args, 1, 2)
+    
     
     # search for the function name
     if hasattr(obj, cluster_type[utype]):
@@ -165,6 +167,16 @@ def Cluster(obj, utype, *args, **kargs):
                 error.CheckType([args[0]], [list])
             if utype == "Information":
                 error.CheckType([args[0]], [[int, float]])
+            try:
+                ret = func(args[0]) # histogram case
+            except:
+                try:
+                    ret = func(1, args[0]) # vector case
+                except:
+                    try:
+                        ret = func(1, args[0], AddVariable) # sequences case
+                    except:
+                        pass
         else:
             raise ValueError(error.STAT_TOOL_NB_VARIABLE_ERROR)
     else:
@@ -175,13 +187,14 @@ def Cluster(obj, utype, *args, **kargs):
             if utype == "Limit":
                 error.CheckType([args[0]], [int])
                 error.CheckType([args[1]], [list])
+            try:
+                ret = func(*args)
+            except:
+                ret = func(args[0], args[1], AddVariable)
+        else:
+            raise ValueError(error.STAT_TOOL_NB_VARIABLE_ERROR)
     
     
-    #calling the function    
-    try:
-        ret = func(*args.append(AddVariable))
-    except:
-        ret = func(*args)
      
     if hasattr(ret, 'markovian_sequences'):
         func = getattr(ret, 'markovian_sequences')
@@ -268,15 +281,27 @@ def Transcode(obj, *args, **kargs):
     if hasattr(obj, 'nb_variable'):# case sequence, vectors
         nb_variable = obj.nb_variable
         if len(args)==1 and nb_variable == 1:
-            pass
+            print kargs.keys()
+
+
+            try:
+                ret = obj.transcode(1, args[0], AddVariable)
+            except:
+                ret = obj.transcode(1, args[0])
+        
         elif len(args)==2 and nb_variable!=1:
-            pass
+            print kargs.keys()
+            try:
+                ret = obj.transcode(args[0], args[1], AddVariable)
+            except:
+                ret = obj.transcode(args[0], args[1])
+        
         else:
             raise ValueError(myerror)
-        try:
-            ret = obj.transcode(*args.append(AddVariable))
-        except:
-            ret = obj.transcode(*args)
+        
+        
+            
+            
     else:# case histogram and co
         nb_variable = None
         new_values = args[0]
@@ -356,7 +381,8 @@ def Clustering(matrix, utype, *args, **kargs):
     # first the partition case
     if utype == "Partition":
         error.CheckArgumentsLength(args, 1, 1)
-        error.CheckKargs(kargs, ["Algorithm", "Prototypes", "Initialization"])
+        error.CheckKargs(kargs, 
+                         ["Algorithm", "Prototypes", "Initialization"])
         Initialization = error.ParseKargs(kargs, "Initialization", 1,
                                           possible=[1, 2])
         

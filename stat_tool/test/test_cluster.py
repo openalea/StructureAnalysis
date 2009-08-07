@@ -32,7 +32,7 @@ class Test:
         histo2 = Cluster(fagus, "Step", 2)
         histo3 = Cluster(fagus, "Information", 0.8)
         histo4 = Cluster(fagus, "Limit", [2, 4, 6, 8, 10])
-
+        
         assert histo2
         assert histo3
         assert histo4
@@ -55,6 +55,13 @@ class Test:
         assert str(Cluster(v, "Step", 1, 2)) == str(v.cluster_step(1, 2))  
         assert str(Cluster(v, "Limit", 1, [2, 4, 6])) == \
             str(v.cluster_limit(1, [2, 4 ,6]))
+    
+    def _test_cluster_vectors1(self):
+        v = Vectors([[1], [2], [3]])
+        
+        assert str(Cluster(v, "Step", 2)) == str(v.cluster_step(1, 2))  
+        assert str(Cluster(v, "Limit",  [2])) == \
+            str(v.cluster_limit(1,[2]))
                     
     def test_cluster_vectors_badtype(self):
         v = Vectors([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
