@@ -14,7 +14,8 @@ from openalea.sequence_analysis._sequence_analysis import _Sequences
 import _sequence_analysis
 
 __all__ = ['TimeEvents',
-           '_Time_events', 'NbEventSelect']
+           '_Time_events', 
+            'NbEventSelect']
 
 
 # Extend dynamically class
@@ -83,14 +84,12 @@ def TimeEvents(*args, **kargs):
     NextDate = kargs.get("NextDate", -1)
      
     if len(args)==1 and isinstance(args[0], str):
-        print 'time events filename case '
         filename = args[0]
         if os.path.isfile(filename):
             time_events =  _Time_events(filename)
         else:
             raise IOError("bad file name")
     elif isinstance(args[0], _Sequences):
-        print 'time events Sequece case '
         seq = args[0]
         nb_variable = seq.nb_variable
         if nb_variable != 1:
@@ -107,7 +106,6 @@ def TimeEvents(*args, **kargs):
                                      PreviousDate, NextDate)
 
     else:
-        print 'time events other case '
         #todo finish this code with examples ? 
         distribution = args[0]
         time = args[1]

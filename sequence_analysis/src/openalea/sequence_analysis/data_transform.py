@@ -6,8 +6,25 @@ uthor:/
 """
 __revision__ = "$Id: $"
 
+from openalea.stat_tool.error import *
 import _sequence_analysis
+from _sequence_analysis import _Markovian_sequences
+from _sequence_analysis import _Sequences
+from _sequence_analysis import _Semi_markov
+from _sequence_analysis import _Semi_markov_data
+from _sequence_analysis import  _Top_parameters
+from _sequence_analysis import _Variable_order_markov
+from _sequence_analysis import _Variable_order_markov_data
+from _sequence_analysis import _Nonhomogeneous_markov
+from _sequence_analysis import _Nonhomogeneous_markov_data
+from _sequence_analysis import _Renewal
+from _sequence_analysis import _Hidden_variable_order_markov
+from _sequence_analysis import _Hidden_semi_markov
+
 from openalea.stat_tool._stat_tool import _VectorDistance
+from openalea.stat_tool import error
+
+from enumerate import type_dict2
 
 
 def __get_mode__(kargs):
@@ -191,17 +208,10 @@ def ExtractVectors(obj, key, *args):
         :func:`~openalea.stat_tool.vectors.VarianceAnalysis`.
     """
     
-    type_dict = {
-        "Length"            : _sequence_analysis.LENGTH,
-        "NbRun"             : _sequence_analysis.NB_RUN,
-        "NbOccurrence"      : _sequence_analysis.NB_OCCURRENCE,
-        "FirstOccurrence"   : _sequence_analysis.FIRST_OCCURRENCE,
-        "Mean"              : _sequence_analysis.SEQUENCE_MEAN,
-        "Cumul"             : _sequence_analysis.SEQUENCE_CUMUL
-        }        
+       
 
-    if key not in type_dict.keys():
-        raise TypeError("key must be in %s" % type_dict.keys())
+    if key not in type_dict2.keys():
+        raise TypeError("key must be in %s" % type_dict2.keys())
      
     
     if obj.nb_variable == 1: 
@@ -210,16 +220,16 @@ def ExtractVectors(obj, key, *args):
         variable = obj.nb_variable
         
     if key == "Length":
-        sequence = obj.extract_vectors(type_dict[key], -1, -1)
+        sequence = obj.extract_vectors(type_dict2[key], -1, -1)
     elif key in ["Cumul", "Mean"]:
-        sequence = obj.extract_vectors(type_dict[key], variable, -1)
+        sequence = obj.extract_vectors(type_dict2[key], variable, -1)
     elif len(args)==2:
         variable = args[0]
         value = args[1]
-        sequence = obj.extract_vectors(type_dict[key], variable, value)
+        sequence = obj.extract_vectors(type_dict2[key], variable, value)
     elif len(args)==1 and obj.nb_variable==1:
         value = args[0]
-        sequence = obj.extract_vectors(type_dict[key], 1, value)
+        sequence = obj.extract_vectors(type_dict2[key], 1, value)
     else:
         raise TypeError("nb_variable =1 so varaible must be 1")
     
@@ -709,7 +719,7 @@ def IndexParameterExtract(obj, minIndex, MaxIndex=40):
         :func:`VariableScaling`.
     """
 
-    return obj.index_parameter_extract(minIndex, maxIndex)
+    return obj.index_parameter_extract(minIndex, MaxIndex)
     
 def IndexParameterSelect(obj, minIndex, *args, **kargs):    
     """IndexExtract
@@ -1260,3 +1270,149 @@ def vec2list(vector):
     for i in range(0, vector.nb_vector):
         output.append(vector[i][0])
     return output
+
+
+def Extract(obj, *args, **kargs):
+    
+    
+    # clean all those enumerate and put them to common enumerate.py
+    INTER_EVENT = 0 
+    WITHIN_OBSERVATION_PERIOD = 1
+    LENGTH_BIAS = 2
+    BACKWARD_RECURRENCE_TIME = 3
+    FORWARD_RECURRENCE_TIME = 4
+    NB_EVENT = 5
+    MIXTURE = 6
+     
+    renewal_nb_event_map = { 
+            "InterEvent" : INTER_EVENT,
+            "LengthBias" : LENGTH_BIAS,
+            "Backward" : BACKWARD_RECURRENCE_TIME,
+            "Forward" : FORWARD_RECURRENCE_TIME,
+            "Mixture" : MIXTURE,
+            "Within": WITHIN_OBSERVATION_PERIOD,
+           }
+    
+    seq_map = {"Observation":0, 
+               "FirstOccurrence":1,
+               "Recurrence":2, 
+               "Sojourn":3,
+               "NbRun":6,
+               "NbOccurrence":7,
+               "Forward": -1}
+    
+    _INITIAL_RUN = 4
+    _FINAL_RUN = 5
+    _LENGTH = 8
+    _SEQUENCE_CUMUL = 9
+    _SEQUENCE_MEAN = 10
+   
+    histogram_type = {
+                      "FinalRun":5,
+                      "InitialRun":4,
+                      }
+     
+    NbEvent = kargs.get("NbEvent", NB_EVENT)  
+    #error.CheckType(NbEvent, [int])
+    
+    
+    
+    
+    if isinstance(obj, _Top_parameters):
+        position = args[0]
+        error.CheckType(position, [int])
+        ret = obj.extract(position)
+        
+    # renewal/timeevents case
+    elif type(obj) in  [_Renewal]:
+        key = args[0]    
+        error.CheckType(key, [str])
+
+        if key == "NbEvent":
+            error.CheckArgumentsLength(args, 2, 2)
+            NbEvent = kargs.get("NbEvent", NB_EVENT)  
+            time = args[1]
+            ret =  obj.extract(NbEvent, time)
+        else:
+            time = -1
+            ret = obj.extract(renewal_nb_event_map[key], time)
+        
+                                          
+    # TODO: bug ? here, we need to specify the _sequence_analysis module
+    # before _Markovian_sequences otherwise even though obj is Markovian_Seqiences, 
+    # it is not found. Found with stat_tool/test/stat_tool_test.py                       
+    elif type(obj) in [_Sequences,
+                       _Markovian_sequences, 
+                       _Variable_order_markov_data,
+                       _Semi_markov_data, 
+                       _Nonhomogeneous_markov_data]:
+                
+        error.CheckType([args[0]], [str])  
+    
+        if args[0] == 'Value':  
+            if obj.nb_variable == 1:
+                #todo: the following call does not work
+                #error.CheckArgumentsLength(args, 2, 2)
+                variable = 1
+            else:
+                #todo: the following call does not work
+                #error.CheckArgumentsLength(args, 3, 3)
+                error.CheckType([args[1]], [int])
+                variable = args[1]
+            
+            ret = obj.extract_value(variable)
+            
+        elif args[0] == 'Length': 
+            #todo: the following call does not work
+            error.CheckArgumentsLength(args, 1, 1)
+            ret = obj.extract_length()
+        else:
+            raise ValueError('With the given type, first argument must be Value or Legnth string.')
+        
+    elif type(obj) in [ _Variable_order_markov, 
+                       _Hidden_variable_order_markov,
+                       _Semi_markov, 
+                       _Nonhomogeneous_markov, 
+                       _Hidden_semi_markov]:
+        error.CheckType([args[0]], [str])
+        key = seq_map[args[0]]
+        # forward is just for semi_markov and hidden+semi_markov
+        # add a CheckType. In addition, args[2] must be int ?
+        if args[0] == "Forward":
+
+            error.CheckArgumentsLength(args, 2, 3)
+            error.CheckType([args[1]], [int])
+            error.CheckType([args[0]], [[_Semi_markov, _Hidden_semi_markov]])
+            HistogramType = kargs.get("HistogramType", "FinalRun")
+            HistogramType = histogram_type[HistogramType]
+            ret = obj.extract(seq_map[args[0]], args[1], HistogramType)
+                    
+        elif len(args) == 2:
+            # todo: ident cannot be Observation
+            variable = 1
+            value = args[1]        
+            error.CheckType([value], [int])
+            ret = obj.extract(seq_map[args[0]], variable, value)
+        
+        elif len(args)==3:         
+            #todo: check validity of variable ?    
+            error.CheckType([args[1], args[2]], [int, int])
+            variable = args[1]
+            value = args[2]
+            ret = obj.extract(seq_map[args[0]], variable, value)
+        else:
+            raise KeyError("expect only 1 or 2 arguments after the type")
+                    
+    else:
+        print 'switch to openalea.stat_tool'
+        # related to Top, Renewal, Markov that are in sequence
+        try:
+            from openalea.stat_tool.data_transform import Extract as newExtract
+            ret = newExtract(obj, *args, **kargs)
+        except:
+            pass
+    #todo check if ret not None
+    if ret is None:
+        raise Exception("return object cannot not be None")
+    else:
+        return ret

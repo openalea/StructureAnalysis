@@ -165,7 +165,6 @@ def _estimate_renewal_count_data(obj, itype, *args, **kargs):
     Estimator = __parse_kargs__(kargs, "Estimator",
                                       default='Likelihood',
                                       dict_map=estimator_type)
-    print Estimator
     NbIteration = kargs.get("NbIteration", -1)
 
     initial_inter_event_option = False
@@ -319,7 +318,6 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
       #todo traise error if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != FORWARD_BACKWARD)) &&(occupancy_mean_option)) {
     
         if Algorithm == "EM":
-            print 'hidden semi markov 1'
             hsmarkov = obj.hidden_semi_markov_estimation_model( Type , NbState ,
                          LeftRight , Estimator , Counting , StateSequence ,
                          OccupancyMean ,NbIteration , MeanComputation)
@@ -328,7 +326,6 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         elif Algorithm == "MCEM": #FORWARD_BACKWARD_SAMPLING : 
             #if Estimator == KAPLAN_MEIER:
             #    Estimator = COMPLETE_LIKELIHOOD
-            print 'hidden semi markov 2'
             hsmarkov = obj.hidden_semi_markov_stochastic_estimation_model(
                 Type, NbState, LeftRight, MinNbSequence, MaxNbSequence,
                 Parameter, Estimator, Counting, StateSequence,
@@ -341,13 +338,11 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         
         hsmarkov = args[0] 
         if Algorithm == 'EM':
-            print 'hidden semi markov 3'
             output = obj.hidden_semi_markov_estimation(hsmarkov,
                                 Estimator, Counting, StateSequence,
                                 NbIteration, MeanComputation)
             return output
         elif Algorithm == 'MCEM':
-            print 'hidden semi markov 4'
             return obj.hidden_semi_markov_stochastic_estimation(hsmarkov,
                             MinNbSequence, MaxNbSequence,
                             Parameter, Estimator, Counting,
@@ -399,7 +394,6 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
     
     
     if len(args)>0 and isinstance(args[0], str):
-        print "Type"
         
         
         order_estimation = True
@@ -414,25 +408,21 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
                                  % (str(stochastic_process_type.keys())))
          
         if order_estimation is True:
-            print "esitmation1" 
 
             
             markov = obj.variable_order_markov_estimation1( 
                 Type, MinOrder, MaxOrder, Algorithm, Threshold, Estimator , 
                   GlobalInitialTransition , GlobalSample , CountingFlag);
         else:
-            print "esitmation2"
             markov = obj.variable_order_markov_estimation2(
                     Type, MaxOrder, GlobalInitialTransition, CountingFlag)
             
     elif isinstance(args[0], _sequence_analysis._Variable_order_markov):
-        print "esitmation3"
         markov = obj.variable_order_markov_estimation3(args[0], 
                       GlobalInitialTransition, CountingFlag)
     
 
     elif isinstance(args[0], list):
-        print "estimation4"
         symbol = args[0]
         markov = obj.lumpability_estimation(symbol, Penalty,
                                          Order, CountingFlag)
@@ -499,9 +489,7 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
         raise KeyError("Valid type are %s or %s" 
                        % (str(fct_map),
                           str(fct_map_distribution)))
-
-        
-        
+    
     if itype == "VARIABLE_ORDER_MARKOV":    
         return _estimate_variable_order_markov(obj, *args, **kargs)
     elif itype == "MARKOV":    

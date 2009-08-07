@@ -136,7 +136,7 @@ def Simulate(obj, *args, **kargs):
         NbAxillary = kargs.get("NbAxillary", 1)
         
         if isinstance(arg1,int) and isinstance(arg2,int):    
-            return obj.simulation(arg1, arg2, NbAxillary)
+            return obj.simulate(arg1, arg2, NbAxillary)
         else:
             raise TypeError("With top_parameters simulation, second and third arguments must be integers")
     # Renewal case

@@ -102,9 +102,6 @@ def _compare_markovian_sequences(obj, *args, **kargs):
                 first_list.append(arg)
             else:
                 second_list.append(arg)
-        print first_list
-        print second_list
-        print nb_seq        
         return obj.divergence_computation_sequences(first_list, second_list,
                                                      nb_seq, filename)
             
@@ -160,10 +157,8 @@ def _compare_sequences(seq, *args, **kargs):
         raise KeyError("wrong Begin or End argument. Use one of %" % 
                        indelcost_map.keys())
         
-    print IndelCost
     
     if len(args)==1:
-        print args[0]
         if isinstance(args[0], _stat_tool._VectorDistance):
             dist_matrix = seq.alignment_vector_distance(args[0], RefSequence,
                                     TestSequence, Begin, End,

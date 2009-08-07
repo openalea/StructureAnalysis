@@ -9,10 +9,18 @@ __revision__ = "$Id: $"
 
 
 import openalea.stat_tool.interface as interface
+import openalea.stat_tool.error as error
+from openalea.stat_tool._stat_tool import I_DEFAULT
+
 import _sequence_analysis
 import tools
 
 from _sequence_analysis import _Correlation
+from _sequence_analysis import _Nonhomogeneous_markov_data
+from _sequence_analysis import _Variable_order_markov_data
+from _sequence_analysis import _Semi_markov_data
+from _sequence_analysis import _Sequences
+from _sequence_analysis import _Markovian_sequences
 
 __all__ = ['_Correlation', 
            'ComputeCorrelation',
@@ -24,13 +32,9 @@ __all__ = ['_Correlation',
 # Extend dynamically class
 interface.extend_class( _Correlation, interface.StatInterface)
 
-type_dict = {"Pearson": 0,
-             "Spearman": 1,
-             "Kendall": 2,
-             "Spearman2": 3}
+from enumerate import type_dict, norm_type
+from openalea.stat_tool.error import CheckType
 
-norm_type = {"Approximated": 0,
-                 "Exact": 1, }
 
 def ComputeCorrelation(obj, *args, **kargs):
     """Computation of sample autocorrelation or cross-correlation functions.
@@ -83,26 +87,44 @@ def ComputeCorrelation(obj, *args, **kargs):
         :func:`~openalea.sequence_analysis.correlation.ComputeWhiteNoiseCorrelation`
 
 """
+
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences, 
+                            _Variable_order_markov_data, _Semi_markov_data, 
+                            _Nonhomogeneous_markov_data]])
+    
     if obj.nb_variable == 1:
         variable1 = 1
         variable2 = 1
     else:
+        error.CheckType([args[0]], [int])
+        #todo: check that variable1 <= nb_variable and > 0
         variable1 = args[0]
-        if len(args)==1:
+        if len(args) == 1:
             variable2 = variable1
-        elif len(args)==2:
+        elif len(args) == 2:
+            #todo: check that variable1 <= nb_variable and > 0
+            error.CheckType([args[1]], [int])
             variable2 = args[1]
         else:
             raise TypeError("1 or 2  non-optional arguments required")
     
     
-    max_lag = tools.__parse_kargs__(kargs, "MaxLag", -1)
-    itype = tools.__parse_kargs__(kargs, "Type", "Pearson", type_dict) 
-    normalization = tools.__parse_kargs__(kargs, "Normalization", "Exact", 
-                                          norm_type)
-
+    max_lag = error.ParseKargs(kargs, "MaxLag", I_DEFAULT)
+    itype = error.ParseKargs(kargs, "Type", "Pearson", type_dict) 
+    normalization = error.ParseKargs(kargs, "Normalization", "Exact", norm_type)
+    IndividualMean = error.ParseKargs(kargs, "IndividualMean", False)
+    
+    
+    #if normalization_option and ((type == SPEARMAN2) or (type == KENDALL)):
+    #    raise Exception
+                                                                            
+    #if individual_mean_option and (type != PEARSON):
+    #    raise Exception
+    
+    # check argument validity.
     return obj.correlation_computation(variable1, variable2,
-                                   itype, max_lag, normalization)
+                                   itype, max_lag, normalization, 
+                                   IndividualMean)
 
 
 
