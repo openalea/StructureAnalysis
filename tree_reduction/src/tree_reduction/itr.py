@@ -6,6 +6,43 @@
 
 """
 
+def signat_vert_comp(g):
+    """
+    """
+    signat_vertices={}
+    for vid in g.vertices():
+        s=[]
+        for vid2 in g.vertices():
+            if vid2 in g.out_neighbors(vid):
+                for eid in g.edges():
+                    if g._edges[eid]==(vid,vid2):
+                        s.append(g._edge_property['weight'][eid])
+            else:
+                s.append(0)
+        signat_vertices[vid]=s                             
+    return signat_vertices
+
+def signat_edg_comp(g, signat_vertices):
+    '''    
+    '''
+    signat_edges={}
+    for eid in g.edges():
+        vid1=g._edges[eid][0]
+        vid2=g._edges[eid][1]
+        s=signat_vertices[vid1][:]       
+        s.append(s[vid2-1])
+        s[vid2-1]=0
+        signat_edges[eid]=s
+    return signat_edges
+
+def quasi_isomorphic_edges(eid1, eid2, signat_edges):
+    '''
+    '''
+    if signat_edges[eid1]==signat_edges[eid2]:
+        return True
+    else:
+        return False
+
 def Rre_compt(g, paths):
     '''Computation of the reduction graph with return edges.
 
@@ -65,18 +102,6 @@ def QPPs_compt(in1):
     '''
   
     return [out1]
-
-def signat_vert_comp(in1):
-    '''    
-    '''
-
-    return [out1]
-
-def signat_edg_comp(sv):
-    '''    
-    '''
-
-    return [se]
 
 def selected_QPP(in1, in2):
     '''    

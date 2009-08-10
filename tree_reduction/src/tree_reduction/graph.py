@@ -2,7 +2,7 @@
 
 '''
 This class is a temporary class.
-It will be replace by a rooted graph class in openalea.container.
+It will be replaced by a rooted graph class in openalea.container.
 '''
 
 from openalea.container.property_graph import PropertyGraph
@@ -20,7 +20,7 @@ class RootedGraph(PropertyGraph):
         self._root = root
     root = property(get_root, set_root)
 
-def from_edges(root, edges):
+def from_edges(root, edges, edges_weight):
     g = RootedGraph(root=root)
     for e in edges:
         s,t=e
@@ -29,14 +29,17 @@ def from_edges(root, edges):
         if t not in g:
             g.add_vertex(t)
         g.add_edge(s,t)
-    update_weight(g)
-    return g
-
-def update_weight(g):
     weight = g.edge_property('weight')
     for eid in g.edges():
-        weight[eid]=1
+        weight[eid]=edges_weight[eid]  
+    update_loop(g)
+    return g
 
+def update_loop(g):
+    loop = g.edge_property('loop')
+    for eid in g.edges():
+        loop[eid]=-1
+        
 def topological_sort(g, vtx_id):
     ''' 
     Traverse the directed graph `g` in a prefix way.
