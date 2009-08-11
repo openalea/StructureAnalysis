@@ -8,14 +8,22 @@ __revision__ = "$Id: $"
 
 import os
 import openalea.stat_tool.interface as interface
+from openalea.stat_tool._stat_tool import _MixtureData
+from openalea.stat_tool._stat_tool import _CompoundData
+from openalea.stat_tool._stat_tool import _ConvolutionData
+from openalea.stat_tool._stat_tool import _DistributionData
+
 from openalea.sequence_analysis._sequence_analysis import _Time_events
+from openalea.sequence_analysis._sequence_analysis import _Renewal_data
 from openalea.sequence_analysis._sequence_analysis import _Sequences
 
-import _sequence_analysis
+#import _sequence_analysis
+from openalea.stat_tool import error
 
 __all__ = ['TimeEvents',
            '_Time_events', 
-            'NbEventSelect']
+           'NbEventSelect']
+
 
 
 # Extend dynamically class
@@ -34,7 +42,8 @@ def TimeEvents(*args, **kargs):
     :Usage:
     
     >>> TimeEvents(seq1, begin_date, end_date, PreviousDate=3, NextDate=8)   
-    >>> TimeEvents(seqn, variable, begin_date, end_date, PreviousDate=3, NextDate=8)   
+    >>> TimeEvents(seqn, variable, begin_date, end_date, PreviousDate=3,
+    ... NextDate=8)   
     >>> TimeEvents(histo, time)
     >>> TimeEvents(file_name)
     >>> h = Histogram([1,1,1,2,2,2])
@@ -42,8 +51,10 @@ def TimeEvents(*args, **kargs):
         
     :Arguments:
     
-    * seq1 (sequences): univariate time sequences (with an explicit index parameter of type TIME),
-    * seqn (sequences): multivariate time sequences (with an explicit index parameter of type TIME),
+    * seq1 (sequences): univariate time sequences (with an explicit index
+      parameter of type TIME),
+    * seqn (sequences): multivariate time sequences (with an explicit index
+      parameter of type TIME),
     * variable (int): variable index,
     * begin_date (int): initial observation date,
     * end_date (int): final observation date,
@@ -76,14 +87,15 @@ def TimeEvents(*args, **kargs):
         :func:`~openalea.sequence_analysis.data_transform.TimeScaling`, 
         :func:`~openalea.sequence_analysis.data_transform.TimeSelect`.
     
-    .. todo:: fix the build_time_events method to allows constructor with histogram
-        issue: this method is in stat_tool and returns a time events so stat_tool requires to know sequence_analysis...
+    .. todo:: fix the build_time_events method to allows constructor with
+       histogram issue: this method is in stat_tool and returns a time events
+       so stat_tool requires to know sequence_analysis...
     """ 
     
     PreviousDate = kargs.get("PreviousDate", -1)
     NextDate = kargs.get("NextDate", -1)
      
-    if len(args)==1 and isinstance(args[0], str):
+    if len(args) == 1 and isinstance(args[0], str):
         filename = args[0]
         if os.path.isfile(filename):
             time_events =  _Time_events(filename)
@@ -100,13 +112,17 @@ def TimeEvents(*args, **kargs):
             variable = 1
             begin_date = args[1]
             end_date = args[2]
-        
+        error.CheckType([variable, begin_date, end_date], [int, int, int])
             
         time_events = seq.extract_time_events(variable, begin_date, end_date,
                                      PreviousDate, NextDate)
 
     else:
-        #todo finish this code with examples ? 
+        # todo: finish this code with examples ?
+        # should work with Histogram, Mixture_data, Conv_data, comp_data
+        error.CheckArgumentsLength(args, 2, 2) 
+        error.CheckType([args[0], args[1]], [[_DistributionData, _MixtureData,
+                                     _ConvolutionData, _CompoundData], int])
         distribution = args[0]
         time = args[1]
         time_events = _Time_events(distribution, time)
@@ -115,11 +131,10 @@ def TimeEvents(*args, **kargs):
     return time_events
 
 
-
 def NbEventSelect(obj, imin, imax):
     """NbEventSelect
     
-    Selection of data item of type {time interval between two observation dates, number of events occurring between these two observation dates} according to a number of events criterion.
+    Selection of data item of type {time interval between two observation dates, number of events occurring bet    ween these two observation dates} according to a number of events criterion.
     
     :Usage:
     
@@ -141,7 +156,7 @@ def NbEventSelect(obj, imin, imax):
         :func:`~openalea.sequence_analysis.data_transform.TimeScaling`,
         :func:`~openalea.sequence_analysis.data_transform.TimeSelect`.
     """
+    error.CheckType([obj, imin, imax], 
+                    [[_Time_events, _Renewal_data], int, int])
 
     return obj.nb_event_select(imin, imax)
-
-

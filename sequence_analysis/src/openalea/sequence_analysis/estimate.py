@@ -6,106 +6,61 @@ uthor:/
 """
 __revision__ = "$Id:  $"
 
-import sys,os
 
 import openalea.stat_tool._stat_tool as _stat_tool
-import _sequence_analysis
-import sequences
-from tools import __parse_kargs__
+from openalea.stat_tool import error
 
+#from tools import __parse_kargs__
+
+# constants
+from openalea.stat_tool._stat_tool import  ONE_STEP_LATE, COMPUTED
+from openalea.stat_tool._stat_tool import COMPLETE_LIKELIHOOD, PARTIAL_LIKELIHOOD
+from openalea.stat_tool._stat_tool import I_DEFAULT, D_DEFAULT
+
+# maps
 from openalea.stat_tool.estimate import estimator_type
+from openalea.stat_tool.estimate import outside_type
+from openalea.stat_tool.estimate import smoothing_penalty_type
+
+from openalea.sequence_analysis.enumerate import estimator_semi_markov_type
+from openalea.sequence_analysis.enumerate import ident_map
+from openalea.sequence_analysis.enumerate import mean_computation_map
+from openalea.sequence_analysis.enumerate import markovian_algorithms
+from openalea.sequence_analysis.enumerate import mean_computation_map
+from openalea.sequence_analysis.enumerate import sub_markovian_algorithms
+from openalea.sequence_analysis.enumerate import algorithm
+from openalea.sequence_analysis.enumerate import estimator
+from openalea.sequence_analysis.enumerate import likelihood_penalty_type
+from openalea.sequence_analysis.enumerate import stochastic_process_type
+
+# structure class
+from openalea.sequence_analysis._sequence_analysis import _Hidden_semi_markov
+from openalea.sequence_analysis._sequence_analysis \
+    import _Hidden_variable_order_markov
+from openalea.sequence_analysis._sequence_analysis import _Tops
+from openalea.sequence_analysis._sequence_analysis import _Variable_order_markov
+from openalea.sequence_analysis._sequence_analysis import _Renewal_data
+from openalea.sequence_analysis._sequence_analysis import _Time_events
+
+from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _Compound
+from openalea.stat_tool._stat_tool import _Convolution
+from openalea.stat_tool._stat_tool import _ParametricModel
 
 __all__ = ['Estimate']
 # to be checked or improve. Maybe the c++ code could be more explicit, i.e.,
 # e switched to elementary and so on.
 
-stochastic_process_type = {
-    'Ordinary': 'o',
-    'Equilibrium' : 'e'
-    }
-
-markovian_algorithms = {
-    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
-    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
-    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
-    'ForwardBackwardSampling':_stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
-    'GeneralizedViterbi':_stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
-    'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,             
-    'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,             
-    'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
-}
-
-sub_markovian_algorithms = {                    
-    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
-    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
-}               
-
-algorithm = {
-    'CTM_BIC':_sequence_analysis.Algorithm.CTM_BIC , # // algorithme Context Tree Maximizing/BIC
-    'CTM_KT': _sequence_analysis.Algorithm.CTM_KT,   # // algorithme Context Tree Maximizing/Krichevsky-Trofimov
-    'LocalBIC': _sequence_analysis.Algorithm.LOCAL_BIC , # // algorithme d'elagage recursif/BIC 
-    'Context': _sequence_analysis.Algorithm.CONTEXT # // algorithme Context
-}
-
-
-estimator = {
-    'MaximumLikelihood' : _sequence_analysis.Estimator.MAXIMUM_LIKELIHOOD ,
-    'Laplace' :_sequence_analysis.Estimator.LAPLACE ,
-    'AdaptativeLaplace' :_sequence_analysis.Estimator.ADAPTATIVE_LAPLACE ,
-    'UniformSubset' :_sequence_analysis.Estimator.UNIFORM_SUBSET ,
-    'UniformCardinality':_sequence_analysis.Estimator.UNIFORM_CARDINALITY
-}
-
-
-likelihood_penalty_type = {
-    'AIC': _stat_tool.LikelihoodPenaltyType.AIC,
-    'AICc': _stat_tool.LikelihoodPenaltyType.AICc,
-    'BIC': _stat_tool.LikelihoodPenaltyType.BIC,
-    'BICc': _stat_tool.LikelihoodPenaltyType.BICc,
-    'ICL' : _stat_tool.LikelihoodPenaltyType.ICL,
-    'ICLc': _stat_tool.LikelihoodPenaltyType.ICLc,
-    }
-#todo add this enumerate in boost_python 
-
-COMPUTED = 0
-ESTIMATED = 1
-ONE_STEP_LATE = 2
-
-mean_computation_map = {
-    "Computed" : COMPUTED,
-    "Estimated" : ESTIMATED,
-    "OneStepLate" : ONE_STEP_LATE        
-}
-
-#todo add this enumerate in boost_python 
-PARTIAL_LIKELIHOOD =0
-COMPLETE_LIKELIHOOD =1
-KAPLAN_MEIER =2
-
-estimator_hidden_semi_markov = {
-    "CompleteLikelihood" : COMPLETE_LIKELIHOOD,
-    "PartialLikelihood" :  PARTIAL_LIKELIHOOD,
-    "KaplanMeier" : KAPLAN_MEIER
-}
 
 
 def _estimate_non_homogeneous_markov(obj, *args, **kargs):
  
-    STAT_LINEAR = 0
-    STAT_LOGISTIC = 1
-    STAT_MONOMOLECULAR =2
-    STAT_NONPARAMETRIC = 3
-
-    ident_map = {
-                 "VOID" :-1,
-                 "MONOMOLECULAR":STAT_MONOMOLECULAR,
-                 "LOGISTIC":STAT_LOGISTIC,
-                 }
+    
     CountingFlag = kargs.get("CountingFlag", True)
     
     ident = [ident_map[x] for x in args]
     
-    return obj.nonhomogeneous_markov_estimation(ident, CountingFlag);
+    return obj.nonhomogeneous_markov_estimation(ident, CountingFlag)
 
 
 def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
@@ -131,7 +86,7 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
     if Algorithm not in markovian_algorithms.keys():
         raise KeyError("Algorithm must be in %s " % markovian_algorithms.keys())
     
-    if not isinstance(args[0], _sequence_analysis._Hidden_variable_order_markov):
+    if not isinstance(args[0], _Hidden_variable_order_markov):
         raise TypeError('First argument must be a hidden_variable_order_markov')
     
     if Algorithm == 'EM':
@@ -149,8 +104,8 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
       
 def _estimate_renewal_count_data(obj, itype, *args, **kargs):
    
-    
-    
+    Type = 'v'
+    error.CheckType([obj, itype], [[_Time_events, _Renewal_data], str])
     if isinstance(itype, str):  
         if itype == "Ordinary":
             Type = 'o'
@@ -162,85 +117,92 @@ def _estimate_renewal_count_data(obj, itype, *args, **kargs):
         raise AttributeError("type must be Ordinary or Equilibrium")
         
 
-    Estimator = __parse_kargs__(kargs, "Estimator",
-                                      default='Likelihood',
-                                      dict_map=estimator_type)
-    NbIteration = kargs.get("NbIteration", -1)
-
-    initial_inter_event_option = False
+    Estimator = error.ParseKargs(kargs, "Estimator",
+                                 'Likelihood', estimator_type)
+    
+    NbIteration = kargs.get("NbIteration", I_DEFAULT)
+    error.CheckType([NbIteration], [int])
+    
     InitialInterEvent = kargs.get("InitialInterEvent", None)
+    error.CheckType([InitialInterEvent], [[type(None), _ParametricModel,
+                                           _Mixture, _Convolution, _Compound]])
 
-    EquilibriumEstimator = __parse_kargs__(kargs, "EquilibriumEstimator",
-                                                default='CompleteLikelihood',
-                                                dict_map=estimator_hidden_semi_markov)
+    EquilibriumEstimator = error.ParseKargs(kargs, "EquilibriumEstimator",
+                            'CompleteLikelihood', estimator_semi_markov_type)
 
-#    Penalty
-#    Weight
-#    Outside
-    inter_event = False
-    InterEventMean = kargs.get("InterEventMean", False) # to be done, todo
-    mean_computation = mean_computation_map['Computed']
-    Penalty = kargs.get("Penalty",  _stat_tool.SECOND_DIFFERENCE)
-    Outside = kargs.get("Outside", _stat_tool.ZERO)
+    InterEventMean = error.ParseKargs(kargs, "InterEventMean",
+                            'Computed', mean_computation_map)
+
+    Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference", 
+                               smoothing_penalty_type)
+    
+    Outside = error.ParseKargs(kargs, "Outside", "Zero", outside_type)
     Weight = kargs.get("Weight", -1.)
-
-#    if type != 'e':
-#        if equilibrium_estimator_option:
-            #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Equilibrium_Estimator");
-#        if inter_event_mean_option:
-            #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "InterEventMean");
+    error.CheckType([Weight], [[int, float]])
+    
+    if Type != 'e':
+        if kargs.get("EquilibriumEstimator"):
+            raise Exception("EquilibriumEstimator cannot be used with type='e'")
+        if kargs.get("InterEventMean"):
+            raise Exception("InterEventMean be used with type='e'")
+        
     if Estimator == estimator_type['PenalizedLikelihood']:
-        if InterEventMean is False:
-             mean_computation = ONE_STEP_LATE;
-        elif mean_computation == mean_computation_map['Computed']:
-            raise ValueError("INCOMPATIBLE_OPTIONS_sss  Estimator and InterEventMean");
+        if kargs.get("InterEventMean") is None:
+            InterEventMean = ONE_STEP_LATE
+        elif InterEventMean == COMPUTED:
+            raise ValueError("""
+                Incompatible options Estimator and InterEventMean""")
     else:
-        #if (penalty_option):
-        #    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Penalty")
-        #if weight_option:
-        #    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Weight");
-        #if outside_option:
-        #    genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Outside");
-        pass
-
+        if kargs.get("Penalty"):
+            raise ValueError("""Incompatible options Penalty with type o""")
+        if kargs.get("Weight"):
+            raise ValueError("""Incompatible options Weight with type o""")
+        if kargs.get("Outside"):
+            raise ValueError("""Incompatible options Outside with type o""")
+        
     if InitialInterEvent:
-        renew = obj.estimation_inter_event(Type, InitialInterEvent, Estimator,  NbIteration , EquilibriumEstimator , mean_computation , Weight , Penalty , Outside)
+        renew = obj.estimation_inter_event(Type, InitialInterEvent,
+                                           Estimator, NbIteration,
+                                           EquilibriumEstimator,
+                                           InterEventMean, Weight, 
+                                           Penalty, Outside)
     else:
-        renew = obj.estimation(Type, Estimator, NbIteration, EquilibriumEstimator , mean_computation , Weight ,  Penalty , Outside);
+        renew = obj.estimation(Type, Estimator, NbIteration,
+                               EquilibriumEstimator, InterEventMean ,
+                               Weight, Penalty, Outside)
     
     return renew
 
 
 def _estimate_semi_markov(obj, *args, **kargs):
  
-    PARTIAL_LIKELIHOOD = 0 
-    COMPLETE_LIKELIHOOD  = 1
-    KAPLAN_MEIER=2
-    estimator_semi_markov_map = {
-        "PartialLikelihood": PARTIAL_LIKELIHOOD,
-        "CompleteLikelihood": COMPLETE_LIKELIHOOD,
-        "KaplanMeier": KAPLAN_MEIER           
-                             }
-    if isinstance(args[0], str):  
-        if args[0] == "Ordinary":
-            Type = 'o'
-        elif args[0] == "Equilibrium":
-            Type = 'e'
-        else:
-            raise AttributeError("type must be Ordinary or Equilibrium")
-    else:
-        raise AttributeError("type must be Ordinary or Equilibrium")
-        
-    NbIteration = kargs.get("NbIteration", -1)
-    Counting = kargs.get("Counting", True)
-    Estimator = kargs.get("Estimator", COMPLETE_LIKELIHOOD)
+    Type = 'v'
+    error.CheckType([args[0]], [str])
     
-    Estimator = estimator_semi_markov_map[Estimator]
-    MeanComputation = __parse_kargs__(kargs, "OccupancyMean",
-                                      default='Computed',
-                                      dict_map=mean_computation_map)
+    if args[0] in stochastic_process_type.keys():
+        Type = stochastic_process_type[args[0]]
+    else:
+        raise AttributeError("type must be in %s " 
+                             % stochastic_process_type.keys())
+        
+    NbIteration = kargs.get("NbIteration", I_DEFAULT)
+    Counting = kargs.get("Counting", True)
+    Estimator = error.ParseKargs(kargs, "Estimator", "CompleteLikelihood",
+                                 stochastic_process_type)
+    
+    OccupancyMean = error.ParseKargs(kargs, "OccupancyMean",
+                                      'Computed', mean_computation_map)
+    
+    error.CheckType([Counting, NbIteration], [bool, int])
+    
+    if Type != 'e' or Estimator == PARTIAL_LIKELIHOOD:
+        if kargs.get(NbIteration):
+            raise ValueError("Forbidden options Estimate NbIteration")
+        if kargs.get("OccupancyMean"):
+            raise ValueError("Forbidden options Estimate OccupancyMean")
+    
     return obj.semi_markov_estimation(Type , Estimator , Counting,
-                                        NbIteration , MeanComputation)
+                                        NbIteration , OccupancyMean)
 
 
        
@@ -263,14 +225,14 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
    
     Algorithm = kargs.get("Algorithm", "EM") #FORWARD_BACKWARD
     
-    _AlgorithmCheck = __parse_kargs__(kargs, "Algorithm", default='EM',
-                                dict_map=sub_markovian_algorithms)
-    Estimator = __parse_kargs__(kargs, "Estimator",
-                                default='CompleteLikelihood',
-                                dict_map=estimator_hidden_semi_markov)
-    MeanComputation = __parse_kargs__(kargs, "OccupancyMean",
-                                      default='Computed',
-                                      dict_map=mean_computation_map)
+    _AlgorithmCheck = error.ParseKargs(kargs, "Algorithm", 'EM',
+                                sub_markovian_algorithms)
+    Estimator = error.ParseKargs(kargs, "Estimator",
+                                'CompleteLikelihood',
+                                estimator_semi_markov_type)
+    MeanComputation = error.ParseKargs(kargs, "OccupancyMean",
+                                      'Computed',
+                                      mean_computation_map)
         
     StateSequence = kargs.get("StateSequence", True)
     Counting = kargs.get("Counting", True)
@@ -334,7 +296,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         
 
     
-    elif isinstance(args[0], _sequence_analysis._Hidden_semi_markov):
+    elif isinstance(args[0], _Hidden_semi_markov):
         
         hsmarkov = args[0] 
         if Algorithm == 'EM':
@@ -357,11 +319,6 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
     """
 
     """
-
-    #fct_map = {
-    #    "VARIABLE_ORDER_MARKOV" : variable_order_markov_estimation,
-     #   }
-
     ORDER = 8
     LOCAL_BIC_THRESHOLD = 10
 
@@ -417,7 +374,7 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
             markov = obj.variable_order_markov_estimation2(
                     Type, MaxOrder, GlobalInitialTransition, CountingFlag)
             
-    elif isinstance(args[0], _sequence_analysis._Variable_order_markov):
+    elif isinstance(args[0], _Variable_order_markov):
         markov = obj.variable_order_markov_estimation3(args[0], 
                       GlobalInitialTransition, CountingFlag)
     
@@ -718,7 +675,7 @@ def Estimate(obj, *args, **kargs):
     """
    
     # top case (no type specified and args  may be empty) 
-    if isinstance(obj, _sequence_analysis._Tops):
+    if isinstance(obj, _Tops):
         return _estimate_top(obj, *args, **kargs) 
     # generic case
     elif isinstance(args[0], str):

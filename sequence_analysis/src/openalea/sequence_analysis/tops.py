@@ -4,8 +4,12 @@ __revision__ = "$Id:  $"
 import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Tops
+from openalea.sequence_analysis._sequence_analysis import _Sequences
 
-import _sequence_analysis
+from openalea.sequence_analysis.enumerate import index_parameter_type_map
+
+#import _sequence_analysis
+from openalea.stat_tool import error
 
 __all__ = ['Tops',
            '_Tops', 
@@ -79,42 +83,41 @@ def Tops(*args, **kargs):
         :func:`~openalea.sequence_analysis.simulate.Simulate`.
     """
     
-    index_parameter_type_map = {
-        "IMPLICIT_TYPE": _sequence_analysis.IMPLICIT_TYPE,
-        "TIME": _sequence_analysis.TIME,
-        "TIME_INTERVAL": _sequence_analysis.TIME_INTERVAL,
-        "POSITION": _sequence_analysis.POSITION,
-        "POSITION_INTERVAL": _sequence_analysis.POSITION_INTERVAL
-        }
+    #todo: test on those constructor, in particular the case of Identifiers
+    # to be compared with AML
+    error.CheckArgumentsLength(args, 1, 1)
     
-    index_parameter_type = kargs.get("IndexParameterType", "IMPLICIT_TYPE")
+    index_parameter = error.ParseKargs(kargs, "IndexParameter", 
+                                            "IMPLICIT_TYPE", 
+                                            index_parameter_type_map)
     
-    try:
-        index_parameter_type = index_parameter_type_map[index_parameter_type]
-    except KeyError:
-        raise KeyError("Possible types are : " + 
-                       str(index_parameter_type_map.keys()))
+    Identifiers = error.ParseKargs(kargs, "Identifiers", None)
         
     
-    if len(args)==1: 
-        #filename case
-        if isinstance(args[0], str):
-            filename = args[0]
-            if os.path.isfile(filename):
-                return _Tops(filename, True)
-            else:
-                raise IOError("bad file name")
-        #sequences case
-        elif isinstance(args[0], _sequence_analysis._Sequences):
-                return _Tops(args[0])
-    #list case
-    elif len(args) == 1 and isinstance(args[0], list):
-        return _Tops(args[0], range(0, len(args[0])), index_parameter_type)
-    #list and identifiesr case
-    elif len(args) == 2 and isinstance(args[0], list) and isinstance(args[1], list):
-        return _Tops(args[0], args[1], index_parameter_type)
+    if isinstance(args[0], str):
+        #todo: add True, False instead or as well as Current, Old
+        #todo: !!! OldFormat set to True does not work in CPP code
+        OldFormat = error.ParseKargs(kargs, "Format", "Old", 
+                                 {"Current":False, "Old":True})         
+        filename = args[0]
+        print OldFormat, filename
+        if os.path.isfile(filename):
+            return _Tops(filename, OldFormat)
+        else:
+            raise IOError("bad file name")
+    #sequences case #todo: to be tested/implemented
+    elif isinstance(args[0], _Sequences):
+        return _Tops(args[0])
+    elif isinstance(args[0], list):
+        # todo:: list of list for the arrayn not yet implemented in the wrapper
+        #list case, no identifier See export_sequences.cpp
+        if Identifiers:
+            return _Tops(args[0], Identifiers, index_parameter)
+        else:    
+            return _Tops(args[0], range(0, len(args[0])), index_parameter)
     else:
-        raise TypeError("Expected a valid filename or a list of lists (e.g., [[1,0],[0,1]])")
+        raise TypeError("""Expected a valid filename or a list of
+         lists (e.g., [[1,0],[0,1]])""")
     
     
 
@@ -142,6 +145,7 @@ def RemoveApicalInternodes(obj, internode):
         :func:`~openalea.stat_tool.data_transform.Merge`, 
         :func:`~openalea.sequence_analysis.data_transform.Reverse`.
     """
+    error.CheckType([obj, internode], [_Tops, int])
     return obj.shift(internode) 
     
 

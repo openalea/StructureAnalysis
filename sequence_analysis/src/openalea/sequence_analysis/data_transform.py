@@ -1,18 +1,31 @@
 """Data transform methods
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
+.. todo:: move _check_nbvariable_ to stat_ttol and use it wherever possible
+.. todo:: decide on using __get_mode__ everywhere or ParseKargs 
 
+.. todo:: move markovian_sequencse call inside the wrapper ?
+ 
+    For instance, Cumulate does not return the same as .cumulate
+    but     the same as  .cumulate(...).markovian_sequences()
+
+    OR test if _Sequence, then use markovian_sequence conversion
 """
 __revision__ = "$Id: $"
 
 from openalea.stat_tool.error import *
-import _sequence_analysis
+
+from openalea.stat_tool._stat_tool import _Compound 
+from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _Convolution
+from openalea.stat_tool._stat_tool import _ParametricModel
+from openalea.stat_tool._stat_tool import _Vectors
+
 from _sequence_analysis import _Markovian_sequences
 from _sequence_analysis import _Sequences
 from _sequence_analysis import _Semi_markov
 from _sequence_analysis import _Semi_markov_data
-from _sequence_analysis import  _Top_parameters
+from _sequence_analysis import _Top_parameters
 from _sequence_analysis import _Variable_order_markov
 from _sequence_analysis import _Variable_order_markov_data
 from _sequence_analysis import _Nonhomogeneous_markov
@@ -20,14 +33,32 @@ from _sequence_analysis import _Nonhomogeneous_markov_data
 from _sequence_analysis import _Renewal
 from _sequence_analysis import _Hidden_variable_order_markov
 from _sequence_analysis import _Hidden_semi_markov
+from _sequence_analysis import _Tops
+from _sequence_analysis import _Renewal_data
+from _sequence_analysis import _Time_events
 
 from openalea.stat_tool._stat_tool import _VectorDistance
 from openalea.stat_tool import error
+from openalea.stat_tool import I_DEFAULT
 
-from enumerate import type_dict2
+from openalea.sequence_analysis._sequence_analysis import MEAN_CHANGE
+from openalea.sequence_analysis._sequence_analysis import MEAN_VARIANCE_CHANGE
+from openalea.sequence_analysis._sequence_analysis import NB_EVENT
+from openalea.stat_tool._stat_tool import MIN_PROBABILITY
+
+from enumerate import markovian_sequence_type, output_map, histogram_type
+from enumerate import mode_type, func_map, estimator_map, model_type, seq_map
+from enumerate import renewal_nb_event_map
 
 
-def __get_mode__(kargs):
+from openalea.stat_tool.enumerate import keep_type
+from openalea.stat_tool.enumerate import format_type
+
+
+
+
+
+def _get_mode__(kargs):
     """ Return True if kargs has "keep" for the "mode" key """
 
     mode = kargs.get("mode", None)
@@ -35,7 +66,8 @@ def __get_mode__(kargs):
         mode = kargs.get("Mode", None)
     if(mode == "Keep" or mode == "keep"):
         keep = True
-    else : keep = False
+    else:
+        keep = False
 
     return keep
 
@@ -130,42 +162,39 @@ def RemoveRun(obj, *args, **kargs):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`,
         :func:`VariableScaling`.
     """
-    
-    MaxLength = kargs.get("MaxLength", -1) # max length will be used
+    error.CheckArgumentsLength(args, 2)
+    MaxLength = kargs.get("MaxLength", I_DEFAULT) # max length will be used
+    error.CheckType([MaxLength], [int])
+    error.CheckType([obj, MaxLength], [[_Sequences, _Markovian_sequences, 
+               _Variable_order_markov_data, _Semi_markov_data, 
+               _Nonhomogeneous_markov_data], int])
+
     if len(args) == 3:
         variable = args[0]
         value = args[1]
         position = args[2]
+        error.CheckType([variable, value, position], [int, int, str])
+        
     elif len(args) == 2:
-        variable = None
+        variable = 1
         value = args[0]
         position = args[1]
-    else:
-        raise TypeError("expect 2 or 3 arguments and 1 optional argument (MaxLength)")
+        error.CheckType([variable, value, position], [int, int, str])
 
-    # position argument
-    # remove_run method takes as its first argument a char in ['e','b'] that 
-    # corresponds to BEGIN and END. The user can use both notation so we need
-    # to convert the position to the expected character if neeeded.
-    if position == 'End':
+    if position in ['End', 'e']:
         position = 'e'
-    if position == 'Begin':
+    elif position == ['b', 'Begin']:
         position = 'b'
-    if position not in ['b', 'e']:
-        raise TypeError("position must be 'e' for end or 'b' for begin")
-    if value is None:
-        raise TypeError("value must be provided")
-
-   # variable argument
-    variable = _check_nb_variable(obj, variable)
-    
-    # value must be provided
-    if value is None:
-        raise TypeError("value must be provided")
-    
-        
+    else:
+        raise TypeError("position must be 'End' or 'e' or 'Begin' or 'b'")
+                
+   
     sequence = obj.remove_run(variable, value, position, MaxLength)
-    return sequence.markovian_sequences()
+    
+    if hasattr(sequence, 'markovian_sequences'):
+        return sequence.markovian_sequences()
+    else:
+        return sequence
 
 
 def ExtractVectors(obj, key, *args):
@@ -207,40 +236,44 @@ def ExtractVectors(obj, key, *args):
         :func:`~openalea.stat_tool.regression.Regression`, 
         :func:`~openalea.stat_tool.vectors.VarianceAnalysis`.
     """
-    
+    error.CheckArgumentsLength(args, 0, 2)
+    error.CheckType([obj, key], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data,
+                             _Nonhomogeneous_markov_data], str])   
        
-
-    if key not in type_dict2.keys():
-        raise TypeError("key must be in %s" % type_dict2.keys())
-     
     
-    if obj.nb_variable == 1: 
-        variable = 1
-    else:
-        variable = obj.nb_variable
+    if key not in markovian_sequence_type.keys():
+        raise KeyError("key must be in %s" % markovian_sequence_type.keys())
         
-    if key == "Length":
-        sequence = obj.extract_vectors(type_dict2[key], -1, -1)
-    elif key in ["Cumul", "Mean"]:
-        sequence = obj.extract_vectors(type_dict2[key], variable, -1)
-    elif len(args)==2:
-        variable = args[0]
-        value = args[1]
-        sequence = obj.extract_vectors(type_dict2[key], variable, value)
-    elif len(args)==1 and obj.nb_variable==1:
-        value = args[0]
-        sequence = obj.extract_vectors(type_dict2[key], 1, value)
-    else:
-        raise TypeError("nb_variable =1 so varaible must be 1")
     
-    #sequence = obj.extract_vectors(key, variable, value)
+    if key == "Length":
+        variable = -1
+        value = -1    
+    elif key in ["Cumul", "Mean"]:
+        value = -1
+        variable = obj.nb_variable
+    elif key in ["NbRun", "FirstOccurrence", "NbOccurrence"]:
+        if len(args)==2:
+            variable = args[0]
+            value = args[1]    
+        elif len(args)==1 and obj.nb_variable==1:
+            value = args[0]
+            variable = obj.nb_variable # should be equal to 1
+            assert variable == 1
+    else:
+        raise KeyError("wrong key. Should not enter here")
+    error.CheckType([variable, value], [int, int])
+    
+    rkey = markovian_sequence_type[key]
+    sequence = obj.extract_vectors(rkey, variable, value)
+
     return sequence
-#.markovian_sequences()
+
 
    
 
 
-def SegmentationExtract(obj, variable, values , Mode="Keep"):
+def SegmentationExtract(obj, variable, values , **kargs):
     """SegmentationExtract 
     
     Extraction by segmentation of sub-sequences.
@@ -299,19 +332,27 @@ def SegmentationExtract(obj, variable, values , Mode="Keep"):
         :func:`~openalea.stat_tool.cluster.Transcode`, 
         :func:`~openalea.stat_tool.data_transform.ValueSelect`,
         :func:`VariableScaling`.
-"""
+    """
+    
+    mode = error.ParseKargs(kargs, "Mode", "Keep", keep_type)
+    mode = bool(mode == "Keep" or mode == "keep")
 
-    keep = bool(Mode == "Keep" or Mode == "keep")
+    error.CheckType([obj, variable, values], [[_Sequences, _Markovian_sequences,
+                            _Variable_order_markov_data, _Semi_markov_data,
+                            _Nonhomogeneous_markov_data], int, [int, list]])
+    
+    if type(values) == int:
+        sequence = obj.segmentation_extract(variable, [values], mode)
+    elif type(values) == list:
+        sequence = obj.segmentation_extract(variable, values, mode)
+    else:
+        raise TypeError("values must be an int or a list")
+        
+    if hasattr(sequence, 'markovian_sequences'):
+        return sequence.markovian_sequences()
+    else:
+        return sequence
 
-
-    # Test if variables is a list
-    try:
-        _v = values[0]
-    except TypeError:
-        values = [values, ]
-
-    sequence = obj.segmentation_extract(variable, list(values), keep)
-    return sequence.markovian_sequences()
 
 def LengthSelect(obj, minLength, *args, **kargs):
     """LengthSelect
@@ -366,16 +407,27 @@ def LengthSelect(obj, minLength, *args, **kargs):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`,
         :func:`VariableScaling`.
     """
-    mode = __get_mode__(kargs)
+    mode = error.ParseKargs(kargs, "Mode", "Keep", keep_type)
+    mode = bool(mode == "Keep" or mode == "keep")
+
+    maxLength = None
     if len(args) == 0:
         maxLength = minLength
     elif len(args)==1:
         maxLength = args[0]
-    else:
-        raise KeyError("one or two arguments required and one optional arguments (Mode). see usage")
-
+    
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences,
+                            _Variable_order_markov_data, _Semi_markov_data,
+                            _Nonhomogeneous_markov_data]])
+    
+    error.CheckType([minLength, maxLength], [int, int])
+    
     sequence =  obj.length_select(minLength, maxLength, mode)
-    return sequence.markovian_sequences()
+    
+    if hasattr(sequence, 'markovian_sequences'):
+        return sequence.markovian_sequences()
+    else:
+        return sequence
 
 
 def RecurrenceTimeSequences(obj, *args):
@@ -420,15 +472,24 @@ def RecurrenceTimeSequences(obj, *args):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`,
         :func:`VariableScaling`.
     """
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences,
+                            _Variable_order_markov_data, _Semi_markov_data,
+                            _Nonhomogeneous_markov_data]])
     if len(args)==1:
         variable = 1
         value = args[0]
     elif len(args)==2:
         variable = args[0]
         value = args[1]
-     
+        
+    error.CheckType([variable, value], [int, int])
+
     sequence = obj.recurrence_time_sequences(variable, value)
-    return sequence.markovian_sequences()
+    
+    if hasattr(sequence, 'markovian_sequences'):
+        return sequence.markovian_sequences()
+    else:
+        return sequence
 
 def WordCount(obj, *args, **kargs):
     """WordCount
@@ -440,22 +501,32 @@ def WordCount(obj, *args, **kargs):
     
     .. todo:: the documentation...
     """
+    error.CheckArgumentsLength(args, 1, 2)
+    error.CheckType([obj], [[_Markovian_sequences, _Variable_order_markov_data,
+                            _Semi_markov_data, _Nonhomogeneous_markov_data]])
     
-    if len(args)==1:
-        variable = 1
+    
+    if len(args) == 1:
+        variable = obj.nb_variable
+        assert variable == 1
         word_length = args[0]
-    elif len(args)==2:
+    elif len(args) == 2:
         variable = args[0]
+        assert variable > 0
         word_length = args[1]
-    begin_state = kargs.get("BeginState", -1)
-    end_state = kargs.get("EndState", -1)
-    min_frequency = kargs.get("MinFrequency", 1)
+    error.CheckType([variable, word_length], [int, int])
+    
+    begin_state = error.ParseKargs(kargs, "BeginState", I_DEFAULT)
+    end_state = error.ParseKargs(kargs, "EndState", I_DEFAULT)
+    min_frequency = error.ParseKargs(kargs, "MinFrequency", 1)
+    
+    error.CheckType([begin_state, end_state, min_frequency], [int, int, int])
     
     return obj.word_count(variable, word_length, begin_state, 
                           end_state, min_frequency)
     
    
-def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
+def AddAbsorbingRun(obj, **kargs):
     """AddAbsorbingRun
     
     Addition of a run of absorbing vectors at the end of sequences.
@@ -502,7 +573,14 @@ def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
     
     .. todo:: wrap the constant values
     """                                  
-
+    error.CheckType([obj], [[_Markovian_sequences, _Variable_order_markov_data, 
+                            _Semi_markov_data, _Nonhomogeneous_markov_data, 
+                            _Tops]])
+    
+    SequenceLength = error.ParseKargs(kargs, "SequenceLength", I_DEFAULT)
+    RunLength = error.ParseKargs(kargs, "RunLength", I_DEFAULT)
+    
+    #todo: replace this by sequence_analysis constant
     MAX_ABSORBING_RUN_LENGTH = 20
         
     try:
@@ -512,8 +590,11 @@ def AddAbsorbingRun(obj, SequenceLength=-1, RunLength=-1):
         max_max_length = obj.max_length + MAX_ABSORBING_RUN_LENGTH
         raise ValueError("abnormal termination. " 
                          "Check the arguments."
-                         "RunLength must be positive and  less than %s" % MAX_ABSORBING_RUN_LENGTH,
-                         "SequenceLength must be positive, larger than max_length (%s) and less than max_length + MAX_RUN_LENGTH (%s)" 
+                         "RunLength must be positive and  less than %s" 
+                         % MAX_ABSORBING_RUN_LENGTH,
+                         "SequenceLength must be positive, larger than "
+                         "max_length (%s) and less than max_length +"
+                         " MAX_RUN_LENGTH (%s)" 
                          % (obj.max_length, max_max_length))
         
 def Reverse(obj):
@@ -560,19 +641,27 @@ def Reverse(obj):
         :func:`VariableScaling`.
     """
     
+    error.CheckType([obj], [[_Markovian_sequences, _Variable_order_markov_data, 
+                            _Semi_markov_data, _Nonhomogeneous_markov_data, 
+                            _Tops]])
+    
     ret = obj.reverse()
     
-    try:
+    if hasattr(ret, 'markovian_sequences'):
         return ret.markovian_sequences()
-    except TypeError:
+    else:
         return ret
 
     
-def Thresholding(obj, MinProbability=1e-5):
+def Thresholding(obj, MinProbability=MIN_PROBABILITY):
     """
     
     .. todo:: documentation
     """
+    error.CheckType([MinProbability], [[int, float]])
+    error.CheckType([obj], [[_Variable_order_markov, _Hidden_semi_markov,
+                            _Hidden_variable_order_markov, _Semi_markov]])
+    
     return obj.thresholding(MinProbability)
     
     
@@ -622,10 +711,23 @@ def Cumulate(obj, Variable=1):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`,
         :func:`VariableScaling`.
     """
-    return obj.cumulate(Variable)
+    
+    error.CheckType([obj, Variable], [[_Sequences, _Markovian_sequences, 
+                                       _Variable_order_markov_data, 
+                                       _Semi_markov_data, 
+                                       _Nonhomogeneous_markov_data], int])
+    
+    ret = obj.cumulate(Variable)
+    
+    
+    if hasattr(ret, 'markovian_sequences'):
+        return ret.markovian_sequences()
+    else:
+        return ret
+
     
 
-def Difference(obj, Variable=-1, FirstElement=False):
+def Difference(obj, Variable=I_DEFAULT, FirstElement=False):
     """Difference
     
     First-order differencing of sequences.
@@ -672,10 +774,22 @@ def Difference(obj, Variable=-1, FirstElement=False):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`,
         :func:`VariableScaling`.
     """
-    return obj.difference(Variable, FirstElement)
+    error.CheckType([obj, Variable, FirstElement],
+                    [[_Sequences, _Markovian_sequences,
+                      _Variable_order_markov_data, _Semi_markov_data,
+                      _Nonhomogeneous_markov_data], int, bool])
+    
+    ret = obj.difference(Variable, FirstElement)
+     
+    #todo: markovian_sequences does nto seem to work
+    #if hasattr(ret, 'markovian_sequences'):
+    #    return ret.markovian_sequences()
+    #else:
+    #    return ret
+    return ret
     
     
-def IndexParameterExtract(obj, minIndex, MaxIndex=40):
+def IndexParameterExtract(obj, minIndex, MaxIndex=I_DEFAULT):
     """IndexExtract
     
     Extraction of sub-sequences corresponding to a range of index parameters.
@@ -683,7 +797,7 @@ def IndexParameterExtract(obj, minIndex, MaxIndex=40):
     :Usage:
     
     >>> IndexParameterExtract(seq, min_index, MaxIndex=40)    
-  
+    >>> IndexParameterExtract(seq, min_index, MaxIndex)
     :Arguments:
     
     * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
@@ -718,8 +832,17 @@ def IndexParameterExtract(obj, minIndex, MaxIndex=40):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
         :func:`VariableScaling`.
     """
-
-    return obj.index_parameter_extract(minIndex, MaxIndex)
+    error.CheckType([obj, minIndex], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data], int])
+    
+     
+    ret = obj.index_parameter_extract(minIndex, MaxIndex)
+    
+    if hasattr(ret, "markovian_sequences"):
+        return ret.markovian_sequences()
+    else:
+        return ret
     
 def IndexParameterSelect(obj, minIndex, *args, **kargs):    
     """IndexExtract
@@ -728,8 +851,10 @@ def IndexParameterSelect(obj, minIndex, *args, **kargs):
 
     :Usage:
 
-    >>> IndexParameterSelect(seq, min_index, MaxIndex=40)    
-
+    >>> IndexParameterSelect(seq, min_index)
+    >>> IndexParameterSelect(seq, min_index, max_index)    
+    >>> IndexParameterSelect(seq, min_index, max_index, Mode="Keep")
+    
     :Arguments:
 
     * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
@@ -737,8 +862,8 @@ def IndexParameterSelect(obj, minIndex, *args, **kargs):
     
     :Optional Arguments:
     
-    * MaxIndex (int): maximum index parameter (default behaviour: the end of sequences is kept).
-    
+    * max_index (int): maximum index parameter (default behaviour: the end of sequences is kept).
+    * Mode: Keep or Reject
     :Returned Object:
     
     If 0 < min_index < (maximum index parameter if the optional argument MaxIndex is set) < (maximum length of sequences), the returned object is of type sequences or discrete_sequences, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is < 15.
@@ -764,19 +889,31 @@ def IndexParameterSelect(obj, minIndex, *args, **kargs):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`, 
         :func:`VariableScaling`.
     """
-
-    mode = __get_mode__(kargs)
+    error.CheckArgumentsLength(args, 0, 1)
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
+    
+    mode = error.ParseKargs(kargs, "Mode", "Keep", keep_type)
+    mode = bool(mode == "Keep" or mode == "keep")
+    
+    
     if len(args) == 0:
         maxIndex = minIndex
     elif len(args)==1:
         maxIndex = args[0]
-    else:
-        raise KeyError("one or two arguments required and one optional arguments (Mode). see usage")
+    
+    error.CheckType([minIndex, maxIndex], [int, int])
 
-    return obj.index_parameter_select(minIndex, maxIndex, mode)
+    ret = obj.index_parameter_select(minIndex, maxIndex, mode)
+    
+    if hasattr(ret, "markovian_sequences"):
+        return ret.markovian_sequences()
+    else:
+        return ret
     
     
-def ComputeStateSequences(obj, data, Characteristics=True):
+def ComputeStateSequences(obj, data, **kargs):
     """ComputeStateSequences
     
     Computation of the optimal state sequences corresponding to the observed sequences using a hidden Markov chain or a hidden semi-Markov chain.
@@ -812,23 +949,20 @@ def ComputeStateSequences(obj, data, Characteristics=True):
     
         :func:`~openalea.stat_tool.data_transform.ExtractHistogram`.
 
-"""
-
-    if isinstance(obj, (_sequence_analysis._Markovian_sequences, 
-                        _sequence_analysis._Variable_order_markov_data,
-                        _sequence_analysis._Semi_markov_data)) and \
-            isinstance(data, (_sequence_analysis._Hidden_variable_order_markov, 
-                           _sequence_analysis._Hidden_semi_markov
-                           )):
-            try:            
-                return data.state_sequence_computation(obj, Characteristics)
-            except:
-                raise Exception('call to state_sequence failed')
-    else:
-        raise Exception("first or second argument has the wrong type")
+    """
+    error.CheckType([obj], [[_Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data]])
     
+    Characteristics = error.ParseKargs(kargs, "Characteristics",
+                                       True, {"True":True, "False":False})
 
-def MovingAverage(obj, itype, Variable=1, BeginEnd=False, Output="Trend"):
+    data = error.CheckType([data], [[_Hidden_variable_order_markov,
+                             _Hidden_semi_markov]])
+    ret = data.state_sequence_computation(obj, Characteristics)
+        
+    return ret
+
+def MovingAverage(obj, itype, *args, **kargs):
     """MovingAverage
 
     Extraction of trends or residuals using a symmetric smoothing filter.
@@ -887,22 +1021,25 @@ def MovingAverage(obj, itype, Variable=1, BeginEnd=False, Output="Trend"):
         returns wrong results. comapre with aml
     
     """
-    func_map = {
-                 "Sequence":0,
-                 "Trend":1,
-                 "SubtractionResidual":2,
-                 "Residual":2,
-                 "DivisionResidual":3
-                 }
-    if Output not in func_map.keys():
-        raise KeyError("output choice must be in %s" % func_map.keys())
+    
+    error.CheckArgumentsLength(args, 0)
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
+    error.CheckType([itype], [[list, _ParametricModel, _Mixture, 
+                               _Convolution, _Compound]])
+    Variable = error.ParseKargs(kargs, "Variable", -1)
+    Output = error.ParseKargs(kargs, "Output", "Trend", func_map)
+    BeginEnd = error.ParseKargs(kargs, "BeginEnd", False, 
+                                {"False":False, "True":True, 
+                                 False:False, True:True})
     
     if isinstance(itype, list):
         #todo build a 2*N+1 filter here or inside moving_average function ?  
-        return obj.moving_average(itype, Variable, BeginEnd, func_map[Output])
+        return obj.moving_average(itype, Variable, BeginEnd, Output)
     else: #distribution
-        return obj.moving_average_from_distribution(itype, Variable, 
-                                                    BeginEnd, func_map[Output])
+        return obj.moving_average_from_distribution(itype, Variable,
+                                                    BeginEnd, Output)
     
     
 def ComputeSelfTransition(obj, Order=1):
@@ -926,86 +1063,95 @@ def ComputeSelfTransition(obj, Order=1):
     
     No object returned.
     """
+    #todo: Order is not used
+    error.CheckType([obj], [[_Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
+    
     obj.self_transition_computation()
     
     
-def TransitionCount(obj, max_order, begin=False, 
-                    estimator="MAXIMUM_LIKELIHOOD", filename=None):
+def TransitionCount(obj, max_order, **kargs): 
+                    
     """.. todo:: documentation"""
-    estimator_map = {
-                     "MaximumLikelihood": 0, # MAXIMUM_LIKELIHOOD;
-                     "Laplace": 1, # LAPLACE;
-                     "AdaptativeLaplace": 2, # ADAPTATIVE_LAPLACE;
-                     "UniformSubset": 3, # UNIFORM_SUBSET;
-                     "UniformCardinality" :4 #estimator = UNIFORM_CARDINALITY;
-                     }
-    estimator_int = estimator_map[estimator]
-    obj.transition_count(max_order, begin, estimator_int, filename)
+    error.CheckType([obj], [[_Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
+    begin = error.ParseKargs(kargs, "begin", False,
+                              {"False":False, "True":True})
+    estimator = error.ParseKargs(kargs, "Estimator", "Maximum_Likelihood",
+                                 estimator_map)
+    error.CheckType([max_order, begin], [int, bool])
+    
+    #todo: check that format_type =ascii/spreadheet is expected. Just the name
+    #may be sufficient
+    filename = error.ParseKargs(kargs, "Filename", None, format_type)
+    
+    obj.transition_count(max_order, begin, estimator, filename)
+    
     
 def Cross(obj):    
     """.. todo:: documentation"""
-    return obj.cross()
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
+    sequence =  obj.cross()
+    if hasattr(sequence, 'markovian_sequences'):
+        return sequence.markovian_sequences()
+    else:
+        return sequence
     
-    
-def PointwiseAverage(obj, *args, **kargs):
+
+def PointwiseAverage(obj, **kargs):
     """.. todo:: documentation"""
 
-    SEQUENCE = 0
-    SUBTRACTION_RESIDUAL = 1
-    STANDARDIZED_RESIDUAL = 2
     
-    output_map = {
-       "Sequence": SEQUENCE,
-       "SubtractionResidual": SUBTRACTION_RESIDUAL,
-       "Residual": SUBTRACTION_RESIDUAL,
-       "StandardizedResidual":  STANDARDIZED_RESIDUAL
-       }
-            
-    StandardDeviation = kargs.get("StandardDeviation", False)
-    Output = kargs.get("Output", "Sequence")
-    Output = output_map[Output]
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
+    
+    StandardDeviation = error.ParseKargs(kargs, "StandardDeviation", False)
+    Output = error.ParseKargs(kargs, "Output", "Sequence", output_map)
     Filename = kargs.get("Filename", None)
-    Format = kargs.get("Format", 'a')
+    Format = error.ParseKargs(kargs, "Format", 'ASCII', format_type)
     
-    return obj.pointwise_average(StandardDeviation, Output,
-                                 Filename, Format)
+    return obj.pointwise_average(StandardDeviation, Output, Filename, Format)
 
     
 def ConsecutiveValues(obj, *args, **kargs):    
     """ConsecutiveValues"""
-        
+    error.CheckType([obj], [[_Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
     AddVariable = kargs.get("AddVariable", False)
 
-    if len(args)==1:
+    if len(args) == 1:
         variable = args[0]
     else:
         variable = 1
      
     variable = _check_nb_variable(obj, variable)
-    
+    error.CheckType([variable, AddVariable], [int, bool])
     sequence = obj.consecutive_values(variable, AddVariable)
     
-    return sequence.markovian_sequences()
+    return sequence
+
+
 
 def Round(obj,  **kargs):
     """Round"""
-
-    CEIL =  2
-    FLOOR = 0
-    ROUND = 1
     
-    mode_map = {
-            "Floor":FLOOR,
-            "Ceil":CEIL,
-            "Round":ROUND
-            }
-    Variable = kargs.get("Variable", -1)
+    Variable = kargs.get("Variable", I_DEFAULT)
     Mode = kargs.get("Mode", "Round")
-    Mode = mode_map[Mode]
+    Mode = mode_type[Mode]
     
-    return obj.round(Variable, Mode) 
-    
-    
+    ret =  obj.round(Variable, Mode)
+    if hasattr(ret, 'markovian_sequences'):
+        return ret.markovian_sequences()
+    else:
+        return ret
+         
+
 def TimeScaling(obj, scaling_factor=0):
     """TimeScaling
     
@@ -1030,7 +1176,7 @@ def TimeScaling(obj, scaling_factor=0):
         :func:`~openalea.sequence_analysis.time_events.NbEventSelect`, 
         :func:`TimeSelect`.
     """
-
+    error.CheckType([obj, scaling_factor], [[ _Time_events, _Renewal_data], int])
     return obj.time_scaling(scaling_factor)    
    
 def TimeSelect(obj, *args):
@@ -1060,14 +1206,18 @@ def TimeSelect(obj, *args):
         :func:`~openalea.sequence_analysis.time_events.NbEventSelect`, 
         :func:`TimeScaling`.
     """
-
+    error.CheckType([obj], [[_Time_events, _Renewal_data]])
+    error.CheckArgumentsLength(args, 1, 2)
+    
     if len(args) == 2:
         min_time = args[0]
         max_time = args[1]
     elif len(args) == 1:
         min_time = args[0]
         max_time = min_time
-        
+    
+    error.CheckType([min_time, max_time], [int, int])
+    
     return obj.time_select(min_time, max_time)
 
 
@@ -1169,8 +1319,16 @@ def Segmentation(obj, *args, **kargs):
  
 def SojournTimeSequences(obj, Variable = 1):
     """.. todo:: documentation"""
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
     
-    return obj.sojourn_time_sequences(Variable).markovian_sequences()
+    #todo:  check that variable is valid
+    ret =  obj.sojourn_time_sequences(Variable)
+    if hasattr(ret, 'markovian_sequences'):
+        return ret.markovian_sequences()
+    else:
+        return ret
 
 def VariableScaling(obj, *args): 
     """VariableScaling
@@ -1218,7 +1376,10 @@ def VariableScaling(obj, *args):
         :func:`~openalea.stat_tool.cluster.Transcode`, 
         :func:`~openalea.stat_tool.data_transform.ValueSelect`.
     """
-
+    error.CheckType([obj], [[_Vectors, _Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
+   
     if len(args) == 2:
         variable = args[0]
         scaling = args[1]
@@ -1228,27 +1389,13 @@ def VariableScaling(obj, *args):
         
     if obj.nb_variable == 1 and variable != 1:
         raise TypeError("nb_variable is 1 but your provided a different value. Check the arguments.")
+    
+    error.CheckType([variable, scaling], [int, int])
     return obj.scaling(variable, scaling)
  
 def __get_model__(data, nb_variable): 
     """ """
-    MULTINOMIAL_CHANGE = 0
-    POISSON_CHANGE = 1
-    ORDINAL_GAUSSIAN_CHANGE = 2
-    GAUSSIAN_CHANGE = 3
-    MEAN_CHANGE = 4
-    VARIANCE_CHANGE = 5
-    MEAN_VARIANCE_CHANGE= 6
-
-    model_type = {
-                      "Multinomial":MULTINOMIAL_CHANGE,
-                      "Poisson":POISSON_CHANGE,
-                      "Ordinal": ORDINAL_GAUSSIAN_CHANGE,
-                      "Gaussian": GAUSSIAN_CHANGE,        
-                      "Mean": MEAN_CHANGE,
-                      "Variance": VARIANCE_CHANGE,
-                      "MeanVariance": MEAN_VARIANCE_CHANGE
-                      }
+   
     Model = []
     for i in range(0, nb_variable):
         Model.append(model_type[data[i]])
@@ -1274,43 +1421,6 @@ def vec2list(vector):
 
 def Extract(obj, *args, **kargs):
     
-    
-    # clean all those enumerate and put them to common enumerate.py
-    INTER_EVENT = 0 
-    WITHIN_OBSERVATION_PERIOD = 1
-    LENGTH_BIAS = 2
-    BACKWARD_RECURRENCE_TIME = 3
-    FORWARD_RECURRENCE_TIME = 4
-    NB_EVENT = 5
-    MIXTURE = 6
-     
-    renewal_nb_event_map = { 
-            "InterEvent" : INTER_EVENT,
-            "LengthBias" : LENGTH_BIAS,
-            "Backward" : BACKWARD_RECURRENCE_TIME,
-            "Forward" : FORWARD_RECURRENCE_TIME,
-            "Mixture" : MIXTURE,
-            "Within": WITHIN_OBSERVATION_PERIOD,
-           }
-    
-    seq_map = {"Observation":0, 
-               "FirstOccurrence":1,
-               "Recurrence":2, 
-               "Sojourn":3,
-               "NbRun":6,
-               "NbOccurrence":7,
-               "Forward": -1}
-    
-    _INITIAL_RUN = 4
-    _FINAL_RUN = 5
-    _LENGTH = 8
-    _SEQUENCE_CUMUL = 9
-    _SEQUENCE_MEAN = 10
-   
-    histogram_type = {
-                      "FinalRun":5,
-                      "InitialRun":4,
-                      }
      
     NbEvent = kargs.get("NbEvent", NB_EVENT)  
     #error.CheckType(NbEvent, [int])

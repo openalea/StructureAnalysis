@@ -10,6 +10,9 @@ import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Hidden_semi_markov
 
+from openalea.stat_tool import error
+from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
+from openalea.sequence_analysis._sequence_analysis import OCCUPANCY_THRESHOLD
 
 __all__ = ['HiddenSemiMarkov',
            '_Hidden_semi_markov']
@@ -62,23 +65,22 @@ def HiddenSemiMarkov(*args, **kargs):
         :func:`~openalea.sequence_analysis.estimate.Estimate` (Markovian models), 
         :func:`~openalea.sequence_analysis.data_transform.ComputeStateSequences`, 
         :func:`~openalea.sequence_analysis.simulate.Simulate` (Markovian models).
-    """ 
-
-    OCCUPANCY_THRESHOLD = 0.99999 
-     
-    Length = kargs.get("Length", 40)
-    CountingFlag = kargs.get("CountingFlag", True)
+    """      
+    Length = kargs.get("Length", DEFAULT_LENGTH)
+    CountingFlag = kargs.get("Counting", True)
+    OldFormat = error.ParseKargs(kargs, "Format", "Current", 
+                                 {"Current":False, "Old":True})
+    error.CheckArgumentsLength(args, 1, 1)
+    error.CheckType([args[0], Length, CountingFlag, OldFormat],
+                    [str, int, bool, bool])
     
-    OldFormat = kargs.get("Format", False)
-    
-    if isinstance(args[0], str):
-        filename = args[0]
-        if os.path.isfile(filename):
+    filename = args[0]
+    if os.path.isfile(filename):
             
-            hsm = _Hidden_semi_markov(filename, Length, CountingFlag,
+        hsm = _Hidden_semi_markov(filename, Length, CountingFlag,
                                    OCCUPANCY_THRESHOLD, OldFormat)
-        else:
-            raise IOError("bad file name")
+    else:
+        raise IOError("bad file name")
         
         
     return hsm

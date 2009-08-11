@@ -9,6 +9,8 @@ __revision__ = "$Id:  $"
 import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Nonhomogeneous_markov
+from openalea.stat_tool import error
+from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 
 
 __all__ = ['NonhomogeneousMarkov',
@@ -26,17 +28,17 @@ def NonhomogeneousMarkov(*args, **kargs):
    
     """ 
 
-     
-    Length = kargs.get("Length", 40)
+    error.CheckArgumentsLength(args, 1, 1)
+    filename = args[0]
+    Length = kargs.get("Length", DEFAULT_LENGTH)
     
-    if isinstance(args[0], str):
-        filename = args[0]
-        if os.path.isfile(filename):
-            
-            output = _Nonhomogeneous_markov(filename, Length)
-
-        else:
-            raise IOError("bad file name")
+    error.CheckType([filename, Length], [str, int])
+    
+        
+    if os.path.isfile(filename):
+        output = _Nonhomogeneous_markov(filename, Length)
+    else:
+        raise IOError("bad file name")
         
     return output
 
