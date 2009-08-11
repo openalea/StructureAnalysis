@@ -13,6 +13,7 @@ from openalea.sequence_analysis.estimate import Estimate
 from openalea.stat_tool.data_transform import ExtractHistogram
 
 from data import *
+from tools import runTestClass
 
    
 class Test_Estimate_Histogram():
@@ -85,3 +86,10 @@ class Test_Estimate_tops():
     """tests not yet implemented"""
     pass
     
+
+
+if __name__ == "__main__":
+    runTestClass(Test_Estimate_HIDDEN_VARIABLE_ORDER_MARKOV())
+    runTestClass(Test_Estimate_VARIABLE_ORDER_MARKOV_from_markovian())
+    runTestClass(Test_Estimate_VARIABLE_ORDER_MARKOV())
+    runTestClass(Test_Estimate_Histogram())

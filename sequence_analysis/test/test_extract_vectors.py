@@ -8,15 +8,29 @@ __revision__ = "$Id:  $"
 
 from data import seq20 as data
 from openalea.sequence_analysis.data_transform import ExtractVectors
-
-def test_extract_vectors_length():
-    res = ExtractVectors(data, "Length") 
+from tools import runTestClass
 
 
-def test_extract_vectors_nb_run():
-    res = ExtractVectors(data, "NbRun", 1)
-    res = ExtractVectors(data, "NbRun", 1, 1)
+class Test():
+    def __init__(self):
+        self.data = data
+        
+    def test_extract_vectors_length(self):
+        data = self.data
+        res = ExtractVectors(data, "Length") 
 
-def test_extract_vectors_occurrence():
-    res = ExtractVectors(data, "NbOccurrence", 1)
-    res = ExtractVectors(data, "NbOccurrence", 1, 1)
+    def test_extract_vectors_nb_run(self):
+        data = self.data
+        res = ExtractVectors(data, "NbRun", 1)
+        res = ExtractVectors(data, "NbRun", 1, 1)
+
+    def test_extract_vectors_occurrence(self):
+        data = self.data
+        res = ExtractVectors(data, "NbOccurrence", 1)
+        res = ExtractVectors(data, "NbOccurrence", 1, 1)
+
+
+
+
+if __name__ == "__main__":
+    runTestClass(Test())

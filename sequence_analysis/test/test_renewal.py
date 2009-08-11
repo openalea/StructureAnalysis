@@ -10,21 +10,25 @@ __revision__ = "$Id:  $"
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.renewal import Renewal
+from openalea.sequence_analysis.time_events import TimeEvents, NbEventSelect
 
 from openalea.stat_tool.data_transform import * 
+from openalea.sequence_analysis.data_transform import TimeScaling
 from openalea.stat_tool.cluster import Cluster 
 from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
+from tools import runTestClass
 
-class _Test(interface):
+
+class Test(interface):
     """to be done
 
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "???",
+                           "data/time_events.dat",
                            Renewal)
         
     def build_data(self):
@@ -52,14 +56,14 @@ class _Test(interface):
         
     def test_len(self):
         seq = self.data
-        assert seq.nb_element==42
-        assert seq.nb_class==8
+        assert seq.nb_element == 42
+        assert seq.nb_class == 8
         pass
 
     def _test_plot(self):        
         self.plot()
     
-    def test_save(self):
+    def _test_save(self):
         self.save(skip_reading=True)
         self.save()
                     
@@ -93,7 +97,7 @@ class _Test(interface):
         data = self.data
         histo = data.get_hnb_event(20)
     
-    def test_get_hmixture(self):
+    def _test_get_hmixture(self):
         data = self.data
         histo = data.get_hmixture()
 
@@ -121,9 +125,8 @@ class _Test(interface):
         #max value must be greater than the offset.
         data= self.data
         data.time_select(3,35)
-"""
 
-time.extract            
-   
 
-"""
+
+if __name__ == "__main__":
+    runTestClass(Test())

@@ -11,6 +11,16 @@ from openalea.sequence_analysis.sequences import Sequences
 
 
 def test1():
+    """FIXME markovian_sequences call"""
     seq69 = Sequences("data//pin_laricio_7x.seq")
-    IndexParameterExtract(seq69, 1928, 1929)
+    a = IndexParameterExtract(seq69, 1929)
+    b = IndexParameterExtract(seq69, 1929, 1994)
+    c = seq69.index_parameter_extract(1929, -1).markovian_sequences()
+    d = seq69.index_parameter_extract(1929, 1994).markovian_sequences()
+    assert str(a) == str(c)
+    assert str(b) == str(d)
+
+
+if __name__ == "__main__":
+    test1()
 

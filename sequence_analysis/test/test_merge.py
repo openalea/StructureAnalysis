@@ -73,5 +73,6 @@ def test_merge_correlation():
 if __name__ == "__main__":
     test_merge_tops()
     test_merge_correlation()
-    test_merge_semi_markov_data()
+    #test_merge_semi_markov_data()
+    test_merge_sequences()
 

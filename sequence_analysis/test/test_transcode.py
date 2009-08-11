@@ -21,3 +21,8 @@ def test_transcode_semi_markov():
     """test to be done"""
     pass
 
+if __name__ == "__main__":
+    test_transcode_vectors()
+    test_transcode_sequences()
+    test_transcode_semi_markov()
+    

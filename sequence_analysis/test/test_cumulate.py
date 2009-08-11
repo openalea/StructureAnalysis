@@ -17,10 +17,11 @@ from data import seq1
 
 
 
-def test_Cumulate1():
+def test_cumulate1():
     data = seq1
     a = Cumulate(data)
-    b = data.cumulate(1)
+    b = data.cumulate(1).markovian_sequences()
+   
     assert str(a) == str(b)
     assert a.get_max_value(0) == 29
     assert b.get_max_value(0) == 29
@@ -28,11 +29,13 @@ def test_Cumulate1():
     assert data.get_max_value(0) == 2
 
 
-def test_Cumulaten():
-
+def test_cumulaten():
     for var in range(1, seqn.nb_variable+1):
-        assert str(seqn.cumulate(var)) == str(Cumulate(seqn, var))
+        assert str(seqn.cumulate(var).markovian_sequences()) == str(Cumulate(seqn, var))
 
 
+if __name__ == "__main__":
+    test_cumulate1()
+    test_cumulaten()
 
 

@@ -15,6 +15,8 @@ from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class
@@ -96,3 +98,8 @@ class Test(interface):
     def test_extract_data(self):
         pass
         #self.data.extract_data()
+
+
+
+if __name__ == "__main__":
+    runTestClass(Test())

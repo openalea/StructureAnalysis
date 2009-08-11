@@ -17,6 +17,7 @@ from openalea.sequence_analysis.data_transform import *
 
 
 from tools import interface
+from tools import runTestClass
 
 
 def TopsData():
@@ -42,7 +43,7 @@ class Test(interface):
                 
         return Tops('data/tops1.dat')      
 
-    def test_empty(self):
+    def _test_empty(self):
         self.empty()
 
     def test_constructor_from_file(self):
@@ -51,6 +52,23 @@ class Test(interface):
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
 
+    def _test_constructor_sequence(self):
+        pass
+
+    def _test_constructor_arrayn(self):
+        pass
+    
+    def _test_constructor_array1(self):
+        #print '--------------'
+        #top = Tops([1,2,3,4,5], Identifiers=[1])
+        print '------------'
+        #print type(top)
+        print '---------'
+        print top 
+        #print self.data
+        #top = Tops('data/tops1.dat')   
+        #print top
+        
     def test_print(self):
         self.print_data()
         
@@ -64,7 +82,7 @@ class Test(interface):
         assert len(seq) == 2
         assert len(seq) == seq.nb_sequence
 
-    def _test_plot(self):        
+    def test_plot(self):        
         self.plot()
     
     def test_save(self):
@@ -129,3 +147,7 @@ t.cumul_length                         t.merge                                t.
 t.cumulate                             t.merge_variable                       
 t.difference                           t.moving_average                       
 """
+
+
+if __name__ == "__main__":
+    runTestClass(Test())

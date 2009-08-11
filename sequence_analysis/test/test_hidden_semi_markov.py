@@ -17,6 +17,8 @@ from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class
@@ -105,3 +107,7 @@ hsm.state_sequence_computation
 hsm.get_state_subtype               
 hsm.nb_iterator                     
 """
+
+
+if __name__ == "__main__":
+    runTestClass(Test())

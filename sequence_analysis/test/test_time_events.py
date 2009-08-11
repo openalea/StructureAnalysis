@@ -16,6 +16,8 @@ from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
+from tools import runTestClass
+
 
 class Test(interface):
     """a simple unittest class
@@ -122,10 +124,9 @@ class Test(interface):
         mod = TimeSelect(self.data, 3, 35)
         assert str(aml) == str(mod)
         
-        
-"""
-
-time.extract            
    
 
-"""
+
+
+if __name__ == "__main__":
+    runTestClass(Test())

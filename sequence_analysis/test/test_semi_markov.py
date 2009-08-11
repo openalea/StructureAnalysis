@@ -15,6 +15,7 @@ from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster 
 
 from tools import interface
+from tools import runTestClass
 
 
 def SemiMarkovData():
@@ -42,7 +43,7 @@ class Test(interface):
         
         return sm
    
-    def test_empty(self):
+    def _test_empty(self):
         self.empty()
 
     def test_constructor_from_file(self):
@@ -92,3 +93,7 @@ class Test(interface):
 
     def test_extract_data(self):
         self.data.extract_data()
+
+
+if __name__ == "__main__":
+    runTestClass(Test())
