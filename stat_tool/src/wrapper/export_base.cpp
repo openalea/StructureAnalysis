@@ -27,6 +27,7 @@
 
 // related to the enumerates
 #include "stat_tool/regression.h"
+#include "stat_tool/markovian.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/distance_matrix.h"
@@ -249,7 +250,7 @@ void class_constant()
   .export_values()
   ;
 
-  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("TOBEDONEType")
+  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("EstimatorHSMType")
   .value("PARTIAL_LIKELIHOOD", PARTIAL_LIKELIHOOD)
   .value("COMPLETE_LIKELIHOOD", COMPLETE_LIKELIHOOD)
   .value("KAPLAN_MEIER", KAPLAN_MEIER)
@@ -298,6 +299,42 @@ void class_constant()
   .export_values()
   ;
 
+
+  // markovian
+
+
+  scope().attr("MIN_PROBABILITY") = MIN_PROBABILITY;
+  scope().attr("ORDER") = ORDER;
+  /*const int NB_STATE = 100;
+  const int ORDER = 8;
+  const double THRESHOLDING_FACTOR = 0.8;
+c  onst int NB_PARAMETER = 100000;
+  const int NB_OUTPUT_PROCESS = 10;
+  const int NB_OUTPUT = 12;
+  const double OBSERVATION_THRESHOLD = 0.999;
+  
+  
+  const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // seuil pour stopper l'algorithme
+  const int ACCESSIBILITY_LENGTH = 100;  // longueur maximum de sequence pour l'algorithme
+  
+  const double NOISE_PROBABILITY = 0.05;  // perturbation des probabilites d'observation
+  
+  const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon construit par arrondi
+  const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
+  const double SELF_TRANSITION = 0.9;    // probabilite de rester dans un etat initiale
+  
+  enum {
+  FORWARD ,
+  FORWARD_BACKWARD ,
+  VITERBI ,
+  //  VITERBI_FORWARD_BACKWARD ,
+  GENERALIZED_VITERBI ,
+  F  ORWARD_BACKWARD_SAMPLING ,
+  GIBBS_SAMPLING ,
+  FORWARD_DYNAMIC_PROGRAMMING
+  };
+
+*/
 }
 
 // Format Error
