@@ -61,7 +61,11 @@ pearson_type = {
     "PEARSON": _stat_tool.PearsonType.PEARSON,
     "SPEARMAN": _stat_tool.PearsonType.SPEARMAN,
     "KENDALL": _stat_tool.PearsonType.KENDALL,
-    "SPEARMAN2": _stat_tool.PearsonType.SPEARMAN2
+    "SPEARMAN2": _stat_tool.PearsonType.SPEARMAN2,
+    "Pearson": _stat_tool.PearsonType.PEARSON,
+    "Spearman": _stat_tool.PearsonType.SPEARMAN,
+    "Kendall": _stat_tool.PearsonType.KENDALL,
+    "Spearman2": _stat_tool.PearsonType.SPEARMAN2
     }
 
 smoothing_penalty_type = {
