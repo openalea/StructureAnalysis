@@ -50,16 +50,15 @@ class SequencesWrap
 public:
 
   static boost::shared_ptr<Sequences>
-  sequences_from_file(char* filename)
+  sequences_from_file(char* filename, bool old_format)
   {
     Format_error error;
     Sequences *sequences = NULL;
-    bool old_format = false;
     sequences = sequences_ascii_read(error, filename, old_format);
     return boost::shared_ptr<Sequences>(sequences);
   }
 
-  static boost::shared_ptr<Sequences>
+/*  static boost::shared_ptr<Sequences>
   sequences_from_file_old(char* filename, bool old_format)
   {
     Format_error error;
@@ -67,7 +66,7 @@ public:
     sequences = sequences_ascii_read(error, filename, old_format);
     return boost::shared_ptr<Sequences>(sequences);
   }
-
+*/
   static Sequences*
   build_from_lists(boost::python::list& input_list,
       boost::python::list& input_identifiers, int input_index_parameter_type)
@@ -714,17 +713,31 @@ public:
   {
 
     int nb_value = len(input_values);
-    double *values;
-    values = new double[nb_value * 2 + 1];
-    for (int i = 0; i < nb_value; i++)
-      {
-        values[i] = extract<double> (input_values[i]);
-        values[2 * nb_value - i] = values[i];
-      }
-    values[nb_value] = 0; //todo check that!!
+    double sum = 0;
+    int i = 0;
+
+    sequence_analysis::wrap_util::auto_ptr_array<double> values(new double[nb_value * 2 + 1]);
+
+    nb_value--;
+    for (i = 0; i < nb_value; i++)
+    {
+      values[i] = extract<double> (input_values[i]);
+      values[2 * nb_value - i] = values[i];
+      sum += 2 * values[i];
+    }
+    // i = n
+    values[i] = extract<double> (input_values[i]);
+    sum += values[i];
+
+
+    //normalization
+    for (i = 0; i < 2 * nb_value + 1; i++)
+    {
+      values[i] = values[i] / sum;
+    }
 
     SIMPLE_METHOD_TEMPLATE_1(seq, moving_average, Sequences,
-            nb_value, values, variable, begin_end,  output);
+            nb_value, values.get(), variable, begin_end,  output);
 
   }
 
@@ -954,50 +967,10 @@ void
 class_sequences()
 {
 
-  enum_<sequence_analysis::wrap_util::UniqueInt<5, 100> > ("IndexParameterType")
-    .value("IMPLICIT_TYPE", IMPLICIT_TYPE)
-    .value("TIME", TIME)
-    .value( "TIME_INTERVAL", TIME_INTERVAL)
-    .value("POSITION", POSITION)
-    .value("POSITION_INTERVAL", POSITION_INTERVAL)
-    .export_values();
-
-  enum_<sequence_analysis::wrap_util::UniqueInt<6, 101> > ("Type")
-    .value("INT_VALUE", INT_VALUE)
-    .value("REAL_VALUE", REAL_VALUE)
-    .value("STATE", STATE)
-    .value("OLD_INT_VALUE", OLD_INT_VALUE)
-    .value("NB_INTERNODE", NB_INTERNODE)
-    .value("AUXILIARY", AUXILIARY)
-    .export_values();
-
-  enum_<sequence_analysis::wrap_util::UniqueInt<4, 102> > ("Algorithm")
-    .value( "CTM_BIC", CTM_BIC)
-    .value("CTM_KT", CTM_KT)
-    .value("LOCAL_BIC",LOCAL_BIC)
-    .value("CONTEXT", CONTEXT)
-    .export_values();
-
-  enum_<sequence_analysis::wrap_util::UniqueInt<4, 103> > ("Estimator") .value(
-      "MAXIMUM_LIKELIHOOD", MAXIMUM_LIKELIHOOD) .value("LAPLACE", LAPLACE) .value(
-      "ADAPTATIVE_LAPLACE", ADAPTATIVE_LAPLACE) .value("UNIFORM_SUBSET",
-      UNIFORM_SUBSET) .value("UNIFORM_CARDINALITY", UNIFORM_CARDINALITY) .export_values();
-
-  enum_<sequence_analysis::wrap_util::UniqueInt<11, 104> > (
-      "MarkovianSequenceType") .value("OBSERVATION", OBSERVATION) .value(
-      "FIRST_OCCURRENCE", FIRST_OCCURRENCE) .value("RECURRENCE_TIME",
-      RECURRENCE_TIME) .value("SOJOURN_TIME", SOJOURN_TIME) .value(
-      "INITIAL_RUN", INITIAL_RUN) .value("FINAL_RUN", FINAL_RUN) .value(
-      "NB_RUN", NB_RUN) .value("NB_OCCURRENCE", NB_OCCURRENCE) .value("LENGTH",
-      LENGTH) .value("SEQUENCE_CUMUL", SEQUENCE_CUMUL) .value("SEQUENCE_MEAN",
-      SEQUENCE_MEAN) .export_values();
-
-  enum_<sequence_analysis::wrap_util::UniqueInt<2, 105> > ("IndelCost") .value(
-      "ADAPTATIVE", ADAPTATIVE) .value("FIXED", FIXED) .export_values();
 
   class_<Sequences, bases<STAT_interface> > ("_Sequences", "Sequences")
     .def("__init__", make_constructor(SequencesWrap::sequences_from_file))
-    .def("__init__", make_constructor(SequencesWrap::sequences_from_file_old))
+   // .def("__init__", make_constructor(SequencesWrap::sequences_from_file_old))
     .def("__init__", make_constructor(SequencesWrap::build_from_lists))
     .def(init <const Renewal_data&>())
 
@@ -1155,25 +1128,25 @@ void
 class_sequence_characteristics()
 {
 
-class_<Sequence_characteristics> ("_SequenceCharacteristics", "SequenceCharacteristics")
-.def(init<optional<int> >())
-.def(init<Sequence_characteristics, optional<bool> >())
-.def(init<Sequence_characteristics, optional<char> >())
+  class_<Sequence_characteristics> ("_SequenceCharacteristics", "SequenceCharacteristics")
+  .def(init<optional<int> >())
+  .def(init<Sequence_characteristics, optional<bool> >())
+  .def(init<Sequence_characteristics, optional<char> >())
 
-.add_property("get_nb_value", &Sequence_characteristics::get_nb_value)
+  .add_property("get_nb_value", &Sequence_characteristics::get_nb_value)
 
-.def("get_initial_run", &WRAP::get_initial_run, "returns initial run")
+  .def("get_initial_run", &WRAP::get_initial_run, "returns initial run")
 
-DEF_RETURN_VALUE("get_initial_run_from_index", WRAP::get_initial_run_from_index,args("index"), "returns initial run")
+  DEF_RETURN_VALUE("get_initial_run_from_index", WRAP::get_initial_run_from_index,args("index"), "returns initial run")
 
-DEF_RETURN_VALUE_NO_ARGS("get_index_value", &Sequence_characteristics::get_index_value, "get_index_value")
-DEF_RETURN_VALUE_NO_ARGS("get_first_occurrence", &Sequence_characteristics::get_first_occurrence, "get first occurrence time")
-DEF_RETURN_VALUE_NO_ARGS("get_recurrence_time", &Sequence_characteristics::get_recurrence_time, "get recurrence time")
-DEF_RETURN_VALUE_NO_ARGS("get_sojourn_time", &Sequence_characteristics::get_sojourn_time,"returns sojourn time")
-DEF_RETURN_VALUE_NO_ARGS("get_final_run", &Sequence_characteristics::get_final_run,"returns final run")
-DEF_RETURN_VALUE_NO_ARGS("get_nb_run", &Sequence_characteristics::get_nb_run, "returns number of run")
-DEF_RETURN_VALUE_NO_ARGS("get_nb_occurrence", &Sequence_characteristics::get_nb_occurrence, "returns number of ocurrences")
-;
+  DEF_RETURN_VALUE_NO_ARGS("get_index_value", &Sequence_characteristics::get_index_value, "get_index_value")
+  DEF_RETURN_VALUE_NO_ARGS("get_first_occurrence", &Sequence_characteristics::get_first_occurrence, "get first occurrence time")
+  DEF_RETURN_VALUE_NO_ARGS("get_recurrence_time", &Sequence_characteristics::get_recurrence_time, "get recurrence time")
+  DEF_RETURN_VALUE_NO_ARGS("get_sojourn_time", &Sequence_characteristics::get_sojourn_time,"returns sojourn time")
+  DEF_RETURN_VALUE_NO_ARGS("get_final_run", &Sequence_characteristics::get_final_run,"returns final run")
+  DEF_RETURN_VALUE_NO_ARGS("get_nb_run", &Sequence_characteristics::get_nb_run, "returns number of run")
+  DEF_RETURN_VALUE_NO_ARGS("get_nb_occurrence", &Sequence_characteristics::get_nb_occurrence, "returns number of ocurrences")
+  ;
 
 //DONE
 /*      Histogram** get_initial_run() const { return initial_run; } */

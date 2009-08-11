@@ -153,8 +153,6 @@ public:
     HEADER(Time_events);
     CREATE_ARRAY(input_timev, const Time_events *, timev)
 
-     cout << "HERE in tim evemtes"<<endl;
-
     ret = new Time_events(timev_size, timev.get());
 
     FOOTER;

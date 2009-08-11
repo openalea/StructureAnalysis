@@ -221,7 +221,6 @@ public:
     Format_error error;
     Renewal_data * ret = NULL;
 
-     cout << "HERE"<<endl;
     int nb_vec = len(vecs);
     sequence_analysis::wrap_util::auto_ptr_array<const Renewal_data *> vects(
         new const Renewal_data*[nb_vec]);

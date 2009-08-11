@@ -20,6 +20,9 @@
 
 
 /* WRAPPER Boost.python for sequences class */
+#include "stat_tool/stat_tools.h"
+
+#include "export_base.h"
 #include "export_function.h"
 #include "export_tops.h"
 #include "export_sequences.h"
@@ -49,6 +52,8 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
 #if BOOST_VERSION >= 103400
   docstring_options doc_options(true, false);
 #endif
+
+  class_constant_sequence();
 
   class_function();
 

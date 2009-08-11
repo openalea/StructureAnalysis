@@ -173,11 +173,7 @@ public:
 
 void class_hidden_semi_markov() {
 
-  enum_<sequence_analysis::wrap_util::UniqueInt<3, 102> >("SemiMarkovState")
-    .value("SSTATE", SSTATE)
-    .value("IN_STATE", IN_STATE)
-    .value("OUT_STATE", OUT_STATE)
-    .export_values();
+
 
   class_<Hidden_semi_markov, bases<Semi_markov > >
     ("_Hidden_semi_markov", "Hidden_semi_markov")
