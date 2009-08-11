@@ -197,8 +197,7 @@ def Cluster(obj, utype, *args, **kargs):
     
      
     if hasattr(ret, 'markovian_sequences'):
-        func = getattr(ret, 'markovian_sequences')
-        ret = func()
+        ret = ret.markovian_sequences()
     
     return ret
    

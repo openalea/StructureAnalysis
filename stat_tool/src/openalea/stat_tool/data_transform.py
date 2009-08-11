@@ -84,8 +84,17 @@ def Merge(obj, *args):
         :func:`~openalea.stat_tool.cluster.RemoveApicalInternodes` 
     """
     
-    return obj.merge(list(args))
-
+    ret =  obj.merge(list(args))
+    if hasattr(ret, 'markovian_sequences'):
+        try:
+            newret = ret.markovian_sequences()
+            return newret
+        except Exception:
+            import warnings
+            warnings.warn("is this normal behaviour? (merge in data_transform)")
+            pass
+    # if here, it means that markovian_sequencse did not work or not present
+    return ret
 
 
 def MergeVariable(obj, *args, **kargs):    
