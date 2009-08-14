@@ -332,17 +332,26 @@ public:
 
     sequence = input.simulation(nb_sequence, initialisation);
     boost::python::list output_sequence;
-   
-
-    for (int j=0; j < sm->get_nb_output_process(); j++)
+    
+    int i, j;
+    for (j=0; j < sm->get_nb_output_process()+1; j++)
     {
         boost::python::list line;
-        for (int i=0; i < nb_sequence; i++)
+        for (i=0; i < nb_sequence; i++)
         {
             line.append(sequence[j][i]);
         }
         output_sequence.append(line);
     }
+
+    // delete the sequence allocated in C++
+    for (j=0; j < sm->get_nb_output_process()+1; j++)
+        {
+        delete [] sequence[j];
+        sequence[j] = 0;
+        }
+    delete [] sequence;
+
     return output_sequence;
  } 
 };
@@ -351,12 +360,12 @@ void
 class_semi_markov_iterator()
 {
 
-  class_<Semi_markov_iterator > ("_Semi_markov_iterator", "Semi_markov_iterator", init<Semi_markov*>())
+  class_<Semi_markov_iterator, boost::shared_ptr<Semi_markov_iterator> > ("_Semi_markov_iterator", "Semi_markov_iterator", init<Semi_markov* >())
     .def(init<const Semi_markov_iterator&>())
-    .add_property("get_state", &Semi_markov_iterator::get_state)
-    .add_property("get_occupancy", &Semi_markov_iterator::get_occupancy)
-    .add_property("get_counter", &Semi_markov_iterator::get_counter)
-    .add_property("get_nb_variable", &Semi_markov_iterator::get_nb_variable)
+    .add_property("state", &Semi_markov_iterator::get_state)
+    .add_property("occupancy", &Semi_markov_iterator::get_occupancy)
+    .add_property("counter", &Semi_markov_iterator::get_counter)
+    .add_property("nb_variable", &Semi_markov_iterator::get_nb_variable)
     .def("simulation", SemiMarkovIteratorWrap::simulation,  "simulation")
 ;
 }
