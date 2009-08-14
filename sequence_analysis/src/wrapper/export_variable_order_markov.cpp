@@ -342,16 +342,24 @@ public:
     sequence = input.simulation(nb_sequence, initialisation);
     boost::python::list output_sequence;
 
-
-    for (int j=0; j < sm->get_nb_output_process(); j++)
+    int i, j;
+    for (j=0; j < sm->get_nb_output_process()+1; j++)
     {
         boost::python::list line;
-        for (int i=0; i < nb_sequence; i++)
+        for (i=0; i < nb_sequence; i++)
         {
             line.append(sequence[j][i]);
         }
         output_sequence.append(line);
     }
+
+    for (j=0; j < sm->get_nb_output_process()+1; j++)
+    {
+        delete [] sequence[j];
+        sequence[j] = 0;
+    }
+    delete [] sequence;
+
     return output_sequence;
  }
 };
