@@ -15,13 +15,18 @@ from _stat_tool import _Compound
 from _stat_tool import _Convolution
 from _stat_tool import _Mixture
 
+
+from enumerate import algo_map
+from enumerate import  bool_type
+
+from openalea.stat_tool import error
+
 __all__ = ['_Regression',
            'Regression']
 
 #todo: use args and kargs as arguments
 def Regression(vec, utype, explanatory, response, 
-               param=None, Algorithm="Averaging",
-               Weighting=True):
+               *args, **kargs):
     """
     Simple regression (with a single explanatory variable).
 
@@ -84,29 +89,28 @@ def Regression(vec, utype, explanatory, response,
         :func:`~openalea.stat_tool.output.Plot`
 
     """
+    STAT_MINIMUM_SPAN = 0.05 # from aml not stat_tool or sequence headers
+    
     error.CheckType([vec, utype, explanatory, response],
                     [_Vectors, str, int, int])
     
     possible_types = ["Linear", "NearestNeighbors", 
                       "NearestNeighbours", "MovingAverage"]
 
-    algo_map = { 'Averaging' : 'a',
-                 'LeastSquares' : 's',
-                 }
-
-    try:
-        Algorithm = algo_map[Algorithm]
-    except KeyError:
-        raise KeyError("Bad Algorithm. Possible algorithms are %s"
-                       % (algo_map.keys(),))
-        
+    Algorithm = error.ParseKargs(kargs, "Algorithm", 'Averaging', algo_map)
+    Weighting = error.ParseKargs(kargs, "Weighting", True, bool_type)
 
     if utype == "Linear":
+        error.CheckArgumentsLength(args, 0, 0)
         return vec.linear_regression(explanatory, response)
 
     elif utype == "MovingAverage":
+        error.CheckArgumentsLength(args, 1, 1)
+        param = args[0]
+        #todo add CheckType for int and models
         # param is a list of float, int 
-        if isinstance(param, list):
+        if isinstance(args[0], list):
+            # todo: check that sum equals 1
             return vec.moving_average_regression_values(explanatory, 
                             response, param, Algorithm)
         # or a set of distributions
@@ -120,14 +124,17 @@ def Regression(vec, utype, explanatory, response,
                             param, Algorithm)
         
     elif utype in ["NearestNeighbors", "NearestNeighbours"]:
-        span = param
+        error.CheckArgumentsLength(args, 1, 1)
+        span = args[0]
         error.CheckType([span], [[float, int]])
-        #todo: check that       
-        # if ((span >= STAT_MINIMUM_SPAN) && 
-        # (span < 1. - STAT_MINIMUM_SPAN)) 
+           
+        
+        assert span >= STAT_MINIMUM_SPAN 
+        #todo: check this assert
+        #assert span <= 1. - STAT_MINIMUM_SPAN 
 
         return vec.nearest_neighbours_regression(explanatory, response, 
-                                                 float(span), bool(Weighting))
+                                                 float(span), Weighting)
     else:
         raise TypeError("Bad Regression type. Must be in %s" % possible_types)
 
