@@ -7,6 +7,9 @@ __version__ = "$Id$"
 
 __all__ = ["Simulate"]
 
+from openalea.stat_tool import error
+
+
 def Simulate(obj, *args):
     """Generation of a random sample from a distribution.
 
@@ -47,5 +50,5 @@ def Simulate(obj, *args):
         Compound,
         ExtractHistogram.
     """
-
-    return obj.simulate(*args)
+    error.CheckArgumentsLength(args, 1, 1)
+    return obj.simulate(args[0])
