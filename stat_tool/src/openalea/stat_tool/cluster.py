@@ -280,7 +280,6 @@ def Transcode(obj, *args, **kargs):
     if hasattr(obj, 'nb_variable'):# case sequence, vectors
         nb_variable = obj.nb_variable
         if len(args)==1 and nb_variable == 1:
-            print kargs.keys()
 
 
             try:
@@ -289,7 +288,6 @@ def Transcode(obj, *args, **kargs):
                 ret = obj.transcode(1, args[0])
         
         elif len(args)==2 and nb_variable!=1:
-            print kargs.keys()
             try:
                 ret = obj.transcode(args[0], args[1], AddVariable)
             except:
