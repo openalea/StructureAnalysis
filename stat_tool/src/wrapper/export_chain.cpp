@@ -49,7 +49,7 @@ void class_chain()
     .add_property("type", &Chain::type, "returns type")
     .add_property("nb_state", &Chain::nb_state, "returns nb_state")
     .add_property("nb_row", &Chain::nb_row, "returns nb_row")
-    .add_property("nb_component", &Chain::nb_row, "returns nb_component")
+    .add_property("nb_component", &Chain::nb_component, "returns nb_component")
 
 /*
  *     .def("get_component_nb_state", &Chain::component_nb_state, "component nb state")
