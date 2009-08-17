@@ -10,7 +10,13 @@ arguments_labels = {1:'first',
                     2:'second', 
                     3:'third', 
                     4:'fourth', 
-                    5:'fifth'}
+                    5:'fifth',
+                    6:'sixth',
+                    7:'seventh',
+                    8:'eighth',
+                    9:'ninth',
+                    10:'tenth'
+                    }
 
 
 
@@ -73,7 +79,11 @@ def CheckType(variables, types, **kargs):
     labels = []
     if variable_id is None:
         for index in range(1, n+1):
-            labels.append(arguments_labels[index])
+            try:
+                labels.append(arguments_labels[index])
+            except:
+                raise KeyError("""consider adding keys in the labels dictionary:
+                 you 've reached the limit""")
     else:
         for var in variable_id:
             if var in arguments_labels.keys():
@@ -102,6 +112,8 @@ def CheckDictKeys(key, udict):
     if key not in udict.keys():
         raise KeyError('Key %s not found. Possible choices are %s.' % 
                             (key, udict.keys()))
+    else:
+        return udict[key]
 
 
 def ParseKargs(kargs, keyword, default=None, possible=None):

@@ -620,7 +620,6 @@ def ValueSelect(obj, *args, **kargs):
     """
     error.CheckArgumentsLength(args, 1, 3)
     Mode = error.ParseKargs(kargs, "Mode", "Keep", keep_type)
-    print Mode
     #keep = bool(Mode == "Keep" or Mode == "keep")
     keep = bool(Mode == "Keep")
     # Test for vectors
