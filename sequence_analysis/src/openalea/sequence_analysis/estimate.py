@@ -1,23 +1,25 @@
 """ Estimation functions 
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
+
 
 """
 __revision__ = "$Id:  $"
 
 
-import openalea.stat_tool._stat_tool as _stat_tool
 from openalea.stat_tool import error
 
-#from tools import __parse_kargs__
-
 # constants
-from openalea.stat_tool._stat_tool import  ONE_STEP_LATE, COMPUTED
-from openalea.stat_tool._stat_tool import COMPLETE_LIKELIHOOD, PARTIAL_LIKELIHOOD
-from openalea.stat_tool._stat_tool import I_DEFAULT, D_DEFAULT
+from openalea.stat_tool._stat_tool import  \
+    ONE_STEP_LATE, \
+    COMPUTED, \
+    COMPLETE_LIKELIHOOD,\
+    PARTIAL_LIKELIHOOD,\
+    I_DEFAULT, \
+    D_DEFAULT, \
+    ORDER
 
-# maps
+#maps
 from openalea.stat_tool.estimate import estimator_type
 from openalea.stat_tool.estimate import outside_type
 from openalea.stat_tool.estimate import smoothing_penalty_type
@@ -25,7 +27,7 @@ from openalea.stat_tool.estimate import smoothing_penalty_type
 from openalea.sequence_analysis.enumerate import estimator_semi_markov_type
 from openalea.sequence_analysis.enumerate import ident_map
 from openalea.sequence_analysis.enumerate import mean_computation_map
-from openalea.sequence_analysis.enumerate import markovian_algorithms
+#from openalea.sequence_analysis.enumerate import markovian_algorithms
 from openalea.sequence_analysis.enumerate import mean_computation_map
 from openalea.sequence_analysis.enumerate import sub_markovian_algorithms
 from openalea.sequence_analysis.enumerate import algorithm
@@ -34,18 +36,21 @@ from openalea.sequence_analysis.enumerate import likelihood_penalty_type
 from openalea.sequence_analysis.enumerate import stochastic_process_type
 
 # structure class
-from openalea.sequence_analysis._sequence_analysis import _Hidden_semi_markov
-from openalea.sequence_analysis._sequence_analysis \
-    import _Hidden_variable_order_markov
-from openalea.sequence_analysis._sequence_analysis import _Tops
-from openalea.sequence_analysis._sequence_analysis import _Variable_order_markov
-from openalea.sequence_analysis._sequence_analysis import _Renewal_data
-from openalea.sequence_analysis._sequence_analysis import _Time_events
+from openalea.sequence_analysis._sequence_analysis import\
+    _Hidden_semi_markov,\
+    _Hidden_variable_order_markov,\
+    _Tops,\
+    _Variable_order_markov,\
+    _Renewal_data,\
+    _Time_events
 
 from openalea.stat_tool._stat_tool import _Mixture
 from openalea.stat_tool._stat_tool import _Compound
+from openalea.stat_tool._stat_tool import _Histogram
 from openalea.stat_tool._stat_tool import _Convolution
+from openalea.stat_tool._stat_tool import _Parametric
 from openalea.stat_tool._stat_tool import _ParametricModel
+from openalea.stat_tool._stat_tool import _Distribution
 
 __all__ = ['Estimate']
 # to be checked or improve. Maybe the c++ code could be more explicit, i.e.,
@@ -54,9 +59,13 @@ __all__ = ['Estimate']
 
 
 def _estimate_non_homogeneous_markov(obj, *args, **kargs):
- 
-    
-    CountingFlag = kargs.get("CountingFlag", True)
+    """
+    Estimate switch hidden_variable_order_markov
+    """
+    #to be finalised given that nb_state is reachable. need test and examples
+    #nb_state = obj.get_marginal(0).nb_value
+    # error.CheckType(args, 2+nb_state)
+    CountingFlag = kargs.get("Counting", True)
     
     ident = [ident_map[x] for x in args]
     
@@ -65,45 +74,60 @@ def _estimate_non_homogeneous_markov(obj, *args, **kargs):
 
 def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
     """
-    
+    Estimate switch hidden_variable_order_markov
     """
-    #default values
-    MIN_NB_STATE_SEQUENCE = 1
-    MAX_NB_STATE_SEQUENCE = 10  
-    NB_STATE_SEQUENCE_PARAMETER = 1.
+    from openalea.sequence_analysis._sequence_analysis import \
+        MIN_NB_STATE_SEQUENCE, \
+        MAX_NB_STATE_SEQUENCE, \
+        NB_STATE_SEQUENCE_PARAMETER
+    from openalea.stat_tool._stat_tool import \
+        FORWARD_BACKWARD, \
+        FORWARD_BACKWARD_SAMPLING 
     
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     NbIteration = kargs.get("NbIteration", 80)
-    CountingFlag = kargs.get("CountingFlag", True)
+    Counting = kargs.get("Counting", True)
     StateSequence = kargs.get("StateSequence", True)
     Parameter = kargs.get("Parameter", NB_STATE_SEQUENCE_PARAMETER)
-    MinNbSequence = kargs.get("MinNbSequence", MIN_NB_STATE_SEQUENCE)
-    MaxNbSequence = kargs.get("MaxNbSequence", MAX_NB_STATE_SEQUENCE)
-    Algorithm = kargs.get("Algorithm", 'EM')
+    MinNbSequence = kargs.get("MinNbStateSequence", MIN_NB_STATE_SEQUENCE)
+    MaxNbSequence = kargs.get("MaxNbStateSequence", MAX_NB_STATE_SEQUENCE)
+    Algorithm = error.ParseKargs(kargs, "Algorithm", 'EM', \
+                                 sub_markovian_algorithms)
     
+    error.CheckType([Counting, GlobalInitialTransition, NbIteration, 
+                     MinNbSequence, MaxNbSequence, Parameter, StateSequence],
+                     [bool, bool, int, int, int, [int, float], bool])
     
-    #check that a proper algorithm has been chosen
-    if Algorithm not in markovian_algorithms.keys():
-        raise KeyError("Algorithm must be in %s " % markovian_algorithms.keys())
+    error.CheckType([args[0]], [_Hidden_variable_order_markov])
+        
+    #sanity check on arguments
+    # this one can be check only whne Chain will be public and exported in 
+    # export_variable_order_markov
+    #if type == 'e' and kargs.get("GlobalInitialTransition")" raise Error
+    if Algorithm != sub_markovian_algorithms["MCEM"]:
+        options = ["Parameter", "MaxNbStateSequence", "MinNbStateSequence"]
+        for option in options:
+            if kargs.get(option):
+                raise ValueError("If % is provided, Algorithm cannot be MCEM" %
+                                 option)
     
-    if not isinstance(args[0], _Hidden_variable_order_markov):
-        raise TypeError('First argument must be a hidden_variable_order_markov')
-    
-    if Algorithm == 'EM':
+    if Algorithm == FORWARD_BACKWARD:
         hmarkov = obj.hidden_variable_order_markov_estimation(
                 args[0], GlobalInitialTransition,
-                CountingFlag, StateSequence, NbIteration)
+                Counting, StateSequence, NbIteration)
 
-    elif Algorithm == 'MCEM':
+    elif Algorithm == FORWARD_BACKWARD_SAMPLING:
         hmarkov = obj.hidden_variable_order_markov_stochastic_estimation(
                         args[0], GlobalInitialTransition, MinNbSequence,
-                        MaxNbSequence, Parameter, CountingFlag,
+                        MaxNbSequence, Parameter, Counting,
                         StateSequence, NbIteration)
 
     return hmarkov
       
-def _estimate_renewal_count_data(obj, itype, *args, **kargs):
-   
+def _estimate_renewal_count_data(obj, itype, **kargs):
+    """
+    Estimate switch renewal_count_data
+    """
     Type = 'v'
     error.CheckType([obj, itype], [[_Time_events, _Renewal_data], str])
     if isinstance(itype, str):  
@@ -161,34 +185,110 @@ def _estimate_renewal_count_data(obj, itype, *args, **kargs):
             raise ValueError("""Incompatible options Outside with type o""")
         
     if InitialInterEvent:
-        renew = obj.estimation_inter_event(Type, InitialInterEvent,
+        #cast from InitialInterEvent to Mixture, Compound should be done
+        
+        if isinstance(InitialInterEvent, _ParametricModel):
+            InitialInterEvent = _Parametric(InitialInterEvent)
+        else:
+            InitialInterEvent = _Distribution(InitialInterEvent)
+        renew = obj.estimation_inter_event_type(Type, InitialInterEvent,
                                            Estimator, NbIteration,
                                            EquilibriumEstimator,
                                            InterEventMean, Weight, 
                                            Penalty, Outside)
     else:
-        renew = obj.estimation(Type, Estimator, NbIteration,
+        renew = obj.estimation_type(Type, Estimator, NbIteration,
                                EquilibriumEstimator, InterEventMean ,
                                Weight, Penalty, Outside)
     
     return renew
 
 
+def _estimate_renewal_interval_data(obj, **kargs):
+    """
+    Estimate switch renewal_count_data
+    
+    .. todo:: to be completed and validated with tests
+    
+    see stat_func4 in aml 
+    """        
+    #only LIKELIHOOD and PENALIZED_LIKELIHOOD
+    Estimator = error.ParseKargs(kargs, "Estimator",
+                                 'Likelihood', estimator_type)
+    
+    
+    NbIteration = kargs.get("NbIteration", I_DEFAULT)
+    error.CheckType([NbIteration], [int])
+    
+    # distribution
+    InitialInterEvent = kargs.get("InitialInterEvent", None)
+    error.CheckType([InitialInterEvent], [[type(None), _ParametricModel,
+                                           _Mixture, _Convolution, _Compound]])
+    if isinstance(InitialInterEvent, _ParametricModel):
+        InitialInterEvent = _Parametric(InitialInterEvent)
+    else:
+        InitialInterEvent = _Distribution(InitialInterEvent)
+    #cast initialInterEvent to parametric ? 
+    Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference", 
+                               smoothing_penalty_type)
+    Weight = kargs.get("Weight", D_DEFAULT)
+    error.CheckType([Weight], [[int, float]])
+    Outside = error.ParseKargs(kargs, "Outside", "Zero", outside_type)
+    error.CheckType([Weight], [[int, float]])
+    
+    InterEventMean = error.ParseKargs(kargs, "InterEventMean",
+                            'Computed', mean_computation_map)
+
+             
+    if Estimator == estimator_type['PenalizedLikelihood']:
+        if kargs.get("InterEventMean") is None:
+            InterEventMean = ONE_STEP_LATE
+        elif InterEventMean == COMPUTED:
+            raise ValueError("""
+                Incompatible options Estimator and InterEventMean""")
+    else:
+        if kargs.get("Penalty"):
+            raise ValueError("""Incompatible options Penalty with type o""")
+        if kargs.get("Weight"):
+            raise ValueError("""Incompatible options Weight with type o""")
+        if kargs.get("Outside"):
+            raise ValueError("""Incompatible options Outside with type o""")
+        
+    if isinstance(obj, _Histogram):
+        if InitialInterEvent:
+            renew = obj.estimation_inter_event(InitialInterEvent,
+                                           Estimator, NbIteration,
+                                           InterEventMean, Weight, 
+                                           Penalty, Outside)
+        else:
+            renew = obj.estimation(Estimator, NbIteration,
+                                   InterEventMean ,
+                                   Weight, Penalty, Outside)
+    else:
+        if InitialInterEvent:
+            renew = obj.estimation_inter_event(InitialInterEvent,
+                                           Estimator, NbIteration,
+                                           InterEventMean, Weight, 
+                                           Penalty, Outside)
+        else:
+            renew = obj.estimation(Estimator, NbIteration,
+                                   InterEventMean ,
+                                   Weight, Penalty, Outside)
+    
+    return renew
+
 def _estimate_semi_markov(obj, *args, **kargs):
  
     Type = 'v'
-    error.CheckType([args[0]], [str])
+    #error.CheckType([args[0]], [str])
     
-    if args[0] in stochastic_process_type.keys():
-        Type = stochastic_process_type[args[0]]
-    else:
-        raise AttributeError("type must be in %s " 
-                             % stochastic_process_type.keys())
-        
+    print args[0]
+    Type = error.CheckDictKeys(args[0], stochastic_process_type)
+       
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     Counting = kargs.get("Counting", True)
     Estimator = error.ParseKargs(kargs, "Estimator", "CompleteLikelihood",
-                                 stochastic_process_type)
+                                 estimator_semi_markov_type)
     
     OccupancyMean = error.ParseKargs(kargs, "OccupancyMean",
                                       'Computed', mean_computation_map)
@@ -209,176 +309,207 @@ def _estimate_semi_markov(obj, *args, **kargs):
 def _estimate_hidden_semi_markov(obj, *args, **kargs):
     """
     >>> hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
-    
+             
     """
-
-    """  nb_required , 
-         
-                
-         mean_computation = COMPUTED
-         
-    """
-    
-    MIN_NB_STATE_SEQUENCE = 1
-    MAX_NB_STATE_SEQUENCE = 10  
-    NB_STATE_SEQUENCE_PARAMETER = 1
-   
-    Algorithm = kargs.get("Algorithm", "EM") #FORWARD_BACKWARD
-    
-    _AlgorithmCheck = error.ParseKargs(kargs, "Algorithm", 'EM',
-                                sub_markovian_algorithms)
-    Estimator = error.ParseKargs(kargs, "Estimator",
-                                'CompleteLikelihood',
-                                estimator_semi_markov_type)
-    MeanComputation = error.ParseKargs(kargs, "OccupancyMean",
-                                      'Computed',
-                                      mean_computation_map)
         
-    StateSequence = kargs.get("StateSequence", True)
+    from openalea.sequence_analysis._sequence_analysis import \
+        MIN_NB_STATE_SEQUENCE, \
+        MAX_NB_STATE_SEQUENCE, \
+        NB_STATE_SEQUENCE_PARAMETER
+        
+    
+        
+    from openalea.stat_tool._stat_tool import \
+        FORWARD_BACKWARD, \
+        FORWARD_BACKWARD_SAMPLING, \
+        KAPLAN_MEIER
+    
+    GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
+    NbIteration = kargs.get("NbIteration", I_DEFAULT)
     Counting = kargs.get("Counting", True)
-    OccupancyMean = kargs.get("InitialOccupancyMean", -1)
-    NbIteration = kargs.get("NbIteration", -1)
-    MinNbSequence = kargs.get("MinNbSequence", MIN_NB_STATE_SEQUENCE)
-    MaxNbSequence = kargs.get("MaxNbSequence", MAX_NB_STATE_SEQUENCE)
-    Parameter = kargs.get("Parameter",NB_STATE_SEQUENCE_PARAMETER )
-     
+    StateSequence = kargs.get("StateSequence", True)
+    Parameter = kargs.get("Parameter", NB_STATE_SEQUENCE_PARAMETER)
+    MinNbSequence = kargs.get("MinNbStateSequence", MIN_NB_STATE_SEQUENCE)
+    MaxNbSequence = kargs.get("MaxNbStateSequence", MAX_NB_STATE_SEQUENCE)
+    Algorithm = error.ParseKargs(kargs, "Algorithm", 'EM', \
+                                 sub_markovian_algorithms)
+    Estimator = error.ParseKargs(kargs, "Estimator", 'CompleteLikelihood',
+                                estimator_semi_markov_type)
+    MeanComputation = error.ParseKargs(kargs, "OccupancyMean", 'Computed',
+                                      mean_computation_map)
+    InitialOccupancyMean = kargs.get("InitialOccupancyMean", D_DEFAULT)
 
-#todo check this ?? not really needed for now      
-#if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (min_nb_state_sequence_option)) {
-      #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MinNbStateSequence");
-#if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (max_nb_state_sequence_option)) {
-    #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "MaxNbStateSequence");
-#if ((algorithm != FORWARD_BACKWARD_SAMPLING) && (parameter_option)) {
-     #genAMLError(ERRORMSG(FORBIDDEN_OPTION_ss) , "Estimate" , "Parameter");
-
-   
-    if isinstance(args[0], str) or isinstance(args[0], int):  
-        #note : do we really need the second isinstance ? 
-        #this is the case in the AML code but later there is an error raised 
-        #if args[0] is not a string... 
+    error.CheckType([Counting, GlobalInitialTransition, NbIteration, 
+                     MinNbSequence, MaxNbSequence, Parameter, StateSequence,
+                     InitialOccupancyMean],
+                     [bool, bool, int, int, int, [int, float], bool,
+                     [float, int]])
+    
+    if Algorithm != sub_markovian_algorithms["MCEM"]:
+        options = ["Parameter", "MaxNbStateSequence", "MinNbStateSequence"]
+        for option in options:
+            if kargs.get(option):
+                raise ValueError(
+                    "If % is provided, Algorithm cannot be MCEM" % option)
+    if Algorithm != sub_markovian_algorithms["EM"]:
+        if Estimator == KAPLAN_MEIER:
+            raise ValueError(
+                "Estimator= KaplanMeier and Algorithm = MCEM not possible")
+                
+       
+    error.CheckType([args[0]], [[str, _Hidden_semi_markov]])
+    if isinstance(args[0], str):  
+        Type = 'v'
         
-        if args[0] == "Ordinary":
-            Type = 'o'
-        elif args[0] == "Equilibrium":
-            Type = 'e'
-        else:
-            raise AttributeError("type must be Ordinary or Equilibrium")
-        
-        if not isinstance(args[1], int):
-            raise AttributeError("nb_state nnot provided. expected an integer after the type.")
-        
+        error.CheckType([args[1]], [int])
         NbState = args[1]
-        
-        if Type == 'o':
+
+        if args[0] == "Ordinary":
+            error.CheckArgumentsLength(args, 3, 3)
+            error.CheckType(args[2], [str])
+            Type = 'o'
             if args[2] not in ["LeftRight", "Irreducible"]:
-                raise AttributeError("third arguments must be a strin : LeftRight or Irreducible.")
+                raise ValueError(
+                        "third argument must be LeftRight or Irreducible.")
             if args[2] == "LeftRight":
                 LeftRight = True
-        elif Type == 'e':
+        elif args[0] == "Equilibrium":
+            error.CheckArgumentsLength(args, 2, 2)
+            Type = 'e' 
             LeftRight = False
-                 
-      #todo traise error if (((type != 'e') || (estimator == PARTIAL_LIKELIHOOD) || (algorithm != FORWARD_BACKWARD)) &&(occupancy_mean_option)) {
+        else:
+            raise AttributeError("type must be Ordinary or Equilibrium")
+   
+        if ((Type != 'e') or (Estimator == PARTIAL_LIKELIHOOD) or \
+            (Algorithm != FORWARD_BACKWARD)) and \
+            kargs.get(InitialOccupancyMean):
+            raise ValueError("Incompatible user arguments") 
     
-        if Algorithm == "EM":
+        if Algorithm == FORWARD_BACKWARD:
             hsmarkov = obj.hidden_semi_markov_estimation_model( Type , NbState ,
                          LeftRight , Estimator , Counting , StateSequence ,
-                         OccupancyMean ,NbIteration , MeanComputation)
+                         InitialOccupancyMean ,NbIteration , MeanComputation)
             return hsmarkov
 
-        elif Algorithm == "MCEM": #FORWARD_BACKWARD_SAMPLING : 
-            #if Estimator == KAPLAN_MEIER:
-            #    Estimator = COMPLETE_LIKELIHOOD
+        elif Algorithm == FORWARD_BACKWARD_SAMPLING: 
             hsmarkov = obj.hidden_semi_markov_stochastic_estimation_model(
                 Type, NbState, LeftRight, MinNbSequence, MaxNbSequence,
                 Parameter, Estimator, Counting, StateSequence,
-                OccupancyMean, NbIteration)
+                InitialOccupancyMean, NbIteration)
             return hsmarkov
         
-
-    
     elif isinstance(args[0], _Hidden_semi_markov):
         
+        #todo: add these lines once Chain is public
+        #if ((( (args[0].type == 'o')) or 
+        #     (Estimator == PARTIAL_LIKELIHOOD) or
+        # (Algorithm != FORWARD_BACKWARD)) and \
+        # kargs.get("InitialOccupancyMean")):
+        #    raise ValueError("Incompatible arguments")
+    
         hsmarkov = args[0] 
-        if Algorithm == 'EM':
+        if Algorithm == FORWARD_BACKWARD:
             output = obj.hidden_semi_markov_estimation(hsmarkov,
                                 Estimator, Counting, StateSequence,
                                 NbIteration, MeanComputation)
             return output
-        elif Algorithm == 'MCEM':
+        elif Algorithm == FORWARD_BACKWARD_SAMPLING:
             return obj.hidden_semi_markov_stochastic_estimation(hsmarkov,
                             MinNbSequence, MaxNbSequence,
                             Parameter, Estimator, Counting,
                             StateSequence, NbIteration)
-    else:
-        raise TypeError("should not reach this part of the code.check the usage")
-    
-    raise TypeError("should not reach this part of the code. check the usage")
-    
+   
+   
+
 
 def _estimate_variable_order_markov(obj, *args, **kargs):
     """
+    EStimate on variable order markov
 
     """
-    ORDER = 8
-    LOCAL_BIC_THRESHOLD = 10
+    from openalea.sequence_analysis._sequence_analysis import \
+        LOCAL_BIC_THRESHOLD,\
+        CTM_KT_THRESHOLD,\
+        CTM_BIC_THRESHOLD,\
+        CONTEXT_THRESHOLD,\
+        CTM_BIC,\
+        CTM_KT,\
+        CONTEXT,\
+        LOCAL_BIC
 
     Order = kargs.get("Order", None)
     MaxOrder = kargs.get("MaxOrder", ORDER) 
     MinOrder = kargs.get("MinOrder", 0)
-    Algorithm = kargs.get("Algorithm", "LocalBIC")
     Threshold = kargs.get("Threshold", LOCAL_BIC_THRESHOLD)
-    Estimator = kargs.get("Estimator", "Laplace")
+    
+    error.CheckType([Threshold, MaxOrder, MinOrder], [[int, float], int, int])
+    
+    
+    Algorithm = error.ParseKargs(kargs, "Algorithm", "LocalBIC", algorithm)
+    Estimator = error.ParseKargs(kargs, "Estimator", "Laplace", estimator)
+    Penalty = error.ParseKargs(kargs, "Penalty", "BIC", likelihood_penalty_type)
+    
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     GlobalSample = kargs.get("GlobalSample", True)
     CountingFlag = kargs.get("CountingFlag", True)
-    Penalty = kargs.get("Penalty","BIC")
-   
-    #convert to integers 
-    try:
-        Estimator = estimator[Estimator]
-    except:
-        pass
-    try:
-        Algorithm = algorithm[Algorithm]
-    except:
-        pass
-    try:
-        Penalty = likelihood_penalty_type[Penalty]
-    except:
-        pass
-       
-
-    
-    
+        
+    error.CheckType([CountingFlag, GlobalSample, GlobalInitialTransition],
+                    [bool, bool, bool])
+        
+    #args0 is a string
     if len(args)>0 and isinstance(args[0], str):
+        Type = 'v'
+        Type = error.CheckDictKeys(args[0], stochastic_process_type)
         
-        
+        # check validity of the input arguments following AML's code
+        if Algorithm != LOCAL_BIC and not kargs.get("Threshold"):
+            if Algorithm == CTM_BIC:
+                Threshold = CTM_BIC_THRESHOLD
+            elif Algorithm == CTM_KT:
+                Threshold = CTM_KT_THRESHOLD
+            elif Algorithm == CONTEXT:
+                Threshold = CONTEXT_THRESHOLD
+        if Algorithm == CTM_KT and kargs.get("Estimator"):
+            raise ValueError("Forbidden combinaison of Algorithm and Estimator")
+            
         order_estimation = True
+        
         if Order is not None:
             order_estimation = False
             MaxOrder = Order
-        try:
-            if (args[0]):
-                Type = stochastic_process_type[args[0]]
-        except KeyError:
-            raise AttributeError("Bad type. Possible types are %s" 
-                                 % (str(stochastic_process_type.keys())))
+        
+        if not order_estimation:
+            options = ["Algorithm", "Estimator", "GlobalSample", "MinOrder",
+                       "Threshold"]
+            for option in options:
+                if kargs.get(option):
+                    raise ValueError("Order and %s cannot be used together" %
+                                     option)
+        if Type == 'e' and kargs.get("GlobalInitialTransition"):
+            raise ValueError("""
+            Type e and GlobalInitialTransition cannot be used together""")
          
         if order_estimation is True:
-
-            
             markov = obj.variable_order_markov_estimation1( 
                 Type, MinOrder, MaxOrder, Algorithm, Threshold, Estimator , 
-                  GlobalInitialTransition , GlobalSample , CountingFlag);
+                  GlobalInitialTransition , GlobalSample , CountingFlag)
         else:
             markov = obj.variable_order_markov_estimation2(
                     Type, MaxOrder, GlobalInitialTransition, CountingFlag)
-            
+     
+    #Variable order markov case       
     elif isinstance(args[0], _Variable_order_markov):
-        markov = obj.variable_order_markov_estimation3(args[0], 
+        vom = args[0]
+        # can be implemted once Chain class is public and exported
+        # in export_variable_order_markov
+     #   if vom.type == 'e' and kargs.get("GlobalInitialTransition"):
+     #       raise ValueError("""
+     #       Type e and GlobalInitialTransition cannot be used together""")
+       
+        markov = obj.variable_order_markov_estimation3(vom, 
                       GlobalInitialTransition, CountingFlag)
     
-
+    # array case
     elif isinstance(args[0], list):
         symbol = args[0]
         markov = obj.lumpability_estimation(symbol, Penalty,
@@ -389,29 +520,33 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
     
     return markov
 
-def _estimate_top(obj, *args, **kargs):
+
+#todo: should be estimate_top_parameters ?
+def _estimate_top(obj, **kargs):
     """
+    Top parameters Estimate switch
+    """
+    error.CheckType([obj], [_Tops])
     
-    """
-    MinPosition = kargs.get("MinPosition",1)
+    MinPosition = kargs.get("MinPosition", 1)
     MaxPosition = kargs.get("MaxPosition", obj.max_position)
     Neighbourhood = kargs.get("Neighbourhood", 1)
-    if kargs.get("Neighborhood", None):
-        Neighbourhood = kargs.get("Neighborhood", None)
+    # user may use us of uk spelling. 
+    Neighbourhood = kargs.get("Neighborhood", Neighbourhood) 
     EqualProbability = kargs.get("EqualProbability", False)
     
+    
+    error.CheckType([MinPosition, MaxPosition], [int, int])
     return obj.estimation(MinPosition, MaxPosition, Neighbourhood, 
                           EqualProbability)
-     
-    return None
 
 
 
 def _estimate_dispatch(obj, itype, *args, **kargs):
     """
     
-    """
-    """    fct_map = {
+    
+        fct_map = {
         "VARIABLE_ORDER_MARKOV": "estimate_variable_order_markov",
         "HIDDEN_VARIABLE_ORDER_MARKOV": "estimate_hidden_variable_order_markov",
         "HIDDEN_SEMI-MARKOV": "estimate_hidden_semi_markov"
@@ -459,8 +594,13 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
         return _estimate_semi_markov(obj, *args, **kargs)
     elif itype == "NON-HOMOGENEOUS_MARKOV":
         return _estimate_non_homogeneous_markov(obj, *args, **kargs)
-    elif itype == "Equilibrium" or itype == "Ordinary":
+    # the two following elif are together and should be kept in this order
+    # the first one expect the obj to be Time_events or Renewal_data only
+    elif itype in ["Equilibrium", "Ordinary"]: 
         return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
+    elif (type(obj) in [_Time_events, _Renewal_data]) or \
+           (isinstance(obj, _Histogram) and isinstance(args[1], _Histogram)): 
+        return  _estimate_renewal_interval_data(obj, itype, *args, **kargs)
     else:
         from openalea.stat_tool.estimate import Estimate as HistoEstimate
         return HistoEstimate(obj, itype, *args, **kargs)
@@ -682,5 +822,4 @@ def Estimate(obj, *args, **kargs):
         return _estimate_dispatch(obj, args[0], *args[1:], **kargs)
     else:
         raise NotImplemented
-    #renewal/time events case: if second argument is InitialInterEvent, the type can be only Equilibrium ? For genericity we ask the user to give the type equilibrium 
     

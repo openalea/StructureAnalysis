@@ -22,6 +22,8 @@ interface.extend_class( _Variable_order_markov, interface.StatInterface)
 def VariableOrderMarkov(*args, **kargs):
     """VariableOrderMarkov
         
+    :Usage:
+        >>> VariableOrderMarkov(filename)
     """ 
     error.CheckArgumentsLength(args, 1, 1)
     error.CheckType([args[0]], [str])

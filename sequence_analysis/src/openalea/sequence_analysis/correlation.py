@@ -1,26 +1,33 @@
 """Correlation methods
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
+
 
 """
 __revision__ = "$Id: $"
 
 
-
 import openalea.stat_tool.interface as interface
 import openalea.stat_tool.error as error
 from openalea.stat_tool._stat_tool import I_DEFAULT
-
-import _sequence_analysis
-import tools
+from openalea.stat_tool._stat_tool import _ParametricModel, _Mixture, \
+    _Convolution, _Compound
 
 from _sequence_analysis import _Correlation
 from _sequence_analysis import _Nonhomogeneous_markov_data
+from _sequence_analysis import _Hidden_variable_order_markov
 from _sequence_analysis import _Variable_order_markov_data
 from _sequence_analysis import _Semi_markov_data
 from _sequence_analysis import _Sequences
 from _sequence_analysis import _Markovian_sequences
+from _sequence_analysis import _Variable_order_markov
+
+
+from enumerate import type_dict, norm_type
+from data_transform import _check_nb_variable
+from openalea.stat_tool import error
+
+from openalea.sequence_analysis._sequence_analysis import MAX_LAG
 
 __all__ = ['_Correlation', 
            'ComputeCorrelation',
@@ -31,9 +38,6 @@ __all__ = ['_Correlation',
 
 # Extend dynamically class
 interface.extend_class( _Correlation, interface.StatInterface)
-
-from enumerate import type_dict, norm_type
-from openalea.stat_tool.error import CheckType
 
 
 def ComputeCorrelation(obj, *args, **kargs):
@@ -132,25 +136,30 @@ def ComputeAutoCorrelation(obj, *args, **kargs):
     """
     ComputeAutoCorrelation
     """
-
+    error.CheckType([obj], [[_Variable_order_markov, 
+                             _Hidden_variable_order_markov,
+                             _Variable_order_markov_data]])
+    
+    error.CheckArgumentsLength(args, 1, 2)
+    
     if len(args) == 1:
         variable = 1
         value = args[0]
     elif len(args) == 2:
         variable = args[0]
         value = args[1]
+    
+    #_check_nb_variable(obj, variable)
+    max_lag = error.ParseKargs(kargs, "MaxLag", MAX_LAG)
 
-    MAXLAG = 100
-    max_lag = tools.__parse_kargs__(kargs, "MaxLag", MAXLAG)
-
+    error.CheckType([variable, value, max_lag], [int, int, int])
 
     if len(args) == 1:
-        if isinstance(obj, _sequence_analysis._Variable_order_markov):
-            return obj.state_autocorrelation_computation(
-                value, max_lag)
+        return obj.state_autocorrelation_computation(value, max_lag)
     elif len(args)==2:
-        return obj.output_autocorrelation_computation(
-                variable, value, max_lag)
+        return obj.output_autocorrelation_computation(variable, value, max_lag)
+    else:
+        raise Exception("Should not enter here")
 
 
 
@@ -185,16 +194,17 @@ def ComputeWhiteNoiseCorrelation(obj, itype):
     .. seealso::  :func:`~openalea.sequence_analysis.correlation.ComputeCorrelation`.
     """
 
+    error.CheckType([obj], [_Correlation])
+    error.CheckType([itype], [[int, list, _ParametricModel, 
+                              _Mixture, _Convolution, _Compound ]])
+
     if isinstance(itype, int):
         obj.white_noise_correlation_order(itype)
     elif isinstance(itype, list):
         obj.white_noise_correlation_filter(itype)
     else:
-        try:
-            obj.white_noise_correlation_dist(itype)
-        except TypeError:
-            raise TypeError("second argument must be either an integer, a list or a Distribution type")
-
+        obj.white_noise_correlation_dist(itype)
+        
     return obj
 
 
@@ -240,21 +250,24 @@ def ComputePartialAutoCorrelation(obj, *args, **kargs):
     
         :func:`~openalea.sequence_analysis.correlation.ComputeCorrelation`
     """
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences,
+                             _Variable_order_markov_data, _Semi_markov_data, 
+                             _Nonhomogeneous_markov_data]])
 
-
-    #if obj.nb_variable==1 and len(args)==1:
-    if len(args) == 1:
+    error.CheckArgumentsLength(args, 0, 1)
+    
+    
+    if len(args) == 0:
         variable = 1
-        value = args[0]
-    #elif obj.nb_variable!=1 and len(args)==2:
-    elif len(args)==2:
+    else:
         variable = args[0]
-        value = args[1]
-
-    MAXLAG = 100
-    max_lag = tools.__parse_kargs__(kargs, "MaxLag", MAXLAG)
-    Type = tools.__parse_kargs__(kargs, "Type", "Pearson", type_dict) 
-
-    if len(args) == 1:
-        return obj.partial_autocorrelation_computation(variable, Type, max_lag)
+        
+    max_lag = error.ParseKargs(kargs, "MaxLag", MAX_LAG)
+    Type = error.ParseKargs(kargs, "Type", "Pearson", type_dict)
+    
+    error.CheckType([variable, max_lag], [int, int])
+    _check_nb_variable(obj, variable)
+    
+    #todo check that  Type is Pearson or Kendall
+    return obj.partial_autocorrelation_computation(variable, Type, max_lag)
 

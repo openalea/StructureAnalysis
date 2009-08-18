@@ -48,28 +48,14 @@ from openalea.stat_tool._stat_tool import MIN_PROBABILITY
 
 from enumerate import markovian_sequence_type, output_map, histogram_type
 from enumerate import mode_type, func_map, estimator_map, model_type, seq_map
-from enumerate import renewal_nb_event_map
+from enumerate import renewal_nb_event_map, sub_func_map, nb_segment_map
+from enumerate import output_type
 
 
-from openalea.stat_tool.enumerate import keep_type
+from openalea.stat_tool.enumerate import keep_type, bool_type
 from openalea.stat_tool.enumerate import format_type
 
 
-
-
-
-def _get_mode__(kargs):
-    """ Return True if kargs has "keep" for the "mode" key """
-
-    mode = kargs.get("mode", None)
-    if(not mode):
-        mode = kargs.get("Mode", None)
-    if(mode == "Keep" or mode == "keep"):
-        keep = True
-    else:
-        keep = False
-
-    return keep
 
 
 def _check_nb_variable(obj, variable):
@@ -96,7 +82,8 @@ def _check_nb_variable(obj, variable):
             raise TypeError("only one variable available. Set variable to 1")
     
     if variable == None:
-        raise TypeError("variable argument must be set because number of variable is larger than 1")
+        raise TypeError("""variable argument must be set because number 
+        of variable is larger than 1""")
     
     if variable > obj.nb_variable:
         raise TypeError("variable larger than max number of variables %s" % 
@@ -242,10 +229,8 @@ def ExtractVectors(obj, key, *args):
                              _Nonhomogeneous_markov_data], str])   
        
     
-    if key not in markovian_sequence_type.keys():
-        raise KeyError("key must be in %s" % markovian_sequence_type.keys())
+    error.CheckDictKeys(key, markovian_sequence_type)
         
-    
     if key == "Length":
         variable = -1
         value = -1    
@@ -260,8 +245,7 @@ def ExtractVectors(obj, key, *args):
             value = args[0]
             variable = obj.nb_variable # should be equal to 1
             assert variable == 1
-    else:
-        raise KeyError("wrong key. Should not enter here")
+    
     error.CheckType([variable, value], [int, int])
     
     rkey = markovian_sequence_type[key]
@@ -839,9 +823,10 @@ def IndexParameterExtract(obj, minIndex, MaxIndex=I_DEFAULT):
      
     ret = obj.index_parameter_extract(minIndex, MaxIndex)
     
-    if hasattr(ret, "markovian_sequences"):
-        return ret.markovian_sequences()
-    else:
+    try:
+        if hasattr(ret, "markovian_sequences"):
+            return ret.markovian_sequences()
+    except:
         return ret
     
 def IndexParameterSelect(obj, minIndex, *args, **kargs):    
@@ -954,9 +939,9 @@ def ComputeStateSequences(obj, data, **kargs):
                              _Variable_order_markov_data, _Semi_markov_data]])
     
     Characteristics = error.ParseKargs(kargs, "Characteristics",
-                                       True, {"True":True, "False":False})
+                                       True, bool_type)
 
-    data = error.CheckType([data], [[_Hidden_variable_order_markov,
+    error.CheckType([data], [[_Hidden_variable_order_markov,
                              _Hidden_semi_markov]])
     ret = data.state_sequence_computation(obj, Characteristics)
         
@@ -1077,8 +1062,7 @@ def TransitionCount(obj, max_order, **kargs):
     error.CheckType([obj], [[_Markovian_sequences, 
                              _Variable_order_markov_data, _Semi_markov_data, 
                              _Nonhomogeneous_markov_data]])
-    begin = error.ParseKargs(kargs, "begin", False,
-                              {"False":False, "True":True})
+    begin = error.ParseKargs(kargs, "begin", False, bool_type)
     estimator = error.ParseKargs(kargs, "Estimator", "Maximum_Likelihood",
                                  estimator_map)
     error.CheckType([max_order, begin], [int, bool])
@@ -1176,7 +1160,8 @@ def TimeScaling(obj, scaling_factor=0):
         :func:`~openalea.sequence_analysis.time_events.NbEventSelect`, 
         :func:`TimeSelect`.
     """
-    error.CheckType([obj, scaling_factor], [[ _Time_events, _Renewal_data], int])
+    error.CheckType([obj, scaling_factor], 
+                    [[ _Time_events, _Renewal_data], int])
     return obj.time_scaling(scaling_factor)    
    
 def TimeSelect(obj, *args):
@@ -1228,91 +1213,81 @@ def Segmentation(obj, *args, **kargs):
     
     >>> Segmentation(seq, 1,2, VectorDistance("N"), Output="Segment")
     >>> S
-    """
-    SEQUENCE = 0
-    #TREND = 1
-    SUBTRACTION_RESIDUAL = 2
-    DIVISION_RESIDUAL = 3
-    STANDARDIZED_RESIDUAL = 4
-    
-    output_sequence_map = {
-       "Sequence": SEQUENCE,
-       "SubtractionResidual": SUBTRACTION_RESIDUAL,
-       "Residual": SUBTRACTION_RESIDUAL,
-       "StandardizedResidual":  STANDARDIZED_RESIDUAL,
-       "DivisionResidual": DIVISION_RESIDUAL
-       }
-            
-    CHANGE_POINT = 0
-    SEGMENT = 1
-    
-    output_type = { 
-            "ChangePoint" : CHANGE_POINT,
-             "Segment" : SEGMENT
-          }
+    """   
+    error.CheckArgumentsLength(args, 2)
+    error.CheckType([obj], [[_Sequences, _Markovian_sequences, 
+                             _Variable_order_markov_data, _Semi_markov_data]])
     
     nb_variable = obj.nb_variable
 
-    #from an array, and a string
-    if isinstance(args[0], list) and isinstance(args[1], str):
-        nb_sequence = obj.nb_sequence
-        nb_segment = args[0]
+    error.CheckType([args[0]], [[int, list]])
+    
+    # Segmentation from list and strings
+    # >>> Segmentation(seq80, [6, 5, 5, 6, 4, 4], "Mean", Output="Residual")
+    # >>> Segmentation(seq80, [5, 5, 6, 5, 5, 4], "Gaussian")
+    if isinstance(args[0], list):
+        nb_segments = obj.nb_sequence
+        nb_segments = args[0]
+        #segments = args[0]
         Model = __get_model__(args[1:], nb_variable)
-        
-        Output = kargs.get("Output", "Sequence")
-        Output = output_sequence_map[Output] 
-        identifier = -1
-        
-        seq = obj.segmentation_array(nb_segment, Model, identifier , Output)
-    #from 2 ints, a vectordistance and the output 
-    elif isinstance(args[0], int) and  isinstance(args[1], int) \
-        and isinstance(args[2], _VectorDistance):
-        Output = kargs.get("Output", "Segment")
-        Output = output_type[Output] 
-        seq = obj.segmentation_vector_distance(args[0], 
-                                               args[1], args[2], Output)
-    #from 2 ints, and model_type
-    elif isinstance(args[0], int) and isinstance(args[1], int)  \
-        and isinstance(args[2], str):
-        
-        nb_sequence = obj.nb_sequence
-        
-        Model = __get_model__(args[2:], nb_variable)
+        Output = error.ParseKargs(kargs, "Output", "Sequence", sub_func_map)
+        identifier = I_DEFAULT
 
-        Output = kargs.get("Output", "Sequence")
-        Output = output_sequence_map[Output]
-        
-        nb_segment_map = {
-                          "Fixed": False,
-                          "Estimated":True 
-                          }
-        NbSegment = kargs.get("NbSegment", "Estimated")
-        nb_segment_estimation =  nb_segment_map[NbSegment]
-        
-        if nb_segment_estimation is False:
-            if args[1] == 1 :
-                #.. todo:: which call ?????????????????
-                seq = obj.segmentation_int_int(args[0] , args[1] ,
-                                        Model, Output)
-            else:   
-                nb_segment = args[0]
-                seq = obj.segmentation_array(nb_segment, Model,
-                                                args[0], Output)
-        else:
-            # correct a priori given the aml example seq80
+        seq = obj.segmentation_array(nb_segments, Model, identifier , Output)
+    
+    
+    # Segmentation(seq, 1,2, VectorDistance("N"), Output="Segment")
+    elif type(args[2]) == _VectorDistance:
+        error.CheckType([args[0], args[1]], [int, int])
+        Output = error.ParseKargs(kargs, "Output", "Sequence", output_type)
+        seq = obj.segmentation_vector_distance(args[0], args[1], args[2],
+                                               Output)
+    
+    # Segmenation when args[0] is int
+    # >>> Segmentation(seq80, 2, 6, "Gaussian", NbChangePoint="Fixed", 
+    # ... Output="Residual")
+    elif isinstance(args[0], int):
+        error.CheckType([args[1]], [[int, list]])
+        Model = __get_model__(args[2:], nb_variable)
+        # >>> Segmentation(seq80, 2, 10, "Gaussian")
+        if type(args[1]) == int:
+            #error.CheckType([args[2]], [[int]])
+            nb_segment_estimation = error.ParseKargs(kargs, "NbSegment", 
+                                                     "Estimated",
+                                                     nb_segment_map)
+
+            Output = error.ParseKargs(kargs, "Output", "Sequence", sub_func_map)
+
+            if kargs.get("NbSegment") and kargs.get("Output"):
+                raise ValueError("NbSegment and Output option incompatible")
             
-            seq = obj.segmentation_model(args[0], args[1], Model)
-        
-    #from int and a list
-    elif isinstance(args[0], int) and isinstance(args[1], list):
-        Model = __get_model__(args[2:], nb_variable)
-                
-        change_point = args[1]
-        Output = kargs.get("Output", "Sequence")
-        Output = output_sequence_map[Output]
-        nb_segment = len(args[1])+1 #.. todo:: to be checked
+            if nb_segment_estimation is False:
+                if args[1] == 1:
+                    seq = obj.segmentation_int_int(args[0], args[1], Model,
+                                                   Output)
+                else:
+                    nb_segment = args[0]
+                    seq = obj.segmentation_array(nb_segment, Model,
+                                                args[0], Output)
+            else:
+                seq = obj.segmentation_model(args[0], args[1], Model)
 
-        seq = obj.segmentation_change_point(args[0] , nb_segment ,
+        else: 
+            # type(args[1]) == list 
+            # >>> Segmentation(seq70, 1, [1935, 1961, 1972, 1990], 
+            #    "Gaussian", "Gaussian"),
+            
+            #todo: to finish 
+            error.CheckType([args[0], args[1]], [int, list])
+    
+            Model = __get_model__(args[2:], nb_variable)
+            Output = error.ParseKargs(kargs, "Output", "Sequence", sub_func_map)
+            
+            change_point = args[1]
+
+            nb_segment = len(args[1]) + 1
+
+            seq = obj.segmentation_change_point(args[0] , nb_segment ,
                             change_point , Model , Output)
     return seq
  
@@ -1386,9 +1361,8 @@ def VariableScaling(obj, *args):
     elif len(args) == 1:
         variable = 1
         scaling = args[0]
-        
-    if obj.nb_variable == 1 and variable != 1:
-        raise TypeError("nb_variable is 1 but your provided a different value. Check the arguments.")
+   
+    _check_nb_variable(obj, variable)
     
     error.CheckType([variable, scaling], [int, int])
     return obj.scaling(variable, scaling)
@@ -1403,7 +1377,7 @@ def __get_model__(data, nb_variable):
         if (i == 0) and (model_type[data[i]] == MEAN_CHANGE) or \
         (model_type[data[i]] == MEAN_VARIANCE_CHANGE):
         
-            for j in range(1, nb_variable):
+            for _j in range(1, nb_variable):
                 Model.append(model_type[i])
             break #todo check that it break the main for i in range() loop
 
@@ -1420,43 +1394,64 @@ def vec2list(vector):
 
 
 def Extract(obj, *args, **kargs):
+    """
+    .. todo:: check the case 
+    elif type(obj) in [_Sequences,
+                       _Markovian_sequences, 
+                       _Variable_order_markov_data,
+                       _Semi_markov_data, 
+                       _Nonhomogeneous_markov_data]
+    """
     
-     
-    NbEvent = kargs.get("NbEvent", NB_EVENT)  
-    #error.CheckType(NbEvent, [int])
-    
-    
-    
-    
-    if isinstance(obj, _Top_parameters):
+    if isinstance(obj, _Tops):
+        raise NotImplemented("Extract Tops case not yet implemented")
+    elif isinstance(obj, _Top_parameters):
         position = args[0]
         error.CheckType(position, [int])
         ret = obj.extract(position)
         
+    elif type(obj) in [_Time_events, _Renewal_data]:
+        if len(args) >=1:
+            key = args[0]
+            if key == "NbEvent":
+                error.CheckType([args[1]], [int])
+                ret = obj.extract(renewal_nb_event_map[key], args[1])
+       
+            elif key == "ObservationTime":
+                ret = obj.get_htime()
+            
+            elif key in renewal_nb_event_map.keys():
+            
+                ret = obj.extract(renewal_nb_event_map[key], I_DEFAULT)
+        else:
+            raise NotImplemented("Not yet implemented") 
+           
     # renewal/timeevents case
     elif type(obj) in  [_Renewal]:
         key = args[0]    
-        error.CheckType(key, [str])
-
+        error.CheckType([key], [str])
+        error.CheckDictKeys(key, renewal_nb_event_map)
+        
+        
         if key == "NbEvent":
             error.CheckArgumentsLength(args, 2, 2)
-            NbEvent = kargs.get("NbEvent", NB_EVENT)  
             time = args[1]
-            ret =  obj.extract(NbEvent, time)
+            ret =  obj.extract(renewal_nb_event_map[key], time)
         else:
-            time = -1
+            time = 0
             ret = obj.extract(renewal_nb_event_map[key], time)
         
                                           
-    # TODO: bug ? here, we need to specify the _sequence_analysis module
-    # before _Markovian_sequences otherwise even though obj is Markovian_Seqiences, 
-    # it is not found. Found with stat_tool/test/stat_tool_test.py                       
+    # todo: bug ? here, we need to specify the _sequence_analysis module
+    # before _Markovian_sequences otherwise even though obj is 
+    # Markovian_Seqiences, 
+    # it is not found. Found with stat_tool/test/stat_tool_test.py
     elif type(obj) in [_Sequences,
                        _Markovian_sequences, 
                        _Variable_order_markov_data,
                        _Semi_markov_data, 
                        _Nonhomogeneous_markov_data]:
-                
+        
         error.CheckType([args[0]], [str])  
     
         if args[0] == 'Value':  
@@ -1477,7 +1472,8 @@ def Extract(obj, *args, **kargs):
             error.CheckArgumentsLength(args, 1, 1)
             ret = obj.extract_length()
         else:
-            raise ValueError('With the given type, first argument must be Value or Legnth string.')
+            raise ValueError("""With the given type, first argument must be 
+            Value or Legnth string.""")
         
     elif type(obj) in [ _Variable_order_markov, 
                        _Hidden_variable_order_markov,

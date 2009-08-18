@@ -69,7 +69,7 @@ def SemiMarkov(filename=None, length=DEFAULT_LENGTH, counting=True,
                     [str, int, bool, [int, float]])
     
     if not os.path.isfile(filename):
-        raise OSError("Invalid filename")
+        raise IOError("Invalid filename")
     else:
         return _Semi_markov(filename, length, counting, cumul_threshold)
 

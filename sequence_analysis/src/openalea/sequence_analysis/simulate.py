@@ -1,15 +1,38 @@
 """Simulate
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr 
-uthor:/
+
 """
 __revision__ = "$Id:  $"
 
-import openalea.stat_tool._stat_tool as _stat_tool
-import _sequence_analysis
 
 from openalea.stat_tool.simulate import Simulate as SimulateDistribution
- 
+
+from openalea.stat_tool._stat_tool import _Histogram
+from openalea.stat_tool._stat_tool import _MixtureData
+from openalea.stat_tool._stat_tool import _ConvolutionData
+from openalea.stat_tool._stat_tool import _CompoundData
+
+from openalea.sequence_analysis._sequence_analysis import _Renewal
+from openalea.sequence_analysis._sequence_analysis import _Top_parameters
+from openalea.sequence_analysis._sequence_analysis import _Time_events
+from openalea.sequence_analysis._sequence_analysis import \
+    _Variable_order_markov,\
+    _Hidden_variable_order_markov,\
+    _Semi_markov,\
+    _Nonhomogeneous_markov,\
+    _Hidden_semi_markov
+from openalea.sequence_analysis._sequence_analysis import \
+    _Markovian_sequences,\
+    _Variable_order_markov_data,\
+    _Semi_markov_data,\
+    _Nonhomogeneous_markov_data
+                    
+from openalea.stat_tool import error
+from enumerate import stochastic_process_type
+from openalea.stat_tool.enumerate import bool_type
+
+
 def Simulate(obj, *args, **kargs):
     """Simulate
     
@@ -120,63 +143,70 @@ def Simulate(obj, *args, **kargs):
         :func:`~openalea.sequence_analysis.top_parameters.TopParameters`,    
     """
     
-    # switch input obj argument: 
+    _valid_dists = [_Histogram, _MixtureData, \
+                              _ConvolutionData, _CompoundData]
     
     # standard distribution case
-    if len(args)==1  and isinstance(args[0], int):
+    if len(args) == 1  and isinstance(args[0], int):
         return SimulateDistribution(obj, args[0])
     # top parameters case
-    elif isinstance(obj, _sequence_analysis._Top_parameters):
-        try:
-            arg1 = args[0]
-            arg2 = args[1]
-        except TypeError:
-            raise TypeError("request two arguments with top_parameters simulation")
-    
+    elif isinstance(obj, _Top_parameters):
+        error.CheckArgumentsLength(args, 2, 2)
         NbAxillary = kargs.get("NbAxillary", 1)
+        error.CheckType([args[0], args[1], NbAxillary], [int, int, int])
+        return obj.simulate(args[0], args[1], NbAxillary)
         
-        if isinstance(arg1,int) and isinstance(arg2,int):    
-            return obj.simulate(arg1, arg2, NbAxillary)
-        else:
-            raise TypeError("With top_parameters simulation, second and third arguments must be integers")
     # Renewal case
-    elif isinstance(obj, _sequence_analysis._Renewal):
-        itype = args[0]
-        if itype == 'Ordinary':
-            Type = 'o'
-        elif itype == 'Equilibrium':
-            Type = 'e'
-        else:
-            raise KeyError("first argument must be Equilibrium or Ordinary")  
+    elif isinstance(obj, _Renewal):
+        # check that args[0] is a correct key 
+        Type = error.CheckDictKeys(args[0], stochastic_process_type)
         
-        if isinstance(args[1], int) and isinstance(args[2], int):
-              return obj.simulation_nb_elements(Type, args[1], args[2])
+        
+        
+        error.CheckType([args[1]], [[_Histogram, _MixtureData, \
+                                     _ConvolutionData, _CompoundData, int]])
+        
+        if type(args[1]) in _valid_dists:
+            ret = obj.simulation_histogram(Type, args[1])
         elif isinstance(args[1], int):
-              return obj.simulation_time_events(Type, args[1], args[2])
-        else:
-            return obj.simulation_histogram(Type, args[1])
+            error.CheckType([args[2]], [[int, _Time_events]])
+            if isinstance(args[2], int):
+                ret = obj.simulation_nb_elements(Type, args[1], args[2])
+            else: 
+                ret =  obj.simulation_time_events(Type, args[1], args[2])
+        return ret
     # other cases (Markovian, semi_markov, hidden_semi_markov and so on
     else:
-        CountingFlag = kargs.get("CountingFlag", True)
+       
+    
+        error.CheckType([obj], [[_Variable_order_markov, _Semi_markov,
+                                 _Hidden_variable_order_markov,
+                                 _Nonhomogeneous_markov, _Hidden_semi_markov]])
+        
+        Counting = error.ParseKargs(kargs, "Counting", True, bool_type)
+        if type(obj) not in [_Semi_markov, _Hidden_semi_markov]:
+            Counting = True 
         
         #order of the if statements is important ! Keep it that way
         if isinstance(args[0], int) and isinstance(args[1], int):
-            if isinstance(obj, _sequence_analysis._Semi_markov) or isinstance(obj, _sequence_analysis._Hidden_semi_markov):
-                return obj.simulation_nb_elements(args[0], args[1], CountingFlag)
-            else:
-                return obj.simulation_nb_elements(args[0], args[1], True)
+            ret = obj.simulation_nb_elements(args[0], args[1], Counting)
+            
         #here the second arguments is data structure such as Sequences
         elif isinstance(args[0], int):
-            if isinstance(obj, _sequence_analysis._Semi_markov) or isinstance(obj, _sequence_analysis._Hidden_semi_markov):
-                return obj.simulation_markovian_sequences(args[0], args[1], CountingFlag)
-            else:
-                return obj.simulation_markovian_sequences(args[0], args[1], True)
+            
+            error.CheckType([args[1]], [[_Markovian_sequences, 
+                                         _Variable_order_markov_data, 
+                                         _Semi_markov_data, 
+                                         _Nonhomogeneous_markov_data]])
+            ret = obj.simulation_markovian_sequences(args[0],
+                                                      args[1], Counting)
+            
         # first argument is a compound_data or equivalent
         else:
-            if isinstance(obj, _sequence_analysis._Semi_markov) or isinstance(obj, _sequence_analysis._Hidden_semi_markov):
-                return obj.simulation_histogram(args[0], CountingFlag, False)
-            else:
-                return obj.simulation_histogram(args[0], True, False)
+            error.CheckType([args[0]], [_valid_dists])
+            ret =  obj.simulation_histogram(args[0], Counting, False)
+        
+        return ret
             
                 
         

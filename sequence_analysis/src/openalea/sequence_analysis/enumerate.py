@@ -7,9 +7,9 @@ __version__ = "$Id: enumerate.py 6708 2009-08-05 14:20:27Z cokelaer $"
 
 from openalea.stat_tool._stat_tool import *
 
-#todo: move the enumerate that depends on sta_tool only into stat_tool.enumerate
 import openalea.stat_tool._stat_tool as _stat_tool
-import _sequence_analysis
+from openalea.sequence_analysis import _sequence_analysis as _sequence_analysis
+
 import openalea.stat_tool.enumerate as enumerate_st
 
 
@@ -28,7 +28,8 @@ markovian_sequence_type = {
     "Length": _sequence_analysis.MarkovianSequenceType.LENGTH,
     "NbRun": _sequence_analysis.MarkovianSequenceType.NB_RUN,
     "NbOccurrence": _sequence_analysis.MarkovianSequenceType.NB_OCCURRENCE,
-    "FirstOccurrence": _sequence_analysis.MarkovianSequenceType.FIRST_OCCURRENCE,
+    "FirstOccurrence": \
+        _sequence_analysis.MarkovianSequenceType.FIRST_OCCURRENCE,
     "Mean": _sequence_analysis.MarkovianSequenceType.SEQUENCE_MEAN,
     "Cumul": _sequence_analysis.MarkovianSequenceType.SEQUENCE_CUMUL
         }
@@ -39,31 +40,42 @@ markovian_sequence_type = {
 mode_type = enumerate_st.round_type
 
 INTER_EVENT = _sequence_analysis.RenewalType.INTER_EVENT
-WITHIN_OBSERVATION_PERIOD =  _sequence_analysis.RenewalType.WITHIN_OBSERVATION_PERIOD
+WITHIN_OBSERVATION_PERIOD =  \
+    _sequence_analysis.RenewalType.WITHIN_OBSERVATION_PERIOD
 LENGTH_BIAS =  _sequence_analysis.RenewalType.LENGTH_BIAS
-BACKWARD_RECURRENCE_TIME = _sequence_analysis.RenewalType.BACKWARD_RECURRENCE_TIME
+BACKWARD_RECURRENCE_TIME = \
+    _sequence_analysis.RenewalType.BACKWARD_RECURRENCE_TIME
 FORWARD_RECURRENCE_TIME = _sequence_analysis.RenewalType.FORWARD_RECURRENCE_TIME
 NB_EVENT = _sequence_analysis.RenewalType.NB_EVENT
 MIXTURE = _sequence_analysis.RenewalType.MIXTURE
      
 renewal_nb_event_map = { 
-    "InterEvent" : _sequence_analysis.RenewalType.INTER_EVENT,
-    "LengthBias" : _sequence_analysis.RenewalType.LENGTH_BIAS,
-    "Backward" : _sequence_analysis.RenewalType.BACKWARD_RECURRENCE_TIME,
-    "Forward" : _sequence_analysis.RenewalType.FORWARD_RECURRENCE_TIME,
-    "Mixture" : _sequence_analysis.RenewalType.MIXTURE,
-    "Within": _sequence_analysis.RenewalType.WITHIN_OBSERVATION_PERIOD,
-    "NbEvent": _sequence_analysis.RenewalType.NB_EVENT,
+    "InterEvent":   _sequence_analysis.RenewalType.INTER_EVENT,
+    "LengthBias":   _sequence_analysis.RenewalType.LENGTH_BIAS,
+    "Backward":     _sequence_analysis.RenewalType.BACKWARD_RECURRENCE_TIME,
+    "Forward":      _sequence_analysis.RenewalType.FORWARD_RECURRENCE_TIME,
+    "Mixture":      _sequence_analysis.RenewalType.MIXTURE,
+    "Within":       _sequence_analysis.RenewalType.WITHIN_OBSERVATION_PERIOD,
+    "NbEvent":      _sequence_analysis.RenewalType.NB_EVENT,
                         }
 
+sub_func_map = {
+    "Sequence": _sequence_analysis.OutputType.SEQUENCE,
+    "SubtractionResidual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL ,
+    "DivisionResidual":_sequence_analysis.OutputType.DIVISION_RESIDUAL,
+    "Residual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL,
+
+    }
 func_map = {
     "Sequence": _sequence_analysis.OutputType.SEQUENCE,
     "Trend": _sequence_analysis.OutputType.TREND,
     "SubtractionResidual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL ,
-    "Residual": _sequence_analysis.OutputType.DIVISION_RESIDUAL,
-    "DivisionResidual":_sequence_analysis.OutputType.DIVISION_RESIDUAL
+    "Residual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL,
+    "DivisionResidual":_sequence_analysis.OutputType.DIVISION_RESIDUAL,
+    "StandardizedResidual": _sequence_analysis.OutputType.STANDARDIZED_RESIDUAL
     }
-
+#todo: simplify
+output_sequence_map = func_map
 output_map = func_map 
 
 estimator_map = {
@@ -136,21 +148,32 @@ markovian_algorithms = {
     'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
     'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
     'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
-    'ForwardBackwardSampling':_stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
-    'GeneralizedViterbi':_stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
+    'ForwardBackwardSampling': \
+        _stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
+    'GeneralizedViterbi': \
+        _stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
     'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,             
     'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,             
     'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
-}
+    }
 
 sub_markovian_algorithms = {                    
     'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
     'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
-}               
+    }               
 
+
+sub_markovian_algorithms_2 = {
+    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
+    'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
+    }
+
+  
 algorithm = {
     'CTM_BIC': _sequence_analysis.Algorithm.CTM_BIC , 
+    'BIC': _sequence_analysis.Algorithm.CTM_BIC ,
     'CTM_KT': _sequence_analysis.Algorithm.CTM_KT,   
+    'KT': _sequence_analysis.Algorithm.CTM_KT,
     'LocalBIC': _sequence_analysis.Algorithm.LOCAL_BIC, 
     'Context': _sequence_analysis.Algorithm.CONTEXT
 }
@@ -181,12 +204,71 @@ estimator_semi_markov_type = {
 
 
 ident_map = {
-             "VOID" : -1,
-             #"LINEAR": _stat_tool.RegressionType.LINEAR.
+             "VOID" : _stat_tool.I_DEFAULT,
+             "LINEAR": _stat_tool.RegressionType.STAT_LINEAR,
              "MONOMOLECULAR": _stat_tool.RegressionType.STAT_MONOMOLECULAR,
              "LOGISTIC": _stat_tool.RegressionType.STAT_LOGISTIC,
              "NONPARAMETRIC": _stat_tool.RegressionType.STAT_NONPARAMETRIC,
 
              }
 
- 
+output_type = { 
+               "ChangePoint" : _sequence_analysis.ChangePointType.CHANGE_POINT,
+               "Segment" : _sequence_analysis.ChangePointType.SEGMENT
+               }
+
+nb_segment_map = {
+                  "Fixed": False,
+                  "Estimated":True 
+                  }
+
+
+begin_aligned_map = {
+                  "Aligned": False,
+                  "Free":True 
+                  }
+end_aligned_map = begin_aligned_map
+
+from openalea.sequence_analysis._sequence_analysis import \
+    _Sequences, _Markovian_sequences, _Variable_order_markov_data, \
+    _Semi_markov_data, _Nonhomogeneous_markov_data, _Variable_order_markov,\
+    _Hidden_variable_order_markov, _Hidden_semi_markov, _Semi_markov
+    
+sequence_alignment_first_arg = [_Sequences,
+                                _Markovian_sequences,
+                                _Variable_order_markov_data,
+                                _Semi_markov_data,
+                                _Nonhomogeneous_markov_data]
+    
+markov_model_comparison_first_arg = \
+    [_Variable_order_markov,
+     _Hidden_variable_order_markov,
+     _Hidden_semi_markov,
+     _Semi_markov]
+    
+markov_model_for_sequences_first_arg = \
+    [_Markovian_sequences,
+     _Variable_order_markov_data,
+     _Semi_markov_data,
+     _Nonhomogeneous_markov_data]
+   
+markov_model_for_sequences_second_arg = \
+    [_Variable_order_markov,
+     _Semi_markov,
+     _Hidden_variable_order_markov,
+     _Hidden_semi_markov]
+
+ms_vomd_smd_list = [_Markovian_sequences,
+                    _Variable_order_markov_data,
+                    _Semi_markov_data]
+
+# todo: use those simpler naming convention: 
+ms_vomd_smd_nhmd = markov_model_for_sequences_first_arg
+
+output_sequence = {
+                   "DistanceMatrix": 'm',
+                   "Sequences": 's'
+                   }
+
+indel_cost_map = {"Adaptative": _sequence_analysis.IndelCost.ADAPTATIVE, 
+                     "Fixed": _sequence_analysis.IndelCost.FIXED} 
