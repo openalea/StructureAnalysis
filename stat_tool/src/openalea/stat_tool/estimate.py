@@ -417,7 +417,6 @@ def Estimate(histo, itype, *args, **kargs):
                 as SeqEstimate   
         except:
             raise ImportError("Could not import sequence_analysis")
-        print 'SWITCH to SeqEstimate'
         return SeqEstimate(histo, itype, *args, **kargs)
     else:
         fct = fct_map[Type]

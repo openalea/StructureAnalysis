@@ -8,10 +8,28 @@ import plot
 import os
 import glob
 import sys
-
+import error
 # Output functions
+from _stat_tool import FORWARD_DYNAMIC_PROGRAMMING, FORWARD_BACKWARD_SAMPLING,\
+    GENERALIZED_VITERBI, FORWARD_BACKWARD_SAMPLING
 
+# exported in sequence_analysis but hard-coded here to prevent dependency on 
+# sequence analysis
+NB_SEGMENTATION = 10
+NB_STATE_SEQUENCE = 10
 
+def add_doc(function):
+    """a simple decorator to replace f's docstring by a new one
+    
+    The new one is the docstring of the function's name capitalized. 
+    E.g: if function's name is display, then 
+        display.__doc__ = Display.__doc__
+    """
+    name = function.__name__
+     
+    function.__doc__ = eval(name.capitalize()).__doc__
+    return function
+     
 def Display(obj, *args, **kargs):
     """ASCII output of an object of the STAT module 
 
@@ -294,7 +312,8 @@ def Save(obj, *args, **kargs):
 
 class StatInterface(object):
     """ Abstract base class for stat_tool objects """
-
+    
+    
     def old_plot(self, *args, **kargs):
         """ Old AML style plot """
         title = kargs.get("Title", "")
@@ -432,11 +451,9 @@ class StatInterface(object):
         for f in glob.glob(prefix+"*"):
             if f != prefix + suffix + ".ps":
                 os.remove(f)
-
+    @add_doc
     def plot(self, *args, **kargs):
-        # todo: check effect of the following line 
-        __doc__ = Plot.__doc__
-
+        
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
         params = kargs.get("Params", ())
@@ -475,18 +492,50 @@ class StatInterface(object):
         else:
             self.old_plot(*args, **kargs)
             
-    def display(self, Detail=1, ViewPoint="", Format=""):
-        __doc__ = Display.__doc__
+    @add_doc
+    def display(self, Detail=1, ViewPoint='v', Format='c', **kargs):
+        
+        format_map = {'c':'c', 'l':'l', "Column": 'c', "Line":'l'}
+        viewpoint_map = {'v':'v', "Data":"d", "Survival":'s',
+                         "SegmentProfile":'q', "StateProfile":'p'}
+          
+        segmentations_map = {
+                "DynamicProgramming": FORWARD_DYNAMIC_PROGRAMMING,
+                "ForwardBackwardSampling": FORWARD_BACKWARD_SAMPLING
+                }
+        
+        state_seq_map = { "GeneralizedViterbi": GENERALIZED_VITERBI,
+                         "ForwardBackwardSampling": FORWARD_BACKWARD_SAMPLING
+                         }
+            
+        
         # Detail level
-        if(Detail>1):
+        exhaustive = False
+        if Detail == 2:
             exhaustive = True
-        else:
-            exhaustive = False
-
+        elif Detail != 1:
+            raise ValueError("Detail can be either 1 or 2. You gave %s" 
+                             % Detail)
+        
+        Format = error.CheckDictKeys(Format, format_map)
+        ViewPoint = error.CheckDictKeys(ViewPoint, viewpoint_map)
+        
+        # those lines are not used yet. Depend on sequence_analysis
+         
+        #Segmentations = error.ParseKargs(kargs, "Segmentations", 
+        #                                 "DynamicProgramming",
+        #                                 segmentations_map ) 
+        #NbSegmentation = kargs.get("NbSegmentation", NB_SEGMENTATION)
+        
+        #state_sequence = error.ParseKargs(kargs, "StateSequences", 
+        #                                  "GeneralizedViterbi", state_seq_map)
+        
+        #nb_state_sequence = kargs.get("NbStateSequence", NB_STATE_SEQUENCE)
         # ViewPoint
 
+        
         # Survival
-        if(ViewPoint.lower() == "survival"):
+        if ViewPoint == 's':
             try:
                 output = self.survival_ascii_write()
             except AttributeError:
@@ -494,7 +543,7 @@ class StatInterface(object):
                 %s has not 'survival' viewpoint""" % (str(type(self))))
 
         # Data
-        elif(ViewPoint.lower() == "data"):
+        elif ViewPoint == "d":
             try:
                 # try with format argument
                 output = self.ascii_data_write(exhaustive, Format)
@@ -508,7 +557,7 @@ class StatInterface(object):
                         %s has not 'data' viewpoint""" % (str(type(self))))
 
         # StatProfile
-        elif(ViewPoint.lower() == "stateprofile"):
+        elif ViewPoint == "p":
             try:
                 output = self.state_profile_ascii_write() # A completer
             except AttributeError:
@@ -519,10 +568,10 @@ class StatInterface(object):
             output = self.ascii_write(exhaustive)
 
         return output 
-
+    
+    @add_doc
     def save(self, filename, Detail=2, ViewPoint="", Format="ASCII" ):
-        __doc__ = Save.__doc__
-
+        
         # Detail level
         if(Detail>1):
             exhaustive = True
