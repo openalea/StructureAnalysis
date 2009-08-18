@@ -118,7 +118,8 @@ class TestRegression(interface):
         
     def test_nearest_neighbours(self):
         
-        r1 = Regression(self.vector, "NearestNeighbors", 1, 2, 1, Weighting=False)
+        r1 = Regression(self.vector, "NearestNeighbors", 1, 2, 1, 
+                        Weighting=False)
         r = self.vector.nearest_neighbours_regression(1, 2, 1., False) 
         assert r
         assert r1

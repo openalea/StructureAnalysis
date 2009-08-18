@@ -81,11 +81,11 @@ class Test(interface):
         keep_false = data.select_individual([1], keep=False)
         keep_true = data.select_individual([1], keep=True)
 
-        assert keep_false.get_nb_row() == 2
-        assert keep_false.get_nb_column() == 2
+        assert keep_false.nb_row == 2
+        assert keep_false.nb_column == 2
         
-        assert keep_true.get_nb_row() == 1
-        assert keep_true.get_nb_column() == 1
+        assert keep_true.nb_row == 1
+        assert keep_true.nb_column == 1
         
     def test_test_symmetry(self):
         data = self.data

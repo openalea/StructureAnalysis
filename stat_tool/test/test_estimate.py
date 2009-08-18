@@ -101,13 +101,15 @@ class Test():
         cdist2 = Estimate(chisto1, "COMPOUND",
                       ExtractDistribution(cdist1, "Sum"), 
                       "Sum",
-                      InitialDistribution=ExtractDistribution(cdist1, "Elementary"))
+                      InitialDistribution=\
+                        ExtractDistribution(cdist1, "Elementary"))
     
-    	#If we call the method directly, we need to provide 
-        #the default values and perform a conversion.
-	    #Default is LIKELIHOOD -1 -1.0 SECOND_DIFFERENCE ZERO, which corresponds to 
-	    #0, -1,-1,1,0
-	    #In addition because the type is 's', the 2 distributions must be reversed.
+    	# If we call the method directly, we need to provide 
+        # the default values and perform a conversion.
+	    # Default is LIKELIHOOD -1 -1.0 SECOND_DIFFERENCE ZERO, which
+        #  corresponds to 0, -1,-1,1,0
+	    # In addition because the type is 's', the 2 distributions 
+        # must be reversed.
 	        
         cdist3 = chisto1.compound_estimation1(
                     ExtractDistribution(cdist1, "Elementary"),

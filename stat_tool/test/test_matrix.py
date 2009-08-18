@@ -22,8 +22,8 @@ class Test(interface):
         vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
-        assert 138 == matrix10.get_nb_row()
-        assert 138 == matrix10.get_nb_column()
+        assert 138 == matrix10.nb_row
+        assert 138 == matrix10.nb_column
         return matrix10
 
     def test_empty(self):

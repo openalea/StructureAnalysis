@@ -27,7 +27,7 @@ class Test(interface):
         d3 = Binomial(0, 12, 0.8)
         
         mixt = Mixture(0.1, d1, 0.2, d2, 0.7, d3)
-        assert mixt.nb_component() == 3
+        assert mixt.nb_component == 3
         return mixt
             
     def test_constructor_from_file(self):
@@ -79,7 +79,7 @@ class Test(interface):
     def test_estimate(self):
         sim = self.simulate()
         # 3 Binomial distribution to match th original data
-        est = Estimate(sim, "Mixture", "B","B","B")
+        est = Estimate(sim, "Mixture", "B", "B", "B")
         est.plot()
        
  
