@@ -467,7 +467,8 @@ class StatInterface(object):
             warnings.warn("Cannot use new plotter. Use old style plot.")
             plotable = None
     
-        if(plot.DISABLE_PLOT): return
+        if plot.DISABLE_PLOT:
+            return
 
         if(plotable is not None):
             plotter.plot(plotable, title, groups, *args, **kargs)
@@ -489,7 +490,8 @@ class StatInterface(object):
             try:
                 output = self.survival_ascii_write()
             except AttributeError:
-                raise AttributeError("%s has not 'survival' viewpoint"%(str(type(self))))
+                raise AttributeError("""
+                %s has not 'survival' viewpoint""" % (str(type(self))))
 
         # Data
         elif(ViewPoint.lower() == "data"):
@@ -502,14 +504,16 @@ class StatInterface(object):
                     output = self.ascii_data_write(exhaustive)
 
                 except AttributeError:
-                    raise AttributeError("%s has not 'data' viewpoint"%(str(type(self))))
+                    raise AttributeError("""
+                        %s has not 'data' viewpoint""" % (str(type(self))))
 
         # StatProfile
         elif(ViewPoint.lower() == "stateprofile"):
             try:
                 output = self.state_profile_ascii_write() # A completer
             except AttributeError:
-                raise AttributeError("%s has not 'stateprofile' viewpoint"%(str(type(self))))
+                raise AttributeError("""
+                    %s has not 'stateprofile' viewpoint""" % (str(type(self))))
                 
         else:
             output = self.ascii_write(exhaustive)

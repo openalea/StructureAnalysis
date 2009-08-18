@@ -7,7 +7,7 @@ __version__ = "$Id$"
 
 __all__ = ["Simulate"]
 
-from openalea.stat_tool import error
+import error
 
 
 def Simulate(obj, *args):
@@ -51,4 +51,8 @@ def Simulate(obj, *args):
         ExtractHistogram.
     """
     error.CheckArgumentsLength(args, 1, 1)
-    return obj.simulate(args[0])
+    try:
+        return obj.simulate(args[0])
+    except:
+        from openalea.sequence_analysis.simulate import Simulate as newSimulate
+        return newSimulate(args[0])

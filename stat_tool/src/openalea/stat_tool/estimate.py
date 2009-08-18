@@ -2,6 +2,7 @@
 
 :Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
 
+.. todo:: refactoring : pylint score is negative !
 """
 __version__ = "$Id$"
 
@@ -9,20 +10,20 @@ import error
 import _stat_tool
 import interface
 
-from openalea.stat_tool.enumerate import likelihood_penalty_type
-from openalea.stat_tool.enumerate import smoothing_penalty_type 
-from openalea.stat_tool.enumerate import outside_type
-from openalea.stat_tool.enumerate import compound_type
-from openalea.stat_tool.enumerate import estimator_type
+from enumerate import likelihood_penalty_type
+from enumerate import smoothing_penalty_type 
+from enumerate import outside_type
+from enumerate import compound_type
+from enumerate import estimator_type
 from enumerate import distribution_identifier_type as dist_type
 
-from openalea.stat_tool._stat_tool import _ParametricModel
-from openalea.stat_tool._stat_tool import _Parametric
-from openalea.stat_tool._stat_tool import _Compound
-from openalea.stat_tool._stat_tool import _Convolution
-from openalea.stat_tool._stat_tool import _Distribution
-from openalea.stat_tool._stat_tool import _Mixture
-
+from _stat_tool import _ParametricModel
+from _stat_tool import _Parametric
+from _stat_tool import _Compound
+from _stat_tool import _Convolution
+from _stat_tool import _Distribution
+from _stat_tool import _Mixture
+from _stat_tool import _Histogram
 
 
 __all__ = ["Estimate"]
@@ -34,7 +35,7 @@ class EstimateFunctions(object):
     """
 
     
-    def estimate_nonparametric( histo):
+    def estimate_nonparametric(histo):
         """
         Estimate a non parametric distribution
 
@@ -374,7 +375,7 @@ class EstimateFunctions(object):
 
 
 # Extend _Histogram class
-_Histogram = interface.extend_class( _stat_tool._Histogram, EstimateFunctions)
+_Histogram = interface.extend_class( _Histogram, EstimateFunctions)
 
 
 
@@ -406,17 +407,28 @@ def Estimate(histo, itype, *args, **kargs):
         "CONVOLUTION" : _Histogram.estimate_convolution,
         "COMPOUND": _Histogram.estimate_compound,
         }
+    
+    Type = itype.upper()
 
-    itype = itype.upper()
-
-    #try:
-    fct = fct_map[itype]
-    if fct == _Histogram.estimate_parametric:
-        return fct(histo, itype, *args, **kargs)
-    elif fct == _Histogram.estimate_mixture:
-        return fct(histo, *args, **kargs)
+    # sequence analysis case
+    if Type not in fct_map.keys():
+        try:
+            from openalea.sequence_analysis.estimate import Estimate \
+                as SeqEstimate   
+        except:
+            raise ImportError("Could not import sequence_analysis")
+        print 'SWITCH to SeqEstimate'
+        return SeqEstimate(histo, itype, *args, **kargs)
     else:
-        return fct(histo, *args, **kargs)
+        fct = fct_map[Type]
+        
+        if fct == _Histogram.estimate_parametric:
+            return fct(histo, Type, *args, **kargs)
+        elif fct == _Histogram.estimate_mixture:
+            return fct(histo, *args, **kargs)
+        else:
+            return fct(histo, *args, **kargs)
+
 
     #except KeyError:
     

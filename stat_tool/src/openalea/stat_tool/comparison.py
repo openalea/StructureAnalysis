@@ -9,13 +9,15 @@ import error
 from enumerate import variable_type 
 from enumerate import format_type
 
-from openalea.stat_tool._stat_tool import _CompoundData
-from openalea.stat_tool._stat_tool import _DistributionData
-from openalea.stat_tool._stat_tool import _MixtureData
-from openalea.stat_tool._stat_tool import _ConvolutionData
-from openalea.stat_tool._stat_tool import _Vectors
-from openalea.stat_tool._stat_tool import _VectorDistance
-from openalea.stat_tool._stat_tool import _Histogram
+
+from _stat_tool import \
+    _CompoundData,\
+    _DistributionData,\
+    _MixtureData,\
+    _ConvolutionData,\
+    _Vectors,\
+    _VectorDistance,\
+    _Histogram
 
 __all__ = ['Compare', 'ComparisonTest']
 
@@ -140,10 +142,8 @@ def Compare(arg1, *args, **kargs):
     else:
         raise NotImplemented
     
-    if ret:
-        return ret
-    else:
-        raise Exception(error.STAT_TOOL_ERROR_MSG_RETURN_NONE)
+    
+    return ret
     
 
 def ComparisonTest(utype, histo1, histo2):

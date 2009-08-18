@@ -6,7 +6,7 @@ __version__ = "$Id$"
 
 import error
 import interface
-#import _stat_tool
+
 
 from _stat_tool import _Regression
 from _stat_tool import _Vectors
@@ -19,10 +19,10 @@ from _stat_tool import _Mixture
 from enumerate import algo_map
 from enumerate import  bool_type
 
-from openalea.stat_tool import error
 
 __all__ = ['_Regression',
            'Regression']
+
 
 #todo: use args and kargs as arguments
 def Regression(vec, utype, explanatory, response, 

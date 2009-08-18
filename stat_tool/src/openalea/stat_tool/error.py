@@ -83,7 +83,7 @@ def CheckType(variables, types, **kargs):
                 labels.append(arguments_labels[index])
             except:
                 raise KeyError("""consider adding keys in the labels dictionary:
-                 you 've reached the limit""")
+                 you've reached the limit""")
     else:
         for var in variable_id:
             if var in arguments_labels.keys():
@@ -91,7 +91,7 @@ def CheckType(variables, types, **kargs):
             else:
                 labels.append("unknown position (larger than 5)")
     
-    if len(variables)!=len(types):
+    if len(variables) != len(types):
         raise ValueError('length of first and second arguments must be equal')
 
 

@@ -7,6 +7,10 @@ __version__ = "$Id$"
 
 import _stat_tool
 
+from _stat_tool import _Histogram, _MixtureData, \
+    _CompoundData,_ConvolutionData, _DistributionData, _Mixture, _Compound, \
+    _Convolution, _ParametricModel
+
 
 # map to enumerate in boost python
 criterion_type = {
@@ -55,6 +59,12 @@ variable_type = {
     "SYMBOLIC" : _stat_tool.VariableType.SYMBOLIC,
     "C" : _stat_tool.VariableType.CIRCULAR,
     "CIRCULAR" : _stat_tool.VariableType.CIRCULAR,
+    }
+sub_variable_type = {
+    "N" : _stat_tool.VariableType.NUMERIC,
+    "NUMERIC" : _stat_tool.VariableType.NUMERIC,
+    "S" : _stat_tool.VariableType.SYMBOLIC,
+    "SYMBOLIC" : _stat_tool.VariableType.SYMBOLIC,                      
     }
 
 pearson_type = {
@@ -154,3 +164,23 @@ keep_type = {
              "Reject": "Reject",
              "Rejected": "Reject"
              }
+
+bool_type = {
+             "False": False,
+             False:False,
+             True:True,
+             "True":True
+             }
+
+
+algo_map = {"Averaging": 'a',
+            "LeastSquares": 's'
+            }
+
+
+histogram_types = [_Histogram, _MixtureData, _CompoundData, _ConvolutionData,
+                    _DistributionData]
+    
+
+model_distribution_type = [_Mixture, _Compound, _Convolution, _ParametricModel]
+    

@@ -189,7 +189,8 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
     """
 
     # Check parameters
-    #todo:  returns error if ((inf_bound < min_inf_bound) || (inf_bound > MAX_INF_BOUND)) {
+    #todo:  returns error if ((inf_bound < min_inf_bound) || 
+    # (inf_bound > MAX_INF_BOUND)) {
     assert inf_bound >= 0
     assert sup_bound >= 0
     assert inf_bound <= sup_bound

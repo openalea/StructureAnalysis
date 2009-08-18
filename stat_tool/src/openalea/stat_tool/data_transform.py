@@ -3,13 +3,14 @@
 __revision__ = "$Id$"
 
 import error
-from openalea.stat_tool import _Mixture
-from openalea.stat_tool import _MixtureData
-from openalea.stat_tool import _Compound
-from openalea.stat_tool import _CompoundData
-from openalea.stat_tool import _Convolution
-from openalea.stat_tool import _ConvolutionData
-from openalea.stat_tool import _Vectors
+from _stat_tool import \
+     _Mixture, \
+     _MixtureData, \
+     _Compound, \
+     _CompoundData, \
+     _Convolution, \
+     _ConvolutionData,\
+     _Vectors
 
 from enumerate import keep_type
 
@@ -89,11 +90,11 @@ def Merge(obj, *args):
         try:
             newret = ret.markovian_sequences()
             return newret
-        except Exception:
+        except ValueError:
             import warnings
-            warnings.warn("is this normal behaviour? (merge in data_transform)")
-            pass
-    # if here, it means that markovian_sequencse did not work or not present
+            warnings.warn("""markovian_sequences did not work. Check that this
+             is normal behaviour""")
+    
     return ret
 
 
@@ -398,7 +399,7 @@ def Extract(obj, *args, **kargs):
             from openalea.sequence_analysis.data_transform import Extract \
                 as newExtract
             ret = newExtract(obj, *args, **kargs)
-        except Exception:
+        except ValueError:
             pass
     
     return ret
@@ -549,7 +550,7 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
         except AttributeError:
             return ret
     else:
-        raise Exception(error.STAT_TOOL_ERROR_MSG_RETURN_NONE)
+        raise Exception("Must not enter here")
     
         
 
@@ -803,11 +804,14 @@ def Unnormalize(obj):
 
     
 def Symmetrize(obj):
+    """
     
+    .. todo:: documentation
+    """
     ret = None
     try:
         ret = obj.symmetrize()
-    except:
+    except ValueError:
         pass
     if ret:
         return ret    
