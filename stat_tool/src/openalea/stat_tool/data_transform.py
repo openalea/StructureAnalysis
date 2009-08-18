@@ -90,7 +90,7 @@ def Merge(obj, *args):
         try:
             newret = ret.markovian_sequences()
             return newret
-        except ValueError:
+        except:
             import warnings
             warnings.warn("""markovian_sequences did not work. Check that this
              is normal behaviour""")
