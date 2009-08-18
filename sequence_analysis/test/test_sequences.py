@@ -83,7 +83,7 @@ class Test(interface):
         assert len(seq) == 2
         assert len(seq) == seq.nb_sequence
 
-    def _test_plot(self):        
+    def test_plot(self):        
         self.plot()
     
     def test_save(self):
@@ -357,6 +357,15 @@ class Test(interface):
     def test_variable_scaling(self):
         """test to be done"""
         pass
+    def test_remove_index_parameter(self):
+        """test to be done"""
+        self.data
+        
+        
+    def test_write_mtg(self):
+        import os
+        self.data.mtg_write('test.mtg', [1,2])
+        os.remove('test.mtg')
     
 """           
  

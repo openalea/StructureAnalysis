@@ -15,6 +15,7 @@ from openalea.sequence_analysis.correlation import ComputeWhiteNoiseCorrelation
 from openalea.sequence_analysis.correlation import ComputePartialAutoCorrelation
 
 from openalea.stat_tool.distribution import Distribution
+from tools import runTestClass
 
 
 class Data():
@@ -41,7 +42,7 @@ def CorrelationData(index=1):
     return ret
 
    
-class test_ComputeCorrelation(Data):
+class TestComputeCorrelation(Data):
         
     def __init__(self):
         Data.__init__(self)
@@ -80,10 +81,10 @@ class test_ComputeCorrelation(Data):
     
             
 
-class test_ComputeWhiteNoiseCorrelation(test_ComputeCorrelation):
+class TestComputeWhiteNoiseCorrelation(TestComputeCorrelation):
     
     def __init__(self):
-        test_ComputeCorrelation.__init__(self)
+        TestComputeCorrelation.__init__(self)
         self.correlation = self.test_pearson()
         
     def test_filter(self):
@@ -98,7 +99,7 @@ class test_ComputeWhiteNoiseCorrelation(test_ComputeCorrelation):
         data = self.correlation
         ComputeWhiteNoiseCorrelation(data , Distribution("BINOMIAL", 0,4,0.5))
      
-class test_ComputePartialAutoCorrelation(Data):
+class TestComputePartialAutoCorrelation(Data):
     
     def __init__(self):
         Data.__init__(self)
@@ -106,3 +107,8 @@ class test_ComputePartialAutoCorrelation(Data):
     def test_compute_partial_auto_correlation(self):
         ComputePartialAutoCorrelation(self.sequence, 2, MaxLag=5)
      
+
+if __name__ == "__main__":
+    runTestClass(TestComputeCorrelation())
+    runTestClass(TestComputePartialAutoCorrelation())
+    runTestClass(TestComputeWhiteNoiseCorrelation())

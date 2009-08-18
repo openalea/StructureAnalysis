@@ -74,7 +74,7 @@ class interface():
         try:
             _h = self.structure("whatever_wrong_filename.txt")
             assert False
-        except Exception:
+        except IOError:
             assert True
 
     def print_data(self):

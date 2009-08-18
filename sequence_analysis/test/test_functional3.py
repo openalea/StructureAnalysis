@@ -31,28 +31,30 @@ path = 'data' + os.sep
 
 seq69 = Sequences(path + "pin_laricio_7x.seq")
 seq70 = Cluster(seq69, "Step", 1, 10)
-# seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 27, MaxIndex=92)
+
+# todo:: error here need to remove MaxIndex 
+#seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 27, MaxIndex=92)
 
 
 # Plot(seq70, ViewPoint="Data")
 # Plot(Cumulate(seq70), ViewPoint="Data")
 
 vec70 = Vectors(seq70)
-# Plot(Regression(vec70, "MovingAverage", 1, 2, [1]))
-# Plot(Regression(vec70, "MovingAverage", 1, 3, [1]))
+Plot(Regression(vec70, "MovingAverage", 1, 2, [1]))
+Plot(Regression(vec70, "MovingAverage", 1, 3, [1]))
 
 vec71 =  Vectors(SelectIndividual(seq70, [1, 2, 3]))
-# Plot(Regression(vec71, "MovingAverage", 1, 2, [1]))
-# Plot(Regression(vec71, "MovingAverage", 1, 3, [1]))
+Plot(Regression(vec71, "MovingAverage", 1, 2, [1]))
+Plot(Regression(vec71, "MovingAverage", 1, 3, [1]))
 
 seq71 = PointwiseAverage(SelectIndividual(seq70, [1, 2, 3]), StandardDeviation=True)
-# Plot(SelectIndividual(seq711, [0, 1, 2, 3]), ViewPoint="Data")
-# Plot(SelectIndividual(seq711, [0, 4]), ViewPoint="Data")
+Plot(SelectIndividual(seq71, [0, 1, 2, 3]), ViewPoint="Data")
+Plot(SelectIndividual(seq71, [0, 4]), ViewPoint="Data")
 
 seq72 = PointwiseAverage(SelectIndividual(seq70, [1, 2, 3]), Output="Residual")
-# seq72 = PointwiseAverage(SelectIndividual(seq70, [1, 2, 3]), Output="StandardizedResidual")
-# Plot(SelectIndividual(seq72, [1, 2, 3]), ViewPoint="Data")
-# Plot(SelectIndividual(Cumulate(seq72), [1, 2, 3]), ViewPoint="Data")
+seq72 = PointwiseAverage(SelectIndividual(seq70, [1, 2, 3]), Output="StandardizedResidual")
+Plot(SelectIndividual(seq72, [1, 2, 3]), ViewPoint="Data")
+Plot(SelectIndividual(Cumulate(seq72), [1, 2, 3]), ViewPoint="Data")
 
 vec73 =  Vectors(SelectIndividual(seq70, [4, 5, 6]))
 # Plot(Regression(vec73, "MovingAverage", 1, 2, [1]))
@@ -182,8 +184,8 @@ seq49 = SelectVariable(seq48, [3])
 
 seq50 = Segmentation(seq80, [5, 6, 6, 4, 4, 4], "Gaussian", Output="Residual")
 seq51 = PointwiseAverage(seq50, StandardDeviation=True)
-# Plot(SelectIndividual(seq51, [0, 7]), ViewPoint=Data)
-# Plot(Regression(Vectors(seq50), "MovingAverage", 1, 3, [1]))
+Plot(SelectIndividual(seq51, [0, 7]), ViewPoint="Data")
+Plot(Regression(Vectors(seq50), "MovingAverage", 1, 3, [1]))
 
 acf50 = ComputeCorrelation(seq50, 1, MaxLag=10)
 # Plot(acf30)
@@ -197,9 +199,9 @@ acf51 = ComputeCorrelation(seq51, MaxLag=10)
 seq55 = Segmentation(seq80, [6, 5, 5, 6, 4, 4], "Mean", Output="Residual")
 seq56 = PointwiseAverage(seq55, StandardDeviation=True)
 # Plot(SelectIndividual(seq56, [0, 7]), ViewPoint=Data)
-# Plot(Regression(Vectors(seq55), "MovingAverage", 1, 3, [1]))
+Plot(Regression(Vectors(seq55), "MovingAverage", 1, 3, [1]))
 
 seq57 = Segmentation(seq80, [5, 5, 5, 4, 4, 4], "Mean")
 seq58 = Segmentation(seq80, [5, 5, 5, 4, 4, 4], "Gaussian")
-# Display(MergeVariable(SelectVariable(seq57, 1), seq58), ViewPoint=Data, Format=Line)
+Display(MergeVariable(SelectVariable(seq57, 1), seq58), ViewPoint="Data", Format="Line")
 

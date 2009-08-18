@@ -21,6 +21,9 @@ from tools import interface
 from tools import runTestClass
 
 
+
+
+
 class Test(interface):
     """to be done
 
@@ -37,6 +40,73 @@ class Test(interface):
         # to sequences1.seq
         return TimeEvents('data/time_events.dat')
    
+    def test_constructor_negative_binomial(self):
+        proba = 0.5
+        inf_bound = 0
+        param = 1.
+        Renewal("NEGATIVE_BINOMIAL", inf_bound, param, 
+               proba, Type="Equilibrium", 
+               ObservationTime=40)
+        
+    def test_constructor_binomial(self):
+        inf_bound = 0
+        sup_bound = 10
+        probability = 1.
+        Renewal("BINOMIAL", inf_bound, sup_bound, 
+               probability, Type="Equilibrium", 
+               ObservationTime=40)
+        
+    def test_constructor_poisson(self):
+        inf_bound = 0
+        probability = 0.5
+        param = 1.
+        Renewal("POISSON", inf_bound, param, 
+               probability, Type="Equilibrium", 
+               ObservationTime=40)
+        
+    def test_constructor_scale(self):
+        inf_bound = 0
+        probability = 0.5
+        param = 1.
+        Renewal("POISSON", inf_bound, param, 
+               probability, Type="Equilibrium", 
+               ObservationTime=40, Scale=0.5)
+
+    def test_constructor_not_implemented(self):
+        try:
+            inf_bound = 0
+            probability = 0.5
+            param = 1.
+            Renewal("NOT_IMPLEMENTED", inf_bound, param, 
+               probability, Type="Equilibrium", 
+               ObservationTime=40)
+
+            assert False
+        except:
+            assert True
+
+    def test_constructor_from_model(self):
+        from openalea.stat_tool.compound import Compound
+        from openalea.stat_tool.mixture import Mixture
+        from openalea.stat_tool.convolution import Convolution
+        from openalea.stat_tool.distribution import Binomial
+        Renewal(Compound(Binomial(0,10,0.5), Binomial(0,10,0.3)), 
+                Type="Equilibrium", ObservationTime=20)
+        Renewal(Mixture(0.1, Binomial(0,10,0.5), 0.9, Binomial(0,10,0.3)), 
+                Type="Equilibrium", ObservationTime=20)
+        Renewal(Compound(Binomial(0,10,0.5), Binomial(0,10,0.3)), 
+                Type="Equilibrium", ObservationTime=20)
+        
+    def test_constructor_not_implemented2(self):
+        try:
+            Renewal(2, 1)
+            print 'here'
+
+            assert False
+        except:
+            assert True
+
+    
     def _test_empty(self):
         self.empty()
 

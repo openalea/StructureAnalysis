@@ -68,7 +68,6 @@ mc11 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=5, GlobalIn
 mc12 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", Algorithm="LocalBIC", Threshold=10., MaxOrder=5, GlobalInitialTransition=False, GlobalSample=False)
 mc13 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", Algorithm="Context", Threshold=1., MaxOrder=5, GlobalInitialTransition=False, GlobalSample=False)
 
-
 acf11 = ComputeAutoCorrelation(mc11, 1, MaxLag=20)
 acf12 = ComputeAutoCorrelation(mc11, 2, MaxLag=20)
 
@@ -81,8 +80,12 @@ matrix1 = Compare(Thresholding(mc2, MinProbability=0.001), seq10, Thresholding(m
 
 matrix2 = Compare(Thresholding(mc2, MinProbability=0.001), seq2, Thresholding(mc4, MinProbability=0.001), seq4,	Thresholding(mc6, MinProbability=0.001), seq6,	Thresholding(mc8, MinProbability=0.001), seq8, 10000)
 
+
 Compare(seq10, Thresholding(mc2, MinProbability=0.001), Thresholding(mc4, MinProbability=.001), Thresholding(mc6, MinProbability=0.001), Thresholding(mc8, MinProbability=0.001))
 
+
+
+# test #
 hmc9 = HiddenVariableOrderMarkov(path + "dupreziana21.hc")
 hmc10 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition=True, NbIteration=80)
 hmc11 = Estimate(seq10, "HIDDEN_VARIABLE_ORDER_MARKOV", hmc9, GlobalInitialTransition=False, NbIteration=80)

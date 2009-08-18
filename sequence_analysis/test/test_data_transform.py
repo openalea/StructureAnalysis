@@ -13,6 +13,7 @@ from openalea.stat_tool import Mixture
 from openalea.stat_tool import Distribution
 from openalea.stat_tool import Simulate
 from openalea.stat_tool import Merge
+from tools import runTestClass
 
 class TestRemoveRun():
 
@@ -66,8 +67,19 @@ def test_discrete_sequences():
     """not implemented"""
     pass
 
+def test_compute_state_sequence():
+    from openalea.sequence_analysis import HiddenSemiMarkov
+    seq = Sequences("data/wij1.seq")
+    hsmc0 = HiddenSemiMarkov("data/" + "wij1.hsc")
+    ComputeStateSequences(seq, hsmc0, Algorithm="ForwardBackward", Characteristics=True)
+ 
 
-
+def test_transition_count():
+    seq = Sequences("data/wij1.seq")
+    TransitionCount(seq, 5, Begin=True, Estimator="MaximumLikelihood",
+                    Filename = "ASCII")
+    
+    
 class TestMerge():
     
     def __init__(self):
@@ -87,3 +99,9 @@ class TestMerge():
         histo12 = Merge(histo10, histo11)
 
         assert histo12
+
+
+if __name__ == "__main__":
+    runTestClass(TestMerge())
+    runTestClass(TestRemoveRun())
+    test_compute_state_sequence()

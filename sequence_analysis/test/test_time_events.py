@@ -19,6 +19,11 @@ from tools import interface
 from tools import runTestClass
 
 
+def TimeEventsData():
+    """Returns simulated top"""
+    time_events = TimeEvents("data/time_events.dat")
+    return time_events
+
 class Test(interface):
     """a simple unittest class
 
@@ -58,7 +63,7 @@ class Test(interface):
         assert seq.nb_class==8
         pass
 
-    def _test_plot(self):        
+    def test_plot(self):        
         self.plot()
     
     def test_save(self):

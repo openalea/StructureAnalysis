@@ -19,7 +19,11 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 from tools import interface
 from tools import runTestClass
 
+def HiddenSemiMarkovData():
+     hsm = HiddenSemiMarkov("data/wij1.hsc")
+     return hsm
 
+    
 class Test(interface):
     """a simple unittest class
     

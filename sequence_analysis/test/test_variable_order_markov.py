@@ -1,4 +1,4 @@
-"""Hidden variable order markov tests
+"""Semi markov tests
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
@@ -7,8 +7,10 @@ __revision__ = "$Id:  $"
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
-from openalea.sequence_analysis.hidden_variable_order_markov import HiddenVariableOrderMarkov
+from openalea.sequence_analysis.variable_order_markov import VariableOrderMarkov
+from openalea.sequence_analysis.sequences import Sequences
 from openalea.sequence_analysis.simulate import Simulate
+from openalea.sequence_analysis.estimate import Estimate
 
 from openalea.stat_tool.data_transform import * 
 from openalea.stat_tool.cluster import Cluster 
@@ -18,6 +20,12 @@ from tools import interface
 from tools import runTestClass
 
 
+def VariableOrderMarkovData():
+    sm =  VariableOrderMarkov('data/variable_order_markov.dat')
+    ret = Simulate(sm, 1, 1000, True)
+    return sm
+
+    
 class Test(interface):
     """a simple unittest class
     
@@ -25,16 +33,15 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/dupreziana21.hc",
-                           HiddenVariableOrderMarkov)
+                           "data/variable_order_markov.dat",
+                           VariableOrderMarkov)
         
     def build_data(self):
-        """todo: check identifier output. should be a list """
-        # build a list of 2 sequences with a variable that should be identical
-        # to sequences1.seq
-        hvom =  HiddenVariableOrderMarkov('data/dupreziana21.hc')
-
-        return hvom
+        seq = Sequences("data/belren1.seq")
+        vom = Estimate(seq, "VARIABLE_ORDER_MARKOV", "Ordinary", 
+                        MaxOrder=4, GlobalInitialTransition=False)
+                
+        return vom
    
     def _test_empty(self):
         self.empty()
@@ -74,31 +81,18 @@ class Test(interface):
         
     def _test_simulate(self):
         sm = self.data
-        sm.simulation_nb_elements(1, 10000, True)
+        #sm.simulation_nb_elements(1, 10000, True)
         Simulate(sm,1, 10000, True)
         pass
-        
-    def _test_merge (self):
-        s1 = self.data
-        s2 = self.data
-        
-        sall = s1.merge([s2])
-        
-        #assert sall.nb_sequence == 4
-        #assert sall.nb_variable == 2
-        
         
     def test_thresholding(self):
         self.data.thresholding(1)
         
     def test_extract(self):
-        #self.data.extract(1,0,0)
-        pass
+        self.data.extract(1,0,0)
 
     def test_extract_data(self):
-        pass
-        #self.data.extract_data()
-
+        self.data.extract_data()
 
 
 if __name__ == "__main__":

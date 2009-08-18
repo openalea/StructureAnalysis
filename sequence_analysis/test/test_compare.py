@@ -101,8 +101,8 @@ class Test_Compare_Vectors_VectorDistance(_Compare):
         data = self.data
         a =  Compare(data, VectorDistance("N", "N", "N"))
 
-        assert a.get_nb_row() == 3
-        assert a.get_nb_column() == 3
+        assert a.nb_row == 3
+        assert a.nb_column == 3
 
 class Test_Compare_hsmc_with_sequences(_Compare):
     
