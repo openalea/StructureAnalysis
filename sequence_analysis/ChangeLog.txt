@@ -1,3 +1,8 @@
+18 August 2009
+==============
+* Sequence analysis major updates: python module, missing wrappers and
+  exhaustive tests added.
+
 20 May 2009
 ===========
 
