@@ -43,8 +43,10 @@ void class_non_parametric_process() {
    ("_Nonparametric_process", "Non parametric process")
 
    .def(init< optional< int, int, int> > ())
-   .def("get_nb_value", &Nonparametric_process::get_nb_value, "returns number of values")
-   .def("get_nb_state", &Nonparametric_process::get_nb_state, "returns number of states")
+   .def("get_nb_value", &Nonparametric_process::get_nb_value,
+       "returns number of values")
+   .def("get_nb_state", &Nonparametric_process::get_nb_state,
+       "returns number of states")
 
    ;
         /*

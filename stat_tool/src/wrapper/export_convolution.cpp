@@ -167,19 +167,29 @@ void class_convolution()
     ("_Convolution", "Convolution Distribution")
     .def("__init__", make_constructor(WRAP::convolution_from_dists))
     .def("__init__", make_constructor(WRAP::convolution_from_file))
-    .def("__len__", &Convolution::get_nb_distribution, "Return the size of the Class instance")
+    .def("__len__", &Convolution::get_nb_distribution,
+        "Return the size of the Class instance")
     .def(self_ns::str(self))
-    .def("nb_distribution", &Convolution::get_nb_distribution, "Return the number of components")
+    .def("nb_distribution", &Convolution::get_nb_distribution,
+        "Return the number of components")
 
-    DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate elements")
+    DEF_RETURN_VALUE("simulate", WRAP::simulation,
+        args("nb_element"), "Simulate elements")
     // check extract and extract_data
-    DEF_RETURN_VALUE("extract", WRAP::extract, ARGS("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary, ARGS("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::extract_convolution, "Return a _ParametricModel object")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _ConvolutionData")
-    DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Convolution into a file")
-    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
-    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
+    DEF_RETURN_VALUE("extract", WRAP::extract,
+        args("index"), "Extract a particular element. First index is 1")
+    DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary, args("index"),
+        "Extract a particular element. First index is 1")
+    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", WRAP::extract_convolution,
+        "Return a _ParametricModel object")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,
+        "Return the associated _ConvolutionData")
+    DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write,
+        "Save Convolution into a file")
+    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable,
+        "Return a survival plotable")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, ""
+        "Return a plotable")
     ;
 /*
 
@@ -233,10 +243,14 @@ void class_convolution_data()
     ("_ConvolutionData", "Convolution Data")
     .def(self_ns::str(self))
     .def("nb_histogram", &Convolution_data::get_nb_histogram)
-    .def("get_histogram", &Convolution_data::get_histogram,	return_value_policy< manage_new_object >(), ARGS("index"),"todo")
-    DEF_RETURN_VALUE("extract", ConvolutionDataWrap::extract, ARGS("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE("extract_elementary", ConvolutionDataWrap::extract, ARGS("index"), "Extract a particular element. First index is 1")
-    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", ConvolutionDataWrap::extract_convolution,"Return a _DistributionData")
+    .def("get_histogram", &Convolution_data::get_histogram,
+        return_value_policy< manage_new_object >(), args("index"),"todo")
+    DEF_RETURN_VALUE("extract", ConvolutionDataWrap::extract,
+        args("index"), "Extract a particular element. First index is 1")
+    DEF_RETURN_VALUE("extract_elementary", ConvolutionDataWrap::extract,
+        args("index"), "Extract a particular element. First index is 1")
+    DEF_RETURN_VALUE_NO_ARGS("extract_convolution", ConvolutionDataWrap::extract_convolution,
+        "Return a _DistributionData")
     ;
 
   /*

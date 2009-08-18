@@ -51,10 +51,11 @@ class WRAP
 public:
 
   WRAP_METHOD2(Vectors,linear_regression, Regression, int, int);
-   WRAP_METHOD2(Vectors,comparison, Distance_matrix, Vector_distance, bool);
-   WRAP_METHOD_SPREADSHEET_WRITE( Vectors);WRAP_METHOD2(Vectors,scaling, Vectors, int, int);
-   WRAP_METHOD2(Vectors,round, Vectors, int, int);
-   WRAP_METHOD_FILE_ASCII_WRITE( Vectors)
+  WRAP_METHOD2(Vectors,comparison, Distance_matrix, Vector_distance, bool);
+  WRAP_METHOD_SPREADSHEET_WRITE( Vectors);WRAP_METHOD2(Vectors,scaling,
+       Vectors, int, int);
+  WRAP_METHOD2(Vectors,round, Vectors, int, int);
+  WRAP_METHOD_FILE_ASCII_WRITE( Vectors)
 
   static Vectors*
   read_from_file(char *filename)
@@ -870,76 +871,133 @@ void
 class_vectors()
 {
 
-class_< Vectors, bases< STAT_interface > >
-("_Vectors", "Vectors (2 dimensions list)", init<>())
-// constructors
-.def("__init__", make_constructor(VectorsWrap::build_from_lists))
-.def("__init__", make_constructor(VectorsWrap::read_from_file))
-// Python Operators
-.def(self_ns::str(self)) // __str__
-.def("__len__", &Vectors::get_nb_vector,"Return the number of vectors")
-.def("__getitem__", VectorsWrap::get_item)
+  class_< Vectors, bases< STAT_interface > >
+  ("_Vectors", "Vectors (2 dimensions list)", init<>())
+  // constructors
+  .def("__init__", make_constructor(VectorsWrap::build_from_lists))
+  .def("__init__", make_constructor(VectorsWrap::read_from_file))
 
-.add_property("nb_variable", &Vectors::get_nb_variable, "Return the number of variables")
-.add_property("nb_vector", &Vectors::get_nb_vector,"Return the number of vectors")
+  // Python Operators
+  .def(self_ns::str(self)) // __str__
+  .def("__len__", &Vectors::get_nb_vector,
+      "Return the number of vectors")
+  .def("__getitem__", WRAP::get_item)
 
-.def("get_identifiers", VectorsWrap::get_identifiers, args("index"),"Return the list of identifiers")
-.def("get_min_value", &Vectors::get_min_value, args("index"),"Return the min value of a variable")
-.def("get_max_value", &Vectors::get_max_value, args("index"),"Return the max value of a variable")
-.def("get_mean", &Vectors::get_mean, args("index"),"Return the mean value of a variable")
-.def("get_type", &Vectors::get_type, args("index"),"Return the type of a variable")
+   // properties
+  .add_property("nb_variable", &Vectors::get_nb_variable, "Return the number of variables")
+  .add_property("nb_vector", &Vectors::get_nb_vector,"Return the number of vectors")
 
-.def("check", VectorsWrap::check, args("ff"), "check vectors")
-DEF_RETURN_VALUE("value_select", VectorsWrap::value_select, args("variable", "min", "max", "keep"), "Selection of individuals according to the values taken by a variable")
-DEF_RETURN_VALUE("select_variable", VectorsWrap::select_variable, args("variables", "keep"), "select variable given a list of index")
-DEF_RETURN_VALUE("select_individual", VectorsWrap::select_individual, args("identifiers", "keep"), "Select individuals given a list of identifiers")
-DEF_RETURN_VALUE("extract", VectorsWrap::extract_histogram,args("variable"), "Extract histogram")
-DEF_RETURN_VALUE("linear_regression", VectorsWrap::linear_regression,args("explanatory_var", "response_var"), "Linear regression")
-DEF_RETURN_VALUE("moving_average_regression_values", VectorsWrap::moving_average_list, args("explanatory_var", "response_var", "dist", "algo"), "Linear regression (moving average)")
-DEF_RETURN_VALUE("moving_average_regression_distribution", VectorsWrap::moving_average_dist, args("explanatory_var", "response_var", "filters", "algo"), "Linear regression (moving average)")
-DEF_RETURN_VALUE("nearest_neighbours_regression", VectorsWrap::nearest_neighbours, args("explanatory_var", "response_var", "span", "weighting"), "Linear regression (nearest neighbours)")
-DEF_RETURN_VALUE("mixture_estimation_wrap", VectorsWrap::mixture_estimation_1, args("initial_mixture", "nb_max_iteration", "force_param"),"Mixture estimation (EM algorithm with initial model)")
-DEF_RETURN_VALUE("mixture_estimation_wrap", VectorsWrap::mixture_estimation_2, args("nb_component", "nb_max_iteration", "force_param"),"Mixture estimation (EM algorithm with fixed number of components)")
-DEF_RETURN_VALUE("shift", VectorsWrap::shift,args("variable", "param"),"Shift")
-DEF_RETURN_VALUE("cluster_step", VectorsWrap::cluster_step, args("variable", "step"), "Cluster Step" )
-DEF_RETURN_VALUE("cluster_limit", VectorsWrap::cluster_limit, args("variable", "limits"), "Cluster limit")
-DEF_RETURN_VALUE("transcode", VectorsWrap::transcode, args("variable", "symbols"), "Transcode")
-DEF_RETURN_VALUE("mixture_cluster", VectorsWrap::mixture_cluster, args("model"), "Cluster individuals using mixture model" )
-DEF_RETURN_VALUE("compare", VectorsWrap::comparison,args("distance"), "Compare Vectors given a VectorDistance")
-DEF_RETURN_VALUE_NO_ARGS("merge", VectorsWrap::merge, "Merge vectors")
-DEF_RETURN_VALUE("scaling", VectorsWrap::scaling,args("variable", "scaling_coeff"), "Scales vectors")
-DEF_RETURN_VALUE("round", VectorsWrap::scaling,args("variable", "scaling_coeff"), "Scales vectors")
-DEF_RETURN_VALUE_NO_ARGS("merge_variable", VectorsWrap::merge_variable,"Merge variables" )
-DEF_RETURN_VALUE_NO_ARGS("get_plotable", VectorsWrap::get_plotable, "Return a plotable")
-.def("contingency_table", VectorsWrap::contingency_table, "Return a string with the contingency_table")
-.def("variance_analysis", VectorsWrap::variance_analysis, "Return a string with the variance analysis")
-.def("ascii_data_write", VectorsWrap::ascii_data_write, "Return a string with the object representation")
-.def("file_ascii_write", VectorsWrap::file_ascii_write,"Save vector summary into a file")
-.def("file_ascii_data_write", VectorsWrap::file_ascii_data_write, "Save vector data into a file")
-.def("spreadsheet_write", VectorsWrap::spreadsheet_write, "Save data into CSV file")
-.def("rank_correlation_computation", VectorsWrap::rank_correlation_computation, args("type", "filename"), "Rank correlation computation")
+  // getter
+  .def("get_identifiers", WRAP::get_identifiers, args("index"),
+      "Return the list of identifiers")
+  .def("get_min_value", &Vectors::get_min_value, args("index"),
+      "Return the min value of a variable")
+  .def("get_max_value", &Vectors::get_max_value, args("index"),
+      "Return the max value of a variable")
+  .def("get_mean", &Vectors::get_mean, args("index"),
+      "Return the mean value of a variable")
+  .def("get_type", &Vectors::get_type, args("index"),
+      "Return the type of a variable")
 
-;
 
-/*
+  // python modules
+  DEF_RETURN_VALUE("value_select", WRAP::value_select,
+      args("variable", "min", "max", "keep"),"See ValueSelect")
+  DEF_RETURN_VALUE("select_variable", WRAP::select_variable,
+      args("variables", "keep"), "See SelectVariable")
+  DEF_RETURN_VALUE("select_individual", WRAP::select_individual,
+      args("identifiers", "keep"),"See SelectIndividual")
+  DEF_RETURN_VALUE("extract", WRAP::extract_histogram,args("variable"),
+      "Extract histogram")
+  DEF_RETURN_VALUE("transcode", WRAP::transcode,
+      args("variable", "symbols"), "See Transcode")
+  DEF_RETURN_VALUE("cluster_step", WRAP::cluster_step,
+      args("variable", "step"), "See Cluster" )
+  DEF_RETURN_VALUE("cluster_limit", WRAP::cluster_limit,
+      args("variable", "limits"), "See Cluster")
+  DEF_RETURN_VALUE("shift", WRAP::shift,
+      args("variable", "param"), "See Shift")
+  DEF_RETURN_VALUE_NO_ARGS("merge", WRAP::merge,
+      "See Merge")
+  DEF_RETURN_VALUE("round", WRAP::scaling,
+      args("variable", "scaling_coeff"), "See Round")
+  DEF_RETURN_VALUE_NO_ARGS("merge_variable", WRAP::merge_variable,
+      "See MergeVariable" )
+  .def("contingency_table", WRAP::contingency_table,
+      "See ContingencyTable")
+  .def("variance_analysis", WRAP::variance_analysis,
+      "See VarianceAnalysis")
 
- Vectors();
- Vectors(const Vectors &vec , int inb_vector , int *index);
 
- bool check(Format_error &error);
+  // Used in Python modules such as:
+  // ---------------- Moving Average
+  DEF_RETURN_VALUE("moving_average_regression_values", WRAP::moving_average_list,
+      args("explanatory_var", "response_var", "dist", "algo"), "Linear regression (MovingAverage)")
+  DEF_RETURN_VALUE("moving_average_regression_distribution", WRAP::moving_average_dist,
+      args("explanatory_var", "response_var", "filters", "algo"), "Linear regression (See MovingAverage)")
+  // ---------------------Estimation
+  DEF_RETURN_VALUE("linear_regression", WRAP::linear_regression,
+      args("explanatory_var", "response_var"), "TODO Linear regression")
+  DEF_RETURN_VALUE("nearest_neighbours_regression", WRAP::nearest_neighbours,
+      args("explanatory_var", "response_var", "span", "weighting"),
+      "TODO Linear regression (nearest neighbours)")
+  DEF_RETURN_VALUE("mixture_estimation_wrap", WRAP::mixture_estimation_1,
+      args("initial_mixture", "nb_max_iteration", "force_param"),
+      "TODO Mixture estimation (EM algorithm with initial model)")
+  DEF_RETURN_VALUE("mixture_estimation_wrap", WRAP::mixture_estimation_2,
+      args("nb_component", "nb_max_iteration", "force_param"),
+      "TODO Mixture estimation (EM algorithm with fixed number of components)")
 
- -->bool plot_write(Format_error &error , const char *prefix ,
- const char *title = 0) const;
 
- double mean_absolute_deviation_computation(int variable) const;
- double mean_absolute_difference_computation(int variable) const;
- double skewness_computation(int variable) const;
- double kurtosis_computation(int variable) const;
 
- // acces membres de la classe
- --Histogram* get_marginal(int variable) const { return marginal[variable]; }
- --double get_covariance(int variable1, int variable2) const { return covariance[variable1][variable2]; }
- */
+  DEF_RETURN_VALUE("mixture_cluster", WRAP::mixture_cluster,
+      args("model"), "TODOCluster individuals using mixture model" )
+  DEF_RETURN_VALUE("compare", WRAP::comparison,
+      args("distance"), "TODOCompare Vectors given a VectorDistance")
+  DEF_RETURN_VALUE("scaling", WRAP::scaling,
+      args("variable", "scaling_coeff"), "TODOScales vectors")
+
+
+  .def("variance_analysis", WRAP::variance_analysis,
+      "Return a string with the variance analysis")
+  .def("rank_correlation_computation", WRAP::rank_correlation_computation,
+      args("type", "filename"), "Rank correlation computation")
+
+  //others
+  DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable,
+      "Return a plotable")
+  .def("check", WRAP::check, args("todo"),
+      "todo check vectors")
+  .def("ascii_data_write", WRAP::ascii_data_write,
+      "Return a string with the object representation")
+  .def("file_ascii_write", WRAP::file_ascii_write,
+      "Save vector summary into a file")
+  .def("file_ascii_data_write", WRAP::file_ascii_data_write,
+      "Save vector data into a file")
+  .def("spreadsheet_write", WRAP::spreadsheet_write,
+      "Save data into CSV file")
+
+  ;
+
+  /*
+
+   Vectors();
+   Vectors(const Vectors &vec , int inb_vector , int *index);
+
+   bool check(Format_error &error);
+
+   -->bool plot_write(Format_error &error , const char *prefix ,
+   const char *title = 0) const;
+
+   double mean_absolute_deviation_computation(int variable) const;
+   double mean_absolute_difference_computation(int variable) const;
+   double skewness_computation(int variable) const;
+   double kurtosis_computation(int variable) const;
+
+   // acces membres de la classe
+   --     Histogram* get_marginal(int variable) const { return marginal[variable]; }
+   --double get_covariance(int variable1, int variable2) const { return covariance[variable1][variable2]; }
+   */
 
 }
 

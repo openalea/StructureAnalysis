@@ -33,7 +33,7 @@
 #include "boost_python_aliases.h"
 
 using namespace boost::python;
-
+using namespace boost;
 
 class CompoundWrap
 {
@@ -158,23 +158,34 @@ class CompoundWrap
 #define WRAP CompoundWrap
 void class_compound()
 {
-    class_< Compound, bases<STAT_interface, Distribution> >  ("_Compound", "Compound" )
+    class_< Compound, bases<STAT_interface, Distribution> >
+    ("_Compound", "Compound" )
 
     //"constructor from 2 distribution and an optional cumul threshold")
     // .def(init<Parametric, Parametric, optional<double> >())
-    .def("__init__", make_constructor(WRAP::compound_from_file),	"Build from a filename")
-    .def("__init__", make_constructor(WRAP::compound_from_dists),"Build from list of objects")
-    .def("__init__", make_constructor(WRAP::compound_from_dists_and_threshold),"Build from list of objects")
+    .def("__init__", make_constructor(WRAP::compound_from_file),
+        "Build from a filename")
+    .def("__init__", make_constructor(WRAP::compound_from_dists),
+        "Build from list of objects")
+    .def("__init__", make_constructor(WRAP::compound_from_dists_and_threshold),
+        "Build from list of objects")
 
     .def(self_ns::str(self)) // __str__
 
-    DEF_RETURN_VALUE("simulate", WRAP::simulation,ARGS("nb_element"), "Simulate nb_element elements")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the data")
-    DEF_RETURN_VALUE_NO_ARGS("extract_compound", WRAP::extract_compound, "Return the compound distribution")
-    DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum,	"Return the sum distribution")
-    DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary,	ARGS("index"),	"Return the elementary distribution")
-    DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
-    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
+    DEF_RETURN_VALUE("simulate", WRAP::simulation,
+        args("nb_element"), "Simulate nb_element elements")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,
+        "Return the data")
+    DEF_RETURN_VALUE_NO_ARGS("extract_compound", WRAP::extract_compound,
+        "Return the compound distribution")
+    DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum,
+        "Return the sum distribution")
+    DEF_RETURN_VALUE("extract_elementary", WRAP::extract_elementary,
+        args("index"),	"Return the elementary distribution")
+    DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write,
+        "Save Compound into a file")
+    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable,
+        "Return a survival plotable")
     ;
 
     /*
@@ -219,10 +230,18 @@ public:
 #define WRAP CompoundDataWrap
 void class_compound_data()
 {
-  class_< Compound_data, bases< STAT_interface, Histogram > > ("_CompoundData", "Compound data")
-  DEF_RETURN_VALUE_NO_ARGS("extract", WRAP::extract, "Return the data")
-  DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum_distribution, "Return the sum distribution")
-  DEF_RETURN_VALUE("extract_elementary", WRAP::extract_distribution,ARGS("index"), "Return the elementary distribution")
+  class_< Compound_data, bases< STAT_interface, Histogram > >
+  ("_CompoundData", "Compound data")
+
+
+  // Used in Python modules such as:
+  // ------------------------Extract
+  DEF_RETURN_VALUE_NO_ARGS("extract", WRAP::extract,
+      "Return the data")
+  DEF_RETURN_VALUE_NO_ARGS("extract_sum", WRAP::extract_sum_distribution,
+      "Return the sum distribution")
+  DEF_RETURN_VALUE("extract_elementary", WRAP::extract_distribution,
+      args("index"), "Return the elementary distribution")
     ;
 
 

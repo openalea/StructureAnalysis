@@ -396,74 +396,58 @@ void class_histogram()
   .def("__getitem__", HistogramWrap::histo_get_item)
 
   // Comparison
-  .def("compare", HistogramWrap::comparison, python::arg("histogram"),
-      "Comparison of histograms")
-
-  .def("f_comparison", HistogramWrap::f_comparison, python::arg("histogram"),
-      "F comparison of histograms")
-
-  .def("t_comparison", HistogramWrap::t_comparison, python::arg("histogram"),
+  .def("compare", HistogramWrap::comparison,
+      args("histogram"),"Comparison of histograms")
+  .def("f_comparison", HistogramWrap::f_comparison,
+      args("histogram"), "F comparison of histograms")
+  .def("t_comparison", HistogramWrap::t_comparison, args("histogram"),
       "T comparison of histograms")
-
   .def("wmw_comparison", HistogramWrap::wmw_comparison,
-      python::arg("histogram"),
+      args("histogram"),
       " Wilcoxon-Mann-Whitney comparison of histograms")
 
   // Estimation
   .def("parametric_estimation", HistogramWrap::parametric_estimation,
       return_value_policy<manage_new_object> (), "Parametric model estimation")
-
   .def("mixture_estimation1", HistogramWrap::mixture_estimation1,
       return_value_policy<manage_new_object> (), "Mixture Estimation")
-
   .def("mixture_estimation2", HistogramWrap::mixture_estimation2,
       return_value_policy<manage_new_object> (), "Mixture Estimation")
-
   .def("convolution_estimation1", HistogramWrap::convolution_estimation1,
       return_value_policy<manage_new_object> (), "Convolution Estimation")
-
   .def("convolution_estimation2", HistogramWrap::convolution_estimation2,
       return_value_policy<manage_new_object> (), "Convolution Estimation")
-
   .def("compound_estimation1", HistogramWrap::compound_estimation1,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
-
   .def("compound_estimation2", HistogramWrap::compound_estimation2,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
 
   // Select
   .def("value_select", HistogramWrap::value_select, return_value_policy<
-      manage_new_object> (), python::args("min", "max", "keep"),
+      manage_new_object> (), args("min", "max", "keep"),
       "Selection of individuals according to the values taken by a variable")
 
   // Cluster
   .def("cluster_step", HistogramWrap::cluster_step, return_value_policy<
-      manage_new_object> (), python::arg("step"), "Cluster with step")
-
+      manage_new_object> (), args("step"), "See Cluster")
   .def("cluster_information", HistogramWrap::cluster_information,
-      return_value_policy<manage_new_object> (), python::arg("ratio"),
+      return_value_policy<manage_new_object> (), args("ratio"),
       "Cluster with information")
-
   .def("cluster_limit", HistogramWrap::cluster_limit, return_value_policy<
-      manage_new_object> (), python::arg("limits"), "Cluster with limits")
-
+      manage_new_object> (), args("limits"), "See Cluster")
   .def("transcode", HistogramWrap::transcode, return_value_policy<
-      manage_new_object> (), "Transcode")
+      manage_new_object> (), "See Transcode")
 
   // Others
   .def("merge", HistogramWrap::merge_histograms, return_value_policy<
-      manage_new_object> (), python::arg("histograms"), "Merge histograms")
-
+      manage_new_object> (), args("histograms"), "Merge histograms")
   .def("shift", HistogramWrap::shift,
-      return_value_policy<manage_new_object> (), python::arg("shift_param"),
+      return_value_policy<manage_new_object> (), args("shift_param"),
       "Shift Histogram")
-
   .def("fit", HistogramWrap::fit, return_value_policy<manage_new_object> (),
-      python::arg("parametric_model"), "Fit histogram")
-
+      args("parametric_model"), "Fit histogram")
   .def("get_plotable_list", HistogramWrap::get_plotable, return_value_policy<
       manage_new_object> (), "Return a plotable for a list of histograms")
-
   .def("get_plotable", &STAT_interface::get_plotable, return_value_policy<
       manage_new_object> (), "Return a plotable (no parameters)")
 
@@ -588,8 +572,8 @@ void class_distribution_data()
 
     // Output
     .def("survival_ascii_write", DistributionDataWrap::survival_ascii_write, "Return a string containing the object description (survival viewpoint)")
-    .def("survival_plot_write", DistributionDataWrap::survival_plot_write, python::args("prefix", "title"), "Write GNUPLOT files (survival viewpoint)")
-    .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write, python::arg("filename"), "Write object to filename (spreadsheet format)")
+    .def("survival_plot_write", DistributionDataWrap::survival_plot_write, args("prefix", "title"), "Write GNUPLOT files (survival viewpoint)")
+    .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write, args("filename"), "Write object to filename (spreadsheet format)")
     DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", DistributionDataWrap::survival_get_plotable, "Return a plotable object")
     .def("file_ascii_write", DistributionDataWrap::file_ascii_write, "Save histogram into a file")
 

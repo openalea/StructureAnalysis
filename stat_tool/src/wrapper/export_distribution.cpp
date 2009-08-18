@@ -51,7 +51,6 @@ public:
   get_plotable_dists(const Distribution& p,
       const boost::python::list& dist_list)
   {
-    cout << "multiplot get_plotable_dists" << endl;
     Format_error error;
     int nb_dist = boost::python::len(dist_list);
     stat_tool::wrap_util::auto_ptr_array<const Distribution *> dists(
@@ -121,23 +120,39 @@ void class_distribution()
     .def( self == self )
     .def( self != self )
 
-    .def_readonly("get_nb_value", &Distribution::nb_value, "Number of values above zero")
-    .def_readonly("get_alloc_nb_value", &Distribution::alloc_nb_value, "Number of values with zero probability")
-    .def_readonly("get_max", &Distribution::max, "probability maximum")
-    .def_readonly("get_complement", &Distribution::complement, "complementary probability")
-    .def_readonly("get_mean", &Distribution::mean, "mean")
-    .def_readonly("get_variance", &Distribution::variance, "variance")
-    .def_readonly("get_nb_parameter", &Distribution::nb_parameter, "number of unknown parameters")
+
+    // todo siwth cto properties ?
+    .add_property("nb_value", &Distribution::nb_value,
+        "Number of values above zero")
+    .def_readonly("get_alloc_nb_value", &Distribution::alloc_nb_value,
+        "Number of values with zero probability")
+    .def_readonly("get_max", &Distribution::max,
+        "probability maximum")
+    .def_readonly("get_complement", &Distribution::complement,
+        "complementary probability")
+    .def_readonly("get_mean", &Distribution::mean,
+        "mean")
+    .def_readonly("get_variance", &Distribution::variance,
+        "variance")
+    .def_readonly("get_nb_parameter", &Distribution::nb_parameter,
+        "number of unknown parameters")
 
     // no tested. is it useful ?
-    DEF_RETURN_VALUE_NO_ARGS("get_plotable_list", WRAP::get_plotable_dists, "Return a plotable for a list of distribution")
-    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
-    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable_list", WRAP::get_plotable_dists,
+        "Return a plotable for a list of distribution")
+    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable,
+        "Return a survival plotable")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable,
+        "Return a plotable")
 
-    .def("survival_ascii_write", WRAP::survival_ascii_write,	"Return a string containing the object description (survival viewpoint)")
-    .def("survival_plot_write", WRAP::survival_plot_write,ARGS("prefix", "title"),"Write GNUPLOT files (survival viewpoint)")
-    .def("survival_spreadsheet_write", WRAP::survival_spreadsheet_write, ARGS("filename"),"Write object to filename (spreadsheet format)")
-    DEF_RETURN_VALUE("truncate", WRAP::truncate,ARGS("index"),"truncate distributino and returns parametric model")
+    .def("survival_ascii_write", WRAP::survival_ascii_write,
+        "Return a string containing the object description (survival viewpoint)")
+    .def("survival_plot_write", WRAP::survival_plot_write,
+        args("prefix", "title"), "Write GNUPLOT files (survival viewpoint)")
+    .def("survival_spreadsheet_write", WRAP::survival_spreadsheet_write,
+        args("filename"),"Write object to filename (spreadsheet format)")
+    DEF_RETURN_VALUE("truncate", WRAP::truncate,
+        args("index"),  "See Truncate")
 
 
     /*
@@ -237,7 +252,7 @@ void class_parametric()
   // Parametric base class
   class_< Parametric, bases< Distribution > >
     ("_Parametric", init< optional< int, int, int, int, double, double > >())
-   // .def(init<int, int, int, double, double, optional< double > >())
+    .def(init<int, int, int, double, double, optional< double > >())
     .def(init<int, int>())
     .def(init<const Distribution&, optional<int> >())
     .def(init<const Distribution&, double>())
@@ -418,30 +433,30 @@ void class_parametric_model()
     		"Return a plotable (no parameters)")
 
 //     .def("plot_write", ParametricModelWrap::plot_write,
-// 	 python::args("prefix", "title", "dists"),
+// 	 args("prefix", "title", "dists"),
 // 	 "Write GNUPLOT files (with prefix) for a list of distribution")
 
 //     .def("plot_write", &StatInterfaceWrap::plot_write,
-// 	 python::args("prefix", "title"),
+// 	 args("prefix", "title"),
 // 	  "Write GNUPLOT files (with prefix)")
 
     .def("survival_ascii_write", WRAP::survival_ascii_write,
     		"Return a string containing the object description (survival viewpoint)")
     .def("survival_plot_write", WRAP::survival_plot_write,
-    		python::args("prefix", "title"),
+    		args("prefix", "title"),
     		"Write GNUPLOT files (survival viewpoint)")
     .def("survival_get_plotable", WRAP::survival_get_plotable,
     		return_value_policy< manage_new_object >(),
     		"Return a plotable object")
     .def("survival_spreadsheet_write", WRAP::survival_spreadsheet_write,
-    		python::arg("filename"),
+    		args("filename"),
     		"Write object to filename (spreadsheet format)")
     .def("extract_data", WRAP::extract_data,
     		return_value_policy< manage_new_object >(),
     		"Return the 'data' part of the model")
     .def("simulate", WRAP::simulation,
     		return_value_policy< manage_new_object >(),
-    		python::arg("nb_value"),
+    		args("nb_value"),
     		"Simulate values")
     .def("simulate", &Parametric::simulation,
     		"Simulate one value")

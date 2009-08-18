@@ -255,24 +255,38 @@ class_distance_matrix()
   ("_DistanceMatrix", "Distance Matrix", init< const Distance_matrix&>())
 
   DEF_INIT_MAKE_CONSTRUCTOR(WRAP::read_from_file, "todo")
+
   .def(self_ns::str(self)) // __str__
-  .def("get_nb_row", &CLASS::get_nb_row, "get number of rows")
-  .def("get_nb_column", &CLASS::get_nb_column, "get number of columns")
+
+  .add_property("nb_row", &CLASS::get_nb_row, "get number of rows")
+  .add_property("nb_column", &CLASS::get_nb_column, "get number of columns")
+
   .def("test_symmetry", &CLASS::test_symmetry, "returns True if symmetric")
   // test the validity of the arguments by using a wrapped function
-  .def("get_distance", &WRAP::get_distance, ARGS("irow", "icolumn"), "todo")
-  .def("get_length", WRAP::get_length,ARGS("irow", "icolumn"), "todo")
-  .def("get_row_identifier", &CLASS::get_row_identifier,ARGS("index"), "todo")
-  .def("get_column_identifier", &CLASS::get_column_identifier,ARGS("index"), "todo")
+  .def("get_distance", &WRAP::get_distance,
+      args("irow", "icolumn"), "todo")
+  .def("get_length", WRAP::get_length,
+      args("irow", "icolumn"), "todo")
+  .def("get_row_identifier", &CLASS::get_row_identifier,
+      args("index"), "todo")
+  .def("get_column_identifier", &CLASS::get_column_identifier,
+      args("index"), "todo")
 
   // Clustering
-  DEF_RETURN_VALUE_NO_ARGS("partitioning_prototype", WRAP::partitioning_prototype,"to be done")
-  DEF_RETURN_VALUE_NO_ARGS("partitioning_clusters", WRAP::partitioning_clusters, "to be done")
-  .def("hierarchical_clustering", WRAP::hierarchical_clustering, ARGS("algorithm","criterion","path","format"),"Clustering using hierarchical methods")
-  DEF_RETURN_VALUE_NO_ARGS("symmetrize", WRAP::symmetrize, "symmetrize distance matrix")
-  DEF_RETURN_VALUE_NO_ARGS("unnormalize", WRAP::unnormalize, "symmetrize distance matrix")
-  DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write, "Save vector summary into a file")
-  DEF_RETURN_VALUE("select_individual", WRAP::select_individual, ARGS("identifiers", "keep"),"Select individuals given a list of identifiers")
+  DEF_RETURN_VALUE_NO_ARGS("partitioning_prototype", WRAP::partitioning_prototype,
+      "to be done")
+  DEF_RETURN_VALUE_NO_ARGS("partitioning_clusters", WRAP::partitioning_clusters,
+      "to be done")
+  .def("hierarchical_clustering", WRAP::hierarchical_clustering,
+      args("algorithm","criterion","path","format"),"Clustering using hierarchical methods")
+  DEF_RETURN_VALUE_NO_ARGS("symmetrize", WRAP::symmetrize,
+      "symmetrize distance matrix")
+  DEF_RETURN_VALUE_NO_ARGS("unnormalize", WRAP::unnormalize,
+      "symmetrize distance matrix")
+  DEF_RETURN_VALUE_NO_ARGS("file_ascii_write", WRAP::file_ascii_write,
+      "Save vector summary into a file")
+  DEF_RETURN_VALUE("select_individual", WRAP::select_individual,
+      args("identifiers", "keep"),"Select individuals given a list of identifiers")
 
 ;
 

@@ -1,8 +1,4 @@
 
-
-#define ARGS boost::python::args
-
-
 // two internal macros used by other macros
 #define METHOD_HEADER(OUTPUT_TYPE) \
 	{\

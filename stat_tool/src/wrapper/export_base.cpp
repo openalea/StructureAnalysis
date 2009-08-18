@@ -312,24 +312,26 @@ c  onst int NB_PARAMETER = 100000;
   const int NB_OUTPUT_PROCESS = 10;
   const int NB_OUTPUT = 12;
   const double OBSERVATION_THRESHOLD = 0.999;
-  
-  
+
+
   const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // seuil pour stopper l'algorithme
   const int ACCESSIBILITY_LENGTH = 100;  // longueur maximum de sequence pour l'algorithme
-  
+
   const double NOISE_PROBABILITY = 0.05;  // perturbation des probabilites d'observation
-  
+
   const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon construit par arrondi
   const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
   const double SELF_TRANSITION = 0.9;    // probabilite de rester dans un etat initiale
-  
+
+
+  // exported in export_markovian_seqiences.cpp
   enum {
   FORWARD ,
   FORWARD_BACKWARD ,
   VITERBI ,
   //  VITERBI_FORWARD_BACKWARD ,
   GENERALIZED_VITERBI ,
-  F  ORWARD_BACKWARD_SAMPLING ,
+  FORWARD_BACKWARD_SAMPLING ,
   GIBBS_SAMPLING ,
   FORWARD_DYNAMIC_PROGRAMMING
   };
@@ -370,17 +372,14 @@ public:
 void class_stat_interface()
 {
   class_< STAT_interface, boost::noncopyable > ("_StatInterface", no_init)
-    .def("ascii_write", &StatInterfaceWrap::ascii_write, args("exhaustive"),
-    	"Return a string containing the object description (exhaustive or not)")
-
-    .def("plot_write", &StatInterfaceWrap::plot_write,	args("prefix", "title"),
-  		"Write GNUPLOT files (with prefix)")
-
-    .def("spreadsheet_write", &StatInterfaceWrap::spreadsheet_write, args("filename"),
-   		"Write object to filename (spreadsheet format)")
-
-    .def("get_plotable", &STAT_interface::get_plotable, return_value_policy< manage_new_object >(),
-  		"Return a plotable object" )
+  .def("ascii_write", &StatInterfaceWrap::ascii_write, args("exhaustive"),
+      "Return a string containing the object description (exhaustive or not)")
+  .def("plot_write", &StatInterfaceWrap::plot_write,
+      args("prefix", "title"), "Write GNUPLOT files (with prefix)")
+  .def("spreadsheet_write", &StatInterfaceWrap::spreadsheet_write,
+     args("filename"), "Write object to filename (spreadsheet format)")
+  .def("get_plotable", &STAT_interface::get_plotable,
+      return_value_policy< manage_new_object >(), "Return a plotable object" )
     ;
 
 }

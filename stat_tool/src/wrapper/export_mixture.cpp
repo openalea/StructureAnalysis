@@ -232,43 +232,70 @@ void class_mixture()
 {
 
   class_< Mixture, bases< Distribution, STAT_interface > >
-    ("_Mixture", "Mixture Distribution")
-    .def("__init__", make_constructor(MixtureWrap::mixture_from_file),  "Build from a filename" )
-    .def("__init__", make_constructor(MixtureWrap::mixture_from_dists),"Build from a list of weights and a list of distributions")
-    .def("__init__", make_constructor(MixtureWrap::mixture_from_unknown_component), "Build from unknown components") // internal use
-    .def("__len__", &Mixture::get_nb_component, "Return the number of components") // __len__
-    .def(self_ns::str(self)) // __str__
+  ("_Mixture", "Mixture Distribution")
+  // constructors
 
-    .def("nb_component", &Mixture::get_nb_component,  "Return the number of components")
+  .def("__init__", make_constructor(MixtureWrap::mixture_from_file),
+      "Build from a filename" )
+  .def("__init__", make_constructor(MixtureWrap::mixture_from_dists),
+      "Build from a list of weights and a list of distributions")
+  .def("__init__", make_constructor(MixtureWrap::mixture_from_unknown_component),
+      "Build from unknown components") // internal use
 
-    DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "Simulate nb_element elements")
-    DEF_RETURN_VALUE("extract_component", WRAP::extract_component, ARGS("index"), "Get a particular component. First index is 1")
-    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return the weight distribution")
-    DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,"Return the Mixture distribution")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,"Return the associated _MixtureData object")
-    .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
-    .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
+  // Python Operators
+  .def("__len__", &Mixture::get_nb_component,
+      "Return the number of components") // __len__
+  .def(self_ns::str(self)) // __str__
+
+  // properties
+  .add_property("nb_component", &Mixture::get_nb_component,
+      "Return the number of components")
+
+  // python modules
+  DEF_RETURN_VALUE("simulate", WRAP::simulation,
+      args("nb_element"), "See Simulate")
+
+  // Used in Python modules such as:
+  // ----------------------- Extract
+  DEF_RETURN_VALUE("extract_component", WRAP::extract_component,
+      args("index"), "Get a particular component. First index is 1")
+  DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,
+      "Return the weight distribution")
+  DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,
+      "Return the Mixture distribution")
+  DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,
+      "Return the associated _MixtureData object")
+
+
+  //others
   //  DEF_RETURN_VALUE_NO_ARGS("get_plotable", &STAT_interface::get_plotable,"Return a plotable (no parameters)");
-    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "return plotable")
-    DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable, "Return a survival plotable")
+  .def("file_ascii_write", WRAP::file_ascii_write,
+      "Save Compound into a file")
+  .def("spreadsheet_write", WRAP::spreadsheet_write,
+      "save data in spreadsheet format")
+  DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable,
+      "return plotable")
+  DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable,
+      "Return a survival plotable")
 
-    ;
+  ;
 
-/*
+  /*
 
   Mixture();
-    Mixture(const Mixture &mixt , bool *component_flag , int inb_value);
-    Mixture(int inb_component , const Parametric **pcomponent);
-    Mixture(const Mixture &mixt , bool data_flag = true)    :Distribution(mixt) { copy(mixt , data_flag); }
+  Mixture(const Mixture &mixt , bool *component_flag , int inb_value);
+  Mixture(int inb_component , const Parametric **pcomponent);
+  Mixture(const Mixture &mixt , bool data_flag = true)    :Distribution(mixt)
+    { copy(mixt , data_flag); }
 
 
-    void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
+  void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
                      bool component_flag = true);
-    double likelihood_computation(const Mixture_data &mixt_histo) const;
+  double likelihood_computation(const Mixture_data &mixt_histo) const;
 
-    // acces membres de la classe
+  // acces membres de la classe
 
-    Parametric* get_component(int index) const { return component[index]; }
+  Parametric* get_component(int index) const { return component[index]; }
 */
 }
 #undef WRAP
@@ -306,23 +333,34 @@ public:
 void class_mixture_data()
 {
   class_< Mixture_data, bases< Histogram, STAT_interface > >
-    ("_MixtureData",  "Mixture Data")
-    .def(self_ns::str(self)) //str
+  ("_MixtureData",  "Mixture Data")
 
-    //members
-    .def("nb_component", &Mixture_data::get_nb_component,"Return the number of components.")
+  // Python Operators
+  .def(self_ns::str(self)) //str
 
-    // return object, arguments required
-    DEF_RETURN_VALUE("get_component", &Mixture_data::get_component,ARGS("index"), "Return the number of components.")
-    DEF_RETURN_VALUE("extract_component", WRAP::extract, ARGS("index"),"Get a particular component. First index is 1")
+  // properties
+ .add_property("nb_component", &Mixture_data::get_nb_component,
+      "Return the number of components.")
 
-    // return object and no arguments needed
-    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return a _DistributionData")
-    DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,"Return a _DistributionData")
+  // getters
+  DEF_RETURN_VALUE("get_component", &Mixture_data::get_component,
+      args("index"), "Return the number of components.")
 
-    .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
+  // Used in Python modules such as:
+  // -----------------------  Extract
+  DEF_RETURN_VALUE("extract_component", WRAP::extract,
+      args("index"),"Get a particular component. First index is 1")
+  DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,
+      "Return a _DistributionData")
+  DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture,
+      "Return a _DistributionData")
 
-    /*
+
+  //others
+
+  .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
+
+  /*
     Mixture_data(const Histogram &histo , int inb_component);
     Mixture_data(const Mixture &mixt);
     Mixture_data(const Mixture_data &mixt_histo , bool model_flag = true) :Histogram(mixt_histo) { copy(mixt_histo , model_flag); }
@@ -657,36 +695,51 @@ void class_mv_mixture()
     ("_MvMixture", "Multivariate Mixture Distribution")
 
     // constructors
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_file), "Build from a filename")
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_mixture), "Build from a _MvMixture object")
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_components), "Build from a list of weights and a list of list of distributions\n" "(components and variables)")
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_file),
+        "Build from a filename")
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_mixture),
+        "Build from a _MvMixture object")
+    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_components),
+        "Build from a list of weights and a list of list of distributions\n" "(components and variables)")
 
-    // python
+    // Python Operators
     .def(self_ns::str(self)) // __str__
-    .def("__len__", &Mv_Mixture::get_nb_component, "Return the number of components") // __len__
+    .def("__len__", &Mv_Mixture::get_nb_component,
+        "Return the number of components") // __len__
 
-    //readonly
-    .add_property("nb_variable", &Mv_Mixture::get_nb_variable, "Return the number of variables")
-    .add_property("nb_component", &Mv_Mixture::get_nb_component, "Return the number of variables")
+    // properties
+    .add_property("nb_variable", &Mv_Mixture::get_nb_variable,
+        "Return the number of variables")
+    .add_property("nb_component", &Mv_Mixture::get_nb_component,
+        "Return the number of variables")
 
     // return object and no arguments needed
-    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,"Return the weight distribution")
-    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "Return the associated _MvMixtureData object")
+    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,
+        "Return the weight distribution")
+    DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,
+        "Return the associated _MvMixtureData object")
 
 
     // return object and arguments needed
-    DEF_RETURN_VALUE("simulate", WRAP::simulation, ARGS("nb_element"), "simulate(self, nb_element) -> _MvMixtureData. \n\n" "Simulate nb_element elements")
-    DEF_RETURN_VALUE("extract_mixture", WRAP::extract_mixture, ARGS("variable"), "extract_mixture(self, variable) -> _Distribution. \n\n" "Return the _MvMixture distribution")
+    DEF_RETURN_VALUE("simulate", WRAP::simulation,
+        args("nb_element"), "simulate(self, nb_element) -> _MvMixtureData. \n\n" "Simulate nb_element elements")
+    DEF_RETURN_VALUE("extract_mixture", WRAP::extract_mixture,
+        args("variable"), "extract_mixture(self, variable) -> _Distribution. \n\n" "Return the _MvMixture distribution")
 
 
     // no object returned, args required
-    .def("_is_parametric", WRAP::_is_parametric, ARGS("variable"),"_is_parametric(self, variable) -> bool. \n\n" "Return True if the variable is parametric")
-    .def("file_ascii_write", WRAP::file_ascii_write, ARGS("path", "exhaustive_flag"), "file_ascii_write(self, path, exhaustive_flag) -> None. \n\n""Save _MvMixture into a file")
-    .def("plot_write", WRAP::plot_write, ARGS("prefix", "title"),"plot_write(self, prefix, title) -> None. \n\n" "Write GNUPLOT files")
+    .def("_is_parametric", WRAP::_is_parametric,
+        args("variable"),"_is_parametric(self, variable) -> bool. \n\n" "Return True if the variable is parametric")
+    .def("file_ascii_write", WRAP::file_ascii_write,
+        args("path", "exhaustive_flag"), "file_ascii_write(self, path, exhaustive_flag) -> None. \n\n""Save _MvMixture into a file")
+    .def("plot_write", WRAP::plot_write,
+        args("prefix", "title"),"plot_write(self, prefix, title) -> None. \n\n" "Write GNUPLOT files")
 
     // no object returned, no arguments required
-    .def("state_permutation", WRAP::state_permutation, "permutation of the model states")
-    .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
+    .def("state_permutation", WRAP::state_permutation,
+        "permutation of the model states")
+    .def("spreadsheet_write", WRAP::spreadsheet_write,
+        "save data in spreadsheet format")
 
      ;
 
@@ -780,13 +833,13 @@ void class_mv_mixture_data()
     .def(self_ns::str(self))
     //.def("__len__", &Mv_Mixture_data::get_nb_component)
     .def("get_nb_component", &Mv_Mixture_data::get_nb_component, "Return the number of components.")
-    DEF_RETURN_VALUE("extract_component", WRAP::extract, ARGS("index"), "Get a particular component for a particular variable. First index is 1")
+    DEF_RETURN_VALUE("extract_component", WRAP::extract, args("index"), "Get a particular component for a particular variable. First index is 1")
     DEF_RETURN_VALUE_NO_ARGS("extract_marginal", WRAP::extract_marginal, "Return a _MvMixtureData for a particular variable.")
     DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight, "Return a _MvMixtureData for mixture weights.")
     DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture, "Return a _MvMixtureData for mixture model")
     .def("file_ascii_write", WRAP::file_ascii_write, "Save _MvMixtureData into a file")
     .def("file_spreadsheet_write", WRAP::spreadsheet_write, "Save _MvMixtureData into a file")
-    .def("plot_write", WRAP::plot_write, ARGS("prefix", "title"), "Write GNUPLOT files")
+    .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")
     .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
 
     ;
