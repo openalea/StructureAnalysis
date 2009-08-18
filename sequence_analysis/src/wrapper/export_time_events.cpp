@@ -89,10 +89,7 @@ public:
        sequence_analysis::wrap_util::throw_error(error);
     return ret;
   }
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extract_overloads, TimeEventsWrap::extract, 1, 2);
-
-
-
+  
   static Histogram*
   get_mixture(const Time_events& input)
   {
@@ -115,6 +112,7 @@ public:
   static Histogram*
   get_htime(const Time_events& input)
   {
+    // check that it is a Histogram cast or Distribution_data
     Histogram* ret;
     ret = new Histogram(*input.get_htime());
     return ret;
@@ -159,7 +157,7 @@ public:
   }
 
   static Renewal*
-  estimation(const Time_events& input, char type, int estimator, int nb_iter,
+  estimation_type(const Time_events& input, char type, int estimator, int nb_iter,
                  int equilibrium_estimator, int mean_computation, double weight,
                  int penalty_type, int outside)
   {
@@ -170,15 +168,18 @@ public:
     FOOTER_OS;
   }
 
+
   static Renewal*
-  estimation_inter_event(const Time_events& input, char type, const Parametric &iinter_event,
-                int estimator, int nb_iter,
-                int equilibrium_estimator, int mean_computation, double weight,
-                int penalty_type, int outside)
+  estimation_inter_event_type(const Time_events& input, char type,
+      const Parametric& input_dist, int estimator, int nb_iter,
+      int equilibrium_estimator, int mean_computation, double weight,
+      int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
-    ret = input.estimation(error, os, type, iinter_event, estimator, nb_iter, equilibrium_estimator,
-                          mean_computation, weight, penalty_type, outside);
+
+
+    ret = input.estimation(error, os, type, input_dist, estimator, nb_iter,
+        equilibrium_estimator, mean_computation, weight, penalty_type, outside);
 
     FOOTER_OS;
   }
@@ -215,8 +216,7 @@ void class_time_events() {
     DEF_RETURN_VALUE_NO_ARGS("get_mixture", &TimeEventsWrap::get_mixture, "returns mixture Mixture histogram")
     DEF_RETURN_VALUE("get_hnb_event", &TimeEventsWrap::get_hnb_event, args("itime"),"returns hmixture Mixture histogram")
 
-    .def("extract", (Distribution_data *(*)(const Time_events&, int, int))  TimeEventsWrap::extract, return_value_policy< manage_new_object >(), TimeEventsWrap::extract_overloads(), "todo")
-    .def("extract", (Distribution_data *(*)(const Time_events& , int))  TimeEventsWrap::extract, return_value_policy< manage_new_object >(), TimeEventsWrap::extract_overloads(), "todp")
+    DEF_RETURN_VALUE("extract", TimeEventsWrap::extract, args("",""), "See ExtractHistogram")
 
     .def("file_ascii_write", TimeEventsWrap::file_ascii_write,"Save vector summary into a file")
 
@@ -225,8 +225,8 @@ void class_time_events() {
     DEF_RETURN_VALUE("nb_event_select", TimeEventsWrap::nb_event_select, args("nb_event_select"),"returns a nb_event-selected TimeEvents")
     DEF_RETURN_VALUE_NO_ARGS("merge", TimeEventsWrap::merge, "Merge tim events")
 
-    DEF_RETURN_VALUE("estimation", TimeEventsWrap::estimation, args("tobedone"), "estimation")
-    DEF_RETURN_VALUE("estimation_inter_event", TimeEventsWrap::estimation_inter_event, args("tobedone"), "estimation")
+    DEF_RETURN_VALUE("estimation_type", TimeEventsWrap::estimation_type, args("tobedone"), "estimation")
+    DEF_RETURN_VALUE("estimation_inter_event_type", TimeEventsWrap::estimation_inter_event_type, args("tobedone"), "estimation")
 
     DEF_RETURN_VALUE_NO_ARGS("get_plotable", TimeEventsWrap::get_plotable, "Return a plotable")
 

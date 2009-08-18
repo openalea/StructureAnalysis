@@ -467,6 +467,19 @@ public:
     FOOTER_OS;
   }
 
+  static bool
+  mtg_write(const Markovian_sequences & input, const char* path,
+      boost::python::list input_values)
+  {
+    Format_error error;
+    bool ret;
+
+    CREATE_ARRAY(input_values, int, data);
+    ret = input.mtg_write(error, path, data.get());
+
+    return ret;
+  }
+
   static Nonhomogeneous_markov*
   nonhomogeneous_markov_estimation(const Markovian_sequences & input,
       boost::python::list list_ident, bool counting_flag)
@@ -548,6 +561,9 @@ void class_markovian_sequences() {
     DEF_RETURN_VALUE("hidden_semi_markov_estimation", WRAP::hidden_semi_markov_estimation, args("tobedone"), "todo")
     DEF_RETURN_VALUE("semi_markov_estimation", WRAP::semi_markov_estimation, args("tobedone"), "todo")
     DEF_RETURN_VALUE("nonhomogeneous_markov_estimation", WRAP::nonhomogeneous_markov_estimation, args("tobedone"), "todo")
+    //DEF_RETURN_VALUE("mtg_write", WRAP::mtg_write, args(""), "mtg_write")
+
+    .def("mtg_write", WRAP::mtg_write, args(""), "")
     ;
 
 

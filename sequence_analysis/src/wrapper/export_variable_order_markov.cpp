@@ -49,11 +49,11 @@ class VariableOrderMarkovWrap {
 public:
 
   static boost::shared_ptr<Variable_order_markov>
-  variable_order_markov_from_file(char* filename)
+  variable_order_markov_from_file(char* filename, int length)
   {
     Format_error error;
     Variable_order_markov *vom = NULL;
-    vom = variable_order_markov_ascii_read(error, filename);
+    vom = variable_order_markov_ascii_read(error, filename, length);
     if (!vom)
       {
         sequence_analysis::wrap_util::throw_error(error);
@@ -190,17 +190,18 @@ public:
 void class_variable_order_markov() {
 
   class_<Variable_order_markov, bases<STAT_interface > >
-  ("_Variable_order_markov", "Variable_order_markov\n"
-      "constructor(type(char in ['o','e']), nb_state(int), nb_row(int)\n"
-      "constructor(type(char in ['o','e']), nb_state(int), nb_row(int), max_order(int)\n"
-      "constructor(type(char in ['o','e']), nb_state(int), order(int), init_flag(bool), output_process=0, nb_value=0\n"
+  ("_Variable_order_markov", "The only possible constructor is Variable_order_markov(filename) \n"
+      "The following constructors will be available once the Chain class is made public (protected right now):\n"
+      " * constructor(type(char in ['o','e']), nb_state(int), nb_row(int)\n"
+      " * constructor(type(char in ['o','e']), nb_state(int), nb_row(int), max_order(int)\n"
+      " * constructor(type(char in ['o','e']), nb_state(int), order(int), init_flag(bool), output_process=0, nb_value=0\n", no_init
   )
     .def("__init__", make_constructor(VariableOrderMarkovWrap::variable_order_markov_from_file))
 
       // type = 'o' : ordinaire, or 'e' : en equilibre des probabilites de transition
-    .def(init <char, int, int>())
-    .def(init <char, int, int,int>())
-    .def(init <char, int, int, bool, optional<int, int> >())
+    //.def(init <char, int, int>())
+    //.def(init <char, int, int,int>())
+    //.def(init <char, int, int, bool, optional<int, int> >())
 
     .def(self_ns::str(self)) //__str__
 
@@ -371,8 +372,8 @@ class_variable_order_markov_iterator()
 
   class_<Variable_order_markov_iterator > ("_Variable_order_markov_iterator", "Variable_order_markov_iterator", init<Variable_order_markov*>())
     .def(init<const Variable_order_markov_iterator&>())
-    .add_property("get_nb_variable", &Variable_order_markov_iterator::get_nb_variable)
-    .add_property("get_memory", &Variable_order_markov_iterator::get_memory)
+    .add_property("nb_variable", &Variable_order_markov_iterator::get_nb_variable)
+    .add_property("memory", &Variable_order_markov_iterator::get_memory)
     .def("simulation", VariableOrderMarkovIteratorWrap::simulation,  "simulation")
     ;
 }

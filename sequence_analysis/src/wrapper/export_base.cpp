@@ -187,8 +187,8 @@ void class_constant_sequence()
     SUBSTITUTION ,
     TRANSPOSITION
   };
-
-  enum {
+*/
+/*enum {
     DATA ,
     GAP ,
     BEGIN_END_GAP
@@ -199,22 +199,26 @@ void class_constant_sequence()
                                          // pour la sortie detaillee ecran
   const int FILE_NB_ALIGNMENT = 300;     // nombre maximum d'alignements
                                          // pour la sortie detaillee fichier
-
-  const double INDEL_FACTOR_1 = 0.51;    // facteur pour deduire le cout d'elision/insertion -
-                                         // alignement simple
-  const double INDEL_FACTOR_N = 0.51;    // facteur pour deduire le cout d'elision/insertion -
-                                         // alignement multiple
-  const double TRANSPOSITION_FACTOR = 0.;  // facteur pour deduire le cout de transposition
-  const double INDEL_DISTANCE = 1.0;     // cout d'elision/insertion
-
-  enum {
-    CHANGE_POINT ,
-    SEGMENT
-
-    const double ROUNDOFF_ERROR = 1.e-10;  // erreur sur une somme de doubles
-const int NB_SEGMENTATION = 10;        // nombre de segmentations calculees
-
 */
+  scope().attr("INDEL_FACTOR_1") = INDEL_FACTOR_1;
+  scope().attr("INDEL_FACTOR_N") = INDEL_FACTOR_N;
+  scope().attr("TRANSPOSITION_FACTOR") = TRANSPOSITION_FACTOR;
+
+/*
+  const double INDEL_DISTANCE = 1.0;     // cout d'elision/insertion
+*/
+
+  enum_<sequence_analysis::wrap_util::UniqueInt<2, 1062> > ("ChangePointType")
+     .value("CHANGE_POINT", CHANGE_POINT)
+     .value("SEGMENT", SEGMENT)
+     .export_values();
+  
+/*
+    const double ROUNDOFF_ERROR = 1.e-10;  // erreur sur une somme de doubles
+*/  
+    scope().attr("NB_SEGMENTATION") = NB_SEGMENTATION;
+
+
   enum_<sequence_analysis::wrap_util::UniqueInt<2, 107> > ("NormType")
     .value("APPROXIMATED", APPROXIMATED)
     .value("EXACT", EXACT)
@@ -292,8 +296,12 @@ const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale
    // vom
    /*
 
-   const int MAX_LAG = 100;               // decalage maximum pour le calcul des coefficients
-                                          // d'autocorrelation
+*/
+
+   scope().attr("MAX_LAG") = MAX_LAG;
+  
+
+/*                                        // d'autocorrelation
    const int MEMORY_MIN_COUNT = 10;       // effectif minimum pour comparer
                                           // une memoire a ses fils
    const double LAPLACE_COEFF = 1.;       // coefficient pour l'estimateur de Laplace

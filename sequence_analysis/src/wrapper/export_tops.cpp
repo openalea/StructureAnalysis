@@ -89,6 +89,22 @@ public:
     return ret;
   }
 
+  static Distribution*
+  get_axillary_nb_internode(const Top_parameters& input, int position)
+  {
+    Distribution *res;
+
+    if (position <=0 || position > input.get_max_position())
+    {
+      PyErr_SetString(PyExc_IndexError,
+            "position must be positive and less or equal to max_position ");
+      boost::python::throw_error_already_set();
+    }
+
+
+    res = new Distribution(*input.get_axillary_nb_internode(position));
+    return res;
+  }
 
 };
 
@@ -111,13 +127,13 @@ void class_top_parameters() {
     .add_property("rhythm_ratio", &Top_parameters::get_rhythm_ratio)
     .add_property("max_position", &Top_parameters::get_max_position)
 
-    DEF_RETURN_VALUE("get_axillary_nb_internode", &Top_parameters::get_axillary_nb_internode,args("position"), "returns axillary nb internode distribution")
+    DEF_RETURN_VALUE("get_axillary_nb_internode", WRAP::get_axillary_nb_internode, args("position"),
+        "returns axillary nb internode distribution")
     DEF_RETURN_VALUE("extract", WRAP::extract, args("position"), "extract parametric model")
     DEF_RETURN_VALUE("simulation_dists", WRAP::simulation_dists,args("position"), "simulation type1")
     DEF_RETURN_VALUE("simulate", WRAP::simulate,args("position"), "simulate ")
-
+    
     DEF_RETURN_VALUE_NO_ARGS("get_tops", &Top_parameters::get_tops,     "returns tops")
-
     DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
 
     ;
@@ -137,7 +153,8 @@ void class_top_parameters() {
 }
 #undef WRAP
 
-class TopsWrap
+#define WRAP TopsWrap
+class WRAP
 {
 
 public:
@@ -221,6 +238,21 @@ public:
      ret = new Tops(timev_size, timev.get());
      FOOTER;
    }
+  
+  static Histogram*
+  get_axillary_nb_internode(const Tops& input, int position)
+  {
+    Histogram *res;
+    if (position <=0 || position > input.get_max_position())
+    {
+      PyErr_SetString(PyExc_IndexError,
+            "position must be positive and less or equal to max_position ");
+      boost::python::throw_error_already_set();
+    }
+
+    res = new Histogram(*input.get_axillary_nb_internode(position));
+    return res;
+  }
 
 
 
@@ -234,8 +266,8 @@ void class_tops() {
 
   class_<Tops, bases<Sequences> > ("_Tops", "Tops")
     .def(init<Sequences> ())
-    .def("__init__", make_constructor(TopsWrap::tops_from_file))
-    .def("__init__", make_constructor(TopsWrap::tops_from_lists))
+    .def("__init__", make_constructor(WRAP::tops_from_file))
+    .def("__init__", make_constructor(WRAP::tops_from_lists))
 
     .def(self_ns::str(self)) //__str__
 
@@ -243,17 +275,17 @@ void class_tops() {
 
     .def("build_nb_internode_histogram", &Tops::build_nb_internode_histogram)
 
-    DEF_RETURN_VALUE("get_axillary_nb_internode", &Tops::get_axillary_nb_internode, args("position"), "returns histogram of axillary nb internode")
-    DEF_RETURN_VALUE("select_individual", TopsWrap::select_individual,args("identifiers", "keep"), "select individual")
-    DEF_RETURN_VALUE("extract",TopsWrap::extract,args("position"), "extract method")
-    DEF_RETURN_VALUE("shift", TopsWrap::shift, args("nb_internode"), "shift method")
-    DEF_RETURN_VALUE("estimation", &TopsWrap::estimation, args("min_position","max_position", "neighborhood", "equal_probability"), "estimation method 1")
-    DEF_RETURN_VALUE("estimation2", &TopsWrap::estimation2, args("neighborhood", "equal_probability"), "estimation method 2")
+    DEF_RETURN_VALUE("get_axillary_nb_internode", WRAP::get_axillary_nb_internode, args("position"), "returns histogram of axillary nb internode")
+    DEF_RETURN_VALUE("select_individual", WRAP::select_individual,args("identifiers", "keep"), "select individual")
+    DEF_RETURN_VALUE("extract", WRAP::extract,args("position"), "extract method")
+    DEF_RETURN_VALUE("shift", WRAP::shift, args("nb_internode"), "shift method")
+    DEF_RETURN_VALUE("estimation", WRAP::estimation, args("min_position","max_position", "neighborhood", "equal_probability"), "estimation method 1")
+    DEF_RETURN_VALUE("estimation2", WRAP::estimation2, args("neighborhood", "equal_probability"), "estimation method 2")
 
-    DEF_RETURN_VALUE_NO_ARGS("reverse", TopsWrap::reverse,"reverse method")
+    DEF_RETURN_VALUE_NO_ARGS("reverse", WRAP::reverse,"reverse method")
     DEF_RETURN_VALUE_NO_ARGS("get_nb_internode", &Tops::get_nb_internode, "returns histogram of nb internode")
     DEF_RETURN_VALUE_NO_ARGS("get_top_parameters", &Tops::get_top_parameters, "returns top parameters")
-    DEF_RETURN_VALUE("merge", &TopsWrap::merge, args("list of top instances"), "returns top parameters")
+    DEF_RETURN_VALUE("merge", WRAP::merge, args("list of top instances"), "returns top parameters")
 
     ;
 
@@ -274,3 +306,4 @@ void class_tops() {
 */
 
 }
+#undef WRAP

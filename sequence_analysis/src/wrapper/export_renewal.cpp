@@ -40,7 +40,7 @@ using namespace sequence_analysis;
 
 
 #define WRAP RenewalWrap
-class RenewalWrap {
+class WRAP {
 
 public:
 
@@ -149,8 +149,8 @@ void class_renewal() {
 
   class_<Renewal, bases<STAT_interface> > ("_Renewal", "Renewal")
     //type = 'o' or 'e'
-    .def("__init__", make_constructor(RenewalWrap::constructor_from_file))
-    .def("__init__", make_constructor(RenewalWrap::constructor_from_inter_event))
+    .def("__init__", make_constructor(WRAP::constructor_from_file))
+    .def("__init__", make_constructor(WRAP::constructor_from_inter_event))
 
     .def(init <char, Histogram, Parametric>())
     .def(init <char, Distribution, Parametric>())
@@ -161,23 +161,21 @@ void class_renewal() {
     .add_property("nb_iterator", &Renewal::get_nb_iterator,"nb iterator")
     .add_property("type", &Renewal::get_type,"type")
 
-    .def("file_ascii_write", RenewalWrap::file_ascii_write,"Save vector summary into a file")
+    .def("file_ascii_write", WRAP::file_ascii_write,"Save vector summary into a file")
 
-    DEF_RETURN_VALUE_NO_ARGS("get_renewal_data", RenewalWrap::get_renewal_data,"returns renewal data")
-    DEF_RETURN_VALUE_NO_ARGS("get_time", RenewalWrap::get_time, "returns time")
-    DEF_RETURN_VALUE("simulation_histogram", RenewalWrap::simulation_histogram, args("todo"), "simulation")
+    DEF_RETURN_VALUE_NO_ARGS("get_renewal_data", WRAP::get_renewal_data,"returns renewal data")
+    DEF_RETURN_VALUE_NO_ARGS("get_time", WRAP::get_time, "returns time")
+    DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("todo"), "simulation")
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
 
-    DEF_RETURN_VALUE("simulation_nb_elements", RenewalWrap::simulation_nb_elements, args("todo"), "simulation")
-    DEF_RETURN_VALUE("simulation_time_events", RenewalWrap::simulation_time_events, args("todo"), "simulation")
+    DEF_RETURN_VALUE("simulation_nb_elements", WRAP::simulation_nb_elements, args("todo"), "simulation")
+    DEF_RETURN_VALUE("simulation_time_events", WRAP::simulation_time_events, args("Ordinary or Equilibirium", "size", "timev"), "simulation")
 
-    DEF_RETURN_VALUE_NO_ARGS("get_plotable", RenewalWrap::get_plotable, "Return a plotable")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
 
     ;
 
 /*
-    friend Renewal* renewal_building(Format_error &error ,
-    const Parametric &inter_event ,   char type, int time);
 
    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
    bool ascii_write(Format_error &error , const char *path ,     bool exhaustive = false) const;
@@ -208,6 +206,7 @@ public:
   static Distribution_data*
   extract(const Renewal_data& seq, int histo_type, int itime)
   {
+    //default itime = I_DEFAULT
     HEADER(Distribution_data);
     ret = seq.extract(error, histo_type, itime);
     FOOTER;
@@ -235,6 +234,35 @@ public:
 
     return ret;
   }
+
+  static Renewal*
+  estimation(const Renewal_data& input, int estimator, int nb_iter,
+      int mean_computation, double weight, int penalty_type, int outside)
+  {
+    HEADER_OS(Renewal);
+    ret = input.estimation(error, os, estimator, nb_iter, mean_computation,
+        weight, penalty_type, outside);
+
+    FOOTER_OS;
+  }
+
+
+   static Renewal*
+  estimation_inter_event(const Renewal_data& input,
+      const Parametric& input_dist, int estimator, int nb_iter,
+      int mean_computation, double weight, int penalty_type, int outside)
+  {
+    HEADER_OS(Renewal);
+
+    ret = input.estimation(error, os, input_dist, estimator, nb_iter,
+        mean_computation, weight, penalty_type, outside);
+
+    FOOTER_OS;
+  }
+
+
+
+
 };
 
 void class_renewal_data() {
@@ -251,20 +279,13 @@ void class_renewal_data() {
     .def("get_type", &Renewal_data::get_type, "get type")
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
     DEF_RETURN_VALUE_NO_ARGS("merge", WRAP::merge, "Merge renewal_data. Type Merge? for more information")
+    DEF_RETURN_VALUE("estimation", WRAP::estimation, args(""), "estimation")
+    DEF_RETURN_VALUE("estimation_inter_event", WRAP::estimation_inter_event, args(""), "estimation")
 
 
 
 /*
     Renewal_data(int nb_sample , const Renewal_data **itimev);
-
-    Renewal* estimation(Format_error &error , std::ostream &os , const Parametric &iinter_event ,
-                        int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
-    Renewal* estimation(Format_error &error , std::ostream &os , int estimator = LIKELIHOOD ,
-                        int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
-                        double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
-                        int outside = ZERO) const;
 
 
    int get_length(int index_seq) const { return length[index_seq]; }
@@ -311,9 +332,9 @@ class_renewal_iterator()
 
   class_<Renewal_iterator > ("_Renewal_iterator", "Renewal_iterator", init<Renewal* ,optional<int> >())
     .def(init<const Renewal_iterator&>())
-    .add_property("get_interval", &Renewal_iterator::get_interval)
-    .add_property("get_length", &Renewal_iterator::get_length)
-    .add_property("get_counter", &Renewal_iterator::get_counter)
+    .add_property("interval", &Renewal_iterator::get_interval)
+    .add_property("length", &Renewal_iterator::get_length)
+    .add_property("counter", &Renewal_iterator::get_counter)
     .def("get_sequence", &Renewal_iterator::get_sequence, args("index"))  // to be done
     .def("simulation", RenewalIteratorWrap::simulation,  "simulation")
 ;

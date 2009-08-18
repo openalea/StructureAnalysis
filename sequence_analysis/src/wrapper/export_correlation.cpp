@@ -76,18 +76,32 @@ public:
    Format_error error;
    bool ret;
    int nb_point = len(input_filter);
-   double *filter;
-   filter = new double[2*nb_point+1];
+   double sum=0;
+   int i=0;
+ 
+   sequence_analysis::wrap_util::auto_ptr_array<double> filter(new double[nb_point * 2 + 1]);
+    
 
-   for (int i = 0; i < nb_point; i++)
+   nb_point--;
+   for (i = 0; i < nb_point; i++)
    {
      filter[i] = boost::python::extract<double> (input_filter[i]);
      filter[2*nb_point -i] = filter[i];
+     sum += 2 * filter[i];
    }
-   filter[nb_point] = 0; //todo check that!!
+   //i = n
+   filter[i] = extract<double> (input_filter[i]);
+   sum += filter[i];
 
-   ret = input.white_noise_correlation(error, 2 * nb_point +1, filter);
+   for (i = 0; i < 2 * nb_point + 1; i++)
+   {
+     filter[i] = filter[i] / sum;
+   }
+
+    
+   ret = input.white_noise_correlation(error, 2 * nb_point +1, filter.get());
    //if (!ret) throw error
+  
   }
 
   static bool

@@ -67,6 +67,9 @@ public:
     return boost::shared_ptr<Sequences>(sequences);
   }
 */
+
+
+  // very complicated implementation of Sequence, but seems to work for now
   static Sequences*
   build_from_lists(boost::python::list& input_list,
       boost::python::list& input_identifiers, int input_index_parameter_type)
@@ -97,7 +100,7 @@ public:
     int nb_variables_check = 0;
     int *length;
     int *identifiers;
-    //int ***int_sequence;
+    
     double ***real_sequence;
     int ***int_sequence;
     bool is_float = false;
@@ -265,6 +268,10 @@ public:
           }
       }
 
+    if (index_parameter_type != IMPLICIT_TYPE)
+        nb_variables--;
+
+
     if (is_float)
       {
         sequences = new Sequences(nb_sequences, identifiers, length,
@@ -305,6 +312,7 @@ public:
           }
       }
 
+    
     delete[] length;
     delete[] identifiers;
 
@@ -369,7 +377,7 @@ public:
   }
 
   static boost::python::list
-  get_item(const Sequences* seq, boost::python::tuple indexes)
+  get_item_tuple(const Sequences* seq, boost::python::tuple indexes)
   {
     int index_var = extract<int> (indexes[1]);
     int index_seq = extract<int> (indexes[0]);
@@ -401,6 +409,41 @@ public:
 
     return l;
   }
+  
+  static boost::python::list
+  get_item_int(const Sequences* seq, int index_seq)
+  {
+    // Test index
+    if (index_seq < 0 || index_seq >= seq->get_nb_sequence())
+      {
+        PyErr_SetString(PyExc_IndexError, "sequence index out of bound");
+        boost::python::throw_error_already_set();
+      }
+    
+    boost::python::list l;
+    int nb_length = seq->get_length(index_seq);
+    int nb_var = seq->get_nb_variable();
+
+
+    for (int indexvar = 0; indexvar < nb_var; indexvar++)
+    {
+      
+      boost::python::list subl;
+      for (int index = 0; index < nb_length; index++)
+      {
+        if ((seq->get_type(indexvar) == INT_VALUE)
+            || (seq->get_type(indexvar) == STATE))
+          subl.append(seq->get_int_sequence(index_seq, indexvar, index));
+        else
+          subl.append(seq->get_real_sequence(index_seq, indexvar, index));
+      }
+      l.append(subl);
+    }
+    return l;
+  }
+
+  
+
 
   static Sequences*
   value_select(const Sequences& seq, int variable, const object& min,
@@ -728,13 +771,15 @@ public:
     // i = n
     values[i] = extract<double> (input_values[i]);
     sum += values[i];
-
+    
+    // check that sum is 1 ?
 
     //normalization
     for (i = 0; i < 2 * nb_value + 1; i++)
     {
       values[i] = values[i] / sum;
     }
+
 
     SIMPLE_METHOD_TEMPLATE_1(seq, moving_average, Sequences,
             nb_value, values.get(), variable, begin_end,  output);
@@ -817,6 +862,17 @@ public:
   {
     SIMPLE_METHOD_TEMPLATE_1 (input, correlation_computation,
       Correlation, variable1, variable2, itype, max_lag, normalization, individual_mean)
+  }
+
+  static Sequences*
+  multiple_alignment(const Sequences& input, const Vector_distance &ivector_dist, 
+      bool begin_free, bool end_free, int indel_cost, double indel_factor, int algorithm, const char *path)
+  {
+    HEADER_OS(Sequences);
+    ret = input.multiple_alignment(error, os, ivector_dist, begin_free,\
+        end_free, indel_cost, indel_factor, algorithm, path);
+    FOOTER_OS;
+
   }
 
   static Distance_matrix*
@@ -978,19 +1034,18 @@ class_sequences()
 
    .def(self_ns::str(self)) //__str__
    .def("__len__", &Sequences::get_nb_sequence,"Returns number of sequences")
-   .def("__getitem__", SequencesWrap::get_item)
+   .def("__getitem__", SequencesWrap::get_item_tuple)
+   .def("__getitem__", SequencesWrap::get_item_int)
 
    //property
    .add_property("nb_sequence", &Sequences::get_nb_sequence, "Return the number of sequences")
    .add_property("nb_variable", &Sequences::get_nb_variable, "Return the number of variables")
    .add_property("max_length", &Sequences::get_max_length,"Return max length")
    .add_property("cumul_length", &Sequences::get_cumul_length,"Return cumul length")
+   .add_property("index_parameter_type", &Sequences::get_index_parameter_type,"return index parameter type")
 
-   //index arguments, return single value
-   .def("get_index_parameter_type", &Sequences::get_index_parameter_type,"return index parameter type")
    .def("get_min_value", &Sequences::get_min_value,args("index_var"), "return min value of variables")
    .def("get_max_value", &Sequences::get_max_value,args("index_var"), "return max value of variables")
-
    // index arguments, wrapping required
    .def("get_length", &SequencesWrap::get_length,args("index_seq"), "return length of a sequence")
    .def("get_type", &SequencesWrap::get_type,args("index_var"),"return  type")
@@ -1002,6 +1057,7 @@ class_sequences()
 
    DEF_RETURN_VALUE("alignment_vector_distance", SequencesWrap::alignment_vector_distance, args(""), "todo")
    DEF_RETURN_VALUE("alignment", SequencesWrap::alignment, args(""), "todo")
+   DEF_RETURN_VALUE("multiple_alignment", SequencesWrap::multiple_alignment, args(""), "todo")
    DEF_RETURN_VALUE("build_vectors", SequencesWrap::build_vectors, args("index_variable"), "build a vector from sequence")
    DEF_RETURN_VALUE("cluster_step", SequencesWrap::cluster_step, args("variable", "step"),"Cluster Step")
    DEF_RETURN_VALUE("cluster_limit", SequencesWrap::cluster_limit, args("variable", "limits"),"Cluster limit")
@@ -1078,7 +1134,6 @@ class_sequences()
  double kurtosis_computation(int variable , double mean , double variance) const;
 
  Histogram* value_index_interval_computation(Format_error &error , int variable , int value) const;
- Sequences* multiple_alignment(Format_error &error , std::ostream &os , const Vector_distance &ivector_dist ,   bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,double indel_factor = INDEL_FACTOR_N , int algorithm = AGGLOMERATIVE , const char *path = 0) const;
  Sequences* hierarchical_segmentation(Format_error &error , std::ostream &os , int iidentifier , int max_nb_segment , int *model_type) const;
 
  bool segment_profile_write(Format_error &error , std::ostream &os , int iidentifier ,int nb_segment , int *model_type , int output = SEGMENT , char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING , int nb_segmentation = NB_SEGMENTATION) const;
@@ -1086,7 +1141,6 @@ class_sequences()
  bool segment_profile_plot_write(Format_error &error , const char *prefix , int iidentifier , int nb_segment , int *model_type ,    int output = SEGMENT , const char *title = 0) const;
 
  Histogram* get_hlength() const { return hlength; }
- int get_index_parameter_type() const { return index_parameter_type; }
  Histogram* get_hindex_parameter() const { return hindex_parameter; }
  Histogram* get_index_interval() const { return index_interval; }
  int get_index_parameter(int iseq , int index) const  { return index_parameter[iseq][index]; }
