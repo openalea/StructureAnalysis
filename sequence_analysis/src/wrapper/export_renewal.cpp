@@ -141,13 +141,14 @@ public:
 
 
 
+
 };
 
 // Boost declaration
 
 void class_renewal() {
 
-  class_<Renewal, bases<STAT_interface> > ("_Renewal", "Renewal")
+  class_<Renewal, bases<STAT_interface> > ("_Renewal", "Renewal", no_init)
     //type = 'o' or 'e'
     .def("__init__", make_constructor(WRAP::constructor_from_file))
     .def("__init__", make_constructor(WRAP::constructor_from_inter_event))
@@ -178,7 +179,6 @@ void class_renewal() {
 /*
 
    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-   bool ascii_write(Format_error &error , const char *path ,     bool exhaustive = false) const;
    bool spreadsheet_write(Format_error &error , const char *path) const;
    bool plot_write(Format_error &error , const char *prefix ,  const char *title = 0) const;
 
@@ -330,13 +330,17 @@ void
 class_renewal_iterator()
 {
 
-  class_<Renewal_iterator > ("_Renewal_iterator", "Renewal_iterator", init<Renewal* ,optional<int> >())
-    .def(init<const Renewal_iterator&>())
-    .add_property("interval", &Renewal_iterator::get_interval)
-    .add_property("length", &Renewal_iterator::get_length)
-    .add_property("counter", &Renewal_iterator::get_counter)
-    .def("get_sequence", &Renewal_iterator::get_sequence, args("index"))  // to be done
-    .def("simulation", RenewalIteratorWrap::simulation,  "simulation")
+  class_<Renewal_iterator >
+  ("_Renewal_iterator", "Renewal_iterator", no_init)
+
+  .def(init<Renewal*>()[with_custodian_and_ward_postcall<1, 2>()])
+
+  .add_property("interval", &Renewal_iterator::get_interval)
+  .add_property("length", &Renewal_iterator::get_length)
+  .add_property("counter", &Renewal_iterator::get_counter)
+
+  .def("get_sequence", &Renewal_iterator::get_sequence, args("index"))  // to be done
+  .def("simulation", RenewalIteratorWrap::simulation,  "simulation")
 ;
 }
 

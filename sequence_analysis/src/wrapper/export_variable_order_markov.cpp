@@ -332,7 +332,8 @@ class VariableOrderMarkovIteratorWrap
 public:
 
   static boost::python::list
-  simulation(Variable_order_markov_iterator& input, int nb_sequence=1, bool initialisation=false)
+  simulation(Variable_order_markov_iterator& input, int nb_sequence=1,
+      bool initialisation=false)
   {
     Format_error error;
     int **sequence;
@@ -370,10 +371,15 @@ void
 class_variable_order_markov_iterator()
 {
 
-  class_<Variable_order_markov_iterator > ("_Variable_order_markov_iterator", "Variable_order_markov_iterator", init<Variable_order_markov*>())
-    .def(init<const Variable_order_markov_iterator&>())
-    .add_property("nb_variable", &Variable_order_markov_iterator::get_nb_variable)
-    .add_property("memory", &Variable_order_markov_iterator::get_memory)
-    .def("simulation", VariableOrderMarkovIteratorWrap::simulation,  "simulation")
+  class_<Variable_order_markov_iterator >
+  ("_Variable_order_markov_iterator", "Variable_order_markov_iterator", no_init)
+
+  .def(init<Variable_order_markov*>()[with_custodian_and_ward_postcall<1, 2>()])
+
+  .add_property("nb_variable", &Variable_order_markov_iterator::get_nb_variable)
+  .add_property("memory", &Variable_order_markov_iterator::get_memory)
+
+  .def("simulation", VariableOrderMarkovIteratorWrap::simulation,
+      args("nb_sequence","initialisation"), "simulation")
     ;
 }

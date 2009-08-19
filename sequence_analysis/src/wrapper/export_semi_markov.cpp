@@ -316,23 +316,26 @@ class_semi_markov_data()
 
 }
 
-class SemiMarkovIteratorWrap 
+class SemiMarkovIteratorWrap
 {
 
 public:
 
+
+
   static boost::python::list
-  simulation(Semi_markov_iterator& input, int nb_sequence=1, bool initialisation=false)
+  simulation(Semi_markov_iterator& input, int nb_sequence=1,
+      bool initialisation=false)
   {
     Format_error error;
     int **sequence;
-  
+
     Semi_markov * sm;
     sm = input.get_semi_markov();
 
     sequence = input.simulation(nb_sequence, initialisation);
     boost::python::list output_sequence;
-    
+
     int i, j;
     for (j=0; j < sm->get_nb_output_process()+1; j++)
     {
@@ -353,19 +356,29 @@ public:
     delete [] sequence;
 
     return output_sequence;
- } 
+  }
 };
 
-void 
+
+void
 class_semi_markov_iterator()
 {
 
-  class_<Semi_markov_iterator, boost::shared_ptr<Semi_markov_iterator> > ("_Semi_markov_iterator", "Semi_markov_iterator", init<Semi_markov* >())
-    .def(init<const Semi_markov_iterator&>())
-    .add_property("state", &Semi_markov_iterator::get_state)
-    .add_property("occupancy", &Semi_markov_iterator::get_occupancy)
-    .add_property("counter", &Semi_markov_iterator::get_counter)
-    .add_property("nb_variable", &Semi_markov_iterator::get_nb_variable)
-    .def("simulation", SemiMarkovIteratorWrap::simulation,  "simulation")
-;
+  class_<Semi_markov_iterator, boost::shared_ptr<Semi_markov_iterator> >
+  ("_Semi_markov_iterator", "Semi_markov_iterator", no_init)
+
+  .def(init<Semi_markov*>() [with_custodian_and_ward_postcall<1, 2>()])
+
+
+  .add_property("state", &Semi_markov_iterator::get_state)
+  .add_property("occupancy", &Semi_markov_iterator::get_occupancy)
+  .add_property("counter", &Semi_markov_iterator::get_counter)
+  .add_property("nb_variable", &Semi_markov_iterator::get_nb_variable)
+
+
+  .def("simulation", SemiMarkovIteratorWrap::simulation,
+        args("nb_sequence","initialisation"), "simulation")
+
+
+  ;
 }

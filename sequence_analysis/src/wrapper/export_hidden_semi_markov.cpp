@@ -176,7 +176,7 @@ void class_hidden_semi_markov() {
 
 
   class_<Hidden_semi_markov, bases<Semi_markov > >
-    ("_Hidden_semi_markov", "Hidden_semi_markov")
+    ("_Hidden_semi_markov", "Hidden_semi_markov", no_init)
     .def(init <Hidden_semi_markov, bool, int>())
     .def("__init__", make_constructor(WRAP::hidden_semi_markov_from_file))
 
