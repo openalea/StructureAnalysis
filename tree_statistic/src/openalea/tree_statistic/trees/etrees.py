@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Trees with integral and floating attributes with enhanced methods.
 """
 
@@ -11,7 +12,7 @@ VariableType = stat_tool.VariableTypeBis
 I_DEFAULT_TREE_SIZE = trees.I_DEFAULT_TREE_SIZE
 I_DEFAULT_TREE_DEPTH = trees.I_DEFAULT_TREE_DEPTH
 
-FormatError = stat_tool.StatToolError
+FormatError = stat_tool.error
 VariableTypeDict = VariableType.values
 
 TreeValue = trees.TreeValue
