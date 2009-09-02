@@ -3941,7 +3941,7 @@ int Typed_edge_trees<Generic_Int_fl_container>::get_max_depth() const
 template<typename Generic_Int_fl_container>
 unsigned int Typed_edge_trees<Generic_Int_fl_container>::get_size(int index) const
 {
-   assert((index >= 0) and (index < _nb_trees));
+   assert((index >= 0) && (index < _nb_trees));
    return trees[index]->get_size();
 }
 
