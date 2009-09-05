@@ -1,16 +1,16 @@
 # -*- coding: cp1252 -*-
 
-"""from amlPy import *"""
+"""from amlPy import *
 
 from vplants.self_similarity.graph import *
 from vplants.self_similarity.cst import *
-from vplants.self_similarity.mtg2graph import *
+from vplants.self_similarity.mtg2graph import *"""
 
 from vplants.tree_reduction.graph import *
 from openalea.container.graph import *
 import string
 
-mtg_filename = './example_MTG.mtg'
+"""mtg_filename = './example_MTG.mtg'
 
 g = MTG(mtg_filename)
 
@@ -19,7 +19,7 @@ tree = mtg2graph(1, 2)
 
 print 'Reduction'
 dag_exact = tree_reduction(tree)
-tree_rec = tree_reconstruction(tree)
+tree_rec = tree_reconstruction(tree)"""
 
 """   rec directe
 def test1():
@@ -448,6 +448,7 @@ def quotient_graph(g,list_node,list_edge,G_node,G_edge,nbr_edge,parameters,param
             m=[]
             for k in range(len(P[j])):
                 eid=P[j][k]
+                print '********'
                 vid1=g._edges[eid][0]
                 vid2=g._edges[eid][1]
                 if list_node[vid1-1] not in m:
