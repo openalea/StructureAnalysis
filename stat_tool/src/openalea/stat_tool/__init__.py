@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # -*- python -*-
 #
 #       vplants.stat_tool
@@ -50,6 +51,8 @@ from regression import *
 from output import  *
 from data_transform import *
 from cluster import *
+
+from error import FormatError as FormatError
 
 # Constant
 from _stat_tool import I_DEFAULT

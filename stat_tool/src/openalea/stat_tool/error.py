@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Error class to manage standard errors in stat_tool """
 __version__ = "$Id$"
 
@@ -202,3 +203,19 @@ def CheckKargs(kargs, possible_kargs, dicts=None):
 STAT_TOOL_NB_VARIABLE_ERROR = \
     """Extra arguments provided (to specify variable value ?). 
     Consider removing it. Be aware that nb_variable equals 1"""
+
+class FormatError(Exception):
+    """Exceptions related to the statistical modules."""
+
+    def __init__(self, error=None):
+        """Initialize a FormatError exception."""
+        if error is None:
+            self.__error=""
+        else:
+            self.__error=error
+
+    def _error(self):
+        return str(self.__error)
+
+    def __str__(self):
+        return str(self.__error)
