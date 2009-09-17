@@ -15,7 +15,7 @@ I_DEFAULT_TREE_SIZE = ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_SIZE = ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_DEPTH = ctree.I_DEFAULT_TREE_DEPTH()
 VariableType = stat_tool.VariableTypeBis
-FormatError = stat_tool.error
+FormatError = stat_tool.FormatError
 CharacteristicType = ctree.Characteristic
 
 VariableTypeDict = VariableType.values

@@ -5,7 +5,7 @@ import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
 import chmt
 
 VariableType=stat_tool.VariableTypeBis
-FormatError=stat_tool.error
+FormatError = stat_tool.FormatError
 CharacteristicType=trees.CharacteristicType
 EntropyAlgorithm=chmt.EntropyAlgorithm
 VariableTypeDict=VariableType.values
