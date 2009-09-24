@@ -1405,6 +1405,17 @@ class Trees(object):
             os.remove(file_name)            
             return res
 
+    def BuildPySequences(self, maximal_sequences=True):
+        """Extract sequence_analysis.Sequences from the Trees,
+        cutting or not sequences after branching"""
+        import os
+        try:
+            res = self.__ctrees.BuildPySequences(maximal_sequences)
+        except RuntimeError, error:
+            raise FormatError(error)
+        else:
+            return res.markovian_sequences()
+
     def BuildVectors(self):
         """Extract Vectors from the Trees."""
         import os

@@ -384,6 +384,28 @@ void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
    }
 }
 
+Sequences* Trees_wrapper_build_py_sequences(const Trees& reftree,
+                                            bool all_paths= true)
+{
+   ostringstream error_message;
+   bool status= true;
+   Format_error error;
+   Sequences* seq= NULL;
+
+
+   seq= reftree.build_sequences(error, all_paths);
+   if (seq == NULL)
+      status= false;
+   if (!status)
+   {
+      error_message << error;
+      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+   else
+       return seq;
+}
+
 void Trees_wrapper_build_vectors_path(const Trees& reftree, const char* prefix)
 {
    ostringstream error_message;
@@ -1120,12 +1142,17 @@ BOOST_PYTHON_MODULE(ctrees)
                                "BuildSequences(self) -> void \n\n"
                                "Build sequences from trees and print them"
                                "into a file.")
+        .def("BuildPySequences", &Trees_wrapper_build_py_sequences,
+                                 return_value_policy< manage_new_object >(),
+                                 "BuildPySequences(self) -> void \n\n"
+                                 "Build sequences from trees into a "
+                                 "sequence_analysis.Sequence object.")
         .def("BuildVectors", &Trees_wrapper_build_vectors_path,
                              "BuildVectors(self, path) -> void \n\n"
                              "Build vectors from trees and print them"
                              "into a file.")
         .def("BuildVectors", &Trees_wrapper_build_vectors_object,
-	                     return_value_policy< manage_new_object >(),
+	                      return_value_policy< manage_new_object >(),
                              "BuildVectors(self, path) -> void \n\n"
                              "Build vectors object from trees.")
         .def("ExtractSizeHistogram", &Trees::extract_size,
