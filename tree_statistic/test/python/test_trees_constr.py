@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # a test for the class trees.Trees: constructor and basic methods
 import sys
 import os
@@ -27,10 +28,7 @@ stat_tools.plot.DISABLE_PLOT = True
 
 inf_bound=0
 sup_bound=3
-probability= 0.6
-ident=stat_tools.DistributionIdentifier.UNIFORM
-parameter=stat_tools.D_DEFAULT
-distrib= stat_tools._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+distrib = stat_tools.Uniform(inf_bound, sup_bound)
 print "Distribution used for the number of children and the tree attributes:"
 print distrib
 max_depth=3
