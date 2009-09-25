@@ -823,6 +823,8 @@ ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape
 /*--------------------------------------------------------------*
  *
  *  Ecriture d'une loi et d'un histogramme au format tableur.
+ *  Si les histogrammes sont presents, les probabilites sont
+ *  remises l'echelle de l'effectif de la population.
  *
  *  arguments : stream, flags sur l'ecriture de la fonction de repartition et
  *              de la fonction de concentration, flag sur le calcul du nombre de valeurs,
@@ -1153,22 +1155,22 @@ bool Distribution::plot_print(const char *path , const Histogram *histo) const
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
                 const Histogram **histo , int *index_dist)
-  
+
 {
   bool status = false;
   register int i , j;
   int plot_nb_value = 0 , *histo_nb_value;
   ofstream out_file(path);
-  
-  
+
+
   if (out_file) {
     status = true;
-    
+
     // calcul du nombre de valeurs
-    
+
     if (histo) {
       histo_nb_value = new int[nb_histo];
-      
+
       for (i = 0;i < nb_histo;i++) {
         if (index_dist[i] == I_DEFAULT) {
           histo_nb_value[i] = histo[i]->nb_value;
@@ -1187,7 +1189,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
         }
       }
     }
-    
+
     if (!dist_nb_value) {
       for (i = 0;i < nb_dist;i++) {
         if (dist[i]->nb_value > plot_nb_value) {
@@ -1195,7 +1197,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
         }
       }
     }
-    
+
     else {
       for (i = 0;i < nb_dist;i++) {
         if (dist_nb_value[i] > plot_nb_value) {
@@ -1205,7 +1207,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
     }
 
     // ecriture des frequences et des probabilites de chaque valeur
-    
+
     for (i = 0;i < plot_nb_value;i++) {
       if (histo) {
         for (j = 0;j < nb_histo;j++) {
@@ -1217,7 +1219,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
           }
         }
       }
-      
+
       if (!dist_nb_value) {
         for (j = 0;j < nb_dist;j++) {
           if (i < dist[j]->nb_value) {
@@ -1228,7 +1230,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
           }
         }
       }
-      
+
       else {
         for (j = 0;j < nb_dist;j++) {
           if (i < dist_nb_value[j]) {
@@ -2907,7 +2909,7 @@ double Distribution::second_difference_norm_computation() const
  *
  *  Calcul de la fonction de repartition d'une loi discrete.
  *
- *  arguments : nombre de valeurs, pointeurs sur les probabilites et 
+ *  arguments : nombre de valeurs, pointeurs sur les probabilites et
  *              sur la fonction de repartition correspondante.
  *
  *--------------------------------------------------------------*/
@@ -3074,7 +3076,7 @@ double Distribution::concentration_computation() const
  *
  *  Calcul des logarithmes des probabilites de chaque valeur.
  *
- *  arguments : nombre de valeurs, pointeurs sur les probabilites et 
+ *  arguments : nombre de valeurs, pointeurs sur les probabilites et
  *              sur la fonction transformee par log correspondante.
  *
  *--------------------------------------------------------------*/
