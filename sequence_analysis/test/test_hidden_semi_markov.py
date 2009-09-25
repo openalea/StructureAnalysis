@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """hidden semi markov data structure  tests
 
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
@@ -47,6 +48,10 @@ class Test(interface):
 
     def test_constructor_from_file(self):
         self.constructor_from_file()
+
+    def test_constructor_from_file2(self):
+        hmc = HiddenSemiMarkov("data/hidden_markov.hmc")
+        assert hmc
 
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
