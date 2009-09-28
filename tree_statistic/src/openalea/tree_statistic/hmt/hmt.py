@@ -173,8 +173,70 @@ class HiddenMarkovTree:
         else:
             msg='bad value for argument "ViewPoint": '+ViewPoint
             raise ValueError, msg
-        
-        
+
+    def Extract(self, nature, variable, value):
+        """Extract a distribution from the HiddenMarkovTree.
+
+        :Parameters:
+
+        * `nature` (str) - 'FirstOccurrenceRoot' or 'FirstOccurrenceLeaves' or
+                           'SojournSize' or 'nbzones' or 'NbOccurrences'
+                           'Observation'
+        * `variable` (int) - variable index,
+        * `value` (int) - value of variable,
+
+        :Returns:
+
+            If the characteristic is available, its distribution for
+            the given variable and value of this variable is returned.
+
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> 
+            >>> self.Extract('FirstOccurrenceRoot', 0, 1)
+            >>> self.Extract('Observation', 1, 1)
+
+        .. seealso::
+
+        :func:`~openalea.tree_statistic.hmt.HiddenMarkovTreeData.ExtractHistogram
+        :func:`~openalea.tree_statistic.hmt.CharacteristicType
+        """
+
+        if type(nature)==str:
+            if type(variable)!=int:
+                raise TypeError, "bad type for argument variable: " \
+                                    "type 'int' expected"
+            if type(value)!=int:
+                raise TypeError, "bad type for argument value: " \
+                                    "type 'int' expected"
+            if nature.upper()=="FIRSTOCCURRENCEROOT":
+                chartype = CharacteristicType.FIRST_OCCURRENCE_ROOT
+            elif nature.upper()=="FIRSTOCCURRENCELEAVES":
+                chartype = CharacteristicType.FIRST_OCCURRENCE_LEAVES
+            elif nature.upper()=="SOJOURNSIZE":
+                chartype = CharacteristicType.SOJOURN_SIZE
+            elif nature.upper()=="NBZONES":
+                chartype = CharacteristicType.NB_ZONES
+            elif nature.upper()=="NBOCCURRENCES":
+                chartype = CharacteristicType.NB_OCCURRENCES
+            elif nature.upper()=="OBSERVATION":
+                chartype = CharacteristicType.OBSERVATION
+                chartype+=0
+                try:
+                    distrib = self.__chmt.Extract(
+                        chartype, variable+1, value)
+                except RuntimeError, error:
+                    raise FormatError, error
+            else:
+                msg='bad value for argument "Nature": '+ nature
+                raise ValueError, msg
+        else:
+            raise TypeError, "bad type for argument 1: type 'str' expected"
+        return distrib
+
     def ExtractData(self):
         """Extract the 'data' part of the HiddenMarkovTree."""
         try:
@@ -184,17 +246,6 @@ class HiddenMarkovTree:
         else:
             chmt_data=chmt_data.StateTrees()
             return HiddenMarkovTreeData(chmt_data, markov=None, aliasing=True)
-
-    def ExtractDistribution(self, type, arg1, arg2=None):
-        """Extract a distribution from the HiddenMarkovTree.
-        
-        Usage:  ExtractDistribution("Observation", variable, state)"""
-        try:
-            cdistribution_data=self.__chmt.ExtractDistribution(arg1, arg2)
-        except RuntimeError, error:
-            raise FormatError, error
-        else:
-            return Distribution(cdistribution_data)
 
     def ExtractPlot(self, TreeId, ViewPoint, Entropy="UPWARD"):
         """Extract a tree with state or entropy profile.
@@ -281,13 +332,13 @@ class HiddenMarkovTree:
         import os
         is_observation=False
         if ViewPoint.upper()=="FIRSTOCCURRENCEROOT":
-            ftype=CharacteristicType.FIRST_OCCURRENCE_ROOT
+            ftype = CharacteristicType.FIRST_OCCURRENCE_ROOT
         elif ViewPoint.upper()=="FIRSTOCCURRENCELEAVES":
-            ftype=CharacteristicType.FIRST_OCCURRENCE_LEAVES
+            ftype = CharacteristicType.FIRST_OCCURRENCE_LEAVES
         elif ViewPoint.upper()=="SOJOURNSIZE":
-            ftype=CharacteristicType.SOJOURN_SIZE
+            ftype = CharacteristicType.SOJOURN_SIZE
         elif ViewPoint.upper()=="COUNTING":
-            ftype=CharacteristicType.NB_ZONES
+            ftype = CharacteristicType.NB_ZONES
         elif ViewPoint.upper()=="OBSERVATION":
             ftype=0 #CharacteristicType.OBSERVATION
             nb_windows=self.__chmt.NbStates()
@@ -473,13 +524,13 @@ class HiddenMarkovTree:
         import os
         is_observation=False
         if ViewPoint.upper()=="FIRSTOCCURRENCEROOT":
-            ftype=CharacteristicType.FIRST_OCCURRENCE_ROOT
+            ftype = CharacteristicType.FIRST_OCCURRENCE_ROOT
         elif ViewPoint.upper()=="FIRSTOCCURRENCELEAVES":
-            ftype=CharacteristicType.FIRST_OCCURRENCE_LEAVES
+            ftype = CharacteristicType.FIRST_OCCURRENCE_LEAVES
         elif ViewPoint.upper()=="SOJOURNSIZE":
-            ftype=CharacteristicType.SOJOURN_SIZE
+            ftype = CharacteristicType.SOJOURN_SIZE
         elif ViewPoint.upper()=="COUNTING":
-            ftype=CharacteristicType.NB_ZONES
+            ftype = CharacteristicType.NB_ZONES
         elif ViewPoint.upper()=="OBSERVATION":
             ftype=0 #CharacteristicType.OBSERVATION
             nb_windows=self.__chmt.NbStates()
@@ -711,17 +762,17 @@ class HiddenMarkovTreeData(trees.Trees):
                     raise TypeError, "bad type for argument 3: " \
                                       "type 'int' expected"
                 if nature.upper()=="FIRSTOCCURRENCEROOT":
-                    chartype=CharacteristicType.FIRST_OCCURRENCE_ROOT
+                    chartype = CharacteristicType.FIRST_OCCURRENCE_ROOT
                 elif nature.upper()=="FIRSTOCCURRENCELEAVES":
-                    chartype=CharacteristicType.FIRST_OCCURRENCE_LEAVES
+                    chartype = CharacteristicType.FIRST_OCCURRENCE_LEAVES
                 elif nature.upper()=="SOJOURNSIZE":
-                    chartype=CharacteristicType.SOJOURN_SIZE
+                    chartype = CharacteristicType.SOJOURN_SIZE
                 elif nature.upper()=="NBZONES":
-                    chartype=CharacteristicType.NB_ZONES
+                    chartype = CharacteristicType.NB_ZONES
                 elif nature.upper()=="NBOCCURRENCES":
-                    chartype=CharacteristicType.NB_OCCURRENCES
+                    chartype = CharacteristicType.NB_OCCURRENCES
                 elif nature.upper()=="OBSERVATION":
-                    chartype=CharacteristicType.OBSERVATION
+                    chartype = CharacteristicType.OBSERVATION
                 chartype+=0
                 try:
                     chisto=self.__ctrees.ExtractValueHistogram(

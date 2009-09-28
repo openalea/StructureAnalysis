@@ -80,6 +80,24 @@ CHmt_wrapper_extract_data(const Hidden_markov_tree& hmt)
    return res;
 }
 
+Parametric_model*
+CHmt_wrapper_extract(const Hidden_markov_tree& hmt, int itype,
+                     int ivariable, int ivalue)
+{
+   Parametric_model *res;
+   Format_error error;
+   ostringstream error_message;
+
+   res= hmt.extract(error, itype, ivariable, ivalue);
+   if (res == NULL)
+   {
+      error_message << error;
+      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+   return res;
+}
+
 double CHmt_wrapper_likelihood(const Hidden_markov_tree& hmt,
                                const Trees& trees)
 {
@@ -694,6 +712,10 @@ BOOST_PYTHON_MODULE(chmt)
     ("CHmt", init< const Hidden_markov_tree&, optional< bool, bool> >())
         .def("ExtractData", &CHmt_wrapper_extract_data,
                             return_value_policy< manage_new_object >())
+        .def("Extract", &CHmt_wrapper_extract,
+                        return_value_policy< manage_new_object >(),
+                        "Extract(self, type, variable, value) -> _Parametric_model \n\n"
+                        "Extract some characteristic or observation distribution")
         .def("IsParametric", &Hidden_markov_tree::is_parametric,
                             "IsParametric(self, variable) -> bool \n\n"
                             "Return True if process 'variable' "

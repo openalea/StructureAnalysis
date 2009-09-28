@@ -42,6 +42,7 @@ int main(void)
    const char * hsmcpath= "./laricio_3.hsc";
    // const char * hmtpath= "./hmt.hmt";
    const char * hmotpath= "./hmot.hmt";
+   const char * hmotpath2= "./hidden_markov.hmt";
    const char * wapath= "./hmot_ascii.hmt";
    const char * wspath= "./hmot_spreadsheet.hmt";
    const char * swapath= "./laricio_3ascii.hsc";
@@ -81,6 +82,16 @@ int main(void)
       if (!w)
          cout << error; */
 
+      // read and print a hidden Markov out tree (error ?)
+      hmot = Stat_trees::hidden_markov_out_tree_ascii_read(error, hmotpath2);
+      cout << error;
+
+      if (hmot != NULL)
+      {
+         // hmot->ascii_write(cout, false);
+         delete hmot;
+         hmot = NULL;
+      }
 
       // read and print a hidden Markov out tree
       hmot= Stat_trees::hidden_markov_out_tree_ascii_read(error, hmotpath);

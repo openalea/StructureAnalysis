@@ -2799,11 +2799,12 @@ Hidden_markov_tree& Hidden_markov_tree::operator=(const Hidden_markov_tree& mark
 
 Parametric_model* Hidden_markov_tree::extract(Format_error& error,
                                               int type,
-                                              int variable,
+                                              int ivariable,
                                               int value) const
 {
    bool status= true;
    int hvariable= 0;
+   int variable= ivariable;
    Distribution *pdist;
    // Parametric *pparam;
    Parametric_model *dist;
@@ -2817,7 +2818,7 @@ Parametric_model* Hidden_markov_tree::extract(Format_error& error,
 
    if (type == OBSERVATION)
    {
-      if ((variable < 1) || (variable > _nb_ioutput_process))
+      if ((ivariable < 1) || (ivariable > _nb_ioutput_process))
       {
          status= false;
          error.update(STAT_TREES_error[STATR_OUTPUT_PROCESS_INDEX]);
@@ -2833,12 +2834,15 @@ Parametric_model* Hidden_markov_tree::extract(Format_error& error,
             error.update((error_message.str()).c_str());
          }
          else
-            pdist= npprocess[variable]->observation[value];
+            if (npprocess[variable] == NULL)
+               pdist= piprocess[variable]->observation[value];
+            else
+               pdist= npprocess[variable]->observation[value];
       }
    }
    else // type != OBSERVATION
    {
-      if ((variable < 0) || (variable > _nb_ioutput_process))
+      if ((ivariable < 0) || (ivariable > _nb_ioutput_process))
       {
          status= false;
          error.update(STAT_TREES_error[STATR_OUTPUT_PROCESS_INDEX]);
