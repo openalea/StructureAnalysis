@@ -40,7 +40,7 @@ class Test():
     def test_binomial(self):
         """BINOMIAL Distribution"""
         h = Histogram("data/meri5.his")
-        assert h.estimate_parametric('B')
+        assert h.estimate_parametric('B')		
 
     def test_poisson(self):
         """Poisson distribution
@@ -127,5 +127,14 @@ class Test():
 if __name__ == "__main__":
     runTestClass(Test())
 
+def test_binomial_vec():
+	"""BINOMIAL Distribution"""
+	import openalea.stat_tool as stat_tool
+	vs = stat_tool.Vectors("data/cvectors.vec")
+	h = vs.extract(4) 
+	d = stat_tool.Estimate(h, "BINOMIAL")
+	assert d
+	print d
 
+test_binomial_vec()
 
