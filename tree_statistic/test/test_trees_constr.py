@@ -184,48 +184,47 @@ class Test():
 
     def test_attribute_function_failure(self):
         """use bad attribute function in building trees"""
-        #filter = lambda x: True
-        #attributes = ["anything"]
-        #try:
-            #T = trees.Trees(self.mtg_name, filter, attributes, attributes,
-                            #scale=2)
-        #except TypeError, t:
-            #print t
-        #else:
-            #msg = "Failed to raise exception for bad attribute function"
-            #assert False, msg
+        filter = lambda x: True
+        attributes = ["anything"]
+        try:
+            T = trees.Trees(self.mtg_name, filter, attributes, attributes,
+                            scale=2)
+        except TypeError, t:
+            print t
+        else:
+            msg = "Failed to raise exception for bad attribute function"
+            assert False, msg
         return 0
 
     def test_attribute_type_failure(self):
         """use bad attribute types in building trees"sample_mtg_forest.txt"""
-        #filter = lambda x: x < 6
-        #attributes = ["anything"]
-        #if type(self.mtg_t) == list:
-            #self.test_mtg_build()
-        #import openalea.aml as amlPy
-        #try:
-            #T = trees.Trees(self.mtg_name, filter, attributes,
-                            #[lambda x: amlPy.Descendants(x)], scale=2)
-        #except TypeError, t:
-            #print t
-        #else:
-            #print "Failed to raise exception for bad attribute type"
+        filter = lambda x: x < 6
+        attributes = ["anything"]
+        if type(self.mtg_t) == list:
+            self.test_mtg_build()
+        import openalea.aml as amlPy
+        try:
+            T = trees.Trees(self.mtg_name, filter, attributes,
+                            [lambda x: amlPy.Descendants(x)], scale=2)
+        except TypeError, t:
+            print t
+        else:
+            print "Failed to raise exception for bad attribute type"
         return 0
 
     def test_attribute_name_failure(self):
         """use bad attribute names in building trees"""
-        #filter = lambda x: x < 6
-        #f = lambda x: 1
-        #if type(self.mtg_t) == list:
-            #self.test_mtg_build()
-        #import openalea.aml as amlPy
-        #try:
-            #T = trees.Trees(self.mtg_name, filter, [f], [f], scale=2)
-        #except TypeError, t:
-            #print t
-        #else:
-            #msg = "Failed to raise exception for bad attribute name"
-            #assert False, msg
+        filter = lambda x: x < 6
+        f = lambda x: 1
+        if type(self.mtg_t) == list:
+            self.test_mtg_build()
+        try:
+            T = trees.Trees(self.mtg_name, filter, [f], [f], scale=2)
+        except TypeError, t:
+            print t
+        else:
+            msg = "Failed to raise exception for bad attribute name"
+            assert False, msg
         return 0
 
     def test_filter_failure(self):
@@ -234,7 +233,6 @@ class Test():
         f = lambda x: 1
         if type(self.mtg_t) == list:
             self.test_mtg_build()
-        import openalea.aml as amlPy
         attributes = ["anything"]
         try:
             T = trees.Trees(self.mtg_name, attributes, attributes, [f], scale=2)
@@ -250,7 +248,6 @@ class Test():
         f = lambda x: 1
         if type(self.mtg_t) == list:
             self.test_mtg_build()
-        import openalea.aml as amlPy
         attributes = ["anything"]
         try:
             T=trees.Trees(self.mtg_name, lambda x: x != 2, attributes, [f],
@@ -263,20 +260,18 @@ class Test():
 
     def test_filter_type_failure(self):
         """use incorrect type return for filter in building trees"""
-        #filter = lambda x: x < 6
-        #f = lambda x: 1
-        #if type(self.mtg_t) == list:
-            #self.test_mtg_build()
-        #import openalea.aml as amlPy
-        #attributes = ["anything"]
-        #try:
-            #T = trees.Trees(self.mtg_name, filter, attributes, [f], scale=1)
-        #except TypeError, t:
-            #print t
-        #else:
-            #msg = "Failed to raise exception for bad filter type"
-            #assert False, msg
-        return 0
+        filter = lambda x: x < 6
+        f = lambda x: "a"
+        if type(self.mtg_t) == list:
+            self.test_mtg_build()
+        attributes = ["anything"]
+        try:
+            T = trees.Trees(self.mtg_name, filter, attributes, [f], scale=1)
+        except TypeError, t:
+            print t
+        else:
+            msg = "Failed to raise exception for bad filter type"
+            assert False, msg
 
 
 if __name__ == "__main__":

@@ -14,14 +14,17 @@ pj = os.path.join
 if env_test['debug']:
    env_test.Append(CPPDEFINES= ['DEBUG'])
 env_test.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
-env_test.AppendUnique(LIBS= ['efence'])
+import os
+if os.name != 'nt':
+	env_test.AppendUnique(LIBS= ['efence'])
+
 # env_test.AppendUnique(LIBS= ['leaktrace'])
 # env.Append(CPPPATH= includes)
 
 #Sources
 
 tests= Split("""
-test_int_fl_containers.cpp
+# test_int_fl_containers.cpp
 test_generic_tree.cpp
 test_int_fl_tree.cpp
 test_tree_characteristics.cpp
