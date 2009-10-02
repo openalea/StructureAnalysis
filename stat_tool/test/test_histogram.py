@@ -117,3 +117,14 @@ class Test(interface):
 
 if __name__ == "__main__":
     runTestClass(Test())
+
+	
+def test_extract_vec():
+	"""Extract histogram from Vectors"""
+	import openalea.stat_tool as stat_tool
+	vs = stat_tool.Vectors("data/cvectors.vec")
+	h = vs.extract(4) 
+	assert h
+	print h
+
+test_extract_vec()
