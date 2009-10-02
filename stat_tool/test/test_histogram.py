@@ -114,11 +114,6 @@ class Test(interface):
         d == d.simulate(1000).extract_model()
         
 
-
-if __name__ == "__main__":
-    runTestClass(Test())
-
-	
 def test_extract_vec():
 	"""Extract histogram from Vectors"""
 	import openalea.stat_tool as stat_tool
@@ -127,4 +122,9 @@ def test_extract_vec():
 	assert h
 	print h
 
-test_extract_vec()
+
+if __name__ == "__main__":
+    #runTestClass(Test())
+    test_extract_vec()
+
+#test_extract_vec()
