@@ -7,7 +7,7 @@ pj = os.path.join
 ALEASolution = config.ALEASolution
 name = 'tree'
 
-options = Options(['../options.py', 'options.py'], ARGUMENTS)
+options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 tools = ['install']
 
 env = ALEASolution(options, tools)
