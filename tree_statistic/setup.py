@@ -1,69 +1,58 @@
-# -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
+from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
  
-packagename = 'tree_statistic'
+packagename = 'tree'
 namespace = 'openalea'
 build_prefix = "build-scons"
 
 # Scons build directory
 scons_parameters=["build_prefix="+build_prefix]
 
-# platform dependencies
-install_requires = ['vplants.aml','vplants.tree']
-setup_requires = install_requires + ['openalea.deploy']
+
+# dependencies
+install_requires = []
+setup_requires = ['openalea.deploy']
+if sys.platform.startswith('win'):
+    pass
+    #setup_requires += ['MinGW','boostpython','openalea.sconsx']
+    #install_requires += [binary_deps('boostpython')]
+else:
+    install_requires = []
+    setup_requires = []
+
 
 if __name__ == '__main__':
     
-    setup(name='VPlants.Tree_Statistic',
+    setup(name='VPlants.Tree',
           version='0.7.0',
-          author='JB durand',
-          description='Tree statistic library',
-          url='',
+          author='C. Pradal',
+          description='Tree structure header',
+          url='http://openalea.gforge.inria.fr',
           license='GPL',
-          
+ 
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  
           scons_parameters=scons_parameters,
         
           # Packages
-          #namespace_packages = [namespace],
-          #create_namespaces = False,
-
-          packages=[namespace,
-                    namespace+".tree_statistic",
-                    namespace+".tree_statistic.trees",
-                    namespace+".tree_statistic.hmt",
-                    namespace+".tree_statistic.int_fl_containers",
-                    namespace+".treestat_wralea",
-                    ],
-
-          package_dir={
-            '' : 'src',
-            },
-
+          #packages=
+          #package_dir=
+      
           # Add package platform libraries if any
           include_package_data=True,
-          package_data = {'' : ['*.pyd', '*.so', '*.dylib'],
-                           namespace+".tree_statistic": ['*/*.pyd', '*/*.so', '*.dylib']},
-          zip_safe=False,
+          zip_safe = False,
 
           # Specific options of openalea.deploy
-          lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
-          inc_dirs = {'include' : pj(build_prefix, 'include') },
+          #lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
+          inc_dirs = { 'include' : pj(build_prefix, 'include') },
+          
 
           # Dependencies
           setup_requires = setup_requires,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
-          entry_points = {
-            "wralea": ["tree_statistic = openalea.treestat_wralea",
-                        "macro = openalea.treestat_wralea.macro",
-                        "demo = openalea.treestat_wralea.demo",
-                       ]
-            },
-
           )
-    
+
