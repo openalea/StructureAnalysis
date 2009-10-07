@@ -3,7 +3,7 @@ from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
  
-packagename = 'tree_matching'
+packagename = 'tree'
 namespace = 'openalea'
 build_prefix = "build-scons"
 
@@ -11,53 +11,48 @@ build_prefix = "build-scons"
 scons_parameters=["build_prefix="+build_prefix]
 
 
-# platform dependencies
-install_requires = []#[binary_deps('vplants.mtg'), binary_deps('vplants.stat_tool')]#, binary_deps("boostpython")]
+# dependencies
+install_requires = []
 setup_requires = ['openalea.deploy']
+if sys.platform.startswith('win'):
+    pass
+    #setup_requires += ['MinGW','boostpython','openalea.sconsx']
+    #install_requires += [binary_deps('boostpython')]
+else:
+    install_requires = []
+    setup_requires = []
 
 
 if __name__ == '__main__':
     
-    setup(name='VPlants.Tree_Matching',
-          version='0.6.2',
-          author='Pascal Ferraro, Aida Ouangraoua',
-          description='Tree matching library',
-          url='',
+    setup(name='VPlants.Tree',
+          version='0.7.0',
+          author='C. Pradal',
+          description='Tree structure header',
+          url='http://openalea.gforge.inria.fr',
           license='GPL',
-          
+ 
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  
           scons_parameters=scons_parameters,
         
           # Packages
-          #namespace_packages = ["openalea"],
-          #create_namespaces = True,
-          
-          # pure python  packages
-          #packages= [ "openalea", 
-          #            "openalea.tree_matching"
-          #            ],
-          
-          # python packages directory
-          #package_dir= { #pkg_name : pj('src','vplants'),
-          #               '' : 'src',
-          #               },
-
+          #packages=
+          #package_dir=
+      
           # Add package platform libraries if any
           include_package_data=True,
-          zip_safe=False,
+          zip_safe = False,
 
           # Specific options of openalea.deploy
-          lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
-          inc_dirs = {'include' : pj(build_prefix, 'include') },
+          #lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
+          inc_dirs = { 'include' : pj(build_prefix, 'include') },
           
 
           # Dependencies
-          setup_requires = setup_requires, 
-          install_requires = install_requires, 
+          setup_requires = setup_requires,
+          install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )
 
-
-    
