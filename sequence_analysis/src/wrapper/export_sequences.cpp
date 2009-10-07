@@ -1013,6 +1013,43 @@ public:
     FOOTER_OS;
   }
 
+  static void plot_write(const Sequences &input, const std::string& prefix,
+    const std::string& title)
+  {
+      Format_error error;
+      input.plot_write(error, prefix.c_str(), title.c_str());    
+  }
+  static void plot_data_write(const Sequences &input, const std::string& prefix,
+  const std::string& title)
+  {
+      Format_error error;
+      input.plot_data_write(error, prefix.c_str(), title.c_str());    
+  }
+ 
+/*
+  static bool segment_profile_write(const Sequences &input, int iidentifier, int nb_segment, int *model_type, int output, char format, int segmentation, int nb_segmentation)
+  {
+    HEADER_OS(Sequences);
+    ret = input.segment_profile_write(error, iidentifier, nb_segment, model_type, output, format, segmentation, nb_segmentation); 
+    FOOTER_OS;
+  }
+  */
+
+  static bool 
+  segment_profile_write(const Sequences &input, const char*prefix, int iidentifier, int nb_segment, 
+    boost::python::list model_type, int output, char title)
+  {
+    Format_error error;
+    bool ret;
+    CREATE_ARRAY(model_type, int, models);
+
+    ret = input.segment_profile_write(error, prefix, iidentifier, nb_segment,
+         models.get(), output, title); 
+    FOOTER;
+  }
+
+
+
 
 
 };
@@ -1101,6 +1138,11 @@ class_sequences()
    DEF_RETURN_VALUE_NO_ARGS("merge_variable", SequencesWrap::merge_variable, "Merge variables")
    DEF_RETURN_VALUE_NO_ARGS("markovian_sequences", SequencesWrap::markovian_sequences , "returns markovian sequence")
 
+   .def("plot_write", SequencesWrap::plot_write, args("prefix", "title"), "Write GNUPLOT files")
+   .def("plot_data_write", SequencesWrap::plot_data_write, args("prefix", "title"), "Write GNUPLOT files")
+   .def("segment_profile_write", SequencesWrap::segment_profile_write, args("todo"), "Write segment_profile")
+
+
 ;
 
 /*
@@ -1118,7 +1160,6 @@ class_sequences()
  bool check(Format_error &error , const char *pattern_label);
 
  std::ostream& line_write(std::ostream &os) const;
- bool plot_data_write(Format_error &error , const char *prefix , const char *title = 0) const;
  bool spreadsheet_write(Format_error &error , const char *path) const;
  bool plot_write(Format_error &error , const char *prefix ,   const char *title = 0) const;
 
@@ -1136,9 +1177,7 @@ class_sequences()
  Histogram* value_index_interval_computation(Format_error &error , int variable , int value) const;
  Sequences* hierarchical_segmentation(Format_error &error , std::ostream &os , int iidentifier , int max_nb_segment , int *model_type) const;
 
- bool segment_profile_write(Format_error &error , std::ostream &os , int iidentifier ,int nb_segment , int *model_type , int output = SEGMENT , char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING , int nb_segmentation = NB_SEGMENTATION) const;
  bool segment_profile_write(Format_error &error , const char *path , int iidentifier , int nb_segment , int *model_type , int output = SEGMENT , char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING , int nb_segmentation = NB_SEGMENTATION) const;
- bool segment_profile_plot_write(Format_error &error , const char *prefix , int iidentifier , int nb_segment , int *model_type ,    int output = SEGMENT , const char *title = 0) const;
 
  Histogram* get_hlength() const { return hlength; }
  Histogram* get_hindex_parameter() const { return hindex_parameter; }

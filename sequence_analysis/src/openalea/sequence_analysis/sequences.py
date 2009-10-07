@@ -168,8 +168,6 @@ def Sequences(obj, **kargs):
         
             sequence = _Sequences(obj, Identifiers, index_parameter)
     
-    print sequence
-    print type(sequence)
     if hasattr(sequence, 'markovian_sequences'):
         try:
             sequence = sequence.markovian_sequences()

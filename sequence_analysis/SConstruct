@@ -5,7 +5,7 @@ import os
 pj = os.path.join
 ALEASolution = config.ALEASolution
 
-options = Options(['../options.py', 'options.py'], ARGUMENTS)
+options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 
 tools = ['boost_python', 'alea', 'vplants.tool', 'install', 'vplants.stat_tool']
 

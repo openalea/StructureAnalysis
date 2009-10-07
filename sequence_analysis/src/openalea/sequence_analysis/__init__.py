@@ -1,5 +1,8 @@
 from openalea.stat_tool import *
 from openalea.stat_tool._stat_tool import *
+
+import _sequence_analysis
+
 import openalea.stat_tool.interface as interface
 
 

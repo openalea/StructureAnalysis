@@ -502,6 +502,14 @@ public:
     ret = input.lumpability_test(error, os, data.get(), order);
     FOOTER_OS;
   }
+
+  static void plot_write(const Markovian_sequences &input, const std::string& prefix,
+    const std::string& title)
+  {
+      Format_error error;
+      input.plot_write(error, prefix.c_str(), title.c_str());
+  }
+
 };
 
 // Boost declaration
@@ -564,6 +572,8 @@ void class_markovian_sequences() {
     //DEF_RETURN_VALUE("mtg_write", WRAP::mtg_write, args(""), "mtg_write")
 
     .def("mtg_write", WRAP::mtg_write, args(""), "")
+    .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")
+
     ;
 
 

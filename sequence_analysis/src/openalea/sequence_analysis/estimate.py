@@ -282,7 +282,6 @@ def _estimate_semi_markov(obj, *args, **kargs):
     Type = 'v'
     #error.CheckType([args[0]], [str])
     
-    print args[0]
     Type = error.CheckDictKeys(args[0], stochastic_process_type)
        
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
