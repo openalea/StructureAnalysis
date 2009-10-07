@@ -543,15 +543,16 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
     except:
         raise Exception("Could not run extract_data on the input variable. ")
     
-    if ret:
-        try:
+    #if ret:
+    #    try:
             # if obj is a sequence, returns markovian_sequences
-            return ret.markovian_sequences()
-        except AttributeError:
-            return ret
-    else:
-        raise Exception("Must not enter here")
-    
+    #        return ret.markovian_sequences()
+    #    except AttributeError:
+    #        return ret
+    #else:
+    #    raise Exception("Must not enter here")
+    # the code above prevent tests to succeed.
+    return ret
         
 
 def ValueSelect(obj, *args, **kargs):

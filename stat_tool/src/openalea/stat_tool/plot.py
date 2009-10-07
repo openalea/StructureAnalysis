@@ -139,6 +139,7 @@ class mplotlib(plotter):
         """
 
         show = kargs.get("Show", True)
+        fig_id = kargs.get("FigureId", 1)
 
         pylab = self.pylab
         matplotlib = self.matplotlib
@@ -148,7 +149,7 @@ class mplotlib(plotter):
         #multiset.border
 
         # Configure figure
-        f1 = pylab.figure(1)
+        f1 = pylab.figure(fig_id)
         f1.clf()     
 
         f1.set_facecolor("w")
@@ -166,7 +167,7 @@ class mplotlib(plotter):
                 group_size[g] = 1
                 group_index[g] = 0
 
-                f = pylab.figure(g+1)
+                f = pylab.figure(fig_id + g )
                 f.set_facecolor("w")
 
         # nb subplot
@@ -182,7 +183,7 @@ class mplotlib(plotter):
                 continue
 
             # Select window
-            pylab.figure(g+1)
+            pylab.figure(fig_id + g )
 
             # Select Subplot
             pylab.subplot(group_size[g], 1, group_index[g] + 1)

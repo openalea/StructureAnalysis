@@ -13,6 +13,7 @@ import error
 from _stat_tool import FORWARD_DYNAMIC_PROGRAMMING, FORWARD_BACKWARD_SAMPLING,\
     GENERALIZED_VITERBI, FORWARD_BACKWARD_SAMPLING
 
+
 # exported in sequence_analysis but hard-coded here to prevent dependency on 
 # sequence analysis
 NB_SEGMENTATION = 10
@@ -212,8 +213,8 @@ def Plot(obj, *args, **kargs):
         :func:`~openalea.stat_tool.output.Save`.
     """
     
+    
     return obj.plot(*args, **kargs)
-
 
 def Save(obj, *args, **kargs):
     """     
@@ -314,19 +315,37 @@ class StatInterface(object):
     """ Abstract base class for stat_tool objects """
     
     
+   
+
     def old_plot(self, *args, **kargs):
         """ Old AML style plot """
+        #todo: to be replace by correct enumerate but depends on sequence_analysis
+        output_type = { 
+               "ChangePoint" : 0,
+               "Segment" : 1
+               }
         title = kargs.get("Title", "")
         ViewPoint = kargs.get("ViewPoint", "")
         suffix = kargs.get("Suffix", "")
         params = kargs.get("Params", ())
+        output = kargs.get("Output", 0)
 
+        data = bool(ViewPoint.lower() == "data")
         survival = bool(ViewPoint.lower() == "survival")
         stateprofile = bool(ViewPoint.lower() == "stateprofile")
+        segmentprofile = bool(ViewPoint.lower() == "segmentprofile")
+
         
         import tempfile
         prefix = tempfile.mktemp()
-        if(survival):
+        
+        if(data):
+            try:
+                self.plot_data_write(prefix, title)
+            except AttributeError:
+                raise AttributeError("%s has not 'data' viewpoint"
+                                     % (str(type(self))))
+        elif(survival):
             try:
                 self.survival_plot_write(prefix, title)
             except AttributeError:
@@ -339,11 +358,29 @@ class StatInterface(object):
             except AttributeError:
                 raise AttributeError("%s has not 'state_profile' viewpoint"
                                      % (str(type(self))))
-
+        elif (segmentprofile):
+            try:
+                
+                error.CheckType([args[0],args[1]], 
+                                [int,int])
+                if len(args)==2:
+                    error.CheckType([args[2]], [[list, str]])
+                    models = []
+                    for model in args[2]:
+                        models.append(model_type[args[2]])
+                else:
+                    models = [3] #Gaussian todo: check this is correct
+                output = output_type[output]
+                self.segment_profile_write(prefix, args[0], args[1], models,
+                                           output, title)
+            except AttributeError:
+                raise AttributeError("%s has not 'segment_profile' viewpoint"
+                                     % (str(type(self))))
         elif(args):
             self.plot_write(prefix, title, list(args))
         else:            
             self.plot_write(prefix, title)
+            
 
         plot_file = prefix + suffix + ".plot"
 
@@ -374,7 +411,7 @@ class StatInterface(object):
         if(not plot.DISABLE_PLOT):
             os.system("%s %s"%(command, plot_file))
         
-        # for f in glob.glob(prefix+"*"):
+        #  for f in glob.glob(prefix+"*"):
         #     os.remove(f)
 
     def plot_print(self, *args, **kargs):
@@ -461,6 +498,8 @@ class StatInterface(object):
 
         survival = bool(ViewPoint.lower() == "survival")
         stateprofile = bool(ViewPoint.lower() == "stateprofile")
+        segmentprofile = bool(ViewPoint.lower() == "segmentprofile")
+        data = bool(ViewPoint.lower() == "data")
         
         try:
             if (survival):
@@ -469,6 +508,8 @@ class StatInterface(object):
             elif (stateprofile):
                 plotable = self.stateprofile_get_plotable(*params)
 
+            elif (segmentprofile):
+                plotable = self.segmentprofile_get_plotable(*params)
             else:
                 if (args):
                     if len(args)==1 and type(args[0])==int:

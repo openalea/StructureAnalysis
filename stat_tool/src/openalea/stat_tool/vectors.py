@@ -10,6 +10,8 @@ import _stat_tool
 import interface
 import error
 
+from openalea.stat_tool.mvmixture import _MvMixture
+
 from _stat_tool import _Vectors
 from _stat_tool import _VectorDistance
 from enumerate import format_type
@@ -42,8 +44,16 @@ def _Vectors_mixture_estimation(self, model,
     """
     if force_param is None:
         force_param = []
-        
-    return _Vectors.mixture_estimation_wrap(self, model,
+
+    error.CheckType([nb_iteration, force_param],[int, list])
+
+    # model is a mv_mixture class
+    error.CheckType([model], [[int, _MvMixture]])
+    if type(model) == int:
+        return _Vectors.mixture_estimation_nb_component(self, model,
+                                            nb_iteration, force_param)
+    else:
+        return _Vectors.mixture_estimation_model(self, model,
                                             nb_iteration, force_param)
 
 _Vectors.mixture_estimation = _Vectors_mixture_estimation
