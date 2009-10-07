@@ -11,10 +11,10 @@ namespace = 'openalea'
 # to get the version
 version="0.7.0"
 description = 'statistics' 
-long_description = """"""
-author = 'Y. Guedon, JB. Durand',
-author_email = 'samuel.dufour@sophia.inria.fr, christophe.pradal@cirad.fr'
-url = 'http://openalea.gforge.inria.fr'
+long_description = """todo"""
+author = 'Y. Guedon, JB. Durand, T. Cokelaer',
+author_email = 'samuel.dufour@sophia.inria.fr, christophe.pradal@cirad.fr, thomas.cokelaer@sophia.inria.fr'
+url = 'http://openalea.gforge.inria.fr/doc/vplants/stat_tool/doc/html/contents.html'
 license = 'GPL' 
 __revision__ = "$Id$"
 
@@ -56,7 +56,9 @@ if __name__ == '__main__':
 
           # Packages
           packages=['openalea.stat_tool', 
-                    'openalea.stat_tool.demo', 
+                    'stat_tool_wralea.demo.change_point', 
+                    'stat_tool_wralea.demo.stat_tool_tutorial', 
+                    'stat_tool_wralea', 
                     'vplants',
                     ],
 
@@ -77,7 +79,18 @@ if __name__ == '__main__':
           setup_requires = setup_requires,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
-          )
+   
+           # entry_points
+           entry_points = {
+            "wralea": ["vplants.stats = stat_tool_wralea",
+                       "vplants.demo = stat_tool_wralea.demo.change_point",
+            ]
+            },
+
+#            pylint_packages = ['src/openalea/stat_tool'],
+#            pylint_options = ['--disable-msg=C0103']
+
+       )
 
 
     

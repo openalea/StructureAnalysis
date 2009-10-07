@@ -22,7 +22,7 @@ from openalea.stat_tool.cluster import Cluster
 #from tools import interface
 
 
-def test1():
+def test():
     """Mixture tests from exploratory.aml
     #
     #  Frequency distributions
@@ -187,5 +187,5 @@ def test2():
 
 
 if __name__ == "__main__":
-    test1()
+    test()
     test2()

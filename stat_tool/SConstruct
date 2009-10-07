@@ -5,9 +5,9 @@ import os
 pj = os.path.join
 ALEASolution = config.ALEASolution
 
-options = Options(['../options.py', 'options.py'], ARGUMENTS)
-options.Add(BoolOption('with_test', 'build test modules', 0))
-options.Add(BoolOption('with_efence', 'build tests with efence library', 0))
+options = Variables(['../options.py', 'options.py'], ARGUMENTS)
+options.Add(BoolVariable('with_test', 'build test modules', 0))
+options.Add(BoolVariable('with_efence', 'build tests with efence library', 0))
 
 tools = ['boost_python', 'vplants.tool', 'install', 'alea']
 

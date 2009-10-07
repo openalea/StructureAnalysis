@@ -622,7 +622,7 @@ public:
   }
 
   static Mv_Mixture*
-  mixture_estimation_1(const Vectors& v, const Mv_Mixture& mixt, int nb_iter,
+  mixture_estimation_model(const Vectors& v, const Mv_Mixture& mixt, int nb_iter,
       boost::python::list force_param)
   {
     bool status = true, several_errors = false;
@@ -718,7 +718,7 @@ public:
   }
 
   static Mv_Mixture*
-  mixture_estimation_2(const Vectors& v, int nb_component, int nb_iter,
+  mixture_estimation_nb_component(const Vectors& v, int nb_component, int nb_iter,
       boost::python::list force_param)
   {
     bool status = true, several_errors = false;
@@ -941,10 +941,10 @@ class_vectors()
   DEF_RETURN_VALUE("nearest_neighbours_regression", WRAP::nearest_neighbours,
       args("explanatory_var", "response_var", "span", "weighting"),
       "TODO Linear regression (nearest neighbours)")
-  DEF_RETURN_VALUE("mixture_estimation_wrap", WRAP::mixture_estimation_1,
+  DEF_RETURN_VALUE("mixture_estimation_model", WRAP::mixture_estimation_model,
       args("initial_mixture", "nb_max_iteration", "force_param"),
       "TODO Mixture estimation (EM algorithm with initial model)")
-  DEF_RETURN_VALUE("mixture_estimation_wrap", WRAP::mixture_estimation_2,
+  DEF_RETURN_VALUE("mixture_estimation_nb_component", WRAP::mixture_estimation_nb_component,
       args("nb_component", "nb_max_iteration", "force_param"),
       "TODO Mixture estimation (EM algorithm with fixed number of components)")
 

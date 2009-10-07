@@ -1,9 +1,7 @@
+Stat_tool 0.7.0
+---------------
 
-
-
-
-- Major update adding most of the AMl functionalities, tests and plot using
-matplotlib interface on the 3d of August 2009
+- Major update adding most of the AMl functionalities, tests and plot using matplotlib interface on the 3d of August 2009
 - finalise wrapping of the stat_tool cpp code with boost_python
 - finalise Python interface a la AML (same syntax as AML code)
 - sphinx documentation:
@@ -13,7 +11,7 @@ matplotlib interface on the 3d of August 2009
 	+ tutorials.
 
 - add exhaustive unitary tests in ./test (coverage>80%)
-- add functional test
+- add functional tests
 - move graphical interface to matplotlib
 
 release 0.6.2

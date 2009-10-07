@@ -34,7 +34,7 @@ class Test:
         m = h.estimate_mixture("B", "NB")
         return m
 
-    def test_old_plot(self):
+    def _test_old_plot(self):
         m = self.get_mixture()
         if DISABLE_PLOT == False:
             m.old_plot()
@@ -82,7 +82,7 @@ class Test:
         if DISABLE_PLOT == False:
             convol_histo1.plot()
 
-    def test_plot_distribution_set(self):
+    def _test_plot_distribution_set(self):
         
         d1 = Distribution("B", 2, 18, 0.5) 
         d2 = Distribution("NB", 10, 10, 0.5)

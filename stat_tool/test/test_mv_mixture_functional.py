@@ -48,7 +48,7 @@ def test1():
     print "Estimation de melanges multivaries ", \
         "d'apres un nombre de composantes : "
         
-    m_estim_nbcomp = v.mixture_estimation(3, 100, [True, True])
+    m_estim_nbcomp = v.mixture_estimation(2, 100, [True, True])
     
     m_estim_nbcomp.plot(variable = 1, Title="Estimated mixture")
 
