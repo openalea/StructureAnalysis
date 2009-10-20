@@ -13,6 +13,14 @@ scons_parameters=["build_prefix="+build_prefix]
 # platform dependencies
 install_requires = ['vplants.aml','vplants.tree']
 setup_requires = install_requires + ['openalea.deploy']
+          
+packages=[namespace,
+          namespace+".tree_statistic",
+          namespace+".tree_statistic.trees",
+          namespace+".tree_statistic.hmt",
+          namespace+".tree_statistic.int_fl_containers",
+          #namespace+".treestat_wralea",
+         ]
 
 if __name__ == '__main__':
     
@@ -32,13 +40,8 @@ if __name__ == '__main__':
           #namespace_packages = [namespace],
           #create_namespaces = False,
 
-          packages=[namespace,
-                    namespace+".tree_statistic",
-                    namespace+".tree_statistic.trees",
-                    namespace+".tree_statistic.hmt",
-                    namespace+".tree_statistic.int_fl_containers",
-                    #namespace+".treestat_wralea",
-                    ],
+          packages=packages,
+
 
           package_dir={
             '' : 'src',
@@ -65,5 +68,6 @@ if __name__ == '__main__':
           #              "demo = openalea.treestat_wralea.demo",
           #             ]
           #  },
-          )
+          pylint_packages = ['src'+os.sep+package.replace('.', os.sep) for package in packages]
+            )
     

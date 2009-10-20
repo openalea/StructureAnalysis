@@ -57,6 +57,7 @@ if __name__ == '__main__':
           setup_requires = setup_requires, 
           install_requires = install_requires, 
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
+          pylint_packages = ['.']
           )
 
 
