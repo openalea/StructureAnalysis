@@ -6,9 +6,14 @@ import sys
 import os
 import openalea.tree_statistic.trees as trees
 import openalea.stat_tool as stat_tool
+from nose import with_setup
 
 
 def init():
+    return setup_func()
+
+def setup_func():
+    global  T,tv,nb_trees, tree_list, mtg_name
     # build some random initial tree
     stat_tool.plot.DISABLE_PLOT = True
     inf_bound = 0
@@ -37,8 +42,11 @@ def init():
     T = trees.Trees(tree_list)
     nb_trees = nbtrees
     mtg_name = "data/sample_mtg_forest.mtg"
+    
     return T, tv, nb_trees, tree_list, mtg_name
 
+
+@with_setup(setup_func)
 def test_types():
     """Test the variables types"""
     msg = "Type lengths do not match"
