@@ -19,7 +19,7 @@ import os
 import sys
 from openalea.misc import sphinx_tools
 
-
+"""
 
 
 
@@ -33,8 +33,11 @@ filenames = [
 
 
 for file in filenames:
-    process = sphinx_tools.PostProcess(file)
-    process.remove_file()
-
+    try:
+        process = sphinx_tools.PostProcess(file)
+        process.remove_file()
+    except:
+        continue
+"""
 print 'Try python setup.py build_sphinx now.'
 

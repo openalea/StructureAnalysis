@@ -66,7 +66,7 @@ if __name__ == '__main__':
           
           # Add package platform libraries if any
           include_package_data=True,
-          package_data = {'' : ['*.pyd', '*.so', '*.dylib'],},
+          package_data = {'' : ['*.pyd', '*.so', '*.dylib', '*.png', '*.hsc', '*.seq', '*.aml'],},
           
           zip_safe = False,
 
