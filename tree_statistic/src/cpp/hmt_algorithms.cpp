@@ -1720,7 +1720,9 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
                status= false;
                ostringstream error_message;
                error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << var+1 << ": "
-                             << STAT_TREES_error[STATR_NB_OUTPUT];
+                             << STAT_TREES_error[STATR_NB_OUTPUT]
+                             << "(" << ihmarkov.piprocess[var+1]->nb_value
+                             << " / " << get_max_int_value(var)+1 << ")";
                error.update((error_message.str()).c_str());
             }
             else
@@ -2458,7 +2460,7 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
    {
       for(var= 0; var < _nb_integral; var++)
       {
-	// nb_value[var]= get_nb_values(var);
+    // nb_value[var]= get_nb_values(var);
          nb_value[var]= characteristics[var]->marginal->nb_value;
       }
 

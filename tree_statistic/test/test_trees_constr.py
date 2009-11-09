@@ -168,7 +168,7 @@ def test_attribute_name_failure():
         msg = "Failed to raise exception for bad attribute name"
         assert False, msg
 
-def test_attribute_function_failure():
+def tst_attribute_function_failure():
     """use bad attribute function in building trees"""
     filter = lambda x: True
     attributes = ["anything"]
@@ -188,7 +188,7 @@ def test_attribute_type_failure():
     import openalea.aml as amlPy
     try:
         T = trees.Trees(mtg_name, filter, attributes,
-                        [lambda x: amlPy.Descendants(x)], scale=2)
+                        [lambda x: "z"], scale=2)
     except TypeError, t:
         print t
     else:

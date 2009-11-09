@@ -184,7 +184,7 @@ class Tree:
             if len(attributes) == 0:
                 self.__attributes = list(tree_object.Attributes())
                 attributes = list(self.__attributes)
-            if treestvalue_object.NbTrees() > 1:
+            if trees_object.NbTrees() > 1:
                 msg="MTG "+str(arg)+" corresponds to a forest, not to a single"\
                     + " tree structure.\n Use constructor trees.Trees()" \
                     + " instead of trees.Tree()"
@@ -226,7 +226,7 @@ class Tree:
             A list of `str` is returned
         """
        
-        return self.__attributes
+        return list(self.__attributes)
 
     def Depth(self):
         """Return the tree depth."""

@@ -5,224 +5,311 @@
     from openalea.stat_tool import *
     from openalea.tree_statistic.trees import *
 
-inf_bound=1
-sup_bound=3
-probability= 0.6
-ident=stat_tool.DistributionIdentifier.UNIFORM
-parameter=stat_tool.D_DEFAULT
-distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+TreeStructure
+=============
 
-print distrib
+Here is a brief description of 
+the :class:`~openalea.tree_statistic.trees.TreeStructure`  class.
 
-max_depth=3
-max_size=20
-n=5
-D=trees.TreeStructure()
-print "Default tree structure: ", D
-print "A random tree structure R:"
-R=trees.TreeStructure(distrib)
-
-Tree
-=========
-
-Here is a brief description of the Tree class.
+The *TreeStructure*
+class is used for the representation of single trees
+(as opposed to forests). No attributes can be attached to the vertices
+(as opposed to the `Tree`_ class).
 
 Constructor
 -----------
 
-Instances of class Tree can be obtained either by simulation,
-by extraction from a :ref:`Trees` object, or by explicit construction.
+Instances of class TreeStructure can be obtained either by simulation,
+or by extraction from a `Tree`_ object.
 
-
+Building a *TreeStructure* instance by simulation requires the distribution of the number
+of children for each vertex to be specified; *e.g.* a discrete uniform
+distribution on 0, 1, 2, 3. The tree is then generated using a branching
+process (Galton-Watson process). A maximal depth and a maximal number
+of children also have to be specified, and are used as stopping criterion
+for the simulation algorithm.
 
 .. filename with respect to the directory where sphinx is launch
 
 .. doctest::
 
-    >>> h1 = Histogram('./test/meri5.his')
+    >>> inf_bound = 0
+    >>> sup_bound = 3
+    >>> distrib = Uniform(inf_bound, sup_bound)
+    >>> max_depth = 3
+    >>> max_size = 10
+    >>> R = TreeStructure(distrib, max_size, max_depth)
 
+TreeValue
+=========
 
-Otherwise, you can construct an histogram from scratch providing a list of 
-numbers. The following example takes a list of numbers, construct its histogram 
-and returns the latter into an instance of :func:`Histogram`: 
+The :class:`~openalea.tree_statistic.trees.TreeValue` 
+class is used to represent the attributes attached
+to each vertex of a `Tree`_ object. It is very much comparable
+to a python list with a fixed number of elements, and containing
+only objects of type 'int' and 'float'. As in python lists,
+the first element of a *TreeValue* has index 0.
+
+Constructor
+-----------
+
+Instances of class `TreeValue`_ can be obtained either by conversion from
+a list into a `TreeValue`_ instance, or by extraction from a `Tree`_
+object, through the method :ref:`Get <get-put>`.
 
 .. doctest::
 
-    >>> h2 = Histogram([1,2,2,3,4,4,4,5])
+    >>> tv = TreeValue([1., 0])
+    >>> print tv #doctest: +SKIP
+    [1.0, 0]
+    >>> print tv[0] #doctest: +SKIP
+    [1.0]
 
-Now, you can use the methods bounded to the `Histogram` class. 
+Tree
+=========
 
+Here is a brief description of the :class:`~openalea.tree_statistic.trees.Tree`
+class.
+
+The *Tree* class is used for the representation of single trees
+(as opposed to forests). To each vertex of a *Tree* object, several
+attributes (or variables) can be attached. The number of variables
+must be the same for each vertex.
+
+Constructor
+-----------
+
+Instances of class `Tree`_ can be obtained either by addition of variables
+to a `TreeStructure`_ object, by extraction from a `Trees`_,
+or from a :ref:`MTG` file (see section `Trees`_).
+If this file contains more than a tree, only
+the first tree of the file will be returned. 
+
+To build a `Tree`_ object from a `TreeStructure`_ object, a default value
+for the attributes has to be provided in the constructor.
+
+.. doctest::
+
+    >>> tv = [1., 0, 1, 2.]
+    >>> T1 = Tree(tv, R)
+
+Attributes
+----------
+
+The object **T1** has a few methods, among which some aims at printing
+information on the screen.
+The :meth:`~openalea.tree_statistic.trees.Tree.Attributes` method is one
+of them. This methods prints the name of the attributes. The default
+name of attribute number `i` is `"Variable"+str(i)`. The attributes
+can only be changed if the `Tree`_ instance was built from a MTG file
+(see below).
 
 Display
 -------
 
-
-The object `h` has a few methods among which some are useful to print
-information on the screen or in a file. The `Display` method 
-:func:`~openalea.stat_tool.output.Display` is one of them. This methods works
-as follows:
+The :meth:`~openalea.tree_statistic.trees.Tree.Display` method
+provides an ASCII output of a `Tree`, as shown below:
    
 .. doctest::
 
-    >>> h1.display()
-    'histogram - sample size: 66\nmean: 4.37879   variance: 1.62354   standard deviation: 1.27418\ncoefficient of skewness: 0.0727983   coefficient of kurtosis: -0.709664\nmean absolute deviation: 1.06841   coefficient of concentration: 0.161214\ninformation: -107.512 (-1.62897)\n'
-    >>> Display(h1)
-    'histogram - sample size: 66\nmean: 4.37879   variance: 1.62354   standard deviation: 1.27418\ncoefficient of skewness: 0.0727983   coefficient of kurtosis: -0.709664\nmean absolute deviation: 1.06841   coefficient of concentration: 0.161214\ninformation: -107.512 (-1.62897)\n'
-    
-.. note:: Note here that you can call the methods in two different ways. 
-    :func:`Display` is in fact a layer above h1.display(). We advice you to use 
-    this function instead of the methods *.display*. The function *Display* will 
-    indeed allow you to add extra layer of robustness and flexibility over the 
-    methods (because the function is written in python). There are a few 
-    functions like that (Save, Display, Estimate, Simulate) that we will see 
-    in this tutorial.   
+    >>> T1.Display() #doctest: +SKIP
+    vids: [ Variable0, Variable1, Variable2, Variable3 ]
+    0: [1.0, 0, 1, 2.0]
+    |-1: [1.0, 0, 1, 2.0]+
+    | |-4: [1.0, 0, 1, 2.0]+
+    |
+    |-2: [1.0, 0, 1, 2.0]+
+    | |-5: [1.0, 0, 1, 2.0]+
+    |
+    |-3: [1.0, 0, 1, 2.0]+
 
-There is another method that is very similar to Display, that is called 
-**ascii_write**. It prints ASCII information on the screen as well, but with a 
-nicer layout by taking the special character '\n' into account:
+The first line sums up the semantics of every further line: 
+The numbers preceding the colons *:* denotes the vertex identifiers,
+or `vids`
+The quantities between brackets are the values of the attributes
+for each vertex.
+Thus, the first line also contains the names of the variables.
 
-.. doctest::
+.. note:: The *Display* method has the following optional arguments,
+    which take boolean values: *vids*, *attributes* and *mtg_vids*
+    (which must be equal to **True** if, respectively, the vids,
+    the attributes and the corresponding vids in
+    the MTG where the data come from, have to be
+    printed). The *mtg_vids* argument is available only if the `Tree`_
+    instance was built from a MTG.
 
-    >>> print h1.ascii_write(True) #doctest: +SKIP
-    >>> print h1.ascii_write(False) #doctest: +SKIP
-    histogram - sample size: 66
-    mean: 4.37879   variance: 1.62354   standard deviation: 1.27418
-    coefficient of skewness: 0.0727983   coefficient of kurtosis: -0.709664
-    mean absolute deviation: 1.06841   coefficient of concentration: 0.161214
-    information: -107.512 (-1.62897)
-    
- 
-If the :func:`str` function is implemented, you can again obtain the same kind
-of results using :
+The :func:`str` and the :func:`print` functions have the same
+effects than .Display(vids=False)
 
 .. doctest::
     
-    >>> str(h1)  # equivalent to Display(h1) 
-    'histogram - sample size: 66\nmean: 4.37879   variance: 1.62354   standard deviation: 1.27418\ncoefficient of skewness: 0.0727983   coefficient of kurtosis: -0.709664\nmean absolute deviation: 1.06841   coefficient of concentration: 0.161214\ninformation: -107.512 (-1.62897)\n'
-    >>> print str(h1) # equivalent to print Display(h1) or h1.file_ascii_write(False)
-    histogram - sample size: 66
-    mean: 4.37879   variance: 1.62354   standard deviation: 1.27418
-    coefficient of skewness: 0.0727983   coefficient of kurtosis: -0.709664
-    mean absolute deviation: 1.06841   coefficient of concentration: 0.161214
-    information: -107.512 (-1.62897)
-    <BLANKLINE>
-    
+    >>> print(T1) #doctest: +SKIP
+    [ Variable0, Variable1, Variable2, Variable3 ]
+    [1.0, 0, 1, 2.0]
+    |-[1.0, 0, 1, 2.0]+
+    | |-[1.0, 0, 1, 2.0]+
+    |
+    |-[1.0, 0, 1, 2.0]+
+    | |-[1.0, 0, 1, 2.0]+
+    |
+    |-[1.0, 0, 1, 2.0]+
+
+Root vertex
+-----------
+
+The :func:`~openalea.tree_statistic.trees.Tree.Root` method
+returns the vertex identifier of the root vertex, as illustrated
+below:
+
+.. doctest::
+
+    >>> T1.Root() #doctest: +SKIP
+    0
+
+..  _get-put:
+
+Changing the attribute values
+-----------------------------
+
+Now in our example, all attributes have the same value for
+every vertex. To access the value of the attributes for a given vertex,
+the :meth:`~openalea.tree_statistic.trees.Tree.Get` method
+has to be called (using as argument the vid of a vertex).
+The :meth:`~openalea.tree_statistic.trees.Tree.Put` method allows
+these attributes to be changed (using as arguments the vid of
+the considered vertex and the list of the new values).
+
+.. doctest::
+
+    >>> T1.Root() #doctest: +SKIP
+    0
+    >>> print(T1.Get(T1.Root())) #doctest: +SKIP
+    [1.0, 0, 1, 2.0]
+    >>> T1.Put(T1.Root(), [3.1, 5, 8, -2.2])
+    >>> print(T1.Get(T1.Root())) #doctest: +SKIP
+    [3.1000000000000001, 5, 8, -2.2000000000000002]
+
 Saving
 ------
 
-In the constructor section, we've seen that we can load an histogram from an
-ASCII file. So, the next step is to know how to save an histogram. 
-
-Let us continue using the **h1** variable. Saving, can be done in two equivalent 
-ways using the :func:`~openalea.stat_tool.output.Save` function or the save methods:
+Any `Tree`_ instance can be saved into a file, using the
+:meth:`~source_openalea.tree_statistic.trees.Tree.Save` method:
 
 .. doctest::
     :options: +SKIP
     
-    >>> h1.save('test.dat')
-    >>> Save(h1, 'test.dat')
-    
-Then, you can construct a new instance as follows:
+    >>> T1.Save('test.mtg', variable_names=["V1", "V2", "V3", "V4"])
+
+This creates a file *test.mtg* where the tree structure is stored,
+as well as the attributes, under the mtg format.
+
+.. note:: In addition to the file name, *Save* takes two optional
+    arguments: the boolean `overwrite` (= **True** if any existing
+    file with the same name can be overwritten) and the list
+    *variable_names* of the names of the variables, if they have
+    to be renamed in the MTG file.
+
+Then, you can construct a new `Tree`_ instance as follows:
 
 .. doctest::
     :options: +SKIP
     
-    >>> dummy = Histogram('test.dat')
+    >>> T2 = Tree('test.mtg')
 
-    
-Plotting
---------
+..  comment lines below
+    Plotting
+    --------
 
-old AML style
+    old AML style
 
-.. doctest::
-    :options: +SKIP
-    
-    h.old_plot()
+    .. doctest::
+        :options: +SKIP
+        
+        h.old_plot()
 
-new style, either with GNUPLOT or MATPLOTLIB. By default, matplotlib is used if
-it is implemented:
+    new style, either with GNUPLOT or MATPLOTLIB. By default, matplotlib is used if
+    it is implemented:
 
-.. doctest::
-    
-    >>> clf()
-    >>> h1.plot(show=False)
-    >>> savefig('doc/user/stat_tool_histogram_plot.png')
-    >>> # by default, the Plot routine uses matplolib (if available)
-    >>> # but you can still use gnuplot 
-    >>> plot.set_plotter(plot.gnuplot()) #doctest: +SKIP
-    >>> # and come back to matplotlib later on
-    >>> plot.set_plotter(plot.mtplotlib()) #doctest: +SKIP
-
-
-.. figure:: stat_tool_histogram_plot.png
-    :width: 50%
-    :align: center
-
-There are other methods related to GNUPLOT that we will not supported anymore
-in the future::
-
-    >>> h1.plot_write('output', 'title')
-    >>> h1.print_plot() # save gnuplot output in a postscript file
-
-Clustering
-----------
-
-Histograms can be clustered. See :func:`~openalea.stat_tool.cluster.Cluster`
-
-.. doctest::
-    :options: +SKIP
-
-    >>> h1.cluster_information(0.5) 
-    # equivalently
-    >>> Cluster(h1, "Information", 0.5)
-    >>> h1.cluster_limit([1,2])
-    # equivalently
-    >>> Cluster(h1, "Limit", [1,2])
-    >>> h1.cluster_step(3)
-    # equivalently
-    >>> Cluster(h1, "Step", 3)
-    
-.. warning:: Again, although the function is equivalent to the method, we 
-    advice you to use the functions. See Display section for details.
+    .. doctest::
+        
+        >>> clf()
+        >>> h1.plot(show=False)
+        >>> savefig('doc/user/stat_tool_histogram_plot.png')
+        >>> # by default, the Plot routine uses matplolib (if available)
+        >>> # but you can still use gnuplot 
+        >>> plot.set_plotter(plot.gnuplot()) #doctest: +SKIP
+        >>> # and come back to matplotlib later on
+        >>> plot.set_plotter(plot.mtplotlib()) #doctest: +SKIP
 
 
-Merging
--------
+    .. figure:: stat_tool_histogram_plot.png
+        :width: 50%
+        :align: center
 
-the following examples illustrates the usage of the 
-:func:`~openalea.stat_tool.data_transform.Merge` function. See also 
-Figure :ref:`fig_merging` for the output plots.
+    There are other methods related to GNUPLOT that we will not supported anymore
+    in the future::
 
-.. doctest::
+        >>> h1.plot_write('output', 'title')
+        >>> h1.print_plot() # save gnuplot output in a postscript file
 
-    >>> # load two histograms
-    >>> h1 = Histogram('./test/meri1.his')
-    >>> clf(); h1.plot(show=False); savefig('doc/user/stat_tool_histogram_h1.png')
-    >>> h5 = Histogram('./test/meri5.his')
-    >>> clf(); h5.plot(show=False); savefig('doc/user/stat_tool_histogram_h5.png')
+    Clustering
+    ----------
 
-The two original histograms are shown here below:
+    Histograms can be clustered. See :func:`~openalea.stat_tool.cluster.Cluster`
 
-+---------------------------------------+----------------------------------------+
-| .. image:: stat_tool_histogram_h1.png | .. image:: stat_tool_histogram_h5.png  |
-|     :width: 100%                      |     :width: 100%                       |
-+---------------------------------------+----------------------------------------+
+    .. doctest::
+        :options: +SKIP
 
-.. doctest::
+        >>> h1.cluster_information(0.5) 
+        # equivalently
+        >>> Cluster(h1, "Information", 0.5)
+        >>> h1.cluster_limit([1,2])
+        # equivalently
+        >>> Cluster(h1, "Limit", [1,2])
+        >>> h1.cluster_step(3)
+        # equivalently
+        >>> Cluster(h1, "Step", 3)
+        
+    .. warning:: Again, although the function is equivalent to the method, we 
+        advice you to use the functions. See Display section for details.
 
-    >>> a = Merge(h1,h5)
-    >>> b= h1.merge([h5])
-    >>> c = h5.merge([h1])
-    >>> clf(); a.plot(show=False)
-    >>> savefig('doc/user/stat_tool_histogram_merging.png')
 
-.. _fig_merging:
-.. figure:: stat_tool_histogram_merging.png
-    :width: 50%
-    :align: center
+    Merging
+    -------
 
-    **Figure: The merging of two histograms**
+    the following examples illustrates the usage of the 
+    :func:`~openalea.stat_tool.data_transform.Merge` function. See also 
+    Figure :ref:`fig_merging` for the output plots.
+
+    .. doctest::
+
+        >>> # load two histograms
+        >>> h1 = Histogram('./test/meri1.his')
+        >>> clf(); h1.plot(show=False); savefig('doc/user/stat_tool_histogram_h1.png')
+        >>> h5 = Histogram('./test/meri5.his')
+        >>> clf(); h5.plot(show=False); savefig('doc/user/stat_tool_histogram_h5.png')
+
+    The two original histograms are shown here below:
+
+    +---------------------------------------+----------------------------------------+
+    | .. image:: stat_tool_histogram_h1.png | .. image:: stat_tool_histogram_h5.png  |
+    |     :width: 100%                      |     :width: 100%                       |
+    +---------------------------------------+----------------------------------------+
+
+    .. doctest::
+
+        >>> a = Merge(h1,h5)
+        >>> b= h1.merge([h5])
+        >>> c = h5.merge([h1])
+        >>> clf(); a.plot(show=False)
+        >>> savefig('doc/user/stat_tool_histogram_merging.png')
+
+    .. _fig_merging:
+    .. figure:: stat_tool_histogram_merging.png
+        :width: 50%
+        :align: center
+
+        **Figure: The merging of two histograms**
 
 
 
