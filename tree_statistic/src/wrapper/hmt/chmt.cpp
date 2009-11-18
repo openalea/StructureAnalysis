@@ -532,6 +532,37 @@ Hmt_wrapper_ascii_read1(const char * path)
  *  Wrappers for Python class CHmt_data:
  */
 
+bool Chmt_data_wrapper_is_parametric(const Hidden_markov_tree_data& reftree,
+                                     int variable)
+{
+   ostringstream error_message;
+   Hidden_markov_tree* hmarkovt= reftree.get_markov();
+   bool res= false;
+
+   if (hmarkovt == NULL)
+   {
+      error_message << "No model associated with data";
+      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+   else
+   {
+      if ((variable <= 0) ||
+          (variable > reftree.get_nb_int() + reftree.get_nb_float()))
+      {
+         error_message << STAT_TREES_error[STATR_OUTPUT_PROCESS_INDEX];
+         PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
+         throw_error_already_set();
+      }
+      else
+      {
+         res= hmarkovt->is_parametric(variable-1);
+         delete hmarkovt;
+         hmarkovt= NULL;
+         return res;
+      }
+   }
+}
 
 Hidden_markov_out_tree*
 Chmt_data_wrapper_hidden_markov_out_tree_estimation_markov(const Hidden_markov_tree_data& hmtd,
@@ -776,6 +807,10 @@ BOOST_PYTHON_MODULE(chmt)
         .def(init< const Trees&>())
         // .def(init< const Trees&, int>())
         // .def("__init__", make_constructor(CHmt_data_wrapper_init1))
+        .def("IsParametric", &Chmt_data_wrapper_is_parametric,
+                            "IsParametric(self, variable) -> bool \n\n"
+                            "Return True if process 'variable' "
+                            "is parametric")
         .def("StateTrees",
              &Hidden_markov_tree_data::get_state_hidden_markov_tree_data,
              return_value_policy< manage_new_object >(),

@@ -1623,8 +1623,11 @@ void Hidden_markov_out_tree::downward_step(const Hidden_markov_tree_data& trees,
  *  algorithm from a tree sample, using a Format_error object,
  *  an output stream, the initial hidden Markov out tree model,
  *  a flag on the computation of the counting distributions,
- *  the restoration algorithm (upward-downward or Viterbi)
- *  the iteration number and a flag on the characteristic computation
+ *  the restoration algorithm (upward-downward or Viterbi),
+ *  the type of variant for the EM algorithm (EM, CEM, SAEM, Gibbs),
+ *  a weight for the stochastic restoration in the case of SAEM or Gibbs,
+ *  the number of iterations and a flag on keeping parametric distributions
+ *  or not
  *
  **/
 
@@ -2409,7 +2412,11 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
  *  a flag on the structure of the transition probability matrix
  *  and on the computation of the counting distributions,
  *  the restoration algorithm (upward-downward or Viterbi),
+ *  the type of variant for the EM algorithm (EM, CEM, SAEM, Gibbs),
+ *  a weight for the stochastic restoration in the case of SAEM or Gibbs,
  *  the initial self_transition probabilities and the iteration number
+ *  the number of iterations and a set of flags on
+ *  keeping parametric distributions within a same family or not
  *
  **/
 
@@ -2428,7 +2435,7 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
                                                            bool* force_param) const
 {
    // note: length of force_param must be checked before call
-   bool status= true, fparam= !(force_param==NULL);
+   bool status= true; //, fparam= !(force_param==NULL);
    register int var;
    int nb_value[SEQUENCE_NB_VARIABLE];
    Hidden_markov_out_tree *ihmt=NULL, *hmt= NULL;
@@ -2477,6 +2484,7 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
       // Hidden_markov_tree::init(...)
 
       // initialization of the observation distributions
+      // This essential step perturbates the initial uniform distributions
 
       for(var= 0; var < ihmt->_nb_ioutput_process; var++)
       {
@@ -2490,7 +2498,7 @@ Hidden_markov_tree_data::hidden_markov_out_tree_estimation(Format_error& error,
 
       hmt= hidden_markov_out_tree_estimation(error, os, *ihmt, counting_flag,
                                              state_trees , algorithm, saem_exponent,
-                                             nb_iter, fparam);
+                                             nb_iter, false); //fparam
       delete ihmt;
       ihmt= NULL;
     }

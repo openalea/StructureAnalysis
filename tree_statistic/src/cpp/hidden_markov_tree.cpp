@@ -2571,7 +2571,8 @@ Hidden_markov_tree::Hidden_markov_tree(char itype, int inb_state,
  , piprocess(NULL)
  , pdprocess(NULL)
 {
-   register int i;
+   register int i, s, v;
+   double sum= 0.0, inc;
    bool *fparam= NULL;
 
    self_row= new int[nb_state];

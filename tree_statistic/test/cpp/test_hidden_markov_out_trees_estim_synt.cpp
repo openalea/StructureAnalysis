@@ -48,11 +48,13 @@ int main(void)
    vertex_iterator it, end;
    vertex_array va;
    Format_error error;
-   int* perm;
+   bool *force_param= NULL;
+   int *perm;
    const char * hmotpath= "./hmot_np_2s.hmt";
    const char * hmotinitpath= "./hmot_np_init_2s.hmt";
+   const char * hmotparampath= "./hmot_init.hmt";
    Hidden_markov_out_tree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL,
-                          *hmot_estim= NULL;
+                          *hmot_estim= NULL, *hmot_param= NULL;
    Hidden_markov_tree_data *hmtd= NULL, *hmtdman= NULL,
                            *hmtdtmp= NULL;
    Trees *ctrees= NULL;
@@ -71,6 +73,8 @@ int main(void)
 
    // reading and printing a hidden Markov out tree
    hmot= hidden_markov_out_tree_ascii_read(error, hmotpath);
+   hmot_param= hidden_markov_out_tree_ascii_read(error, hmotparampath);
+
    cout << error;
 
    if (hmot != NULL)
@@ -303,6 +307,55 @@ int main(void)
                     << (hmot2->likelihood_computation(*hmtd) - likelihood)/abs(likelihood)<< endl;
                likelihood= hmot2->likelihood_computation(*hmtd);
             }
+            cout << endl << "estimated HMT (" << nb_iterations << " iterations)" << endl;
+            cout << *hmot2;
+            delete hmot2;
+            hmot2= NULL;
+         }
+
+         cout << endl << "Testing estimation with auto-parametric distributions "
+              << "and self-transitions." << endl;
+         if (hmot_param != NULL)
+         {
+            // simulation of hidden Markov out trees
+            hmtdtmp= hmot_param->simulation(error, nb_trees, size, nb_children_max);
+            cout << error;
+            if (hmtdtmp != NULL)
+            {
+                hmot2= hmtdtmp->hidden_markov_out_tree_estimation(error, cout, 'o', 2, false,
+                                                                  true, VITERBI, FORWARD_BACKWARD,
+                                                                  1., 0.99999, nb_iterations);
+                cout << error;
+                if (hmot2 != NULL)
+                {
+                   cout << endl << "estimated HMT (" << nb_iterations << " iterations)" << endl;
+                   cout << *hmot2;
+                   delete hmot2;
+                   hmot2= NULL;
+                }
+                delete hmtdtmp;
+                hmtdtmp= NULL;
+                delete hmot_param;
+                hmot_param= NULL;
+            }
+         }
+
+
+         cout << endl << "Testing estimation with imposed parametric distributions "
+              << " and self-transitions." << endl;
+
+         force_param= new bool[1];
+         force_param[0]= true;
+
+         hmot2= hmtd->hidden_markov_out_tree_estimation(error, cout, 'o', 2, false,
+                                                        true, VITERBI, FORWARD_BACKWARD,
+                                                        1., 0.99999, nb_iterations, force_param);
+         cout << error;
+         delete [] force_param;
+         force_param= NULL;
+
+         if (hmot2 != NULL)
+         {
             cout << endl << "estimated HMT (" << nb_iterations << " iterations)" << endl;
             cout << *hmot2;
             delete hmot2;

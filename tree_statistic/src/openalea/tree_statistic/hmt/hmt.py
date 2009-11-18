@@ -825,6 +825,14 @@ class HiddenMarkovTreeData(trees.Trees):
                 file_id = ref_file_id + "0"
             else:
                 file_id = ref_file_id
+            try:
+                param = False
+                param = self.__ctrees.IsParametric(cvariable)
+            except RuntimeError:
+                pass
+            else:
+                if param:
+                    file_id = ref_file_id
             # part of the filename which identifies the graph to be displayed
 ##            prefix="ftmp"
 ##            file_created=False

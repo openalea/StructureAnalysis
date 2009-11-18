@@ -16,15 +16,15 @@ if env_test['debug']:
 env_test.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
 import os
 if os.name != 'nt':
-	env_test.AppendUnique(LIBS= ['efence'])
+    env_test.AppendUnique(LIBS= ['efence'])
 
 # env_test.AppendUnique(LIBS= ['leaktrace'])
 # env.Append(CPPPATH= includes)
 
 #Sources
 
-tests= Split("""
 # test_int_fl_containers.cpp
+tests= Split("""
 test_generic_tree.cpp
 test_int_fl_tree.cpp
 test_tree_characteristics.cpp
@@ -63,7 +63,7 @@ def rmTests(target, source, env):
   return 1
 
 r= env.AddPostAction(test_prog, rmTests)
-Alias("clean_test",r)
+Alias('clean_test', r)
 '''
 
 # print test_prog

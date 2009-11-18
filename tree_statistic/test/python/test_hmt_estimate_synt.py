@@ -1,13 +1,11 @@
+# -*- coding: utf-8 -*-
 # a test for the class hmt.Hmt: estimation - syntax
 import sys, os
 import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.trees as trees, openalea.tree_statistic.hmt as hmt
 inf_bound=1
 sup_bound=3
-probability= 0.6
-ident=stat_tool.DistributionIdentifier.UNIFORM
-parameter=stat_tool.D_DEFAULT
-distrib= stat_tool._ParametricModel(ident, inf_bound, sup_bound, parameter, probability)
+distrib = stat_tool.Uniform(inf_bound, sup_bound)
 # Distribution used for the number of children and the tree attributes
 file_name="hmot_np_2s.hmt"
 # read a HMT from a file
