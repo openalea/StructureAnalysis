@@ -43,9 +43,9 @@
 
 #include "matchpath.h"
 
-void MatchPath::link(int deg_max,DistanceTable& tree_distances)
+void MatchPath::link(int deg_max,MatchingDistanceTable* mdtable)
 {
-  _treeDistances=&tree_distances;
+  _mdtable=mdtable;
   flow.resize(deg_max*deg_max+3*deg_max);
   cost.resize(2*deg_max+3);
 }
@@ -186,11 +186,21 @@ bool MatchPath::direct(int residual_edge)
 
 DistanceType MatchPath::edgeCost(int input_vertex,int reference_vertex)
 {
-  if (input_vertex==-1) 
-    input_vertex = _treeDistances->size()-1; 
-  if (reference_vertex==-1) 
-    reference_vertex = (_treeDistances->at(input_vertex)).size()-1; 
-  return _treeDistances->at(input_vertex)[reference_vertex];
+   if (_mdtable->getType()==STD){
+     DistanceVectorTable* _treeDistances = &_mdtable->getDistanceTable();
+     if (input_vertex==-1) 
+      input_vertex = _treeDistances->size()-1; 
+    if (reference_vertex==-1) 
+      reference_vertex = (_treeDistances->at(input_vertex)).size()-1; 
+     return _treeDistances->at(input_vertex)[reference_vertex];
+  }
+  else{
+     DistanceTable* _treeDTable = &_mdtable->getTreeDistanceTable();
+    //cerr<<_treeDTable->getDistance(input_vertex,reference_vertex)<<endl;
+    if (input_vertex==-1) { input_vertex = _treeDTable->getSimulatedSize()-1; }
+    if (reference_vertex==-1) { reference_vertex = _treeDTable->getColumnSize()-1; }
+    return(_treeDTable->getDistance(input_vertex,reference_vertex));
+  }
 }
 
 

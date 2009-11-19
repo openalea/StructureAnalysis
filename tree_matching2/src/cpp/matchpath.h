@@ -67,7 +67,7 @@ class TREEMATCH_API MatchPath
     // une contenant les noeuds initiaux et l'autre les noeuds de reference
     void make(NodeList& ,NodeList& );
 
-    void link(int, DistanceTable&);
+    void link(int, MatchingDistanceTable*);
     // Recherche le plus court chemin au sens du cout ameliore de
     // Edmons et Karp
     bool findPath(VertexVector&,EdgeList& );
@@ -92,7 +92,7 @@ class TREEMATCH_API MatchPath
  
 
   protected :
-    DistanceTable*     _treeDistances;  //
+    MatchingDistanceTable*     _mdtable;  //
     NodeList*          _inputList;     //Liste des noeuds de la foret initiale
     NodeList*          _referenceList; //Liste des noeuds de la foret de reference
     CapacityVector     flow; // Vecteur flot

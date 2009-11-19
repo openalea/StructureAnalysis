@@ -86,6 +86,8 @@ class TREEMATCH_API TreeGraph
   inline TreeNodePtr getTreeNode(int vertex) { return getNode(vertex); }
   TreeNodePtr getNode(int vertex);
 
+  int getDepth() const { return _depth;};
+
    /** Return the father of a node */
   int father(int ) const;
 

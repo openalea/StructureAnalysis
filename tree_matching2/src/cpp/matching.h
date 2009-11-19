@@ -64,6 +64,8 @@
  *\date 2009
  */
 
+
+
 class TREEMATCH_API Matching
 {
 
@@ -71,7 +73,7 @@ public :
   //Constructor
   Matching() {};
 
-  Matching(const TreeGraphPtr& , const TreeGraphPtr& ,const NodeCostPtr& ) ;
+  Matching(const TreeGraphPtr& , const TreeGraphPtr& ,const NodeCostPtr&, MDTableType mdtable_type = STD ) ;
 
   //Destructor
   ~Matching();
@@ -84,7 +86,12 @@ public :
   
   
   //Operator
-  inline DistanceTable getDistanceTable(){ return _distances.getDistanceTable(); }
+  inline DistanceVectorTable getDistanceTable(){ 
+    if (_distances->getType() == STD)
+      return _distances->getDistanceTable(); 
+    else
+      exit(0);
+  }
 
   DistanceType getDBT(int ,int ) const;
   DistanceType getDBF(int ,int ) const;
@@ -98,12 +105,15 @@ public :
 protected :
   TreeGraphPtr T1;
   TreeGraphPtr T2;
-  MatchingDistanceTable _distances;
+  MatchingDistanceTable* _distances;
   ChoiceTable _choices;
   NodeCostPtr ND;
   MatchPath _restrMapp;
   VertexVector _restrMappList;
   int M(int,int);
+
+  MDTableType _mdtable_type;
+  
 };
 
 

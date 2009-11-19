@@ -41,12 +41,18 @@
   // -------------
   // Constructeur
   // -------------
-Matching::Matching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance):
-  T1(input), T2(reference), ND(nodeDistance),_distances(input,reference,nodeDistance)
+Matching::Matching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance, MDTableType mdtable_type  ):
+  T1(input), T2(reference), ND(nodeDistance)//,_distances(input,reference,nodeDistance)
 {
+  _mdtable_type = mdtable_type;
+  if (_mdtable_type == STD)
+    _distances = new StdMatchingDistanceTable(input,reference,nodeDistance);
+  else
+    _distances = new CompactMatchingDistanceTable(input,reference,nodeDistance);
   _choices.resize(T1->getNbVertex(),T2->getNbVertex());
   // constante qui va permettre de calculer l'alignement restreint
-  _restrMapp.link(I_MAX(T1->getDegree(),T2->getDegree()),_distances.getDistanceTable());
+  //_restrMapp.link(I_MAX(T1->getDegree(),T2->getDegree()),_distances.getDistanceTable());
+  _restrMapp.link(I_MAX(T1->getDegree(),T2->getDegree()),_distances);
 }
 // -------------
 // Destructeur
@@ -119,7 +125,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
   // Le cout est celui de l'alignement des deux forets
   // plus celui de l'echange de T1(i) en T2(j)
   cost3=getDBF(input_vertex,reference_vertex);
-  cost3=cost3+_distances.getCCost(input_vertex,reference_vertex);
+  cost3=cost3+_distances->getCCost(input_vertex,reference_vertex);
   // On conserve le cout s'il est inferieur au precedent
   if (cost3<MIN) { MIN=cost3; MTC=3;  }
 
@@ -144,7 +150,7 @@ DistanceType Matching::distanceBetweenTree(int input_vertex,int reference_vertex
     default :   assert(0);break;
     }
   _choices.putFirst(input_vertex,reference_vertex,MTC);
-  _distances.putDBT(input_vertex,reference_vertex,MIN);
+  _distances->putDBT(input_vertex,reference_vertex,MIN);
   return(MIN);
 
 }
@@ -283,7 +289,7 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
 
   delete (NodeList*) input_list;
   delete (NodeList*) reference_list;
-  _distances.putDBF(input_vertex,reference_vertex,DIST);
+  _distances->putDBF(input_vertex,reference_vertex,DIST);
   return(DIST);
 
 }
@@ -321,7 +327,7 @@ void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence
           }
           break;
         case 3: {
-          sequence.append(input_vertex,reference_vertex,_distances.getCCost(input_vertex,reference_vertex));
+          sequence.append(input_vertex,reference_vertex,_distances->getCCost(input_vertex,reference_vertex));
           ForestList(input_vertex,reference_vertex,sequence);
         }break;
         default : break;
@@ -358,37 +364,44 @@ DistanceType Matching::match()
 	{
 		const int size1 = T1->getNbVertex();
 		const int size2 = T2->getNbVertex();
+		if (_mdtable_type == STD){
+		  for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
+		    {
+		      _distances->inputForestToEmpty(input_vertex);
+		      _distances->inputTreeToEmpty(input_vertex);
+		    }
+		  for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
+		    {
+		      _distances->referenceForestFromEmpty(reference_vertex);
+		      _distances->referenceTreeFromEmpty(reference_vertex);
+		    }
+		}
 		for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
 		{
-			_distances.inputForestToEmpty(input_vertex);
-			_distances.inputTreeToEmpty(input_vertex);
-		}
-		for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
-		{
-			_distances.referenceForestFromEmpty(reference_vertex);
-			_distances.referenceTreeFromEmpty(reference_vertex);
-		}
-		for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
-		{
-			for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
-			{
-				distanceBetweenForest(input_vertex,reference_vertex);
-				DistanceType d =distanceBetweenTree(input_vertex,reference_vertex);
-			}
-			if (int(100. - 100*input_vertex/size1)%5 == 0)
-				cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
-		}
+		  if (_mdtable_type == COMPACT)
+		    _distances->openDistancesVector(input_vertex);
+		  for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
+		    {
+		      distanceBetweenForest(input_vertex,reference_vertex);
+		      DistanceType d =distanceBetweenTree(input_vertex,reference_vertex);
+		    }
+		  if (int(100. - 100*input_vertex/size1)%5 == 0)
+		    cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
+		  if (_mdtable_type == COMPACT)
+		    for (int i=1;i<=T1->getNbChild(input_vertex);i++)
+		      _distances->closeDistancesVector(T1->child(input_vertex,i));
+ 		}
 		D=getDBT(0,0);
 	}
 	else
 	{
 		if (T1->isNull())
 		{
-			if (!T2->isNull()) {D=_distances.referenceTreeFromEmpty(0);}
+			if (!T2->isNull()) {D=_distances->referenceTreeFromEmpty(0);}
 		}
 		else
 		{
-			D=_distances.inputTreeToEmpty(0);
+			D=_distances->inputTreeToEmpty(0);
 		}
 	}
 	cerr<<"\x0d"<<endl;
@@ -402,12 +415,12 @@ DistanceType Matching::match()
 
 DistanceType Matching::getDBT(int input_vertex,int reference_vertex) const
 {
-  return(_distances.getDBT(input_vertex,reference_vertex));
+  return(_distances->getDBT(input_vertex,reference_vertex));
 }
 
 DistanceType Matching::getDBF(int input_vertex,int reference_vertex) const
 {
-  return(_distances.getDBF(input_vertex,reference_vertex));
+  return(_distances->getDBF(input_vertex,reference_vertex));
 }
 
 
