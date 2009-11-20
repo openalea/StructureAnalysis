@@ -97,8 +97,8 @@ class TREEMATCH_API MatchingDistanceTable
   virtual DistanceType getICost(int& ) const {return 0.;};
   virtual DistanceType getDCost(int& ) const {return 0.;};
   virtual DistanceType getCCost(int ,int ) const {return 0.;};
-  virtual DistanceTable &getTreeDistanceTable() {};
-  virtual DistanceVectorTable &getDistanceTable(){}; //;{return(_treeDistTable);};
+  // virtual DistanceTable &getTreeDistanceTable()   = 0;
+  virtual DistanceVectorTable &getDistanceTable() = 0; 
   MDTableType getType() const {return _type;};
   
  protected :
@@ -140,9 +140,8 @@ class TREEMATCH_API StdMatchingDistanceTable : public MatchingDistanceTable
   DistanceType inputForestToEmpty(int );
   DistanceType referenceTreeFromEmpty(int );
   DistanceType referenceForestFromEmpty(int );
-  DistanceVectorTable &getDistanceTable() {
-      return(_treeDistTable);
-  };
+
+  virtual DistanceVectorTable &getDistanceTable() { return(_treeDistTable); }
 
     private :
     int _n1;
@@ -150,6 +149,7 @@ class TREEMATCH_API StdMatchingDistanceTable : public MatchingDistanceTable
     TreeGraphPtr T1;
     TreeGraphPtr T2;
     NodeCostPtr ND;
+
 
   protected :
   //DistanceVector _inputTreeToEmpty;
@@ -190,6 +190,7 @@ class TREEMATCH_API CompactMatchingDistanceTable : public MatchingDistanceTable
   DistanceType referenceForestFromEmpty(int );
   DistanceTable &getTreeDistanceTable() {
     return(_treeDistTable);};
+  virtual DistanceVectorTable &getDistanceTable() { exit(1); }
 
     private :
     int _n1;

@@ -160,7 +160,6 @@ TreeNodePtr TreeGraph::getNode(int vertex)
 {
   assert((vertex>=0)&&(vertex<_treenodes.size()));
   return _treenodes[vertex];
-  // return getTreeNode(i);
 }
 
 

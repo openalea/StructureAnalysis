@@ -88,7 +88,7 @@ public :
   //Operator
   inline DistanceVectorTable getDistanceTable(){ 
     if (_distances->getType() == STD)
-      return _distances->getDistanceTable(); 
+      return ((StdMatchingDistanceTable*)_distances)->getDistanceTable(); 
     else
       exit(0);
   }
