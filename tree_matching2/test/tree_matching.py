@@ -32,7 +32,9 @@ def test_matching():
   tree2 = create_treegraph()
 
   node_cost = MyNodeCost()
+  # Standard option = 0
   m = Matching(tree1,tree2,node_cost,0)
+  # Compact option = 1
   val = m.match()
   print 'match =',val
   print m.getList(0,0)
