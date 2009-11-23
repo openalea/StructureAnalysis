@@ -29,6 +29,7 @@ int main(void)
 {
    typedef Hidden_markov_tree_data::state_tree_type state_tree_type;
    typedef Hidden_markov_tree_data::tree_type tree_type;
+   typedef Hidden_markov_tree_data::key key;
    typedef Hidden_markov_tree_data::value value;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
@@ -37,6 +38,7 @@ int main(void)
    const int tid= 1, // id of the tree to be analyzed
              size= 55, // size2= 25;
              nb_children_max= 2;
+   key vid;
    double hidden_likelihood, likelihood,
           likelihood2; //, max_marginal_entropy, entropy;
    value default_value;
@@ -317,6 +319,61 @@ int main(void)
          messages[cptm++]= NULL;
          delete generalized;
          generalized= NULL;
+      }
+
+      // Test of the generalized Viterbi algorithm
+      // on subtrees
+      vid= 1;
+      hmot->state_profile(error, *hmtd, tid, smoothed, hmtdv,
+                          vud, generalized, messages,
+                          GENERALIZED_VITERBI, 5,
+                          UPWARD, vid);
+      cout << error << endl;
+      ptrees= new state_tree_type*[1];
+
+      if (smoothed != NULL)
+      {
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete smoothed;
+         smoothed= NULL;
+      }
+      if (vud != NULL)
+      {
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete vud;
+         vud= NULL;
+      }
+
+      if (generalized != NULL)
+      {
+         cout << endl
+              << "Generalized viterbi started at vertex "
+              << vid << ": " << endl;
+         cout << messages[cptm]->str();
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         potrees= new tree_type*[1];
+         potrees[0]= generalized->get_tree(0);
+         potrees[0]->display(cout, 0);
+         cout << endl;
+         delete potrees[0];
+         potrees[0]= NULL;
+
+         cout << messages[cptm]->str();
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         delete generalized;
+         generalized= NULL;
+         delete [] potrees;
+         potrees= NULL;
       }
 
       delete hmot;

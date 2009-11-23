@@ -452,7 +452,8 @@ protected :
                                                         std::vector<ostringstream*>& messages,
                                                         int nb_state_trees,
                                                         double likelihood,
-                                                        int index) const;
+                                                        int index,
+                                                        int sroot= I_DEFAULT) const;
 
    /**Compute the completed likelihood for a given set of trees and state trees*/
    virtual double state_likelihood_computation(const Hidden_markov_tree_data& trees) const;
@@ -525,7 +526,8 @@ public :
                       std::vector<ostringstream*>& messages,
                       int state_tree= GENERALIZED_VITERBI,
                       unsigned int nb_state_trees= NB_STATE_TREES,
-                      int entropy_algo= UPWARD) const;
+                      int entropy_algo= UPWARD,
+                      int root= I_DEFAULT) const;
 
    /** Write Gnuplot output of state and entropy profiles */
    virtual bool tree_state_profile_plot_write(Format_error &error, const char *prefix,

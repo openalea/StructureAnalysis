@@ -383,6 +383,8 @@ public :
    Typed_edge_trees* size_select(Format_error& error, int imin_size, int imax_size,
                                bool keep= true) const;
 
+   /** Select subtrees using the subtree root index, the tree index
+       and a flag on keeping or pruning the subtree */
    Typed_edge_trees* select_subtrees(Format_error& error, int iindex,
                                    int itree= I_DEFAULT, bool keep= true) const;
    // would be more interesting with true vertex and tree identifiers

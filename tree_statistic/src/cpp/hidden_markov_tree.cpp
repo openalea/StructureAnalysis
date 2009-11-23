@@ -3714,7 +3714,8 @@ bool Hidden_markov_tree::state_profile(Format_error& error,
                                        std::vector<ostringstream*>& messages,
                                        int state_tree,
                                        unsigned int nb_state_trees,
-                                       int entropy_algo) const
+                                       int entropy_algo,
+                                       int root) const
 { return false; }
 
 /*****************************************************************
@@ -5314,7 +5315,8 @@ Hidden_markov_tree_data* Hidden_markov_tree::generalized_viterbi(const Hidden_ma
                                                                  std::vector<ostringstream*>& messages,
                                                                  int nb_state_trees,
                                                                  double likelihood,
-                                                                 int index) const
+                                                                 int index,
+                                                                 int sroot) const
 { return NULL; }
 
 double Hidden_markov_tree::state_likelihood_computation(const Hidden_markov_tree_data& trees) const

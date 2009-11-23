@@ -90,12 +90,12 @@ int main(void)
    visitor->print_inorder(t);
    visitor->print_postorder(t);
 
-   cout << "Breath first tree traversing : " << endl;
+   cout << "Breath first tree traversal: " << endl;
    vertex_array va= visitor->get_breadthorder(t);
    for(i= 0; i < va.size(); i++)
       cout << va[i]+1 << endl;
 
-   cout << endl << "Leaves last tree traversing : " << endl;
+   cout << endl << "Leaves last tree traversal : " << endl;
    va= visitor->get_leavesfirstorder(t, depth);
    for(i= 0; i < va.size(); i++)
       cout << va[i]+1 << endl;
@@ -133,6 +133,20 @@ int main(void)
       delete ptcopy_t;
    }
    ptcopy_t= NULL;
+
+   delete visitor;
+   visitor= new generic_visitor<tree_int>;
+   traverse_tree(child, t, *visitor);
+
+   cout << "Preorder tree traversal starting at vertex "
+        << child+1 << ": " << endl;
+   visitor->print_preorder(t);
+
+   cout << "Breath first tree traversal starting at vertex "
+        << child+1 << ": " << endl;
+   va= visitor->get_breadthorder(t, child);
+   for(i= 0; i < va.size(); i++)
+      cout << va[i]+1 << endl;
 
    // construction of a tree by copy
    ptcopy_t= new tree_int(t);
@@ -228,7 +242,7 @@ int main(void)
    visitor->print_inorder(*ptcopy_t);
    visitor->print_postorder(*ptcopy_t);
 
-   cout << "Breath first tree traversing : " << endl;
+   cout << "Breath first tree traversal: " << endl;
    va= visitor->get_breadthorder(*ptcopy_t);
    for(i= 0; i < va.size(); i++)
       cout << va[i] << endl;
@@ -238,7 +252,7 @@ int main(void)
    //         << ptcopy_t->get_nb_children(va[i]) << endl;
    // cout << endl;
 
-   cout << endl << "Leaves-last tree traversing : " << endl;
+   cout << endl << "Leaves-last tree traversal: " << endl;
    va= visitor->get_leavesfirstorder(*ptcopy_t, depth);
    for(i= 0; i < va.size(); i++)
       cout << va[i] << endl;
@@ -447,14 +461,14 @@ int main(void)
    for(i= 0; i < va.size(); i++)
       tlabellized->put(va[i], i+1);
 
-   cout << "Vertices ordered by breadth first traversing : " << endl;
+   cout << "Vertices ordered by breadth first traversal: " << endl;
    tlabellized->display(cout, tlabellized->root());
 
    va= visitor->get_leavesfirstorder(*tlabellized, depth);
    for(i= 0; i < va.size(); i++)
       tlabellized->put(va[i], i+1);
 
-   cout << endl << "Leaves-last tree traversing : " << endl;
+   cout << endl << "Leaves-last tree traversal: " << endl;
    for(i= 0; i < va.size(); i++)
       cout << va[i] << endl;
    cout << endl;
@@ -464,7 +478,7 @@ int main(void)
       cout << depth[i] << endl;
    cout << endl;
 
-   cout << "Vertices ordered by leaves-first traversing : " << endl;
+   cout << "Vertices ordered by leaves-first traversal: " << endl;
    tlabellized->display(cout, tlabellized->root());
 
    cout << "Test of the left (bit) shift operator : " << endl;

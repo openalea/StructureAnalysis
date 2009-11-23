@@ -55,7 +55,7 @@ class HiddenMarkovTree:
 
     def Display(self, ViewPoint=None, Detail=None, TreeId=None, 
                 NbStateTrees=2, StateTrees="GeneralizedViterbi",
-                Entropy="UPWARD"):
+                Entropy="UPWARD", RootVertex=None):
         """Display HiddenMarkovTree object.
         
         Usage: Display()
@@ -96,6 +96,10 @@ class HiddenMarkovTree:
                     msg='bad type for argument "NbStateTrees": '\
                         +str(type(NbStateTrees))
                     raise TypeError, msg
+                if not(RootVertex is None) and (type(RootVertex!=int)):
+                    msg='bad type for argument "RootVertex": '\
+                        +str(type(RootVertex))
+                    raise TypeError, msg
                 if (type(Entropy)!=str):
                     msg='bad type for argument "Entropy": '\
                         +str(type(Entropy))
@@ -110,8 +114,9 @@ class HiddenMarkovTree:
                     raise ValueError, msg    
                 try:
                     ## chmt_data=self.__chmt.ExtractData()
-                    res=self.__chmt.StateProfile(0, NbStateTrees, 
-                                                 TreeId, entropy_algo)
+                    res = self.__chmt.StateProfile(0, NbStateTrees, 
+                                                   TreeId, entropy_algo,
+                                                   RootVertex)
                 except RuntimeError, error:
                     raise FormatError, error
                 else:

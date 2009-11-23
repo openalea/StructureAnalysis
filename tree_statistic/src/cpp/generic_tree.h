@@ -119,7 +119,7 @@ struct generic_visitor
    vertex_array get_preorder(const Tree& t) { return _preorder; }
    vertex_array get_inorder(const Tree& t) { return _inorder; }
    vertex_array get_postorder(const Tree& t) { return _postorder; }
-   vertex_array get_breadthorder(Tree& t) // should be const Tree& t
+   vertex_array get_breadthorder(Tree& t, vid vroot) // should be const Tree& t
    {   // breadth-first tree traversing
 
        typedef typename tree_traits<Tree>::children_iterator children_iterator;
@@ -131,7 +131,7 @@ struct generic_visitor
 
        curr_width= 1; // number of remaining children at current width
        nb_children= 0; // number of children at next width
-       nodes.push_front(t.root());
+       nodes.push_front(vroot);
 
        while(!nodes.empty())
        // breadth-first tree traversing
@@ -156,8 +156,14 @@ struct generic_visitor
               nodes.push_front(*it++);
            }
        }
-       assert(res.size() == (unsigned int)t.size());
        return res;
+   }
+   vertex_array get_breadthorder(Tree& t) // should be const Tree& t
+   {   // breadth-first tree traversing from root
+      std::vector<vid> res= get_breadthorder(t, t.root());
+
+      assert(res.size() == (unsigned int)t.size());
+      return res;
    }
 
    void find_leaves(Tree& t,

@@ -37,14 +37,14 @@ postorder: 5
 3
 1
 
-Breath first tree traversing : 
+Breath first tree traversal: 
 1
 2
 3
 4
 5
 
-Leaves last tree traversing : 
+Leaves last tree traversal : 
 4
 5
 3
@@ -70,6 +70,16 @@ Extracting subtree from this tree rooted at node 2
 Pruning this tree at node 2
 1
 |-3
+Preorder tree traversal starting at vertex 2: 
+preorder: 3
+2
+4
+5
+
+Breath first tree traversal starting at vertex 2: 
+2
+4
+5
 A copy of the whole tree is (constr) 
 1
 |-2
@@ -154,7 +164,7 @@ postorder: 10
 4
 6
 
-Breath first tree traversing : 
+Breath first tree traversal: 
 6
 5
 2
@@ -166,7 +176,7 @@ Breath first tree traversing :
 7
 9
 
-Leaves-last tree traversing : 
+Leaves-last tree traversal: 
 8
 1
 9
@@ -648,7 +658,7 @@ A random structure with less than 45 vertices using no _max_depth constructor
       |   
       |-*
         
-Vertices ordered by breadth first traversing : 
+Vertices ordered by breadth first traversal: 
 1
 |-2
 | |-4
@@ -679,7 +689,7 @@ Vertices ordered by breadth first traversing :
       |-15
         
 
-Leaves-last tree traversing : 
+Leaves-last tree traversal: 
 15
 7
 8
@@ -729,7 +739,7 @@ Distance of each node to nearest leaf :
 3
 4
 
-Vertices ordered by leaves-first traversing : 
+Vertices ordered by leaves-first traversal: 
 21
 |-23
 | |-22

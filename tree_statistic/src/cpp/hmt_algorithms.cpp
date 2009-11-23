@@ -353,7 +353,9 @@ Hidden_markov_tree_data* Hidden_markov_out_tree::state_tree_computation(Format_e
  *  using a Format_error, a given tree referred to by its identifier,
  *  including the suboptimal state trees computed by simulation
  *  or generalized Viterbi algorithm, using nb_state_trees suboptimal trees,
- *  and return various information contained in messages
+ *  and return various information contained in messages.
+ *  The type of algorithm for computing the entropy is specified by entropy_algo
+ *  and only a subtree is returned if a valid value for root is specified
  *
  **/
 
@@ -367,9 +369,11 @@ bool Hidden_markov_out_tree::state_profile(Format_error& error,
                                            std::vector<ostringstream*>& messages,
                                            int state_tree,
                                            unsigned int nb_state_trees,
-                                           int entropy_algo) const
+                                           int entropy_algo,
+                                           int root) const
 {
    bool status= true;
+   int iroot;
    long double nb_possible_state_trees;
    double likelihood, hidden_likelihood, state_likelihood;
           // ambiguity;
@@ -383,6 +387,7 @@ bool Hidden_markov_out_tree::state_profile(Format_error& error,
 
    if ((index >= trees._nb_trees) || (index < 0))
    {
+      // index cannot be I_DEFAULT in this context
       status= false;
       error.update(STAT_TREES_error[STATR_TREE_IDENTIFIER]);
    }
@@ -392,6 +397,19 @@ bool Hidden_markov_out_tree::state_profile(Format_error& error,
      status= false;
      error.update(STAT_TREES_error[STATR_NB_STATE_TREES]);
    }
+
+   if ((status) && (root != I_DEFAULT))
+   {
+      if ((root < 0) || (root > trees.trees[index]->get_size()))
+      {
+        status= false;
+        error.update(STAT_TREES_error[STATR_VERTEX_ID]);
+      }
+      else
+         iroot= root;
+   }
+   else
+      iroot= I_DEFAULT;
 
    if (status)
    {
@@ -465,7 +483,8 @@ bool Hidden_markov_out_tree::state_profile(Format_error& error,
                                                             messages,
                                                             nb_state_trees,
                                                             likelihood,
-                                                            index);
+                                                            index,
+                                                            iroot);
       hmarkov->remove_cumul();
       delete hmarkov;
       hmarkov= NULL;
@@ -3747,8 +3766,74 @@ Hidden_markov_out_tree::viterbi_upward_downward(const Hidden_markov_tree_data& t
 /*****************************************************************
  *
  *  Generalized Viterbi algorithm for Hidden_markov_out_trees.
+ *  Applies generalized_viterbi on a subtree
+ *
+ **/
+
+Hidden_markov_tree_data*
+Hidden_markov_out_tree::generalized_viterbi_subtree(const Hidden_markov_tree_data& trees,
+                                                    std::vector<ostringstream*>& messages,
+                                                    int nb_state_trees,
+                                                    double likelihood,
+                                                    int index, int root) const
+{
+   typedef Hidden_markov_tree_data::tree_type tree_type;
+   typedef generic_visitor<tree_type> visitor;
+   typedef visitor::vertex_array vertex_array;
+
+   register int sroot;
+   Format_error error;
+   vertex_array va_e, va_st;
+   visitor *v= NULL;
+   Trees *sub_trees;
+   Hidden_markov_tree_data *res_trees= NULL, *cp_trees= NULL, *hmt_sub_trees= NULL;
+
+   assert((index >= 0) && (index < trees.get_nb_trees()));
+   assert((root >=0) && (root < trees.trees[index]->get_size()));
+
+   // generalized Viterbi algorithm starts at vertex iroot
+   // used classical Viterbi otherwise
+   cp_trees= new Hidden_markov_tree_data(trees, true, false);
+   viterbi(*cp_trees, index);
+   sroot= cp_trees->state_trees[index]->get(trees.trees[index]->parent(root)).Int();
+   delete cp_trees;
+   sub_trees= trees.select_subtrees(error, root, index);
+   // correspondance between the vids of both trees has to be kept
+
+   v= new generic_visitor<tree_type>;
+   traverse_tree(trees.trees[index]->root(), *trees.trees[index], *v);
+
+   va_st= v->get_breadthorder(*trees.trees[index]);
+   delete v;
+   v= NULL;
+
+   v= new generic_visitor<tree_type>;
+   traverse_tree(sub_trees->trees[index]->root(), *sub_trees->trees[index], *v);
+
+   va_e= v->get_breadthorder(*sub_trees->trees[index]);
+   delete v;
+   v= NULL;
+
+
+   hmt_sub_trees= new Hidden_markov_tree_data(*sub_trees);
+   hmt_sub_trees->markov= new Hidden_markov_out_tree(*this);
+
+   cp_trees= generalized_viterbi(*sub_trees, messages, nb_state_trees,
+                                 likelihood, index,  sroot);
+
+   delete hmt_sub_trees;
+   delete sub_trees;
+
+   return res_trees;
+
+}
+
+/*****************************************************************
+ *
+ *  Generalized Viterbi algorithm for Hidden_markov_out_trees.
  *  Compute the nb_state_trees best trees associated with
- *  the given trees, using the likelihood and the tree index
+ *  the given trees, using the likelihood, the tree index,
+ *  and the state at root vertex if known
  *
  **/
 
@@ -3757,7 +3842,7 @@ Hidden_markov_out_tree::generalized_viterbi(const Hidden_markov_tree_data& trees
                                             std::vector<ostringstream*>& messages,
                                             int nb_state_trees,
                                             double likelihood,
-                                            int index) const
+                                            int index, int state_root) const
 {
    typedef Hidden_markov_tree_data::tree_type tree_type;
    typedef tree_type::vertex_descriptor vid;
@@ -3772,29 +3857,22 @@ Hidden_markov_out_tree::generalized_viterbi(const Hidden_markov_tree_data& trees
    typedef std::vector<std::vector<std::vector<int> > > int_array_3d;
    typedef std::vector<std::vector<std::vector<std::vector<int> > > >
            int_array_4d;
-
-   register int k, j, u, m;
+   register int k, j, u, m, sroot;
    register int var;
    const int _nb_integral= nb_state_trees;
    unsigned int max_digits= 0; // format the display
    int nb_trees= trees._nb_trees, t, tid, e, current_size, inb_trees,
        effective_nb_state_trees, state, pstate, crank, // current_rank,
-       nb_cell, nb_children, ch_id, ci,
+       nb_cell, nb_children, ch_id, ci, iroot,
        combination, cp_combination, max_combination, next_max_combination;
    vid cnode, pnode; // current and parent vertices;
    double state_tree_likelihood= 0., pmap, mapm, mpmap,
           hidden_likelihood, likelihood_cumul;
    bool skip_combination;
-   // bool *used_combination= NULL;
-   // bool **active_cell= NULL;
-   int *itype= NULL; //, *nb_cell_array= NULL,
-   //    *max_children_ranks= NULL, *cnt_ch= NULL;
-   // double *likelihood_array= NULL, *ratio_array= NULL, *cumul_array= NULL;
-   // long double *max_nb_state_trees= NULL;
+   int *itype= NULL;
    double_array_3d map_upward= NULL, map2_upward= NULL;
                    // previous_upward= NULL;
-   double_array_3d output_cond= NULL;
-   // int **val_states= NULL;
+   double_array_3d output_cond= NULL, state_marginal= NULL;
    int_array_3d optimal_states, optimal_ranks;
    int_array_4d children_ranks;
    ostringstream *msg= NULL;
@@ -4118,34 +4196,40 @@ Hidden_markov_out_tree::generalized_viterbi(const Hidden_markov_tree_data& trees
          {
             // termination: root node
             cnode= current_tree->root();
-            mapm= D_INF;
-            for(j= 0; j < nb_state; j++)
+            if (state_root == I_DEFAULT)
             {
-               if (map_upward[j][cnode][rank[j]] > D_INF)
-                  pmap= map_upward[j][cnode][rank[j]] + cumul_initial[j];
-               else
-                  pmap= D_INF;
-               if (pmap > mapm)
+               mapm= D_INF;
+               for(j= 0; j < nb_state; j++)
                {
-                  mapm= pmap;
-                  state= j;
+                  if (map_upward[j][cnode][rank[j]] > D_INF)
+                     pmap= map_upward[j][cnode][rank[j]] + cumul_initial[j];
+                  else
+                     pmap= D_INF;
+                  if (pmap > mapm)
+                  {
+                     mapm= pmap;
+                     state= j;
+                  }
+               }
+   #           ifdef DEBUG
+               cout << "\n hidden_likelihood = " << mapm << endl;
+   #           endif
+               if (m == 0)
+               {
+                  hidden_likelihood= mapm;
+                  if (mapm <= D_INF)
+                     break;
+                  else
+                     state_tree_likelihood+= mapm;
                }
             }
-#           ifdef DEBUG
-            cout << "\n hidden_likelihood = " << mapm << endl;
-#           endif
-            if (m == 0)
-            {
-               hidden_likelihood= mapm;
-               if (mapm <= D_INF)
-                  break;
-               else
-                  state_tree_likelihood+= mapm;
-            }
+            else
+               state= state_root;
 
             // restoration
             v= new generic_visitor<tree_type>;
             traverse_tree(current_tree->root(), *current_tree, *v);
+
             va= v->get_breadthorder(*current_tree);
             delete v;
             v= NULL;
@@ -4159,6 +4243,7 @@ Hidden_markov_out_tree::generalized_viterbi(const Hidden_markov_tree_data& trees
             for(u= 1; u < current_size; u++)
             {
                cnode= va[u];
+               nb_children= current_tree->get_nb_children(cnode);
                pnode= current_tree->parent(cnode);
                pstate= val_states[pnode][m];
                ch_id= inv_children_ids[cnode];
@@ -4181,6 +4266,7 @@ Hidden_markov_out_tree::generalized_viterbi(const Hidden_markov_tree_data& trees
             ratio_array[m]= exp(mapm-hidden_likelihood);
             cumul_array[m]= exp(log(likelihood_cumul) - likelihood);
             nb_cell_array[m]= nb_cell;
+
          } // end for m
 
          // computation of the maximal width for table printing

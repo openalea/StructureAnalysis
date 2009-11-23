@@ -188,12 +188,22 @@ protected :
                                                     char format= 'a',
                                                     int vertex= I_DEFAULT) const;
 
+   /**Compute the nb_state_trees best state trees starting under some vertex*/
+
+   Hidden_markov_tree_data* generalized_viterbi_subtree(const Hidden_markov_tree_data& trees,
+                                                        std::vector<ostringstream*>& messages,
+                                                        int nb_state_trees,
+                                                        double likelihood,
+                                                        int index,
+                                                        int root) const;
+
    /**Compute the nb_state_trees best state trees */
    Hidden_markov_tree_data* generalized_viterbi(const Hidden_markov_tree_data& trees,
                                                 std::vector<ostringstream*>& messages,
                                                 int nb_state_trees,
                                                 double likelihood,
-                                                int index= I_DEFAULT) const;
+                                                int index= I_DEFAULT,
+                                                int sroot= I_DEFAULT) const;
 
    /**Simulate a state tree given observed tree (SEM-like principle)*/
    Hidden_markov_tree_data* sstate_simulation(const Hidden_markov_tree_data& trees,
@@ -325,7 +335,8 @@ public :
                       std::vector<ostringstream*>& messages,
                       int state_tree= GENERALIZED_VITERBI,
                       unsigned int nb_state_trees= NB_STATE_TREES,
-                      int entropy_algo= UPWARD) const;
+                      int entropy_algo= UPWARD,
+                      int root= I_DEFAULT) const;
 
    /** Write Gnuplot output of state, entropy and Viterbi profiles */
    bool tree_state_profile_plot_write(Format_error &error, const char *prefix,

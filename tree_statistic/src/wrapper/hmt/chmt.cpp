@@ -327,10 +327,11 @@ CiHmot_wrapper_simulate_trees(const Hidden_markov_out_tree& hmt,
 }
 
 boost::python::list CiHmot_wrapper_state_profile(const Hidden_markov_out_tree& hmt,
-                                  int viterbi_algorithm,
-                                  int nb_state_trees,
-                                  int index,
-                                  int entropy_algorithm= Stat_trees::UPWARD)
+                                                 int viterbi_algorithm,
+                                                 int nb_state_trees,
+                                                 int index,
+                                                 int entropy_algorithm= Stat_trees::UPWARD,
+                                                 int root= I_DEFAULT)
 {
    bool status= false;
    unsigned int cpt_msg= 0;
@@ -352,10 +353,10 @@ boost::python::list CiHmot_wrapper_state_profile(const Hidden_markov_out_tree& h
    }
    else
    {
-      status= hmt.state_profile(error, *markov_data, index, smoothed, nstate_trees,
-                                viterbi_upward_downward, generalized_restoration,
-                                messages, viterbi_algorithm, nb_state_trees,
-                                entropy_algorithm);
+      status= hmt.state_profile(error, *markov_data, index, smoothed,
+                                nstate_trees, viterbi_upward_downward,
+                                generalized_restoration, messages, viterbi_algorithm,
+                                nb_state_trees, entropy_algorithm, root);
 
       if (!status)
       // if ((smoothed == NULL) || (viterbi_upward_downward == NULL)
