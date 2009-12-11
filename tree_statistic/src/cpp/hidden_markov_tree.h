@@ -649,6 +649,8 @@ private :
 
    void copy(const Hidden_markov_tree_data& otrees, bool model_flag= true,
              bool characteristic_flag= true);
+
+   ///  Deallocation. The markov part is deleted if any.
    void remove();
 
    void nb_state_computation();

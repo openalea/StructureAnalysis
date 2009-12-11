@@ -316,9 +316,38 @@ int main(void)
          delete messages[cptm];
          messages[cptm++]= NULL;
          delete messages[cptm];
-         messages[cptm++]= NULL;
+         messages[cptm]= NULL;
          delete generalized;
          generalized= NULL;
+      }
+
+      // Test of the generalized Viterbi algorithm
+      // on subtrees
+      vid= 2;
+      generalized= hmot->generalized_viterbi_subtree(*hmtd, messages, 5,
+                                                     likelihood, 0, vid);
+      if (generalized != NULL)
+      {
+         cout << endl
+              << "Generalized viterbi started at vertex "
+              << vid << ": " << endl;
+         cout << messages[++cptm]->str();
+         delete messages[cptm];
+         messages[cptm++]= NULL;
+         potrees= new tree_type*[1];
+         potrees[0]= generalized->get_tree(0);
+         potrees[0]->display(cout, 0);
+         cout << endl;
+         delete potrees[0];
+         potrees[0]= NULL;
+
+         /*cout << messages[cptm]->str();
+         delete messages[cptm];
+         messages[cptm++]= NULL;*/
+         delete generalized;
+         generalized= NULL;
+         delete [] potrees;
+         potrees= NULL;
       }
 
       // Test of the generalized Viterbi algorithm

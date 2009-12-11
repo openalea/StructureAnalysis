@@ -188,15 +188,6 @@ protected :
                                                     char format= 'a',
                                                     int vertex= I_DEFAULT) const;
 
-   /**Compute the nb_state_trees best state trees starting under some vertex*/
-
-   Hidden_markov_tree_data* generalized_viterbi_subtree(const Hidden_markov_tree_data& trees,
-                                                        std::vector<ostringstream*>& messages,
-                                                        int nb_state_trees,
-                                                        double likelihood,
-                                                        int index,
-                                                        int root) const;
-
    /**Compute the nb_state_trees best state trees */
    Hidden_markov_tree_data* generalized_viterbi(const Hidden_markov_tree_data& trees,
                                                 std::vector<ostringstream*>& messages,
@@ -321,6 +312,15 @@ public :
                                                    bool characteristic_flag= false,
                                                    int index= I_DEFAULT,
                                                    int entropy_algo= UPWARD) const;
+
+   /** Compute the nb_state_trees best state trees starting under some vertex */
+
+   Hidden_markov_tree_data* generalized_viterbi_subtree(const Hidden_markov_tree_data& trees,
+                                                        std::vector<ostringstream*>& messages,
+                                                        int nb_state_trees,
+                                                        double likelihood,
+                                                        int index,
+                                                        int root) const;
 
    /**Compute the state profiles for a given tree,
       including the smoothed probabilities,

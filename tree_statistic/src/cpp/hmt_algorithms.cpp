@@ -3781,15 +3781,27 @@ Hidden_markov_out_tree::generalized_viterbi_subtree(const Hidden_markov_tree_dat
                                                     int index, int root) const
 {
    typedef Hidden_markov_tree_data::tree_type tree_type;
+   typedef Hidden_markov_tree_data::vertex_iterator vertex_iterator;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
-   register int sroot;
+   register int sroot, s;
+   unsigned int u= 0, var;
+   int _nb_integral= 1;
+   vertex_iterator it, end;
    Format_error error;
    vertex_array va_e, va_st;
+   vertex_array tree2subtree, subtree2tree;
+   Int_fl_container i(_nb_integral, 0);
+   // correspondance between the vids of tree and subtree
+   int *itype= NULL;
    visitor *v= NULL;
    Trees *sub_trees;
-   Hidden_markov_tree_data *res_trees= NULL, *cp_trees= NULL, *hmt_sub_trees= NULL;
+   Unlabelled_typed_edge_tree *tmp_utree= NULL;
+   Hidden_markov_tree *hmarkov= NULL;
+   Hidden_markov_tree_data *res_trees= NULL, *cp_trees= NULL,
+                           *hmt_sub_trees= NULL;
+   Default_tree **otrees= NULL;
 
    assert((index >= 0) && (index < trees.get_nb_trees()));
    assert((root >=0) && (root < trees.trees[index]->get_size()));
@@ -3797,16 +3809,19 @@ Hidden_markov_out_tree::generalized_viterbi_subtree(const Hidden_markov_tree_dat
    // generalized Viterbi algorithm starts at vertex iroot
    // used classical Viterbi otherwise
    cp_trees= new Hidden_markov_tree_data(trees, true, false);
-   viterbi(*cp_trees, index);
+   hmarkov= new Hidden_markov_out_tree(*this, false, false);
+   hmarkov->create_cumul();
+   hmarkov->log_computation();
+   cp_trees->build_state_trees();
+
+   hmarkov->viterbi(*cp_trees, index);
    sroot= cp_trees->state_trees[index]->get(trees.trees[index]->parent(root)).Int();
-   delete cp_trees;
    sub_trees= trees.select_subtrees(error, root, index);
-   // correspondance between the vids of both trees has to be kept
 
    v= new generic_visitor<tree_type>;
    traverse_tree(trees.trees[index]->root(), *trees.trees[index], *v);
 
-   va_st= v->get_breadthorder(*trees.trees[index]);
+   va_st= v->get_breadthorder(*trees.trees[index], root);
    delete v;
    v= NULL;
 
@@ -3817,15 +3832,97 @@ Hidden_markov_out_tree::generalized_viterbi_subtree(const Hidden_markov_tree_dat
    delete v;
    v= NULL;
 
+   // correspondance between the vids of both trees has to be kept
+   assert(va_st.size() == va_e.size());
+   tree2subtree.assign(trees.trees[index]->get_size(), I_DEFAULT);
+   subtree2tree.resize(sub_trees->trees[index]->get_size());
+   while (u < va_st.size())
+   {
+      tree2subtree[va_st[u]]= va_e[u];
+      subtree2tree[va_e[u]]= va_st[u];
+      u++;
+   }
 
    hmt_sub_trees= new Hidden_markov_tree_data(*sub_trees);
-   hmt_sub_trees->markov= new Hidden_markov_out_tree(*this);
+   hmt_sub_trees->markov= hmarkov;
 
-   cp_trees= generalized_viterbi(*sub_trees, messages, nb_state_trees,
-                                 likelihood, index,  sroot);
 
+   hmt_sub_trees->build_state_trees();
+
+   res_trees= hmarkov->generalized_viterbi(*hmt_sub_trees, messages, nb_state_trees,
+                                           likelihood, index,  sroot);
+   _nb_integral= res_trees->get_nb_int();
+   i.reset(_nb_integral, 0);
+
+   hmarkov->remove_cumul();
+
+   otrees= new Default_tree*[1];
+   itype= new int[_nb_integral];
+
+   for(var=0; var < _nb_integral; var++)
+      itype[var]= STATE;
+
+   tmp_utree= trees.trees[index]->get_structure();
+
+   otrees[0]= new Default_tree(_nb_integral, 0,
+                               trees.trees[index]->root(), 1);
+   otrees[0]->set_structure(*tmp_utree, i);
+   tie(it, end)= trees.trees[index]->vertices();
+   while (it < end)
+   {
+      if (tree2subtree[*it] == I_DEFAULT)
+      // vertices not in the considered subtree:
+      // optimal states are copied
+      {
+         s= cp_trees->state_trees[index]->get(*it).Int();
+         for(var= 0; var < _nb_integral; var++)
+            i.Int(var)= s;
+         otrees[0]->put(*it, i);
+      }
+      else
+      // vertices in the considered subtree:
+      // generalized restoration is copied
+      {
+         i= res_trees->trees[0]->get(tree2subtree[*it]);
+         otrees[0]->put(*it, i);
+      }
+      it++;
+   }
+   res_trees= new Hidden_markov_tree_data(1, itype, otrees);
+   res_trees->markov= new Hidden_markov_out_tree(*this, false, false);
+
+   res_trees->state_trees= new Typed_edge_one_int_tree*[1];
+   res_trees->state_trees[0]= new Typed_edge_one_int_tree(*(cp_trees->state_trees[index]));
+   res_trees->likelihood= likelihood;
+   res_trees->hidden_likelihood= hmt_sub_trees->hidden_likelihood;
+   res_trees->_nb_states= nb_state;
+
+   // res->chain_data= new Chain_data(*res, 0, 1, markov);
+
+   res_trees->chain_data= new Chain_data(type, nb_state, nb_state);
+   res_trees->build_characteristics();
+   res_trees->build_size_histogram();
+   res_trees->build_nb_children_histogram();
+   res_trees->build_observation_histogram();
+
+   // res_trees is not the realization of a Markov model
+   // res_trees->markov->characteristic_computation(*res_trees, true);
+
+   delete [] itype;
+   itype= NULL;
+   delete otrees[0];
+   delete [] otrees;
+   otrees= NULL;
+
+   delete tmp_utree;
+   tmp_utree= NULL;
+   delete hmarkov;
+   hmarkov= NULL;
+   hmt_sub_trees->markov= NULL;
    delete hmt_sub_trees;
    delete sub_trees;
+   delete cp_trees;
+
 
    return res_trees;
 
@@ -3836,7 +3933,7 @@ Hidden_markov_out_tree::generalized_viterbi_subtree(const Hidden_markov_tree_dat
  *  Generalized Viterbi algorithm for Hidden_markov_out_trees.
  *  Compute the nb_state_trees best trees associated with
  *  the given trees, using the likelihood, the tree index,
- *  and the state at root vertex if known
+ *  and the state at root vertex if known. 1 message is produced
  *
  **/
 

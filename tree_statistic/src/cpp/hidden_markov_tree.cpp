@@ -7304,6 +7304,7 @@ Hidden_markov_tree_data::profile_plot_print(std::ostream& os,
 /*****************************************************************
  *
  *  Deallocation of the pointers for Hidden_markov_tree_data class
+ *  The markov part is deleted if any
  *
  **/
 
