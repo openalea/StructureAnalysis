@@ -7,7 +7,7 @@ ALEASolution = config.ALEASolution
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 
-tools = ['boost_python', 'alea', 'vplants.tool', 'install', 'vplants.stat_tool']
+tools = ['boost_python', 'qt4', 'vplants.tool', 'install', 'vplants.stat_tool']
 
 env = ALEASolution(options, tools)
 

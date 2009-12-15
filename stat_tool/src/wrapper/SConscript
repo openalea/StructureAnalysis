@@ -5,6 +5,7 @@ import os
 pj = os.path.join
 Import("env")
 
+env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 # Export symbols under windows
 if env['compiler'] == 'mingw':
     LINKFLAGS=["-enable-stdcall-fixup",
@@ -13,11 +14,9 @@ if env['compiler'] == 'mingw':
                "-s"]
     env.AppendUnique(LINKFLAGS=LINKFLAGS)
 
-
 # Build wrappers as shared libraries
 includes= env.ALEAGlob('*.h')
 sources = env.ALEAGlob('*.cpp')
-
 
 LIBS = ['vptool', 'vpstat_tool']
 env.AppendUnique(LIBS=LIBS)

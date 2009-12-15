@@ -10,7 +10,7 @@ options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 
 # Dependencies
 common_tools = ['vplants.mtg', 'vplants.tool','vplants.plantgl',
-                'vplants.amlobj', 'vplants.stat_tool','boost_python']
+                'vplants.amlobj', 'vplants.stat_tool','boost_python', 'qt4']
 
 tools = ['alea','install'] + common_tools
 

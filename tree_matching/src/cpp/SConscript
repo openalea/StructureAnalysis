@@ -7,6 +7,7 @@ pj = os.path.join
 Import( "env" )
 
 lib_env = env.Clone()
+lib_env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 
 # Export Symbols on Windows
 if lib_env['compiler'] == 'mingw':

@@ -1,6 +1,9 @@
 # -*-python-*-
 Import("env")
 
+env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
+
+
 # Export/Import Symbols for windows
 if env['compiler'] == 'mingw':
     LINKFLAGS=["-enable-stdcall-fixup",
