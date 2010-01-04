@@ -180,7 +180,7 @@ class Tree:
             self.__types = list(tree_object.__types)
             self._copy_vid_conversion(trees_object.TreeVertexId(0),
                                       trees_object.MTGVertexId(0))
-            self.__mtg_tid = trees_object.MTGComponentRoot(0)
+            #self.__mtg_tid = trees_object.MTGComponentRoot(0)
             if len(attributes) == 0:
                 self.__attributes = list(tree_object.Attributes())
                 attributes = list(self.__attributes)
@@ -2532,10 +2532,10 @@ class Trees(object):
     def Tree(self, TreeId):
         """Return the tree corresponding to the given identifier."""
         # d=self.__default_tree_value()
-        d=self.Types()
+        d = self.Types()
         if self.__valid_tree(TreeId):
-            res=Tree(d, self.__ctrees.Tree(TreeId), self.__attributes)
-            if not (self.__mtg_to_tree_vid is None):
+            res = Tree(d, self.__ctrees.Tree(TreeId), self.__attributes)
+            if len(self.__mtg_to_tree_vid[TreeId]) > 0:
                 res._copy_vid_conversion(self.TreeVertexId(TreeId),
                                          self.MTGVertexId(TreeId))
                 res._copy_mtg_tid(self.MTGComponentRoot(TreeId))

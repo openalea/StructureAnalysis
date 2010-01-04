@@ -66,7 +66,7 @@ object, through the method :ref:`Get <get-put>`.
     [1.0]
 
 Tree
-=========
+====
 
 Here is a brief description of the :class:`~openalea.tree_statistic.trees.Tree`
 class.
@@ -123,9 +123,9 @@ provides an ASCII output of a `Tree`, as shown below:
     |
     |-3: [1.0, 0, 1, 2.0]+
 
-The first line sums up the semantics of every further line: 
-The numbers preceding the colons *:* denotes the vertex identifiers,
-or `vids`
+The first line sums up the semantics of every further line, as follows.
+The numbers preceding the colons *:* denote the vertex identifiers,
+or `vids`.
 The quantities between brackets are the values of the attributes
 for each vertex.
 Thus, the first line also contains the names of the variables.
@@ -189,6 +189,8 @@ the considered vertex and the list of the new values).
     >>> print(T1.Get(T1.Root())) #doctest: +SKIP
     [3.1000000000000001, 5, 8, -2.2000000000000002]
 
+..  _tree-save:
+
 Saving
 ------
 
@@ -215,6 +217,103 @@ Then, you can construct a new `Tree`_ instance as follows:
     :options: +SKIP
     
     >>> T2 = Tree('test.mtg')
+
+Trees
+=====
+
+Here is a brief description of the :class:`~openalea.tree_statistic.trees.Trees`
+class.
+
+The *Trees* class is used for the representation of forests, *i.e.* collections
+of `Tree`_ objects
+
+Constructor
+-----------
+
+Instances of class `Trees`_ can be obtained either from a list of `Tree`_
+objects, a `Trees`_ object (by copy), or from a MTG file.
+
+To build an instance of `Trees`_ from a list of  `Tree`_ objects, its constructor
+must be called using that list as argument.
+
+.. doctest::
+
+    >>> F = Trees([T1, T2])
+    >>> F.Save('test_forest.mtg', variable_names=["Ln", "Fl", "Lf", "LgEn"])
+
+.. note:: The *Save* method is used exactly the same way 
+    as for `Tree`_ objects - see Section :ref:`Saving <tree-save>`.
+ 
+To copy a `Trees`_ instance, its constructor must be called using 
+that instance as argument.
+
+.. doctest::
+
+    >>> F2 = Trees(F)
+
+To build an instance of `Trees`_ from a MTG file, the name of that file must be 
+provided as argument of the constructor.
+
+.. note:: In addition to the file name, this constructor has two optional
+    arguments : a filter on the vertices (which is a boolean function), 
+    a list of strings defining the attribute names, a list of functions 
+    defining how the attributes are computed, and the considered scale of the MTG.
+    The default value for the scale is the finest scale of the MTG (*i.e.*
+    the scale with highest value).
+
+.. doctest::
+
+    >>> F3 = Trees('test_forest.mtg')
+
+Attributes
+----------
+
+The names of the attributes for the objects **F1**, **F2** and **F3**
+can be accessed to using the method :meth:`~openalea.tree_statistic.trees.Trees.Attributes`.
+
+.. doctest::
+
+    >>> print(F3.Attributes()) #doctest: +SKIP
+    ['Ln', 'Fl', 'Lf', 'Lge']
+
+
+Display
+-------
+The :func:`print` functions prints
+
+The :meth:`~openalea.tree_statistic.trees.Trees.Display` method
+provides an ASCII output of a `Tree`, as shown below:
+   
+.. doctest::
+
+    >>> T1.Display() #doctest: +SKIP
+    vids: [ Variable0, Variable1, Variable2, Variable3 ]
+    0: [1.0, 0, 1, 2.0]
+    |-1: [1.0, 0, 1, 2.0]+
+    | |-4: [1.0, 0, 1, 2.0]+
+    |
+    |-2: [1.0, 0, 1, 2.0]+
+    | |-5: [1.0, 0, 1, 2.0]+
+    |
+    |-3: [1.0, 0, 1, 2.0]+
+
+The first line sums up the semantics of every further line, as follows.
+The numbers preceding the colons *:* denote the vertex identifiers,
+or `vids`.
+The quantities between brackets are the values of the attributes
+for each vertex.
+Thus, the first line also contains the names of the variables.
+
+.. note:: The *Display* method has the following optional arguments,
+    which take boolean values: *vids*, *attributes* and *mtg_vids*
+    (which must be equal to **True** if, respectively, the vids,
+    the attributes and the corresponding vids in
+    the MTG where the data come from, have to be
+    printed). The *mtg_vids* argument is available only if the `Tree`_
+    instance was built from a MTG.
+
+The :func:`str` and the :func:`print` functions have the same
+effects than .Display(vids=False)
 
 ..  comment lines below
     Plotting
