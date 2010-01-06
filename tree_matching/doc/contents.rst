@@ -30,7 +30,7 @@ Documentation
     :maxdepth: 1
 
     User Guide<user/index.rst>   
-    Reference Guide<tree_matching/index.rst>
+    Reference Guide<user/autosum.rst>
 
 - A `PDF <../latex/tree_matching.pdf>`_ version of |tree_matching| documentation is 
   available.
