@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+__revision__ = "$Id: setup.py 6086 2009-03-13 16:24:30Z cokelaer $"
 
 import os, sys
 from os.path import join as pj
@@ -6,21 +7,13 @@ from os.path import join as pj
 from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
 
-name = 'VPlants.Sequence_analysis'
-namespace = 'openalea'
-version = "0.7.0"
-description = 'sequence analysis library',
-long_description = """Python version of sequence analysis (AML stat)"""
-authors = 'Y. Guédon, T. Cokelaer',
-author_email = 'yann.guedon@cirad.fr, christophe.pradal@cirad.fr, thomas.cokelaer@sophia.inria.fr'
-url = 'http://www-sop-inria.fr/virtualplants'
-license = 'GPL'
-__revision__ = "$Id: setup.py 6086 2009-03-13 16:24:30Z cokelaer $"
+
+from openalea.deploy.metainfo import read_metainfo
+metadata = read_metainfo('metainfo.ini', verbose=True)
+for key,value in zip(metadata.keys(), metadata.values()):
+    exec("%s = '%s'" % (key, value))
 
 
-
-
-packagename = 'sequence_analysis'
 build_prefix = "build-scons"
 
 # Scons build directory
@@ -42,7 +35,7 @@ if __name__ == '__main__':
     setup(name=name,
           version=version,
           author=authors,
-          author_email=author_email,
+          author_email=authors_email,
           description=description,
           long_description=long_description,
           url=url,
