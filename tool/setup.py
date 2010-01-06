@@ -1,9 +1,13 @@
 from setuptools import setup, find_packages
 import os, sys
 from os.path import join as pj
+
+from openalea.deploy.metainfo import read_metainfo
+metadata = read_metainfo('metainfo.ini', verbose=True)
+for key,value in zip(metadata.keys(), metadata.values()):
+    exec("%s = '%s'" % (key, value))
+
  
-packagename = 'tool'
-namespace = 'openalea'
 build_prefix = "build-scons"
 
 # Scons build directory
@@ -24,13 +28,13 @@ else:
 
 if __name__ == '__main__':
     
-    setup(name='VPlants.Tool',
-          version='0.7.0',
-          author='',
-          author_email='',
-          description='vplants tools',
-          url='',
-          license='GPL',
+    setup(name=name,
+          version=version,
+          author=authors,
+          author_email=authors_email,
+          description=description,
+          url=url,
+          license=license,
  
           # Define where to execute scons
           scons_scripts=['SConstruct'],
