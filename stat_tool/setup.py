@@ -1,25 +1,16 @@
 """setup file for stat_tool package"""
+__revision__ = "$Id$"
 import os, sys
 from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
 from os.path import join as pj
 
+from openalea.deploy.metainfo import read_metainfo
+metadata = read_metainfo('metainfo.ini', verbose=True)
+for key,value in zip(metadata.keys(), metadata.values()):
+    exec("%s = '%s'" % (key, value))
 
 
-name = 'VPlants.Stat_Tool'
-namespace = 'openalea'
-# to get the version
-version="0.7.0"
-description = 'statistics' 
-long_description = """todo"""
-author = 'Y. Guedon, JB. Durand, T. Cokelaer',
-author_email = 'samuel.dufour@sophia.inria.fr, christophe.pradal@cirad.fr, thomas.cokelaer@sophia.inria.fr'
-url = 'http://openalea.gforge.inria.fr/doc/vplants/stat_tool/doc/html/contents.html'
-license = 'GPL' 
-__revision__ = "$Id$"
-
-
-packagename = 'stat_tool'
 build_prefix = "build-scons"
 
 # Scons build directory
@@ -35,7 +26,7 @@ setup_requires = install_requires + ['openalea.deploy']
 
 
 if __name__ == '__main__':
-    
+
     setup(name=name,
           version=version,
           description=description,
@@ -44,8 +35,8 @@ if __name__ == '__main__':
           author_email=author_email,
           url=url,
           license=license,
- 
-          
+
+
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  v
@@ -63,23 +54,23 @@ if __name__ == '__main__':
                     ],
 
           package_dir={ "" : "src"  },
-          
+
           # Add package platform libraries if any
           include_package_data=True,
           package_data = {'' : ['*.pyd', '*.so', '*.dylib', '*.png', '*.hsc', '*.seq', '*.aml'],},
-          
+
           zip_safe = False,
 
           # Specific options of openalea.deploy
           lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
           inc_dirs = { 'include' : pj(build_prefix, 'include') },
-          
+
 
           # Dependencies
           setup_requires = setup_requires,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
-   
+
            # entry_points
            entry_points = {
             "wralea": ["vplants.stats = stat_tool_wralea",
@@ -93,4 +84,4 @@ if __name__ == '__main__':
        )
 
 
-    
+

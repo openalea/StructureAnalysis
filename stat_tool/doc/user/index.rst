@@ -42,3 +42,4 @@ To finalise
     gnuplot_versus_matplotlib.rst
     plotting.rst
     aml2py.rst
+    troubleshooting.rst

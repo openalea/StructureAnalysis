@@ -29,8 +29,8 @@ Documentation
 .. toctree::
     :maxdepth: 1
 
-    User Guide<user/index.rst>   
-    Reference Guide<stat_tool/index.rst>
+    User Guide<user/index.rst>
+    Reference Guide<user/autosum.rst>
     Administration<user/admin.rst>
 
 - A `PDF <../latex/stat_tool.pdf>`_ version of |stat_tool| documentation is 
