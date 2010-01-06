@@ -27,7 +27,10 @@ Tutorial
     >>> import openalea
     >>> from pylab import savefig
 
-.. include:: tutorial_object_types.rst
+
+.. todo:: uncomment the tutorial_object_types.rst in the tutorial.rst file once commited
+
+.. .. include:: tutorial_object_types.rst
 
 .. toctree:: 
     

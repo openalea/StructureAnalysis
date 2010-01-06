@@ -30,7 +30,7 @@ Documentation
     :maxdepth: 1
 
     User Guide<user/index.rst>   
-    Reference Guide<tree_statistic/index.rst>
+    Reference Guide<user/autosum.rst>
 
 - A `PDF <../latex/tree_statistic.pdf>`_ version of |tree_statistic| documentation is 
   available.
