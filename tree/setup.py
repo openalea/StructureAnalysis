@@ -2,9 +2,13 @@ from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
 import os, sys
 from os.path import join as pj
+from openalea.deploy.metainfo import read_metainfo
+
+metadata = read_metainfo('metainfo.ini', verbose=True)
+for key,value in zip(metadata.keys(), metadata.values()):
+    exec("%s = '%s'" % (key, value))
+
  
-packagename = 'tree'
-namespace = 'openalea'
 build_prefix = "build-scons"
 
 # Scons build directory
@@ -24,23 +28,21 @@ else:
 
 
 if __name__ == '__main__':
-    
-    setup(name='VPlants.Tree',
-          version='0.7.0',
-          author='C. Pradal',
-          description='Tree structure header',
-          url='http://openalea.gforge.inria.fr',
-          license='GPL',
- 
+
+    setup(name=name,
+          version=version,
+          author=authors,
+          description=description,
+          url=url,
+          license=license,
           # Define where to execute scons
           scons_scripts=['SConstruct'],
           # Scons parameters  
           scons_parameters=scons_parameters,
-        
           # Packages
           #packages=
           #package_dir=
-      
+
           # Add package platform libraries if any
           include_package_data=True,
           zip_safe = False,
@@ -48,7 +50,7 @@ if __name__ == '__main__':
           # Specific options of openalea.deploy
           #lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
           inc_dirs = { 'include' : pj(build_prefix, 'include') },
-          
+
 
           # Dependencies
           setup_requires = setup_requires,
