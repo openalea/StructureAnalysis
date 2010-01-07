@@ -1,6 +1,6 @@
 """NonhomogeneousMarkov
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 uthor:/
 
 """

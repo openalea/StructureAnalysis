@@ -1,6 +1,6 @@
 """Simulate
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr 
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr 
 
 """
 __revision__ = "$Id:  $"

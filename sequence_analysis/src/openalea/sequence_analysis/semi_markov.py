@@ -1,6 +1,6 @@
 """Semi markov
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 uthor:/
 """
 __revision__ = "$Id:  $"

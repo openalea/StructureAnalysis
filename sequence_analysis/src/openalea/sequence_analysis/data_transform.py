@@ -1,6 +1,6 @@
 """Data transform methods
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 .. todo:: move _check_nbvariable_ to stat_ttol and use it wherever possible
 .. todo:: decide on using __get_mode__ everywhere or ParseKargs 
 

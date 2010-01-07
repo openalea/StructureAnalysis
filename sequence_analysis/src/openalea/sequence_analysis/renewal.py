@@ -1,6 +1,6 @@
 """Renewal
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 .. todo:: print (str in the wrapper file) for the renewal class
 

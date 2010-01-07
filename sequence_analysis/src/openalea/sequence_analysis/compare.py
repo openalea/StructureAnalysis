@@ -1,6 +1,6 @@
 """Compare module on vectors, sequences, renewal, distributions...
 
-.. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
 
