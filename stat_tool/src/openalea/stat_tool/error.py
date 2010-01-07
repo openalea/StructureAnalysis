@@ -48,15 +48,16 @@ def CheckArgumentsLength(args, min_nargs=0, max_nargs=1e6, optional=False):
 
 def CheckType(variables, types, **kargs):
     """Check types of input variables
-    
+
     :param variables: a list of variables to be checked 
     :param types: list of types 
-    
-    :optional argument: variable_id corresponding to the position of each 
-    variable.
+
+    :optional argument: 
+
+    variable_id corresponding to the position of each variable.
 
     :example:
-    
+
         >>> #CheckType(1, int, variable_index=0) NOT IMPLEMENTED 
         >>> CheckType([1,'a'], [int,str], variable_id=[0,1])
         >>> CheckType([1,'a'], [[int, float],str], variable_id=[0,1])

@@ -52,37 +52,42 @@ def Display(obj, *args, **kargs):
     Markovian model for the sequence :math:`x_0^\tau` (ViewPoint="StateProfile").
 
     :Parameters:
-      * `obj` - object to display,
-      * `vec` (`_Vectors`), 
-      * `seq` (`_Sequences`, `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData`, `_Tops`),
-      * `dist` (`_Distribution`, `_MixtureDist`, `_Convolution`, `_Compound`),
-      * `histo` (`_Histogram`, `_MixtureData`, `_ConvolutionData`, `_CompoundData`),
-      * `hmc` (`_HiddenMarkov`),
-      * `hsmc` (`_HiddenSemiMarkov`),
-      * `identifier` (int) - identifier of a sequence.
+
+    * `obj` - object to display,
+    * `vec` (`_Vectors`),
+    * `seq` (`_Sequences`, `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData`, `_Tops`),
+    * `dist` (`_Distribution`, `_MixtureDist`, `_Convolution`, `_Compound`),
+    * `histo` (`_Histogram`, `_MixtureData`, `_ConvolutionData`, `_CompoundData`),
+    * `hmc` (`_HiddenMarkov`),
+    * `hsmc` (`_HiddenSemiMarkov`),
+    * `identifier` (int) - identifier of a sequence.
 
     :Keywords:
-      * ViewPoint (string): point of view on the object ("Survival" or "Data"
-        or "StateProfile"). This optional argument can be set at
-          * "Data" only if the first argument is of type `_Vectors`,
-            `_Sequences`, `_DiscreteSequences`, `_MarkovData`,
-            `_SemiMarkovData` or `_Tops`,
-          * "Survival" only if the first argument is of type `_Distribution`,
-            `_MixtureDist`, `_Convolution`, `_Compound`, `_Histogram`,
-            `_MixtureData`, `_ConvolutionData` or `_CompoundData`
-          * "StateProfile" only if the first argument is of type `_HiddenMarkov` 
-            or `_HiddenSemiMarkov`.
-      * Detail (int): level of detail: 1 (default value) or 2. 
-        This optional argument cannot be used if the optional argument 
-        ViewPoint is set at "Survival" or "StateProfile".
-      * Format (string): format of sequences (only relevant for multivariate 
-        sequences): "Column" (default value) or "Line". This optional argument
-        can only be used if the  optional argument ViewPoint is set at "Data",
-        and hence, if the first argument is of type `_Vectors`, `_Sequences`,
-        `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData` or `_Tops`. 
+
+    * ViewPoint (string): point of view on the object ("Survival" or "Data"
+      or "StateProfile"). This optional argument can be set at
+
+      * "Data" only if the first argument is of type `_Vectors`,
+        `_Sequences`, `_DiscreteSequences`, `_MarkovData`,
+        `_SemiMarkovData` or `_Tops`,
+      * "Survival" only if the first argument is of type `_Distribution`,
+        `_MixtureDist`, `_Convolution`, `_Compound`, `_Histogram`,
+        `_MixtureData`, `_ConvolutionData` or `_CompoundData`
+      * "StateProfile" only if the first argument is of type `_HiddenMarkov` 
+        or `_HiddenSemiMarkov`.
+
+    * Detail (int): level of detail: 1 (default value) or 2. 
+      This optional argument cannot be used if the optional argument 
+      ViewPoint is set at "Survival" or "StateProfile".
+    * Format (string): format of sequences (only relevant for multivariate 
+      sequences): "Column" (default value) or "Line". This optional argument
+      can only be used if the  optional argument ViewPoint is set at "Data",
+      and hence, if the first argument is of type `_Vectors`, `_Sequences`,
+      `_DiscreteSequences`, `_MarkovData`, `_SemiMarkovData` or `_Tops`. 
 
     :Returns:
-        A string
+    
+    A string
 
     :Examples:
 
@@ -99,7 +104,7 @@ def Display(obj, *args, **kargs):
         >>> Display(hsmc, identifier, ViewPoint="StateProfile") 
 
     .. seealso::
-        :func:`~openalea.stat_tool.output.Plot`,
+        :func:`~vplants.stat_tool.output.Plot`,
         :func:`~openalea.stat_tool.output.Save`.
 
     """

@@ -1,6 +1,8 @@
 """Histogram functions and classes
 
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+:Author: 
+
+Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
 __version__ = "$Id$"
 
