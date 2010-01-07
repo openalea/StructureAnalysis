@@ -31,8 +31,8 @@ if __name__ == '__main__':
           version=version,
           description=description,
           long_description=long_description,
-          author=author,
-          author_email=author_email,
+          author=authors,
+          author_email=authors_email,
           url=url,
           license=license,
 
