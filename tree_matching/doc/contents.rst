@@ -32,7 +32,7 @@ Documentation
     User Guide<user/index.rst>   
     Reference Guide<user/autosum.rst>
 
-- A `PDF <../latex/tree_matching.pdf>`_ version of |tree_matching| documentation is 
+- A `PDF <../latex/main.pdf>`_ version of |tree_matching| documentation is 
   available.
 
 .. seealso::

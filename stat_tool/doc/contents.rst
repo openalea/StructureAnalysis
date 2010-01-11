@@ -33,7 +33,7 @@ Documentation
     Reference Guide<user/autosum.rst>
     Administration<user/admin.rst>
 
-- A `PDF <../latex/stat_tool.pdf>`_ version of |stat_tool| documentation is 
+- A `PDF <../latex/main.pdf>`_ version of |stat_tool| documentation is 
   available.
 
 .. seealso::

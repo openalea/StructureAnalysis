@@ -28,7 +28,9 @@ Documentation
 
 No reference or user guide. 
 
+.. toctree::
 
+    user/index.rst
 
 Authors
 =======

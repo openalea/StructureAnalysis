@@ -31,7 +31,7 @@ Documentation
 
     User Guide<user/index.rst>
 
-- A `PDF <../latex/amlobj.pdf>`_ version of |amlobj| documentation is 
+- A `PDF <../latex/main.pdf>`_ version of |amlobj| documentation is 
   available.
 
 .. seealso::

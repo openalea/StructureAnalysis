@@ -32,7 +32,7 @@ Documentation
     User Guide<user/index.rst>
     Reference Guide<user/autosum.rst>
 
-- A `PDF <../latex/sequence_analysis.pdf>`_ version of |sequence_analysis| documentation is 
+- A `PDF <../latex/main.pdf>`_ version of |sequence_analysis| documentation is 
   available.
 
 .. seealso::

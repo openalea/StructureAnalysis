@@ -32,7 +32,7 @@ Documentation
     User Guide<user/index.rst>   
     Reference Guide<user/autosum.rst>
 
-- A `PDF <../latex/tree_statistic.pdf>`_ version of |tree_statistic| documentation is 
+- A `PDF <../latex/main.pdf>`_ version of |tree_statistic| documentation is 
   available.
 
 .. seealso::
