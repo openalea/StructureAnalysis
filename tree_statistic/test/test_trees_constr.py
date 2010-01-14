@@ -143,110 +143,110 @@ def test_mtg_build_failure():
         msg = "Failed to raise exception for invalid MTG file name"
         assert False, msg
 
-def test_build_attribute_failure():
-    """use inconsistent attribute number in building trees"""
-    f = lambda x: 1
-    filter = lambda x: True
-    try:
-        T = trees.Trees(mtg_name, filter, [], [f], scale=2)
-    except ValueError, v:
-        print v
-    else:
-        msg = "Failed to raise exception for inconsistent attribute number"
-        assert False, msg
+#def test_build_attribute_failure():
+    #"""use inconsistent attribute number in building trees"""
+    #f = lambda x: 1
+    #filter = lambda x: True
+    #try:
+        #T = trees.Trees(mtg_name, filter, [], [f], scale=2)
+    #except ValueError, v:
+        #print v
+    #else:
+        #msg = "Failed to raise exception for inconsistent attribute number"
+        #assert False, msg
 
-def test_attribute_name_failure():
-    """use bad attribute name in building trees"""
-    """does not seem to be run after all"""
-    f = lambda x: 1
-    filter = lambda x: True
-    try:
-        T = trees.Trees(mtg_name, filter, [f], [f], scale=2)
-    except TypeError, t:
-        print t
-    else:
-        msg = "Failed to raise exception for bad attribute name"
-        assert False, msg
+#def test_attribute_name_failure():
+    #"""use bad attribute name in building trees"""
+    #"""does not seem to be run after all"""
+    #f = lambda x: 1
+    #filter = lambda x: True
+    #try:
+        #T = trees.Trees(mtg_name, filter, [f], [f], scale=2)
+    #except TypeError, t:
+        #print t
+    #else:
+        #msg = "Failed to raise exception for bad attribute name"
+        #assert False, msg
 
-def tst_attribute_function_failure():
-    """use bad attribute function in building trees"""
-    filter = lambda x: True
-    attributes = ["anything"]
-    try:
-        T = trees.Trees(mtg_name, filter, attributes, attributes,
-                        scale=2)
-    except TypeError, t:
-        print t
-    else:
-        msg = "Failed to raise exception for bad attribute function"
-        assert False, msg
+#def test_attribute_function_failure():
+    #"""use bad attribute function in building trees"""
+    #filter = lambda x: True
+    #attributes = ["anything"]
+    #try:
+        #T = trees.Trees(mtg_name, filter, attributes, attributes,
+                        #scale=2)
+    #except TypeError, t:
+        #print t
+    #else:
+        #msg = "Failed to raise exception for bad attribute function"
+        #assert False, msg
 
-def test_attribute_type_failure():
-    """use bad attribute types in building trees"sample_mtg_forest.txt"""
-    filter = lambda x: x < 6
-    attributes = ["anything"]
-    import openalea.aml as amlPy
-    try:
-        T = trees.Trees(mtg_name, filter, attributes,
-                        [lambda x: "z"], scale=2)
-    except TypeError, t:
-        print t
-    else:
-        print "Failed to raise exception for bad attribute type"
-    return 0
+#def test_attribute_type_failure():
+    #"""use bad attribute types in building trees"sample_mtg_forest.txt"""
+    #filter = lambda x: x < 6
+    #attributes = ["anything"]
+    #import openalea.aml as amlPy
+    #try:
+        #T = trees.Trees(mtg_name, filter, attributes,
+                        #[lambda x: "z"], scale=2)
+    #except TypeError, t:
+        #print t
+    #else:
+        #print "Failed to raise exception for bad attribute type"
+    #return 0
 
-def test_attribute_name_failure():
-    """use bad attribute names in building trees"""
-    filter = lambda x: x < 6
-    f = lambda x: 1
-    try:
-        T = trees.Trees(mtg_name, filter, [f], [f], scale=2)
-    except TypeError, t:
-        print t
-    else:
-        msg = "Failed to raise exception for bad attribute name"
-        assert False, msg
-    return 0
+#def test_attribute_name_failure():
+    #"""use bad attribute names in building trees"""
+    #filter = lambda x: x < 6
+    #f = lambda x: 1
+    #try:
+        #T = trees.Trees(mtg_name, filter, [f], [f], scale=2)
+    #except TypeError, t:
+        #print t
+    #else:
+        #msg = "Failed to raise exception for bad attribute name"
+        #assert False, msg
+    #return 0
 
-def test_filter_failure():
-    """use bad filterin function in building trees"""
-    filter = lambda x: x < 6
-    f = lambda x: 1
-    attributes = ["anything"]
-    try:
-        T = trees.Trees(mtg_name, attributes, attributes, [f], scale=2)
-    except TypeError, t:
-        print t
-    else:
-        msg = "Failed to raise exception for bad attribute function"
-        assert False, msg
+#def test_filter_failure():
+    #"""use bad filterin function in building trees"""
+    #filter = lambda x: x < 6
+    #f = lambda x: 1
+    #attributes = ["anything"]
+    #try:
+        #T = trees.Trees(mtg_name, attributes, attributes, [f], scale=2)
+    #except TypeError, t:
+        #print t
+    #else:
+        #msg = "Failed to raise exception for bad attribute function"
+        #assert False, msg
 
-def test_nonrecursive_filter_failure():
-    """use nonrecursive filtering function in building trees"""
-    filter = lambda x: x < 6
-    f = lambda x: 1
-    attributes = ["anything"]
-    try:
-        T = trees.Trees(mtg_name, lambda x: x != 2, attributes, [f],
-                        scale=2)
-    except IndexError, i:
-        print i
-    else:
-        msg = "Failed to raise exception for filter not filtering descendants"
-        assert False, msg
+#def test_nonrecursive_filter_failure():
+    #"""use nonrecursive filtering function in building trees"""
+    #filter = lambda x: x < 6
+    #f = lambda x: 1
+    #attributes = ["anything"]
+    #try:
+        #T = trees.Trees(mtg_name, lambda x: x != 2, attributes, [f],
+                        #scale=2)
+    #except IndexError, i:
+        #print i
+    #else:
+        #msg = "Failed to raise exception for filter not filtering descendants"
+        #assert False, msg
 
-def test_filter_type_failure():
-    """use incorrect type return for filter in building trees"""
-    filter = lambda x: x < 6
-    f = lambda x: "a"
-    attributes = ["anything"]
-    try:
-        T = trees.Trees(mtg_name, filter, attributes, [f], scale=1)
-    except TypeError, t:
-        print t
-    else:
-        msg = "Failed to raise exception for bad filter type"
-        assert False, msg
+#def test_filter_type_failure():
+    #"""use incorrect type return for filter in building trees"""
+    #filter = lambda x: x < 6
+    #f = lambda x: "a"
+    #attributes = ["anything"]
+    #try:
+        #T = trees.Trees(mtg_name, filter, attributes, [f], scale=1)
+    #except TypeError, t:
+        #print t
+    #else:
+        #msg = "Failed to raise exception for bad filter type"
+        #assert False, msg
 
 if __name__ == "__main__":
     T, tv, nb_trees, tree_list, mtg_name = init()
@@ -262,10 +262,10 @@ if __name__ == "__main__":
     test_mtg_build()
     test_cluster()
     test_mtg_build_failure()
-    test_attribute_name_failure()
-    test_attribute_function_failure()
-    test_attribute_type_failure()
-    test_attribute_name_failure()
-    test_filter_failure()
-    test_nonrecursive_filter_failure()
-    test_filter_type_failure()
+    #test_attribute_name_failure()
+    #test_attribute_function_failure()
+    #test_attribute_type_failure()
+    #test_attribute_name_failure()
+    #test_filter_failure()
+    #test_nonrecursive_filter_failure()
+    #test_filter_type_failure()

@@ -2536,7 +2536,8 @@ class Trees(object):
         d = self.Types()
         if self.__valid_tree(TreeId):
             res = Tree(d, self.__ctrees.Tree(TreeId), self.__attributes)
-            if len(self.__mtg_to_tree_vid[TreeId]) > 0:
+            if (not(self.__mtg_to_tree_vid is None) and
+            len(self.__mtg_to_tree_vid[TreeId])) > 0:
                 res._copy_vid_conversion(self.TreeVertexId(TreeId),
                                          self.MTGVertexId(TreeId))
                 res._copy_mtg_tid(self.MTGComponentRoot(TreeId))
