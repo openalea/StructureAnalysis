@@ -1620,7 +1620,7 @@ class Trees(object):
                         msg='bad type for argument "structure" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
-                        'Algorithm, Saem, ForceParametric): '
+                        'Algorithm, Saem, ForceParametric): '\
                         +"type 'str' expected"
                         raise TypeError, msg
                     elif ((arg2.upper()!="IRREDUCTIBLE")
@@ -1629,7 +1629,7 @@ class Trees(object):
                         msg='bad value for argument "structure" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
-                        'Algorithm, Saem, ForceParametric): '
+                        'Algorithm, Saem, ForceParametric): '\
                         +arg2+" - expecting 'Irreducible' or 'LeftRight'"
                         raise ValueError, msg
                     structure=(arg2.upper()=="LEFTRIGHT")
@@ -1639,7 +1639,7 @@ class Trees(object):
                         msg='bad type for argument "SelfTransition" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
-                        'Algorithm, Saem, ForceParametric): '
+                        'Algorithm, Saem, ForceParametric): '\
                         +"type 'float' expected"
                         raise TypeError, msg                        
                     if arg4 is None:
@@ -1653,7 +1653,7 @@ class Trees(object):
                         msg='bad type for argument "NbIteration" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
-                        'Algorithm, Saem, ForceParametric): '
+                        'Algorithm, Saem, ForceParametric): '\
                         +"type 'int' expected"
                         raise TypeError, msg
                     if arg5 is None:
@@ -1662,14 +1662,15 @@ class Trees(object):
                         msg='bad type for argument "StateTrees" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
-                        'Algorithm, Saem, ForceParametric): '
+                        'Algorithm, Saem, ForceParametric): '\
                         +"type 'str' expected"
                         raise TypeError, msg
                     elif ((arg5.upper()!="FORWARDBACKWARD")
                           and (arg5.upper()!="VITERBI")):
+                        msg = 'bad type for argument "StateTrees" in ' \
                         'Estimate("HIDDEN_MARKOV_TREE", nb_state, structure, '\
                         'SelfTransition, NbIteration, StateTrees, Counting, '\
-                        'Algorithm, Saem, ForceParametric): '
+                        'Algorithm, Saem, ForceParametric): '\
                         +arg2
                         raise ValueError, msg
                     if (arg5.upper()=="FORWARDBACKWARD"):
