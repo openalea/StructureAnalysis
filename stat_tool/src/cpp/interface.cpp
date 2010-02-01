@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -38,73 +38,11 @@
 
 #include <string.h>
 #include <sstream>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "stat_label.h"
 
 using namespace std;
 
-
-
-/*--------------------------------------------------------------*
- *
- *  Lecture d'un objet du module STAT dans un fichier au format binaire.
- *
- *  arguments : reference sur un objet Format_error, path.
- *
- *--------------------------------------------------------------*/
-
-/* RWCollectable* STAT_binary_read(Format_error &error , const char *path)
-
-{
-  RWCollectable *obj;
-  RWFile in_file(path , "r");
-
-
-  obj = 0;
-  error.init();
-
-  if (!(in_file.isValid())) {
-    error.update(STAT_error[STATR_FILE_NAME]);
-  }
-
-  else {
-    in_file >> obj;
-  }
-
-  return obj;
-} */
-
-
-/*--------------------------------------------------------------*
- *
- *  Ecriture d'un objet STAT_interface dans un fichier au format binaire.
- *
- *  arguments : reference sur un objet Format_error, path.
- *
- *--------------------------------------------------------------*/
-
-/* bool STAT_interface::binary_write(Format_error &error , const char *path) const
-
-{
-  bool status;
-  RWFile out_file(path , "w");
-
-
-  error.init();
-
-  if (!(out_file.isValid())) {
-    status = false;
-    error.update(STAT_error[STATR_FILE_NAME]);
-  }
-
-  else {
-    status = true;
-    out_file << *this;
-  }
-
-  return status;
-} */
 
 
 /*--------------------------------------------------------------*
