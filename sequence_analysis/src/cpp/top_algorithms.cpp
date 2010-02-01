@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -150,13 +150,13 @@ void Tops::build_nb_internode_histogram()
     }
   }
 
-  axillary_nb_internode[0] = 0;
+  axillary_nb_internode[0] = NULL;
   for (i = 1;i <= max_position;i++) {
     if (bmax_length[i] != I_DEFAULT) {
       axillary_nb_internode[i] = new Histogram(bmax_length[i] + 1);
     }
     else {
-      axillary_nb_internode[i] = 0;
+      axillary_nb_internode[i] = NULL;
     }
   }
 
@@ -256,7 +256,7 @@ void Top_parameters::axillary_nb_internode_computation(int imax_position)
     max_position = imax_position;
     axillary_nb_internode = new Distribution*[max_position + 1];
 
-    axillary_nb_internode[0] = 0;
+    axillary_nb_internode[0] = NULL;
     for (i = 1;i <= max_position;i++) {
       position_nb_internode_computation(i);
     }
@@ -284,7 +284,7 @@ Top_parameters* Tops::estimation(Format_error &error , int imin_position , int i
   Top_parameters *parameters;
 
 
-  parameters = 0;
+  parameters = NULL;
   error.init();
 
   if ((imin_position < 1) || (imin_position > imax_position)) {
@@ -427,7 +427,7 @@ Top_parameters* Tops::estimation(Format_error &error , int imin_position , int i
     if ((parameters->probability < TOP_MIN_PROBABILITY) || (parameters->probability > 1.) ||
         (parameters->axillary_probability < TOP_MIN_PROBABILITY) || (parameters->axillary_probability > 1.)) {
       delete parameters;
-      parameters = 0;
+      parameters = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -435,7 +435,7 @@ Top_parameters* Tops::estimation(Format_error &error , int imin_position , int i
       if (equal_probability) {
         if (fabs(parameters->probability - parameters->axillary_probability) > PROBABILITY_DIFF) {
           delete parameters;
-          parameters = 0;
+          parameters = NULL;
           error.update(SEQ_error[SEQR_EQUAL_PROBABILITY]);
         }
 
@@ -481,7 +481,7 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
   Tops *tops;
 
 
-  tops = 0;
+  tops = NULL;
   error.init();
 
   if ((nb_top < 1) || (nb_top > NB_TOP)) {
@@ -609,7 +609,7 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
   Tops *tops;
 
 
-  tops = 0;
+  tops = NULL;
   error.init();
 
   if ((nb_top < 1) || (nb_top > NB_TOP)) {
