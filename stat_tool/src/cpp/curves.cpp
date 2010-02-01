@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -37,8 +37,7 @@
 
 
 #include <iomanip>
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
@@ -65,8 +64,8 @@ Curves::Curves()
   nb_curve = 0;
   length = 0;
   offset = 0;
-  frequency = 0;
-  point = 0;
+  frequency = NULL;
+  point = NULL;
 }
 
 
@@ -103,7 +102,7 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag , bool init_fla
   }
 
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   point = new double*[nb_curve];
@@ -145,7 +144,7 @@ Curves::Curves(const Distribution &dist)
   }
 
   offset = 0;
-  frequency = 0;
+  frequency = NULL;
 
   point = new double*[2];
   for (i = 0;i < 2;i++) {
@@ -240,7 +239,7 @@ void Curves::copy(const Curves &curves)
   }
 
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   point = new double*[nb_curve];
@@ -638,6 +637,28 @@ void Curves::plotable_write(int index , SinglePlot &plot) const
 
 /*--------------------------------------------------------------*
  *
+ *  Ecriture d'une famille de courbes.
+ *
+ *  argument : reference sur un objet MultiPlot.
+ *
+ *--------------------------------------------------------------*/
+
+void Curves::plotable_write(MultiPlot &plot) const
+
+{
+  register int i , j;
+
+
+  for (i = offset;i < length;i++) {
+    for (j = 0;j < nb_curve;j++) {
+      plot[j].add_point(i , point[j][i]);
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Ecriture des frequences.
  *
  *  argument : reference sur un objet SinglePlot.
@@ -698,141 +719,6 @@ ostream& operator<<(ostream &os , const Curves &curves)
 
   return os;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Curves::binaryStoreSize() const
-
-{
-  RWspace size = sizeof(nb_curve) + sizeof(length) + sizeof(offset);
-
-
-  size += sizeof(true);
-  if (frequency) {
-    size += sizeof(*frequency) * length;
-  }
-
-  size += sizeof(**point) * nb_curve * length;
-
-  return size;
-}
-
-
-void Curves::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i , j;
-
-
-  remove();
-
-  is >> nb_curve >> length >> offset;
-
-  is >> status;
-  if (status) {
-    frequency = new int[length];
-    for (i = 0;i < length;i++) {
-      is >> frequency[i];
-    }
-  }
-  else {
-    frequency = 0;
-  }
-
-  point = new double*[nb_curve];
-  for (i = 0;i < nb_curve;i++) {
-    point[i] = new double[length];
-    for (j = 0;j < length;j++) {
-      is >> point[i][j];
-    }
-  }
-}
-
-
-void Curves::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_curve);
-  file.Read(length);
-  file.Read(offset);
-
-  file.Read(status);
-  if (status) {
-    frequency = new int[length];
-    file.Read(frequency , length);
-  }
-  else {
-    frequency = 0;
-  }
-
-  point = new double*[nb_curve];
-  for (i = 0;i < nb_curve;i++) {
-    point[i] = new double[length];
-    file.Read(point[i] , length);
-  }
-}
-
-
-void Curves::saveGuts(RWvostream &os) const
-
-{
-  register int i , j;
-
-
-  os << nb_curve << length << offset;
-
-  if (frequency) {
-    os << true;
-    for (i = 0;i < length;i++) {
-      os << frequency[i];
-    }
-  }
-  else {
-    os << false;
-  }
-
-  for (i = 0;i < nb_curve;i++) {
-    for (j = 0;j < length;j++) {
-      os << point[i][j];
-    }
-  }
-}
-
-
-void Curves::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_curve);
-  file.Write(length);
-  file.Write(offset);
-
-  if (frequency) {
-    file.Write(true);
-    file.Write(frequency , length);
-  }
-  else {
-    file.Write(false);
-  }
-
-  for (i = 0;i < nb_curve;i++) {
-    file.Write(point[i] , length);
-  }
-} */
 
 
 /*--------------------------------------------------------------*
