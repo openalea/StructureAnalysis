@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -78,13 +78,13 @@ Parametric_process::Parametric_process(int inb_state , int inb_value)
 
     else {
       for (i = 0;i < nb_state;i++) {
-        observation[i] = 0;
+        observation[i] = NULL;
       }
     }
   }
 
   else {
-    observation = 0;
+    observation = NULL;
   }
 }
 
@@ -232,7 +232,7 @@ void Parametric_process::remove()
     }
     delete [] observation;
 
-    observation = 0;
+    observation = NULL;
   }
 }
 
@@ -294,11 +294,11 @@ Parametric_process* observation_parsing(Format_error &error , ifstream &in_file 
   Parametric_process *process;
 
 
-  process = 0;
+  process = NULL;
 
   dist = new Parametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    dist[i] = 0;
+    dist[i] = NULL;
   }
 
   for (i = 0;i < nb_state;i++) {
@@ -506,8 +506,8 @@ ostream& Parametric_process::spreadsheet_print(ostream &os , Histogram **empiric
  *
  *--------------------------------------------------------------*/
 
-bool Parametric_process::plot_print(const char *prefix , const char *title ,
-                                    int process , Histogram **empirical_observation) const
+bool Parametric_process::plot_print(const char *prefix , const char *title , int process ,
+                                    Histogram **empirical_observation) const
 
 {
   bool status;
@@ -532,15 +532,15 @@ bool Parametric_process::plot_print(const char *prefix , const char *title ,
     index_dist = new int[nb_state];
   }
   else {
-    phisto = 0;
-    index_dist = 0;
+    phisto = NULL;
+    index_dist = NULL;
   }
 
   for (i = 0;i < nb_state;i++) {
     pdist[i] = observation[i];
     dist_nb_value[i] = observation[i]->nb_value;
 
-    if (empirical_observation) {
+    if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
       phisto[i] = empirical_observation[i];
       index_dist[i] = i;
       scale[i] = phisto[i]->nb_element;
@@ -591,7 +591,7 @@ bool Parametric_process::plot_print(const char *prefix , const char *title ,
           out_file << "set xtics 0,1" << endl;
         }
 
-        if (empirical_observation) {
+        if ((empirical_observation) && (empirical_observation[j]->nb_element > 0)) {
           out_file << "plot [0:" << observation[j]->nb_value - 1 << "] [0:"
                    << (int)(MAX(empirical_observation[j]->max , observation[j]->max * scale[j]) * YSCALE) + 1
                    << "] \"" << label((data_file_name.str()).c_str()) << "\" using " << j + 1
@@ -642,6 +642,82 @@ bool Parametric_process::plot_print(const char *prefix , const char *title ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Parametric_process.
+ *
+ *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
+ *              indice du processus d'observation,
+ *              pointeurs sur les lois d'observation empiriques.
+ *
+ *--------------------------------------------------------------*/
+
+void Parametric_process::plotable_write(MultiPlotSet &plot , int &index , int process ,
+                                        Histogram **empirical_observation) const
+
+{
+  register int i , j;
+  double scale;
+  ostringstream title , legend;
+
+
+  plot.variable_nb_viewpoint[process] = 1;
+
+  for (i = 0;i < nb_state;i++) {
+
+    // vue : ajustement loi d'observation
+
+    plot.variable[index] = process;
+//    plot.viewpoint[index] = OBSERVATION;
+
+    title.str("");
+    title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+    plot[index].title = title.str();
+
+    plot[index].xrange = Range(0 , observation[i]->nb_value - 1);
+    if (observation[i]->nb_value - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+
+    if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
+      scale = empirical_observation[i]->nb_element;
+      plot[index].yrange = Range(0 , ceil(MAX(empirical_observation[i]->max ,
+                                              observation[i]->max * scale) * YSCALE));
+
+      plot[index].resize(2);
+
+      legend.str("");
+      legend << STAT_label[STATL_STATE] << " " << i << " "
+             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[index][0].legend = legend.str();
+
+      plot[index][0].style = "impulses";
+
+      empirical_observation[i]->plotable_frequency_write(plot[index][0]);
+      j = 1;
+    }
+
+    else {
+      scale = 1.;
+      plot[index].yrange = Range(0 , MIN(observation[i]->max * YSCALE , 1.));
+
+      plot[index].resize(1);
+      j = 0;
+    }
+
+    legend.str("");
+    legend << STAT_label[STATL_STATE] << " " << i << " "
+           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+    plot[index][j].legend = legend.str();
+
+    plot[index][j].style = "linespoints";
+
+    observation[i]->plotable_mass_write(plot[index][j] , scale);
+    index++;
+  }
 }
 
 
