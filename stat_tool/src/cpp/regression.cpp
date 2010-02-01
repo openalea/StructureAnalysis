@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -39,8 +39,7 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tools.h"
 #include "vectors.h"
 #include "regression.h"
@@ -77,9 +76,9 @@ Regression_kernel::Regression_kernel()
   residual_df = 0.;
 
   nb_parameter = 0;
-  parameter = 0;
+  parameter = NULL;
 //  step = 1.;
-  point = 0;
+  point = NULL;
 }
 
 
@@ -129,7 +128,7 @@ Regression_kernel::Regression_kernel(int iident , int imin_value , int imax_valu
     parameter = new double[nb_parameter];
   }
   else {
-    parameter = 0;
+    parameter = NULL;
   }
 
 //  step = istep;
@@ -170,7 +169,7 @@ void Regression_kernel::copy(const Regression_kernel &regression)
     }
   }
   else {
-    parameter = 0;
+    parameter = NULL;
   }
 
 //  step = regression.step;
@@ -436,158 +435,6 @@ void Regression_kernel::plotable_write(SinglePlot &plot) const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Regression_kernel::binaryStoreSize() const
-
-{
-  RWspace size;
-
-
-  size = sizeof(ident) + sizeof(min_value) + sizeof(max_value) +
-         sizeof(regression_df) + sizeof(residual_df) + sizeof(nb_parameter);
-
-  size += sizeof(true);
-  if (parameter) {
-    size += sizeof(parameter) * nb_parameter;
-  }
-
-  size += sizeof(point) * (max_value - min_value + 1);
-
-  return size;
-}
-
-
-void Regression_kernel::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  is >> ident;
-
-  is >> min_value;
-  is >> max_value;
-
-  is >> regression_df;
-  is >> residual_df;
-
-  is >> nb_parameter;
-
-  is >> status;
-  if (status) {
-    parameter = new double[nb_parameter];
-    for (i = 0;i < nb_parameter;i++) {
-      is >> parameter[i];
-    }
-  }
-  else {
-    parameter = 0;
-  }
-
-  point = new double[max_value - min_value + 1];
-  for (i = 0;i <= max_value - min_value;i++) {
-    is >> point[i];
-  }
-}
-
-
-void Regression_kernel::restoreGuts(RWFile &file)
-
-{
-  bool status;
-
-
-  remove();
-
-  file.Read(ident);
-
-  file.Read(min_value);
-  file.Read(max_value);
-
-  file.Read(regression_df);
-  file.Read(residual_df);
-
-  file.Read(nb_parameter);
-
-  file.Read(status);
-  if (status) {
-    parameter = new double[nb_parameter];
-    file.Read(parameter , nb_parameter);
-  }
-  else {
-    parameter = 0;
-  }
-
-  point = new double[max_value - min_value + 1];
-  file.Read(point , max_value - min_value + 1);
-}
-
-
-void Regression_kernel::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  os << ident;
-
-  os << min_value;
-  os << max_value;
-
-  os << regression_df;
-  os << residual_df;
-
-  os << nb_parameter;
-
-  if (parameter) {
-    os << true;
-    for (i = 0;i < nb_parameter;i++) {
-      os << parameter[i];
-    }
-  }
-  else {
-    os << false;
-  }
-
-  for (i = 0;i <= max_value - min_value;i++) {
-    os << point[i];
-  }
-}
-
-
-void Regression_kernel::saveGuts(RWFile &file) const
-
-{
-  file.Write(ident);
-
-  file.Write(min_value);
-  file.Write(max_value);
-
-  file.Write(regression_df);
-  file.Write(residual_df);
-
-  file.Write(nb_parameter);
-
-  if (parameter) {
-    file.Write(true);
-    file.Write(parameter , nb_parameter);
-  }
-  else {
-    file.Write(false);
-  }
-
-  file.Write(point , max_value - min_value + 1);
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Calcul des valeurs d'une fonction parametrique.
  *
  *--------------------------------------------------------------*/
@@ -690,10 +537,10 @@ double Regression_kernel::max_computation() const
 Regression::Regression()
 
 {
-  vectors = 0;
+  vectors = NULL;
 
   nb_vector = 0;
-  residual = 0;
+  residual = NULL;
 }
 
 
@@ -742,7 +589,7 @@ void Regression::copy(const Regression &regression)
     vectors = new Vectors(*(regression.vectors));
   }
   else {
-    vectors = 0;
+    vectors = NULL;
   }
 
   nb_vector = regression.nb_vector;
@@ -1607,15 +1454,15 @@ MultiPlotSet* Regression::get_plotable() const
   }
   plot[0].yrange = Range(ymin , MAX(max_response , min_response + 1));
 
-  plot[0].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
-  plot[0].ylabel = STAT_label[STATL_RESPONSE_VARIABLE];
-
   if (max_value - min_value < TIC_THRESHOLD) {
     plot[0].xtics = 1;
   }
   if (max_response - min_response < TIC_THRESHOLD) {
     plot[0].ytics = 1;
   }
+
+  plot[0].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
+  plot[0].ylabel = STAT_label[STATL_RESPONSE_VARIABLE];
 
   if (((vectors->marginal[0]) && (vectors->marginal[0]->nb_value <= PLOT_NB_VALUE)) &&
       ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
@@ -1675,12 +1522,12 @@ MultiPlotSet* Regression::get_plotable() const
   plot[1].yrange = Range(MIN(min_standard_residual , -threshold) ,
                          MAX(max_standard_residual , threshold));
 
-  plot[1].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
-  plot[1].ylabel = STAT_label[STATL_STANDARDIZED_RESIDUAL];
-
   if (max_value - min_value < TIC_THRESHOLD) {
     plot[1].xtics = 1;
   }
+
+  plot[1].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
+  plot[1].ylabel = STAT_label[STATL_STANDARDIZED_RESIDUAL];
 
   nb_plot = 1;
   if (min_standard_residual < -threshold) {
@@ -1717,114 +1564,6 @@ MultiPlotSet* Regression::get_plotable() const
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Regression , STATI_REGRESSION);
-
-
-RWspace Regression::binaryStoreSize() const
-
-{
-  RWspace size;
-
-
-  size = Regression_kernel::binaryStoreSize() +
-         sizeof(nb_vector) + sizeof(residual) * nb_vector;
-
-  if (vectors) {
-    size += vectors->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Regression::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  Regression_kernel::restoreGuts(is);
-
-  is >> nb_vector;
-
-  residual = new double[nb_vector];
-  for (i = 0;i < nb_vector;i++) {
-    is >> residual[i];
-  }
-
-  is >> vectors;
-  if (vectors == RWnilCollectable) {
-    vectors = 0;
-  }
-}
-
-
-void Regression::restoreGuts(RWFile &file)
-
-{
-  remove();
-
-  Regression_kernel::restoreGuts(file);
-
-  file.Read(nb_vector);
-
-  residual = new double[nb_vector];
-  file.Read(residual , nb_vector);
-
-  file >> vectors;
-  if (vectors == RWnilCollectable) {
-    vectors = 0;
-  }
-}
-
-
-void Regression::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Regression_kernel::saveGuts(os);
-
-  os << nb_vector;
-  for (i = 0;i < nb_vector;i++) {
-    os << residual[i];
-  }
-
-  if (vectors) {
-    os << vectors;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Regression::saveGuts(RWFile &file) const
-
-{
-  Regression_kernel::saveGuts(file);
-
-  file.Write(nb_vector);
-  file.Write(residual , nb_vector);
-
-  if (vectors) {
-    file << vectors;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
 
 
 /*--------------------------------------------------------------*
@@ -1977,7 +1716,7 @@ Regression* Vectors::linear_regression(Format_error &error , int explanatory_var
   Regression *regression;
 
 
-  regression = 0;
+  regression = NULL;
   error.init();
 
   if (nb_vector < 3) {
@@ -2063,7 +1802,7 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
   Vectors *vec;
 
 
-  regression = 0;
+  regression = NULL;
   error.init();
 
   if ((nb_vector < 3) || (nb_vector > REGRESSION_NB_VECTOR)) {
@@ -2366,7 +2105,7 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
   Regression *regression;
 
 
-  regression = 0;
+  regression = NULL;
   error.init();
 
   if ((dist.offset != 0) || ((dist.nb_value - dist.offset) % 2 == 0)) {
@@ -2415,7 +2154,7 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
   Vectors *vec;
 
 
-  regression = 0;
+  regression = NULL;
   error.init();
 
   if ((nb_vector < 3) || (nb_vector > REGRESSION_NB_VECTOR)) {
@@ -2709,7 +2448,7 @@ Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explana
 
     else {
       delete regression;
-      regression = 0;
+      regression = NULL;
       error.update(STAT_error[STATR_REGRESSION_FAILURE]);
     }
 
