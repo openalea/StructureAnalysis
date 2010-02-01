@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -40,11 +40,8 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
-
 #include "tool/config.h"
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "distribution.h"
 #include "curves.h"
@@ -306,7 +303,7 @@ Distribution_data* Histogram::shift(Format_error &error , int shift_param) const
   error.init();
 
   if (shift_param < -offset) {
-    histo = 0;
+    histo = NULL;
     ostringstream correction_message;
     correction_message << STAT_error[STATR_GREATER_THAN] << " " << -offset;
     error.correction_update(STAT_error[STATR_SHIFT_VALUE] , (correction_message.str()).c_str());
@@ -338,7 +335,7 @@ Distribution_data* Histogram::cluster(Format_error &error , int step , int mode)
   error.init();
 
   if (step < 1) {
-    histo = 0;
+    histo = NULL;
     error.update(STAT_error[STATR_CLUSTERING_STEP]);
   }
 
@@ -370,7 +367,7 @@ Distribution_data* Histogram::cluster(Format_error &error , double ratio , ostre
   Distribution_data *histo , *previous_histo;
 
 
-  previous_histo = 0;
+  previous_histo = NULL;
   error.init();
 
   if ((ratio < 0.) || (ratio > 1.)) {
@@ -479,7 +476,7 @@ Distribution_data* Histogram::cluster(Format_error &error , int nb_class , int *
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if ((nb_class < 2) || (nb_class >= nb_value)) {
@@ -551,7 +548,7 @@ Distribution_data* Histogram::transcode(Format_error &error , int *symbol) const
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   min_symbol = INT_MAX;
@@ -655,7 +652,7 @@ Distribution_data* Histogram::value_select(Format_error &error , int min_value ,
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if ((min_value < 0) || (min_value >= nb_value) || (min_value > max_value)) {
@@ -722,7 +719,7 @@ Distribution_data* Histogram::value_select(Format_error &error , int min_value ,
 
     else {
       delete histo;
-      histo = 0;
+      histo = NULL;
       error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
     }
   }
@@ -1547,7 +1544,7 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
   error.init();
 
   if (variance == 0.) {
-    plot_set = 0;
+    plot_set = NULL;
     error.update(STAT_error[STATR_PLOT_NULL_VARIANCE]);
   }
 
@@ -1625,16 +1622,12 @@ MultiPlotSet* Histogram::survival_get_plotable(Format_error &error) const
     plot[2].resize(2);
 
     plot[2][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
-
     plot[2][0].style = "linespoints";
 
-    survival_rate->plotable_write(0 , plot[2][0]);
-
     plot[2][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
-
     plot[2][1].style = "linespoints";
 
-    survival_rate->plotable_write(1 , plot[2][1]);
+    survival_rate->plotable_write(plot[2]);
 
     delete survival_rate;
   }
@@ -1761,7 +1754,7 @@ double* Histogram::concentration_function_computation(double scale) const
   }
 
   else {
-    concentration_function = 0;
+    concentration_function = NULL;
   }
 
   return concentration_function;
@@ -1782,7 +1775,7 @@ double Histogram::concentration_computation() const
   double concentration = D_DEFAULT , *concentration_function;
 
 
-  if (mean > 0.) {
+  if ((mean > 0.) && (variance > 0.)) {
     concentration_function = concentration_function_computation();
     pfrequency = frequency + offset;
 
