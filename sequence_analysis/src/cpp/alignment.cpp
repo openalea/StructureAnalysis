@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -658,7 +658,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
   ofstream *out_file;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   if (nb_sequence < 2) {
@@ -814,7 +814,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
         rank[i] = marginal[i]->rank_computation();
       }
       else {
-        rank[i] = 0;
+        rank[i] = NULL;
       }
 
       // calcul des dispersions pour la standardisation
@@ -879,7 +879,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
       }
     }
 
-    out_file = 0;
+    out_file = NULL;
 
     if (result_path) {
       out_file = new ofstream(result_path);
@@ -950,12 +950,12 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
       }
 
       else {
-        local_indel_distance[i] = 0;
+        local_indel_distance[i] = NULL;
       }
     }
 
     local_substitution_distance = new double*[max_length + 1];
-    local_substitution_distance[0] = 0;
+    local_substitution_distance[0] = NULL;
     for (i = 1;i <= max_length;i++) {
       local_substitution_distance[i] = new double[max_length + 1];
     }
@@ -1615,7 +1615,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
   ofstream *out_file;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   if (nb_sequence < 2) {
@@ -1709,7 +1709,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
       }
     }
 
-    out_file = 0;
+    out_file = NULL;
 
     if (result_path) {
       out_file = new ofstream(result_path);
@@ -2818,7 +2818,7 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
   Sequences *seq , **clustered_seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if (index_parameter) {
@@ -2880,7 +2880,7 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
           rank[i] = marginal[i]->rank_computation();
         }
         else {
-          rank[i] = 0;
+          rank[i] = NULL;
         }
 
         // calcul des dispersions pour la standardisation
