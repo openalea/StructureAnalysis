@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -40,8 +40,6 @@
 #include <iomanip>
 #include <cstring>
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "distance_matrix.h"
 #include "stat_label.h"
@@ -69,16 +67,16 @@ extern int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_patte
 Clusters::Clusters()
 
 {
-  distance_matrix = 0;
+  distance_matrix = NULL;
 
   nb_pattern = 0;
   nb_cluster = 0;
 
-  cluster_nb_pattern = 0;
-  assignment = 0;
+  cluster_nb_pattern = NULL;
+  assignment = NULL;
 
-  pattern_distance = 0;
-  pattern_length = 0;
+  pattern_distance = NULL;
+  pattern_length = NULL;
 }
 
 
@@ -1149,7 +1147,7 @@ MultiPlotSet* Clusters::get_plotable(Format_error &error) const
   }
 
   if (max_nb_pattern == 1) {
-    plot_set = 0;
+    plot_set = NULL;
     error.update(STAT_error[STATR_SINGLE_ELEMENT_CLUSTERS]);
   }
 
@@ -1250,166 +1248,6 @@ MultiPlotSet* Clusters::get_plotable() const
 
   return get_plotable(error);
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Clusters , STATI_CLUSTERS);
-
-
-RWspace Clusters::binaryStoreSize() const
-
-{
-  RWspace size = Distance_matrix::binaryStoreSize() + sizeof(nb_pattern) + sizeof(nb_cluster) +
-                 sizeof(*cluster_nb_pattern) * nb_cluster + sizeof(*assignment) * nb_pattern +
-                 sizeof(**pattern_distance) * nb_pattern * nb_cluster +
-                 sizeof(**pattern_length) * nb_pattern * nb_cluster;
-
-  size += distance_matrix->recursiveStoreSize();
-
-  return size;
-}
-
-
-void Clusters::restoreGuts(RWvistream &is)
-
-{
-  register int i , j;
-
-
-  remove();
-
-  Distance_matrix::restoreGuts(is);
-
-  is >> nb_pattern >> nb_cluster;
-
-  cluster_nb_pattern = new int[nb_cluster];
-  for (i = 0;i < nb_cluster;i++) {
-    is >> cluster_nb_pattern[i];
-  }
-
-  assignment = new int[nb_pattern];
-  for (i = 0;i < nb_pattern;i++) {
-    is >> assignment[i];
-  }
-
-  pattern_distance = new double*[nb_pattern];
-  for (i = 0;i < nb_pattern;i++) {
-    pattern_distance[i] = new double[nb_cluster];
-    for (j = 0;j < nb_cluster;j++) {
-      is >> pattern_distance[i][j];
-    }
-  }
-
-  pattern_length = new int*[nb_pattern];
-  for (i = 0;i < nb_pattern;i++) {
-    pattern_length[i] = new int[nb_cluster];
-    for (j = 0;j < nb_cluster;j++) {
-      is >> pattern_length[i][j];
-    }
-  }
-
-  is >> distance_matrix;
-}
-
-
-void Clusters::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  Distance_matrix::restoreGuts(file);
-
-  file.Read(nb_pattern);
-  file.Read(nb_cluster);
-
-  cluster_nb_pattern = new int[nb_cluster];
-  file.Read(cluster_nb_pattern , nb_cluster);
-
-  assignment = new int[nb_pattern];
-  file.Read(assignment , nb_pattern);
-
-  pattern_distance = new double*[nb_pattern];
-  for (i = 0;i < nb_pattern;i++) {
-    pattern_distance[i] = new double[nb_cluster];
-    file.Read(pattern_distance[i] , nb_cluster);
-  }
-
-  pattern_length = new int*[nb_pattern];
-  for (i = 0;i < nb_pattern;i++) {
-    pattern_length[i] = new int[nb_cluster];
-    file.Read(pattern_length[i] , nb_cluster);
-  }
-
-  file >> distance_matrix;
-}
-
-
-void Clusters::saveGuts(RWvostream &os) const
-
-{
-  register int i , j;
-
-
-  Distance_matrix::saveGuts(os);
-
-  os << nb_pattern << nb_cluster;
-
-  for (i = 0;i < nb_cluster;i++) {
-    os << cluster_nb_pattern[i];
-  }
-
-  for (i = 0;i < nb_pattern;i++) {
-    os << assignment[i];
-  }
-
-  for (i = 0;i < nb_pattern;i++) {
-    for (j = 0;j < nb_cluster;j++) {
-      os << pattern_distance[i][j];
-    }
-  }
-
-  for (i = 0;i < nb_pattern;i++) {
-    for (j = 0;j < nb_cluster;j++) {
-      os << pattern_length[i][j];
-    }
-  }
-
-  os << distance_matrix;
-}
-
-
-void Clusters::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  Distance_matrix::saveGuts(file);
-
-  file.Write(nb_pattern);
-  file.Write(nb_cluster);
-
-  file.Write(cluster_nb_pattern , nb_cluster);
-  file.Write(assignment , nb_pattern);
-
-  for (i = 0;i < nb_pattern;i++) {
-    file.Write(pattern_distance[i] , nb_cluster);
-  }
-
-  for (i = 0;i < nb_pattern;i++) {
-    file.Write(pattern_length[i] , nb_cluster);
-  }
-
-  file << distance_matrix;
-} */
 
 
 /*--------------------------------------------------------------*
@@ -2595,7 +2433,7 @@ Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int 
   Clusters *clusters;
 
 
-  clusters = 0;
+  clusters = NULL;
   error.init();
 
   if (nb_row != nb_column) {
@@ -2748,7 +2586,7 @@ Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int 
   Clusters *clusters;
 
 
-  clusters = 0;
+  clusters = NULL;
   error.init();
 
   if (nb_row != nb_column) {
