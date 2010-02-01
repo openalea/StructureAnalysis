@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -42,9 +42,6 @@
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
 
-
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "distribution.h"
 #include "stat_label.h"
@@ -372,7 +369,7 @@ Parametric* parametric_parsing(Format_error &error , ifstream &in_file , int &li
   Parametric *dist;
 
 
-  dist = 0;
+  dist = NULL;
 
   while (buffer.readLine(in_file , false)) {
     line++;
@@ -707,66 +704,6 @@ ostream& operator<<(ostream &os , const Parametric &dist)
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Parametric::binaryStoreSize(int ialloc_nb_value) const
-
-{
-  RWspace size = Distribution::binaryStoreSize(ialloc_nb_value) + sizeof(ident) +
-                 sizeof(inf_bound) + sizeof(sup_bound) + sizeof(parameter) + sizeof(probability);
-
-  return size;
-}
-
-
-void Parametric::restoreGuts(RWvistream &is)
-
-{
-  Distribution::restoreGuts(is);
-
-  is >> ident >> inf_bound >> sup_bound >> parameter >> probability;
-}
-
-
-void Parametric::restoreGuts(RWFile &file)
-
-{
-  Distribution::restoreGuts(file);
-
-  file.Read(ident);
-  file.Read(inf_bound);
-  file.Read(sup_bound);
-  file.Read(parameter);
-  file.Read(probability);
-}
-
-
-void Parametric::saveGuts(RWvostream &os , int ialloc_nb_value) const
-
-{
-  Distribution::saveGuts(os , ialloc_nb_value);
-
-  os << ident << inf_bound << sup_bound << parameter << probability;
-}
-
-
-void Parametric::saveGuts(RWFile &file , int ialloc_nb_value) const
-
-{
-  Distribution::saveGuts(file , ialloc_nb_value);
-
-  file.Write(ident);
-  file.Write(inf_bound);
-  file.Write(sup_bound);
-  file.Write(parameter);
-  file.Write(probability);
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Calcul du nombre de parametres d'une loi.
  *
  *--------------------------------------------------------------*/
@@ -1017,7 +954,7 @@ Parametric_model::Parametric_model(const Distribution &dist , const Histogram *h
     histogram = new Distribution_data(*histo);
   }
   else {
-    histogram = 0;
+    histogram = NULL;
   }
 }
 
@@ -1040,7 +977,7 @@ Parametric_model::Parametric_model(const Parametric &dist , const Histogram *his
     histogram = new Distribution_data(*histo);
   }
   else {
-    histogram = 0;
+    histogram = NULL;
   }
 }
 
@@ -1062,7 +999,7 @@ Parametric_model::Parametric_model(const Parametric_model &dist , bool data_flag
     histogram = new Distribution_data(*(dist.histogram) , false);
   }
   else {
-    histogram = 0;
+    histogram = NULL;
   }
 }
 
@@ -1106,7 +1043,7 @@ Parametric_model& Parametric_model::operator=(const Parametric_model &dist)
       histogram = new Distribution_data(*(dist.histogram) , false);
     }
     else {
-      histogram = 0;
+      histogram = NULL;
     }
   }
 
@@ -1131,7 +1068,7 @@ Distribution_data* Parametric_model::extract_data(Format_error &error) const
   error.init();
 
   if (!histogram) {
-    histo = 0;
+    histo = NULL;
     error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
   }
 
@@ -1166,7 +1103,7 @@ Parametric_model* parametric_ascii_read(Format_error &error , const char *path ,
   ifstream in_file(path);
 
 
-  dist = 0;
+  dist = NULL;
   error.init();
 
   if (!in_file) {
@@ -1547,7 +1484,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
     pcumul = new double*[2];
 
     pconcentration = new double*[2];
-    pconcentration[1] = 0;
+    pconcentration[1] = NULL;
 
     data_file_name[0] << prefix << 0 << ".dat";
 
@@ -2004,80 +1941,3 @@ MultiPlotSet* Parametric_model::get_plotable() const
 {
   return get_plotable(histogram);
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Parametric_model , STATI_PARAMETRIC_MODEL);
-
-
-RWspace Parametric_model::binaryStoreSize() const
-
-{
-  RWspace size = Parametric::binaryStoreSize();
-  if (histogram) {
-    size += histogram->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Parametric_model::restoreGuts(RWvistream &is)
-
-{
-  delete histogram;
-
-  Parametric::restoreGuts(is);
-
-  is >> histogram;
-  if (histogram == RWnilCollectable) {
-    histogram = 0;
-  }
-}
-
-
-void Parametric_model::restoreGuts(RWFile &file)
-
-{
-  delete histogram;
-
-  Parametric::restoreGuts(file);
-
-  file >> histogram;
-  if (histogram == RWnilCollectable) {
-    histogram = 0;
-  }
-}
-
-
-void Parametric_model::saveGuts(RWvostream &os) const
-
-{
-  Parametric::saveGuts(os);
-
-  if (histogram) {
-    os << histogram;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Parametric_model::saveGuts(RWFile &file) const
-
-{
-  Parametric::saveGuts(file);
-
-  if (histogram) {
-    file << histogram;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
