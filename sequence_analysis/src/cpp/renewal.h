@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -145,12 +145,6 @@ public :
     char type;              // 'o' : ordinaire, 'e' : en equilibre
     int time;               // temps d'observation
 
-/*    RWspace binaryStoreSize(int ialloc_nb_value = I_DEFAULT) const;
-    void restoreGuts(RWvistream &is);
-    void restoreGuts(RWFile &file);
-    void saveGuts(RWvostream &os , int ialloc_nb_value = I_DEFAULT) const;
-    void saveGuts(RWFile &file , int ialloc_nb_value = I_DEFAULT) const; */
-
     void binomial_computation();
     void negative_binomial_computation();
 
@@ -249,19 +243,11 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-/*    RWDECLARE_COLLECTABLE(Renewal);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
-
     void computation(bool inter_event_flag = true , char itype = 'v' ,
-                     const Distribution *dtime = 0);
+                     const Distribution *dtime = NULL);
 
     double likelihood_computation(const Time_events &timev) const;
 
@@ -392,16 +378,8 @@ public :
                      bool exhaustive = true) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Time_events);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     double information_computation() const;
 
@@ -481,16 +459,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Renewal_data);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     Renewal* estimation(Format_error &error , std::ostream &os , const Parametric &iinter_event ,
                         int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
