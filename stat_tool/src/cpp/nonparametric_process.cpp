@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -78,7 +78,7 @@ Nonparametric_process::Nonparametric_process(int inb_state , int inb_value , int
   }
 
   else {
-    observation = 0;
+    observation = NULL;
   }
 }
 
@@ -170,7 +170,7 @@ void Nonparametric_process::copy(const Nonparametric_process &process)
   }
 
   else {
-    observation = 0;
+    observation = NULL;
   }
 }
 
@@ -203,7 +203,7 @@ void Nonparametric_process::add_state(const Nonparametric_process &process , int
   }
 
   else {
-    observation = 0;
+    observation = NULL;
   }
 }
 
@@ -249,7 +249,7 @@ void Nonparametric_process::remove()
     }
     delete [] observation;
 
-    observation = 0;
+    observation = NULL;
   }
 }
 
@@ -427,7 +427,7 @@ Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_fi
   Nonparametric_process *process;
 
 
-  process = 0;
+  process = NULL;
 
   for (i = 0;i < NB_OUTPUT;i++) {
     defined_output[i] = false;
@@ -649,7 +649,7 @@ Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_fi
 
     if (!status) {
       delete process;
-      process = 0;
+      process = NULL;
     }
   }
 
@@ -688,7 +688,7 @@ Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_f
 
 
   nb_output_process = I_DEFAULT;
-  process = 0;
+  process = NULL;
 
   while (buffer.readLine(in_file , false)) {
     line++;
@@ -760,7 +760,7 @@ Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_f
   else {
     process = new Nonparametric_process*[nb_output_process];
     for (i = 0;i < nb_output_process;i++) {
-      process[i] = 0;
+      process[i] = NULL;
     }
 
     index = 0;
@@ -859,7 +859,7 @@ Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_f
       }
       delete [] process;
 
-      process = 0;
+      process = NULL;
     }
   }
 
@@ -893,7 +893,7 @@ Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &
 
 
   nb_output_process = I_DEFAULT;
-  process = 0;
+  process = NULL;
 
   while (buffer.readLine(in_file , false)) {
     line++;
@@ -1003,7 +1003,7 @@ Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &
   else {
     process = new Nonparametric_process*[nb_output_process];
     for (i = 0;i < nb_output_process;i++) {
-      process[i] = 0;
+      process[i] = NULL;
     }
 
     index = 0;
@@ -1082,7 +1082,7 @@ Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &
       }
       delete [] process;
 
-      process = 0;
+      process = NULL;
     }
   }
 
