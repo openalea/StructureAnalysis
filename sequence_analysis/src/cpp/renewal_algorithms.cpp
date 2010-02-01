@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -604,7 +604,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
   Renewal *renew;
 
 
-  renew = 0;
+  renew = NULL;
   error.init();
 
   if (mixture->nb_value <= 2) {
@@ -880,7 +880,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
 
     else {
       delete renew;
-      renew = 0;
+      renew = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
   }
@@ -1179,7 +1179,7 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
   const Histogram *phisto[2];
 
 
-  inter_event = 0;
+  inter_event = NULL;
   error.init();
 
   if (nb_element < NB_COMPLETE_INTERVAL) {
@@ -1483,7 +1483,7 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
 
     else {
       delete inter_event;
-      inter_event = 0;
+      inter_event = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -1680,7 +1680,7 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , const Para
 
   if (no_event->nb_element == 0) {
     delete no_event;
-    no_event = 0;
+    no_event = NULL;
   }
 
   inter_event = within->estimation(error , os , *within_backward , *within_forward , no_event ,
@@ -1695,7 +1695,7 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , const Para
     renew = new Renewal(*this , *((Parametric*)inter_event));
   }
   else {
-    renew = 0;
+    renew = NULL;
   }
 
   return renew;
@@ -1771,7 +1771,7 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
   Renewal_data *timev;
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if ((ihtime.nb_element < 1) || (ihtime.nb_element > RENEWAL_NB_ELEMENT)) {
@@ -1983,7 +1983,7 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
   Renewal_data *timev;
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if ((nb_element < 1) || (nb_element > RENEWAL_NB_ELEMENT)) {
@@ -2037,7 +2037,7 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
   error.init();
 
   if ((nb_element < 1) || (nb_element > RENEWAL_NB_ELEMENT)) {
-    timev = 0;
+    timev = NULL;
     error.update(STAT_error[STATR_SAMPLE_SIZE]);
   }
 
