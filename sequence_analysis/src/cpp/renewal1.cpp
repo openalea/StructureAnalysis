@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -39,8 +39,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
@@ -127,60 +126,6 @@ Nb_event::Nb_event(const Nb_event &nb_event , int ialloc_nb_value)
   type = nb_event.type;
   time = nb_event.time;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Nb_event::binaryStoreSize(int ialloc_nb_value) const
-
-{
-  RWspace size = Parametric::binaryStoreSize(ialloc_nb_value) +
-                 sizeof(type) + sizeof(time);
-
-  return size;
-}
-
-
-void Nb_event::restoreGuts(RWvistream &is)
-
-{
-  Parametric::restoreGuts(is);
-
-  is >> type >> time;
-}
-
-
-void Nb_event::restoreGuts(RWFile &file)
-
-{
-  Parametric::restoreGuts(file);
-
-  file.Read(type);
-  file.Read(time);
-}
-
-
-void Nb_event::saveGuts(RWvostream &os , int ialloc_nb_value) const
-
-{
-  Parametric::saveGuts(os , ialloc_nb_value);
-
-  os << type << time;
-}
-
-
-void Nb_event::saveGuts(RWFile &file , int ialloc_nb_value) const
-
-{
-  Parametric::saveGuts(file , ialloc_nb_value);
-
-  file.Write(type);
-  file.Write(time);
-} */
 
 
 /*--------------------------------------------------------------*
@@ -276,24 +221,24 @@ Renewal::Renewal()
 
 {
   nb_iterator = 0;
-  renewal_data = 0;
+  renewal_data = NULL;
 
   type = 'v';
 
-  time = 0;
+  time = NULL;
 
-  inter_event = 0;
-  length_bias = 0;
-  backward = 0;
-  forward = 0;
+  inter_event = NULL;
+  length_bias = NULL;
+  backward = NULL;
+  forward = NULL;
 
   nb_event_max = 0;
-  nevent_time = 0;
+  nevent_time = NULL;
 
-  nb_event = 0;
-  mixture = 0;
+  nb_event = NULL;
+  mixture = NULL;
 
-  index_event = 0;
+  index_event = NULL;
 }
 
 
@@ -314,7 +259,7 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
 
 
   nb_iterator = 0;
-  renewal_data = 0;
+  renewal_data = NULL;
 
   type = itype;
 
@@ -334,7 +279,7 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
   nb_event = new Nb_event*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
-    nb_event[i] = 0;
+    nb_event[i] = NULL;
   }
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
@@ -353,7 +298,7 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
     }
 
     else {
-      nb_event[i] = 0;
+      nb_event[i] = NULL;
     }
   }
 
@@ -362,7 +307,7 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
   nb_event_max = nb_value - 1;
   nevent_time = new Parametric*[nb_event_max + 1];
   for (i = 0;i <= nb_event_max;i++) {
-    nevent_time[i] = 0;
+    nevent_time[i] = NULL;
   }
 
   index_event = new Curves(2 , time->nb_value);
@@ -387,7 +332,7 @@ Renewal::Renewal(char itype , const Distribution &itime ,
 
 
   nb_iterator = 0;
-  renewal_data = 0;
+  renewal_data = NULL;
 
   type = itype;
 
@@ -403,7 +348,7 @@ Renewal::Renewal(char itype , const Distribution &itime ,
   nb_event = new Nb_event*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
-    nb_event[i] = 0;
+    nb_event[i] = NULL;
   }
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
@@ -422,7 +367,7 @@ Renewal::Renewal(char itype , const Distribution &itime ,
     }
 
     else {
-      nb_event[i] = 0;
+      nb_event[i] = NULL;
     }
   }
 
@@ -431,7 +376,7 @@ Renewal::Renewal(char itype , const Distribution &itime ,
   nb_event_max = nb_value - 1;
   nevent_time = new Parametric*[nb_event_max + 1];
   for (i = 0;i <= nb_event_max;i++) {
-    nevent_time[i] = 0;
+    nevent_time[i] = NULL;
   }
 
   index_event = new Curves(2 , time->nb_value);
@@ -473,7 +418,7 @@ Renewal::Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_ev
   nb_event = new Nb_event*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
-    nb_event[i] = 0;
+    nb_event[i] = NULL;
   }
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
@@ -492,7 +437,7 @@ Renewal::Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_ev
     }
 
     else {
-      nb_event[i] = 0;
+      nb_event[i] = NULL;
     }
   }
 
@@ -501,7 +446,7 @@ Renewal::Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_ev
   nb_event_max = nb_value - 1;
   nevent_time = new Parametric*[nb_event_max + 1];
   for (i = 0;i <= nb_event_max;i++) {
-    nevent_time[i] = 0;
+    nevent_time[i] = NULL;
   }
 
   index_event = new Curves(2 , time->nb_value);
@@ -531,7 +476,7 @@ void Renewal::copy(const Renewal &renew , bool data_flag)
     renewal_data = new Renewal_data(*(renew.renewal_data));
   }
   else {
-    renewal_data = 0;
+    renewal_data = NULL;
   }
 
   type = renew.type;
@@ -547,27 +492,27 @@ void Renewal::copy(const Renewal &renew , bool data_flag)
 
   nevent_time = new Parametric*[nb_event_max + 1];
 
-  nevent_time[0] = 0;
+  nevent_time[0] = NULL;
   for (i = 1;i <= nb_event_max;i++) {
     if (renew.nevent_time[i]) {
       nevent_time[i] = new Parametric(*(renew.nevent_time[i]));
     }
     else {
-      nevent_time[i] = 0;
+      nevent_time[i] = NULL;
     }
   }
 
   nb_event = new Nb_event*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
-    nb_event[i] = 0;
+    nb_event[i] = NULL;
   }
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
       nb_event[i] = new Nb_event(*(renew.nb_event[i]));
     }
     else {
-      nb_event[i] = 0;
+      nb_event[i] = NULL;
     }
   }
 
@@ -691,7 +636,7 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
     error.init();
 
     if ((itime < time->offset) || (itime >= time->nb_value) || (time->mass[itime] == 0.)) {
-      dist = 0;
+      dist = NULL;
       error.update(SEQ_error[SEQR_OBSERVATION_TIME]);
     }
     else {
@@ -701,8 +646,8 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
   }
 
   else {
-    pdist = 0;
-    pparam = 0;
+    pdist = NULL;
+    pparam = NULL;
 
     switch (dist_type) {
     case INTER_EVENT :
@@ -722,7 +667,7 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
       break;
     }
 
-    phisto = 0;
+    phisto = NULL;
     if (renewal_data) {
       switch (dist_type) {
 
@@ -757,7 +702,7 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
       }
 
       if ((phisto) && (phisto->nb_element == 0)) {
-        phisto = 0;
+        phisto = NULL;
       }
     }
 
@@ -791,7 +736,7 @@ Renewal* renewal_building(Format_error &error , const Parametric &inter_event ,
   Renewal *renew;
 
 
-  renew = 0;
+  renew = NULL;
   error.init();
 
   if (inter_event.offset == 0) {
@@ -841,7 +786,7 @@ Renewal* renewal_ascii_read(Format_error &error , const char *path ,
   ifstream in_file(path);
 
 
-  renew = 0;
+  renew = NULL;
   error.init();
 
   if (!in_file) {
