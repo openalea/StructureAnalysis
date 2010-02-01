@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -37,8 +37,7 @@
 
 
 #include <sstream>
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
@@ -66,14 +65,14 @@ Sequence_characteristics::Sequence_characteristics(int inb_value)
 {
   nb_value = inb_value;
 
-  index_value = 0;
-  first_occurrence = 0;
-  recurrence_time = 0;
-  sojourn_time = 0;
-  initial_run = 0;
-  final_run = 0;
-  nb_run = 0;
-  nb_occurrence = 0;
+  index_value = NULL;
+  first_occurrence = NULL;
+  recurrence_time = NULL;
+  sojourn_time = NULL;
+  initial_run = NULL;
+  final_run = NULL;
+  nb_run = NULL;
+  nb_occurrence = NULL;
 }
 
 
@@ -114,7 +113,7 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
     initial_run = new Histogram*[nb_value];
   }
   else {
-    initial_run = 0;
+    initial_run = NULL;
   }
 
   final_run = new Histogram*[nb_value];
@@ -126,8 +125,8 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
       final_run[i] = new Histogram(*(characteristics.final_run[i]));
     }
     else {
-      sojourn_time[i] = 0;
-      final_run[i] = 0;
+      sojourn_time[i] = NULL;
+      final_run[i] = NULL;
     }
 
     if ((characteristics.initial_run) && (initial_run_flag)) {
@@ -142,7 +141,7 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
     }
   }
   else {
-    nb_run = 0;
+    nb_run = NULL;
   }
 
   if (characteristics.nb_occurrence) {
@@ -152,7 +151,7 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
     }
   }
   else {
-    nb_occurrence = 0;
+    nb_occurrence = NULL;
   }
 }
 
@@ -192,7 +191,7 @@ void Sequence_characteristics::copy(const Sequence_characteristics &characterist
     initial_run = new Histogram*[nb_value];
   }
   else {
-    initial_run = 0;
+    initial_run = NULL;
   }
 
   final_run = new Histogram*[nb_value];
@@ -212,7 +211,7 @@ void Sequence_characteristics::copy(const Sequence_characteristics &characterist
     }
   }
   else {
-    nb_run = 0;
+    nb_run = NULL;
   }
 
   if (characteristics.nb_occurrence) {
@@ -222,7 +221,7 @@ void Sequence_characteristics::copy(const Sequence_characteristics &characterist
     }
   }
   else {
-    nb_occurrence = 0;
+    nb_occurrence = NULL;
   }
 }
 
@@ -244,8 +243,8 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
 
   nb_value = characteristics.nb_value;
 
-  index_value = 0;
-  first_occurrence = 0;
+  index_value = NULL;
+  first_occurrence = NULL;
 
   recurrence_time = new Histogram*[nb_value];
   for (i = 0;i < nb_value;i++) {
@@ -265,9 +264,9 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
   }
 
   else {
-    sojourn_time = 0;
-    initial_run = 0;
-    final_run = 0;
+    sojourn_time = NULL;
+    initial_run = NULL;
+    final_run = NULL;
   }
 
   if (characteristics.nb_run) {
@@ -277,7 +276,7 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
     }
   }
   else {
-    nb_run = 0;
+    nb_run = NULL;
   }
 
   if (characteristics.nb_occurrence) {
@@ -287,7 +286,7 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
     }
   }
   else {
-    nb_occurrence = 0;
+    nb_occurrence = NULL;
   }
 }
 
@@ -453,7 +452,7 @@ void Sequence_characteristics::create_sojourn_time_histogram(int max_length , in
  *
  *  Ecriture d'un objet Sequence_characteristics.
  *
- *  arguments : stream, type de la variable (STATE / VALUE), histogramme
+ *  arguments : stream, type de la variable, histogramme
  *              des longueurs des sequences, flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
@@ -485,7 +484,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
     if (comment_flag) {
       os << "# ";
     }
-    os << SEQ_label[type == STATE ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_VALUE_FIRST_OCCURRENCE]
+    os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
        << " " << i << " " << STAT_label[STATL_HISTOGRAM] << " - ";
     first_occurrence[i]->ascii_characteristic_print(os , false , comment_flag);
 
@@ -494,7 +493,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       if (comment_flag) {
         os << "# ";
       }
-      os << "   | " << SEQ_label[type == STATE ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_VALUE_FIRST_OCCURRENCE]
+      os << "   | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << STAT_label[STATL_HISTOGRAM] << endl;
       first_occurrence[i]->ascii_print(os , comment_flag);
     }
@@ -588,7 +587,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       if (comment_flag) {
         os << "# ";
       }
-      os << SEQ_label[type == STATE ? SEQL_STATE_NB_RUN : SEQL_VALUE_NB_RUN]
+      os << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
       nb_run[i]->ascii_characteristic_print(os , (hlength.variance > 0. ? false : true) , comment_flag);
 
@@ -597,7 +596,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << SEQ_label[type == STATE ? SEQL_STATE_NB_RUN : SEQL_VALUE_NB_RUN]
+        os << "   | " << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
         nb_run[i]->ascii_print(os , comment_flag);
       }
@@ -610,7 +609,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       if (comment_flag) {
         os << "# ";
       }
-      os << SEQ_label[type == STATE ? SEQL_STATE_NB_OCCURRENCE : SEQL_VALUE_NB_OCCURRENCE]
+      os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
       nb_occurrence[i]->ascii_characteristic_print(os , (hlength.variance > 0. ? false : true) , comment_flag);
 
@@ -619,7 +618,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << SEQ_label[type == STATE ? SEQL_STATE_NB_OCCURRENCE : SEQL_VALUE_NB_OCCURRENCE]
+        os << "   | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
         nb_occurrence[i]->ascii_print(os , comment_flag);
       }
@@ -634,7 +633,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
  *
  *  Ecriture d'un objet Sequence_characteristics au format tableur.
  *
- *  arguments : stream, type de la variable (STATE / VALUE), histogramme
+ *  arguments : stream, type de la variable, histogramme
  *              des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
@@ -668,12 +667,12 @@ ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
   delete smoothed_curves;
 
   for (i = 0;i < nb_value;i++) {
-    os << "\n" << SEQ_label[type == STATE ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_VALUE_FIRST_OCCURRENCE]
+    os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
        << " " << i << " " << STAT_label[STATL_HISTOGRAM] << "\t";
     first_occurrence[i]->spreadsheet_characteristic_print(os);
 
     if (first_occurrence[i]->nb_element > 0) {
-      os << "\n\t" << SEQ_label[type == STATE ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_VALUE_FIRST_OCCURRENCE]
+      os << "\n\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << STAT_label[STATL_HISTOGRAM] << endl;
       first_occurrence[i]->spreadsheet_print(os);
     }
@@ -731,12 +730,12 @@ ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
 
   if (nb_run) {
     for (i = 0;i < nb_value;i++) {
-      os << "\n" << SEQ_label[type == STATE ? SEQL_STATE_NB_RUN : SEQL_VALUE_NB_RUN]
+      os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
       nb_run[i]->spreadsheet_characteristic_print(os , (hlength.variance > 0. ? false : true));
 
       if (nb_run[i]->nb_element > 0) {
-        os << "\n\t" << SEQ_label[type == STATE ? SEQL_STATE_NB_RUN : SEQL_VALUE_NB_RUN]
+        os << "\n\t" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
         nb_run[i]->spreadsheet_print(os);
       }
@@ -745,12 +744,12 @@ ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
 
   if (nb_occurrence) {
     for (i = 0;i < nb_value;i++) {
-      os << "\n" << SEQ_label[type == STATE ? SEQL_STATE_NB_OCCURRENCE : SEQL_VALUE_NB_OCCURRENCE]
+      os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
          << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
       nb_occurrence[i]->spreadsheet_characteristic_print(os , (hlength.variance > 0. ? false : true));
 
       if (nb_occurrence[i]->nb_element > 0) {
-        os << "\n\t" << SEQ_label[type == STATE ? SEQL_STATE_NB_OCCURRENCE : SEQL_VALUE_NB_OCCURRENCE]
+        os << "\n\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
         nb_occurrence[i]->spreadsheet_print(os);
       }
@@ -766,19 +765,20 @@ ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
  *  Sortie Gnuplot d'un objet Sequences_characteristics.
  *
  *  arguments : prefixe des fichiers, titre des figures, indice de la variable,
- *              nombre de variables, type de la variable (STATE / VALUE),
+ *              nombre de variables, type de la variable,
  *              histogramme des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
 
-bool Sequence_characteristics::plot_print(const char *prefix , const char *title , int variable ,
-                                          int nb_variable , int type , const Histogram &hlength) const
+bool Sequence_characteristics::plot_print(const char *prefix , const char *title ,
+                                          int variable , int nb_variable , int type ,
+                                          const Histogram &hlength) const
 
 {
   bool status , start;
   register int i , j , k;
   int index_length , nb_histo , histo_index;
-  Curves *pcurves;
+  Curves *smoothed_curves;
   const Histogram **phisto;
   ostringstream data_file_name[2];
 
@@ -790,14 +790,15 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
   index_length = index_value->plot_length_computation();
 
   if (index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
-    pcurves = new Curves(*index_value , 's');
+    smoothed_curves = new Curves(*index_value , 's');
   }
   else {
-    pcurves = 0;
+    smoothed_curves = NULL;
   }
 
-  status = index_value->plot_print((data_file_name[0].str()).c_str() , index_length , pcurves);
-  delete pcurves;
+  status = index_value->plot_print((data_file_name[0].str()).c_str() ,
+                                   index_length , smoothed_curves);
+  delete smoothed_curves;
 
   if (status) {
     phisto = new const Histogram*[1 + NB_OUTPUT * 6];
@@ -1030,8 +1031,9 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
           out_file << "plot [0:" << MAX(first_occurrence[k]->nb_value - 1 , 1) << "] [0:"
                    << (int)(first_occurrence[k]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
-                   << " title \"" << SEQ_label[type == STATE ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_VALUE_FIRST_OCCURRENCE]
-                   << " " << k << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                   << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF]
+                   << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
+                   << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
 
           if (MAX(1 , first_occurrence[k]->nb_value - 1) < TIC_THRESHOLD) {
             out_file << "set xtics autofreq" << endl;
@@ -1350,8 +1352,9 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
             out_file << "plot [0:" << nb_run[k]->nb_value - 1 << "] [0:"
                      << (int)(nb_run[k]->max * YSCALE) + 1 << "] \""
                      << label((data_file_name[1].str()).c_str()) << "\" using " << j++
-                     << " title \"" << SEQ_label[type == STATE ? SEQL_STATE_NB_RUN : SEQL_VALUE_NB_RUN]
-                     << " " << k << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                     << " title \"" << SEQ_label[SEQL_NB_RUN_OF]
+                     << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
+                     << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
                      << "\" with impulses" << endl;
 
             if (nb_run[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1376,8 +1379,9 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
             out_file << "plot [0:" << nb_occurrence[k]->nb_value - 1 << "] [0:"
                      << (int)(nb_occurrence[k]->max * YSCALE) + 1 << "] \""
                      << label((data_file_name[1].str()).c_str()) << "\" using " << j++
-                     << " title \"" << SEQ_label[type == STATE ? SEQL_STATE_NB_OCCURRENCE : SEQL_VALUE_NB_OCCURRENCE]
-                     << " " << k << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                     << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+                     << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
+                     << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
                      << "\" with impulses" << endl;
 
             if (nb_occurrence[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1431,269 +1435,825 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Sequences_characteristics.
+ *
+ *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
+ *              indice et type de la variable,
+ *              histogramme des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
 
-/* RWspace Sequence_characteristics::binaryStoreSize() const
+void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
+                                              int variable , int type ,
+                                              const Histogram &hlength) const
 
 {
-  register int i;
-  RWspace size;
+  register int i , j , k;
+  int index_length , nb_histo , max_nb_value , max_frequency;
+  double shift;
+  Curves *smoothed_curves;
+  ostringstream title , legend;
 
 
-  size = sizeof(nb_value)+ index_value->binaryStoreSize();
+  index_length = index_value->plot_length_computation();
 
-  for (i = 0;i < nb_value;i++) {
-    size += first_occurrence[i]->binaryStoreSize();
+  // calcul du nombre de vues
+
+  /*  nb_plot_set = 2;
+  if (index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+    nb_plot_set++;
   }
 
+  nb_plot_set++;
   for (i = 0;i < nb_value;i++) {
-    size += recurrence_time[i]->binaryStoreSize();
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    size += sojourn_time[i]->binaryStoreSize();
-  }
-
-  size += sizeof(true);
-  if (initial_run) {
-    for (i = 0;i < nb_value;i++) {
-      size += initial_run[i]->binaryStoreSize();
+    if (first_occurrence[i]->nb_element > 0) {
+      nb_plot_set++;
     }
   }
 
+  nb_plot_set++;
   for (i = 0;i < nb_value;i++) {
-    size += final_run[i]->binaryStoreSize();
+    if (recurrence_time[i]->nb_element > 0) {
+      nb_plot_set++;
+    }
   }
 
+  nb_plot_set++;
   for (i = 0;i < nb_value;i++) {
-    size += nb_run[i]->binaryStoreSize();
+    if (sojourn_time[i]->nb_element > 0) {
+      nb_plot_set++;
+    }
+    if ((initial_run) && (initial_run[i]->nb_element > 0)) {
+      nb_plot_set++;
+    }
+    if (final_run[i]->nb_element > 0) {
+      nb_plot_set++;
+    }
   }
 
-  for (i = 0;i < nb_value;i++) {
-    size += nb_occurrence[i]->binaryStoreSize();
+  if ((nb_run) && (nb_occurrence)) {
+    nb_plot_set += 3;
+    for (i = 0;i < nb_value;i++) {
+      if ((nb_run[i]->nb_element > 0) && (nb_occurrence[i]->nb_element > 0)) {
+        nb_plot_set += 2;
+      }
+    }
+  } */
+
+  plot.variable_nb_viewpoint[variable] += 4;
+  if ((nb_run) && (nb_occurrence)) {
+    plot.variable_nb_viewpoint[variable]++;
   }
 
-  return size;
+  if (index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+
+    // vue : intensite lissee
+
+    plot.variable[index] = variable;
+    plot.viewpoint[index] = INTENSITY;
+
+    smoothed_curves = new Curves(*index_value , 's');
+
+    title.str("");
+    if (plot.nb_variable > 1) {
+      title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
+    }
+    title << SEQ_label[SEQL_SMOOTHED_OBSERVED_PROBABILITIES];
+    plot[index].title = title.str();
+
+    plot[index].xrange = Range(0 , index_length - 1);
+    plot[index].yrange = Range(0. , 1.);
+
+    if (index_length - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+
+    plot[index].resize(nb_value);
+
+    for (i = 0;i < nb_value;i++) {
+      legend.str("");
+      legend << SEQ_label[SEQL_OBSERVED] << " "
+             << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i;
+      plot[index][i].legend = legend.str();
+
+      plot[index][i].style = "linespoints";
+    }
+
+    smoothed_curves->plotable_write(plot[index]);
+
+    delete smoothed_curves;
+    index++;
+  }
+
+  // vue : intensite
+
+  plot.variable[index] = variable;
+  plot.viewpoint[index] = INTENSITY;
+
+  if (plot.nb_variable > 1) {
+    title.str("");
+    title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+    plot[index].title = title.str();
+  }
+
+  plot[index].xrange = Range(0 , index_length - 1);
+  plot[index].yrange = Range(0. , 1.);
+
+  if (index_length - 1 < TIC_THRESHOLD) {
+    plot[index].xtics = 1;
+  }
+
+  plot[index].resize(nb_value);
+
+  for (i = 0;i < nb_value;i++) {
+    legend.str("");
+    legend << SEQ_label[SEQL_OBSERVED] << " "
+           << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i;
+    plot[index][i].legend = legend.str();
+
+    plot[index][i].style = "linespoints";
+  }
+
+  index_value->plotable_write(plot[index]);
+  index++;
+
+  // vue : histogramme des longueurs des sequences
+
+  plot.variable[index] = variable;
+  plot.viewpoint[index] = INTENSITY;
+
+  plot[index].xrange = Range(0 , hlength.nb_value - 1);
+  plot[index].yrange = Range(0 , ceil(hlength.max * YSCALE));
+
+  if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+    plot[index].xtics = 1;
+  }
+  if (ceil(hlength.max * YSCALE) < TIC_THRESHOLD) {
+    plot[index].ytics = 1;
+  }
+
+  plot[index].resize(1);
+
+  legend.str("");
+  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+  plot[index][0].legend = legend.str();
+
+  plot[index][0].style = "impulses";
+
+  hlength.plotable_frequency_write(plot[index][0]);
+  index++;
+
+  // vue : lois empiriques du temps avant 1ere occurrence d'une observation
+
+  plot.variable[index] = variable;
+  plot.viewpoint[index] = FIRST_OCCURRENCE;
+
+  title.str("");
+  if (plot.nb_variable > 1) {
+    title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
+  }
+  title << SEQ_label[SEQL_FIRST_OCCURRENCE] << " " << STAT_label[STATL_HISTOGRAMS];
+  plot[index].title = title.str();
+
+  // calcul du temps maximum et de la frequence maximum
+
+  nb_histo = 0;
+  max_nb_value = 0;
+  max_frequency = 0;
+
+  for (i = 0;i < nb_value;i++) {
+    if (first_occurrence[i]->nb_element > 0) {
+      nb_histo++;
+
+      if (first_occurrence[i]->nb_value > max_nb_value) {
+        max_nb_value = first_occurrence[i]->nb_value;
+      }
+      if (first_occurrence[i]->max > max_frequency) {
+        max_frequency = first_occurrence[i]->max;
+      }
+    }
+  }
+
+  plot[index].xrange = Range(0 , max_nb_value);
+  plot[index].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+  if (max_nb_value < TIC_THRESHOLD) {
+    plot[index].xtics = 1;
+  }
+  if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+    plot[index].ytics = 1;
+  }
+
+  plot[index].resize(nb_histo);
+
+  i = 0;
+  shift = 0.;
+
+  for (j = 0;j < nb_value;j++) {
+    if (first_occurrence[j]->nb_element > 0) {
+      legend.str("");
+      legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << j;
+      plot[index][i].legend = legend.str();
+
+      plot[index][i].style = "impulses";
+
+      for (k = first_occurrence[j]->offset;k < first_occurrence[j]->nb_value;k++) {
+        if (first_occurrence[j]->frequency[k] > 0) {
+          plot[index][i].add_point(k + shift , first_occurrence[j]->frequency[k]);
+        }
+      }
+
+      if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+        shift += PLOT_SHIFT;
+      }
+      else {
+        shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+      }
+
+      i++;
+    }
+  }
+  index++;
+
+  for (i = 0;i < nb_value;i++) {
+    if (first_occurrence[i]->nb_element > 0) {
+
+      // vue : loi empirique du temps avant la 1ere occurrence d'une observation
+
+      plot.variable[index] = variable;
+      plot.viewpoint[index] = FIRST_OCCURRENCE;
+
+      if (plot.nb_variable > 1) {
+        title.str("");
+        title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+        plot[index].title = title.str();
+      }
+
+      plot[index].xrange = Range(0 , MAX(first_occurrence[i]->nb_value - 1 , 1));
+      plot[index].yrange = Range(0 , ceil(first_occurrence[i]->max * YSCALE));
+
+      if (MAX(first_occurrence[i]->nb_value - 1 , 1) < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+      if (ceil(first_occurrence[i]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[index].ytics = 1;
+      }
+
+      plot[index].resize(1);
+
+      legend.str("");
+      legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
+             << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+      plot[index][0].legend = legend.str();
+
+      plot[index][0].style = "impulses";
+
+      first_occurrence[i]->plotable_frequency_write(plot[index][0]);
+      index++;
+    }
+  }
+
+  // vue : lois empiriques du temps de retour dans une observation
+
+  plot.variable[index] = variable;
+  plot.viewpoint[index] = RECURRENCE_TIME;
+
+  title.str("");
+  if (plot.nb_variable > 1) {
+    title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
+  }
+  title << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAMS];
+  plot[index].title = title.str();
+
+  // calcul du temps maximum et de la frequence maximum
+
+  nb_histo = 0;
+  max_nb_value = 0;
+  max_frequency = 0;
+
+  for (i = 0;i < nb_value;i++) {
+    if (recurrence_time[i]->nb_element > 0) {
+      nb_histo++;
+
+      if (recurrence_time[i]->nb_value > max_nb_value) {
+        max_nb_value = recurrence_time[i]->nb_value;
+      }
+      if (recurrence_time[i]->max > max_frequency) {
+        max_frequency = recurrence_time[i]->max;
+      }
+    }
+  }
+
+  plot[index].xrange = Range(0 , max_nb_value);
+  plot[index].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+  if (max_nb_value < TIC_THRESHOLD) {
+    plot[index].xtics = 1;
+  }
+  if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+    plot[index].ytics = 1;
+  }
+
+  plot[index].resize(nb_histo);
+
+  i = 0;
+  shift = 0.;
+
+  for (j = 0;j < nb_value;j++) {
+    if (recurrence_time[j]->nb_element > 0) {
+      legend.str("");
+      legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << j;
+      plot[index][i].legend = legend.str();
+
+      plot[index][i].style = "impulses";
+
+      for (k = recurrence_time[j]->offset;k < recurrence_time[j]->nb_value;k++) {
+        if (recurrence_time[j]->frequency[k] > 0) {
+          plot[index][i].add_point(k + shift , recurrence_time[j]->frequency[k]);
+        }
+      }
+
+      if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+        shift += PLOT_SHIFT;
+      }
+      else {
+        shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+      }
+
+      i++;
+    }
+  }
+  index++;
+
+  for (i = 0;i < nb_value;i++) {
+    if (recurrence_time[i]->nb_element > 0) {
+
+      // vue : loi empirique du temps de retour dans une observation
+
+      plot.variable[index] = variable;
+      plot.viewpoint[index] = RECURRENCE_TIME;
+
+      if (plot.nb_variable > 1) {
+        title.str("");
+        title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+        plot[index].title = title.str();
+      }
+
+      plot[index].xrange = Range(0 , recurrence_time[i]->nb_value - 1);
+      plot[index].yrange = Range(0 , ceil(recurrence_time[i]->max * YSCALE));
+
+      if (recurrence_time[i]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+      if (ceil(recurrence_time[i]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[index].ytics = 1;
+      }
+
+      plot[index].resize(1);
+
+      legend.str("");
+      legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
+             << i << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
+             << STAT_label[STATL_HISTOGRAM];
+      plot[index][0].legend = legend.str();
+
+      plot[index][0].style = "impulses";
+
+      recurrence_time[i]->plotable_frequency_write(plot[index][0]);
+      index++;
+    }
+  }
+
+  // vue : lois empiriques du temps de sejour dans une observation
+
+  plot.variable[index] = variable;
+  plot.viewpoint[index] = SOJOURN_TIME;
+
+  title.str("");
+  if (plot.nb_variable > 1) {
+    title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
+  }
+  title << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAMS];
+  plot[index].title = title.str();
+
+  // calcul du temps maximum et de la frequence maximum
+
+  nb_histo = 0;
+  max_nb_value = 0;
+  max_frequency = 0;
+
+  for (i = 0;i < nb_value;i++) {
+    if (sojourn_time[i]->nb_element > 0) {
+      nb_histo++;
+
+      if (sojourn_time[i]->nb_value > max_nb_value) {
+        max_nb_value = sojourn_time[i]->nb_value;
+      }
+      if (sojourn_time[i]->max > max_frequency) {
+        max_frequency = sojourn_time[i]->max;
+      }
+    }
+  }
+
+  plot[index].xrange = Range(0 , max_nb_value);
+  plot[index].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+  if (max_nb_value < TIC_THRESHOLD) {
+    plot[index].xtics = 1;
+  }
+  if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+    plot[index].ytics = 1;
+  }
+
+  plot[index].resize(nb_histo);
+
+  i = 0;
+  shift = 0.;
+
+  for (j = 0;j < nb_value;j++) {
+    if (sojourn_time[j]->nb_element > 0) {
+      legend.str("");
+      legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << j;
+      plot[index][i].legend = legend.str();
+
+      plot[index][i].style = "impulses";
+
+      for (k = sojourn_time[j]->offset;k < sojourn_time[j]->nb_value;k++) {
+        if (sojourn_time[j]->frequency[k] > 0) {
+          plot[index][i].add_point(k + shift , sojourn_time[j]->frequency[k]);
+        }
+      }
+
+      if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+        shift += PLOT_SHIFT;
+      }
+      else {
+        shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+      }
+
+      i++;
+    }
+  }
+  index++;
+
+  for (i = 0;i < nb_value;i++) {
+    if (sojourn_time[i]->nb_element > 0) {
+
+      // vue : loi empirique du temps de sejour dans une observation
+
+      plot.variable[index] = variable;
+      plot.viewpoint[index] = SOJOURN_TIME;
+
+      if (plot.nb_variable > 1) {
+        title.str("");
+        title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+        plot[index].title = title.str();
+      }
+
+      plot[index].xrange = Range(0 , sojourn_time[i]->nb_value - 1);
+      plot[index].yrange = Range(0 , ceil(sojourn_time[i]->max * YSCALE));
+
+      if (sojourn_time[i]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+      if (ceil(sojourn_time[i]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[index].ytics = 1;
+      }
+
+      plot[index].resize(1);
+
+      legend.str("");
+      legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
+             << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
+             << STAT_label[STATL_HISTOGRAM];
+      plot[index][0].legend = legend.str();
+
+      plot[index][0].style = "impulses";
+
+      sojourn_time[i]->plotable_frequency_write(plot[index][0]);
+      index++;
+    }
+
+    if ((initial_run) && (initial_run[i]->nb_element > 0)) {
+
+      // vue : loi empirique du temps de sejour dans la 1ere observation rencontree
+
+      plot.variable[index] = variable;
+      plot.viewpoint[index] = SOJOURN_TIME;
+
+      if (plot.nb_variable > 1) {
+        title.str("");
+        title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+        plot[index].title = title.str();
+      }
+
+      plot[index].xrange = Range(0 , initial_run[i]->nb_value - 1);
+      plot[index].yrange = Range(0 , ceil(initial_run[i]->max * YSCALE));
+
+      if (initial_run[i]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+      if (ceil(initial_run[i]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[index].ytics = 1;
+      }
+
+      plot[index].resize(1);
+
+      legend.str("");
+      legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
+             << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
+             << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
+             << STAT_label[STATL_HISTOGRAM];
+      plot[index][0].legend = legend.str();
+
+      plot[index][0].style = "impulses";
+
+      initial_run[i]->plotable_frequency_write(plot[index][0]);
+      index++;
+    }
+
+    if (final_run[i]->nb_element > 0) {
+
+      // vue : loi empirique du temps de sejour dans la derniere observation rencontree
+
+      plot.variable[index] = variable;
+      plot.viewpoint[index] = SOJOURN_TIME;
+
+      if (plot.nb_variable > 1) {
+        title.str("");
+        title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+        plot[index].title = title.str();
+      }
+
+      plot[index].xrange = Range(0 , final_run[i]->nb_value - 1);
+      plot[index].yrange = Range(0 , ceil(final_run[i]->max * YSCALE));
+
+      if (final_run[i]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+      if (ceil(final_run[i]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[index].ytics = 1;
+      }
+
+      legend.str("");
+      legend << SEQ_label[SEQL_FINAL_RUN] << " - "
+             << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
+             << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
+             << STAT_label[STATL_HISTOGRAM];
+      plot[index][0].legend = legend.str();
+
+      plot[index][0].style = "impulses";
+
+      final_run[i]->plotable_frequency_write(plot[index][0]);
+      index++;
+    }
+  }
+
+  if ((nb_run) && (nb_occurrence)) {
+
+    // vue : lois empiriques du nombre de series d'une observation
+
+    plot.variable[index] = variable;
+    plot.viewpoint[index] = COUNTING;
+
+    title.str("");
+    if (plot.nb_variable > 1) {
+      title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
+    }
+    title << SEQ_label[SEQL_NB_RUN] << " " << SEQ_label[SEQL_PER_SEQUENCE] << " "
+          << STAT_label[STATL_HISTOGRAMS];
+    plot[index].title = title.str();
+
+    // calcul du nombre de series maximum et de la frequence maximum
+
+    nb_histo = 0;
+    max_nb_value = 0;
+    max_frequency = 0;
+
+    for (i = 0;i < nb_value;i++) {
+      if (nb_run[i]->nb_element > 0) {
+        nb_histo++;
+
+        if (nb_run[i]->nb_value > max_nb_value) {
+          max_nb_value = nb_run[i]->nb_value;
+        }
+        if (nb_run[i]->max > max_frequency) {
+          max_frequency = nb_run[i]->max;
+        }
+      }
+    }
+
+    plot[index].xrange = Range(0 , max_nb_value);
+    plot[index].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+    if (max_nb_value < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+    if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+      plot[index].ytics = 1;
+    }
+
+    plot[index].resize(nb_histo);
+
+    i = 0;
+    shift = 0.;
+
+    for (j = 0;j < nb_value;j++) {
+      if (nb_run[j]->nb_element > 0) {
+        legend.str("");
+        legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << j;
+        plot[index][i].legend = legend.str();
+
+        plot[index][i].style = "impulses";
+
+        for (k = nb_run[j]->offset;k < nb_run[j]->nb_value;k++) {
+          if (nb_run[j]->frequency[k] > 0) {
+            plot[index][i].add_point(k + shift , nb_run[j]->frequency[k]);
+          }
+        }
+
+        if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+          shift += PLOT_SHIFT;
+        }
+        else {
+          shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+        }
+
+        i++;
+      }
+    }
+    index++;
+
+    // vue : lois empiriques du nombre d'occurrences d'une observation
+
+    plot.variable[index] = variable;
+    plot.viewpoint[index] = COUNTING;
+
+    title.str("");
+    if (plot.nb_variable > 1) {
+      title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
+    }
+    title << SEQ_label[SEQL_NB_OCCURRENCE] << " " << SEQ_label[SEQL_PER_SEQUENCE] << " "
+          << STAT_label[STATL_HISTOGRAMS];
+    plot[index].title = title.str();
+
+    // calcul du nombre d'occurrences maximum et de la frequence maximum
+
+    nb_histo = 0;
+    max_nb_value = 0;
+    max_frequency = 0;
+
+    for (i = 0;i < nb_value;i++) {
+      if (nb_occurrence[i]->nb_element > 0) {
+        nb_histo++;
+
+        if (nb_occurrence[i]->nb_value > max_nb_value) {
+          max_nb_value = nb_occurrence[i]->nb_value;
+        }
+        if (nb_occurrence[i]->max > max_frequency) {
+          max_frequency = nb_occurrence[i]->max;
+        }
+      }
+    }
+
+    plot[index].xrange = Range(0 , max_nb_value);
+    plot[index].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+    if (max_nb_value < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+    if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+      plot[index].ytics = 1;
+    }
+
+    plot[index].resize(nb_histo);
+
+    i = 0;
+    shift = 0.;
+
+    for (j = 0;j < nb_value;j++) {
+      if (nb_occurrence[j]->nb_element > 0) {
+        legend.str("");
+        legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << j;
+        plot[index][i].legend = legend.str();
+
+        plot[index][i].style = "impulses";
+
+        for (k = nb_occurrence[j]->offset;k < nb_occurrence[j]->nb_value;k++) {
+          if (nb_occurrence[j]->frequency[k] > 0) {
+            plot[index][i].add_point(k + shift , nb_occurrence[j]->frequency[k]);
+          }
+        }
+
+        if (PLOT_SHIFT * (nb_histo - 1) < PLOT_MAX_SHIFT) {
+          shift += PLOT_SHIFT;
+        }
+        else {
+          shift += PLOT_MAX_SHIFT / (nb_histo - 1);
+        }
+
+        i++;
+      }
+    }
+    index++;
+
+    for (i = 0;i < nb_value;i++) {
+      if ((nb_run[i]->nb_element > 0) && (nb_occurrence[i]->nb_element > 0)) {
+
+        // vue : loi empirique du nombre de series d'une observation par sequence
+
+        plot.variable[index] = variable;
+        plot.viewpoint[index] = COUNTING;
+
+        if (plot.nb_variable > 1) {
+          title.str("");
+          title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , nb_run[i]->nb_value - 1);
+        plot[index].yrange = Range(0 , ceil(nb_run[i]->max * YSCALE));
+
+        if (nb_run[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(nb_run[i]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_RUN_OF]
+               << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
+               << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        nb_run[i]->plotable_frequency_write(plot[index][0]);
+        index++;
+
+        // vue : loi empirique du nombre d'occurrences d'une observation par sequence
+
+        plot.variable[index] = variable;
+        plot.viewpoint[index] = COUNTING;
+
+        if (plot.nb_variable > 1) {
+          title.str("");
+          title << STAT_label[STATL_VARIABLE] << " " << variable + 1;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , nb_occurrence[i]->nb_value - 1);
+        plot[index].yrange = Range(0 , ceil(nb_occurrence[i]->max * YSCALE));
+
+        if (nb_occurrence[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(nb_occurrence[i]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+               << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
+               << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        nb_occurrence[i]->plotable_frequency_write(plot[index][0]);
+        index++;
+      }
+    }
+
+    // vue : histogramme des longueurs des sequences
+
+    plot.variable[index] = variable;
+    plot.viewpoint[index] = COUNTING;
+
+    plot[index].xrange = Range(0 , hlength.nb_value - 1);
+    plot[index].yrange = Range(0 , ceil(hlength.max * YSCALE));
+
+    if (hlength.nb_value - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+    if (ceil(hlength.max * YSCALE) < TIC_THRESHOLD) {
+      plot[index].ytics = 1;
+    }
+
+    plot[index].resize(1);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[index][0].legend = legend.str();
+
+    plot[index][0].style = "impulses";
+
+    hlength.plotable_frequency_write(plot[index][0]);
+    index++;
+  }
 }
-
-
-void Sequence_characteristics::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  is >> nb_value;
-
-  index_value = new Curves();
-  index_value->restoreGuts(is);
-
-  first_occurrence = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    first_occurrence[i] = new Histogram();
-    first_occurrence[i]->restoreGuts(is);
-  }
-
-  recurrence_time = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    recurrence_time[i] = new Histogram();
-    recurrence_time[i]->restoreGuts(is);
-  }
-
-  sojourn_time = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    sojourn_time[i] = new Histogram();
-    sojourn_time[i]->restoreGuts(is);
-  }
-
-  is >> status;
-  if (status) {
-    initial_run = new Histogram*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      initial_run[i] = new Histogram();
-      initial_run[i]->restoreGuts(is);
-    }
-  }
-  else {
-    initial_run = 0;
-  }
-
-  final_run = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    final_run[i] = new Histogram();
-    final_run[i]->restoreGuts(is);
-  }
-
-  nb_run = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    nb_run[i] = new Histogram();
-    nb_run[i]->restoreGuts(is);
-  }
-
-  nb_occurrence = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    nb_occurrence[i] = new Histogram();
-    nb_occurrence[i]->restoreGuts(is);
-  }
-}
-
-
-void Sequence_characteristics::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_value);
-
-  index_value = new Curves();
-  index_value->restoreGuts(file);
-
-  first_occurrence = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    first_occurrence[i] = new Histogram();
-    first_occurrence[i]->restoreGuts(file);
-  }
-
-  recurrence_time = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    recurrence_time[i] = new Histogram();
-    recurrence_time[i]->restoreGuts(file);
-  }
-
-  sojourn_time = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    sojourn_time[i] = new Histogram();
-    sojourn_time[i]->restoreGuts(file);
-  }
-
-  file.Read(status);
-  if (status) {
-    initial_run = new Histogram*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      initial_run[i] = new Histogram();
-      initial_run[i]->restoreGuts(file);
-    }
-  }
-  else {
-    initial_run = 0;
-  }
-
-  final_run = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    final_run[i] = new Histogram();
-    final_run[i]->restoreGuts(file);
-  }
-
-  nb_run = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    nb_run[i] = new Histogram();
-    nb_run[i]->restoreGuts(file);
-  }
-
-  nb_occurrence = new Histogram*[nb_value];
-  for (i = 0;i < nb_value;i++) {
-    nb_occurrence[i] = new Histogram();
-    nb_occurrence[i]->restoreGuts(file);
-  }
-}
-
-
-void Sequence_characteristics::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  os << nb_value;
-
-  index_value->saveGuts(os);
-
-  for (i = 0;i < nb_value;i++) {
-    first_occurrence[i]->saveGuts(os);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    recurrence_time[i]->saveGuts(os);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    sojourn_time[i]->saveGuts(os);
-  }
-
-  if (initial_run) {
-    os << true;
-    for (i = 0;i < nb_value;i++) {
-      initial_run[i]->saveGuts(os);
-    }
-  }
-  else {
-    os << false;
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    final_run[i]->saveGuts(os);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    nb_run[i]->saveGuts(os);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    nb_occurrence[i]->saveGuts(os);
-  }
-}
-
-
-void Sequence_characteristics::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_value);
-
-  index_value->saveGuts(file);
-
-  for (i = 0;i < nb_value;i++) {
-    first_occurrence[i]->saveGuts(file);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    recurrence_time[i]->saveGuts(file);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    sojourn_time[i]->saveGuts(file);
-  }
-
-  if (initial_run) {
-    file.Write(true);
-    for (i = 0;i < nb_value;i++) {
-      initial_run[i]->saveGuts(file);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    final_run[i]->saveGuts(file);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    nb_run[i]->saveGuts(file);
-  }
-
-  for (i = 0;i < nb_value;i++) {
-    nb_occurrence[i]->saveGuts(file);
-  }
-} */
