@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -68,10 +68,8 @@ class Histogram;
 class Mixture_data;
 
 
-// melange de lois discretes parametriques
-
-//class Mixture : public STAT_interface , protected Distribution {  
-class Mixture : public STAT_interface , public Distribution {  
+// class Mixture : public STAT_interface , protected Distribution {
+class Mixture : public STAT_interface , public Distribution {  // melange de lois discretes
 
     friend class Histogram;
     friend class Mixture_data;
@@ -131,16 +129,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Mixture);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
                      bool component_flag = true);
@@ -163,11 +153,9 @@ Mixture* mixture_ascii_read(Format_error &error , const char *path ,
 
 
 
-// structure de donnees correspondant
-//class Mixture_data : public STAT_interface , protected Histogram {  
-
-class Mixture_data : public STAT_interface , public Histogram {  
-                                                                    // a un melange
+// class Mixture_data : public STAT_interface , protected Histogram {
+class Mixture_data : public STAT_interface , public Histogram {  // structure de donnees correspondant
+                                                                 // a un melange
     friend class Histogram;
     friend class Mixture;
 
@@ -203,16 +191,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Mixture_data);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     double information_computation() const;
 
