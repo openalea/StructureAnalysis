@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -180,7 +180,7 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
   Convolution_data *convol_histo;
 
 
-  convol = 0;
+  convol = NULL;
   error.init();
 
   if (known_dist.offset + unknown_dist.offset > offset) {
@@ -231,7 +231,7 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
     partial_convol[0] = convol->distribution[1];
     partial_convol[1] = convol->distribution[0];
 
-    reestim[0] = 0;
+    reestim[0] = NULL;
     reestim[1] = new Reestimation<double>(convol->distribution[1]->alloc_nb_value);
 
     convol->computation(nb_value);
@@ -376,7 +376,7 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
 
     else {
       delete convol;
-      convol = 0;
+      convol = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -416,7 +416,7 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
   Convolution *convol;
 
 
-  convol = 0;
+  convol = NULL;
   error.init();
 
   if (((min_inf_bound != 0) && (min_inf_bound != 1)) ||
@@ -478,7 +478,7 @@ Convolution_data* Convolution::simulation(Format_error &error , int nb_element) 
   error.init();
 
   if ((nb_element < 1) || (nb_element > DIST_NB_ELEMENT)) {
-    convol_histo = 0;
+    convol_histo = NULL;
     error.update(STAT_error[STATR_SAMPLE_SIZE]);
   }
 
