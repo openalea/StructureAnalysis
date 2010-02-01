@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -281,7 +281,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
   Variable_order_markov_data *seq;
 
 
-  hmarkov = 0;
+  hmarkov = NULL;
   error.init();
 
   // test nombre de valeurs observees par variable
@@ -407,7 +407,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
       hobservation = new Histogram(max_nb_value);
     }
     else {
-      hobservation = 0;
+      hobservation = NULL;
     }
 
     poutput = new int*[nb_variable];
@@ -806,7 +806,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     if (likelihood == D_INF) {
       delete hmarkov;
-      hmarkov = 0;
+      hmarkov = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -818,7 +818,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
           if ((hmarkov->parametric_process[i]) && (seq->characteristics[i])) {
             delete seq->characteristics[i];
-            seq->characteristics[i] = 0;
+            seq->characteristics[i] = NULL;
           }
         }
 
@@ -864,7 +864,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
           if ((hmarkov->parametric_process[i]) && (seq->characteristics[i - 1])) {
             delete seq->characteristics[i - 1];
-            seq->characteristics[i - 1] = 0;
+            seq->characteristics[i - 1] = NULL;
           }
         }
       }
@@ -947,7 +947,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 # endif
 
 
-  hmarkov = 0;
+  hmarkov = NULL;
   error.init();
 
   // test nombre de valeurs observees par variable
@@ -1461,7 +1461,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     if (likelihood == D_INF) {
       delete hmarkov;
-      hmarkov = 0;
+      hmarkov = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -1473,7 +1473,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
           if ((hmarkov->parametric_process[i]) && (seq->characteristics[i])) {
             delete seq->characteristics[i];
-            seq->characteristics[i] = 0;
+            seq->characteristics[i] = NULL;
           }
         }
 
@@ -1519,7 +1519,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
           if ((hmarkov->parametric_process[i]) && (seq->characteristics[i - 1])) {
             delete seq->characteristics[i - 1];
-            seq->characteristics[i - 1] = 0;
+            seq->characteristics[i - 1] = NULL;
           }
         }
       }
@@ -1567,7 +1567,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
 /*--------------------------------------------------------------
  *
- *  Ecriture des profils d'etats et des profils d'entropie pour une sequence.
+ *  Ecriture des profils d'etats et d'entropie.
  *
  *  arguments : stream, indice de la sequence, nombre d'etats,
  *              pointeur sur les profils d'etats, 
@@ -1684,8 +1684,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_state ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des profils d'etats et des profils d'entropie pour une sequence
- *  au format tableur.
+ *  Ecriture des profils d'etats et d'entropie au format tableur.
  *
  *  arguments : stream, indice de la sequence, nombre d'etats,
  *              pointeur sur les profils d'etats, 
@@ -1748,8 +1747,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des profils d'etats et des profils d'entropie pour une sequence
- *  au format Gnuplot.
+ *  Ecriture des profils d'etats et d'entropie au format Gnuplot.
  *
  *  arguments : stream, indice de la sequence, nombre d'etats,
  *              pointeur sur les profils d'etat,
@@ -1792,17 +1790,109 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_state ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward.
+ *  Ecriture des profils d'etats au format "plotable".
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
- *              stream, format de fichier ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot),
- *              references sur l'entropie marginale maximum et l'entropie (pour la visualisation).
+ *  arguments : reference sur un objet MultiPlot, indice de la sequence,
+ *              nombre d'etats, pointeur sur les profils d'etat.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_variable_order_markov::forward_backward(const Markovian_sequences &seq ,
-                                                      int index , ostream &os , char format ,
-                                                      double &max_marginal_entropy ,
+void Sequences::profile_plotable_write(MultiPlot &plot , int index , int nb_state ,
+                                       double **profiles) const
+
+{
+  register int i , j;
+
+
+  if (index_parameter) {
+    for (i = 0;i < length[index];i++) {
+      for (j = 0;j < nb_state;j++) {
+        plot[j].add_point(index_parameter[index][i] , profiles[i][j]);
+      }
+    }
+  }
+
+  else {
+    for (i = 0;i < length[index];i++) {
+      for (j = 0;j < nb_state;j++) {
+        plot[j].add_point(i , profiles[i][j]);
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture des profils d'entropie au format "plotable".
+ *
+ *  arguments : reference sur un objet MultiPlot, indice de la sequence,
+ *              pointeurs sur les profils d'entropies.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
+                                               double *begin_entropy , double *end_entropy ,
+                                               double *marginal_entropy) const
+
+{
+  register int i , j;
+
+
+  if (index_parameter) {
+    for (i = 0;i < length[index];i++) {
+      plot[0].add_point(index_parameter[index][i] , begin_entropy[i]);
+    }
+
+    if (end_entropy) {
+      for (i = 0;i < length[index];i++) {
+        plot[1].add_point(index_parameter[index][i] , end_entropy[i]);
+      }
+    }
+
+    if (marginal_entropy) {
+      i = (end_entropy ? 2 : 1);
+      for (j = 0;j < length[index];j++) {
+        plot[i].add_point(index_parameter[index][j] , marginal_entropy[j]);
+      }
+    }
+  }
+
+  else {
+    for (i = 0;i < length[index];i++) {
+      plot[0].add_point(i , begin_entropy[i]);
+    }
+
+    if (end_entropy) {
+      for (i = 0;i < length[index];i++) {
+        plot[1].add_point(i , end_entropy[i]);
+      }
+    }
+
+    if (marginal_entropy) {
+      i = (end_entropy ? 2 : 1);
+      for (j = 0;j < length[index];j++) {
+        plot[i].add_point(j , marginal_entropy[j]);
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward.
+ *
+ *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
+ *              stream, pointeur sur un objet MultiPlotSet, format de sortie ('a' : ASCII,
+ *              's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable), references sur
+ *              l'entropie marginale maximum et l'entropie (pour la visualisation).
+ *
+ *--------------------------------------------------------------*/
+
+double Hidden_variable_order_markov::forward_backward(const Markovian_sequences &seq , int index ,
+                                                      ostream *os , MultiPlotSet *plot_set ,
+                                                      char format , double &max_marginal_entropy ,
                                                       double &entropy1) const
 
 {
@@ -2349,38 +2439,47 @@ double Hidden_variable_order_markov::forward_backward(const Markovian_sequences 
     switch (format) {
 
     case 'a' : {
-      os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
-//      seq.profile_ascii_print(os , index , nb_state , state_backward ,
+      *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+//      seq.profile_ascii_print(*os , index , nb_state , state_backward ,
 //                              STAT_label[STATL_STATE]);
-      seq.profile_ascii_print(os , index , nb_state , state_backward , begin_conditional_entropy ,
+      seq.profile_ascii_print(*os , index , nb_state , state_backward , begin_conditional_entropy ,
                               marginal_entropy , begin_partial_entropy , end_conditional_entropy ,
                               end_partial_entropy);
 
-      os << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << seq_likelihood
-         << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
-         << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
+      *os << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << seq_likelihood
+          << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
+          << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
       break;
     }
 
     case 's' : {
-      os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
-//      seq.profile_spreadsheet_print(os , index , nb_state , state_backward ,
+      *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+//      seq.profile_spreadsheet_print(*os , index , nb_state , state_backward ,
 //                                    STAT_label[STATL_STATE]);
-      seq.profile_spreadsheet_print(os , index , nb_state , state_backward , begin_conditional_entropy ,
+      seq.profile_spreadsheet_print(*os , index , nb_state , state_backward , begin_conditional_entropy ,
                                     marginal_entropy , begin_partial_entropy , end_conditional_entropy ,
                                     end_partial_entropy);
 
-      os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << seq_likelihood
-         << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
-         << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
+      *os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << seq_likelihood
+          << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
+          << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
       break;
     }
 
     case 'g' : {
-//      seq.profile_plot_print(os , index , nb_state , state_backward);
-      seq.profile_plot_print(os , index , nb_state , state_backward , begin_conditional_entropy ,
+//      seq.profile_plot_print(*os , index , nb_state , state_backward);
+      seq.profile_plot_print(*os , index , nb_state , state_backward , begin_conditional_entropy ,
                              marginal_entropy , begin_partial_entropy , end_conditional_entropy ,
                              end_partial_entropy);
+      break;
+    }
+
+    case 'p' : {
+      seq.profile_plotable_write((*plot_set)[1] , index , nb_state , state_backward);
+      seq.entropy_profile_plotable_write((*plot_set)[2] , index , begin_conditional_entropy ,
+                                         end_conditional_entropy , marginal_entropy);
+      seq.entropy_profile_plotable_write((*plot_set)[3] , index , begin_partial_entropy ,
+                                         end_partial_entropy);
       break;
     }
     }
@@ -2506,26 +2605,26 @@ double Hidden_variable_order_markov::forward_backward(const Markovian_sequences 
 
       switch (format) {
       case 'a' :
-/*        os << "\n" << SEQ_label[SEQL_GINI_INDEX] << ": " << gini_index << " ("
-           << gini_index / seq.length[index] */
-        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy1
-           << " (" << entropy1 / seq.length[index] << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
-           << log((double)nb_state_sequence) << " ("
-           << log((double)nb_state_sequence) / seq.length[index]
-           << ")\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << ": " << entropy3 << " ("
-           << entropy3 / seq.length[index] << ")\n\n"
-           << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence << endl;
+/*        *os << "\n" << SEQ_label[SEQL_GINI_INDEX] << ": " << gini_index << " ("
+            << gini_index / seq.length[index] */
+        *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy1
+            << " (" << entropy1 / seq.length[index] << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
+            << log((double)nb_state_sequence) << " ("
+            << log((double)nb_state_sequence) / seq.length[index]
+            << ")\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << ": " << entropy3 << " ("
+            << entropy3 / seq.length[index] << ")\n\n"
+            << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence << endl;
         break;
       case 's' :
-/*        os << "\n" << SEQ_label[SEQL_GINI_INDEX] << "\t" << gini_index << "\t"
-           << gini_index / seq.length[index] */
-        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << "\t" << entropy1
-           << "\t" << entropy1 / seq.length[index] << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
-           << log((double)nb_state_sequence) << "\t"
-           << log((double)nb_state_sequence) / seq.length[index]
-           << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << "\t" << entropy3 << "\t"
-           << entropy3 / seq.length[index] << "\n\n"
-           << SEQ_label[SEQL_NB_STATE_SEQUENCE] << "\t" << nb_state_sequence << endl;
+/*        *os << "\n" << SEQ_label[SEQL_GINI_INDEX] << "\t" << gini_index << "\t"
+            << gini_index / seq.length[index] */
+        *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << "\t" << entropy1
+            << "\t" << entropy1 / seq.length[index] << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
+            << log((double)nb_state_sequence) << "\t"
+            << log((double)nb_state_sequence) / seq.length[index]
+            << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << "\t" << entropy3 << "\t"
+            << entropy3 / seq.length[index] << "\n\n"
+            << SEQ_label[SEQL_NB_STATE_SEQUENCE] << "\t" << nb_state_sequence << endl;
         break;
       }
     }
@@ -2587,8 +2686,8 @@ double Hidden_variable_order_markov::forward_backward(const Markovian_sequences 
 
 /*--------------------------------------------------------------*
  *
- *  Simulation de L sequences d'etats correspondant a une sequence observee
- *  par l'algorithme forward-backward.
+ *  Simulation de sequences d'etats correspondant a une sequence observee
+ *  par l'algorithme forward-backward de simulation.
  *
  *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
  *              stream, format de fichier ('a' : ASCII, 's' : Spreadsheet),
@@ -3133,7 +3232,8 @@ double Hidden_variable_order_markov::viterbi(const Markovian_sequences &seq ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des L sequences d'etats optimales par l'algorithme de Viterbi generalise.
+ *  Calcul des N sequences d'etats les plus probables correspondant a
+ *  une sequence observee par l'algorithme de Viterbi generalise.
  *
  *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
  *              stream, vraisemblance des donnees, format de fichier
@@ -3156,13 +3256,13 @@ double Hidden_variable_order_markov::generalized_viterbi(const Markovian_sequenc
   // initialisations
 
   forward = new double*[nb_row];
-  forward[0] = 0;
+  forward[0] = NULL;
   for (i = 1;i < nb_row;i++) {
     forward[i] = new double[inb_state_sequence];
   }
 
   previous_forward = new double*[nb_row];
-  previous_forward[0] = 0;
+  previous_forward[0] = NULL;
   for (i = 1;i < nb_row;i++) {
     previous_forward[i] = new double[inb_state_sequence];
     for (j = 1;j < inb_state_sequence;j++) {
@@ -3175,7 +3275,7 @@ double Hidden_variable_order_markov::generalized_viterbi(const Markovian_sequenc
   optimal_memory = new int**[seq.length[index]];
   for (i = 0;i < seq.length[index];i++) {
     optimal_memory[i] = new int*[nb_row];
-    optimal_memory[i][0] = 0;
+    optimal_memory[i][0] = NULL;
     for (j = 1;j < nb_row;j++) {
       optimal_memory[i][j] = new int[inb_state_sequence];
     }
@@ -3184,7 +3284,7 @@ double Hidden_variable_order_markov::generalized_viterbi(const Markovian_sequenc
   optimal_rank = new int**[seq.length[index]];
   for (i = 0;i < seq.length[index];i++) {
     optimal_rank[i] = new int*[nb_row];
-    optimal_rank[i][0] = 0;
+    optimal_rank[i][0] = NULL;
     for (j = 1;j < nb_row;j++) {
       optimal_rank[i][j] = new int[inb_state_sequence];
     }
@@ -3540,18 +3640,17 @@ double Hidden_variable_order_markov::generalized_viterbi(const Markovian_sequenc
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des vraisemblances des sequences d'etats optimales
- *  par l'algorithme de Viterbi forward-backward.
+ *  Calcul des profils d'etats par l'algorithme de Viterbi forward-backward.
  *
  *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
- *              stream, format de fichier ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot),
- *              vraisemblance des donnees.
+ *              stream, pointeur sur un objet MultiPlot, format de sortie ('a' : ASCII,
+ *              's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable), vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
 double Hidden_variable_order_markov::viterbi_forward_backward(const Markovian_sequences &seq ,
-                                                              int index , ostream &os , char format ,
-                                                              double seq_likelihood) const
+                                                              int index , ostream *os , MultiPlot *plot ,
+                                                              char format , double seq_likelihood) const
 
 {
   register int i , j , k;
@@ -3827,27 +3926,32 @@ double Hidden_variable_order_markov::viterbi_forward_backward(const Markovian_se
     switch (format) {
 
     case 'a' : {
-      os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
-      seq.profile_ascii_print(os , index , nb_state , state_backward ,
+      *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+      seq.profile_ascii_print(*os , index , nb_state , state_backward ,
                               STAT_label[STATL_STATE]);
 
-      os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
-         << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
+      *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
+          << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
       break;
     }
 
     case 's' : {
-      os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
-      seq.profile_spreadsheet_print(os , index , nb_state , state_backward ,
+      *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+      seq.profile_spreadsheet_print(*os , index , nb_state , state_backward ,
                                     STAT_label[STATL_STATE]);
 
-      os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
-         << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
+      *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
+          << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
       break;
     }
 
     case 'g' : {
-      seq.profile_plot_print(os , index , nb_state , state_backward);
+      seq.profile_plot_print(*os , index , nb_state , state_backward);
+      break;
+    }
+
+    case 'p' : {
+      seq.profile_plotable_write(*plot , index , nb_state , state_backward);
       break;
     }
     }
@@ -3869,12 +3973,12 @@ double Hidden_variable_order_markov::viterbi_forward_backward(const Markovian_se
 
       switch (format) {
       case 'a' :
-        os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
-           << " (" << ambiguity / seq.length[index] << ")" << endl;
+        *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
+            << " (" << ambiguity / seq.length[index] << ")" << endl;
         break;
       case 's' :
-        os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
-           << "\t" << ambiguity / seq.length[index] << "\t" << endl;
+        *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
+            << "\t" << ambiguity / seq.length[index] << "\t" << endl;
         break;
       }
     }
@@ -3916,10 +4020,11 @@ double Hidden_variable_order_markov::viterbi_forward_backward(const Markovian_se
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats.
  *
  *  arguments : reference sur un objet Format_error, stream, sequences,
  *              identificateur de la sequence, format ('a' : ASCII, 's' : Spreadsheet),
@@ -4019,7 +4124,7 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ost
 
     for (i = 0;i < seq->nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
-        seq_likelihood = forward_backward(*seq , i , os , format ,
+        seq_likelihood = forward_backward(*seq , i , &os , 0 , format ,
                                           max_marginal_entropy , entropy);
 
         if (seq_likelihood == D_INF) {
@@ -4037,7 +4142,8 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ost
         }
 
         else {
-          hmarkov->viterbi_forward_backward(*seq , i , os , format , seq_likelihood);
+          hmarkov->viterbi_forward_backward(*seq , i , &os , 0 , format ,
+                                            seq_likelihood);
 
           switch (state_sequence) {
           case GENERALIZED_VITERBI :
@@ -4062,11 +4168,11 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ost
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats
- *  dans un fichier.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path, sequences,
  *              identificateur de la sequence, format de fichier ('a' : ASCII, 's' : Spreadsheet),
@@ -4102,10 +4208,11 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , con
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats.
  *
  *  arguments : reference sur un objet Format_error, stream, identificateur de la sequence,
  *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
@@ -4138,11 +4245,11 @@ bool Hidden_variable_order_markov::state_profile_ascii_write(Format_error &error
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats
- *  dans un fichier.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path, identificateur de la sequence,
  *              format de fichier ('a' : ASCII, 's' : Spreadsheet),
@@ -4182,9 +4289,9 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , con
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward et affichage des resultats au format Gnuplot.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  affichage des resultats au format Gnuplot.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              sequences, identificateur de la sequence, titre des figures.
@@ -4282,7 +4389,7 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
         seq = new Variable_order_markov_data(iseq , 'c' , (type == 'e' ? true : false));
       }
 
-      seq_likelihood = forward_backward(*seq , index , *out_data_file , 'g' ,
+      seq_likelihood = forward_backward(*seq , index , out_data_file , 0 , 'g' ,
                                         max_marginal_entropy , entropy);
       out_data_file->close();
       delete out_data_file;
@@ -4300,7 +4407,7 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
 
         hmarkov->create_cumul();
         hmarkov->log_computation();
-        state_seq_likelihood = hmarkov->viterbi_forward_backward(*seq , index , *out_data_file ,
+        state_seq_likelihood = hmarkov->viterbi_forward_backward(*seq , index , out_data_file , 0 ,
                                                                  'g' , seq_likelihood);
         out_data_file->close();
         delete out_data_file;
@@ -4332,7 +4439,7 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
           if (title) {
             out_file << title << " - ";
           }
-          out_file << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+          out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
 
           if (seq->index_parameter) {
             if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
@@ -4340,9 +4447,10 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
             }
 
             out_file << "plot [" << seq->index_parameter[index][0] << ":"
-                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
+                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
+                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
                        << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -4360,13 +4468,12 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
             if (title) {
               out_file << title << " - ";
             }
-            out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+            out_file << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
 
             out_file << "plot [" << seq->index_parameter[index][0] << ":"
-                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
-                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
+                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
                        << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -4429,9 +4536,10 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
               out_file << "set xtics 0,1" << endl;
             }
 
-            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
+                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
                        << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -4449,12 +4557,11 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
             if (title) {
               out_file << title << " - ";
             }
-            out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+            out_file << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
 
-            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
-                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
+            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
                        << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -4515,10 +4622,11 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
 
           out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
         }
+
+        delete hmarkov;
       }
 
       delete seq;
-      delete hmarkov;
     }
   }
 
@@ -4528,9 +4636,9 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward et affichage des resultats au format Gnuplot.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  affichage des resultats au format Gnuplot.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              identificateur de la sequence, titre des figures.
@@ -4561,7 +4669,278 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des sequences d'etats optimales.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  sortie graphique des resultats.
+ *
+ *  arguments : reference sur un objet Format_error, sequences,
+ *              identificateur de la sequence.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_error &error ,
+                                                                         const Markovian_sequences &iseq ,
+                                                                         int identifier) const
+
+{
+  bool status = true;
+  register int i;
+  int offset = I_DEFAULT , nb_value , index;
+  double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
+  Hidden_variable_order_markov *hmarkov;
+  Variable_order_markov_data *seq;
+  ostringstream legend;
+  MultiPlotSet *plot_set;
+
+
+  plot_set = NULL;
+  error.init();
+
+  for (i = 0;i < iseq.nb_variable;i++) {
+    if ((iseq.type[i] != INT_VALUE) && (iseq.type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+  }
+
+  if (nb_output_process == iseq.nb_variable) {
+    offset = 0;
+  }
+  else if ((iseq.type[0] == STATE) && (nb_output_process + 1 == iseq.nb_variable)) {
+    offset = 1;
+  }
+  else {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+  }
+
+  if (offset != I_DEFAULT) {
+    for (i = 0;i < nb_output_process;i++) {
+      if (nonparametric_process[i + 1]) {
+        nb_value = nonparametric_process[i + 1]->nb_value;
+      }
+      else {
+        nb_value = parametric_process[i + 1]->nb_value;
+      }
+
+      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
+                      << SEQ_error[SEQR_NB_OUTPUT];
+        error.update((error_message.str()).c_str());
+      }
+    }
+  }
+
+  for (i = 0;i < iseq.nb_sequence;i++) {
+    if (identifier == iseq.identifier[i]) {
+      index = i;
+      break;
+    }
+  }
+
+  if (i == iseq.nb_sequence) {
+    status = false;
+    error.update(SEQ_error[SEQR_SEQUENCE_IDENTIFIER]);
+  }
+
+  if (status) {
+    plot_set = new MultiPlotSet(4);
+
+    MultiPlotSet &plot = *plot_set;
+
+    plot.border = "15 lw 0";
+
+    if (iseq.type[0] != STATE) {
+      seq = new Variable_order_markov_data(iseq);
+    }
+    else {
+      seq = new Variable_order_markov_data(iseq , 'c' , (type == 'e' ? true : false));
+    }
+
+    seq_likelihood = forward_backward(*seq , index , 0 , plot_set , 'p' ,
+                                      max_marginal_entropy , entropy);
+
+    if (seq_likelihood == D_INF) {
+      delete plot_set;
+      plot_set = NULL;
+      error.update(SEQ_error[SEQR_SEQUENCE_INCOMPATIBLE_MODEL]);
+    }
+
+    else {
+      hmarkov = new Hidden_variable_order_markov(*this , false);
+
+      hmarkov->create_cumul();
+      hmarkov->log_computation();
+      state_seq_likelihood = hmarkov->viterbi_forward_backward(*seq , index , 0 , &plot[0] ,
+                                                               'p' , seq_likelihood);
+
+      // 1ere vue : probabilitees maximum
+
+      plot[0].title = SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY];
+
+      if (seq->index_parameter) {
+        plot[0].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[0].xtics = 1;
+        }
+      }
+
+      else {
+        plot[0].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[0].xtics = 1;
+        }
+      }
+
+      plot[0].yrange = Range(0. , exp(state_seq_likelihood - seq_likelihood));
+
+      plot[0].resize(nb_state);
+
+      for (i = 0;i < nb_state;i++) {
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i;
+        plot[0][i].legend = legend.str();
+
+        plot[0][i].style = "linespoints";
+      }
+
+      // 2eme vue : probabilitees lissees
+
+      plot[1].title = SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY];
+
+      if (seq->index_parameter) {
+        plot[1].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[1].xtics = 1;
+        }
+      }
+
+      else {
+        plot[1].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[1].xtics = 1;
+        }
+      }
+
+      plot[1].yrange = Range(0. , 1.);
+
+      plot[1].resize(nb_state);
+
+      for (i = 0;i < nb_state;i++) {
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i;
+        plot[1][i].legend = legend.str();
+
+        plot[1][i].style = "linespoints";
+      }
+
+      // 3eme vue : profils d'entropies conditionnelles
+
+      if (seq->index_parameter) {
+        plot[2].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[2].xtics = 1;
+        }
+      }
+
+      else {
+        plot[2].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[2].xtics = 1;
+        }
+      }
+
+      plot[2].yrange = Range(0. , max_marginal_entropy);
+
+      plot[2].resize(3);
+
+      plot[2][0].legend = SEQ_label[SEQL_CONDITIONAL_ENTROPY];
+      plot[2][0].style = "linespoints";
+
+      plot[2][1].legend = SEQ_label[SEQL_CONDITIONAL_ENTROPY];
+      plot[2][1].style = "linespoints";
+
+      plot[2][2].legend = SEQ_label[SEQL_MARGINAL_ENTROPY];
+      plot[2][2].style = "linespoints";
+
+      // 4eme vue : profils d'entropies partielles
+
+      if (seq->index_parameter) {
+        plot[3].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[3].xtics = 1;
+        }
+      }
+
+      else {
+        plot[3].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[3].xtics = 1;
+        }
+      }
+
+      plot[3].yrange = Range(0. ,entropy);
+
+      plot[3].resize(2);
+
+      plot[3][0].legend = SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY];
+      plot[3][0].style = "linespoints";
+
+      plot[3][1].legend = SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY];
+      plot[3][1].style = "linespoints";
+
+      delete hmarkov;
+    }
+
+    delete seq;
+  }
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  sortie graphique des resultats.
+ *
+ *  arguments : reference sur un objet Format_error,
+ *              identificateur de la sequence.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_error &error ,
+                                                                         int identifier) const
+
+{
+  MultiPlotSet *plot_set;
+
+
+  error.init();
+
+  if (!markov_data) {
+    plot_set = NULL;
+    error.update(STAT_error[STATR_NO_DATA]);
+  }
+  else {
+    plot_set = state_profile_plotable_write(error , *markov_data , identifier);
+  }
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des sequences d'etats les plus probables.
  *
  *  arguments : references sur un objet Format_error et sur un objet Markovian_sequences,
  *              flag sur le calcul des caracteristiques.
@@ -4580,7 +4959,7 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
   Variable_order_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   for (i = 0;i < iseq.nb_variable;i++) {
@@ -4635,7 +5014,7 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
 
     if (seq->likelihood == D_INF) {
       delete seq;
-      seq = 0;
+      seq = NULL;
       error.update(SEQ_error[SEQR_STATE_SEQUENCE_COMPUTATION_FAILURE]);
     }
 
@@ -4655,7 +5034,7 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
 
 /*      if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
         delete seq;
-        seq = 0;
+        seq = NULL;
         error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
       }
 
@@ -4941,7 +5320,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
   ofstream *out_file;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   for (i = 0;i < nb_model - 1;i++) {
@@ -5022,7 +5401,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
   }
 
   if (status) {
-    out_file = 0;
+    out_file = NULL;
 
     if (path) {
       out_file = new ofstream(path);
@@ -5142,7 +5521,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
   Distance_matrix *dist_matrix;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
@@ -5211,7 +5590,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
-    dist_matrix = 0;
+    dist_matrix = NULL;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
