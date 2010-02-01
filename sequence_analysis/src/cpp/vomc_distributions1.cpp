@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -672,7 +672,7 @@ void Variable_order_markov::state_recurrence_time_distribution(const double *ime
 
   else {
     delete nonparametric_process[0]->recurrence_time[istate];
-    nonparametric_process[0]->recurrence_time[istate] = 0;
+    nonparametric_process[0]->recurrence_time[istate] = NULL;
   }
 
   delete [] memory;
@@ -1314,7 +1314,7 @@ void Variable_order_markov::output_recurrence_time_distribution(const double *im
 
   else {
     delete nonparametric_process[variable]->recurrence_time[output];
-    nonparametric_process[variable]->recurrence_time[output] = 0;
+    nonparametric_process[variable]->recurrence_time[output] = NULL;
   }
 
   delete [] observation;
@@ -1435,7 +1435,7 @@ void Variable_order_markov::output_sojourn_time_distribution(const double *imemo
   if (*pcumul == 0.) {
     absorption = 1.;
     delete nonparametric_process[variable]->sojourn_time[output];
-    nonparametric_process[variable]->sojourn_time[output] = 0;
+    nonparametric_process[variable]->sojourn_time[output] = NULL;
   }
 
   else {
@@ -1484,7 +1484,7 @@ Correlation* Variable_order_markov::state_autocorrelation_computation(Format_err
   Markovian_sequences *binary_seq;
 
 
-  correl = 0;
+  correl = NULL;
   error.init();
 
 /*  if (nb_component > 1) {
@@ -1704,7 +1704,7 @@ Correlation* Variable_order_markov::output_autocorrelation_computation(Format_er
   Markovian_sequences *binary_seq;
 
 
-  correl = 0;
+  correl = NULL;
   error.init();
 
 /*  if (nb_component > 1) {
