@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -387,8 +387,8 @@ void Semi_markov::output_nb_run_mixture(int variable , int output)
       occupancy = nonparametric_process[0]->sojourn_time[i / 2];
       state_nb_run[i] = new double*[MIN(max_length + 1 , occupancy->nb_value) * 2];
 
-      state_nb_run[i][0] = 0;
-      state_nb_run[i][1] = 0;
+      state_nb_run[i][0] = NULL;
+      state_nb_run[i][1] = NULL;
       index_nb_pattern = 1;
       for (j = 1;j < MIN(max_length + 1 , occupancy->nb_value);j++) {
         state_nb_run[i][j * 2] = new double[index_nb_pattern + 1];
@@ -698,7 +698,7 @@ void Semi_markov::output_nb_occurrence_mixture(int variable , int output)
       occupancy = nonparametric_process[0]->sojourn_time[i];
       observation[i] = new Parametric*[MIN(max_length + 1 , occupancy->nb_value)];
 
-      observation[i][0] = 0;
+      observation[i][0] = NULL;
       for (j = 1;j < MIN(max_length + 1 , occupancy->nb_value);j++) {
         observation[i][j] = new Parametric(BINOMIAL , 0 , j , D_DEFAULT ,
                                            nonparametric_process[variable]->observation[i]->mass[output]);
@@ -908,7 +908,7 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
     Parametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
 
-    memory = 0;
+    memory = NULL;
 
     // calcul des lois de type intensite et intervalle au niveau etat
 
@@ -934,7 +934,7 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
         }
         else {
           delete nonparametric_process[0]->recurrence_time[i];
-          nonparametric_process[0]->recurrence_time[i] = 0;
+          nonparametric_process[0]->recurrence_time[i] = NULL;
         }
 
         if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
@@ -1005,7 +1005,7 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
           }
           else {
             delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = 0;
+            nonparametric_process[i]->first_occurrence[j] = NULL;
             nonparametric_process[i]->leave[j] = 1.;
           }
 
@@ -1017,7 +1017,7 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
           }
           else {
             delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = 0;
+            nonparametric_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
@@ -1033,7 +1033,7 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
           else {
             nonparametric_process[i]->absorption[j] = 1.;
             delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = 0;
+            nonparametric_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
@@ -1094,7 +1094,7 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
     Distribution dlength(*(seq.hlength));
 
 
-    memory = 0;
+    memory = NULL;
 
     // calcul des lois de type intensite et intervalle au niveau etat
 
@@ -1130,7 +1130,7 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
         }
         else {
           delete nonparametric_process[0]->recurrence_time[i];
-          nonparametric_process[0]->recurrence_time[i] = 0;
+          nonparametric_process[0]->recurrence_time[i] = NULL;
         }
 
         if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
@@ -1215,7 +1215,7 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
           }
           else {
             delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = 0;
+            nonparametric_process[i]->first_occurrence[j] = NULL;
             nonparametric_process[i]->leave[j] = 1.;
           }
 
@@ -1227,7 +1227,7 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
           }
           else {
             delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = 0;
+            nonparametric_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
@@ -1243,7 +1243,7 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
           else {
             nonparametric_process[i]->absorption[j] = 1.;
             delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = 0;
+            nonparametric_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
