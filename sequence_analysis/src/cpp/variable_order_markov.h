@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -122,6 +122,7 @@ protected :
                                     bool hidden = false) const;
     bool plot_write(const char *prefix , const char *title ,
                     const Variable_order_markov_data *seq) const;
+    MultiPlotSet* get_plotable(const Variable_order_markov_data *seq) const;
 
     void find_parent_memory(int index);
     void build_memory_transition();
@@ -222,7 +223,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
     void characteristic_computation(const Variable_order_markov_data &seq , bool counting_flag ,
@@ -246,13 +248,13 @@ public :
 
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Variable_order_markov **imarkov , Histogram **hlength ,
-                                            const char *path = 0) const;
+                                            const char *path = NULL) const;
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Variable_order_markov **markov , int nb_sequence ,
-                                            int length , const char *path = 0) const;
+                                            int length , const char *path = NULL) const;
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Variable_order_markov **markov , int nb_sequence ,
-                                            const Markovian_sequences **seq , const char *path = 0) const;
+                                            const Markovian_sequences **seq , const char *path = NULL) const;
 
     // acces membres de la classe
 
@@ -383,7 +385,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
     void build_transition_count(const Variable_order_markov &markov ,
                                 bool begin = true , bool non_terminal = false);
