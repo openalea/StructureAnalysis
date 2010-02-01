@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -43,8 +43,6 @@
 
 #include "tool/config.h"
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
@@ -143,8 +141,8 @@ void Distribution::init(int inb_value)
   nb_parameter = 0;
 
   if (nb_value == 0) {
-    mass = 0;
-    cumul = 0;
+    mass = NULL;
+    cumul = NULL;
   }
 
   else {
@@ -1397,7 +1395,7 @@ bool Distribution::plot_write(Format_error &error , const char *prefix , int nb_
 
     concentration = new double*[nb_dist];
     for (i = 0;i < nb_dist;i++) {
-      concentration[i] = 0;
+      concentration[i] = NULL;
     }
 
     max_nb_value = 0;
@@ -1766,7 +1764,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
   error.init();
 
   if (nb_dist > PLOT_NB_DISTRIBUTION) {
-    plot_set = 0;
+    plot_set = NULL;
     error.update(STAT_error[STATR_PLOT_NB_DISTRIBUTION]);
   }
 
@@ -2303,7 +2301,7 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
   error.init();
 
   if (variance == 0.) {
-    plot_set = 0;
+    plot_set = NULL;
     error.update(STAT_error[STATR_PLOT_NULL_VARIANCE]);
   }
 
@@ -2368,16 +2366,12 @@ MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
     plot[1].resize(2);
 
     plot[1][0].legend = STAT_label[STATL_DEATH_PROBABILITY];
-
     plot[1][0].style = "linespoints";
 
-    survival_rate->plotable_write(0 , plot[1][0]);
-
     plot[1][1].legend = STAT_label[STATL_SURVIVAL_PROBABILITY];
-
     plot[1][1].style = "linespoints";
 
-    survival_rate->plotable_write(1 , plot[1][1]);
+    survival_rate->plotable_write(plot[1]);
 
     delete survival_rate;
   }
@@ -2444,150 +2438,6 @@ ostream& operator<<(ostream &os , const Distribution &dist)
 
   return os;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Distribution::binaryStoreSize(int ialloc_nb_value) const
-
-{
-  int bnb_value;
-  RWspace size;
-
-
-  if (ialloc_nb_value == I_DEFAULT) {
-    bnb_value = nb_value;
-  }
-  else {
-    bnb_value = MAX(nb_value , ialloc_nb_value);
-    if (bnb_value > alloc_nb_value) {
-      bnb_value = alloc_nb_value;
-    }
-  }
-
-  size = sizeof(nb_value) + sizeof(bnb_value) + sizeof(offset) + sizeof(max) +
-         sizeof(complement) + sizeof(mean) + sizeof(variance) + sizeof(nb_parameter) +
-         sizeof(*mass) * bnb_value + sizeof(*cumul) * bnb_value;
-
-  return size;
-}
-
-
-void Distribution::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-  double *pmass , *pcumul;
-
-
-  delete [] mass;
-  delete [] cumul;
-
-  is >> nb_value >> alloc_nb_value >> offset >> max >> complement
-     >> mean >> variance >> nb_parameter;
-
-  mass = new double[alloc_nb_value];
-  pmass = mass;
-  for (i = 0;i < alloc_nb_value;i++) {
-    is >> *pmass++;
-  }
-
-  cumul = new double[alloc_nb_value];
-  pcumul = cumul;
-  for (i = 0;i < alloc_nb_value;i++) {
-    is >> *pcumul++;
-  }
-}
-
-
-void Distribution::restoreGuts(RWFile &file)
-
-{
-  delete [] mass;
-  delete [] cumul;
-
-  file.Read(nb_value);
-  file.Read(alloc_nb_value);
-  file.Read(offset);
-  file.Read(max);
-  file.Read(complement);
-  file.Read(mean);
-  file.Read(variance);
-  file.Read(nb_parameter);
-
-  mass = new double[alloc_nb_value];
-  file.Read(mass , alloc_nb_value);
-
-  cumul = new double[alloc_nb_value];
-  file.Read(cumul , alloc_nb_value);
-}
-
-
-void Distribution::saveGuts(RWvostream &os , int ialloc_nb_value) const
-
-{
-  register int i;
-  int bnb_value;
-  double *pmass , *pcumul;
-
-
-  if (ialloc_nb_value == I_DEFAULT) {
-    bnb_value = nb_value;
-  }
-  else {
-    bnb_value = MAX(nb_value , ialloc_nb_value);
-    if (bnb_value > alloc_nb_value) {
-      bnb_value = alloc_nb_value;
-    }
-  }
-
-  os << nb_value << bnb_value << offset << max << complement
-     << mean << variance << nb_parameter;
-
-  pmass = mass;
-  for (i = 0;i < bnb_value;i++) {
-    os << *pmass++;
-  }
-
-  pcumul = cumul;
-  for (i = 0;i < bnb_value;i++) {
-    os << *pcumul++;
-  }
-}
-
-
-void Distribution::saveGuts(RWFile &file , int ialloc_nb_value) const
-
-{
-  int bnb_value;
-
-
-  if (ialloc_nb_value == I_DEFAULT) {
-    bnb_value = nb_value;
-  }
-  else {
-    bnb_value = MAX(nb_value , ialloc_nb_value);
-    if (bnb_value > alloc_nb_value) {
-      bnb_value = alloc_nb_value;
-    }
-  }
-
-  file.Write(nb_value);
-  file.Write(bnb_value);
-  file.Write(offset);
-  file.Write(max);
-  file.Write(complement);
-  file.Write(mean);
-  file.Write(variance);
-  file.Write(nb_parameter);
-
-  file.Write(mass , bnb_value);
-  file.Write(cumul , bnb_value);
-} */
 
 
 /*--------------------------------------------------------------*
@@ -2992,7 +2842,7 @@ double* Distribution::concentration_function_computation() const
   double *concentration_function , *pconcentration , *pmass;
 
 
-  if (mean > 0.) {
+  if ((mean > 0.) && (variance > 0.)) {
     concentration_function = new double[nb_value];
 
     pconcentration = concentration_function;
@@ -3010,7 +2860,7 @@ double* Distribution::concentration_function_computation() const
   }
 
   else {
-    concentration_function = 0;
+    concentration_function = NULL;
   }
 
   return concentration_function;
@@ -3030,7 +2880,7 @@ double Distribution::concentration_computation() const
   double concentration = D_DEFAULT , *concentration_function , *pmass;
 
 
-  if (mean > 0.) {
+  if ((mean > 0.) && (variance > 0.)) {
     concentration_function = concentration_function_computation();
     pmass = mass + offset;
 
