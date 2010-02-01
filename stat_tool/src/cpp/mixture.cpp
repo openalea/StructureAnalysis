@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -40,8 +40,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tools.h"
 #include "distribution.h"
 #include "mixture.h"
@@ -63,10 +62,10 @@ extern char* label(const char *file_name);
 Mixture::Mixture()
 
 {
-  mixture_data = 0;
+  mixture_data = NULL;
   nb_component = 0;
-  weight = 0;
-  component = 0;
+  weight = NULL;
+  component = NULL;
 }
 
 
@@ -84,7 +83,7 @@ Mixture::Mixture(int inb_component , double *pweight , const Parametric **pcompo
   register int i;
 
 
-  mixture_data = 0;
+  mixture_data = NULL;
   nb_component = inb_component;
 
   weight = new Parametric(nb_component);
@@ -125,7 +124,7 @@ Mixture::Mixture(const Mixture &mixt , bool *component_flag , int inb_value)
   register int i;
 
 
-  mixture_data = 0;
+  mixture_data = NULL;
   nb_component = mixt.nb_component;
 
   weight = new Parametric(nb_component);
@@ -163,10 +162,10 @@ Mixture::Mixture(int inb_component , const Parametric **pcomponent)
   register int i;
 
 
-  mixture_data = 0;
+  mixture_data = NULL;
   nb_component = inb_component;
 
-  weight = 0;
+  weight = NULL;
 
   component = new Parametric*[nb_component];
   for (i = 0;i < nb_component;i++) {
@@ -194,7 +193,7 @@ void Mixture::copy(const Mixture &mixt , bool data_flag)
     mixture_data = new Mixture_data(*(mixt.mixture_data) , false);
   }
   else {
-    mixture_data = 0;
+    mixture_data = NULL;
   }
 
   nb_component = mixt.nb_component;
@@ -284,7 +283,7 @@ Parametric_model* Mixture::extract(Format_error &error , int index) const
 
 
   if ((index < 1) || (index > nb_component)) {
-    pcomponent = 0;
+    pcomponent = NULL;
     error.update(STAT_error[STATR_DISTRIBUTION_INDEX]);
   }
 
@@ -315,7 +314,7 @@ Mixture_data* Mixture::extract_data(Format_error &error) const
   error.init();
 
   if (!mixture_data) {
-    mixt_histo = 0;
+    mixt_histo = NULL;
     error.update(STAT_error[STATR_NO_DATA]);
   }
 
@@ -347,7 +346,7 @@ Mixture* mixture_building(Format_error &error , int nb_component , double *weigh
   Mixture *mixt;
 
 
-  mixt = 0;
+  mixt = NULL;
   error.init();
 
   if ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT)) {
@@ -403,7 +402,7 @@ Mixture* mixture_ascii_read(Format_error &error , const char *path ,
   ifstream in_file(path);
 
 
-  mixt = 0;
+  mixt = NULL;
   error.init();
 
   if (!in_file) {
@@ -490,7 +489,7 @@ Mixture* mixture_ascii_read(Format_error &error , const char *path ,
     if (status) {
       component = new const Parametric*[nb_component];
       for (i = 0;i < nb_component;i++) {
-        component[i] = 0;
+        component[i] = NULL;
       }
 
       cumul = 0.;
@@ -1583,139 +1582,6 @@ double Mixture::penalty_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Mixture , STATI_MIXTURE);
-
-
-RWspace Mixture::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = Distribution::binaryStoreSize() + sizeof(nb_component) + weight->binaryStoreSize();
-  for (i = 0;i < nb_component;i++) {
-    size += component[i]->binaryStoreSize();
-  }
-
-  if (mixture_data) {
-    size += mixture_data->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Mixture::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  Distribution::restoreGuts(is);
-
-  is >> nb_component;
-
-  weight = new Parametric();
-  weight->restoreGuts(is);
-
-  component = new Parametric*[nb_component];
-  for (i = 0;i < nb_component;i++) {
-    component[i] = new Parametric();
-    component[i]->restoreGuts(is);
-  }
-
-  is >> mixture_data;
-  if (mixture_data == RWnilCollectable) {
-    mixture_data = 0;
-  }
-}
-
-
-void Mixture::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  Distribution::restoreGuts(file);
-
-  file.Read(nb_component);
-
-  weight = new Parametric();
-  weight->restoreGuts(file);
-
-  component = new Parametric*[nb_component];
-  for (i = 0;i < nb_component;i++) {
-    component[i] = new Parametric();
-    component[i]->restoreGuts(file);
-  }
-
-  file >> mixture_data;
-  if (mixture_data == RWnilCollectable) {
-    mixture_data = 0;
-  }
-}
-
-
-void Mixture::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Distribution::saveGuts(os);
-
-  os << nb_component;
-  weight->saveGuts(os);
-
-  for (i = 0;i < nb_component;i++) {
-    component[i]->saveGuts(os);
-  }
-
-  if (mixture_data) {
-    os << mixture_data;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Mixture::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  Distribution::saveGuts(file);
-
-  file.Write(nb_component);
-  weight->saveGuts(file);
-
-  for (i = 0;i < nb_component;i++) {
-    component[i]->saveGuts(file);
-  }
-
-  if (mixture_data) {
-    file << mixture_data;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur par defaut de la classe Mixture_data.
  *
  *--------------------------------------------------------------*/
@@ -1723,10 +1589,10 @@ void Mixture::saveGuts(RWFile &file) const
 Mixture_data::Mixture_data()
 
 {
-  mixture = 0;
+  mixture = NULL;
   nb_component = 0;
-  weight = 0;
-  component = 0;
+  weight = NULL;
+  component = NULL;
 }
 
 
@@ -1746,7 +1612,7 @@ Mixture_data::Mixture_data(const Histogram &histo , int inb_component)
   register int i;
 
 
-  mixture = 0;
+  mixture = NULL;
   nb_component = inb_component;
 
   weight = new Histogram(nb_component);
@@ -1773,7 +1639,7 @@ Mixture_data::Mixture_data(const Mixture &mixt)
   register int i;
 
 
-  mixture = 0;
+  mixture = NULL;
   nb_component = mixt.nb_component;
 
   weight = new Histogram(*(mixt.weight));
@@ -1804,7 +1670,7 @@ void Mixture_data::copy(const Mixture_data &mixt_histo , bool model_flag)
     mixture = new Mixture(*(mixt_histo.mixture) , false);
   }
   else {
-    mixture = 0;
+    mixture = NULL;
   }
 
   nb_component = mixt_histo.nb_component;
@@ -1893,7 +1759,7 @@ Distribution_data* Mixture_data::extract(Format_error &error , int index) const
   Distribution_data *pcomponent;
 
 
-  pcomponent = 0;
+  pcomponent = NULL;
   error.init();
 
   if ((index < 1) || (index > nb_component)) {
@@ -2071,141 +1937,8 @@ MultiPlotSet* Mixture_data::get_plotable() const
     plot_set = mixture->get_plotable(this);
   }
   else {
-    plot_set = 0;
+    plot_set = NULL;
   }
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Mixture_data , STATI_MIXTURE_DATA);
-
-
-RWspace Mixture_data::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = Histogram::binaryStoreSize() + sizeof(nb_component) + weight->binaryStoreSize();
-  for (i = 0;i < nb_component;i++) {
-    size += component[i]->binaryStoreSize();
-  }
-
-  if (mixture) {
-    size += mixture->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Mixture_data::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  Histogram::restoreGuts(is);
-
-  is >> nb_component;
-
-  weight = new Histogram();
-  weight->restoreGuts(is);
-
-  component = new Histogram*[nb_component];
-  for (i = 0;i < nb_component;i++) {
-    component[i] = new Histogram();
-    component[i]->restoreGuts(is);
-  }
-
-  is >> mixture;
-  if (mixture == RWnilCollectable) {
-    mixture = 0;
-  }
-}
-
-
-void Mixture_data::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  Histogram::restoreGuts(file);
-
-  file.Read(nb_component);
-
-  weight = new Histogram();
-  weight->restoreGuts(file);
-
-  component = new Histogram*[nb_component];
-  for (i = 0;i < nb_component;i++) {
-    component[i] = new Histogram();
-    component[i]->restoreGuts(file);
-  }
-
-  file >> mixture;
-  if (mixture == RWnilCollectable) {
-    mixture = 0;
-  }
-}
-
-
-void Mixture_data::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Histogram::saveGuts(os);
-
-  os << nb_component;
-  weight->saveGuts(os);
-
-  for (i = 0;i < nb_component;i++) {
-    component[i]->saveGuts(os);
-  }
-
-  if (mixture) {
-    os << mixture;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Mixture_data::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  Histogram::saveGuts(file);
-
-  file.Write(nb_component);
-  weight->saveGuts(file);
-
-  for (i = 0;i < nb_component;i++) {
-    component[i]->saveGuts(file);
-  }
-
-  if (mixture) {
-    file << mixture;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
