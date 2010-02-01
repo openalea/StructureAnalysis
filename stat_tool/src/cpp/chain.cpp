@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -43,8 +43,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "markovian.h"
 #include "stat_label.h"
@@ -73,18 +71,18 @@ Chain::Chain(char itype , int inb_state , bool init_flag)
   type = itype;
   nb_state = inb_state;
 
-  accessibility = 0;
+  accessibility = NULL;
 
   nb_component = 0;
-  component_nb_state = 0;
-  component = 0;
-  state_type = 0;
+  component_nb_state = NULL;
+  component = NULL;
+  state_type = NULL;
 
   if (nb_state == 0) {
     nb_row = 0;
 
-    initial = 0;
-    transition = 0;
+    initial = NULL;
+    transition = NULL;
   }
 
   else {
@@ -115,8 +113,8 @@ Chain::Chain(char itype , int inb_state , bool init_flag)
     }
   }
 
-  cumul_initial = 0;
-  cumul_transition = 0;
+  cumul_initial = NULL;
+  cumul_transition = NULL;
 }
 
 
@@ -140,12 +138,12 @@ Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
   nb_state = inb_state;
   nb_row = inb_row;
 
-  accessibility = 0;
+  accessibility = NULL;
 
   nb_component = 0;
-  component_nb_state = 0;
-  component = 0;
-  state_type = 0;
+  component_nb_state = NULL;
+  component = NULL;
+  state_type = NULL;
 
   initial = new double[type == 'o' ? nb_state : nb_row];
 
@@ -168,8 +166,8 @@ Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
     }
   }
 
-  cumul_initial = 0;
-  cumul_transition = 0;
+  cumul_initial = NULL;
+  cumul_transition = NULL;
 }
 
 
@@ -268,11 +266,11 @@ void Chain::copy(const Chain &chain)
   }
 
   else {
-    accessibility = 0;
+    accessibility = NULL;
     nb_component = 0;
-    component_nb_state = 0;
-    component = 0;
-    state_type = 0;
+    component_nb_state = NULL;
+    component = NULL;
+    state_type = NULL;
   }
 
   initial = new double[type == 'o' ? nb_state : nb_row];
@@ -281,7 +279,7 @@ void Chain::copy(const Chain &chain)
     cumul_initial = new double[type == 'o' ? nb_state : nb_row];
   }
   else {
-    cumul_initial = 0;
+    cumul_initial = NULL;
   }
 
   transition = new double*[nb_row];
@@ -296,7 +294,7 @@ void Chain::copy(const Chain &chain)
     }
   }
   else {
-    cumul_transition = 0;
+    cumul_transition = NULL;
   }
 
   parameter_copy(chain);
@@ -409,7 +407,7 @@ Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line , char 
   Chain *chain;
 
 
-  chain = 0;
+  chain = NULL;
 
   // analyse lignes definissant le nombre d'etats et l'ordre
 
@@ -619,7 +617,7 @@ Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line , char 
 
     if (!status) {
       delete chain;
-      chain = 0;
+      chain = NULL;
     }
   }
 
@@ -795,205 +793,6 @@ ostream& Chain::spreadsheet_print(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Chain::binaryStoreSize() const
-
-{
-  RWspace size;
-
-
-  size = sizeof(nb_state) + sizeof(nb_row) + sizeof(nb_component);
-
-  if (nb_component > 0) {
-    register int i;
-
-    size += sizeof(**accessibility) * nb_state * nb_state +
-            sizeof(*component_nb_state) * nb_component;
-
-    for (i = 0;i < nb_component;i++) {
-      size += sizeof(**component) * component_nb_state[i];
-    }
-
-    size += sizeof(*state_type) * nb_state;
-  }
-
-  size += sizeof(*initial) * nb_state + sizeof(**transition) * nb_row * nb_state;
-
-  return size;
-}
-
-
-void Chain::restoreGuts(RWvistream &is)
-
-{
-  register int i , j;
-
-
-  remove();
-
-  is >> nb_state >> nb_row >> nb_component;
-
-  if (nb_component > 0) {
-    accessibility = new bool*[nb_state];
-    for (i = 0;i < nb_state;i++) {
-      accessibility[i] = new bool[nb_state];
-      for (j = 0;j < nb_state;j++) {
-        is >> accessibility[i][j];
-      }
-    }
-
-    component_nb_state = new int[nb_component];
-    for (i = 0;i < nb_component;i++) {
-      is >> component_nb_state[i];
-    }
-
-    component = new int*[nb_component];
-    for (i = 0;i < nb_component;i++) {
-      component[i] = new int[component_nb_state[i]];
-      for (j = 0;j < component_nb_state[i];j++) {
-        is >> component[i][j];
-      }
-    }
-
-    state_type = new char[nb_state];
-    for (i = 0;i < nb_state;i++) {
-      is >> state_type[i];
-    }
-  }
-
-  initial = new double[nb_state];
-  for (i = 0;i < nb_state;i++) {
-    is >> initial[i];
-  }
-
-  transition = new double*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    transition[i] = new double[nb_state];
-    for (j = 0;j < nb_state;j++) {
-      is >> transition[i][j];
-    }
-  }
-}
-
-
-void Chain::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_state);
-  file.Read(nb_row);
-  file.Read(nb_component);
-
-  if (nb_component > 0) {
-    accessibility = new bool*[nb_state];
-    for (i = 0;i < nb_state;i++) {
-      accessibility[i] = new bool[nb_state];
-      file.Read(accessibility[i] , nb_state);
-    }
-
-    component_nb_state = new int[nb_component];
-    file.Read(component_nb_state , nb_component);
-
-    component = new int*[nb_component];
-    for (i = 0;i < nb_component;i++) {
-      component[i] = new int[component_nb_state[i]];
-      file.Read(component[i] , component_nb_state[i]);
-    }
-
-    state_type = new char[nb_state];
-    file.Read(state_type , nb_state);
-  }
-
-  initial = new double[nb_state];
-  file.Read(initial , nb_state);
-
-  transition = new double*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    transition[i] = new double[nb_state];
-    file.Read(transition[i] , nb_state);
-  }
-}
-
-
-void Chain::saveGuts(RWvostream &os) const
-
-{
-  register int i , j;
-
-
-  os << nb_state << nb_row << nb_component;
-
-  if (nb_component > 0) {
-    for (i = 0;i < nb_state;i++) {
-      for (j = 0;j < nb_state;j++) {
-        os << accessibility[i][j];
-      }
-    }
-
-    for (i = 0;i < nb_component;i++) {
-      os << component_nb_state[i];
-    }
-    for (i = 0;i < nb_component;i++) {
-      for (j = 0;j < component_nb_state[i];j++) {
-        os << component[i][j];
-      }
-    }
-
-    for (i = 0;i < nb_state;i++) {
-      os << state_type[i];
-    }
-  }
-
-  for (i = 0;i < nb_state;i++) {
-    os << initial[i];
-  }
-  for (i = 0;i < nb_row;i++) {
-    for (j = 0;j < nb_state;j++) {
-      os << transition[i][j];
-    }
-  }
-}
-
-
-void Chain::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_state);
-  file.Write(nb_row);
-  file.Write(nb_component);
-
-  if (nb_component > 0) {
-    for (i = 0;i < nb_state;i++) {
-      file.Write(accessibility[i] , nb_state);
-    }
-
-    file.Write(component_nb_state , nb_component);
-    for (i = 0;i < nb_component;i++) {
-      file.Write(component[i] , component_nb_state[i]);
-    }
-
-    file.Write(state_type , nb_state);
-  }
-
-  file.Write(initial , nb_state);
-  for (i = 0;i < nb_row;i++) {
-    file.Write(transition[i] , nb_state);
-  }
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Creation des champs de type "cumul" d'un objet Chain.
  *
  *--------------------------------------------------------------*/
@@ -1032,7 +831,7 @@ void Chain::remove_cumul()
   if (cumul_initial) {
     delete [] cumul_initial;
 
-    cumul_initial = 0;
+    cumul_initial = NULL;
   }
 
   if (cumul_transition) {
@@ -1041,7 +840,7 @@ void Chain::remove_cumul()
     }
     delete [] cumul_transition;
 
-    cumul_transition = 0;
+    cumul_transition = NULL;
   }
 }
 
@@ -1103,101 +902,3 @@ Chain_data::Chain_data(const Chain_data &chain_data)
 {
   copy(chain_data);
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Chain_data::binaryStoreSize() const
-
-{
-  RWspace size = sizeof(nb_state) + sizeof(nb_row) + sizeof(*initial) * nb_state +
-                 sizeof(**transition) * nb_row * nb_state;
-
-  return size;
-}
-
-
-void Chain_data::restoreGuts(RWvistream &is)
-
-{
-  register int i , j;
-
-
-  remove();
-
-  is >> nb_state >> nb_row;
-
-  initial = new int[nb_state];
-  for (i = 0;i < nb_state;i++) {
-    is >> initial[i];
-  }
-
-  transition = new int*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    transition[i] = new int[nb_state];
-    for (j = 0;j < nb_state;j++) {
-      is >> transition[i][j];
-    }
-  }
-}
-
-
-void Chain_data::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_state);
-  file.Read(nb_row);
-
-  initial = new int[nb_state];
-  file.Read(initial , nb_state);
-
-  transition = new int*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    transition[i] = new int[nb_state];
-    file.Read(transition[i] , nb_state);
-  }
-}
-
-
-void Chain_data::saveGuts(RWvostream &os) const
-
-{
-  register int i , j;
-
-
-  os << nb_state << nb_row;
-
-  for (i = 0;i < nb_state;i++) {
-    os << initial[i];
-  }
-  for (i = 0;i < nb_row;i++) {
-    for (j = 0;j < nb_state;j++) {
-      os << transition[i][j];
-    }
-  }
-}
-
-
-void Chain_data::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_state);
-  file.Write(nb_row);
-
-  file.Write(initial , nb_state);
-  for (i = 0;i < nb_row;i++) {
-    file.Write(transition[i] , nb_state);
-  }
-} */
