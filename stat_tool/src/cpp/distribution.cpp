@@ -821,8 +821,6 @@ ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape
 /*--------------------------------------------------------------*
  *
  *  Ecriture d'une loi et d'un histogramme au format tableur.
- *  Si les histogrammes sont presents, les probabilites sont
- *  remises l'echelle de l'effectif de la population.
  *
  *  arguments : stream, flags sur l'ecriture de la fonction de repartition et
  *              de la fonction de concentration, flag sur le calcul du nombre de valeurs,
