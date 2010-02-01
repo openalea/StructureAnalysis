@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -38,8 +38,7 @@
 
 #include <sstream>
 #include <iomanip>
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
@@ -192,7 +191,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[process == 0 ? SEQL_STATE_NO_OCCURRENCE : SEQL_OUTPUT_NO_OCCURRENCE]
+          os << SEQ_label[SEQL_NO_OCCURRENCE] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << no_occurrence[i] << endl;
         }
 
@@ -201,7 +200,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+          os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           first_occurrence[i]->ascii_characteristic_print(os , false , file_flag);
         }
@@ -212,7 +211,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+        os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
            << " " << i << " " << STAT_label[STATL_HISTOGRAM] << " - ";
         characteristics->first_occurrence[i]->ascii_characteristic_print(os , false , file_flag);
       }
@@ -227,12 +226,12 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         os << "  ";
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->first_occurrence[i]->nb_element > 0)) {
-          os << " | " << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+          os << " | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_HISTOGRAM];
         }
 
         if ((first_occurrence) && (first_occurrence[i])) {
-          os << " | " << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+          os << " | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->first_occurrence[i]->nb_element > 0)) {
@@ -262,7 +261,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[process == 0 ? SEQL_LEAVING_STATE : SEQL_LEAVING_OUTPUT]
+          os << SEQ_label[SEQL_LEAVING] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << leave[i] << endl;
         }
 
@@ -333,7 +332,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[process == 0 ? SEQL_STATE_ABSORPTION : SEQL_OUTPUT_ABSORPTION]
+          os << SEQ_label[SEQL_ABSORPTION] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << absorption[i] << endl;
         }
 
@@ -508,13 +507,13 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         if (length->variance == 0.) {
-          os << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+          os << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
-          os << SEQ_label[SEQL_MIXTURE_OF]
-             << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN] << " " << i << " "
+          os << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
+             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
              << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_run[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
@@ -526,7 +525,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN] << " " << i << " "
+        os << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
            << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
         characteristics->nb_run[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
       }
@@ -539,19 +538,19 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         os << "  ";
         if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
             (characteristics->nb_run[i]->nb_element > 0)) {
-          os << " | " << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+          os << " | " << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
         }
 
         if (nb_run) {
           if (length->variance == 0.) {
-            os << " | " << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+            os << " | " << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
           }
           else {
-            os << " | " << SEQ_label[SEQL_MIXTURE_OF]
-               << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN] << " " << i << " "
+            os << " | " << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
+               << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
           }
           if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
@@ -588,14 +587,14 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         if (length->variance == 0.) {
-          os << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+          os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
-          os << SEQ_label[SEQL_MIXTURE_OF]
-             << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
-             << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
+          os << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+             << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_occurrence[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
       }
@@ -606,7 +605,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+        os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
         characteristics->nb_occurrence[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
       }
@@ -620,20 +619,20 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->nb_occurrence) &&
             (characteristics->nb_occurrence[i]->nb_element > 0)) {
-          os << " | " << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+          os << " | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
         }
 
         if (nb_occurrence) {
           if (length->variance == 0.) {
-            os << " | " << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+            os << " | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
           }
           else {
-            os << " | " << SEQ_label[SEQL_MIXTURE_OF]
-               << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
-               << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
+            os << " | " << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+               << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
           }
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->nb_occurrence) &&
@@ -768,19 +767,19 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (first_occurrence) {
         if (no_occurrence[i] > 0.) {
-          os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_NO_OCCURRENCE : SEQL_OUTPUT_NO_OCCURRENCE]
+          os << "\n" << SEQ_label[SEQL_NO_OCCURRENCE] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << no_occurrence[i] << endl;
         }
 
         if (first_occurrence[i]) {
-          os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+          os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           first_occurrence[i]->spreadsheet_characteristic_print(os);
         }
       }
 
       if ((characteristics) && (i < characteristics->nb_value)) {
-        os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+        os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
            << " " << i << " " << STAT_label[STATL_HISTOGRAM] << "\t";
         characteristics->first_occurrence[i]->spreadsheet_characteristic_print(os);
       }
@@ -791,12 +790,12 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
         os << "\n";
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->first_occurrence[i]->nb_element > 0)) {
-          os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+          os << "\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_HISTOGRAM];
         }
 
         if ((first_occurrence) && (first_occurrence[i])) {
-          os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+          os << "\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->first_occurrence[i]->nb_element > 0)) {
@@ -822,7 +821,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (recurrence_time) {
         if (leave[i] > 0.) {
-          os << "\n" << SEQ_label[process == 0 ? SEQL_LEAVING_STATE : SEQL_LEAVING_OUTPUT]
+          os << "\n" << SEQ_label[SEQL_LEAVING] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << leave[i] << endl;
         }
 
@@ -877,7 +876,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (sojourn_time) {
         if (absorption[i] > 0.) {
-          os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_ABSORPTION : SEQL_OUTPUT_ABSORPTION]
+          os << "\n" << SEQ_label[SEQL_ABSORPTION] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << absorption[i] << endl;
         }
 
@@ -1015,20 +1014,20 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (nb_run) {
         if (length->variance == 0.) {
-          os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+          os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
-          os << "\n" << SEQ_label[SEQL_MIXTURE_OF]
-             << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN] << " " << i << " "
+          os << "\n" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
+             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
              << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_run[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
       }
 
       if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run)) {
-        os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+        os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
         characteristics->nb_run[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
       }
@@ -1036,19 +1035,19 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
       os << "\n";
       if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
           (characteristics->nb_run[i]->nb_element > 0)) {
-        os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+        os << "\t" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
       }
 
       if (nb_run) {
         if (length->variance == 0.) {
-          os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+          os << "\t" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         else {
-          os << "\t" << SEQ_label[SEQL_MIXTURE_OF]
-             << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN] << " " << i << " "
+          os << "\t" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
+             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
              << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
         }
         if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
@@ -1080,13 +1079,13 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (nb_occurrence) {
         if (length->variance == 0.) {
-          os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+          os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
-          os << "\n" << SEQ_label[SEQL_MIXTURE_OF]
-             << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+          os << "\n" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_occurrence[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
@@ -1094,7 +1093,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
 
       if ((characteristics) && (i < characteristics->nb_value) &&
           (characteristics->nb_occurrence)) {
-        os << "\n" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+        os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
         characteristics->nb_occurrence[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
       }
@@ -1103,19 +1102,19 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
       if ((characteristics) && (i < characteristics->nb_value) &&
           (characteristics->nb_occurrence) &&
           (characteristics->nb_occurrence[i]->nb_element > 0)) {
-        os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+        os << "\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
            << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
       }
 
       if (nb_occurrence) {
         if (length->variance == 0.) {
-          os << "\t" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+          os << "\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         else {
-          os << "\t" << SEQ_label[SEQL_MIXTURE_OF]
-             << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+          os << "\t" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
         }
         if ((characteristics) && (i < characteristics->nb_value) &&
@@ -1189,7 +1188,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
         smoothed_curves = new Curves(*(characteristics->index_value) , 's');
       }
       else {
-        smoothed_curves = 0;
+        smoothed_curves = NULL;
       }
     }
 
@@ -1241,7 +1240,8 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
             index_dist[nb_histo] = nb_dist;
             dist_nb_value[nb_dist] = MIN(first_occurrence[i]->nb_value , phisto[nb_histo]->nb_value * 3);
             scale[nb_dist++] = phisto[nb_histo++]->nb_element /
-                               first_occurrence[i]->cumul[first_occurrence[i]->nb_value - 1];
+                               (1. - first_occurrence[i]->complement);
+//                               first_occurrence[i]->cumul[first_occurrence[i]->nb_value - 1];
           }
           else {
             dist_nb_value[nb_dist] = first_occurrence[i]->nb_value;
@@ -1249,12 +1249,10 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
           }
         }
 
-        else {
-          if ((characteristics) && (i < characteristics->nb_value) &&
-              (characteristics->first_occurrence[i]->nb_element > 0)) {
-            phisto[nb_histo] = characteristics->first_occurrence[i];
-            index_dist[nb_histo++] = I_DEFAULT;
-          }
+        else if ((characteristics) && (i < characteristics->nb_value) &&
+                 (characteristics->first_occurrence[i]->nb_element > 0)) {
+          phisto[nb_histo] = characteristics->first_occurrence[i];
+          index_dist[nb_histo++] = I_DEFAULT;
         }
       }
     }
@@ -1269,7 +1267,8 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
             phisto[nb_histo] = characteristics->recurrence_time[i];
             index_dist[nb_histo] = nb_dist;
             dist_nb_value[nb_dist] = MIN(recurrence_time[i]->nb_value , phisto[nb_histo]->nb_value * 3);
-            scale[nb_dist++] = phisto[nb_histo++]->nb_element / (1. - leave[i]);
+            scale[nb_dist++] = phisto[nb_histo++]->nb_element /
+                               (1. - recurrence_time[i]->complement);
           }
           else {
             dist_nb_value[nb_dist] = recurrence_time[i]->nb_value;
@@ -1277,12 +1276,10 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
           }
         }
 
-        else {
-          if ((characteristics) && (i < characteristics->nb_value) &&
-              (characteristics->recurrence_time[i]->nb_element > 0)) {
-            phisto[nb_histo] = characteristics->recurrence_time[i];
-            index_dist[nb_histo++] = I_DEFAULT;
-          }
+        else if ((characteristics) && (i < characteristics->nb_value) &&
+                 (characteristics->recurrence_time[i]->nb_element > 0)) {
+          phisto[nb_histo] = characteristics->recurrence_time[i];
+          index_dist[nb_histo++] = I_DEFAULT;
         }
       }
     }
@@ -1298,7 +1295,9 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
             phisto[nb_histo] = characteristics->sojourn_time[i];
             index_dist[nb_histo] = nb_dist;
             if (sojourn_time[i]->cumul[sojourn_time[i]->nb_value - 1] < CUMUL_THRESHOLD) {
-              scale[nb_dist++] = phisto[nb_histo++]->nb_element / sojourn_time[i]->cumul[sojourn_time[i]->nb_value - 1];
+              scale[nb_dist++] = phisto[nb_histo++]->nb_element /
+                                 (1. - sojourn_time[i]->complement);
+//                                 sojourn_time[i]->cumul[sojourn_time[i]->nb_value - 1];
             }
             else {
               scale[nb_dist++] = phisto[nb_histo++]->nb_element;
@@ -1309,12 +1308,10 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
           }
         }
 
-        else {
-          if ((characteristics) && (i < characteristics->nb_value) &&
-              (characteristics->sojourn_time[i]->nb_element > 0)) {
-            phisto[nb_histo] = characteristics->sojourn_time[i];
-            index_dist[nb_histo++] = I_DEFAULT;
-          }
+        else if ((characteristics) && (i < characteristics->nb_value) &&
+                 (characteristics->sojourn_time[i]->nb_element > 0)) {
+          phisto[nb_histo] = characteristics->sojourn_time[i];
+          index_dist[nb_histo++] = I_DEFAULT;
         }
 
         if ((characteristics) && (i < characteristics->nb_value) &&
@@ -1349,12 +1346,10 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
           }
         }
 
-        else {
-          if ((characteristics) && (i < characteristics->nb_value) &&
+        else if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->final_run[i]->nb_element > 0)) {
-            phisto[nb_histo] = characteristics->final_run[i];
-            index_dist[nb_histo++] = I_DEFAULT;
-          }
+          phisto[nb_histo] = characteristics->final_run[i];
+          index_dist[nb_histo++] = I_DEFAULT;
         }
       }
     }
@@ -1365,8 +1360,8 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
         if (nb_run) {
           pdist[nb_dist] = nb_run[i];
 
-          if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
-              (characteristics->nb_run[i]->nb_element > 0)) {
+          if ((characteristics) && (i < characteristics->nb_value) &&
+              (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
             phisto[nb_histo] = characteristics->nb_run[i];
             index_dist[nb_histo] = nb_dist;
             dist_nb_value[nb_dist] = nb_run[i]->plot_nb_value_computation(phisto[nb_histo]);
@@ -1378,12 +1373,10 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
           }
         }
 
-        else {
-          if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
-              (characteristics->nb_run[i]->nb_element > 0)) {
-            phisto[nb_histo] = characteristics->nb_run[i];
-            index_dist[nb_histo++] = I_DEFAULT;
-          }
+        else if ((characteristics) && (i < characteristics->nb_value) &&
+                 (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
+          phisto[nb_histo] = characteristics->nb_run[i];
+          index_dist[nb_histo++] = I_DEFAULT;
         }
 
         if (nb_occurrence) {
@@ -1403,13 +1396,11 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
           }
         }
 
-        else {
-          if ((characteristics) && (i < characteristics->nb_value) &&
-              (characteristics->nb_occurrence) &&
-              (characteristics->nb_occurrence[i]->nb_element > 0)) {
-            phisto[nb_histo] = characteristics->nb_occurrence[i];
-            index_dist[nb_histo++] = I_DEFAULT;
-          }
+        else if ((characteristics) && (i < characteristics->nb_value) &&
+                 (characteristics->nb_occurrence) &&
+                 (characteristics->nb_occurrence[i]->nb_element > 0)) {
+          phisto[nb_histo] = characteristics->nb_occurrence[i];
+          index_dist[nb_histo++] = I_DEFAULT;
         }
       }
     }
@@ -1719,10 +1710,10 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
                 j++;
               }
@@ -1731,7 +1722,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
               }
 
@@ -1763,7 +1754,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
               out_file << "plot [0:" << MAX(phisto[j]->nb_value , 2) - 1 << "] [0:"
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                       << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_FIRST_OCCURRENCE : SEQL_OUTPUT_FIRST_OCCURRENCE]
+                       << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                        << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
 
               if (MAX(phisto[j]->nb_value , 2) - 1 < TIC_THRESHOLD) {
@@ -2267,18 +2258,18 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+                         << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1;
                 if (length->variance == 0.) {
-                  out_file << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+                  out_file << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                            << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 else {
-                  out_file << " title \"" << SEQ_label[SEQL_MIXTURE_OF]
-                           << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+                  out_file << " title \"" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
+                           << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 out_file << "\" with linespoints" << endl;
@@ -2289,7 +2280,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+                         << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                          << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION]
                          << "\" with linespoints" << endl;
@@ -2324,7 +2315,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
               out_file << "plot [0:" << phisto[j]->nb_value - 1 << "] [0:"
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                       << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_RUN : SEQL_OUTPUT_NB_RUN]
+                       << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                        << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
                        << "\" with impulses" << endl;
 
@@ -2358,18 +2349,18 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+                         << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1;
                 if (length->variance == 0.) {
-                  out_file << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+                  out_file << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                            << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 else {
-                  out_file << " title \"" << SEQ_label[SEQL_MIXTURE_OF]
-                           << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+                  out_file << " title \"" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+                           << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 out_file << "\" with linespoints" << endl;
@@ -2380,7 +2371,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+                         << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                          << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION]
                          << "\" with linespoints" << endl;
@@ -2410,7 +2401,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
               out_file << "plot [0:" << phisto[j]->nb_value - 1 << "] [0:"
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                       << " title \"" << SEQ_label[process == 0 ? SEQL_STATE_NB_OCCURRENCE : SEQL_OUTPUT_NB_OCCURRENCE]
+                       << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                        << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
                        << "\" with impulses" << endl;
 
@@ -2555,633 +2546,1082 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Nonparametric_sequence_process.
+ *
+ *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
+ *              indice du processus d'observation,
+ *              pointeurs sur les lois d'observation empiriques,
+ *              sur les caracteristiques des sequences observees,
+ *              sur l'histogramme des longueurs des sequences et
+ *              sur les lois de l'intervalle de temps residuel.
  *
  *--------------------------------------------------------------*/
 
-/* RWspace Nonparametric_sequence_process::binaryStoreSize() const
+void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &index , int process ,
+                                                    Histogram **empirical_observation ,
+                                                    const Sequence_characteristics *characteristics ,
+                                                    const Histogram *hlength , Forward **forward) const
 
 {
-  register int i;
-  RWspace size;
+  register int i , j;
+  int index_length , dist_nb_value;
+  double scale;
+  Curves *smoothed_curves;
+  ostringstream title , legend;
 
 
-  size = sizeof(nb_state) + sizeof(nb_value);
+  // calcul du nombre de vues
 
-  size += sizeof(true);
-  if (observation) {
-    for (i = 0;i < nb_state;i++) {
-      size += observation[i]->binaryStoreSize();
+/*  nb_plot_set = 0;
+
+  if ((index_value) || (characteristics)) {
+    nb_plot_set++;
+
+    if (characteristics) {
+      index_length = characteristics->index_value->plot_length_computation();
+
+      if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+        nb_plot_set++;
+      }
+      nb_plot_set++;
     }
   }
 
-  size += sizeof(true);
-  if (length) {
-    size += length->binaryStoreSize();
-  }
-
-  size += sizeof(true);
-  if (index_value) {
-    size += index_value->binaryStoreSize();
-  }
-
-  size += sizeof(true);
-  if (no_occurrence) {
-    size += sizeof(*no_occurrence) * nb_value;
-  }
-
-  size += sizeof(true);
-  if (first_occurrence) {
+  if ((first_occurrence) || (characteristics)) {
     for (i = 0;i < nb_value;i++) {
-      size += first_occurrence[i]->binaryStoreSize();
-    }
-  }
-
-  size += sizeof(true);
-  if (leave) {
-    size += sizeof(*leave) * nb_value;
-  }
-
-  size += sizeof(true);
-  if (recurrence_time) {
-    size += sizeof(true) * nb_value;
-    for (i = 0;i < nb_value;i++) {
-      if (recurrence_time[i]) {
-        size += recurrence_time[i]->binaryStoreSize();
+      if ((first_occurrence) && (first_occurrence[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->first_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
       }
     }
   }
 
-  size += sizeof(true);
-  if (absorption) {
-    size += sizeof(*absorption) * nb_value;
-  }
-
-  size += sizeof(true);
-  if (sojourn_time) {
-    size += sizeof(true) * nb_value;
+  if ((recurrence_time) || (characteristics)) {
     for (i = 0;i < nb_value;i++) {
-      if (sojourn_time[i]) {
-        size += sojourn_time[i]->binaryStoreSize();
+      if ((recurrence_time) && (recurrence_time[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->recurrence_time[i]->nb_element > 0)) {
+        nb_plot_set++;
       }
     }
   }
 
-  size += sizeof(true);
-  if (nb_run) {
+  if ((sojourn_time) || (characteristics)) {
     for (i = 0;i < nb_value;i++) {
-      size += nb_run[i]->binaryStoreSize();
-    }
-  }
-
-  size += sizeof(true);
-  if (nb_occurrence) {
-    for (i = 0;i < nb_value;i++) {
-      size += nb_occurrence[i]->binaryStoreSize();
-    }
-  }
-
-  return size;
-}
-
-
-void Nonparametric_sequence_process::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  is >> nb_state >> nb_value;
-
-  is >> status;
-  if (status) {
-    observation = new Distribution*[nb_state];
-    for (i = 0;i < nb_state;i++) {
-      observation[i] = new Distribution();
-      observation[i]->restoreGuts(is);
-    }
-  }
-  else {
-    observation = 0;
-  }
-
-  is >> status;
-  if (status) {
-    length = new Distribution();
-    length->restoreGuts(is);
-  }
-  else {
-    length = 0;
-  }
-
-  is >> status;
-  if (status) {
-    index_value = new Curves();
-    index_value->restoreGuts(is);
-  }
-  else {
-    index_value = 0;
-  }
-
-  is >> status;
-  if (status) {
-    no_occurrence = new double[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      is >> no_occurrence[i];
-    }
-  }
-  else {
-    no_occurrence = 0;
-  }
-
-  is >> status;
-  if (status) {
-    first_occurrence = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      first_occurrence[i] = new Distribution();
-      first_occurrence[i]->restoreGuts(is);
-    }
-  }
-  else {
-    first_occurrence = 0;
-  }
-
-  is >> status;
-  if (status) {
-    leave = new double[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      is >> leave[i];
-    }
-  }
-  else {
-    leave = 0;
-  }
-
-  is >> status;
-  if (status) {
-    recurrence_time = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      is >> status;
-      if (status) {
-        recurrence_time[i] = new Distribution();
-        recurrence_time[i]->restoreGuts(is);
+      if ((sojourn_time) && (sojourn_time[i])) {
+        nb_plot_set++;
       }
-      else {
-        recurrence_time[i] = 0;
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->sojourn_time[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((characteristics) && (i < characteristics->nb_value) &&
+          (characteristics->initial_run) &&
+          (characteristics->initial_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((forward) && (forward[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->final_run[i]->nb_element > 0)) {
+        nb_plot_set++;
       }
     }
   }
-  else {
-    recurrence_time = 0;
-  }
 
-  is >> status;
-  if (status) {
-    absorption = new double[nb_value];
+  if ((nb_run) || (nb_occurrence) ||
+      ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
     for (i = 0;i < nb_value;i++) {
-      is >> absorption[i];
-    }
-  }
-  else {
-    absorption = 0;
-  }
-
-  is >> status;
-  if (status) {
-    sojourn_time = new Parametric*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      is >> status;
-      if (status) {
-        sojourn_time[i] = new Parametric();
-        sojourn_time[i]->restoreGuts(is);
+      if (nb_run) {
+        nb_plot_set++;
       }
-      else {
-        sojourn_time[i] = 0;
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if (nb_occurrence) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_occurrence) &&
+               (characteristics->nb_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
       }
     }
-  }
-  else {
-    sojourn_time = 0;
-  }
 
-  is >> status;
-  if (status) {
-    nb_run = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      nb_run[i] = new Distribution();
-      nb_run[i]->restoreGuts(is);
+    if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
+      nb_plot_set++;
     }
   }
-  else {
-    nb_run = 0;
-  }
-
-  is >> status;
-  if (status) {
-    nb_occurrence = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      nb_occurrence[i] = new Distribution();
-      nb_occurrence[i]->restoreGuts(is);
-    }
-  }
-  else {
-    nb_occurrence = 0;
-  }
-}
-
-
-void Nonparametric_sequence_process::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_state);
-  file.Read(nb_value);
-
-  file.Read(status);
-  if (status) {
-    observation = new Distribution*[nb_state];
-    for (i = 0;i < nb_state;i++) {
-      observation[i] = new Distribution();
-      observation[i]->restoreGuts(file);
-    }
-  }
-  else {
-    observation = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    length = new Distribution();
-    length->restoreGuts(file);
-  }
-  else {
-    length = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    index_value = new Curves();
-    index_value->restoreGuts(file);
-  }
-  else {
-    index_value = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    no_occurrence = new double[nb_value];
-    file.Read(no_occurrence , nb_value);
-  }
-  else {
-    no_occurrence = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    first_occurrence = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      first_occurrence[i] = new Distribution();
-      first_occurrence[i]->restoreGuts(file);
-    }
-  }
-  else {
-    first_occurrence = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    leave = new double[nb_value];
-    file.Read(leave , nb_value);
-  }
-  else {
-    leave = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    recurrence_time = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      file.Read(status);
-      if (status) {
-        recurrence_time[i] = new Distribution();
-        recurrence_time[i]->restoreGuts(file);
-      }
-      else {
-        recurrence_time[i] = 0;
-      }
-    }
-  }
-  else {
-    recurrence_time = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    absorption = new double[nb_value];
-    file.Read(absorption , nb_value);
-  }
-  else {
-    absorption = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    sojourn_time = new Parametric*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      file.Read(status);
-      if (status) {
-        sojourn_time[i] = new Parametric();
-        sojourn_time[i]->restoreGuts(file);
-      }
-      else {
-        sojourn_time[i] = 0;
-      }
-    }
-  }
-  else {
-    sojourn_time = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    nb_run = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      nb_run[i] = new Distribution();
-      nb_run[i]->restoreGuts(file);
-    }
-  }
-  else {
-    nb_run = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    nb_occurrence = new Distribution*[nb_value];
-    for (i = 0;i < nb_value;i++) {
-      nb_occurrence[i] = new Distribution();
-      nb_occurrence[i]->restoreGuts(file);
-    }
-  }
-  else {
-    nb_occurrence = 0;
-  }
-}
-
-
-void Nonparametric_sequence_process::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  os << nb_state << nb_value;
 
   if (observation) {
-    os << true;
-    for (i = 0;i < nb_state;i++) {
-      observation[i]->saveGuts(os);
-    }
+    nb_plot_set += nb_state;
+  } */
+
+  if ((index_value) || (characteristics)) {
+    plot.variable_nb_viewpoint[process]++;
   }
-  else {
-    os << false;
+  if ((first_occurrence) || (characteristics)) {
+    plot.variable_nb_viewpoint[process]++;
+  }
+  if ((recurrence_time) || (characteristics)) {
+    plot.variable_nb_viewpoint[process]++;
+  }
+  if ((sojourn_time) || (characteristics)) {
+    plot.variable_nb_viewpoint[process]++;
+  }
+  if ((nb_run) || (nb_occurrence) ||
+      ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
+    plot.variable_nb_viewpoint[process]++;
   }
 
-  if (length) {
-    os << true;
-    length->saveGuts(os);
-  }
-  else {
-    os << false;
-  }
+  if (characteristics) {
+    if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
 
-  if (index_value) {
-    os << true;
-    index_value->saveGuts(os);
-  }
-  else {
-    os << false;
-  }
+      // vue : ajustement intensite lissee
 
-  if (no_occurrence) {
-    os << true;
-    for (i = 0;i < nb_value;i++) {
-      os << no_occurrence[i];
-    }
-  }
-  else {
-    os << false;
-  }
+      plot.variable[index] = process;
+      plot.viewpoint[index] = INTENSITY;
 
-  if (first_occurrence) {
-    os << true;
-    for (i = 0;i < nb_value;i++) {
-      first_occurrence[i]->saveGuts(os);
-    }
-  }
-  else {
-    os << false;
-  }
+      smoothed_curves = new Curves(*(characteristics->index_value) , 's');
 
-  if (leave) {
-    os << true;
-    for (i = 0;i < nb_value;i++) {
-      os << leave[i];
-    }
-  }
-  else {
-    os << false;
-  }
-
-  if (recurrence_time) {
-    os << true;
-    for (i = 0;i < nb_value;i++) {
-      if (recurrence_time[i]) {
-        os << true;
-        recurrence_time[i]->saveGuts(os);
+      title.str("");
+      if (process > 0) {
+        title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process << " - ";
       }
-      else {
-        os << false;
+      title << SEQ_label[SEQL_SMOOTHED_OBSERVED_PROBABILITIES];
+      plot[index].title = title.str();
+
+      plot[index].xrange = Range(0 , index_length - 1);
+      if (index_length - 1 < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+
+      plot[index].yrange = Range(0. , 1.);
+
+      plot[index].resize(index_value ? nb_value * 2 : nb_value);
+
+      i = 0;
+      for (j = 0;j < nb_value;j++) {
+        legend.str("");
+        legend << SEQ_label[SEQL_OBSERVED] << " "
+               << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << j;
+        plot[index][i].legend = legend.str();
+
+        plot[index][i].style = "linespoints";
+
+        smoothed_curves->plotable_write(j , plot[index][i]);
+        i++;
+
+        if (index_value) {
+          legend.str("");
+          legend << SEQ_label[SEQL_THEORETICAL] << " "
+                 << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << j;
+          plot[index][i].legend = legend.str();
+
+          plot[index][i].style = "linespoints";
+
+          index_value->plotable_write(j , plot[index][i]);
+          i++;
+        }
+      }
+
+      delete smoothed_curves;
+      index++;
+    }
+
+    // vue : ajustement intensite
+
+    plot.variable[index] = process;
+    plot.viewpoint[index] = INTENSITY;
+
+    if (process > 0) {
+      title.str("");
+      title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+      plot[index].title = title.str();
+    }
+
+    plot[index].xrange = Range(0 , index_length - 1);
+    if (index_length - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+
+    plot[index].yrange = Range(0. , 1.);
+
+    plot[index].resize(index_value ? nb_value * 2 : nb_value);
+
+    i = 0;
+    for (j = 0;j < nb_value;j++) {
+      legend.str("");
+      legend << SEQ_label[SEQL_OBSERVED] << " "
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << j;
+      plot[index][i].legend = legend.str();
+
+      plot[index][i].style = "linespoints";
+
+      characteristics->index_value->plotable_write(j , plot[index][i]);
+      i++;
+
+      if (index_value) {
+        legend.str("");
+        legend << SEQ_label[SEQL_THEORETICAL] << " "
+               << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << j;
+        plot[index][i].legend = legend.str();
+
+        plot[index][i].style = "linespoints";
+
+        index_value->plotable_write(j , plot[index][i]);
+        i++;
+      }
+    }
+    index++;
+
+    // vue : histogramme des longueurs des sequences
+
+    plot.variable[index] = process;
+    plot.viewpoint[index] = INTENSITY;
+
+    plot[index].xrange = Range(0 , hlength->nb_value - 1);
+    plot[index].yrange = Range(0 , ceil(hlength->max * YSCALE));
+
+    if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+    if (ceil(hlength->max * YSCALE) < TIC_THRESHOLD) {
+      plot[index].ytics = 1;
+    }
+
+    plot[index].resize(1);
+
+    legend.str("");
+    legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[index][0].legend = legend.str();
+
+    plot[index][0].style = "impulses";
+
+    hlength->plotable_frequency_write(plot[index][0]);
+    index++;
+  }
+
+  else {
+
+    // vue : intensite theorique
+
+    plot.variable[index] = process;
+    plot.viewpoint[index] = INTENSITY;
+
+    if (process > 0) {
+      title.str("");
+      title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+      plot[index].title = title.str();
+    }
+
+    plot[index].xrange = Range(0 , index_length - 1);
+    if (index_length - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
+    }
+
+    plot[index].yrange = Range(0. , 1.);
+
+    plot[index].resize(nb_value);
+
+    for (i = 0;i < nb_value;i++) {
+      legend.str("");
+      legend << SEQ_label[SEQL_THEORETICAL] << " "
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i;
+      plot[index][i].legend = legend.str();
+
+      plot[index][i].style = "linespoints";
+
+      index_value->plotable_write(i , plot[index][i]);
+    }
+    index++;
+  }
+
+  if ((first_occurrence) || (characteristics)) {
+    for (i = 0;i < nb_value;i++) {
+      if ((first_occurrence) && (first_occurrence[i])) {
+
+        // vue : ajustement loi du temps avant la 1ere occurrence d'un etat/observation
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = FIRST_OCCURRENCE;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , MAX(first_occurrence[i]->nb_value , 2) - 1);
+        if (MAX(first_occurrence[i]->nb_value , 2) - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        if ((characteristics) && (i < characteristics->nb_value) &&
+            (characteristics->first_occurrence[i]->nb_element > 0)) {
+          scale = characteristics->first_occurrence[i]->nb_element /
+                  (1. - first_occurrence[i]->complement);
+          plot[index].yrange = Range(0 , ceil(MAX(characteristics->first_occurrence[i]->max ,
+                                                  first_occurrence[i]->max * scale) * YSCALE));
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->first_occurrence[i]->plotable_frequency_write(plot[index][0]);
+          j = 1;
+        }
+
+        else {
+          scale = 1.;
+          plot[index].yrange = Range(0. , MIN(first_occurrence[i]->max * YSCALE , 1.));
+
+          plot[index].resize(1);
+          j = 0;
+        }
+
+        legend.str("");
+        legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+               << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
+        plot[index][j].legend = legend.str();
+
+        plot[index][j].style = "linespoints";
+
+        first_occurrence[i]->plotable_mass_write(plot[index][j] , scale);
+        index++;
+      }
+
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->first_occurrence[i]->nb_element > 0)) {
+
+        // vue : loi empirique du temps avant la 1ere occurrence d'un etat/observation
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = FIRST_OCCURRENCE;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , MAX(characteristics->first_occurrence[i]->nb_value , 2) - 1);
+        plot[index].yrange = Range(0 , ceil(characteristics->first_occurrence[i]->max * YSCALE));
+
+        if (MAX(characteristics->first_occurrence[i]->nb_value , 2) - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(characteristics->first_occurrence[i]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+               << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        characteristics->first_occurrence[i]->plotable_frequency_write(plot[index][0]);
+        index++;
       }
     }
   }
-  else {
-    os << false;
-  }
 
-  if (absorption) {
-    os << true;
+  if ((recurrence_time) || (characteristics)) {
     for (i = 0;i < nb_value;i++) {
-      os << absorption[i];
-    }
-  }
-  else {
-    os << false;
-  }
+      if ((recurrence_time) && (recurrence_time[i])) {
 
-  if (sojourn_time) {
-    os << true;
-    for (i = 0;i < nb_value;i++) {
-      if (sojourn_time[i]) {
-        os << true;
-        sojourn_time[i]->saveGuts(os);
+        // vue : ajustement loi empirique du temps de retour dans un etat/observation
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = RECURRENCE_TIME;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , recurrence_time[i]->nb_value - 1);
+        if (recurrence_time[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        if ((characteristics) && (i < characteristics->nb_value) &&
+            (characteristics->recurrence_time[i]->nb_element > 0)) {
+          scale = characteristics->recurrence_time[i]->nb_element /
+                  (1. - recurrence_time[i]->complement);
+          plot[index].yrange = Range(0 , ceil(MAX(characteristics->recurrence_time[i]->max ,
+                                                  recurrence_time[i]->max * scale) * YSCALE));
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+                 << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->recurrence_time[i]->plotable_frequency_write(plot[index][0]);
+          j = 1;
+        }
+
+        else {
+          scale = 1.;
+          plot[index].yrange = Range(0. , MIN(recurrence_time[i]->max * YSCALE , 1.));
+
+          plot[index].resize(1);
+          j = 0;
+        }
+
+        legend.str("");
+        legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+        plot[index][j].legend = legend.str();
+
+        plot[index][j].style = "linespoints";
+
+        recurrence_time[i]->plotable_mass_write(plot[index][j] , scale);
+        index++;
       }
-      else {
-        os << false;
+
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->recurrence_time[i]->nb_element > 0)) {
+
+        // vue : loi empirique du temps de retour dans un etat/observation
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = RECURRENCE_TIME;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , characteristics->recurrence_time[i]->nb_value - 1);
+        plot[index].yrange = Range(0 , ceil(characteristics->recurrence_time[i]->max * YSCALE));
+
+        if (characteristics->recurrence_time[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(characteristics->recurrence_time[i]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        characteristics->recurrence_time[i]->plotable_frequency_write(plot[index][0]);
+        index++;
       }
     }
   }
-  else {
-    os << false;
-  }
 
-  if (nb_run) {
-    os << true;
+  if ((sojourn_time) || (characteristics)) {
     for (i = 0;i < nb_value;i++) {
-      nb_run[i]->saveGuts(os);
+      if ((sojourn_time) && (sojourn_time[i])) {
+
+        // vue : ajustement loi du temps de sejour dans un etat/observation
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = SOJOURN_TIME;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , sojourn_time[i]->nb_value - 1);
+        if (sojourn_time[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        if ((characteristics) && (i < characteristics->nb_value) &&
+            (characteristics->sojourn_time[i]->nb_element > 0)) {
+          scale = characteristics->sojourn_time[i]->nb_element /
+                  (1. - sojourn_time[i]->complement);
+          plot[index].yrange = Range(0 , ceil(MAX(characteristics->sojourn_time[i]->max ,
+                                                  sojourn_time[i]->max * scale) * YSCALE));
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->sojourn_time[i]->plotable_frequency_write(plot[index][0]);
+          j = 1;
+        }
+
+        else {
+          scale = 1.;
+          plot[index].yrange = Range(0. , MIN(sojourn_time[i]->max * YSCALE , 1.));
+
+          plot[index].resize(1);
+          j = 0;
+        }
+
+        legend.str("");
+        legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+        plot[index][j].legend = legend.str();
+
+        plot[index][j].style = "linespoints";
+
+        sojourn_time[i]->plotable_mass_write(plot[index][j] , scale);
+        index++;
+      }
+
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->sojourn_time[i]->nb_element > 0)) {
+
+        // vue : loi empirique du temps de sejour dans un etat/observation
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = SOJOURN_TIME;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , characteristics->sojourn_time[i]->nb_value - 1);
+        plot[index].yrange = Range(0 , ceil(characteristics->sojourn_time[i]->max * YSCALE));
+
+        if (characteristics->sojourn_time[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(characteristics->sojourn_time[i]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        characteristics->sojourn_time[i]->plotable_frequency_write(plot[index][0]);
+        index++;
+      }
+
+      if ((characteristics) && (i < characteristics->nb_value) &&
+          (characteristics->initial_run) &&
+          (characteristics->initial_run[i]->nb_element > 0)) {
+        if ((forward) && (forward[i])) {
+
+          // vue : ajustement loi du temps de sejour residuel
+
+          plot.variable[index] = process;
+          plot.viewpoint[index] = SOJOURN_TIME;
+
+          if (process > 0) {
+            title.str("");
+            title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+            plot[index].title = title.str();
+          }
+
+          plot[index].xrange = Range(0 , forward[i]->nb_value - 1);
+          plot[index].yrange = Range(0 , ceil(MAX(characteristics->initial_run[i]->max ,
+                                                  forward[i]->max * characteristics->initial_run[i]->nb_element) * YSCALE));
+
+          if (forward[i]->nb_value - 1 < TIC_THRESHOLD) {
+            plot[index].xtics = 1;
+          }
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
+                 << STAT_label[STATL_STATE] << " " << i << " "
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->initial_run[i]->plotable_frequency_write(plot[index][0]);
+
+          legend.str("");
+          legend << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+          plot[index][1].legend = legend.str();
+
+          plot[index][1].style = "linespoints";
+
+          forward[i]->plotable_mass_write(plot[index][1] , characteristics->initial_run[i]->nb_element);
+          index++;
+        }
+
+        else {
+
+          // vue : loi empirique du temps de sejour dans le 1ere etat rencontre
+
+          plot.variable[index] = process;
+          plot.viewpoint[index] = SOJOURN_TIME;
+
+          if (process > 0) {
+            title.str("");
+            title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+            plot[index].title = title.str();
+          }
+
+          plot[index].xrange = Range(0 , characteristics->initial_run[i]->nb_value - 1);
+          plot[index].yrange = Range(0 , ceil(characteristics->initial_run[i]->max * YSCALE));
+
+          if (characteristics->initial_run[i]->nb_value - 1 < TIC_THRESHOLD) {
+            plot[index].xtics = 1;
+          }
+          if (ceil(characteristics->initial_run[i]->max * YSCALE) < TIC_THRESHOLD) {
+            plot[index].ytics = 1;
+          }
+
+          plot[index].resize(1);
+
+          legend.str("");
+          legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
+                 << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->initial_run[i]->plotable_frequency_write(plot[index][0]);
+          index++;
+        }
+      }
+
+      if ((forward) && (forward[i])) {
+
+        // vue : ajustement loi du temps de sejour dans le dernier etat/observation rencontre
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = SOJOURN_TIME;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , forward[i]->nb_value - 1);
+        if (forward[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        if ((characteristics) && (i < characteristics->nb_value) &&
+            (characteristics->final_run[i]->nb_element > 0)) {
+          scale = characteristics->final_run[i]->nb_element;
+          plot[index].yrange = Range(0 , ceil(MAX(characteristics->final_run[i]->max ,
+                                                  forward[i]->max * scale) * YSCALE));
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << SEQ_label[SEQL_FINAL_RUN] << " - "
+                 << STAT_label[STATL_STATE] << " " << i << " "
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->final_run[i]->plotable_frequency_write(plot[index][0]);
+          j = 1;
+
+        }
+
+        else {
+          scale = 1.;
+          plot[index].yrange = Range(0. , MIN(forward[i]->max * YSCALE , 1.));
+
+          plot[index].resize(1);
+          j = 0;
+        }
+
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+        plot[index][j].legend = legend.str();
+
+        plot[index][j].style = "linespoints";
+
+        forward[i]->plotable_mass_write(plot[index][j] , scale);
+        index++;
+      }
+
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->final_run[i]->nb_element > 0)) {
+
+        // vue : loi empirique du temps de sejour dans le dernier etat/observation rencontre
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = SOJOURN_TIME;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , characteristics->final_run[i]->nb_value - 1);
+        plot[index].yrange = Range(0 , ceil(characteristics->final_run[i]->max * YSCALE));
+
+        if (characteristics->final_run[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(characteristics->final_run[i]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_FINAL_RUN] << " - "
+               << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        characteristics->final_run[i]->plotable_frequency_write(plot[index][0]);
+        index++;
+      }
     }
   }
-  else {
-    os << false;
-  }
 
-  if (nb_occurrence) {
-    os << true;
+  if ((nb_run) || (nb_occurrence) ||
+      ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
     for (i = 0;i < nb_value;i++) {
-      nb_occurrence[i]->saveGuts(os);
+      if (nb_run) {
+
+        // vue : ajustement loi du nombre de series d'un etat/observation par sequence
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = COUNTING;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        if ((characteristics) && (i < characteristics->nb_value) &&
+            (characteristics->nb_run) &&
+            (characteristics->nb_run[i]->nb_element > 0)) {
+          dist_nb_value = nb_run[i]->plot_nb_value_computation(characteristics->nb_run[i]);
+          scale = characteristics->nb_run[i]->nb_element;
+
+          plot[index].yrange = Range(0 , ceil(MAX(characteristics->nb_run[i]->max ,
+                                                  nb_run[i]->max * scale) * YSCALE));
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->nb_run[i]->plotable_frequency_write(plot[index][0]);
+          j = 1;
+        }
+
+        else {
+          dist_nb_value = nb_run[i]->plot_nb_value_computation();
+          scale = 1.;
+
+          plot[index].yrange = Range(0. , MIN(nb_run[i]->max * YSCALE , 1.));
+
+          plot[index].resize(1);
+          j = 0;
+        }
+
+        plot[index].xrange = Range(0 , dist_nb_value);
+        if (dist_nb_value < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        legend.str("");
+        if (length->variance == 0.) {
+          legend << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
+                 << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
+        }
+        else {
+          legend << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
+                 << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+                 << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
+        }
+        plot[index][j].legend = legend.str();
+
+        plot[index][j].style = "linespoints";
+
+        nb_run[i]->plotable_mass_write(plot[index][j] , scale);
+        index++;
+      }
+
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_run) &&
+               (characteristics->nb_run[i]->nb_element > 0)) {
+
+        // vue : loi empirique du nombre de series d'un etat/observation par sequence
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = COUNTING;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , MAX(characteristics->nb_run[i]->nb_value , 2) - 1);
+        plot[index].yrange = Range(0 , ceil(characteristics->nb_run[i]->max * YSCALE));
+
+        if (MAX(characteristics->nb_run[i]->nb_value , 2) - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(characteristics->nb_run[i]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+               << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        characteristics->nb_run[i]->plotable_frequency_write(plot[index][0]);
+        index++;
+      }
+
+      if (nb_occurrence) {
+
+        // vue : ajustement loi du nombre d'occurrences d'un etat/observation par sequence
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = COUNTING;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        if ((characteristics) && (i < characteristics->nb_value) &&
+            (characteristics->nb_occurrence) &&
+            (characteristics->nb_occurrence[i]->nb_element > 0)) {
+          dist_nb_value = nb_occurrence[i]->plot_nb_value_computation(characteristics->nb_occurrence[i]);
+          scale = characteristics->nb_occurrence[i]->nb_element;
+
+          plot[index].yrange = Range(0 , ceil(MAX(characteristics->nb_occurrence[i]->max ,
+                                                  nb_occurrence[i]->max * scale) * YSCALE));
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          characteristics->nb_occurrence[i]->plotable_frequency_write(plot[index][0]);
+          j = 1;
+        }
+
+        else {
+          dist_nb_value = nb_occurrence[i]->plot_nb_value_computation();
+          scale = 1.;
+
+          plot[index].yrange = Range(0. , MIN(nb_occurrence[i]->max * YSCALE , 1.));
+
+          plot[index].resize(1);
+          j = 0;
+        }
+
+        plot[index].xrange = Range(0 , dist_nb_value);
+        if (dist_nb_value < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        legend.str("");
+        if (length->variance == 0.) {
+          legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
+                 << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
+        }
+        else {
+          legend << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
+                 << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
+        }
+        plot[index][j].legend = legend.str();
+
+        plot[index][j].style = "linespoints";
+
+        nb_occurrence[i]->plotable_mass_write(plot[index][j] , scale);
+        index++;
+      }
+
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_occurrence) &&
+               (characteristics->nb_occurrence[i]->nb_element > 0)) {
+
+        // vue : loi empirique du nombre d'occurrences d'un etat/observation par sequence
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = COUNTING;
+
+        if (process > 0) {
+          title.str("");
+          title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , MAX(characteristics->nb_occurrence[i]->nb_value , 2) - 1);
+        plot[index].yrange = Range(0 , ceil(characteristics->nb_occurrence[i]->max * YSCALE));
+
+        if (MAX(characteristics->nb_occurrence[i]->nb_value , 2) - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(characteristics->nb_occurrence[i]->max * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+               << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        characteristics->nb_occurrence[i]->plotable_frequency_write(plot[index][0]);
+        index++;
+      }
+    }
+
+    if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
+
+      // vue : histogramme des longueurs des sequences
+
+      plot.variable[index] = process;
+      plot.viewpoint[index] = COUNTING;
+
+      plot[index].xrange = Range(0 , hlength->nb_value - 1);
+      plot[index].yrange = Range(0 , ceil(hlength->max * YSCALE));
+
+      if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+      if (ceil(hlength->max * YSCALE) < TIC_THRESHOLD) {
+        plot[index].ytics = 1;
+      }
+
+      plot[index].resize(1);
+
+      legend.str("");
+      legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[index][0].legend = legend.str();
+
+      plot[index][0].style = "impulses";
+
+      hlength->plotable_frequency_write(plot[index][0]);
+      index++;
     }
   }
-  else {
-    os << false;
-  }
-}
-
-
-void Nonparametric_sequence_process::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_state);
-  file.Write(nb_value);
 
   if (observation) {
-    file.Write(true);
     for (i = 0;i < nb_state;i++) {
-      observation[i]->saveGuts(file);
-    }
-  }
-  else {
-    file.Write(false);
-  }
 
-  if (length) {
-    file.Write(true);
-    length->saveGuts(file);
-  }
-  else {
-    file.Write(false);
-  }
+      // vue : ajustement loi d'observation
 
-  if (index_value) {
-    file.Write(true);
-    index_value->saveGuts(file);
-  }
-  else {
-    file.Write(false);
-  }
+      plot.variable[index] = process;
+      plot.viewpoint[index] = OBSERVATION;
 
-  if (no_occurrence) {
-    file.Write(true);
-    file.Write(no_occurrence , nb_value);
-  }
-  else {
-    file.Write(false);
-  }
+      title.str("");
+      title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+      plot[index].title = title.str();
 
-  if (first_occurrence) {
-    file.Write(true);
-    for (i = 0;i < nb_value;i++) {
-      first_occurrence[i]->saveGuts(file);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  if (leave) {
-    file.Write(true);
-    file.Write(leave , nb_value);
-  }
-  else {
-    file.Write(false);
-  }
-
-  if (recurrence_time) {
-    file.Write(true);
-    for (i = 0;i < nb_value;i++) {
-      if (recurrence_time[i]) {
-        file.Write(true);
-        recurrence_time[i]->saveGuts(file);
+      plot[index].xrange = Range(0 , observation[i]->nb_value - 1);
+      if (observation[i]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
       }
+
+      if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
+        scale = empirical_observation[i]->nb_element;
+        plot[index].yrange = Range(0 , ceil(MAX(empirical_observation[i]->max ,
+                                                observation[i]->max * scale) * YSCALE));
+
+        plot[index].resize(2);
+
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i << " "
+               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        empirical_observation[i]->plotable_frequency_write(plot[index][0]);
+        j = 1;
+      }
+
       else {
-        file.Write(false);
+        scale = 1;
+        plot[index].yrange = Range(0 , MIN(observation[i]->max * YSCALE , 1.));
+
+        plot[index].resize(1);
+        j = 0;
       }
+
+      legend.str("");
+      legend << STAT_label[STATL_STATE] << " " << i << " "
+             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+      plot[index][j].legend = legend.str();
+
+      plot[index][j].style = "linespoints";
+
+      observation[i]->plotable_mass_write(plot[index][j] , scale);
+      index++;
     }
   }
-  else {
-    file.Write(false);
-  }
-
-  if (absorption) {
-    file.Write(true);
-    file.Write(absorption , nb_value);
-  }
-  else {
-    file.Write(false);
-  }
-
-  if (sojourn_time) {
-    file.Write(true);
-    for (i = 0;i < nb_value;i++) {
-      if (sojourn_time[i]) {
-        file.Write(true);
-        sojourn_time[i]->saveGuts(file);
-      }
-      else {
-        file.Write(false);
-      }
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  if (nb_run) {
-    file.Write(true);
-    for (i = 0;i < nb_value;i++) {
-      nb_run[i]->saveGuts(file);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  if (nb_occurrence) {
-    file.Write(true);
-    for (i = 0;i < nb_value;i++) {
-      nb_occurrence[i]->saveGuts(file);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-} */
+}
