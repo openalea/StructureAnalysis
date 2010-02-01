@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -354,6 +354,40 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment 
 
 /*--------------------------------------------------------------*
  *
+ *  Ecriture des profils de ruptures pour une sequence au format "plotable".
+ *
+ *  arguments : reference sur un objet MultiPlot, indice de la sequence,
+ *              nombre de segments, pointeur sur les profils de rupture.
+ *
+ *--------------------------------------------------------------*/
+
+void Sequences::change_point_profile_plotable_write(MultiPlot &plot , int index , int nb_segment ,
+                                                    double **change_point) const
+
+{
+  register int i , j;
+
+
+  if (index_parameter) {
+    for (i = 1;i < nb_segment;i++) {
+      for (j = 0;j < length[index];j++) {
+        plot[i].add_point(index_parameter[index][j] , change_point[i][j]);
+      }
+    }
+  }
+
+  else {
+    for (i = 1;i < nb_segment;i++) {
+      for (j = 0;j < length[index];j++) {
+        plot[i].add_point(j , change_point[i][j]);
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul du nombre de parametres independants.
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles.
@@ -458,7 +492,7 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
     frequency = new int[max_nb_value];
   }
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   if ((model_type[0] == MEAN_CHANGE) || (model_type[0] == MEAN_VARIANCE_CHANGE)) {
@@ -623,7 +657,7 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , ostream &os ,
-                                          int output , int* ichange_point)
+                                          int output , int *ichange_point)
 
 {
   bool *segment_mean;
@@ -656,7 +690,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
       mean[i] = new double[max_nb_segment];
     }
     else {
-      mean[i] = 0;
+      mean[i] = NULL;
     }
   }
 
@@ -669,7 +703,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
         variance[i] = new double[nb_segment[0]];
       }
       else {
-        variance[i] = 0;
+        variance[i] = NULL;
       }
     }
 
@@ -684,7 +718,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
       }
     }
     else {
-      segment_variance = 0;
+      segment_variance = NULL;
     }
   }
 
@@ -893,7 +927,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
           }
 
           delete [] int_sequence[i][j];
-          int_sequence[i][j] = 0;
+          int_sequence[i][j] = NULL;
         }
 
         else {
@@ -929,7 +963,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
           }
 
           delete [] int_sequence[i][j];
-          int_sequence[i][j] = 0;
+          int_sequence[i][j] = NULL;
         }
 
         else {
@@ -997,7 +1031,7 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
 
       if (seq->marginal[i]) {
         delete seq->marginal[i];
-        seq->marginal[i] = 0;
+        seq->marginal[i] = NULL;
       }
     }
   }
@@ -1017,20 +1051,20 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iidentifier ,
-                                   int nb_segment , int* ichange_point , int *model_type ,
+                                   int nb_segment , int *ichange_point , int *model_type ,
                                    int output) const
 
 {
   bool status = true;
   register int i , j , k , m;
-  int index , max_nb_value , nb_parameter , *change_point = 0 , *pindex_param ,
+  int index , max_nb_value , nb_parameter , *change_point = NULL , *pindex_param ,
       *frequency , *pisequence , *psegment , inb_segment[1];
   double sum , factorial_sum , diff , residual , segmentation_likelihood ,
          segment_penalty , penalized_likelihood , *mean , *prsequence , *segment_variance , **rank;
   Sequences *iseq , *seq , *oseq;
 
 
-  oseq = 0;
+  oseq = NULL;
   error.init();
 
   if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
@@ -1185,7 +1219,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         rank[i] = marginal[i]->rank_computation();
       }
       else {
-        rank[i] = 0;
+        rank[i] = NULL;
       }
     }
 
@@ -1201,7 +1235,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       frequency = new int[max_nb_value];
     }
     else {
-      frequency = 0;
+      frequency = NULL;
     }
 
     mean = new double[nb_variable];
@@ -1210,7 +1244,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       segment_variance = new double[nb_segment];
     }
     else {
-      segment_variance = 0;
+      segment_variance = NULL;
     }
 
     for (i = 0;i < nb_variable;i++) {
@@ -1523,7 +1557,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
       factorial[i] = new double[max_length];
     }
     else {
-      factorial[i] = 0;
+      factorial[i] = NULL;
     }
   }
 
@@ -1531,7 +1565,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
     frequency = new int[max_nb_value];
   }
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   mean = new double[nb_variable];
@@ -1986,7 +2020,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
   Sequences *seq , *iseq , *oseq;
 
 
-  oseq = 0;
+  oseq = NULL;
   error.init();
 
   if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
@@ -2105,7 +2139,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
         rank[i] = seq->marginal[i]->rank_computation();
       }
       else {
-        rank[i] = 0;
+        rank[i] = NULL;
       }
     }
 
@@ -2160,7 +2194,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
 
     else {
       delete seq;
-      oseq = 0;
+      oseq = NULL;
       error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
     }
   }
@@ -2187,13 +2221,13 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
   register int i , j;
   int index , nb_segment , *nb_parameter , inb_segment[1];
   double max_likelihood[2] , *segmentation_likelihood , *segment_penalty , *slope_penalty ,
-         **penalized_likelihood , *likelihood , *change_point_entropy , *segment_entropy , **rank;
+         **penalized_likelihood , *likelihood , *segmentation_entropy ,
+         *ranked_change_point_entropy , *change_point_entropy , *uniform_entropy ,
+         *segmentation_divergence , *marginal_entropy , **rank;
   Sequences *iseq , *seq , *oseq;
 
-// double *normalized_change_point_entropy;
 
-
-  oseq = 0;
+  oseq = NULL;
   error.init();
 
   if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
@@ -2299,7 +2333,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         rank[i] = marginal[i - 1]->rank_computation();
       }
       else {
-        rank[i] = 0;
+        rank[i] = NULL;
       }
     }
 
@@ -2315,9 +2349,12 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
     if (model_type[0] != MEAN_CHANGE) {
       likelihood = new double[max_nb_segment + 1];
+      segmentation_entropy = new double[max_nb_segment + 1];
+      ranked_change_point_entropy = new double[max_nb_segment + 1];
       change_point_entropy = new double[max_nb_segment + 1];
-//      normalized_change_point_entropy = new double[max_nb_segment + 1];
-      segment_entropy = new double[max_nb_segment + 1];
+      uniform_entropy = new double[max_nb_segment + 1];
+      segmentation_divergence = new double[max_nb_segment + 1];
+      marginal_entropy = new double[max_nb_segment + 1];
     }
 
     inb_segment[0] = max_nb_segment + 1;
@@ -2325,8 +2362,15 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     seq->segmentation(inb_segment , model_type , rank , segmentation_likelihood + 1 ,
                       nb_parameter + 1 , segment_penalty + 1);
     if (model_type[0] != MEAN_CHANGE) {
-      seq->forward_backward(0 , max_nb_segment , model_type , rank , 0 , SEGMENT , 'a' ,
-                            likelihood + 1 , change_point_entropy + 1 , segment_entropy + 1);
+      seq->forward_backward(0 , max_nb_segment , model_type , rank , 0 , 0 , SEGMENT , 'a' ,
+                            likelihood + 1 , segmentation_entropy + 1 ,
+                            ranked_change_point_entropy + 1 , change_point_entropy + 1 ,
+                            uniform_entropy + 1 , marginal_entropy + 1);
+
+      segmentation_divergence[1] = 0;
+      for (i = 2;i <= max_nb_segment;i++) {
+        segmentation_divergence[i] = uniform_entropy[i] - segmentation_entropy[i];
+      }
     }
 
     // calcul des vraisemblances penalisees au sens du BIC, du BIC modifie (Zhang & Siegmund, 2007) et
@@ -2409,16 +2453,12 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       else {
         penalized_likelihood[2][i] = D_INF;
       }
-
-/*      if (model_type[0] != MEAN_CHANGE) {
-        normalized_change_point_entropy[i] = change_point_entropy[i] / i;
-      } */
     }
 
     if (nb_segment > 0) {
 
 #     ifdef MESSAGE
-      int width[13];
+      int width[16];
       long old_adjust;
       double norm , *posterior_probability , **weight , *normalized_likelihood , *curvature;
 
@@ -2474,22 +2514,30 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         width[1] = column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
         width[2] = column_width(max_nb_segment , likelihood + 1 , 2.) + ASCII_SPACE;
         width[3] = column_width(max_nb_segment , posterior_probability + 1) + ASCII_SPACE;
-        width[4] = column_width(max_nb_segment - 1 , change_point_entropy + 2) + ASCII_SPACE;
-//        width[5] = column_width(max_nb_segment - 1 , normalized_change_point_entropy + 2) + ASCII_SPACE;
-        width[6] = column_width(max_nb_segment - 1 , segment_entropy + 2) + ASCII_SPACE;
-        width[7] = column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
-        width[8] = column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
-        width[9] = column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
-        width[10] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
-        width[11] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
-        width[12] = column_width(max_nb_segment - 1 , curvature + 2) + ASCII_SPACE;
+        width[4] = column_width(max_nb_segment - 1 , segmentation_entropy + 2) + ASCII_SPACE;
+        width[5] = column_width(max_nb_segment - 1 , ranked_change_point_entropy + 2) + ASCII_SPACE;
+        width[6] = column_width(max_nb_segment - 1 , change_point_entropy + 2) + ASCII_SPACE;
+        width[7] = column_width(max_nb_segment - 1 , uniform_entropy + 2) + ASCII_SPACE;
+        width[8] = column_width(max_nb_segment - 1 , segmentation_divergence + 2) + ASCII_SPACE;
+        width[9] = column_width(max_nb_segment - 1 , marginal_entropy + 2) + ASCII_SPACE;
+        width[10] = column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
+//        width[11] = column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
+//        width[12] = column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
+        width[13] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
+        width[14] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
+        width[15] = column_width(max_nb_segment - 1 , curvature + 2) + ASCII_SPACE;
 
-        os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " |  2 * " << STAT_label[STATL_LIKELIHOOD]
-           << " |  2 * " << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD]
-           << " | " << SEQ_label[SEQL_POSTERIOR_PROBABILITY] << " | " << SEQ_label[SEQL_CHANGE_POINT_ENTROPY]
-//           << " | " << SEQ_label[SEQL_NORMALIZED_CHANGE_POINT_ENTROPY]
-           << " | " << SEQ_label[SEQL_SEGMENT_ENTROPY] << " | " << STAT_label[STATL_FREE_PARAMETERS]
-           << " | "  << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
+        os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
+           << " | 2 * " << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD]
+           << " | " << SEQ_label[SEQL_POSTERIOR_PROBABILITY]
+           << " | " << SEQ_label[SEQL_SEGMENTATION_ENTROPY]
+           << " | " << SEQ_label[SEQL_RANKED_CHANGE_POINT_ENTROPY]
+           << " | " << SEQ_label[SEQL_CHANGE_POINT_ENTROPY]
+           << " | " << SEQ_label[SEQL_UNIFORM_ENTROPY]
+           << " | " << SEQ_label[SEQL_SEGMENTATION_DIVERGENCE]
+           << " | " << SEQ_label[SEQL_MARGINAL_ENTROPY]
+           << " | " << STAT_label[STATL_FREE_PARAMETERS]
+//           << " | "  << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
            << " | Modified " << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
            << " | Lavielle criterion (standardized curvature)" << endl;
 
@@ -2500,28 +2548,35 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
            << setw(width[2]) << 2 * likelihood[1]
            << setw(width[3]) << posterior_probability[1]
            << setw(width[4]) << " "
+           << setw(width[5]) << " "
            << setw(width[6]) << " "
-           << setw(width[7]) << nb_parameter[1]
-           << setw(width[8]) << penalized_likelihood[0][1]
-           << setw(width[9]) << weight[0][1]
-           << setw(width[10]) << penalized_likelihood[1][1]
-           << setw(width[11]) << weight[1][1]
-           << setw(width[12]) << " " << endl;
+           << setw(width[7]) << " "
+           << setw(width[8]) << segmentation_divergence[1]
+           << setw(width[9]) << " "
+           << setw(width[10]) << nb_parameter[1]
+//           << setw(width[11]) << penalized_likelihood[0][1]
+//           << setw(width[12]) << weight[0][1]
+           << setw(width[13]) << penalized_likelihood[1][1]
+           << setw(width[14]) << weight[1][1]
+           << setw(width[15]) << " " << endl;
 
         for (i = 2;i <= max_nb_segment;i++) {
           os << setw(width[0]) << i
              << setw(width[1]) << 2 * segmentation_likelihood[i]
              << setw(width[2]) << 2 * likelihood[i]
              << setw(width[3]) << posterior_probability[i]
-             << setw(width[4]) << change_point_entropy[i]
-//             << setw(width[5]) << normalized_change_point_entropy[i]
-             << setw(width[6]) << segment_entropy[i]
-             << setw(width[7]) << nb_parameter[i]
-             << setw(width[8]) << penalized_likelihood[0][i]
-             << setw(width[9]) << weight[0][i]
-             << setw(width[10]) << penalized_likelihood[1][i]
-             << setw(width[11]) << weight[1][i]
-             << setw(width[12]) << curvature[i] << endl;
+             << setw(width[4]) << segmentation_entropy[i]
+             << setw(width[5]) << ranked_change_point_entropy[i]
+             << setw(width[6]) << change_point_entropy[i]
+             << setw(width[7]) << uniform_entropy[i]
+             << setw(width[8]) << segmentation_divergence[i]
+             << setw(width[9]) << marginal_entropy[i]
+             << setw(width[10]) << nb_parameter[i]
+//             << setw(width[11]) << penalized_likelihood[0][i]
+//             << setw(width[12]) << weight[0][i]
+             << setw(width[13]) << penalized_likelihood[1][i]
+             << setw(width[14]) << weight[1][i]
+             << setw(width[15]) << curvature[i] << endl;
         }
         os << endl;
       }
@@ -2529,16 +2584,16 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       else {
         width[0] = column_width(max_nb_segment) + ASCII_SPACE;
         width[1] = column_width(max_nb_segment , segmentation_likelihood + 1 , 2.) + ASCII_SPACE;
-        width[7] = column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
-        width[8] = column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
-        width[9] = column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
-        width[10] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
-        width[11] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
-        width[12] = column_width(max_nb_segment - 1 , curvature + 2) + ASCII_SPACE;
+        width[10] = column_width(nb_parameter[max_nb_segment]) + ASCII_SPACE;
+//        width[11] = column_width(max_nb_segment , penalized_likelihood[0] + 1) + ASCII_SPACE;
+//        width[12] = column_width(max_nb_segment , weight[0] + 1) + ASCII_SPACE;
+        width[13] = column_width(max_nb_segment , penalized_likelihood[1] + 1) + ASCII_SPACE;
+        width[14] = column_width(max_nb_segment , weight[1] + 1) + ASCII_SPACE;
+        width[15] = column_width(max_nb_segment - 1 , curvature + 2) + ASCII_SPACE;
 
-        os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " |  2 * " << STAT_label[STATL_LIKELIHOOD]
+        os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
            << " | " << STAT_label[STATL_FREE_PARAMETERS]
-           << " | "  << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
+//           << " | "  << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
            << " | Modified " << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT]
            << " | Lavielle criterion (standardized curvature)" << endl;
 
@@ -2546,30 +2601,29 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
         os << setw(width[0]) << 1
            << setw(width[1]) << 2 * segmentation_likelihood[1]
-           << setw(width[7]) << nb_parameter[1]
-           << setw(width[8]) << penalized_likelihood[0][1]
-           << setw(width[9]) << weight[0][1]
-           << setw(width[10]) << penalized_likelihood[1][1]
-           << setw(width[11]) << weight[1][1]
-           << setw(width[12]) << " " << endl;
+           << setw(width[10]) << nb_parameter[1]
+//           << setw(width[11]) << penalized_likelihood[0][1]
+//           << setw(width[12]) << weight[0][1]
+           << setw(width[13]) << penalized_likelihood[1][1]
+           << setw(width[14]) << weight[1][1]
+           << setw(width[15]) << " " << endl;
 
         for (i = 2;i <= max_nb_segment;i++) {
           os << setw(width[0]) << i
              << setw(width[1]) << 2 * segmentation_likelihood[i]
-             << setw(width[7]) << nb_parameter[i]
-             << setw(width[8]) << penalized_likelihood[0][i]
-             << setw(width[9]) << weight[0][i]
-             << setw(width[10]) << penalized_likelihood[1][i]
-             << setw(width[11]) << weight[1][i]
-             << setw(width[12]) << curvature[i] << endl;
+             << setw(width[10]) << nb_parameter[i]
+//             << setw(width[11]) << penalized_likelihood[0][i]
+//             << setw(width[12]) << weight[0][i]
+             << setw(width[13]) << penalized_likelihood[1][i]
+             << setw(width[14]) << weight[1][i]
+             << setw(width[15]) << curvature[i] << endl;
         }
         os << endl;
       }
 
       os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
-#     ifdef DEBUG
-      for (i = 1;i <= max_nb_segment;i++) {
+/*      for (i = 1;i <= max_nb_segment;i++) {
         penalized_likelihood[1][i] = 2 * segmentation_likelihood[i] - nb_parameter[i] *
                                      log((double)seq->length[0]) - segment_penalty[i];
 //        penalized_likelihood[1][i] += nb_parameter[i] *
@@ -2590,23 +2644,14 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
       }
       for (i = 1;i <= max_nb_segment;i++) {
         weight[1][i] /= norm;
-      }
-#     endif
-
-      for (i = 1;i <= max_nb_segment;i++) {
-        os << "\n" << i << " " << (i == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
-           << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood[i] << "   "
-           << nb_parameter[i] << " " << STAT_label[nb_parameter[i] == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-           << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
-           << penalized_likelihood[1][i] << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[1][i] << endl;
-      }
+      } */
 
 /*      for (i = 1;i <= max_nb_segment;i++) {
         os << "\n" << i << " " << (i == 1 ? SEQ_label[SEQL_SEGMENT] : SEQ_label[SEQL_SEGMENTS])
            << "   2 * " << STAT_label[STATL_LIKELIHOOD] << ": " << 2 * segmentation_likelihood[i] << "   "
            << nb_parameter[i] << " " << STAT_label[nb_parameter[i] == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
-           << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BIC] << "): "
-           << penalized_likelihood[0][i] << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[0][i] << endl;
+           << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (Modified "  << STAT_criterion_word[BIC] << "): "
+           << penalized_likelihood[1][i] << "   " << STAT_label[STATL_WEIGHT] << ": " << weight[1][i] << endl;
       }
 
       for (i = 1;i <= max_nb_segment;i++) {
@@ -2621,9 +2666,9 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 //           << segmentation_likelihood[i - 1] - 2 * segmentation_likelihood[i] + segmentation_likelihood[i + 1];
         }
         os << endl;
-      } */
+      }
 
-      os << endl;
+      os << endl; */
 
       if (model_type[0] != MEAN_CHANGE) {
         delete [] posterior_probability;
@@ -2653,7 +2698,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
       oseq = seq->segmentation_output(inb_segment , model_type , os);
 
-#     ifdef MESSAGE
+#     ifdef DEBUG
       if ((model_type[0] != MEAN_CHANGE) && (model_type[0] != MEAN_VARIANCE_CHANGE)) {
         hierarchical_segmentation(error , os , iidentifier , max_nb_segment , model_type);
       }
@@ -2662,7 +2707,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
     }
 
     else {
-      oseq = 0;
+      oseq = NULL;
       error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
     }
 
@@ -2685,9 +2730,12 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
     if (model_type[0] != MEAN_CHANGE) {
       delete [] likelihood;
+      delete [] segmentation_entropy;
+      delete [] ranked_change_point_entropy;
       delete [] change_point_entropy;
-//      delete [] normalized_change_point_entropy;
-      delete [] segment_entropy;
+      delete [] uniform_entropy;
+      delete [] segmentation_divergence;
+      delete [] marginal_entropy;
     }
   }
 
@@ -2697,29 +2745,42 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
 /*--------------------------------------------------------------*
  *
- *  Calcul par sommation des profils de segmentation d'une sequence.
+ *  Calcul par sommation des profils de segments/ruptures d'une sequence et
+ *  de l'entropie des segmentations.
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles,
- *              rangs (variables ordinales), stream, type de sortie, format
- *              de fichier ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot),
- *              pointeurs sur les vraisemblances de toutes les segmentations possibles,
- *              les entropies des ruptures et les entropies marginale.
+ *              rangs (variables ordinales), stream, pointeur sur un objet MultiPlotSet,
+ *              type de sortie, format de sortie ('a' : ASCII, 's' : Spreadsheet,
+ *              'g' : Gnuplot, 'p' : plotable), pointeurs sur
+ *              les vraisemblances de toutes les segmentations possibles,
+ *              les entropies des segmentations, les entropies des ruptures
+ *              en tenant compte ou non de rangs des ruptures,
+ *              les entropies sous une hypothese de segmentations equiprobables et
+ *              les entropies marginales.
  *
  *--------------------------------------------------------------*/
 
 double Sequences::forward_backward(int index , int nb_segment , int *model_type ,
-                                   double **rank , ostream *os , int output , char format ,
-                                   double *ilikelihood , double *ichange_point_entropy ,
-                                   double *isegment_entropy) const
+                                   double **rank , ostream *os , MultiPlotSet *plot_set ,
+                                   int output , char format , double *ilikelihood ,
+                                   double *isegmentation_entropy ,
+                                   double *iranked_change_point_entropy ,
+                                   double *ichange_point_entropy , double *uniform_entropy ,
+                                   double *imarginal_entropy) const
 
 {
-  register int i , j , k;
+  register int i , j , k , m;
   int max_nb_value , *frequency , *pisequence;
   double sum , factorial_sum , diff , sum_square , buff , segment_norm , sequence_norm ,
-         rlikelihood , change_point_entropy , segment_entropy , *mean , *residual , *prsequence ,
-         *contrast , *likelihood , *norm , *forward_norm , *backward_norm , *entropy_backward ,
-         **factorial , **forward , **backward , **backward_output , **change_point;
-//  long double **forward , **backward;
+         rlikelihood , segmentation_entropy , ranked_change_point_entropy , change_point_entropy ,
+         marginal_entropy , *mean , *residual , *prsequence , *contrast , *normalized_contrast ,
+         *likelihood , *norm , *forward_norm , *backward_norm , *entropy_backward , **factorial ,
+         **nb_segmentation_forward , **forward , **nb_segmentation_backward , **backward ,
+         **backward_output , **change_point;
+
+# ifdef DEBUG
+  double **change_point_entropy_profile , **segment_entropy_profile;
+# endif
 
 
   max_nb_value = 0;
@@ -2734,7 +2795,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       factorial[i] = new double[length[index]];
     }
     else {
-      factorial[i] = 0;
+      factorial[i] = NULL;
     }
   }
 
@@ -2742,13 +2803,19 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     frequency = new int[max_nb_value];
   }
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   mean = new double[nb_variable];
   residual = new double[length[index]];
 
   contrast = new double[length[index]];
+  normalized_contrast = new double[length[index]];
+
+  nb_segmentation_forward = new double*[length[index]];
+  for (i = 0;i < length[index];i++) {
+    nb_segmentation_forward[i] = new double[nb_segment];
+  }
 
   forward = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
@@ -2765,22 +2832,17 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     likelihood = new double[nb_segment];
   }
 
+  nb_segmentation_backward = new double*[length[index]];
+  for (i = 0;i < length[index];i++) {
+    nb_segmentation_backward[i] = new double[nb_segment];
+  }
+
   backward = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
     backward[i] = new double[nb_segment];
   }
 
   backward_norm = new double[length[index]];
-
-/*  forward = new long double*[length[index]];
-  for (i = 0;i < length[index];i++) {
-    forward[i] = new long double[nb_segment];
-  }
-
-  backward = new long double*[length[index]];
-  for (i = 0;i < length[index];i++) {
-    backward[i] = new long double[nb_segment];
-  } */
 
   backward_output = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
@@ -2792,9 +2854,19 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     change_point[i] = new double[length[index]];
   }
 
-  if (isegment_entropy) {
-    entropy_backward = new double[nb_segment];
+  entropy_backward = new double[nb_segment];
+
+# ifdef DEBUG
+  change_point_entropy_profile = new double*[nb_segment];
+  for (i = 1;i < nb_segment;i++) {
+    change_point_entropy_profile[i] = new double[length[index]];
   }
+
+  segment_entropy_profile = new double*[nb_segment];
+  for (i = 1;i < nb_segment;i++) {
+    segment_entropy_profile[i] = new double[length[index]];
+  }
+# endif
 
   for (i = 1;i < nb_variable;i++) {
     if (model_type[i - 1] == VARIANCE_CHANGE) {
@@ -2987,31 +3059,28 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       }
     }
 
-/*    for (j = 0;j < nb_segment;j++) {
-      forward[i][j] = D_INF;
+    // calcul du nombre de segmentations
+
+    for (j = 0;j < nb_segment;j++) {
+      nb_segmentation_forward[i][j] = 0;
     }
 
-    for (j = MAX(0 , nb_segment + i - length[index]);j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+    for (j = 0;j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+//    for (j = MAX(0 , nb_segment + i - length[index]);j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
       if (j == 0) {
-        forward[i][j] = contrast[0];
+        if (contrast[0] != D_INF) {
+          nb_segmentation_forward[i][j]++;
+        }
       }
 
       else {
-        forward[i][j] = 0.;
         for (k = i;k >= j;k--) {
-          if ((contrast[k] != D_INF) && (forward[k - 1][j - 1] != D_INF)) {
-            forward[i][j] += expl(contrast[k] + forward[k - 1][j - 1]);
+          if (contrast[k] != D_INF) {
+            nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
           }
         }
-
-        if (forward[i][j] > 0.) {
-          forward[i][j] = logl(forward[i][j]);
-        }
-        else {
-          forward[i][j] = D_INF;
-        }
       }
-    } */
+    }
 
     if (contrast[i] != D_INF) {
       contrast[i] = exp(contrast[i]);
@@ -3096,6 +3165,23 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
   }
 
+  if (uniform_entropy) {
+    for (i = 1;i < nb_segment;i++) {
+      uniform_entropy[i] = log(nb_segmentation_forward[length[index] - 1][i]);
+    }
+  }
+
+# ifdef DEBUG
+  cout << "\n";
+  buff = 1.;
+  for (i = 1;i < nb_segment;i++) {
+    buff *= (double)(length[index] - i) / (double)i;
+    cout << i + 1 << " " << SEQ_label[SEQL_SEGMENTS] << ": "
+         << nb_segmentation_forward[length[index] - 1][i] << " (" << buff << ") | "
+         << log(nb_segmentation_forward[length[index] - 1][i]) << endl;
+  }
+# endif
+
 //  rlikelihood = forward[length[index] - 1][nb_segment - 1];
 
   for (i = 0;i < nb_segment;i++) {
@@ -3110,6 +3196,13 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   rlikelihood = likelihood[nb_segment - 1];
 
   if (rlikelihood != D_INF) {
+    segmentation_entropy = rlikelihood;
+
+    if (isegmentation_entropy) {
+      for (i = 1;i < nb_segment - 1;i++) {
+        isegmentation_entropy[i] = likelihood[i];
+      }
+    }
 
     // recurrence "backward"
 
@@ -3275,87 +3368,44 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         }
       }
 
-/*      for (j = 0;j < nb_segment;j++) {
-        backward[i][j] = D_INF;
-        backward_output[i][j] = 0.;
+      // calcul du nombre de segmentations
+
+      for (j = 0;j < nb_segment;j++) {
+        nb_segmentation_backward[i][j] = 0;
       }
 
-      for (j = MAX((i == 0 ? 0 : 1) , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
+      for (j = MAX((i == 0 ? 0 : 1) , nb_segment + i - length[index]);j < nb_segment;j++) {
+//      for (j = MAX((i == 0 ? 0 : 1) , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
         if (j < nb_segment - 1) {
-          backward[i][j] = 0.;
           for (k = i;k <= length[index] + j - nb_segment;k++) {
-            if ((contrast[k] != D_INF) && (backward[k + 1][j + 1] != D_INF)) {
-              backward[i][j] += expl(contrast[k] + backward[k + 1][j + 1]);
+            if (contrast[k] != D_INF) {
+              nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
             }
-          }
-
-          if (backward[i][j] > 0.) {
-            backward[i][j] = logl(backward[i][j]);
-          }
-          else {
-            backward[i][j] = D_INF;
           }
         }
 
         else {
-          backward[i][j] = contrast[length[index] - 1];
-        }
-
-        if (backward[i][j] != D_INF) {
-          if ((i == 0) && (j == 0)) {
-            buff = 1.;
+          if (contrast[length[index] - 1] != D_INF) {
+            nb_segmentation_backward[i][j]++;
           }
-          else if ((j > 0) && (forward[i - 1][j - 1] != D_INF)) {
-            buff = exp(forward[i - 1][j - 1] + backward[i][j] - rlikelihood);
-          }
-
-          if (output == CHANGE_POINT) {
-            backward_output[i][j] = buff;
-          }
-          change_point[nb_segment - 1][i] += buff;
         }
       }
-
-      if (output == SEGMENT) {
-        if (i < length[index] - 1) {
-          for (j = MAX(0 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
-            backward_output[i][j] = backward_output[i + 1][j];
-            if ((j < nb_segment - 1) && (forward[i][j] != D_INF) && (backward[i + 1][j + 1] != D_INF)) {
-              backward_output[i][j] += exp(forward[i][j] + backward[i + 1][j + 1] - rlikelihood);
-            }
-            if ((j > 0) && (forward[i][j - 1] != D_INF) && (backward[i + 1][j] != D_INF)) {
-              backward_output[i][j] -= exp(forward[i][j - 1] + backward[i + 1][j] - rlikelihood);
-            }
-
-            if (backward_output[i][j] < 0.) {
-              backward_output[i][j] = 0.;
-            }
-            if (backward_output[i][j] > 1.) {
-              backward_output[i][j] = 1.;
-            }
-          }
-        }
-
-        else {
-          backward_output[i][nb_segment - 1] = 1.;
-        }
-      } */
 
       if (contrast[i] != D_INF) {
-        contrast[i] = exp(contrast[i]);
+        normalized_contrast[i] = exp(contrast[i]);
       }
       else {
-        contrast[i] = 0.;
+        normalized_contrast[i] = 0.;
       }
 
       segment_norm = 0.;
       for (j = i + 1;j < length[index];j++) {
         segment_norm += norm[j];
         if (contrast[j] != D_INF) {
-          contrast[j] = exp(contrast[j] - segment_norm);
+          normalized_contrast[j] = exp(contrast[j] - segment_norm);
         }
         else {
-          contrast[j] = 0.;
+          normalized_contrast[j] = 0.;
         }
       }
 
@@ -3369,11 +3419,11 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 //      for (j = MAX((i == 0 ? 0 : 1) , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
         if (j < nb_segment - 1) {
           for (k = i;k <= length[index] + j - nb_segment;k++) {
-            backward[i][j] += contrast[k] * backward[k + 1][j + 1];
+            backward[i][j] += normalized_contrast[k] * backward[k + 1][j + 1];
           }
         }
         else {
-          backward[i][j] = contrast[length[index] - 1];
+          backward[i][j] = normalized_contrast[length[index] - 1];
         }
 
         norm[i] += backward[i][j];
@@ -3394,11 +3444,11 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         if (i < length[index] - 1) {
           for (j = MAX(0 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
             backward_output[i][j] = backward_output[i + 1][j];
-            if (j < nb_segment - 1) {
-              backward_output[i][j] += forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
-            }
             if (j > 0) {
               backward_output[i][j] -= forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
+            }
+            if (j < nb_segment - 1) {
+              backward_output[i][j] += forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
             }
 
             if (backward_output[i][j] < 0.) {
@@ -3457,7 +3507,108 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         }
         change_point[nb_segment - 1][i] *= sequence_norm;
       }
+
+      // calcul des entropies des segmentations
+
+      segment_norm = 0.;
+      for (j = i;j < length[index];j++) {
+        segment_norm += norm[j];
+        if (contrast[j] != D_INF) {
+          normalized_contrast[j] = exp(contrast[j] - segment_norm);
+        }
+        else {
+          normalized_contrast[j] = 0.;
+        }
+      }
+
+      if (i == 0) {
+        sequence_norm = exp(backward_norm[i] - rlikelihood);
+
+        for (j = i;j <= length[index] - nb_segment;j++) {
+          if (contrast[j] != D_INF) {
+            segmentation_entropy -= normalized_contrast[j] * backward[j + 1][1] *
+                                    sequence_norm * contrast[j];
+          }
+        }
+      }
+
+      else {
+        sequence_norm = exp(forward_norm[i - 1] + backward_norm[i] - rlikelihood);
+
+        for (j = MAX(1 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
+          if (j < nb_segment - 1) {
+            for (k = i;k <= length[index] + j - nb_segment;k++) {
+              if (contrast[k] != D_INF) {
+                segmentation_entropy -= forward[i - 1][j - 1] * normalized_contrast[k] * backward[k + 1][j + 1] *
+                                        sequence_norm * contrast[k];
+              }
+            }
+          }
+
+          else {
+            if (contrast[length[index] - 1] != D_INF) {
+              segmentation_entropy -= forward[i - 1][nb_segment - 2] * normalized_contrast[length[index] - 1] *
+                                      sequence_norm * contrast[length[index] - 1];
+            }
+          }
+        }
+      }
+
+      if (isegmentation_entropy) {
+        if (i == 0) {
+          for (j = i;j < length[index] - 1;j++) {
+            if (contrast[j] != D_INF) {
+              buff = normalized_contrast[j] * contrast[j];
+              for (k = 1;k < MIN(nb_segment - 1 , length[index] - j);k++) {
+                isegmentation_entropy[k] -= backward[j + 1][nb_segment - k] *
+                                            exp(backward_norm[i] - likelihood[k]) * buff;
+//                isegmentation_entropy[k] -= normalized_contrast[j] * backward[j + 1][nb_segment - k] *
+//                                            exp(backward_norm[i] - likelihood[k]) * contrast[j];
+              }
+            }
+          }
+        }
+
+        else {
+          for (j = 1;j < nb_segment;j++) {
+            if (j < nb_segment - 1) {
+              for (k = i;k < length[index] - 1;k++) {
+                if (contrast[k] != D_INF) {
+                  buff = forward[i - 1][j - 1] * normalized_contrast[k] * contrast[k];
+                  for (m = j + 1;m < MIN(nb_segment - 1 , j + length[index] - k);m++) {
+                    isegmentation_entropy[m] -= backward[k + 1][j + nb_segment - m] *
+                                                exp(forward_norm[i - 1] + backward_norm[i] - likelihood[m]) * buff;
+//                    isegmentation_entropy[m] -= forward[i - 1][j - 1] * normalized_contrast[k] * backward[k + 1][j + nb_segment - m] *
+//                                                exp(forward_norm[i - 1] + backward_norm[i] - likelihood[m]) * contrast[k];
+                  }
+                }
+              }
+            }
+
+            else {
+              if (contrast[length[index] - 1] != D_INF) {
+                buff = normalized_contrast[length[index] - 1] * contrast[length[index] - 1];
+                for (k = 1;k < MIN(nb_segment - 1 , i + 1);k++) {
+                  isegmentation_entropy[k] -= forward[i - 1][k - 1] *
+                                              exp(forward_norm[i - 1] + backward_norm[i] - likelihood[k]) * buff;
+//                  isegmentation_entropy[k] -= forward[i - 1][k - 1] * normalized_contrast[length[index] - 1] *
+//                                              exp(forward_norm[i - 1] + backward_norm[i] - likelihood[k]) * contrast[length[index] - 1];
+                }
+              }
+            }
+          }
+        }
+      }
     }
+
+#   ifdef MESSAGE
+    for (i = 1;i < nb_segment;i++) {
+      if (nb_segmentation_backward[0][nb_segment - 1 - i] != nb_segmentation_forward[length[index] - 1][i]) {
+        cout << "\nERROR: " << i << "  " << nb_segmentation_forward[length[index] - 1][i]
+             << " | " << nb_segmentation_backward[0][nb_segment - 1 - i] << endl;
+      }
+    }
+#   endif
 
 #   ifdef MESSAGE
     if (output == SEGMENT) {
@@ -3483,6 +3634,75 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     }
 #   endif
 
+    for (i = 0;i < nb_segment - 1;i++) {
+      entropy_backward[i] = 0.;
+    }
+    entropy_backward[nb_segment - 1] = 1.;
+
+    ranked_change_point_entropy = 0.;
+    marginal_entropy = 0.;
+
+    for (i = length[index] - 2;i >= 0;i--) {
+      sequence_norm = exp(forward_norm[i] + backward_norm[i + 1] - rlikelihood);
+
+/*      for (j = 0;j < MAX(0 , nb_segment + i - length[index]);j++) {
+        entropy_backward[j] = 0.;
+      }
+      for (j = MIN(nb_segment - 1 , i) + 1;j < nb_segment;j++) {
+        entropy_backward[j] = 0.;
+      } */
+
+//      for (j = 0;j < nb_segment;j++) {
+      for (j = MAX(0 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
+        if (j > 0) {
+//          entropy_backward[j] -= forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
+          buff = forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
+          entropy_backward[j] -= buff;
+//          if ((buff > 0.) && (buff < 1.)) {
+          if (buff > 0.) {
+            ranked_change_point_entropy -= buff * log(buff);
+          }
+        }
+//        if ((entropy_backward[j] > 0.) && (entropy_backward[j] < 1.)) {
+        if (entropy_backward[j] > 0.) {
+          ranked_change_point_entropy -= entropy_backward[j] * log(entropy_backward[j]);
+        }
+
+        if (j < nb_segment - 1) {
+          entropy_backward[j] += forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
+/*          buff = forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
+          entropy_backward[j] += buff;
+          if (buff > 0.) {
+            ranked_change_point_entropy -= buff * log(buff);
+          } */
+        }
+
+        if (entropy_backward[j] < 0.) {
+          entropy_backward[j] = 0.;
+        }
+        if (entropy_backward[j] > 1.) {
+          entropy_backward[j] = 1.;
+        }
+
+        if (entropy_backward[j] > 0.) {
+          ranked_change_point_entropy += entropy_backward[j] * log(entropy_backward[j]);
+          marginal_entropy -= entropy_backward[j] * log(entropy_backward[j]);
+        }
+      }
+
+#     ifdef MESSAGE
+      sum = 0.;
+//      for (j = MAX(0 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
+      for (j = 0;j < nb_segment;j++) {
+        sum += entropy_backward[j];
+      }
+      if ((sum < 1. - DOUBLE_ERROR) || (sum > 1. + DOUBLE_ERROR)) {
+        cout << "\nERROR: " << nb_segment << " " << i << " | " << sum << endl;
+      }
+#     endif
+
+    }
+
     change_point_entropy = 0.;
     for (i = 1;i < length[index];i++) {
       if ((change_point[nb_segment - 1][i] > 0.) && (change_point[nb_segment - 1][i] < 1.)) {
@@ -3491,17 +3711,157 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       }
     }
 
-    segment_entropy = 0.;
-    for (i = 1;i < length[index] - 1;i++) {
-      for (j = 0;j < nb_segment;j++) {
-        if (backward_output[i][j] > 0.) {
-          segment_entropy -= backward_output[i][j] * log(backward_output[i][j]);
+#   ifdef DEBUG
+
+    // calcul du profil d'informations mutuelles
+
+    for (i = 0;i < nb_segment - 1;i++) {
+      entropy_backward[i] = 0.;
+    }
+    entropy_backward[nb_segment - 1] = 1.;
+
+    for (i = length[index] - 2;i >= 0;i--) {
+      sequence_norm = exp(forward_norm[i] + backward_norm[i + 1] - rlikelihood);
+      segment_entropy_profile[nb_segment - 1][i + 1] = 0.;
+
+      for (j = MAX(0 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
+        if (entropy_backward[j] > 0.) {
+          segment_entropy_profile[nb_segment - 1][i + 1] -= entropy_backward[j] * log(entropy_backward[j]);
+        }
+
+        if (j > 0) {
+//          entropy_backward[j] -= forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
+          buff = forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
+          entropy_backward[j] -= buff;
+          if (buff > 0.) {
+            segment_entropy_profile[nb_segment - 1][i + 1] += buff * log(buff);
+          }
+        }
+        if (entropy_backward[j] > 0.) {
+          segment_entropy_profile[nb_segment - 1][i + 1] += entropy_backward[j] * log(entropy_backward[j]);
+        }
+
+        if (j < nb_segment - 1) {
+          entropy_backward[j] += forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
+/*          buff = forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
+          entropy_backward[j] += buff;
+          if (buff > 0.) {
+            segment_entropy_profile[nb_segment - 1][i + 1] += buff * log(buff);
+          } */
+        }
+
+        if (entropy_backward[j] < 0.) {
+          entropy_backward[j] = 0.;
+        }
+        if (entropy_backward[j] > 1.) {
+          entropy_backward[j] = 1.;
+        }
+
+        if (entropy_backward[j] > 0.) {
+          segment_entropy_profile[nb_segment - 1][i + 1] -= entropy_backward[j] * log(entropy_backward[j]);
         }
       }
     }
+    segment_entropy_profile[nb_segment - 1][0] = 0.;
+
+    // calcul du profil d'entropies
+
+    change_point_entropy_profile[nb_segment - 1][0] = 0.;
+    for (i = 1;i < length[index];i++) {
+      if ((change_point[nb_segment - 1][i] > 0.) && (change_point[nb_segment - 1][i] < 1.)) {
+
+        change_point_entropy_profile[nb_segment - 1][i] = -change_point[nb_segment - 1][i] * log(change_point[nb_segment - 1][i]) -
+                                                          (1 - change_point[nb_segment - 1][i]) * log(1 - change_point[nb_segment - 1][i]);
+      }
+
+      else {
+        change_point_entropy_profile[nb_segment - 1][i] = 0.;
+      }
+    }
+#   endif
+
+    if (isegmentation_entropy) {
+      isegmentation_entropy[nb_segment - 1] = segmentation_entropy;
+    }
+
+    if ((iranked_change_point_entropy) && (imarginal_entropy)) {
+      for (i = 1;i < nb_segment - 1;i++) {
+        for (j = 0;j < i;j++) {
+          entropy_backward[j] = 0.;
+        }
+        entropy_backward[i] = 1.;
+
+        iranked_change_point_entropy[i] = 0.;
+        imarginal_entropy[i] = 0.;
+
+        for (j = length[index] - 2;j > 0;j--) {
+          sequence_norm = exp(forward_norm[j] + backward_norm[j + 1] - likelihood[i]);
+
+/*          for (k = 0;k < MAX(0 , i + 1 + j - length[index]);k++) {
+            entropy_backward[k] = 0.;
+          }
+          for (k = MIN(i , j) + 1;k <= i;k++) {
+            entropy_backward[k] = 0.;
+          } */
+
+//          for (k = 0;k <= i;k++) {
+          for (k = MAX(0 , i + 1 + j - length[index]);k <= MIN(i , j);k++) {
+            if (k > 0) {
+//              entropy_backward[k] -= forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
+              buff = forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
+              entropy_backward[k] -= buff;
+//              if (buff > 0.) {
+              if ((buff > 0.) && (buff < 1.)) {
+                iranked_change_point_entropy[i] -= buff * log(buff);
+              }
+            }
+//            if (entropy_backward[k] > 0.) {
+            if ((entropy_backward[k] > 0.) && (entropy_backward[k] < 1.)) {
+              iranked_change_point_entropy[i] -= entropy_backward[k] * log(entropy_backward[k]);
+            }
+
+            if (k < i) {
+              entropy_backward[k] += forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
+/*              buff = forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
+              entropy_backward[k] += buff;
+              if (buff > 0.) {
+                iranked_change_point_entropy[i] -= buff * log(buff);
+              } */
+            }
+
+            if (entropy_backward[k] < 0.) {
+              entropy_backward[k] = 0.;
+            }
+            if (entropy_backward[k] > 1.) {
+              entropy_backward[k] = 1.;
+            }
+
+            if (entropy_backward[k] > 0.) {
+              iranked_change_point_entropy[i] += entropy_backward[k] * log(entropy_backward[k]);
+              imarginal_entropy[i] -= entropy_backward[k] * log(entropy_backward[k]);
+            }
+          }
+
+#         ifdef MESSAGE
+          sum = 0.;
+//          for (k = MAX(0 , i + 1 + j - length[index]);k <= MIN(i , j);k++) {
+          for (k = 0;k <= i;k++) {
+            sum += entropy_backward[k];
+          }
+          if ((sum < 1. - DOUBLE_ERROR) || (sum > 1. + DOUBLE_ERROR)) {
+            cout << "\nERROR: " << i + 1 << " " << j << " | " << sum << endl;
+          }
+#         endif
+
+        }
+      }
+
+      iranked_change_point_entropy[nb_segment - 1] = ranked_change_point_entropy;
+      imarginal_entropy[nb_segment - 1] = marginal_entropy;
+    }
 
     if (ichange_point_entropy) {
-      for (i = 1;i < nb_segment;i++) {
+      for (i = 1;i < nb_segment - 1;i++) {
         ichange_point_entropy[i] = 0.;
         for (j = 1;j < length[index];j++) {
           if ((change_point[i][j] > 0.) && (change_point[i][j] < 1.)) {
@@ -3514,51 +3874,123 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       ichange_point_entropy[nb_segment - 1] = change_point_entropy;
     }
 
-    if (isegment_entropy) {
-      for (i = 1;i < nb_segment - 1;i++) {
-        isegment_entropy[i] = 0.;
-        for (j = 0;j < i;j++) {
-          entropy_backward[j] = 0.;
-        }
-        entropy_backward[i] = 1.;
+#   ifdef DEBUG
 
-        for (j = length[index] - 2;j > 0;j--) {
-          for (k = MAX(0 , i + 1 + j - length[index]);k <= MIN(i , j);k++) {
-            sequence_norm = exp(forward_norm[j] + backward_norm[j + 1] - likelihood[i]);
-            if (k < i) {
-              entropy_backward[k] += forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
-            }
-            if (k > 0) {
-              entropy_backward[k] -= forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
-            }
+    // calcul des profils d'informations mutuelles
 
-            if (entropy_backward[k] < 0.) {
-              entropy_backward[k] = 0.;
-            }
-            if (entropy_backward[k] > 1.) {
-              entropy_backward[k] = 1.;
-            }
+    for (i = 1;i < nb_segment - 1;i++) {
+      for (j = 0;j < i;j++) {
+        entropy_backward[j] = 0.;
+      }
+      entropy_backward[i] = 1.;
 
-            if (entropy_backward[k] > 0.) {
-              isegment_entropy[i] -= entropy_backward[k] * log(entropy_backward[k]);
-            }
+      for (j = length[index] - 2;j > 0;j--) {
+        sequence_norm = exp(forward_norm[j] + backward_norm[j + 1] - likelihood[i]);
+        segment_entropy_profile[i][j + 1] = 0.;
+
+        for (k = MAX(0 , i + 1 + j - length[index]);k <= MIN(i , j);k++) {
+          if (entropy_backward[k] > 0.) {
+            segment_entropy_profile[i][j + 1] -= entropy_backward[k] * log(entropy_backward[k]);
           }
 
-#         ifdef MESSAGE
-          sum = 0.;
-          for (k = MAX(0 , i + 1 + j - length[index]);k <= MIN(i , j);k++) {
-            sum += entropy_backward[k];
+          if (k > 0) {
+//            entropy_backward[k] -= forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
+            buff = forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
+            entropy_backward[k] -= buff;
+            if (buff > 0.) {
+              segment_entropy_profile[i][j + 1] += buff * log(buff);
+            }
           }
-          if ((sum < 1. - DOUBLE_ERROR) || (sum > 1. + DOUBLE_ERROR)) {
-            cout << "\nERROR: " << i + 1 << " " << j << " | " << sum << endl;
+          if (entropy_backward[k] > 0.) {
+            segment_entropy_profile[i][j + 1] += entropy_backward[k] * log(entropy_backward[k]);
           }
-#         endif
 
+          if (k < i) {
+            entropy_backward[k] += forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
+/*            buff = forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
+            entropy_backward[k] += buff;
+            if (buff > 0.) {
+              segment_entropy_profile[i][j + 1] += buff * log(buff);
+            } */
+          }
+
+          if (entropy_backward[k] < 0.) {
+            entropy_backward[k] = 0.;
+          }
+          if (entropy_backward[k] > 1.) {
+            entropy_backward[k] = 1.;
+          }
+
+          if (entropy_backward[k] > 0.) {
+            segment_entropy_profile[i][j + 1] -= entropy_backward[k] * log(entropy_backward[k]);
+          }
         }
       }
 
-      isegment_entropy[nb_segment - 1] = segment_entropy;
+      segment_entropy_profile[i][0] = 0.;
     }
+
+    // calcul des profils d'entropies
+
+    for (i = 1;i < nb_segment - 1;i++) {
+      change_point_entropy_profile[i][0] = 0.;
+      for (j = 1;j < length[index];j++) {
+        if ((change_point[i][j] > 0.) && (change_point[i][j] < 1.)) {
+          change_point_entropy_profile[i][j] = -change_point[i][j] * log(change_point[i][j]) -
+                                               (1 - change_point[i][j]) * log(1 - change_point[i][j]);
+        }
+
+        else {
+          change_point_entropy_profile[i][j] = 0.;
+        }
+      }
+    }
+
+    int ibuff , width;
+    long old_adjust;
+
+
+    old_adjust = cout.flags(ios::adjustfield);
+
+    width = 0;
+    for (i = 1;i < nb_segment;i++) {
+      ibuff = column_width(length[index] , change_point_entropy_profile[i]);
+      if (ibuff > width) {
+        width = ibuff;
+      }
+    }
+    width += ASCII_SPACE;
+
+    cout << "\nChange-point entropy profiles\n" << endl;
+    for (i = 0;i < length[index];i++) {
+      cout << (index_parameter ? index_parameter[index][i] : i) << " ";
+      for (j = 1;j < nb_segment;j++) {
+        cout << setw(width) << change_point_entropy_profile[j][i];
+      }
+      cout << endl;
+    }
+
+    width = 0;
+    for (i = 1;i < nb_segment;i++) {
+      ibuff = column_width(length[index] , segment_entropy_profile[i]);
+      if (ibuff > width) {
+        width = ibuff;
+      }
+    }
+    width += ASCII_SPACE;
+
+    cout << "\nSegment entropy profiles\n" << endl;
+    for (i = 0;i < length[index];i++) {
+      cout << (index_parameter ? index_parameter[index][i] : i) << " ";
+      for (j = 1;j < nb_segment;j++) {
+        cout << setw(width) << segment_entropy_profile[j][i];
+      }
+      cout << endl;
+    }
+    cout << endl;
+
+    cout.setf((FMTFLAGS)old_adjust , ios::adjustfield);
+#   endif
 
     if (os) {
       switch (format) {
@@ -3578,12 +4010,11 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
                             0 , change_point);
 
         *os << "\n" << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD] << ": " << rlikelihood << endl;
-        *os << "\n" << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << ": " << change_point_entropy << " ("
-            << change_point_entropy / nb_segment << ")";
-        if (output == SEGMENT) {
-          *os << "\n" << SEQ_label[SEQL_SEGMENT_ENTROPY] << ": " << segment_entropy;
-        }
-        *os << endl;
+        *os << "\n" << SEQ_label[SEQL_SEGMENTATION_ENTROPY] << ": " << segmentation_entropy
+            << "\n" << SEQ_label[SEQL_RANKED_CHANGE_POINT_ENTROPY] << ": " << ranked_change_point_entropy
+            << "\n" << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << ": " << change_point_entropy
+//            << " (" << change_point_entropy / nb_segment << ")";
+            << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY] << ": " << marginal_entropy << endl;
         break;
       }
 
@@ -3602,12 +4033,11 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
                                   0 , change_point);
 
         *os << "\n" << SEQ_label[SEQL_POSSIBLE_SEGMENTATION_LIKELIHOOD] << "\t" << rlikelihood << endl;
-        *os << "\n" << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << "\t" << change_point_entropy << "\t"
-            << change_point_entropy / nb_segment;
-        if (output == SEGMENT) {
-          *os << "\n" << SEQ_label[SEQL_SEGMENT_ENTROPY] << "\t" << segment_entropy;
-        }
-        *os << endl;
+        *os << "\n" << SEQ_label[SEQL_SEGMENTATION_ENTROPY] << "\t" << segmentation_entropy
+            << "\n" << SEQ_label[SEQL_RANKED_CHANGE_POINT_ENTROPY] << "\t" << ranked_change_point_entropy
+            << "\n" << SEQ_label[SEQL_CHANGE_POINT_ENTROPY] << "\t" << change_point_entropy
+//            << "\t" << change_point_entropy / nb_segment;
+            << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY] << "\t" << marginal_entropy << endl;
         break;
       }
 
@@ -3615,9 +4045,121 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         profile_plot_print(*os , index , nb_segment , backward_output , 0 , change_point);
         break;
       }
+
+      case 'p' : {
+        i = 1;
+        for (j = 1;j < nb_variable;j++) {
+          if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+              (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+              (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+            i++;
+          }
+        }
+
+        profile_plotable_write((*plot_set)[i] , index , nb_segment , backward_output);
+        i++;
+        change_point_profile_plotable_write((*plot_set)[i] , index , nb_segment , change_point);
+        break;
+      }
       }
     }
   }
+
+# ifdef DEBUG
+  double **segment_length;
+
+
+  // calcul des lois a priori des longueurs de segments sous une hypothese de loi a priori
+  // uniforme sur les segmentations possibles
+
+  segment_length = new double*[nb_segment];
+  for (i = 0;i < nb_segment;i++) {
+    segment_length[i] = new double[length[index] - nb_segment + 2];
+    for (j = 0;j <= length[index] - nb_segment + 1;j++) {
+      segment_length[i][j] = 0.;
+    }
+  }
+
+  // recurrence "forward"
+
+  for (i = 0;i < length[index];i++) {
+    for (j = 0;j < nb_segment;j++) {
+      nb_segmentation_forward[i][j] = 0;
+    }
+
+    for (j = MAX(0 , nb_segment + i - length[index]);j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+      if (j == 0) {
+        nb_segmentation_forward[i][j]++;
+      }
+
+      else {
+        for (k = i;k >= j;k--) {
+          nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
+        }
+      }
+    }
+  }
+
+  // recurrence "backward"
+
+  for (i = length[index] - 1;i > 0;i--) {
+    for (j = 0;j < nb_segment;j++) {
+      nb_segmentation_backward[i][j] = 0;
+    }
+
+    for (j = MAX(1 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
+      if (j < nb_segment - 1) {
+        for (k = i;k <= length[index] + j - nb_segment;k++) {
+          nb_segmentation_backward[i][j] += nb_segmentation_backward[k + 1][j + 1];
+          segment_length[j][k - i + 1] += nb_segmentation_forward[i - 1][j - 1] *
+                                          nb_segmentation_backward[k + 1][j + 1];
+        }
+      }
+
+      else {
+        nb_segmentation_backward[i][j]++;
+        segment_length[j][length[index] - i] += nb_segmentation_forward[i - 1][j - 1];
+      }
+    }
+  }
+
+  for (i = 0;i <= length[index] - nb_segment;i++) {
+    segment_length[0][i + 1] += nb_segmentation_backward[i + 1][1];
+  }
+
+  for (i = 0;i < nb_segment;i++) {
+    cout << "\n" << SEQ_label[SEQL_SEGMENT] << " " << i << ":";
+
+    sum = 0.;
+    for (j = 1;j <= length[index] - nb_segment + 1;j++) {
+      sum += segment_length[i][j];
+    }
+
+    for (j = 1;j <= length[index] - nb_segment + 1;j++) {
+      cout << " " << segment_length[i][j] / sum;
+    }
+    cout << endl;
+  }
+
+  buff = 1.;
+  for (i = 1;i < nb_segment - 1;i++) {
+    buff *= (double)(length[index] - i - 1) / (double)i;
+  }
+  sum = buff * (double)(length[index] - 1) / (double)(nb_segment - 1);
+
+  cout << "\nAll " << SEQ_label[SEQL_SEGMENTS] << ":";
+  for (i = 1;i <= length[index] - nb_segment + 1;i++) {
+    cout << " " << buff / sum;
+    buff *= (double)(length[index] - i - nb_segment + 1) /
+            (double)(length[index] - i - 1);
+  }
+  cout << endl;
+
+  for (i = 0;i < nb_segment;i++) {
+    delete [] segment_length[i];
+  }
+  delete [] segment_length;
+# endif
 
   delete [] frequency;
 
@@ -3630,6 +4172,12 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   delete [] residual;
 
   delete [] contrast;
+  delete [] normalized_contrast;
+
+  for (i = 0;i < length[index];i++) {
+    delete [] nb_segmentation_forward[i];
+  }
+  delete [] nb_segmentation_forward;
 
   for (i = 0;i < length[index];i++) {
     delete [] forward[i];
@@ -3642,6 +4190,11 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   if (!ilikelihood) {
     delete [] likelihood;
   }
+
+  for (i = 0;i < length[index];i++) {
+    delete [] nb_segmentation_backward[i];
+  }
+  delete [] nb_segmentation_backward;
 
   for (i = 0;i < length[index];i++) {
     delete [] backward[i];
@@ -3660,9 +4213,19 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   }
   delete [] change_point;
 
-  if (isegment_entropy) {
-    delete [] entropy_backward;
+  delete [] entropy_backward;
+
+# ifdef DEBUG
+  for (i = 1;i < nb_segment;i++) {
+    delete [] change_point_entropy_profile[i];
   }
+  delete [] change_point_entropy_profile;
+
+  for (i = 1;i < nb_segment;i++) {
+    delete [] segment_entropy_profile[i];
+  }
+  delete [] segment_entropy_profile;
+# endif
 
   return rlikelihood;
 }
@@ -3703,7 +4266,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
       factorial[i] = new double[length[index]];
     }
     else {
-      factorial[i] = 0;
+      factorial[i] = NULL;
     }
   }
 
@@ -3711,7 +4274,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
     frequency = new int[max_nb_value];
   }
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   sequence_mean = new double[nb_variable];
@@ -3738,8 +4301,8 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
       variance[i] = new double[nb_segment];
     }
     else {
-      mean[i] = 0;
-      variance[i] = 0;
+      mean[i] = NULL;
+      variance[i] = NULL;
     }
   }
 
@@ -3747,14 +4310,13 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   srsequence = new double*[nb_variable];
 
 # ifdef DEBUG
-  double **segmentation_probability;
+  double **segment_probability;
 
-
-  segmentation_probability = new double*[length[index]];
+  segment_probability = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
-    segmentation_probability[i] = new double[nb_segment];
+    segment_probability[i] = new double[nb_segment];
     for (j = 0;j < nb_segment;j++) {
-      segmentation_probability[i][j] = 0.;
+      segment_probability[i][j] = 0.;
     }
   }
 # endif
@@ -4282,9 +4844,12 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
       }
 
 #     ifdef DEBUG
+
+      // approximation des probabilites lissees
+
       psegment = int_sequence[index][0];
       for (j = 0;j < length[index];j++) {
-        segmentation_probability[j][*psegment++]++;
+        segment_probability[j][*psegment++]++;
       }
 #     endif
 
@@ -4401,18 +4966,18 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
     if (nb_segmentation >= 1000) {
       for (i = 0;i < length[index];i++) {
         for (j = 0;j < nb_segment;j++) {
-          segmentation_probability[i][j] /= nb_segmentation;
+          segment_probability[i][j] /= nb_segmentation;
         }
+      }
+
+      psegment = int_sequence[index][0];
+      for (i = 0;i < length[index];i++) {
+        *psegment++ = I_DEFAULT;
       }
 
       os << "\n" << SEQ_label[SEQL_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
 
-      psegment = int_sequence[index][0];
-      for (j = 0;j < length[index];j++) {
-        *psegment++ = I_DEFAULT;
-      }
-
-      profile_ascii_print(os , index , nb_segment , segmentation_probability ,
+      profile_ascii_print(os , index , nb_segment , segment_probability ,
                           SEQ_label[SEQL_SEGMENT]);
     }
 #   endif
@@ -4453,9 +5018,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
 # ifdef DEBUG
   for (i = 0;i < length[index];i++) {
-    delete [] segmentation_probability[i];
+    delete [] segment_probability[i];
   }
-  delete [] segmentation_probability;
+  delete [] segment_probability;
 # endif
 
   return likelihood;
@@ -4464,7 +5029,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des L segmentations optimales d'une sequence.
+ *  Calcul des N segmentations les plus probables d'une sequence.
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles,
  *              rangs (variables ordinales), stream, format de fichier ('a' : ASCII,
@@ -4472,7 +5037,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
  *
  *--------------------------------------------------------------*/
 
-double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
+double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
                                  double **irank , ostream &os , char format ,
                                  int inb_segmentation , double likelihood) const
 
@@ -4483,20 +5048,14 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
       *psegment , **sisequence , ***optimal_length , ***optimal_rank;
   double sum , factorial_sum , diff , sum_square , buff , segmentation_likelihood ,
          *nb_segmentation , *sequence_mean , *residual , *prsequence , *contrast ,
-         **factorial , **srsequence , **mean , **variance , ***forward;
+         **factorial , **nb_segmentation_forward , **srsequence , **mean , **variance ,
+         ***forward;
   long double likelihood_cumul;
 
-
 # ifdef MESSAGE
-  double max_nb_segmentation , sum2;
-
-  max_nb_segmentation = 1.;
-  for (i = 1;i < nb_segment;i++) {
-    max_nb_segmentation *= (double)(length[index] - i) / (double)i;
-//    max_nb_segmentation = max_nb_segmentation * (length[index] - i) / i;
-  }
-  os << "\n" << SEQ_label[SEQL_NB_SEGMENTATION] << ": " << max_nb_segmentation << endl;
+  double sum2;
 # endif
+
 
   // initialisations
 
@@ -4512,7 +5071,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
       factorial[i] = new double[length[index]];
     }
     else {
-      factorial[i] = 0;
+      factorial[i] = NULL;
     }
   }
 
@@ -4520,13 +5079,18 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
     frequency = new int[max_nb_value];
   }
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   sequence_mean = new double[nb_variable];
   residual = new double[length[index]];
 
   contrast = new double[length[index]];
+
+  nb_segmentation_forward = new double*[length[index]];
+  for (i = 0;i < length[index];i++) {
+    nb_segmentation_forward[i] = new double[nb_segment];
+  }
 
   forward = new double**[length[index]];
   for (i = 0;i < length[index];i++) {
@@ -4565,8 +5129,8 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
       variance[i] = new double[nb_segment];
     }
     else {
-      mean[i] = 0;
-      variance[i] = 0;
+      mean[i] = NULL;
+      variance[i] = NULL;
     }
   }
 
@@ -4584,7 +5148,6 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
 # ifdef MESSAGE
   double **mean_square_diff;
 
-
   mean_square_diff = new double*[nb_variable];
   for (i = 1;i < nb_variable;i++) {
     if ((model_type[i - 1] == GAUSSIAN_CHANGE) || (model_type[i - 1] == MEAN_CHANGE) ||
@@ -4592,21 +5155,34 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
       mean_square_diff[i] = new double[length[index]];
     }
     else {
-      mean_square_diff[i] = 0;
+      mean_square_diff[i] = NULL;
     }
   }
 # endif
 
 # ifdef DEBUG
-  double **segmentation_probability;
+  double **segment_probability;
 
-
-  segmentation_probability = new double*[length[index]];
+  segment_probability = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
-    segmentation_probability[i] = new double[nb_segment];
+    segment_probability[i] = new double[nb_segment];
     for (j = 0;j < nb_segment;j++) {
-//      segmentation_probability[i][j] = 0.;
-      segmentation_probability[i][j] = D_INF;
+      segment_probability[i][j] = D_INF;
+    }
+  }
+# endif
+
+# ifdef MESSAGE
+  double **smoothed_probability;
+  long double approximated_likelihood = 0.;
+
+  if (inb_segmentation >= 1000) {
+    smoothed_probability = new double*[length[index]];
+    for (i = 0;i < length[index];i++) {
+      smoothed_probability[i] = new double[nb_segment];
+      for (j = 0;j < nb_segment;j++) {
+        smoothed_probability[i][j] = 0.;
+      }
     }
   }
 # endif
@@ -4633,9 +5209,11 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
     }
   }
 
-/*  for (i = 0;i < nb_segment;i++) {
+# ifdef DEBUG
+  for (i = 0;i < nb_segment;i++) {
     nb_segmentation[i] = 1;
-  } */
+  }
+# endif
 
   // recurrence "forward"
 
@@ -4859,11 +5437,45 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
     cout << endl;
 #   endif
 
+    // calcul du nombre de segmentations
+
+    for (j = 0;j < nb_segment;j++) {
+      nb_segmentation_forward[i][j] = 0;
+    }
+
+    for (j = MAX(0 , nb_segment + i - length[index]);j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+      if (j == 0) {
+        if (contrast[0] != D_INF) {
+          nb_segmentation_forward[i][j]++;
+        }
+      }
+
+      else {
+        for (k = i;k >= j;k--) {
+          if (contrast[k] != D_INF) {
+            nb_segmentation_forward[i][j] += nb_segmentation_forward[k - 1][j - 1];
+          }
+        }
+      }
+    }
+
+#   ifdef DEBUG
     nb_segmentation[0] = 1;
     for (j = 1;j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
       nb_segmentation[j] = nb_segmentation[j - 1] * (i - j + 1) / j;
     }
-    for (j = 1;j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+
+    if (i < inb_segmentation) {
+      cout << i << ": ";
+      for (j = 0;j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+        cout << nb_segmentation_forward[i][j] << " " << nb_segmentation[j] << " | ";
+      }
+      cout << endl;
+    }
+#   endif
+
+    for (j = 0;j < MIN((i < length[index] - 1 ? nb_segment - 1 : nb_segment) , i + 1);j++) {
+      nb_segmentation[j] = nb_segmentation_forward[i][j];
       if (nb_segmentation[j] > inb_segmentation) {
         nb_segmentation[j] = inb_segmentation;
       }
@@ -4950,6 +5562,16 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
 #   endif
 
   }
+
+# ifdef MESSAGE
+  buff = 1.;
+  for (i = 1;i < nb_segment;i++) {
+    buff *= (double)(length[index] - i) / (double)i;
+//    buff = buff * (length[index] - i) / i;
+  }
+  os << "\n" << SEQ_label[SEQL_NB_SEGMENTATION] << ": "
+     << nb_segmentation_forward[length[index] - 1][nb_segment - 1] << " (" << buff << ")" << endl;
+# endif
 
   // restauration
 
@@ -5066,14 +5688,26 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
 #   ifdef DEBUG
     psegment = int_sequence[index][0];
     for (j = 0;j < length[index];j++) {
-/*      segmentation_probability[j][*psegment++] += exp(forward[length[index] - 1][nb_segment - 1][i] - likelihood);
-
-      if (((i == 0) || (*psegment != *(psegment - 1))) &&
-          (forward[length[index] - 1][nb_segment - 1][i] > segmentation_probability[j][*psegment])) { */
-      if (forward[length[index] - 1][nb_segment - 1][i] > segmentation_probability[j][*psegment]) {
-        segmentation_probability[j][*psegment] = forward[length[index] - 1][nb_segment - 1][i];
+//      if (((i == 0) || (*psegment != *(psegment - 1))) &&
+//          (forward[length[index] - 1][nb_segment - 1][i] > segment_probability[j][*psegment])) {
+      if (forward[length[index] - 1][nb_segment - 1][i] > segment_probability[j][*psegment]) {
+        segment_probability[j][*psegment] = forward[length[index] - 1][nb_segment - 1][i];
       }
       psegment++;
+    }
+#   endif
+
+#   ifdef MESSAGE
+    if (inb_segmentation >= 1000) {
+
+      // approximation des probabilites lissees
+
+      buff = exp(forward[length[index] - 1][nb_segment - 1][i]);
+      approximated_likelihood += buff;
+      psegment = int_sequence[index][0];
+      for (j = 0;j < length[index];j++) {
+        smoothed_probability[j][*psegment++] += buff;
+      }
     }
 #   endif
 
@@ -5094,6 +5728,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
     switch (format) {
 
     case 'a' : {
+      if (inb_segmentation <= 200) {
       psegment = int_sequence[index][0];
       for (j = 0;j < length[index];j++) {
         os << *psegment++ << " ";
@@ -5155,6 +5790,7 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
           os << endl;
         }
       }
+      }
       break;
     }
 
@@ -5211,27 +5847,26 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
     if (likelihood != D_INF) {
       for (i = 0;i < length[index];i++) {
         for (j = 0;j < nb_segment;j++) {
-          if (segmentation_probability[i][j] != D_INF) {
-            segmentation_probability[i][j] = exp(segmentation_probability[i][j] - likelihood);
+          if (segment_probability[i][j] != D_INF) {
+            segment_probability[i][j] = exp(segment_probability[i][j] - likelihood);
           }
           else {
-            segmentation_probability[i][j] = 0.;
+            segment_probability[i][j] = 0.;
           }
         }
       }
 
-//      os << "\n" << SEQ_label[SEQL_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
       os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
     }
 
     else {
       for (i = 0;i < length[index];i++) {
         for (j = 0;j < nb_segment;j++) {
-          if (segmentation_probability[i][j] != D_INF) {
-            segmentation_probability[i][j] = exp(segmentation_probability[i][j] - segmentation_likelihood);
+          if (segment_probability[i][j] != D_INF) {
+            segment_probability[i][j] = exp(segment_probability[i][j] - segmentation_likelihood);
           }
           else {
-            segmentation_probability[i][j] = 0.;
+            segment_probability[i][j] = 0.;
           }
         }
       }
@@ -5244,8 +5879,144 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
       *psegment++ = I_DEFAULT;
     }
 
-    profile_ascii_print(os , index , nb_segment , segmentation_probability ,
+    profile_ascii_print(os , index , nb_segment , segment_probability ,
                         SEQ_label[SEQL_SEGMENT]);
+  }
+# endif
+
+# ifdef MESSAGE
+  if (inb_segmentation >= 1000) {
+    double previous_cumul[2] ,
+           cdf[10] = {0.5 , 0.75 , 0.9 , 0.95 , 0.975 , 0.99 , 0.995, 0.9975 , 0.999 , 1};
+    long double divergence;
+    Distribution *segmentation;
+
+
+    for (i = 0;i < length[index];i++) {
+      for (j = 0;j < nb_segment;j++) {
+        smoothed_probability[i][j] /= approximated_likelihood;
+      }
+    }
+
+    psegment = int_sequence[index][0];
+    for (i = 0;i < length[index];i++) {
+      *psegment++ = I_DEFAULT;
+    }
+
+    os << "\n" << SEQ_label[SEQL_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
+
+    profile_ascii_print(os , index , nb_segment , smoothed_probability , SEQ_label[SEQL_SEGMENT]);
+
+    // approximation de la divergence de Kullback-Leibler de la loi uniforme par rapport
+    // a la loi des segmentations
+
+    segmentation = new Distribution(inb_segmentation);
+    likelihood_cumul = 0.;
+    divergence = 0.;
+
+    if (likelihood != D_INF) {
+      for (i = 0;i < inb_segmentation;i++) {
+        segmentation->mass[i] = expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood);
+        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood);
+        segmentation->cumul[i] = likelihood_cumul;
+
+        divergence += expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood) *
+                      (forward[length[index] - 1][nb_segment - 1][i] - likelihood +
+                       log(nb_segmentation_forward[length[index] - 1][nb_segment - 1]));
+      }
+
+      segmentation->complement = 1. - likelihood_cumul;
+    }
+
+    else {
+      for (i = 0;i < inb_segmentation;i++) {
+        segmentation->mass[i] = expl(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood;
+
+        divergence += expl(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood *
+                      (forward[length[index] - 1][nb_segment - 1][i] - logl(approximated_likelihood) +
+                       log(nb_segmentation_forward[length[index] - 1][nb_segment - 1]));
+      }
+
+      segmentation->cumul_computation();
+    }
+
+    segmentation->max_computation();
+    segmentation->mean_computation();
+    segmentation->variance_computation();
+
+    os << "\n" << SEQ_label[SEQL_SEGMENTATION_DIVERGENCE] << ": " << divergence << endl;
+
+    os << "\n";
+    segmentation->ascii_characteristic_print(os , true);
+    if (likelihood != D_INF) {
+      os << STAT_label[STATL_CUMULATIVE] << " " << SEQ_label[SEQL_POSTERIOR_PROBABILITY] << ": "
+         << likelihood_cumul << " (" << inb_segmentation << " "
+         << SEQ_label[SEQL_SEGMENTATIONS]<< ")" << endl;
+    }
+
+    delete segmentation;
+
+    os << "\n";
+    likelihood_cumul = 0.;
+    i = 0;
+    if (likelihood != D_INF) {
+      for (j = 0;j < inb_segmentation;j++) {
+        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][j]);
+        if (likelihood_cumul / expl(likelihood) > cdf[i]) {
+          os << j << " " << likelihood_cumul / expl(likelihood) << " (";
+          if (i == 0) {
+            os << j / nb_segmentation_forward[length[index] - 1][nb_segment - 1] << ")" << endl;
+          }
+          else {
+            os << likelihood_cumul / expl(likelihood) - previous_cumul[0] << " "
+               << j / nb_segmentation_forward[length[index] - 1][nb_segment - 1] - previous_cumul[1] << ")" << endl;
+          }
+          previous_cumul[0] = likelihood_cumul / expl(likelihood);
+          previous_cumul[1] = j / nb_segmentation_forward[length[index] - 1][nb_segment - 1];
+          i++;
+        }
+      }
+    }
+
+    else {
+      for (j = 0;j < inb_segmentation;j++) {
+        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][j]);
+        if (likelihood_cumul / approximated_likelihood > cdf[i]) {
+          os << j << " " << likelihood_cumul / approximated_likelihood << " (";
+          if (i == 0) {
+            os << j / nb_segmentation_forward[length[index] - 1][nb_segment - 1] << ")" << endl;
+          }
+          else {
+            os << likelihood_cumul / approximated_likelihood - previous_cumul[0] << " "
+               << j / nb_segmentation_forward[length[index] - 1][nb_segment - 1] - previous_cumul[1] << ")" << endl;
+          }
+          previous_cumul[0] = likelihood_cumul / approximated_likelihood;
+          previous_cumul[1] = j / nb_segmentation_forward[length[index] - 1][nb_segment - 1];
+          i++;
+        }
+      }
+    }
+
+/*    ofstream out_file("Spreadsheet/segmentation_probability.xld");
+  
+    likelihood_cumul = 0.;
+    if (likelihood != D_INF) {
+      for (i = 0;i < inb_segmentation;i++) {
+        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][i]);
+        out_file << i << "\t" << expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood) << "\t"
+                 << likelihood_cumul / expl(likelihood) << "\t"
+                 << 1. / nb_segmentation_forward[length[index] - 1][nb_segment - 1] << endl;
+      }
+    }
+
+    else {
+      for (i = 0;i < inb_segmentation;i++) {
+        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][i]);
+        out_file << i << "\t" << expl(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood << "\t"
+                 << likelihood_cumul / approximated_likelihood << "\t"
+                 << 1. / nb_segmentation_forward[length[index] - 1][nb_segment - 1] << endl;
+      }
+    } */
   }
 # endif
 
@@ -5260,6 +6031,11 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
   delete [] residual;
 
   delete [] contrast;
+
+  for (i = 0;i < length[index];i++) {
+    delete [] nb_segmentation_forward[i];
+  }
+  delete [] nb_segmentation_forward;
 
   for (i = 0;i < length[index];i++) {
     for (j = 0;j < nb_segment;j++) {
@@ -5312,9 +6088,18 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
 
 # ifdef DEBUG
   for (i = 0;i < length[index];i++) {
-    delete [] segmentation_probability[i];
+    delete [] segment_probability[i];
   }
-  delete [] segmentation_probability;
+  delete [] segment_probability;
+# endif
+
+# ifdef MESSAGE
+  if (inb_segmentation >= 1000) {
+    for (i = 0;i < length[index];i++) {
+      delete [] smoothed_probability[i];
+    }
+    delete [] smoothed_probability;
+  }
 # endif
 
   return segmentation_likelihood;
@@ -5323,18 +6108,20 @@ double Sequences::L_segmentation(int index , int nb_segment , int *model_type ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul par maximisation des profils de segmentation d'une sequence.
+ *  Calcul par maximisation des profils de segments/ruptures d'une sequence.
  *
  *  arguments : indice de la sequence, nombre de segments, types des modeles,
- *              rangs (variables ordinales), stream, type de sortie, format
- *              de fichier ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot),
- *              vraisemblance des donnees.
+ *              rangs (variables ordinales), stream, pointeur sur un objet MultiPlotSet,
+ *              type de sortie, format de sortie ('a' : ASCII, 's' : Spreadsheet,
+ *              'g' : Gnuplot, 'p' : plotable), vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::forward_backward_dynamic_programming(int index , int nb_segment , int *model_type ,
-                                                       double **rank , ostream &os , int output ,
-                                                       char format , double likelihood) const
+double Sequences::forward_backward_dynamic_programming(int index , int nb_segment ,
+                                                       int *model_type , double **rank ,
+                                                       ostream *os , MultiPlotSet *plot_set ,
+                                                       int output , char format ,
+                                                       double likelihood) const
 
 {
   register int i , j , k , m;
@@ -5356,7 +6143,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       factorial[i] = new double[length[index]];
     }
     else {
-      factorial[i] = 0;
+      factorial[i] = NULL;
     }
   }
 
@@ -5364,7 +6151,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
     frequency = new int[max_nb_value];
   }
   else {
-    frequency = 0;
+    frequency = NULL;
   }
 
   sequence_mean = new double[nb_variable];
@@ -5400,7 +6187,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       mean[i] = new double[length[index]];
     }
     else {
-      mean[i] = 0;
+      mean[i] = NULL;
     }
   }
 
@@ -6055,10 +6842,10 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       if (likelihood != D_INF) {
         switch (output) {
         case CHANGE_POINT :
-          os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\n\n";
           break;
         case SEGMENT :
-          os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
           break;
         }
       }
@@ -6066,23 +6853,23 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       else {
         switch (output) {
         case CHANGE_POINT :
-          os << "\n" << SEQ_label[SEQL_MAX_CHANGE_POINT_LIKELIHOOD] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_CHANGE_POINT_LIKELIHOOD] << "\n\n";
           break;
         case SEGMENT :
-          os << "\n" << SEQ_label[SEQL_MAX_SEGMENT_LIKELIHOOD] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_SEGMENT_LIKELIHOOD] << "\n\n";
           break;
         }
       }
 
-      profile_ascii_print(os , index , nb_segment , backward_output ,
+      profile_ascii_print(*os , index , nb_segment , backward_output ,
                           (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT]) ,
                           mean);
 
-      os << "\n" << SEQ_label[SEQL_SEGMENTATION_LIKELIHOOD] << ": " << segmentation_likelihood;
+      *os << "\n" << SEQ_label[SEQL_SEGMENTATION_LIKELIHOOD] << ": " << segmentation_likelihood;
       if (likelihood != D_INF) {
-        os << "   (" << exp(segmentation_likelihood - likelihood) << ")";
+        *os << "   (" << exp(segmentation_likelihood - likelihood) << ")";
       }
-      os << endl;
+      *os << endl;
       break;
     }
 
@@ -6090,10 +6877,10 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       if (likelihood != D_INF) {
         switch (output) {
         case CHANGE_POINT :
-          os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\n\n";
           break;
         case SEGMENT :
-          os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_SEGMENT_PROBABILITY] << "\n\n";
           break;
         }
       }
@@ -6101,28 +6888,78 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       else {
         switch (output) {
         case CHANGE_POINT :
-          os << "\n" << SEQ_label[SEQL_MAX_CHANGE_POINT_LIKELIHOOD] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_CHANGE_POINT_LIKELIHOOD] << "\n\n";
           break;
         case SEGMENT :
-          os << "\n" << SEQ_label[SEQL_MAX_SEGMENT_LIKELIHOOD] << "\n\n";
+          *os << "\n" << SEQ_label[SEQL_MAX_SEGMENT_LIKELIHOOD] << "\n\n";
           break;
         }
       }
 
-      profile_spreadsheet_print(os , index , nb_segment , backward_output ,
+      profile_spreadsheet_print(*os , index , nb_segment , backward_output ,
                                 (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT]) ,
                                 mean);
 
-      os << "\n" << SEQ_label[SEQL_SEGMENTATION_LIKELIHOOD] << "\t" << segmentation_likelihood;
+      *os << "\n" << SEQ_label[SEQL_SEGMENTATION_LIKELIHOOD] << "\t" << segmentation_likelihood;
       if (likelihood != D_INF) {
-        os << "\t" << exp(segmentation_likelihood - likelihood);
+        *os << "\t" << exp(segmentation_likelihood - likelihood);
       }
-      os << endl;
+      *os << endl;
       break;
     }
 
     case 'g' : {
-      profile_plot_print(os , index , nb_segment , backward_output , mean);
+      profile_plot_print(*os , index , nb_segment , backward_output , mean);
+      break;
+    }
+
+    case 'p' : {
+      MultiPlotSet &plot = *plot_set;
+
+      i = 0;
+      for (j = 1;j < nb_variable;j++) {
+        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+            (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+            (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+          if (index_parameter) {
+            if (type[j] != REAL_VALUE) {
+              for (k = 0;k < length[index];k++) {
+                plot[i][0].add_point(index_parameter[index][k] , int_sequence[index][j][k]);
+              }
+            }
+            else {
+              for (k = 0;k < length[index];k++) {
+                plot[i][0].add_point(index_parameter[index][k] , real_sequence[index][j][k]);
+              }
+            }
+
+            for (k = 0;k < length[index];k++) {
+              plot[i][1].add_point(index_parameter[index][k] , mean[j][k]);
+            }
+          }
+
+          else {
+            if (type[j] != REAL_VALUE) {
+              for (k = 0;k < length[index];k++) {
+                plot[i][0].add_point(k , int_sequence[index][j][k]);
+              }
+            }
+            else {
+              for (k = 0;k < length[index];k++) {
+                plot[i][0].add_point(k , real_sequence[index][j][k]);
+              }
+            }
+
+            for (k = 0;k < length[index];k++) {
+              plot[i][1].add_point(k , mean[j][k]);
+            }
+          }
+
+          i++;
+        }
+      }
+
+      profile_plotable_write(plot[i] , index , nb_segment , backward_output);
       break;
     }
     }
@@ -6147,12 +6984,12 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
       switch (format) {
       case 'a' :
-        os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
-           << " (" << ambiguity / length[index] << ")" << endl;
+        *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
+            << " (" << ambiguity / length[index] << ")" << endl;
         break;
       case 's' :
-        os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
-           << "\t" << ambiguity / length[index] << "\t" << endl;
+        *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
+            << "\t" << ambiguity / length[index] << "\t" << endl;
         break;
       }
     }
@@ -6203,7 +7040,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des L segmentations optimales et des profils de segmentation d'une sequence.
+ *  Calcul des N segmentations les plus probables et
+ *  des profils de segments/ruptures d'une sequence.
  *
  *  arguments : reference sur un objet Format_error, stream,
  *              identificateur de la sequence, nombre de segments, types des modeles,
@@ -6335,18 +7173,18 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
         rank[i] = seq->marginal[i]->rank_computation();
       }
       else {
-        rank[i] = 0;
+        rank[i] = NULL;
       }
     }
 
     for (i = 0;i < seq->nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
         if (model_type[0] != MEAN_CHANGE) {
-          likelihood = seq->forward_backward(i , nb_segment , model_type , rank , &os ,
+          likelihood = seq->forward_backward(i , nb_segment , model_type , rank , &os , 0 ,
                                              output , format);
         }
         segmentation_likelihood = seq->forward_backward_dynamic_programming(i , nb_segment , model_type ,
-                                                                            rank , os , output , format ,
+                                                                            rank , &os , 0 , output , format ,
                                                                             likelihood);
         if (segmentation_likelihood == D_INF) {
           status = false;
@@ -6356,7 +7194,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
         else {
           switch (segmentation) {
           case FORWARD_DYNAMIC_PROGRAMMING :
-            seq->L_segmentation(i , nb_segment , model_type , rank , os , format ,
+            seq->N_segmentation(i , nb_segment , model_type , rank , os , format ,
                                 nb_segmentation , likelihood);
             break;
           case FORWARD_BACKWARD_SAMPLING :
@@ -6382,8 +7220,8 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des L segmentations optimales et des profils de segmentation d'une sequence et
- *  ecriture des resultats dans un fichier.
+ *  Calcul des N segmentations les plus probables, des profils de
+ *  segments/ruptures d'une sequence et ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path, identificateur de la sequence,
  *              nombre de segments, types des modeles, type de sortie, format de fichier
@@ -6421,8 +7259,8 @@ bool Sequences::segment_profile_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des profils de segmentation d'une sequence et affichage
- *  des resultats au format Gnuplot.
+ *  Calcul des profils de segments/ruptures d'une sequence et
+ *  affichage des resultats au format Gnuplot.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              identificateur de la sequence, nombre de segments, types des modeles,
@@ -6560,13 +7398,13 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
           rank[i] = seq->marginal[i]->rank_computation();
         }
         else {
-          rank[i] = 0;
+          rank[i] = NULL;
         }
       }
 
       if (model_type[0] != MEAN_CHANGE) {
         likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
-                                           out_data_file , output , 'g');
+                                           out_data_file , 0 , output , 'g');
         out_data_file->close();
         delete out_data_file;
 
@@ -6579,7 +7417,7 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 #     endif
 
       segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
-                                                                          rank , *out_data_file ,
+                                                                          rank , out_data_file , 0 ,
                                                                           output , 'g' , likelihood);
       out_data_file->close();
       delete out_data_file;
@@ -6615,19 +7453,6 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
 
           out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n";
 
-          for (j = 1;j < seq->nb_variable;j++) {
-            if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
-                (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
-                (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
-              out_file << "set title";
-              if (title) {
-                out_file << " \"" << title << "\"";
-              }
-              out_file << "\n\n";
-              break;
-            }
-          }
-
           if (index_parameter) {
             if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
               out_file << "set xtics 0,1" << endl;
@@ -6638,76 +7463,34 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
               if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
                   (model_type[k - 1] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
                   (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
+                out_file << "set title \"";
+                if (title) {
+                  out_file << title;
+                  if (seq->nb_variable > 2) {
+                    out_file << " - ";
+                  }
+                }
+
+                if (seq->nb_variable > 2) {
+                  out_file << STAT_label[STATL_VARIABLE] << " " << k;
+                }
+                out_file << "\n\n";
+
                 out_file << "plot [" << seq->index_parameter[index][0] << ":"
                          << seq->index_parameter[index][seq->length[index] - 1] << "] ["
                          << MIN(seq->min_value[k] , 0) << ":"
                          << MAX(seq->max_value[k] , seq->min_value[k] + 1) << "] "
                          << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << 1 << " : " << j++
-                         << " title \"" << SEQ_label[SEQL_SEQUENCE] << "\" with linespoints" << ",\\" << endl;
+                         << " title \"" << SEQ_label[SEQL_SEQUENCE] << " " << iidentifier
+                         << "\" with linespoints" << ",\\" << endl;
                 out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << 1 << " : " << j++
-                         << " title \"" << SEQ_label[SEQL_SEGMENT_MEAN] << "\" with linespoints" << endl;
+                         << " title \"" << SEQ_label[SEQL_SEGMENT_MEAN] << "\" with lines" << endl;
 
                 if (i == 0) {
                   out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
                 }
                 out_file << endl;
               }
-            }
-
-            if (likelihood != D_INF) {
-              out_file << "set title \"";
-              if (title) {
-                out_file << title << " - ";
-              }
-              switch (output) {
-              case CHANGE_POINT :
-                out_file << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\"\n\n";
-                break;
-              case SEGMENT :
-                out_file << SEQ_label[SEQL_POSTERIOR_SEGMENT_PROBABILITY] << "\"\n\n";
-                break;
-              }
-
-              out_file << "plot [" << seq->index_parameter[index][0] << ":"
-                       << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
-              for (k = 0;k < nb_segment;k++) {
-                out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                         << 1 << " : " << k + 2 << " title \""
-                         << (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT])
-                         << " " << k << "\" with linespoints";
-                if (k < nb_segment - 1) {
-                  out_file << ",\\";
-                }
-                out_file << endl;
-              }
-
-              if (i == 0) {
-                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-              }
-              out_file << endl;
-
-              out_file << "set title \"";
-              if (title) {
-                out_file << " \"" << title << " - ";
-              }
-              out_file << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\"\n\n";
-
-              out_file << "plot [" << seq->index_parameter[index][0] << ":"
-                       << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
-              for (k = MAX(1 , nb_segment - 3);k < nb_segment;k++) {
-                out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                         << 1 << " : " << nb_segment + k + 1 << " title \"" << k + 1 << " "
-                         << SEQ_label[SEQL_SEGMENTS] << "\" with linespoints";
-                if (k < nb_segment - 1) {
-                  out_file << ",\\";
-                }
-                out_file << endl;
-              }
-
-              if (i == 0) {
-                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-              }
-              out_file << endl;
             }
 
             out_file << "set title \"";
@@ -6756,37 +7539,12 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
               out_file << endl;
             }
 
-            if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
-              out_file << "set xtics autofreq" << endl;
-            }
-          }
-
-          else {
-            if (seq->length[index] - 1 < TIC_THRESHOLD) {
-              out_file << "set xtics 0,1" << endl;
-            }
-
-            j = 1;
-            for (k = 1;k < seq->nb_variable;k++) {
-              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
-                  (model_type[k - 1] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
-                  (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
-                out_file << "plot [0:" << seq->length[index] - 1 << "] ["
-                         << MIN(seq->min_value[k] , 0) << ":"
-                         << MAX(seq->max_value[k] , seq->min_value[k] + 1) << "] "
-                         << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                         << " title \"" << iidentifier << "\" with linespoints,\\" << endl;
-                out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                         << " title \"" << SEQ_label[SEQL_SEGMENT_MEAN] << "\" with linespoints" << endl;
-
-                if (i == 0) {
-                  out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-                }
-                out_file << endl;
-              }
-            }
-
             if (likelihood != D_INF) {
+              if (i == 0) {
+                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+              }
+              out_file << endl;
+
               out_file << "set title \"";
               if (title) {
                 out_file << title << " - ";
@@ -6800,10 +7558,11 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
                 break;
               }
 
-              out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+              out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                       << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
               for (k = 0;k < nb_segment;k++) {
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                         << k + 1 << " title \""
+                         << 1 << " : " << k + 2 << " title \""
                          << (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT])
                          << " " << k << "\" with linespoints";
                 if (k < nb_segment - 1) {
@@ -6823,21 +7582,61 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
               }
               out_file << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\"\n\n";
 
-              out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+              out_file << "plot [" << seq->index_parameter[index][0] << ":"
+                       << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
               for (k = MAX(1 , nb_segment - 3);k < nb_segment;k++) {
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
-                         << nb_segment + k << " title \"" << k + 1 << " "
+                         << 1 << " : " << nb_segment + k + 1 << " title \"" << k + 1 << " "
                          << SEQ_label[SEQL_SEGMENTS] << "\" with linespoints";
                 if (k < nb_segment - 1) {
                   out_file << ",\\";
                 }
                 out_file << endl;
               }
+            }
 
-              if (i == 0) {
-                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+            if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+              out_file << "set xtics autofreq" << endl;
+            }
+          }
+
+          else {
+            if (seq->length[index] - 1 < TIC_THRESHOLD) {
+              out_file << "set xtics 0,1" << endl;
+            }
+
+            j = 1;
+            for (k = 1;k < seq->nb_variable;k++) {
+              if ((model_type[k - 1] == POISSON_CHANGE) || (model_type[k - 1] == GAUSSIAN_CHANGE) ||
+                  (model_type[k - 1] == MEAN_CHANGE) || (model_type[k - 1] == VARIANCE_CHANGE) ||
+                  (model_type[k - 1] == MEAN_VARIANCE_CHANGE)) {
+                out_file << "set title \"";
+                if (title) {
+                  out_file << title;
+                  if (seq->nb_variable > 2) {
+                    out_file << " - ";
+                  }
+                }
+
+                if (seq->nb_variable > 2) {
+                  out_file << STAT_label[STATL_VARIABLE] << " " << k;
+                }
+                out_file << "\n\n";
+
+                out_file << "plot [0:" << seq->length[index] - 1 << "] ["
+                         << MIN(seq->min_value[k] , 0) << ":"
+                         << MAX(seq->max_value[k] , seq->min_value[k] + 1) << "] "
+                         << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << j++
+                         << " title \"" << SEQ_label[SEQL_SEQUENCE] << " " << iidentifier
+                         << "\" with linespoints,\\" << endl;
+                out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << j++
+                         << " title \"" << SEQ_label[SEQL_SEGMENT_MEAN] << "\" with lines" << endl;
+
+                if (i == 0) {
+                  out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                }
+                out_file << endl;
               }
-              out_file << endl;
             }
 
             out_file << "set title \"";
@@ -6885,6 +7684,60 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
               out_file << endl;
             }
 
+            if (likelihood != D_INF) {
+              if (i == 0) {
+                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+              }
+              out_file << endl;
+
+              out_file << "set title \"";
+              if (title) {
+                out_file << title << " - ";
+              }
+              switch (output) {
+              case CHANGE_POINT :
+                out_file << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\"\n\n";
+                break;
+              case SEGMENT :
+                out_file << SEQ_label[SEQL_POSTERIOR_SEGMENT_PROBABILITY] << "\"\n\n";
+                break;
+              }
+
+              out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+              for (k = 0;k < nb_segment;k++) {
+                out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                         << k + 1 << " title \""
+                         << (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT])
+                         << " " << k << "\" with linespoints";
+                if (k < nb_segment - 1) {
+                  out_file << ",\\";
+                }
+                out_file << endl;
+              }
+
+              if (i == 0) {
+                out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+              }
+              out_file << endl;
+
+              out_file << "set title \"";
+              if (title) {
+                out_file << " \"" << title << " - ";
+              }
+              out_file << SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY] << "\"\n\n";
+
+              out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+              for (k = MAX(1 , nb_segment - 3);k < nb_segment;k++) {
+                out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+                         << nb_segment + k << " title \"" << k + 1 << " "
+                         << SEQ_label[SEQL_SEGMENTS] << "\" with linespoints";
+                if (k < nb_segment - 1) {
+                  out_file << ",\\";
+                }
+                out_file << endl;
+              }
+            }
+
             if (seq->length[index] - 1 < TIC_THRESHOLD) {
               out_file << "set xtics autofreq" << endl;
             }
@@ -6908,6 +7761,361 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des profils de segments/ruptures d'une sequence et
+ *  sortie graphique des resultats.
+ *
+ *  arguments : reference sur un objet Format_error, identificateur de la sequence,
+ *              nombre de segments, types des modeles, type de sortie.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Sequences::segment_profile_plotable_write(Format_error &error , int iidentifier ,
+                                                        int nb_segment , int *model_type ,
+                                                        int output) const
+
+{
+  bool status = true;
+  register int i , j;
+  int index , nb_plot_set;
+  double likelihood = D_INF , segmentation_likelihood , **rank;
+  Sequences *seq;
+  ostringstream title , legend;
+  MultiPlotSet *plot_set;
+
+
+  plot_set = NULL;
+  error.init();
+
+  if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
+      (index_parameter_type == POSITION)) {
+    status = false;
+    error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if ((model_type[i] == MULTINOMIAL_CHANGE) || (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) ||
+        (model_type[i] == POISSON_CHANGE)) {
+      if ((type[i] != INT_VALUE) && (type[i] != STATE)) {
+        status = false;
+        ostringstream error_message , correction_message;
+        error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                      << STAT_error[STATR_VARIABLE_TYPE];
+        correction_message << STAT_variable_word[INT_VALUE] << " or "
+                           << STAT_variable_word[STATE];
+        error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      }
+
+      else {
+        if (min_value[i] < 0) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << SEQ_error[SEQR_POSITIVE_MIN_VALUE];
+          error.update((error_message.str()).c_str());
+        }
+
+        if (!marginal[i]) {
+          status = false;
+          ostringstream error_message;
+          error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+          error.update((error_message.str()).c_str());
+        }
+
+        else if (model_type[i] == MULTINOMIAL_CHANGE) {
+          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+            status = false;
+            ostringstream error_message;
+            error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                          << STAT_error[STATR_NB_VALUE];
+            error.update((error_message.str()).c_str());
+          }
+
+          else {
+            for (j = 0;j < marginal[i]->nb_value;j++) {
+              if (marginal[i]->frequency[j] == 0) {
+                status = false;
+                ostringstream error_message;
+                error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                              << STAT_error[STATR_MISSING_VALUE] << " " << j;
+                error.update((error_message.str()).c_str());
+              }
+            }
+          }
+        }
+      }
+    }
+
+    else if ((type[i] != INT_VALUE) && (type[i] != STATE) && (type[i] != REAL_VALUE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE] << " or "
+                         << STAT_variable_word[REAL_VALUE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+  }
+
+  for (i = 0;i < nb_sequence;i++) {
+    if (iidentifier == identifier[i]) {
+      index = i;
+      break;
+    }
+  }
+
+  if (i == nb_sequence) {
+    status = false;
+    error.update(SEQ_error[SEQR_SEQUENCE_IDENTIFIER]);
+  }
+
+  else if ((nb_segment < 2) || (nb_segment > length[index] / 2)) {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_SEGMENT]);
+  }
+
+  if (status) {
+
+    // calcul du nombre de vues
+
+    nb_plot_set = 1;
+    for (i = 1;i < seq->nb_variable;i++) {
+      if ((model_type[i - 1] == POISSON_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
+          (model_type[i - 1] == MEAN_CHANGE) || (model_type[i - 1] == VARIANCE_CHANGE) ||
+          (model_type[i - 1] == MEAN_VARIANCE_CHANGE)) {
+        nb_plot_set++;
+      }
+    }
+    if (model_type[0] != MEAN_CHANGE) {
+      nb_plot_set += 2;
+    }
+
+    plot_set = new MultiPlotSet(nb_plot_set);
+
+    MultiPlotSet &plot = *plot_set;
+
+    plot.border = "15 lw 0";
+
+    seq = new Sequences(*this , 'a');
+
+    // calcul des rangs pour les variables ordinales
+
+    rank = new double*[seq->nb_variable];
+
+    for (i = 1;i < seq->nb_variable;i++) {
+      if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
+        rank[i] = seq->marginal[i]->rank_computation();
+      }
+      else {
+        rank[i] = NULL;
+      }
+    }
+
+    if (model_type[0] != MEAN_CHANGE) {
+      likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
+                                         0 , plot_set , output , 'p');
+    }
+
+#   ifdef DEBUG
+    likelihood = D_INF;
+#   endif
+
+    segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
+                                                                        rank , 0 , plot_set ,
+                                                                        output , 'p' , likelihood);
+
+    if (segmentation_likelihood == D_INF) {
+      delete plot_set;
+      plot_set = NULL;
+      error.update(SEQ_error[SEQR_SEGMENTATION_FAILURE]);
+    }
+
+    else {
+      i = 0;
+
+      // vues : sequence et fonction en escalier
+
+      for (j = 1;j < seq->nb_variable;j++) {
+        if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
+            (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
+            (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+          if (seq->nb_variable > 2) {
+            title.str("");
+            title << STAT_label[STATL_VARIABLE] << " " << j;
+            plot[i].title = title.str();
+          }
+
+          if (seq->index_parameter) {
+            plot[i].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+            if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+              plot[i].xtics = 1;
+            }
+          }
+
+          else {
+            plot[i].xrange = Range(0 , seq->length[index] - 1);
+            if (seq->length[index] - 1 < TIC_THRESHOLD) {
+              plot[i].xtics = 1;
+            }
+          }
+
+          plot[i].yrange = Range(MIN(seq->min_value[j] , 0) , MAX(seq->max_value[j] , seq->min_value[j] + 1));
+
+          plot[i].resize(2);
+
+          legend.str("");
+          legend << SEQ_label[SEQL_SEQUENCE] << " " << iidentifier;
+          plot[i][0].legend = legend.str();
+
+          plot[i][0].style = "linespoints";
+
+          plot[i][1].legend = SEQ_label[SEQL_SEGMENT_MEAN];
+          plot[i][1].style = "lines";
+          i++;
+        }
+      }
+
+      // vue : probabilitees maximum
+
+      if (likelihood != D_INF) {
+        switch (output) {
+        case CHANGE_POINT :
+          plot[i].title = SEQ_label[SEQL_MAX_POSTERIOR_CHANGE_POINT_PROBABILITY];
+          break;
+        case SEGMENT :
+          plot[i].title = SEQ_label[SEQL_MAX_POSTERIOR_SEGMENT_PROBABILITY];
+          break;
+        }
+
+        plot[i].yrange = Range(0. , exp(segmentation_likelihood - likelihood));
+      }
+
+      else {
+        switch (output) {
+        case CHANGE_POINT :
+          plot[i].title = SEQ_label[SEQL_MAX_CHANGE_POINT_LIKELIHOOD];
+          break;
+        case SEGMENT :
+          plot[i].title = SEQ_label[SEQL_MAX_SEGMENT_LIKELIHOOD];
+          break;
+        }
+
+        plot[i].yrange = Range(0. , 1.);
+      }
+
+      if (seq->index_parameter) {
+        plot[i].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[i].xtics = 1;
+        }
+      }
+
+      else {
+        plot[i].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[i].xtics = 1;
+        }
+      }
+
+      plot[i].resize(nb_segment);
+
+      for (j = 0;j < nb_segment;j++) {
+        legend.str("");
+        legend << (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT])
+               << " " << j;
+        plot[i][j].legend = legend.str();
+
+        plot[i][j].style = "linespoints";
+      }
+      i++;
+
+      // vue : probabilitees lissees
+
+      if (likelihood != D_INF) {
+        switch (output) {
+        case CHANGE_POINT :
+          plot[i].title = SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY];
+          break;
+        case SEGMENT :
+          plot[i].title = SEQ_label[SEQL_POSTERIOR_SEGMENT_PROBABILITY];
+          break;
+        }
+
+        if (seq->index_parameter) {
+          plot[i].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+          if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+            plot[i].xtics = 1;
+          }
+        }
+
+        else {
+          plot[i].xrange = Range(0 , seq->length[index] - 1);
+          if (seq->length[index] - 1 < TIC_THRESHOLD) {
+            plot[i].xtics = 1;
+          }
+        }
+
+        plot[i].yrange = Range(0. , 1.);
+
+        plot[i].resize(nb_segment);
+
+        for (j = 0;j < nb_segment;j++) {
+          legend.str("");
+          legend << (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT])
+                 << " " << j;
+          plot[i][j].legend = legend.str();
+
+          plot[i][j].style = "linespoints";
+        }
+        i++;
+
+        // vue : profils de rupture
+
+        plot[i].title = SEQ_label[SEQL_POSTERIOR_CHANGE_POINT_PROBABILITY];
+
+        if (seq->index_parameter) {
+          plot[i].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+          if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+            plot[i].xtics = 1;
+          }
+        }
+
+        else {
+          plot[i].xrange = Range(0 , seq->length[index] - 1);
+          if (seq->length[index] - 1 < TIC_THRESHOLD) {
+            plot[i].xtics = 1;
+          }
+        }
+
+        plot[i].yrange = Range(0. , 1.);
+
+        plot[i].resize(MAX(nb_segment - 1 , 3));
+
+        for (j = MAX(1 , nb_segment - 3);j < nb_segment;j++) {
+          legend.str("");
+          legend << j + 1 << " " << SEQ_label[SEQL_SEGMENTS];
+          plot[i][j].legend = legend.str();
+
+          plot[i][j].style = "linespoints";
+        }
+      }
+    }
+
+    delete seq;
+
+    for (i = 1;i < seq->nb_variable;i++) {
+      delete [] rank[i];
+    }
+    delete [] rank;
+  }
+
+  return plot_set;
 }
 
 
@@ -6937,7 +8145,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
   Sequences *seq , *iseq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
@@ -7048,7 +8256,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         rank[i] = marginal[i - 1]->rank_computation();
       }
       else {
-        rank[i] = 0;
+        rank[i] = NULL;
       }
     }
 
@@ -7077,16 +8285,16 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           end_frequency[i][j] = new int[seq->marginal[i]->nb_value];
         }
 
-        begin_sum[i] = 0;
-        end_sum[i] = 0;
+        begin_sum[i] = NULL;
+        end_sum[i] = NULL;
       }
 
       else {
         begin_sum[i] = new double[seq->length[0]];
         end_sum[i] = new double[seq->length[0]];
 
-        begin_frequency[i] = 0;
-        end_frequency[i] = 0;
+        begin_frequency[i] = NULL;
+        end_frequency[i] = NULL;
       }
 
       if (model_type[i - 1] == POISSON_CHANGE) {
@@ -7097,10 +8305,10 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       }
 
       else {
-        begin_factorial_sum[i] = 0;
-        end_factorial_sum[i] = 0;
+        begin_factorial_sum[i] = NULL;
+        end_factorial_sum[i] = NULL;
 
-        factorial[i] = 0;
+        factorial[i] = NULL;
       }
 
       if ((model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
@@ -7109,8 +8317,8 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
         end_sum_square[i] = new double[seq->length[0]];
       }
       else {
-        begin_sum_square[i] = 0;
-        end_sum_square[i] = 0;
+        begin_sum_square[i] = NULL;
+        end_sum_square[i] = NULL;
       }
     }
 
@@ -7118,7 +8326,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       frequency = new int[max_nb_value];
     }
     else {
-      frequency = 0;
+      frequency = NULL;
     }
 
     mean = new double[seq->nb_variable];
@@ -8889,7 +10097,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
       width[4] = column_width(max_nb_segment , penalized_likelihood + 1) + ASCII_SPACE;
       width[5] = column_width(max_nb_segment , weight + 1) + ASCII_SPACE;
 
-      os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " |  2 * " << STAT_label[STATL_LIKELIHOOD]
+      os << "\n" << SEQ_label[SEQL_NB_SEGMENT] << " | 2 * " << STAT_label[STATL_LIKELIHOOD]
          << " | " << STAT_label[STATL_FREE_PARAMETERS] << " | " << SEQ_label[SEQL_PENALTY]
          << " | Modified " << STAT_criterion_word[BIC] << " - "  << STAT_label[STATL_WEIGHT] << endl;
 
@@ -9006,7 +10214,7 @@ Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
   Sequences *seq , *oseq;
 
 
-  oseq = 0;
+  oseq = NULL;
   error.init();
 
   if (((index_parameter_type == TIME) && (index_interval->variance > 0.)) ||
@@ -9114,7 +10322,7 @@ Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
         rank[i] = seq->marginal[i]->rank_computation();
       }
       else {
-        rank[i] = 0;
+        rank[i] = NULL;
       }
 
       // calcul des dispersions pour la standardisation
@@ -9168,7 +10376,7 @@ Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
         mean[i] = new double[seq->length[index]];
       }
       else {
-        mean[i] = 0;
+        mean[i] = NULL;
       }
     }
 
