@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -40,8 +40,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
@@ -65,14 +64,14 @@ Semi_markov::Semi_markov()
 
 {
   nb_iterator = 0;
-  semi_markov_data = 0;
+  semi_markov_data = NULL;
 
-  state_subtype = 0;
-  forward = 0;
+  state_subtype = NULL;
+  forward = NULL;
 
   nb_output_process = 0;
-  nonparametric_process = 0;
-  parametric_process = 0;
+  nonparametric_process = NULL;
+  parametric_process = NULL;
 }
 
 
@@ -93,25 +92,25 @@ Semi_markov::Semi_markov(char itype , int inb_state , int inb_output_process , i
 
 
   nb_iterator = 0;
-  semi_markov_data = 0;
+  semi_markov_data = NULL;
 
-  state_subtype = 0;
-  forward = 0;
+  state_subtype = NULL;
+  forward = NULL;
 
   nb_output_process = inb_output_process;
 
   nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
   nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state , false);
   parametric_process = new Parametric_process*[nb_output_process + 1];
-  parametric_process[0] = 0;
+  parametric_process[0] = NULL;
 
   for (i = 1;i <= nb_output_process;i++) {
     if (*nb_value <= NB_OUTPUT) {
       nonparametric_process[i] = new Nonparametric_sequence_process(nb_state , *nb_value++ , true);
-      parametric_process[i] = 0;
+      parametric_process[i] = NULL;
     }
     else {
-      nonparametric_process[i] = 0;
+      nonparametric_process[i] = NULL;
       parametric_process[i] = new Parametric_process(nb_state , (int)(*nb_value++ * SAMPLE_NB_VALUE_COEFF));
     }
   }
@@ -138,7 +137,7 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
 
 
   nb_iterator = 0;
-  semi_markov_data = 0;
+  semi_markov_data = NULL;
 
   nb_output_process = (pobservation ? 1 : 0);
   nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
@@ -147,7 +146,7 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
     nonparametric_process[1] = new Nonparametric_sequence_process(*pobservation);
   }
 
-  parametric_process = 0;
+  parametric_process = NULL;
 
   for (i = 0;i < nb_state;i++) {
     if (transition[i][i] < 1.) {
@@ -168,7 +167,7 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
       forward[i] = new Forward(*(nonparametric_process[0]->sojourn_time[i]));
     }
     else {
-      forward[i] = 0;
+      forward[i] = NULL;
     }
   }
 
@@ -209,7 +208,7 @@ void Semi_markov::copy(const Semi_markov &smarkov , bool data_flag , int param)
     semi_markov_data = new Semi_markov_data(*(smarkov.semi_markov_data) , false);
   }
   else {
-    semi_markov_data = 0;
+    semi_markov_data = NULL;
   }
 
   state_subtype = new int[nb_state];
@@ -224,7 +223,7 @@ void Semi_markov::copy(const Semi_markov &smarkov , bool data_flag , int param)
       forward[i] = new Forward(*(smarkov.forward[i]) , param);
     }
     else {
-      forward[i] = 0;
+      forward[i] = NULL;
     }
   }
 
@@ -234,10 +233,10 @@ void Semi_markov::copy(const Semi_markov &smarkov , bool data_flag , int param)
 
   if (smarkov.parametric_process) {
     parametric_process = new Parametric_process*[nb_output_process + 1];
-    parametric_process[0] = 0;
+    parametric_process[0] = NULL;
   }
   else {
-    parametric_process = 0;
+    parametric_process = NULL;
   }
 
   switch (param) {
@@ -279,11 +278,11 @@ void Semi_markov::copy(const Semi_markov &smarkov , bool data_flag , int param)
   for (i = 1;i <= nb_output_process;i++) {
     if (smarkov.nonparametric_process[i]) {
       if (smarkov.parametric_process) {
-        parametric_process[i] = 0;
+        parametric_process[i] = NULL;
       }
     }
     else {
-      nonparametric_process[i] = 0;
+      nonparametric_process[i] = NULL;
       parametric_process[i] = new Parametric_process(*(smarkov.parametric_process[i]));
     }
   }
@@ -402,11 +401,11 @@ Parametric_model* Semi_markov::extract(Format_error &error , int type ,
   Histogram *phisto;
 
 
-  dist = 0;
+  dist = NULL;
   error.init();
 
-  pdist = 0;
-  pparam = 0;
+  pdist = NULL;
+  pparam = NULL;
 
   if (type == OBSERVATION) {
     if ((variable < 1) || (variable > nb_output_process)) {
@@ -485,7 +484,7 @@ Parametric_model* Semi_markov::extract(Format_error &error , int type ,
   }
 
   if (status) {
-    phisto = 0;
+    phisto = NULL;
 
     if (semi_markov_data) {
       switch (semi_markov_data->type[0]) {
@@ -569,10 +568,10 @@ Parametric_model* Semi_markov::extract(Format_error &error , int state , int his
   Histogram *phisto;
 
 
-  dist = 0;
+  dist = NULL;
   error.init();
 
-  pdist = 0;
+  pdist = NULL;
 
   if ((state < 0) || (state >= nb_state)) {
     status = false;
@@ -591,7 +590,7 @@ Parametric_model* Semi_markov::extract(Format_error &error , int state , int his
     }
 
     else {
-      phisto = 0;
+      phisto = NULL;
 
       if ((semi_markov_data) && (semi_markov_data->type[0] == STATE)) {
         switch (histogram_type) {
@@ -636,7 +635,7 @@ Semi_markov_data* Semi_markov::extract_data(Format_error &error) const
   Semi_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if (!semi_markov_data) {
@@ -712,7 +711,7 @@ Semi_markov* semi_markov_ascii_read(Format_error &error , const char *path , int
   ifstream in_file(path);
 
 
-  smarkov = 0;
+  smarkov = NULL;
   error.init();
 
   if (!in_file) {
@@ -797,7 +796,7 @@ Semi_markov* semi_markov_ascii_read(Format_error &error , const char *path , int
 
         // analyse du format et lecture des lois d'observation
 
-        observation = 0;
+        observation = NULL;
 
         while (buffer.readLine(in_file , false)) {
           line++;
@@ -909,7 +908,7 @@ ostream& Semi_markov::ascii_write(ostream &os , const Semi_markov_data *seq ,
 {
   register int i;
   int variable;
-  Histogram **observation = 0;
+  Histogram **observation = NULL;
   Sequence_characteristics *characteristics;
 
 
@@ -950,7 +949,7 @@ ostream& Semi_markov::ascii_write(ostream &os , const Semi_markov_data *seq ,
     characteristics = seq->characteristics[0];
   }
   else {
-    characteristics = 0;
+    characteristics = NULL;
   }
 
   nonparametric_process[0]->ascii_print(os , 0 , 0 , characteristics , exhaustive ,
@@ -1035,7 +1034,7 @@ ostream& Semi_markov::ascii_write(ostream &os , const Semi_markov_data *seq ,
         characteristics = seq->characteristics[variable];
       }
       else {
-        characteristics = 0;
+        characteristics = NULL;
       }
     }
 
@@ -1252,7 +1251,7 @@ ostream& Semi_markov::spreadsheet_write(ostream &os , const Semi_markov_data *se
 {
   register int i;
   int variable;
-  Histogram **observation = 0;
+  Histogram **observation = NULL;
   Sequence_characteristics *characteristics;
 
 
@@ -1293,7 +1292,7 @@ ostream& Semi_markov::spreadsheet_write(ostream &os , const Semi_markov_data *se
     characteristics = seq->characteristics[0];
   }
   else {
-    characteristics = 0;
+    characteristics = NULL;
   }
 
   nonparametric_process[0]->spreadsheet_print(os , 0 , 0 , characteristics , forward);
@@ -1338,7 +1337,7 @@ ostream& Semi_markov::spreadsheet_write(ostream &os , const Semi_markov_data *se
         characteristics = seq->characteristics[variable];
       }
       else {
-        characteristics = 0;
+        characteristics = NULL;
       }
     }
 
@@ -1484,7 +1483,7 @@ bool Semi_markov::plot_write(const char *prefix , const char *title ,
   bool status;
   register int i;
   int variable;
-  Histogram *hlength = 0 , **observation = 0;
+  Histogram *hlength = NULL , **observation = NULL;
   Sequence_characteristics *characteristics;
 
 
@@ -1493,7 +1492,7 @@ bool Semi_markov::plot_write(const char *prefix , const char *title ,
     hlength = seq->hlength;
   }
   else {
-    characteristics = 0;
+    characteristics = NULL;
   }
 
   status = nonparametric_process[0]->plot_print(prefix , title , 0 , 0 , characteristics ,
@@ -1523,7 +1522,7 @@ bool Semi_markov::plot_write(const char *prefix , const char *title ,
           characteristics = seq->characteristics[variable];
         }
         else {
-          characteristics = 0;
+          characteristics = NULL;
         }
       }
 
@@ -1568,126 +1567,307 @@ bool Semi_markov::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Semi_markov et de la structure
+ *  de donnees associee.
+ *
+ *  argument : pointeur sur les sequences observees.
  *
  *--------------------------------------------------------------*/
 
-/* RWDEFINE_COLLECTABLE(Semi_markov , STATI_SEMI_MARKOV);
-
-
-RWspace Semi_markov::binaryStoreSize() const
+MultiPlotSet* Semi_markov::get_plotable(const Semi_markov_data *seq) const
 
 {
-  register int i;
-  RWspace size;
+  register int i , j;
+  int nb_plot_set , index_length , index , variable;
+  Histogram *hlength = NULL , **observation = NULL;
+  Sequence_characteristics *characteristics;
+  MultiPlotSet *plot_set;
 
 
-  size = Chain::binaryStoreSize() + sizeof(nb_output_process);
-
-  for (i = 0;i <= nb_output_process;i++) {
-    size += nonparametric_process[i]->binaryStoreSize();
-  }
-
-  if (semi_markov_data) {
-    size += semi_markov_data->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Semi_markov::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  Chain::restoreGuts(is);
-
-  is >> nb_output_process;
-
-  nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
-  for (i = 0;i <= nb_output_process;i++) {
-    nonparametric_process[i] = new Nonparametric_sequence_process();
-    nonparametric_process[i]->restoreGuts(is);
-  }
-
-  is >> semi_markov_data;
-  if (semi_markov_data == RWnilCollectable) {
-    semi_markov_data = 0;
-  }
-}
-
-
-void Semi_markov::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  Chain::restoreGuts(file);
-
-  file.Read(nb_output_process);
-
-  nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
-  for (i = 0;i <= nb_output_process;i++) {
-    nonparametric_process[i] = new Nonparametric_sequence_process();
-    nonparametric_process[i]->restoreGuts(file);
-  }
-
-  file >> semi_markov_data;
-  if (semi_markov_data == RWnilCollectable) {
-    semi_markov_data = 0;
-  }
-}
-
-
-void Semi_markov::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Chain::saveGuts(os);
-
-  os << nb_output_process;
-  for (i = 0;i <= nb_output_process;i++) {
-    nonparametric_process[i]->saveGuts(os);
-  }
-
-  if (semi_markov_data) {
-    os << semi_markov_data;
+  if ((seq) && (seq->type[0] == STATE)) {
+    characteristics = seq->characteristics[0];
   }
   else {
-    os << RWnilCollectable;
+    characteristics = NULL;
   }
+
+  // calcul du nombre de vues
+
+  nb_plot_set = 0;
+
+  if ((nonparametric_process[0]->index_value) || (characteristics)) {
+    nb_plot_set++;
+
+    if (characteristics) {
+      index_length = characteristics->index_value->plot_length_computation();
+
+      if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+        nb_plot_set++;
+      }
+      nb_plot_set++;
+    }
+  }
+
+  if ((nonparametric_process[0]->first_occurrence) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((nonparametric_process[0]->first_occurrence) &&
+          (nonparametric_process[0]->first_occurrence[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->first_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+  }
+
+  if ((nonparametric_process[0]->recurrence_time) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((nonparametric_process[0]->recurrence_time) &&
+          (nonparametric_process[0]->recurrence_time[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->recurrence_time[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+  }
+
+  if ((nonparametric_process[0]->sojourn_time) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((nonparametric_process[0]->sojourn_time) &&
+          (nonparametric_process[0]->sojourn_time[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->sojourn_time[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((characteristics) && (i < characteristics->nb_value) &&
+          (characteristics->initial_run) &&
+          (characteristics->initial_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((forward) && (forward[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->final_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+  }
+
+  if ((nonparametric_process[0]->nb_run) || (nonparametric_process[0]->nb_occurrence) ||
+      ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
+    for (i = 0;i < nb_state;i++) {
+      if (nonparametric_process[0]->nb_run) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if (nonparametric_process[0]->nb_occurrence) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_occurrence) &&
+               (characteristics->nb_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+
+    if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
+      nb_plot_set++;
+    }
+  }
+
+  for (i = 1;i <= nb_output_process;i++) {
+    if (seq) {
+      switch (seq->type[0]) {
+      case INT_VALUE :
+        variable = i - 1;
+        break;
+      case STATE :
+        variable = i;
+        break;
+      }
+
+      if (seq->characteristics[variable]) {
+        characteristics = seq->characteristics[variable];
+      }
+      else {
+        characteristics = NULL;
+      }
+    }
+
+    if (nonparametric_process[i]) {
+      if ((nonparametric_process[i]->index_value) || (characteristics)) {
+        nb_plot_set++;
+
+        if (characteristics) {
+          index_length = characteristics->index_value->plot_length_computation();
+
+          if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+            nb_plot_set++;
+          }
+          nb_plot_set++;
+        }
+      }
+
+      if ((nonparametric_process[i]->first_occurrence) || (characteristics)) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if ((nonparametric_process[i]->first_occurrence) &&
+              (nonparametric_process[i]->first_occurrence[j])) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (j < characteristics->nb_value) &&
+                   (characteristics->first_occurrence[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+      }
+
+      if ((nonparametric_process[i]->recurrence_time) || (characteristics)) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if ((nonparametric_process[i]->recurrence_time) &&
+              (nonparametric_process[i]->recurrence_time[j])) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (i < characteristics->nb_value) &&
+                   (characteristics->recurrence_time[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+      }
+
+      if ((nonparametric_process[i]->sojourn_time) || (characteristics)) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if ((nonparametric_process[i]->sojourn_time) &&
+              (nonparametric_process[i]->sojourn_time[j])) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (i < characteristics->nb_value) &&
+                   (characteristics->sojourn_time[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+
+/*          if ((characteristics) && (j < characteristics->nb_value) &&
+              (characteristics->initial_run) &&
+              (characteristics->initial_run[j]->nb_element > 0)) {
+            nb_plot_set++;
+          } */
+
+          if ((characteristics) && (j < characteristics->nb_value) &&
+              (characteristics->final_run[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+      }
+
+      if ((nonparametric_process[i]->nb_run) || (nonparametric_process[i]->nb_occurrence) ||
+          ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if (nonparametric_process[i]->nb_run) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (j < characteristics->nb_value) &&
+                   (characteristics->nb_run) && (characteristics->nb_run[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+
+          if (nonparametric_process[i]->nb_occurrence) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (j < characteristics->nb_value) &&
+                   (characteristics->nb_occurrence) &&
+                   (characteristics->nb_occurrence[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+
+        if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
+          nb_plot_set++;
+        }
+      }
+    }
+
+    nb_plot_set += nb_state;
+  }
+
+  plot_set = new MultiPlotSet(nb_plot_set);
+  plot_set->border = "15 lw 0";
+
+  if ((seq) && (seq->type[0] == STATE)) {
+    characteristics = seq->characteristics[0];
+    hlength = seq->hlength;
+  }
+  else {
+    characteristics = NULL;
+  }
+
+  index = 0;
+  plot_set->variable_nb_viewpoint[0] = 0;
+  nonparametric_process[0]->plotable_write(*plot_set , index , 0 , 0 , characteristics ,
+                                           hlength , forward);
+
+  if (seq) {
+    hlength = seq->hlength;
+  }
+
+  for (i = 1;i <= nb_output_process;i++) {
+    if (seq) {
+      switch (seq->type[0]) {
+      case INT_VALUE :
+        variable = i - 1;
+        break;
+      case STATE :
+        variable = i;
+        break;
+      }
+
+      if (seq->observation) {
+        observation = seq->observation[variable];
+      }
+
+      if (seq->characteristics[variable]) {
+        characteristics = seq->characteristics[variable];
+      }
+      else {
+        characteristics = NULL;
+      }
+    }
+
+    if (nonparametric_process[i]) {
+      plot_set->variable_nb_viewpoint[i] = 0;
+      nonparametric_process[i]->plotable_write(*plot_set , index , i , observation ,
+                                               characteristics , hlength);
+    }
+    else {
+      parametric_process[i]->plotable_write(*plot_set , index , i , observation);
+    }
+  }
+
+  return plot_set;
 }
 
 
-void Semi_markov::saveGuts(RWFile &file) const
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Semi_markov.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Semi_markov::get_plotable() const
 
 {
-  register int i;
-
-
-  Chain::saveGuts(file);
-
-  file.Write(nb_output_process);
-  for (i = 0;i <= nb_output_process;i++) {
-    nonparametric_process[i]->saveGuts(file);
-  }
-
-  if (semi_markov_data) {
-    file << semi_markov_data;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
+  return get_plotable(semi_markov_data);
+}
 
 
 /*--------------------------------------------------------------*
@@ -1904,13 +2084,13 @@ double Semi_markov::penalty_computation(bool hidden , double min_probability) co
 Semi_markov_data::Semi_markov_data()
 
 {
-  semi_markov = 0;
-  chain_data = 0;
+  semi_markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -1928,13 +2108,13 @@ Semi_markov_data::Semi_markov_data(const Histogram &ihlength , int inb_variable 
 :Markovian_sequences(ihlength , inb_variable , init_flag)
 
 {
-  semi_markov = 0;
-  chain_data = 0;
+  semi_markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -1951,13 +2131,13 @@ Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq)
 :Markovian_sequences(seq , 'a' , DEFAULT)
 
 {
-  semi_markov = 0;
-  chain_data = 0;
+  semi_markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -1976,13 +2156,13 @@ Semi_markov_data::Semi_markov_data(const Markovian_sequences &seq , char transfo
 :Markovian_sequences(seq , transform , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
 
 {
-  semi_markov = 0;
-  chain_data = 0;
+  semi_markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -2005,14 +2185,14 @@ void Semi_markov_data::copy(const Semi_markov_data &seq , bool model_flag)
     semi_markov = new Semi_markov(*(seq.semi_markov) , false);
   }
   else {
-    semi_markov = 0;
+    semi_markov = NULL;
   }
 
   if (seq.chain_data) {
     chain_data = new Chain_data(*(seq.chain_data));
   }
   else {
-    chain_data = 0;
+    chain_data = NULL;
   }
 
   likelihood = seq.likelihood;
@@ -2025,7 +2205,7 @@ void Semi_markov_data::copy(const Semi_markov_data &seq , bool model_flag)
     }
   }
   else {
-    posterior_probability = 0;
+    posterior_probability = NULL;
   }
 }
 
@@ -2095,10 +2275,10 @@ Distribution_data* Semi_markov_data::extract(Format_error &error , int type ,
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
-  phisto = 0;
+  phisto = NULL;
 
   if (type == OBSERVATION) {
     if ((variable < 2) || (variable > nb_variable)) {
@@ -2207,8 +2387,8 @@ Distribution_data* Semi_markov_data::extract(Format_error &error , int type ,
   }
 
   if (status) {
-    pdist = 0;
-    pparam = 0;
+    pdist = NULL;
+    pparam = NULL;
 
     switch (type) {
 
@@ -2291,7 +2471,7 @@ Semi_markov_data* Semi_markov_data::remove_index_parameter(Format_error &error) 
   error.init();
 
   if (!index_parameter) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
@@ -2480,134 +2660,22 @@ bool Semi_markov_data::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Semi_markov_data.
  *
  *--------------------------------------------------------------*/
 
-/* RWDEFINE_COLLECTABLE(Semi_markov_data , STATI_SEMI_MARKOV_DATA);
-
-
-RWspace Semi_markov_data::binaryStoreSize() const
+MultiPlotSet* Semi_markov_data::get_plotable() const
 
 {
-  RWspace size = Markovian_sequences::binaryStoreSize() + sizeof(likelihood) + sizeof(hidden_likelihood);
+  MultiPlotSet *plot_set;
 
-  size += sizeof(true);
-  if (chain_data) {
-    size += chain_data->binaryStoreSize();
-  }
 
   if (semi_markov) {
-    size += semi_markov->recursiveStoreSize();
+    plot_set = semi_markov->get_plotable(this);
+  }
+  else {
+    plot_set = NULL;
   }
 
-  return size;
+  return plot_set;
 }
-
-
-void Semi_markov_data::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-
-
-  delete semi_markov;
-  delete chain_data;
-
-  Markovian_sequences::restoreGuts(is);
-
-  is >> status;
-  if (status) {
-    chain_data = new Chain_data();
-    chain_data->restoreGuts(is);
-  }
-  else {
-    chain_data = 0;
-  }
-
-  is >> likelihood >> hidden_likelihood;
-
-  is >> semi_markov;
-  if (semi_markov == RWnilCollectable) {
-    semi_markov = 0;
-  }
-}
-
-
-void Semi_markov_data::restoreGuts(RWFile &file)
-
-{
-  bool status;
-
-
-  delete semi_markov;
-  delete chain_data;
-
-  Markovian_sequences::restoreGuts(file);
-
-  file.Read(status);
-  if (status) {
-    chain_data = new Chain_data();
-    chain_data->restoreGuts(file);
-  }
-  else {
-    chain_data = 0;
-  }
-
-  file.Read(likelihood);
-  file.Read(hidden_likelihood);
-
-  file >> semi_markov;
-  if (semi_markov == RWnilCollectable) {
-    semi_markov = 0;
-  }
-}
-
-
-void Semi_markov_data::saveGuts(RWvostream &os) const
-
-{
-  Markovian_sequences::saveGuts(os);
-
-  if (chain_data) {
-    os << true;
-    chain_data->saveGuts(os);
-  }
-  else {
-    os << false;
-  }
-
-  os << likelihood << hidden_likelihood;
-
-  if (semi_markov) {
-    os << semi_markov;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Semi_markov_data::saveGuts(RWFile &file) const
-
-{
-  Markovian_sequences::saveGuts(file);
-
-  if (chain_data) {
-    file.Write(true);
-    chain_data->saveGuts(file);
-  }
-  else {
-    file.Write(false);
-  }
-
-  file.Write(likelihood);
-  file.Write(hidden_likelihood);
-
-  if (semi_markov) {
-    file << semi_markov;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
