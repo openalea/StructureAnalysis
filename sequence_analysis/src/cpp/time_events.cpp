@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -43,8 +43,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
@@ -81,7 +80,7 @@ void Time_events::build_histogram()
 
   hnb_event = new Histogram*[time[nb_class - 1] + 1];
   for (i = 0;i <= time[nb_class - 1];i++) {
-    hnb_event[i] = 0;
+    hnb_event[i] = NULL;
   }
 
   ptime = time;
@@ -352,9 +351,9 @@ Time_events::Time_events(int inb_class)
   nb_class = inb_class;
 
   if (nb_class == 0) {
-    time = 0;
-    nb_event = 0;
-    frequency = 0;
+    time = NULL;
+    nb_event = NULL;
+    frequency = NULL;
   }
 
   else {
@@ -376,9 +375,9 @@ Time_events::Time_events(int inb_class)
     }
   }
 
-  htime = 0;
-  hnb_event = 0;
-  mixture = 0;
+  htime = NULL;
+  hnb_event = NULL;
+  mixture = NULL;
 }
 
 
@@ -426,7 +425,7 @@ void Time_events::copy(const Time_events &timev)
   hnb_event = new Histogram*[htime->nb_value];
 
   for (i = 0;i < htime->offset;i++) {
-    hnb_event[i] = 0;
+    hnb_event[i] = NULL;
   }
 
   for (i = htime->offset;i < htime->nb_value;i++) {
@@ -434,7 +433,7 @@ void Time_events::copy(const Time_events &timev)
       hnb_event[i] = new Histogram(*(timev.hnb_event[i]));
     }
     else {
-      hnb_event[i] = 0;
+      hnb_event[i] = NULL;
     }
   }
 
@@ -478,7 +477,7 @@ void Time_events::merge(int nb_sample , const Time_events **ptimev)
   hnb_event = new Histogram*[htime->nb_value];
 
   for (i = 0;i < htime->offset;i++) {
-    hnb_event[i] = 0;
+    hnb_event[i] = NULL;
   }
 
   for (i = htime->offset;i < htime->nb_value;i++) {
@@ -493,7 +492,7 @@ void Time_events::merge(int nb_sample , const Time_events **ptimev)
     }
 
     else {
-      hnb_event[i] = 0;
+      hnb_event[i] = NULL;
     }
   }
 
@@ -591,7 +590,7 @@ Distribution_data* Time_events::extract(Format_error &error , int histo_type , i
 
   if (histo_type == NB_EVENT) {
     if ((itime < htime->offset) || (itime >= htime->nb_value) || (htime->frequency[itime] == 0)) {
-      histo = 0;
+      histo = NULL;
       error.update(SEQ_error[SEQR_OBSERVATION_TIME]);
     }
     else {
@@ -624,7 +623,7 @@ Time_events* Time_events::time_scaling(Format_error &error , int scaling_coeff) 
   Time_events *timev;
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if (scaling_coeff < 1) {
@@ -681,7 +680,7 @@ Time_events* Time_events::time_select(Format_error &error , int min_time ,
   Time_events *timev;
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if ((min_time < 1) || (min_time > max_time)) {
@@ -737,7 +736,7 @@ Time_events* Time_events::time_select(Format_error &error , int min_time ,
 
     else {
       delete timev;
-      timev = 0;
+      timev = NULL;
       error.update(SEQ_error[SEQR_EMPTY_RENEWAL_DATA]);
     }
   }
@@ -766,7 +765,7 @@ Time_events* Time_events::nb_event_select(Format_error &error , int min_nb_event
   Time_events *timev;
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if ((min_nb_event < 0) || (min_nb_event > max_nb_event)) {
@@ -822,7 +821,7 @@ Time_events* Time_events::nb_event_select(Format_error &error , int min_nb_event
 
     else {
       delete timev;
-      timev = 0;
+      timev = NULL;
       error.update(SEQ_error[SEQR_EMPTY_RENEWAL_DATA]);
     }
   }
@@ -848,7 +847,7 @@ Time_events* Histogram::build_time_events(Format_error &error , int itime) const
   Time_events *timev;
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if (itime / (nb_value - 1) < MIN_INTER_EVENT) {
@@ -902,7 +901,7 @@ Time_events* Histogram::build_time_events(Format_error &error , int itime) const
 
     timev->hnb_event = new Histogram*[itime + 1];
     for (i = 0;i < itime;i++) {
-      timev->hnb_event[i] = 0;
+      timev->hnb_event[i] = NULL;
     }
     timev->hnb_event[itime] = new Histogram(*this);
 
@@ -937,7 +936,7 @@ Time_events* time_events_ascii_read(Format_error &error , const char *path)
   ifstream in_file(path);
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if (!in_file) {
@@ -1125,7 +1124,7 @@ Time_events* old_time_events_ascii_read(Format_error &error , const char *path)
   ifstream in_file(path);
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   if (!in_file) {
@@ -1962,9 +1961,9 @@ MultiPlotSet* Time_events::get_plotable() const
 
   // vue : lois de comptage pour chaque temps d'observation
 
+  nb_histo = 0;
   max_nb_value = 0;
   max_frequency = 0;
-  nb_histo = 0;
 
   for (j = htime->offset;j < htime->nb_value;j++) {
     if (htime->frequency[j] > 0) {
@@ -1993,9 +1992,9 @@ MultiPlotSet* Time_events::get_plotable() const
 
   plot[i].resize(nb_histo);
 
+  j = 0;
   shift = 0.;
 
-  j = 0;
   for (k = htime->offset;k < htime->nb_value;k++) {
     if (htime->frequency[k] > 0) {
       legend.str("");
@@ -2129,192 +2128,6 @@ double Time_events::min_inter_event_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Time_events , STATI_TIME_EVENTS);
-
-
-RWspace Time_events::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = sizeof(nb_element) + sizeof(nb_class) +
-         sizeof(*time) * nb_class + sizeof(*nb_event) * nb_class +
-         sizeof(*frequency) * nb_class + htime->binaryStoreSize();
-
-  for (i = htime->offset;i < htime->nb_value;i++) {
-    if (htime->frequency[i] > 0) {
-      size += hnb_event[i]->binaryStoreSize();
-    }
-  }
-
-  size += mixture->binaryStoreSize();
-
-  return size;
-}
-
-
-void Time_events::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-  int *ptime , *pnb_event , *pfrequency;
-
-
-  remove();
-
-  is >> nb_element >> nb_class;
-
-  time = new int[nb_class];
-  ptime = time;
-  for (i = 0;i < nb_class;i++) {
-    is >> *ptime++;
-  }
-
-  nb_event = new int[nb_class];
-  pnb_event = nb_event;
-  for (i = 0;i < nb_class;i++) {
-    is >> *pnb_event++;
-  }
-
-  frequency = new int[nb_class];
-  pfrequency = frequency;
-  for (i = 0;i < nb_class;i++) {
-    is >> *pfrequency++;
-  }
-
-  htime = new Histogram();
-  htime->restoreGuts(is);
-
-  hnb_event = new Histogram*[htime->nb_value];
-
-  for (i = 0;i < htime->offset;i++) {
-    hnb_event[i] = 0;
-  }
-  for (i = htime->offset;i < htime->nb_value;i++) {
-    if (htime->frequency[i] > 0) {
-      hnb_event[i] = new Histogram();
-      hnb_event[i]->restoreGuts(is);
-    }
-    else {
-      hnb_event[i] = 0;
-    }
-  }
-
-  mixture = new Histogram();
-  mixture->restoreGuts(is);
-}
-
-
-void Time_events::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_element);
-  file.Read(nb_class);
-
-  time = new int[nb_class];
-  file.Read(time , nb_class);
-  nb_event = new int[nb_class];
-  file.Read(nb_event , nb_class);
-  frequency = new int[nb_class];
-  file.Read(frequency , nb_class);
-
-  htime = new Histogram();
-  htime->restoreGuts(file);
-
-  hnb_event = new Histogram*[htime->nb_value];
-
-  for (i = 0;i < htime->offset;i++) {
-    hnb_event[i] = 0;
-  }
-  for (i = htime->offset;i < htime->nb_value;i++) {
-    if (htime->frequency[i] > 0) {
-      hnb_event[i] = new Histogram();
-      hnb_event[i]->restoreGuts(file);
-    }
-    else {
-      hnb_event[i] = 0;
-    }
-  }
-
-  mixture = new Histogram();
-  mixture->restoreGuts(file);
-}
-
-
-void Time_events::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-  int *ptime , *pnb_event , *pfrequency;
-
-
-  os << nb_element << nb_class;
-
-  ptime = time;
-  for (i = 0;i < nb_class;i++) {
-    os << *ptime++;
-  }
-
-  pnb_event = nb_event;
-  for (i = 0;i < nb_class;i++) {
-    os << *pnb_event++;
-  }
-
-  pfrequency = frequency;
-  for (i = 0;i < nb_class;i++) {
-    os << *pfrequency++;
-  }
-
-  htime->saveGuts(os);
-
-  for (i = htime->offset;i < htime->nb_value;i++) {
-    if (htime->frequency[i] > 0) {
-      hnb_event[i]->saveGuts(os);
-    }
-  }
-
-  mixture->saveGuts(os);
-}
-
-
-void Time_events::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_element);
-  file.Write(nb_class);
-
-  file.Write(time , nb_class);
-  file.Write(nb_event , nb_class);
-  file.Write(frequency , nb_class);
-
-  htime->saveGuts(file);
-
-  for (i = htime->offset;i < htime->nb_value;i++) {
-    if (htime->frequency[i] > 0) {
-      hnb_event[i]->saveGuts(file);
-    }
-  }
-
-  mixture->saveGuts(file);
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Calcul de l'effectif total d'un objet Time_events.
  *
  *--------------------------------------------------------------*/
@@ -2343,20 +2156,20 @@ void Time_events::nb_element_computation()
 Renewal_data::Renewal_data()
 
 {
-  renewal = 0;
+  renewal = NULL;
 
   type = 'v';
 
-  length = 0;
-  sequence = 0;
+  length = NULL;
+  sequence = NULL;
 
-  inter_event = 0;
-  within = 0;
-  length_bias = 0;
-  backward = 0;
-  forward = 0;
+  inter_event = NULL;
+  within = NULL;
+  length_bias = NULL;
+  backward = NULL;
+  forward = NULL;
 
-  index_event = 0;
+  index_event = NULL;
 }
 
 
@@ -2371,20 +2184,20 @@ Renewal_data::Renewal_data()
 Renewal_data::Renewal_data(int nb_element , int itime)
 
 {
-  renewal = 0;
+  renewal = NULL;
 
   type = 'e';
 
   length = new int[nb_element];
   sequence = new int*[nb_element];
 
-  inter_event = 0;
+  inter_event = NULL;
   within = new Histogram(itime);
-  length_bias = 0;
+  length_bias = NULL;
   backward = new Histogram(itime);
   forward = new Histogram(itime + 1);
 
-  index_event = 0;
+  index_event = NULL;
 }
 
 
@@ -2401,20 +2214,20 @@ Renewal_data::Renewal_data(const Time_events &timev , int itype)
 :Time_events(timev)
 
 {
-  renewal = 0;
+  renewal = NULL;
 
   type = itype;
 
-  length = 0;
-  sequence = 0;
+  length = NULL;
+  sequence = NULL;
 
-  inter_event = 0;
-  within = 0;
-  length_bias = 0;
-  backward = 0;
-  forward = 0;
+  inter_event = NULL;
+  within = NULL;
+  length_bias = NULL;
+  backward = NULL;
+  forward = NULL;
 
-  index_event = 0;
+  index_event = NULL;
 }
 
 
@@ -2430,12 +2243,12 @@ Renewal_data::Renewal_data(const Time_events &timev , int itype)
 Renewal_data::Renewal_data(int itype , const Renewal &renew)
 
 {
-  renewal = 0;
+  renewal = NULL;
 
   type = itype;
 
-  length = 0;
-  sequence = 0;
+  length = NULL;
+  sequence = NULL;
 
   inter_event = new Histogram(*(renew.inter_event));
   within = new Histogram(*(renew.inter_event));
@@ -2443,7 +2256,7 @@ Renewal_data::Renewal_data(int itype , const Renewal &renew)
   backward = new Histogram(renew.backward->alloc_nb_value);
   forward = new Histogram(*(renew.forward));
 
-  index_event = 0;
+  index_event = NULL;
 }
 
 
@@ -2472,7 +2285,7 @@ Renewal_data::Renewal_data(int nb_sample , const Renewal_data **itimev)
 
   delete [] ptimev;
 
-  renewal = 0;
+  renewal = NULL;
 
   type = itimev[0]->type;
 
@@ -2488,13 +2301,13 @@ Renewal_data::Renewal_data(int nb_sample , const Renewal_data **itimev)
     }
   }
 
-  inter_event = 0;
-  within = 0;
-  length_bias = 0;
-  backward = 0;
-  forward = 0;
+  inter_event = NULL;
+  within = NULL;
+  length_bias = NULL;
+  backward = NULL;
+  forward = NULL;
 
-  index_event = 0;
+  index_event = NULL;
 }
 
 
@@ -2518,7 +2331,7 @@ void Renewal_data::copy(const Renewal_data &timev , bool model_flag)
     renewal = new Renewal(*(timev.renewal) , false);
   }
   else {
-    renewal = 0;
+    renewal = NULL;
   }
 
   type = timev.type;
@@ -2543,14 +2356,14 @@ void Renewal_data::copy(const Renewal_data &timev , bool model_flag)
     inter_event = new Histogram(*(timev.inter_event));
   }
   else {
-    inter_event = 0;
+    inter_event = NULL;
   }
   within = new Histogram(*(timev.within));
   if (timev.length_bias) {
     length_bias = new Histogram(*(timev.length_bias));
   }
   else {
-    length_bias = 0;
+    length_bias = NULL;
   }
   backward = new Histogram(*(timev.backward));
   forward = new Histogram(*(timev.forward));
@@ -2647,7 +2460,7 @@ Renewal_data* Renewal_data::merge(Format_error &error , int nb_sample , const Re
   const Renewal_data **ptimev;
 
 
-  timev = 0;
+  timev = NULL;
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
@@ -2750,7 +2563,7 @@ Distribution_data* Renewal_data::extract(Format_error &error , int histo_type , 
 
   if (histo_type == NB_EVENT) {
     if ((itime < htime->offset) || (itime >= htime->nb_value) || (htime->frequency[itime] == 0)) {
-      histo = 0;
+      histo = NULL;
       error.update(SEQ_error[SEQR_OBSERVATION_TIME]);
     }
     else {
@@ -2760,7 +2573,7 @@ Distribution_data* Renewal_data::extract(Format_error &error , int histo_type , 
   }
 
   else {
-    histo = 0;
+    histo = NULL;
 
     switch (histo_type) {
 
@@ -2819,8 +2632,8 @@ Distribution_data* Renewal_data::extract(Format_error &error , int histo_type , 
     }
 
     if (status) {
-      pdist = 0;
-      pparam = 0;
+      pdist = NULL;
+      pparam = NULL;
 
       if (renewal) {
         switch (histo_type) {
@@ -3681,7 +3494,7 @@ MultiPlotSet* Renewal_data::get_plotable() const
     int nb_plot_set , nb_histo , max_nb_value , max_frequency;
     double shift;
     const Histogram *phisto[2] , **merged_histo;
-    ostringstream legend;
+    ostringstream title , legend;
 
 
     nb_plot_set = 3;
@@ -3880,15 +3693,21 @@ MultiPlotSet* Renewal_data::get_plotable() const
 
     // vue : lois de comptage pour chaque temps d'observation
 
+    if (htime->variance > 0.) {
+      title.str("");
+      title << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAMS];
+      plot[i].title = title.str();
+    }
+
+    // calcul du nombre de valeurs maximum et de la frequence maximum
+
+    nb_histo = 0;
     max_nb_value = 0;
     max_frequency = 0;
-    nb_histo = 0;
 
     for (j = htime->offset;j < htime->nb_value;j++) {
       if (htime->frequency[j] > 0) {
         nb_histo++;
-
-        // calcul du nombre de valeurs maximum et de la frequence maximum
 
         if (hnb_event[j]->nb_value > max_nb_value) {
           max_nb_value = hnb_event[j]->nb_value;
@@ -3911,14 +3730,19 @@ MultiPlotSet* Renewal_data::get_plotable() const
 
     plot[i].resize(nb_histo);
 
+    j = 0;
     shift = 0.;
 
-    j = 0;
     for (k = htime->offset;k < htime->nb_value;k++) {
       if (htime->frequency[k] > 0) {
         legend.str("");
-        legend << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " " << k << " "
-               << SEQ_label[SEQL_TIME_UNIT] << " " << STAT_label[STATL_HISTOGRAM];
+        if (htime->variance > 0.) {
+          legend << k << " " << SEQ_label[SEQL_TIME_UNIT];
+        }
+        else {
+          legend << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " " << k << " "
+                 << SEQ_label[SEQL_TIME_UNIT] << " " << STAT_label[STATL_HISTOGRAM];
+        }
         plot[i][j].legend = legend.str();
 
         plot[i][j].style = "impulses";
@@ -3964,6 +3788,10 @@ MultiPlotSet* Renewal_data::get_plotable() const
         }
       }
 
+      title.str("");
+      title << SEQ_label[SEQL_NB_EVENT] << " " << STAT_label[STATL_HISTOGRAMS];
+      plot[i].title = title.str();
+
       plot[i].xrange = Range(0 , merged_histo[0]->nb_value - 1);
       plot[i].yrange = Range(0 , ceil(merged_histo[0]->max * YSCALE));
 
@@ -3980,8 +3808,7 @@ MultiPlotSet* Renewal_data::get_plotable() const
       for (k = htime->offset;k < htime->nb_value;k++) {
         if (htime->frequency[k] > 0) {
           legend.str("");
-          legend << SEQ_label[SEQL_NB_EVENT] << " " << SEQ_label[SEQL_DURING] << " " << k << " "
-                 << SEQ_label[SEQL_TIME_UNIT] << " " << STAT_label[STATL_HISTOGRAM];
+          legend << k << " " << SEQ_label[SEQL_TIME_UNIT];
           plot[i][j].legend = legend.str();
 
           plot[i][j].style = "impulses";
@@ -4039,269 +3866,6 @@ MultiPlotSet* Renewal_data::get_plotable() const
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Renewal_data , STATI_RENEWAL_DATA);
-
-
-RWspace Renewal_data::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = Time_events::binaryStoreSize() + sizeof(type) + sizeof(*length) * nb_element;
-
-  for (i = 0;i < nb_element;i++) {
-    size += sizeof(**sequence) * length[i];
-  }
-
-  if (inter_event) {
-    size += inter_event->binaryStoreSize();
-  }
-  size += 2 * sizeof(true) + within->binaryStoreSize();
-  if (length_bias) {
-    size += length_bias->binaryStoreSize();
-  }
-  size += backward->binaryStoreSize() + forward->binaryStoreSize() + index_event->binaryStoreSize();
-
-  if (renewal) {
-    size += renewal->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Renewal_data::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i , j;
-  int *psequence;
-
-
-  remove();
-
-  Time_events::restoreGuts(is);
-
-  is >> type;
-
-  length = new int[nb_element];
-  for (i = 0;i < nb_element;i++) {
-    is >> length[i];
-  }
-
-  sequence = new int*[nb_element];
-  for (i = 0;i < nb_element;i++) {
-    sequence[i] = new int[length[i]];
-    psequence = sequence[i];
-    for (j = 0;j < length[i];j++) {
-      is >> *psequence++;
-    }
-  }
-
-  is >> status;
-  if (status) {
-    inter_event = new Histogram();
-    inter_event->restoreGuts(is);
-  }
-  else {
-    inter_event = 0;
-  }
-
-  within = new Histogram();
-  within->restoreGuts(is);
-
-  is >> status;
-  if (status) {
-    length_bias = new Histogram();
-    length_bias->restoreGuts(is);
-  }
-  else {
-    length_bias = 0;
-  }
-
-  backward = new Histogram();
-  backward->restoreGuts(is);
-  forward = new Histogram();
-  forward->restoreGuts(is);
-
-  index_event = new Curves();
-  index_event->restoreGuts(is);
-
-  is >> renewal;
-  if (renewal == RWnilCollectable) {
-    renewal = 0;
-  }
-}
-
-
-void Renewal_data::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  Time_events::restoreGuts(file);
-
-  file.Read(type);
-
-  length = new int[nb_element];
-  file.Read(length , nb_element);
-
-  sequence = new int*[nb_element];
-  for (i = 0;i < nb_element;i++) {
-    sequence[i] = new int[length[i]];
-    file.Read(sequence[i] , length[i]);
-  }
-
-  file.Read(status);
-  if (status) {
-    inter_event = new Histogram();
-    inter_event->restoreGuts(file);
-  }
-  else {
-    inter_event = 0;
-  }
-
-  within = new Histogram();
-  within->restoreGuts(file);
-
-  file.Read(status);
-  if (status) {
-    length_bias = new Histogram();
-    length_bias->restoreGuts(file);
-  }
-  else {
-    length_bias = 0;
-  }
-
-  backward = new Histogram();
-  backward->restoreGuts(file);
-  forward = new Histogram();
-  forward->restoreGuts(file);
-
-  index_event = new Curves();
-  index_event->restoreGuts(file);
-
-  file >> renewal;
-  if (renewal == RWnilCollectable) {
-    renewal = 0;
-  }
-}
-
-
-void Renewal_data::saveGuts(RWvostream &os) const
-
-{
-  register int i , j;
-  int *psequence;
-
-
-  Time_events::saveGuts(os);
-
-  os << type;
-
-  for (i = 0;i < nb_element;i++) {
-    os << length[i];
-  }
-
-  for (i = 0;i < nb_element;i++) {
-    psequence = sequence[i];
-    for (j = 0;j < length[i];j++) {
-      os << *psequence++;
-    }
-  }
-
-  if (inter_event) {
-    os << true;
-    inter_event->saveGuts(os);
-  }
-  else {
-    os << false;
-  }
-
-  within->saveGuts(os);
-
-  if (length_bias) {
-    os << true;
-    length_bias->saveGuts(os);
-  }
-  else {
-    os << false;
-  }
-
-  backward->saveGuts(os);
-  forward->saveGuts(os);
-
-  index_event->saveGuts(os);
-
-  if (renewal) {
-    os << renewal;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Renewal_data::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  Time_events::saveGuts(file);
-
-  file.Write(type);
-
-  file.Write(length , nb_element);
-
-  for (i = 0;i < nb_element;i++) {
-    file.Write(sequence[i] , length[i]);
-  }
-
-  if (inter_event) {
-    file.Write(true);
-    inter_event->saveGuts(file);
-  }
-  else {
-    file.Write(false);
-  }
-
-  within->saveGuts(file);
-
-  if (length_bias) {
-    file.Write(true);
-    length_bias->saveGuts(file);
-  }
-  else {
-    file.Write(false);
-  }
-
-  backward->saveGuts(file);
-  forward->saveGuts(file);
-
-  index_event->saveGuts(file);
-
-  if (renewal) {
-    file << renewal;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
 
 
 /*--------------------------------------------------------------*
