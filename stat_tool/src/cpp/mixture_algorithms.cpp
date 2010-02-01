@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -522,7 +522,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imix
   Mixture_data *mixt_histo;
 
 
-  mixt = 0;
+  mixt = NULL;
   error.init();
 
   if ((min_inf_bound < 0) || (min_inf_bound > 1) || (min_inf_bound > offset)) {
@@ -684,7 +684,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imix
 
     else {
       delete mixt;
-      mixt = 0;
+      mixt = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
   }
@@ -750,7 +750,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , int nb_component , 
   error.init();
 
   if ((nb_component < 2) || (nb_component > MIXTURE_NB_COMPONENT)) {
-    mixt = 0;
+    mixt = NULL;
     error.update(STAT_error[STATR_NB_DISTRIBUTION]);
   }
 
@@ -805,7 +805,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , std::ostream &os , 
   Mixture *imixt , *mixt , *pmixt;
 
 
-  mixt = 0;
+  mixt = NULL;
   error.init();
 
   if ((min_nb_component < 1) || (min_nb_component >= max_nb_component)) {
@@ -996,7 +996,7 @@ Mixture_data* Mixture::simulation(Format_error &error , int nb_element) const
   error.init();
 
   if ((nb_element < 1) || (nb_element > DIST_NB_ELEMENT)) {
-    mixt_histo = 0;
+    mixt_histo = NULL;
     error.update(STAT_error[STATR_SAMPLE_SIZE]);
   }
 
