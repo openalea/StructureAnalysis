@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -87,21 +87,21 @@ private :
 
     int end_state() const;
 
-    double forward_backward(const Markovian_sequences &seq , int index , std::ostream &os ,
-                            int output , char format , double &max_marginal_entropy ,
-                            double &entropy1) const;
+    double forward_backward(const Markovian_sequences &seq , int index , std::ostream *os ,
+                            MultiPlotSet *plot_set , int output , char format ,
+                            double &max_marginal_entropy , double &entropy1) const;
     double forward_backward_sampling(const Markovian_sequences &seq , int index ,
                                      std::ostream &os , char format = 'a' ,
                                      int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
     void log_computation();
-    double viterbi(const Markovian_sequences &seq , double *posterior_probability = 0 ,
+    double viterbi(const Markovian_sequences &seq , double *posterior_probability = NULL ,
                    int index = I_DEFAULT) const;
     double generalized_viterbi(const Markovian_sequences &seq , int index , std::ostream &os ,
                                double seq_likelihood , char format , int inb_state_sequence) const;
     double viterbi_forward_backward(const Markovian_sequences &seq , int index ,
-                                    std::ostream &os , int output , char format ,
-                                    double seq_likelihood = D_INF) const;
+                                    std::ostream *os , MultiPlot *plot , int output ,
+                                    char format , double seq_likelihood = D_INF) const;
 
 public :
 
@@ -128,15 +128,7 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
 
-/*    RWDECLARE_COLLECTABLE(Hidden_semi_markov);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
-
-    double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = 0 ,
+    double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = NULL ,
                                   int index = I_DEFAULT) const;
 
     bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,
@@ -157,9 +149,15 @@ public :
 
     bool state_profile_plot_write(Format_error &error , const char *prefix ,
                                   const Markovian_sequences &iseq , int identifier ,
-                                  int output = SSTATE , const char *title = 0) const;
+                                  int output = SSTATE , const char *title = NULL) const;
     bool state_profile_plot_write(Format_error &error , const char *prefix , int identifier ,
-                                  int output = SSTATE , const char *title = 0) const;
+                                  int output = SSTATE , const char *title = NULL) const;
+
+    MultiPlotSet* state_profile_plotable_write(Format_error &error ,
+                                               const Markovian_sequences &iseq ,
+                                               int identifier , int output = SSTATE) const;
+    MultiPlotSet* state_profile_plotable_write(Format_error &error ,
+                                               int identifier , int output = SSTATE) const;
 
     Semi_markov_data* state_sequence_computation(Format_error &error , ostream &os ,
                                                  const Markovian_sequences &seq ,
@@ -174,13 +172,13 @@ public :
 
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Hidden_semi_markov **ihsmarkov , Histogram **hlength ,
-                                            const char *path = 0) const;
+                                            const char *path = NULL) const;
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Hidden_semi_markov **hsmarkov , int nb_sequence ,
-                                            int length , const char *path = 0) const;
+                                            int length , const char *path = NULL) const;
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Hidden_semi_markov **hsmarkov , int nb_sequence ,
-                                            const Markovian_sequences **seq , const char *path = 0) const;
+                                            const Markovian_sequences **seq , const char *path = NULL) const;
 };
 
 
