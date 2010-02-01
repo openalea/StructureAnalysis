@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -69,8 +69,9 @@ const int COMPOUND_COEFF = 10;         // coefficient arrondi estimateur
 class Histogram;
 class Compound_data;
 
-class Compound : public STAT_interface , public Distribution {
-  //class Compound : public STAT_interface , protected Distribution {  // loi composee
+
+// class Compound : public STAT_interface , protected Distribution {
+class Compound : public STAT_interface , public Distribution {  // loi composee
 
     friend class Histogram;
     friend class Compound_data;
@@ -120,16 +121,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Compound);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     void computation(int min_nb_value = 1 ,
                      double cumul_threshold = COMPOUND_THRESHOLD ,
@@ -149,9 +142,9 @@ Compound* compound_ascii_read(Format_error &error , const char *path ,
 
 
 
-class Compound_data : public STAT_interface , public Histogram {
-  //class Compound_data : public STAT_interface , protected Histogram {  // structure de donnees correspondant
-                                                                     // a une loi composee
+// class Compound_data : public STAT_interface , protected Histogram {
+class Compound_data : public STAT_interface , public Histogram {  // structure de donnees correspondant
+                                                                  // a une loi composee
     friend class Histogram;
     friend class Compound;
 
@@ -185,16 +178,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Compound_data);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     // acces membres de la classe
 
