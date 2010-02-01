@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -63,22 +63,22 @@ extern int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_patte
 Dendrogram::Dendrogram()
 
 {
-  distance_matrix = 0;
+  distance_matrix = NULL;
 
   scale = I_DEFAULT;
 
   nb_cluster = 0;
-  cluster_nb_pattern = 0;
-  cluster_pattern = 0;
+  cluster_nb_pattern = NULL;
+  cluster_pattern = NULL;
 
-  parent = 0;
-  child = 0;
+  parent = NULL;
+  child = NULL;
 
-  child_distance = 0;
-  intra_cluster_distance = 0;
-  inter_cluster_distance = 0;
-  max_intra_cluster_distance = 0;
-  min_inter_cluster_distance = 0;
+  child_distance = NULL;
+  intra_cluster_distance = NULL;
+  inter_cluster_distance = NULL;
+  max_intra_cluster_distance = NULL;
+  min_inter_cluster_distance = NULL;
 }
 
 
@@ -112,13 +112,13 @@ Dendrogram::Dendrogram(const Distance_matrix &dist_matrix , int iscale)
   }
   for (i = distance_matrix->nb_row;i < 2 * distance_matrix->nb_row - 1;i++) {
     cluster_nb_pattern[i] = 0;
-    cluster_pattern[i] = 0;
+    cluster_pattern[i] = NULL;
   }
 
   parent = new int[nb_cluster];
   child = new int*[nb_cluster];
   for (i = 0;i < distance_matrix->nb_row;i++) {
-    child[i] = 0;
+    child[i] = NULL;
   }
   for (i = distance_matrix->nb_row;i < 2 * distance_matrix->nb_row - 1;i++) {
     child[i] = new int[2];
@@ -186,7 +186,7 @@ void Dendrogram::copy(const Dendrogram &dendrogram)
 
   child = new int*[nb_cluster];
   for (i = 0;i < distance_matrix->nb_row;i++) {
-    child[i] = 0;
+    child[i] = NULL;
   }
   for (i = distance_matrix->nb_row;i < 2 * distance_matrix->nb_row - 1;i++) {
     child[i] = new int[2];
