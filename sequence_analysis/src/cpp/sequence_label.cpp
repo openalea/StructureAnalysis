@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -143,24 +143,21 @@ const char *SEQ_label[] = {
   "self-transition" ,
   "asymptote" ,
 
-  "probability of no-occurrence of state" ,
-  "probability of no-occurrence of output" ,
-  "time up to the first occurrence of state" ,
-  "time up to the first occurrence of output" ,
-  "probability of leaving state" ,
-  "probability of leaving output" ,
-  "absorption probability of state" ,
-  "absorption probability of output" ,
+  "probability of no-occurrence of " ,
+  "time up to the first occurrence" ,
+  "time up to the first occurrence of " ,
+  "probability of leaving " ,
+  "absorption probability of " ,
   "biased" ,
   "occupancy" ,
   "sojourn time" ,
   "initial run" ,
   "final run" ,
   "mixture of " ,
-  "number of runs of state" ,
-  "number of runs of output" ,
-  "number of occurrences of state" ,
-  "number of occurrences of output" ,
+  "number of runs" ,
+  "number of runs of " ,
+  "number of occurrences" ,
+  "number of occurrences of " ,
   "per sequence" ,
   "per length" ,
   "missing value" ,
@@ -213,9 +210,6 @@ const char *SEQ_label[] = {
   "sequence length" ,
   "cumulated length" ,
   "shift" ,
-  "time up to the first occurrence of value" ,
-  "number of runs of value" ,
-  "number of occurrences of value" ,
 
   "alignment length" ,
   "aligned on" ,
@@ -236,13 +230,16 @@ const char *SEQ_label[] = {
   "posterior probability" ,
   "penalty" ,
   "number of segmentations" ,
+  "segmentations" ,
   "segmentation log-likelihood" ,
   "log-likelihood of all the possible segmentations" ,
   "posterior change-point probabilities" ,
   "posterior segment probabilities" ,
+  "segmentation entropy" ,
+  "ranked change-point entropy" ,
   "change-point entropy" ,
-//  "normalized change-point entropy" ,
-  "segment entropy" ,
+  "uniform entropy" ,
+  "segmentation divergence" ,
   "maximum change-point likelihood" ,
   "maximum segment likelihood" ,
   "maximum posterior change-point probabilities" ,
