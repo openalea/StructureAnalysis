@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -432,7 +432,7 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
   Compound_data *compound_histo;
 
 
-  compound = 0;
+  compound = NULL;
   error.init();
 
   if ((nb_iter != I_DEFAULT) && (nb_iter < 1)) {
@@ -745,7 +745,7 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
 
     else {
       delete compound;
-      compound = 0;
+      compound = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -793,7 +793,7 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
   error.init();
 
   if ((min_inf_bound != 0) && (min_inf_bound != 1)) {
-    compound = 0;
+    compound = NULL;
     error.update(STAT_error[STATR_MIN_INF_BOUND]);
   }
 
@@ -857,7 +857,7 @@ Compound_data* Compound::simulation(Format_error &error , int nb_element) const
   error.init();
 
   if ((nb_element < 1) || (nb_element > DIST_NB_ELEMENT)) {
-    compound_histo = 0;
+    compound_histo = NULL;
     error.update(STAT_error[STATR_SAMPLE_SIZE]);
   }
 
