@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -42,12 +42,10 @@
 
 
 #include <fstream>
-// #include <rw/collect.h>
 #include "reestimation.h"
 #include "plotable.h"
 
 using namespace plotable;
-
 
 
 
@@ -180,6 +178,23 @@ enum {
   AUXILIARY                            // variable auxiliaire (lissage/moyenne par segment)
 };
 
+enum {
+  SELF_TRANSITION ,
+  OBSERVATION ,
+  INTENSITY ,
+  FIRST_OCCURRENCE ,
+  RECURRENCE_TIME ,
+  SOJOURN_TIME ,
+  INITIAL_RUN ,
+  FINAL_RUN ,
+  NB_RUN ,
+  NB_OCCURRENCE ,
+  COUNTING ,
+  LENGTH ,
+  SEQUENCE_CUMUL ,
+  SEQUENCE_MEAN
+};
+
 const int MAX_INF_BOUND = 10000;       // borne inferieure maximum
 const int MAX_DIFF_BOUND = 10000;      // difference maximum entre les bornes
                                        // inferieure et superieure
@@ -240,50 +255,6 @@ const int TIC_THRESHOLD = 10;          // nombre de graduations minimum pour ech
 const double PLOT_MASS_THRESHOLD = 1.e-3;  // valeur minimale pour afficher un 0 apres la derniere
                                            // valeur possible (sortie graphique)
 const double YSCALE = 1.4;             // facteur d'echelle axe y (sortie graphique)
-
-
-
-/****************************************************************
- *
- *  Identificateurs des classes pour la persistance :
- */
-
-
-/* enum {
-  STATI_PARAMETRIC_MODEL = 500 ,
-  STATI_MIXTURE ,
-  STATI_CONVOLUTION ,
-  STATI_COMPOUND ,
-  STATI_DISTRIBUTION_DATA ,
-  STATI_MIXTURE_DATA ,
-  STATI_CONVOLUTION_DATA ,
-  STATI_COMPOUND_DATA ,
-
-  STATI_VECTORS ,
-  STATI_REGRESSION ,
-
-  STATI_VECTOR_DISTANCE ,
-
-  STATI_DISTANCE_MATRIX ,
-  STATI_CLUSTERS ,
-
-  STATI_RENEWAL ,
-  STATI_TIME_EVENTS ,
-  STATI_RENEWAL_DATA ,
-
-  STATI_MARKOV ,
-  STATI_SEMI_MARKOV ,
-  STATI_HIDDEN_MARKOV ,
-  STATI_HIDDEN_SEMI_MARKOV ,
-  STATI_SEQUENCES ,
-  STATI_MARKOVIAN_SEQUENCES ,
-  STATI_MARKOV_DATA ,
-  STATI_SEMI_MARKOV_DATA ,
-  STATI_CORRELATION ,
-
-  STATI_TOP_PARAMETERS ,
-  STATI_TOPS
-}; */
 
 
 
@@ -373,9 +344,9 @@ public :
     void init() { nb_error = 0; }
     void update(const char *ilabel , int iline = 0 , int icolumn = 0);
     void correction_update(const char *ilabel , const char *correction ,
-                           int iline  = 0 , int icolumn = 0);
+                           int iline = 0 , int icolumn = 0);
     void correction_update(const char *ilabel , int correction ,
-                           int iline  = 0 , int icolumn = 0);
+                           int iline = 0 , int icolumn = 0);
 
     // acces membres de la classe
 
@@ -386,7 +357,6 @@ public :
 
 
 class STAT_interface {  // classe abstraite pour les interfaces
-// class STAT_interface : public RWCollectable {
 
 public :
 
@@ -399,7 +369,7 @@ public :
                              bool exhaustive = false) const = 0;
     virtual bool spreadsheet_write(Format_error &error , const char *path) const = 0;
     virtual bool plot_write(Format_error &error , const char *prefix ,
-                            const char *title = 0) const = 0;
+                            const char *title = NULL) const = 0;
 
     virtual MultiPlotSet* get_plotable() const { return 0; };
 
@@ -472,24 +442,24 @@ class Distribution {    // loi de probabilite discrete
     std::ostream& ascii_characteristic_print(std::ostream &os , bool shape = false ,
                                              bool comment_flag = false) const;
     std::ostream& ascii_print(std::ostream &os , bool comment_flag , bool cumul_flag ,
-                              bool nb_value_flag , const Histogram *histo = 0) const;
+                              bool nb_value_flag , const Histogram *histo = NULL) const;
 
     std::ostream& ascii_print(std::ostream &os , int nb_dist , const Distribution **dist ,
                               double *dist_scale , bool comment_flag , bool cumul_flag ,
-                              const Histogram *histo = 0) const;
+                              const Histogram *histo = NULL) const;
 
     std::ostream& spreadsheet_characteristic_print(std::ostream &os , bool shape = false) const;
 
     std::ostream& spreadsheet_print(std::ostream &os , bool cumul_flag , bool concentration_flag ,
-                                    bool nb_value_flag , const Histogram *histo = 0) const;
+                                    bool nb_value_flag , const Histogram *histo = NULL) const;
 
     std::ostream& spreadsheet_print(std::ostream &os , int nb_dist , const Distribution **dist ,
                                     double *dist_scale , bool cumul_flag ,
-                                    const Histogram *histo = 0) const;
+                                    const Histogram *histo = NULL) const;
 
-    int plot_nb_value_computation(const Histogram *histo = 0) const;
+    int plot_nb_value_computation(const Histogram *histo = NULL) const;
     bool plot_print(const char *path , double *concentration , double scale) const;
-    bool plot_print(const char *path , const Histogram *histo = 0) const;
+    bool plot_print(const char *path , const Histogram *histo = NULL) const;
     virtual std::ostream& plot_title_print(std::ostream &os) const
     { return os; }
     bool survival_plot_print(const char *path , double *survivor) const;
@@ -500,12 +470,6 @@ class Distribution {    // loi de probabilite discrete
     void plotable_cumul_matching_write(SinglePlot &plot , const Distribution &reference_dist) const;
     void plotable_concentration_write(SinglePlot &plot) const;
     void plotable_survivor_write(SinglePlot &plot) const;
-
-/*    RWspace binaryStoreSize(int ialloc_nb_value = I_DEFAULT) const;
-    void restoreGuts(RWvistream &is);
-    void restoreGuts(RWFile &file);
-    void saveGuts(RWvostream &os , int ialloc_nb_value = I_DEFAULT) const;
-    void saveGuts(RWFile &file , int ialloc_nb_value = I_DEFAULT) const; */
 
     void convolution(Distribution &dist1 , Distribution &dist2 ,
                      int inb_value = I_DEFAULT);
@@ -547,7 +511,7 @@ class Distribution {    // loi de probabilite discrete
     bool survival_ascii_write(Format_error &error , const char *path) const;
     bool survival_spreadsheet_write(Format_error &error , const char *path) const;
     bool survival_plot_write(Format_error &error , const char *prefix ,
-                             const char *title = 0) const;
+                             const char *title = NULL) const;
     MultiPlotSet* survival_get_plotable(Format_error &error) const;
 
     double mean_absolute_deviation_computation() const;
@@ -639,12 +603,6 @@ public :
     std::ostream& plot_title_print(std::ostream &os) const;
 
     void nb_parameter_update();
-
-/*    RWspace binaryStoreSize(int ialloc_nb_value = I_DEFAULT) const;
-    void restoreGuts(RWvistream &is);
-    void restoreGuts(RWFile &file);
-    void saveGuts(RWvostream &os , int ialloc_nb_value = I_DEFAULT) const;
-    void saveGuts(RWFile &file , int ialloc_nb_value = I_DEFAULT) const; */
 
     void binomial_computation(int inb_value , char mode);
     void poisson_computation(int inb_value , double cumul_threshold ,
@@ -808,7 +766,7 @@ public :
     std::ostream& spreadsheet_print(std::ostream &os , bool cumul_flag = false ,
                                     bool concentration_flag = false) const;
     bool plot_print(const char *path , int nb_histo = 0 ,
-                    const Histogram **histo = 0) const;
+                    const Histogram **histo = NULL) const;
     bool plot_print(const char *path , double *cumul , double *concentration ,
                     double shift = 0.) const;
     bool survival_plot_print(const char *path , double *survivor) const;
@@ -817,20 +775,14 @@ public :
 
     void plotable_frequency_write(SinglePlot &plot) const;
     void plotable_mass_write(SinglePlot &plot) const;
-    void plotable_cumul_write(SinglePlot &plot , double *icumul = 0 ,
+    void plotable_cumul_write(SinglePlot &plot , double *icumul = NULL ,
                               double scale = D_DEFAULT) const;
     void plotable_cumul_matching_write(SinglePlot &plot , int reference_offset ,
                                        int  reference_nb_value , double *reference_cumul ,
-                                       double *icumul = 0) const;
-    void plotable_concentration_write(SinglePlot &plot , double *icumul = 0 ,
+                                       double *icumul = NULL) const;
+    void plotable_concentration_write(SinglePlot &plot , double *icumul = NULL ,
                                       double scale = D_DEFAULT) const;
     void plotable_survivor_write(SinglePlot &plot) const;
-
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     double* cumul_computation(double scale = D_DEFAULT) const;
     double concentration_computation() const;
@@ -894,11 +846,11 @@ public :
     bool survival_ascii_write(Format_error &error , const char *path) const;
     bool survival_spreadsheet_write(Format_error &error , const char *path) const;
     bool survival_plot_write(Format_error &error , const char *prefix ,
-                             const char *title = 0) const;
+                             const char *title = NULL) const;
     MultiPlotSet* survival_get_plotable(Format_error &error) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_histo ,
-                    const Histogram **ihisto , int type , const char *path = 0 ,
+                    const Histogram **ihisto , int type , const char *path = NULL ,
                     char format = 'a') const;
 
     void F_comparison(std::ostream &os , const Histogram &histo) const;
@@ -947,14 +899,12 @@ public :
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,  // sequence_analysis
-                                 const Histogram &forward , const Histogram *no_event ,
+    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,                                 const Histogram &forward , const Histogram *no_event ,
                                  const Parametric &iinter_event , int estimator = LIKELIHOOD ,
                                  int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
                                  double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
                                  int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,  // sequence_analysis
-                                 const Histogram &forward , const Histogram *no_event ,
+    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,                                 const Histogram &forward , const Histogram *no_event ,
                                  int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
                                  int mean_computation = COMPUTED , double weight = D_DEFAULT ,
                                  int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
