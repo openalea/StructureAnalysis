@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -39,8 +39,7 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
@@ -71,12 +70,12 @@ Correlation::Correlation()
 {
   type = PEARSON;
 
-  variable_type = 0;
+  variable_type = NULL;
 
-  variable1 = 0;
-  variable2 = 0;
+  variable1 = NULL;
+  variable2 = NULL;
 
-  white_noise = 0;
+  white_noise = NULL;
 }
 
 
@@ -102,7 +101,7 @@ Correlation::Correlation(int itype , int max_lag , int ivariable1 , int ivariabl
   variable1[0] = ivariable1;
   variable2[0] = ivariable2;
 
-  white_noise = 0;
+  white_noise = NULL;
 }
 
 
@@ -126,7 +125,7 @@ Correlation::Correlation(int inb_curve , int ilength , bool frequency_flag , int
   variable1 = new int[nb_curve];
   variable2 = new int[nb_curve];
 
-  white_noise = 0;
+  white_noise = NULL;
 }
 
 
@@ -165,7 +164,7 @@ void Correlation::copy(const Correlation &correl)
     }
   }
   else {
-    white_noise = 0;
+    white_noise = NULL;
   }
 }
 
@@ -245,7 +244,7 @@ Correlation* Correlation::merge(Format_error &error , int nb_correl ,
   const Correlation **pcorrel;
 
 
-  correl = 0;
+  correl = NULL;
   error.init();
 
   pfrequency = frequency;
@@ -822,7 +821,7 @@ bool Correlation::plot_write(Format_error &error , const char *prefix ,
 {
   bool status , autocorrelation , cross_correlation;
   register int i , j;
-  double standard_normal_value , *confidence_limit = 0;
+  double standard_normal_value , *confidence_limit = NULL;
   ostringstream data_file_name;
 
 
@@ -1052,7 +1051,7 @@ MultiPlotSet* Correlation::get_plotable() const
   bool autocorrelation , cross_correlation;
   register int i , j;
   int nb_plot;
-  double standard_normal_value , *confidence_limit = 0;
+  double standard_normal_value , *confidence_limit = NULL;
   ostringstream title , legend;
   MultiPlotSet *plot_set;
 
@@ -1239,153 +1238,6 @@ MultiPlotSet* Correlation::get_plotable() const
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Correlation , STATI_CORRELATION);
-
-
-RWspace Correlation::binaryStoreSize() const
-
-{
-  RWspace size;
-
-
-  size = Curves::binaryStoreSize() + sizeof(type) +
-         sizeof(variable1) * nb_curve + sizeof(variable2) * nb_curve;
-
-  size += sizeof(true);
-  if (white_noise) {
-    size += sizeof(*white_noise) * length;
-  }
-
-  return size;
-}
-
-
-void Correlation::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i;
-
-
-  delete [] variable1;
-  delete [] variable2;
-
-  delete [] white_noise;
-
-  Curves::restoreGuts(is);
-
-  is >> type;
-
-  variable1 = new int[nb_curve];
-  for (i = 0;i < nb_curve;i++) {
-    is >> variable1[i];
-  }
-
-  variable2 = new int[nb_curve];
-  for (i = 0;i < nb_curve;i++) {
-    is >> variable2[i];
-  }
-
-  is >> status;
-  if (status) {
-    white_noise = new double[length];
-    for (i = 0;i < length;i++) {
-      is >> white_noise[i];
-    }
-  }
-  else {
-    white_noise = 0;
-  }
-}
-
-
-void Correlation::restoreGuts(RWFile &file)
-
-{
-  bool status;
-
-
-  delete [] variable1;
-  delete [] variable2;
-
-  delete [] white_noise;
-
-  Curves::restoreGuts(file);
-
-  file.Read(type);
-
-  variable1 = new int[nb_curve];
-  file.Read(variable1 , nb_curve);
-
-  variable2 = new int[nb_curve];
-  file.Read(variable2 , nb_curve);
-
-  file.Read(status);
-  if (status) {
-    white_noise = new double[length];
-    file.Read(white_noise , length);
-  }
-  else {
-    white_noise = 0;
-  }
-}
-
-
-void Correlation::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Curves::saveGuts(os);
-
-  os << type;
-
-  for (i = 0;i < nb_curve;i++) {
-    os << variable1[i];
-  }
-  for (i = 0;i < nb_curve;i++) {
-    os << variable2[i];
-  }
-
-  if (white_noise) {
-    os << true;
-    for (i = 0;i < length;i++) {
-      os << white_noise[i];
-    }
-  }
-  else {
-    os << false;
-  }
-}
-
-
-void Correlation::saveGuts(RWFile &file) const
-
-{
-  Curves::saveGuts(file);
-
-  file.Write(type);
-
-  file.Write(variable1 , nb_curve);
-  file.Write(variable2 , nb_curve);
-
-  if (white_noise) {
-    file.Write(true);
-    file.Write(white_noise , length);
-  }
-  else {
-    file.Write(false);
-  }
-} */
 
 
 /*--------------------------------------------------------------*
@@ -1806,7 +1658,7 @@ Correlation* Sequences::correlation_computation(Format_error &error , int variab
   Correlation *correl;
 
 
-  correl = 0;
+  correl = NULL;
   error.init();
 
   if ((variable1 < 1) || (variable1 > nb_variable)) {
@@ -2081,7 +1933,7 @@ Correlation* Sequences::partial_autocorrelation_computation(Format_error &error 
   Correlation *correl , *partial_correl;
 
 
-  partial_correl = 0;
+  partial_correl = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
