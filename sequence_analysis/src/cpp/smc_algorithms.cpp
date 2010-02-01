@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -983,7 +983,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
   const Histogram *prun[3];
 
 
-  smarkov = 0;
+  smarkov = NULL;
   error.init();
 
   if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
@@ -1109,7 +1109,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
     if ((model_type == 'e') && (smarkov->nb_component > 1)) {
       delete smarkov;
-      smarkov = 0;
+      smarkov = NULL;
       error.correction_update(STAT_parsing[STATP_CHAIN_STRUCTURE] , STAT_parsing[STATP_IRREDUCIBLE]);
     }
 
@@ -1128,8 +1128,8 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
       smarkov->nonparametric_process[0]->sojourn_time = new Parametric*[smarkov->nb_state];
       smarkov->forward = new Forward*[smarkov->nb_state];
       for (i = 0;i < smarkov->nb_state;i++) {
-        smarkov->forward[i] = 0;
-        smarkov->nonparametric_process[0]->sojourn_time[i] = 0;
+        smarkov->forward[i] = NULL;
+        smarkov->nonparametric_process[0]->sojourn_time[i] = NULL;
       }
 
       for (i = 0;i < smarkov->nb_state;i++) {
@@ -1143,7 +1143,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
           smarkov->nonparametric_process[0]->absorption[i] = 0.;
 
           if ((model_type == 'e') && (seq->characteristics[0]->sojourn_time[i]->nb_element == 0)) {
-            occupancy = 0;
+            occupancy = NULL;
           }
 
           else if ((estimator != PARTIAL_LIKELIHOOD) && (model_type == 'e') && 
@@ -1312,13 +1312,13 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
                 else {
                   delete occupancy;
-                  occupancy = 0;
+                  occupancy = NULL;
                 }
               }
 
               else {
                 delete occupancy;
-                occupancy = 0;
+                occupancy = NULL;
               }
 
               delete forward;
@@ -1454,13 +1454,13 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
               else {
                 delete occupancy;
-                occupancy = 0;
+                occupancy = NULL;
               }
             }
 
             else {
               delete occupancy;
-              occupancy = 0;
+              occupancy = NULL;
             }
           }
 
@@ -1499,7 +1499,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
           else {
             delete smarkov;
-            smarkov = 0;
+            smarkov = NULL;
             error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
             break;
           }
@@ -1559,7 +1559,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
       if (seq->likelihood == D_INF) {
         delete smarkov;
-        smarkov = 0;
+        smarkov = NULL;
         error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
       }
 
@@ -1735,7 +1735,7 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
   Semi_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((hlength.nb_element < 1) || (hlength.nb_element > NB_SEQUENCE)) {
@@ -1870,7 +1870,7 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
       delete seq;
-      seq = 0;
+      seq = NULL;
       error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
     }
 
@@ -1906,7 +1906,7 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , int nb_sequence 
   Semi_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
@@ -1960,7 +1960,7 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , int nb_sequence 
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
@@ -2001,7 +2001,7 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
   ofstream *out_file;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   for (i = 0;i < nb_model - 1;i++) {
@@ -2100,7 +2100,7 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
   }
 
   if (status) {
-    out_file = 0;
+    out_file = NULL;
 
     if (path) {
       out_file = new ofstream(path);
@@ -2238,7 +2238,7 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
   Distance_matrix *dist_matrix;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
@@ -2306,7 +2306,7 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
-    dist_matrix = 0;
+    dist_matrix = NULL;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
@@ -2348,7 +2348,7 @@ Semi_markov_iterator::Semi_markov_iterator(Semi_markov *ismarkov)
   }
 
   state = I_DEFAULT;
-  occupancy = 0;
+  occupancy = NULL;
   counter = I_DEFAULT;
 }
 
@@ -2521,7 +2521,7 @@ int** Semi_markov_iterator::simulation(int length , bool initialization)
 
 
   if ((state == I_DEFAULT) && (!initialization)) {
-    int_seq = 0;
+    int_seq = NULL;
   }
 
   else {
