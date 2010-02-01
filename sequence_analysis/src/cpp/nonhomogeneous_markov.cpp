@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: markov.cpp 3257 2007-06-06 12:56:12Z dufourko $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers: amldevlp@cirad.fr
  *
  *  ----------------------------------------------------------------------------
  *
@@ -42,8 +42,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/regression.h"
@@ -73,8 +72,8 @@ extern char* label(const char *file_name);
 Function::Function()
 
 {
-  residual = 0;
-  frequency = 0;
+  residual = NULL;
+  frequency = NULL;
 }
 
 
@@ -97,8 +96,8 @@ Function::Function(int iident , int length , double *iparameter)
     parameter[i] = iparameter[i];
   }
 
-  residual = 0;
-  frequency = 0;
+  residual = NULL;
+  frequency = NULL;
 
   computation();
 }
@@ -158,8 +157,8 @@ void Function::copy(const Function &function)
   }
 
   else {
-    residual = 0;
-    frequency = 0;
+    residual = NULL;
+    frequency = NULL;
   }
 }
 
@@ -255,7 +254,7 @@ Function* function_parsing(Format_error &error , ifstream &in_file , int &line ,
   Function *function;
 
 
-  function = 0;
+  function = NULL;
 
   while (buffer.readLine(in_file , false)) {
     line++;
@@ -519,7 +518,7 @@ ostream& Function::ascii_print(ostream &os , bool exhaustive , bool file_flag ,
   if (exhaustive) {
     if (curves) {
 
-      // calcul des residus reduits
+      // calcul des residus standardises
 
       standard_residual = new double[max_value + 1];
 
@@ -541,8 +540,8 @@ ostream& Function::ascii_print(ostream &os , bool exhaustive , bool file_flag ,
       width[5] = column_width(curves->max_frequency_computation()) + ASCII_SPACE;
     }
 
-    // ecriture des reponses observees et theoriques, des residus, des residus reduits et
-    // des frequences
+    // ecriture des reponses observees et theoriques, des residus,
+    // des residus standardises et des frequences
 
     os << "\n";
     if (file_flag) {
@@ -653,8 +652,8 @@ ostream& Function::spreadsheet_print(ostream &os , const Curves *curves) const
        << residual_standard_deviation << endl;
   }
 
-  // ecriture des reponses observees et theoriques, des residus des residus reduits et
-  // des frequences
+  // ecriture des reponses observees et theoriques, des residus,
+  // des residus standardises et des frequences
 
   os << "\n";
   if (curves) {
@@ -735,9 +734,9 @@ bool Function::plot_print(const char *path , double residual_standard_deviation)
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une courbe et des residus reduits correspondants au format Gnuplot.
+ *  Ecriture d'une courbe et des residus standardises correspondants au format Gnuplot.
  *
- *  arguments : path, pointeur sur les residus reduits.
+ *  arguments : path, pointeur sur les residus standardises.
  *
  *--------------------------------------------------------------*/
 
@@ -752,7 +751,7 @@ bool Curves::plot_print_standard_residual(const char *path , double *standard_re
   if (out_file) {
     status = true;
 
-    // ecriture des reponses observees et des residus reduits
+    // ecriture des reponses observees et des residus standardises
 
     for (i = 0;i < length;i++) {
       if (frequency[i] > 0) {
@@ -771,129 +770,6 @@ bool Curves::plot_print_standard_residual(const char *path , double *standard_re
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWspace Function::binaryStoreSize() const
-
-{
-  RWspace size;
-
-
-  size = Regression_kernel::binaryStoreSize();
-
-  size += sizeof(true);
-  if ((residual) && (frequency)) {
-    size += sizeof(residual) * (max_value + 1) + sizeof(frequency) * (max_value + 1);
-  }
-
-  return size;
-}
-
-
-void Function::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  Regression_kernel::restoreGuts(is);
-
-  is >> status;
-
-  if (status) {
-    residual = new double[max_value + 1];
-    for (i = 0;i <= max_value;i++) {
-      is >> residual[i];
-    }
-
-    frequency = new int[max_value + 1];
-    for (i = 0;i <= max_value;i++) {
-      is >> frequency[i];
-    }
-  }
-
-  else {
-    residual = 0;
-    frequency = 0;
-  }
-}
-
-
-void Function::restoreGuts(RWFile &file)
-
-{
-  bool status;
-
-
-  remove();
-
-  Regression_kernel::restoreGuts(file);
-
-  file.Read(status);
-
-  if (status) {
-    residual = new double[max_value + 1];
-    file.Read(residual , max_value + 1);
-
-    frequency = new int[max_value + 1];
-    file.Read(frequency , max_value + 1);
-  }
-
-  else {
-    residual = 0;
-    frequency = 0;
-  }
-}
-
-
-void Function::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Regression_kernel::saveGuts(os);
-
-  if ((residual) && (frequency)) {
-    os << true;
-    for (i = 0;i <= max_value;i++) {
-      os << residual[i];
-    }
-    for (i = 0;i <= max_value;i++) {
-      os << frequency[i];
-    }
-  }
-
-  else {
-    os << false;
-  }
-}
-
-
-void Function::saveGuts(RWFile &file) const
-
-{
-  Regression_kernel::saveGuts(file);
-
-  if ((residual) && (frequency)) {
-    file.Write(true);
-    file.Write(residual , max_value + 1);
-    file.Write(frequency , max_value + 1);
-  }
-
-  else {
-    file.Write(false);
-  }
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur par defaut de la classe Nonhomogeneous_markov.
  *
  *--------------------------------------------------------------*/
@@ -901,12 +777,12 @@ void Function::saveGuts(RWFile &file) const
 Nonhomogeneous_markov::Nonhomogeneous_markov()
 
 {
-  markov_data = 0;
+  markov_data = NULL;
 
-  homogeneity = 0;
-  self_transition = 0;
+  homogeneity = NULL;
+  self_transition = NULL;
 
-  process = 0;
+  process = NULL;
 }
 
 
@@ -926,7 +802,7 @@ Nonhomogeneous_markov::Nonhomogeneous_markov(int inb_state , int *ident)
   register int i;
 
 
-  markov_data = 0;
+  markov_data = NULL;
 
   homogeneity = new bool[nb_state];
   self_transition = new Function*[nb_state];
@@ -938,7 +814,7 @@ Nonhomogeneous_markov::Nonhomogeneous_markov(int inb_state , int *ident)
     else {
       homogeneity[i] = false;
     }
-    self_transition[i] = 0;
+    self_transition[i] = NULL;
   }
 
   process = new Nonparametric_sequence_process(nb_state , nb_state);
@@ -962,7 +838,7 @@ Nonhomogeneous_markov::Nonhomogeneous_markov(const Chain *pchain , const Functio
   register int i;
 
 
-  markov_data = 0;
+  markov_data = NULL;
 
   homogeneity = new bool[nb_state];
   self_transition = new Function*[nb_state];
@@ -975,7 +851,7 @@ Nonhomogeneous_markov::Nonhomogeneous_markov(const Chain *pchain , const Functio
 
     else {
       homogeneity[i] = true;
-      self_transition[i] = 0;
+      self_transition[i] = NULL;
     }
   }
 
@@ -1006,7 +882,7 @@ void Nonhomogeneous_markov::copy(const Nonhomogeneous_markov &markov , bool data
     markov_data = new Nonhomogeneous_markov_data(*(markov.markov_data) , false);
   }
   else {
-    markov_data = 0;
+    markov_data = NULL;
   }
 
   homogeneity = new bool[nb_state];
@@ -1015,7 +891,7 @@ void Nonhomogeneous_markov::copy(const Nonhomogeneous_markov &markov , bool data
   for (i = 0;i < nb_state;i++) {
     homogeneity[i] = markov.homogeneity[i];
     if (homogeneity[i]) {
-      self_transition[i] = 0;
+      self_transition[i] = NULL;
     }
     else {
       self_transition[i] = new Function(*(markov.self_transition[i]));
@@ -1110,11 +986,11 @@ Parametric_model* Nonhomogeneous_markov::extract(Format_error &error , int type 
   Histogram *phisto;
 
 
-  dist = 0;
+  dist = NULL;
   error.init();
 
-  pdist = 0;
-  pparam = 0;
+  pdist = NULL;
+  pparam = NULL;
 
   if ((state < 0) || (state >= process->nb_value)) {
     status = false;
@@ -1154,7 +1030,7 @@ Parametric_model* Nonhomogeneous_markov::extract(Format_error &error , int type 
   }
 
   if (status) {
-    phisto = 0;
+    phisto = NULL;
 
     if (markov_data) {
       switch (type) {
@@ -1228,7 +1104,7 @@ Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , co
   ifstream in_file(path);
 
 
-  markov = 0;
+  markov = NULL;
   error.init();
 
   if (!in_file) {
@@ -1294,7 +1170,7 @@ Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , co
       nb_state = chain->nb_state;
       self_transition = new const Function*[nb_state];
       for (i = 0;i < nb_state;i++) {
-        self_transition[i] = 0;
+        self_transition[i] = NULL;
       }
 
       // analyse format des fonctions d'evolution
@@ -1756,7 +1632,7 @@ bool Nonhomogeneous_markov::plot_write(const char *prefix , const char *title ,
   register int i , j;
   int variable , start , *pfrequency , max_frequency[NB_STATE];
   double residual_mean , residual_standard_deviation , *standard_residual , *presidual ,
-         *pstandard_residual , min_standard_residual[NB_STATE] , max_standard_residual[NB_STATE];
+         min_standard_residual[NB_STATE] , max_standard_residual[NB_STATE];
   ostringstream data_file_name[NB_STATE * 2];
 
 
@@ -1776,7 +1652,7 @@ bool Nonhomogeneous_markov::plot_write(const char *prefix , const char *title ,
         if (seq) {
           max_frequency[i] = seq->self_transition[i]->max_frequency_computation();
 
-          // calcul des residus reduits
+          // calcul des residus standardises
 
           residual_mean = self_transition[i]->residual_mean_computation();
           residual_standard_deviation = sqrt(self_transition[i]->residual_variance_computation(residual_mean));
@@ -1784,22 +1660,20 @@ bool Nonhomogeneous_markov::plot_write(const char *prefix , const char *title ,
           standard_residual = new double[self_transition[i]->max_value + 1];
 
           pfrequency = self_transition[i]->frequency;
-          pstandard_residual = standard_residual;
           presidual = self_transition[i]->residual;
           min_standard_residual[i] = 0.;
           max_standard_residual[i] = 0.;
 
           for (j = 0;j <= self_transition[i]->max_value;j++) {
             if (*pfrequency++ > 0) {
-              *pstandard_residual = *presidual / residual_standard_deviation;
-              if (*pstandard_residual < min_standard_residual[i]) {
-                min_standard_residual[i] = *pstandard_residual;
+              standard_residual[j] = *presidual / residual_standard_deviation;
+              if (standard_residual[j] < min_standard_residual[i]) {
+                min_standard_residual[i] = standard_residual[j];
               }
-              if (*pstandard_residual > max_standard_residual[i]) {
-                max_standard_residual[i] = *pstandard_residual;
+              if (standard_residual[j] > max_standard_residual[i]) {
+                max_standard_residual[i] = standard_residual[j];
               }
               presidual++;
-              pstandard_residual++;
             }
           }
         }
@@ -1928,14 +1802,16 @@ bool Nonhomogeneous_markov::plot_write(const char *prefix , const char *title ,
             if (seq->self_transition[j]->length - 1 < TIC_THRESHOLD) {
               out_file << "set xtics 0,1" << endl;
             }
-            if (max_frequency[j] < TIC_THRESHOLD) {
+            if ((int)(max_frequency[j] * YSCALE) + 1 < TIC_THRESHOLD) {
               out_file << "set ytics 0,1" << endl;
             }
 
             out_file << "plot [0:" << seq->self_transition[j]->length - 1
-                     << "] [0:" << max_frequency[j] << "] \""
+                     << "] [0:" << (int)(max_frequency[j] * YSCALE) + 1 << "] \""
                      << label((data_file_name[j * 2 + 1].str()).c_str())
-                     << "\" using 1:4 notitle with impulses" << endl;
+                     << "\" using 1:4 title \"" << STAT_label[STATL_STATE] << " "
+                     << j << " - "<< SEQ_label[SEQL_TRANSITION_COUNTS]
+                     << "\" with impulses" << endl;
 
             out_file << "set xlabel" << endl;
             out_file << "set ylabel" << endl;
@@ -1989,164 +1865,334 @@ bool Nonhomogeneous_markov::plot_write(Format_error &error , const char *prefix 
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Nonhomogeneous_markov et
+ *  de la structure de donnees associee.
+ *
+ *  argument : pointeur sur les sequences observees.
  *
  *--------------------------------------------------------------*/
 
-/* RWDEFINE_COLLECTABLE(Nonhomogeneous_markov , STATI_NONHOMOGENEOUS_MARKOV);
-
-
-RWspace Nonhomogeneous_markov::binaryStoreSize() const
+MultiPlotSet* Nonhomogeneous_markov::get_plotable(const Nonhomogeneous_markov_data *seq) const
 
 {
-  register int i;
-  RWspace size;
+  register int i , j , k;
+  int nb_plot_set , index_length , index , nb_plot , max_frequency , *pfrequency;
+  double residual_mean , residual_standard_deviation , min_standard_residual ,
+         max_standard_residual , *standard_residual , *presidual;
+  ostringstream legend;
+  Histogram *hlength;
+  Sequence_characteristics *characteristics;
+  MultiPlotSet *plot_set;
 
 
-  size = Chain::binaryStoreSize() + sizeof(*homogeneity) * nb_state;
-
-  for (i = 0;i < nb_state;i++) {
-    if (!homogeneity[i]) {
-      size += self_transition[i]->binaryStoreSize();
-    }
-  }
-
-  size += process->binaryStoreSize();
-
-  if (markov_data) {
-    size += markov_data->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Nonhomogeneous_markov::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  Chain::restoreGuts(is);
-
-  homogeneity = new bool[nb_state];
-  for (i = 0;i < nb_state;i++) {
-    is >> homogeneity[i];
-  }
-
-  self_transition = new Function*[nb_state];
-  for (i = 0;i < nb_state;i++) {
-    if (homogeneity[i]) {
-      self_transition[i] = 0;
-    }
-    else {
-      self_transition[i] = new Function();
-      self_transition[i]->restoreGuts(is);
-    }
-  }
-
-  process = new Nonparametric_sequence_process();
-  process->restoreGuts(is);
-
-  is >> markov_data;
-  if (markov_data == RWnilCollectable) {
-    markov_data = 0;
-  }
-}
-
-
-void Nonhomogeneous_markov::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  Chain::restoreGuts(file);
-
-  homogeneity = new bool[nb_state];
-  file.Read(homogeneity , nb_state);
-
-  self_transition = new Function*[nb_state];
-  for (i = 0;i < nb_state;i++) {
-    if (homogeneity[i]) {
-      self_transition[i] = 0;
-    }
-    else {
-      self_transition[i] = new Function();
-      self_transition[i]->restoreGuts(file);
-    }
-  }
-
-  file.Read(nb_output_process);
-
-  process = new Nonparametric_sequence_process();
-  process->restoreGuts(file);
-
-  file >> markov_data;
-  if (markov_data == RWnilCollectable) {
-    markov_data = 0;
-  }
-}
-
-
-void Nonhomogeneous_markov::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Chain::saveGuts(os);
-
-  for (i = 0;i < nb_state;i++) {
-    os << homogeneity[i];
-  }
-
-  for (i = 0;i < nb_state;i++) {
-    if (!homogeneity[i]) {
-      self_transition[i]->saveGuts(os);
-    }
-  }
-
-  process->saveGuts(os);
-
-  if (markov_data) {
-    os << markov_data;
+  if (seq) {
+    characteristics = seq->characteristics[0];
+    hlength = seq->hlength;
   }
   else {
-    os << RWnilCollectable;
+    characteristics = NULL;
+    hlength = NULL;
   }
-}
 
+  // calcul du nombre de vues
 
-void Nonhomogeneous_markov::saveGuts(RWFile &file) const
+  nb_plot_set = 0;
 
-{
-  register int i;
+  if ((process->index_value) || (characteristics)) {
+    nb_plot_set++;
 
+    if (characteristics) {
+      index_length = characteristics->index_value->plot_length_computation();
 
-  Chain::saveGuts(file);
-
-  file.Write(homogeneity , nb_state);
-
-  for (i = 0;i < nb_state;i++) {
-    if (!homogeneity[i]) {
-      self_transition[i]->saveGuts(file);
+      if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+        nb_plot_set++;
+      }
+      nb_plot_set++;
     }
   }
 
-  process->saveGuts(file);
+  if ((process->first_occurrence) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((process->first_occurrence) &&
+          (process->first_occurrence[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->first_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+  }
 
-  if (markov_data) {
-    file << markov_data;
+  if ((process->recurrence_time) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((process->recurrence_time) &&
+          (process->recurrence_time[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->recurrence_time[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
   }
-  else {
-    file << RWnilCollectable;
+
+  if ((process->sojourn_time) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((process->sojourn_time) &&
+          (process->sojourn_time[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->sojourn_time[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((characteristics) && (i < characteristics->nb_value) &&
+          (characteristics->initial_run) &&
+          (characteristics->initial_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((characteristics) && (i < characteristics->nb_value) &&
+          (characteristics->final_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
   }
-} */
+
+  if ((process->nb_run) || (process->nb_occurrence) ||
+      ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
+    for (i = 0;i < nb_state;i++) {
+      if (process->nb_run) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if (process->nb_occurrence) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_occurrence) &&
+               (characteristics->nb_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+
+    if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
+      nb_plot_set++;
+    }
+  }
+
+  for (i = 0;i < nb_state;i++) {
+    if (!homogeneity[i]) {
+      nb_plot_set++;
+      if (seq) {
+        nb_plot_set += 2;
+      }
+    }
+  }
+
+  plot_set = new MultiPlotSet(nb_plot_set);
+
+  MultiPlotSet &plot = *plot_set;
+
+  plot.border = "15 lw 0";
+
+  plot.variable_nb_viewpoint[0] = 1;
+
+  index = 0;
+  for (i = 0;i < nb_state;i++) {
+    if (!homogeneity[i]) {
+
+      // vue : probabilites de rester dans l'etat i indexees
+
+      plot.variable[index] = 0;
+      plot.viewpoint[index] = SELF_TRANSITION;
+
+      plot[index].xrange = Range(0 , self_transition[i]->max_value);
+      plot[index].yrange = Range(0. , 1.);
+
+      if (self_transition[i]->max_value < TIC_THRESHOLD) {
+        plot[index].xtics = 1;
+      }
+
+      if (seq) {
+        plot[index].resize(2);
+
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i << " - "
+               << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_SELF_TRANSITION];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "points";
+
+        seq->self_transition[i]->plotable_write(0 , plot[index][0]);
+        j = 1;
+      }
+
+      else {
+        plot[index].resize(1);
+        j = 0;
+      }
+
+      legend.str("");
+      legend << STAT_label[STATL_STATE] << " " << i << " - "
+             << SEQ_label[SEQL_THEORETICAL] << " " << SEQ_label[SEQL_SELF_TRANSITION];
+      plot[index][j].legend = legend.str();
+
+      plot[index][j].style = "linespoint";
+
+      self_transition[i]->plotable_write(plot[index][j]);
+      index++;
+
+      if (seq) {
+
+        // calcul des residus standardises
+
+        residual_mean = self_transition[i]->residual_mean_computation();
+        residual_standard_deviation = sqrt(self_transition[i]->residual_variance_computation(residual_mean));
+
+        standard_residual = new double[self_transition[i]->max_value + 1];
+
+        pfrequency = self_transition[i]->frequency;
+        presidual = self_transition[i]->residual;
+        min_standard_residual = 0.;
+        max_standard_residual = 0.;
+
+        for (j = 0;j <= self_transition[i]->max_value;j++) {
+          if (*pfrequency++ > 0) {
+            standard_residual[j] = *presidual / residual_standard_deviation;
+            if (standard_residual[j] < min_standard_residual) {
+              min_standard_residual = standard_residual[j];
+            }
+            if (standard_residual[j] > max_standard_residual) {
+              max_standard_residual = standard_residual[j];
+            }
+            presidual++;
+          }
+        }
+
+        // vue : residus standardises
+
+        plot.variable[index] = 0;
+        plot.viewpoint[index] = SELF_TRANSITION;
+
+        plot[index].xrange = Range(0 , seq->self_transition[i]->length - 1);
+        if (seq->self_transition[i]->length - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        plot[index].yrange = Range(min_standard_residual , max_standard_residual);
+
+        plot[index].xlabel = SEQ_label[SEQL_INDEX];
+        plot[index].ylabel = STAT_label[STATL_STANDARDIZED_RESIDUAL];
+
+        nb_plot = 1;
+        if (((1. - self_transition[i]->point[0]) / residual_standard_deviation <= max_standard_residual) ||
+            ((1. - self_transition[i]->point[seq->self_transition[i]->length - 1]) / residual_standard_deviation <=
+             max_standard_residual)) {
+          nb_plot++;
+        }
+        if ((-self_transition[i]->point[0] / residual_standard_deviation >= min_standard_residual) ||
+            (-self_transition[i]->point[seq->self_transition[i]->length - 1] / residual_standard_deviation >=
+             min_standard_residual)) {
+          nb_plot++;
+        }
+        plot[index].resize(nb_plot);
+
+        plot[index][0].style = "points";
+
+        pfrequency = self_transition[i]->frequency;
+        for (j = 0;j <= self_transition[i]->max_value;j++) {
+          if (*pfrequency++ > 0) {
+            plot[index][0].add_point(j , standard_residual[j]);
+          }
+        }
+
+        j = 1;
+        if (((1. - self_transition[i]->point[0]) / residual_standard_deviation <= max_standard_residual) ||
+            ((1. - self_transition[i]->point[seq->self_transition[i]->length - 1]) / residual_standard_deviation <=
+             max_standard_residual)) {
+          plot[index][j].legend = SEQ_label[SEQL_ASYMPTOTE];
+
+          plot[index][j].style = "lines";
+
+          for (k = 0;k <= self_transition[i]->max_value;k++) {
+            plot[index][j].add_point(k , (1. - self_transition[i]->point[k]) / residual_standard_deviation);
+          }
+          j++;
+        }
+
+        if ((-self_transition[i]->point[0] / residual_standard_deviation >= min_standard_residual) ||
+            (-self_transition[i]->point[seq->self_transition[i]->length - 1] / residual_standard_deviation >=
+             min_standard_residual)) {
+          plot[index][j].legend = SEQ_label[SEQL_ASYMPTOTE];
+
+          plot[index][j].style = "lines";
+
+          for (k = 0;k <= self_transition[i]->max_value;k++) {
+            plot[index][j].add_point(k , -self_transition[i]->point[k] / residual_standard_deviation);
+          }
+        }
+        index++;
+
+        // vue : histogramme des comptages de transition indexes
+
+        plot.variable[index] = 0;
+        plot.viewpoint[index] = SELF_TRANSITION;
+
+        plot[index].xrange = Range(0 , seq->self_transition[i]->length - 1);
+        max_frequency = seq->self_transition[i]->max_frequency_computation();
+        plot[index].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+        if (seq->self_transition[i]->length - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].xlabel = SEQ_label[SEQL_INDEX];
+        plot[index].ylabel = STAT_label[STATL_FREQUENCY];
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i << " - "
+               << SEQ_label[SEQL_TRANSITION_COUNTS];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        seq->self_transition[i]->plotable_frequency_write(plot[index][0]);
+        index++;
+
+        delete [] standard_residual;
+      }
+    }
+  }
+
+  process->plotable_write(*plot_set , index , 0 , 0 , characteristics , hlength);
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Nonhomogeneous_markov.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Nonhomogeneous_markov::get_plotable() const
+
+{
+  return get_plotable(markov_data);
+}
 
 
 /*--------------------------------------------------------------*
@@ -2181,8 +2227,8 @@ int Nonhomogeneous_markov::nb_parameter_computation() const
 Nonhomogeneous_markov_data::Nonhomogeneous_markov_data()
 
 {
-  markov = 0;
-  chain_data = 0;
+  markov = NULL;
+  chain_data = NULL;
   likelihood = D_INF;
 }
 
@@ -2199,8 +2245,8 @@ Nonhomogeneous_markov_data::Nonhomogeneous_markov_data(const Histogram &ihlength
 :Markovian_sequences(ihlength , 1 , false)
 
 {
-  markov = 0;
-  chain_data = 0;
+  markov = NULL;
+  chain_data = NULL;
   likelihood = D_INF;
 }
 
@@ -2218,8 +2264,8 @@ Nonhomogeneous_markov_data::Nonhomogeneous_markov_data(const Markovian_sequences
 :Markovian_sequences(seq)
 
 {
-  markov = 0;
-  chain_data = 0;
+  markov = NULL;
+  chain_data = NULL;
   likelihood = D_INF;
 }
 
@@ -2240,14 +2286,14 @@ void Nonhomogeneous_markov_data::copy(const Nonhomogeneous_markov_data &seq , bo
     markov = new Nonhomogeneous_markov(*(seq.markov) , false);
   }
   else {
-    markov = 0;
+    markov = NULL;
   }
 
   if (seq.chain_data) {
     chain_data = new Chain_data(*(seq.chain_data));
   }
   else {
-    chain_data = 0;
+    chain_data = NULL;
   }
 
   likelihood = seq.likelihood;
@@ -2314,7 +2360,7 @@ Distribution_data* Nonhomogeneous_markov_data::extract(Format_error &error , int
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if ((state < 0) || (state >= marginal[0]->nb_value)) {
@@ -2354,8 +2400,8 @@ Distribution_data* Nonhomogeneous_markov_data::extract(Format_error &error , int
   }
 
   if (status) {
-    pdist = 0;
-    pparam = 0;
+    pdist = NULL;
+    pparam = NULL;
 
     switch (type) {
     case FIRST_OCCURRENCE :
@@ -2408,7 +2454,7 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov_data::remove_index_parameter(F
   error.init();
 
   if (!index_parameter) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
@@ -2540,132 +2586,22 @@ bool Nonhomogeneous_markov_data::plot_write(Format_error &error , const char *pr
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Nonhomogeneous_markov_data.
  *
  *--------------------------------------------------------------*/
 
-/* RWDEFINE_COLLECTABLE(Nonhomogeneous_markov_data , STATI_NONHOMOGENEOUS_MARKOV_DATA);
-
-
-RWspace Nonhomogeneous_markov_data::binaryStoreSize() const
+MultiPlotSet* Nonhomogeneous_markov_data::get_plotable() const
 
 {
-  RWspace size = Markovian_sequences::binaryStoreSize() + sizeof(likelihood);
+  MultiPlotSet *plot_set;
 
-  size += sizeof(true);
-  if (chain_data) {
-    size += chain_data->binaryStoreSize();
-  }
 
   if (markov) {
-    size += markov->recursiveStoreSize();
+    plot_set = markov->get_plotable(this);
+  }
+  else {
+    plot_set = NULL;
   }
 
-  return size;
+  return plot_set;
 }
-
-
-void Nonhomogeneous_markov_data::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-
-
-  delete markov;
-  delete chain_data;
-
-  Markovian_sequences::restoreGuts(is);
-
-  is >> status;
-  if (status) {
-    chain_data = new Chain_data();
-    chain_data->restoreGuts(is);
-  }
-  else {
-    chain_data = 0;
-  }
-
-  is >> likelihood;
-
-  is >> markov;
-  if (markov == RWnilCollectable) {
-    markov = 0;
-  }
-}
-
-
-void Nonhomogeneous_markov_data::restoreGuts(RWFile &file)
-
-{
-  bool status;
-
-
-  delete markov;
-  delete chain_data;
-
-  Markovian_sequences::restoreGuts(file);
-
-  file.Read(status);
-  if (status) {
-    chain_data = new Chain_data();
-    chain_data->restoreGuts(file);
-  }
-  else {
-    chain_data = 0;
-  }
-
-  file.Read(likelihood);
-
-  file >> markov;
-  if (markov == RWnilCollectable) {
-    markov = 0;
-  }
-}
-
-
-void Nonhomogeneous_markov_data::saveGuts(RWvostream &os) const
-
-{
-  Markovian_sequences::saveGuts(os);
-
-  if (chain_data) {
-    os << true;
-    chain_data->saveGuts(os);
-  }
-  else {
-    os << false;
-  }
-
-  os << likelihood;
-
-  if (markov) {
-    os << markov;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Nonhomogeneous_markov_data::saveGuts(RWFile &file) const
-
-{
-  Markovian_sequences::saveGuts(file);
-
-  if (chain_data) {
-    file.Write(true);
-    chain_data->saveGuts(file);
-  }
-  else {
-    file.Write(false);
-  }
-
-  file.Write(likelihood);
-
-  if (markov) {
-    file << markov;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
