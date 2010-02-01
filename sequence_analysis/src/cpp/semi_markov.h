@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -109,6 +109,7 @@ protected :
                                     bool hidden = false) const;
     bool plot_write(const char *prefix , const char *title ,
                     const Semi_markov_data *seq) const;
+    MultiPlotSet* get_plotable(const Semi_markov_data *seq) const;
 
     int nb_parameter_computation(double min_probability = 0.) const;
     double penalty_computation(bool hidden , double min_probability = 0.) const;
@@ -172,15 +173,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
-
-/*    RWDECLARE_COLLECTABLE(Semi_markov);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
     void characteristic_computation(const Semi_markov_data &seq , bool counting_flag ,
@@ -198,13 +192,13 @@ public :
 
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Semi_markov **ismarkov , Histogram **hlength ,
-                                            const char *path = 0) const;
+                                            const char *path = NULL) const;
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Semi_markov **smarkov , int nb_sequence ,
-                                            int length , const char *path = 0) const;
+                                            int length , const char *path = NULL) const;
     Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
                                             const Semi_markov **smarkov , int nb_sequence ,
-                                            const Markovian_sequences **seq , const char *path = 0) const;
+                                            const Markovian_sequences **seq , const char *path = NULL) const;
 
     // acces membres de la classe
 
@@ -306,17 +300,10 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
-/*    RWDECLARE_COLLECTABLE(Semi_markov_data);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
-
-    void build_transition_count(const Semi_markov *smarkov = 0);
+    void build_transition_count(const Semi_markov *smarkov = NULL);
 
     // acces membres de la classe
 
