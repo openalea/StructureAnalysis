@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -83,6 +83,7 @@ class Vector_distance;
 class Vectors;
 class Mv_Mixture;
 
+
 class Vectors : public STAT_interface {  // vecteurs
 
     friend class Regression;
@@ -123,7 +124,7 @@ protected :
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , bool comment_flag) const;
-    bool plot_print(const char *path , double *standard_residual = 0) const;
+    bool plot_print(const char *path , double *standard_residual = NULL) const;
     void plotable_write(SinglePlot &plot , int variable1 , int variable2) const;
     void plotable_frequency_write(SinglePlot &plot , int variable1 , int variable2) const;
 
@@ -224,16 +225,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Vectors);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     double mean_absolute_deviation_computation(int variable) const;
     double mean_absolute_difference_computation(int variable) const;
@@ -241,17 +234,17 @@ public :
     double kurtosis_computation(int variable) const;
 
     bool rank_correlation_computation(Format_error &error , std::ostream &os ,
-                                      int correlation_type , const char *path = 0) const;
+                                      int correlation_type , const char *path = NULL) const;
 
     Distance_matrix* comparison(Format_error &error , const Vector_distance &ivector_dist ,
                                 bool standardization = true) const;
 
-    bool contingency_table(Format_error &error , std::ostream &os , int variable1 , int variable2 ,
-                           const char *path = 0 , char format = 'a') const;
+    bool contingency_table(Format_error &error , std::ostream &os , int variable1 ,
+                           int variable2 , const char *path = NULL , char format = 'a') const;
 
     bool variance_analysis(Format_error &error , std::ostream &os , int class_variable ,
-                           int response_variable , int response_type , const char *path = 0 ,
-                           char format = 'a') const;
+                           int response_variable , int response_type ,
+                           const char *path = NULL , char format = 'a') const;
 
     Regression* linear_regression(Format_error &error , int explanatory_variable ,
                                   int response_variable) const;
@@ -262,11 +255,14 @@ public :
                                int response_variable , const Distribution &dist ,
                                char algorithm = 'a') const;
     Regression* nearest_neighbor_smoother(Format_error &error , int explanatory_variable ,
-                                          int response_variable , double span , bool weighting = true) const;
-    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, const Mv_Mixture &imixture,
-                                   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
-    Mv_Mixture* mixture_estimation(Format_error &error, std::ostream& os, int nb_component,
-                                   int nb_iter=I_DEFAULT, bool *force_param=NULL) const;
+                                          int response_variable , double span ,
+                                          bool weighting = true) const;
+
+    Mv_Mixture* mixture_estimation(Format_error &error , std::ostream &os ,
+                                   const Mv_Mixture &imixture, int nb_iter = I_DEFAULT ,
+                                   bool *force_param = NULL) const;
+    Mv_Mixture* mixture_estimation(Format_error &error , std::ostream& os , int nb_component ,
+                                   int nb_iter = I_DEFAULT , bool *force_param = NULL) const;
 
     // acces membres de la classe
 
@@ -340,19 +336,12 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
-
-/*    RWDECLARE_COLLECTABLE(Vector_distance);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
+                    const char *title = NULL) const;
 
     double* max_symbol_distance_computation(int variable) const;
 
-    void dispersion_computation(int variable , const Histogram *marginal , double *rank = 0) const;
+    void dispersion_computation(int variable , const Histogram *marginal ,
+                                double *rank = NULL) const;
 
     // acces membres de la classe
 
