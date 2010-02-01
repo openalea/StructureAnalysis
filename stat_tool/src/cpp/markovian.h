@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -72,7 +72,7 @@ const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon constr
 const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
                                        // d'observation parametriques
 
-const double SELF_TRANSITION = 0.9;    // probabilite de rester dans un etat initiale
+// const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
 
 enum {
   FORWARD ,
@@ -131,22 +131,16 @@ public :
     std::ostream& ascii_print(std::ostream &os , bool file_flag = false) const;
     std::ostream& spreadsheet_print(std::ostream &os) const;
 
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
-
     void create_cumul();
     void cumul_computation();
     void remove_cumul();
     void log_computation();
 
     bool** logic_transition_computation() const;
-    bool connex_component_research(Format_error &error , bool **ilogic_transition = 0) const;
+    bool connex_component_research(Format_error &error , bool **ilogic_transition = NULL) const;
     void graph_accessibility_computation(bool **ilogic_transition);
     void probability_accessibility_computation();
-    void component_computation(bool **ilogic_transition = 0);
+    void component_computation(bool **ilogic_transition = NULL);
 
     void thresholding(double min_probability);
 
@@ -202,12 +196,6 @@ class Chain_data : public Chain_reestimation<int> {  // structure de donnees cor
 
 // protected :
 public :
-
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     int nb_parameter_computation() const;
 
@@ -277,17 +265,12 @@ public :
     Distribution* get_observation(int state) const
     { return observation[state]; }
 
-    // affichage des lois d'observation
-    std::ostream& ascii_print(std::ostream &os, Histogram **empirical_observation,
-                  bool exhaustive, bool file_flag) const;
-
-    // affichage des lois d'observation dans un tableur
-    std::ostream& spreadsheet_print(std::ostream &os, Histogram **empirical_observation=NULL) const;
-  
-    /** sortie gnuplot */
-    bool plot_print(const char *prefix, const char *title,
-            int process, Histogram **empirical_observation = NULL) const;
-
+    std::ostream& ascii_print(std::ostream &os , Histogram **empirical_observation ,
+                              bool exhaustive , bool file_flag) const;
+    std::ostream& spreadsheet_print(std::ostream &os ,
+                                    Histogram **empirical_observation = NULL) const;
+    bool plot_print(const char *prefix , const char *title ,
+                    int process , Histogram **empirical_observation = NULL) const;
 };
 
 
@@ -343,9 +326,11 @@ public :
 
     std::ostream& ascii_print(std::ostream &os , Histogram **empirical_observation ,
                               bool exhaustive , bool file_flag) const;
-    std::ostream& spreadsheet_print(std::ostream &os , Histogram **empirical_observation = 0) const;
+    std::ostream& spreadsheet_print(std::ostream &os , Histogram **empirical_observation = NULL) const;
     bool plot_print(const char *prefix , const char *title , int process ,
-                    Histogram **empirical_observation = 0) const;
+                    Histogram **empirical_observation = NULL) const;
+    void plotable_write(MultiPlotSet &plot , int &index , int process ,
+                        Histogram **empirical_observation = NULL) const;
 
     int nb_parameter_computation() const;
     void init();
