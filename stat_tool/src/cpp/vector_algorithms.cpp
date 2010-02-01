@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -65,7 +65,7 @@ double** Vectors::spearman_rank_correlation_computation() const
 {
   register int i , j , k;
   int *pfrequency;
-  double main_term , rank_mean , rank_diff , *correction , **correlation = 0 , **rank;
+  double main_term , rank_mean , rank_diff , *correction , **correlation = NULL , **rank;
 
 
   if (nb_vector > 2) {
@@ -142,7 +142,7 @@ double** Vectors::kendall_rank_correlation_computation() const
   register int i , j , k , m , n , p;
   int diff , *current_frequency , *pfrequency , *cumul_frequency , *pcumul , *index ,
       **frequency;
-  double nb_pair , sum , rank_diff_sign , *correction , **correlation = 0;
+  double nb_pair , sum , rank_diff_sign , *correction , **correlation = NULL;
 
 
   if (nb_vector > 2) {
@@ -680,7 +680,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
   Distance_matrix *dist_matrix;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   if ((nb_vector < 2) || (nb_vector > DISTANCE_NB_VECTOR)) {
@@ -780,7 +780,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
 
       else {
         for (i = 0;i < nb_variable;i++) {
-          rank[i] = 0;
+          rank[i] = NULL;
         }
       }
       break;
@@ -792,7 +792,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
           rank[i] = marginal[i]->rank_computation();
         }
         else {
-          rank[i] = 0;
+          rank[i] = NULL;
         }
       }
       break;
@@ -989,7 +989,7 @@ int** Vectors::joint_frequency_computation(int variable1 , int variable2) const
 
 {
   register int i , j;
-  int *pfrequency , **frequency = 0;
+  int *pfrequency , **frequency = NULL;
 
 
   if ((marginal[variable1]) && (marginal[variable2])) {
