@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -73,24 +73,24 @@ Variable_order_markov::Variable_order_markov()
 
 {
   nb_iterator = 0;
-  markov_data = 0;
+  markov_data = NULL;
 
   max_order = 0;
 
-  memory_type = 0;
-  order = 0;
-  state = 0;
+  memory_type = NULL;
+  order = NULL;
+  state = NULL;
 
-  parent = 0;
-  child = 0;
+  parent = NULL;
+  child = NULL;
 
-  next = 0;
-  nb_memory = 0;
-  previous = 0;
+  next = NULL;
+  nb_memory = NULL;
+  previous = NULL;
 
   nb_output_process = 0;
-  nonparametric_process = 0;
-  parametric_process = 0;
+  nonparametric_process = NULL;
+  parametric_process = NULL;
 }
 
 
@@ -110,7 +110,7 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state , int in
 
 
   nb_iterator = 0;
-  markov_data = 0;
+  markov_data = NULL;
 
   max_order = 0;
 
@@ -121,19 +121,19 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state , int in
   child = new int*[nb_row];
 
   for (i = 0;i < nb_row;i++) {
-    state[i] = 0;
-    child[i] = 0;
+    state[i] = NULL;
+    child[i] = NULL;
   }
 
-  next = 0;
-  nb_memory = 0;
-  previous = 0;
+  next = NULL;
+  nb_memory = NULL;
+  previous = NULL;
 
   nb_output_process = 0;
   nonparametric_process = new Nonparametric_sequence_process*[1];
   nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state);
 
-  parametric_process = 0;
+  parametric_process = NULL;
 }
 
 
@@ -154,7 +154,7 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
 
 
   nb_iterator = 0;
-  markov_data = 0;
+  markov_data = NULL;
 
   max_order = imax_order;
 
@@ -166,18 +166,18 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
 
   for (i = 0;i < nb_row;i++) {
     state[i] = new int[max_order];
-    child[i] = 0;
+    child[i] = NULL;
   }
 
-  next = 0;
-  nb_memory = 0;
-  previous = 0;
+  next = NULL;
+  nb_memory = NULL;
+  previous = NULL;
 
   nb_output_process = 0;
   nonparametric_process = new Nonparametric_sequence_process*[1];
   nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state);
 
-  parametric_process = 0;
+  parametric_process = NULL;
 }
 
 
@@ -201,7 +201,7 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
 
 
   nb_iterator = 0;
-  markov_data = 0;
+  markov_data = NULL;
 
   max_order = iorder;
 
@@ -215,7 +215,7 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
 
   memory_type[0] = NON_TERMINAL;
   order[0] = 0;
-  state[0] = 0;
+  state[0] = NULL;
   parent[0] = -1;
   child[0] = new int[nb_state];
 
@@ -287,15 +287,15 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
       child[i] = new int[nb_state];
     }
     else {
-      child[i] = 0;
+      child[i] = NULL;
     }
   }
 
   // calcul des transitions entre memoires terminales
 
-  next = 0;
-  nb_memory = 0;
-  previous = 0;
+  next = NULL;
+  nb_memory = NULL;
+  previous = NULL;
 
   build_memory_transition();
 
@@ -307,7 +307,7 @@ Variable_order_markov::Variable_order_markov(char itype , int inb_state ,
     nonparametric_process[1] = new Nonparametric_sequence_process(nb_state , nb_value , true);
   }
 
-  parametric_process = 0;
+  parametric_process = NULL;
 }
 
 
@@ -629,11 +629,11 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
   }
 
   else {
-    accessibility = 0;
+    accessibility = NULL;
     nb_component = 0;
-    component_nb_state = 0;
-    component = 0;
-    state_type = 0;
+    component_nb_state = NULL;
+    component = NULL;
+    state_type = NULL;
   }
 
   initial = new double[type == 'o' ? nb_state : nb_row];
@@ -649,8 +649,8 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
     transition[i] = new double[nb_state];
   }
 
-  cumul_initial = 0;
-  cumul_transition = 0;
+  cumul_initial = NULL;
+  cumul_transition = NULL;
 
   nb_iterator = 0;
 
@@ -658,7 +658,7 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
     markov_data = new Variable_order_markov_data(*(markov.markov_data) , false);
   }
   else {
-    markov_data = 0;
+    markov_data = NULL;
   }
 
   max_order = markov.max_order;
@@ -669,9 +669,9 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
   parent = new int[nb_row];
   child = new int*[nb_row];
 
-  next = 0;
-  nb_memory = 0;
-  previous = 0;
+  next = NULL;
+  nb_memory = NULL;
+  previous = NULL;
 
   // insertion des memoires dans l'arborescence
 
@@ -702,7 +702,7 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
     }
 
     else {
-      child[i] = 0;
+      child[i] = NULL;
     }
 
     i++;
@@ -731,7 +731,7 @@ void Variable_order_markov::memory_tree_completion(const Variable_order_markov &
           child[i] = new int[nb_state];
         }
         else {
-          child[i] = 0;
+          child[i] = NULL;
         }
 
         i++;
@@ -848,7 +848,7 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov &markov
     nonparametric_process[1] = new Nonparametric_sequence_process(nb_state , nb_value , true);
   }
 
-  parametric_process = 0;
+  parametric_process = NULL;
 }
 
 
@@ -877,15 +877,15 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov &markov
   nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
   nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state , false);
   parametric_process = new Parametric_process*[nb_output_process + 1];
-  parametric_process[0] = 0;
+  parametric_process[0] = NULL;
 
   for (i = 1;i <= nb_output_process;i++) {
     if (*nb_value <= NB_OUTPUT) {
       nonparametric_process[i] = new Nonparametric_sequence_process(nb_state , *nb_value++ , true);
-      parametric_process[i] = 0;
+      parametric_process[i] = NULL;
     }
     else {
-      nonparametric_process[i] = 0;
+      nonparametric_process[i] = NULL;
       parametric_process[i] = new Parametric_process(nb_state , (int)(*nb_value++ * SAMPLE_NB_VALUE_COEFF));
     }
   }
@@ -944,7 +944,7 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov *pmarko
     nonparametric_process[1] = new Nonparametric_sequence_process(*pobservation);
   }
 
-  parametric_process = 0;
+  parametric_process = NULL;
 
   characteristic_computation(length , true);
 }
@@ -971,7 +971,7 @@ void Variable_order_markov::copy(const Variable_order_markov &markov , bool data
     markov_data = new Variable_order_markov_data(*(markov.markov_data) , false);
   }
   else {
-    markov_data = 0;
+    markov_data = NULL;
   }
 
   memory_type = new int[nb_row];
@@ -1008,7 +1008,7 @@ void Variable_order_markov::copy(const Variable_order_markov &markov , bool data
       }
     }
     else {
-      child[i] = 0;
+      child[i] = NULL;
     }
   }
 
@@ -1022,12 +1022,12 @@ void Variable_order_markov::copy(const Variable_order_markov &markov , bool data
         }
       }
       else {
-        next[i] = 0;
+        next[i] = NULL;
       }
     }
   }
   else {
-    next = 0;
+    next = NULL;
   }
 
   if (markov.nb_memory) {
@@ -1037,7 +1037,7 @@ void Variable_order_markov::copy(const Variable_order_markov &markov , bool data
     }
   }
   else {
-    nb_memory = 0;
+    nb_memory = NULL;
   }
 
   if (markov.previous) {
@@ -1050,12 +1050,12 @@ void Variable_order_markov::copy(const Variable_order_markov &markov , bool data
         }
       }
       else {
-        previous[i] = 0;
+        previous[i] = NULL;
       }
     }
   }
   else {
-    previous = 0;
+    previous = NULL;
   }
 
   nb_output_process = markov.nb_output_process;
@@ -1064,10 +1064,10 @@ void Variable_order_markov::copy(const Variable_order_markov &markov , bool data
 
   if (markov.parametric_process) {
     parametric_process = new Parametric_process*[nb_output_process + 1];
-    parametric_process[0] = 0;
+    parametric_process[0] = NULL;
   }
   else {
-    parametric_process = 0;
+    parametric_process = NULL;
   }
 
   nonparametric_process[0] = new Nonparametric_sequence_process(*(markov.nonparametric_process[0]));
@@ -1076,11 +1076,11 @@ void Variable_order_markov::copy(const Variable_order_markov &markov , bool data
     if (markov.nonparametric_process[i]) {
       nonparametric_process[i] = new Nonparametric_sequence_process(*(markov.nonparametric_process[i]));
       if (markov.parametric_process) {
-        parametric_process[i] = 0;
+        parametric_process[i] = NULL;
       }
     }
     else {
-      nonparametric_process[i] = 0;
+      nonparametric_process[i] = NULL;
       parametric_process[i] = new Parametric_process(*(markov.parametric_process[i]));
     }
   }
@@ -1231,7 +1231,7 @@ void Variable_order_markov::build_memory_transition()
 #   endif
 
     next = new int*[nb_row];
-    next[0] = 0;
+    next[0] = NULL;
 
     for (i = 1;i < nb_row;i++) {
       if ((type == 'o') || (!child[i])) {
@@ -1283,7 +1283,7 @@ void Variable_order_markov::build_memory_transition()
       }
 
       else {
-        next[i] = 0;
+        next[i] = NULL;
       }
     }
   }
@@ -1307,7 +1307,7 @@ void Variable_order_markov::build_previous_memory()
     nb_memory = new int[nb_row];
     previous = new int*[nb_row];
     nb_memory[0] = 0;
-    previous[0] = 0;
+    previous[0] = NULL;
 
     buffer = new int[nb_row - 1];
     for (i = 1;i < nb_row;i++) {
@@ -1330,7 +1330,7 @@ void Variable_order_markov::build_previous_memory()
         }
       }
       else {
-        previous[i] = 0;
+        previous[i] = NULL;
       }
     }
 
@@ -1594,11 +1594,11 @@ Parametric_model* Variable_order_markov::extract(Format_error &error , int type 
   Histogram *phisto;
 
 
-  dist = 0;
+  dist = NULL;
   error.init();
 
-  pdist = 0;
-  pparam = 0;
+  pdist = NULL;
+  pparam = NULL;
 
   if (type == OBSERVATION) {
     if ((variable < 1) || (variable > nb_output_process)) {
@@ -1677,7 +1677,7 @@ Parametric_model* Variable_order_markov::extract(Format_error &error , int type 
   }
 
   if (status) {
-    phisto = 0;
+    phisto = NULL;
 
     if (markov_data) {
       switch (markov_data->type[0]) {
@@ -1758,7 +1758,7 @@ Variable_order_markov_data* Variable_order_markov::extract_data(Format_error &er
   Variable_order_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if (!markov_data) {
@@ -1875,7 +1875,7 @@ void Variable_order_markov::threshold_application(double min_probability)
     }
     delete [] accessibility;
   }
-  accessibility = 0;
+  accessibility = NULL;
 
   delete [] component_nb_state;
 
@@ -1895,10 +1895,10 @@ void Variable_order_markov::threshold_application(double min_probability)
     }
     delete [] next;
   }
-  next = 0;
+  next = NULL;
 
   delete [] nb_memory;
-  nb_memory = 0;
+  nb_memory = NULL;
 
   if (previous) {
     for (i = 1;i < nb_row;i++) {
@@ -1906,7 +1906,7 @@ void Variable_order_markov::threshold_application(double min_probability)
     }
     delete [] previous;
   }
-  previous = 0;
+  previous = NULL;
 
   build_memory_transition();
   build_previous_memory();
@@ -1968,7 +1968,7 @@ Variable_order_markov* variable_order_markov_parsing(Format_error &error , ifstr
   Variable_order_markov *markov;
 
 
-  markov = 0;
+  markov = NULL;
 
   // analyse ligne definissant le nombre d'etats
 
@@ -2378,7 +2378,7 @@ Variable_order_markov* variable_order_markov_parsing(Format_error &error , ifstr
 
       if (!status) {
         delete markov;
-        markov = 0;
+        markov = NULL;
       }
       else {
         markov->max_order_computation();
@@ -2417,7 +2417,7 @@ Variable_order_markov* variable_order_markov_ascii_read(Format_error &error ,
   ifstream in_file(path);
 
 
-  markov = 0;
+  markov = NULL;
   error.init();
 
   if (!in_file) {
@@ -2495,7 +2495,7 @@ Variable_order_markov* variable_order_markov_ascii_read(Format_error &error ,
 
         // analyse du format et lecture des lois d'observation
 
-        observation = 0;
+        observation = NULL;
 
         while (buffer.readLine(in_file , false)) {
           line++;
@@ -3198,7 +3198,7 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
   int buff , variable , max_memory_count , *memory_count , width[2];
   double standard_normal_value , half_confidence_interval;
   long old_adjust;
-  Histogram **observation = 0;
+  Histogram **observation = NULL;
   Sequence_characteristics *characteristics;
 
 
@@ -3354,7 +3354,7 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
     characteristics = seq->characteristics[0];
   }
   else {
-    characteristics = 0;
+    characteristics = NULL;
   }
 
   nonparametric_process[0]->ascii_print(os , 0 , 0 , characteristics , exhaustive , file_flag);
@@ -3438,7 +3438,7 @@ ostream& Variable_order_markov::ascii_write(ostream &os , const Variable_order_m
         characteristics = seq->characteristics[variable];
       }
       else {
-        characteristics = 0;
+        characteristics = NULL;
       }
     }
 
@@ -3849,7 +3849,7 @@ ostream& Variable_order_markov::spreadsheet_write(ostream &os ,
 {
   register int i;
   int variable;
-  Histogram **observation = 0;
+  Histogram **observation = NULL;
   Sequence_characteristics *characteristics;
 
 
@@ -3888,7 +3888,7 @@ ostream& Variable_order_markov::spreadsheet_write(ostream &os ,
     characteristics = seq->characteristics[0];
   }
   else {
-    characteristics = 0;
+    characteristics = NULL;
   }
 
   nonparametric_process[0]->spreadsheet_print(os , 0 , 0 , characteristics);
@@ -3933,7 +3933,7 @@ ostream& Variable_order_markov::spreadsheet_write(ostream &os ,
         characteristics = seq->characteristics[variable];
       }
       else {
-        characteristics = 0;
+        characteristics = NULL;
       }
     }
 
@@ -4078,7 +4078,8 @@ bool Variable_order_markov::spreadsheet_write(Format_error &error , const char *
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Variable_order_markov et de la structure de donnees associee.
+ *  Sortie Gnuplot d'un objet Variable_order_markov et
+ *  de la structure de donnees associee.
  *
  *  arguments : prefixe des fichiers, titre des figures,
  *              pointeur sur les sequences observees.
@@ -4092,7 +4093,7 @@ bool Variable_order_markov::plot_write(const char *prefix , const char *title ,
   bool status;
   register int i;
   int variable;
-  Histogram *hlength = 0 , **observation = 0;
+  Histogram *hlength = NULL , **observation = NULL;
   Sequence_characteristics *characteristics;
 
 
@@ -4101,7 +4102,7 @@ bool Variable_order_markov::plot_write(const char *prefix , const char *title ,
     hlength = seq->hlength;
   }
   else {
-    characteristics = 0;
+    characteristics = NULL;
   }
 
   status = nonparametric_process[0]->plot_print(prefix , title , 0 , 0 , characteristics ,
@@ -4131,7 +4132,7 @@ bool Variable_order_markov::plot_write(const char *prefix , const char *title ,
           characteristics = seq->characteristics[variable];
         }
         else {
-          characteristics = 0;
+          characteristics = NULL;
         }
       }
 
@@ -4171,6 +4172,308 @@ bool Variable_order_markov::plot_write(Format_error &error , const char *prefix 
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Variable_order_markov et
+ *  de la structure de donnees associee.
+ *
+ *  arguments : pointeur sur les sequences observees.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Variable_order_markov::get_plotable(const Variable_order_markov_data *seq) const
+
+{
+  register int i , j;
+  int nb_plot_set , index_length , index , variable;
+  Histogram *hlength = NULL , **observation = NULL;
+  Sequence_characteristics *characteristics;
+  MultiPlotSet *plot_set;
+
+
+  if ((seq) && (seq->type[0] == STATE)) {
+    characteristics = seq->characteristics[0];
+  }
+  else {
+    characteristics = NULL;
+  }
+
+  // calcul du nombre de vues
+
+  nb_plot_set = 0;
+
+  if ((nonparametric_process[0]->index_value) || (characteristics)) {
+    nb_plot_set++;
+
+    if (characteristics) {
+      index_length = characteristics->index_value->plot_length_computation();
+
+      if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+        nb_plot_set++;
+      }
+      nb_plot_set++;
+    }
+  }
+
+  if ((nonparametric_process[0]->first_occurrence) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((nonparametric_process[0]->first_occurrence) &&
+          (nonparametric_process[0]->first_occurrence[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->first_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+  }
+
+  if ((nonparametric_process[0]->recurrence_time) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((nonparametric_process[0]->recurrence_time) &&
+          (nonparametric_process[0]->recurrence_time[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->recurrence_time[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+  }
+
+  if ((nonparametric_process[0]->sojourn_time) || (characteristics)) {
+    for (i = 0;i < nb_state;i++) {
+      if ((nonparametric_process[0]->sojourn_time) &&
+          (nonparametric_process[0]->sojourn_time[i])) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->sojourn_time[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((characteristics) && (i < characteristics->nb_value) &&
+          (characteristics->initial_run) &&
+          (characteristics->initial_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if ((characteristics) && (i < characteristics->nb_value) &&
+          (characteristics->final_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+  }
+
+  if ((nonparametric_process[0]->nb_run) || (nonparametric_process[0]->nb_occurrence) ||
+      ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
+    for (i = 0;i < nb_state;i++) {
+      if (nonparametric_process[0]->nb_run) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+
+      if (nonparametric_process[0]->nb_occurrence) {
+        nb_plot_set++;
+      }
+      else if ((characteristics) && (i < characteristics->nb_value) &&
+               (characteristics->nb_occurrence) &&
+               (characteristics->nb_occurrence[i]->nb_element > 0)) {
+        nb_plot_set++;
+      }
+    }
+
+    if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
+      nb_plot_set++;
+    }
+  }
+
+  for (i = 1;i <= nb_output_process;i++) {
+    if (seq) {
+      switch (seq->type[0]) {
+      case INT_VALUE :
+        variable = i - 1;
+        break;
+      case STATE :
+        variable = i;
+        break;
+      }
+
+      if (seq->characteristics[variable]) {
+        characteristics = seq->characteristics[variable];
+      }
+      else {
+        characteristics = NULL;
+      }
+    }
+
+    if (nonparametric_process[i]) {
+      if ((nonparametric_process[i]->index_value) || (characteristics)) {
+        nb_plot_set++;
+
+        if (characteristics) {
+          index_length = characteristics->index_value->plot_length_computation();
+
+          if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+            nb_plot_set++;
+          }
+          nb_plot_set++;
+        }
+      }
+
+      if ((nonparametric_process[i]->first_occurrence) || (characteristics)) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if ((nonparametric_process[i]->first_occurrence) &&
+              (nonparametric_process[i]->first_occurrence[j])) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (j < characteristics->nb_value) &&
+                   (characteristics->first_occurrence[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+      }
+
+      if ((nonparametric_process[i]->recurrence_time) || (characteristics)) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if ((nonparametric_process[i]->recurrence_time) &&
+              (nonparametric_process[i]->recurrence_time[j])) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (i < characteristics->nb_value) &&
+                   (characteristics->recurrence_time[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+      }
+
+      if ((nonparametric_process[i]->sojourn_time) || (characteristics)) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if ((nonparametric_process[i]->sojourn_time) &&
+              (nonparametric_process[i]->sojourn_time[j])) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (i < characteristics->nb_value) &&
+                   (characteristics->sojourn_time[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+
+/*          if ((characteristics) && (j < characteristics->nb_value) &&
+              (characteristics->initial_run) &&
+              (characteristics->initial_run[j]->nb_element > 0)) {
+            nb_plot_set++;
+          } */
+
+          if ((characteristics) && (j < characteristics->nb_value) &&
+              (characteristics->final_run[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+      }
+
+      if ((nonparametric_process[i]->nb_run) || (nonparametric_process[i]->nb_occurrence) ||
+          ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence))) {
+        for (j = 0;j < nonparametric_process[i]->nb_value;j++) {
+          if (nonparametric_process[i]->nb_run) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (j < characteristics->nb_value) &&
+                   (characteristics->nb_run) && (characteristics->nb_run[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+
+          if (nonparametric_process[i]->nb_occurrence) {
+            nb_plot_set++;
+          }
+          else if ((characteristics) && (j < characteristics->nb_value) &&
+                   (characteristics->nb_occurrence) &&
+                   (characteristics->nb_occurrence[j]->nb_element > 0)) {
+            nb_plot_set++;
+          }
+        }
+
+        if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
+          nb_plot_set++;
+        }
+      }
+    }
+
+    nb_plot_set += nb_state;
+  }
+
+  plot_set = new MultiPlotSet(nb_plot_set);
+  plot_set->border = "15 lw 0";
+
+  if ((seq) && (seq->type[0] == STATE)) {
+    characteristics = seq->characteristics[0];
+    hlength = seq->hlength;
+  }
+  else {
+    characteristics = NULL;
+  }
+
+  index = 0;
+  plot_set->variable_nb_viewpoint[0] = 0;
+  nonparametric_process[0]->plotable_write(*plot_set , index , 0 , 0 , characteristics ,
+                                           hlength);
+
+  if (seq) {
+    hlength = seq->hlength;
+  }
+
+  for (i = 1;i <= nb_output_process;i++) {
+    if (seq) {
+      switch (seq->type[0]) {
+      case INT_VALUE :
+        variable = i - 1;
+        break;
+      case STATE :
+        variable = i;
+        break;
+      }
+
+      if (seq->observation) {
+        observation = seq->observation[variable];
+      }
+
+      if (seq->characteristics[variable]) {
+        characteristics = seq->characteristics[variable];
+      }
+      else {
+        characteristics = NULL;
+      }
+    }
+
+    if (nonparametric_process[i]) {
+      plot_set->variable_nb_viewpoint[i] = 0;
+      nonparametric_process[i]->plotable_write(*plot_set , index , i , observation ,
+                                               characteristics , hlength);
+    }
+    else {
+      parametric_process[i]->plotable_write(*plot_set , index , i , observation);
+    }
+  }
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Variable_order_markov.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Variable_order_markov::get_plotable() const
+
+{
+  return get_plotable(markov_data);
 }
 
 
@@ -4458,13 +4761,13 @@ double Variable_order_markov::penalty_computation(bool hidden , double min_proba
 Variable_order_markov_data::Variable_order_markov_data()
 
 {
-  markov = 0;
-  chain_data = 0;
+  markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -4482,13 +4785,13 @@ Variable_order_markov_data::Variable_order_markov_data(const Histogram &ihlength
 :Markovian_sequences(ihlength , inb_variable , init_flag)
 
 {
-  markov = 0;
-  chain_data = 0;
+  markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -4505,13 +4808,13 @@ Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences
 :Markovian_sequences(seq , 'a' , DEFAULT)
 
 {
-  markov = 0;
-  chain_data = 0;
+  markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -4531,13 +4834,13 @@ Variable_order_markov_data::Variable_order_markov_data(const Markovian_sequences
 :Markovian_sequences(seq , transform , (initial_run_flag ? ADD_INITIAL_RUN : REMOVE_INITIAL_RUN))
 
 {
-  markov = 0;
-  chain_data = 0;
+  markov = NULL;
+  chain_data = NULL;
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
 
-  posterior_probability = 0;
+  posterior_probability = NULL;
 }
 
 
@@ -4561,14 +4864,14 @@ void Variable_order_markov_data::copy(const Variable_order_markov_data &seq ,
     markov = new Variable_order_markov(*(seq.markov) , false);
   }
   else {
-    markov = 0;
+    markov = NULL;
   }
 
   if (seq.chain_data) {
     chain_data = new Variable_order_chain_data(*(seq.chain_data));
   }
   else {
-    chain_data = 0;
+    chain_data = NULL;
   }
 
   likelihood = seq.likelihood;
@@ -4581,7 +4884,7 @@ void Variable_order_markov_data::copy(const Variable_order_markov_data &seq ,
     }
   }
   else {
-    posterior_probability = 0;
+    posterior_probability = NULL;
   }
 }
 
@@ -4651,7 +4954,7 @@ Distribution_data* Variable_order_markov_data::extract(Format_error &error , int
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if (type == OBSERVATION) {
@@ -4738,8 +5041,8 @@ Distribution_data* Variable_order_markov_data::extract(Format_error &error , int
   }
 
   if (status) {
-    pdist = 0;
-    pparam = 0;
+    pdist = NULL;
+    pparam = NULL;
 
     switch (type) {
 
@@ -4808,7 +5111,7 @@ Variable_order_markov_data* Variable_order_markov_data::remove_index_parameter(F
   error.init();
 
   if (!index_parameter) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
@@ -4993,4 +5296,27 @@ bool Variable_order_markov_data::plot_write(Format_error &error , const char *pr
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Variable_order_markov_data.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Variable_order_markov_data::get_plotable() const
+
+{
+  MultiPlotSet *plot_set;
+
+
+  if (markov) {
+    plot_set = markov->get_plotable(this);
+  }
+  else {
+    plot_set = NULL;
+  }
+
+  return plot_set;
 }
