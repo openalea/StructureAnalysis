@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -100,20 +100,15 @@ public :
     void remove();
 
     std::ostream& ascii_print(std::ostream &os , bool file_flag = false ,
-                              const Curves *curves = 0) const;
-    std::ostream& spreadsheet_print(std::ostream &os , const Curves *curves = 0) const;
+                              const Curves *curves = NULL) const;
+    std::ostream& spreadsheet_print(std::ostream &os , const Curves *curves = NULL) const;
     int plot_length_computation() const;
     bool plot_print(const char *path , int ilength = I_DEFAULT ,
-                    const Curves *curves_0 = 0 , const Curves *curves_1 = 0) const;
-    bool plot_print_standard_residual(const char *path , double *standard_residual = 0) const;  // sequence_analysis
+                    const Curves *curves_0 = NULL , const Curves *curves_1 = NULL) const;
+    bool plot_print_standard_residual(const char *path , double *standard_residual = NULL) const;
     void plotable_write(int index , SinglePlot &plot) const;
+    void plotable_write(MultiPlot &plot) const;
     void plotable_frequency_write(SinglePlot &plot) const;
-
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     double mean_computation(int index) const;
     double total_square_sum_computation(int index , double mean) const;
