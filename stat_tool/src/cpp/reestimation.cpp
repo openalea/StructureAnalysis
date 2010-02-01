@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -69,7 +69,7 @@ void Reestimation<Type>::init(int inb_value)
   variance = D_DEFAULT;
 
   if (nb_value == 0) {
-    frequency = 0;
+    frequency = NULL;
   }
 
   else {
@@ -1263,7 +1263,7 @@ Parametric* Reestimation<Type>::type_parametric_estimation(int min_inf_bound , b
   }
   else {
     delete dist;
-    dist = 0;
+    dist = NULL;
   }
 
   return dist;
