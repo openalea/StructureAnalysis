@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  * 
@@ -44,8 +44,6 @@
 
 #include "tool/config.h"
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "distance_matrix.h"
 #include "stat_label.h"
@@ -71,24 +69,24 @@ Distance_matrix::Distance_matrix()
   nb_row = 0;
   nb_column = 0;
 
-  row_identifier = 0;
-  column_identifier = 0;
+  row_identifier = NULL;
+  column_identifier = NULL;
 
-  distance = 0;
-  length = 0;
+  distance = NULL;
+  length = NULL;
 
-  deletion_distance = 0;
-  nb_deletion = 0;
-  insertion_distance = 0;
-  nb_insertion = 0;
-  nb_match = 0;
-  substitution_distance = 0;
-  nb_substitution = 0;
-  transposition_distance = 0;
-  nb_transposition = 0;
+  deletion_distance = NULL;
+  nb_deletion = NULL;
+  insertion_distance = NULL;
+  nb_insertion = NULL;
+  nb_match = NULL;
+  substitution_distance = NULL;
+  nb_substitution = NULL;
+  transposition_distance = NULL;
+  nb_transposition = NULL;
 
   label_size = 0;
-  label = 0;
+  label = NULL;
 }
 
 
@@ -155,15 +153,15 @@ Distance_matrix::Distance_matrix(int nb_pattern , const char *ilabel , int *patt
     }
   }
 
-  deletion_distance = 0;
-  nb_deletion = 0;
-  insertion_distance = 0;
-  nb_insertion = 0;
-  nb_match = 0;
-  substitution_distance = 0;
-  nb_substitution = 0;
-  transposition_distance = 0;
-  nb_transposition = 0;
+  deletion_distance = NULL;
+  nb_deletion = NULL;
+  insertion_distance = NULL;
+  nb_insertion = NULL;
+  nb_match = NULL;
+  substitution_distance = NULL;
+  nb_substitution = NULL;
+  transposition_distance = NULL;
+  nb_transposition = NULL;
 
   label_size = strlen(ilabel) + 1;
   label = new char[label_size];
@@ -303,8 +301,8 @@ Distance_matrix::Distance_matrix(int nb_pattern , int irow_identifier , int icol
     }
   }
   else {
-    substitution_distance = 0;
-    nb_substitution = 0;
+    substitution_distance = NULL;
+    nb_substitution = NULL;
   }
 
   if (transposition_flag) {
@@ -323,8 +321,8 @@ Distance_matrix::Distance_matrix(int nb_pattern , int irow_identifier , int icol
     }
   }
   else {
-    transposition_distance = 0;
-    nb_transposition = 0;
+    transposition_distance = NULL;
+    nb_transposition = NULL;
   }
 
   label_size = strlen(ilabel) + 1;
@@ -458,8 +456,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int inb_pa
     }
   }
   else {
-    deletion_distance = 0;
-    nb_deletion = 0;
+    deletion_distance = NULL;
+    nb_deletion = NULL;
   }
 
   if ((dist_matrix.insertion_distance) && (dist_matrix.nb_insertion)) {
@@ -475,8 +473,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int inb_pa
     }
   }
   else {
-    insertion_distance = 0;
-    nb_insertion = 0;
+    insertion_distance = NULL;
+    nb_insertion = NULL;
   }
 
   if (dist_matrix.nb_match) {
@@ -489,7 +487,7 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int inb_pa
     }
   }
   else {
-    nb_match = 0;
+    nb_match = NULL;
   }
 
   if ((dist_matrix.substitution_distance) && (dist_matrix.nb_substitution)) {
@@ -505,8 +503,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int inb_pa
     }
   }
   else {
-    substitution_distance = 0;
-    nb_substitution = 0;
+    substitution_distance = NULL;
+    nb_substitution = NULL;
   }
 
   if ((dist_matrix.transposition_distance) && (dist_matrix.nb_transposition)) {
@@ -522,8 +520,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int inb_pa
     }
   }
   else {
-    transposition_distance = 0;
-    nb_transposition = 0;
+    transposition_distance = NULL;
+    nb_transposition = NULL;
   }
 
   label_size = dist_matrix.label_size;
@@ -593,8 +591,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int nb_clu
   }
 
   else {
-    deletion_distance = 0;
-    nb_deletion = 0;
+    deletion_distance = NULL;
+    nb_deletion = NULL;
   }
 
   if ((dist_matrix.insertion_distance) && (dist_matrix.nb_insertion)) {
@@ -611,8 +609,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int nb_clu
   }
 
   else {
-    insertion_distance = 0;
-    nb_insertion = 0;
+    insertion_distance = NULL;
+    nb_insertion = NULL;
   }
 
   if (dist_matrix.nb_match) {
@@ -626,7 +624,7 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int nb_clu
   }
 
   else {
-    nb_match = 0;
+    nb_match = NULL;
   }
 
   if ((dist_matrix.substitution_distance) && (dist_matrix.nb_substitution)) {
@@ -643,8 +641,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int nb_clu
   }
 
   else {
-    substitution_distance = 0;
-    nb_substitution = 0;
+    substitution_distance = NULL;
+    nb_substitution = NULL;
   }
 
   if ((dist_matrix.transposition_distance) && (dist_matrix.nb_transposition)) {
@@ -661,8 +659,8 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int nb_clu
   }
 
   else {
-    transposition_distance = 0;
-    nb_transposition = 0;
+    transposition_distance = NULL;
+    nb_transposition = NULL;
   }
 
   label_size = strlen(ilabel) + 1;
@@ -807,8 +805,8 @@ void Distance_matrix::copy(const Distance_matrix &dist_matrix , char transform)
     }
 
     else {
-      deletion_distance = 0;
-      nb_deletion = 0;
+      deletion_distance = NULL;
+      nb_deletion = NULL;
     }
 
     if ((dist_matrix.insertion_distance) && (dist_matrix.nb_insertion)) {
@@ -856,8 +854,8 @@ void Distance_matrix::copy(const Distance_matrix &dist_matrix , char transform)
     }
 
     else {
-      insertion_distance = 0;
-      nb_insertion = 0;
+      insertion_distance = NULL;
+      nb_insertion = NULL;
     }
 
     if (dist_matrix.nb_match) {
@@ -896,7 +894,7 @@ void Distance_matrix::copy(const Distance_matrix &dist_matrix , char transform)
     }
 
     else {
-      nb_match = 0;
+      nb_match = NULL;
     }
 
     if ((dist_matrix.substitution_distance) && (dist_matrix.nb_substitution)) {
@@ -944,8 +942,8 @@ void Distance_matrix::copy(const Distance_matrix &dist_matrix , char transform)
     }
 
     else {
-      substitution_distance = 0;
-      nb_substitution = 0;
+      substitution_distance = NULL;
+      nb_substitution = NULL;
     }
 
     if ((dist_matrix.transposition_distance) && (dist_matrix.nb_transposition)) {
@@ -993,21 +991,21 @@ void Distance_matrix::copy(const Distance_matrix &dist_matrix , char transform)
     }
 
     else {
-      transposition_distance = 0;
-      nb_transposition = 0;
+      transposition_distance = NULL;
+      nb_transposition = NULL;
     }
   }
 
   else {
-    deletion_distance = 0;
-    nb_deletion = 0;
-    insertion_distance = 0;
-    nb_insertion = 0;
-    nb_match = 0;
-    substitution_distance = 0;
-    nb_substitution = 0;
-    transposition_distance = 0;
-    nb_transposition = 0;
+    deletion_distance = NULL;
+    nb_deletion = NULL;
+    insertion_distance = NULL;
+    nb_insertion = NULL;
+    nb_match = NULL;
+    substitution_distance = NULL;
+    nb_substitution = NULL;
+    transposition_distance = NULL;
+    nb_transposition = NULL;
   }
 
   label_size = dist_matrix.label_size;
@@ -1165,7 +1163,7 @@ Distance_matrix* Distance_matrix::select_individual(Format_error &error , int in
   Distance_matrix *dist_matrix;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   nb_pattern = MAX(nb_row , nb_column);
@@ -1257,7 +1255,7 @@ Distance_matrix* Distance_matrix::symmetrize(Format_error &error) const
   error.init();
 
   if (test_symmetry()) {
-    dist_matrix = 0;
+    dist_matrix = NULL;
     error.update(STAT_error[STATR_SYMMETRICAL_MATRIX]);
   }
   else {
@@ -1285,7 +1283,7 @@ Distance_matrix* Distance_matrix::unnormalize(Format_error &error) const
 
 
   error.init();
-  dist_matrix = 0;
+  dist_matrix = NULL;
 
   for (i = 0;i < nb_row;i++) {
     for (j = 0;j < nb_column;j++) {
@@ -2345,7 +2343,7 @@ MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
   error.init();
 
   if ((nb_row == 1) && (nb_column == 1)) {
-    plot_set = 0;
+    plot_set = NULL;
     error.update(STAT_error[STATR_MATRIX_DIMENSIONS]);
   }
 
@@ -2391,7 +2389,7 @@ MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
     index = pattern_sort(plot_nb_pattern , plot_distance , I_DEFAULT);
 
     if (plot_distance[index[0]] == -D_INF) {
-      plot_set = 0;
+      plot_set = NULL;
       error.update(STAT_error[STATR_INFINITE_DISTANCES]);
     }
 
@@ -2475,514 +2473,6 @@ MultiPlotSet* Distance_matrix::get_plotable() const
 
   return get_plotable(error);
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Distance_matrix , STATI_DISTANCE_MATRIX);
-
-
-RWspace Distance_matrix::binaryStoreSize() const
-
-{
-  RWspace size;
-
-
-  size = sizeof(nb_row) + sizeof(nb_column) + sizeof(*row_identifier) * nb_row +
-         sizeof(*column_identifier) * nb_column + sizeof(**distance) * nb_row * nb_column +
-         sizeof(**length) * nb_row * nb_column;
-
-  size += sizeof(true);
-  if ((deletion_distance) && (nb_deletion)) {
-    size += sizeof(**deletion_distance) * nb_row * nb_column + sizeof(**nb_deletion) * nb_row * nb_column;
-  }
-
-  size += sizeof(true);
-  if ((insertion_distance) && (nb_insertion)) {
-    size += sizeof(**insertion_distance) * nb_row * nb_column + sizeof(**nb_insertion) * nb_row * nb_column;
-  }
-
-  size += sizeof(true);
-  if (nb_match) {
-    size += sizeof(**nb_match) * nb_row * nb_column;
-  }
-
-  size += sizeof(true);
-  if ((substitution_distance) && (nb_substitution)) {
-    size += sizeof(**substitution_distance) * nb_row * nb_column + sizeof(**nb_substitution) * nb_row * nb_column;
-  }
-
-  size += sizeof(true);
-  if ((transposition_distance) && (nb_transposition)) {
-    size += sizeof(**transposition_distance) * nb_row * nb_column + sizeof(**nb_transposition) * nb_row * nb_column;
-  }
-
-  size += sizeof(label_size) + sizeof(*label) * label_size;
-
-  return size;
-}
-
-
-void Distance_matrix::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i , j;
-
-
-  remove();
-
-  is >> nb_row >> nb_column;
-
-  row_identifier = new int[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    is >> row_identifier[i];
-  }
-  column_identifier = new int[nb_column];
-  for (i = 0;i < nb_column;i++) {
-    is >> column_identifier[i];
-  }
-
-  distance = new double*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    distance[i] = new double[nb_column];
-    for (j = 0;j < nb_column;j++) {
-      is >> distance[i][j];
-    }
-  }
-  length = new int*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    length[i] = new int[nb_column];
-    for (j = 0;j < nb_column;j++) {
-      is >> length[i][j];
-    }
-  }
-
-  is >> status;
-  if (status) {
-    deletion_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      deletion_distance[i] = new double[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> deletion_distance[i][j];
-      }
-    }
-    nb_deletion = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_deletion[i] = new int[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> nb_deletion[i][j];
-      }
-    }
-  }
-  else {
-    deletion_distance = 0;
-    nb_deletion = 0;
-  }
-
-  is >> status;
-  if (status) {
-    insertion_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      insertion_distance[i] = new double[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> insertion_distance[i][j];
-      }
-    }
-    nb_insertion = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_insertion[i] = new int[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> nb_insertion[i][j];
-      }
-    }
-  }
-  else {
-    insertion_distance = 0;
-    nb_insertion = 0;
-  }
-
-  is >> status;
-  if (status) {
-    nb_match = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_match[i] = new int[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> nb_match[i][j];
-      }
-    }
-  }
-  else {
-    nb_match = 0;
-  }
-
-  is >> status;
-  if (status) {
-    substitution_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      substitution_distance[i] = new double[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> substitution_distance[i][j];
-      }
-    }
-    nb_substitution = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_substitution[i] = new int[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> nb_substitution[i][j];
-      }
-    }
-  }
-  else {
-    substitution_distance = 0;
-    nb_substitution = 0;
-  }
-
-  is >> status;
-  if (status) {
-    transposition_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      transposition_distance[i] = new double[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> transposition_distance[i][j];
-      }
-    }
-    nb_transposition = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_transposition[i] = new int[nb_column];
-      for (j = 0;j < nb_column;j++) {
-        is >> nb_transposition[i][j];
-      }
-    }
-  }
-  else {
-    transposition_distance = 0;
-    nb_transposition = 0;
-  }
-
-  is >> label_size;
-  label = new char[label_size];
-  is.getString(label , label_size);
-}
-
-
-void Distance_matrix::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_row);
-  file.Read(nb_column);
-
-  row_identifier = new int[nb_row];
-  file.Read(row_identifier , nb_row);
-  column_identifier = new int[nb_column];
-  file.Read(column_identifier , nb_column);
-
-  distance = new double*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    distance[i] = new double[nb_column];
-    file.Read(distance[i] , nb_column);
-  }
-  length = new int*[nb_row];
-  for (i = 0;i < nb_row;i++) {
-    length[i] = new int[nb_column];
-    file.Read(length[i] , nb_column);
-  }
-
-  file.Read(status);
-  if (status) {
-    deletion_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      deletion_distance[i] = new double[nb_column];
-      file.Read(deletion_distance[i] , nb_column);
-    }
-    nb_deletion = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_deletion[i] = new int[nb_column];
-      file.Read(nb_deletion[i] , nb_column);
-    }
-  }
-  else {
-    deletion_distance = 0;
-    nb_deletion = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    insertion_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      insertion_distance[i] = new double[nb_column];
-      file.Read(insertion_distance[i] , nb_column);
-    }
-    nb_insertion = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_insertion[i] = new int[nb_column];
-      file.Read(nb_insertion[i] , nb_column);
-    }
-  }
-  else {
-    insertion_distance = 0;
-    nb_insertion = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    nb_match = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_match[i] = new int[nb_column];
-      file.Read(nb_match[i] , nb_column);
-    }
-  }
-  else {
-    nb_match = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    substitution_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      substitution_distance[i] = new double[nb_column];
-      file.Read(substitution_distance[i] , nb_column);
-    }
-    nb_substitution = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_substitution[i] = new int[nb_column];
-      file.Read(nb_substitution[i] , nb_column);
-    }
-  }
-  else {
-    substitution_distance = 0;
-    nb_substitution = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    transposition_distance = new double*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      transposition_distance[i] = new double[nb_column];
-      file.Read(transposition_distance[i] , nb_column);
-    }
-    nb_transposition = new int*[nb_row];
-    for (i = 0;i < nb_row;i++) {
-      nb_transposition[i] = new int[nb_column];
-      file.Read(nb_transposition[i] , nb_column);
-    }
-  }
-  else {
-    transposition_distance = 0;
-    nb_transposition = 0;
-  }
-
-  file.Read(label_size);
-  label = new char[label_size];
-  file.Read(label , label_size);
-}
-
-
-void Distance_matrix::saveGuts(RWvostream &os) const
-
-{
-  register int i , j;
-
-
-  os << nb_row << nb_column;
-
-  for (i = 0;i < nb_row;i++) {
-    os << row_identifier[i];
-  }
-  for (i = 0;i < nb_column;i++) {
-    os << column_identifier[i];
-  }
-
-  for (i = 0;i < nb_row;i++) {
-    for (j = 0;j < nb_column;j++) {
-      os << distance[i][j];
-    }
-  }
-  for (i = 0;i < nb_row;i++) {
-    for (j = 0;j < nb_column;j++) {
-      os << length[i][j];
-    }
-  }
-
-  if ((deletion_distance) && (nb_deletion)) {
-    os << true;
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << deletion_distance[i][j];
-      }
-    }
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << nb_deletion[i][j];
-      }
-    }
-  }
-  else {
-    os << false;
-  }
-
-  if ((insertion_distance) && (nb_insertion)) {
-    os << true;
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << insertion_distance[i][j];
-      }
-    }
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << nb_insertion[i][j];
-      }
-    }
-  }
-  else {
-    os << false;
-  }
-
-  if (nb_match) {
-    os << true;
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << nb_match[i][j];
-      }
-    }
-  }
-  else {
-    os << false;
-  }
-
-  if ((substitution_distance) && (nb_substitution)) {
-    os << true;
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << substitution_distance[i][j];
-      }
-    }
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << nb_substitution[i][j];
-      }
-    }
-  }
-  else {
-    os << false;
-  }
-
-  if ((transposition_distance) && (nb_transposition)) {
-    os << true;
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << transposition_distance[i][j];
-      }
-    }
-    for (i = 0;i < nb_row;i++) {
-      for (j = 0;j < nb_column;j++) {
-        os << nb_transposition[i][j];
-      }
-    }
-  }
-  else {
-    os << false;
-  }
-
-  os << label_size;
-  os << label;
-}
-
-
-void Distance_matrix::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_row);
-  file.Write(nb_column);
-
-  file.Write(row_identifier , nb_row);
-  file.Write(column_identifier , nb_column);
-
-  for (i = 0;i < nb_row;i++) {
-    file.Write(distance[i] , nb_column);
-  }
-  for (i = 0;i < nb_row;i++) {
-    file.Write(length[i] , nb_column);
-  }
-
-  if ((deletion_distance) && (nb_deletion)) {
-    file.Write(true);
-    for (i = 0;i < nb_row;i++) {
-      file.Write(deletion_distance[i] , nb_column);
-    }
-    for (i = 0;i < nb_row;i++) {
-      file.Write(nb_deletion[i] , nb_column);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  if ((insertion_distance) && (nb_insertion)) {
-    file.Write(true);
-    for (i = 0;i < nb_row;i++) {
-      file.Write(insertion_distance[i] , nb_column);
-    }
-    for (i = 0;i < nb_row;i++) {
-      file.Write(nb_insertion[i] , nb_column);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  if (nb_match) {
-    file.Write(true);
-    for (i = 0;i < nb_row;i++) {
-      file.Write(nb_match[i] , nb_column);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  if ((substitution_distance) && (nb_substitution)) {
-    file.Write(true);
-    for (i = 0;i < nb_row;i++) {
-      file.Write(substitution_distance[i] , nb_column);
-    }
-    for (i = 0;i < nb_row;i++) {
-      file.Write(nb_substitution[i] , nb_column);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  if ((transposition_distance) && (nb_transposition)) {
-    file.Write(true);
-    for (i = 0;i < nb_row;i++) {
-      file.Write(transposition_distance[i] , nb_column);
-    }
-    for (i = 0;i < nb_row;i++) {
-      file.Write(nb_transposition[i] , nb_column);
-    }
-  }
-  else {
-    file.Write(false);
-  }
-
-  file.Write(label_size);
-  file.Write(label , label_size);
-} */
 
 
 /*--------------------------------------------------------------*
