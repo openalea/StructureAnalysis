@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -964,7 +964,7 @@ Parametric_model* Distribution::truncate(Format_error &error , int imax_value) c
   error.init();
 
   if (imax_value <= offset) {
-    dist = 0;
+    dist = NULL;
     error.update(STAT_error[STATR_MAX_VALUE]);
   }
 
@@ -1014,7 +1014,7 @@ Parametric_model* Histogram::fit(Format_error &error , const Parametric &idist) 
   error.init();
 
   if ((offset < idist.offset) || (nb_value > idist.nb_value)) {
-    dist = 0;
+    dist = NULL;
     error.update(STAT_error[STATR_VALUE_RANGE]);
   }
 
@@ -1060,7 +1060,7 @@ Parametric* Histogram::parametric_estimation(int ident , int min_inf_bound ,
   }
   else {
     delete dist;
-    dist = 0;
+    dist = NULL;
   }
 
   return dist;
@@ -1090,7 +1090,7 @@ Parametric_model* Histogram::parametric_estimation(Format_error &error , int ide
   error.init();
 
   if ((min_inf_bound < 0) || (min_inf_bound > 1) || (min_inf_bound > offset)) {
-    dist = 0;
+    dist = NULL;
     error.update(STAT_error[STATR_MIN_INF_BOUND]);
   }
 
@@ -1122,7 +1122,7 @@ Parametric_model* Histogram::parametric_estimation(Format_error &error , int ide
 
     else {
       delete dist;
-      dist = 0;
+      dist = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
   }
@@ -1153,7 +1153,7 @@ Parametric_model* Histogram::type_parametric_estimation(Format_error &error ,
   error.init();
 
   if ((min_inf_bound < 0) || (min_inf_bound > 1) || (min_inf_bound > offset)) {
-    dist = 0;
+    dist = NULL;
     error.update(STAT_error[STATR_MIN_INF_BOUND]);
   }
 
@@ -1185,7 +1185,7 @@ Parametric_model* Histogram::type_parametric_estimation(Format_error &error ,
 
     else {
       delete dist;
-      dist = 0;
+      dist = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
   }
@@ -1477,7 +1477,7 @@ Distribution_data* Parametric_model::simulation(Format_error &error , int nb_ele
   error.init();
 
   if ((nb_element < 1) || (nb_element > DIST_NB_ELEMENT)) {
-    histo = 0;
+    histo = NULL;
     error.update(STAT_error[STATR_SAMPLE_SIZE]);
   }
 
