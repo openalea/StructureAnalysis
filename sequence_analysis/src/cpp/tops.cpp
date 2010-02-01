@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -40,8 +40,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
@@ -73,7 +72,7 @@ Top_parameters::Top_parameters(double iprobability , double iaxillary_probabilit
                                double irhythm_ratio , int imax_position)
 
 {
-  tops = 0;
+  tops = NULL;
 
   probability = iprobability;
   axillary_probability = iaxillary_probability;
@@ -82,7 +81,7 @@ Top_parameters::Top_parameters(double iprobability , double iaxillary_probabilit
   max_position = 0;
 
   if (imax_position == 0) {
-    axillary_nb_internode = 0;
+    axillary_nb_internode = NULL;
   }
   else {
     axillary_nb_internode_computation(imax_position);
@@ -109,7 +108,7 @@ void Top_parameters::copy(const Top_parameters &parameters , bool data_flag)
     tops = new Tops(*(parameters.tops) , false);
   }
   else {
-    tops = 0;
+    tops = NULL;
   }
 
   probability = parameters.probability;
@@ -119,7 +118,7 @@ void Top_parameters::copy(const Top_parameters &parameters , bool data_flag)
   max_position = parameters.max_position;
 
   axillary_nb_internode = new Distribution*[max_position + 1];
-  axillary_nb_internode[0] = 0;
+  axillary_nb_internode[0] = NULL;
   for (i = 1;i <= max_position;i++) {
     axillary_nb_internode[i] = new Distribution(*(parameters.axillary_nb_internode[i]));
   }
@@ -179,7 +178,7 @@ Parametric_model* Top_parameters::extract(Format_error &error , int position) co
   error.init();
 
   if ((position < 1) || (position > max_position)) {
-    dist = 0;
+    dist = NULL;
     error.update(SEQ_error[SEQR_POSITION]);
   }
 
@@ -236,7 +235,7 @@ Top_parameters* top_parameters_ascii_read(Format_error &error , const char *path
   ifstream in_file(path);
 
 
-  parameters = 0;
+  parameters = NULL;
   error.init();
 
   if (!in_file) {
@@ -1084,132 +1083,6 @@ MultiPlotSet* Top_parameters::get_plotable() const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Top_parameters , STATI_TOP_PARAMETERS);
-
-
-RWspace Top_parameters::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = sizeof(probability) + sizeof(axillary_probability) + sizeof(rhythm_ratio) + sizeof(max_position);
-
-  for (i = 1;i <= max_position;i++) {
-    size += axillary_nb_internode[i]->binaryStoreSize();
-  }
-
-  if (tops) {
-    size += tops->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Top_parameters::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  is >> probability >> axillary_probability >> rhythm_ratio >> max_position;
-
-  axillary_nb_internode = new Distribution*[max_position + 1];
-  axillary_nb_internode[0] = 0;
-  for (i = 1;i <= max_position;i++) {
-    axillary_nb_internode[i] = new Distribution();
-    axillary_nb_internode[i]->restoreGuts(is);
-  }
-
-  is >> tops;
-  if (tops == RWnilCollectable) {
-    tops = 0;
-  }
-}
-
-
-void Top_parameters::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  file.Read(probability);
-  file.Read(axillary_probability);
-  file.Read(rhythm_ratio);
-  file.Read(max_position);
-
-  axillary_nb_internode = new Distribution*[max_position + 1];
-  axillary_nb_internode[0] = 0;
-  for (i = 1;i <= max_position;i++) {
-    axillary_nb_internode[i] = new Distribution();
-    axillary_nb_internode[i]->restoreGuts(file);
-  }
-
-  file >> tops;
-  if (tops == RWnilCollectable) {
-    tops = 0;
-  }
-}
-
-
-void Top_parameters::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  os << probability << axillary_probability << rhythm_ratio << max_position;
-
-  for (i = 1;i <= max_position;i++) {
-    axillary_nb_internode[i]->saveGuts(os);
-  }
-
-  if (tops) {
-    os << tops;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Top_parameters::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(probability);
-  file.Write(axillary_probability);
-  file.Write(rhythm_ratio);
-  file.Write(max_position);
-
-  for (i = 1;i <= max_position;i++) {
-    axillary_nb_internode[i]->saveGuts(file);
-  }
-
-  if (tops) {
-    file << tops;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur par defaut de la classe Tops.
  *
  *--------------------------------------------------------------*/
@@ -1217,11 +1090,11 @@ void Top_parameters::saveGuts(RWFile &file) const
 Tops::Tops()
 
 {
-  top_parameters = 0;
+  top_parameters = NULL;
 
-  nb_internode = 0;
+  nb_internode = NULL;
   max_position = 0;
-  axillary_nb_internode = 0;
+  axillary_nb_internode = NULL;
 }
 
 
@@ -1242,11 +1115,11 @@ Tops::Tops(int nb_top , int *iidentifier , int *nb_position , bool init_flag)
 
   init(nb_top , iidentifier , nb_position , POSITION , 1 , itype , init_flag);
 
-  top_parameters = 0;
+  top_parameters = NULL;
 
-  nb_internode = 0;
+  nb_internode = NULL;
   max_position = 0;
-  axillary_nb_internode = 0;
+  axillary_nb_internode = NULL;
 }
 
 
@@ -1262,7 +1135,7 @@ Tops::Tops(const Sequences &seq)
 :Sequences(seq)
 
 {
-  top_parameters = 0;
+  top_parameters = NULL;
 
   max_position = 0;
   build_nb_internode_histogram();
@@ -1282,7 +1155,7 @@ Tops::Tops(const Tops &tops , int inb_sequence , int *index)
 :Sequences(tops , inb_sequence , index)
 
 {
-  top_parameters = 0;
+  top_parameters = NULL;
 
   max_position = 0;
   build_nb_internode_histogram();
@@ -1308,21 +1181,21 @@ void Tops::copy(const Tops &tops , bool model_flag)
     top_parameters = new Top_parameters(*(tops.top_parameters) , false);
   }
   else {
-    top_parameters = 0;
+    top_parameters = NULL;
   }
 
   nb_internode = new Histogram(*(tops.nb_internode));
 
   max_position = tops.max_position;
   axillary_nb_internode = new Histogram*[max_position + 1];
-  axillary_nb_internode[0] = 0;
+  axillary_nb_internode[0] = NULL;
 
   for (i = 1;i <= max_position;i++) {
     if (tops.axillary_nb_internode[i]) {
       axillary_nb_internode[i] = new Histogram(*(tops.axillary_nb_internode[i]));
     }
     else {
-      axillary_nb_internode[i] = 0;
+      axillary_nb_internode[i] = NULL;
     }
   }
 }
@@ -1350,7 +1223,7 @@ Tops::Tops(const Tops &tops , bool model_flag , bool reverse_flag)
   }
 
   case true : {
-    top_parameters = 0;
+    top_parameters = NULL;
 
     max_position = 0;
     build_nb_internode_histogram();
@@ -1417,7 +1290,7 @@ Tops::Tops(int nb_sample , const Tops **ptops)
   }
   hindex_parameter = new Histogram(nb_sample , phisto);
 
-  index_interval = 0;
+  index_interval = NULL;
 
   nb_variable = 1;
 
@@ -1478,7 +1351,7 @@ Tops::Tops(int nb_sample , const Tops **ptops)
     }
   }
 
-  top_parameters = 0;
+  top_parameters = NULL;
 
   // calcul de la position maximum et fusion des histogrammes
   // du nombre d'entrenoeuds axe porteur/axes portes
@@ -1494,7 +1367,7 @@ Tops::Tops(int nb_sample , const Tops **ptops)
   nb_internode = new Histogram(nb_sample , phisto);
 
   axillary_nb_internode = new Histogram*[max_position + 1];
-  axillary_nb_internode[0] = 0;
+  axillary_nb_internode[0] = NULL;
 
   for (i = 1;i <= max_position;i++) {
     nb_histo = 0;
@@ -1508,7 +1381,7 @@ Tops::Tops(int nb_sample , const Tops **ptops)
       axillary_nb_internode[i] = new Histogram(nb_histo , phisto);
     }
     else {
-      axillary_nb_internode[i] = 0;
+      axillary_nb_internode[i] = NULL;
     }
   }
 
@@ -1592,7 +1465,7 @@ Distribution_data* Tops::extract(Format_error &error , int position) const
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if ((position < 1) || (position > max_position)) {
@@ -1630,7 +1503,7 @@ Tops* Tops::shift(Format_error &error , int inb_internode) const
   Tops *tops;
 
 
-  tops = 0;
+  tops = NULL;
   error.init();
 
   if (inb_internode < 1) {
@@ -1700,7 +1573,7 @@ Tops* Tops::select_individual(Format_error &error , int inb_sequence ,
   Tops *tops;
 
 
-  tops = 0;
+  tops = NULL;
   error.init();
 
   if ((inb_sequence < 1) || (inb_sequence > (keep ? nb_sequence : nb_sequence - 1))) {
@@ -1778,7 +1651,7 @@ Tops* Tops::reverse(Format_error &error) const
   Tops *tops;
 
 
-  tops = 0;
+  tops = NULL;
   error.init();
 
   for (i = 0;i < nb_sequence;i++) {
@@ -1814,7 +1687,7 @@ Tops* tops_ascii_read(Format_error &error , const char *path , bool old_format)
   Tops *tops;
 
 
-  tops = 0;
+  tops = NULL;
 
   seq = sequences_ascii_read(error , path , old_format);
 
@@ -2389,169 +2262,3 @@ MultiPlotSet* Tops::get_plotable() const
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Tops , STATI_TOPS);
-
-
-RWspace Tops::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = Sequences::binaryStoreSize() + nb_internode->binaryStoreSize() +
-         sizeof(max_position);
-
-  for (i = 1;i <= max_position;i++) {
-    size += sizeof(true);
-    if (axillary_nb_internode[i]) {
-      size += axillary_nb_internode[i]->binaryStoreSize();
-    }
-  }
-
-  if (top_parameters) {
-    size += top_parameters->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Tops::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  Sequences::restoreGuts(is);
-
-  nb_internode = new Histogram();
-  nb_internode->restoreGuts(is);
-
-  is >> max_position;
-
-  axillary_nb_internode = new Histogram*[max_position + 1];
-  axillary_nb_internode[0] = 0;
-  for (i = 1;i <= max_position;i++) {
-    is >> status;
-    if (status) {
-      axillary_nb_internode[i] = new Histogram();
-      axillary_nb_internode[i]->restoreGuts(is);
-    }
-    else {
-      axillary_nb_internode[i] = 0;
-    }
-  }
-
-  is >> top_parameters;
-  if (top_parameters == RWnilCollectable) {
-    top_parameters = 0;
-  }
-}
-
-
-void Tops::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  Sequences::restoreGuts(file);
-
-  nb_internode = new Histogram();
-  nb_internode->restoreGuts(file);
-
-  file.Read(max_position);
-
-  axillary_nb_internode = new Histogram*[max_position + 1];
-  axillary_nb_internode[0] = 0;
-  for (i = 1;i <= max_position;i++) {
-    file.Read(status);
-    if (status) {
-      axillary_nb_internode[i] = new Histogram();
-      axillary_nb_internode[i]->restoreGuts(file);
-    }
-    else {
-      axillary_nb_internode[i] = 0;
-    }
-  }
-
-  file >> top_parameters;
-  if (top_parameters == RWnilCollectable) {
-    top_parameters = 0;
-  }
-}
-
-
-void Tops::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Sequences::saveGuts(os);
-
-  nb_internode->saveGuts(os);
-  os << max_position;
-
-  for (i = 1;i <= max_position;i++) {
-    if (axillary_nb_internode[i]) {
-      os << true;
-      axillary_nb_internode[i]->saveGuts(os);
-    }
-    else {
-      os << false;
-    }
-  }
-
-  if (top_parameters) {
-    os << top_parameters;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Tops::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  Sequences::saveGuts(file);
-
-  nb_internode->saveGuts(file);
-  file.Write(max_position);
-
-  for (i = 1;i <= max_position;i++) {
-    if (axillary_nb_internode[i]) {
-      file.Write(true);
-      axillary_nb_internode[i]->saveGuts(file);
-    }
-    else {
-      file.Write(false);
-    }
-  }
-
-  if (top_parameters) {
-    file << top_parameters;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
