@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -103,15 +103,15 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov *pmarko
   nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
   nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state);
   parametric_process = new Parametric_process*[nb_output_process + 1];
-  parametric_process[0] = 0;
+  parametric_process[0] = NULL;
 
   for (i = 1;i <= nb_output_process;i++) {
     if (nonparametric_observation[i - 1]) {
       nonparametric_process[i] = new Nonparametric_sequence_process(*nonparametric_observation[i - 1]);
-      parametric_process[i] = 0;
+      parametric_process[i] = NULL;
     }
     else {
-      nonparametric_process[i] = 0;
+      nonparametric_process[i] = NULL;
       parametric_process[i] = new Parametric_process(*parametric_observation[i - 1]);
     }
   }
@@ -186,7 +186,7 @@ Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_err
   ifstream in_file(path);
 
 
-  hmarkov = 0;
+  hmarkov = NULL;
   error.init();
 
   if (!in_file) {
@@ -265,8 +265,8 @@ Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_err
       if (imarkov) {
         nb_output_process = I_DEFAULT;
 
-        nonparametric_observation = 0;
-        parametric_observation = 0;
+        nonparametric_observation = NULL;
+        parametric_observation = NULL;
 
         while (buffer.readLine(in_file , false)) {
           line++;
@@ -339,8 +339,8 @@ Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_err
           nonparametric_observation = new Nonparametric_process*[nb_output_process];
           parametric_observation = new Parametric_process*[nb_output_process];
           for (i = 0;i < nb_output_process;i++) {
-            nonparametric_observation[i] = 0;
-            parametric_observation[i] = 0;
+            nonparametric_observation[i] = NULL;
+            parametric_observation[i] = NULL;
           }
 
           index = 0;
