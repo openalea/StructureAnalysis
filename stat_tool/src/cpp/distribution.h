@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -40,9 +40,10 @@
 #define DISTRIBUTION_H
 
 
-// loi de probabilite parametrique
-class Parametric_model : public STAT_interface , public Parametric 
-{  
+
+// class Parametric_model : public STAT_interface , protected Parametric {
+class Parametric_model : public STAT_interface , public Parametric {  // loi parametrique
+
     friend class Distribution;  // Hack pour Windows
 
     friend class Histogram;
@@ -70,16 +71,16 @@ public :
                      int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
                      double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
     :Parametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
-    { histogram = 0; }
+    { histogram = NULL; }
     Parametric_model(int iident , int iinf_bound , int isup_bound , double iparameter ,
                      double iprobability , double cumul_threshold = CUMUL_THRESHOLD)
     :Parametric(iident , iinf_bound , isup_bound , iparameter , iprobability , cumul_threshold)
-    { histogram = 0; }
+    { histogram = NULL; }
     Parametric_model(const Histogram &histo);
     Parametric_model(const Distribution &dist)
-    :Parametric(dist) { histogram = 0; }
+    :Parametric(dist) { histogram = NULL; }
     Parametric_model(const Parametric &dist)
-    :Parametric(dist) { histogram = 0; }
+    :Parametric(dist) { histogram = NULL; }
     Parametric_model(const Distribution &dist , const Histogram *histo);
     Parametric_model(const Parametric &dist , const Histogram *histo);
     Parametric_model(const Parametric_model &dist , bool data_flag = true);
@@ -95,16 +96,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Parametric_model);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     Distribution_data* simulation(Format_error &error , int nb_element) const;
 
@@ -134,17 +127,17 @@ private :
 public :
 
     Distribution_data(int inb_value = 0)
-    :Histogram(inb_value) { distribution = 0; }
+    :Histogram(inb_value) { distribution = NULL; }
     Distribution_data(const Distribution &dist)
-    :Histogram(dist) { distribution = 0; }
+    :Histogram(dist) { distribution = NULL; }
     Distribution_data(const Histogram &histo)
-    :Histogram(histo) { distribution = 0; }
+    :Histogram(histo) { distribution = NULL; }
     Distribution_data(int inb_element , int *pelement)
-    :Histogram(inb_element , pelement) { distribution = 0; }
+    :Histogram(inb_element , pelement) { distribution = NULL; }
     Distribution_data(const Histogram &histo , char transform , int param , int mode = FLOOR)
-    :Histogram(histo , transform , param , mode) { distribution = 0; }
+    :Histogram(histo , transform , param , mode) { distribution = NULL; }
     Distribution_data(int nb_histo , const Histogram **phisto)
-    :Histogram(nb_histo , phisto) { distribution = 0; }
+    :Histogram(nb_histo , phisto) { distribution = NULL; }
     Distribution_data(const Histogram &histo , const Distribution *dist);
     Distribution_data(const Histogram &histo , const Parametric *dist);
     Distribution_data(const Distribution_data &histo , bool model_flag = true);
@@ -160,16 +153,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Distribution_data);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     Parametric* get_distribution() const { return distribution; }
 };
