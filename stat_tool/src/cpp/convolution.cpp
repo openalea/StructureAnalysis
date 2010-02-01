@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -41,8 +41,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tools.h"
 #include "distribution.h"
 #include "convolution.h"
@@ -64,9 +63,9 @@ extern char* label(const char *file_name);
 Convolution::Convolution()
 
 {
-  convolution_data = 0;
+  convolution_data = NULL;
   nb_distribution = 0;
-  distribution = 0;
+  distribution = NULL;
 }
 
 
@@ -85,7 +84,7 @@ Convolution::Convolution(int nb_dist , const Parametric **pdist)
   int cnb_value = 1;
 
 
-  convolution_data = 0;
+  convolution_data = NULL;
   nb_distribution = nb_dist;
 
   distribution = new Parametric*[nb_distribution];
@@ -110,7 +109,7 @@ Convolution::Convolution(int nb_dist , const Parametric **pdist)
 Convolution::Convolution(const Parametric &known_dist , const Parametric &unknown_dist)
 
 {
-  convolution_data = 0;
+  convolution_data = NULL;
 
   nb_distribution = 2;
   distribution = new Parametric*[nb_distribution];
@@ -147,7 +146,7 @@ void Convolution::copy(const Convolution &convol , bool data_flag)
     convolution_data = new Convolution_data(*(convol.convolution_data) , false);
   }
   else {
-    convolution_data = 0;
+    convolution_data = NULL;
   }
 
   nb_distribution = convol.nb_distribution;
@@ -233,7 +232,7 @@ Parametric_model* Convolution::extract(Format_error &error , int index) const
 
 
   if ((index < 1) || (index > nb_distribution)) {
-    pdist = 0;
+    pdist = NULL;
     error.update(STAT_error[STATR_DISTRIBUTION_INDEX]);
   }
 
@@ -264,7 +263,7 @@ Convolution_data* Convolution::extract_data(Format_error &error) const
   error.init();
 
   if (!convolution_data) {
-    convol_histo = 0;
+    convol_histo = NULL;
     error.update(STAT_error[STATR_NO_DATA]);
   }
 
@@ -295,7 +294,7 @@ Convolution* convolution_building(Format_error &error , int nb_dist , const Para
   error.init();
 
   if ((nb_dist < 2) || (nb_dist > CONVOLUTION_NB_DISTRIBUTION)) {
-    convol = 0;
+    convol = NULL;
     error.update(STAT_parsing[STATP_NB_DISTRIBUTION]);
   }
 
@@ -332,7 +331,7 @@ Convolution* convolution_ascii_read(Format_error &error , const char *path ,
   ifstream in_file(path);
 
 
-  convol = 0;
+  convol = NULL;
   error.init();
 
   if (!in_file) {
@@ -419,7 +418,7 @@ Convolution* convolution_ascii_read(Format_error &error , const char *path ,
     if (status) {
       dist = new const Parametric*[nb_dist];
       for (i = 0;i < nb_dist;i++) {
-        dist[i] = 0;
+        dist[i] = NULL;
       }
 
       for (i = 0;i < nb_dist;i++) {
@@ -1238,131 +1237,6 @@ MultiPlotSet* Convolution::get_plotable() const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Convolution , STATI_CONVOLUTION);
-
-
-RWspace Convolution::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = Distribution::binaryStoreSize() + sizeof(nb_distribution);
-  for (i = 0;i < nb_distribution;i++) {
-    size += distribution[i]->binaryStoreSize();
-  }
-
-  if (convolution_data) {
-    size += convolution_data->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Convolution::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  Distribution::restoreGuts(is);
-
-  is >> nb_distribution;
-
-  distribution = new Parametric*[nb_distribution];
-  for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new Parametric();
-    distribution[i]->restoreGuts(is);
-  }
-
-  is >> convolution_data;
-  if (convolution_data == RWnilCollectable) {
-    convolution_data = 0;
-  }
-}
-
-
-void Convolution::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  Distribution::restoreGuts(file);
-
-  file.Read(nb_distribution);
-
-  distribution = new Parametric*[nb_distribution];
-  for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new Parametric();
-    distribution[i]->restoreGuts(file);
-  }
-
-  file >> convolution_data;
-  if (convolution_data == RWnilCollectable) {
-    convolution_data = 0;
-  }
-}
-
-
-void Convolution::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Distribution::saveGuts(os);
-
-  os << nb_distribution;
-
-  for (i = 0;i < nb_distribution;i++) {
-    distribution[i]->saveGuts(os);
-  }
-
-  if (convolution_data) {
-    os << convolution_data;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Convolution::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  Distribution::saveGuts(file);
-
-  file.Write(nb_distribution);
-
-  for (i = 0;i < nb_distribution;i++) {
-    distribution[i]->saveGuts(file);
-  }
-
-  if (convolution_data) {
-    file << convolution_data;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur par defaut de la classe Convolution_data.
  *
  *--------------------------------------------------------------*/
@@ -1370,9 +1244,9 @@ void Convolution::saveGuts(RWFile &file) const
 Convolution_data::Convolution_data()
 
 {
-  convolution = 0;
+  convolution = NULL;
   nb_histogram = 0;
-  histogram = 0;
+  histogram = NULL;
 }
 
 
@@ -1392,7 +1266,7 @@ Convolution_data::Convolution_data(const Histogram &histo , int nb_histo)
   register int i;
 
 
-  convolution = 0;
+  convolution = NULL;
   nb_histogram = nb_histo;
 
   histogram = new Histogram*[nb_histogram];
@@ -1417,7 +1291,7 @@ Convolution_data::Convolution_data(const Convolution &convol)
   register int i;
 
 
-  convolution = 0;
+  convolution = NULL;
   nb_histogram = convol.nb_distribution;
 
   histogram = new Histogram*[nb_histogram];
@@ -1446,7 +1320,7 @@ void Convolution_data::copy(const Convolution_data &convol_histo , bool model_fl
     convolution = new Convolution(*(convol_histo.convolution) , false);
   }
   else {
-    convolution = 0;
+    convolution = NULL;
   }
 
   nb_histogram = convol_histo.nb_histogram;
@@ -1533,7 +1407,7 @@ Distribution_data* Convolution_data::extract(Format_error &error , int index) co
   error.init();
 
   if ((index < 1) || (index > nb_histogram)) {
-    phisto = 0;
+    phisto = NULL;
     error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
   }
 
@@ -1701,133 +1575,8 @@ MultiPlotSet* Convolution_data::get_plotable() const
     plot_set = convolution->get_plotable(this);
   }
   else {
-    plot_set = 0;
+    plot_set = NULL;
   }
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Convolution_data , STATI_CONVOLUTION_DATA);
-
-
-RWspace Convolution_data::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = Histogram::binaryStoreSize() + sizeof(nb_histogram);
-  for (i = 0;i < nb_histogram;i++) {
-    size += histogram[i]->binaryStoreSize();
-  }
-
-  if (convolution) {
-    size += convolution->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Convolution_data::restoreGuts(RWvistream &is)
-
-{
-  register int i;
-
-
-  remove();
-
-  Histogram::restoreGuts(is);
-
-  is >> nb_histogram;
-
-  histogram = new Histogram*[nb_histogram];
-  for (i = 0;i < nb_histogram;i++) {
-    histogram[i] = new Histogram();
-    histogram[i]->restoreGuts(is);
-  }
-
-  is >> convolution;
-  if (convolution == RWnilCollectable) {
-    convolution = 0;
-  }
-}
-
-
-void Convolution_data::restoreGuts(RWFile &file)
-
-{
-  register int i;
-
-
-  remove();
-
-  Histogram::restoreGuts(file);
-
-  file.Read(nb_histogram);
-
-  histogram = new Histogram*[nb_histogram];
-  for (i = 0;i < nb_histogram;i++) {
-    histogram[i] = new Histogram();
-    histogram[i]->restoreGuts(file);
-  }
-
-  file >> convolution;
-  if (convolution == RWnilCollectable) {
-    convolution = 0;
-  }
-}
-
-
-void Convolution_data::saveGuts(RWvostream &os) const
-
-{
-  register int i;
-
-
-  Histogram::saveGuts(os);
-
-  os << nb_histogram;
-
-  for (i = 0;i < nb_histogram;i++) {
-    histogram[i]->saveGuts(os);
-  }
-
-  if (convolution) {
-    os << convolution;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Convolution_data::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  Histogram::saveGuts(file);
-
-  file.Write(nb_histogram);
-
-  for (i = 0;i < nb_histogram;i++) {
-    histogram[i]->saveGuts(file);
-  }
-
-  if (convolution) {
-    file << convolution;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
