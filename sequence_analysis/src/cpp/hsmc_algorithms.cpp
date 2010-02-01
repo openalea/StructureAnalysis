@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -360,7 +360,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 # endif
 
 
-  hsmarkov = 0;
+  hsmarkov = NULL;
   error.init();
 
   // test nombre de valeurs observees par variable
@@ -503,9 +503,9 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
       }
 
       case MARKOVIAN : {
-        occupancy_reestim[i] = 0;
+        occupancy_reestim[i] = NULL;
         if (hsmarkov->type == 'e') {
-          length_bias_reestim[i] = 0;
+          length_bias_reestim[i] = NULL;
         }
         break;
       }
@@ -530,7 +530,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
           censored_occupancy_reestim[i] = new Reestimation<double>(censored_occupancy_nb_value[i]);
           break;
         case MARKOVIAN :
-          censored_occupancy_reestim[i] = 0;
+          censored_occupancy_reestim[i] = NULL;
           break;
         }
       }
@@ -560,7 +560,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
       hobservation = new Histogram(max_nb_value);
     }
     else {
-      hobservation = 0;
+      hobservation = NULL;
     }
 
     poutput = new int*[nb_variable];
@@ -1306,9 +1306,9 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
             (hsmarkov->nonparametric_process[0]->sojourn_time[i]->mean == 1.)) {
           hsmarkov->state_subtype[i] = MARKOVIAN;
           delete hsmarkov->nonparametric_process[0]->sojourn_time[i];
-          hsmarkov->nonparametric_process[0]->sojourn_time[i] = 0;
+          hsmarkov->nonparametric_process[0]->sojourn_time[i] = NULL;
           delete hsmarkov->forward[i];
-          hsmarkov->forward[i] = 0;
+          hsmarkov->forward[i] = NULL;
         }
       }
 
@@ -1402,7 +1402,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
 
     if (likelihood == D_INF) {
       delete hsmarkov;
-      hsmarkov = 0;
+      hsmarkov = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -1414,7 +1414,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
         for (i = 1;i <= hsmarkov->nb_output_process;i++) {
           if ((hsmarkov->parametric_process[i]) && (seq->characteristics[i])) {
             delete seq->characteristics[i];
-            seq->characteristics[i] = 0;
+            seq->characteristics[i] = NULL;
           }
         }
 
@@ -1486,7 +1486,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
         for (i = 1;i <= hsmarkov->nb_output_process;i++) {
           if ((hsmarkov->parametric_process[i]) && (seq->characteristics[i - 1])) {
             delete seq->characteristics[i - 1];
-            seq->characteristics[i - 1] = 0;
+            seq->characteristics[i - 1] = NULL;
           }
         }
       }
@@ -1583,7 +1583,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
   Hidden_semi_markov *ihsmarkov , *hsmarkov;
 
 
-  hsmarkov = 0;
+  hsmarkov = NULL;
   error.init();
 
   if ((nb_state < 2) || (nb_state > NB_STATE)) {
@@ -1642,15 +1642,15 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_estimation(Format_er
                                               ihsmarkov->nonparametric_process[0]->sojourn_time[i]->alloc_nb_value);
         }
         else {
-          ihsmarkov->forward[i] = 0;
+          ihsmarkov->forward[i] = NULL;
         }
       }
 
       else {
         ihsmarkov->state_subtype[i] = MARKOVIAN;
         ihsmarkov->nonparametric_process[0]->absorption[i] = 1.;
-        ihsmarkov->nonparametric_process[0]->sojourn_time[i] = 0;
-        ihsmarkov->forward[i] = 0;
+        ihsmarkov->nonparametric_process[0]->sojourn_time[i] = NULL;
+        ihsmarkov->forward[i] = NULL;
       }
     }
 
@@ -1717,7 +1717,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 # endif
 
 
-  hsmarkov = 0;
+  hsmarkov = NULL;
   error.init();
 
   // test nombre de valeurs observees par variable
@@ -1860,11 +1860,11 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
       }
 
       case MARKOVIAN : {
-        complete_run[i] = 0;
-        final_run[i] = 0;
+        complete_run[i] = NULL;
+        final_run[i] = NULL;
         if (hsmarkov->type == 'e') {
-          initial_run[i] = 0;
-          single_run[i] = 0;
+          initial_run[i] = NULL;
+          single_run[i] = NULL;
         }
         break;
       }
@@ -2550,9 +2550,9 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
             (hsmarkov->nonparametric_process[0]->sojourn_time[i]->mean == 1.)) {
           hsmarkov->state_subtype[i] = MARKOVIAN;
           delete hsmarkov->nonparametric_process[0]->sojourn_time[i];
-          hsmarkov->nonparametric_process[0]->sojourn_time[i] = 0;
+          hsmarkov->nonparametric_process[0]->sojourn_time[i] = NULL;
           delete hsmarkov->forward[i];
-          hsmarkov->forward[i] = 0;
+          hsmarkov->forward[i] = NULL;
         }
       }
 
@@ -2641,7 +2641,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
     if (likelihood == D_INF) {
       delete hsmarkov;
-      hsmarkov = 0;
+      hsmarkov = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -2653,7 +2653,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
         for (i = 1;i <= hsmarkov->nb_output_process;i++) {
           if ((hsmarkov->parametric_process[i]) && (seq->characteristics[i])) {
             delete seq->characteristics[i];
-            seq->characteristics[i] = 0;
+            seq->characteristics[i] = NULL;
           }
         }
 
@@ -2725,7 +2725,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
         for (i = 1;i <= hsmarkov->nb_output_process;i++) {
           if ((hsmarkov->parametric_process[i]) && (seq->characteristics[i - 1])) {
             delete seq->characteristics[i - 1];
-            seq->characteristics[i - 1] = 0;
+            seq->characteristics[i - 1] = NULL;
           }
         }
       }
@@ -2822,7 +2822,7 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
   Hidden_semi_markov *ihsmarkov , *hsmarkov;
 
 
-  hsmarkov = 0;
+  hsmarkov = NULL;
   error.init();
 
   if ((nb_state < 2) || (nb_state > NB_STATE)) {
@@ -2881,15 +2881,15 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
                                               ihsmarkov->nonparametric_process[0]->sojourn_time[i]->alloc_nb_value);
         }
         else {
-          ihsmarkov->forward[i] = 0;
+          ihsmarkov->forward[i] = NULL;
         }
       }
 
       else {
         ihsmarkov->state_subtype[i] = MARKOVIAN;
         ihsmarkov->nonparametric_process[0]->absorption[i] = 1.;
-        ihsmarkov->nonparametric_process[0]->sojourn_time[i] = 0;
-        ihsmarkov->forward[i] = 0;
+        ihsmarkov->nonparametric_process[0]->sojourn_time[i] = NULL;
+        ihsmarkov->forward[i] = NULL;
       }
     }
 
@@ -2916,18 +2916,19 @@ Hidden_semi_markov* Markovian_sequences::hidden_semi_markov_stochastic_estimatio
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward.
  *
  *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
- *              stream, type de sortie, format de fichier ('a' : ASCII,
- *              's' : Spreadsheet, 'g' : Gnuplot), references sur l'entropie marginale
- *              maximum et l'entropie (pour la visualisation).
+ *              stream, pointeur sur un objet MultiPlotSet, type de sortie, format de sortie
+ *              ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable), references sur
+ *              l'entropie marginale maximum et l'entropie (pour la visualisation).
  *
  *--------------------------------------------------------------*/
 
 double Hidden_semi_markov::forward_backward(const Markovian_sequences &seq , int index ,
-                                            ostream &os , int output , char format ,
-                                            double &max_marginal_entropy , double &entropy1) const
+                                            ostream *os , MultiPlotSet *plot_set , int output ,
+                                            char format , double &max_marginal_entropy ,
+                                            double &entropy1) const
 
 {
   register int i , j , k , m;
@@ -3010,7 +3011,7 @@ double Hidden_semi_markov::forward_backward(const Markovian_sequences &seq , int
       occupancy_entropy[i] = new double[MIN(seq.length[index] , occupancy->nb_value)];
       break;
     case MARKOVIAN :
-      occupancy_entropy[i] = 0;
+      occupancy_entropy[i] = NULL;
       break;
     }
   }
@@ -3666,55 +3667,63 @@ double Hidden_semi_markov::forward_backward(const Markovian_sequences &seq , int
     case 'a' : {
       switch (output) {
       case SSTATE :
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
         break;
       case IN_STATE :
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
         break;
       case OUT_STATE :
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
         break;
       }
 
-//      seq.profile_ascii_print(os , index , nb_state , backward_output ,
+//      seq.profile_ascii_print(*os , index , nb_state , backward_output ,
 //                              STAT_label[STATL_STATE]);
-      seq.profile_ascii_print(os , index , nb_state , backward_output , conditional_entropy ,
+      seq.profile_ascii_print(*os , index , nb_state , backward_output , conditional_entropy ,
                               marginal_entropy , partial_entropy);
 
-      os << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << seq_likelihood
-         << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
-         << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
+      *os << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << seq_likelihood
+          << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
+          << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
       break;
     }
 
     case 's' : {
       switch (output) {
       case SSTATE :
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\n\n";
         break;
       case IN_STATE :
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
         break;
       case OUT_STATE :
-        os << "\n" << SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
         break;
       }
 
-//      seq.profile_spreadsheet_print(os , index , nb_state , backward_output ,
+//      seq.profile_spreadsheet_print(*os , index , nb_state , backward_output ,
 //                                    STAT_label[STATL_STATE]);
-      seq.profile_spreadsheet_print(os , index , nb_state , backward_output , conditional_entropy ,
+      seq.profile_spreadsheet_print(*os , index , nb_state , backward_output , conditional_entropy ,
                                     marginal_entropy , partial_entropy);
 
-      os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << seq_likelihood
-         << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
-         << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
+      *os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << seq_likelihood
+          << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
+          << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
       break;
     }
 
     case 'g' : {
-//      seq.profile_plot_print(os , index , nb_state , backward_output);
-      seq.profile_plot_print(os , index , nb_state , backward_output , conditional_entropy ,
+//      seq.profile_plot_print(*os , index , nb_state , backward_output);
+      seq.profile_plot_print(*os , index , nb_state , backward_output , conditional_entropy ,
                              marginal_entropy , partial_entropy);
+      break;
+    }
+
+    case 'p' : {
+      seq.profile_plotable_write((*plot_set)[1] , index , nb_state , backward_output);
+      seq.entropy_profile_plotable_write((*plot_set)[2] , index , conditional_entropy , 0 ,
+                                         marginal_entropy);
+      seq.entropy_profile_plotable_write((*plot_set)[3] , index , partial_entropy);
       break;
     }
     }
@@ -3890,32 +3899,32 @@ double Hidden_semi_markov::forward_backward(const Markovian_sequences &seq , int
 
       switch (format) {
       case 'a' :
-/*        os << "\n" << SEQ_label[SEQL_GINI_INDEX] << ": " << gini_index << " ("
-           << gini_index / seq.length[index] << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
-           << seq.length[index] * (1. - 1. / nb_state) << " (" << 1. - 1. / nb_state
-        os << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
-           << seq.length[index] * log((double)nb_state) << " (" << log((double)nb_state) */
-        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy1
-           << " (" << entropy1 / seq.length[index] << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
-           << log((double)nb_state_sequence) << " ("
-           << log((double)nb_state_sequence) / seq.length[index]
-           << ")\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << ": " << entropy3 << " ("
-           << entropy3 / seq.length[index] << ")\n\n"
-           << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence << endl;
+/*        *os << "\n" << SEQ_label[SEQL_GINI_INDEX] << ": " << gini_index << " ("
+            << gini_index / seq.length[index] << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
+            << seq.length[index] * (1. - 1. / nb_state) << " (" << 1. - 1. / nb_state
+        *os << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
+            << seq.length[index] * log((double)nb_state) << " (" << log((double)nb_state) */
+        *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy1
+            << " (" << entropy1 / seq.length[index] << ")   " << SEQ_label[SEQL_UPPER_BOUND] << ": "
+            << log((double)nb_state_sequence) << " ("
+            << log((double)nb_state_sequence) / seq.length[index]
+            << ")\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << ": " << entropy3 << " ("
+            << entropy3 / seq.length[index] << ")\n\n"
+            << SEQ_label[SEQL_NB_STATE_SEQUENCE] << ": " << nb_state_sequence << endl;
         break;
       case 's' :
-/*        os << "\n" << SEQ_label[SEQL_GINI_INDEX] << "\t" << gini_index << "\t"
-           << gini_index / seq.length[index] << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
-           << seq.length[index] * (1. - 1. / nb_state) << "\t" << 1. - 1. / nb_state
-        os << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
-           << seq.length[index] * log((double)nb_state) << "\t" << log((double)nb_state) */
-        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << "\t" << entropy1
-           << "\t" << entropy1 / seq.length[index] << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
-           << log((double)nb_state_sequence) << "\t"
-           << log((double)nb_state_sequence) / seq.length[index]
-           << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << "\t" << entropy3 << "\t"
-           << entropy3 / seq.length[index] << "\n\n"
-           << SEQ_label[SEQL_NB_STATE_SEQUENCE] << "\t" << nb_state_sequence << endl;
+/*        *os << "\n" << SEQ_label[SEQL_GINI_INDEX] << "\t" << gini_index << "\t"
+            << gini_index / seq.length[index] << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
+            << seq.length[index] * (1. - 1. / nb_state) << "\t" << 1. - 1. / nb_state
+        *os << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
+            << seq.length[index] * log((double)nb_state) << "\t" << log((double)nb_state) */
+        *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << "\t" << entropy1
+            << "\t" << entropy1 / seq.length[index] << "\t" << SEQ_label[SEQL_UPPER_BOUND] << "\t"
+            << log((double)nb_state_sequence) << "\t"
+            << log((double)nb_state_sequence) / seq.length[index]
+            << "\n" << SEQ_label[SEQL_MARGINAL_ENTROPY_SUM] << "\t" << entropy3 << "\t"
+            << entropy3 / seq.length[index] << "\n\n"
+            << SEQ_label[SEQL_NB_STATE_SEQUENCE] << "\t" << nb_state_sequence << endl;
         break;
       }
 
@@ -4068,18 +4077,18 @@ double Hidden_semi_markov::forward_backward(const Markovian_sequences &seq , int
         }
       }
 
-      os << SEQ_label[SEQL_NB_STATE_SEQUENCE]
-         << " (" << 1. - MIN_SMOOTHED_PROBABILITY << " beam)"
-         << ": " << min_nb_state_sequence << endl;
+      cout << SEQ_label[SEQL_NB_STATE_SEQUENCE]
+           << " (" << 1. - MIN_SMOOTHED_PROBABILITY << " beam)"
+           << ": " << min_nb_state_sequence << endl;
 
-      os << "\n";
+      cout << "\n";
       for (i = 0;i < seq.length[index];i++) {
         obs_product = 0.;
         for (j = 0;j < nb_state;j++) {
-          os << backward2[i][j] << " (" << backward[i][j] << ")  ";
+          cout << backward2[i][j] << " (" << backward[i][j] << ")  ";
           obs_product += backward2[i][j];
         }
-        os << "| " << obs_product << endl;
+        cout << "| " << obs_product << endl;
       }
 
       for (i = 0;i < seq.length[index];i++) {
@@ -4168,8 +4177,8 @@ double Hidden_semi_markov::forward_backward(const Markovian_sequences &seq , int
 
 /*--------------------------------------------------------------*
  *
- *  Simulation de L sequences d'etats correspondant a une sequence observee
- *  par l'algorithme forward-backward.
+ *  Simulation de sequences d'etats correspondant a une sequence observee
+ *  par l'algorithme forward-backward de simulation.
  *
  *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
  *              stream, format de fichier ('a' : ASCII, 's' : Spreadsheet),
@@ -4962,7 +4971,8 @@ double Hidden_semi_markov::viterbi(const Markovian_sequences &seq ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des L sequences d'etats optimales par l'algorithme de Viterbi generalise.
+ *  Calcul des N sequences d'etats les plus probables correspondant a
+ *  une sequence observee par l'algorithme de Viterbi generalise.
  *
  *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
  *              stream, vraisemblance des donnees, format de fichier
@@ -5577,18 +5587,19 @@ double Hidden_semi_markov::generalized_viterbi(const Markovian_sequences &seq , 
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des vraisemblances des sequences d'etats optimales
- *  par l'algorithme de Viterbi forward-backward.
+ *  Calcul des profils d'etats par l'algorithme de Viterbi forward-backward.
  *
  *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
- *              stream, type de sortie, format de fichier ('a' : ASCII,
- *              's' : Spreadsheet, 'g' : Gnuplot), vraisemblance des donnees.
+ *              stream, pointeur sur un objet MultiPlot, type de sortie, format de sortie
+ *              ('a' : ASCII, 's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable),
+ *              vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
 double Hidden_semi_markov::viterbi_forward_backward(const Markovian_sequences &seq ,
-                                                    int index , ostream &os , int output ,
-                                                    char format , double seq_likelihood) const
+                                                    int index , ostream *os , MultiPlot *plot ,
+                                                    int output , char format ,
+                                                    double seq_likelihood) const
 
 {
   register int i , j , k , m;
@@ -6145,47 +6156,52 @@ double Hidden_semi_markov::viterbi_forward_backward(const Markovian_sequences &s
     case 'a' : {
       switch (output) {
       case SSTATE :
-        os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
         break;
       case IN_STATE :
-        os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
         break;
       case OUT_STATE :
-        os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
         break;
       }
 
-      seq.profile_ascii_print(os , index , nb_state , backward_output ,
+      seq.profile_ascii_print(*os , index , nb_state , backward_output ,
                               STAT_label[STATL_STATE]);
 
-      os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
-         << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
+      *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << ": " << state_seq_likelihood
+          << "   (" << exp(state_seq_likelihood - seq_likelihood) << ")" << endl;
       break;
     }
 
     case 's' : {
       switch (output) {
       case SSTATE :
-        os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\n\n";
         break;
       case IN_STATE :
-        os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\n\n";
         break;
       case OUT_STATE :
-        os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
+        *os << "\n" << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\n\n";
         break;
       }
 
-      seq.profile_spreadsheet_print(os , index , nb_state , backward_output ,
+      seq.profile_spreadsheet_print(*os , index , nb_state , backward_output ,
                                     STAT_label[STATL_STATE]);
 
-      os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
-         << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
+      *os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_LIKELIHOOD] << "\t" << state_seq_likelihood
+          << "\t" << exp(state_seq_likelihood - seq_likelihood) << endl;
       break;
     }
 
     case 'g' : {
-      seq.profile_plot_print(os , index , nb_state , backward_output);
+      seq.profile_plot_print(*os , index , nb_state , backward_output);
+      break;
+    }
+
+    case 'p' : {
+      seq.profile_plotable_write(*plot , index , nb_state , backward_output);
       break;
     }
     }
@@ -6220,12 +6236,12 @@ double Hidden_semi_markov::viterbi_forward_backward(const Markovian_sequences &s
 
       switch (format) {
       case 'a' :
-        os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
-           << " (" << ambiguity / seq.length[index] << ")" << endl;
+        *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << ": " << ambiguity
+            << " (" << ambiguity / seq.length[index] << ")" << endl;
         break;
       case 's' :
-        os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
-           << "\t" << ambiguity / seq.length[index] << "\t" << endl;
+        *os << "\n" << SEQ_label[SEQL_AMBIGUITY] << "\t" << ambiguity
+            << "\t" << ambiguity / seq.length[index] << "\t" << endl;
         break;
       }
     }
@@ -6295,10 +6311,11 @@ double Hidden_semi_markov::viterbi_forward_backward(const Markovian_sequences &s
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats.
  *
  *  arguments : reference sur un objet Format_error, stream, sequences,
  *              identificateur de la sequence, type de sortie,
@@ -6401,7 +6418,7 @@ bool Hidden_semi_markov::state_profile_write(Format_error &error , ostream &os ,
 
     for (i = 0;i < seq->nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
-        seq_likelihood = hsmarkov1->forward_backward(*seq , i , os , output , format ,
+        seq_likelihood = hsmarkov1->forward_backward(*seq , i , &os , 0 , output , format ,
                                                      max_marginal_entropy , entropy);
 
         if (seq_likelihood == D_INF) {
@@ -6419,7 +6436,8 @@ bool Hidden_semi_markov::state_profile_write(Format_error &error , ostream &os ,
         }
 
         else {
-          hsmarkov2->viterbi_forward_backward(*seq , i , os , output , format , seq_likelihood);
+          hsmarkov2->viterbi_forward_backward(*seq , i , &os , 0 , output , format ,
+                                              seq_likelihood);
 
           switch (state_sequence) {
           case GENERALIZED_VITERBI :
@@ -6447,11 +6465,11 @@ bool Hidden_semi_markov::state_profile_write(Format_error &error , ostream &os ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats
- *  dans un fichier.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path, sequences,
  *              identificateur de la sequence, type de sortie,
@@ -6488,10 +6506,11 @@ bool Hidden_semi_markov::state_profile_write(Format_error &error , const char *p
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats.
  *
  *  arguments : reference sur un objet Format_error, stream,
  *              identificateur de la sequence, type de sortie,
@@ -6525,11 +6544,11 @@ bool Hidden_semi_markov::state_profile_ascii_write(Format_error &error , ostream
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward, des L sequences d'etats optimales par l'algorithme de Viterbi
- *  generalise ou l'algorithme forward-backward de simulation et ecriture des resultats
- *  dans un fichier.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward,
+ *  calcul des N sequences d'etats les plus probables par l'algorithme de Viterbi generalise ou
+ *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
+ *  ecriture des resultats dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path, identificateur de la sequence,
  *              type de sortie, format de fichier ('a' : ASCII, 's' : Spreadsheet),
@@ -6569,9 +6588,9 @@ bool Hidden_semi_markov::state_profile_write(Format_error &error , const char *p
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward et affichage des resultats au format Gnuplot.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  affichage des resultats au format Gnuplot.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers, sequences,
  *              identificateur de la sequence, type de sortie, titre des figures.
@@ -6671,8 +6690,8 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
 
       hsmarkov = new Hidden_semi_markov(*this , false);
 
-      seq_likelihood = hsmarkov->forward_backward(*seq , index , *out_data_file , output , 'g' ,
-                                                  max_marginal_entropy , entropy);
+      seq_likelihood = hsmarkov->forward_backward(*seq , index , out_data_file , 0 , output ,
+                                                  'g' , max_marginal_entropy , entropy);
       out_data_file->close();
       delete out_data_file;
 
@@ -6687,7 +6706,7 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
 
         hsmarkov->create_cumul();
         hsmarkov->log_computation();
-        state_seq_likelihood = hsmarkov->viterbi_forward_backward(*seq , index , *out_data_file ,
+        state_seq_likelihood = hsmarkov->viterbi_forward_backward(*seq , index , out_data_file , 0 ,
                                                                   output , 'g' , seq_likelihood);
         out_data_file->close();
         delete out_data_file;
@@ -6721,13 +6740,13 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
           }
           switch (output) {
           case SSTATE :
-            out_file << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
             break;
           case IN_STATE :
-            out_file << SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
             break;
           case OUT_STATE :
-            out_file << SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
+            out_file << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
             break;
           }
 
@@ -6737,9 +6756,10 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
             }
 
             out_file << "plot [" << seq->index_parameter[index][0] << ":"
-                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
+                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
+                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
                        << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -6759,21 +6779,20 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
             }
             switch (output) {
             case SSTATE :
-              out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+              out_file << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
               break;
             case IN_STATE :
-              out_file << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
+              out_file << SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
               break;
             case OUT_STATE :
-              out_file << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
+              out_file << SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
               break;
             }
 
             out_file << "plot [" << seq->index_parameter[index][0] << ":"
-                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:"
-                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
+                     << seq->index_parameter[index][seq->length[index] - 1] << "] [0:1] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
                        << 1 << " : " << j + 2 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -6830,9 +6849,10 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
               out_file << "set xtics 0,1" << endl;
             }
 
-            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
+            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
+                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
                        << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -6852,20 +6872,19 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
             }
             switch (output) {
             case SSTATE :
-              out_file << SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
+              out_file << SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY] << "\"\n\n";
               break;
             case IN_STATE :
-              out_file << SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
+              out_file << SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY] << "\"\n\n";
               break;
             case OUT_STATE :
-              out_file << SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
+              out_file << SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY] << "\"\n\n";
               break;
             }
 
-            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:"
-                     << exp(state_seq_likelihood - seq_likelihood) << "] ";
+            out_file << "plot [0:" << seq->length[index] - 1 << "] [0:1] ";
             for (j = 0;j < nb_state;j++) {
-              out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using "
+              out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
                        << j + 1 << " title \"" << STAT_label[STATL_STATE] << " "
                        << j << "\" with linespoints";
               if (j < nb_state - 1) {
@@ -6933,9 +6952,9 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des probabilites a posteriori des etats par l'algorithme forward-backward,
- *  des vraisemblances des sequences d'etats optimales par l'algorithme de Viterbi
- *  forward-backward et affichage des resultats au format Gnuplot.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  affichage des resultats au format Gnuplot.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              identificateur de la sequence, type de sortie, titre des figures.
@@ -6966,7 +6985,291 @@ bool Hidden_semi_markov::state_profile_plot_write(Format_error &error , const ch
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des sequences d'etats optimales.
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  sortie graphique des profils.
+ *
+ *  arguments : reference sur un objet Format_error, sequences,
+ *              identificateur de la sequence, type de sortie.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Hidden_semi_markov::state_profile_plotable_write(Format_error &error ,
+                                                               const Markovian_sequences &iseq ,
+                                                               int identifier , int output) const
+
+{
+  bool status = true;
+  register int i;
+  int offset = I_DEFAULT , nb_value , index;
+  double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
+  Hidden_semi_markov *hsmarkov;
+  Semi_markov_data *seq;
+  ostringstream legend;
+  MultiPlotSet *plot_set;
+
+
+  plot_set = NULL;
+  error.init();
+
+  for (i = 0;i < iseq.nb_variable;i++) {
+    if ((iseq.type[i] != INT_VALUE) && (iseq.type[i] != STATE)) {
+      status = false;
+      ostringstream error_message , correction_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      correction_message << STAT_variable_word[INT_VALUE] << " or "
+                         << STAT_variable_word[STATE];
+      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+    }
+  }
+
+  if (nb_output_process == iseq.nb_variable) {
+    offset = 0;
+  }
+  else if ((iseq.type[0] == STATE) && (nb_output_process + 1 == iseq.nb_variable)) {
+    offset = 1;
+  }
+  else {
+    status = false;
+    error.update(SEQ_error[SEQR_NB_OUTPUT_PROCESS]);
+  }
+
+  if (offset != I_DEFAULT) {
+    for (i = 0;i < nb_output_process;i++) {
+      if (nonparametric_process[i + 1]) {
+        nb_value = nonparametric_process[i + 1]->nb_value;
+      }
+      else {
+        nb_value = parametric_process[i + 1]->nb_value;
+      }
+
+      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+        status = false;
+        ostringstream error_message;
+        error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
+                      << SEQ_error[SEQR_NB_OUTPUT];
+        error.update((error_message.str()).c_str());
+      }
+    }
+  }
+
+  for (i = 0;i < iseq.nb_sequence;i++) {
+    if (identifier == iseq.identifier[i]) {
+      index = i;
+      break;
+    }
+  }
+
+  if (i == iseq.nb_sequence) {
+    status = false;
+    error.update(SEQ_error[SEQR_SEQUENCE_IDENTIFIER]);
+  }
+
+  if (status) {
+    plot_set = new MultiPlotSet(4);
+
+    MultiPlotSet &plot = *plot_set;
+
+    plot.border = "15 lw 0";
+
+    if (iseq.type[0] != STATE) {
+      seq = new Semi_markov_data(iseq);
+    }
+    else {
+      seq = new Semi_markov_data(iseq , 'c' , (type == 'e' ? true : false));
+    }
+
+    hsmarkov = new Hidden_semi_markov(*this , false);
+
+    seq_likelihood = hsmarkov->forward_backward(*seq , index , 0 , plot_set , output ,
+                                                'p' , max_marginal_entropy , entropy);
+
+    if (seq_likelihood == D_INF) {
+      delete plot_set;
+      plot_set = NULL;
+      error.update(SEQ_error[SEQR_SEQUENCE_INCOMPATIBLE_MODEL]);
+    }
+
+    else {
+      hsmarkov->create_cumul();
+      hsmarkov->log_computation();
+      state_seq_likelihood = hsmarkov->viterbi_forward_backward(*seq , index , 0 , &plot[0] ,
+                                                                output , 'p' , seq_likelihood);
+
+      // 1ere vue : probabilitees maximum
+
+      switch (output) {
+      case SSTATE :
+        plot[0].title = SEQ_label[SEQL_MAX_POSTERIOR_STATE_PROBABILITY];
+        break;
+      case IN_STATE :
+        plot[0].title = SEQ_label[SEQL_MAX_POSTERIOR_IN_STATE_PROBABILITY];
+        break;
+      case OUT_STATE :
+        plot[0].title = SEQ_label[SEQL_MAX_POSTERIOR_OUT_STATE_PROBABILITY];
+        break;
+      }
+
+      if (seq->index_parameter) {
+        plot[0].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[0].xtics = 1;
+        }
+      }
+
+      else {
+        plot[0].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[0].xtics = 1;
+        }
+      }
+
+      plot[0].yrange = Range(0. , exp(state_seq_likelihood - seq_likelihood));
+
+      plot[0].resize(nb_state);
+
+      for (i = 0;i < nb_state;i++) {
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i;
+        plot[0][i].legend = legend.str();
+
+        plot[0][i].style = "linespoints";
+      }
+
+      // 2eme vue : probabilitees lissees
+
+      switch (output) {
+      case SSTATE :
+        plot[1].title = SEQ_label[SEQL_POSTERIOR_STATE_PROBABILITY];
+        break;
+      case IN_STATE :
+        plot[1].title = SEQ_label[SEQL_POSTERIOR_IN_STATE_PROBABILITY];
+        break;
+      case OUT_STATE :
+        plot[1].title = SEQ_label[SEQL_POSTERIOR_OUT_STATE_PROBABILITY];
+        break;
+      }
+
+      if (seq->index_parameter) {
+        plot[1].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[1].xtics = 1;
+        }
+      }
+
+      else {
+        plot[1].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[1].xtics = 1;
+        }
+      }
+
+      plot[1].yrange = Range(0. , 1.);
+
+      plot[1].resize(nb_state);
+
+      for (i = 0;i < nb_state;i++) {
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i;
+        plot[1][i].legend = legend.str();
+
+        plot[1][i].style = "linespoints";
+      }
+
+      // 3eme vue : profils d'entropies conditionnelles
+
+      if (seq->index_parameter) {
+        plot[2].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[2].xtics = 1;
+        }
+      }
+
+      else {
+        plot[2].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[2].xtics = 1;
+        }
+      }
+
+      plot[2].yrange = Range(0. , max_marginal_entropy);
+
+      plot[2].resize(2);
+
+      plot[2][0].legend = SEQ_label[SEQL_CONDITIONAL_ENTROPY];
+      plot[2][0].style = "linespoints";
+
+      plot[2][1].legend = SEQ_label[SEQL_MARGINAL_ENTROPY];
+      plot[2][1].style = "linespoints";
+
+      // 4eme vue : profils d'entropies partielles
+
+      if (seq->index_parameter) {
+        plot[3].xrange = Range(seq->index_parameter[index][0] , seq->index_parameter[index][seq->length[index] - 1]);
+        if (seq->index_parameter[index][seq->length[index] - 1] - seq->index_parameter[index][0] < TIC_THRESHOLD) {
+          plot[3].xtics = 1;
+        }
+      }
+
+      else {
+        plot[3].xrange = Range(0 , seq->length[index] - 1);
+        if (seq->length[index] - 1 < TIC_THRESHOLD) {
+          plot[3].xtics = 1;
+        }
+      }
+
+      plot[3].yrange = Range(0. ,entropy);
+
+      plot[3].resize(1);
+
+      plot[3][0].legend = SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY];
+      plot[3][0].style = "linespoints";
+    }
+
+    delete seq;
+    delete hsmarkov;
+  }
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward,
+ *  des profils d'etats par l'algorithme de Viterbi forward-backward et
+ *  sortie graphique des resultats.
+ *
+ *  arguments : reference sur un objet Format_error,
+ *              identificateur de la sequence, type de sortie.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Hidden_semi_markov::state_profile_plotable_write(Format_error &error ,
+                                                               int identifier , int output) const
+
+{
+  MultiPlotSet *plot_set;
+
+
+  error.init();
+
+  if (!semi_markov_data) {
+    plot_set = NULL;
+    error.update(STAT_error[STATR_NO_DATA]);
+  }
+  else {
+    plot_set = state_profile_plotable_write(error , *semi_markov_data , identifier , output);
+  }
+
+  return plot_set;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul des sequences d'etats les plus probables.
  *
  *  arguments : reference sur un objet Format_error, stream,
  *              reference sur un objet Markovian_sequences,
@@ -6986,7 +7289,7 @@ Semi_markov_data* Hidden_semi_markov::state_sequence_computation(Format_error &e
   Semi_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   for (i = 0;i < iseq.nb_variable;i++) {
@@ -7043,7 +7346,7 @@ Semi_markov_data* Hidden_semi_markov::state_sequence_computation(Format_error &e
 
     if (seq->likelihood == D_INF) {
       delete seq;
-      seq = 0;
+      seq = NULL;
       error.update(SEQ_error[SEQR_STATE_SEQUENCE_COMPUTATION_FAILURE]);
     }
 
@@ -7101,7 +7404,7 @@ Semi_markov_data* Hidden_semi_markov::state_sequence_computation(Format_error &e
 
 /*      if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
         delete seq;
-        seq = 0;
+        seq = NULL;
         error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
       }
 
@@ -7385,7 +7688,7 @@ Distance_matrix* Hidden_semi_markov::divergence_computation(Format_error &error 
   ofstream *out_file;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   for (i = 0;i < nb_model - 1;i++) {
@@ -7466,7 +7769,7 @@ Distance_matrix* Hidden_semi_markov::divergence_computation(Format_error &error 
   }
 
   if (status) {
-    out_file = 0;
+    out_file = NULL;
 
     if (path) {
       out_file = new ofstream(path);
@@ -7586,7 +7889,7 @@ Distance_matrix* Hidden_semi_markov::divergence_computation(Format_error &error 
   Distance_matrix *dist_matrix;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
@@ -7655,7 +7958,7 @@ Distance_matrix* Hidden_semi_markov::divergence_computation(Format_error &error 
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
-    dist_matrix = 0;
+    dist_matrix = NULL;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
