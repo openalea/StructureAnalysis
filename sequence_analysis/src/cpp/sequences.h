@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -52,7 +52,7 @@ const int DEFAULT_LENGTH = 20;         // longueur par defaut d'une sequence
 const int SEQUENCE_NB_VARIABLE = NB_OUTPUT_PROCESS;  // nombre maximum de variables observees
 
 const int PLOT_NB_SEQUENCE = 200;      // nombre maximum de sequences visualisees (sortie Gnuplot)
-const int PLOT_TITLE_NB_SEQUENCE = 15;  // nombre maximum de sequences identifiees (sortie Gnuplot)
+const int PLOT_LEGEND_NB_SEQUENCE = 15;  // nombre maximum de sequences identifiees (sortie Gnuplot)
 
 enum {
   IMPLICIT_TYPE ,                      // parametre d'index implicite
@@ -68,20 +68,6 @@ enum {
   THEORETICAL_STATE ,
   OBSERVED_OUTPUT ,
   THEORETICAL_OUTPUT
-};
-
-enum {
-  OBSERVATION ,
-  FIRST_OCCURRENCE ,
-  RECURRENCE_TIME ,
-  SOJOURN_TIME ,
-  INITIAL_RUN ,
-  FINAL_RUN ,
-  NB_RUN ,
-  NB_OCCURRENCE ,
-  LENGTH ,
-  SEQUENCE_CUMUL ,
-  SEQUENCE_MEAN
 };
 
 enum {
@@ -286,21 +272,19 @@ private :
 
     std::ostream& ascii_print(std::ostream &os , int process , Histogram **empirical_observation ,
                               const Sequence_characteristics *characteristics ,
-                              bool exhaustive , bool file_flag , Forward **forward = 0) const;
+                              bool exhaustive , bool file_flag , Forward **forward = NULL) const;
     std::ostream& spreadsheet_print(std::ostream &os , int process ,
-                                    Histogram **empirical_observation = 0 ,
-                                    const Sequence_characteristics *characteristics = 0 ,
-                                    Forward **forward = 0) const;
+                                    Histogram **empirical_observation = NULL ,
+                                    const Sequence_characteristics *characteristics = NULL ,
+                                    Forward **forward = NULL) const;
     bool plot_print(const char *prefix , const char *title , int process ,
-                    Histogram **empirical_observation = 0 ,
-                    const Sequence_characteristics *characteristics = 0 ,
-                    const Histogram *hlength = 0 , Forward **forward = 0) const;
-
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
+                    Histogram **empirical_observation = NULL ,
+                    const Sequence_characteristics *characteristics = NULL ,
+                    const Histogram *hlength = NULL , Forward **forward = NULL) const;
+    void plotable_write(MultiPlotSet &plot , int &index , int process ,
+                        Histogram **empirical_observation = NULL ,
+                        const Sequence_characteristics *characteristics = NULL ,
+                        const Histogram *hlength = NULL , Forward **forward = NULL) const;
 
 public :
 
@@ -379,16 +363,8 @@ public :
     bool ascii_write(Format_error &error , const char *path , bool exhaustive) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Correlation);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     bool white_noise_correlation(Format_error &error , int nb_point , double *filter ,
                                  int residual = true);
@@ -429,7 +405,8 @@ protected :
     int cumul_length;       // longueur cumulee des sequences
     int *length;            // longueurs des sequences
     Histogram *hlength;     // histogramme des longueurs des sequences
-    int index_parameter_type; // type du parametre d'index (TIME/POSITION)
+    int **vertex_identifier;  // identificateurs des vertex d'un MTG associe
+    int index_parameter_type;  // type du parametre d'index (TIME/POSITION)
     Histogram *hindex_parameter;   // histogramme des parametres d'index explicites
     Histogram *index_interval;  // intervalles entre parametres d'index explicites
     int **index_parameter;  // parametres d'index explicites
@@ -468,7 +445,7 @@ protected :
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , char format , bool comment_flag ,
-                              double *posterior_probability = 0 ,
+                              double *posterior_probability = NULL ,
                               int line_nb_character = LINE_NB_CHARACTER) const;
     bool plot_print(const char *path , int ilength) const;
 
@@ -496,7 +473,7 @@ protected :
                                       double **max_symbol_distance) const;
     double substitution_distance_computation(const Vector_distance &vector_dist , int ref_index ,
                                              int test_index , int ref_position , int test_position ,
-                                             double **rank , const Sequences *test_seq = 0) const;
+                                             double **rank , const Sequences *test_seq = NULL) const;
     double substitution_distance_computation(int ref_index , int test_index , int ref_position,
                                              int test_position , double substitution_distance) const;
 
@@ -512,47 +489,56 @@ protected :
 
     std::ostream& profile_ascii_print(std::ostream &os , int index , int nb_segment ,
                                       double **profiles , const char *label ,
-                                      double **mean = 0 , double **change_point = 0) const;
+                                      double **mean = NULL , double **change_point = NULL) const;
     std::ostream& profile_spreadsheet_print(std::ostream &os , int index , int nb_segment ,
                                             double **profiles , const char *label ,
-                                            double **mean = 0 , double **change_point = 0) const;
+                                            double **mean = NULL , double **change_point = NULL) const;
     std::ostream& profile_plot_print(std::ostream &os , int index , int nb_segment ,
-                                     double **profiles , double **mean = 0 ,
-                                     double **change_point = 0) const;
+                                     double **profiles , double **mean = NULL ,
+                                     double **change_point = NULL) const;
+    void change_point_profile_plotable_write(MultiPlot &plot , int index , int nb_segment ,
+                                             double **change_point) const;
 
     int nb_parameter_computation(int index , int nb_segment , int *model_type) const;
     double one_segment_likelihood(int index , int *model_type , double **rank) const;
     Sequences* segmentation_output(int *nb_segment , int *model_type , std::ostream &os ,
-                                   int output = SEQUENCE , int* ichange_point = 0);
+                                   int output = SEQUENCE , int *ichange_point = NULL);
     double segmentation(int *nb_segment , int *model_type , double **rank ,
-                        double *isegmentation_likelihood = 0 , int *nb_parameter = 0 ,
-                        double *segment_penalty = 0);
+                        double *isegmentation_likelihood = NULL , int *nb_parameter = NULL ,
+                        double *segment_penalty = NULL);
     double forward_backward(int index , int nb_segment , int *model_type , double **rank ,
-                            std::ostream *os , int output , char format ,
-                            double *ilikelihood = 0 , double *ichange_point_entropy = 0 ,
-                            double *isegment_entropy = 0) const;
+                            std::ostream *os , MultiPlotSet *plot_set , int output , char format ,
+                            double *ilikelihood = NULL , double *isegmentation_entropy = NULL ,
+                            double *iranked_change_point_entropy = NULL ,
+                            double *ichange_point_entropy = NULL , double *uniform_entropy = NULL ,
+                            double *imarginal_entropy = NULL) const;
     double forward_backward_sampling(int index , int nb_segment , int *model_type ,
                                      double **rank , std::ostream &os , char format ,
                                      int nb_segmentation) const;
-    double L_segmentation(int index , int nb_segment , int *model_type , double **irank ,
+    double N_segmentation(int index , int nb_segment , int *model_type , double **irank ,
                           std::ostream &os , char format , int inb_segmentation ,
                           double likelihood) const;
     double forward_backward_dynamic_programming(int index , int nb_segment , int *model_type ,
-                                                double **rank , std::ostream &os , int output ,
+                                                double **rank , std::ostream *os ,
+                                                MultiPlotSet *plot_set , int output ,
                                                 char format , double likelihood = D_INF) const;
 
     std::ostream& profile_ascii_print(std::ostream &os , int index , int nb_state ,
                                       double **profiles , double *begin_conditional_entropy ,
                                       double *marginal_entropy , double *begin_partial_entropy ,
-                                      double *end_conditional_entropy = 0 , double *end_partial_entropy = 0) const;
+                                      double *end_conditional_entropy = NULL , double *end_partial_entropy = NULL) const;
     std::ostream& profile_spreadsheet_print(std::ostream &os , int index , int nb_state ,
                                             double **profiles , double *begin_conditional_entropy ,
                                             double *marginal_entropy , double *begin_partial_entropy ,
-                                            double *end_conditional_entropy = 0 , double *end_partial_entropy = 0) const;
+                                            double *end_conditional_entropy = NULL , double *end_partial_entropy = NULL) const;
     std::ostream& profile_plot_print(std::ostream &os , int index , int nb_state ,
                                      double **profiles , double *begin_conditional_entropy ,
                                      double *marginal_entropy , double *begin_partial_entropy ,
-                                     double *end_conditional_entropy = 0 , double *end_partial_entropy = 0) const;
+                                     double *end_conditional_entropy = NULL , double *end_partial_entropy = NULL) const;
+    void profile_plotable_write(MultiPlot &plot , int index , int nb_state ,
+                                double **profiles) const;
+    void entropy_profile_plotable_write(MultiPlot &plot , int index , double *begin_entropy ,
+                                        double *end_entropy = NULL , double *marginal_entropy = NULL) const;
 
 public :
 
@@ -650,7 +636,7 @@ public :
                               int output = TREND) const;
 
     Sequences* pointwise_average(Format_error &error , bool standard_deviation = false ,
-                                 int output = SEQUENCE , const char *path = 0 ,
+                                 int output = SEQUENCE , const char *path = NULL ,
                                  char format = 'a') const;
 
     Sequences* recurrence_time_sequences(Format_error &error , int variable , int value) const;
@@ -667,22 +653,16 @@ public :
     virtual bool ascii_data_write(Format_error &error , const char *path ,
                                   char format = 'c' , bool exhaustive = false) const;
     bool plot_data_write(Format_error &error , const char *prefix ,
-                         const char *title = 0) const;
+                         const char *title = NULL) const;
+    MultiPlotSet* get_plotable_data(Format_error &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
     bool ascii_write(Format_error &error , const char *path ,
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
-
-  /*    RWDECLARE_COLLECTABLE(Sequences);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
     int min_index_parameter_computation() const;
     int max_index_parameter_computation(bool last_position = false) const;
@@ -708,17 +688,17 @@ public :
                                bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,
                                double indel_factor = INDEL_FACTOR_1 , bool transposition_flag = false ,
                                double transposition_factor = TRANSPOSITION_FACTOR ,
-                               const char *result_path = 0 , char result_format = 'a' ,
-                               const char *alignment_path = 0 , char alignment_format = 'a') const;
+                               const char *result_path = NULL , char result_format = 'a' ,
+                               const char *alignment_path = NULL , char alignment_format = 'a') const;
     Distance_matrix* alignment(Format_error &error , std::ostream *os , int ref_identifier = I_DEFAULT ,
                                int test_identifier = I_DEFAULT , bool begin_free = false , bool end_free = false ,
-                               const char *result_path = 0 , char result_format = 'a' ,
-                               const char *alignment_path = 0 , char alignment_format = 'a') const;
+                               const char *result_path = NULL , char result_format = 'a' ,
+                               const char *alignment_path = NULL , char alignment_format = 'a') const;
 
     Sequences* multiple_alignment(Format_error &error , std::ostream &os , const Vector_distance &ivector_dist ,
                                   bool begin_free = false , bool end_free = false , int indel_cost = ADAPTATIVE ,
                                   double indel_factor = INDEL_FACTOR_N , int algorithm = AGGLOMERATIVE ,
-                                  const char *path = 0) const;
+                                  const char *path = NULL) const;
 
     Sequences* segmentation(Format_error &error , std::ostream &os , int iidentifier ,
                             int nb_segment , int *ichange_point , int *model_type ,
@@ -746,7 +726,10 @@ public :
                                int nb_segmentation = NB_SEGMENTATION) const;
     bool segment_profile_plot_write(Format_error &error , const char *prefix ,
                                     int iidentifier , int nb_segment , int *model_type ,
-                                    int output = SEGMENT , const char *title = 0) const;
+                                    int output = SEGMENT , const char *title = NULL) const;
+    MultiPlotSet* segment_profile_plotable_write(Format_error &error , int iidentifier ,
+                                                 int nb_segment , int *model_type ,
+                                                 int output = SEGMENT) const;
 
     // acces membres de la classe
 
@@ -756,6 +739,8 @@ public :
     int get_cumul_length() const { return cumul_length; }
     int get_length(int index_seq) const { return length[index_seq]; }
     Histogram* get_hlength() const { return hlength; }
+    int get_vertex_identifier(int iseq , int index) const
+    { return vertex_identifier[iseq][index]; }
     int get_index_parameter_type() const { return index_parameter_type; }
     Histogram* get_hindex_parameter() const { return hindex_parameter; }
     Histogram* get_index_interval() const { return index_interval; }
@@ -819,12 +804,8 @@ private :
     std::ostream& spreadsheet_print(std::ostream &os , int type , const Histogram &hlength) const;
     bool plot_print(const char *prefix , const char *title , int variable ,
                     int nb_variable , int type , const Histogram &hlength) const;
-
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
+    void plotable_write(MultiPlotSet &plot , int &index , int variable ,
+                        int type , const Histogram &hlength) const;
 
 public :
 
@@ -898,6 +879,7 @@ protected :
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     bool plot_print(const char *prefix , const char *title , int variable ,
                     int nb_variable) const;
+    void plotable_write(MultiPlotSet &plot , int &index , int variable) const;
 
     void state_variable_init(int itype = STATE);
 
@@ -905,7 +887,7 @@ protected :
                                       const Variable_order_markov &markov ,
                                       bool begin = true , bool non_terminal = false) const;
     void transition_count_computation(const Chain_data &chain_data ,
-                                      const Semi_markov *smarkov = 0) const;
+                                      const Semi_markov *smarkov = NULL) const;
 
     void self_transition_computation(int state);
     void observation_histogram_computation(int variable);
@@ -986,23 +968,16 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
     bool transition_count(Format_error &error , std::ostream &os , int max_order ,
                           bool begin = false , int estimator = MAXIMUM_LIKELIHOOD ,
-                          const char *path = 0) const;
+                          const char *path = NULL) const;
     bool word_count(Format_error &error , std::ostream &os , int variable , int word_length ,
                     int begin_state = I_DEFAULT , int end_state = I_DEFAULT ,
                     int min_frequency = 1) const;
     bool mtg_write(Format_error &error , const char *path , int *itype) const;
-
-/*    RWDECLARE_COLLECTABLE(Markovian_sequences);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     double iid_information_computation() const;
 
@@ -1098,18 +1073,18 @@ public :
     bool lumpability_test(Format_error &error , std::ostream &os , int *symbol , int order = 1) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_model ,
-                    const Variable_order_markov **imarkov , const char *path = 0) const;
+                    const Variable_order_markov **imarkov , const char *path = NULL) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_model ,
-                    const Semi_markov **ismarkov , const char *path = 0) const;
+                    const Semi_markov **ismarkov , const char *path = NULL) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_model ,
                     const Hidden_variable_order_markov **ihmarkov ,
-                    int algorithm = FORWARD , const char *path = 0) const;
+                    int algorithm = FORWARD , const char *path = NULL) const;
 
     bool comparison(Format_error &error , std::ostream &os , int nb_model ,
                     const Hidden_semi_markov **ihsmarkov ,
-                    int algorithm = FORWARD , const char *path = 0) const;
+                    int algorithm = FORWARD , const char *path = NULL) const;
 
     // acces membres de la classe
 
