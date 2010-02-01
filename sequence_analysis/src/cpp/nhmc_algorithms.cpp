@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -577,7 +577,7 @@ void Nonhomogeneous_markov::characteristic_computation(int length , bool countin
           else {
             process->absorption[i] = 1.;
             delete process->sojourn_time[i];
-            process->sojourn_time[i] = 0;
+            process->sojourn_time[i] = NULL;
           }
         }
 
@@ -634,7 +634,7 @@ void Nonhomogeneous_markov::characteristic_computation(const Nonhomogeneous_mark
           else {
             process->absorption[i] = 1.;
             delete process->sojourn_time[i];
-            process->sojourn_time[i] = 0;
+            process->sojourn_time[i] = NULL;
           }
         }
 
@@ -1234,7 +1234,7 @@ Nonhomogeneous_markov* Markovian_sequences::nonhomogeneous_markov_estimation(For
   Nonhomogeneous_markov_data *seq;
 
 
-  markov = 0;
+  markov = NULL;
   error.init();
 
   if (nb_variable > 1) {
@@ -1295,7 +1295,7 @@ Nonhomogeneous_markov* Markovian_sequences::nonhomogeneous_markov_estimation(For
 
     if (i == markov->nb_state) {
       delete [] markov->self_transition;
-      markov->self_transition = 0;
+      markov->self_transition = NULL;
     }
 
     // calcul de la vraisemblance et des lois caracteristiques du modele
@@ -1304,7 +1304,7 @@ Nonhomogeneous_markov* Markovian_sequences::nonhomogeneous_markov_estimation(For
 
     if (seq->likelihood == D_INF) {
       delete markov;
-      markov = 0;
+      markov = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -1340,7 +1340,7 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
   Nonhomogeneous_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((hlength.nb_element < 1) || (hlength.nb_element > NB_SEQUENCE)) {
@@ -1476,7 +1476,7 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
   Nonhomogeneous_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
@@ -1530,7 +1530,7 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
