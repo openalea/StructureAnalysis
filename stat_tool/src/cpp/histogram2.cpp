@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -45,8 +45,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "distribution.h"
 #include "stat_label.h"
@@ -1120,8 +1118,8 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
       cumul = new double*[nb_histo];
       concentration = new double*[nb_histo];
       for (i = 0;i < nb_histo;i++) {
-        cumul[i] = 0;
-        concentration[i] = 0;
+        cumul[i] = NULL;
+        concentration[i] = NULL;
       }
 
       max_nb_value = 0;
@@ -1481,7 +1479,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
   error.init();
 
   if (nb_histo > PLOT_NB_HISTOGRAM) {
-    plot_set = 0;
+    plot_set = NULL;
     error.update(STAT_error[STATR_PLOT_NB_HISTOGRAM]);
   }
 
@@ -1827,7 +1825,7 @@ Distribution_data::Distribution_data(const Histogram &histo , const Distribution
     distribution = new Parametric_model(*dist);
   }
   else {
-    distribution = 0;
+    distribution = NULL;
   }
 }
 
@@ -1850,7 +1848,7 @@ Distribution_data::Distribution_data(const Histogram &histo , const Parametric *
     distribution = new Parametric_model(*dist);
   }
   else {
-    distribution = 0;
+    distribution = NULL;
   }
 }
 
@@ -1872,7 +1870,7 @@ Distribution_data::Distribution_data(const Distribution_data &histo , bool model
     distribution = new Parametric_model(*(histo.distribution) , false);
   }
   else {
-    distribution = 0;
+    distribution = NULL;
   }
 }
 
@@ -1910,7 +1908,7 @@ Distribution_data& Distribution_data::operator=(const Distribution_data &histo)
       distribution = new Parametric_model(*(histo.distribution) , false);
     }
     else {
-      distribution = 0;
+      distribution = NULL;
     }
   }
 
@@ -1935,7 +1933,7 @@ Parametric_model* Distribution_data::extract_model(Format_error &error) const
   error.init();
 
   if (!distribution) {
-    dist = 0;
+    dist = NULL;
     error.update(STAT_error[STATR_NON_EXISTING_DISTRIBUTION]);
   }
 
@@ -1972,7 +1970,7 @@ Distribution_data* histogram_ascii_read(Format_error &error , const char *path)
   ifstream in_file(path);
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if (!in_file) {
@@ -2319,80 +2317,3 @@ MultiPlotSet* Distribution_data::get_plotable() const
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Distribution_data , STATI_DISTRIBUTION_DATA);
-
-
-RWspace Distribution_data::binaryStoreSize() const
-
-{
-  RWspace size = Histogram::binaryStoreSize();
-  if (distribution) {
-    size += distribution->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Distribution_data::restoreGuts(RWvistream &is)
-
-{
-  delete distribution;
-
-  Histogram::restoreGuts(is);
-
-  is >> distribution;
-  if (distribution == RWnilCollectable) {
-    distribution = 0;
-  }
-}
-
-
-void Distribution_data::restoreGuts(RWFile &file)
-
-{
-  delete distribution;
-
-  Histogram::restoreGuts(file);
-
-  file >> distribution;
-  if (distribution == RWnilCollectable) {
-    distribution = 0;
-  }
-}
-
-
-void Distribution_data::saveGuts(RWvostream &os) const
-
-{
-  Histogram::saveGuts(os);
-
-  if (distribution) {
-    os << distribution;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Distribution_data::saveGuts(RWFile &file) const
-
-{
-  Histogram::saveGuts(file);
-
-  if (distribution) {
-    file << distribution;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
