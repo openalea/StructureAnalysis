@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -379,7 +379,7 @@ void Semi_markov::state_no_occurrence_probability(int state , double increment)
     state_out = new double[nb_state];
 
     state_in = new double*[LEAVE_LENGTH];
-    state_in[0] = 0;
+    state_in[0] = NULL;
     for (i = 1;i < LEAVE_LENGTH;i++) {
       state_in[i] = new double[nb_state];
     }
@@ -524,7 +524,7 @@ void Semi_markov::state_first_occurrence_distribution(int state , int min_nb_val
   state_out = new double[nb_state];
 
   state_in = new double*[first_occurrence->alloc_nb_value];
-  state_in[0] = 0;
+  state_in[0] = NULL;
   for (i = 1;i < first_occurrence->alloc_nb_value;i++) {
     state_in[i] = new double[nb_state];
   }
@@ -643,8 +643,8 @@ void Semi_markov::state_leave_probability(int state , double increment)
     state_out = new double[nb_state];
 
     state_in = new double*[LEAVE_LENGTH];
-    state_in[0] = 0;
-    state_in[1] = 0;
+    state_in[0] = NULL;
+    state_in[1] = NULL;
     for (i = 2;i < LEAVE_LENGTH;i++) {
       state_in[i] = new double[nb_state];
     }
@@ -795,8 +795,8 @@ void Semi_markov::state_recurrence_time_distribution(int state , int min_nb_valu
   state_out = new double[nb_state];
 
   state_in = new double*[recurrence_time->alloc_nb_value];
-  state_in[0] = 0;
-  state_in[1] = 0;
+  state_in[0] = NULL;
+  state_in[1] = NULL;
   for (i = 2;i < recurrence_time->alloc_nb_value;i++) {
     state_in[i] = new double[nb_state];
   }
@@ -901,7 +901,7 @@ void Semi_markov::state_recurrence_time_distribution(int state , int min_nb_valu
 
   else {
     delete nonparametric_process[0]->recurrence_time[state];
-    nonparametric_process[0]->recurrence_time[state] = 0;
+    nonparametric_process[0]->recurrence_time[state] = NULL;
   }
 }
 
@@ -1362,7 +1362,7 @@ void Semi_markov::output_leave_probability(const double *memory , int variable ,
     state_out = new double[nb_state];
 
     state_in = new double*[LEAVE_LENGTH];
-    state_in[0] = 0;
+    state_in[0] = NULL;
     for (i = 1;i < LEAVE_LENGTH;i++) {
       state_in[i] = new double[nb_state];
     }
@@ -1572,7 +1572,7 @@ void Semi_markov::output_recurrence_time_distribution(const double *memory , int
   state_out = new double[nb_state];
 
   state_in = new double*[recurrence_time->alloc_nb_value];
-  state_in[0] = 0;
+  state_in[0] = NULL;
   for (i = 1;i < recurrence_time->alloc_nb_value;i++) {
     state_in[i] = new double[nb_state];
   }
@@ -1725,7 +1725,7 @@ void Semi_markov::output_recurrence_time_distribution(const double *memory , int
 
   else {
     delete nonparametric_process[variable]->recurrence_time[output];
-    nonparametric_process[variable]->recurrence_time[output] = 0;
+    nonparametric_process[variable]->recurrence_time[output] = NULL;
   }
 
   delete [] observation;
@@ -1795,7 +1795,7 @@ void Semi_markov::output_sojourn_time_distribution(const double *memory , int va
   state_out = new double[nb_state];
 
   state_in = new double*[sojourn_time->alloc_nb_value];
-  state_in[0] = 0;
+  state_in[0] = NULL;
   for (i = 1;i < sojourn_time->alloc_nb_value;i++) {
     state_in[i] = new double[nb_state];
   }
@@ -1977,7 +1977,7 @@ void Semi_markov::output_sojourn_time_distribution(const double *memory , int va
   if (*pcumul == 0.) {
     absorption = 1.;
     delete nonparametric_process[variable]->sojourn_time[output];
-    nonparametric_process[variable]->sojourn_time[output] = 0;
+    nonparametric_process[variable]->sojourn_time[output] = NULL;
   }
 
   else {
