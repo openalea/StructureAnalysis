@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -1020,7 +1020,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
   Variable_order_markov_data *seq;
 
 
-  completed_markov = 0;
+  completed_markov = NULL;
   error.init();
 
   if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
@@ -1334,10 +1334,10 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
         case false : {
           markov->memory_type[i] = -1;
           delete [] markov->state[i];
-          markov->state[i] = 0;
+          markov->state[i] = NULL;
           if (markov->child[i]) {
             delete [] markov->child[i];
-            markov->child[i] = 0;
+            markov->child[i] = NULL;
           }
           break;
         }
@@ -1345,7 +1345,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
         case true : {
           if ((markov->memory_type[i] == TERMINAL) && (markov->child[i])) {
             delete [] markov->child[i];
-            markov->child[i] = 0;
+            markov->child[i] = NULL;
           }
           break;
         }
@@ -1461,10 +1461,10 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
                 for (j = 0;j < markov->nb_state;j++) {
                   markov->memory_type[markov->child[i][j]] = -1;
                   delete [] markov->state[markov->child[i][j]];
-                  markov->state[markov->child[i][j]] = 0;
+                  markov->state[markov->child[i][j]] = NULL;
                 }
                 delete [] markov->child[i];
-                markov->child[i] = 0;
+                markov->child[i] = NULL;
 
                 nb_row -= markov->nb_state;
               }
@@ -1517,7 +1517,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 
           else if (markov->child[i]) {
             delete [] markov->child[i];
-            markov->child[i] = 0;
+            markov->child[i] = NULL;
           }
         }
 
@@ -1529,7 +1529,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
       delete [] markov->next[i];
     }
     delete [] markov->next;
-    markov->next = 0;
+    markov->next = NULL;
 
     markov->nb_row = nb_row;
     markov->max_order_computation();
@@ -1641,7 +1641,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 
     if (seq->likelihood == D_INF) {
       delete completed_markov;
-      completed_markov = 0;
+      completed_markov = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -1680,7 +1680,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
   Variable_order_markov_data *seq;
 
 
-  markov = 0;
+  markov = NULL;
   error.init();
 
   if ((type[0] != INT_VALUE) && (type[0] != STATE)) {
@@ -1816,7 +1816,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
 
     if (seq->likelihood == D_INF) {
       delete markov;
-      markov = 0;
+      markov = NULL;
       error.update(STAT_error[STATR_ESTIMATION_FAILURE]);
     }
 
@@ -1853,7 +1853,7 @@ Variable_order_markov* Markovian_sequences::variable_order_markov_estimation(For
   Variable_order_markov *imarkov , *markov;
 
 
-  markov = 0;
+  markov = NULL;
   error.init();
 
   if ((order < 1) || (order > ORDER)) {
@@ -2991,7 +2991,7 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
   Variable_order_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((hlength.nb_element < 1) || (hlength.nb_element > NB_SEQUENCE)) {
@@ -3102,7 +3102,7 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
       delete seq;
-      seq = 0;
+      seq = NULL;
       error.update(SEQ_error[SEQR_STATES_NOT_REPRESENTED]);
     }
 
@@ -3145,7 +3145,7 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
   Variable_order_markov_data *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
@@ -3200,7 +3200,7 @@ Variable_order_markov_data* Variable_order_markov::simulation(Format_error &erro
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
@@ -3242,7 +3242,7 @@ Distance_matrix* Variable_order_markov::divergence_computation(Format_error &err
   ofstream *out_file;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   for (i = 0;i < nb_model - 1;i++) {
@@ -3341,7 +3341,7 @@ Distance_matrix* Variable_order_markov::divergence_computation(Format_error &err
   }
 
   if (status) {
-    out_file = 0;
+    out_file = NULL;
 
     if (path) {
       out_file = new ofstream(path);
@@ -3480,7 +3480,7 @@ Distance_matrix* Variable_order_markov::divergence_computation(Format_error &err
   Distance_matrix *dist_matrix;
 
 
-  dist_matrix = 0;
+  dist_matrix = NULL;
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
@@ -3549,7 +3549,7 @@ Distance_matrix* Variable_order_markov::divergence_computation(Format_error &err
   error.init();
 
   if ((nb_sequence < 1) || (nb_sequence > NB_SEQUENCE)) {
-    dist_matrix = 0;
+    dist_matrix = NULL;
     error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
@@ -3744,7 +3744,7 @@ int** Variable_order_markov_iterator::simulation(int length , bool initializatio
 
 
   if ((memory == I_DEFAULT) && (!initialization)) {
-    int_seq = 0;
+    int_seq = NULL;
   }
 
   else {
@@ -3817,7 +3817,7 @@ Variable_order_markov* Markovian_sequences::lumpability_estimation(Format_error 
   Markovian_sequences *seq;
 
 
-  markov = 0;
+  markov = NULL;
   error.init();
 
   if (nb_variable > 1) {
