@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers
  *
  *  ----------------------------------------------------------------------------
  *
@@ -45,8 +45,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "vectors.h"
 #include "stat_label.h"
@@ -70,14 +68,14 @@ Vector_distance::Vector_distance()
   nb_variable = 0;
   distance_type = I_DEFAULT;
 
-  variable_type = 0;
-  weight = 0;
-  dispersion = 0;
+  variable_type = NULL;
+  weight = NULL;
+  dispersion = NULL;
 
-  nb_value = 0;
-  symbol_distance = 0;
+  nb_value = NULL;
+  symbol_distance = NULL;
 
-  period = 0;
+  period = NULL;
 }
 
 
@@ -121,7 +119,7 @@ Vector_distance::Vector_distance(int inb_variable , int *ivariable_type ,
 
   symbol_distance = new double**[nb_variable];
   for (i = 0;i < nb_variable;i++) {
-    symbol_distance[i] = 0;
+    symbol_distance[i] = NULL;
   }
 
   period = new int[nb_variable];
@@ -182,7 +180,7 @@ Vector_distance::Vector_distance(int inb_variable , int idistance_type , int *iv
     }
 
     else {
-      symbol_distance[i] = 0;
+      symbol_distance[i] = NULL;
     }
   }
 
@@ -241,7 +239,7 @@ void Vector_distance::copy(const Vector_distance &vector_dist)
     }
 
     else {
-      symbol_distance[i] = 0;
+      symbol_distance[i] = NULL;
     }
   }
 
@@ -344,7 +342,7 @@ Vector_distance* vector_distance_ascii_read(Format_error &error , const char *pa
   ifstream in_file(path);
 
 
-  vector_dist = 0;
+  vector_dist = NULL;
   error.init();
 
   if (!in_file) {
@@ -510,7 +508,7 @@ Vector_distance* vector_distance_ascii_read(Format_error &error , const char *pa
         variable_type[i] = NUMERIC;
         weight[i] = 1. / (double)nb_variable;
         nb_value[i] = 0;
-        symbol_distance[i] = 0;
+        symbol_distance[i] = NULL;
         period[i] = I_DEFAULT;
       }
 
@@ -1018,210 +1016,6 @@ bool Vector_distance::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Vector_distance , STATI_VECTOR_DISTANCE);
-
-
-RWspace Vector_distance::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = sizeof(nb_variable) + sizeof(distance_type) + sizeof(variable_type) * nb_variable +
-         sizeof(weight) * nb_variable + sizeof(dispersion) * nb_variable +
-         sizeof(nb_value) * nb_variable;
-
-  for (i = 0;i < nb_variable;i++) {
-    size += sizeof(true);
-    if (symbol_distance[i]) {
-      size += sizeof(**symbol_distance[i]) * nb_value[i] * nb_value[i];
-    }
-  }
-
-  size += sizeof(period) * nb_variable;
-
-  return size;
-}
-
-
-void Vector_distance::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i , j , k;
-
-
-  remove();
-
-  is >> nb_variable >> distance_type;
-
-  variable_type = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> variable_type[i];
-  }
-
-  weight = new double[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> weight[i];
-  }
-
-  dispersion = new double[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> dispersion[i];
-  }
-
-  nb_value = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> nb_value[i];
-  }
-
-  symbol_distance = new double**[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> status;
-    if (status) {
-      symbol_distance[i] = new double*[nb_value[i]];
-      for (j = 0;j < nb_value[i];j++) {
-        symbol_distance[i][j] = new double[nb_value[i]];
-        for (k = 0;k < nb_value[i];k++) {
-          is >> symbol_distance[i][j][k];
-        }
-      }
-    }
-    else {
-      symbol_distance[i] = 0;
-    }
-  }
-
-  period = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> period[i];
-  }
-}
-
-
-void Vector_distance::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i , j;
-
-
-  remove();
-
-  file.Read(nb_variable);
-  file.Read(distance_type);
-
-  variable_type = new int[nb_variable];
-  file.Read(variable_type , nb_variable);
-
-  weight = new double[nb_variable];
-  file.Read(weight , nb_variable);
-
-  dispersion = new double[nb_variable];
-  file.Read(dispersion , nb_variable);
-
-  nb_value = new int[nb_variable];
-  file.Read(nb_value , nb_variable);
-
-  symbol_distance = new double**[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    file.Read(status);
-    if (status) {
-      symbol_distance[i] = new double*[nb_value[i]];
-      for (j = 0;j < nb_value[i];j++) {
-        symbol_distance[i][j] = new double[nb_value[i]];
-        file.Read(symbol_distance[i][j] , nb_value[i]);
-      }
-    }
-    else {
-      symbol_distance[i] = 0;
-    }
-  }
-
-  period = new int[nb_variable];
-  file.Read(period , nb_variable);
-}
-
-
-void Vector_distance::saveGuts(RWvostream &os) const
-
-{
-  register int i , j , k;
-
-
-  os << nb_variable;
-  os << distance_type;
-
-  for (i = 0;i < nb_variable;i++) {
-    os << variable_type[i];
-  }
-  for (i = 0;i < nb_variable;i++) {
-    os << weight[i];
-  }
-  for (i = 0;i < nb_variable;i++) {
-    os << dispersion[i];
-  }
-  for (i = 0;i < nb_variable;i++) {
-    os << nb_value[i];
-  }
-
-  for (i = 0;i < nb_variable;i++) {
-    if (symbol_distance[i]) {
-      os << true;
-      for (j = 0;j < nb_value[i];j++) {
-        for (k = 0;k < nb_value[i];k++) {
-          os << symbol_distance[i][j][k];
-        }
-      }
-    }
-    else {
-      os << false;
-    }
-  }
-
-  for (i = 0;i < nb_variable;i++) {
-    os << period[i];
-  }
-}
-
-
-void Vector_distance::saveGuts(RWFile &file) const
-
-{
-  register int i , j;
-
-
-  file.Write(nb_variable);
-  file.Write(distance_type);
-
-  file.Write(variable_type , nb_variable);
-  file.Write(weight , nb_variable);
-  file.Write(dispersion , nb_variable);
-  file.Write(nb_value , nb_variable);
-
-  for (i = 0;i < nb_variable;i++) {
-    if (symbol_distance[i]) {
-      file.Write(true);
-      for (j = 0;j < nb_value[i];j++) {
-        file.Write(symbol_distance[i][j] , nb_value[i]);
-      }
-    }
-    else {
-      file.Write(false);
-    }
-  }
-
-  file.Write(period , nb_variable);
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Calcul de la distance maximum pour chaque symbole
  *
  *  argument : indice de la variable.
@@ -1232,7 +1026,7 @@ double* Vector_distance::max_symbol_distance_computation(int variable) const
 
 {
   register int i , j;
-  double *max_symbol_distance = 0;
+  double *max_symbol_distance = NULL;
 
 
   if ((variable_type[variable] == SYMBOLIC) && (symbol_distance[variable])) {
