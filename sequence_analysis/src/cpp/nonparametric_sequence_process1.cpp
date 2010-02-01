@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -123,7 +123,7 @@ void Nonparametric_sequence_process::create_characteristic(const Distribution &i
       sojourn_time[i] = new Parametric(NB_VALUE);
     }
     else {
-      sojourn_time[i] = 0;
+      sojourn_time[i] = NULL;
       homogeneous = false;
     }
   }
@@ -320,16 +320,16 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , i
 :Nonparametric_process(inb_state , inb_value , observation_flag)
 
 {
-  length = 0;
-  index_value = 0;
-  no_occurrence = 0;
-  first_occurrence = 0;
-  leave = 0;
-  recurrence_time = 0;
-  absorption = 0;
-  sojourn_time = 0;
-  nb_run = 0;
-  nb_occurrence = 0;
+  length = NULL;
+  index_value = NULL;
+  no_occurrence = NULL;
+  first_occurrence = NULL;
+  leave = NULL;
+  recurrence_time = NULL;
+  absorption = NULL;
+  sojourn_time = NULL;
+  nb_run = NULL;
+  nb_occurrence = NULL;
 }
 
 
@@ -350,14 +350,14 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , P
   nb_state = inb_state;
   nb_value = inb_state;
 
-  observation = 0;
+  observation = NULL;
 
-  length = 0;
-  index_value = 0;
-  no_occurrence = 0;
-  first_occurrence = 0;
-  leave = 0;
-  recurrence_time = 0;
+  length = NULL;
+  index_value = NULL;
+  no_occurrence = NULL;
+  first_occurrence = NULL;
+  leave = NULL;
+  recurrence_time = NULL;
 
   absorption = new double[nb_state];
   sojourn_time = new Parametric*[nb_state];
@@ -366,12 +366,12 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , P
       sojourn_time[i] = new Parametric(*occupancy[i]);
     }
     else {
-      sojourn_time[i] = 0;
+      sojourn_time[i] = NULL;
     }
   }
 
-  nb_run = 0;
-  nb_occurrence = 0;
+  nb_run = NULL;
+  nb_occurrence = NULL;
 }
 
 
@@ -388,16 +388,16 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(const Nonparametr
 :Nonparametric_process(process)
 
 {
-  length = 0;
-  index_value = 0;
-  no_occurrence = 0;
-  first_occurrence = 0;
-  leave = 0;
-  recurrence_time = 0;
-  absorption = 0;
-  sojourn_time = 0;
-  nb_run = 0;
-  nb_occurrence = 0;
+  length = NULL;
+  index_value = NULL;
+  no_occurrence = NULL;
+  first_occurrence = NULL;
+  leave = NULL;
+  recurrence_time = NULL;
+  absorption = NULL;
+  sojourn_time = NULL;
+  nb_run = NULL;
+  nb_occurrence = NULL;
 }
 
 
@@ -422,14 +422,14 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
       length = new Distribution(*(process.length));
     }
     else {
-      length = 0;
+      length = NULL;
     }
 
     if (process.index_value) {
       index_value = new Curves(*(process.index_value));
     }
     else {
-      index_value = 0;
+      index_value = NULL;
     }
 
     if (process.no_occurrence) {
@@ -439,7 +439,7 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
       }
     }
     else {
-      no_occurrence = 0;
+      no_occurrence = NULL;
     }
 
     if (process.first_occurrence) {
@@ -449,7 +449,7 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
       }
     }
     else {
-      first_occurrence = 0;
+      first_occurrence = NULL;
     }
 
     if (process.leave) {
@@ -459,7 +459,7 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
       }
     }
     else {
-      leave = 0;
+      leave = NULL;
     }
 
     if (process.recurrence_time) {
@@ -469,12 +469,12 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
           recurrence_time[i] = new Distribution(*(process.recurrence_time[i]));
         }
         else {
-          recurrence_time[i] = 0;
+          recurrence_time[i] = NULL;
         }
       }
     }
     else {
-      recurrence_time = 0;
+      recurrence_time = NULL;
     }
 
     if (process.absorption) {
@@ -484,7 +484,7 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
       }
     }
     else {
-      absorption = 0;
+      absorption = NULL;
     }
 
     if (process.sojourn_time) {
@@ -494,12 +494,12 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
           sojourn_time[i] = new Parametric(*(process.sojourn_time[i]));
         }
         else {
-          sojourn_time[i] = 0;
+          sojourn_time[i] = NULL;
         }
       }
     }
     else {
-      sojourn_time = 0;
+      sojourn_time = NULL;
     }
 
     if (process.nb_run) {
@@ -509,7 +509,7 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
       }
     }
     else {
-      nb_run = 0;
+      nb_run = NULL;
     }
 
     if (process.nb_occurrence) {
@@ -519,21 +519,21 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
       }
     }
     else {
-      nb_occurrence = 0;
+      nb_occurrence = NULL;
     }
   }
 
   else {
-    length = 0;
-    index_value = 0;
-    no_occurrence = 0;
-    first_occurrence = 0;
-    leave = 0;
-    recurrence_time = 0;
-    absorption = 0;
-    sojourn_time = 0;
-    nb_run = 0;
-    nb_occurrence = 0;
+    length = NULL;
+    index_value = NULL;
+    no_occurrence = NULL;
+    first_occurrence = NULL;
+    leave = NULL;
+    recurrence_time = NULL;
+    absorption = NULL;
+    sojourn_time = NULL;
+    nb_run = NULL;
+    nb_occurrence = NULL;
   }
 }
 
@@ -557,14 +557,14 @@ void Nonparametric_sequence_process::init_occupancy(const Nonparametric_sequence
   nb_state = process.nb_state;
   nb_value = process.nb_value;
 
-  observation = 0;
+  observation = NULL;
 
-  length = 0;
-  index_value = 0;
-  no_occurrence = 0;
-  first_occurrence = 0;
-  leave = 0;
-  recurrence_time = 0;
+  length = NULL;
+  index_value = NULL;
+  no_occurrence = NULL;
+  first_occurrence = NULL;
+  leave = NULL;
+  recurrence_time = NULL;
 
   absorption = new double[nb_value];
   sojourn_time = new Parametric*[nb_value];
@@ -574,12 +574,12 @@ void Nonparametric_sequence_process::init_occupancy(const Nonparametric_sequence
       sojourn_time[i] = new Parametric(*(process.sojourn_time[i]) , 'c' , occupancy_nb_value);
     }
     else {
-      sojourn_time[i] = 0;
+      sojourn_time[i] = NULL;
     }
   }
 
-  nb_run = 0;
-  nb_occurrence = 0;
+  nb_run = NULL;
+  nb_occurrence = NULL;
 }
 
 
@@ -615,16 +615,16 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(const Nonparametr
   case 's' : {
     add_state(process , param);
 
-    length = 0;
-    index_value = 0;
-    no_occurrence = 0;
-    first_occurrence = 0;
-    leave = 0;
-    recurrence_time = 0;
-    absorption = 0;
-    sojourn_time = 0;
-    nb_run = 0;
-    nb_occurrence = 0;
+    length = NULL;
+    index_value = NULL;
+    no_occurrence = NULL;
+    first_occurrence = NULL;
+    leave = NULL;
+    recurrence_time = NULL;
+    absorption = NULL;
+    sojourn_time = NULL;
+    nb_run = NULL;
+    nb_occurrence = NULL;
     break;
   }
   }
@@ -646,19 +646,19 @@ void Nonparametric_sequence_process::remove()
   if (length) {
     delete length;
 
-    length = 0;
+    length = NULL;
   }
 
   if (index_value) {
     delete index_value;
 
-    index_value = 0;
+    index_value = NULL;
   }
 
   if (no_occurrence) {
     delete [] no_occurrence;
 
-    no_occurrence = 0;
+    no_occurrence = NULL;
   }
 
   if (first_occurrence) {
@@ -667,13 +667,13 @@ void Nonparametric_sequence_process::remove()
     }
     delete [] first_occurrence;
 
-    first_occurrence = 0;
+    first_occurrence = NULL;
   }
 
   if (leave) {
     delete [] leave;
 
-    leave = 0;
+    leave = NULL;
   }
 
   if (recurrence_time) {
@@ -682,13 +682,13 @@ void Nonparametric_sequence_process::remove()
     }
     delete [] recurrence_time;
 
-    recurrence_time = 0;
+    recurrence_time = NULL;
   }
 
   if (absorption) {
     delete [] absorption;
 
-    absorption = 0;
+    absorption = NULL;
   }
 
   if (sojourn_time) {
@@ -697,7 +697,7 @@ void Nonparametric_sequence_process::remove()
     }
     delete [] sojourn_time;
 
-    sojourn_time = 0;
+    sojourn_time = NULL;
   }
 
   if (nb_run) {
@@ -706,7 +706,7 @@ void Nonparametric_sequence_process::remove()
     }
     delete [] nb_run;
 
-    nb_run = 0;
+    nb_run = NULL;
   }
 
   if (nb_occurrence) {
@@ -715,7 +715,7 @@ void Nonparametric_sequence_process::remove()
     }
     delete [] nb_occurrence;
 
-    nb_occurrence = 0;
+    nb_occurrence = NULL;
   }
 }
 
@@ -814,11 +814,11 @@ Nonparametric_sequence_process* occupancy_parsing(Format_error &error , ifstream
   Nonparametric_sequence_process *process;
 
 
-  process = 0;
+  process = NULL;
 
   dist = new Parametric*[chain.nb_state];
   for (i = 0;i < chain.nb_state;i++) {
-    dist[i] = 0;
+    dist[i] = NULL;
   }
 
   for (i = 0;i < chain.nb_state;i++) {
@@ -894,7 +894,7 @@ Nonparametric_sequence_process* occupancy_parsing(Format_error &error , ifstream
 
           else if (dist[i]->mean == 1.) {
             delete dist[i];
-            dist[i] = 0;
+            dist[i] = NULL;
           }
           break;
         }
