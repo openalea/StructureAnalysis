@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -544,7 +544,7 @@ void Variable_order_markov::characteristic_computation(int length , bool countin
     Parametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
 
-    memory = 0;
+    memory = NULL;
 
     // calcul des lois de type intensite et intervalle au niveau etat
 
@@ -589,7 +589,7 @@ void Variable_order_markov::characteristic_computation(int length , bool countin
         else {
           nonparametric_process[0]->absorption[i] = 1.;
           delete nonparametric_process[0]->sojourn_time[i];
-          nonparametric_process[0]->sojourn_time[i] = 0;
+          nonparametric_process[0]->sojourn_time[i] = NULL;
         }
       }
 
@@ -661,7 +661,7 @@ void Variable_order_markov::characteristic_computation(int length , bool countin
           }
           else {
             delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = 0;
+            nonparametric_process[i]->first_occurrence[j] = NULL;
             nonparametric_process[i]->leave[j] = 1.;
           }
 
@@ -673,7 +673,7 @@ void Variable_order_markov::characteristic_computation(int length , bool countin
           }
           else {
             delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = 0;
+            nonparametric_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
@@ -689,7 +689,7 @@ void Variable_order_markov::characteristic_computation(int length , bool countin
           else {
             nonparametric_process[i]->absorption[j] = 1.;
             delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = 0;
+            nonparametric_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
@@ -751,7 +751,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
     Distribution dlength(*(seq.hlength));
 
 
-    memory = 0;
+    memory = NULL;
 
     // calcul des lois caracteristiques au niveau etat
 
@@ -812,7 +812,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
         else {
           nonparametric_process[0]->absorption[i] = 1.;
           delete nonparametric_process[0]->sojourn_time[i];
-          nonparametric_process[0]->sojourn_time[i] = 0;
+          nonparametric_process[0]->sojourn_time[i] = NULL;
         }
       }
 
@@ -893,7 +893,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
           }
           else {
             delete nonparametric_process[i]->first_occurrence[j];
-            nonparametric_process[i]->first_occurrence[j] = 0;
+            nonparametric_process[i]->first_occurrence[j] = NULL;
             nonparametric_process[i]->leave[j] = 1.;
           }
 
@@ -905,7 +905,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
           }
           else {
             delete nonparametric_process[i]->recurrence_time[j];
-            nonparametric_process[i]->recurrence_time[j] = 0;
+            nonparametric_process[i]->recurrence_time[j] = NULL;
           }
 
           for (k = 0;k < nb_state;k++) {
@@ -921,7 +921,7 @@ void Variable_order_markov::characteristic_computation(const Variable_order_mark
           else {
             nonparametric_process[i]->absorption[j] = 1.;
             delete nonparametric_process[i]->sojourn_time[j];
-            nonparametric_process[i]->sojourn_time[j] = 0;
+            nonparametric_process[i]->sojourn_time[j] = NULL;
           }
         }
       }
