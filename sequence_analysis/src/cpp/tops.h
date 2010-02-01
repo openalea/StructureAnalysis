@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -120,16 +120,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Top_parameters);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     void axillary_nb_internode_computation(int imax_position);
 
@@ -208,16 +200,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Tops);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     void build_nb_internode_histogram();
 
