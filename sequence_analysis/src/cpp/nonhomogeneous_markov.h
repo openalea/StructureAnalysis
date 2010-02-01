@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id: markov.h 3257 2007-06-06 12:56:12Z dufourko $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -86,8 +86,8 @@ private :
     void remove();
 
     std::ostream& ascii_print(std::ostream &os , bool exhaustive , bool file_flag ,
-                              const Curves *curves = 0) const;
-    std::ostream& spreadsheet_print(std::ostream &os , const Curves *curves = 0) const;
+                              const Curves *curves = NULL) const;
+    std::ostream& spreadsheet_print(std::ostream &os , const Curves *curves = NULL) const;
     bool plot_print(const char *path , double residual_standard_deviation = D_DEFAULT) const;
 
     double regression_square_sum_computation(double self_transition_mean) const;
@@ -104,12 +104,6 @@ public :
     Function(const Function &function);
     ~Function();
     Function& operator=(const Function &function);
-
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     // acces membres de la classe
 
@@ -151,6 +145,7 @@ protected :
     std::ostream& spreadsheet_write(std::ostream &os , const Nonhomogeneous_markov_data *seq) const;
     bool plot_write(const char *prefix , const char *title ,
                     const Nonhomogeneous_markov_data *seq) const;
+    MultiPlotSet* get_plotable(const Nonhomogeneous_markov_data *seq) const;
 
     int nb_parameter_computation() const;
 
@@ -181,15 +176,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
-
-/*    RWDECLARE_COLLECTABLE(Nonhomogeneous_markov);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag);
     void characteristic_computation(const Nonhomogeneous_markov_data &seq , bool counting_flag ,
@@ -256,15 +244,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
-
-/*    RWDECLARE_COLLECTABLE(Nonhomogeneous_markov_data);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
+                    const char *title = NULL) const;
+    MultiPlotSet* get_plotable() const;
 
     void build_transition_count();
 
