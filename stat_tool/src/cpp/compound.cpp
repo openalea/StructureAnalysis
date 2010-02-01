@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -39,8 +39,7 @@
 #include <sstream>
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tools.h"
 #include "distribution.h"
 #include "compound.h"
@@ -62,9 +61,9 @@ extern char* label(const char *file_name);
 Compound::Compound()
 
 {
-  compound_data = 0;
-  sum_distribution = 0;
-  distribution = 0;
+  compound_data = NULL;
+  sum_distribution = NULL;
+  distribution = NULL;
 }
 
 
@@ -81,7 +80,7 @@ Compound::Compound(const Parametric &sum_dist , const Parametric &dist ,
                    double cumul_threshold)
 
 {
-  compound_data = 0;
+  compound_data = NULL;
 
   sum_distribution = new Parametric(sum_dist , 'n');
   distribution = new Parametric(dist , 'n');
@@ -104,7 +103,7 @@ Compound::Compound(const Parametric &sum_dist , const Parametric &dist ,
 Compound::Compound(const Parametric &sum_dist , const Parametric &dist , char type)
 
 {
-  compound_data = 0;
+  compound_data = NULL;
 
   switch (type) {
 
@@ -147,7 +146,7 @@ void Compound::copy(const Compound &compound , bool data_flag)
     compound_data = new Compound_data(*(compound.compound_data) , false);
   }
   else {
-    compound_data = 0;
+    compound_data = NULL;
   }
 
   sum_distribution = new Parametric(*(compound.sum_distribution));
@@ -216,7 +215,7 @@ Compound_data* Compound::extract_data(Format_error &error) const
   error.init();
 
   if (!compound_data) {
-    compound_histo = 0;
+    compound_histo = NULL;
     error.update(STAT_error[STATR_NO_DATA]);
   }
 
@@ -253,7 +252,7 @@ Compound* compound_ascii_read(Format_error &error , const char *path ,
   ifstream in_file(path);
 
 
-  compound = 0;
+  compound = NULL;
   error.init();
 
   if (!in_file) {
@@ -265,8 +264,8 @@ Compound* compound_ascii_read(Format_error &error , const char *path ,
     line = 0;
     read_line = 0;
 
-    sum_dist = 0;
-    dist = 0;
+    sum_dist = NULL;
+    dist = NULL;
 
     while (buffer.readLine(in_file , false)) {
       line++;
@@ -1187,107 +1186,6 @@ MultiPlotSet* Compound::get_plotable() const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Compound , STATI_COMPOUND);
-
-
-RWspace Compound::binaryStoreSize() const
-
-{
-  RWspace size = Distribution::binaryStoreSize() +
-                 sum_distribution->binaryStoreSize() + distribution->binaryStoreSize();
-
-  if (compound_data) {
-    size += compound_data->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Compound::restoreGuts(RWvistream &is)
-
-{
-  delete compound_data;
-
-  delete sum_distribution;
-  delete distribution;
-
-  Distribution::restoreGuts(is);
-
-  sum_distribution = new Parametric();
-  sum_distribution->restoreGuts(is);
-  distribution = new Parametric();
-  distribution->restoreGuts(is);
-
-  is >> compound_data;
-  if (compound_data == RWnilCollectable) {
-    compound_data = 0;
-  }
-}
-
-
-void Compound::restoreGuts(RWFile &file)
-
-{
-  delete compound_data;
-
-  delete sum_distribution;
-  delete distribution;
-
-  Distribution::restoreGuts(file);
-
-  sum_distribution = new Parametric();
-  sum_distribution->restoreGuts(file);
-  distribution = new Parametric();
-  distribution->restoreGuts(file);
-
-  file >> compound_data;
-  if (compound_data == RWnilCollectable) {
-    compound_data = 0;
-  }
-}
-
-
-void Compound::saveGuts(RWvostream &os) const
-
-{
-  Distribution::saveGuts(os);
-
-  sum_distribution->saveGuts(os);
-  distribution->saveGuts(os);
-
-  if (compound_data) {
-    os << compound_data;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Compound::saveGuts(RWFile &file) const
-
-{
-  Distribution::saveGuts(file);
-
-  sum_distribution->saveGuts(file);
-  distribution->saveGuts(file);
-
-  if (compound_data) {
-    file << compound_data;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur par defaut de la classe Compound_data.
  *
  *--------------------------------------------------------------*/
@@ -1295,9 +1193,9 @@ void Compound::saveGuts(RWFile &file) const
 Compound_data::Compound_data()
 
 {
-  compound = 0;
-  sum_histogram = 0;
-  histogram = 0;
+  compound = NULL;
+  sum_histogram = NULL;
+  histogram = NULL;
 }
 
 
@@ -1314,7 +1212,7 @@ Compound_data::Compound_data(const Histogram &histo , const Compound &icompound)
 :Histogram(histo)
 
 {
-  compound = 0;
+  compound = NULL;
 
   sum_histogram = new Histogram(icompound.sum_distribution->alloc_nb_value);
   histogram = new Histogram(icompound.distribution->alloc_nb_value);
@@ -1333,7 +1231,7 @@ Compound_data::Compound_data(const Compound &icompound)
 :Histogram(icompound)
 
 {
-  compound = 0;
+  compound = NULL;
 
   sum_histogram = new Histogram(*(icompound.sum_distribution));
   histogram = new Histogram(*(icompound.distribution));
@@ -1356,7 +1254,7 @@ void Compound_data::copy(const Compound_data &compound_histo , bool model_flag)
     compound = new Compound(*(compound_histo.compound) , false);
   }
   else {
-    compound = 0;
+    compound = NULL;
   }
 
   sum_histogram = new Histogram(*(compound_histo.sum_histogram));
@@ -1433,7 +1331,7 @@ Distribution_data* Compound_data::extract(Format_error &error , char type) const
 
   case 'e' : {
     if (histogram->nb_element == 0) {
-      phisto = 0;
+      phisto = NULL;
       error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
     }
 
@@ -1607,109 +1505,8 @@ MultiPlotSet* Compound_data::get_plotable() const
     plot_set = compound->get_plotable(this);
   }
   else {
-    plot_set = 0;
+    plot_set = NULL;
   }
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Compound_data , STATI_COMPOUND_DATA);
-
-
-RWspace Compound_data::binaryStoreSize() const
-
-{
-  RWspace size = Histogram::binaryStoreSize() +
-                 sum_histogram->binaryStoreSize() + histogram->binaryStoreSize();
-
-  if (compound) {
-    size += compound->recursiveStoreSize();
-  }
-
-  return size;
-}
-
-
-void Compound_data::restoreGuts(RWvistream &is)
-
-{
-  delete compound;
-
-  delete sum_histogram;
-  delete histogram;
-
-  Histogram::restoreGuts(is);
-
-  sum_histogram = new Histogram();
-  sum_histogram->restoreGuts(is);
-  histogram = new Histogram();
-  histogram->restoreGuts(is);
-
-  is >> compound;
-  if (compound == RWnilCollectable) {
-    compound = 0;
-  }
-}
-
-
-void Compound_data::restoreGuts(RWFile &file)
-
-{
-  delete compound;
-
-  delete sum_histogram;
-  delete histogram;
-
-  Histogram::restoreGuts(file);
-
-  sum_histogram = new Histogram();
-  sum_histogram->restoreGuts(file);
-  histogram = new Histogram();
-  histogram->restoreGuts(file);
-
-  file >> compound;
-  if (compound == RWnilCollectable) {
-    compound = 0;
-  }
-}
-
-
-void Compound_data::saveGuts(RWvostream &os) const
-
-{
-  Histogram::saveGuts(os);
-
-  sum_histogram->saveGuts(os);
-  histogram->saveGuts(os);
-
-  if (compound) {
-    os << compound;
-  }
-  else {
-    os << RWnilCollectable;
-  }
-}
-
-
-void Compound_data::saveGuts(RWFile &file) const
-
-{
-  Histogram::saveGuts(file);
-
-  sum_histogram->saveGuts(file);
-  histogram->saveGuts(file);
-
-  if (compound) {
-    file << compound;
-  }
-  else {
-    file << RWnilCollectable;
-  }
-} */
