@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -42,8 +42,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
@@ -86,7 +85,7 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path , bool ol
   ifstream in_file(path);
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if (!in_file) {
@@ -96,8 +95,8 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path , bool ol
   else {
     status = true;
     line = 0;
-    type = 0;
-    length = 0;
+    type = NULL;
+    length = NULL;
 
     // 1ere passe : analyse de la ligne definissant le parametre d'index et
     // de la ligne definissant le nombre de variables
@@ -1629,9 +1628,11 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
 
           out_file << "plot [0:" << MAX(marginal[k]->nb_value - 1 , 1) << "] [0:"
                    << (int)(marginal[k]->max * YSCALE) + 1 << "] \""
-                   << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
-                   << STAT_label[STATL_VARIABLE] << " " << k + 1 << " - "
-                   << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
+                   << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \"";
+          if (nb_variable > 1) {
+            out_file << STAT_label[STATL_VARIABLE] << " " << k + 1 << " - ";
+          }
+          out_file << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
                    << "\" with impulses" << endl;
 
           if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1677,6 +1678,154 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
   }
 
   return status;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Sequences.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Sequences::get_plotable() const
+
+{
+  register int i , j;
+  int nb_plot_set;
+  ostringstream legend;
+  MultiPlotSet *plot_set;
+
+
+  nb_plot_set = 1;
+  if (hindex_parameter) {
+    nb_plot_set++;
+  }
+  if (index_interval) {
+    nb_plot_set++;
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    if (marginal[i]) {
+      nb_plot_set++;
+    }
+  }
+
+  plot_set = new MultiPlotSet(nb_plot_set);
+
+  MultiPlotSet &plot = *plot_set;
+
+  plot.border = "15 lw 0";
+
+  i = 0;
+
+  if (hindex_parameter) {
+
+    // vue : histogramme des parametres d'index
+
+    plot[i].xrange = Range(hindex_parameter->offset , hindex_parameter->nb_value - 1);
+    plot[i].yrange = Range(0 , ceil(hindex_parameter->max * YSCALE));
+
+    if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+      plot[i].xtics = 1;
+    }
+    if (ceil(hindex_parameter->max * YSCALE) < TIC_THRESHOLD) {
+      plot[i].ytics = 1;
+    }
+
+    plot[i].resize(1);
+
+    legend.str("");
+    legend << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
+           << " " << STAT_label[STATL_HISTOGRAM];
+    plot[i][0].legend = legend.str();
+
+    plot[i][0].style = "impulses";
+
+    hindex_parameter->plotable_frequency_write(plot[i][0]);
+    i++;
+  }
+
+  if (index_interval) {
+
+    // vue : histogramme des intervalles entre parametres d'index successifs
+
+    plot[i].xrange = Range(0 , index_interval->nb_value - 1);
+    plot[i].yrange = Range(0 , ceil(index_interval->max * YSCALE));
+
+    if (index_interval->nb_value - 1 < TIC_THRESHOLD) {
+      plot[i].xtics = 1;
+    }
+    if (ceil(index_interval->max * YSCALE) < TIC_THRESHOLD) {
+      plot[i].ytics = 1;
+    }
+
+    plot[i].resize(1);
+
+    legend.str("");
+    legend << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
+           << " " << STAT_label[STATL_HISTOGRAM];
+    plot[i][0].legend = legend.str();
+
+    plot[i][0].style = "impulses";
+
+    index_interval->plotable_frequency_write(plot[i][0]);
+    i++;
+  }
+
+  for (j = 0;j < nb_variable;j++) {
+    if (marginal[j]) {
+
+      // vue : loi marginale empirique
+
+      plot[i].xrange = Range(0 , MAX(marginal[j]->nb_value - 1 , 1));
+      plot[i].yrange = Range(0 , ceil(marginal[j]->max * YSCALE));
+
+      if (marginal[j]->nb_value - 1 < TIC_THRESHOLD) {
+        plot[i].xtics = 1;
+      }
+      if (ceil(marginal[j]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(1);
+
+      legend.str("");
+      if (nb_variable > 1) {
+        legend << STAT_label[STATL_VARIABLE] << " " << j + 1 << " - ";
+      }
+      legend << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][0].legend = legend.str();
+
+      plot[i][0].style = "impulses";
+
+      marginal[j]->plotable_frequency_write(plot[i][0]);
+      i++;
+    }
+  }
+
+  // vue : histogramme des longueurs des sequences
+
+  plot[i].xrange = Range(0 , hlength->nb_value - 1);
+  plot[i].yrange = Range(0 , ceil(hlength->max * YSCALE));
+
+  if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+    plot[i].xtics = 1;
+  }
+  if (ceil(hlength->max * YSCALE) < TIC_THRESHOLD) {
+    plot[i].ytics = 1;
+  }
+
+  plot[i].resize(1);
+
+  legend.str("");
+  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+  plot[i][0].legend = legend.str();
+
+  plot[i][0].style = "impulses";
+
+  hlength->plotable_frequency_write(plot[i][0]);
+
+  return plot_set;
 }
 
 
@@ -1845,19 +1994,19 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
                        << length_nb_sequence[length[k]] * (nb_variable + 1) + j + 2;
-              if (nb_sequence <= PLOT_TITLE_NB_SEQUENCE) {
+              if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
                 out_file << " title \"" << identifier[k] << "\" with linespoints";
               }
               else {
                 out_file << " notitle with linespoints";
               }
 
-              if (type[j + 1] == AUXILIARY) {
+              if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
                 out_file << ",\\" << endl;
                 out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                          << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
                          << length_nb_sequence[length[k]] * (nb_variable + 1) + j + 3;
-                if (nb_sequence <= PLOT_TITLE_NB_SEQUENCE) {
+                if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
                   out_file << " title \"" << identifier[k] << "\" with linespoints";
                 }
                 else {
@@ -1893,18 +2042,18 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * nb_variable + j + 1;
-              if (nb_sequence <= PLOT_TITLE_NB_SEQUENCE) {
+              if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
                 out_file << " title \"" << identifier[k] << "\" with linespoints";
               }
               else {
                 out_file << " notitle with linespoints";
               }
 
-              if (type[j + 1] == AUXILIARY) {
+              if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
                 out_file << ",\\" << endl;
                 out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                          << length_nb_sequence[length[k]] * nb_variable + j + 2;
-                if (nb_sequence <= PLOT_TITLE_NB_SEQUENCE) {
+                if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
                   out_file << " title \"" << identifier[k] << "\" with linespoints";
                 }
                 else {
@@ -1927,7 +2076,7 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
             }
           }
 
-          if (type[j + 1] == AUXILIARY) {
+          if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
             j++;
           }
 
@@ -1957,299 +2106,166 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Sequences.
+ *
+ *  argument : reference sur un objet Format_error.
  *
  *--------------------------------------------------------------*/
 
-/* RWDEFINE_COLLECTABLE(Sequences , STATI_SEQUENCES);
-
-
-RWspace Sequences::binaryStoreSize() const
+MultiPlotSet* Sequences::get_plotable_data(Format_error &error) const
 
 {
-  register int i , j;
-  RWspace size;
+  register int i , j , k , m , n;
+  int nb_plot_set , min_index_parameter , max_index_parameter;
+  ostringstream title , legend;
+  MultiPlotSet *plot_set;
 
 
-  size = sizeof(nb_variable) + sizeof(type) * nb_variable + sizeof(min_value) * nb_variable +
-         sizeof(max_value) * nb_variable;
-  for (i = 0;i < nb_variable;i++) {
-    size += sizeof(true);
-    if (marginal[i]) {
-      size += marginal[i]->binaryStoreSize();
-    }
+  error.init();
+
+  if (nb_sequence > PLOT_NB_SEQUENCE) {
+    plot_set = NULL;
+    error.update(SEQ_error[SEQR_NB_SEQUENCE]);
   }
 
-  size += sizeof(nb_sequence) + sizeof(*identifier) * nb_sequence + sizeof(max_length) +
-          sizeof(cumul_length) + sizeof(*length) * nb_sequence + hlength->binaryStoreSize();
-
-  size += sizeof(true);
-  if (index_interval) {
-    size += index_interval->binaryStoreSize();
-  }
-
-  for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < nb_variable;j++) {
-      size += sizeof(***sequence) * (type[j] == POSITION ? length[i] + 1 : length[i]);
-    }
-  }
-
-  return size;
-}
-
-
-void Sequences::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i , j , k;
-  int blength , *psequence;
-
-
-  remove();
-
-  is >> nb_variable;
-
-  type = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> type[i];
-  }
-
-  min_value = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> min_value[i];
-  }
-  max_value = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> max_value[i];
-  }
-
-  marginal = new Histogram*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> status;
-    if (status) {
-      marginal[i] = new Histogram();
-      marginal[i]->restoreGuts(is);
-    }
-    else {
-      marginal[i] = 0;
-    }
-  }
-
-  is >> nb_sequence;
-
-  identifier = new int[nb_sequence];
-  for (i = 0;i < nb_sequence;i++) {
-    is >> identifier[i];
-  }
-
-  is >> max_length >> cumul_length;
-
-  length = new int[nb_sequence];
-  for (i = 0;i < nb_sequence;i++) {
-    is >> length[i];
-  }
-
-  hlength = new Histogram();
-  hlength->restoreGuts(is);
-
-  is >> status;
-  if (status) {
-    index_interval = new Histogram();
-    index_interval->restoreGuts(is);
-  }
   else {
-    index_interval = 0;
-  }
+    nb_plot_set = 0;
+    for (i = 0;i < nb_variable;i++) {
+      if (type[i] != AUXILIARY) {
+        nb_plot_set++;
+      }
+    }
 
-  sequence = new int**[nb_sequence];
-  for (i = 0;i < nb_sequence;i++) {
-    int_sequence[i] = new int*[nb_variable];
+    plot_set = new MultiPlotSet(nb_plot_set);
+
+    MultiPlotSet &plot = *plot_set;
+
+    plot.border = "15 lw 0";
+
+    if (index_parameter) {
+      min_index_parameter = hindex_parameter->offset;
+      max_index_parameter = max_index_parameter_computation(true);
+    }
+
+    i = 0;
     for (j = 0;j < nb_variable;j++) {
-      blength = (type[j] == POSITION ? length[i] + 1 : length[i]);
-      int_sequence[i][j] = new int[blength];
-      psequence = int_sequence[i][j];
-      for (k = 0;k < blength;k++) {
-        is >> *psequence++;
+      if (type[j] != AUXILIARY) {
+        if (nb_variable > 1) {
+          title.str("");
+          title << STAT_label[STATL_VARIABLE] << " " << i + 1;
+          plot[i].title = title.str();
+        }
+
+        plot[i].yrange = Range(MIN(min_value[j] , 0) , MAX(max_value[j] , min_value[j] + 1));
+        if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
+          plot[i].ytics = 1;
+        }
+
+        if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
+          plot[i].resize(nb_sequence * 2);
+        }
+        else {
+          plot[i].resize(nb_sequence);
+        }
+
+        if (index_parameter) {
+          plot[i].xrange = Range(min_index_parameter , max_index_parameter);
+          if (max_index_parameter - min_index_parameter < TIC_THRESHOLD) {
+            plot[i].xtics = 1;
+          }
+
+          k = 0;
+          for (m = 0;m < nb_sequence;m++) {
+            plot[i][k].style = "linespoints";
+
+            if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
+              legend.str("");
+              legend << identifier[m];
+              plot[i][k].legend = legend.str();
+            }
+
+            if (type[j] != REAL_VALUE) {
+              for (n = 0;n < length[m];n++) {
+                plot[i][k].add_point(index_parameter[m][n] , int_sequence[m][j][n]);
+              }
+            }
+
+            else {
+              for (n = 0;n < length[m];n++) {
+                plot[i][k].add_point(index_parameter[m][n] , real_sequence[m][j][n]);
+              }
+            }
+            k++;
+
+            if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
+              plot[i][k].style = "lines";
+
+              if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
+                legend.str("");
+                legend << identifier[m];
+                plot[i][k].legend = legend.str();
+              }
+
+              for (n = 0;n < length[m];n++) {
+                plot[i][k].add_point(index_parameter[m][n] , real_sequence[m][j + 1][n]);
+              }
+
+              k++;
+            }
+          }
+        }
+
+        else {
+          plot[i].xrange = Range(0 , max_length - 1);
+          if (max_length - 1 < TIC_THRESHOLD) {
+            plot[i].xtics = 1;
+          }
+
+          k = 0;
+          for (m = 0;m < nb_sequence;m++) {
+            plot[i][k].style = "linespoints";
+
+            if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
+              legend.str("");
+              legend << identifier[m];
+              plot[i][k].legend = legend.str();
+            }
+
+            if (type[j] != REAL_VALUE) {
+              for (n = 0;n < length[m];n++) {
+                plot[i][k].add_point(n , int_sequence[m][j][n]);
+              }
+            }
+
+            else {
+              for (n = 0;n < length[m];n++) {
+                plot[i][k].add_point(n , real_sequence[m][j][n]);
+              }
+            }
+            k++;
+
+            if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
+              plot[i][k].style = "lines";
+
+              if (nb_sequence <= PLOT_LEGEND_NB_SEQUENCE) {
+                legend.str("");
+                legend << identifier[m];
+                plot[i][k].legend = legend.str();
+              }
+
+              for (n = 0;n < length[m];n++) {
+                plot[i][k].add_point(n , real_sequence[m][j + 1][n]);
+              }
+
+              k++;
+            }
+          }
+        }
+
+        i++;
       }
     }
   }
+
+  return plot_set;
 }
-
-
-void Sequences::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i , j;
-  int blength;
-
-
-  remove();
-
-  file.Read(nb_variable);
-
-  type = new int[nb_variable];
-  file.Read(type , nb_variable);
-
-  min_value = new int[nb_variable];
-  file.Read(min_value , nb_variable);
-  max_value = new int[nb_variable];
-  file.Read(max_value , nb_variable);
-
-  marginal = new Histogram*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    file.Read(status);
-    if (status) {
-      marginal[i] = new Histogram();
-      marginal[i]->restoreGuts(file);
-    }
-    else {
-      marginal[i] = 0;
-    }
-  }
-
-  file.Read(nb_sequence);
-
-  identifier = new int[nb_sequence];
-  file.Read(identifier , nb_sequence);
-
-  file.Read(max_length);
-  file.Read(cumul_length);
-
-  length = new int[nb_sequence];
-  file.Read(length , nb_sequence);
-
-  hlength = new Histogram();
-  hlength->restoreGuts(file);
-
-  file.Read(status);
-  if (status) {
-    index_interval = new Histogram();
-    index_interval->restoreGuts(file);
-  }
-  else {
-    index_interval = 0;
-  }
-
-  sequence = new int**[nb_sequence];
-  for (i = 0;i < nb_sequence;i++) {
-    int_sequence[i] = new int*[nb_variable];
-    for (j = 0;j < nb_variable;j++) {
-      blength = (type[j] == POSITION ? length[i] + 1 : length[i]);
-      int_sequence[i][j] = new int[blength];
-      file.Read(int_sequence[i][j] , blength);
-    }
-  }
-}
-
-
-void Sequences::saveGuts(RWvostream &os) const
-
-{
-  register int i , j , k;
-  int *psequence;
-
-
-  os << nb_variable;
-
-  for (i = 0;i < nb_variable;i++) {
-    os << type[i];
-  }
-
-  for (i = 0;i < nb_variable;i++) {
-    os << min_value[i];
-  }
-  for (i = 0;i < nb_variable;i++) {
-    os << max_value[i];
-  }
-
-  for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]) {
-      os << true;
-      marginal[i]->saveGuts(os);
-    }
-    else {
-      os << false;
-    }
-  }
-
-  os << nb_sequence;
-
-  for (i = 0;i < nb_sequence;i++) {
-    os << identifier[i];
-  }
-
-  os << max_length << cumul_length;
-
-  for (i = 0;i < nb_sequence;i++) {
-    os << length[i];
-  }
-  hlength->saveGuts(os);
-
-  if (index_interval) {
-    os << true;
-    index_interval->saveGuts(os);
-  }
-  else {
-    os << false;
-  }
-
-  for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < nb_variable;j++) {
-      psequence = int_sequence[i][j];
-      for (k = 0;k < (type[j] == POSITION ? length[i] + 1 : length[i]);k++) {
-        os << *psequence++;
-      }
-    }
-  }
-}
-
-
-void Sequences::saveGuts(RWFile &file) const
-
-{
-  register int i , j;
-
-
-  file.Write(nb_variable);
-
-  file.Write(type , nb_variable);
-
-  file.Write(min_value , nb_variable);
-  file.Write(max_value , nb_variable);
-
-  for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]) {
-      file.Write(true);
-      marginal[i]->saveGuts(file);
-    }
-    else {
-      file.Write(false);
-    }
-  }
-
-  file.Write(nb_sequence);
-
-  file.Write(identifier , nb_sequence);
-
-  file.Write(max_length);
-  file.Write(cumul_length);
-
-  file.Write(length , nb_sequence);
-  hlength->saveGuts(file);
-
-  if (index_interval) {
-    file.Write(true);
-    index_interval->saveGuts(file);
-  }
-  else {
-    file.Write(false);
-  }
-
-  for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < nb_variable;j++) {
-      file.Write(int_sequence[i][j] , (type[j] == POSITION ? length[i] + 1 : length[i]));
-    }
-  }
-} */
