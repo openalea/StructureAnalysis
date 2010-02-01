@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -91,12 +91,6 @@ protected :
     bool plot_print(const char *path) const;
     void plotable_write(SinglePlot &plot) const;
 
-/*    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
-
     void computation();
     double min_computation() const;
     double max_computation() const;
@@ -104,7 +98,7 @@ protected :
 public :
 
     Regression_kernel();
-//    Regression_kernel(int iident , double imin_value , double imax_value , double istep == 1);
+//    Regression_kernel(int iident , double imin_value , double imax_value , double istep = 1);
     Regression_kernel(int iident , int imin_value , int imax_value);
     Regression_kernel(const Regression_kernel &regression) { copy(regression); }
     ~Regression_kernel();
@@ -164,16 +158,8 @@ public :
                      bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Regression);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     // acces membres de la classe
 
