@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -46,8 +46,6 @@
 #include "tool/rw_locale.h"
 #include "tool/config.h"
 
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
 #include "stat_tools.h"
 #include "distribution.h"
 #include "vectors.h"
@@ -75,20 +73,20 @@ Vectors::Vectors()
 
 {
   nb_vector = 0;
-  identifier = 0;
+  identifier = NULL;
 
   nb_variable = 0;
 
-  type = 0;
-  min_value = 0;
-  max_value = 0;
-  marginal = 0;
+  type = NULL;
+  min_value = NULL;
+  max_value = NULL;
+  marginal = NULL;
 
-  mean = 0;
-  covariance = 0;
+  mean = NULL;
+  covariance = NULL;
 
-  int_vector = 0;
-  real_vector = 0;
+  int_vector = NULL;
+  real_vector = NULL;
 }
 
 
@@ -133,7 +131,7 @@ void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
     type[i] = itype[i];
     min_value[i] = 0.;
     max_value[i] = 0.;
-    marginal[i] = 0;
+    marginal[i] = NULL;
   }
 
   mean = new double[nb_variable];
@@ -280,7 +278,7 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = vec.type[i];
-    marginal[i] = 0;
+    marginal[i] = NULL;
   }
 
   mean = new double[nb_variable];
@@ -348,7 +346,7 @@ void Vectors::copy(const Vectors &vec)
       marginal[i] = new Histogram(*(vec.marginal[i]));
     }
     else {
-      marginal[i] = 0;
+      marginal[i] = NULL;
     }
   }
 
@@ -501,7 +499,7 @@ Distribution_data* Vectors::extract(Format_error &error , int variable) const
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -629,7 +627,7 @@ Vectors* Vectors::merge(Format_error &error , int nb_sample , const Vectors **iv
   const Vectors **pvec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
@@ -746,7 +744,7 @@ Vectors* Vectors::shift(Format_error &error , int variable , int shift_param) co
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -871,7 +869,7 @@ Vectors* Vectors::shift(Format_error &error , int variable , double shift_param)
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -962,7 +960,7 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int step , int mo
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -1174,7 +1172,7 @@ Vectors* Vectors::transcode(Format_error &error , int variable , int *symbol) co
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -1270,7 +1268,7 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int nb_class ,
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -1451,7 +1449,7 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int nb_class ,
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -1524,7 +1522,7 @@ Vectors* Vectors::scaling(Format_error &error , int variable , int scaling_coeff
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -1633,7 +1631,7 @@ Vectors* Vectors::round(Format_error &error , int variable , int mode) const
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if (variable != I_DEFAULT) {
@@ -1792,7 +1790,7 @@ Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable 
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -1900,7 +1898,7 @@ Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable 
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -2116,7 +2114,7 @@ Vectors* Vectors::select_individual(Format_error &error , int inb_vector ,
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((inb_vector < 1) || (inb_vector > (keep ? nb_vector : nb_vector - 1))) {
@@ -2282,7 +2280,7 @@ Vectors* Vectors::select_variable(Format_error &error , int inb_variable ,
   Vectors *vec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if ((inb_variable < 1) || (inb_variable > (keep ? nb_variable : nb_variable - 1))) {
@@ -2360,7 +2358,7 @@ Vectors* Vectors::merge_variable(Format_error &error , int nb_sample ,
   const Vectors **pvec;
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
@@ -2486,7 +2484,7 @@ Vectors* vectors_ascii_read(Format_error &error , const char *path)
   ifstream in_file(path);
 
 
-  vec = 0;
+  vec = NULL;
   error.init();
 
   if (!in_file) {
@@ -3712,14 +3710,17 @@ MultiPlotSet* Vectors::get_plotable() const
     }
   }
 
-  plot_set = new MultiPlotSet(nb_plot_set);
+  plot_set = new MultiPlotSet(nb_plot_set , nb_variable);
   MultiPlotSet &plot = *plot_set;
 
   plot.border = "15 lw 0";
 
   i = 0;
   for (j = 0;j < nb_variable;j++) {
+    plot.variable_nb_viewpoint[j] = 1;
+
     if (marginal[j]) {
+      plot.variable[i] = j;
 
       // vue : loi marginale empirique
 
@@ -3748,6 +3749,7 @@ MultiPlotSet* Vectors::get_plotable() const
 
     for (k = 0;k < nb_variable;k++) {
       if (k != j) {
+        plot.variable[i] = j;
 
          // vue : loi jointe empirique de 2 variables
 
@@ -3767,6 +3769,13 @@ MultiPlotSet* Vectors::get_plotable() const
         }
         plot[i].yrange = Range(ymin , MAX(max_value[k] , min_value[k] + 1));
 
+        if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
+          plot[i].xtics = 1;
+        }
+        if (max_value[k] - min_value[k] < TIC_THRESHOLD) {
+          plot[i].ytics = 1;
+        }
+
         label.str("");
         label << STAT_label[STATL_VARIABLE] << " " << j + 1;
         plot[i].xlabel = label.str();
@@ -3774,13 +3783,6 @@ MultiPlotSet* Vectors::get_plotable() const
         label.str("");
         label << STAT_label[STATL_VARIABLE] << " " << k + 1;
         plot[i].ylabel = label.str();
-
-        if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
-          plot[i].xtics = 1;
-        }
-        if (max_value[k] - min_value[k] < TIC_THRESHOLD) {
-          plot[i].ytics = 1;
-        }
 
         if (((marginal[j]) && (marginal[j]->nb_value <= PLOT_NB_VALUE)) &&
             ((marginal[k]) && (marginal[k]->nb_value <= PLOT_NB_VALUE))) {
@@ -3808,238 +3810,6 @@ MultiPlotSet* Vectors::get_plotable() const
 
   return plot_set;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Vectors , STATI_VECTORS);
-
-
-RWspace Vectors::binaryStoreSize() const
-
-{
-  register int i;
-  RWspace size;
-
-
-  size = sizeof(nb_variable) + sizeof(min_value) * nb_variable + sizeof(max_value) * nb_variable;
-  for (i = 0;i < nb_variable;i++) {
-    size += sizeof(true);
-    if (marginal[i]) {
-      size += marginal[i]->binaryStoreSize();
-    }
-  }
-
-  size += sizeof(mean) * nb_variable + sizeof(covariance) * nb_variable * nb_variable +
-          sizeof(nb_vector) + sizeof(identifier) * nb_vector +
-          sizeof(vector) * nb_vector * nb_variable;
-
-  return size;
-}
-
-
-void Vectors::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i , j;
-  int *pivector;
-
-
-  remove();
-
-  is >> nb_variable;
-
-  min_value = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> min_value[i];
-  }
-  max_value = new int[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> max_value[i];
-  }
-
-  marginal = new Histogram*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> status;
-    if (status) {
-      marginal[i] = new Histogram();
-      marginal[i]->restoreGuts(is);
-    }
-    else {
-      marginal[i] = 0;
-    }
-  }
-
-  mean = new double[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> mean[i];
-  }
-
-  covariance = new double*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    covariance[i] = new double[nb_variable];
-    for (j = 0;j < nb_variable;j++) {
-      is >> covariance[i][j];
-    }
-  }
-
-  is >> nb_vector;
-
-  identifier = new int[nb_vector];
-  for (i = 0;i < nb_vector;i++) {
-    is >> identifier[i];
-  }
-
-  vector = new int*[nb_vector];
-  for (i = 0;i < nb_vector;i++) {
-    int_vector[i] = new int[nb_variable];
-    pivector = int_vector[i];
-    for (j = 0;j < nb_variable;j++) {
-      is >> *pivector++;
-    }
-  }
-}
-
-
-void Vectors::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i;
-
-
-  remove();
-
-  file.Read(nb_variable);
-
-  min_value = new int[nb_variable];
-  file.Read(min_value , nb_variable);
-  max_value = new int[nb_variable];
-  file.Read(max_value , nb_variable);
-
-  marginal = new Histogram*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    file.Read(status);
-    if (status) {
-      marginal[i] = new Histogram();
-      marginal[i]->restoreGuts(file);
-    }
-    else {
-      marginal[i] = 0;
-    }
-  }
-
-  mean = new double[nb_variable];
-  file.Read(mean , nb_variable);
-
-  covariance = new double*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    covariance[i] = new double[nb_variable];
-    file.Read(covariance[i] , nb_variable);
-  }
-
-  file.Read(nb_vector);
-
-  identifier = new int[nb_vector];
-  file.Read(identifier , nb_vector);
-
-  vector = new int*[nb_vector];
-  for (i = 0;i < nb_vector;i++) {
-    int_vector[i] = new int[nb_variable];
-    file.Read(int_vector[i] , nb_variable);
-  }
-}
-
-
-void Vectors::saveGuts(RWvostream &os) const
-
-{
-  register int i , j;
-  int *pivector;
-
-
-  os << nb_variable;
-
-  for (i = 0;i < nb_variable;i++) {
-    os << min_value[i];
-  }
-  for (i = 0;i < nb_variable;i++) {
-    os << max_value[i];
-  }
-
-  for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]) {
-      os << true;
-      marginal[i]->saveGuts(os);
-    }
-    else {
-      os << false;
-    }
-  }
-
-  for (i = 0;i < nb_variable;i++) {
-    os << mean[i];
-  }
-  for (i = 0;i < nb_variable;i++) {
-    for (j = 0;j < nb_variable;j++) {
-      os << covariance[i][j];
-    }
-  }
-
-  os << nb_vector;
-
-  for (i = 0;i < nb_vector;i++) {
-    os << identifier[i];
-  }
-
-  for (i = 0;i < nb_vector;i++) {
-    pivector = int_vector[i];
-    for (j = 0;j < nb_variable;j++) {
-      os << *pivector++;
-    }
-  }
-}
-
-
-void Vectors::saveGuts(RWFile &file) const
-
-{
-  register int i;
-
-
-  file.Write(nb_variable);
-
-  file.Write(min_value , nb_variable);
-  file.Write(max_value , nb_variable);
-
-  for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]) {
-      file.Write(true);
-      marginal[i]->saveGuts(file);
-    }
-    else {
-      file.Write(false);
-    }
-  }
-
-  file.Write(mean , nb_variable);
-  for (i = 0;i < nb_variable;i++) {
-    file.Write(covariance[i] , nb_variable);
-  }
-
-  file.Write(nb_vector);
-
-  file.Write(identifier , nb_vector);
-
-  for (i = 0;i < nb_vector;i++) {
-    file.Write(int_vector[i] , nb_variable);
-  }
-} */
 
 
 /*--------------------------------------------------------------*
@@ -4545,7 +4315,7 @@ double** Vectors::correlation_computation() const
 
 {
   register int i , j;
-  double norm , **correlation = 0;
+  double norm , **correlation = NULL;
 
 
   if (covariance[0][0] != D_DEFAULT) {
