@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -41,8 +41,7 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
@@ -77,7 +76,7 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
 
 
   nb_iterator = 0;
-  semi_markov_data = 0;
+  semi_markov_data = NULL;
 
   nb_output_process = inb_output_process;
 
@@ -87,7 +86,7 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
     nonparametric_process[i] = new Nonparametric_sequence_process(*pobservation[i - 1]);
   }
 
-  parametric_process = 0;
+  parametric_process = NULL;
 
   for (i = 0;i < nb_state;i++) {
     if (transition[i][i] < 1.) {
@@ -108,7 +107,7 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
       forward[i] = new Forward(*(nonparametric_process[0]->sojourn_time[i]));
     }
     else {
-      forward[i] = 0;
+      forward[i] = NULL;
     }
   }
 
@@ -147,22 +146,22 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
 
 
   nb_iterator = 0;
-  semi_markov_data = 0;
+  semi_markov_data = NULL;
 
   nb_output_process = inb_output_process;
 
   nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
   nonparametric_process[0] = new Nonparametric_sequence_process(*poccupancy);
   parametric_process = new Parametric_process*[nb_output_process + 1];
-  parametric_process[0] = 0;
+  parametric_process[0] = NULL;
 
   for (i = 1;i <= nb_output_process;i++) {
     if (nonparametric_observation[i - 1]) {
       nonparametric_process[i] = new Nonparametric_sequence_process(*nonparametric_observation[i - 1]);
-      parametric_process[i] = 0;
+      parametric_process[i] = NULL;
     }
     else {
-      nonparametric_process[i] = 0;
+      nonparametric_process[i] = NULL;
       parametric_process[i] = new Parametric_process(*parametric_observation[i - 1]);
     }
   }
@@ -186,7 +185,7 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
       forward[i] = new Forward(*(nonparametric_process[0]->sojourn_time[i]));
     }
     else {
-      forward[i] = 0;
+      forward[i] = NULL;
     }
   }
 
@@ -272,7 +271,7 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
   ifstream in_file(path);
 
 
-  hsmarkov = 0;
+  hsmarkov = NULL;
   error.init();
 
   if (!in_file) {
@@ -361,8 +360,8 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
         case false : {
           nb_output_process = I_DEFAULT;
 
-          nonparametric_observation = 0;
-          parametric_observation = 0;
+          nonparametric_observation = NULL;
+          parametric_observation = NULL;
 
           while (buffer.readLine(in_file , false)) {
             line++;
@@ -435,8 +434,8 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
             nonparametric_observation = new Nonparametric_process*[nb_output_process];
             parametric_observation = new Parametric_process*[nb_output_process];
             for (i = 0;i < nb_output_process;i++) {
-              nonparametric_observation[i] = 0;
-              parametric_observation[i] = 0;
+              nonparametric_observation[i] = NULL;
+              parametric_observation[i] = NULL;
             }
 
             index = 0;
@@ -686,51 +685,6 @@ bool Hidden_semi_markov::spreadsheet_write(Format_error &error , const char *pat
 
   return status;
 }
-
-
-/*--------------------------------------------------------------*
- *
- *  Fonctions pour la persistance.
- *
- *--------------------------------------------------------------*/
-
-/* RWDEFINE_COLLECTABLE(Hidden_semi_markov , STATI_HIDDEN_SEMI_MARKOV);
-
-
-RWspace Hidden_semi_markov::binaryStoreSize() const
-
-{
-  return Semi_markov::binaryStoreSize();
-}
-
-
-void Hidden_semi_markov::restoreGuts(RWvistream &is)
-
-{
-  Semi_markov::restoreGuts(is);
-}
-
-
-void Hidden_semi_markov::restoreGuts(RWFile &file)
-
-{
-  Semi_markov::restoreGuts(file);
-}
-
-
-void Hidden_semi_markov::saveGuts(RWvostream &os) const
-
-{
-  Semi_markov::saveGuts(os);
-}
-
-
-void Hidden_semi_markov::saveGuts(RWFile &file) const
-
-{
-  Semi_markov::saveGuts(file);
-} */
-
 
 
 /*--------------------------------------------------------------*
