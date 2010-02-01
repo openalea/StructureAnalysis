@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -756,7 +756,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
 
       nevent_time = new Parametric*[nb_event_max + 1];
       for (i = 0;i <= nb_event_max;i++) {
-        nevent_time[i] = 0;
+        nevent_time[i] = NULL;
       }
 
       nb_event = new Nb_event*[time->nb_value];
@@ -765,7 +765,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
     }
 
     for (i = 0;i < time->offset;i++) {
-      nb_event[i] = 0;
+      nb_event[i] = NULL;
     }
 
     tmass = time->mass + time->offset;
@@ -784,7 +784,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
       }
 
       else {
-        nb_event[i] = 0;
+        nb_event[i] = NULL;
       }
     }
 
