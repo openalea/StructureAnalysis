@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -38,8 +38,7 @@
 
 #include <sstream>
 #include <iomanip>
-// #include <rw/vstream.h>
-// #include <rw/rwfile.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
@@ -69,9 +68,9 @@ extern char* label(const char *file_name);
 Markovian_sequences::Markovian_sequences()
 
 {
-  self_transition = 0;
-  observation = 0;
-  characteristics = 0;
+  self_transition = NULL;
+  observation = NULL;
+  characteristics = NULL;
 }
 
 
@@ -87,12 +86,12 @@ void Markovian_sequences::init()
   register int i;
 
 
-  self_transition = 0;
-  observation = 0;
+  self_transition = NULL;
+  observation = NULL;
 
   characteristics = new Sequence_characteristics*[nb_variable];
   for (i = 0;i < nb_variable;i++) {
-    characteristics[i] = 0;
+    characteristics[i] = NULL;
   }
 }
 
@@ -137,18 +136,18 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
         self_transition[i] = new Self_transition(*(seq.self_transition[i]));
       }
       else {
-        self_transition[i] = 0;
+        self_transition[i] = NULL;
       }
     }
   }
 
   else {
-    self_transition = 0;
+    self_transition = NULL;
   }
 
   if (seq.observation) {
     observation = new Histogram**[nb_variable];
-    observation[0] = 0;
+    observation[0] = NULL;
 
     for (i = 1;i < nb_variable;i++) {
       observation[i] = new Histogram*[marginal[0]->nb_value];
@@ -159,7 +158,7 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
   }
 
   else {
-    observation = 0;
+    observation = NULL;
   }
 
   characteristics = new Sequence_characteristics*[nb_variable];
@@ -201,7 +200,7 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
     }
 
     else {
-      characteristics[i] = 0;
+      characteristics[i] = NULL;
     }
   }
 }
@@ -223,11 +222,11 @@ void Markovian_sequences::add_state_variable(const Markovian_sequences &seq , in
   register int i;
 
 
-  self_transition = 0;
-  observation = 0;
+  self_transition = NULL;
+  observation = NULL;
 
   characteristics = new Sequence_characteristics*[nb_variable];
-  characteristics[0] = 0;
+  characteristics[0] = NULL;
 
   for (i = 0;i < seq.nb_variable;i++) {
     if (seq.characteristics[i]) {
@@ -255,7 +254,7 @@ void Markovian_sequences::add_state_variable(const Markovian_sequences &seq , in
     }
 
     else {
-      characteristics[i + 1] = 0;
+      characteristics[i + 1] = NULL;
     }
   }
 }
@@ -392,7 +391,7 @@ void Markovian_sequences::state_variable_init(int itype)
         }
         delete [] self_transition;
 
-        self_transition = 0;
+        self_transition = NULL;
       }
 
       if (observation) {
@@ -404,7 +403,7 @@ void Markovian_sequences::state_variable_init(int itype)
         }
         delete [] observation;
 
-        observation = 0;
+        observation = NULL;
       }
     }
 
@@ -435,7 +434,7 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
   Distribution_data *histo;
 
 
-  histo = 0;
+  histo = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -482,7 +481,7 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
           phisto = characteristics[variable]->initial_run[value];
         }
         else {
-          phisto = 0;
+          phisto = NULL;
           status = false;
           error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
         }
@@ -499,7 +498,7 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
           phisto = characteristics[variable]->nb_run[value];
         }
         else {
-          phisto = 0;
+          phisto = NULL;
           status = false;
           error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
         }
@@ -511,7 +510,7 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
           phisto = characteristics[variable]->nb_occurrence[value];
         }
         else {
-          phisto = 0;
+          phisto = NULL;
           status = false;
           error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
         }
@@ -557,7 +556,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
   const Markovian_sequences **pseq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
@@ -841,7 +840,7 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
   Markovian_sequences *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -903,7 +902,7 @@ Markovian_sequences* Markovian_sequences::transcode(Format_error &error , int iv
   Markovian_sequences *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((ivariable < 1) || (ivariable > nb_variable)) {
@@ -1064,7 +1063,7 @@ Markovian_sequences* Markovian_sequences::consecutive_values(Format_error &error
   Markovian_sequences *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((ivariable < 1) || (ivariable > nb_variable)) {
@@ -1191,7 +1190,7 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int ivar
   Markovian_sequences *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((ivariable < 1) || (ivariable > nb_variable)) {
@@ -1301,7 +1300,7 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
   Markovian_sequences *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((variable < 1) || (variable > nb_variable)) {
@@ -1386,7 +1385,7 @@ Markovian_sequences* Markovian_sequences::remove_index_parameter(Format_error &e
   error.init();
 
   if (!index_parameter) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
@@ -1417,7 +1416,7 @@ Markovian_sequences* Markovian_sequences::select_variable(Format_error &error , 
   Markovian_sequences *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if ((inb_variable < 1) || (inb_variable > (keep ? nb_variable : nb_variable - 1))) {
@@ -1543,7 +1542,7 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
   const Markovian_sequences **pseq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   for (i = 0;i < nb_sample;i++) {
@@ -1743,7 +1742,7 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
   }
 
   if (i < nb_variable) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_INITIAL_RUN_ALREADY_BUILT]);
   }
 
@@ -1776,7 +1775,7 @@ Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error 
   Markovian_sequences *seq;
 
 
-  seq = 0;
+  seq = NULL;
   error.init();
 
   if (index_parameter_type == TIME) {
@@ -1924,7 +1923,7 @@ Markovian_sequences* Markovian_sequences::split(Format_error &error , int step) 
   error.init();
 
   if ((step < 1) || (step > max_length)) {
-    seq = 0;
+    seq = NULL;
     error.update(SEQ_error[SEQR_SEQUENCE_LENGTH]);
   }
 
@@ -2144,7 +2143,7 @@ void Markovian_sequences::self_transition_computation(bool *homogeneity)
         self_transition_computation(i);
         break;
       case true :
-        self_transition[i] = 0;
+        self_transition[i] = NULL;
         break;
       }
     }
@@ -2239,7 +2238,7 @@ void Markovian_sequences::create_observation_histogram(int nb_state)
 
 
     observation = new Histogram**[nb_variable];
-    observation[0] = 0;
+    observation[0] = NULL;
 
     for (i = 1;i < nb_variable;i++) {
       observation[i] = new Histogram*[nb_state];
@@ -3770,7 +3769,7 @@ bool Markovian_sequences::plot_print(const char *prefix , const char *title , in
       }
       out_file << "\n\n";
 
-      if (marginal[i]) {
+      if (marginal[variable]) {
         if (marginal[variable]->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
         }
@@ -3989,7 +3988,8 @@ bool Markovian_sequences::plot_write(Format_error &error , const char *prefix ,
             out_file << "plot [0:" << self_transition[j]->length - 1
                      << "] [0:" << (int)(max_frequency[j] * YSCALE) + 1 << "] \""
                      << label((data_file_name[j].str()).c_str())
-                     << "\" using 1:3 notitle with impulses" << endl;
+                     << "\" using 1:3 title \"" << SEQ_label[SEQL_TRANSITION_COUNTS]
+                     << "\" with impulses" << endl;
 
             if (self_transition[j]->length - 1 < TIC_THRESHOLD) {
               out_file << "set xtics autofreq" << endl;
@@ -4018,264 +4018,289 @@ bool Markovian_sequences::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la persistance.
+ *  Sortie graphique d'un objet Markovian_sequences pour une variable donnee
+ *  dans le cas d'absence de lois caracteristiques.
+ *
+ *  arguments : indice de la variable, nombre de variables.
  *
  *--------------------------------------------------------------*/
 
-/* RWDEFINE_COLLECTABLE(Markovian_sequences , STATI_MARKOVIAN_SEQUENCES);
-
-
-RWspace Markovian_sequences::binaryStoreSize() const
+void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int variable) const
 
 {
-  register int i , j;
-  RWspace size;
+  ostringstream legend;
 
 
-  size = Sequences::binaryStoreSize();
+  /*  nb_plot_set = 1;
+  if (marginal[variable]) {
+    nb_plot_set++;
+  }
+  if (hindex_parameter) {
+    nb_plot_set++;
+  } */
 
-  size += sizeof(true);
-  if (self_transition) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      size += sizeof(true);
-      if (self_transition[i]) {
-        size += self_transition[i]->binaryStoreSize();
-      }
+  plot.variable_nb_viewpoint[variable] = 1;
+
+  if (marginal[variable]) {
+
+    // vue : loi marginale empirique
+
+    plot.variable[index] = variable;
+
+    plot[index].xrange = Range(0 , MAX(marginal[variable]->nb_value - 1 , 1));
+    plot[index].yrange = Range(0 , ceil(marginal[variable]->max * YSCALE));
+
+    if (marginal[variable]->nb_value - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
     }
-  }
-
-  size += sizeof(true);
-  if (observation) {
-    for (i = 1;i < nb_variable;i++) {
-      for (j = 0;j < marginal[0]->nb_value;j++) {
-        size += observation[i][j]->binaryStoreSize();
-      }
+    if (ceil(marginal[variable]->max * YSCALE) < TIC_THRESHOLD) {
+      plot[index].ytics = 1;
     }
+
+    plot[index].resize(1);
+
+    legend.str("");
+    legend << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
+           << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[index][0].legend = legend.str();
+
+    plot[index][0].style = "impulses";
+
+    marginal[variable]->plotable_frequency_write(plot[index][0]);
+    index++;
   }
 
-  for (i = 0;i < nb_variable;i++) {
-    size += sizeof(true);
-    if (characteristics[i]) {
-      characteristics[i]->binaryStoreSize();
+  // vue : histogramme des longueurs des sequences
+
+  plot.variable[index] = variable;
+
+  plot[index].xrange = Range(0 , hlength->nb_value - 1);
+  plot[index].yrange = Range(0 , ceil(hlength->max * YSCALE));
+
+  if (hlength->nb_value - 1 < TIC_THRESHOLD) {
+    plot[index].xtics = 1;
+  }
+  if (ceil(hlength->max * YSCALE) < TIC_THRESHOLD) {
+    plot[index].ytics = 1;
+  }
+
+  plot[index].resize(1);
+
+  legend.str("");
+  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+  plot[index][0].legend = legend.str();
+
+  plot[index][0].style = "impulses";
+
+  hlength->plotable_frequency_write(plot[index][0]);
+  index++;
+
+  if (hindex_parameter) {
+
+    // vue : histogramme des parametres d'index
+
+    plot.variable[index] = variable;
+
+    plot[index].xrange = Range(hindex_parameter->offset , hindex_parameter->nb_value - 1);
+    plot[index].yrange = Range(0 , ceil(hindex_parameter->max * YSCALE));
+
+    if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
+      plot[index].xtics = 1;
     }
-  }
-
-  return size;
-}
-
-
-void Markovian_sequences::restoreGuts(RWvistream &is)
-
-{
-  bool status;
-  register int i , j;
-
-
-  remove();
-
-  Sequences::restoreGuts(is);
-
-  is >> status;
-  if (status) {
-    self_transition = new Curves*[marginal[0]->nb_value];
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      is >> status;
-      if (status) {
-        self_transition[i] = new Curves();
-        self_transition[i]->restoreGuts(is);
-      }
-      else {
-        self_transition[i] = 0;
-      }
+    if (ceil(hindex_parameter->max * YSCALE) < TIC_THRESHOLD) {
+      plot[index].ytics = 1;
     }
-  }
-  else {
-    self_transition = 0;
-  }
 
-  is >> status;
-  if (status) {
-    observation = new Histogram**[nb_variable];
-    observation[0] = 0;
-    for (i = 1;i < nb_variable;i++) {
-      observation[i] = new Histogram*[marginal[0]->nb_value];
-      for (j = 0;j < marginal[0]->nb_value;j++) {
-        observation[i][j] = new Histogram();
-        observation[i][j]->restoreGuts(is);
-      }
-    }
-  }
-  else {
-    observation = 0;
-  }
+    plot[index].resize(1);
 
-  characteristics = new Sequence_characteristics*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    is >> status;
-    if (status) {
-      characteristics[i] = new Sequence_characteristics();
-      characteristics[i]->restoreGuts(is);
-    }
-    else {
-      characteristics[i] = 0;
-    }
-  }
-}
+    legend.str("");
+    legend << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[index][0].legend = legend.str();
 
+    plot[index][0].style = "impulses";
 
-void Markovian_sequences::restoreGuts(RWFile &file)
-
-{
-  bool status;
-  register int i , j;
-
-
-  remove();
-
-  Sequences::restoreGuts(file);
-
-  file.Read(status);
-  if (status) {
-    self_transition = new Curves*[marginal[0]->nb_value];
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      file.Read(status);
-      if (status) {
-        self_transition[i] = new Curves();
-        self_transition[i]->restoreGuts(file);
-      }
-      else {
-        self_transition[i] = 0;
-      }
-    }
-  }
-  else {
-    self_transition = 0;
-  }
-
-  file.Read(status);
-  if (status) {
-    observation = new Histogram**[nb_variable];
-    observation[0] = 0;
-    for (i = 1;i < nb_variable;i++) {
-      observation[i] = new Histogram*[marginal[0]->nb_value];
-      for (j = 0;j < marginal[0]->nb_value;j++) {
-        observation[i][j] = new Histogram();
-        observation[i][j]->restoreGuts(file);
-      }
-    }
-  }
-  else {
-    observation = 0;
-  }
-
-  characteristics = new Sequence_characteristics*[nb_variable];
-  for (i = 0;i < nb_variable;i++) {
-    file.Read(status);
-    if (status) {
-      characteristics[i] = new Sequence_characteristics();
-      characteristics[i]->restoreGuts(file);
-    }
-    else {
-      characteristics[i] = 0;
-    }
+    hindex_parameter->plotable_frequency_write(plot[index][0]);
+    index++;
   }
 }
 
 
-void Markovian_sequences::saveGuts(RWvostream &os) const
+/*--------------------------------------------------------------*
+ *
+ *  Sortie graphique d'un objet Markovian_sequences.
+ *
+ *--------------------------------------------------------------*/
+
+MultiPlotSet* Markovian_sequences::get_plotable() const
 
 {
   register int i , j;
+  int nb_plot_set , index_length , index , max_frequency;
+  ostringstream title , legend;
+  MultiPlotSet *plot_set;
 
 
-  Sequences::saveGuts(os);
+  // calcul du nombre de vues
 
-  if (self_transition) {
-    os << true;
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if (self_transition[i]) {
-        os << true;
-        self_transition[i]->saveGuts(os);
-      }
-      else {
-        os << false;
-      }
-    }
-  }
-  else {
-    os << false;
-  }
-
-  if (observation) {
-    os << true;
-    for (i = 1;i < nb_variable;i++) {
-      for (j = 0;j < marginal[0]->nb_value;j++) {
-        observation[i][j]->saveGuts(os);
-      }
-    }
-  }
-  else {
-    os << false;
-  }
+  nb_plot_set = 0;
 
   for (i = 0;i < nb_variable;i++) {
     if (characteristics[i]) {
-      os << true;
-      characteristics[i]->saveGuts(os);
+      index_length = characteristics[i]->index_value->plot_length_computation();
+
+      nb_plot_set += 2;
+      if (characteristics[i]->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
+        nb_plot_set++;
+      }
+
+      nb_plot_set++;
+      for (j = 0;j < characteristics[i]->nb_value;j++) {
+        if (characteristics[i]->first_occurrence[j]->nb_element > 0) {
+          nb_plot_set++;
+        }
+      }
+
+      nb_plot_set++;
+      for (j = 0;j < characteristics[i]->nb_value;j++) {
+        if (characteristics[i]->recurrence_time[j]->nb_element > 0) {
+          nb_plot_set++;
+        }
+      }
+
+      nb_plot_set++;
+      for (j = 0;j < characteristics[i]->nb_value;j++) {
+        if (characteristics[i]->sojourn_time[j]->nb_element > 0) {
+          nb_plot_set++;
+        }
+        if ((characteristics[i]->initial_run) &&
+            (characteristics[i]->initial_run[j]->nb_element > 0)) {
+          nb_plot_set++;
+        }
+        if (characteristics[i]->final_run[j]->nb_element > 0) {
+          nb_plot_set++;
+        }
+      }
+
+      if ((characteristics[i]->nb_run) && (characteristics[i]->nb_occurrence)) {
+        nb_plot_set += 3;
+        for (j = 0;j < characteristics[i]->nb_value;j++) {
+          if ((characteristics[i]->nb_run[j]->nb_element > 0) &&
+              (characteristics[i]->nb_occurrence[j]->nb_element > 0)) {
+            nb_plot_set += 2;
+          }
+        }
+      }
     }
+
     else {
-      os << false;
+      nb_plot_set++;
+      if (marginal[i]) {
+        nb_plot_set++;
+      }
+      if (hindex_parameter) {
+        nb_plot_set++;
+      }
     }
   }
-}
 
+  for (i = 0;i < marginal[0]->nb_value;i++) {
+    if (self_transition[i]) {
+      nb_plot_set += 2;
+    }
+  }
 
-void Markovian_sequences::saveGuts(RWFile &file) const
+  plot_set = new MultiPlotSet(nb_plot_set , nb_variable);
 
-{
-  register int i , j;
+  MultiPlotSet &plot = *plot_set;
 
+  plot.border = "15 lw 0";
 
-  Sequences::saveGuts(file);
+  for (i = 0;i < nb_variable;i++) {
+    plot.variable_nb_viewpoint[i] = 0;
+  }
 
+  index = 0;
   if (self_transition) {
-    file.Write(true);
+    plot.variable_nb_viewpoint[0]++;
+
     for (i = 0;i < marginal[0]->nb_value;i++) {
       if (self_transition[i]) {
-        file.Write(true);
-        self_transition[i]->saveGuts(file);
-      }
-      else {
-        file.Write(false);
-      }
-    }
-  }
-  else {
-    file.Write(false);
-  }
 
-  if (observation) {
-    file.Write(true);
-    for (i = 1;i < nb_variable;i++) {
-      for (j = 0;j < marginal[0]->nb_value;j++) {
-        observation[i][j]->saveGuts(file);
+        // vue : probabilites de rester dans l'etat i indexees
+
+        if (nb_variable > 1) {
+          title.str("");
+          title << STAT_label[STATL_VARIABLE] << " " << 1;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , self_transition[i]->length - 1);
+        plot[index].yrange = Range(0. , 1.);
+
+        if (self_transition[i]->length - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i << " - "
+               << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_SELF_TRANSITION];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "linespoint";
+
+        self_transition[i]->plotable_write(0 , plot[index][0]);
+        index++;
+
+        // vue : histogramme des comptages de transition indexes
+
+        if (nb_variable > 1) {
+          title.str("");
+          title << STAT_label[STATL_VARIABLE] << " " << 1;
+          plot[index].title = title.str();
+        }
+
+        plot[index].xrange = Range(0 , self_transition[i]->length - 1);
+        max_frequency = self_transition[i]->max_frequency_computation();
+        plot[index].yrange = Range(0 , ceil(max_frequency * YSCALE));
+
+        if (self_transition[i]->length - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+        if (ceil(max_frequency * YSCALE) < TIC_THRESHOLD) {
+          plot[index].ytics = 1;
+        }
+
+        plot[index].xlabel = SEQ_label[SEQL_INDEX];
+        plot[index].ylabel = STAT_label[STATL_FREQUENCY];
+
+        plot[index].resize(1);
+
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i << " - "
+               << SEQ_label[SEQL_TRANSITION_COUNTS];
+        plot[index][0].legend = legend.str();
+
+        plot[index][0].style = "impulses";
+
+        self_transition[i]->plotable_frequency_write(plot[index][0]);
+        index++;
       }
     }
-  }
-  else {
-    file.Write(false);
   }
 
   for (i = 0;i < nb_variable;i++) {
     if (characteristics[i]) {
-      file.Write(true);
-      characteristics[i]->saveGuts(file);
+      characteristics[i]->plotable_write(plot , index , i , type[i] , *hlength);
     }
     else {
-      file.Write(false);
+      plotable_write(plot , index , i);
     }
   }
-} */
+
+  return plot_set;
+}
 
 
 /*--------------------------------------------------------------*
