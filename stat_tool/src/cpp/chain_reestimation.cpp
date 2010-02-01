@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -55,8 +55,8 @@ Chain_reestimation<Type>::Chain_reestimation()
   nb_state = 0;
   nb_row = 0;
 
-  initial = 0;
-  transition = 0;
+  initial = NULL;
+  transition = NULL;
 }
 
 
@@ -118,7 +118,7 @@ Chain_reestimation<Type>::Chain_reestimation(char itype , int inb_state ,
     initial = new Type[nb_row];
   }
   else {
-    initial = 0;
+    initial = NULL;
   }
 
   transition = new Type*[nb_row];
@@ -162,7 +162,7 @@ void Chain_reestimation<Type>::copy(const Chain_reestimation<Type> &chain_data)
   }
 
   else {
-    initial = 0;
+    initial = NULL;
   }
 
   transition = new Type*[nb_row];
