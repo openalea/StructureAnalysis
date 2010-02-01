@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
  *       $Id$
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -122,9 +122,9 @@ protected :
 public :
 
     Distance_matrix();
-    Distance_matrix(int nb_pattern , const char *ilabel , int *pattern_identifier = 0);
+    Distance_matrix(int nb_pattern , const char *ilabel , int *pattern_identifier = NULL);
     Distance_matrix(int nb_pattern , int irow_identifier , int icolumn_identifier ,
-                    const char *ilabel , int *pattern_identifier = 0 ,
+                    const char *ilabel , int *pattern_identifier = NULL ,
                     bool substitution_flag = true , bool transposition_flag = false);
     Distance_matrix(const Distance_matrix &dist_matrix , int inb_pattern ,
                     int *iidentifier , bool keep = true);
@@ -148,16 +148,8 @@ public :
     std::ostream& spreadsheet_write(std::ostream &os) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Distance_matrix);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     bool test_symmetry() const;
 
@@ -169,7 +161,7 @@ public :
     void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
 
     Clusters* partitioning(Format_error &error , std::ostream &os , int nb_cluster ,
-                           int *prototype = 0 , int initialization = 1 , int algorithm = 1) const;
+                           int *prototype = NULL , int initialization = 1 , int algorithm = 1) const;
     Clusters* partitioning(Format_error &error , std::ostream &os , int nb_cluster ,
                            int *cluster_nb_pattern , int **cluster_pattern) const;
 
@@ -178,7 +170,7 @@ public :
 
     bool hierarchical_clustering(Format_error &error , std::ostream &os ,
                                  int algorithm = AGGLOMERATIVE , int criterion = AVERAGING ,
-                                 const char *path = 0 , char format = 'a') const;
+                                 const char *path = NULL , char format = 'a') const;
 
     // acces membres de la classe
 
@@ -272,16 +264,8 @@ public :
     bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const;
+                    const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
-
-/*    RWDECLARE_COLLECTABLE(Clusters);
-
-    RWspace binaryStoreSize() const;
-    void restoreGuts(RWvistream&);
-    void restoreGuts(RWFile&);
-    void saveGuts(RWvostream&) const;
-    void saveGuts(RWFile&) const; */
 
     void cluster_nb_pattern_computation();
     void pattern_distance_computation();
@@ -348,7 +332,7 @@ public :
     bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
     bool spreadsheet_write(Format_error &error , const char *path) const;
     bool plot_write(Format_error &error , const char *prefix ,
-                    const char *title = 0) const { return false; }
+                    const char *title = NULL) const { return false; }
     // acces membres de la classe
 
     Distance_matrix* get_distance_matrix() { return distance_matrix; }
