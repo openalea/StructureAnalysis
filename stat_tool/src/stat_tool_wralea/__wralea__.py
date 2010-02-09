@@ -19,7 +19,7 @@ Wralea for AMAPmod.
 """
 
 __license__ = "Cecill"
-__revision__ = " $Id: wralea.py 3740 2007-10-05 13:07:39Z godin $"
+__revision__ = " $Id$"
 
 
 from openalea.core import Factory, IFileStr, IInt, IBool, IFloat, \
@@ -37,7 +37,7 @@ __license__ = 'CECILL-C'
 __authors__ = 'OpenAlea consortium'
 __institutes__ = 'INRIA/CIRAD'
 __description__ = 'stat_tool nodes.'
-__url__ = __openalea_url + '/doc/vplants/stat_tool/doc/html/contents.html'
+__url__ = __openalea_url + '/doc/vplants/stat_tool/doc/_build/html/contents.html'
 __editable__ = 'True'
 __icon__ = 'icon.png'
 
