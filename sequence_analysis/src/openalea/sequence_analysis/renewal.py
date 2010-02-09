@@ -5,7 +5,7 @@
 .. todo:: print (str in the wrapper file) for the renewal class
 
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface

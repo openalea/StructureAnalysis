@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__revision__ = "$Id: setup.py 6086 2009-03-13 16:24:30Z cokelaer $"
+__revision__ = "$Id$"
 
 import os, sys
 from os.path import join as pj
@@ -10,7 +10,7 @@ from openalea.deploy.binary_deps import binary_deps
 
 from openalea.deploy.metainfo import read_metainfo
 metadata = read_metainfo('metainfo.ini', verbose=True)
-for key,value in zip(metadata.keys(), metadata.values()):
+for key,value in metadata.iteritems():
     exec("%s = '%s'" % (key, value))
 
 

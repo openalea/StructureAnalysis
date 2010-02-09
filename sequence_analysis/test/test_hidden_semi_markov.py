@@ -4,7 +4,7 @@
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 
 from openalea.stat_tool import _stat_tool
@@ -49,7 +49,7 @@ class Test(interface):
     def test_constructor_from_file(self):
         self.constructor_from_file()
 
-    def test_constructor_from_file2(self):
+    def _test_constructor_from_file2(self):
         hmc = HiddenSemiMarkov("data/hidden_markov.hmc")
         assert hmc
 

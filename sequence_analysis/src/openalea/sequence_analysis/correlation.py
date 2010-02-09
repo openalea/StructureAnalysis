@@ -4,7 +4,7 @@
 
 
 """
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 
 import openalea.stat_tool.interface as interface

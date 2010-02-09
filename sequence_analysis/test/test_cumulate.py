@@ -7,7 +7,7 @@ Do we want to start at 0 ? Since later on, python calls will
 start the index at 0 ?
  
 """
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 
 from openalea.sequence_analysis.data_transform import Cumulate

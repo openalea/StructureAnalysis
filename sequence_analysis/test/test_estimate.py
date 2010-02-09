@@ -4,7 +4,7 @@
 
 .. todo:: finalise
 """
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 from openalea.sequence_analysis.sequences import Sequences
 from openalea.stat_tool.vectors import Vectors

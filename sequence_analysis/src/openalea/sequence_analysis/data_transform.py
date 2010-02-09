@@ -11,7 +11,7 @@
 
     OR test if _Sequence, then use markovian_sequence conversion
 """
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 from openalea.stat_tool.error import *
 

@@ -17,7 +17,7 @@
 #
 #########################################################################
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare

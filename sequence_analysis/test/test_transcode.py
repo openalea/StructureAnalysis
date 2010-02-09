@@ -4,7 +4,7 @@
 
 .. todo:: to be done
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 
 def test_transcode_vectors():

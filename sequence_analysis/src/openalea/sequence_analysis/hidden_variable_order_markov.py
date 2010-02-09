@@ -4,7 +4,7 @@
 uthor:/
 
 """
-__revision__ = "$Id: r $"
+__revision__ = "$Id$"
 
 import os
 

@@ -4,7 +4,7 @@
 
 .. todo:: to be done
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis

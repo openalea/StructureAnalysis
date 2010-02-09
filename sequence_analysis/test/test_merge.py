@@ -3,7 +3,7 @@
  
  .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 
 from openalea.stat_tool.data_transform import Merge 

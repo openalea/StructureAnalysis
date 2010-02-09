@@ -4,7 +4,7 @@
 
 .. todo:: to be done
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 
 from openalea.stat_tool.data_transform import ValueSelect, ExtractHistogram

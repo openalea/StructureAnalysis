@@ -3,7 +3,7 @@
 
 .. todo:: to be done
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 import os
 from openalea.stat_tool import *

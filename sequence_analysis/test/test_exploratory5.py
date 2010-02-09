@@ -18,7 +18,7 @@
 #
 #########################################################################
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 from openalea.sequence_analysis import *
 seq20 = Sequences("data/belren1.seq")
 seq21 = Sequences("data/elstar1.seq")

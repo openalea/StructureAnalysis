@@ -3,7 +3,7 @@
 .. author:: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 from os import sep
 from openalea.sequence_analysis import _sequence_analysis as sa

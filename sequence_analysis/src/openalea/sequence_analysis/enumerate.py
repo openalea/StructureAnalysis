@@ -3,7 +3,7 @@
 :Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
 
 """
-__version__ = "$Id: enumerate.py 6708 2009-08-05 14:20:27Z cokelaer $"
+__version__ = "$Id$"
 
 from openalea.stat_tool._stat_tool import *
 

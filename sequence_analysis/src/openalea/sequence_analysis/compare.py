@@ -4,7 +4,7 @@
 
 """
 
-__revision__ = "$Id: $"
+__revision__ = "$Id$"
 
 
 from openalea.stat_tool.comparison import compare_histo, compare_vectors

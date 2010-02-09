@@ -3,7 +3,7 @@
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 uthor:/
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface

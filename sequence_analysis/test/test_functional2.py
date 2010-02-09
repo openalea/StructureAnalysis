@@ -1,7 +1,7 @@
 """ functional tests
 
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 
 

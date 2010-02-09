@@ -21,7 +21,7 @@
 #
 #########################################################################
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 from openalea.sequence_analysis import *
 seq19 = Sequences("data/dupreziana_20a2.seq")
 seq20 = RemoveRun(seq19, 0, "End")

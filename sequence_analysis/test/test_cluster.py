@@ -4,7 +4,7 @@
 
 .. todo:: check the AddVariable option (sequences) and sequences cases
 """
-__revision__ = "$Id:  $"
+__revision__ = "$Id$"
 
 
 from openalea.sequence_analysis.sequences import Sequences
