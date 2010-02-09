@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+__revision__ = "$Id$"
+
 from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
 import os, sys
@@ -14,7 +17,8 @@ scons_parameters=["build_prefix="+build_prefix]
 # platform dependencies
 install_requires = []
 if sys.platform == 'win32':
-	install_requires.append(binary_deps("boostpython"))
+    install_requires.append(binary_deps("boostpython"))
+
 setup_requires = ['openalea.deploy']
 
 
