@@ -1,31 +1,25 @@
-from setuptools import setup, find_packages
-from openalea.deploy.binary_deps import binary_deps
+# -*- coding: utf-8 -*-
+__revision__ = "$Id$"
+
 import os, sys
 from os.path import join as pj
+
+from setuptools import setup, find_packages
+
 from openalea.deploy.metainfo import read_metainfo
 
 metadata = read_metainfo('metainfo.ini', verbose=True)
-for key,value in zip(metadata.keys(), metadata.values()):
+for key,value in metadata.iteritems():
     exec("%s = '%s'" % (key, value))
 
- 
-build_prefix = "build-scons"
 
 # Scons build directory
+build_prefix = "build-scons"
 scons_parameters=["build_prefix="+build_prefix]
-
 
 # dependencies
 install_requires = []
 setup_requires = ['openalea.deploy']
-if sys.platform.startswith('win'):
-    pass
-    #setup_requires += ['MinGW','boostpython','openalea.sconsx']
-    #install_requires += [binary_deps('boostpython')]
-else:
-    install_requires = []
-    setup_requires = []
-
 
 if __name__ == '__main__':
 
@@ -56,6 +50,5 @@ if __name__ == '__main__':
           setup_requires = setup_requires,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
-          pylint_packages = ['.'] 
          )
 
