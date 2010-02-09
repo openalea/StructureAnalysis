@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 """setup file for tree reduction package"""
+__revision__ = "$Id$"
+
 import os, sys
 from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
 from os.path import join as pj
-__revision__ = "$Id: setup.py 6086 2009-03-13 16:24:30Z cokelaer $"
+__revision__ = "$Id$"
 
 
 
