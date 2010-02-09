@@ -52,6 +52,10 @@
 #include <iostream>
 #endif
 
+#if defined(DO_NOT_DLLIMPORT_RCOBJECT) && defined(VPTOOLS_API)
+#undef VPTOOLS_API
+#define VPTOOLS_API
+#endif
 
 /* ----------------------------------------------------------------------- */
 

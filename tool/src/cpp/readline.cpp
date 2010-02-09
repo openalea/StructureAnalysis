@@ -42,7 +42,7 @@
 #define ON_ERROR failwith(our_error_message());
 */
 
-static char* DEFAULT_PROMPT = ">";
+static const char* DEFAULT_PROMPT = ">";
 
 #if 0
 #define NOHISTORY

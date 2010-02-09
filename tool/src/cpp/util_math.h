@@ -34,8 +34,8 @@
 
 
 
-#ifndef __util_vpmath_h__
-#define __util_vpmath_h__
+#ifndef __util_math_h__
+#define __util_math_h__
 
 /*! \file util_math.h
     \brief File that contains some math utility.

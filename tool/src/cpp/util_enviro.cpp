@@ -73,7 +73,7 @@ VPTOOLS_BEGIN_NAMESPACE
 static string AMAPMOD_DIR;
 
 string getHome(){
-        char * home = getenv("HOME");
+        const char * home = getenv("HOME");
 #ifdef _WIN32
         if(!home)home = getenv("USERPROFILE");
         if(!home)home = "C:\\";
@@ -370,7 +370,7 @@ void setAMAPmodDir(const std::string& dir){
 string getAMAPmodDir(){
 		if(!AMAPMOD_DIR.empty())return AMAPMOD_DIR;
 #ifdef _WIN32
-        char * dir = getenv("AMAPMOD_DIR");
+        const char * dir = getenv("AMAPMOD_DIR");
         if(dir){
 			AMAPMOD_DIR = short_dirname(string(dir));
 			return AMAPMOD_DIR;
@@ -388,7 +388,7 @@ string getAMAPmodDir(){
 		if(AMAPMOD_DIR.empty())AMAPMOD_DIR = string("C:\\");
 		else AMAPMOD_DIR = short_dirname(AMAPMOD_DIR);
 #else
-        char * dir = getenv("AMAPMOD_DIR");
+        const char * dir = getenv("AMAPMOD_DIR");
         if(!dir)dir = "/usr/local/AMAPmod";
 		AMAPMOD_DIR = string(dir);
 #endif
