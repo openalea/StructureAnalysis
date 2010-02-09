@@ -45,6 +45,10 @@
  *  mixed data (i.e. vectors of integers/floats)
  */
 
+#ifdef __MINGW32__
+#define DO_NOT_DLLIMPORT_RCOBJECT
+#endif
+
 #include "tool/rcobject.h"
 
 // Useful for RefCountObject (<=> DECLARE_PTR(DataSet))
