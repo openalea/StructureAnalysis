@@ -72,7 +72,7 @@ const int PLOT_MIN_FREQUENCY = 10;     // effectif minimum pour afficher les poi
 class Curves {          // famille de courbes avec effectif
 
 /*    friend class Distribution;
-    friend class Histogram;
+    friend class FrequencyDistribution;
     friend class Function;
     friend class Renewal;
     friend class Renewal_data;
@@ -119,7 +119,7 @@ public :
     Curves(int inb_curve , int ilength , bool frequency_flag = false , bool init_flag = true);
     Curves(const Curves &curves , char transform = 'c' , int max_frequency = MAX_FREQUENCY);
     Curves(const Distribution &dist);
-    Curves(const Histogram &histo);
+    Curves(const FrequencyDistribution &histo);
     ~Curves();
     Curves& operator=(const Curves &curves);
 
