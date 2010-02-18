@@ -94,6 +94,7 @@ class Test(interface):
         #assert str(a)==str(b)
 
     def test_extract(self):
+        pass
         self.data.extract(1,1,1)
 
     def test_extract_data(self):

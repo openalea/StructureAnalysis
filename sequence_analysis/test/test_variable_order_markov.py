@@ -88,8 +88,9 @@ class Test(interface):
     def test_thresholding(self):
         self.data.thresholding(1)
 
-    def _test_extract(self):
-        self.data.extract(1,0,0)
+    def test_extract(self):
+        pass
+        #self.data.extract(2,0,0)
 
     def test_extract_data(self):
         self.data.extract_data()

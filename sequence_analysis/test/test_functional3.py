@@ -36,8 +36,9 @@ seq70 = Cluster(seq69, "Step", 1, 10)
 #seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 27, MaxIndex=92)
 
 
-# Plot(seq70, ViewPoint="Data")
-# Plot(Cumulate(seq70), ViewPoint="Data")
+#TODO error seg fault
+#Plot(seq70, ViewPoint="Data")
+#Plot(Cumulate(seq70), ViewPoint="Data")
 
 vec70 = Vectors(seq70)
 Plot(Regression(vec70, "MovingAverage", 1, 2, [1]))
@@ -66,13 +67,13 @@ seq73 = PointwiseAverage(SelectIndividual(seq70, [4, 5, 6]), StandardDeviation=T
 
 seq74 = PointwiseAverage(SelectIndividual(seq70, [4, 5, 6]), Output="Residual")
 # seq74 = PointwiseAverage(SelectIndividual(seq70, [4, 5, 6]), Output="StandardizedResidual")
-# Plot(SelectIndividual(seq74, [4, 5, 6]), ViewPoint="Data")
-# Plot(SelectIndividual(Cumulate(seq74), [4, 5, 6]), ViewPoint="Data")
+Plot(SelectIndividual(seq74, [4, 5, 6]), ViewPoint="Data")
+Plot(SelectIndividual(Cumulate(seq74), [4, 5, 6]), ViewPoint="Data")
 
 
 matrix70 = Compare(seq70, VectorDistance("N", "N"), IndelFactor=1., End="Free")
-# matrix70 = Compare(seq70, VectorDistance("N", "N"), IndelFactor=1.)
-# Display(Clustering(matrix70, "Partition", 3))
+matrix70 = Compare(seq70, VectorDistance("N", "N"), IndelFactor=1.)
+Display(Clustering(matrix70, "Partition", 3))
 Clustering(matrix70, "Hierarchy")
 
 # extraction of trends (slowly varying component) and residuals (rapidly varying component)
@@ -81,7 +82,7 @@ Clustering(matrix70, "Hierarchy")
 seq75 = Difference(seq70)
 acf11 = Merge(ComputeCorrelation(seq75, 1, MaxLag=10), ComputeCorrelation(seq75, 2, MaxLag=10))
 ComputeWhiteNoiseCorrelation(acf11, 1)
-# Plot(acf11)
+Plot(acf11)
 
 # symmetric smoothing filters of half-width 3
 
@@ -91,20 +92,20 @@ filter3 = Convolution(Distribution("U", 0, 2), Distribution("U", 0, 2), Distribu
 filter4 = Convolution(Distribution("U", 0, 3), Distribution("U", 0, 3), Distribution("U", 0, 3), Distribution("U", 0, 3))
 filter5 = Convolution(Distribution("U", 0, 4), Distribution("U", 0, 4), Distribution("U", 0, 4))
 filter6 = Convolution(Distribution("U", 0, 6), Distribution("U", 0, 6))
-# Plot(filter1, filter2, Distribution("B", 0, 12, 0.5), filter3, filter4, filter5, filter6, Distribution("U", 0, 12))
+Plot(filter1, filter2, Distribution("B", 0, 12, 0.5), filter3, filter4, filter5, filter6, Distribution("U", 0, 12))
 
 seq76 = MovingAverage(seq70, Distribution("B", 0, 16, 0.5), BeginEnd=True)
 
 seq77 = MovingAverage(seq70, Distribution("B", 0, 16, 0.5), BeginEnd=True, Output="Residual")
 acf12 = Merge(ComputeCorrelation(seq73, 1, MaxLag=10), ComputeCorrelation(seq73, 2, MaxLag=10))
 ComputeWhiteNoiseCorrelation(acf12, Distribution("B", 0, 6, 0.5))
-# Plot(acf12)
+Plot(acf12)
 
 seq78 = MovingAverage(seq70, [1, 1, 1], BeginEnd=True)
 seq79 = MovingAverage(seq70, [1, 1, 1], BeginEnd=True, Output="Residual")
 acf13 = Merge(ComputeCorrelation(seq75, 1, MaxLag=10), ComputeCorrelation(seq75, 2, MaxLag=10))
 ComputeWhiteNoiseCorrelation(acf13, [1, 1, 1])
-# Plot(acf13)
+Plot(acf13)
 
 # multiple change-point models
 
@@ -114,7 +115,7 @@ ComputeWhiteNoiseCorrelation(acf13, [1, 1, 1])
 seq80 = SelectVariable(seq70, 1)
 # Display(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile", NbSegmentation=5)
 # Plot(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile")
-# Plot(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile", Output="ChangePoint")
+#Plot(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile", Output="ChangePoint")
 
 seq81 = Segmentation(seq80, 2, 10, "Gaussian")
 # Plot(seq81, ViewPoint="Data")

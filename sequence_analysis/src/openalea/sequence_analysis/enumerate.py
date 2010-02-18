@@ -2,6 +2,10 @@
 
 :Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
 
+this is a mess, need to be simplified very carefully though according to stat_tool/
+sequence original code.
+
+
 """
 __version__ = "$Id$"
 
@@ -91,13 +95,34 @@ estimator = estimator_map
 SEQUENCE = 0
 SUBTRACTION_RESIDUAL = 1
 STANDARDIZED_RESIDUAL = 2
-    
-seq_map = {"Observation":0, 
-               "FirstOccurrence":1,
-               "Recurrence":2, 
-               "Sojourn":3,
-               "NbRun":6,
-               "NbOccurrence":7,
+
+"""
+
+enum {
+  SELF_TRANSITION ,
+  OBSERVATION ,
+  INTENSITY ,
+  FIRST_OCCURRENCE ,
+  RECURRENCE_TIME ,
+  SOJOURN_TIME ,
+  INITIAL_RUN ,
+  FINAL_RUN ,
+  NB_RUN ,
+  NB_OCCURRENCE ,
+  COUNTING ,
+  LENGTH ,
+  SEQUENCE_CUMUL ,
+  SEQUENCE_MEAN
+};
+"""
+
+#todo: replace by appropriate enumerate from_se uence_analysis    
+seq_map = {"Observation":1, 
+               "FirstOccurrence":3,
+               "Recurrence":4, 
+               "Sojourn":5,
+               "NbRun":7,
+               "NbOccurrence":8,
                "Forward": -1}
     
 _INITIAL_RUN = 4
