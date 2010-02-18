@@ -24,7 +24,7 @@
 
 // Boost.Python Wrapper export function
 void class_constant();
-void class_format_error();
+void class_stat_error();
 
 
 class StatInterfaceWrap;
