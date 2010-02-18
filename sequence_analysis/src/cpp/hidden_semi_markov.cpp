@@ -57,18 +57,18 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Semi_markov.
+ *  Constructeur de la classe SemiMarkov.
  *
- *  arguments : pointeur sur un objet Chain et sur un objet Nonparametric_sequence_process,
+ *  arguments : pointeur sur un objet Chain et sur un objet NonparametricSequenceProcess,
  *              nombre de processus d'observation, pointeurs sur
- *              des objets Nonparametric_process, longueur des sequences,
+ *              des objets NonparametricProcess, longueur des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
-                         int inb_output_process , Nonparametric_process **pobservation ,
-                         int length , bool counting_flag)
+SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
+                       int inb_output_process , NonparametricProcess **pobservation ,
+                       int length , bool counting_flag)
 :Chain(*pchain)
 
 {
@@ -80,10 +80,10 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
 
   nb_output_process = inb_output_process;
 
-  nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
-  nonparametric_process[0] = new Nonparametric_sequence_process(*poccupancy);
+  nonparametric_process = new NonparametricSequenceProcess*[nb_output_process + 1];
+  nonparametric_process[0] = new NonparametricSequenceProcess(*poccupancy);
   for (i = 1;i <= nb_output_process;i++) {
-    nonparametric_process[i] = new Nonparametric_sequence_process(*pobservation[i - 1]);
+    nonparametric_process[i] = new NonparametricSequenceProcess(*pobservation[i - 1]);
   }
 
   parametric_process = NULL;
@@ -127,18 +127,18 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Semi_markov.
+ *  Constructeur de la classe SemiMarkov.
  *
- *  arguments : pointeur sur un objet Chain et sur un objet Nonparametric_sequence_process,
+ *  arguments : pointeur sur un objet Chain et sur un objet NonparametricSequenceProcess,
  *              nombre de processus d'observation, pointeurs sur des objets
- *              Nonparametric_process et Parametric_process, longueur des sequences,
+ *              NonparametricProcess et DiscreteParametricProcess, longueur des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
-                         int inb_output_process , Nonparametric_process **nonparametric_observation ,
-                         Parametric_process **parametric_observation , int length , bool counting_flag)
+SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
+                       int inb_output_process , NonparametricProcess **nonparametric_observation ,
+                       DiscreteParametricProcess **parametric_observation , int length , bool counting_flag)
 :Chain(*pchain)
 
 {
@@ -150,19 +150,19 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
 
   nb_output_process = inb_output_process;
 
-  nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
-  nonparametric_process[0] = new Nonparametric_sequence_process(*poccupancy);
-  parametric_process = new Parametric_process*[nb_output_process + 1];
+  nonparametric_process = new NonparametricSequenceProcess*[nb_output_process + 1];
+  nonparametric_process[0] = new NonparametricSequenceProcess(*poccupancy);
+  parametric_process = new DiscreteParametricProcess*[nb_output_process + 1];
   parametric_process[0] = NULL;
 
   for (i = 1;i <= nb_output_process;i++) {
     if (nonparametric_observation[i - 1]) {
-      nonparametric_process[i] = new Nonparametric_sequence_process(*nonparametric_observation[i - 1]);
+      nonparametric_process[i] = new NonparametricSequenceProcess(*nonparametric_observation[i - 1]);
       parametric_process[i] = NULL;
     }
     else {
       nonparametric_process[i] = NULL;
-      parametric_process[i] = new Parametric_process(*parametric_observation[i - 1]);
+      parametric_process[i] = new DiscreteParametricProcess(*parametric_observation[i - 1]);
     }
   }
 
@@ -205,11 +205,11 @@ Semi_markov::Semi_markov(const Chain *pchain , const Nonparametric_sequence_proc
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Hidden_semi_markov.
+ *  Destructeur de la classe HiddenSemiMarkov.
  *
  *--------------------------------------------------------------*/
 
-Hidden_semi_markov::~Hidden_semi_markov() {}
+HiddenSemiMarkov::~HiddenSemiMarkov() {}
 
 
 /*--------------------------------------------------------------*
@@ -220,14 +220,14 @@ Hidden_semi_markov::~Hidden_semi_markov() {}
  *
  *--------------------------------------------------------------*/
 
-Hidden_semi_markov* Hidden_semi_markov::thresholding(double min_probability) const
+HiddenSemiMarkov* HiddenSemiMarkov::thresholding(double min_probability) const
 
 {
   register int i;
-  Hidden_semi_markov *hsmarkov;
+  HiddenSemiMarkov *hsmarkov;
 
 
-  hsmarkov = new Hidden_semi_markov(*this , false , false);
+  hsmarkov = new HiddenSemiMarkov(*this , false , false);
   hsmarkov->Chain::thresholding(min_probability);
 
   for (i = 1;i <= nb_output_process;i++) {
@@ -242,17 +242,17 @@ Hidden_semi_markov* Hidden_semi_markov::thresholding(double min_probability) con
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Hidden_semi_markov a partir d'un fichier.
+ *  Construction d'un objet HiddenSemiMarkov a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, longueur des sequences,
+ *  arguments : reference sur un objet StatError, path, longueur des sequences,
  *              flag sur le calcul des lois de comptage, seuil sur les fonctions de repartition
  *              des lois parametriques, flag format des processus d'observation.
  *
  *--------------------------------------------------------------*/
 
-Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const char *path ,
-                                                  int length , bool counting_flag ,
-                                                  double cumul_threshold , bool old_format)
+HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *path ,
+                                                int length , bool counting_flag ,
+                                                double cumul_threshold , bool old_format)
 
 {
   RWLocaleSnapshot locale("en");
@@ -264,10 +264,10 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
   int line , nb_output_process , index;
   long value;
   const Chain *chain;
-  const Nonparametric_sequence_process *occupancy;
-  Nonparametric_process **nonparametric_observation;
-  Parametric_process **parametric_observation;
-  Hidden_semi_markov *hsmarkov;
+  const NonparametricSequenceProcess *occupancy;
+  NonparametricProcess **nonparametric_observation;
+  DiscreteParametricProcess **parametric_observation;
+  HiddenSemiMarkov *hsmarkov;
   ifstream in_file(path);
 
 
@@ -431,8 +431,8 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
           }
 
           else {
-            nonparametric_observation = new Nonparametric_process*[nb_output_process];
-            parametric_observation = new Parametric_process*[nb_output_process];
+            nonparametric_observation = new NonparametricProcess*[nb_output_process];
+            parametric_observation = new DiscreteParametricProcess*[nb_output_process];
             for (i = 0;i < nb_output_process;i++) {
               nonparametric_observation[i] = NULL;
               parametric_observation[i] = NULL;
@@ -557,9 +557,9 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
             }
 
             if (status) {
-              hsmarkov = new Hidden_semi_markov(chain , occupancy , nb_output_process ,
-                                                nonparametric_observation , parametric_observation ,
-                                                length , counting_flag);
+              hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
+                                              nonparametric_observation , parametric_observation ,
+                                              length , counting_flag);
             }
 
             for (i = 0;i < nb_output_process;i++) {
@@ -579,8 +579,8 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
 
           if (nonparametric_observation) {
             if (status) {
-              hsmarkov = new Hidden_semi_markov(chain , occupancy , nb_output_process ,
-                                                nonparametric_observation , length , counting_flag);
+              hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
+                                              nonparametric_observation , length , counting_flag);
             }
 
             for (i = 0;i < nb_output_process;i++) {
@@ -604,17 +604,17 @@ Hidden_semi_markov* hidden_semi_markov_ascii_read(Format_error &error , const ch
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Hidden_semi_markov dans un fichier.
+ *  Ecriture d'un objet HiddenSemiMarkov dans un fichier.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Hidden_semi_markov::ascii_write(ostream &os , bool exhaustive) const
+ostream& HiddenSemiMarkov::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  Semi_markov::ascii_write(os , semi_markov_data , exhaustive ,
-                           false , true);
+  SemiMarkov::ascii_write(os , semi_markov_data , exhaustive ,
+                          false , true);
 
 //  os << "\nEnd state: " << end_state() << endl;
 
@@ -624,15 +624,15 @@ ostream& Hidden_semi_markov::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Hidden_semi_markov dans un fichier.
+ *  Ecriture d'un objet HiddenSemiMarkov dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_semi_markov::ascii_write(Format_error &error , const char *path ,
-                                     bool exhaustive) const
+bool HiddenSemiMarkov::ascii_write(StatError &error , const char *path ,
+                                   bool exhaustive) const
 
 {
   bool status;
@@ -648,8 +648,8 @@ bool Hidden_semi_markov::ascii_write(Format_error &error , const char *path ,
 
   else {
     status = true;
-    Semi_markov::ascii_write(out_file , semi_markov_data , exhaustive ,
-                             true , true);
+    SemiMarkov::ascii_write(out_file , semi_markov_data , exhaustive ,
+                            true , true);
   }
 
   return status;
@@ -658,13 +658,13 @@ bool Hidden_semi_markov::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Hidden_semi_markov dans un fichier au format tableur.
+ *  Ecriture d'un objet HiddenSemiMarkov dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_semi_markov::spreadsheet_write(Format_error &error , const char *path) const
+bool HiddenSemiMarkov::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -680,7 +680,7 @@ bool Hidden_semi_markov::spreadsheet_write(Format_error &error , const char *pat
 
   else {
     status = true;
-    Semi_markov::spreadsheet_write(out_file , semi_markov_data , true);
+    SemiMarkov::spreadsheet_write(out_file , semi_markov_data , true);
   }
 
   return status;
@@ -693,7 +693,7 @@ bool Hidden_semi_markov::spreadsheet_write(Format_error &error , const char *pat
  *
  *--------------------------------------------------------------*/
 
-int Hidden_semi_markov::end_state() const
+int HiddenSemiMarkov::end_state() const
 
 {
   register int i , j , k;
