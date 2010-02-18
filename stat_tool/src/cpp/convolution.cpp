@@ -77,7 +77,7 @@ Convolution::Convolution()
  *
  *--------------------------------------------------------------*/
 
-Convolution::Convolution(int nb_dist , const Parametric **pdist)
+Convolution::Convolution(int nb_dist , const DiscreteParametric **pdist)
 
 {
   register int i;
@@ -87,9 +87,9 @@ Convolution::Convolution(int nb_dist , const Parametric **pdist)
   convolution_data = NULL;
   nb_distribution = nb_dist;
 
-  distribution = new Parametric*[nb_distribution];
+  distribution = new DiscreteParametric*[nb_distribution];
   for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new Parametric(*pdist[i] , 'n');
+    distribution[i] = new DiscreteParametric(*pdist[i] , 'n');
     cnb_value += distribution[i]->nb_value - 1;
   }
 
@@ -106,22 +106,24 @@ Convolution::Convolution(int nb_dist , const Parametric **pdist)
  *
  *--------------------------------------------------------------*/
 
-Convolution::Convolution(const Parametric &known_dist , const Parametric &unknown_dist)
+Convolution::Convolution(const DiscreteParametric &known_dist ,
+                         const DiscreteParametric &unknown_dist)
 
 {
   convolution_data = NULL;
 
   nb_distribution = 2;
-  distribution = new Parametric*[nb_distribution];
+  distribution = new DiscreteParametric*[nb_distribution];
 
   if ((known_dist.ident == POISSON) || (known_dist.ident == NEGATIVE_BINOMIAL)) {
-    distribution[0] = new Parametric(known_dist.ident , known_dist.inf_bound , known_dist.sup_bound ,
-                                     known_dist.parameter , known_dist.probability , CONVOLUTION_THRESHOLD);
+    distribution[0] = new DiscreteParametric(known_dist.ident , known_dist.inf_bound ,
+                                             known_dist.sup_bound , known_dist.parameter ,
+                                             known_dist.probability , CONVOLUTION_THRESHOLD);
   }
   else {
-    distribution[0] = new Parametric(known_dist , 'n');
+    distribution[0] = new DiscreteParametric(known_dist , 'n');
   }
-  distribution[1] = new Parametric(unknown_dist , 'c' , (int)(unknown_dist.nb_value * NB_VALUE_COEFF));
+  distribution[1] = new DiscreteParametric(unknown_dist , 'c' , (int)(unknown_dist.nb_value * NB_VALUE_COEFF));
 
   Distribution::init(distribution[0]->alloc_nb_value + distribution[1]->alloc_nb_value - 1);
 }
@@ -132,7 +134,7 @@ Convolution::Convolution(const Parametric &known_dist , const Parametric &unknow
  *  Copie d'un objet Convolution.
  *
  *  arguments : reference sur un objet Convolution,
- *              flag copie de l'objet Convolution_data.
+ *              flag copie de l'objet ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
@@ -143,7 +145,7 @@ void Convolution::copy(const Convolution &convol , bool data_flag)
 
 
   if ((data_flag) && (convol.convolution_data)) {
-    convolution_data = new Convolution_data(*(convol.convolution_data) , false);
+    convolution_data = new ConvolutionData(*(convol.convolution_data) , false);
   }
   else {
     convolution_data = NULL;
@@ -151,9 +153,9 @@ void Convolution::copy(const Convolution &convol , bool data_flag)
 
   nb_distribution = convol.nb_distribution;
 
-  distribution = new Parametric*[nb_distribution];
+  distribution = new DiscreteParametric*[nb_distribution];
   for (i = 0;i < nb_distribution;i++) {
-    distribution[i] = new Parametric(*(convol.distribution[i]));
+    distribution[i] = new DiscreteParametric(*(convol.distribution[i]));
   }
 }
 
@@ -225,10 +227,10 @@ Convolution& Convolution::operator=(const Convolution &convol)
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Convolution::extract(Format_error &error , int index) const
+DiscreteParametricModel* Convolution::extract(Format_error &error , int index) const
 
 {
-  Parametric_model *pdist;
+  DiscreteParametricModel *pdist;
 
 
   if ((index < 1) || (index > nb_distribution)) {
@@ -238,8 +240,8 @@ Parametric_model* Convolution::extract(Format_error &error , int index) const
 
   else {
     index--;
-    pdist = new Parametric_model(*distribution[index] ,
-                                 (convolution_data ? convolution_data->histogram[index] : 0));
+    pdist = new DiscreteParametricModel(*distribution[index] ,
+                                        (convolution_data ? convolution_data->frequency_distribution[index] : 0));
   }
 
   return pdist;
@@ -254,10 +256,10 @@ Parametric_model* Convolution::extract(Format_error &error , int index) const
  *
  *--------------------------------------------------------------*/
 
-Convolution_data* Convolution::extract_data(Format_error &error) const
+ConvolutionData* Convolution::extract_data(Format_error &error) const
 
 {
-  Convolution_data *convol_histo;
+  ConvolutionData *convol_histo;
 
 
   error.init();
@@ -268,7 +270,7 @@ Convolution_data* Convolution::extract_data(Format_error &error) const
   }
 
   else {
-    convol_histo = new Convolution_data(*convolution_data);
+    convol_histo = new ConvolutionData(*convolution_data);
     convol_histo->convolution = new Convolution(*this , false);
   }
 
@@ -285,7 +287,8 @@ Convolution_data* Convolution::extract_data(Format_error &error) const
  *
  *--------------------------------------------------------------*/
 
-Convolution* convolution_building(Format_error &error , int nb_dist , const Parametric **dist)
+Convolution* convolution_building(Format_error &error , int nb_dist ,
+                                  const DiscreteParametric **dist)
 
 {
   Convolution *convol;
@@ -326,7 +329,7 @@ Convolution* convolution_ascii_read(Format_error &error , const char *path ,
   register int i , j;
   int line;
   long index , nb_dist;
-  const Parametric **dist;
+  const DiscreteParametric **dist;
   Convolution *convol;
   ifstream in_file(path);
 
@@ -416,7 +419,7 @@ Convolution* convolution_ascii_read(Format_error &error , const char *path ,
     }
 
     if (status) {
-      dist = new const Parametric*[nb_dist];
+      dist = new const DiscreteParametric*[nb_dist];
       for (i = 0;i < nb_dist;i++) {
         dist[i] = NULL;
       }
@@ -475,8 +478,8 @@ Convolution* convolution_ascii_read(Format_error &error , const char *path ,
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            dist[i] = parametric_parsing(error , in_file , line ,
-                                         NEGATIVE_BINOMIAL , cumul_threshold);
+            dist[i] = discrete_parametric_parsing(error , in_file , line ,
+                                                  NEGATIVE_BINOMIAL , cumul_threshold);
             break;
           }
         }
@@ -543,12 +546,12 @@ ostream& Convolution::line_write(ostream &os) const
  *  Ecriture d'un produit de convolution et de la structure
  *  de donnees associee dans un fichier.
  *
- *  arguments : stream, pointeur sur un objet Convolution_data,
+ *  arguments : stream, pointeur sur un objet ConvolutionData,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Convolution::ascii_write(ostream &os , const Convolution_data *convol_histo ,
+ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_histo ,
                                   bool exhaustive , bool file_flag) const
 
 {
@@ -569,7 +572,7 @@ ostream& Convolution::ascii_write(ostream &os , const Convolution_data *convol_h
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     convol_histo->ascii_characteristic_print(os , exhaustive , file_flag);
 
     likelihood = likelihood_computation(*convol_histo);
@@ -602,10 +605,10 @@ ostream& Convolution::ascii_write(ostream &os , const Convolution_data *convol_h
       if (file_flag) {
         os << "# ";
       }
-      os << "   | " << STAT_label[STATL_HISTOGRAM] << " | " << STAT_label[STATL_CONVOLUTION]
-         << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-         << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE] << " "
-         << STAT_label[STATL_CONVOLUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
+      os << "   | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " | " << STAT_label[STATL_CONVOLUTION]
+         << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+         << " " << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_CONVOLUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
       ascii_print(os , file_flag , true , false , convol_histo);
     }
@@ -628,21 +631,21 @@ ostream& Convolution::ascii_write(ostream &os , const Convolution_data *convol_h
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_HISTOGRAM] << " " << i + 1 << " - ";
-      convol_histo->histogram[i]->ascii_characteristic_print(os , exhaustive , file_flag);
+      os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1 << " - ";
+      convol_histo->frequency_distribution[i]->ascii_characteristic_print(os , exhaustive , file_flag);
 
       if (exhaustive) {
         os << "\n";
         if (file_flag) {
           os << "# ";
         }
-        os << "   | " << STAT_label[STATL_HISTOGRAM] << " " << i + 1
+        os << "   | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1
            << " | " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1
-           << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i + 1
-           << " " << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE] << " "
-           << STAT_label[STATL_DISTRIBUTION] << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
+           << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+           << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE]
+           << " " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
 
-        distribution[i]->Distribution::ascii_print(os , file_flag , true , false , convol_histo->histogram[i]);
+        distribution[i]->Distribution::ascii_print(os , file_flag , true , false , convol_histo->frequency_distribution[i]);
       }
     }
   }
@@ -669,8 +672,8 @@ ostream& Convolution::ascii_write(ostream &os , const Convolution_data *convol_h
     for (i = 0;i < nb_distribution;i++) {
       os << " | " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
     }
-    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION] << " "
-       << STAT_label[STATL_FUNCTION] << endl;
+    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION]
+       << " " << STAT_label[STATL_FUNCTION] << endl;
 
     ascii_print(os , nb_distribution , pdist , scale , file_flag , true);
   }
@@ -732,11 +735,11 @@ bool Convolution::ascii_write(Format_error &error , const char *path ,
  *  Ecriture d'un produit de convolution et de la structure
  *  de donnees associee dans un fichier au format tableur.
  *
- *  arguments : stream, pointeur sur un objet Convolution_data.
+ *  arguments : stream, pointeur sur un objet ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
-ostream& Convolution::spreadsheet_write(ostream &os , const Convolution_data *convol_histo) const
+ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *convol_histo) const
 
 {
   register int i;
@@ -752,7 +755,7 @@ ostream& Convolution::spreadsheet_write(ostream &os , const Convolution_data *co
     Test test(CHI2);
 
 
-    os << "\n" << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     convol_histo->spreadsheet_characteristic_print(os , true);
 
     likelihood = likelihood_computation(*convol_histo);
@@ -768,10 +771,10 @@ ostream& Convolution::spreadsheet_write(ostream &os , const Convolution_data *co
     os << "\n";
     test.spreadsheet_print(os);
 
-    os << "\n\t" << STAT_label[STATL_HISTOGRAM] << "\t" << STAT_label[STATL_CONVOLUTION]
-       << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-       << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE] << " "
-       << STAT_label[STATL_CONVOLUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
+    os << "\n\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t" << STAT_label[STATL_CONVOLUTION]
+       << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+       << " " << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE]
+       << " " << STAT_label[STATL_CONVOLUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
     spreadsheet_print(os , true , false , false , convol_histo);
 
@@ -784,16 +787,16 @@ ostream& Convolution::spreadsheet_write(ostream &os , const Convolution_data *co
          << STAT_label[STATL_VARIATION_COEFF] << "\t"
          << sqrt(distribution[i]->variance) / distribution[i]->mean << endl;
 
-      os << "\n" << STAT_label[STATL_HISTOGRAM] << " " << i + 1 << "\t";
-      convol_histo->histogram[i]->spreadsheet_characteristic_print(os , true);
+      os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1 << "\t";
+      convol_histo->frequency_distribution[i]->spreadsheet_characteristic_print(os , true);
 
-      os << "\n\t" << STAT_label[STATL_HISTOGRAM] << " " << i + 1
+      os << "\n\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1
          << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1
-         << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-         << i + 1 << " " << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE] << " "
-         << STAT_label[STATL_DISTRIBUTION] << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
+         << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+         << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE]
+         << " " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
 
-      distribution[i]->Distribution::spreadsheet_print(os , true , false , false , convol_histo->histogram[i]);
+      distribution[i]->Distribution::spreadsheet_print(os , true , false , false , convol_histo->frequency_distribution[i]);
     }
   }
 
@@ -814,8 +817,8 @@ ostream& Convolution::spreadsheet_write(ostream &os , const Convolution_data *co
   for (i = 0;i < nb_distribution;i++) {
     os << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
   }
-  os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION] << " "
-     << STAT_label[STATL_FUNCTION] << endl;
+  os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION]
+     << " " << STAT_label[STATL_FUNCTION] << endl;
 
   spreadsheet_print(os , nb_distribution , pdist , scale , true);
 
@@ -860,12 +863,12 @@ bool Convolution::spreadsheet_write(Format_error &error , const char *path) cons
  *  de la structure de donnees associee.
  *
  *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur un objet Convolution_data.
+ *              pointeur sur un objet ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
 bool Convolution::plot_write(const char *prefix , const char *title ,
-                             const Convolution_data *convol_histo) const
+                             const ConvolutionData *convol_histo) const
 
 {
   bool status;
@@ -873,7 +876,7 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
   int index_dist[CONVOLUTION_NB_DISTRIBUTION + 1];
   double plot_max , scale[CONVOLUTION_NB_DISTRIBUTION + 2];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION + 2];
-  const Histogram *phisto[CONVOLUTION_NB_DISTRIBUTION + 1];
+  const FrequencyDistribution *phisto[CONVOLUTION_NB_DISTRIBUTION + 1];
   ostringstream data_file_name[CONVOLUTION_NB_DISTRIBUTION + 1];
 
 
@@ -892,9 +895,9 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
 
     for (i = 0;i < nb_distribution;i++) {
       pdist[i + 2] = distribution[i];
-      phisto[i + 1] = convol_histo->histogram[i];
+      phisto[i + 1] = convol_histo->frequency_distribution[i];
       index_dist[i + 1] = i + 2;
-      scale[i + 2] = convol_histo->histogram[i]->nb_element;
+      scale[i + 2] = convol_histo->frequency_distribution[i]->nb_element;
     }
 
     status = ::plot_print((data_file_name[0].str()).c_str() , nb_distribution + 2 , pdist ,
@@ -977,7 +980,7 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
         out_file << "plot [0:" << nb_value - 1 << "] [0:"
                  << (int)(MAX(convol_histo->max , max * convol_histo->nb_element) * YSCALE) + 1
                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
-                 << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
+                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
         out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_distribution + 3
                  << " title \"" << STAT_label[STATL_CONVOLUTION] << "\" with linespoints" << endl;
       }
@@ -998,10 +1001,10 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
           }
 
           out_file << "plot [0:" << distribution[j]->nb_value - 1 << "] [0:"
-                   << (int)(MAX(convol_histo->histogram[j]->max ,
-                                distribution[j]->max * convol_histo->histogram[j]->nb_element) * YSCALE) + 1
+                   << (int)(MAX(convol_histo->frequency_distribution[j]->max ,
+                                distribution[j]->max * convol_histo->frequency_distribution[j]->nb_element) * YSCALE) + 1
                    << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << j + 2
-                   << " title \"" << STAT_label[STATL_HISTOGRAM] << " " << j + 1
+                   << " title \"" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << j + 1
                    << "\" with impulses,\\" << endl;
           out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_distribution + j + 4
                    << " title \"" << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
@@ -1056,11 +1059,11 @@ bool Convolution::plot_write(Format_error &error , const char *prefix ,
  *  Sortie graphique d'un produit de convolution et
  *  de la structure de donnees associee.
  *
- *  argument : pointeur sur un objet Convolution_data.
+ *  argument : pointeur sur un objet ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) const
+MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) const
 
 {
   register int i;
@@ -1137,7 +1140,7 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
     plot[1].resize(2);
 
-    plot[1][0].legend = STAT_label[STATL_HISTOGRAM];
+    plot[1][0].legend = STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
     plot[1][0].style = "impulses";
 
@@ -1161,8 +1164,8 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     plot[2].resize(2);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-           << STAT_label[STATL_FUNCTION];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+           << " " << STAT_label[STATL_FUNCTION];
     plot[2][0].legend = legend.str();
 
     plot[2][0].style = "linespoints";
@@ -1170,8 +1173,8 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
     convol_histo->plotable_cumul_write(plot[2][0]);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION] << " "
-           << STAT_label[STATL_FUNCTION];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION]
+           << " " << STAT_label[STATL_FUNCTION];
     plot[2][1].legend = legend.str();
 
     plot[2][1].style = "linespoints";
@@ -1189,8 +1192,8 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
       }
       plot[i + 3].xrange = Range(0 , xmax);
 
-      plot[i + 3].yrange = Range(0. , ceil(MAX(convol_histo->histogram[i]->max ,
-                                           distribution[i]->max * convol_histo->histogram[i]->nb_element)
+      plot[i + 3].yrange = Range(0. , ceil(MAX(convol_histo->frequency_distribution[i]->max ,
+                                           distribution[i]->max * convol_histo->frequency_distribution[i]->nb_element)
                                            * YSCALE));
 
       if (distribution[i]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1200,12 +1203,12 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
       plot[i + 3].resize(2);
 
       legend.str("");
-      legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      legend << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
       plot[i + 3][0].legend = legend.str();
 
       plot[i + 3][0].style = "impulses";
 
-      convol_histo->histogram[i]->plotable_frequency_write(plot[i + 3][0]);
+      convol_histo->frequency_distribution[i]->plotable_frequency_write(plot[i + 3][0]);
 
       legend.str("");
       legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
@@ -1214,7 +1217,7 @@ MultiPlotSet* Convolution::get_plotable(const Convolution_data *convol_histo) co
 
       plot[i + 3][1].style = "linespoints";
 
-      distribution[i]->plotable_mass_write(plot[i + 3][1] , convol_histo->histogram[i]->nb_element);
+      distribution[i]->plotable_mass_write(plot[i + 3][1] , convol_histo->frequency_distribution[i]->nb_element);
     }
   }
 
@@ -1237,80 +1240,80 @@ MultiPlotSet* Convolution::get_plotable() const
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Convolution_data.
+ *  Constructeur par defaut de la classe ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
-Convolution_data::Convolution_data()
+ConvolutionData::ConvolutionData()
 
 {
   convolution = NULL;
-  nb_histogram = 0;
-  histogram = NULL;
+  nb_distribution = 0;
+  frequency_distribution = NULL;
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Convolution_data.
+ *  Constructeur de la classe ConvolutionData.
  *
- *  arguments : reference sur un objet Histogram,
- *              nombre d'histogrammes.
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              nombre de lois empiriques.
  *
  *--------------------------------------------------------------*/
 
-Convolution_data::Convolution_data(const Histogram &histo , int nb_histo)
-:Histogram(histo)
+ConvolutionData::ConvolutionData(const FrequencyDistribution &histo , int nb_dist)
+:FrequencyDistribution(histo)
 
 {
   register int i;
 
 
   convolution = NULL;
-  nb_histogram = nb_histo;
+  nb_distribution = nb_dist;
 
-  histogram = new Histogram*[nb_histogram];
-  for (i = 0;i < nb_histogram;i++) {
-    histogram[i] = new Histogram(nb_value);
+  frequency_distribution = new FrequencyDistribution*[nb_distribution];
+  for (i = 0;i < nb_distribution;i++) {
+    frequency_distribution[i] = new FrequencyDistribution(nb_value);
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Convolution_data.
+ *  Constructeur de la classe ConvolutionData.
  *
  *  argument : reference sur un objet Convolution.
  *
  *--------------------------------------------------------------*/
 
-Convolution_data::Convolution_data(const Convolution &convol)
-:Histogram(convol)
+ConvolutionData::ConvolutionData(const Convolution &convol)
+:FrequencyDistribution(convol)
 
 {
   register int i;
 
 
   convolution = NULL;
-  nb_histogram = convol.nb_distribution;
+  nb_distribution = convol.nb_distribution;
 
-  histogram = new Histogram*[nb_histogram];
-  for (i = 0;i < nb_histogram;i++) {
-    histogram[i] = new Histogram(*(convol.distribution[i]));
+  frequency_distribution = new FrequencyDistribution*[nb_distribution];
+  for (i = 0;i < nb_distribution;i++) {
+    frequency_distribution[i] = new FrequencyDistribution(*(convol.distribution[i]));
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Convolution_data.
+ *  Copie d'un objet ConvolutionData.
  *
- *  arguments : reference sur un objet Convolution_data,
+ *  arguments : reference sur un objet ConvolutionData,
  *              flag copie de l'objet Convolution.
  *
  *--------------------------------------------------------------*/
 
-void Convolution_data::copy(const Convolution_data &convol_histo , bool model_flag)
+void ConvolutionData::copy(const ConvolutionData &convol_histo , bool model_flag)
 
 {
   register int i;
@@ -1323,44 +1326,44 @@ void Convolution_data::copy(const Convolution_data &convol_histo , bool model_fl
     convolution = NULL;
   }
 
-  nb_histogram = convol_histo.nb_histogram;
+  nb_distribution = convol_histo.nb_distribution;
 
-  histogram = new Histogram*[nb_histogram];
-  for (i = 0;i < nb_histogram;i++) {
-    histogram[i] = new Histogram(*(convol_histo.histogram[i]));
+  frequency_distribution = new FrequencyDistribution*[nb_distribution];
+  for (i = 0;i < nb_distribution;i++) {
+    frequency_distribution[i] = new FrequencyDistribution(*(convol_histo.frequency_distribution[i]));
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Convolution_data.
+ *  Destruction des champs d'un objet ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
-void Convolution_data::remove()
+void ConvolutionData::remove()
 
 {
   delete convolution;
 
-  if (histogram) {
+  if (frequency_distribution) {
     register int i;
 
-    for (i = 0;i < nb_histogram;i++) {
-      delete histogram[i];
+    for (i = 0;i < nb_distribution;i++) {
+      delete frequency_distribution[i];
     }
-    delete [] histogram;
+    delete [] frequency_distribution;
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Convolution_data.
+ *  Destructeur de la classe ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
-Convolution_data::~Convolution_data()
+ConvolutionData::~ConvolutionData()
 
 {
   remove();
@@ -1369,20 +1372,20 @@ Convolution_data::~Convolution_data()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Convolution_data.
+ *  Operateur d'assignement de la classe ConvolutionData.
  *
- *  argument : reference sur un objet Convolution_data.
+ *  argument : reference sur un objet ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
-Convolution_data& Convolution_data::operator=(const Convolution_data &convol_histo)
+ConvolutionData& ConvolutionData::operator=(const ConvolutionData &convol_histo)
 
 {
   if (&convol_histo != this) {
     remove();
     delete [] frequency;
 
-    Histogram::copy(convol_histo);
+    FrequencyDistribution::copy(convol_histo);
     copy(convol_histo);
   }
 
@@ -1392,29 +1395,29 @@ Convolution_data& Convolution_data::operator=(const Convolution_data &convol_his
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un sous-histogramme.
+ *  Extraction de lois empiriques elementaires.
  *
- *  arguments : reference sur un objet Format_error, indice de l'histogramme.
+ *  arguments : reference sur un objet Format_error, indice de la loi empirique.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Convolution_data::extract(Format_error &error , int index) const
+DiscreteDistributionData* ConvolutionData::extract(Format_error &error , int index) const
 
 {
-  Distribution_data *phisto;
+  DiscreteDistributionData *phisto;
 
 
   error.init();
 
-  if ((index < 1) || (index > nb_histogram)) {
+  if ((index < 1) || (index > nb_distribution)) {
     phisto = NULL;
-    error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
+    error.update(STAT_error[STATR_FREQUENCY_DISTRIBUTION_INDEX]);
   }
 
   else {
     index--;
-    phisto = new Distribution_data(*histogram[index] ,
-                                   (convolution ? convolution->distribution[index] : 0));
+    phisto = new DiscreteDistributionData(*frequency_distribution[index] ,
+                                          (convolution ? convolution->distribution[index] : 0));
   }
 
   return phisto;
@@ -1423,13 +1426,13 @@ Distribution_data* Convolution_data::extract(Format_error &error , int index) co
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Convolution_data.
+ *  Ecriture sur une ligne d'un objet ConvolutionData.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Convolution_data::line_write(ostream &os) const
+ostream& ConvolutionData::line_write(ostream &os) const
 
 {
   os << STAT_label[STATL_SAMPLE_SIZE] << ": " << nb_element << "   "
@@ -1442,13 +1445,13 @@ ostream& Convolution_data::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Convolution_data.
+ *  Ecriture d'un objet ConvolutionData.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Convolution_data::ascii_write(ostream &os , bool exhaustive) const
+ostream& ConvolutionData::ascii_write(ostream &os , bool exhaustive) const
 
 {
   if (convolution) {
@@ -1461,15 +1464,15 @@ ostream& Convolution_data::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Convolution_data dans un fichier.
+ *  Ecriture d'un objet ConvolutionData dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Convolution_data::ascii_write(Format_error &error , const char *path ,
-                                   bool exhaustive) const
+bool ConvolutionData::ascii_write(Format_error &error , const char *path ,
+                                  bool exhaustive) const
 
 {
   bool status = false;
@@ -1497,13 +1500,13 @@ bool Convolution_data::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Convolution_data dans un fichier au format tableur.
+ *  Ecriture d'un objet ConvolutionData dans un fichier au format tableur.
  *
  *  arguments : reference sur un objet Format_error, path.
  *
  *--------------------------------------------------------------*/
 
-bool Convolution_data::spreadsheet_write(Format_error &error , const char *path) const
+bool ConvolutionData::spreadsheet_write(Format_error &error , const char *path) const
 
 {
   bool status = false;
@@ -1531,15 +1534,15 @@ bool Convolution_data::spreadsheet_write(Format_error &error , const char *path)
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Convolution_data.
+ *  Sortie Gnuplot d'un objet ConvolutionData.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Convolution_data::plot_write(Format_error &error , const char *prefix ,
-                                  const char *title) const
+bool ConvolutionData::plot_write(Format_error &error , const char *prefix ,
+                                 const char *title) const
 
 {
   bool status = false;
@@ -1561,11 +1564,11 @@ bool Convolution_data::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Convolution_data.
+ *  Sortie graphique d'un objet ConvolutionData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Convolution_data::get_plotable() const
+MultiPlotSet* ConvolutionData::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
