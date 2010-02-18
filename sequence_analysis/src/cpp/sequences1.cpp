@@ -55,8 +55,8 @@
 using namespace std;
 
 
-extern bool identifier_checking(Format_error &error , int nb_individual , int *individual_identifier);
-extern bool selected_identifier_checking(Format_error &error , int nb_individual , int *identifier ,
+extern bool identifier_checking(StatError &error , int nb_individual , int *individual_identifier);
+extern bool selected_identifier_checking(StatError &error , int nb_individual , int *identifier ,
                                          int nb_selected_individual , int *selected_identifier ,
                                          const char *data_label);
 extern int* identifier_select(int nb_individual , int *identifier , int nb_selected_individual ,
@@ -149,7 +149,7 @@ Sequences::Sequences(int inb_sequence , int inb_variable)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = INT_VALUE;
@@ -212,7 +212,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 
   max_length_computation();
   cumul_length_computation();
-  build_length_histogram();
+  build_length_frequency_distribution();
 
   vertex_identifier = NULL;
 
@@ -243,7 +243,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = itype[i];
@@ -325,7 +325,7 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
       }
     }
 
-    build_index_parameter_histogram();
+    build_index_parameter_frequency_distribution();
 
     if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
         (type[0] != NB_INTERNODE))) {
@@ -352,7 +352,7 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
-    build_marginal_histogram(i);
+    build_marginal_frequency_distribution(i);
   }
 }
 
@@ -441,7 +441,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
 
   max_length_computation();
   cumul_length_computation();
-  build_length_histogram();
+  build_length_frequency_distribution();
 
   vertex_identifier = NULL;
 
@@ -455,7 +455,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = INT_VALUE;
@@ -488,12 +488,12 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
  *
  *  Constructeur de la classe Sequences.
  *
- *  arguments : histogramme des longueurs des sequences, nombre de variables,
+ *  arguments : loi empirique des longueurs des sequences, nombre de variables,
  *              flag initialisation.
  *
  *--------------------------------------------------------------*/
 
-Sequences::Sequences(const Histogram &ihlength , int inb_variable , bool init_flag)
+Sequences::Sequences(const FrequencyDistribution &ihlength , int inb_variable , bool init_flag)
 
 {
   register int i , j , k;
@@ -517,7 +517,7 @@ Sequences::Sequences(const Histogram &ihlength , int inb_variable , bool init_fl
 
   max_length = ihlength.nb_value - 1;
   cumul_length_computation();
-  hlength = new Histogram(ihlength);
+  hlength = new FrequencyDistribution(ihlength);
 
   vertex_identifier = NULL;
 
@@ -531,7 +531,7 @@ Sequences::Sequences(const Histogram &ihlength , int inb_variable , bool init_fl
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = INT_VALUE;
@@ -562,13 +562,13 @@ Sequences::Sequences(const Histogram &ihlength , int inb_variable , bool init_fl
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Sequences a partir d'un objet Renewal_data.
+ *  Construction d'un objet Sequences a partir d'un objet RenewalData.
  *
- *  argument : reference sur un objet Renewal_data.
+ *  argument : reference sur un objet RenewalData.
  *
  *--------------------------------------------------------------*/
 
-Sequences::Sequences(const Renewal_data &timev)
+Sequences::Sequences(const RenewalData &timev)
 
 {
   register int i , j;
@@ -589,7 +589,7 @@ Sequences::Sequences(const Renewal_data &timev)
 
   max_length_computation();
   cumul_length_computation();
-  build_length_histogram();
+  build_length_frequency_distribution();
 
   vertex_identifier = NULL;
 
@@ -605,7 +605,7 @@ Sequences::Sequences(const Renewal_data &timev)
 
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   int_sequence = new int**[nb_sequence];
   real_sequence = new double**[nb_sequence];
@@ -625,7 +625,7 @@ Sequences::Sequences(const Renewal_data &timev)
 
   min_value_computation(0);
   max_value_computation(0);
-  build_marginal_histogram(0);
+  build_marginal_frequency_distribution(0);
 }
 
 
@@ -660,7 +660,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 
   max_length_computation();
   cumul_length_computation();
-  build_length_histogram();
+  build_length_frequency_distribution();
 
   vertex_identifier = NULL;
 
@@ -671,7 +671,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = seq.type[i];
@@ -692,7 +692,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
       }
     }
 
-    build_index_parameter_histogram();
+    build_index_parameter_frequency_distribution();
     index_interval_computation();
   }
 
@@ -735,7 +735,7 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
-    build_marginal_histogram(i);
+    build_marginal_frequency_distribution(i);
   }
 }
 
@@ -772,7 +772,7 @@ Sequences::Sequences(const Sequences &seq , bool *segment_mean)
     length[i] = seq.length[i];
   }
 
-  hlength = new Histogram(*(seq.hlength));
+  hlength = new FrequencyDistribution(*(seq.hlength));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -790,14 +790,14 @@ Sequences::Sequences(const Sequences &seq , bool *segment_mean)
   index_parameter_type = seq.index_parameter_type;
 
   if (seq.hindex_parameter) {
-    hindex_parameter = new Histogram(*(seq.hindex_parameter));
+    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
   }
   else {
     hindex_parameter = NULL;
   }
 
   if (seq.index_interval) {
-    index_interval = new Histogram(*(seq.index_interval));
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
   }
   else {
     index_interval = NULL;
@@ -826,7 +826,7 @@ Sequences::Sequences(const Sequences &seq , bool *segment_mean)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   i = 0;
   for (j = 0;j < seq.nb_variable;j++) {
@@ -835,7 +835,7 @@ Sequences::Sequences(const Sequences &seq , bool *segment_mean)
     max_value[i] = seq.max_value[j];
 
     if (seq.marginal[j]) {
-      marginal[i] = new Histogram(*(seq.marginal[j]));
+      marginal[i] = new FrequencyDistribution(*(seq.marginal[j]));
     }
     else {
       marginal[i] = NULL;
@@ -925,7 +925,7 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
     length[i] = seq.length[i];
   }
 
-  hlength = new Histogram(*(seq.hlength));
+  hlength = new FrequencyDistribution(*(seq.hlength));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -962,14 +962,14 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
   index_parameter_type = seq.index_parameter_type;
 
   if (seq.hindex_parameter) {
-    hindex_parameter = new Histogram(*(seq.hindex_parameter));
+    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
   }
   else {
     hindex_parameter = NULL;
   }
 
   if (seq.index_interval) {
-    index_interval = new Histogram(*(seq.index_interval));
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
   }
   else {
     index_interval = NULL;
@@ -1023,7 +1023,7 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = seq.type[i];
@@ -1031,7 +1031,7 @@ void Sequences::copy(const Sequences &seq , bool reverse_flag)
     max_value[i] = seq.max_value[i];
 
     if (seq.marginal[i]) {
-      marginal[i] = new Histogram(*(seq.marginal[i]));
+      marginal[i] = new FrequencyDistribution(*(seq.marginal[i]));
     }
     else {
       marginal[i] = NULL;
@@ -1131,7 +1131,7 @@ void Sequences::add_state_variable(const Sequences &seq)
     length[i] = seq.length[i];
   }
 
-  hlength = new Histogram(*(seq.hlength));
+  hlength = new FrequencyDistribution(*(seq.hlength));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -1149,14 +1149,14 @@ void Sequences::add_state_variable(const Sequences &seq)
   index_parameter_type = seq.index_parameter_type;
 
   if (seq.hindex_parameter) {
-    hindex_parameter = new Histogram(*(seq.hindex_parameter));
+    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
   }
   else {
     hindex_parameter = NULL;
   }
 
   if (seq.index_interval) {
-    index_interval = new Histogram(*(seq.index_interval));
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
   }
   else {
     index_interval = NULL;
@@ -1180,7 +1180,7 @@ void Sequences::add_state_variable(const Sequences &seq)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   type[0] = STATE;
   min_value[0] = 0.;
@@ -1193,7 +1193,7 @@ void Sequences::add_state_variable(const Sequences &seq)
     max_value[i + 1] = seq.max_value[i];
 
     if (seq.marginal[i]) {
-      marginal[i + 1] = new Histogram(*(seq.marginal[i]));
+      marginal[i + 1] = new FrequencyDistribution(*(seq.marginal[i]));
     }
     else {
       marginal[i + 1] = NULL;
@@ -1267,7 +1267,7 @@ void Sequences::remove_index_parameter(const Sequences &seq)
     length[i] = seq.length[i];
   }
 
-  hlength = new Histogram(*(seq.hlength));
+  hlength = new FrequencyDistribution(*(seq.hlength));
 
   if (seq.vertex_identifier) {
     vertex_identifier = new int*[nb_sequence];
@@ -1292,7 +1292,7 @@ void Sequences::remove_index_parameter(const Sequences &seq)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = seq.type[i];
@@ -1300,7 +1300,7 @@ void Sequences::remove_index_parameter(const Sequences &seq)
     max_value[i] = seq.max_value[i];
 
     if (seq.marginal[i]) {
-      marginal[i] = new Histogram(*(seq.marginal[i]));
+      marginal[i] = new FrequencyDistribution(*(seq.marginal[i]));
     }
     else {
       marginal[i] = NULL;
@@ -1473,15 +1473,15 @@ Sequences& Sequences::operator=(const Sequences &seq)
  *
  *  Extraction de la loi marginale empirique pour une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, variable.
+ *  arguments : reference sur un objet StatError, variable.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Sequences::extract(Format_error &error , int variable) const
+DiscreteDistributionData* Sequences::extract(StatError &error , int variable) const
 
 {
   bool status = true;
-  Distribution_data *histo;
+  DiscreteDistributionData *histo;
 
 
   histo = NULL;
@@ -1504,12 +1504,12 @@ Distribution_data* Sequences::extract(Format_error &error , int variable) const
 
     else if (!marginal[variable]) {
       status = false;
-      error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+      error.update(STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION]);
     }
   }
 
   if (status) {
-    histo = new Distribution_data(*(marginal[variable]));
+    histo = new DiscreteDistributionData(*(marginal[variable]));
   }
 
   return histo;
@@ -1599,7 +1599,7 @@ Vectors* Sequences::build_vectors(bool index_variable) const
       vec->max_value[0] = max_length - 1;
     }
 
-    vec->build_marginal_histogram(0);
+    vec->build_marginal_frequency_distribution(0);
   }
 
   for (i = 0;i < nb_variable;i++) {
@@ -1607,7 +1607,7 @@ Vectors* Sequences::build_vectors(bool index_variable) const
     vec->max_value[i + offset] = max_value[i];
 
     if (marginal[i]) {
-      vec->marginal[i + offset] = new Histogram(*marginal[i]);
+      vec->marginal[i + offset] = new FrequencyDistribution(*marginal[i]);
       vec->mean[i + offset] = vec->marginal[i + offset]->mean;
       vec->covariance[i + offset][i + offset] = vec->marginal[i + offset]->variance;
     }
@@ -1628,11 +1628,11 @@ Vectors* Sequences::build_vectors(bool index_variable) const
  *  Extraction de mesures globales (longueur, temps avant la 1ere occurrence
  *  d'une valeur, nombre de series/d'occurrences d'une valeur) par sequence.
  *
- *  arguments : reference sur un objet Format_error, type, variable, valeur.
+ *  arguments : reference sur un objet StatError, type, variable, valeur.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Sequences::extract_vectors(Format_error &error , int feature_type ,
+Vectors* Sequences::extract_vectors(StatError &error , int feature_type ,
                                     int variable , int value) const
 
 {
@@ -1813,7 +1813,7 @@ Vectors* Sequences::extract_vectors(Format_error &error , int feature_type ,
 
     vec->min_value_computation(0);
     vec->max_value_computation(0);
-    vec->build_marginal_histogram(0);
+    vec->build_marginal_frequency_distribution(0);
   }
 
   return vec;
@@ -1822,18 +1822,18 @@ Vectors* Sequences::extract_vectors(Format_error &error , int feature_type ,
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Markovian_sequences a partir d'un objet Sequences.
+ *  Construction d'un objet MarkovianSequences a partir d'un objet Sequences.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Sequences::markovian_sequences(Format_error &error) const
+MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
 
 {
   bool status = true;
   register int i;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -1878,14 +1878,14 @@ Markovian_sequences* Sequences::markovian_sequences(Format_error &error) const
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                      << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                      << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
         error.update((error_message.str()).c_str());
       }
     }
   }
 
   if (status) {
-    seq = new Markovian_sequences(*this);
+    seq = new MarkovianSequences(*this);
   }
 
   return seq;
@@ -1896,11 +1896,11 @@ Markovian_sequences* Sequences::markovian_sequences(Format_error &error) const
  *
  *  Construction d'un objet Tops a partir d'un objet Sequences.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Tops* Sequences::tops(Format_error &error) const
+Tops* Sequences::tops(StatError &error) const
 
 {
   bool status = true;
@@ -1929,7 +1929,7 @@ Tops* Sequences::tops(Format_error &error) const
 
     else if (!marginal[0]) {
       status = false;
-      error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+      error.update(STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION]);
     }
   }
 
@@ -1957,12 +1957,12 @@ Tops* Sequences::tops(Format_error &error) const
  *
  *  Verification du caractere (strictement) croissant des parametres d'index.
  *
- *  arguments : reference sur un objet Format_error, flag croissance strict ou non,
+ *  arguments : reference sur un objet StatError, flag croissance strict ou non,
  *              label de l'objet.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::increasing_index_parameter_checking(Format_error &error , bool strict ,
+bool Sequences::increasing_index_parameter_checking(StatError &error , bool strict ,
                                                     const char *pattern_label) const
 
 {
@@ -1993,12 +1993,12 @@ bool Sequences::increasing_index_parameter_checking(Format_error &error , bool s
  *  Verification du caractere (strictement) croissant des sequences
  *  pour une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              flag croissance strict ou non, labels de l'objet et de la variable.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::increasing_sequence_checking(Format_error &error , int variable , bool strict ,
+bool Sequences::increasing_sequence_checking(StatError &error , int variable , bool strict ,
                                              const char *pattern_label , const char *variable_label) const
 
 {
@@ -2028,11 +2028,11 @@ bool Sequences::increasing_sequence_checking(Format_error &error , int variable 
  *
  *  Verification d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, label.
+ *  arguments : reference sur un objet StatError, label.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::check(Format_error &error , const char *pattern_label)
+bool Sequences::check(StatError &error , const char *pattern_label)
 
 {
   bool status = true , lstatus;
@@ -2066,7 +2066,7 @@ bool Sequences::check(Format_error &error , const char *pattern_label)
 
   if (status) {
     if (index_parameter) {
-      build_index_parameter_histogram();
+      build_index_parameter_frequency_distribution();
     }
     if ((index_parameter_type == TIME) || ((index_parameter_type == POSITION) &&
          (type[0] != NB_INTERNODE))) {
@@ -2080,23 +2080,23 @@ bool Sequences::check(Format_error &error , const char *pattern_label)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un objet Time_events a partir d'un objet Sequences.
+ *  Extraction d'un objet TimeEvents a partir d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre d'evenements, dates de debut et de fin,
  *              dates precedente et suivante.
  *
  *--------------------------------------------------------------*/
 
-Time_events* Sequences::extract_time_events(Format_error &error , int variable ,
-                                            int begin_date , int end_date ,
-                                            int previous_date , int next_date) const
+TimeEvents* Sequences::extract_time_events(StatError &error , int variable ,
+                                           int begin_date , int end_date ,
+                                           int previous_date , int next_date) const
 
 {
   bool status = true , lstatus;
   register int i , j;
   int nb_element , previous , begin , end , next , *time , *nb_event , *pdate;
-  Time_events *timev;
+  TimeEvents *timev;
 
 
   timev = NULL;
@@ -2200,7 +2200,7 @@ Time_events* Sequences::extract_time_events(Format_error &error , int variable ,
     }
 
     else {
-      timev = new Time_events(nb_element , time , nb_event);
+      timev = new TimeEvents(nb_element , time , nb_event);
     }
 
     delete [] time;
@@ -2213,21 +2213,21 @@ Time_events* Sequences::extract_time_events(Format_error &error , int variable ,
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un objet Renewal_data a partir d'un objet Sequences.
+ *  Extraction d'un objet RenewalData a partir d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre d'evenements, index de debut et de fin.
  *
  *--------------------------------------------------------------*/
 
-Renewal_data* Sequences::extract_renewal_data(Format_error &error , int variable ,
-                                              int begin_index_parameter , int end_index_parameter) const
+RenewalData* Sequences::extract_renewal_data(StatError &error , int variable ,
+                                             int begin_index_parameter , int end_index_parameter) const
 
 {
   bool status = true , lstatus;
   register int i , j;
   int nb_element , index , *ptime , *pnb_event , *pisequence , *cisequence;
-  Renewal_data *timev;
+  RenewalData *timev;
 
 
   timev = NULL;
@@ -2269,7 +2269,7 @@ Renewal_data* Sequences::extract_renewal_data(Format_error &error , int variable
   }
 
   if (status) {
-    timev = new Renewal_data(nb_sequence , end_index_parameter + 1 - begin_index_parameter);
+    timev = new RenewalData(nb_sequence , end_index_parameter + 1 - begin_index_parameter);
 
     ptime = new int[nb_sequence];
     pnb_event = new int[nb_sequence];
@@ -2310,7 +2310,7 @@ Renewal_data* Sequences::extract_renewal_data(Format_error &error , int variable
     }
 
     // construction des echantillons {temps, nombre d'evenements, frequence} et
-    // des histogrammes du temps d'observation et du nombre d'evenements
+    // des lois empiriques du temps d'observation et du nombre d'evenements
 
     ptime -= nb_element;
     pnb_event -= nb_element;
@@ -2319,7 +2319,7 @@ Renewal_data* Sequences::extract_renewal_data(Format_error &error , int variable
     delete [] ptime;
     delete [] pnb_event;
 
-    // extraction des caracteristiques des histogrammes des intervalles de temps entre 2 evenements,
+    // extraction des caracteristiques des lois empiriques des intervalles de temps entre 2 evenements,
     // des intervalles de temps entre 2 evenements compris entre les 2 dates d'observation,
     // des intervalles de temps apres le dernier evenement, des intervalles de temps residuel
 
@@ -2361,19 +2361,19 @@ Renewal_data* Sequences::extract_renewal_data(Format_error &error , int variable
  *
  *  Fusion d'objets Sequences.
  *
- *  arguments : reference sur un objet Format_error, nombre d'objets Sequences,
+ *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
  *              pointeurs sur les objets Sequences.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::merge(Format_error &error , int nb_sample , const Sequences **iseq) const
+Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences **iseq) const
 
 {
   bool status = true;
   register int i , j , k , m , n;
   int inb_sequence , *ilength , *pindex_param , *cindex_param , *pisequence , *cisequence;
   double *prsequence , *crsequence;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   Sequences *seq;
   const Sequences **pseq;
 
@@ -2449,7 +2449,7 @@ Sequences* Sequences::merge(Format_error &error , int nb_sample , const Sequence
                         nb_variable , type);
     delete [] ilength;
 
-    phisto = new const Histogram*[nb_sample];
+    phisto = new const FrequencyDistribution*[nb_sample];
 
     // copie des sequences
 
@@ -2469,7 +2469,7 @@ Sequences* Sequences::merge(Format_error &error , int nb_sample , const Sequence
       for (i = 0;i < nb_sample;i++) {
         phisto[i] = pseq[i]->hindex_parameter;
       }
-      seq->hindex_parameter = new Histogram(nb_sample , phisto);
+      seq->hindex_parameter = new FrequencyDistribution(nb_sample , phisto);
     }
 
     if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
@@ -2477,7 +2477,7 @@ Sequences* Sequences::merge(Format_error &error , int nb_sample , const Sequence
       for (i = 0;i < nb_sample;i++) {
         phisto[i] = pseq[i]->index_interval;
       }
-      seq->index_interval = new Histogram(nb_sample , phisto);
+      seq->index_interval = new FrequencyDistribution(nb_sample , phisto);
     }
 
     i = 0;
@@ -2526,7 +2526,7 @@ Sequences* Sequences::merge(Format_error &error , int nb_sample , const Sequence
       }
 
       if (j == nb_sample) {
-        seq->marginal[i] = new Histogram(nb_sample , phisto);
+        seq->marginal[i] = new FrequencyDistribution(nb_sample , phisto);
       }
     }
 
@@ -2542,12 +2542,12 @@ Sequences* Sequences::merge(Format_error &error , int nb_sample , const Sequence
  *
  *  Translation des valeurs d'une variable.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              parametre de translation.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::shift(Format_error &error , int variable , int shift_param) const
+Sequences* Sequences::shift(StatError &error , int variable , int shift_param) const
 
 {
   bool status = true;
@@ -2601,10 +2601,10 @@ Sequences* Sequences::shift(Format_error &error , int variable , int shift_param
     // copie des parametres d'index
 
     if (hindex_parameter) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
     }
     if (index_interval) {
-      seq->index_interval = new Histogram(*index_interval);
+      seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
     if (index_parameter) {
@@ -2669,10 +2669,10 @@ Sequences* Sequences::shift(Format_error &error , int variable , int shift_param
         if ((seq->type[i] == INT_VALUE) && (seq->min_value[i] >= 0) &&
             (seq->max_value[i] <= MARGINAL_MAX_VALUE)) {
           if (marginal[i]) {
-            seq->marginal[i] = new Histogram(*marginal[i] , 's' , shift_param);
+            seq->marginal[i] = new FrequencyDistribution(*marginal[i] , 's' , shift_param);
           }
           else {
-            seq->build_marginal_histogram(i);
+            seq->build_marginal_frequency_distribution(i);
           }
         }
       }
@@ -2681,7 +2681,7 @@ Sequences* Sequences::shift(Format_error &error , int variable , int shift_param
         seq->min_value[i] = min_value[i];
         seq->max_value[i] = max_value[i];
         if (marginal[i]) {
-          seq->marginal[i] = new Histogram(*marginal[i]);
+          seq->marginal[i] = new FrequencyDistribution(*marginal[i]);
         }
       }
     }
@@ -2695,12 +2695,12 @@ Sequences* Sequences::shift(Format_error &error , int variable , int shift_param
  *
  *  Translation des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              parametre de translation.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::shift(Format_error &error , int variable , double shift_param) const
+Sequences* Sequences::shift(StatError &error , int variable , double shift_param) const
 
 {
   bool status = true;
@@ -2734,10 +2734,10 @@ Sequences* Sequences::shift(Format_error &error , int variable , double shift_pa
     // copie des parametres d'index
 
     if (hindex_parameter) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
     }
     if (index_interval) {
-      seq->index_interval = new Histogram(*index_interval);
+      seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
     if (index_parameter) {
@@ -2794,7 +2794,7 @@ Sequences* Sequences::shift(Format_error &error , int variable , double shift_pa
         seq->min_value[i] = min_value[i];
         seq->max_value[i] = max_value[i];
         if (marginal[i]) {
-          seq->marginal[i] = new Histogram(*marginal[i]);
+          seq->marginal[i] = new FrequencyDistribution(*marginal[i]);
         }
       }
     }
@@ -2824,10 +2824,10 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , int mod
   // copie des parametres d'index
 
   if (seq.hindex_parameter) {
-    hindex_parameter = new Histogram(*(seq.hindex_parameter));
+    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
   }
   if (seq.index_interval) {
-    index_interval = new Histogram(*(seq.index_interval));
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
   }
 
   if (seq.index_parameter) {
@@ -2937,10 +2937,10 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , int mod
       }
 
       if (seq.marginal[i]) {
-        marginal[i] = new Histogram(*(seq.marginal[i]) , 'c' , step , mode);
+        marginal[i] = new FrequencyDistribution(*(seq.marginal[i]) , 'c' , step , mode);
       }
       else {
-        build_marginal_histogram(i);
+        build_marginal_frequency_distribution(i);
       }
     }
 
@@ -2948,7 +2948,7 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , int mod
       min_value[i] = seq.min_value[i];
       max_value[i] = seq.max_value[i];
       if (seq.marginal[i]) {
-        marginal[i] = new Histogram(*(seq.marginal[i]));
+        marginal[i] = new FrequencyDistribution(*(seq.marginal[i]));
       }
     }
   }
@@ -2959,12 +2959,12 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , int mod
  *
  *  Regroupement des valeurs d'une variable.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::cluster(Format_error &error , int variable , int step , int mode) const
+Sequences* Sequences::cluster(StatError &error , int variable , int step , int mode) const
 
 {
   bool status = true;
@@ -3039,10 +3039,10 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_symbol 
   // copie des parametres d'index
 
   if (seq.hindex_parameter) {
-    hindex_parameter = new Histogram(*(seq.hindex_parameter));
+    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
   }
   if (seq.index_interval) {
-    index_interval = new Histogram(*(seq.index_interval));
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
   }
 
   if (seq.index_parameter) {
@@ -3104,14 +3104,14 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_symbol 
     if (i == variable) {
       min_value[i] = min_symbol;
       max_value[i] = max_symbol;
-      build_marginal_histogram(i);
+      build_marginal_frequency_distribution(i);
     }
 
     else {
       min_value[i] = seq.min_value[i - offset];
       max_value[i] = seq.max_value[i - offset];
       if (seq.marginal[i - offset]) {
-        marginal[i] = new Histogram(*(seq.marginal[i - offset]));
+        marginal[i] = new FrequencyDistribution(*(seq.marginal[i - offset]));
       }
     }
   }
@@ -3122,12 +3122,12 @@ void Sequences::transcode(const Sequences &seq , int ivariable , int min_symbol 
  *
  *  Transcodage des symboles d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              table de transcodage des symboles.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::transcode(Format_error &error , int variable , int *symbol) const
+Sequences* Sequences::transcode(StatError &error , int variable , int *symbol) const
 
 {
   bool status = true , *presence;
@@ -3231,12 +3231,12 @@ Sequences* Sequences::transcode(Format_error &error , int variable , int *symbol
  *
  *  Regroupement des valeurs d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre de classes, bornes pour regrouper les valeurs.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::cluster(Format_error &error , int variable ,
+Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , int *ilimit) const
 
 {
@@ -3379,10 +3379,10 @@ void Sequences::cluster(const Sequences &seq , int variable , int nb_class , dou
   // copie des parametres d'index
 
   if (seq.hindex_parameter) {
-    hindex_parameter = new Histogram(*(seq.hindex_parameter));
+    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
   }
   if (seq.index_interval) {
-    index_interval = new Histogram(*(seq.index_interval));
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
   }
 
   if (seq.index_parameter) {
@@ -3440,14 +3440,14 @@ void Sequences::cluster(const Sequences &seq , int variable , int nb_class , dou
     if (i == variable) {
       min_value_computation(i);
       max_value_computation(i);
-      build_marginal_histogram(i);
+      build_marginal_frequency_distribution(i);
     }
 
     else {
       min_value[i] = seq.min_value[i];
       max_value[i] = seq.max_value[i];
       if (seq.marginal[i]) {
-        marginal[i] = new Histogram(*(seq.marginal[i]));
+        marginal[i] = new FrequencyDistribution(*(seq.marginal[i]));
       }
     }
   }
@@ -3458,12 +3458,12 @@ void Sequences::cluster(const Sequences &seq , int variable , int nb_class , dou
  *
  *  Regroupement des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre de classes, bornes pour regrouper les valeurs.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::cluster(Format_error &error , int variable ,
+Sequences* Sequences::cluster(StatError &error , int variable ,
                               int nb_class , double *ilimit) const
 
 {
@@ -3549,11 +3549,11 @@ Sequences* Sequences::cluster(Format_error &error , int variable ,
  *
  *  Changement d'unite d'une variable.
  *
- *  arguments : reference sur un objet Format_error, variable, facteur d'echelle.
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::scaling(Format_error &error , int variable , int scaling_coeff) const
+Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coeff) const
 
 {
   bool status = true;
@@ -3600,10 +3600,10 @@ Sequences* Sequences::scaling(Format_error &error , int variable , int scaling_c
                         nb_variable , type);
 
     if (hindex_parameter) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
     }
     if (index_interval) {
-      seq->index_interval = new Histogram(*index_interval);
+      seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
     if (index_parameter) {
@@ -3664,14 +3664,14 @@ Sequences* Sequences::scaling(Format_error &error , int variable , int scaling_c
       if (i == variable) {
         seq->min_value[i] = min_value[i] * scaling_coeff;
         seq->max_value[i] = max_value[i] * scaling_coeff;
-        seq->build_marginal_histogram(i);
+        seq->build_marginal_frequency_distribution(i);
       }
 
       else {
         seq->min_value[i] = min_value[i];
         seq->max_value[i] = max_value[i];
         if (marginal[i]) {
-          seq->marginal[i] = new Histogram(*marginal[i]);
+          seq->marginal[i] = new FrequencyDistribution(*marginal[i]);
         }
       }
     }
@@ -3685,12 +3685,12 @@ Sequences* Sequences::scaling(Format_error &error , int variable , int scaling_c
  *
  *  Arrondi des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::round(Format_error &error , int variable , int mode) const
+Sequences* Sequences::round(StatError &error , int variable , int mode) const
 
 {
   bool status = true;
@@ -3771,10 +3771,10 @@ Sequences* Sequences::round(Format_error &error , int variable , int mode) const
     // copie des parametres d'index
 
     if (hindex_parameter) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
     }
     if (index_interval) {
-      seq->index_interval = new Histogram(*index_interval);
+      seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
     if (index_parameter) {
@@ -3860,14 +3860,14 @@ Sequences* Sequences::round(Format_error &error , int variable , int mode) const
           break;
         }
 
-        seq->build_marginal_histogram(i);
+        seq->build_marginal_frequency_distribution(i);
       }
 
       else {
         seq->min_value[i] = min_value[i];
         seq->max_value[i] = max_value[i];
         if (marginal[i]) {
-          seq->marginal[i] = new Histogram(*marginal[i]);
+          seq->marginal[i] = new FrequencyDistribution(*marginal[i]);
         }
       }
     }
@@ -3881,13 +3881,13 @@ Sequences* Sequences::round(Format_error &error , int variable , int mode) const
  *
  *  Selection de sequences sur les valeurs prises par le parametre d'index.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              bornes sur les parametres d'index,
  *              flag pour conserver ou rejeter les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::index_parameter_select(Format_error &error , ostream &os ,
+Sequences* Sequences::index_parameter_select(StatError &error , ostream &os ,
                                              int min_index_parameter ,
                                              int max_index_parameter , bool keep) const
 
@@ -3976,13 +3976,13 @@ Sequences* Sequences::index_parameter_select(Format_error &error , ostream &os ,
  *
  *  Selection de sequences sur les valeurs prises par une variable.
  *
- *  arguments : reference sur un objet Format_error, stream, indice de la variable,
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(Format_error &error , ostream &os , int variable ,
+Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
                                    int imin_value , int imax_value , bool keep) const
 
 {
@@ -4108,13 +4108,13 @@ Sequences* Sequences::value_select(Format_error &error , ostream &os , int varia
  *
  *  Selection de sequences sur les valeurs prises par une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, stream, indice de la variable,
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::value_select(Format_error &error , ostream &os , int variable ,
+Sequences* Sequences::value_select(StatError &error , ostream &os , int variable ,
                                    double imin_value , double imax_value , bool keep) const
 
 {
@@ -4212,13 +4212,13 @@ Sequences* Sequences::value_select(Format_error &error , ostream &os , int varia
  *
  *  Selection de sequences par l'identificateur.
  *
- *  arguments : reference sur un objet Format_error, nombre de sequences,
+ *  arguments : reference sur un objet StatError, nombre de sequences,
  *              identificateur des sequences, flag pour conserver ou rejeter
  *              les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::select_individual(Format_error &error , int inb_sequence ,
+Sequences* Sequences::select_individual(StatError &error , int inb_sequence ,
                                         int *iidentifier , bool keep) const
 
 {
@@ -4256,11 +4256,11 @@ Sequences* Sequences::select_individual(Format_error &error , int inb_sequence ,
  *
  *  Suppression du parametre d'index.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::remove_index_parameter(Format_error &error) const
+Sequences* Sequences::remove_index_parameter(StatError &error) const
 
 {
   Sequences *seq;
@@ -4299,10 +4299,10 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
   // copie des parametres d'index
 
   if (seq.hindex_parameter) {
-    hindex_parameter = new Histogram(*(seq.hindex_parameter));
+    hindex_parameter = new FrequencyDistribution(*(seq.hindex_parameter));
   }
   if (seq.index_interval) {
-    index_interval = new Histogram(*(seq.index_interval));
+    index_interval = new FrequencyDistribution(*(seq.index_interval));
   }
 
   if (seq.index_parameter) {
@@ -4339,7 +4339,7 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
     min_value[i] = seq.min_value[variable[i]];
     max_value[i] = seq.max_value[variable[i]];
     if (seq.marginal[variable[i]]) {
-      marginal[i] = new Histogram(*(seq.marginal[variable[i]]));
+      marginal[i] = new FrequencyDistribution(*(seq.marginal[variable[i]]));
     }
   }
 }
@@ -4349,13 +4349,13 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
  *
  *  Selection de variables.
  *
- *  arguments : reference sur un objet Format_error, nombre de variables,
+ *  arguments : reference sur un objet StatError, nombre de variables,
  *              indices des variables, flag pour conserver ou rejeter
  *              les variables selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::select_variable(Format_error &error , int inb_variable ,
+Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
                                       int *ivariable , bool keep) const
 
 {
@@ -4431,12 +4431,12 @@ Sequences* Sequences::select_variable(Format_error &error , int inb_variable ,
  *
  *  Concatenation des variables d'objets Sequences.
  *
- *  arguments : reference sur un objet Format_error, nombre d'objets Sequences,
+ *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
  *              pointeurs sur les objets Sequences, echantillon de reference pour les identificateurs.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::merge_variable(Format_error &error , int nb_sample ,
+Sequences* Sequences::merge_variable(StatError &error , int nb_sample ,
                                      const Sequences **iseq , int ref_sample) const
 
 {
@@ -4565,10 +4565,10 @@ Sequences* Sequences::merge_variable(Format_error &error , int nb_sample ,
     // copie des sequences
 
     if (hindex_parameter) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
     }
     if (index_interval) {
-      seq->index_interval = new Histogram(*index_interval);
+      seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
     if (index_parameter) {
@@ -4608,7 +4608,7 @@ Sequences* Sequences::merge_variable(Format_error &error , int nb_sample ,
         seq->min_value[inb_variable] = pseq[i]->min_value[j];
         seq->max_value[inb_variable] = pseq[i]->max_value[j];
         if (pseq[i]->marginal[j]) {
-          seq->marginal[inb_variable] = new Histogram(*(pseq[i]->marginal[j]));
+          seq->marginal[inb_variable] = new FrequencyDistribution(*(pseq[i]->marginal[j]));
         }
         inb_variable++;
       }
@@ -4625,11 +4625,11 @@ Sequences* Sequences::merge_variable(Format_error &error , int nb_sample ,
  *
  *  Inversion du sens de parcours des sequences.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::reverse(Format_error &error) const
+Sequences* Sequences::reverse(StatError &error) const
 
 {
   Sequences *seq;
@@ -4654,12 +4654,12 @@ Sequences* Sequences::reverse(Format_error &error) const
  *
  *  Selection des sequences sur un critere de longueur.
  *
- *  arguments : reference sur un objet Format_error, stream, bornes sur la longueur,
+ *  arguments : reference sur un objet StatError, stream, bornes sur la longueur,
  *              flag pour conserver ou rejeter les sequences selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::length_select(Format_error &error , ostream &os , int min_length ,
+Sequences* Sequences::length_select(StatError &error , ostream &os , int min_length ,
                                     int imax_length , bool keep) const
 
 {
@@ -4734,13 +4734,13 @@ Sequences* Sequences::length_select(Format_error &error , ostream &os , int min_
  *
  *  Suppression des premieres/dernieres series d'une valeur donne.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              valeur, position ('b' : begin, 'e' : end),
  *              longueur maximum de la serie supprimee.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::remove_run(Format_error &error , int variable , int ivalue ,
+Sequences* Sequences::remove_run(StatError &error , int variable , int ivalue ,
                                  char position , int max_run_length) const
 
 {
@@ -4780,7 +4780,7 @@ Sequences* Sequences::remove_run(Format_error &error , int variable , int ivalue
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
-                      << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                      << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
         error.update((error_message.str()).c_str());
       }
 
@@ -4871,7 +4871,7 @@ Sequences* Sequences::remove_run(Format_error &error , int variable , int ivalue
         }
       }
 
-      seq->build_index_parameter_histogram();
+      seq->build_index_parameter_frequency_distribution();
       seq->index_interval_computation();
     }
 
@@ -4916,7 +4916,7 @@ Sequences* Sequences::remove_run(Format_error &error , int variable , int ivalue
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
 
     delete [] iidentifier;
@@ -4932,12 +4932,12 @@ Sequences* Sequences::remove_run(Format_error &error , int variable , int ivalue
  *
  *  Extraction de sous-sequences.
  *
- *  arguments : reference sur un objet Format_error, parametres d'index minimum et
+ *  arguments : reference sur un objet StatError, parametres d'index minimum et
  *              maximum dans la sequence.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::index_parameter_extract(Format_error &error , int min_index_parameter ,
+Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_parameter ,
                                               int max_index_parameter) const
 
 {
@@ -5111,7 +5111,7 @@ Sequences* Sequences::index_parameter_extract(Format_error &error , int min_inde
       }
 
       if (hindex_parameter) {
-        seq->build_index_parameter_histogram();
+        seq->build_index_parameter_frequency_distribution();
       }
       if (index_interval) {
         seq->index_interval_computation();
@@ -5120,7 +5120,7 @@ Sequences* Sequences::index_parameter_extract(Format_error &error , int min_inde
       for (i = 0;i < seq->nb_variable;i++) {
         seq->min_value_computation(i);
         seq->max_value_computation(i);
-        seq->build_marginal_histogram(i);
+        seq->build_marginal_frequency_distribution(i);
       }
 
       delete [] iidentifier;
@@ -5141,13 +5141,13 @@ Sequences* Sequences::index_parameter_extract(Format_error &error , int min_inde
  *
  *  Extraction par segmentation d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre de valeurs, valeurs, flag zones correspondant aux valeurs
  *              extraites/pas extraites.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation_extract(Format_error &error , int variable ,
+Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
                                            int nb_value , int *ivalue , bool keep) const
 
 {
@@ -5191,7 +5191,7 @@ Sequences* Sequences::segmentation_extract(Format_error &error , int variable ,
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
-                      << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                      << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
         error.update((error_message.str()).c_str());
       }
 
@@ -5374,7 +5374,7 @@ Sequences* Sequences::segmentation_extract(Format_error &error , int variable ,
     }
 
     if (hindex_parameter) {
-      seq->build_index_parameter_histogram();
+      seq->build_index_parameter_frequency_distribution();
     }
     if (index_interval) {
       seq->index_interval_computation();
@@ -5408,7 +5408,7 @@ Sequences* Sequences::segmentation_extract(Format_error &error , int variable ,
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
 
     if (!keep) {
@@ -5432,11 +5432,11 @@ Sequences* Sequences::segmentation_extract(Format_error &error , int variable ,
  *
  *  Cumul des valeurs successives des sequences.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable.
+ *  arguments : reference sur un objet StatError, indice de la variable.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::cumulate(Format_error &error , int variable) const
+Sequences* Sequences::cumulate(StatError &error , int variable) const
 
 {
   bool status = true;
@@ -5489,10 +5489,10 @@ Sequences* Sequences::cumulate(Format_error &error , int variable) const
     // copie des parametres d'index
 
     if (hindex_parameter) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
     }
     if (index_interval) {
-      seq->index_interval = new Histogram(*index_interval);
+      seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
     if (index_parameter) {
@@ -5537,7 +5537,7 @@ Sequences* Sequences::cumulate(Format_error &error , int variable) const
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
   }
 
@@ -5549,12 +5549,12 @@ Sequences* Sequences::cumulate(Format_error &error , int variable) const
  *
  *  Differenciation au 1er ordre des sequences.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              premier element de la sequence garde ou pas.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::difference(Format_error &error , int variable ,
+Sequences* Sequences::difference(StatError &error , int variable ,
                                  bool first_element) const
 
 {
@@ -5670,15 +5670,15 @@ Sequences* Sequences::difference(Format_error &error , int variable ,
 
     if (first_element) {
       if (hindex_parameter) {
-        seq->hindex_parameter = new Histogram(*hindex_parameter);
+        seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
       }
       if (index_interval) {
-        seq->index_interval = new Histogram(*index_interval);
+        seq->index_interval = new FrequencyDistribution(*index_interval);
       }
     }
 
     else {
-      seq->build_index_parameter_histogram();
+      seq->build_index_parameter_frequency_distribution();
       if (index_interval) {
         seq->index_interval_computation();
       }
@@ -5769,7 +5769,7 @@ Sequences* Sequences::difference(Format_error &error , int variable ,
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
   }
 
@@ -5781,13 +5781,13 @@ Sequences* Sequences::difference(Format_error &error , int variable ,
  *
  *  Filtrage de type moyenne mobile des sequences.
  *
- *  arguments : reference sur un objet Format_error, demi-largeur du filtre,
+ *  arguments : reference sur un objet StatError, demi-largeur du filtre,
  *              filtre, indice de la variable, debut/fin garde ou pas,
  *              tendance ou residus (par soustraction ou par division).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::moving_average(Format_error &error , int nb_point , double *filter ,
+Sequences* Sequences::moving_average(StatError &error , int nb_point , double *filter ,
                                      int variable , bool begin_end , int output) const
 
 {
@@ -5906,15 +5906,15 @@ Sequences* Sequences::moving_average(Format_error &error , int nb_point , double
 
     if (begin_end) {
       if (hindex_parameter) {
-        seq->hindex_parameter = new Histogram(*hindex_parameter);
+        seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
       }
       if (index_interval) {
-        seq->index_interval = new Histogram(*index_interval);
+        seq->index_interval = new FrequencyDistribution(*index_interval);
       }
     }
 
     else {
-      seq->build_index_parameter_histogram();
+      seq->build_index_parameter_frequency_distribution();
       if (index_interval) {
         seq->index_interval_computation();
       }
@@ -6105,7 +6105,7 @@ Sequences* Sequences::moving_average(Format_error &error , int nb_point , double
             seq->min_value[i] = min_value[j];
             seq->max_value[i] = max_value[j];
             if (marginal[j]) {
-              seq->marginal[i] = new Histogram(*marginal[j]);
+              seq->marginal[i] = new FrequencyDistribution(*marginal[j]);
             }
             i++;
             seq->min_value_computation(i);
@@ -6120,7 +6120,7 @@ Sequences* Sequences::moving_average(Format_error &error , int nb_point , double
           if ((variable == I_DEFAULT) || (variable == j)) {
             seq->min_value_computation(i);
             seq->max_value_computation(i);
-            seq->build_marginal_histogram(i);
+            seq->build_marginal_frequency_distribution(i);
             i++;
             seq->min_value_computation(i);
             seq->max_value_computation(i);
@@ -6146,13 +6146,13 @@ Sequences* Sequences::moving_average(Format_error &error , int nb_point , double
  *
  *  Filtrage de type moyenne mobile des sequences.
  *
- *  arguments : reference sur un objet Format_error, loi symmetrique,
+ *  arguments : reference sur un objet StatError, loi symmetrique,
  *              indice de la variable, debut/fin supprime ou pas,
  *              tendance ou residus (par soustraction ou par division).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::moving_average(Format_error &error , const Distribution &dist ,
+Sequences* Sequences::moving_average(StatError &error , const Distribution &dist ,
                                      int variable , bool begin_end , int output) const
 
 {
@@ -6189,13 +6189,13 @@ Sequences* Sequences::moving_average(Format_error &error , const Distribution &d
  *
  *  Ecriture des sequences de moyennes et d'ecart-types.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              tailles d'echantillons, flag calcul des ecart-types,
  *              sortie (sequences, residus ou residus standardisees).
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::pointwise_average_ascii_print(Format_error &error , const char *path ,
+bool Sequences::pointwise_average_ascii_print(StatError &error , const char *path ,
                                               int *size , bool standard_deviation ,
                                               int output) const
 
@@ -6394,13 +6394,13 @@ bool Sequences::pointwise_average_ascii_print(Format_error &error , const char *
  *
  *  Ecriture des sequences de moyennes et d'ecart-types au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              tailles d'echantillons, flag calcul des ecart-types,
  *              sortie (sequences, residus ou residus standardisees).
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::pointwise_average_spreadsheet_print(Format_error &error , const char *path ,
+bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const char *path ,
                                                     int *size , bool standard_deviation ,
                                                     int output) const
 
@@ -6539,13 +6539,13 @@ bool Sequences::pointwise_average_spreadsheet_print(Format_error &error , const 
  *
  *  Calcul de la sequence des moyennes (et des ecart-types).
  *
- *  arguments : reference sur un objet Format_error, flag calcul des ecart-types,
+ *  arguments : reference sur un objet StatError, flag calcul des ecart-types,
  *              sortie (sequences, residus ou residus standardisees),
  *              path, format ('a' : ASCII / 's' : Spreadsheet).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::pointwise_average(Format_error &error , bool standard_deviation ,
+Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviation ,
                                         int output , const char *path , char format) const
 
 {
@@ -6673,7 +6673,7 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
         }
       }
 
-      seq->build_index_parameter_histogram();
+      seq->build_index_parameter_frequency_distribution();
       seq->index_interval_computation();
     }
 
@@ -7090,11 +7090,11 @@ Sequences* Sequences::pointwise_average(Format_error &error , bool standard_devi
  *  Calcul des sequences des temps de retour pour une valeur prise
  *  par une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable, valeur.
+ *  arguments : reference sur un objet StatError, indice de la variable, valeur.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variable , int value) const
+Sequences* Sequences::recurrence_time_sequences(StatError &error , int variable , int value) const
 
 {
   bool status = true;
@@ -7126,7 +7126,7 @@ Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variab
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
-                      << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                      << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
         error.update((error_message.str()).c_str());
       }
 
@@ -7178,11 +7178,11 @@ Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variab
 
     seq->max_length_computation();
     seq->cumul_length_computation();
-    seq->build_length_histogram();
+    seq->build_length_frequency_distribution();
 
     seq->min_value_computation(0);
     seq->max_value_computation(0);
-    seq->build_marginal_histogram(0);
+    seq->build_marginal_frequency_distribution(0);
   }
 
   return seq;
@@ -7193,11 +7193,11 @@ Sequences* Sequences::recurrence_time_sequences(Format_error &error , int variab
  *
  *  Calcul des sequences des temps de sejour par une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable.
+ *  arguments : reference sur un objet StatError, indice de la variable.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::sojourn_time_sequences(Format_error &error , int variable) const
+Sequences* Sequences::sojourn_time_sequences(StatError &error , int variable) const
 
 {
   bool status = true;
@@ -7228,7 +7228,7 @@ Sequences* Sequences::sojourn_time_sequences(Format_error &error , int variable)
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
-                    << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                    << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
       error.update((error_message.str()).c_str());
     }
   }
@@ -7269,12 +7269,12 @@ Sequences* Sequences::sojourn_time_sequences(Format_error &error , int variable)
     seq->max_length_computation();
     seq->cumul_length_computation();
     delete seq->hlength;
-    seq->build_length_histogram();
+    seq->build_length_frequency_distribution();
 
     for (i = 0;i < 2;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
   }
 
@@ -7286,12 +7286,12 @@ Sequences* Sequences::sojourn_time_sequences(Format_error &error , int variable)
  *
  *  Discretisation des positions.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              pas de discretisation.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::transform_position(Format_error &error , int step) const
+Sequences* Sequences::transform_position(StatError &error , int step) const
 
 {
   bool status = true;
@@ -7377,12 +7377,12 @@ Sequences* Sequences::transform_position(Format_error &error , int step) const
     seq->max_length_computation();
     seq->cumul_length_computation();
     delete seq->hlength;
-    seq->build_length_histogram();
+    seq->build_length_frequency_distribution();
 
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value[i] = min_value[i] - 1;
       seq->max_value[i] = max_value[i];
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
 
     delete [] pisequence;
@@ -7396,11 +7396,11 @@ Sequences* Sequences::transform_position(Format_error &error , int step) const
  *
  *  Croisement des sequences.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::cross(Format_error &error) const
+Sequences* Sequences::cross(StatError &error) const
 
 {
   bool status = true;
@@ -7487,13 +7487,13 @@ Sequences* Sequences::cross(Format_error &error) const
     seq->max_length = nb_sequence;
     seq->cumul_length = cumul_length;
     delete seq->hlength;
-    seq->build_length_histogram();
+    seq->build_length_frequency_distribution();
 
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value[i] = min_value[i];
       seq->max_value[i] = max_value[i];
       if (marginal[i]) {
-        seq->marginal[i] = new Histogram(*marginal[i]);
+        seq->marginal[i] = new FrequencyDistribution(*marginal[i]);
       }
     }
   }
@@ -7544,17 +7544,17 @@ void Sequences::cumul_length_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Construction de l'histogramme des longueurs des sequences.
+ *  Construction de la loi empirique des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
 
-void Sequences::build_length_histogram()
+void Sequences::build_length_frequency_distribution()
 
 {
   register int i;
 
 
-  hlength = new Histogram(max_length + 1);
+  hlength = new FrequencyDistribution(max_length + 1);
 
   hlength->nb_element = nb_sequence;
   for (i = 0;i < nb_sequence;i++) {
@@ -7668,18 +7668,18 @@ int Sequences::max_index_parameter_computation(bool last_position) const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de l'histogramme des parametres d'index.
+ *  Calcul de la loi empirique des parametres d'index.
  *
  *--------------------------------------------------------------*/
 
-void Sequences::build_index_parameter_histogram()
+void Sequences::build_index_parameter_frequency_distribution()
 
 {
   if (index_parameter) {
     register int i , j;
 
 
-    hindex_parameter = new Histogram(max_index_parameter_computation() + 1);
+    hindex_parameter = new FrequencyDistribution(max_index_parameter_computation() + 1);
 
     for (i = 0;i < nb_sequence;i++) {
       for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
@@ -7701,7 +7701,7 @@ void Sequences::build_index_parameter_histogram()
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de l'histogramme des intervalles entre index successifs.
+ *  Extraction de la loi empirique des intervalles entre index successifs.
  *
  *--------------------------------------------------------------*/
 
@@ -7713,9 +7713,9 @@ void Sequences::index_interval_computation()
     register int i , j;
 
 
-    index_interval = new Histogram(max_index_parameter_computation(true) + 1);
+    index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
 
-    // constitution de l'histogramme des intervalles entre index successifs
+    // constitution de la loi empirique des intervalles entre index successifs
 
     for (i = 0;i < nb_sequence;i++) {
       for (j = 1;j < length[i];j++) {
@@ -7735,21 +7735,21 @@ void Sequences::index_interval_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de l'histogramme des intervalles entre index successifs
+ *  Extraction de la loi empirique des intervalles entre index successifs
  *  pour une valeur d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable, valeur.
+ *  arguments : reference sur un objet StatError, indice de la variable, valeur.
  *
  *--------------------------------------------------------------*/
 
-Histogram* Sequences::value_index_interval_computation(Format_error &error , int variable ,
-                                                       int value) const
+FrequencyDistribution* Sequences::value_index_interval_computation(StatError &error , int variable ,
+                                                                   int value) const
 
 {
   bool status = true;
   register int i , j;
   int previous_index_param , *pindex_param , *pisequence;
-  Histogram *value_index_interval;
+  FrequencyDistribution *value_index_interval;
 
 
   value_index_interval = NULL;
@@ -7772,7 +7772,7 @@ Histogram* Sequences::value_index_interval_computation(Format_error &error , int
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
-                    << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                    << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
       error.update((error_message.str()).c_str());
     }
 
@@ -7784,7 +7784,7 @@ Histogram* Sequences::value_index_interval_computation(Format_error &error , int
   }
 
   if (status) {
-    value_index_interval = new Histogram(max_index_parameter_computation(true) + 1);
+    value_index_interval = new FrequencyDistribution(max_index_parameter_computation(true) + 1);
 
     for (i = 0;i < nb_sequence;i++) {
       pindex_param = index_parameter[i];
@@ -7804,7 +7804,7 @@ Histogram* Sequences::value_index_interval_computation(Format_error &error , int
       }
     }
 
-    // extraction des caracteristiques de l'histogramme
+    // extraction des caracteristiques de la loi empirique
 
     value_index_interval->nb_value_computation();
     value_index_interval->offset_computation();
@@ -7813,7 +7813,7 @@ Histogram* Sequences::value_index_interval_computation(Format_error &error , int
     if (value_index_interval->nb_element == 0) {
       delete value_index_interval;
       value_index_interval = NULL;
-      error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+      error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
     else {
@@ -7927,7 +7927,7 @@ void Sequences::max_value_computation(int variable)
  *
  *--------------------------------------------------------------*/
 
-void Sequences::marginal_histogram_computation(int variable)
+void Sequences::marginal_frequency_distribution_computation(int variable)
 
 {
   register int i , j;
@@ -7962,13 +7962,13 @@ void Sequences::marginal_histogram_computation(int variable)
  *
  *--------------------------------------------------------------*/
 
-void Sequences::build_marginal_histogram(int variable)
+void Sequences::build_marginal_frequency_distribution(int variable)
 
 {
   if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY) &&
       (min_value[variable] >= 0) && (max_value[variable] <= MARGINAL_MAX_VALUE)) {
-    marginal[variable] = new Histogram((int)max_value[variable] + 1);
-    marginal_histogram_computation(variable);
+    marginal[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
+    marginal_frequency_distribution_computation(variable);
   }
 }
 
