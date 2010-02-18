@@ -196,7 +196,7 @@ ostream& TreeMatch_PO::viewAllMatching(ostream& out_fich) const
 // GET THE MATRIX OF THE MATCHING
 //------------------------------------------------------------------------------------------------------
 
-Distance_matrix* TreeMatch_PO::getMatrix()
+DistanceMatrix* TreeMatch_PO::getMatrix()
 {
   int nb_tree ;
 
@@ -206,7 +206,7 @@ Distance_matrix* TreeMatch_PO::getMatrix()
   int nb_ins;
   double del_cost;
   double ins_cost;
-  Distance_matrix* dmatrix = new Distance_matrix(nb_tree, -1, -1, "ARBORESCENCE");
+  DistanceMatrix* dmatrix = new DistanceMatrix(nb_tree, -1, -1, "ARBORESCENCE");
 
   for (int inp_tree=0;inp_tree<nb_tree-1;inp_tree++)
     {
