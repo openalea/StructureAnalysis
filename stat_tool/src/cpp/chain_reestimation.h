@@ -48,13 +48,13 @@
 
 
 template <typename Type>
-class Chain_reestimation {  // structure de donnees correspondant a une chaine de Markov
+class ChainReestimation {  // structure de donnees correspondant a une chaine de Markov
 
 /*    friend class Markovian_sequences;
 
     friend class Hidden_markov_tree_data;   module STAT_TREES */
 
-    friend std::ostream& operator<<(std::ostream &os , const Chain_reestimation<Type> &chain_data)
+    friend std::ostream& operator<<(std::ostream &os , const ChainReestimation<Type> &chain_data)
     { return chain_data.print(os); }
 
 // protected :
@@ -68,18 +68,18 @@ public :
     Type **transition;      // matrice des frequences des transition
 
     void init();
-    void copy(const Chain_reestimation<Type> &chain_data);
+    void copy(const ChainReestimation<Type> &chain_data);
     void remove();
     std::ostream& print(std::ostream &os) const;
 
 // public :
 
-    Chain_reestimation();
-    Chain_reestimation(char itype , int inb_state , int inb_row , bool init_flag = false);
-    Chain_reestimation(const Chain_reestimation<Type> &chain_data)
+    ChainReestimation();
+    ChainReestimation(char itype , int inb_state , int inb_row , bool init_flag = false);
+    ChainReestimation(const ChainReestimation<Type> &chain_data)
     { copy(chain_data); }
-    ~Chain_reestimation();
-    Chain_reestimation<Type>& operator=(const Chain_reestimation<Type> &chain_data);
+    ~ChainReestimation();
+    ChainReestimation<Type>& operator=(const ChainReestimation<Type> &chain_data);
 };
 
 
