@@ -45,9 +45,9 @@ class WRAP {
 public:
 
   static boost::shared_ptr<Renewal>
-  constructor_from_file(char* filename)
+  constructor_from_file(char *filename)
   {
-    Format_error error;
+    StatError error;
     Renewal *renewal = NULL;
     bool old_format = false;
 
@@ -57,9 +57,9 @@ public:
   }
 
   static boost::shared_ptr<Renewal>
-  constructor_from_inter_event(const Parametric &inter_event, char type, int time)
+  constructor_from_inter_event(const DiscreteParametric &inter_event, char type, int time)
   {
-    Format_error error;
+    StatError error;
     Renewal *renewal = NULL;
 
     renewal = renewal_building(error, inter_event, type, time);
@@ -69,10 +69,10 @@ public:
 
 
   static void
-  file_ascii_write(const Renewal& d, const char* path, bool exhaustive)
+  file_ascii_write(const Renewal &d, const char *path, bool exhaustive)
   {
     bool result = true;
-    Format_error error;
+    StatError error;
 
     result = d.ascii_write(error, path, exhaustive);
     if (!result)
@@ -81,59 +81,59 @@ public:
 
 
   static Distribution*
-  get_time(const Renewal& input)
+  get_time(const Renewal &input)
   {
     Distribution* ret;
     ret = new Distribution(*input.get_time());
     return ret;
 }
 
-  static Renewal_data*
-  get_renewal_data(const Renewal& input)
+  static RenewalData*
+  get_renewal_data(const Renewal &input)
   {
-    Renewal_data* ret;
-    ret = new Renewal_data(*input.get_renewal_data());
+    RenewalData* ret;
+    ret = new RenewalData(*input.get_renewal_data());
     return ret;
   }
 
 
-  static Renewal_data*
-  simulation_histogram(const Renewal& input, char itype, const Histogram & ihtime)
+  static RenewalData*
+  simulation_histogram(const Renewal &input, char itype, const FrequencyDistribution &ihtime)
   {
-    HEADER(Renewal_data);
+    HEADER(RenewalData);
     ret = input.simulation(error, itype , ihtime);
     FOOTER;
 
   }
 
-  static Renewal_data*
-  simulation_nb_elements(const Renewal& input, char itype , int nb_element , int itime)
+  static RenewalData*
+  simulation_nb_elements(const Renewal &input, char itype, int nb_element, int itime)
   {
-    HEADER(Renewal_data);
+    HEADER(RenewalData);
     ret = input.simulation(error, itype , nb_element, itime);
     FOOTER;
   }
 
-  static Renewal_data*
-  simulation_time_events(const Renewal& input, char itype , int nb_element,
-		  const Time_events &timev)
+  static RenewalData*
+  simulation_time_events(const Renewal &input, char itype , int nb_element,
+		  const TimeEvents &timev)
   {
-    HEADER(Renewal_data);
+    HEADER(RenewalData);
     ret = input.simulation(error, itype , nb_element, timev);
     FOOTER;
   }
 
-  static Parametric_model*
-  extract(const Renewal& seq, int type, int state)
+  static DiscreteParametricModel*
+  extract(const Renewal &seq, int type, int state)
   {
-    HEADER(Parametric_model);
+    HEADER(DiscreteParametricModel);
     ret = seq.extract(error, type, state);
     FOOTER;
   }
 
-  static MultiPlotSet* get_plotable(const Renewal& p)
+  static MultiPlotSet* get_plotable(const Renewal &p)
   {
-    Format_error error;
+    StatError error;
     MultiPlotSet* ret = p.get_plotable();
     if (!ret) ERROR;
     return ret;
@@ -148,13 +148,13 @@ public:
 
 void class_renewal() {
 
-  class_<Renewal, bases<STAT_interface> > ("_Renewal", "Renewal", no_init)
+  class_<Renewal, bases<StatInterface> > ("_Renewal", "Renewal", no_init)
     //type = 'o' or 'e'
     .def("__init__", make_constructor(WRAP::constructor_from_file))
     .def("__init__", make_constructor(WRAP::constructor_from_inter_event))
 
-    .def(init <char, Histogram, Parametric>())
-    .def(init <char, Distribution, Parametric>())
+    .def(init <char, FrequencyDistribution, DiscreteParametric>())
+    .def(init <char, Distribution, DiscreteParametric>())
 
     // Python Operators
     .def(self_ns::str(self)) //__str__
@@ -179,19 +179,19 @@ void class_renewal() {
 /*
 
    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-   bool spreadsheet_write(Format_error &error , const char *path) const;
-   bool plot_write(Format_error &error , const char *prefix ,  const char *title = 0) const;
+   bool spreadsheet_write(StatError &error , const char *path) const;
+   bool plot_write(StatError &error , const char *prefix ,  const char *title = 0) const;
 
 
 	void computation(bool inter_event_flag = true , char itype = 'v' , const Distribution *dtime = 0);
-	double likelihood_computation(const Time_events &timev) const;
+	double likelihood_computation(const TimeEvents &timev) const;
 
-	Parametric* get_inter_event() const { return inter_event; }
-	Length_bias* get_length_bias() const { return length_bias; }
+	DiscreteParametric* get_inter_event() const { return inter_event; }
+	LengthBias* get_length_bias() const { return length_bias; }
 	Backward* get_backward() const { return backward; }
 	Forward* get_forward() const { return forward; }
-	Parametric* get_nevent_time(int inb_event) const { return nevent_time[inb_event]; }
-	Nb_event* get_nb_event(int itime) const { return nb_event[itime]; }
+	DiscreteParametric* get_nevent_time(int inb_event) const { return nevent_time[inb_event]; }
+	NbEvent* get_nb_event(int itime) const { return nb_event[itime]; }
 	Distribution* get_mixture() const { return mixture; }
 	Curves* get_index_event() const { return index_event; }
 */
@@ -203,29 +203,29 @@ void class_renewal() {
 class RenewalDataWrap {
 
 public:
-  static Distribution_data*
-  extract(const Renewal_data& seq, int histo_type, int itime)
+  static DiscreteDistributionData*
+  extract(const RenewalData &seq, int histo_type, int itime)
   {
     //default itime = I_DEFAULT
-    HEADER(Distribution_data);
+    HEADER(DiscreteDistributionData);
     ret = seq.extract(error, histo_type, itime);
     FOOTER;
   }
 
   //merge inherited from TimeEvents
 
-  static Renewal_data*
-  merge(const Renewal_data& v, const boost::python::list& vecs)
+  static RenewalData*
+  merge(const RenewalData &v, const boost::python::list& vecs)
   {
-    Format_error error;
-    Renewal_data * ret = NULL;
+    StatError error;
+    RenewalData * ret = NULL;
 
     int nb_vec = len(vecs);
-    sequence_analysis::wrap_util::auto_ptr_array<const Renewal_data *> vects(
-        new const Renewal_data*[nb_vec]);
+    sequence_analysis::wrap_util::auto_ptr_array<const RenewalData*> vects(
+        new const RenewalData*[nb_vec]);
 
     for (int i = 0; i < nb_vec; i++)
-      vects[i] = boost::python::extract<Renewal_data*> (vecs[i]);
+      vects[i] = boost::python::extract<RenewalData*> (vecs[i]);
 
     ret = v.merge(error, nb_vec, vects.get());
 
@@ -236,7 +236,7 @@ public:
   }
 
   static Renewal*
-  estimation(const Renewal_data& input, int estimator, int nb_iter,
+  estimation(const RenewalData &input, int estimator, int nb_iter,
       int mean_computation, double weight, int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
@@ -248,8 +248,8 @@ public:
 
 
    static Renewal*
-  estimation_inter_event(const Renewal_data& input,
-      const Parametric& input_dist, int estimator, int nb_iter,
+  estimation_inter_event(const RenewalData &input,
+      const DiscreteParametric &input_dist, int estimator, int nb_iter,
       int mean_computation, double weight, int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
@@ -268,15 +268,15 @@ public:
 void class_renewal_data() {
 
 
-  class_<Renewal_data, bases<Time_events> > ("_Renewal_data", "Renewal_data", no_init)
+  class_<RenewalData, bases<TimeEvents> > ("_RenewalData", "RenewalData", no_init)
     .def(init <int, int>())
     .def(init <int, Renewal>())
-    .def(init <Time_events, int>())
-    .def(init <Renewal_data, optional<bool> >())
+    .def(init <TimeEvents, int>())
+    .def(init <RenewalData, optional<bool> >())
 
     // Python Operators
-    .def("get_renewal", &Renewal_data::get_renewal, return_value_policy<manage_new_object> (),"get renewal")
-    .def("get_type", &Renewal_data::get_type, "get type")
+    .def("get_renewal", &RenewalData::get_renewal, return_value_policy<manage_new_object> (),"get renewal")
+    .def("get_type", &RenewalData::get_type, "get type")
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
     DEF_RETURN_VALUE_NO_ARGS("merge", WRAP::merge, "Merge renewal_data. Type Merge? for more information")
     DEF_RETURN_VALUE("estimation", WRAP::estimation, args(""), "estimation")
@@ -285,17 +285,17 @@ void class_renewal_data() {
 
 
 /*
-    Renewal_data(int nb_sample , const Renewal_data **itimev);
+    RenewalData(int nb_sample , const RenewalData **itimev);
 
 
    int get_length(int index_seq) const { return length[index_seq]; }
    int get_sequence(int index_seq , int index) const
    { return sequence[index_seq][index]; }
-   Histogram* get_inter_event() const { return inter_event; }
-   Histogram* get_within() const { return within; }
-   Histogram* get_length_bias() const { return length_bias; }
-   Histogram* get_backward() const { return backward; }
-   Histogram* get_forward() const { return forward; }
+   FrequencyDistribution* get_inter_event() const { return inter_event; }
+   FrequencyDistribution* get_within() const { return within; }
+   FrequencyDistribution* get_length_bias() const { return length_bias; }
+   FrequencyDistribution* get_backward() const { return backward; }
+   FrequencyDistribution* get_forward() const { return forward; }
    Curves* get_index_event() const { return index_event; }
    };
 */
@@ -311,7 +311,7 @@ class RenewalIteratorWrap
 public:
 
   static boost::python::list
-  simulation(Renewal_iterator& input, int nb_sequence=1, char type='v')
+  simulation(RenewalIterator &input, int nb_sequence = 1, char type = 'v')
   {
     int *sequence;
 
@@ -330,16 +330,16 @@ void
 class_renewal_iterator()
 {
 
-  class_<Renewal_iterator >
-  ("_Renewal_iterator", "Renewal_iterator", no_init)
+  class_<RenewalIterator >
+  ("_RenewalIterator", "RenewalIterator", no_init)
 
   .def(init<Renewal*>()[with_custodian_and_ward_postcall<1, 2>()])
 
-  .add_property("interval", &Renewal_iterator::get_interval)
-  .add_property("length", &Renewal_iterator::get_length)
-  .add_property("counter", &Renewal_iterator::get_counter)
+  .add_property("interval", &RenewalIterator::get_interval)
+  .add_property("length", &RenewalIterator::get_length)
+  .add_property("counter", &RenewalIterator::get_counter)
 
-  .def("get_sequence", &Renewal_iterator::get_sequence, args("index"))  // to be done
+  .def("get_sequence", &RenewalIterator::get_sequence, args("index"))  // to be done
   .def("simulation", RenewalIteratorWrap::simulation,  "simulation")
 ;
 }
