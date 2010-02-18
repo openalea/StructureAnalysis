@@ -106,7 +106,7 @@ class TreeMatch_PO : public TreeMatch
 	       AMString mapping_type,
 	       AMString mapping,
 	       AMString scale_type,
-	       const Vector_distance &ivect,
+	       const VectorDistance &ivect,
 	       double coeff);
     
 
@@ -120,7 +120,7 @@ class TreeMatch_PO : public TreeMatch
 
   //Fonctions de ordered_matching_extract
 
-//   Distance_matrix* getMatrix();
+//   DistanceMatrix* getMatrix();
 //   SLArray* getList(int i_tree,int r_tree);
 //   DistanceType getDist(int i_tree,int r_tree);
 //   DistanceType getTime(int inp_tree,int ref_tree) const;
@@ -162,7 +162,7 @@ class TreeMatch_PO : public TreeMatch
 //   char*               _fileName;
 //   int                 _nbTree;
 //   DistanceType        _InsDelCostCoeff;
-//   Vector_distance     _vectorDist;
+//   VectorDistance      _vectorDist;
 //   ValueVector         _dispersion;
 //   ValueVector         _maxValue;
 //   ValueVector         _minValue;
