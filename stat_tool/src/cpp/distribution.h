@@ -41,122 +41,124 @@
 
 
 
-// class Parametric_model : public STAT_interface , protected Parametric {
-class Parametric_model : public STAT_interface , public Parametric {  // loi parametrique
+// class DiscreteParametricModel : public StatInterface , protected DiscreteParametric {
+class DiscreteParametricModel : public StatInterface , public DiscreteParametric {  // loi discrete parametrique
 
     friend class Distribution;  // Hack pour Windows
 
-    friend class Histogram;
-    friend class Distribution_data;
+    friend class FrequencyDistribution;
+    friend class DiscreteDistributionData;
 
-    friend Parametric_model* parametric_ascii_read(Format_error &error , const char *path ,
-                                                   double cumul_threshold);
-    friend std::ostream& operator<<(std::ostream &os , const Parametric_model &dist)
-    { return dist.ascii_write(os , dist.histogram , false , false); }
+    friend DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error ,
+                                                                   const char *path ,
+                                                                   double cumul_threshold);
+    friend std::ostream& operator<<(std::ostream &os , const DiscreteParametricModel &dist)
+    { return dist.ascii_write(os , dist.frequency_distribution , false , false); }
 
 private :
 
-    Distribution_data *histogram;  // pointeur sur un objet Distribution_data
+    DiscreteDistributionData *frequency_distribution;  // pointeur sur un objet DiscreteDistributionData
 
-    std::ostream& ascii_write(std::ostream &os , const Distribution_data *histo ,
+    std::ostream& ascii_write(std::ostream &os , const DiscreteDistributionData *histo ,
                               bool exhaustive , bool file_flag) const;
-    std::ostream& spreadsheet_write(std::ostream &os , const Distribution_data *histo) const;
-    bool plot_write(Format_error &error , const char *prefix , const char *title ,
-                    const Distribution_data *histo) const;
-    MultiPlotSet* get_plotable(const Distribution_data *histo) const;
+    std::ostream& spreadsheet_write(std::ostream &os , const DiscreteDistributionData *histo) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title ,
+                    const DiscreteDistributionData *histo) const;
+    MultiPlotSet* get_plotable(const DiscreteDistributionData *histo) const;
 
 public :
 
-    Parametric_model(int inb_value = 0 , int iident = NONPARAMETRIC ,
+    DiscreteParametricModel(int inb_value = 0 , int iident = NONPARAMETRIC ,
                      int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
                      double iparameter = D_DEFAULT, double iprobability = D_DEFAULT)
-    :Parametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
-    { histogram = NULL; }
-    Parametric_model(int iident , int iinf_bound , int isup_bound , double iparameter ,
-                     double iprobability , double cumul_threshold = CUMUL_THRESHOLD)
-    :Parametric(iident , iinf_bound , isup_bound , iparameter , iprobability , cumul_threshold)
-    { histogram = NULL; }
-    Parametric_model(const Histogram &histo);
-    Parametric_model(const Distribution &dist)
-    :Parametric(dist) { histogram = NULL; }
-    Parametric_model(const Parametric &dist)
-    :Parametric(dist) { histogram = NULL; }
-    Parametric_model(const Distribution &dist , const Histogram *histo);
-    Parametric_model(const Parametric &dist , const Histogram *histo);
-    Parametric_model(const Parametric_model &dist , bool data_flag = true);
-    ~Parametric_model();
-    Parametric_model& operator=(const Parametric_model &dist);
+    :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
+    { frequency_distribution = NULL; }
+    DiscreteParametricModel(int iident , int iinf_bound , int isup_bound , double iparameter ,
+                            double iprobability , double cumul_threshold = CUMUL_THRESHOLD)
+    :DiscreteParametric(iident , iinf_bound , isup_bound , iparameter , iprobability , cumul_threshold)
+    { frequency_distribution = NULL; }
+    DiscreteParametricModel(const FrequencyDistribution &histo);
+    DiscreteParametricModel(const Distribution &dist)
+    :DiscreteParametric(dist) { frequency_distribution = NULL; }
+    DiscreteParametricModel(const DiscreteParametric &dist)
+    :DiscreteParametric(dist) { frequency_distribution = NULL; }
+    DiscreteParametricModel(const Distribution &dist , const FrequencyDistribution *histo);
+    DiscreteParametricModel(const DiscreteParametric &dist , const FrequencyDistribution *histo);
+    DiscreteParametricModel(const DiscreteParametricModel &dist , bool data_flag = true);
+    ~DiscreteParametricModel();
+    DiscreteParametricModel& operator=(const DiscreteParametricModel &dist);
 
-    Distribution_data* extract_data(Format_error &error) const;
+    DiscreteDistributionData* extract_data(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    Distribution_data* simulation(Format_error &error , int nb_element) const;
+    DiscreteDistributionData* simulation(StatError &error , int nb_element) const;
 
-    Distribution_data* get_histogram() const { return histogram; }
+    DiscreteDistributionData* get_frequency_distribution() const { return frequency_distribution; }
 };
 
 
-Parametric_model* parametric_ascii_read(Format_error &error , const char *path ,
-                                        double cumul_threshold = CUMUL_THRESHOLD);
+DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const char *path ,
+                                                        double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
-// class Distribution_data : public STAT_interface , protected Histogram {
-class Distribution_data : public STAT_interface , public Histogram {  // histogramme
+// class DiscreteDistributionData : public StatInterface , protected FrequencyDistribution {
+class DiscreteDistributionData : public StatInterface , public FrequencyDistribution {  // loi discrete empirique
 
-    friend class Parametric_model;
+    friend class DiscreteParametricModel;
 
-    friend std::ostream& operator<<(std::ostream &os , const Distribution_data &histo)
+    friend std::ostream& operator<<(std::ostream &os , const DiscreteDistributionData &histo)
     { return histo.ascii_write(os); }
 
 private :
 
-    Parametric_model *distribution;  // pointeur sur un objet Parametric_model
+    DiscreteParametricModel *distribution;  // pointeur sur un objet DiscreteParametricModel
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
 
 public :
 
-    Distribution_data(int inb_value = 0)
-    :Histogram(inb_value) { distribution = NULL; }
-    Distribution_data(const Distribution &dist)
-    :Histogram(dist) { distribution = NULL; }
-    Distribution_data(const Histogram &histo)
-    :Histogram(histo) { distribution = NULL; }
-    Distribution_data(int inb_element , int *pelement)
-    :Histogram(inb_element , pelement) { distribution = NULL; }
-    Distribution_data(const Histogram &histo , char transform , int param , int mode = FLOOR)
-    :Histogram(histo , transform , param , mode) { distribution = NULL; }
-    Distribution_data(int nb_histo , const Histogram **phisto)
-    :Histogram(nb_histo , phisto) { distribution = NULL; }
-    Distribution_data(const Histogram &histo , const Distribution *dist);
-    Distribution_data(const Histogram &histo , const Parametric *dist);
-    Distribution_data(const Distribution_data &histo , bool model_flag = true);
-    virtual ~Distribution_data();
-    Distribution_data& operator=(const Distribution_data &histo);
+    DiscreteDistributionData(int inb_value = 0)
+    :FrequencyDistribution(inb_value) { distribution = NULL; }
+    DiscreteDistributionData(const Distribution &dist)
+    :FrequencyDistribution(dist) { distribution = NULL; }
+    DiscreteDistributionData(const FrequencyDistribution &histo)
+    :FrequencyDistribution(histo) { distribution = NULL; }
+    DiscreteDistributionData(int inb_element , int *pelement)
+    :FrequencyDistribution(inb_element , pelement) { distribution = NULL; }
+    DiscreteDistributionData(const FrequencyDistribution &histo , char transform ,
+                             int param , int mode = FLOOR)
+    :FrequencyDistribution(histo , transform , param , mode) { distribution = NULL; }
+    DiscreteDistributionData(int nb_histo , const FrequencyDistribution **phisto)
+    :FrequencyDistribution(nb_histo , phisto) { distribution = NULL; }
+    DiscreteDistributionData(const FrequencyDistribution &histo , const Distribution *dist);
+    DiscreteDistributionData(const FrequencyDistribution &histo , const DiscreteParametric *dist);
+    DiscreteDistributionData(const DiscreteDistributionData &histo , bool model_flag = true);
+    virtual ~DiscreteDistributionData();
+    DiscreteDistributionData& operator=(const DiscreteDistributionData &histo);
 
-    Parametric_model* extract_model(Format_error &error) const;
+    DiscreteParametricModel* extract_model(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    Parametric* get_distribution() const { return distribution; }
+    DiscreteParametric* get_distribution() const { return distribution; }
 };
 
 
