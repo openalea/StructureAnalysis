@@ -62,16 +62,16 @@ extern char* label(const char *file_name);
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des resultats d'une comparaison d'histogrammes.
+ *  Ecriture des resultats d'une comparaison de lois empiriques.
  *
- *  arguments : stream, nombre d'histogrammes, pointeurs sur les histogrammes,
+ *  arguments : stream, nombre de lois empiriques, pointeurs sur les lois empiriques,
  *              type de variable (SYMBOLIC/ORDINAL/NUMERIC), dissimilarites.
  *
  *--------------------------------------------------------------*/
 
-ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
-                                              const Histogram **ihisto ,
-                                              int type , double **dissimilarity) const
+ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_histo ,
+                                                          const FrequencyDistribution **ihisto ,
+                                                          int type , double **dissimilarity) const
 
 {
   register int i , j;
@@ -79,11 +79,11 @@ ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
   long old_adjust;
   double information , **cumul;
   Test *test;
-  const Histogram **histo;
+  const FrequencyDistribution **histo;
 
 
   nb_histo++;
-  histo = new const Histogram*[nb_histo];
+  histo = new const FrequencyDistribution*[nb_histo];
 
   histo[0] = this;
   for (i = 1;i < nb_histo;i++) {
@@ -92,10 +92,10 @@ ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
-  // ecriture des caracteristiques des histogrammes
+  // ecriture des caracteristiques des lois empiriques
 
   for (i = 0;i < nb_histo;i++) {
-    os << STAT_label[STATL_HISTOGRAM] << " " << i + 1  << " - ";
+    os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1  << " - ";
 
     if (type == SYMBOLIC) {
       os << STAT_label[STATL_SAMPLE_SIZE] << ": " << histo[i]->nb_element << endl;
@@ -151,14 +151,14 @@ ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
   }
   width[2] += ASCII_SPACE;
 
-  // ecriture des histogrammes et des fonctions de repartition
+  // ecriture des lois empiriques et des fonctions de repartition
 
   os << "  ";
   for (i = 0;i < nb_histo;i++) {
-    os << " | " << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+    os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
   }
   for (i = 0;i < nb_histo;i++) {
-    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
        << i + 1 << " " << STAT_label[STATL_FUNCTION];
   }
   os << endl;
@@ -202,18 +202,19 @@ ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
   }
   width[1] += ASCII_SPACE;
 
-  // ecriture de la matrice des dissimilarites entre lois deduites des histogrammes
+  // ecriture de la matrice des dissimilarites entre lois empiriques
 
-  os << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between " << STAT_label[STATL_HISTOGRAMS] << endl;
+  os << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
+     << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << endl;
 
   os << "\n           ";
   for (i = 0;i < nb_histo;i++) {
-    os << " | " << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+    os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
   }
   os << endl;
 
   for (i = 0;i < nb_histo;i++) {
-    os << STAT_label[STATL_HISTOGRAM] << " ";
+    os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " ";
     os << setw(width[0]) << i + 1 << " ";
     for (j = 0;j < nb_histo;j++) {
       os << setw(width[1]) << dissimilarity[i][j];
@@ -236,10 +237,10 @@ ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
   case NUMERIC : {
     int df[3];
     double diff , square_sum[3] , mean_square[3];
-    Histogram *merged_histo;
+    FrequencyDistribution *merged_histo;
 
 
-    merged_histo = new Histogram(nb_histo , histo);
+    merged_histo = new FrequencyDistribution(nb_histo , histo);
 
     square_sum[0] = 0.;
     square_sum[1] = 0.;
@@ -312,17 +313,17 @@ ostream& Histogram::dissimilarity_ascii_write(ostream &os , int nb_histo ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des resultats d'une comparaison d'histogrammes dans un fichier.
+ *  Ecriture des resultats d'une comparaison de lois empiriques dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, nombre d'histogrammes,
- *              pointeurs sur les histogrammes, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *  arguments : reference sur un objet StatError, path, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
  *              dissimilarites.
  *
  *--------------------------------------------------------------*/
 
-bool Histogram::dissimilarity_ascii_write(Format_error &error , const char *path ,
-                                          int nb_histo , const Histogram **ihisto ,
-                                          int type , double **dissimilarity) const
+bool FrequencyDistribution::dissimilarity_ascii_write(StatError &error , const char *path ,
+                                                      int nb_histo , const FrequencyDistribution **ihisto ,
+                                                      int type , double **dissimilarity) const
 
 {
   bool status;
@@ -347,18 +348,18 @@ bool Histogram::dissimilarity_ascii_write(Format_error &error , const char *path
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des resultats d'une comparaison d'histogrammes dans un fichier
+ *  Ecriture des resultats d'une comparaison de lois empiriques dans un fichier
  *  au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path, nombre d'histogrammes,
- *              pointeurs sur les histogrammes, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *  arguments : reference sur un objet StatError, path, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
  *              dissimilarites.
  *
  *--------------------------------------------------------------*/
 
-bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char *path ,
-                                                int nb_histo , const Histogram **ihisto ,
-                                                int type , double **dissimilarity) const
+bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , const char *path ,
+                                                            int nb_histo , const FrequencyDistribution **ihisto ,
+                                                            int type , double **dissimilarity) const
 
 {
   bool status;
@@ -366,7 +367,7 @@ bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char
   int max_nb_value;
   double information , **cumul , **concentration;
   Test *test;
-  const Histogram **histo;
+  const FrequencyDistribution **histo;
   ofstream out_file(path);
 
 
@@ -381,17 +382,17 @@ bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char
     status = true;
 
     nb_histo++;
-    histo = new const Histogram*[nb_histo];
+    histo = new const FrequencyDistribution*[nb_histo];
 
     histo[0] = this;
     for (i = 1;i < nb_histo;i++) {
       histo[i] = ihisto[i - 1];
     }
 
-    // ecriture des caracteristiques des histogrammes
+    // ecriture des caracteristiques des lois empiriques
 
     for (i = 0;i < nb_histo;i++) {
-      out_file << STAT_label[STATL_HISTOGRAM] << " " << i + 1  << "\t";
+      out_file << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1  << "\t";
 
       if (type == SYMBOLIC) {
         out_file << STAT_label[STATL_SAMPLE_SIZE] << "\t" << histo[i]->nb_element << endl;
@@ -413,7 +414,7 @@ bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char
                << information / histo[i]->nb_element << "\n" << endl;
     }
 
-    // ecriture des histogrammes, des fonctions de repartition et des courbes de concentration
+    // ecriture des lois empiriques, des fonctions de repartition et des courbes de concentration
 
     cumul = new double*[nb_histo];
     for (i = 0;i < nb_histo;i++) {
@@ -435,10 +436,10 @@ bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char
     }
 
     for (i = 0;i < nb_histo;i++) {
-      out_file << "\t" << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      out_file << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
     }
     for (i = 0;i < nb_histo;i++) {
-      out_file << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      out_file << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
                << i + 1 << " " << STAT_label[STATL_FUNCTION];
     }
 
@@ -492,17 +493,18 @@ bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char
       delete [] concentration;
     }
 
-    // ecriture de la matrice des dissimilarites entre lois deduites des histogrammes
+    // ecriture de la matrice des dissimilarites entre lois empiriques
 
-    out_file << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between " << STAT_label[STATL_HISTOGRAMS] << "\n\n";
+    out_file << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
+             << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << "\n\n";
 
     for (i = 0;i < nb_histo;i++) {
-      out_file << "\t" << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      out_file << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
     }
     out_file << endl;
 
     for (i = 0;i < nb_histo;i++) {
-      out_file << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      out_file << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
       for (j = 0;j < nb_histo;j++) {
         out_file << "\t" << dissimilarity[i][j];
       }
@@ -524,10 +526,10 @@ bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char
     case NUMERIC : {
       int df[3];
       double diff , square_sum[3] , mean_square[3];
-      Histogram *merged_histo;
+      FrequencyDistribution *merged_histo;
 
 
-      merged_histo = new Histogram(nb_histo , histo);
+      merged_histo = new FrequencyDistribution(nb_histo , histo);
 
       square_sum[0] = 0.;
       square_sum[1] = 0.;
@@ -591,30 +593,30 @@ bool Histogram::dissimilarity_spreadsheet_write(Format_error &error , const char
  *
  *  Test de Kruskal-Wallis (analyse de variance dans le cas ordinal).
  *
- *  arguments : nombre d'histogrammes, pointeurs sur les histogrammes.
+ *  arguments : nombre de lois empiriques, pointeurs sur les lois empiriques.
  *
  *--------------------------------------------------------------*/
 
-Test* Histogram::kruskal_wallis_test(int nb_histo , const Histogram **ihisto) const
+Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyDistribution **ihisto) const
 
 {
   register int i , j;
   int *pfrequency;
   double correction , value , sum , *rank;
-  const Histogram **histo;
-  Histogram *merged_histo;
+  const FrequencyDistribution **histo;
+  FrequencyDistribution *merged_histo;
   Test *test;
 
 
   nb_histo++;
-  histo = new const Histogram*[nb_histo];
+  histo = new const FrequencyDistribution*[nb_histo];
 
   histo[0] = this;
   for (i = 1;i < nb_histo;i++) {
     histo[i] = ihisto[i - 1];
   }
 
-  merged_histo = new Histogram(nb_histo , histo);
+  merged_histo = new FrequencyDistribution(nb_histo , histo);
 
   // calcul du terme de correction pour les ex-aequo
 
@@ -661,17 +663,17 @@ Test* Histogram::kruskal_wallis_test(int nb_histo , const Histogram **ihisto) co
 
 /*--------------------------------------------------------------*
  *
- *  Comparaison d'histogrammes.
+ *  Comparaison de lois empiriques.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre d'histogrammes,
- *              pointeurs sur les histogrammes, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
+ *  arguments : reference sur un objet StatError, stream, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, type de variable (SYMBOLIC/ORDINAL/NUMERIC),
  *              path, format de fichier ('a' : ASCII, 's' : Spreadsheet).
  *
  *--------------------------------------------------------------*/
 
-bool Histogram::comparison(Format_error &error , ostream &os , int nb_histo ,
-                           const Histogram **ihisto , int type , const char *path ,
-                           char format) const
+bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_histo ,
+                                       const FrequencyDistribution **ihisto , int type ,
+                                       const char *path , char format) const
 
 {
   bool status = true;
@@ -679,11 +681,11 @@ bool Histogram::comparison(Format_error &error , ostream &os , int nb_histo ,
   int max_nb_value , distance = 1;
   double **dissimilarity;
   Distribution **dist;
-  const Histogram **histo;
+  const FrequencyDistribution **histo;
 
 
   nb_histo++;
-  histo = new const Histogram*[nb_histo];
+  histo = new const FrequencyDistribution*[nb_histo];
 
   histo[0] = this;
   max_nb_value = nb_value;
@@ -711,16 +713,16 @@ bool Histogram::comparison(Format_error &error , ostream &os , int nb_histo ,
   if (type == ORDINAL) {
     int buff , *pfrequency , width[2];
     double *rank , *rank_mean;
-    Histogram *merged_histo;
+    FrequencyDistribution *merged_histo;
 
 
-    merged_histo = new Histogram(nb_histo , histo);
+    merged_histo = new FrequencyDistribution(nb_histo , histo);
 
     // calcul des rangs
 
     rank = merged_histo->rank_computation();
 
-    // calcul des rangs moyens pour chaque histogramme
+    // calcul des rangs moyens pour chaque loi empirique
 
     rank_mean = new double[nb_histo];
 
@@ -754,18 +756,19 @@ bool Histogram::comparison(Format_error &error , ostream &os , int nb_histo ,
     }
     width[1] += ASCII_SPACE;
 
-    // ecriture de la matrice des dissimilarites entre lois deduites des histogrammes
+    // ecriture de la matrice des dissimilarites entre lois empiriques
 
-    os << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between " << STAT_label[STATL_HISTOGRAMS] << endl;
+    os << "\n" << STAT_label[STATL_DISSIMILARITIES] << " between "
+       << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS] << endl;
 
     os << "\n           ";
     for (i = 0;i < nb_histo;i++) {
-      os << " | " << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
     }
     os << endl;
 
     for (i = 0;i < nb_histo;i++) {
-      os << STAT_label[STATL_HISTOGRAM] << " ";
+      os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " ";
       os << setw(width[0]) << i + 1 << " ";
       for (j = 0;j < nb_histo;j++) {
         os << setw(width[1]) << dissimilarity[i][j];
@@ -844,13 +847,13 @@ bool Histogram::comparison(Format_error &error , ostream &os , int nb_histo ,
 
 /*--------------------------------------------------------------*
  *
- *  Test F de comparaison des variances de 2 histogrammes.
+ *  Test F de comparaison des variances de 2 lois empiriques.
  *
- *  arguments : stream, reference sur un histogramme.
+ *  arguments : stream, reference sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-void Histogram::F_comparison(ostream &os , const Histogram &histo) const
+void FrequencyDistribution::F_comparison(ostream &os , const FrequencyDistribution &histo) const
 
 {
   Test *test;
@@ -877,13 +880,13 @@ void Histogram::F_comparison(ostream &os , const Histogram &histo) const
 
 /*--------------------------------------------------------------*
  *
- *  Test t de comparaison des moyennes de 2 histogrammes.
+ *  Test t de comparaison des moyennes de 2 lois empiriques.
  *
- *  arguments : stream, reference sur un histogramme.
+ *  arguments : stream, reference sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-void Histogram::t_comparison(ostream &os , const Histogram &histo) const
+void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistribution &histo) const
 
 {
   int df;
@@ -930,21 +933,21 @@ void Histogram::t_comparison(ostream &os , const Histogram &histo) const
  *
  *  Test de comparaison de Wilcoxon-Mann-Whitney.
  *
- *  arguments : reference sur un objet Format_error, stream,
- *              reference sur un histogramme.
+ *  arguments : reference sur un objet StatError, stream,
+ *              reference sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-bool Histogram::wilcoxon_mann_whitney_comparison(Format_error &error , ostream &os ,
-                                                 const Histogram &ihisto) const
+bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , ostream &os ,
+                                                             const FrequencyDistribution &ihisto) const
 
 {
   bool status;
   register int i;
   int nb_equal , min , max , *pfrequency0 , *pfrequency1;
   double correction , value , nb_sup , mean , variance , *rank;
-  const Histogram **histo;
-  Histogram *merged_histo;
+  const FrequencyDistribution **histo;
+  FrequencyDistribution *merged_histo;
   Test *test;
 
 
@@ -956,12 +959,12 @@ bool Histogram::wilcoxon_mann_whitney_comparison(Format_error &error , ostream &
   else {
     status = true;
 
-    histo = new const Histogram*[2];
+    histo = new const FrequencyDistribution*[2];
 
     histo[0] = this;
     histo[1] = &ihisto;
 
-    merged_histo = new Histogram(2 , histo);
+    merged_histo = new FrequencyDistribution(2 , histo);
 
     // calcul du terme de correction pour les ex-aequo
 
@@ -1048,19 +1051,19 @@ bool Histogram::wilcoxon_mann_whitney_comparison(Format_error &error , ostream &
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'une famille d'histogrammes :
+ *  Sortie Gnuplot d'une famille de lois empiriques :
  *  - histogrammes seuls et histogrammes etages,
- *  - lois et fonctions de repartition deduites des histogrammes,
+ *  - lois et fonctions de repartition,
  *  - mise en correspondance des fonctions de repartition,
  *  - courbes de concentration.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
- *              nombre d'histogrammes, pointeurs sur les histogrammes, titre des figures.
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              nombre de lois empiriques, pointeurs sur les lois empiriques, titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_histo ,
-                           const Histogram **ihisto , const char *title) const
+bool FrequencyDistribution::plot_write(StatError &error , const char *prefix , int nb_histo ,
+                                       const FrequencyDistribution **ihisto , const char *title) const
 
 {
   bool status = true;
@@ -1079,12 +1082,12 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
     int max_nb_value , max_frequency , max_range , reference_matching ,
         reference_concentration , *poffset , *pnb_value;
     double max_mass , shift , **cumul , **concentration;
-    const Histogram **histo , *phisto[2] , **merged_histo;
+    const FrequencyDistribution **histo , *phisto[2] , **merged_histo;
     ostringstream *data_file_name;
 
 
     nb_histo++;
-    histo = new const Histogram*[nb_histo];
+    histo = new const FrequencyDistribution*[nb_histo];
 
     histo[0] = this;
     for (i = 1;i < nb_histo;i++) {
@@ -1098,13 +1101,13 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
     if (nb_histo > 1) {
       data_file_name[0] << prefix << 0 << ".dat";
 
-      merged_histo = new const Histogram*[nb_histo];
-      merged_histo[nb_histo - 1] = new Histogram(*histo[nb_histo - 1]);
+      merged_histo = new const FrequencyDistribution*[nb_histo];
+      merged_histo[nb_histo - 1] = new FrequencyDistribution(*histo[nb_histo - 1]);
 
       for (i = nb_histo - 2;i >= 0;i--) {
         phisto[0] = merged_histo[i + 1];
         phisto[1] = histo[i];
-        merged_histo[i] = new Histogram(2 , phisto);
+        merged_histo[i] = new FrequencyDistribution(2 , phisto);
       }
 
       status = merged_histo[0]->plot_print((data_file_name[0].str()).c_str() ,
@@ -1241,7 +1244,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
                  << (int)(max_frequency * YSCALE) + 1 << "] ";
         for (j = 0;j < nb_histo;j++) {
           out_file << "\"" << label((data_file_name[j + 1].str()).c_str()) << "\" using 2:3 title \""
-                   << STAT_label[STATL_HISTOGRAM];
+                   << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           if (nb_histo > 1) {
             out_file << " " << j + 1;
           }
@@ -1279,7 +1282,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
                    << (int)(merged_histo[0]->max * YSCALE) + 1 << "] ";
           for (j = 0;j < nb_histo;j++) {
             out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using "
-                     << j + 1 << " title \"" << STAT_label[STATL_HISTOGRAM] << " " << j + 1
+                     << j + 1 << " title \"" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << j + 1
                      << "\" with impulses";
             if (j < nb_histo - 1) {
               out_file << ",\\";
@@ -1294,7 +1297,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
             out_file << "set ytics autofreq" << endl;
           }
 
-          // lois deduite des histogrammes
+          // lois
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1323,7 +1326,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
 
         if (cumul_concentration_flag) {
 
-          // fonctions de repartition deduites des histogrammes
+          // fonctions de repartition
 
           if (i == 0) {
             out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
@@ -1344,7 +1347,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
               }
               j++;
               out_file << "\"" << label((data_file_name[k + 1].str()).c_str()) << "\" using 1:5 title \""
-                       << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM];
+                       << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION];
               if (nb_histo > 1) {
                 out_file << " " << k + 1;
               }
@@ -1358,7 +1361,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
           }
 
           // mise en correspondance des fonctions de repartition en prenant
-          // comme reference l'histogramme dont l'etendue est la plus grande
+          // comme reference la loi empirique dont l'etendue est la plus grande
 
           if (nb_histo > 1) {
             if (i == 0) {
@@ -1371,7 +1374,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
             if (title) {
               out_file << title << " - ";
             }
-            out_file << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+            out_file << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
                      << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING] << "\"\n\n";
 
             out_file << "set grid\n" << "set xtics 0,0.1\n" << "set ytics 0,0.1" << endl;
@@ -1387,7 +1390,7 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
                 j++;
                 out_file << "\"" << label((data_file_name[nb_histo + 1].str()).c_str()) << "\" using "
                          << reference_matching + 1 << ":" << k + 1 << " title \""
-                         << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+                         << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
                          << k + 1 << " " << STAT_label[STATL_FUNCTION] << "\" with linespoints";
               }
             }
@@ -1458,19 +1461,19 @@ bool Histogram::plot_write(Format_error &error , const char *prefix , int nb_his
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'une famille d'histogrammes :
+ *  Sortie graphique d'une famille de lois empiriques :
  *  - histogrammes seuls et histogrammes etages,
- *  - lois et fonctions de repartition deduites des histogrammes,
+ *  - lois et fonctions de repartition,
  *  - mise en correspondance des fonctions de repartition,
  *  - courbes de concentration.
  *
- *  arguments : reference sur un objet Format_error, nombre d'histogrammes,
- *              pointeurs sur les histogrammes, titre des figures.
+ *  arguments : reference sur un objet StatError, nombre de lois empiriques,
+ *              pointeurs sur les lois empiriques, titre des figures.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_histo ,
-                                                 const Histogram **ihisto) const
+MultiPlotSet* FrequencyDistribution::get_plotable_frequency_distributions(StatError &error , int nb_histo ,
+                                                                          const FrequencyDistribution **ihisto) const
 
 {
   MultiPlotSet *plot_set;
@@ -1488,12 +1491,12 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
     int max_nb_value , max_frequency , cumul_concentration_nb_histo , max_range ,
         reference_matching , nb_plot_set;
     double max_mass , shift , **cumul;
-    const Histogram **histo , *phisto[2] , **merged_histo;
+    const FrequencyDistribution **histo , *phisto[2] , **merged_histo;
     ostringstream legend , title;
 
 
     nb_histo++;
-    histo = new const Histogram*[nb_histo];
+    histo = new const FrequencyDistribution*[nb_histo];
 
     histo[0] = this;
     for (i = 1;i < nb_histo;i++) {
@@ -1583,7 +1586,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
     for (i = 0;i < nb_histo;i++) {
       legend.str("");
-      legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+      legend << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
       plot[0][i].legend = legend.str();
 
       plot[0][i].style = "impulses";
@@ -1606,13 +1609,13 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
       // 2eme vue : histogrammes etages
 
-      merged_histo = new const Histogram*[nb_histo];
-      merged_histo[nb_histo - 1] = new Histogram(*histo[nb_histo - 1]);
+      merged_histo = new const FrequencyDistribution*[nb_histo];
+      merged_histo[nb_histo - 1] = new FrequencyDistribution(*histo[nb_histo - 1]);
 
       for (i = nb_histo - 2;i >= 0;i--) {
         phisto[0] = merged_histo[i + 1];
         phisto[1] = histo[i];
-        merged_histo[i] = new Histogram(2 , phisto);
+        merged_histo[i] = new FrequencyDistribution(2 , phisto);
       }
 
       plot[1].xrange = Range(0 , MAX(merged_histo[0]->nb_value , 2) - 1);
@@ -1629,7 +1632,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
       for (i = 0;i < nb_histo;i++) {
         legend.str("");
-        legend << STAT_label[STATL_HISTOGRAM] << " " << i + 1;
+        legend << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1;
         plot[1][i].legend = legend.str();
 
         plot[1][i].style = "impulses";
@@ -1642,7 +1645,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
       }
       delete [] merged_histo;
 
-      // 3eme vue : lois deduite des histogrammes
+      // 3eme vue : lois
 
       plot[2].xrange = Range(0 , MAX(max_nb_value , 2) - 1);
       plot[2].yrange = Range(0 , MIN(max_mass * YSCALE , 1.));
@@ -1672,7 +1675,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
     if (cumul_concentration_nb_histo > 0) {
 
-      // 4eme vue : fonctions de repartition deduites des histogrammes
+      // 4eme vue : fonctions de repartition
 
       plot[i].xrange = Range(0 , max_nb_value - 1);
       plot[i].yrange = Range(0. , 1.);
@@ -1688,7 +1691,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
         if (((histo[k]->variance == D_DEFAULT) && (histo[k]->nb_value > histo[k]->offset + 1)) ||
             (histo[k]->variance > 0.)) {
           legend.str("");
-          legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM];
+          legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION];
           if (nb_histo > 1) {
             legend << " " << k + 1;
           }
@@ -1705,11 +1708,11 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
       i++;
 
       // 5eme vue : mise en correspondance des fonctions de repartition en prenant
-      // comme reference l'histogramme dont l'etendue est la plus grande
+      // comme reference la loi empirique dont l'etendue est la plus grande
 
       if (nb_histo > 1) {
         title.str("");
-        title << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+        title << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
               << " " << STAT_label[STATL_FUNCTION] << " " << STAT_label[STATL_MATCHING];
         plot[i].title = title.str();
 
@@ -1728,7 +1731,7 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
           if (((histo[k]->variance == D_DEFAULT) && (histo[k]->nb_value > histo[k]->offset + 1)) ||
               (histo[k]->variance > 0.)) {
             legend.str("");
-            legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+            legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
                    << " " << k + 1 << " " << STAT_label[STATL_FUNCTION];
             plot[i][j].legend = legend.str();
 
@@ -1794,35 +1797,36 @@ MultiPlotSet* Histogram::get_plotable_histograms(Format_error &error , int nb_hi
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un histogramme.
+ *  Sortie graphique d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Histogram::get_plotable() const
+MultiPlotSet* FrequencyDistribution::get_plotable() const
 
 {
-  Format_error error;
+  StatError error;
 
-  return get_plotable_histograms(error , 0 , 0);
+  return get_plotable_frequency_distributions(error , 0 , 0);
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Distribution_data a partir
- *  d'un objet Histogram et d'un objet Distribution.
+ *  Construction d'un objet DiscreteDistributionData a partir
+ *  d'un objet FrequencyDistribution et d'un objet Distribution.
  *
- *  arguments : reference sur un objet Histogram,
+ *  arguments : reference sur un objet FrequencyDistribution,
  *              pointeur sur un objet Distribution.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data::Distribution_data(const Histogram &histo , const Distribution *dist)
-:Histogram(histo)
+DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &histo ,
+                                                   const Distribution *dist)
+:FrequencyDistribution(histo)
 
 {
   if (dist) {
-    distribution = new Parametric_model(*dist);
+    distribution = new DiscreteParametricModel(*dist);
   }
   else {
     distribution = NULL;
@@ -1832,20 +1836,21 @@ Distribution_data::Distribution_data(const Histogram &histo , const Distribution
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Distribution_data a partir
- *  d'un objet Histogram et d'un objet Parametric.
+ *  Construction d'un objet DiscreteDistributionData a partir
+ *  d'un objet FrequencyDistribution et d'un objet DiscreteParametric.
  *
- *  arguments : reference sur un objet Histogram,
- *              pointeur sur un objet Parametric.
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              pointeur sur un objet DiscreteParametric.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data::Distribution_data(const Histogram &histo , const Parametric *dist)
-:Histogram(histo)
+DiscreteDistributionData::DiscreteDistributionData(const FrequencyDistribution &histo ,
+                                                   const DiscreteParametric *dist)
+:FrequencyDistribution(histo)
 
 {
   if (dist) {
-    distribution = new Parametric_model(*dist);
+    distribution = new DiscreteParametricModel(*dist);
   }
   else {
     distribution = NULL;
@@ -1855,19 +1860,20 @@ Distribution_data::Distribution_data(const Histogram &histo , const Parametric *
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Distribution_data.
+ *  Constructeur par copie de la classe DiscreteDistributionData.
  *
- *  arguments : reference sur un objet Distribution_data,
- *              flag copie de l'objet Parametric_model.
+ *  arguments : reference sur un objet DiscreteDistributionData,
+ *              flag copie de l'objet DiscreteParametricModel.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data::Distribution_data(const Distribution_data &histo , bool model_flag)
-:Histogram(histo)
+DiscreteDistributionData::DiscreteDistributionData(const DiscreteDistributionData &histo ,
+                                                   bool model_flag)
+:FrequencyDistribution(histo)
 
 {
   if ((model_flag) && (histo.distribution)) {
-    distribution = new Parametric_model(*(histo.distribution) , false);
+    distribution = new DiscreteParametricModel(*(histo.distribution) , false);
   }
   else {
     distribution = NULL;
@@ -1877,11 +1883,11 @@ Distribution_data::Distribution_data(const Distribution_data &histo , bool model
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Distribution_data.
+ *  Destructeur de la classe DiscreteDistributionData.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data::~Distribution_data()
+DiscreteDistributionData::~DiscreteDistributionData()
 
 {
   delete distribution;
@@ -1890,22 +1896,22 @@ Distribution_data::~Distribution_data()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Distribution_data.
+ *  Operateur d'assignement de la classe DiscreteDistributionData.
  *
- *  argument : reference sur un objet Distribution_data.
+ *  argument : reference sur un objet DiscreteDistributionData.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data& Distribution_data::operator=(const Distribution_data &histo)
+DiscreteDistributionData& DiscreteDistributionData::operator=(const DiscreteDistributionData &histo)
 
 {
   if (&histo != this) {
     delete distribution;
     delete [] frequency;
 
-    Histogram::copy(histo);
+    FrequencyDistribution::copy(histo);
     if (histo.distribution) {
-      distribution = new Parametric_model(*(histo.distribution) , false);
+      distribution = new DiscreteParametricModel(*(histo.distribution) , false);
     }
     else {
       distribution = NULL;
@@ -1918,16 +1924,16 @@ Distribution_data& Distribution_data::operator=(const Distribution_data &histo)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de la partie "modele" d'un objet Distribution_data.
+ *  Extraction de la partie "modele" d'un objet DiscreteDistributionData.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Distribution_data::extract_model(Format_error &error) const
+DiscreteParametricModel* DiscreteDistributionData::extract_model(StatError &error) const
 
 {
-  Parametric_model *dist;
+  DiscreteParametricModel *dist;
 
 
   error.init();
@@ -1938,8 +1944,8 @@ Parametric_model* Distribution_data::extract_model(Format_error &error) const
   }
 
   else {
-    dist = new Parametric_model(*distribution);
-    dist->histogram = new Distribution_data(*this , false);
+    dist = new DiscreteParametricModel(*distribution);
+    dist->frequency_distribution = new DiscreteDistributionData(*this , false);
   }
 
   return dist;
@@ -1948,15 +1954,15 @@ Parametric_model* Distribution_data::extract_model(Format_error &error) const
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Histogram a partir d'un fichier.
+ *  Construction d'un objet FrequencyDistribution a partir d'un fichier.
  *  Format : n lignes de la forme (valeur) (frequence).
  *  Les valeurs sont ordonnees.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* histogram_ascii_read(Format_error &error , const char *path)
+DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , const char *path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1966,7 +1972,7 @@ Distribution_data* histogram_ascii_read(Format_error &error , const char *path)
   register int i;
   int line , nb_element;
   long value , index , max_index;
-  Distribution_data *histo;
+  DiscreteDistributionData *histo;
   ifstream in_file(path);
 
 
@@ -2070,7 +2076,7 @@ Distribution_data* histogram_ascii_read(Format_error &error , const char *path)
       in_file.clear();
       in_file.seekg(0 , ios::beg);
 
-      histo = new Distribution_data(max_index + 1);
+      histo = new DiscreteDistributionData(max_index + 1);
 
       while (buffer.readLine(in_file , false)) {
         position = buffer.first('#');
@@ -2115,13 +2121,13 @@ Distribution_data* histogram_ascii_read(Format_error &error , const char *path)
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Distribution_data.
+ *  Ecriture sur une ligne d'un objet DiscreteDistributionData.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Distribution_data::line_write(ostream &os) const
+ostream& DiscreteDistributionData::line_write(ostream &os) const
 
 {
   os << STAT_label[STATL_SAMPLE_SIZE] << ": " << nb_element;
@@ -2138,21 +2144,21 @@ ostream& Distribution_data::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distribution_data.
+ *  Ecriture d'un objet DiscreteDistributionData.
  *
  *  arguments : stream, flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Distribution_data::ascii_write(ostream &os , bool exhaustive ,
-                                        bool file_flag) const
+ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive ,
+                                               bool file_flag) const
 
 {
   if (distribution) {
     distribution->ascii_write(os , this , exhaustive , file_flag);
   }
   else {
-    Histogram::ascii_write(os , exhaustive , file_flag);
+    FrequencyDistribution::ascii_write(os , exhaustive , file_flag);
   }
 
   return os;
@@ -2161,13 +2167,13 @@ ostream& Distribution_data::ascii_write(ostream &os , bool exhaustive ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distribution_data.
+ *  Ecriture d'un objet DiscreteDistributionData.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Distribution_data::ascii_write(ostream &os , bool exhaustive) const
+ostream& DiscreteDistributionData::ascii_write(ostream &os , bool exhaustive) const
 
 {
   return ascii_write(os , exhaustive , false);
@@ -2176,15 +2182,15 @@ ostream& Distribution_data::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distribution_data dans un fichier.
+ *  Ecriture d'un objet DiscreteDistributionData dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution_data::ascii_write(Format_error &error , const char *path ,
-                                    bool exhaustive) const
+bool DiscreteDistributionData::ascii_write(StatError &error , const char *path ,
+                                           bool exhaustive) const
 
 {
   bool status;
@@ -2209,13 +2215,13 @@ bool Distribution_data::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distribution_data dans un fichier au format tableur.
+ *  Ecriture d'un objet DiscreteDistributionData dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution_data::spreadsheet_write(Format_error &error , const char *path) const
+bool DiscreteDistributionData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -2240,7 +2246,7 @@ bool Distribution_data::spreadsheet_write(Format_error &error , const char *path
       double information = information_computation();
 
 
-      out_file << STAT_label[STATL_HISTOGRAM] << "\t";
+      out_file << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       spreadsheet_characteristic_print(out_file , true);
 
       out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << mean_absolute_deviation_computation();
@@ -2252,8 +2258,8 @@ bool Distribution_data::spreadsheet_write(Format_error &error , const char *path
       out_file << STAT_label[STATL_INFORMATION] << "\t" << information << "\t"
                << information / nb_element << endl;
 
-      out_file << "\n\t" << STAT_label[STATL_HISTOGRAM] << "\t" << STAT_label[STATL_CUMULATIVE]
-               << " " << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_FUNCTION];
+      out_file << "\n\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t" << STAT_label[STATL_CUMULATIVE]
+               << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
       if (mean > 0.) {
         out_file << "\t" << STAT_label[STATL_CONCENTRATION] << " " << STAT_label[STATL_FUNCTION];
       }
@@ -2268,15 +2274,15 @@ bool Distribution_data::spreadsheet_write(Format_error &error , const char *path
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Distribution_data.
+ *  Sortie Gnuplot d'un objet DiscreteDistributionData.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
-                                   const char *title) const
+bool DiscreteDistributionData::plot_write(StatError &error , const char *prefix ,
+                                          const char *title) const
 
 {
   bool status;
@@ -2287,7 +2293,7 @@ bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
   }
 
   else {
-    status = Histogram::plot_write(error , prefix , 0 , 0 , title);
+    status = FrequencyDistribution::plot_write(error , prefix , 0 , 0 , title);
   }
 
   return status;
@@ -2296,11 +2302,11 @@ bool Distribution_data::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Distribution_data.
+ *  Sortie graphique d'un objet DiscreteDistributionData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Distribution_data::get_plotable() const
+MultiPlotSet* DiscreteDistributionData::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
@@ -2310,9 +2316,8 @@ MultiPlotSet* Distribution_data::get_plotable() const
     plot_set = distribution->get_plotable(this);
   }
   else {
-    Format_error error;
-    plot_set = Histogram::get_plotable_histograms(error , 0 , 0);
-
+    StatError error;
+    plot_set = FrequencyDistribution::get_plotable_frequency_distributions(error , 0 , 0);
   }
 
   return plot_set;
