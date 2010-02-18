@@ -101,19 +101,19 @@ int Tops::min_position_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes du nombre d'entrenoeuds
+ *  Construction des lois empiriques du nombre d'entrenoeuds
  *  axe porteur/axes portes.
  *
  *--------------------------------------------------------------*/
 
-void Tops::build_nb_internode_histogram()
+void Tops::build_nb_internode_frequency_distribution()
 
 {
   register int i , j;
   int max_nb_internode , *bmax_length , *pposition , *plength;
 
 
-  // creation de l'histogramme du nombre d'entrenoeuds de l'axe porteur
+  // creation de la loi empirique du nombre d'entrenoeuds de l'axe porteur
 
   max_nb_internode = 0;
   for (i = 0;i < nb_sequence;i++) {
@@ -122,13 +122,13 @@ void Tops::build_nb_internode_histogram()
     }
   }
 
-  nb_internode = new Histogram(max_nb_internode + 1);
+  nb_internode = new FrequencyDistribution(max_nb_internode + 1);
 
-  // constitution de l'histogramme du nombre d'entrenoeuds de l'axe porteur et
-  // creation des l'histogrammes du nombre d'entrenoeuds des axes portes
+  // constitution de la loi empirique du nombre d'entrenoeuds de l'axe porteur et
+  // creation des lois empiriques du nombre d'entrenoeuds des axes portes
 
   max_position_computation();
-  axillary_nb_internode = new Histogram*[max_position + 1];
+  axillary_nb_internode = new FrequencyDistribution*[max_position + 1];
 
   bmax_length = new int[max_position + 1];
   for (i = 0;i <= max_position;i++) {
@@ -153,14 +153,14 @@ void Tops::build_nb_internode_histogram()
   axillary_nb_internode[0] = NULL;
   for (i = 1;i <= max_position;i++) {
     if (bmax_length[i] != I_DEFAULT) {
-      axillary_nb_internode[i] = new Histogram(bmax_length[i] + 1);
+      axillary_nb_internode[i] = new FrequencyDistribution(bmax_length[i] + 1);
     }
     else {
       axillary_nb_internode[i] = NULL;
     }
   }
 
-  // constitution des histogrammes du nombre d'entrenoeuds des axes portes
+  // constitution des lois empiriques du nombre d'entrenoeuds des axes portes
 
   for (i = 0;i < nb_sequence;i++) {
     pposition = index_parameter[i];
@@ -172,7 +172,7 @@ void Tops::build_nb_internode_histogram()
 
   delete [] bmax_length;
 
-  // calcul des caracteristiques des histogrammes
+  // calcul des caracteristiques des lois empiriques
 
   nb_internode->offset_computation();
   nb_internode->nb_element = nb_sequence;
@@ -201,17 +201,17 @@ void Tops::build_nb_internode_histogram()
  *
  *--------------------------------------------------------------*/
 
-void Top_parameters::position_nb_internode_computation(int position)
+void TopParameters::position_nb_internode_computation(int position)
 
 {
-  Parametric *nb_trial , *scale_nb_trial , *elementary;
+  DiscreteParametric *nb_trial , *scale_nb_trial , *elementary;
   Compound *cdist;
 
 
-  nb_trial = new Parametric(NEGATIVE_BINOMIAL , position , I_DEFAULT ,
-                            (double)position , probability);
+  nb_trial = new DiscreteParametric(NEGATIVE_BINOMIAL , position , I_DEFAULT ,
+                                    (double)position , probability);
 
-  scale_nb_trial = new Parametric(*((Distribution*)nb_trial) , rhythm_ratio);
+  scale_nb_trial = new DiscreteParametric(*((Distribution*)nb_trial) , rhythm_ratio);
 
 #  ifdef DEBUG
 //   cout << "\ntest : " << nb_trial->variance / scale_nb_trial->variance << " | "
@@ -220,7 +220,7 @@ void Top_parameters::position_nb_internode_computation(int position)
 
   delete nb_trial;
 
-  elementary = new Parametric(BINOMIAL , 0 , 1 , D_DEFAULT , axillary_probability);
+  elementary = new DiscreteParametric(BINOMIAL , 0 , 1 , D_DEFAULT , axillary_probability);
 
   cdist = new Compound(*scale_nb_trial , *elementary);
   delete scale_nb_trial;
@@ -239,7 +239,7 @@ void Top_parameters::position_nb_internode_computation(int position)
  *
  *--------------------------------------------------------------*/
 
-void Top_parameters::axillary_nb_internode_computation(int imax_position)
+void TopParameters::axillary_nb_internode_computation(int imax_position)
 
 {
   if (imax_position != max_position) {
@@ -268,20 +268,20 @@ void Top_parameters::axillary_nb_internode_computation(int imax_position)
  *
  *  Estimation des parametres d'une cime.
  *
- *  arguments : reference sur un objet Format_error, positions minimum et
+ *  arguments : reference sur un objet StatError, positions minimum et
  *              maximum, voisinage, flag probabilites egales.
  *
  *--------------------------------------------------------------*/
 
-Top_parameters* Tops::estimation(Format_error &error , int imin_position , int imax_position ,
-                                 int neighborhood , bool equal_probability) const
+TopParameters* Tops::estimation(StatError &error , int imin_position , int imax_position ,
+                                int neighborhood , bool equal_probability) const
 
 {
   bool status = true;
   register int i , j , k;
   int nb_neighbor , diff , total , variance_total , *pposition , *plength;
   double mixt_position , mean , mixt_mean2 , moment2 , variance;
-  Top_parameters *parameters;
+  TopParameters *parameters;
 
 
   parameters = NULL;
@@ -339,9 +339,9 @@ Top_parameters* Tops::estimation(Format_error &error , int imin_position , int i
 
   if (status) {
 
-    // creation de l'objet Top_parameters
+    // creation de l'objet TopParameters
 
-    parameters = new Top_parameters();
+    parameters = new TopParameters();
     parameters->tops = new Tops(*this , false);
 
     // accumulation position moyenne, moyenne, moment d'ordre 2 et
@@ -461,23 +461,23 @@ Top_parameters* Tops::estimation(Format_error &error , int imin_position , int i
  *
  *  Simulation d'un ensemble de cimes.
  *
- *  arguments : reference sur un objet Format_error, nombre de cimes,
+ *  arguments : reference sur un objet StatError, nombre de cimes,
  *              loi du nombre d'epreuves axes porteurs,
  *              loi du nombre d'axes portes par noeud.
  *
  *--------------------------------------------------------------*/
 
-Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
-                                 const Distribution &nb_trial ,
-                                 const Distribution &nb_axillary) const
+Tops* TopParameters::simulation(StatError &error , int nb_top ,
+                                const Distribution &nb_trial ,
+                                const Distribution &nb_axillary) const
 
 {
   bool status = true;
   register int i , j , k , m;
   int nb_trial_value , value , nb_axillary_value , axillary_nb_trial , *nb_position ,
       *pposition , *plength;
-  Parametric *growth , *axillary_growth;
-  Top_parameters *parameters;
+  DiscreteParametric *growth , *axillary_growth;
+  TopParameters *parameters;
   Tops *tops;
 
 
@@ -511,14 +511,14 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
     }
 
     tops = new Tops(nb_top , 0 , nb_position);
-    tops->top_parameters = new Top_parameters(*this , false);
+    tops->top_parameters = new TopParameters(*this , false);
     parameters = tops->top_parameters;
 
     // construction de la loi de croissance de l'axe porteur et
     // creation de la loi de croissance des axes portes
 
-    growth = new Parametric(BINOMIAL , 0 , 1 , D_DEFAULT , parameters->probability);
-    axillary_growth = new Parametric((int)round(nb_trial.nb_value * parameters->rhythm_ratio) , BINOMIAL);
+    growth = new DiscreteParametric(BINOMIAL , 0 , 1 , D_DEFAULT , parameters->probability);
+    axillary_growth = new DiscreteParametric((int)round(nb_trial.nb_value * parameters->rhythm_ratio) , BINOMIAL);
 
     for (i = 0;i < nb_top;i++) {
       nb_trial_value = nb_trial.simulation();
@@ -570,15 +570,15 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
     tops->max_length_computation();
     tops->cumul_length_computation();
     delete tops->hlength;
-    tops->build_length_histogram();
+    tops->build_length_frequency_distribution();
 
-    tops->build_index_parameter_histogram();
+    tops->build_index_parameter_frequency_distribution();
 
     tops->min_value_computation(0);
     tops->max_value_computation(0);
-    tops->build_marginal_histogram(0);
+    tops->build_marginal_frequency_distribution(0);
 
-    tops->build_nb_internode_histogram();
+    tops->build_nb_internode_frequency_distribution();
     parameters->axillary_nb_internode_computation(tops->max_position);
 
     delete [] nb_position;
@@ -594,18 +594,18 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
  *
  *  Simulation d'un ensemble de cimes.
  *
- *  arguments : reference sur un objet Format_error, nombre de cimes,
+ *  arguments : reference sur un objet StatError, nombre de cimes,
  *              nombre d'epreuves axes porteurs,
  *              nombre d'axes portes par noeud.
  *
  *--------------------------------------------------------------*/
 
-Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
-                                 int nb_trial , int nb_axillary) const
+Tops* TopParameters::simulation(StatError &error , int nb_top ,
+                                int nb_trial , int nb_axillary) const
 
 {
   bool status = true;
-  Parametric *nb_trial_dist , *nb_axillary_dist;
+  DiscreteParametric *nb_trial_dist , *nb_axillary_dist;
   Tops *tops;
 
 
@@ -630,10 +630,10 @@ Tops* Top_parameters::simulation(Format_error &error , int nb_top ,
   }
 
   if (status) {
-    nb_trial_dist = new Parametric(UNIFORM , nb_trial , nb_trial ,
-                                   D_DEFAULT , D_DEFAULT);
-    nb_axillary_dist = new Parametric(UNIFORM , nb_axillary , nb_axillary ,
-                                      D_DEFAULT , D_DEFAULT);
+    nb_trial_dist = new DiscreteParametric(UNIFORM , nb_trial , nb_trial ,
+                                           D_DEFAULT , D_DEFAULT);
+    nb_axillary_dist = new DiscreteParametric(UNIFORM , nb_axillary , nb_axillary ,
+                                              D_DEFAULT , D_DEFAULT);
 
     tops = simulation(error , nb_top , *nb_trial_dist , *nb_axillary_dist);
 
