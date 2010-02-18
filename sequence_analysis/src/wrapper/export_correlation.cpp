@@ -62,7 +62,7 @@ public:
   white_noise_correlation_order(Correlation& input, int order)
 
   {
-    Format_error error;
+    StatError error;
     bool ret;
     ret = input.white_noise_correlation(error, order);
     FOOTER;
@@ -73,7 +73,7 @@ public:
 		  boost::python::list input_filter)
 
   {
-   Format_error error;
+   StatError error;
    bool ret;
    int nb_point = len(input_filter);
    double sum=0;
@@ -108,7 +108,7 @@ public:
   white_noise_correlation_dist(Correlation& input,
  		  const Distribution& dist)
   {
-    Format_error error;
+    StatError error;
     bool ret;
     ret = input.white_noise_correlation(error, dist);
     //if (!ret) throw error
@@ -120,7 +120,7 @@ public:
 
 void class_correlation() {
 
-  class_<Correlation, bases<STAT_interface> >
+  class_<Correlation, bases<StatInterface> >
   ("_Correlation", "Correlation")
     .def(init<int, int, int, int>())
     .def(init<int, int, bool, int>())
