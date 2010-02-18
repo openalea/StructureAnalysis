@@ -4,7 +4,7 @@
  *
  *        Copyright 2006-2007 INRIA - CIRAD - INRA
  *
- *        File author(s): Yann Guédon <yann.guedon@cirad.fr>
+ *        File author(s): Yann Guedon <yann.guedon@cirad.fr>
  *                        Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
  *
  *        Distributed under the GPL 2.0 License.
@@ -53,72 +53,72 @@ class WRAP {
 
 public:
 
-  static Markovian_sequences*
+  static MarkovianSequences*
   markovian_sequences1(int nb_sequence, boost::python::list& input_identifiers,
       boost::python::list& input_ilength, int input_index_parameter_type,
       int input_nb_variable, boost::python::list& input_itype, bool init_flag)
   {
-    Markovian_sequences *seq = NULL;
+    MarkovianSequences *seq = NULL;
     // TODO
     return seq;
   }
 
-  static Markovian_sequences*
+  static MarkovianSequences*
   markovian_sequences2(int nb_sequence, boost::python::list& input_identifiers,
       boost::python::list& input_ilength, int input_index_parameter_type,
       int input_nb_variable, boost::python::list& input_itype, bool init_flag)
   {
-    Markovian_sequences *seq = NULL;
+    MarkovianSequences *seq = NULL;
     // todo
     return seq;
   }
 
-  static Markovian_sequences*
+  static MarkovianSequences*
   markovian_sequences3(int nb_sequence, boost::python::list& input_identifiers,
       boost::python::list& input_ilength, int input_index_parameter_type,
       int input_nb_variable, boost::python::list& input_itype, bool init_flag)
   {
-    Markovian_sequences *seq = NULL;
+    MarkovianSequences *seq = NULL;
     // todo
     return seq;
   }
 
-  static Distribution_data*
-  extract(const Markovian_sequences& input, int type, int variable, int value)
+  static DiscreteDistributionData*
+  extract(const MarkovianSequences &input, int type, int variable, int value)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, Distribution_data, type,
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, type,
         variable, value);
   }
 
-  static Markovian_sequences*
-  merge(const Markovian_sequences& input, const boost::python::list& input_list)
+  static MarkovianSequences*
+  merge(const MarkovianSequences &input, const boost::python::list& input_list)
   {
 
-   CREATE_ARRAY(input_list, const Markovian_sequences*, data);
-   SIMPLE_METHOD_TEMPLATE_1(input, merge, Markovian_sequences,
+   CREATE_ARRAY(input_list, const MarkovianSequences*, data);
+   SIMPLE_METHOD_TEMPLATE_1(input, merge, MarkovianSequences,
         data_size, data.get());
   }
 
-  static Markovian_sequences*
-  cluster_step(const Markovian_sequences& input, int variable, int step,
+  static MarkovianSequences*
+  cluster_step(const MarkovianSequences &input, int variable, int step,
 		  int mode = FLOOR)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, cluster, Markovian_sequences,
+    SIMPLE_METHOD_TEMPLATE_1(input, cluster, MarkovianSequences,
     		variable, step, mode);
   }
 
-  static Markovian_sequences*
-  cluster_limit(const Markovian_sequences& seq,
+  static MarkovianSequences*
+  cluster_limit(const MarkovianSequences &seq,
 		  int variable, boost::python::list& limit, bool add_flag)
   {
 
-     Format_error error;
+     StatError error;
 
      int nb_limit = len(limit);
      bool is_float = true;
      int *lint = NULL;
      double *ldouble = NULL;
-     Markovian_sequences* ret;
+     MarkovianSequences* ret;
      // Test type
      boost::python::extract<int> get_int(limit[0]);
      if (get_int.check())
@@ -162,70 +162,70 @@ public:
      return ret;
    }
 
-  static Markovian_sequences*
-  transcode(const Markovian_sequences& input, int variable,
+  static MarkovianSequences*
+  transcode(const MarkovianSequences &input, int variable,
       boost::python::list& input_list, bool add_flag = false)
   {
 
     CREATE_ARRAY(input_list, int, data);
-    SIMPLE_METHOD_TEMPLATE_1(input, transcode, Markovian_sequences,
+    SIMPLE_METHOD_TEMPLATE_1(input, transcode, MarkovianSequences,
     		variable, data.get(), add_flag);
   }
 
-  static Markovian_sequences*
-  merge_variable(const Markovian_sequences& input,
+  static MarkovianSequences*
+  merge_variable(const MarkovianSequences &input,
       const boost::python::list& input_seqs,
       int ref_sample)
   {
-    CREATE_ARRAY(input_seqs, const Markovian_sequences*, sequences);
-    SIMPLE_METHOD_TEMPLATE_1(input, merge_variable, Markovian_sequences,
+    CREATE_ARRAY(input_seqs, const MarkovianSequences*, sequences);
+    SIMPLE_METHOD_TEMPLATE_1(input, merge_variable, MarkovianSequences,
         sequences_size, sequences.get(), ref_sample);
   }
 
-  static Markovian_sequences*
-  select_variable(const Markovian_sequences& input,
+  static MarkovianSequences*
+  select_variable(const MarkovianSequences &input,
       boost::python::list& input_list , bool keep)
   {
     CREATE_ARRAY(input_list, int, data);
-    SIMPLE_METHOD_TEMPLATE_1(input, select_variable, Markovian_sequences,
+    SIMPLE_METHOD_TEMPLATE_1(input, select_variable, MarkovianSequences,
         data_size, data.get(), keep);
   }
 
-  static Markovian_sequences*
-  split(const Markovian_sequences& input, int index)
+  static MarkovianSequences*
+  split(const MarkovianSequences &input, int index)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, split, Markovian_sequences, index);
+    SIMPLE_METHOD_TEMPLATE_1(input, split, MarkovianSequences, index);
   }
 
-  static Markovian_sequences*
-  consecutive_values(const Markovian_sequences& input,
+  static MarkovianSequences*
+  consecutive_values(const MarkovianSequences &input,
       int variable , bool add_flag )
   {
-    HEADER_OS(Markovian_sequences);
+    HEADER_OS(MarkovianSequences);
     ret = input.consecutive_values(error, os, variable, add_flag);
     FOOTER_OS;
   }
 
-  static Markovian_sequences*
-  remove_index_parameter(const Markovian_sequences& input)
+  static MarkovianSequences*
+  remove_index_parameter(const MarkovianSequences &input)
   {
-     SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, Markovian_sequences);
+     SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, MarkovianSequences);
   }
 
-  static Markovian_sequences*
-  add_absorbing_run(const Markovian_sequences& input ,int sequence_length
+  static MarkovianSequences*
+  add_absorbing_run(const MarkovianSequences &input ,int sequence_length
 		, int run_length)
   {
      SIMPLE_METHOD_TEMPLATE_1(input, add_absorbing_run,
-    		 Markovian_sequences, sequence_length, run_length);
+    		 MarkovianSequences, sequence_length, run_length);
   }
 
   static bool
-  transition_count(const Markovian_sequences &input, int max_order,
+  transition_count(const MarkovianSequences &input, int max_order,
 		  bool begin = false , int estimator = MAXIMUM_LIKELIHOOD ,
 		  const char *path = 0)
   {
-    Format_error error;
+    StatError error;
     std::stringstream os;
     bool ret = true;
 
@@ -235,10 +235,10 @@ public:
   }
 
   static std::string
-  word_count(const Markovian_sequences& input, int variable, int word_length,
+  word_count(const MarkovianSequences &input, int variable, int word_length,
 		  int begin_state, int end_state, int min_frequency)
   {
-    Format_error error;
+    StatError error;
     std::stringstream os;
     bool ret = true;
 
@@ -252,48 +252,48 @@ public:
   }
 
 
-  static Variable_order_markov*
-  variable_order_markov_estimation1(const Markovian_sequences& input,
+  static VariableOrderMarkov*
+  variable_order_markov_estimation1(const MarkovianSequences &input,
       char model_type, int min_order, int max_order, int algorithm,
       double threshold, int estimator, bool global_initial_transition,
       bool global_sample, bool counting_flag)
   {
-    HEADER_OS(Variable_order_markov);
+    HEADER_OS(VariableOrderMarkov);
     ret = input.variable_order_markov_estimation(error, os, model_type,
         min_order, max_order, algorithm, threshold, estimator,
         global_initial_transition, global_sample, counting_flag);
     FOOTER_OS;
   }
 
-  static Variable_order_markov*
-  variable_order_markov_estimation2(const Markovian_sequences& input,
+  static VariableOrderMarkov*
+  variable_order_markov_estimation2(const MarkovianSequences &input,
       char type, int max_order, bool global_initial_transition,
       bool counting_flag)
   {
-    HEADER(Variable_order_markov);
+    HEADER(VariableOrderMarkov);
     ret = input.variable_order_markov_estimation(error, type, max_order,
         global_initial_transition, counting_flag);
     FOOTER;
 
   }
 
-  static Variable_order_markov*
-  variable_order_markov_estimation3(const Markovian_sequences& input,
-      const Variable_order_markov &markov, bool global_initial_transition,
+  static VariableOrderMarkov*
+  variable_order_markov_estimation3(const MarkovianSequences &input,
+      const VariableOrderMarkov &markov, bool global_initial_transition,
       bool counting_flag)
   {
-    HEADER_OS(Variable_order_markov);
+    HEADER_OS(VariableOrderMarkov);
     ret = input.variable_order_markov_estimation(error, markov,
         global_initial_transition, counting_flag);
     FOOTER_OS;
   }
 
-  static Variable_order_markov*
-  lumpability_estimation(const Markovian_sequences& input,
+  static VariableOrderMarkov*
+  lumpability_estimation(const MarkovianSequences &input,
       boost::python::list& input_symbol, int penalty_type, int order,
       bool counting_flag)
   {
-    HEADER_OS(Variable_order_markov);
+    HEADER_OS(VariableOrderMarkov);
 
 //    int nb_value = len(input_symbol);
 //    int *symbol;
@@ -311,26 +311,26 @@ public:
 
   }
 
-  static Hidden_variable_order_markov*
-  hidden_variable_order_markov_estimation(const Markovian_sequences& input,
-      const Hidden_variable_order_markov &hvom, bool global_initial_transition,
+  static HiddenVariableOrderMarkov*
+  hidden_variable_order_markov_estimation(const MarkovianSequences &input,
+      const HiddenVariableOrderMarkov &hvom, bool global_initial_transition,
       bool counting_flag, bool state_sequence, int nb_iter)
   {
-    HEADER_OS(Hidden_variable_order_markov);
+    HEADER_OS(HiddenVariableOrderMarkov);
     ret = input.hidden_variable_order_markov_estimation(error, os, hvom,
         global_initial_transition, counting_flag, state_sequence, nb_iter);
     FOOTER_OS;
   }
 
 
-  static Hidden_variable_order_markov*
+  static HiddenVariableOrderMarkov*
   hidden_variable_order_markov_stochastic_estimation(
-      const Markovian_sequences &input,
-      const Hidden_variable_order_markov &hvom, bool global_initial_transition,
+      const MarkovianSequences &input,
+      const HiddenVariableOrderMarkov &hvom, bool global_initial_transition,
       int min_nb_state_sequence, int max_nb_state_sequence, double parameter,
       bool counting_flag, bool state_sequence, int nb_iter)
   {
-    HEADER_OS(Hidden_variable_order_markov);
+    HEADER_OS(HiddenVariableOrderMarkov);
     ret = input.hidden_variable_order_markov_stochastic_estimation(error, os,
         hvom, global_initial_transition, min_nb_state_sequence,
         max_nb_state_sequence, parameter, counting_flag, state_sequence,
@@ -339,55 +339,55 @@ public:
   }
 
   static bool
-  comparison_variable_order_markov(const Markovian_sequences &input,
+  comparison_variable_order_markov(const MarkovianSequences &input,
       boost::python::list &input_markov, char *filename)
   {
-    Format_error error;
+    StatError error;
     bool ret = false;
     std::stringstream os;
 
-    CREATE_ARRAY(input_markov, const Variable_order_markov *, data);
+    CREATE_ARRAY(input_markov, const VariableOrderMarkov*, data);
     ret = input.comparison(error, os, data_size, data.get(), filename);
     FOOTER_OS;
   }
 
   static bool
-  comparison_semi_markov(const Markovian_sequences &input,
+  comparison_semi_markov(const MarkovianSequences &input,
       boost::python::list &input_markov, char *filename)
   {
-    Format_error error;
+    StatError error;
     std::stringstream os;
     bool ret = false;
 
-    CREATE_ARRAY(input_markov, const Semi_markov *, data);
+    CREATE_ARRAY(input_markov, const SemiMarkov*, data);
     ret = input.comparison(error, os, data_size, data.get(), filename);
     FOOTER_OS;
   }
 
   static bool
-  comparison_hidden_variable_order_markov(const Markovian_sequences &input,
+  comparison_hidden_variable_order_markov(const MarkovianSequences &input,
       boost::python::list &input_markov, int algorithm, const char *filename)
   {
-    Format_error error;
+    StatError error;
     std::stringstream os;
     bool ret = false;
 
-    CREATE_ARRAY(input_markov, const Hidden_variable_order_markov *, data);
+    CREATE_ARRAY(input_markov, const HiddenVariableOrderMarkov*, data);
     ret = input.comparison(error, os, data_size, data.get(), algorithm,
         filename);
     FOOTER_OS;
   }
 
   static bool
-  comparison_hidden_semi_markov(const Markovian_sequences &input,
+  comparison_hidden_semi_markov(const MarkovianSequences &input,
       boost::python::list &input_markov, int algorithm,
       const char *filename)
   {
-    Format_error error;
+    StatError error;
     std::stringstream os;
     bool ret = false;
 
-    CREATE_ARRAY(input_markov, const Hidden_semi_markov*, markov);
+    CREATE_ARRAY(input_markov, const HiddenSemiMarkov*, markov);
     ret = input.comparison(error, os, markov_size, markov.get(), algorithm,
         filename);
 
@@ -395,30 +395,30 @@ public:
   }
 
   static void
-  self_transition_computation(Markovian_sequences& input)
+  self_transition_computation(MarkovianSequences &input)
   {
       //todo this functio is protected so only the case with no arguments is wrapped for now
       input.self_transition_computation();
   }
 
-  static Hidden_semi_markov*
-  hidden_semi_markov_estimation(const Markovian_sequences &input,
-      const Hidden_semi_markov &ihsmarkov, int estimator, bool counting_flag,
+  static HiddenSemiMarkov*
+  hidden_semi_markov_estimation(const MarkovianSequences &input,
+      const HiddenSemiMarkov &ihsmarkov, int estimator, bool counting_flag,
       bool state_sequence, int nb_iter, int mean_computation)
   {
-    HEADER_OS(Hidden_semi_markov);
+    HEADER_OS(HiddenSemiMarkov);
     ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov, estimator,
         counting_flag, state_sequence, nb_iter, mean_computation);
     FOOTER_OS;
   }
 
-  static Hidden_semi_markov*
-  hidden_semi_markov_estimation_model(const Markovian_sequences &input,
+  static HiddenSemiMarkov*
+  hidden_semi_markov_estimation_model(const MarkovianSequences &input,
       char model_type, int nb_state, bool left_right, int estimator,
       bool counting_flag, bool state_sequence, double occupancy_mean,
       int nb_iter, int mean_computation)
   {
-    HEADER_OS(Hidden_semi_markov);
+    HEADER_OS(HiddenSemiMarkov);
     ret = input.hidden_semi_markov_estimation(error, os, model_type, nb_state,
         left_right, estimator, counting_flag, state_sequence, occupancy_mean,
         nb_iter, mean_computation);
@@ -426,13 +426,13 @@ public:
   }
 
 
-  static Hidden_semi_markov*
-  hidden_semi_markov_stochastic_estimation(const Markovian_sequences &input,
-      const Hidden_semi_markov &ihsmarkov, int min_nb_state_sequence,
+  static HiddenSemiMarkov*
+  hidden_semi_markov_stochastic_estimation(const MarkovianSequences &input,
+      const HiddenSemiMarkov &ihsmarkov, int min_nb_state_sequence,
       int max_nb_state_sequence, double parameter, int estimator,
       bool counting_flag, bool state_sequence, int nb_iter)
   {
-    HEADER_OS(Hidden_semi_markov);
+    HEADER_OS(HiddenSemiMarkov);
 
     ret = input.hidden_semi_markov_stochastic_estimation(error, os, ihsmarkov,
         min_nb_state_sequence, max_nb_state_sequence, parameter, estimator,
@@ -441,14 +441,14 @@ public:
     FOOTER_OS;
   }
 
-  static Hidden_semi_markov*
+  static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation_model(
-      const Markovian_sequences &input, char model_type, int nb_state,
+      const MarkovianSequences &input, char model_type, int nb_state,
       bool left_right, int min_nb_state_sequence, int max_nb_state_sequence,
       double parameter, int estimator, bool counting_flag, bool state_sequence,
       double occupancy_mean, int nb_iter)
   {
-    HEADER_OS(Hidden_semi_markov);
+    HEADER_OS(HiddenSemiMarkov);
     ret = input.hidden_semi_markov_stochastic_estimation(error, os, model_type,
         nb_state, left_right, min_nb_state_sequence, max_nb_state_sequence,
         parameter, estimator, counting_flag, state_sequence, occupancy_mean,
@@ -457,21 +457,21 @@ public:
 
   }
 
-  static Semi_markov*
-  semi_markov_estimation(const Markovian_sequences & input, char model_type,
+  static SemiMarkov*
+  semi_markov_estimation(const MarkovianSequences &input, char model_type,
       int estimator, bool counting_flag, int nb_iter, int mean_computation)
   {
-    HEADER_OS(Semi_markov);
+    HEADER_OS(SemiMarkov);
     ret = input.semi_markov_estimation(error, os, model_type, estimator,
         counting_flag, nb_iter, mean_computation);
     FOOTER_OS;
   }
 
   static bool
-  mtg_write(const Markovian_sequences & input, const char* path,
+  mtg_write(const MarkovianSequences &input, const char* path,
       boost::python::list input_values)
   {
-    Format_error error;
+    StatError error;
     bool ret;
 
     CREATE_ARRAY(input_values, int, data);
@@ -480,21 +480,21 @@ public:
     return ret;
   }
 
-  static Nonhomogeneous_markov*
-  nonhomogeneous_markov_estimation(const Markovian_sequences & input,
+  static NonhomogeneousMarkov*
+  nonhomogeneous_markov_estimation(const MarkovianSequences &input,
       boost::python::list list_ident, bool counting_flag)
   {
-    HEADER(Nonhomogeneous_markov);
+    HEADER(NonhomogeneousMarkov);
     CREATE_ARRAY(list_ident, int, data);
     ret = input.nonhomogeneous_markov_estimation(error, data.get(), counting_flag);
     FOOTER;
   }
 
   static bool
-  lumpability_test(const Markovian_sequences & input,
+  lumpability_test(const MarkovianSequences &input,
       boost::python::list input_values, int order)
   {
-    Format_error error;
+    StatError error;
     bool ret;
     std::stringstream os;
 
@@ -503,10 +503,10 @@ public:
     FOOTER_OS;
   }
 
-  static void plot_write(const Markovian_sequences &input, const std::string& prefix,
+  static void plot_write(const MarkovianSequences &input, const std::string& prefix,
     const std::string& title)
   {
-      Format_error error;
+      StatError error;
       input.plot_write(error, prefix.c_str(), title.c_str());
   }
 
@@ -519,7 +519,7 @@ void class_markovian_sequences() {
 
 
 
-  class_<Markovian_sequences, bases<Sequences> > ("_Markovian_sequences", "Markovian_sequences")
+  class_<MarkovianSequences, bases<Sequences> > ("_MarkovianSequences", "MarkovianSequences")
 
      //todo those constructors if needed
     .def("__init__", make_constructor(WRAP::markovian_sequences1))
@@ -527,7 +527,7 @@ void class_markovian_sequences() {
     .def("__init__", make_constructor(WRAP::markovian_sequences3))
 
     .def(init <Sequences>())
-    .def(init <Markovian_sequences, optional<char, int> >())
+    .def(init <MarkovianSequences, optional<char, int> >())
 
     .def(self_ns::str(self)) //__str__
 
@@ -578,17 +578,17 @@ void class_markovian_sequences() {
 
 
   /*
-   Markovian_sequences* remove_variable_1() const;
-   Markovian_sequences* initial_run_computation(Format_error &error) const;
+   MarkovianSequences* remove_variable_1() const;
+   MarkovianSequences* initial_run_computation(StatError &error) const;
 
    std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,   bool exhaustive = false) const;
-   bool ascii_data_write(Format_error &error , const char *path , char format = 'c' , bool exhaustive = false) const;
+   bool ascii_data_write(StatError &error , const char *path , char format = 'c' , bool exhaustive = false) const;
    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-   bool ascii_write(Format_error &error , const char *path ,   bool exhaustive = false) const;
-   bool spreadsheet_write(Format_error &error , const char *path) const;
-   bool plot_write(Format_error &error , const char *prefix ,   const char *title = 0) const;
+   bool ascii_write(StatError &error , const char *path ,   bool exhaustive = false) const;
+   bool spreadsheet_write(StatError &error , const char *path) const;
+   bool plot_write(StatError &error , const char *prefix ,   const char *title = 0) const;
 
-   bool mtg_write(Format_error &error , const char *path , int *itype) const;
+   bool mtg_write(StatError &error , const char *path , int *itype) const;
 
    double iid_information_computation() const;
 
@@ -601,10 +601,10 @@ void class_markovian_sequences() {
    // acces membres de la classe
 
    Curves* get_self_transition(int state) const { return self_transition[state]; }
-   Histogram*** get_observation() const { return observation; }
-   Histogram** get_observation(int variable) const { return observation[variable]; }
-   Histogram* get_observation(int variable , int state) const   { return observation[variable][state]; }
-   Sequence_characteristics* get_characteristics(int variable) const   { return characteristics[variable]; }
+   FrequencyDistribution*** get_observation() const { return observation; }
+   FrequencyDistribution** get_observation(int variable) const { return observation[variable]; }
+   FrequencyDistribution* get_observation(int variable , int state) const   { return observation[variable][state]; }
+   SequenceCharacteristics* get_characteristics(int variable) const   { return characteristics[variable]; }
    */
 
 }
@@ -614,10 +614,10 @@ void class_markovian_sequences() {
 
 void class_self_transition() {
 
-  class_<Self_transition, bases<Curves> > ("_Self_transition", "Self_transition", no_init)
+  class_<SelfTransition, bases<Curves> > ("_SelfTransition", "SelfTransition", no_init)
     .def(init <int>())
-    DEF_RETURN_VALUE_NO_ARGS("monomolecular_regression", &Self_transition::monomolecular_regression, "returns monomolecular regression")
-    DEF_RETURN_VALUE_NO_ARGS("logistic_regression", &Self_transition::logistic_regression,"returns logistic regression")
+    DEF_RETURN_VALUE_NO_ARGS("monomolecular_regression", &SelfTransition::monomolecular_regression, "returns monomolecular regression")
+    DEF_RETURN_VALUE_NO_ARGS("logistic_regression", &SelfTransition::logistic_regression,"returns logistic regression")
     ;
     //Done
 }
