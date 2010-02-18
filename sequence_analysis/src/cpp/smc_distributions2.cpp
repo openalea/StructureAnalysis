@@ -57,14 +57,14 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::state_nb_pattern_mixture(int state , char pattern)
+void SemiMarkov::state_nb_pattern_mixture(int state , char pattern)
 
 {
   register int i , j , k , m;
   int max_length , index_nb_pattern , previous_nb_pattern , increment;
   double sum , *pmass , *lmass , **state_out , *pstate_out , ***state_in;
   Distribution *pdist;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   switch (pattern) {
@@ -339,14 +339,14 @@ void Semi_markov::state_nb_pattern_mixture(int state , char pattern)
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::output_nb_run_mixture(int variable , int output)
+void SemiMarkov::output_nb_run_mixture(int variable , int output)
 
 {
   register int i , j , k , m , n;
   int max_length , index_nb_pattern , min , max;
   double sum0 , sum1 , *pmass , *lmass , **state_out , ***state_in , ***state_nb_run;
   Distribution *nb_run;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   nb_run = nonparametric_process[variable]->nb_run[output];
@@ -657,14 +657,14 @@ void Semi_markov::output_nb_run_mixture(int variable , int output)
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::output_nb_occurrence_mixture(int variable , int output)
+void SemiMarkov::output_nb_occurrence_mixture(int variable , int output)
 
 {
   register int i , j , k , m , n;
   int max_length , min , max;
   double sum , *pmass , *omass , *lmass , **state_out , ***state_in;
   Distribution *nb_occurrence;
-  Parametric *occupancy , ***observation;
+  DiscreteParametric *occupancy , ***observation;
 
 
   nb_occurrence = nonparametric_process[variable]->nb_occurrence[output];
@@ -692,16 +692,16 @@ void Semi_markov::output_nb_occurrence_mixture(int variable , int output)
   // calcul des lois du nombre d'occurrences de l'observation selectionnee
   // pour les differents temps passes dans un etat donne
 
-  observation = new Parametric**[nb_state];
+  observation = new DiscreteParametric**[nb_state];
   for (i = 0;i < nb_state;i++) {
     if (state_subtype[i] == SEMI_MARKOVIAN) {
       occupancy = nonparametric_process[0]->sojourn_time[i];
-      observation[i] = new Parametric*[MIN(max_length + 1 , occupancy->nb_value)];
+      observation[i] = new DiscreteParametric*[MIN(max_length + 1 , occupancy->nb_value)];
 
       observation[i][0] = NULL;
       for (j = 1;j < MIN(max_length + 1 , occupancy->nb_value);j++) {
-        observation[i][j] = new Parametric(BINOMIAL , 0 , j , D_DEFAULT ,
-                                           nonparametric_process[variable]->observation[i]->mass[output]);
+        observation[i][j] = new DiscreteParametric(BINOMIAL , 0 , j , D_DEFAULT ,
+                                                   nonparametric_process[variable]->observation[i]->mass[output]);
       }
     }
   }
@@ -891,21 +891,21 @@ void Semi_markov::output_nb_occurrence_mixture(int variable , int output)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des lois caracteristiques d'un objet Semi_markov.
+ *  Calcul des lois caracteristiques d'un objet SemiMarkov.
  *
  *  arguments : longueur des sequences, flag sur le calcul des lois de comptage,
  *              indice du processus d'observation.
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::characteristic_computation(int length , bool counting_flag , int variable)
+void SemiMarkov::characteristic_computation(int length , bool counting_flag , int variable)
 
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
     register int i , j , k;
     double *memory;
-    Parametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
+    DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
 
     memory = NULL;
@@ -939,14 +939,16 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
 
         if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
           if (transition[i][i] > 0.) {
-            nonparametric_process[0]->sojourn_time[i] = new Parametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
-                                                                       1. - transition[i][i] , OCCUPANCY_THRESHOLD);
+            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
+                                                                               I_DEFAULT , 1. , 1. - transition[i][i] ,
+                                                                               OCCUPANCY_THRESHOLD);
             nonparametric_process[0]->sojourn_time[i]->parameter = D_DEFAULT;
             nonparametric_process[0]->sojourn_time[i]->probability = D_DEFAULT;
           }
 
           else {
-            nonparametric_process[0]->sojourn_time[i] = new Parametric(UNIFORM , 1 , 1 , D_DEFAULT , D_DEFAULT);
+            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(UNIFORM , 1 , 1 ,
+                                                                               D_DEFAULT , D_DEFAULT);
             nonparametric_process[0]->sojourn_time[i]->sup_bound = I_DEFAULT;
           }
 
@@ -1073,17 +1075,17 @@ void Semi_markov::characteristic_computation(int length , bool counting_flag , i
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des lois caracteristiques d'un objet Semi_markov.
+ *  Calcul des lois caracteristiques d'un objet SemiMarkov.
  *
- *  arguments : reference sur un objet Semi_markov_data,
+ *  arguments : reference sur un objet SemiMarkovData,
  *              flag sur le calcul des lois de comptage,
  *              indice du processus d'observation,
  *              flag pour tenir compte des longueurs.
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool counting_flag ,
-                                             int variable , bool length_flag)
+void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool counting_flag ,
+                                            int variable , bool length_flag)
 
 {
   if (nb_component > 0) {
@@ -1135,8 +1137,9 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
 
         if ((state_subtype[i] == MARKOVIAN) && (transition[i][i] < 1.)) {
           if (transition[i][i] > 0.) {
-            nonparametric_process[0]->sojourn_time[i] = new Parametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
-                                                                       1. - transition[i][i] , OCCUPANCY_THRESHOLD);
+            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 ,
+                                                                               I_DEFAULT , 1. , 1. - transition[i][i] ,
+                                                                               OCCUPANCY_THRESHOLD);
 
             if ((seq.type[0] == STATE) && (seq.characteristics[0]) &&
                 (seq.characteristics[0]->sojourn_time[i]->nb_value > nonparametric_process[0]->sojourn_time[i]->nb_value)) {
@@ -1147,7 +1150,8 @@ void Semi_markov::characteristic_computation(const Semi_markov_data &seq , bool 
           }
 
           else {
-            nonparametric_process[0]->sojourn_time[i] = new Parametric(UNIFORM , 1 , 1 , D_DEFAULT , D_DEFAULT);
+            nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(UNIFORM , 1 , 1 ,
+                                                                               D_DEFAULT , D_DEFAULT);
             nonparametric_process[0]->sojourn_time[i]->sup_bound = I_DEFAULT;
           }
 
