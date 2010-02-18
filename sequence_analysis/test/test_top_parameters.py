@@ -13,7 +13,7 @@ from openalea.sequence_analysis.tops import Tops
 from openalea.sequence_analysis.simulate import Simulate
 from openalea.sequence_analysis.top_parameters import TopParameters
 from openalea.sequence_analysis.data_transform import *
-  
+
 
 
 from tools import interface
@@ -28,19 +28,19 @@ def TopParametersData():
 class Test(interface):
     """a simple unittest class
 
- 
+
     """
     def __init__(self):
         interface.__init__(self,
                            self.test_build_data(),
                            "data/param1.p",
                            TopParameters)
-        
-        
-    def test_build_data(self): 
+
+
+    def test_build_data(self):
         return TopParameters(0.6, 0.6, 1.2)
 
-    
+
     def _test_empty(self):
         #test tobedone
         self.empty()
@@ -53,55 +53,55 @@ class Test(interface):
 
     def test_print(self):
         self.print_data()
-        
+
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
         self.display_versus_str()
-        
+
     def test_len(self):
         pass
-     
-    def test_plot(self):        
+
+    def test_plot(self):
         self.plot()
-    
+
     def test_save(self):
         pass
         #self.save(skip_reading=True)
-                    
+
     def test_plot_write(self):
         self.plot_write()
-        
+
     def _test_file_ascii_write(self):
         self.file_ascii_write()
-        
+
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
-           
+
     def test_extract(self):
         """test to be done"""
-        from openalea.stat_tool._stat_tool import _ParametricModel
+        from openalea.stat_tool._stat_tool import _DiscreteParametricModel
         for i in range(1, self.data.max_position):
-            assert type(self.data.extract(i)) == _ParametricModel
-        
+            assert type(self.data.extract(i)) == _DiscreteParametricModel
+
     def test_extract_data(self):
         """test to be done"""
-        pass 
+        pass
     def test_axillary_probability(self):
         assert self.data.axillary_probability == 0.6
-        
+
     def test_probability(self):
         assert self.data.probability == 0.6
 
     def test_rhythm_ratio(self):
         assert self.data.rhythm_ratio == 1.2
-        
+
     def test_get_axillary_nb_internode(self):
         for i in range(1, self.data.max_position):
             self.data.get_axillary_nb_internode(i)
-        
+
     def test_get_axillary_nb_internode_wrong_arg(self):
-        
+
         try:
             self.data.get_axillary_nb_internode(0)
             assert False
@@ -120,11 +120,11 @@ class Test(interface):
 
 
 """
-remain to be tested : 
-top.ascii_write                  
+remain to be tested :
+top.ascii_write
 top.simulation_dists
-top.get_tops                 
-    
+top.get_tops
+
 """
 
 

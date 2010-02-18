@@ -17,29 +17,29 @@ N = 10
 # SEMI MARKOV case
 def test_semi_markov_iterator():
     hsm = HiddenSemiMarkov('data'+sep+'hidden_semi_markov.dat')
-    smi = sa._Semi_markov_iterator(hsm)
+    smi = sa._SemiMarkovIterator(hsm)
     sim = smi.simulation(N, True)
 
 def hsm_iterator(fn):
     hsm = HiddenSemiMarkov(fn)
-    it = sa._Semi_markov_iterator(hsm)
+    it = sa._SemiMarkovIterator(hsm)
     return it
 
 def test_semi_markov_iterator2():
     fn = 'data'+sep+'hidden_semi_markov.dat'
-    smi = hsm_iterator(fn)  
+    smi = hsm_iterator(fn)
     sim = smi.simulation(N, True)
 
 # VARIABLE ORDER MARKOV case
 def vom_iterator(fn):
-    
+
     vom = HiddenVariableOrderMarkov(fn)
-    it = sa._Variable_order_markov_iterator(vom)
+    it = sa._VariableOrderMarkovIterator(vom)
     return it
 
 def test_variable_order_markov_iterator():
     vom = HiddenVariableOrderMarkov('data'+sep+'dupreziana21.hc')
-    smi = sa._Variable_order_markov_iterator(vom)
+    smi = sa._VariableOrderMarkovIterator(vom)
     sim = smi.simulation(N, True)
 
 def test_variable_order_markov_iterator2():
@@ -50,7 +50,7 @@ def test_variable_order_markov_iterator2():
 # RENEWAL case
 def renewal_iterator(fn):
     ren = Renewal(fn)
-    it = sa._Renewal_iterator(ren)
+    it = sa._RenewalIterator(ren)
     return it
 
 def _test_renewal_iterator2():
@@ -63,19 +63,19 @@ def _test_renewal_iterator():
     """to be fixed"""
     ren = Renewal("data" + sep + "abri13.ren")
     print type(ren)
-    smi = sa._Renewal_iterator(ren)
+    smi = sa._RenewalIterator(ren)
     sim = smi.simulation(N, True)
 
 
 
 if __name__ == "__main__":
-    
+
     test_semi_markov_iterator()
     test_semi_markov_iterator2()
-    
+
     test_variable_order_markov_iterator()
     test_variable_order_markov_iterator2()
-    
+
     #test_renewal_iterator()
     #test_renewal_iterator2()
-    
+

@@ -10,9 +10,9 @@ from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.semi_markov import SemiMarkov
 from openalea.sequence_analysis.simulate import Simulate
 
-from openalea.stat_tool.data_transform import * 
-from openalea.stat_tool.cluster import Cluster 
-from openalea.stat_tool.cluster import Transcode, Cluster 
+from openalea.stat_tool.data_transform import *
+from openalea.stat_tool.cluster import Cluster
+from openalea.stat_tool.cluster import Transcode, Cluster
 
 from tools import interface
 from tools import runTestClass
@@ -23,26 +23,26 @@ def SemiMarkovData():
     ret = Simulate(sm, 1, 1000, True)
     return sm
 
-    
+
 class Test(interface):
     """a simple unittest class
-    
+
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
                            "data/semi_markov.dat",
                            SemiMarkov)
-        
+
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
         sm =  SemiMarkov('data/semi_markov.dat')
-        
-        
+
+
         return sm
-   
+
     def _test_empty(self):
         self.empty()
 
@@ -54,42 +54,42 @@ class Test(interface):
 
     def test_print(self):
         self.print_data()
-        
+
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
         self.display_versus_str()
-        
+
     def test_len(self):
         seq = self.data
         pass
 
-    def _test_plot(self):        
+    def _test_plot(self):
         self.plot()
-    
+
     def test_save(self):
         self.save(skip_reading=True)
-                    
+
     def test_plot_write(self):
         self.plot_write()
-        
+
     def test_file_ascii_write(self):
         self.file_ascii_write()
-        
+
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
-        
+
     def test_simulate(self):
         sm = self.data
         sm.simulation_nb_elements(1, 10000, True)
         Simulate(sm,1, 10000, True)
         pass
-        
+
     def test_thresholding(self):
         self.data.thresholding(1)
-        
+
     def test_extract(self):
-        self.data.extract(1,0,0)
+        self.data.extract(0,1,1)
 
     def test_extract_data(self):
         self.data.extract_data()
