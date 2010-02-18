@@ -27,7 +27,7 @@ namespace stat_tool
     
     
 
-    inline void throw_error(Format_error &error)
+    inline void throw_error(StatError &error)
     {
       ostringstream error_message;
       error_message << error;
