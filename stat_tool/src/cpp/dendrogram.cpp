@@ -86,17 +86,17 @@ Dendrogram::Dendrogram()
  *
  *  Constructeur de la classe Dendrogram.
  *
- *  arguments : reference sur un objet Distance_matrix, echelle.
+ *  arguments : reference sur un objet DistanceMatrix, echelle.
  *
  *--------------------------------------------------------------*/
 
-Dendrogram::Dendrogram(const Distance_matrix &dist_matrix , int iscale)
+Dendrogram::Dendrogram(const DistanceMatrix &dist_matrix , int iscale)
 
 {
   register int i;
 
 
-  distance_matrix = new Distance_matrix(dist_matrix);
+  distance_matrix = new DistanceMatrix(dist_matrix);
 
   scale = iscale;
 
@@ -160,7 +160,7 @@ void Dendrogram::copy(const Dendrogram &dendrogram)
   register int i , j;
 
 
-  distance_matrix = new Distance_matrix(*(dendrogram.distance_matrix));
+  distance_matrix = new DistanceMatrix(*(dendrogram.distance_matrix));
 
   scale = dendrogram.scale;
 
@@ -819,20 +819,20 @@ double Dendrogram::coefficient_computation(int iscale) const
  *
  *--------------------------------------------------------------*/
 
-Dendrogram* Distance_matrix::agglomerative_hierarchical_clustering(int algorithm ,
-                                                                   int criterion) const
+Dendrogram* DistanceMatrix::agglomerative_hierarchical_clustering(int algorithm ,
+                                                                  int criterion) const
 
 {
   register int i , j , k;
   int index , index1 , index2 , icluster , *pattern_index , **cluster_pattern;
   double min_distance , *cumul_distance , **normalized_cluster_distance ,
          **normalized_pattern_distance , **max_inter_cluster_distance;
-  Distance_matrix *dist_matrix;
+  DistanceMatrix *dist_matrix;
   Clusters *clusters;
   Dendrogram *dendrogram;
 
 
-  dist_matrix = new Distance_matrix(*this , (test_symmetry() ? 'c' : 's'));
+  dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
 
 # ifdef DEBUG
   if (!(test_symmetry())) {
@@ -1201,19 +1201,19 @@ Dendrogram* Distance_matrix::agglomerative_hierarchical_clustering(int algorithm
  *
  *--------------------------------------------------------------*/
 
-Dendrogram* Distance_matrix::divisive_hierarchical_clustering() const
+Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
 
 {
   register int i , j , k;
   int bnb_pattern , icluster , new_cluster , outlying_pattern , *passignment1 , *passignment2 ,
       *cluster_identifier , *cluster_index;
   double distance , max_cumul_distance , *cumul_distance , **normalized_distance;
-  Distance_matrix *dist_matrix , *step_dist_matrix;
+  DistanceMatrix *dist_matrix , *step_dist_matrix;
   Clusters *clusters , *step_clusters;
   Dendrogram *dendrogram;
 
 
-  dist_matrix = new Distance_matrix(*this , (test_symmetry() ? 'c' : 's'));
+  dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
 
 # ifdef DEBUG
   if (!(test_symmetry())) {
@@ -1257,7 +1257,7 @@ Dendrogram* Distance_matrix::divisive_hierarchical_clustering() const
         cluster_index[j] = j;
       }
 
-      step_dist_matrix = new Distance_matrix(*dist_matrix);
+      step_dist_matrix = new DistanceMatrix(*dist_matrix);
     }
 
     else {
@@ -1302,8 +1302,8 @@ Dendrogram* Distance_matrix::divisive_hierarchical_clustering() const
           }
         }
 
-        step_dist_matrix = new Distance_matrix(*dist_matrix , clusters->cluster_nb_pattern[icluster] ,
-                                               cluster_identifier);
+        step_dist_matrix = new DistanceMatrix(*dist_matrix , clusters->cluster_nb_pattern[icluster] ,
+                                              cluster_identifier);
       }
     }
 
@@ -1449,9 +1449,9 @@ Dendrogram* Distance_matrix::divisive_hierarchical_clustering() const
  *
  *--------------------------------------------------------------*/
 
-bool Distance_matrix::hierarchical_clustering(Format_error &error , ostream &os ,
-                                              int algorithm , int criterion ,
-                                              const char *path , char format) const
+bool DistanceMatrix::hierarchical_clustering(Format_error &error , ostream &os ,
+                                             int algorithm , int criterion ,
+                                             const char *path , char format) const
 
 {
   bool status = true;
