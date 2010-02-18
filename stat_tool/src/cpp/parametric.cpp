@@ -63,7 +63,8 @@ extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *off
  *
  *--------------------------------------------------------------*/
 
-void Parametric::init(int iinf_bound , int isup_bound , double iparameter , double iprobability)
+void DiscreteParametric::init(int iinf_bound , int isup_bound ,
+                              double iparameter , double iprobability)
 
 {
   inf_bound = iinf_bound;
@@ -82,8 +83,8 @@ void Parametric::init(int iinf_bound , int isup_bound , double iparameter , doub
  *
  *--------------------------------------------------------------*/
 
-void Parametric::init(int iident , int iinf_bound , int isup_bound ,
-                      double iparameter , double iprobability)
+void DiscreteParametric::init(int iident , int iinf_bound , int isup_bound ,
+                              double iparameter , double iprobability)
 
 {
   ident = iident;
@@ -97,15 +98,16 @@ void Parametric::init(int iident , int iinf_bound , int isup_bound ,
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Parametric.
+ *  Constructeur de la classe DiscreteParametric.
  *
  *  arguments : nombre de valeurs, identificateur, bornes inferieure et
  *              superieure, parametre, probabilite.
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(int inb_value , int iident , int iinf_bound ,
-                       int isup_bound , double iparameter , double iprobability)
+DiscreteParametric::DiscreteParametric(int inb_value , int iident ,
+                                       int iinf_bound , int isup_bound ,
+                                       double iparameter , double iprobability)
 :Distribution(inb_value)
 
 {
@@ -120,15 +122,16 @@ Parametric::Parametric(int inb_value , int iident , int iinf_bound ,
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Parametric.
+ *  Constructeur de la classe DiscreteParametric.
  *
  *  arguments : identificateur, bornes inferieure et superieure,
  *              parametre, probabilite, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(int iident , int iinf_bound , int isup_bound ,
-                       double iparameter , double iprobability , double cumul_threshold)
+DiscreteParametric::DiscreteParametric(int iident , int iinf_bound ,
+                                       int isup_bound , double iparameter ,
+                                       double iprobability , double cumul_threshold)
 
 {
   ident = iident;
@@ -161,13 +164,13 @@ Parametric::Parametric(int iident , int iinf_bound , int isup_bound ,
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Parametric a partir d'un objet Distribution.
+ *  Construction d'un objet DiscreteParametric a partir d'un objet Distribution.
  *
  *  arguments : reference sur un objet Distribution, nombre de valeurs allouees.
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(const Distribution &dist , int ialloc_nb_value)
+DiscreteParametric::DiscreteParametric(const Distribution &dist , int ialloc_nb_value)
 :Distribution(dist , 'c' , ialloc_nb_value)
 
 {
@@ -182,14 +185,14 @@ Parametric::Parametric(const Distribution &dist , int ialloc_nb_value)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Parametric a partir d'un objet Distribution
+ *  Construction d'un objet DiscreteParametric a partir d'un objet Distribution
  *  avec changement d'echelle.
  *
  *  arguments : reference sur un objet Distribution, facteur d'echelle.
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(const Distribution &dist , double scaling_coeff)
+DiscreteParametric::DiscreteParametric(const Distribution &dist , double scaling_coeff)
 :Distribution(dist , scaling_coeff)
 
 {
@@ -211,7 +214,7 @@ Parametric::Parametric(const Distribution &dist , double scaling_coeff)
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(const Parametric &dist , double scaling_coeff)
+DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist , double scaling_coeff)
 :Distribution((int)floor(dist.nb_value * scaling_coeff) + 1)
 
 {
@@ -264,13 +267,14 @@ Parametric::Parametric(const Parametric &dist , double scaling_coeff)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Parametric a partir d'un objet Histogram.
+ *  Construction d'un objet DiscreteParametric a partir
+ *  d'un objet FrequencyDistribution.
  *
- *  argument : reference sur un objet Histogram.
+ *  argument : reference sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(const Histogram &histo)
+DiscreteParametric::DiscreteParametric(const FrequencyDistribution &histo)
 :Distribution(histo)
 
 {
@@ -285,13 +289,13 @@ Parametric::Parametric(const Histogram &histo)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Parametric.
+ *  Copie d'un objet DiscreteParametric.
  *
- *  argument : reference sur un objet Parametric.
+ *  argument : reference sur un objet DiscreteParametric.
  *
  *--------------------------------------------------------------*/
 
-void Parametric::copy(const Parametric &dist)
+void DiscreteParametric::copy(const DiscreteParametric &dist)
 
 {
   ident = dist.ident;
@@ -305,15 +309,16 @@ void Parametric::copy(const Parametric &dist)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Parametric.
+ *  Constructeur par copie de la classe DiscreteParametric.
  *
- *  arguments : reference sur un objet Parametric, type de transformation
+ *  arguments : reference sur un objet DiscreteParametric, type de transformation
  *              ('c' : copie , 'n' : copie avec renormalisation),
  *              nombre de valeurs allouees.
  *
  *--------------------------------------------------------------*/
 
-Parametric::Parametric(const Parametric &dist , char transform , int ialloc_nb_value)
+DiscreteParametric::DiscreteParametric(const DiscreteParametric &dist ,
+                                       char transform , int ialloc_nb_value)
 :Distribution(dist , transform , ialloc_nb_value)
 
 {
@@ -323,13 +328,13 @@ Parametric::Parametric(const Parametric &dist , char transform , int ialloc_nb_v
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Parametric.
+ *  Operateur d'assignement de la classe DiscreteParametric.
  *
- *  argument : reference sur un objet Parametric.
+ *  argument : reference sur un objet DiscreteParametric.
  *
  *--------------------------------------------------------------*/
 
-Parametric& Parametric::operator=(const Parametric &dist)
+DiscreteParametric& DiscreteParametric::operator=(const DiscreteParametric &dist)
 
 {
   if (&dist != this) {
@@ -345,17 +350,18 @@ Parametric& Parametric::operator=(const Parametric &dist)
 
 /*--------------------------------------------------------------*
  *
- *  Analyse du format d'un objet Parametric.
+ *  Analyse du format d'un objet DiscreteParametric.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, identificateur
  *              de la derniere loi dans la liste, seuil sur la fonction
  *              de repartition, borne inferieure minimum.
  *
  *--------------------------------------------------------------*/
 
-Parametric* parametric_parsing(Format_error &error , ifstream &in_file , int &line ,
-                               int last_ident , double cumul_threshold , int min_inf_bound)
+DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_file ,
+                                                int &line ,  int last_ident ,
+                                                double cumul_threshold , int min_inf_bound)
 
 {
   RWLocaleSnapshot locale("en");
@@ -366,7 +372,7 @@ Parametric* parametric_parsing(Format_error &error , ifstream &in_file , int &li
   int ident = I_DEFAULT;
   long inf_bound , sup_bound = I_DEFAULT;
   double parameter = D_DEFAULT , probability = D_DEFAULT;
-  Parametric *dist;
+  DiscreteParametric *dist;
 
 
   dist = NULL;
@@ -578,8 +584,8 @@ Parametric* parametric_parsing(Format_error &error , ifstream &in_file , int &li
   }
 
   if (status) {
-    dist = new Parametric(ident , inf_bound , sup_bound ,
-                          parameter , probability , cumul_threshold);
+    dist = new DiscreteParametric(ident , inf_bound , sup_bound ,
+                                  parameter , probability , cumul_threshold);
   }
 
   return dist;
@@ -594,7 +600,7 @@ Parametric* parametric_parsing(Format_error &error , ifstream &in_file , int &li
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric::ascii_print(ostream &os) const
+ostream& DiscreteParametric::ascii_print(ostream &os) const
 
 {
   os << STAT_distribution_word[ident] << "   ";
@@ -625,7 +631,7 @@ ostream& Parametric::ascii_print(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric::spreadsheet_print(ostream &os) const
+ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 
 {
   os << STAT_distribution_word[ident] << "\t";
@@ -656,7 +662,7 @@ ostream& Parametric::spreadsheet_print(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric::plot_title_print(ostream &os) const
+ostream& DiscreteParametric::plot_title_print(ostream &os) const
 
 {
   if (ident != NONPARAMETRIC) {
@@ -683,11 +689,11 @@ ostream& Parametric::plot_title_print(ostream &os) const
  *
  *  Visualisation d'une loi parametrique.
  *
- *  arguments : stream, reference sur un objet Parametric.
+ *  arguments : stream, reference sur un objet DiscreteParametric.
  *
  *--------------------------------------------------------------*/
 
-ostream& operator<<(ostream &os , const Parametric &dist)
+ostream& operator<<(ostream &os , const DiscreteParametric &dist)
 
 {
   os.precision(5);
@@ -708,7 +714,7 @@ ostream& operator<<(ostream &os , const Parametric &dist)
  *
  *--------------------------------------------------------------*/
 
-int Parametric::nb_parameter_computation()
+int DiscreteParametric::nb_parameter_computation()
 
 {
   int bnb_parameter;
@@ -742,7 +748,7 @@ int Parametric::nb_parameter_computation()
  *
  *--------------------------------------------------------------*/
 
-void Parametric::nb_parameter_update()
+void DiscreteParametric::nb_parameter_update()
 
 {
   nb_parameter = nb_parameter_computation();
@@ -755,7 +761,7 @@ void Parametric::nb_parameter_update()
  *
  *--------------------------------------------------------------*/
 
-double Parametric::parametric_mean_computation() const
+double DiscreteParametric::parametric_mean_computation() const
 
 {
   double parametric_mean;
@@ -789,7 +795,7 @@ double Parametric::parametric_mean_computation() const
  *
  *--------------------------------------------------------------*/
 
-double Parametric::parametric_variance_computation() const
+double DiscreteParametric::parametric_variance_computation() const
 
 {
   double parametric_variance;
@@ -824,7 +830,7 @@ double Parametric::parametric_variance_computation() const
  *
  *--------------------------------------------------------------*/
 
-double Parametric::parametric_skewness_computation() const
+double DiscreteParametric::parametric_skewness_computation() const
 
 {
   double parametric_skewness;
@@ -875,7 +881,7 @@ double Parametric::parametric_skewness_computation() const
  *
  *--------------------------------------------------------------*/
 
-double Parametric::parametric_kurtosis_computation() const
+double DiscreteParametric::parametric_kurtosis_computation() const
 
 {
   double parametric_kurtosis;
@@ -922,128 +928,132 @@ double Parametric::parametric_kurtosis_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Parametric_model a partir d'un objet Histogram.
+ *  Construction d'un objet DiscreteParametricModel a partir
+ *  d'un objet FrequencyDistribution.
  *
- *  argument : reference sur un objet Histogram.
+ *  argument : reference sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model::Parametric_model(const Histogram &histo)
-:Parametric(histo)
+DiscreteParametricModel::DiscreteParametricModel(const FrequencyDistribution &histo)
+:DiscreteParametric(histo)
 
 {
-  histogram = new Distribution_data(histo);
+  frequency_distribution = new DiscreteDistributionData(histo);
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Parametric_model a partir
- *  d'un objet Distribution et d'un objet Histogram.
+ *  Construction d'un objet DiscreteParametricModel a partir
+ *  d'un objet Distribution et d'un objet FrequencyDistribution.
  *
  *  arguments : reference sur un objet Distribution,
- *              pointeur sur un objet Histogram.
+ *              pointeur sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model::Parametric_model(const Distribution &dist , const Histogram *histo)
-:Parametric(dist)
+DiscreteParametricModel::DiscreteParametricModel(const Distribution &dist ,
+                                                 const FrequencyDistribution *histo)
+:DiscreteParametric(dist)
 
 {
   if ((histo) && (histo->nb_element > 0)) {
-    histogram = new Distribution_data(*histo);
+    frequency_distribution = new DiscreteDistributionData(*histo);
   }
   else {
-    histogram = NULL;
+    frequency_distribution = NULL;
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Parametric_model a partir
- *  d'un objet Parametric et d'un objet Histogram.
+ *  Construction d'un objet DiscreteParametricModel a partir
+ *  d'un objet DiscreteParametric et d'un objet FrequencyDistribution.
  *
- *  arguments : reference sur un objet Parametric,
- *              pointeur sur un objet Histogram.
+ *  arguments : reference sur un objet DiscreteParametric,
+ *              pointeur sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model::Parametric_model(const Parametric &dist , const Histogram *histo)
-:Parametric(dist)
+DiscreteParametricModel::DiscreteParametricModel(const DiscreteParametric &dist ,
+                                                 const FrequencyDistribution *histo)
+:DiscreteParametric(dist)
 
 {
   if ((histo) && (histo->nb_element > 0)) {
-    histogram = new Distribution_data(*histo);
+    frequency_distribution = new DiscreteDistributionData(*histo);
   }
   else {
-    histogram = NULL;
+    frequency_distribution = NULL;
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Parametric_model.
+ *  Constructeur par copie de la classe DiscreteParametricModel.
  *
- *  arguments : reference sur un objet Parametric_model,
- *              flag copie de l'objet Distribution_data.
+ *  arguments : reference sur un objet DiscreteParametricModel,
+ *              flag copie de l'objet DiscreteDistributionData.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model::Parametric_model(const Parametric_model &dist , bool data_flag)
-:Parametric(dist)
+DiscreteParametricModel::DiscreteParametricModel(const DiscreteParametricModel &dist ,
+                                                 bool data_flag)
+:DiscreteParametric(dist)
 
 {
-  if ((data_flag) && (dist.histogram)) {
-    histogram = new Distribution_data(*(dist.histogram) , false);
+  if ((data_flag) && (dist.frequency_distribution)) {
+    frequency_distribution = new DiscreteDistributionData(*(dist.frequency_distribution) , false);
   }
   else {
-    histogram = NULL;
+    frequency_distribution = NULL;
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Parametric_model.
+ *  Destructeur de la classe DiscreteParametricModel.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model::~Parametric_model()
+DiscreteParametricModel::~DiscreteParametricModel()
 
 {
-  if (histogram) {
-    delete histogram; 
+  if (frequency_distribution) {
+    delete frequency_distribution; 
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Parametric_model.
+ *  Operateur d'assignement de la classe DiscreteParametricModel.
  *
- *  argument : reference sur un objet Parametric_model.
+ *  argument : reference sur un objet DiscreteParametricModel.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model& Parametric_model::operator=(const Parametric_model &dist)
+DiscreteParametricModel& DiscreteParametricModel::operator=(const DiscreteParametricModel &dist)
 
 {
   if (&dist != this) {
-    delete histogram;
+    delete frequency_distribution;
 
     delete [] mass;
     delete [] cumul;
 
     Distribution::copy(dist);
-    Parametric::copy(dist);
+    DiscreteParametric::copy(dist);
 
-    if (dist.histogram) {
-      histogram = new Distribution_data(*(dist.histogram) , false);
+    if (dist.frequency_distribution) {
+      frequency_distribution = new DiscreteDistributionData(*(dist.frequency_distribution) , false);
     }
     else {
-      histogram = NULL;
+      frequency_distribution = NULL;
     }
   }
 
@@ -1053,28 +1063,28 @@ Parametric_model& Parametric_model::operator=(const Parametric_model &dist)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de la partie "donnees" d'un objet Parametric_model.
+ *  Extraction de la partie "donnees" d'un objet DiscreteParametricModel.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Parametric_model::extract_data(Format_error &error) const
+DiscreteDistributionData* DiscreteParametricModel::extract_data(StatError &error) const
 
 {
-  Distribution_data *histo;
+  DiscreteDistributionData *histo;
 
 
   error.init();
 
-  if (!histogram) {
+  if (!frequency_distribution) {
     histo = NULL;
-    error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
+    error.update(STAT_error[STATR_NON_EXISTING_FREQUENCY_DISTRIBUTION]);
   }
 
   else {
-    histo = new Distribution_data(*histogram);
-    histo->distribution = new Parametric_model(*this , false);
+    histo = new DiscreteDistributionData(*frequency_distribution);
+    histo->distribution = new DiscreteParametricModel(*this , false);
   }
 
   return histo;
@@ -1083,23 +1093,23 @@ Distribution_data* Parametric_model::extract_data(Format_error &error) const
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Parametric_model a partir d'un fichier.
+ *  Construction d'un objet DiscreteParametricModel a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* parametric_ascii_read(Format_error &error , const char *path ,
-                                        double cumul_threshold)
+DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const char *path ,
+                                                        double cumul_threshold)
 
 {
   RWCString buffer;
   size_t position;
   bool status;
   int line;
-  Parametric *pdist;
-  Parametric_model *dist;
+  DiscreteParametric *pdist;
+  DiscreteParametricModel *dist;
   ifstream in_file(path);
 
 
@@ -1114,7 +1124,8 @@ Parametric_model* parametric_ascii_read(Format_error &error , const char *path ,
     status = true;
     line = 0;
 
-    pdist = parametric_parsing(error , in_file , line , UNIFORM , cumul_threshold);
+    pdist = discrete_parametric_parsing(error , in_file , line ,
+                                        UNIFORM , cumul_threshold);
 
     if (!pdist) {
       status = false;
@@ -1138,7 +1149,7 @@ Parametric_model* parametric_ascii_read(Format_error &error , const char *path ,
     }
 
     if (status) {
-      dist = new Parametric_model(*pdist);
+      dist = new DiscreteParametricModel(*pdist);
     }
 
     delete pdist;
@@ -1150,13 +1161,13 @@ Parametric_model* parametric_ascii_read(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Parametric_model.
+ *  Ecriture sur une ligne d'un objet DiscreteParametricModel.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric_model::line_write(ostream &os) const
+ostream& DiscreteParametricModel::line_write(ostream &os) const
 
 {
   os << STAT_distribution_word[ident];
@@ -1172,15 +1183,15 @@ ostream& Parametric_model::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une loi parametrique et d'un histogramme.
+ *  Ecriture d'une loi parametrique et d'une loi empirique.
  *
- *  arguments : stream, pointeur sur un histogramme,
+ *  arguments : stream, pointeur sur une loi empirique,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric_model::ascii_write(ostream &os , const Distribution_data *histo ,
-                                       bool exhaustive , bool file_flag) const
+ostream& DiscreteParametricModel::ascii_write(ostream &os , const DiscreteDistributionData *histo ,
+                                              bool exhaustive , bool file_flag) const
 
 {
   if (ident == NONPARAMETRIC) {
@@ -1213,7 +1224,7 @@ ostream& Parametric_model::ascii_write(ostream &os , const Distribution_data *hi
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     histo->ascii_characteristic_print(os , true , file_flag);
 
     if (file_flag) {
@@ -1265,11 +1276,11 @@ ostream& Parametric_model::ascii_write(ostream &os , const Distribution_data *hi
     }
     os << "  ";
     if (histo) {
-      os << " | " << STAT_label[STATL_HISTOGRAM];
+      os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
     os << " | " << STAT_label[STATL_DISTRIBUTION];
     if (histo) {
-      os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
          << STAT_label[STATL_FUNCTION];
     }
     os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -1284,30 +1295,30 @@ ostream& Parametric_model::ascii_write(ostream &os , const Distribution_data *hi
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Parametric_model.
+ *  Ecriture d'un objet DiscreteParametricModel.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric_model::ascii_write(ostream &os , bool exhaustive) const
+ostream& DiscreteParametricModel::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  return ascii_write(os , histogram , exhaustive , false);
+  return ascii_write(os , frequency_distribution , exhaustive , false);
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Parametric_model dans un fichier.
+ *  Ecriture d'un objet DiscreteParametricModel dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Parametric_model::ascii_write(Format_error &error , const char *path ,
-                                   bool exhaustive) const
+bool DiscreteParametricModel::ascii_write(StatError &error , const char *path ,
+                                          bool exhaustive) const
 
 {
   bool status;
@@ -1323,7 +1334,7 @@ bool Parametric_model::ascii_write(Format_error &error , const char *path ,
 
   else {
     status = true;
-    ascii_write(out_file , histogram , exhaustive , true);
+    ascii_write(out_file , frequency_distribution , exhaustive , true);
   }
 
   return status;
@@ -1332,14 +1343,15 @@ bool Parametric_model::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une loi parametrique et d'un histogramme dans un fichier
+ *  Ecriture d'une loi parametrique et d'une loi empirique dans un fichier
  *  au format tableur.
  *
- *  arguments : stream, pointeur sur un histogramme.
+ *  arguments : stream, pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric_model::spreadsheet_write(ostream &os , const Distribution_data *histo) const
+ostream& DiscreteParametricModel::spreadsheet_write(ostream &os ,
+                                                    const DiscreteDistributionData *histo) const
 
 {
 
@@ -1363,7 +1375,7 @@ ostream& Parametric_model::spreadsheet_write(ostream &os , const Distribution_da
     Test test(CHI2);
 
 
-    os << "\n" << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     histo->spreadsheet_characteristic_print(os , true);
 
     os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "\t" << histo->mean_absolute_deviation_computation();
@@ -1392,18 +1404,18 @@ ostream& Parametric_model::spreadsheet_write(ostream &os , const Distribution_da
 
   os << "\n";
   if (histo) {
-    os << "\t" << STAT_label[STATL_HISTOGRAM];
+    os << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
   os << "\t" << STAT_label[STATL_DISTRIBUTION];
   if (histo) {
-    os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+    os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
        << STAT_label[STATL_FUNCTION];
   }
   os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
      << STAT_label[STATL_FUNCTION];
   if (mean > 0.) {
     if ((histo) && (histo->mean > 0.)) {
-      os << "\t" << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_CONCENTRATION] << " "
+      os << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_CONCENTRATION] << " "
          << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_DISTRIBUTION] << " ";
     }
     else {
@@ -1421,13 +1433,13 @@ ostream& Parametric_model::spreadsheet_write(ostream &os , const Distribution_da
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Parametric_model dans un fichier au format tableur.
+ *  Ecriture d'un objet DiscreteParametricModel dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Parametric_model::spreadsheet_write(Format_error &error , const char *path) const
+bool DiscreteParametricModel::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1443,7 +1455,7 @@ bool Parametric_model::spreadsheet_write(Format_error &error , const char *path)
 
   else {
     status = true;
-    spreadsheet_write(out_file , histogram);
+    spreadsheet_write(out_file , frequency_distribution);
   }
 
   return status;
@@ -1452,15 +1464,15 @@ bool Parametric_model::spreadsheet_write(Format_error &error , const char *path)
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'une loi parametrique et d'un histogramme.
+ *  Sortie Gnuplot d'une loi parametrique et d'une loi empirique.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
- *              titre des figures, pointeur sur un histogramme.
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
+ *              titre des figures, pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-bool Parametric_model::plot_write(Format_error &error , const char *prefix , const char *title ,
-                                  const Distribution_data *histo) const
+bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix , const char *title ,
+                                         const DiscreteDistributionData *histo) const
 
 {
   bool status;
@@ -1491,7 +1503,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
     poffset[0] = histo->offset;
     pnb_value[0] = histo->nb_value;
 
-    // calcul des fonctions de repartition et de concentration de l'histogramme
+    // calcul des fonctions de repartition et de concentration de la loi empirique
 
     scale = histo->nb_element / (1. - complement);
     pcumul[0] = histo->cumul_computation(scale);
@@ -1568,7 +1580,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
         out_file << "plot [0:" << MAX(plot_nb_value - 1 , 1) << "] [0:"
                  << (int)(MAX(histo->max , max * scale) * YSCALE) + 1
                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using 1:3 title \""
-                 << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
+                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
         out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using 1:2 title \""
                  << STAT_label[STATL_DISTRIBUTION];
         plot_title_print(out_file);
@@ -1594,7 +1606,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
           out_file << "plot [0:" << plot_nb_value - 1 << "] [0:" << 1. - complement << "] ";
           if (histo->variance > 0.) {
             out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using 1:5 title \""
-                     << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+                     << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION] << "\" with linespoints,\\" << endl;
           }
           out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using 1:3 title \""
@@ -1633,7 +1645,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
 
 /*            out_file << "plot [0:" << 1. - complement << "] [0:" << 1. - complement << "] \""
                      << label((data_file_name[2].str()).c_str()) << "\" using 2:1 title \""
-                     << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+                     << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION] << "\" with linespoints,\\" << endl;
             out_file << "\"" << label((data_file_name[2].str()).c_str()) << "\" using 2:2 title \""
                      << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -1660,7 +1672,7 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
           out_file << "plot [0:" << 1. - complement << "] [0:" << 1. - complement << "] ";
           if (histo->variance > 0.) {
             out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using 5:6 title \""
-                     << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_CONCENTRATION] << " "
+                     << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_CONCENTRATION] << " "
                      << STAT_label[STATL_CURVE] << "\" with linespoints,\\" << endl;
           }
           out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using 3:4 title \""
@@ -1697,30 +1709,30 @@ bool Parametric_model::plot_write(Format_error &error , const char *prefix , con
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Parametric_model.
+ *  Sortie Gnuplot d'un objet DiscreteParametricModel.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Parametric_model::plot_write(Format_error &error , const char *prefix ,
-                                  const char *title) const
+bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
+                                         const char *title) const
 
 {
-  return plot_write(error , prefix , title , histogram);
+  return plot_write(error , prefix , title , frequency_distribution);
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'une loi parametrique et d'un histogramme.
+ *  Sortie graphique d'une loi parametrique et d'une loi empirique.
  *
- *  argument : pointeur sur un histogramme.
+ *  argument : pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) const
+MultiPlotSet* DiscreteParametricModel::get_plotable(const DiscreteDistributionData *histo) const
 
 {
   MultiPlotSet *plot_set;
@@ -1767,7 +1779,7 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
     plot[0].resize(2);
 
-    plot[0][0].legend = STAT_label[STATL_HISTOGRAM];
+    plot[0][0].legend = STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
     plot[0][0].style = "impulses";
 
@@ -1784,7 +1796,7 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
     if (variance > 0.) {
 
-      // calcul de la fonction de repartition de l'histogramme
+      // calcul de la fonction de repartition de la loi empirique
 
       scale = histo->nb_element / (1. - complement);
       pcumul = histo->cumul_computation(scale);
@@ -1802,7 +1814,7 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
       if (histo->variance > 0.) {
         legend.str("");
-        legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+        legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
         plot[1][0].legend = legend.str();
 
@@ -1845,7 +1857,7 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
         plot[2].resize(2);
 
 /*        legend.str("");
-        legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+        legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
 	       plot[2][0].legend = legend.str(); */
 
@@ -1889,7 +1901,7 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
       if (histo->variance > 0.) {
         legend.str("");
-        legend << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_CONCENTRATION] << " "
+        legend << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_CONCENTRATION] << " "
                << STAT_label[STATL_CURVE];
         plot[i][0].legend = legend.str();
 
@@ -1921,7 +1933,7 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
   }
 
   else {
-    Format_error error;
+    StatError error;
 
     plot_set = Distribution::get_plotable_distributions(error , 0 , 0);
   }
@@ -1932,12 +1944,12 @@ MultiPlotSet* Parametric_model::get_plotable(const Distribution_data *histo) con
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Parametric_model.
+ *  Sortie graphique d'un objet DiscreteParametricModel.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Parametric_model::get_plotable() const
+MultiPlotSet* DiscreteParametricModel::get_plotable() const
 
 {
-  return get_plotable(histogram);
+  return get_plotable(frequency_distribution);
 }
