@@ -61,7 +61,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
 {
   register int i , j;
   double *smass , *pmass , *cmass;
-  Parametric *power_dist;
+  DiscreteParametric *power_dist;
 
 
   // calcul de la loi de la somme et de la loi elementaire
@@ -76,8 +76,8 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
   // calcul des puissances de convolution de la loi elementaire et
   // calcul de la loi composee resultante
 
-  power_dist = new Parametric((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1 ,
-                              distribution->ident);
+  power_dist = new DiscreteParametric((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1 ,
+                                      distribution->ident);
 
   pmass = mass;
   for (i = 0;i < MIN(power_dist->nb_value , alloc_nb_value);i++) {
@@ -148,7 +148,7 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
  *
  *--------------------------------------------------------------*/
 
-void Compound::computation(Parametric **power_dist , int min_nb_value ,
+void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
                            double cumul_threshold , bool sum_flag , bool dist_flag)
 
 {
@@ -253,14 +253,16 @@ void Compound::computation(Parametric **power_dist , int min_nb_value ,
  *
  *  Calcul des quantites de reestimation (estimateur EM).
  *
- *  arguments : reference sur l'histogramme,
+ *  arguments : reference sur la loi empirique,
  *              pointeurs sur les puissances de convolution
  *              de la loi elementaire et sur les quantites de reestimation.
  *
  *--------------------------------------------------------------*/
 
-void Compound::expectation_step(const Histogram &histo , Parametric **power_dist ,
-                                Reestimation<double> *sum_reestim , Reestimation<double> *reestim) const
+void Compound::expectation_step(const FrequencyDistribution &histo ,
+                                DiscreteParametric **power_dist ,
+                                Reestimation<double> *sum_reestim ,
+                                Reestimation<double> *reestim) const
 
 {
   register int i , j , k;
@@ -416,20 +418,21 @@ void Compound::expectation_step(const Histogram &histo , Parametric **power_dist
  *
  *--------------------------------------------------------------*/
 
-Compound* Histogram::compound_estimation(Format_error &error , ostream &os , const Parametric &sum_dist ,
-                                         const Parametric &dist , char type , int estimator ,
-                                         int nb_iter , double weight , int penalty_type ,
-                                         int outside) const
+Compound* FrequencyDistribution::compound_estimation(Format_error &error , ostream &os ,
+                                                     const DiscreteParametric &sum_dist ,
+                                                     const DiscreteParametric &dist , char type ,
+                                                     int estimator , int nb_iter , double weight ,
+                                                     int penalty_type , int outside) const
 
 {
   bool status = true , sum_compute , dist_compute;
   register int i;
   int sum_nb_value , nb_likelihood_decrease;
   double likelihood , previous_likelihood , hlikelihood , *penalty;
-  Parametric **power_dist;
+  DiscreteParametric **power_dist;
   Reestimation<double> *sum_reestim , *reestim;
   Compound *compound;
-  Compound_data *compound_histo;
+  CompoundData *compound_histo;
 
 
   compound = NULL;
@@ -450,7 +453,7 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
     // creation d'un objet Compound
 
     compound = new Compound(sum_dist , dist , type);
-    compound->compound_data = new Compound_data(*this , *compound);
+    compound->compound_data = new CompoundData(*this , *compound);
     compound_histo = compound->compound_data;
 
     if (estimator == PENALIZED_LIKELIHOOD) {
@@ -498,10 +501,10 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
 
     sum_nb_value = compound->sum_distribution->alloc_nb_value;
 
-    power_dist = new Parametric*[sum_nb_value];
+    power_dist = new DiscreteParametric*[sum_nb_value];
     for (i = MAX(sum_dist.offset - 1 , 1);i < sum_nb_value;i++) {
-      power_dist[i] = new Parametric(i * (compound->distribution->alloc_nb_value - 1) + 1 ,
-                                     compound->distribution->ident);
+      power_dist[i] = new DiscreteParametric(i * (compound->distribution->alloc_nb_value - 1) + 1 ,
+                                             compound->distribution->ident);
     }
 
     sum_reestim = new Reestimation<double>(sum_nb_value);
@@ -644,19 +647,22 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
 
           case 's' : {
             compound->expectation_step(*this , power_dist , sum_reestim , 0);
-            compound_histo->sum_histogram->update(sum_reestim , (int)(sum_reestim->nb_element *
-                                                                      MAX(sqrt(sum_reestim->variance) , 1.) * COMPOUND_COEFF));
-            hlikelihood = compound_histo->sum_histogram->Reestimation<int>::type_parametric_estimation(compound->sum_distribution ,
-                                                                                                       MIN(sum_dist.offset , 1) , true);
+            compound_histo->sum_frequency_distribution->update(sum_reestim ,
+                                                               (int)(sum_reestim->nb_element *
+                                                               MAX(sqrt(sum_reestim->variance) , 1.) * COMPOUND_COEFF));
+            hlikelihood = compound_histo->sum_frequency_distribution->Reestimation<int>::type_parametric_estimation(compound->sum_distribution ,
+                                                                                                                    MIN(sum_dist.offset , 1) , true);
             break;
           }
 
           case 'e' : {
             compound->expectation_step(*this , power_dist , 0 , reestim);
-            compound_histo->histogram->update(reestim , (int)(reestim->nb_element *
-                                                              MAX(sqrt(reestim->variance) , 1.) * COMPOUND_COEFF));
-            hlikelihood = compound_histo->histogram->Reestimation<int>::type_parametric_estimation(compound->distribution , MIN(dist.offset , 1) ,
-                                                                                                   true , COMPOUND_THRESHOLD);
+            compound_histo->frequency_distribution->update(reestim ,
+                                                           (int)(reestim->nb_element *
+                                                           MAX(sqrt(reestim->variance) , 1.) * COMPOUND_COEFF));
+            hlikelihood = compound_histo->frequency_distribution->Reestimation<int>::type_parametric_estimation(compound->distribution ,
+                                                                                                                MIN(dist.offset , 1) , true ,
+                                                                                                                COMPOUND_THRESHOLD);
             break;
           }
           }
@@ -739,8 +745,8 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
       }
 
       compound->expectation_step(*this , power_dist , sum_reestim , reestim);
-      compound_histo->sum_histogram->update(sum_reestim , nb_element);
-      compound_histo->histogram->update(reestim , (int)(nb_element * compound->sum_distribution->mean));
+      compound_histo->sum_frequency_distribution->update(sum_reestim , nb_element);
+      compound_histo->frequency_distribution->update(reestim , (int)(nb_element * compound->sum_distribution->mean));
     }
 
     else {
@@ -780,13 +786,14 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
  *
  *--------------------------------------------------------------*/
 
-Compound* Histogram::compound_estimation(Format_error &error , ostream &os , const Parametric &known_dist ,
-                                         char type , int min_inf_bound , int estimator , int nb_iter ,
-                                         double weight , int penalty_type , int outside) const
+Compound* FrequencyDistribution::compound_estimation(Format_error &error , ostream &os ,
+                                                     const DiscreteParametric &known_dist , char type ,
+                                                     int min_inf_bound , int estimator , int nb_iter ,
+                                                     double weight , int penalty_type , int outside) const
 
 {
   double proba;
-  Parametric *unknown_dist;
+  DiscreteParametric *unknown_dist;
   Compound *compound;
 
 
@@ -808,11 +815,12 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
 
     switch (type) {
     case 's' :
-      unknown_dist = new Parametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT , 1. , proba);
+      unknown_dist = new DiscreteParametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT ,
+                                            1. , proba);
       break;
     case 'e' :
-      unknown_dist = new Parametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT , 1. , proba ,
-                                    COMPOUND_THRESHOLD);
+      unknown_dist = new DiscreteParametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT ,
+                                            1. , proba , COMPOUND_THRESHOLD);
       break;
     }
 
@@ -846,12 +854,12 @@ Compound* Histogram::compound_estimation(Format_error &error , ostream &os , con
  *
  *--------------------------------------------------------------*/
 
-Compound_data* Compound::simulation(Format_error &error , int nb_element) const
+CompoundData* Compound::simulation(Format_error &error , int nb_element) const
 
 {
   register int i , j;
   int nb_dist , sum , value;
-  Compound_data *compound_histo;
+  CompoundData *compound_histo;
 
 
   error.init();
@@ -863,9 +871,9 @@ Compound_data* Compound::simulation(Format_error &error , int nb_element) const
 
   else {
 
-    // creation d'un objet Compound_data
+    // creation d'un objet CompoundData
 
-    compound_histo = new Compound_data(*this);
+    compound_histo = new CompoundData(*this);
     compound_histo->compound = new Compound(*this , false);
 
     for (i = 0;i < nb_element;i++) {
@@ -873,7 +881,7 @@ Compound_data* Compound::simulation(Format_error &error , int nb_element) const
       // loi de la somme
 
       nb_dist = sum_distribution->simulation();
-      (compound_histo->sum_histogram->frequency[nb_dist])++;
+      (compound_histo->sum_frequency_distribution->frequency[nb_dist])++;
 
       sum = 0;
       for (j = 0;j < nb_dist;j++) {
@@ -882,7 +890,7 @@ Compound_data* Compound::simulation(Format_error &error , int nb_element) const
 
         value = distribution->simulation();
         sum += value;
-        (compound_histo->histogram->frequency[value])++;
+        (compound_histo->frequency_distribution->frequency[value])++;
       }
 
       // loi resultante
@@ -890,7 +898,7 @@ Compound_data* Compound::simulation(Format_error &error , int nb_element) const
       (compound_histo->frequency[sum])++;
     }
 
-    // extraction des caracteristiques des histogrammes
+    // extraction des caracteristiques des lois empiriques
 
     compound_histo->nb_value_computation();
     compound_histo->offset_computation();
@@ -899,19 +907,19 @@ Compound_data* Compound::simulation(Format_error &error , int nb_element) const
     compound_histo->mean_computation();
     compound_histo->variance_computation();
 
-    compound_histo->sum_histogram->nb_value_computation();
-    compound_histo->sum_histogram->offset_computation();
-    compound_histo->sum_histogram->nb_element_computation();
-    compound_histo->sum_histogram->max_computation();
-    compound_histo->sum_histogram->mean_computation();
-    compound_histo->sum_histogram->variance_computation();
+    compound_histo->sum_frequency_distribution->nb_value_computation();
+    compound_histo->sum_frequency_distribution->offset_computation();
+    compound_histo->sum_frequency_distribution->nb_element_computation();
+    compound_histo->sum_frequency_distribution->max_computation();
+    compound_histo->sum_frequency_distribution->mean_computation();
+    compound_histo->sum_frequency_distribution->variance_computation();
 
-    compound_histo->histogram->nb_value_computation();
-    compound_histo->histogram->offset_computation();
-    compound_histo->histogram->nb_element_computation();
-    compound_histo->histogram->max_computation();
-    compound_histo->histogram->mean_computation();
-    compound_histo->histogram->variance_computation();
+    compound_histo->frequency_distribution->nb_value_computation();
+    compound_histo->frequency_distribution->offset_computation();
+    compound_histo->frequency_distribution->nb_element_computation();
+    compound_histo->frequency_distribution->max_computation();
+    compound_histo->frequency_distribution->mean_computation();
+    compound_histo->frequency_distribution->variance_computation();
   }
 
   return compound_histo;
