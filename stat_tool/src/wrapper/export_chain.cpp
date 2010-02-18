@@ -85,7 +85,7 @@ void class_chain()
     void log_computation();
 
     bool** logic_transition_computation() const;
-    bool connex_component_research(Format_error &error , bool **ilogic_transition = 0) const;
+    bool connex_component_research(StatError &error , bool **ilogic_transition = 0) const;
     void graph_accessibility_computation(bool **ilogic_transition);
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = 0);
