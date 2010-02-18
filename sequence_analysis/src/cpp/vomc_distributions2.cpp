@@ -57,7 +57,7 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::state_nb_pattern_mixture(int istate , char pattern)
+void VariableOrderMarkov::state_nb_pattern_mixture(int istate , char pattern)
 
 {
   register int i , j , k , m;
@@ -228,7 +228,7 @@ void Variable_order_markov::state_nb_pattern_mixture(int istate , char pattern)
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::output_nb_run_mixture(int variable , int output)
+void VariableOrderMarkov::output_nb_run_mixture(int variable , int output)
 
 {
   register int i , j , k , m;
@@ -388,7 +388,7 @@ void Variable_order_markov::output_nb_run_mixture(int variable , int output)
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::output_nb_occurrence_mixture(int variable , int output)
+void VariableOrderMarkov::output_nb_occurrence_mixture(int variable , int output)
 
 {
   register int i , j , k , m;
@@ -526,22 +526,22 @@ void Variable_order_markov::output_nb_occurrence_mixture(int variable , int outp
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des lois caracteristiques d'un objet Variable_order_markov.
+ *  Calcul des lois caracteristiques d'un objet VariableOrderMarkov.
  *
  *  arguments : longueur des sequences, flag sur le calcul des lois de comptage,
  *              indice du processus d'observation.
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::characteristic_computation(int length , bool counting_flag ,
-                                                       int variable)
+void VariableOrderMarkov::characteristic_computation(int length , bool counting_flag ,
+                                                     int variable)
 
 {
   if (nb_component > 0) {
     bool computation[NB_OUTPUT_PROCESS + 1];
     register int i , j , k;
     double *memory;
-    Parametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
+    DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
 
     memory = NULL;
@@ -729,18 +729,18 @@ void Variable_order_markov::characteristic_computation(int length , bool countin
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des lois caracteristiques d'un objet Variable_order_markov.
+ *  Calcul des lois caracteristiques d'un objet VariableOrderMarkov.
  *
- *  arguments : reference sur un objet Variable_order_markov_data,
+ *  arguments : reference sur un objet VariableOrderMarkovData,
  *              flag sur le calcul des lois de comptage,
  *              indice du processus d'observation,
  *              flag pour tenir compte des longueurs.
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::characteristic_computation(const Variable_order_markov_data &seq ,
-                                                       bool counting_flag , int variable ,
-                                                       bool length_flag)
+void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovData &seq ,
+                                                     bool counting_flag , int variable ,
+                                                     bool length_flag)
 
 {
   if (nb_component > 0) {
