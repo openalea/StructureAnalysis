@@ -55,17 +55,17 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Variable_order_markov.
+ *  Constructeur de la classe VariableOrderMarkov.
  *
- *  arguments : pointeur sur un objet Variable_order_markov,
+ *  arguments : pointeur sur un objet VariableOrderMarkov,
  *              nombre de processus d'observation, pointeurs sur des objets
- *              Nonparametric_process et Parametric_process, longueur des sequences.
+ *              NonparametricProcess et DiscreteParametricProcess, longueur des sequences.
  *
  *--------------------------------------------------------------*/
 
-Variable_order_markov::Variable_order_markov(const Variable_order_markov *pmarkov , int inb_output_process ,
-                                             Nonparametric_process **nonparametric_observation ,
-                                             Parametric_process **parametric_observation , int length)
+VariableOrderMarkov::VariableOrderMarkov(const VariableOrderMarkov *pmarkov , int inb_output_process ,
+                                         NonparametricProcess **nonparametric_observation ,
+                                         DiscreteParametricProcess **parametric_observation , int length)
 
 {
   register int i;
@@ -100,19 +100,19 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov *pmarko
 
   nb_output_process = inb_output_process;
 
-  nonparametric_process = new Nonparametric_sequence_process*[nb_output_process + 1];
-  nonparametric_process[0] = new Nonparametric_sequence_process(nb_state , nb_state);
-  parametric_process = new Parametric_process*[nb_output_process + 1];
+  nonparametric_process = new NonparametricSequenceProcess*[nb_output_process + 1];
+  nonparametric_process[0] = new NonparametricSequenceProcess(nb_state , nb_state);
+  parametric_process = new DiscreteParametricProcess*[nb_output_process + 1];
   parametric_process[0] = NULL;
 
   for (i = 1;i <= nb_output_process;i++) {
     if (nonparametric_observation[i - 1]) {
-      nonparametric_process[i] = new Nonparametric_sequence_process(*nonparametric_observation[i - 1]);
+      nonparametric_process[i] = new NonparametricSequenceProcess(*nonparametric_observation[i - 1]);
       parametric_process[i] = NULL;
     }
     else {
       nonparametric_process[i] = NULL;
-      parametric_process[i] = new Parametric_process(*parametric_observation[i - 1]);
+      parametric_process[i] = new DiscreteParametricProcess(*parametric_observation[i - 1]);
     }
   }
 
@@ -122,11 +122,11 @@ Variable_order_markov::Variable_order_markov(const Variable_order_markov *pmarko
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Hidden_variable_order_markov.
+ *  Destructeur de la classe HiddenVariableOrderMarkov.
  *
  *--------------------------------------------------------------*/
 
-Hidden_variable_order_markov::~Hidden_variable_order_markov() {}
+HiddenVariableOrderMarkov::~HiddenVariableOrderMarkov() {}
 
 
 /*--------------------------------------------------------------*
@@ -137,14 +137,14 @@ Hidden_variable_order_markov::~Hidden_variable_order_markov() {}
  *
  *--------------------------------------------------------------*/
 
-Hidden_variable_order_markov* Hidden_variable_order_markov::thresholding(double min_probability) const
+HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_probability) const
 
 {
   register int i;
-  Hidden_variable_order_markov *hmarkov;
+  HiddenVariableOrderMarkov *hmarkov;
 
 
-  hmarkov = new Hidden_variable_order_markov(*this , false);
+  hmarkov = new HiddenVariableOrderMarkov(*this , false);
   hmarkov->threshold_application(min_probability);
 
   for (i = 1;i <= nb_output_process;i++) {
@@ -159,16 +159,16 @@ Hidden_variable_order_markov* Hidden_variable_order_markov::thresholding(double 
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Hidden_variable_order_markov a partir d'un fichier.
+ *  Construction d'un objet HiddenVariableOrderMarkov a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, longueur des sequences,
+ *  arguments : reference sur un objet StatError, path, longueur des sequences,
  *              seuil sur les fonctions de repartition des lois parametriques.
  *
  *--------------------------------------------------------------*/
 
-Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_error &error ,
-                                                                      const char *path , int length ,
-                                                                      double cumul_threshold)
+HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &error ,
+                                                                   const char *path , int length ,
+                                                                   double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -179,10 +179,10 @@ Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_err
   register int i;
   int line , nb_output_process , index;
   long value;
-  const Variable_order_markov *imarkov;
-  Nonparametric_process **nonparametric_observation;
-  Parametric_process **parametric_observation;
-  Hidden_variable_order_markov *hmarkov;
+  const VariableOrderMarkov *imarkov;
+  NonparametricProcess **nonparametric_observation;
+  DiscreteParametricProcess **parametric_observation;
+  HiddenVariableOrderMarkov *hmarkov;
   ifstream in_file(path);
 
 
@@ -336,8 +336,8 @@ Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_err
         }
 
         else {
-          nonparametric_observation = new Nonparametric_process*[nb_output_process];
-          parametric_observation = new Parametric_process*[nb_output_process];
+          nonparametric_observation = new NonparametricProcess*[nb_output_process];
+          parametric_observation = new DiscreteParametricProcess*[nb_output_process];
           for (i = 0;i < nb_output_process;i++) {
             nonparametric_observation[i] = NULL;
             parametric_observation[i] = NULL;
@@ -462,9 +462,9 @@ Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_err
           }
 
           if (status) {
-            hmarkov = new Hidden_variable_order_markov(imarkov , nb_output_process ,
-                                                       nonparametric_observation ,
-                                                       parametric_observation , length);
+            hmarkov = new HiddenVariableOrderMarkov(imarkov , nb_output_process ,
+                                                    nonparametric_observation ,
+                                                    parametric_observation , length);
 
 #           ifdef DEBUG
             hmarkov->ascii_write(cout);
@@ -491,16 +491,16 @@ Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_err
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Hidden_variable_order_markov dans un fichier.
+ *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Hidden_variable_order_markov::ascii_write(ostream &os , bool exhaustive) const
+ostream& HiddenVariableOrderMarkov::ascii_write(ostream &os , bool exhaustive) const
 
 {
-  Variable_order_markov::ascii_write(os , markov_data , exhaustive , false , true);
+  VariableOrderMarkov::ascii_write(os , markov_data , exhaustive , false , true);
 
   return os;
 }
@@ -508,15 +508,15 @@ ostream& Hidden_variable_order_markov::ascii_write(ostream &os , bool exhaustive
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Hidden_variable_order_markov dans un fichier.
+ *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::ascii_write(Format_error &error , const char *path ,
-                                               bool exhaustive) const
+bool HiddenVariableOrderMarkov::ascii_write(StatError &error , const char *path ,
+                                            bool exhaustive) const
 
 {
   bool status;
@@ -532,7 +532,7 @@ bool Hidden_variable_order_markov::ascii_write(Format_error &error , const char 
 
   else {
     status = true;
-    Variable_order_markov::ascii_write(out_file , markov_data , exhaustive , true , true);
+    VariableOrderMarkov::ascii_write(out_file , markov_data , exhaustive , true , true);
   }
 
   return status;
@@ -541,14 +541,14 @@ bool Hidden_variable_order_markov::ascii_write(Format_error &error , const char 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Hidden_variable_order_markov dans un fichier au format tableur.
+ *  Ecriture d'un objet HiddenVariableOrderMarkov dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::spreadsheet_write(Format_error &error ,
-                                                     const char *path) const
+bool HiddenVariableOrderMarkov::spreadsheet_write(StatError &error ,
+                                                  const char *path) const
 
 {
   bool status;
@@ -564,7 +564,7 @@ bool Hidden_variable_order_markov::spreadsheet_write(Format_error &error ,
 
   else {
     status = true;
-    Variable_order_markov::spreadsheet_write(out_file , markov_data , true);
+    VariableOrderMarkov::spreadsheet_write(out_file , markov_data , true);
   }
 
   return status;
