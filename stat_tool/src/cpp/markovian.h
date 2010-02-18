@@ -93,13 +93,13 @@ enum {
  */
 
 
-class Chain_data;
+class ChainData;
 
 class Chain {           // chaine de Markov
 
-//    friend class Chain_data;
+//    friend class ChainData;
 
-    friend Chain* chain_parsing(Format_error &error , ifstream &in_file ,
+    friend Chain* chain_parsing(StatError &error , ifstream &in_file ,
                                 int &line , char type);
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
@@ -137,7 +137,7 @@ public :
     void log_computation();
 
     bool** logic_transition_computation() const;
-    bool connex_component_research(Format_error &error , bool **ilogic_transition = NULL) const;
+    bool connex_component_research(StatError &error , bool **ilogic_transition = NULL) const;
     void graph_accessibility_computation(bool **ilogic_transition);
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = NULL);
@@ -145,7 +145,7 @@ public :
     void thresholding(double min_probability);
 
     int nb_parameter_computation(double min_probability = 0.) const;
-    double chi2_value_computation(const Chain_data &chain_data) const;
+    double chi2_value_computation(const ChainData &chain_data) const;
 
 // public :
 
@@ -157,8 +157,8 @@ public :
 
     void init(bool left_right , double self_transition);
 
-    double likelihood_computation(const Chain_data &chain_data , bool initial_flag = true) const;
-    void chi2_fit(const Chain_data &chain_data , Test &test) const;
+    double likelihood_computation(const ChainData &chain_data , bool initial_flag = true) const;
+    void chi2_fit(const ChainData &chain_data , Test &test) const;
 
     // acces membres de la classe
 
@@ -179,20 +179,20 @@ public :
 };
 
 
-Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line , char type);
+Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type);
 
 
 
-class Chain_data : public Chain_reestimation<int> {  // structure de donnees correspondant a
-                                                     // une chaine de Markov
+class ChainData : public ChainReestimation<int> {  // structure de donnees correspondant a
+                                                   // une chaine de Markov
 
 /*    friend class Chain;
-    friend class Markovian_sequences;
-    friend class Variable_order_markov;
-    friend class Variable_order_markov_data;
-    friend class Semi_markov_data;
-    friend class Non_homogeneous_markov;
-    friend class Non_homogeneous_markov_data; */
+    friend class MarkovianSequences;
+    friend class VariableOrderMarkov;
+    friend class VariableOrderMarkovData;
+    friend class SemiMarkovData;
+    friend class NonhomogeneousMarkov;
+    friend class NonhomogeneousMarkovData; */
 
 // protected :
 public :
@@ -201,9 +201,9 @@ public :
 
 // public :
 
-    Chain_data(char itype , int inb_state , int inb_row , bool init_flag = false)
-    :Chain_reestimation<int>(itype , inb_state , inb_row , init_flag) {}
-    Chain_data(const Chain_data &chain_data);
+    ChainData(char itype , int inb_state , int inb_row , bool init_flag = false)
+    :ChainReestimation<int>(itype , inb_state , inb_row , init_flag) {}
+    ChainData(const ChainData &chain_data);
 
     void estimation(Chain &chain) const;
 
@@ -219,17 +219,17 @@ public :
 
 
 
-class Nonparametric_process {  // processus d'observation non-parametrique
+class NonparametricProcess {  // processus d'observation discret non-parametrique
 
     friend class Mv_Mixture;
 
-    friend Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
-                                                      int &line , int nb_state , bool hidden);
+    friend NonparametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
+                                                     int &line , int nb_state , bool hidden);
 
-    friend Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_file ,
-                                                       int &line , int nb_state , int &nb_output_process);
-    friend Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &in_file ,
-                                                           int &line , int nb_state , int &nb_output_process);
+    friend NonparametricProcess** observation_parsing(StatError &error , ifstream &in_file ,
+                                                      int &line , int nb_state , int &nb_output_process);
+    friend NonparametricProcess** old_observation_parsing(StatError &error , ifstream &in_file ,
+                                                          int &line , int nb_state , int &nb_output_process);
 
 protected :
 
@@ -237,8 +237,8 @@ protected :
     int nb_value;           // nombre de valeurs
     Distribution **observation;  // lois d'observation
 
-    void copy(const Nonparametric_process &process);
-    void add_state(const Nonparametric_process &process , int state);
+    void copy(const NonparametricProcess &process);
+    void add_state(const NonparametricProcess &process , int state);
     void remove();
 
     bool test_hidden() const;
@@ -248,12 +248,13 @@ protected :
 
 public :
 
-    Nonparametric_process(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
-    Nonparametric_process(int inb_state , int inb_value , double **observation_probability);
-    Nonparametric_process(int inb_state , Distribution **pobservation);
-    Nonparametric_process(const Nonparametric_process &process , char manip = 'c' , int state = I_DEFAULT);
-    ~Nonparametric_process();
-    Nonparametric_process& operator=(const Nonparametric_process &process);
+    NonparametricProcess(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
+    NonparametricProcess(int inb_state , int inb_value , double **observation_probability);
+    NonparametricProcess(int inb_state , Distribution **pobservation);
+    NonparametricProcess(const NonparametricProcess &process , char manip = 'c' ,
+                         int state = I_DEFAULT);
+    ~NonparametricProcess();
+    NonparametricProcess& operator=(const NonparametricProcess &process);
 
     int nb_parameter_computation(double min_probability) const;
     void init();
@@ -265,72 +266,74 @@ public :
     Distribution* get_observation(int state) const
     { return observation[state]; }
 
-    std::ostream& ascii_print(std::ostream &os , Histogram **empirical_observation ,
+    std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
                               bool exhaustive , bool file_flag) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
-                                    Histogram **empirical_observation = NULL) const;
-    bool plot_print(const char *prefix , const char *title ,
-                    int process , Histogram **empirical_observation = NULL) const;
+                                    FrequencyDistribution **empirical_observation = NULL) const;
+    bool plot_print(const char *prefix , const char *title , int process ,
+                    FrequencyDistribution **empirical_observation = NULL) const;
 };
 
 
-Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
-                                           int &line , int nb_state , bool hidden);
+NonparametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
+                                          int &line , int nb_state , bool hidden);
 
-Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_file ,
-                                            int &line , int nb_state , int &nb_output_process);
-Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &in_file ,
-                                                int &line , int nb_state , int &nb_output_process);
+NonparametricProcess** observation_parsing(StatError &error , ifstream &in_file ,
+                                           int &line , int nb_state , int &nb_output_process);
+NonparametricProcess** old_observation_parsing(StatError &error , ifstream &in_file ,
+                                               int &line , int nb_state , int &nb_output_process);
 
 
 
-class Parametric_process {  // processus d'observation parametrique
+class DiscreteParametricProcess {  // processus d'observation discret parametrique
 
-/*    friend class Markovian_sequences;
-    friend class Semi_markov;
-    friend class Semi_markov_data;
-    friend class Semi_markov_iterator;
-    friend class Hidden_semi_markov;
-    friend class Variable_order_markov;
-    friend class Variable_order_markov_data;
-    friend class Variable_order_markov_iterator;
-    friend class Hidden_variable_order_markov; */
+/*    friend class MarkovianSequences;
+    friend class SemiMarkov;
+    friend class SemiMarkovData;
+    friend class SemiMarkovIterator;
+    friend class HiddenSemiMarkov;
+    friend class VariableOrderMarkov;
+    friend class VariableOrderMarkovData;
+    friend class VariableOrderMarkovIterator;
+    friend class HiddenVariableOrderMarkov; */
 
-    friend Parametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
-                                                   int &line , int nb_state ,
-                                                   double cumul_threshold);
+    friend DiscreteParametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
+                                                          int &line , int nb_state ,
+                                                          double cumul_threshold);
 
 // protected :
 public :
 
     int nb_state;           // nombre d'etats
     int nb_value;           // nombre de valeurs
-    Parametric **observation;  // lois d'observation
+    DiscreteParametric **observation;  // lois d'observation
 
-    void copy(const Parametric_process &process);
+    void copy(const DiscreteParametricProcess &process);
 
     void state_permutation(int *perm) const; // permutation des etats
 
-    void add_state(const Parametric_process &process , int state);
+    void add_state(const DiscreteParametricProcess &process , int state);
     void remove();
 
     void nb_value_computation();
 
 // public :
 
-    Parametric_process(int inb_state = 0 , int inb_value = 0);
-    Parametric_process(int inb_state , Parametric **pobservation);
-    Parametric_process(const Parametric_process &process , char manip = 'c' , int state = I_DEFAULT);
-    ~Parametric_process();
-    Parametric_process& operator=(const Parametric_process &process);
+    DiscreteParametricProcess(int inb_state = 0 , int inb_value = 0);
+    DiscreteParametricProcess(int inb_state , DiscreteParametric **pobservation);
+    DiscreteParametricProcess(const DiscreteParametricProcess &process , char manip = 'c' ,
+                              int state = I_DEFAULT);
+    ~DiscreteParametricProcess();
+    DiscreteParametricProcess& operator=(const DiscreteParametricProcess &process);
 
-    std::ostream& ascii_print(std::ostream &os , Histogram **empirical_observation ,
+    std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
                               bool exhaustive , bool file_flag) const;
-    std::ostream& spreadsheet_print(std::ostream &os , Histogram **empirical_observation = NULL) const;
+    std::ostream& spreadsheet_print(std::ostream &os ,
+                                    FrequencyDistribution **empirical_observation = NULL) const;
     bool plot_print(const char *prefix , const char *title , int process ,
-                    Histogram **empirical_observation = NULL) const;
+                    FrequencyDistribution **empirical_observation = NULL) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
-                        Histogram **empirical_observation = NULL) const;
+                        FrequencyDistribution **empirical_observation = NULL) const;
 
     int nb_parameter_computation() const;
     void init();
@@ -339,14 +342,14 @@ public :
 
 /*    int get_nb_state() const { return nb_state; }
     int get_nb_value() const { return nb_value; }
-    Parametric* get_observation(int state) const
+    DiscreteParametric* get_observation(int state) const
     { return observation[state]; } */
 };
 
 
-Parametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
-                                        int &line , int nb_state ,
-                                        double cumul_threshold = OBSERVATION_THRESHOLD);
+DiscreteParametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
+                                               int &line , int nb_state ,
+                                               double cumul_threshold = OBSERVATION_THRESHOLD);
 
 
 
