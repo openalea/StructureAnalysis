@@ -99,7 +99,7 @@ TreeMatch_O::TreeMatch_O(MTG& mtg,
 			 AMString mapping_type,
 			 AMString mapping,
 			 AMString scale_type,
-			 const Vector_distance &ivect,
+			 const VectorDistance &ivect,
 			 double coeff)
 {
   _mtg=&mtg;
@@ -130,7 +130,7 @@ TreeMatch_O::TreeMatch_O(MTG& mtg,
   // making of the local functions list
   if (local_functions)
     {
-      _vectorDist=*(new Vector_distance(ivect));
+      _vectorDist=*(new VectorDistance(ivect));
       _localFun=new NodeFunctionList();
       assert(local_functions->surfaceType()==AMObjType::FNODE);
       ArrayIter* p_next=local_functions->iterator();
