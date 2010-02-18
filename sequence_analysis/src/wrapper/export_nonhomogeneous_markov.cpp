@@ -47,48 +47,48 @@ class NonHomogeneousMarkovWrap
 
 public:
 
-  static boost::shared_ptr<Nonhomogeneous_markov>
-  nonhomogeneous_markov_from_file(char* filename, int length)
+  static boost::shared_ptr<NonhomogeneousMarkov>
+  nonhomogeneous_markov_from_file(char *filename, int length)
   {
     //olf_format should be true
-    Format_error error;
-    Nonhomogeneous_markov *nonhomo = NULL;
+    StatError error;
+    NonhomogeneousMarkov *nonhomo = NULL;
     nonhomo = nonhomogeneous_markov_ascii_read(error, filename, length);
     if (!nonhomo)
       {
         sequence_analysis::wrap_util::throw_error(error);
       }
-    return boost::shared_ptr<Nonhomogeneous_markov>(nonhomo);
+    return boost::shared_ptr<NonhomogeneousMarkov>(nonhomo);
   }
 
-  static Nonhomogeneous_markov_data*
-  simulation_markovian_sequences(const Nonhomogeneous_markov &input,
-      int nb_sequence, const Markovian_sequences input_seq, bool counting_flag)
+  static NonhomogeneousMarkovData*
+  simulation_markovian_sequences(const NonhomogeneousMarkov &input,
+      int nb_sequence, const MarkovianSequences input_seq, bool counting_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Nonhomogeneous_markov_data,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, NonhomogeneousMarkovData,
         nb_sequence, input_seq, counting_flag);
   }
 
-  static Nonhomogeneous_markov_data*
-  simulation_histogram(const Nonhomogeneous_markov &input,
-      const Histogram &hlength, bool counting_flag)
+  static NonhomogeneousMarkovData*
+  simulation_histogram(const NonhomogeneousMarkov &input,
+      const FrequencyDistribution &hlength, bool counting_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Nonhomogeneous_markov_data,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, NonhomogeneousMarkovData,
         hlength, counting_flag);
   }
 
-  static Nonhomogeneous_markov_data*
-  simulation_nb_sequences(const Nonhomogeneous_markov &input, int nb_sequence,
+  static NonhomogeneousMarkovData*
+  simulation_nb_sequences(const NonhomogeneousMarkov &input, int nb_sequence,
       int length, bool counting_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Nonhomogeneous_markov_data,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, NonhomogeneousMarkovData,
         nb_sequence, length, counting_flag);
   }
 
-  static Parametric_model*
-  extract(const Nonhomogeneous_markov& input, int type, int state)
+  static DiscreteParametricModel*
+  extract(const NonhomogeneousMarkov &input, int type, int state)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, Parametric_model,
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel,
         type, state);
     }
 
@@ -98,14 +98,14 @@ public:
 
 void class_nonhomogeneous_markov() {
 
-  class_<Nonhomogeneous_markov, bases<STAT_interface> > ("_Nonhomogeneous_markov", "Nonhomogeneous_markov")
+  class_<NonhomogeneousMarkov, bases<StatInterface> > ("_NonhomogeneousMarkov", "NonhomogeneousMarkov")
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_nb_state_and_ident_list))
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_chain_and_self_transition))
     .def("__init__", make_constructor(WRAP::nonhomogeneous_markov_from_file))
 
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
-    .def("get_homogeneity", &Nonhomogeneous_markov::get_homogeneity, python::args("index"),"return homogeneity")
-    .def("get_self_transition", &Nonhomogeneous_markov::get_self_transition, return_value_policy<manage_new_object> (),	python::args("index"),"return Function* of self transition")
+    .def("get_homogeneity", &NonhomogeneousMarkov::get_homogeneity, python::args("index"),"return homogeneity")
+    .def("get_self_transition", &NonhomogeneousMarkov::get_self_transition, return_value_policy<manage_new_object> (),	python::args("index"),"return Function* of self transition")
 
     DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
     DEF_RETURN_VALUE("simulation_nb_sequences", WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
@@ -113,23 +113,23 @@ void class_nonhomogeneous_markov() {
 
     ;
 
-	//.def("get_process", &Nonhomogeneous_markov::get_process,
+	//.def("get_process", &NonhomogeneousMarkov::get_process,
 	//	"return non parametric sequence process")
 
 /*
-    Nonhomogeneous_markov();
-    Nonhomogeneous_markov(int inb_state , int *ident);
-    Nonhomogeneous_markov(const Chain *pchain , const Function **pself_transition , int length);
-    Nonhomogeneous_markov(const Nonhomogeneous_markov &markov , bool data_flag = true , bool haracteristic_flag = true)    :Chain(markov) { copy(markov , data_flag , characteristic_flag); }
+    NonhomogeneousMarkov();
+    NonhomogeneousMarkov(int inb_state , int *ident);
+    NonhomogeneousMarkov(const Chain *pchain , const Function **pself_transition , int length);
+    NonhomogeneousMarkov(const NonhomogeneousMarkov &markov , bool data_flag = true , bool haracteristic_flag = true)    :Chain(markov) { copy(markov , data_flag , characteristic_flag); }
 
 
     void characteristic_computation(int length , bool counting_flag);
-    void characteristic_computation(const Nonhomogeneous_markov_data &seq , bool counting_flag ,            bool length_flag = true);
+    void characteristic_computation(const NonhomogeneousMarkovData &seq , bool counting_flag ,            bool length_flag = true);
 
-    double likelihood_computation(const Markovian_sequences &seq , int index = I_DEFAULT) const;
+    double likelihood_computation(const MarkovianSequences &seq , int index = I_DEFAULT) const;
 
-    Nonhomogeneous_markov_data* get_markov_data() const { return markov_data; }
-    Nonparametric_sequence_process* get_process() const { return process; }
+    NonhomogeneousMarkovData* get_markov_data() const { return markov_data; }
+    NonparametricSequenceProcess* get_process() const { return process; }
    */
 }
 #undef WRAP
@@ -141,47 +141,47 @@ class NonHomogeneousMarkovDataWrap
 {
 
 public:
-  static Distribution_data*
-  extract(const Nonhomogeneous_markov_data& input, int type, int state)
+  static DiscreteDistributionData*
+  extract(const NonhomogeneousMarkovData &input, int type, int state)
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract,
-        Distribution_data, type, state);
+        DiscreteDistributionData, type, state);
   }
 
-  static Nonhomogeneous_markov_data*
-  remove_index_parameter(const Nonhomogeneous_markov_data& input)
+  static NonhomogeneousMarkovData*
+  remove_index_parameter(const NonhomogeneousMarkovData& input)
   {
     SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter,
-        Nonhomogeneous_markov_data);
+        NonhomogeneousMarkovData);
   }
 
 };
 
 void class_nonhomogeneous_markov_data()
 {
-  class_<Nonhomogeneous_markov_data, bases<Markovian_sequences > >
-  ("_Nonhomogeneous_markov_data", "Nonhomogeneous_markov_data")
+  class_<NonhomogeneousMarkovData, bases<MarkovianSequences > >
+  ("_NonhomogeneousMarkovData", "NonhomogeneousMarkovData")
 
-    .def(init<Markovian_sequences & >())
+    .def(init<MarkovianSequences& >())
 
-    .add_property("likelihood", &Nonhomogeneous_markov_data::get_likelihood, "returns likelihood")
+    .add_property("likelihood", &NonhomogeneousMarkovData::get_likelihood, "returns likelihood")
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
 
   ;
   /*
-    Nonhomogeneous_markov_data();
-    Nonhomogeneous_markov_data(const Histogram &ihlength);
-    Nonhomogeneous_markov_data(const Nonhomogeneous_markov_data &seq , bool model_flag = true , char transform = 'c') :Markovian_sequences(seq , transform) { copy(seq , model_flag); }
+    NonhomogeneousMarkovData();
+    NonhomogeneousMarkovData(const FrequencyDistribution &ihlength);
+    NonhomogeneousMarkovData(const NonhomogeneousMarkovData &seq , bool model_flag = true , char transform = 'c') :MarkovianSequences(seq , transform) { copy(seq , model_flag); }
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,const char *title = 0) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,const char *title = 0) const;
 
     void build_transition_count();
 
-    Nonhomogeneous_markov* get_markov() const { return markov; }
-    Chain_data* get_chain_data() const { return chain_data; }
+    NonhomogeneousMarkov* get_markov() const { return markov; }
+    ChainData* get_chain_data() const { return chain_data; }
 
     */
 
