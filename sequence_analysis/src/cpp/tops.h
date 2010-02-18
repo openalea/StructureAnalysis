@@ -72,13 +72,13 @@ const int TOP_SIZE = 2000000;          // taille memoire maximum (en int) d'un e
  */
 
 
-class Top_parameters : public STAT_interface {  // parametres de croissance d'une cime
+class TopParameters : public StatInterface {  // parametres de croissance d'une cime
 
     friend class Tops;
 
-    friend Top_parameters* top_parameters_ascii_read(Format_error &error , const char *path ,
-                                                     int max_position);
-    friend std::ostream& operator<<(std::ostream &os , const Top_parameters &parameters)
+    friend TopParameters* top_parameters_ascii_read(StatError &error , const char *path ,
+                                                    int max_position);
+    friend std::ostream& operator<<(std::ostream &os , const TopParameters &parameters)
     { return parameters.ascii_write(os , parameters.tops , false , false); }
 
 private :
@@ -90,7 +90,7 @@ private :
     int max_position;       // position maximum
     Distribution **axillary_nb_internode;  // lois du nombre d'entrenoeuds axes portes
 
-    void copy(const Top_parameters &parameters , bool data_flag = true);
+    void copy(const TopParameters &parameters , bool data_flag = true);
     void remove();
 
     std::ostream& ascii_write(std::ostream &os , const Tops *itops ,
@@ -104,31 +104,31 @@ private :
 
 public :
 
-    Top_parameters(double iprobability = D_DEFAULT , double iaxillary_probability = D_DEFAULT ,
-                   double irhythm_ratio = D_DEFAULT , int imax_position = 0);
-    Top_parameters(const Top_parameters &parameters , bool data_flag = true)
+    TopParameters(double iprobability = D_DEFAULT , double iaxillary_probability = D_DEFAULT ,
+                  double irhythm_ratio = D_DEFAULT , int imax_position = 0);
+    TopParameters(const TopParameters &parameters , bool data_flag = true)
     { copy(parameters , data_flag); }
-    virtual ~Top_parameters();
-    Top_parameters& operator=(const Top_parameters&);
+    virtual ~TopParameters();
+    TopParameters& operator=(const TopParameters&);
 
-    Parametric_model* extract(Format_error &error , int position) const;
+    DiscreteParametricModel* extract(StatError &error , int position) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void axillary_nb_internode_computation(int imax_position);
 
-    Tops* simulation(Format_error &error , int nb_top ,
+    Tops* simulation(StatError &error , int nb_top ,
                      const Distribution &nb_trial ,
                      const Distribution &nb_axillary) const;
-    Tops* simulation(Format_error &error , int nb_top ,
+    Tops* simulation(StatError &error , int nb_top ,
                      int nb_trial , int nb_axillary = 1) const;
 
     // acces membres de la classe
@@ -143,25 +143,25 @@ public :
 };
 
 
-Top_parameters* top_parameters_ascii_read(Format_error &error , const char *path ,
-                                          int max_position = DEFAULT_MAX_POSITION);
+TopParameters* top_parameters_ascii_read(StatError &error , const char *path ,
+                                         int max_position = DEFAULT_MAX_POSITION);
 
 
 
 class Tops : public Sequences {  // ensemble de cimes
 
-    friend class Top_parameters;
+    friend class TopParameters;
 
-    friend Tops* tops_ascii_read(Format_error &error , const char *path , bool old_format);
+    friend Tops* tops_ascii_read(StatError &error , const char *path , bool old_format);
     friend std::ostream& operator<<(std::ostream &os , const Tops &tops)
     { return tops.ascii_write(os); }
 
 private :
 
-    Top_parameters *top_parameters;  // pointeur sur un objet Top_parameters
-    Histogram *nb_internode;  // histogramme du nombre d'entrenoeuds axe porteur
+    TopParameters *top_parameters;  // pointeur sur un objet TopParameters
+    FrequencyDistribution *nb_internode;  // loi empirique du nombre d'entrenoeuds axe porteur
     int max_position;        // position maximum
-    Histogram **axillary_nb_internode;  // histogrammes du nombre d'entrenoeuds axes portes
+    FrequencyDistribution **axillary_nb_internode;  // lois empiriques du nombre d'entrenoeuds axes portes
 
     void copy(const Tops &tops , bool model_flag = true);
     void remove();
@@ -182,45 +182,45 @@ public :
     ~Tops();
     Tops& operator=(const Tops &tops);
 
-    Distribution_data* extract(Format_error &error , int position) const;
+    DiscreteDistributionData* extract(StatError &error , int position) const;
 
-    Tops* shift(Format_error &error , int inb_internode) const;
-    Tops* select_individual(Format_error &error , int inb_sequence ,
+    Tops* shift(StatError &error , int inb_internode) const;
+    Tops* select_individual(StatError &error , int inb_sequence ,
                             int *iidentifier , bool keep = true) const;
-    Tops* reverse(Format_error &error) const;
+    Tops* reverse(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_data_write(std::ostream &os , char format = 'c' , bool exhaustive = false) const;
-    bool ascii_data_write(Format_error &error , const char *path ,
+    bool ascii_data_write(StatError &error , const char *path ,
                           char format = 'c' , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    void build_nb_internode_histogram();
+    void build_nb_internode_frequency_distribution();
 
-    Top_parameters* estimation(Format_error &error , int imin_position , int imax_position ,
-                               int neighborhood , bool equal_probability = false) const;
-    Top_parameters* estimation(Format_error &error , int neighborhood , bool equal_probability = false) const
+    TopParameters* estimation(StatError &error , int imin_position , int imax_position ,
+                              int neighborhood , bool equal_probability = false) const;
+    TopParameters* estimation(StatError &error , int neighborhood , bool equal_probability = false) const
     { return estimation(error , 1 , max_position , neighborhood , equal_probability); }
 
     // acces membres de la classe
 
-    Top_parameters* get_top_parameters() const { return top_parameters; }
-    Histogram* get_nb_internode() const { return nb_internode; }
+    TopParameters* get_top_parameters() const { return top_parameters; }
+    FrequencyDistribution* get_nb_internode() const { return nb_internode; }
     int get_max_position() const { return max_position; }
-    Histogram* get_axillary_nb_internode(int position) const
+    FrequencyDistribution* get_axillary_nb_internode(int position) const
     { return axillary_nb_internode[position]; }
 };
 
 
-Tops* tops_ascii_read(Format_error &error , const char *path , bool old_format = false);
+Tops* tops_ascii_read(StatError &error , const char *path , bool old_format = false);
 
 
 
