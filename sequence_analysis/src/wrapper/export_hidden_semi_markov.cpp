@@ -51,13 +51,13 @@ class WRAP {
 
 public:
 
-  static boost::shared_ptr<Hidden_semi_markov>
-  hidden_semi_markov_from_file(char* filename, int length, bool counting_flag,
+  static boost::shared_ptr<HiddenSemiMarkov>
+  hidden_semi_markov_from_file(char *filename, int length, bool counting_flag,
       double cumul_threshold, bool old_format)
   {
     //olf_format should be true
-    Format_error error;
-    Hidden_semi_markov *hidden_semi_markov = NULL;
+    StatError error;
+    HiddenSemiMarkov *hidden_semi_markov = NULL;
 
     hidden_semi_markov = hidden_semi_markov_ascii_read(error, filename, length,
         counting_flag, cumul_threshold, old_format);
@@ -65,101 +65,101 @@ public:
       {
         sequence_analysis::wrap_util::throw_error(error);
       }
-    return boost::shared_ptr<Hidden_semi_markov>(hidden_semi_markov);
+    return boost::shared_ptr<HiddenSemiMarkov>(hidden_semi_markov);
   }
 
   static void
-  file_ascii_write(const Hidden_semi_markov& d, const char* path,
+  file_ascii_write(const HiddenSemiMarkov &d, const char *path,
       bool exhaustive)
   {
     bool result = true;
-    Format_error error;
+    StatError error;
 
     result = d.ascii_write(error, path, exhaustive);
     if (!result)
       sequence_analysis::wrap_util::throw_error(error);
   }
 
-  static Semi_markov_data*
-  state_sequence_computation(const Hidden_semi_markov& input,
-      const Markovian_sequences &seq, bool characteristic_flag = true)
+  static SemiMarkovData*
+  state_sequence_computation(const HiddenSemiMarkov &input,
+      const MarkovianSequences &seq, bool characteristic_flag = true)
   {
     std:stringstream os;
     SIMPLE_METHOD_TEMPLATE_1(input, state_sequence_computation,
-        Semi_markov_data, os, seq, characteristic_flag);
+        SemiMarkovData, os, seq, characteristic_flag);
   }
 
-  static Hidden_semi_markov*
-  thresholding(const Hidden_semi_markov& input, double min_probability)
+  static HiddenSemiMarkov*
+  thresholding(const HiddenSemiMarkov &input, double min_probability)
   {
     return input.thresholding(min_probability);
   }
 
-  static Semi_markov_data*
-  simulation_markovian_sequences(const Hidden_semi_markov &input,
-      int nb_sequence, const Markovian_sequences input_seq, bool counting_flag)
+  static SemiMarkovData*
+  simulation_markovian_sequences(const HiddenSemiMarkov &input,
+      int nb_sequence, const MarkovianSequences input_seq, bool counting_flag)
   {
 
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Semi_markov_data, nb_sequence,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, SemiMarkovData, nb_sequence,
         input_seq, counting_flag);
   }
 
-  static Semi_markov_data*
-  simulation_histogram(const Hidden_semi_markov &input,
-      const Histogram &hlength, bool counting_flag, bool divergence_flag)
+  static SemiMarkovData*
+  simulation_histogram(const HiddenSemiMarkov &input,
+      const FrequencyDistribution &hlength, bool counting_flag, bool divergence_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Semi_markov_data, hlength,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, SemiMarkovData, hlength,
         counting_flag, divergence_flag);
 
   }
 
-  static Semi_markov_data*
-  simulation_nb_sequences(const Hidden_semi_markov &input, int nb_sequence,
+  static SemiMarkovData*
+  simulation_nb_sequences(const HiddenSemiMarkov &input, int nb_sequence,
       int length, bool counting_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Semi_markov_data, nb_sequence,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, SemiMarkovData, nb_sequence,
         length, counting_flag);
   }
 
 
-  static Distance_matrix*
-  divergence_computation_histo(const Hidden_semi_markov &input,
+  static DistanceMatrix*
+  divergence_computation_histo(const HiddenSemiMarkov &input,
       boost::python::list input_markov,
       boost::python::list input_histogram_length, const char *filename)
   {
-    HEADER_OS(Distance_matrix);
-    CREATE_ARRAY(input_markov, const Hidden_semi_markov *, markov);
-    CREATE_ARRAY(input_histogram_length, Histogram *, hlength);
+    HEADER_OS(DistanceMatrix);
+    CREATE_ARRAY(input_markov, const HiddenSemiMarkov*, markov);
+    CREATE_ARRAY(input_histogram_length, FrequencyDistribution*, hlength);
     ret = input.divergence_computation(error, os, markov_size, markov.get(),
         hlength.get(), filename);
     FOOTER_OS;
   }
 
-  static Distance_matrix*
-  divergence_computation_length(const Hidden_semi_markov &input,
+  static DistanceMatrix*
+  divergence_computation_length(const HiddenSemiMarkov &input,
       boost::python::list input_markov, int nb_sequence, int length,
       const char *filename)
   {
-    HEADER_OS(Distance_matrix);
-    CREATE_ARRAY(input_markov, const Hidden_semi_markov *, markov);
+    HEADER_OS(DistanceMatrix);
+    CREATE_ARRAY(input_markov, const HiddenSemiMarkov*, markov);
     ret = input.divergence_computation(error, os, markov_size, markov.get(),
         nb_sequence, length, filename);
     FOOTER_OS;
   }
 
 
-  static Distance_matrix*
-  divergence_computation_sequences(const Hidden_semi_markov &input,
+  static DistanceMatrix*
+  divergence_computation_sequences(const HiddenSemiMarkov &input,
       boost::python::list &input_markov, boost::python::list &input_sequence,
       int nb_seq, char *filename)
   {
-    // there is as much Variable_order_markov elmts as Markovian elts
+    // there is as much VariableOrderMarkov elmts as Markovian elts
     // 1 for input and N-1 for input_markov and N input_sequence
 
-    HEADER_OS(Distance_matrix);
+    HEADER_OS(DistanceMatrix);
 
-    CREATE_ARRAY(input_markov, const Hidden_semi_markov*, markov);
-    CREATE_ARRAY(input_sequence, const Markovian_sequences*, sequence);
+    CREATE_ARRAY(input_markov, const HiddenSemiMarkov*, markov);
+    CREATE_ARRAY(input_sequence, const MarkovianSequences*, sequence);
 
     ret = input.divergence_computation(error, os, markov_size + 1, markov.get(),
         sequence_size, sequence.get(), filename);
@@ -175,9 +175,9 @@ void class_hidden_semi_markov() {
 
 
 
-  class_<Hidden_semi_markov, bases<Semi_markov > >
-    ("_Hidden_semi_markov", "Hidden_semi_markov", no_init)
-    .def(init <Hidden_semi_markov, bool, int>())
+  class_<HiddenSemiMarkov, bases<SemiMarkov > >
+    ("_HiddenSemiMarkov", "HiddenSemiMarkov", no_init)
+    .def(init <HiddenSemiMarkov, bool, int>())
     .def("__init__", make_constructor(WRAP::hidden_semi_markov_from_file))
 
     .def(self_ns::str(self)) //__str__
@@ -197,27 +197,27 @@ void class_hidden_semi_markov() {
 
 /*
  *
-    Hidden_semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,             int inb_output_process , Nonparametric_process **pobservation ,    int length , bool counting_flag)  :Semi_markov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
-    Hidden_semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,          int inb_output_process , Nonparametric_process **nonparametric_observation ,    Parametric_process **parametric_observation , int length , bool counting_flag)    :Semi_markov(pchain , poccupancy , inb_output_process , nonparametric_observation ,     parametric_observation , length , counting_flag) {}
-    Hidden_semi_markov(const Hidden_semi_markov &hsmarkov , bool data_flag = true ,     int param = I_DEFAULT)
+    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,             int inb_output_process , NonparametricProcess **pobservation ,    int length , bool counting_flag)  :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,          int inb_output_process , NonparametricProcess **nonparametric_observation ,    DiscreteParametricProcess **parametric_observation , int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,     parametric_observation , length , counting_flag) {}
+    HiddenSemiMarkov(const HiddenSemiMarkov &hsmarkov , bool data_flag = true ,     int param = I_DEFAULT)
 
-    bool spreadsheet_write(Format_error &error , const char *path) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
 
-    Hidden_semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,  int inb_output_process , Nonparametric_process **pobservation ,  int length , bool counting_flag)    :Semi_markov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
-    Hidden_semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,    int inb_output_process , Nonparametric_process **nonparametric_observation ,int observationn , int length , bool counting_flag)    :Semi_markov(pchain , poccupancy , inb_output_process , nonparametric_observation ,                 parametric_observation , length , counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,  int inb_output_process , NonparametricProcess **pobservation ,  int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , pobservation , length ,  counting_flag) {}
+    HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,    int inb_output_process , NonparametricProcess **nonparametric_observation ,int observationn , int length , bool counting_flag)    :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,                 parametric_observation , length , counting_flag) {}
 
 
-    double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = 0 ,  int index = I_DEFAULT) const;
+    double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = 0 ,  int index = I_DEFAULT) const;
 
-    bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,   int identifier = I_DEFAULT , int output = SSTATE ,  char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(Format_error &error , const char *path , const Markovian_sequences &iseq ,  int identifier = I_DEFAULT , int output = SSTATE ,  char format = 'a' , int state_sequence = GENERALIZED_VITERBI , int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_ascii_write(Format_error &error , std::ostream &os , int identifier ,int output = SSTATE , int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(Format_error &error , const char *path ,  int identifier = I_DEFAULT , int output = SSTATE , char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,   int identifier = I_DEFAULT , int output = SSTATE ,  char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,  int identifier = I_DEFAULT , int output = SSTATE ,  char format = 'a' , int state_sequence = GENERALIZED_VITERBI , int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_ascii_write(StatError &error , std::ostream &os , int identifier ,int output = SSTATE , int state_sequence = GENERALIZED_VITERBI ,int nb_state_sequence = NB_STATE_SEQUENCE) const;
+    bool state_profile_write(StatError &error , const char *path ,  int identifier = I_DEFAULT , int output = SSTATE , char format = 'a' , int state_sequence = GENERALIZED_VITERBI ,  int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
-    bool state_profile_plot_write(Format_error &error , const char *prefix , const Markovian_sequences &iseq , int identifier ,int output = SSTATE , const char *title = 0) const;
-    bool state_profile_plot_write(Format_error &error , const char *prefix , int identifier ,   int output = SSTATE , const char *title = 0) const;
+    bool state_profile_plot_write(StatError &error , const char *prefix , const MarkovianSequences &iseq , int identifier ,int output = SSTATE , const char *title = 0) const;
+    bool state_profile_plot_write(StatError &error , const char *prefix , int identifier ,   int output = SSTATE , const char *title = 0) const;
 
-    Semi_markov_data* state_sequence_computation(Format_error &error , ostream &os , const Markovian_sequences &seq , bool characteristic_flag = true) const;
+    SemiMarkovData* state_sequence_computation(StatError &error , ostream &os , const MarkovianSequences &seq , bool characteristic_flag = true) const;
 */
 }
 
