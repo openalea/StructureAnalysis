@@ -3,7 +3,7 @@ __version__ = "$Id$"
 
 
 from openalea.stat_tool.regression import Regression
-from openalea.stat_tool._stat_tool import _Regression_kernel as RegressionKernel
+from openalea.stat_tool._stat_tool import _RegressionKernel as RegressionKernel
 from openalea.stat_tool.vectors import Vectors
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.distribution import Binomial

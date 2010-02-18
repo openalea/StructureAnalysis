@@ -52,9 +52,13 @@ from openalea.stat_tool import Transcode
 try:
     from openalea.sequence_analysis import Sequences
 except ImportError:
-    pass
+    Sequences = None
 
 def test(): 
+    if Sequences:
+        pass
+    else:
+        return
     vec1 = Vectors(Sequences("../examples/Sample/Sequences/hetre.seq"))
     
     Plot(ExtractHistogram(ValueSelect(vec1, 1, 0), 4), 

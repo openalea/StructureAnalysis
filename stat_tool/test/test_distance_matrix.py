@@ -17,13 +17,13 @@ from tools import runTestClass
 
 
 class Test(interface):
-    
+
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
                            "data/distribution1.dist",
                            ToDistanceMatrix)
-    
+
     def build_data(self):
         vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
@@ -46,28 +46,28 @@ class Test(interface):
     def test_constructor_from_file_failure(self):
         pass
         #self.constructor_from_file_failure()
-        
+
     def test_print(self):
         self.print_data()
-    
+
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
         self.display_versus_str()
-    
-    def test_plot(self):        
+
+    def test_plot(self):
         self.plot()
 
     def test_save(self):
         pass
         #self.save()
-                
+
     def test_extract(self):
         pass
-    
+
     def test_extract_data(self):
         pass
-    
+
     def test_symmetrize(self):
         data = self.data
         assert data.symmetrize()
@@ -83,14 +83,14 @@ class Test(interface):
 
         assert keep_false.nb_row == 2
         assert keep_false.nb_column == 2
-        
+
         assert keep_true.nb_row == 1
         assert keep_true.nb_column == 1
-        
+
     def test_test_symmetry(self):
         data = self.data
         assert data.test_symmetry() == False
-        
+
     def test_get_distance(self):
         data = self.data
         assert data.get_distance(0, 0)
@@ -98,7 +98,7 @@ class Test(interface):
     def test_get_length(self):
         data = self.data
         assert data.get_length(0, 0)
- 
+
     def test_get_length_outside_range(self):
         data = self.data
         try:

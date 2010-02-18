@@ -11,7 +11,7 @@ from openalea.stat_tool import Estimate
 
 
 
-from openalea.stat_tool._stat_tool import _ParametricModel
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 
 from tools import interface
 from tools import runTestClass
@@ -20,14 +20,14 @@ from tools import runTestClass
 class Test(interface):
     """a simple unittest class
 
- 
+
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
                            "data/distribution1.dist",
                            Distribution)
-    
+
     def build_data(self):
         d1 = Binomial(0, 10, 0.5)
         d2 = Distribution("BINOMIAL", 0, 10, 0.5)
@@ -39,20 +39,20 @@ class Test(interface):
 
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
-        
+
     def test_constructors(self):
         h = Histogram([1, 2, 3, 4, 5, 6, 1, 2, 3])
         assert h
-        
+
         # from histogram
         dist = Distribution(h)
         assert dist
-        
+
         #from parametric model
-        pm = _ParametricModel(h)
+        pm = _DiscreteParametricModel(h)
         dist = Distribution(pm)
         assert dist
-        
+
     def test_constructor_failure(self):
         try:
             _h = Distribution("Whatever", 1, 1)
@@ -62,40 +62,40 @@ class Test(interface):
 
     def test_print(self):
         self.print_data()
-        
+
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
         self.display_versus_str()
-        
+
     def test_len(self):
         """not implemented; irrelevant?"""
         pass
-    
-    def test_plot(self):        
+
+    def test_plot(self):
         self.plot()
 
     def test_save(self):
         self.save()
-                
+
     def test_plot_write(self):
         self.plot_write()
 
     def test_file_ascii_write(self):
         self.file_ascii_write()
-      
+
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
-    
+
     def test_simulate(self):
         self.simulate()
-        
+
     def test_survival_ascii_write(self):
         self.survival_ascii_write()
-        
+
     def test_survival_spreadsheet_write(self):
         self.survival_spreadsheet_write()
-        
+
     def test_extract(self):
         pass
 
@@ -105,23 +105,23 @@ class Test(interface):
         d = e.extract_data()
         assert d
         _eprime = Estimate(s, "Binomial")
-        
+
     def test_truncate(self):
         # todo:find a test
         s = self.data
-        _res = s.truncate(4) 
-        
+        _res = s.truncate(4)
+
 
 class TestDistribution():
     """Test the distribution (Uniform, Binomial, ...)
-    
+
     test the sup_bound, inf_bound, probability, parameter,ident
-    
+
     test the ToDistribution and ToHistogram
     """
     def __init__(self):
         pass
-    
+
     def test_to_histogram(self):
 
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
@@ -142,12 +142,12 @@ class TestDistribution():
         assert d.get_probability == -1
         assert d.get_parameter == -1
         assert d.get_ident == 4
-        
+
         d = Uniform(0, 10)
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _ParametricModel)
+        assert isinstance(m, _DiscreteParametricModel)
 
     def test_binomial(self):
 
@@ -163,7 +163,7 @@ class TestDistribution():
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _ParametricModel)
+        assert isinstance(m, _DiscreteParametricModel)
 
     def test_poisson(self):
 
@@ -179,10 +179,10 @@ class TestDistribution():
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _ParametricModel)
+        assert isinstance(m, _DiscreteParametricModel)
 
     def test_neg_binomial(self):
-        
+
         d = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.5)
         assert list(d.simulate(1000))
         assert d.get_sup_bound == -1
@@ -194,22 +194,22 @@ class TestDistribution():
         assert list(d.simulate(1000))
 
         m = d.simulate(1000).extract_model()
-        assert isinstance(m, _ParametricModel)
-        
+        assert isinstance(m, _DiscreteParametricModel)
+
     def test_multimodial(self):
         pass
-    
+
     def test_getters(self):
         dist = Distribution(Histogram([1, 1, 1, 2, 2, 2, 3, 3, 3]))
         assert dist.get_mean == 2
-        assert 0.3333 < dist.get_max < 0.3334 
+        assert 0.3333 < dist.get_max < 0.3334
         assert dist.get_mean == 2
         assert 0.6666 < dist.get_variance < 0.6667
 
 
 
-    
-    
+
+
 
 if __name__ == "__main__":
     runTestClass(Test())
