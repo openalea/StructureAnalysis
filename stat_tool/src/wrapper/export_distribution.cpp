@@ -39,7 +39,7 @@ using namespace boost;
 
 #include "boost_python_aliases.h"
 
-////////////////////// Export Parametric_model ////////////////////////////////
+////////////////////// Export DiscreteParametricModel ////////////////////////////////
 
 
 
@@ -48,10 +48,10 @@ class DistributionWrap {
 public:
 
   static MultiPlotSet*
-  get_plotable_dists(const Distribution& p,
+  get_plotable_dists(const Distribution &p,
       const boost::python::list& dist_list)
   {
-    Format_error error;
+    StatError error;
     int nb_dist = boost::python::len(dist_list);
     stat_tool::wrap_util::auto_ptr_array<const Distribution *> dists(
         new const Distribution*[nb_dist]);
@@ -61,7 +61,7 @@ public:
 
     const Distribution** d = dists.get();
 
-    MultiPlotSet* ret = p.get_plotable_distributions(error, nb_dist, d);
+    MultiPlotSet *ret = p.get_plotable_distributions(error, nb_dist, d);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 //    for (int i = 0; i < nb_dist; i++)
@@ -71,19 +71,19 @@ public:
   }
 
   static MultiPlotSet*
-  survival_get_plotable(const Distribution& p)
+  survival_get_plotable(const Distribution &p)
   {
-    Format_error error;
-    MultiPlotSet* ret = p.survival_get_plotable(error);
+    StatError error;
+    MultiPlotSet *ret = p.survival_get_plotable(error);
     if (!ret)
       ERROR;
     return ret;
   }
 
   static MultiPlotSet*
-  get_plotable(const Distribution& p)
+  get_plotable(const Distribution &p)
   {
-    MultiPlotSet* ret = p.get_plotable();
+    MultiPlotSet *ret = p.get_plotable();
     return ret;
   }
 
@@ -97,7 +97,7 @@ public:
     WRAP_METHOD_SURVIVAL_PLOT_WRITE( Distribution);
 
     //truncate
-    WRAP_METHOD1(Distribution, truncate, Parametric_model, int);
+    WRAP_METHOD1(Distribution, truncate, DiscreteParametricModel, int);
 
 };
 
@@ -112,7 +112,7 @@ void class_distribution()
   // Distribution base class
   class_< Distribution>("_Distribution")
     .def(init< optional< int > > ())
-    .def(init<const Histogram&>())
+    .def(init<const FrequencyDistribution&>())
     .def(init<const Distribution&, double>())
     .def(init<const Distribution&, optional< char, int > >())
 
@@ -171,10 +171,10 @@ void class_distribution()
    std::ostream& spreadsheet_print(...
    std::ostream& spreadsheet_print(
 
-   int plot_nb_value_computation(const Histogram *histo = 0) const;
+   int plot_nb_value_computation(const FrequencyDistribution *histo = 0) const;
 
    bool plot_print(const char *path , double *concentration , double scale) const;
-   bool plot_print(const char *path , const Histogram *histo = 0) const;
+   bool plot_print(const char *path , const FrequencyDistribution *histo = 0) const;
 
    virtual std::ostream& plot_title_print(std::ostream &os) const { return os; }
    bool survival_plot_print(const char *path , double *survivor) const;
@@ -197,14 +197,14 @@ void class_distribution()
    double* concentration_function_computation() const;
    void log_computation();
 
-   double survivor_likelihood_computation(const Histogram &histo) const;
-   double chi2_value_computation(const Histogram &histo) const;
-   void chi2_degree_of_freedom(const Histogram &histo , Test &test) const;
+   double survivor_likelihood_computation(const FrequencyDistribution &histo) const;
+   double chi2_value_computation(const FrequencyDistribution &histo) const;
+   void chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const;
 
    void penalty_computation(double weight , int type , double *penalty , int outside) const;
 
 
-   bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
+   bool plot_write(StatError &error , const char *prefix , int nb_dist ,
                    const Distribution **idist , const char *title) const;
 
 
@@ -219,11 +219,11 @@ void class_distribution()
 
    double likelihood_computation(const Reestimation<int> &histo) const   { return histo.likelihood_computation(*this); }
    double likelihood_computation(const Reestimation<double> &histo) const   { return histo.likelihood_computation(*this); }
-   void chi2_fit(const Histogram &histo , Test &test) const;
+   void chi2_fit(const FrequencyDistribution &histo , Test &test) const;
 
    int simulation() const;
 
-   Parametric_model* truncate(Format_error &error , int imax_value) const;
+   DiscreteParametricModel* truncate(StatError &error , int imax_value) const;
 */
 
 
@@ -235,7 +235,7 @@ void class_distribution()
 
 
 
-class ParametricWrap
+class DiscreteParametricWrap
 {
 
 public:
@@ -244,32 +244,32 @@ public:
 
 };
 
-void class_parametric()
+void class_discrete_parametric()
 {
 
-#define WRAP ParametricWrap
+#define WRAP DiscreteParametricWrap
 
-  // Parametric base class
-  class_< Parametric, bases< Distribution > >
-    ("_Parametric", init< optional< int, int, int, int, double, double > >())
+  // DiscreteParametric base class
+  class_< DiscreteParametric, bases< Distribution > >
+    ("_DiscreteParametric", init< optional< int, int, int, int, double, double > >())
     .def(init<int, int, int, double, double, optional< double > >())
     .def(init<int, int>())
     .def(init<const Distribution&, optional<int> >())
     .def(init<const Distribution&, double>())
-    .def(init<const Parametric&, double>())
-    .def(init<const Histogram& >())
-    .def(init<const Parametric&, optional< char, int> >())
+    .def(init<const DiscreteParametric&, double>())
+    .def(init<const FrequencyDistribution& >())
+    .def(init<const DiscreteParametric&, optional< char, int> >())
     .def(init<Distribution&>())
-    .def(init<Parametric&>())
+    .def(init<DiscreteParametric&>())
     //to remove
     .def(init<Distribution&>())
-    .def_readonly("get_ident", &Parametric::ident)
-    .def_readonly("get_inf_bound", &Parametric::inf_bound)
-    .def_readonly("get_sup_bound", &Parametric::sup_bound)
-    .def_readonly("get_parameter", &Parametric::parameter)
-    .def_readonly("get_probability", &Parametric::probability)
+    .def_readonly("get_ident", &DiscreteParametric::ident)
+    .def_readonly("get_inf_bound", &DiscreteParametric::inf_bound)
+    .def_readonly("get_sup_bound", &DiscreteParametric::sup_bound)
+    .def_readonly("get_parameter", &DiscreteParametric::parameter)
+    .def_readonly("get_probability", &DiscreteParametric::probability)
     .def(self_ns::str(self))
-    .def("simulate", &Parametric::simulation, "Simulation one value")
+    .def("simulate", &DiscreteParametric::simulation, "Simulation one value")
 
     ;
 
@@ -316,42 +316,42 @@ void class_parametric()
 
 // Wrapper class
 
-class ParametricModelWrap
+class DiscreteParametricModelWrap
 {
 
 public:
 
-  static boost::shared_ptr<Parametric_model> parametric_model_from_file(char* filename)
+  static boost::shared_ptr<DiscreteParametricModel> parametric_model_from_file(char* filename)
   {
-    Format_error error;
-    Parametric_model *model = NULL;
-    model = parametric_ascii_read(error, filename);
+    StatError error;
+    DiscreteParametricModel *model = NULL;
+    model = discrete_parametric_ascii_read(error, filename);
 
     if(!model) stat_tool::wrap_util::throw_error(error);
-    return boost::shared_ptr<Parametric_model>(model);
+    return boost::shared_ptr<DiscreteParametricModel>(model);
   }
 
 
   // simulation method wrapping
-  WRAP_METHOD1(Parametric_model, simulation, Distribution_data, int);
+  WRAP_METHOD1(DiscreteParametricModel, simulation, DiscreteDistributionData, int);
 
   // extract_data method wrapping
-  WRAP_METHOD0(Parametric_model, extract_data, Distribution_data);
+  WRAP_METHOD0(DiscreteParametricModel, extract_data, DiscreteDistributionData);
 
   // survival_ascii_write wrapping
-  WRAP_METHOD_SURVIVAL_ASCII_WRITE(Parametric_model);
+  WRAP_METHOD_SURVIVAL_ASCII_WRITE(DiscreteParametricModel);
 
   //survival_spreadsheet_write wrapping
-  WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE(Parametric_model);
+  WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE(DiscreteParametricModel);
 
   // survival_plot_write wrapping
-  WRAP_METHOD_SURVIVAL_PLOT_WRITE(Parametric_model);
+  WRAP_METHOD_SURVIVAL_PLOT_WRITE(DiscreteParametricModel);
 
-//   static void plot_write(const Parametric_model& p,
+//   static void plot_write(const DiscreteParametricModel& p,
 // 			 const std::string& prefix, const std::string& title,
 // 			 const boost::python::list& dist_list)
 //   {
-//     Format_error error;
+//     StatError error;
 
 //     int nb_dist = boost::python::len(dist_list);
 //     stat_tool::wrap_util::auto_ptr_array<const Distribution *>
@@ -364,12 +364,12 @@ public:
 //   }
 
 
-  static MultiPlotSet* get_plotable(const Parametric_model& p,
+  static MultiPlotSet* get_plotable(const DiscreteParametricModel& p,
 				const boost::python::list& dist_list)
   {
 
     cout << "get_plotable" << endl;
-    Format_error error;
+    StatError error;
     int nb_dist = boost::python::len(dist_list);
     stat_tool::wrap_util::auto_ptr_array<const Distribution *>
       dists(new const Distribution*[nb_dist]);
@@ -390,49 +390,49 @@ public:
   }
 
   //survival_get_plotable wrapping
-  WRAP_METHOD_SURVIVAL_GET_PLOTABLE(Parametric_model);
+  WRAP_METHOD_SURVIVAL_GET_PLOTABLE(DiscreteParametricModel);
 
   //file_ascii_write wrapping
-  WRAP_METHOD_FILE_ASCII_WRITE(Parametric_model);
+  WRAP_METHOD_FILE_ASCII_WRITE(DiscreteParametricModel);
 
 };
 
 
 
 
-void class_parametric_model()
+void class_discrete_parametric_model()
 {
 
-#define WRAP ParametricModelWrap
+#define WRAP DiscreteParametricModelWrap
 
 
-  // _Parametric Model
-  class_< Parametric_model, bases< Parametric, STAT_interface > >
-  ("_ParametricModel", "Parametric model", init <const Histogram& >())
+  // DiscreteParametricModel
+  class_< DiscreteParametricModel, bases< DiscreteParametric, StatInterface > >
+  ("_ParametricModel", "Parametric model", init <const FrequencyDistribution& >())
 
   .def(init< int, int, int, double, double, optional< double > >())
   // this constructor clashes with the previous one and fail to pass tests.
   //.def(init< int, optional <int, int, int, double, double > >())
   .def(init <const Distribution& >())
-  .def(init <const Parametric& >())
-  .def(init <const Parametric_model& ,optional< bool> >())
+  .def(init <const DiscreteParametric& >())
+  .def(init <const DiscreteParametricModel& ,optional< bool> >())
 
-  .def("__init__", make_constructor(ParametricModelWrap::parametric_model_from_file))
+  .def("__init__", make_constructor(DiscreteParametricModelWrap::parametric_model_from_file))
   .def(self_ns::str(self)) // __str__
 
-  /*.def("get_histogram", &Parametric_model::get_histogram,
+  /*.def("get_histogram", &DiscreteParametricModel::get_histogram,
     	return_value_policy< manage_new_object >(),
     	"returns histogram")
 */
     // Output
-    .def("get_plotable", ParametricModelWrap::get_plotable,
+    .def("get_plotable", DiscreteParametricModelWrap::get_plotable,
     		return_value_policy< manage_new_object >(),
     		"Return a plotable for a list of distribution")
-    .def("get_plotable", &STAT_interface::get_plotable,
+    .def("get_plotable", &StatInterface::get_plotable,
     		return_value_policy< manage_new_object >(),
     		"Return a plotable (no parameters)")
 
-//     .def("plot_write", ParametricModelWrap::plot_write,
+//     .def("plot_write", DiscreteParametricModelWrap::plot_write,
 // 	 args("prefix", "title", "dists"),
 // 	 "Write GNUPLOT files (with prefix) for a list of distribution")
 
@@ -458,7 +458,7 @@ void class_parametric_model()
     		return_value_policy< manage_new_object >(),
     		args("nb_value"),
     		"Simulate values")
-    .def("simulate", &Parametric::simulation,
+    .def("simulate", &DiscreteParametric::simulation,
     		"Simulate one value")
     .def("file_ascii_write", WRAP::file_ascii_write,
     		"Return a string containing the object description")
@@ -466,13 +466,13 @@ void class_parametric_model()
 
   //remains to be done if needed
   /*
-    Parametric_model(const Distribution &dist , const Histogram *histo);
-    Parametric_model(const Parametric &dist , const Histogram *histo);
+    DiscreteParametricModel(const Distribution &dist , const FrequencyDistribution *histo);
+    DiscreteParametricModel(const DiscreteParametric &dist , const FrequencyDistribution *histo);
 
     std::ostream& line_write(std::ostream &os) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,const char *title = 0) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,const char *title = 0) const;
 
 */
 #undef WRAP
