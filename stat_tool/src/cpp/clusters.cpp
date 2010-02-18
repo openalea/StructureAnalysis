@@ -84,12 +84,12 @@ Clusters::Clusters()
  *
  *  Constructeur de la classe Clusters.
  *
- *  arguments : reference sur un objet Distance_matrix et nombre de groupes.
+ *  arguments : reference sur un objet DistanceMatrix et nombre de groupes.
  *
  *--------------------------------------------------------------*/
 
-Clusters::Clusters(const Distance_matrix &dist_matrix , int inb_cluster)
-:Distance_matrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
+Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster)
+:DistanceMatrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
 
 {
   register int i , j;
@@ -97,7 +97,7 @@ Clusters::Clusters(const Distance_matrix &dist_matrix , int inb_cluster)
   double *pdistance;
 
 
-  distance_matrix = new Distance_matrix(dist_matrix);
+  distance_matrix = new DistanceMatrix(dist_matrix);
 
   nb_pattern = distance_matrix->nb_row;
   nb_cluster = inb_cluster;
@@ -136,14 +136,14 @@ Clusters::Clusters(const Distance_matrix &dist_matrix , int inb_cluster)
  *
  *  Constructeur de la classe Clusters.
  *
- *  arguments : reference sur un objet Distance_matrix, nombre de groupes,
+ *  arguments : reference sur un objet DistanceMatrix, nombre de groupes,
  *              effectifs et composition des groupes.
  *
  *--------------------------------------------------------------*/
 
-Clusters::Clusters(const Distance_matrix &dist_matrix , int inb_cluster ,
+Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
                    int *icluster_nb_pattern , int **cluster_pattern)
-:Distance_matrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
+:DistanceMatrix(dist_matrix , inb_cluster , STAT_label[STATL_CLUSTER])
 
 {
   register int i , j , k;
@@ -151,7 +151,7 @@ Clusters::Clusters(const Distance_matrix &dist_matrix , int inb_cluster ,
   double *pdistance;
 
 
-  distance_matrix = new Distance_matrix(dist_matrix);
+  distance_matrix = new DistanceMatrix(dist_matrix);
 
   nb_pattern = distance_matrix->nb_row;
   nb_cluster = inb_cluster;
@@ -212,7 +212,7 @@ void Clusters::copy(const Clusters &clusters)
   double *pdistance , *cdistance;
 
 
-  distance_matrix = new Distance_matrix(*(clusters.distance_matrix));
+  distance_matrix = new DistanceMatrix(*(clusters.distance_matrix));
 
   nb_pattern = clusters.nb_pattern;
   nb_cluster = clusters.nb_cluster;
@@ -308,9 +308,9 @@ Clusters& Clusters::operator=(const Clusters &clusters)
 {
   if (&clusters != this) {
     remove();
-    Distance_matrix::remove();
+    DistanceMatrix::remove();
 
-    Distance_matrix::copy(clusters);
+    DistanceMatrix::copy(clusters);
     copy(clusters);
   }
 
@@ -2422,14 +2422,14 @@ void Clusters::algorithmic_step_2()
  *
  *--------------------------------------------------------------*/
 
-Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int nb_cluster ,
-                                        int *prototype , int initialization , int algorithm) const
+Clusters* DistanceMatrix::partitioning(Format_error &error , ostream &os , int nb_cluster ,
+                                       int *prototype , int initialization , int algorithm) const
 
 {
   bool status = true , *selected_prototype;
   register int i , j;
   int max_identifier;
-  Distance_matrix *dist_matrix;
+  DistanceMatrix *dist_matrix;
   Clusters *clusters;
 
 
@@ -2497,7 +2497,7 @@ Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int 
   }
 
   if (status) {
-    dist_matrix = new Distance_matrix(*this , (test_symmetry() ? 'c' : 's'));
+    dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
 
 #   ifdef DEBUG
     if (!(test_symmetry())) {
@@ -2575,14 +2575,14 @@ Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int 
  *
  *--------------------------------------------------------------*/
 
-Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int nb_cluster ,
-                                        int *cluster_nb_pattern , int **cluster_pattern) const
+Clusters* DistanceMatrix::partitioning(Format_error &error , ostream &os , int nb_cluster ,
+                                       int *cluster_nb_pattern , int **cluster_pattern) const
 
 {
   bool status = true , *selected_pattern;
   register int i , j , k;
   int nb_pattern , max_identifier;
-  Distance_matrix *dist_matrix;
+  DistanceMatrix *dist_matrix;
   Clusters *clusters;
 
 
@@ -2663,7 +2663,7 @@ Clusters* Distance_matrix::partitioning(Format_error &error , ostream &os , int 
   }
 
   if (status) {
-    dist_matrix = new Distance_matrix(*this , (test_symmetry() ? 'c' : 's'));
+    dist_matrix = new DistanceMatrix(*this , (test_symmetry() ? 'c' : 's'));
 
 #   ifdef DEBUG
     if (!(test_symmetry())) {
