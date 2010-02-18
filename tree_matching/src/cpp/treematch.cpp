@@ -97,7 +97,7 @@ TreeMatch::TreeMatch(MTG& mtg,
                      AMString matching_type,
                      AMString ordered_type,
                      int self_similarity,
-                     const Vector_distance &ivect,
+                     const VectorDistance &ivect,
                      double coeff)
 {
   _scale = 3;
@@ -132,7 +132,7 @@ TreeMatch::TreeMatch(MTG& mtg,
   // making of the local functions list
   if (local_functions)
     {
-      _vectorDist=*(new Vector_distance(ivect));
+      _vectorDist=*(new VectorDistance(ivect));
       _localFun=new NodeFunctionList();
       assert(local_functions->surfaceType()==AMObjType::FNODE);
       ArrayIter* p_next=local_functions->iterator();
@@ -270,7 +270,7 @@ TreeMatch::TreeMatch(MTG& mtg,
                      AMString matching_type,
                      AMString ordered_type,
                      int self_similarity,
-                     const Vector_distance &ivect,
+                     const VectorDistance &ivect,
                      double coeff,
                      NodeCost& Nd,
                      int scale)
@@ -307,7 +307,7 @@ TreeMatch::TreeMatch(MTG& mtg,
   // making of the local functions list
   if (local_functions)
     {
-      _vectorDist=*(new Vector_distance(ivect));
+      _vectorDist=*(new VectorDistance(ivect));
       _localFun=new NodeFunctionList();
       assert(local_functions->surfaceType()==AMObjType::FNODE);
       ArrayIter* p_next=local_functions->iterator();
