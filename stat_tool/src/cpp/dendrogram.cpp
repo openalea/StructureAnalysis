@@ -614,11 +614,11 @@ ostream& Dendrogram::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Dendrogram dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, niveau de detail.
+ *  arguments : reference sur un objet StatError, path, niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Dendrogram::ascii_write(Format_error &error , const char *path ,
+bool Dendrogram::ascii_write(StatError &error , const char *path ,
                              bool exhaustive) const
 
 {
@@ -646,11 +646,11 @@ bool Dendrogram::ascii_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet Dendrogram dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Dendrogram::spreadsheet_write(Format_error &error , const char *path) const
+bool Dendrogram::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1443,13 +1443,13 @@ Dendrogram* DistanceMatrix::divisive_hierarchical_clustering() const
  *
  *  Algorithmes de clustering hierarchique.
  *
- *  arguments : reference sur un objet Format_error, stream, type d'algorithme,
+ *  arguments : reference sur un objet StatError, stream, type d'algorithme,
  *              critere pour le groupement (algorithme par agglomeration),
  *              path, format ('a' : ASCII, 's' : Spreadsheet).
  *
  *--------------------------------------------------------------*/
 
-bool DistanceMatrix::hierarchical_clustering(Format_error &error , ostream &os ,
+bool DistanceMatrix::hierarchical_clustering(StatError &error , ostream &os ,
                                              int algorithm , int criterion ,
                                              const char *path , char format) const
 
