@@ -52,7 +52,7 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void Length_bias::computation(const Parametric &inter_event)
+void LengthBias::computation(const DiscreteParametric &inter_event)
 
 {
   register int i;
@@ -100,7 +100,7 @@ void Length_bias::computation(const Parametric &inter_event)
  *
  *--------------------------------------------------------------*/
 
-void Backward::computation(const Parametric &inter_event , const Distribution &time)
+void Backward::computation(const DiscreteParametric &inter_event , const Distribution &time)
 
 {
   register int i , j;
@@ -163,13 +163,13 @@ void Backward::computation(const Parametric &inter_event , const Distribution &t
  *
  *--------------------------------------------------------------*/
 
-void Nb_event::computation(Parametric &inter_event)
+void NbEvent::computation(DiscreteParametric &inter_event)
 
 {
   register int i , j;
   int time_nb_value;
   double bcumul = 1. , previous_cumul = 1. , *pmass , *pcumul;
-  Parametric *nevent_time;
+  DiscreteParametric *nevent_time;
   Forward *forward;
 
 
@@ -193,7 +193,7 @@ void Nb_event::computation(Parametric &inter_event)
     break;
   }
 
-  nevent_time = new Parametric(time + 1 , ident);
+  nevent_time = new DiscreteParametric(time + 1 , ident);
 
   pmass = mass - 1;
   pcumul = cumul - 1;
@@ -317,7 +317,7 @@ void Nb_event::computation(Parametric &inter_event)
  *
  *--------------------------------------------------------------*/
 
-void Nb_event::binomial_computation()
+void NbEvent::binomial_computation()
 
 {
   register int i , j;
@@ -460,7 +460,7 @@ void Nb_event::binomial_computation()
  *
  *--------------------------------------------------------------*/
 
-void Nb_event::negative_binomial_computation()
+void NbEvent::negative_binomial_computation()
 
 {
   register int i , j;
@@ -591,7 +591,7 @@ void Nb_event::negative_binomial_computation()
  *
  *--------------------------------------------------------------*/
 
-void Nb_event::ordinary_computation(Parametric &inter_event)
+void NbEvent::ordinary_computation(DiscreteParametric &inter_event)
 
 {
   if (type == 'o') {
@@ -703,7 +703,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
   register int i , j;
   int nb_value , time_nb_value;
   double sum , *tmass , *pmass , *cumul , *previous_cumul , *pcumul1 , *pcumul2;
-  Parametric *pnevent_time , *power , *forward_power;
+  DiscreteParametric *pnevent_time , *power , *forward_power;
 
 
   if (itype == 'v') {
@@ -754,12 +754,12 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
         break;
       }
 
-      nevent_time = new Parametric*[nb_event_max + 1];
+      nevent_time = new DiscreteParametric*[nb_event_max + 1];
       for (i = 0;i <= nb_event_max;i++) {
         nevent_time[i] = NULL;
       }
 
-      nb_event = new Nb_event*[time->nb_value];
+      nb_event = new NbEvent*[time->nb_value];
 
       index_event = new Curves(2 , time->nb_value);
     }
@@ -780,7 +780,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
           break;
         }
 
-        nb_event[i] = new Nb_event(type , i , nb_value , inter_event->ident);
+        nb_event[i] = new NbEvent(type , i , nb_value , inter_event->ident);
       }
 
       else {
@@ -845,7 +845,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
   }
 
   if (type == 'e') {
-    pnevent_time = new Parametric(time->nb_value , inter_event->ident);
+    pnevent_time = new DiscreteParametric(time->nb_value , inter_event->ident);
     power = pnevent_time;
   }
 
@@ -859,7 +859,7 @@ void Renewal::computation(bool inter_event_flag , char itype , const Distributio
       j = i + 1;
 
       if (!nevent_time[j]) {
-        nevent_time[j] = new Parametric(time->nb_value , inter_event->ident);
+        nevent_time[j] = new DiscreteParametric(time->nb_value , inter_event->ident);
       }
 
       switch (type) {
