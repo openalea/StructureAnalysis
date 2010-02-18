@@ -39,32 +39,32 @@ using namespace stat_tool;
 
 void class_non_parametric_process() {
 
-   class_<Nonparametric_process >
-   ("_Nonparametric_process", "Non parametric process")
+   class_<NonparametricProcess >
+   ("_NonparametricProcess", "Non parametric process")
 
    .def(init< optional< int, int, int> > ())
-   .def("get_nb_value", &Nonparametric_process::get_nb_value,
+   .def("get_nb_value", &NonparametricProcess::get_nb_value,
        "returns number of values")
-   .def("get_nb_state", &Nonparametric_process::get_nb_state,
+   .def("get_nb_state", &NonparametricProcess::get_nb_state,
        "returns number of states")
 
    ;
         /*
-   Nonparametric_process(int inb_state , int inb_value , double **observation_probability);
-   Nonparametric_process(int inb_state , Distribution **pobservation);
-   Nonparametric_process(const Nonparametric_process &process , char manip = 'c' , int state = I_DEFAULT);
+   NonparametricProcess(int inb_state , int inb_value , double **observation_probability);
+   NonparametricProcess(int inb_state , Distribution **pobservation);
+   NonparametricProcess(const NonparametricProcess &process , char manip = 'c' , int state = I_DEFAULT);
 
    int nb_parameter_computation(double min_probability) const;
 
 
    Distribution* get_observation(int state) const   { return observation[state]; }
 
-   std::ostream& ascii_print(std::ostream &os, Histogram **empirical_observation,
+   std::ostream& ascii_print(std::ostream &os, FrequencyDistribution **empirical_observation,
                  bool exhaustive, bool file_flag) const;
 
-   std::ostream& spreadsheet_print(std::ostream &os, Histogram **empirical_observation=NULL) const;
+   std::ostream& spreadsheet_print(std::ostream &os, FrequencyDistribution **empirical_observation=NULL) const;
 
-   bool plot_print(const char *prefix, const char *title, int process, Histogram **empirical_observation = NULL) const;
+   bool plot_print(const char *prefix, const char *title, int process, FrequencyDistribution **empirical_observation = NULL) const;
 
 
 */
