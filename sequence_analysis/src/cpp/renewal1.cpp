@@ -53,16 +53,16 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nb_event.
+ *  Constructeur de la classe NbEvent.
  *
  *  arguments : type, temps d'observation, nombre de valeurs,
  *              identificateur et parametres de la loi.
  *
  *--------------------------------------------------------------*/
 
-Nb_event::Nb_event(char itype , int itime , int inb_value , int iident ,
-                   int iinf_bound , int isup_bound , double iparameter , double iprobability)
-:Parametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
+NbEvent::NbEvent(char itype , int itime , int inb_value , int iident ,
+                 int iinf_bound , int isup_bound , double iparameter , double iprobability)
+:DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability)
 
 {
   type = itype;
@@ -72,13 +72,13 @@ Nb_event::Nb_event(char itype , int itime , int inb_value , int iident ,
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nb_event.
+ *  Constructeur de la classe NbEvent.
  *
- *  arguments : type, temps d'observation, reference sur un objet Parametric.
+ *  arguments : type, temps d'observation, reference sur un objet DiscreteParametric.
  *
  *--------------------------------------------------------------*/
 
-Nb_event::Nb_event(char itype , int itime , Parametric &inter_event)
+NbEvent::NbEvent(char itype , int itime , DiscreteParametric &inter_event)
 
 {
   type = itype;
@@ -113,14 +113,14 @@ Nb_event::Nb_event(char itype , int itime , Parametric &inter_event)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Nb_event.
+ *  Constructeur par copie de la classe NbEvent.
  *
- *  arguments : reference sur un objet Nb_event, nombre de valeurs allouees.
+ *  arguments : reference sur un objet NbEvent, nombre de valeurs allouees.
  *
  *--------------------------------------------------------------*/
 
-Nb_event::Nb_event(const Nb_event &nb_event , int ialloc_nb_value)
-:Parametric(nb_event , 'c' , ialloc_nb_value)
+NbEvent::NbEvent(const NbEvent &nb_event , int ialloc_nb_value)
+:DiscreteParametric(nb_event , 'c' , ialloc_nb_value)
 
 {
   type = nb_event.type;
@@ -246,12 +246,13 @@ Renewal::Renewal()
  *
  *  Constructeur de la classe Renewal.
  *
- *  arguments : type, reference sur l'histogramme du temps d'observation et
+ *  arguments : type, reference sur la loi empirique du temps d'observation et
  *              sur la loi inter-evenement.
  *
  *--------------------------------------------------------------*/
 
-Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_event)
+Renewal::Renewal(char itype , const FrequencyDistribution &htime ,
+                 const DiscreteParametric &iinter_event)
 
 {
   register int i;
@@ -265,10 +266,10 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
 
   time = new Distribution(htime);
 
-  inter_event = new Parametric(iinter_event , 'c' , (int)(iinter_event.nb_value * NB_VALUE_COEFF));
-  length_bias = new Length_bias(inter_event->alloc_nb_value , inter_event->ident ,
-                                inter_event->inf_bound , inter_event->sup_bound ,
-                                inter_event->parameter , inter_event->probability);
+  inter_event = new DiscreteParametric(iinter_event , 'c' , (int)(iinter_event.nb_value * NB_VALUE_COEFF));
+  length_bias = new LengthBias(inter_event->alloc_nb_value , inter_event->ident ,
+                               inter_event->inf_bound , inter_event->sup_bound ,
+                               inter_event->parameter , inter_event->probability);
   backward = new Backward(inter_event->alloc_nb_value - 1 , inter_event->ident ,
                           inter_event->inf_bound , inter_event->sup_bound ,
                           inter_event->parameter , inter_event->probability);
@@ -276,7 +277,7 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
                         inter_event->inf_bound , inter_event->sup_bound ,
                         inter_event->parameter , inter_event->probability);
 
-  nb_event = new Nb_event*[time->nb_value];
+  nb_event = new NbEvent*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
     nb_event[i] = NULL;
@@ -292,9 +293,9 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
         break;
       }
 
-      nb_event[i] = new Nb_event(type , i , nb_value , inter_event->ident ,
-                                 inter_event->inf_bound , inter_event->sup_bound ,
-                                 inter_event->parameter , inter_event->probability);
+      nb_event[i] = new NbEvent(type , i , nb_value , inter_event->ident ,
+                                inter_event->inf_bound , inter_event->sup_bound ,
+                                inter_event->parameter , inter_event->probability);
     }
 
     else {
@@ -305,7 +306,7 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
   mixture = new Distribution(nb_value);
 
   nb_event_max = nb_value - 1;
-  nevent_time = new Parametric*[nb_event_max + 1];
+  nevent_time = new DiscreteParametric*[nb_event_max + 1];
   for (i = 0;i <= nb_event_max;i++) {
     nevent_time[i] = NULL;
   }
@@ -324,7 +325,7 @@ Renewal::Renewal(char itype , const Histogram &htime , const Parametric &iinter_
  *--------------------------------------------------------------*/
 
 Renewal::Renewal(char itype , const Distribution &itime ,
-                 const Parametric &iinter_event)
+                 const DiscreteParametric &iinter_event)
 
 {
   register int i;
@@ -338,14 +339,14 @@ Renewal::Renewal(char itype , const Distribution &itime ,
 
   time = new Distribution(itime);
 
-  inter_event = new Parametric(iinter_event , 'n');
-  length_bias = new Length_bias(*inter_event);
+  inter_event = new DiscreteParametric(iinter_event , 'n');
+  length_bias = new LengthBias(*inter_event);
   backward = new Backward(inter_event->nb_value - 1 , inter_event->ident ,
                           inter_event->inf_bound , inter_event->sup_bound ,
                           inter_event->parameter , inter_event->probability);
   forward = new Forward(*inter_event);
 
-  nb_event = new Nb_event*[time->nb_value];
+  nb_event = new NbEvent*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
     nb_event[i] = NULL;
@@ -361,9 +362,9 @@ Renewal::Renewal(char itype , const Distribution &itime ,
         break;
       }
 
-      nb_event[i] = new Nb_event(type , i , nb_value , inter_event->ident ,
-                                 inter_event->inf_bound , inter_event->sup_bound ,
-                                 inter_event->parameter , inter_event->probability);
+      nb_event[i] = new NbEvent(type , i , nb_value , inter_event->ident ,
+                                inter_event->inf_bound , inter_event->sup_bound ,
+                                inter_event->parameter , inter_event->probability);
     }
 
     else {
@@ -374,7 +375,7 @@ Renewal::Renewal(char itype , const Distribution &itime ,
   mixture = new Distribution(nb_value);
 
   nb_event_max = nb_value - 1;
-  nevent_time = new Parametric*[nb_event_max + 1];
+  nevent_time = new DiscreteParametric*[nb_event_max + 1];
   for (i = 0;i <= nb_event_max;i++) {
     nevent_time[i] = NULL;
   }
@@ -389,11 +390,11 @@ Renewal::Renewal(char itype , const Distribution &itime ,
  *
  *  Constructeur de la classe Renewal.
  *
- *  arguments : references sur un objet Renewal_data et sur la loi inter-evenement.
+ *  arguments : references sur un objet RenewalData et sur la loi inter-evenement.
  *
  *--------------------------------------------------------------*/
 
-Renewal::Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_event)
+Renewal::Renewal(const RenewalData &irenewal_data , const DiscreteParametric &iinter_event)
 
 {
   register int i;
@@ -401,21 +402,21 @@ Renewal::Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_ev
 
 
   nb_iterator = 0;
-  renewal_data = new Renewal_data(irenewal_data);
+  renewal_data = new RenewalData(irenewal_data);
   renewal_data->type = 'e';
 
   type = 'e';
 
   time = new Distribution(*(renewal_data->htime));
 
-  inter_event = new Parametric(iinter_event);
-  length_bias = new Length_bias(*inter_event);
+  inter_event = new DiscreteParametric(iinter_event);
+  length_bias = new LengthBias(*inter_event);
   backward = new Backward(inter_event->nb_value - 1 , inter_event->ident ,
                           inter_event->inf_bound , inter_event->sup_bound ,
                           inter_event->parameter , inter_event->probability);
   forward = new Forward(*inter_event);
 
-  nb_event = new Nb_event*[time->nb_value];
+  nb_event = new NbEvent*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
     nb_event[i] = NULL;
@@ -431,9 +432,9 @@ Renewal::Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_ev
         break;
       }
 
-      nb_event[i] = new Nb_event(type , i , nb_value , inter_event->ident ,
-                                 inter_event->inf_bound , inter_event->sup_bound ,
-                                 inter_event->parameter , inter_event->probability);
+      nb_event[i] = new NbEvent(type , i , nb_value , inter_event->ident ,
+                                inter_event->inf_bound , inter_event->sup_bound ,
+                                inter_event->parameter , inter_event->probability);
     }
 
     else {
@@ -444,7 +445,7 @@ Renewal::Renewal(const Renewal_data &irenewal_data , const Parametric &iinter_ev
   mixture = new Distribution(nb_value);
 
   nb_event_max = nb_value - 1;
-  nevent_time = new Parametric*[nb_event_max + 1];
+  nevent_time = new DiscreteParametric*[nb_event_max + 1];
   for (i = 0;i <= nb_event_max;i++) {
     nevent_time[i] = NULL;
   }
@@ -473,7 +474,7 @@ void Renewal::copy(const Renewal &renew , bool data_flag)
   nb_iterator = 0;
 
   if ((data_flag) && (renew.renewal_data)) {
-    renewal_data = new Renewal_data(*(renew.renewal_data));
+    renewal_data = new RenewalData(*(renew.renewal_data));
   }
   else {
     renewal_data = NULL;
@@ -483,33 +484,33 @@ void Renewal::copy(const Renewal &renew , bool data_flag)
 
   time = new Distribution(*(renew.time));
 
-  inter_event = new Parametric(*(renew.inter_event));
-  length_bias = new Length_bias(*(renew.length_bias));
+  inter_event = new DiscreteParametric(*(renew.inter_event));
+  length_bias = new LengthBias(*(renew.length_bias));
   backward = new Backward(*(renew.backward) , renew.backward->alloc_nb_value);
   forward = new Forward(*(renew.forward));
 
   nb_event_max = renew.mixture->nb_value - 1;
 
-  nevent_time = new Parametric*[nb_event_max + 1];
+  nevent_time = new DiscreteParametric*[nb_event_max + 1];
 
   nevent_time[0] = NULL;
   for (i = 1;i <= nb_event_max;i++) {
     if (renew.nevent_time[i]) {
-      nevent_time[i] = new Parametric(*(renew.nevent_time[i]));
+      nevent_time[i] = new DiscreteParametric(*(renew.nevent_time[i]));
     }
     else {
       nevent_time[i] = NULL;
     }
   }
 
-  nb_event = new Nb_event*[time->nb_value];
+  nb_event = new NbEvent*[time->nb_value];
 
   for (i = 0;i < time->offset;i++) {
     nb_event[i] = NULL;
   }
   for (i = time->offset;i < time->nb_value;i++) {
     if (time->mass[i] > 0.) {
-      nb_event[i] = new Nb_event(*(renew.nb_event[i]));
+      nb_event[i] = new NbEvent(*(renew.nb_event[i]));
     }
     else {
       nb_event[i] = NULL;
@@ -618,18 +619,18 @@ Renewal& Renewal::operator=(const Renewal &renew)
  *
  *  Extraction d'une loi.
  *
- *  arguments : reference sur un objet Format_error, type de loi,
+ *  arguments : reference sur un objet StatError, type de loi,
  *              temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Renewal::extract(Format_error &error , int dist_type , int itime) const
+DiscreteParametricModel* Renewal::extract(StatError &error , int dist_type , int itime) const
 
 {
   Distribution *pdist;
-  Parametric *pparam;
-  Parametric_model *dist;
-  Histogram *phisto;
+  DiscreteParametric *pparam;
+  DiscreteParametricModel *dist;
+  FrequencyDistribution *phisto;
 
 
   if (dist_type == NB_EVENT) {
@@ -640,8 +641,8 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
       error.update(SEQ_error[SEQR_OBSERVATION_TIME]);
     }
     else {
-      dist = new Parametric_model(*((Distribution*)nb_event[itime]) ,
-                                  (renewal_data ? renewal_data->hnb_event[itime] : 0));
+      dist = new DiscreteParametricModel(*((Distribution*)nb_event[itime]) ,
+                                         (renewal_data ? renewal_data->hnb_event[itime] : 0));
     }
   }
 
@@ -707,10 +708,10 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
     }
 
     if (pdist) {
-      dist = new Parametric_model(*pdist , phisto);
+      dist = new DiscreteParametricModel(*pdist , phisto);
     }
     else if (pparam) {
-      dist = new Parametric_model(*pparam , phisto);
+      dist = new DiscreteParametricModel(*pparam , phisto);
     }
   }
 
@@ -722,13 +723,13 @@ Parametric_model* Renewal::extract(Format_error &error , int dist_type , int iti
  *
  *  Construction d'un objet Renewal a partir d'une loi inter-evenement.
  *
- *  arguments : reference sur un objet Format_error, reference sur la loi inter-evenement,
+ *  arguments : reference sur un objet StatError, reference sur la loi inter-evenement,
  *              type du processus ('o' : ordinaire, 'e' : en equilibre),
  *              temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-Renewal* renewal_building(Format_error &error , const Parametric &inter_event ,
+Renewal* renewal_building(StatError &error , const DiscreteParametric &inter_event ,
                           char type , int time)
 
 {
@@ -753,7 +754,7 @@ Renewal* renewal_building(Format_error &error , const Parametric &inter_event ,
   }
 
   if (status) {
-    Parametric dtime(UNIFORM , time , time , D_DEFAULT , D_DEFAULT);
+    DiscreteParametric dtime(UNIFORM , time , time , D_DEFAULT , D_DEFAULT);
     renew = new Renewal(type , dtime , inter_event);
   }
 
@@ -765,14 +766,14 @@ Renewal* renewal_building(Format_error &error , const Parametric &inter_event ,
  *
  *  Construction d'un objet Renewal a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              type du processus ('o' : ordinaire, 'e' : en equilibre),
  *              temps d'observation, seuil sur la fonction de repartition
  *              de la loi inter-evenement.
  *
  *--------------------------------------------------------------*/
 
-Renewal* renewal_ascii_read(Format_error &error , const char *path ,
+Renewal* renewal_ascii_read(StatError &error , const char *path ,
                             char type , int time , double cumul_threshold)
 
 {
@@ -781,7 +782,7 @@ Renewal* renewal_ascii_read(Format_error &error , const char *path ,
   size_t position;
   bool status;
   int line;
-  Parametric *inter_event;
+  DiscreteParametric *inter_event;
   Renewal *renew;
   ifstream in_file(path);
 
@@ -797,8 +798,8 @@ Renewal* renewal_ascii_read(Format_error &error , const char *path ,
     status = true;
     line = 0;
 
-    inter_event = parametric_parsing(error , in_file , line ,
-                                     NEGATIVE_BINOMIAL , cumul_threshold , 1);
+    inter_event = discrete_parametric_parsing(error , in_file , line ,
+                                              NEGATIVE_BINOMIAL , cumul_threshold , 1);
 
     if (!inter_event) {
       status = false;
@@ -833,7 +834,7 @@ Renewal* renewal_ascii_read(Format_error &error , const char *path ,
     }
 
     if (status) {
-      Parametric dtime(UNIFORM , time , time , D_DEFAULT , D_DEFAULT);
+      DiscreteParametric dtime(UNIFORM , time , time , D_DEFAULT , D_DEFAULT);
       renew = new Renewal(type , dtime , *inter_event);
     }
 
