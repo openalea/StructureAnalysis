@@ -198,13 +198,13 @@ void Mv_Mixture::get_posterior_distribution(const Vectors &mixt_data,
  *
  *  Restauration des etats d'un objet Vectors, pour un melange de lois.
  *
- *  arguments : reference sur un objet Format_error, sur un object Vectors,
+ *  arguments : reference sur un objet StatError, sur un object Vectors,
  *  l' algorithme de restauration, l'index (a partir de 0)
  *  et la loi a posteriori des etats
  *
  *--------------------------------------------------------------*/
 
-std::vector<int>* Mv_Mixture::state_computation(Format_error &error, const Vectors &vec,
+std::vector<int>* Mv_Mixture::state_computation(StatError &error, const Vectors &vec,
                         int algorithm,
                         int index,
                         double** posterior_dist) const {
@@ -326,13 +326,13 @@ void Mv_Mixture::init() {
   unsigned int j, var;
 
   if (weight == NULL)
-    weight = new Parametric(nb_component);
+    weight = new DiscreteParametric(nb_component);
 
   if (pcomponent == NULL)
-    pcomponent = new Parametric_process*[nb_var];
+    pcomponent = new DiscreteParametricProcess*[nb_var];
 
   if (npcomponent == NULL)
-    npcomponent = new Nonparametric_process*[nb_var];
+    npcomponent = new NonparametricProcess*[nb_var];
 
 
   for(j = 0; j < nb_component; j++)
@@ -351,14 +351,14 @@ void Mv_Mixture::init() {
  *  Estimation du nombre de composantes et des parametres
  *  d'un melange de lois par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, modele initial,
+ *  arguments : reference sur un objet StatError, modele initial,
  *  nombre d'iteration maximal, flag sur l'utilisation forcee ou
  *  non de lois d'observation de meme nature que le modele initial
  *  (parametriques ou non)
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
+Mv_Mixture* Vectors::mixture_estimation(StatError &error,
                     ostream& os, const Mv_Mixture &imixture,
                     int nb_iter, bool *force_param) const {
 
@@ -371,10 +371,10 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
     best_likelihood= D_INF; // best likelihood for SEM
   double *state_array; // simulated states for SEM
   double **output_cond = NULL, **cond_prob = NULL;
-  Format_error error_v;
+  StatError error_v;
   Reestimation<double> ***observation_reestim = NULL;
   Reestimation<double> *weight_reestim = NULL;
-  Histogram *hobservation= NULL;
+  FrequencyDistribution *hobservation= NULL;
   Mv_Mixture *mixt = NULL,  *best_mixt= NULL; // best model for SEM
   Mv_Mixture_data *mixt_data = NULL,
     *state_restoration= NULL;
@@ -499,7 +499,7 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
     max_nb_value= (int)get_max_value(var) + 1;
 
     if (max_nb_value > 0)
-      hobservation= new Histogram(max_nb_value);
+      hobservation= new FrequencyDistribution(max_nb_value);
     else
       hobservation= NULL;
 
@@ -944,14 +944,14 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error,
  *  Estimation du nombre de composantes et des parametres
  *  d'un melange de lois par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, nombre de composantes,
+ *  arguments : reference sur un objet StatError, nombre de composantes,
  *  nombre d'iterations maximal, flag sur l'utilisation forcee ou
  *  non de lois d'observation parametriques (pour chaque variable)
  *
  *--------------------------------------------------------------*/
 #include <boost/scoped_array.hpp>
 
-Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
+Mv_Mixture* Vectors::mixture_estimation(StatError &error, std::ostream& os ,
                     int nb_component, int nb_iter, bool *force_param) const {
 
   // note: length of force_param must be checked before call
@@ -992,11 +992,11 @@ Mv_Mixture* Vectors::mixture_estimation(Format_error &error, std::ostream& os ,
  *
  *  Simulation par un melange de lois.
  *
- *  arguments : reference sur un objet Format_error, effectif.
+ *  arguments : reference sur un objet StatError, effectif.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) const
+Mv_Mixture_data* Mv_Mixture::simulation(StatError &error , int nb_element) const
 
 {
   int k , n, var;
@@ -1004,8 +1004,8 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
   int *iidentifier, **iint_vector;
   Mv_Mixture_data *mixt_data = NULL;
   Vectors *vec = NULL;
-  Histogram *hweight = NULL;
-  Histogram ***hcomponent = NULL;
+  FrequencyDistribution *hweight = NULL;
+  FrequencyDistribution ***hcomponent = NULL;
 
 
   error.init();
@@ -1017,13 +1017,13 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
     // creation d'un objet Mv_Mixture_data
     iidentifier = new int[nb_element];
     iint_vector = new int*[nb_element];
-    hweight = new Histogram(nb_component);
-    hcomponent = new Histogram**[nb_var];
+    hweight = new FrequencyDistribution(nb_component);
+    hcomponent = new FrequencyDistribution**[nb_var];
 
     for (var = 0; var < nb_var; var++) {
-      hcomponent[var] = new Histogram*[nb_component];
+      hcomponent[var] = new FrequencyDistribution*[nb_component];
       for (k = 0; k < nb_component; k++)
-    hcomponent[var][k] = new Histogram(nb_element);
+    hcomponent[var][k] = new FrequencyDistribution(nb_element);
     }
 
     for (n = 0; n < nb_element; n++) {
@@ -1054,7 +1054,7 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
       iint_vector[n] = NULL;
     }
 
-    // calcul des caracteristiques des histogrammes
+    // calcul des caracteristiques des lois empiriques
     for (var = 0; var < nb_var; var++) {
       for (k = 0; k < nb_component; k++) {
     hcomponent[var][k]->nb_value_computation();
@@ -1078,7 +1078,7 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
     delete [] iidentifier;
     iidentifier = NULL;
 
-    // extraction des caracteristiques des histogrammes
+    // extraction des caracteristiques des lois empiriques
     mixt_data = new Mv_Mixture_data(*vec, nb_component);
     mixt_data->mixture = new Mv_Mixture(*this , false);
 
@@ -1092,12 +1092,12 @@ Mv_Mixture_data* Mv_Mixture::simulation(Format_error &error , int nb_element) co
  *
  *  Ajout des etats restaures en tant que variable
  *
- *  arguments : reference sur un objet Format_error, sur un objet Vectors,
+ *  arguments : reference sur un objet StatError, sur un objet Vectors,
  *  et algorithme de restauration
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
+Mv_Mixture_data* Mv_Mixture::cluster(StatError &error,  const Vectors &vec,
                                      int algorithm) const {
 
   int n, var, s, k;
@@ -1107,7 +1107,7 @@ Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
   std::vector<int> *states = NULL;
   Mv_Mixture_data* clusters_vec = NULL;
   Vectors* state_vec = NULL;
-  Histogram *hweight = NULL, ***hcomponent = NULL;
+  FrequencyDistribution *hweight = NULL, ***hcomponent = NULL;
 
   states = state_computation(error, vec, algorithm);
   if (states != NULL) {
@@ -1135,7 +1135,7 @@ Mv_Mixture_data* Mv_Mixture::cluster(Format_error &error,  const Vectors &vec,
 
     assert(clusters_vec->type[0] = STATE);
 
-    // calcul des histogrammes d'observation
+    // calcul des lois empiriques d'observation
 
     hweight = clusters_vec->weight;
     hcomponent = clusters_vec->component;
