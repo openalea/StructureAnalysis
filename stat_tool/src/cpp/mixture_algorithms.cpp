@@ -48,11 +48,11 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la quantite d'information d'un objet Mixture_data.
+ *  Calcul de la quantite d'information d'un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
-double Mixture_data::information_computation() const
+double MixtureData::information_computation() const
 
 {
   register int i;
@@ -83,13 +83,13 @@ double Mixture_data::information_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la vraisemblance d'un objet Mixture_data pour un melange de lois.
+ *  Calcul de la vraisemblance d'un objet MixtureData pour un melange de lois.
  *
- *  argument : reference sur un objet Mixture_data.
+ *  argument : reference sur un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
-double Mixture::likelihood_computation(const Mixture_data &mixt_histo) const
+double Mixture::likelihood_computation(const MixtureData &mixt_histo) const
 
 {
   register int i;
@@ -185,14 +185,14 @@ void Mixture::computation(int min_nb_value , double cumul_threshold , bool compo
 
 /*--------------------------------------------------------------*
  *
- *  Initialisation d'un melange de lois a partir d'un histogramme.
+ *  Initialisation d'un melange de lois a partir d'une loi empirique.
  *
- *  arguments : reference sur l'histogramme, flags sur les composantes connues,
+ *  arguments : reference sur la loi empirique, flags sur les composantes connues,
  *              borne inferieure minimum, flag sur le decalage des composantes.
  *
  *--------------------------------------------------------------*/
 
-void Mixture::init(const Histogram &histo , bool *estimate ,
+void Mixture::init(const FrequencyDistribution &histo , bool *estimate ,
                    int min_inf_bound , bool component_flag)
 
 {
@@ -266,15 +266,14 @@ void Mixture::init(const Histogram &histo , bool *estimate ,
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des histogrammes correspondant a chacune des composantes
- *  (estimateur EM d'un melange de lois).
+ *  Calcul des composantes empiriques (estimateur EM d'un melange de lois discretes).
  *
- *  arguments : pointeur sur un objet Mixture_data,
- *              effectif theorique de l'histogramme.
+ *  arguments : pointeur sur un objet MixtureData,
+ *              effectif theorique de la loi empirique.
  *
  *--------------------------------------------------------------*/
 
-void Mixture::expectation_step(Mixture_data *mixt_histo , int nb_element) const
+void Mixture::expectation_step(MixtureData *mixt_histo , int nb_element) const
 
 {
   register int i , j , k;
@@ -297,8 +296,7 @@ void Mixture::expectation_step(Mixture_data *mixt_histo , int nb_element) const
     if ((*mfrequency > 0) && (*mmass > 0.)) {
       pweight = weight->mass;
 
-      // repartition de l'effectif d'une classe entre les histogrammes
-      // correspondant a chacune des composantes
+      // repartition de l'effectif d'une classe entre les composantes empiriques
 
       for (j = 0;j < nb_component;j++) {
         pfrequency = mixt_histo->component[j]->frequency + i;
@@ -362,7 +360,7 @@ void Mixture::expectation_step(Mixture_data *mixt_histo , int nb_element) const
   }
   delete [] rfrequency;
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des composantes empiriques
 
   for (i = 0;i < nb_component;i++) {
     mixt_histo->component[i]->nb_value_computation();
@@ -378,7 +376,7 @@ void Mixture::expectation_step(Mixture_data *mixt_histo , int nb_element) const
 
   }
 
-  // mise a jour de l'histogramme des poids
+  // mise a jour de la loi empirique des poids
 
   for (i = 0;i < nb_component;i++) {
     mixt_histo->weight->frequency[i] = mixt_histo->component[i]->nb_element;
@@ -390,21 +388,21 @@ void Mixture::expectation_step(Mixture_data *mixt_histo , int nb_element) const
 
 /*--------------------------------------------------------------*
  *
- *  Correction des histogrammes dans le cas d'une loi binomiale ou
+ *  Correction des lois empiriques dans le cas d'une loi binomiale ou
  *  d'une loi de Poisson
  *
- *  arguments : pointeur sur un objet Mixture_data,
+ *  arguments : pointeur sur un objet MixtureData,
  *              flags sur les composantes connues, borne inferieure minimum.
  *
  *--------------------------------------------------------------*/
 
-void Mixture::variance_correction(Mixture_data *mixt_histo ,
+void Mixture::variance_correction(MixtureData *mixt_histo ,
                                   bool *estimate , int min_inf_bound) const
 
 {
   register int i;
   double skewness;
-  Histogram *pcomponent , *ncomponent;
+  FrequencyDistribution *pcomponent , *ncomponent;
 
 
   for (i = 0;i < nb_component;i++) {
@@ -443,7 +441,7 @@ void Mixture::variance_correction(Mixture_data *mixt_histo ,
         }
       }
 
-      // extraction des caracteristiques des histogrammes
+      // extraction des caracteristiques des composantes empiriques
 
       pcomponent->max_computation();
 
@@ -456,7 +454,7 @@ void Mixture::variance_correction(Mixture_data *mixt_histo ,
     }
   }
 
-  // mise a jour de l'histogramme des poids
+  // mise a jour de la loi empirique des poids
 
   for (i = 0;i < nb_component;i++) {
     mixt_histo->weight->frequency[i] = mixt_histo->component[i]->nb_element;
@@ -501,16 +499,16 @@ bool Mixture::component_order_test() const
  *
  *  Estimation des parametres d'un melange de lois par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, pointeur sur les composantes connues,
+ *  arguments : reference sur un objet StatError, pointeur sur les composantes connues,
  *              flags sur les composantes connues, borne inferieure minimum du melange,
  *              flag sur la borne inferieure du melange, flag sur les bornes
  *              inferieures des composantes, pas pour l'initialisation des ponderations.
  *
  *--------------------------------------------------------------*/
 
-Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imixt ,
-                                       bool *estimate , int min_inf_bound , bool mixt_flag ,
-                                       bool component_flag , double weight_step) const
+Mixture* FrequencyDistribution::mixture_estimation(StatError &error , const Mixture &imixt ,
+                                                   bool *estimate , int min_inf_bound , bool mixt_flag ,
+                                                   bool component_flag , double weight_step) const
 
 {
   bool status = true;
@@ -519,7 +517,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imix
   double step , likelihood , previous_likelihood , max_likelihood = D_INF , weight[MIXTURE_NB_COMPONENT] ,
          parameter[MIXTURE_NB_COMPONENT] , probability[MIXTURE_NB_COMPONENT];
   Mixture *mixt;
-  Mixture_data *mixt_histo;
+  MixtureData *mixt_histo;
 
 
   mixt = NULL;
@@ -543,7 +541,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imix
     // creation d'un objet Mixture
 
     mixt = new Mixture(imixt , estimate , (int)(nb_value * SAMPLE_NB_VALUE_COEFF));
-    mixt->mixture_data = new Mixture_data(*this , nb_component);
+    mixt->mixture_data = new MixtureData(*this , nb_component);
     mixt_histo = mixt->mixture_data;
 
     // estimation pour chaque ponderation initiale possible des parametres
@@ -572,7 +570,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imix
         do {
           j++;
 
-          // calcul des histogrammes correspondant aux composantes
+          // calcul des composantes empiriques
 
           mixt->expectation_step(mixt_histo , (int)round(nb_element * MAX(sqrt(mixt->variance) , 1.) * MIXTURE_COEFF));
           mixt->variance_correction(mixt_histo , estimate , min_inf_bound);
@@ -697,16 +695,16 @@ Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imix
  *
  *  Estimation des parametres d'un melange de lois par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, pointeur sur les composantes connues,
+ *  arguments : reference sur un objet StatError, pointeur sur les composantes connues,
  *              borne inferieure minimum du melange, flag sur la borne inferieure
  *              du melange, flag sur les bornes inferieures des composantes,
  *              pas pour l'initialisation des ponderations.
  *
  *--------------------------------------------------------------*/
 
-Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imixt ,
-                                       int min_inf_bound , bool mixt_flag ,
-                                       bool component_flag , double weight_step) const
+Mixture* FrequencyDistribution::mixture_estimation(StatError &error , const Mixture &imixt ,
+                                                   int min_inf_bound , bool mixt_flag ,
+                                                   bool component_flag , double weight_step) const
 
 {
   bool estimate[MIXTURE_NB_COMPONENT];
@@ -729,21 +727,21 @@ Mixture* Histogram::mixture_estimation(Format_error &error , const Mixture &imix
  *
  *  Estimation des parametres d'un melange de lois par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, nombre de composantes,
+ *  arguments : reference sur un objet StatError, nombre de composantes,
  *              identificateur des composantes, borne inferieure minimum du melange,
  *              flag sur la borne inferieure du melange, flag sur les bornes
  *              inferieures des composantes, pas pour l'initialisation des ponderations.
  *
  *--------------------------------------------------------------*/
 
-Mixture* Histogram::mixture_estimation(Format_error &error , int nb_component , int *ident ,
-                                       int min_inf_bound , bool mixt_flag ,
-                                       bool component_flag , double weight_step) const
+Mixture* FrequencyDistribution::mixture_estimation(StatError &error , int nb_component , int *ident ,
+                                                   int min_inf_bound , bool mixt_flag ,
+                                                   bool component_flag , double weight_step) const
 
 {
   bool estimate[MIXTURE_NB_COMPONENT];
   register int i;
-  const Parametric *pcomponent[MIXTURE_NB_COMPONENT];
+  const DiscreteParametric *pcomponent[MIXTURE_NB_COMPONENT];
   Mixture *imixt , *mixt;
 
 
@@ -756,7 +754,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , int nb_component , 
 
   else {
     for (i = 0;i < nb_component;i++) {
-      pcomponent[i] = new Parametric(0 , ident[i]);
+      pcomponent[i] = new DiscreteParametric(0 , ident[i]);
       estimate[i] = true;
     }
 
@@ -781,7 +779,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , int nb_component , 
  *  Estimation du nombre de composantes et des parametres
  *  d'un melange de lois par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, stream, nombres minimum et
+ *  arguments : reference sur un objet StatError, stream, nombres minimum et
  *              maximum de composantes, identificateur des composantes, borne inferieure minimum
  *              du melange, flag sur la borne inferieure du melange, flag sur
  *              les bornes inferieures des composantes, type de penalisation (AIC(c)/BIC(c)),
@@ -789,10 +787,11 @@ Mixture* Histogram::mixture_estimation(Format_error &error , int nb_component , 
  *
  *--------------------------------------------------------------*/
 
-Mixture* Histogram::mixture_estimation(Format_error &error , std::ostream &os , int min_nb_component ,
-                                       int max_nb_component , int *ident , int min_inf_bound ,
-                                       bool mixt_flag , bool component_flag , int penalty_type ,
-                                       double weight_step) const
+Mixture* FrequencyDistribution::mixture_estimation(StatError &error , std::ostream &os ,
+                                                   int min_nb_component , int max_nb_component ,
+                                                   int *ident , int min_inf_bound , bool mixt_flag ,
+                                                   bool component_flag , int penalty_type ,
+                                                   double weight_step) const
 
 {
   bool status = true , estimate[MIXTURE_NB_COMPONENT];
@@ -800,8 +799,8 @@ Mixture* Histogram::mixture_estimation(Format_error &error , std::ostream &os , 
   int nb_parameter[MIXTURE_NB_COMPONENT + 1];
   double penalty , max_likelihood , likelihood[MIXTURE_NB_COMPONENT + 1] ,
          penalized_likelihood[MIXTURE_NB_COMPONENT + 1];
-  const Parametric *pcomponent[MIXTURE_NB_COMPONENT];
-  Parametric_model *dist;
+  const DiscreteParametric *pcomponent[MIXTURE_NB_COMPONENT];
+  DiscreteParametricModel *dist;
   Mixture *imixt , *mixt , *pmixt;
 
 
@@ -819,7 +818,7 @@ Mixture* Histogram::mixture_estimation(Format_error &error , std::ostream &os , 
 
   if (status) {
     for (i = 0;i < max_nb_component;i++) {
-      pcomponent[i] = new Parametric(0 , ident[i]);
+      pcomponent[i] = new DiscreteParametric(0 , ident[i]);
       estimate[i] = true;
     }
 
@@ -981,16 +980,16 @@ Mixture* Histogram::mixture_estimation(Format_error &error , std::ostream &os , 
  *
  *  Simulation par un melange de lois.
  *
- *  arguments : reference sur un objet Format_error, effectif.
+ *  arguments : reference sur un objet StatError, effectif.
  *
  *--------------------------------------------------------------*/
 
-Mixture_data* Mixture::simulation(Format_error &error , int nb_element) const
+MixtureData* Mixture::simulation(StatError &error , int nb_element) const
 
 {
   register int i , j;
   int value;
-  Mixture_data *mixt_histo;
+  MixtureData *mixt_histo;
 
 
   error.init();
@@ -1002,9 +1001,9 @@ Mixture_data* Mixture::simulation(Format_error &error , int nb_element) const
 
   else {
 
-    // creation d'un objet Mixture_data
+    // creation d'un objet MixtureData
 
-    mixt_histo = new Mixture_data(*this);
+    mixt_histo = new MixtureData(*this);
     mixt_histo->mixture = new Mixture(*this , false);
 
     for (i = 0;i < nb_element;i++) {
@@ -1021,7 +1020,7 @@ Mixture_data* Mixture::simulation(Format_error &error , int nb_element) const
       (mixt_histo->frequency[value])++;
     }
 
-    // extraction des caracteristiques des histogrammes
+    // extraction des caracteristiques des lois empiriques
 
     mixt_histo->nb_value_computation();
     mixt_histo->offset_computation();
