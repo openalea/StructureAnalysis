@@ -236,8 +236,8 @@ const char *STAT_label[] = {
   "survival probability" ,
   "frequency" ,
 
-  "histogram" ,
-  "histograms" ,
+  "frequency distribution" ,
+  "frequency distributions" ,
   "sample" ,
   "sample size" ,
   "dissimilarities" ,
@@ -415,19 +415,19 @@ const char *STAT_error[] = {
   "bad size of the sample" ,
   "bad sizes of the samples" ,
   "non-existing distribution" ,
-  "non-existing histogram" ,
+  "non-existing frequency distribution" ,
   "no data associated with the model" ,
 
   "too many distributions" ,
   "too many histograms" ,
   "null variance: plot not possible" ,
 
-  "distribution range of values incompatible with histogram range of values" ,
+  "distribution range of values incompatible with frequency distribution range of values" ,
   "bad minimum inferior bound" ,
   "estimation failure" ,
 
   "bad distribution index" ,
-  "bad histogram index" ,
+  "bad frequency distribution index" ,
   "bad number of distributions" ,
   "bad weight initialization step" ,
   "inferior bound: distribution flag incompatible with mixture flag" ,
@@ -453,11 +453,10 @@ const char *STAT_error[] = {
   "bad scaling coefficient" ,
   "bad minimum value" ,
   "bad maximum value" ,
-  "empty histogram" ,
 
   "not present" ,
 
-  "marginal histogram not built" ,
+  "marginal frequency distribution not built" ,
   "bad" ,
   "bad number of vectors" ,
   "bad number of variables" ,
