@@ -68,48 +68,48 @@ enum {
  */
 
 
-// class Semi_markov : public STAT_interface , public Chain {
-class Semi_markov : public STAT_interface , protected Chain {  // semi-chaine de Markov
+// class SemiMarkov : public StatInterface , public Chain {
+class SemiMarkov : public StatInterface , protected Chain {  // semi-chaine de Markov
 
-    friend class Markovian_sequences;
-    friend class Semi_markov_iterator;
-    friend class Semi_markov_data;
+    friend class MarkovianSequences;
+    friend class SemiMarkovIterator;
+    friend class SemiMarkovData;
 
-    friend Semi_markov* semi_markov_ascii_read(Format_error &error , const char *path ,
-                                               int length, bool counting_flag ,
-                                               double cumul_threshold );
-    friend std::ostream& operator<<(std::ostream &os , const Semi_markov &smarkov)
+    friend SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path ,
+                                              int length, bool counting_flag ,
+                                              double cumul_threshold );
+    friend std::ostream& operator<<(std::ostream &os , const SemiMarkov &smarkov)
     { return smarkov.ascii_write(os , smarkov.semi_markov_data); }
 
 protected :
 
     int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
-    Semi_markov_data *semi_markov_data;  // pointeur sur un objet Semi_markov_data
+    SemiMarkovData *semi_markov_data;  // pointeur sur un objet SemiMarkovData
     int *state_subtype;     //  MARKOVIAN/SEMI_MARKOVIAN
     Forward **forward;      // lois de l'intervalle de temps residuel
     int nb_output_process;  // nombre de processus d'observation
-    Nonparametric_sequence_process **nonparametric_process;  // processus d'observation non-parametriques
-    Parametric_process **parametric_process;  // processus d'observation parametriques
+    NonparametricSequenceProcess **nonparametric_process;  // processus d'observation non-parametriques
+    DiscreteParametricProcess **parametric_process;  // processus d'observation parametriques
 
-    Semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
-                int inb_output_process , Nonparametric_process **pobservation ,
-                int length , bool counting_flag);
-    Semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
-                int inb_output_process , Nonparametric_process **nonparametric_observation ,
-                Parametric_process **parametric_observation , int length , bool counting_flag);
+    SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
+               int inb_output_process , NonparametricProcess **pobservation ,
+               int length , bool counting_flag);
+    SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
+               int inb_output_process , NonparametricProcess **nonparametric_observation ,
+               DiscreteParametricProcess **parametric_observation , int length , bool counting_flag);
 
-    void copy(const Semi_markov &smarkov , bool data_flag = true ,
+    void copy(const SemiMarkov &smarkov , bool data_flag = true ,
               int param = I_DEFAULT);
     void remove();
 
-    std::ostream& ascii_write(std::ostream &os , const Semi_markov_data *seq ,
+    std::ostream& ascii_write(std::ostream &os , const SemiMarkovData *seq ,
                               bool exhaustive = false , bool file_flag  = false ,
                               bool hidden = false) const;
-    std::ostream& spreadsheet_write(std::ostream &os , const Semi_markov_data *seq ,
+    std::ostream& spreadsheet_write(std::ostream &os , const SemiMarkovData *seq ,
                                     bool hidden = false) const;
     bool plot_write(const char *prefix , const char *title ,
-                    const Semi_markov_data *seq) const;
-    MultiPlotSet* get_plotable(const Semi_markov_data *seq) const;
+                    const SemiMarkovData *seq) const;
+    MultiPlotSet* get_plotable(const SemiMarkovData *seq) const;
 
     int nb_parameter_computation(double min_probability = 0.) const;
     double penalty_computation(bool hidden , double min_probability = 0.) const;
@@ -146,107 +146,108 @@ protected :
 
 public :
 
-    Semi_markov();
-    Semi_markov(char itype , int inb_state , int inb_output_process , int *nb_value);
-    Semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy ,
-                const Nonparametric_process *pobservation , int length ,
-                bool counting_flag);
-    Semi_markov(const Semi_markov &smarkov , bool data_flag = true ,
-                int param = I_DEFAULT)
+    SemiMarkov();
+    SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value);
+    SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
+               const NonparametricProcess *pobservation , int length ,
+               bool counting_flag);
+    SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,
+               int param = I_DEFAULT)
     :Chain(smarkov) { copy(smarkov , data_flag , param); }
     void conditional_delete();
-    virtual ~Semi_markov();
-    Semi_markov& operator=(const Semi_markov &smarkov);
+    virtual ~SemiMarkov();
+    SemiMarkov& operator=(const SemiMarkov &smarkov);
 
-    Parametric_model* extract(Format_error &error , int type ,
-                              int variable , int value) const;
-    Parametric_model* extract(Format_error &error , int state ,
-                              int histogram_type = FINAL_RUN) const;
-    Semi_markov_data* extract_data(Format_error &error) const;
+    DiscreteParametricModel* extract(StatError &error , int type ,
+                                     int variable , int value) const;
+    DiscreteParametricModel* extract(StatError &error , int state ,
+                                     int frequency_distribution_type = FINAL_RUN) const;
+    SemiMarkovData* extract_data(StatError &error) const;
 
-    Semi_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
+    SemiMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
-    void characteristic_computation(const Semi_markov_data &seq , bool counting_flag ,
+    void characteristic_computation(const SemiMarkovData &seq , bool counting_flag ,
                                     int variable = I_DEFAULT , bool length_flag = true);
 
-    double likelihood_computation(const Markovian_sequences &seq , int index) const;
-    double likelihood_computation(const Semi_markov_data &seq) const;
+    double likelihood_computation(const MarkovianSequences &seq , int index) const;
+    double likelihood_computation(const SemiMarkovData &seq) const;
 
-    Semi_markov_data* simulation(Format_error &error , const Histogram &hlength ,
-                                 bool counting_flag = true , bool divergence_flag = false) const;
-    Semi_markov_data* simulation(Format_error &error , int nb_sequence , int length ,
-                                 bool counting_flag = true) const;
-    Semi_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                 const Markovian_sequences &iseq , bool counting_flag = true) const;
+    SemiMarkovData* simulation(StatError &error , const FrequencyDistribution &hlength ,
+                               bool counting_flag = true , bool divergence_flag = false) const;
+    SemiMarkovData* simulation(StatError &error , int nb_sequence , int length ,
+                               bool counting_flag = true) const;
+    SemiMarkovData* simulation(StatError &error , int nb_sequence ,
+                               const MarkovianSequences &iseq , bool counting_flag = true) const;
 
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Semi_markov **ismarkov , Histogram **hlength ,
-                                            const char *path = NULL) const;
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Semi_markov **smarkov , int nb_sequence ,
-                                            int length , const char *path = NULL) const;
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Semi_markov **smarkov , int nb_sequence ,
-                                            const Markovian_sequences **seq , const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const SemiMarkov **ismarkov ,
+                                           FrequencyDistribution **hlength ,
+                                           const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const SemiMarkov **smarkov , int nb_sequence ,
+                                           int length , const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const SemiMarkov **smarkov , int nb_sequence ,
+                                           const MarkovianSequences **seq , const char *path = NULL) const;
 
     // acces membres de la classe
 
     int get_nb_iterator() const { return nb_iterator; }
-    Semi_markov_data* get_semi_markov_data() const { return semi_markov_data; }
+    SemiMarkovData* get_semi_markov_data() const { return semi_markov_data; }
     int get_state_subtype(int state) const { return state_subtype[state]; }
     Forward** get_forward() const { return forward; }
     Forward* get_forward(int state) const { return forward[state]; }
     int get_nb_output_process() const { return nb_output_process; }
-    Nonparametric_sequence_process* get_nonparametric_process(int variable)
+    NonparametricSequenceProcess* get_nonparametric_process(int variable)
     const { return nonparametric_process[variable]; }
-    Parametric_process** get_parametric_process() const { return parametric_process; }
-    Parametric_process* get_parametric_process(int variable)
+    DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
+    DiscreteParametricProcess* get_parametric_process(int variable)
     const { return parametric_process[variable]; }
 };
 
 
-Semi_markov* semi_markov_ascii_read(Format_error &error , const char *path ,
-                                    int length = DEFAULT_LENGTH , bool counting_flag = true ,
-                                    double cumul_threshold = OCCUPANCY_THRESHOLD);
+SemiMarkov* semi_markov_ascii_read(StatError &error , const char *path ,
+                                   int length = DEFAULT_LENGTH , bool counting_flag = true ,
+                                   double cumul_threshold = OCCUPANCY_THRESHOLD);
 
 
 
-class Semi_markov_iterator {  // iterateur semi-chaine de Markov
+class SemiMarkovIterator {  // iterateur semi-chaine de Markov
 
 private :
 
-    Semi_markov *semi_markov;  // pointeur sur un objet Semi_markov
+    SemiMarkov *semi_markov;  // pointeur sur un objet SemiMarkov
     int state;              // etat
     int occupancy;          // temps d'occupation de l'etat
     int counter;            // compteur
 
-    void copy(const Semi_markov_iterator &it);
+    void copy(const SemiMarkovIterator &it);
 
 public :
 
-    Semi_markov_iterator(Semi_markov *ismarkov);
-    Semi_markov_iterator(const Semi_markov_iterator &it)
+    SemiMarkovIterator(SemiMarkov *ismarkov);
+    SemiMarkovIterator(const SemiMarkovIterator &it)
     { copy(it); }
-    ~Semi_markov_iterator();
-    Semi_markov_iterator& operator=(const Semi_markov_iterator &it);
+    ~SemiMarkovIterator();
+    SemiMarkovIterator& operator=(const SemiMarkovIterator &it);
 
     bool simulation(int **int_seq , int length = 1 , bool initialization = false);
     int** simulation(int length = 1 , bool initialization = false);
 
     // acces membres de la classe
 
-    Semi_markov* get_semi_markov() const { return semi_markov; }
+    SemiMarkov* get_semi_markov() const { return semi_markov; }
     int get_state() const { return state; }
     int get_occupancy() const { return occupancy; }
     int get_counter() const { return counter; }
@@ -255,60 +256,61 @@ public :
 
 
 
-class Semi_markov_data : public Markovian_sequences {  // structure de donnees correspondant
-                                                       // a une semi-chaine de Markov
+class SemiMarkovData : public MarkovianSequences {  // structure de donnees correspondant
+                                                    // a une semi-chaine de Markov
 
-    friend class Markovian_sequences;
-    friend class Semi_markov;
-    friend class Hidden_semi_markov;
+    friend class MarkovianSequences;
+    friend class SemiMarkov;
+    friend class HiddenSemiMarkov;
 
-    friend std::ostream& operator<<(std::ostream &os , const Semi_markov_data &seq)
+    friend std::ostream& operator<<(std::ostream &os , const SemiMarkovData &seq)
     { return seq.ascii_write(os , false); }
 
 private :
 
-    Semi_markov *semi_markov;  // pointeur sur un objet Semi_markov
-    Chain_data *chain_data;  // etats initaux et transitions
+    SemiMarkov *semi_markov;  // pointeur sur un objet SemiMarkov
+    ChainData *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences
     double hidden_likelihood;  // vraisemblance de toutes les sequences possibles
     double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
 
-    void copy(const Semi_markov_data &seq , bool model_flag = true);
+    void copy(const SemiMarkovData &seq , bool model_flag = true);
 
 public :
 
-    Semi_markov_data();
-    Semi_markov_data(const Histogram &ihlength , int inb_variable , bool init_flag = false);
-    Semi_markov_data(const Markovian_sequences &seq);
-    Semi_markov_data(const Markovian_sequences &seq , char transform , bool initial_run_flag);
-    Semi_markov_data(const Semi_markov_data &seq , bool model_flag = true , char transform = 'c')
-    :Markovian_sequences(seq , transform) { copy(seq , model_flag); }
-    ~Semi_markov_data();
-    Semi_markov_data& operator=(const Semi_markov_data &seq);
+    SemiMarkovData();
+    SemiMarkovData(const FrequencyDistribution &ihlength ,
+                   int inb_variable , bool init_flag = false);
+    SemiMarkovData(const MarkovianSequences &seq);
+    SemiMarkovData(const MarkovianSequences &seq , char transform , bool initial_run_flag);
+    SemiMarkovData(const SemiMarkovData &seq , bool model_flag = true , char transform = 'c')
+    :MarkovianSequences(seq , transform) { copy(seq , model_flag); }
+    ~SemiMarkovData();
+    SemiMarkovData& operator=(const SemiMarkovData &seq);
 
-    Distribution_data* extract(Format_error &error , int type ,
-                               int variable , int value) const;
-    Semi_markov_data* remove_index_parameter(Format_error &error) const;
+    DiscreteDistributionData* extract(StatError &error , int type ,
+                                      int variable , int value) const;
+    SemiMarkovData* remove_index_parameter(StatError &error) const;
 
     std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
                                    bool exhaustive = false) const;
-    bool ascii_data_write(Format_error &error , const char *path ,
+    bool ascii_data_write(StatError &error , const char *path ,
                           char format = 'c' , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    void build_transition_count(const Semi_markov *smarkov = NULL);
+    void build_transition_count(const SemiMarkov *smarkov = NULL);
 
     // acces membres de la classe
 
-    Semi_markov* get_semi_markov() const { return semi_markov; }
-    Chain_data* get_chain_data() const { return chain_data; }
+    SemiMarkov* get_semi_markov() const { return semi_markov; }
+    ChainData* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
     double get_hidden_likelihood() const { return hidden_likelihood; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
