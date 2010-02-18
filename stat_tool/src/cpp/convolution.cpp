@@ -223,11 +223,11 @@ Convolution& Convolution::operator=(const Convolution &convol)
  *
  *  Extraction d'une loi elementaire.
  *
- *  arguments : reference sur un objet Format_error, indice de la loi.
+ *  arguments : reference sur un objet StatError, indice de la loi.
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* Convolution::extract(Format_error &error , int index) const
+DiscreteParametricModel* Convolution::extract(StatError &error , int index) const
 
 {
   DiscreteParametricModel *pdist;
@@ -252,11 +252,11 @@ DiscreteParametricModel* Convolution::extract(Format_error &error , int index) c
  *
  *  Extraction de la partie "donnees" d'un objet Convolution.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-ConvolutionData* Convolution::extract_data(Format_error &error) const
+ConvolutionData* Convolution::extract_data(StatError &error) const
 
 {
   ConvolutionData *convol_histo;
@@ -282,12 +282,12 @@ ConvolutionData* Convolution::extract_data(Format_error &error) const
  *
  *  Construction d'un objet Convolution a partir de lois elementaires.
  *
- *  arguments : reference sur un objet Format_error, nombre de lois elementaires,
+ *  arguments : reference sur un objet StatError, nombre de lois elementaires,
  *              pointeurs sur les lois elementaires.
  *
  *--------------------------------------------------------------*/
 
-Convolution* convolution_building(Format_error &error , int nb_dist ,
+Convolution* convolution_building(StatError &error , int nb_dist ,
                                   const DiscreteParametric **dist)
 
 {
@@ -313,12 +313,12 @@ Convolution* convolution_building(Format_error &error , int nb_dist ,
  *
  *  Construction d'un objet Convolution a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Convolution* convolution_ascii_read(Format_error &error , const char *path ,
+Convolution* convolution_ascii_read(StatError &error , const char *path ,
                                     double cumul_threshold)
 
 {
@@ -701,12 +701,12 @@ ostream& Convolution::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Convolution dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Convolution::ascii_write(Format_error &error , const char *path ,
+bool Convolution::ascii_write(StatError &error , const char *path ,
                               bool exhaustive) const
 
 {
@@ -830,11 +830,11 @@ ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *con
  *
  *  Ecriture d'un objet Convolution dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Convolution::spreadsheet_write(Format_error &error , const char *path) const
+bool Convolution::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1033,12 +1033,12 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
  *
  *  Sortie Gnuplot d'un objet Convolution.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Convolution::plot_write(Format_error &error , const char *prefix ,
+bool Convolution::plot_write(StatError &error , const char *prefix ,
                              const char *title) const
 
 {
@@ -1397,11 +1397,11 @@ ConvolutionData& ConvolutionData::operator=(const ConvolutionData &convol_histo)
  *
  *  Extraction de lois empiriques elementaires.
  *
- *  arguments : reference sur un objet Format_error, indice de la loi empirique.
+ *  arguments : reference sur un objet StatError, indice de la loi empirique.
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* ConvolutionData::extract(Format_error &error , int index) const
+DiscreteDistributionData* ConvolutionData::extract(StatError &error , int index) const
 
 {
   DiscreteDistributionData *phisto;
@@ -1466,12 +1466,12 @@ ostream& ConvolutionData::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet ConvolutionData dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool ConvolutionData::ascii_write(Format_error &error , const char *path ,
+bool ConvolutionData::ascii_write(StatError &error , const char *path ,
                                   bool exhaustive) const
 
 {
@@ -1502,11 +1502,11 @@ bool ConvolutionData::ascii_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet ConvolutionData dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool ConvolutionData::spreadsheet_write(Format_error &error , const char *path) const
+bool ConvolutionData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
@@ -1536,12 +1536,12 @@ bool ConvolutionData::spreadsheet_write(Format_error &error , const char *path) 
  *
  *  Sortie Gnuplot d'un objet ConvolutionData.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool ConvolutionData::plot_write(Format_error &error , const char *prefix ,
+bool ConvolutionData::plot_write(StatError &error , const char *prefix ,
                                  const char *title) const
 
 {
