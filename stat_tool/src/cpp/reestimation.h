@@ -68,19 +68,19 @@ const int BISECTION_NB_ITER = 100;     // nombre d'iterations maximum pour la me
 
 
 class Distribution;
-class Parametric;
+class DiscreteParametric;
 
 
 template <typename Type>
-class Reestimation {    // histogramme a frequences entieres ou reelles (estimateur EM)
+class Reestimation {    // loi empirique a frequences entieres ou reelles (estimateur EM)
 
-/*    friend class Parametric;
-      friend class Histogram;
+/*    friend class DiscreteParametric;
+      friend class FrequencyDistribution;
       friend class Compound;
       friend class Convolution;
       friend class Renewal;
-      friend class Time_events;
-      friend class Markovian_sequences; */
+      friend class TimeEvents;
+      friend class MarkovianSequences; */
 
     friend std::ostream& operator<<(std::ostream &os , const Reestimation<Type> &histo)
     { return histo.print(os); }
@@ -115,19 +115,19 @@ public :
     void penalized_likelihood_estimation(Distribution *dist , double weight , int type ,
                                          double *penalty , int outside) const;
 
-    double binomial_estimation(Parametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
-    double poisson_estimation(Parametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
+    double binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag) const;
+    double poisson_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                               double cumul_threshold) const;
-    double negative_binomial_estimation(Parametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
+    double negative_binomial_estimation(DiscreteParametric *pdist , int min_inf_bound , bool min_inf_bound_flag ,
                                         double cumul_threshold) const;
 
-    double parametric_estimation(Parametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
+    double parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
                                  double cumul_threshold = CUMUL_THRESHOLD) const;
-    double type_parametric_estimation(Parametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
+    double type_parametric_estimation(DiscreteParametric *pdist , int min_inf_bound = 0 , bool min_inf_bound_flag = true ,
                                       double cumul_threshold = CUMUL_THRESHOLD) const;
 
-    Parametric* type_parametric_estimation(int min_inf_bound = 0 , bool flag = true ,
-                                           double cumul_threshold = CUMUL_THRESHOLD) const;
+    DiscreteParametric* type_parametric_estimation(int min_inf_bound = 0 , bool flag = true ,
+                                                   double cumul_threshold = CUMUL_THRESHOLD) const;
 
     void equilibrium_process_combination(const Reestimation<Type> *length_bias_reestim , double imean);
     void equilibrium_process_estimation(const Reestimation<Type> *length_bias_reestim ,
