@@ -393,12 +393,12 @@ ostream& Sequences::alignment_spreadsheet_print(ostream &os , int ref_index , in
  *
  *  Calcul du cout d'elision/insertion fixe.
  *
- *  arguments : reference sur un objet Vector_distance, rangs,
+ *  arguments : reference sur un objet VectorDistance, rangs,
  *              distances maximum aux symboles.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::indel_distance_computation(const Vector_distance &vector_dist ,
+double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
                                              double **rank , double **max_symbol_distance) const
 
 {
@@ -463,12 +463,12 @@ double Sequences::indel_distance_computation(const Vector_distance &vector_dist 
  *
  *  Calcul du cout d'elision/insertion d'un vecteur.
  *
- *  arguments : reference sur un objet Vector_distance, indice de la sequence,
+ *  arguments : reference sur un objet VectorDistance, indice de la sequence,
  *              position dans la sequence, rangs, distances maximum aux symboles.
  *
  *--------------------------------------------------------------*/
 
-double Sequences::indel_distance_computation(const Vector_distance &vector_dist ,
+double Sequences::indel_distance_computation(const VectorDistance &vector_dist ,
                                              int index , int position , double **rank ,
                                              double **max_symbol_distance) const
 
@@ -540,13 +540,13 @@ double Sequences::indel_distance_computation(const Vector_distance &vector_dist 
  *
  *  Calcul du cout de substitution d'un vecteur par un autre vecteur.
  *
- *  arguments : reference sur un objet Vector_distance, indices des 2 sequences,
+ *  arguments : reference sur un objet VectorDistance, indices des 2 sequences,
  *              positions dans les 2 sequence, rangs, pointeur sur
  *              les sequences de test (alignement multiple).
  *
  *--------------------------------------------------------------*/
 
-double Sequences::substitution_distance_computation(const Vector_distance &vector_dist ,
+double Sequences::substitution_distance_computation(const VectorDistance &vector_dist ,
                                                     int ref_index , int test_index ,
                                                     int ref_position , int test_position ,
                                                     double **rank , const Sequences *test_seq) const
@@ -625,7 +625,7 @@ double Sequences::substitution_distance_computation(const Vector_distance &vecto
  *
  *  Alignement de sequences.
  *
- *  arguments : reference sur un objet Format_error, stream, reference sur un objet Vector_distance,
+ *  arguments : reference sur un objet StatError, stream, reference sur un objet VectorDistance,
  *              identificateurs de 2 sequences, flags debut/fin libres,
  *              couts d'elision/insertion adaptatifs ou fixes,
  *              facteur pour deduire les couts d'elision/insertion,
@@ -635,12 +635,12 @@ double Sequences::substitution_distance_computation(const Vector_distance &vecto
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const Vector_distance &ivector_dist ,
-                                      int ref_identifier , int test_identifier , bool begin_free ,
-                                      bool end_free , int indel_cost , double indel_factor ,
-                                      bool transposition_flag , double transposition_factor ,
-                                      const char *result_path , char result_format ,
-                                      const char *alignment_path , char alignment_format) const
+DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const VectorDistance &ivector_dist ,
+                                     int ref_identifier , int test_identifier , bool begin_free ,
+                                     bool end_free , int indel_cost , double indel_factor ,
+                                     bool transposition_flag , double transposition_factor ,
+                                     const char *result_path , char result_format ,
+                                     const char *alignment_path , char alignment_format) const
 
 {
   bool status = true , half_matrix;
@@ -652,8 +652,8 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
   double buff , deletion_distance , insertion_distance , substitution_distance ,
          transposition_distance , max_transposition_cost , **rank , **max_symbol_distance ,
          **local_indel_distance , **local_substitution_distance , **cumul_distance;
-  Vector_distance *vector_dist;
-  Distance_matrix *dist_matrix;
+  VectorDistance *vector_dist;
+  DistanceMatrix *dist_matrix;
   Sequences *alignment;
   ofstream *out_file;
 
@@ -694,7 +694,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -794,7 +794,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
       half_matrix = false;
     }
 
-    vector_dist = new Vector_distance(ivector_dist);
+    vector_dist = new VectorDistance(ivector_dist);
 
     // calcul des distance maximum de substitution pour les variables symboliques et
     // des rangs pour les variables ordinales
@@ -898,9 +898,9 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
 
     // creation des structures de donnees resultat
 
-    dist_matrix = new Distance_matrix(nb_sequence , ref_identifier , test_identifier ,
-                                      SEQ_label[SEQL_SEQUENCE] , identifier ,
-                                      true , transposition_flag);
+    dist_matrix = new DistanceMatrix(nb_sequence , ref_identifier , test_identifier ,
+                                     SEQ_label[SEQL_SEQUENCE] , identifier ,
+                                     true , transposition_flag);
 
     if (alignment_path) {
       alignment = new Sequences(nb_alignment , 1);
@@ -1481,11 +1481,11 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , const 
 
       alignment->min_value_computation(0);
       alignment->max_value_computation(0);
-      alignment->build_marginal_histogram(0);
+      alignment->build_marginal_frequency_distribution(0);
 
       alignment->max_length_computation();
       alignment->cumul_length_computation();
-      alignment->build_length_histogram();
+      alignment->build_length_frequency_distribution();
 
       // ecriture des sequences d'alignement
 
@@ -1590,16 +1590,16 @@ double Sequences::substitution_distance_computation(int ref_index , int test_ind
  *
  *  Alignement de sequences.
  *
- *  arguments : reference sur un objet Format_error, stream, identificateurs de 2 sequences,
+ *  arguments : reference sur un objet StatError, stream, identificateurs de 2 sequences,
  *              flags debut/fin libres, path resultat, format du fichier resultat ('a' : ASCII, 's' : Spreadsheet),
  *              path alignement, format du fichier alignement ('a' : ASCII, 'b' : Binary),
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int ref_identifier ,
-                                      int test_identifier , bool begin_free , bool end_free ,
-                                      const char *result_path , char result_format ,
-                                      const char *alignment_path , char alignment_format) const
+DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_identifier ,
+                                     int test_identifier , bool begin_free , bool end_free ,
+                                     const char *result_path , char result_format ,
+                                     const char *alignment_path , char alignment_format) const
 
 {
   bool status = true , half_matrix;
@@ -1610,7 +1610,7 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
       *calignment , *symbol , **path_length , ***back_pointers;
   double buff , deletion_distance , insertion_distance , substitution_distance ,
          **cumul_distance;
-  Distance_matrix *dist_matrix;
+  DistanceMatrix *dist_matrix;
   Sequences *alignment;
   ofstream *out_file;
 
@@ -1728,8 +1728,8 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
 
     // creation des structures de donnees resultat
 
-    dist_matrix = new Distance_matrix(nb_sequence , ref_identifier , test_identifier ,
-                                      SEQ_label[SEQL_SEQUENCE] , identifier , false);
+    dist_matrix = new DistanceMatrix(nb_sequence , ref_identifier , test_identifier ,
+                                     SEQ_label[SEQL_SEQUENCE] , identifier , false);
 
     if (alignment_path) {
       alignment = new Sequences(nb_alignment , 1);
@@ -2127,11 +2127,11 @@ Distance_matrix* Sequences::alignment(Format_error &error , ostream *os , int re
 
       alignment->min_value_computation(0);
       alignment->max_value_computation(0);
-      alignment->build_marginal_histogram(0);
+      alignment->build_marginal_frequency_distribution(0);
 
       alignment->max_length_computation();
       alignment->cumul_length_computation();
-      alignment->build_length_histogram();
+      alignment->build_length_frequency_distribution();
 
       // ecriture des sequences d'alignement
 
@@ -2327,11 +2327,11 @@ ostream& Sequences::multiple_alignment_ascii_print(ostream &os) const
  *
  *  Ecriture de l'alignement multiple de sequences dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::multiple_alignment_ascii_print(Format_error &error , const char *path) const
+bool Sequences::multiple_alignment_ascii_print(StatError &error , const char *path) const
 
 {
   bool status;
@@ -2358,14 +2358,14 @@ bool Sequences::multiple_alignment_ascii_print(Format_error &error , const char 
  *
  *  Alignement multiple de sequences.
  *
- *  arguments : references sur les sequences de test et sur un objet Vector_distance,
+ *  arguments : references sur les sequences de test et sur un objet VectorDistance,
  *              rangs, distances maximum aux symboles, flags debut/fin libres,
  *              couts d'elision/insertion adaptatifs ou fixes,
  *              facteur pour deduire les couts d'elision/insertion.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vector_distance &vector_dist ,
+Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const VectorDistance &vector_dist ,
                                          double **rank , double **max_symbol_distance , bool begin_free ,
                                          bool end_free , int indel_cost , double indel_factor) const
 
@@ -2795,15 +2795,15 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
  *
  *  Alignement multiple de sequences.
  *
- *  arguments : reference sur un objet Format_error, stream, reference sur un objet Vector_distance,
+ *  arguments : reference sur un objet StatError, stream, reference sur un objet VectorDistance,
  *              flags debut/fin libres, couts d'elision/insertion adaptatifs ou fixes,
  *              facteur pour deduire les couts d'elision/insertion, type d'algorihme pour
  *              la construction du dendrogramme, path.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
-                                         const Vector_distance &ivector_dist ,
+Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
+                                         const VectorDistance &ivector_dist ,
                                          bool begin_free , bool end_free , int indel_cost ,
                                          double indel_factor , int algorithm , const char *path) const
 
@@ -2812,8 +2812,8 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
   register int i , j , k;
   int *itype , *psequence , *csequence , *variable;
   double **rank , **max_symbol_distance;
-  Vector_distance *vector_dist;
-  Distance_matrix *dist_matrix;
+  VectorDistance *vector_dist;
+  DistanceMatrix *dist_matrix;
   Dendrogram *dendrogram;
   Sequences *seq , **clustered_seq;
 
@@ -2860,7 +2860,7 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
       cout << *dendrogram << "\n";
 #     endif
 
-      vector_dist = new Vector_distance(ivector_dist);
+      vector_dist = new VectorDistance(ivector_dist);
 
       // calcul des distance maximum de substitution pour les variables symboliques et
       // des rangs pour les variables ordinales
@@ -2979,7 +2979,7 @@ Sequences* Sequences::multiple_alignment(Format_error &error , ostream &os ,
 
       for (i = 0;i < nb_variable;i++) {
         (seq->max_value[i])++;
-        seq->build_marginal_histogram(i);
+        seq->build_marginal_frequency_distribution(i);
       }
 
       delete [] variable;
