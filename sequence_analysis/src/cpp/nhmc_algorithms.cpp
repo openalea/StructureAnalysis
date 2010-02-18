@@ -63,7 +63,7 @@ extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::transition_update(int state , int index , Chain &index_chain) const
+void NonhomogeneousMarkov::transition_update(int state , int index , Chain &index_chain) const
 
 
 {
@@ -107,7 +107,7 @@ void Nonhomogeneous_markov::transition_update(int state , int index , Chain &ind
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::index_state_distribution()
+void NonhomogeneousMarkov::index_state_distribution()
 
 {
   register int i , j , k;
@@ -162,7 +162,7 @@ void Nonhomogeneous_markov::index_state_distribution()
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::state_no_occurrence_probability(int state , double increment)
+void NonhomogeneousMarkov::state_no_occurrence_probability(int state , double increment)
 
 {
   register int i;
@@ -272,8 +272,8 @@ void Nonhomogeneous_markov::state_no_occurrence_probability(int state , double i
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::state_first_occurrence_distribution(int state , int min_nb_value ,
-                                                                double cumul_threshold)
+void NonhomogeneousMarkov::state_first_occurrence_distribution(int state , int min_nb_value ,
+                                                               double cumul_threshold)
 
 {
   register int i , j , k;
@@ -388,7 +388,7 @@ void Nonhomogeneous_markov::state_first_occurrence_distribution(int state , int 
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::state_nb_pattern_mixture(int state , char pattern)
+void NonhomogeneousMarkov::state_nb_pattern_mixture(int state , char pattern)
 
 {
   register int i , j , k , m;
@@ -541,18 +541,18 @@ void Nonhomogeneous_markov::state_nb_pattern_mixture(int state , char pattern)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des lois caracteristiques d'un objet Nonhomogeneous_markov.
+ *  Calcul des lois caracteristiques d'un objet NonhomogeneousMarkov.
  *
  *  arguments : longueur des sequences, flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::characteristic_computation(int length , bool counting_flag)
+void NonhomogeneousMarkov::characteristic_computation(int length , bool counting_flag)
 
 {
   if (nb_component > 0) {
     register int i;
-    Parametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
+    DiscreteParametric dlength(UNIFORM , length , length , D_DEFAULT , D_DEFAULT);
 
 
     // calcul des lois caracteristiques au niveau etat
@@ -593,16 +593,16 @@ void Nonhomogeneous_markov::characteristic_computation(int length , bool countin
 
 /*--------------------------------------------------------------*
  *
- *  Calcul des lois caracteristiques d'un objet Nonhomogeneous_markov.
+ *  Calcul des lois caracteristiques d'un objet NonhomogeneousMarkov.
  *
- *  arguments : reference sur un objet Nonhomogeneous_markov_data,
+ *  arguments : reference sur un objet NonhomogeneousMarkovData,
  *              flag sur le calcul des lois de comptage,
  *              flag pour tenir compte des longueurs.
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::characteristic_computation(const Nonhomogeneous_markov_data &seq ,
-                                                       bool counting_flag , bool length_flag)
+void NonhomogeneousMarkov::characteristic_computation(const NonhomogeneousMarkovData &seq ,
+                                                      bool counting_flag , bool length_flag)
 
 {
   if (nb_component > 0) {
@@ -689,7 +689,7 @@ double Function::regression_square_sum_computation(double mean) const
  *
  *--------------------------------------------------------------*/
 
-void Function::residual_computation(const Self_transition &self_transition)
+void Function::residual_computation(const SelfTransition &self_transition)
 
 {
   register int i;
@@ -824,7 +824,7 @@ double Function::residual_square_sum_computation() const
  *
  *--------------------------------------------------------------*/
 
-Function* Self_transition::monomolecular_regression() const
+Function* SelfTransition::monomolecular_regression() const
 
 {
   register int i;
@@ -971,7 +971,7 @@ Function* Self_transition::monomolecular_regression() const
  *
  *--------------------------------------------------------------*/
 
-Function* Self_transition::logistic_regression() const
+Function* SelfTransition::logistic_regression() const
 
 {
   register int i;
@@ -1116,11 +1116,11 @@ Function* Self_transition::logistic_regression() const
  *
  *  Calcul de la vraisemblance de sequences pour une chaine de Markov non-homogene.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence.
+ *  arguments : reference sur un objet MarkovianSequences, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
-double Nonhomogeneous_markov::likelihood_computation(const Markovian_sequences &seq , int index) const
+double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
 {
   register int i , j , k;
@@ -1205,10 +1205,10 @@ double Nonhomogeneous_markov::likelihood_computation(const Markovian_sequences &
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov_data::build_transition_count()
+void NonhomogeneousMarkovData::build_transition_count()
 
 {
-  chain_data = new Chain_data('o' , marginal[0]->nb_value , marginal[0]->nb_value);
+  chain_data = new ChainData('o' , marginal[0]->nb_value , marginal[0]->nb_value);
   transition_count_computation(*chain_data);
 }
 
@@ -1218,20 +1218,20 @@ void Nonhomogeneous_markov_data::build_transition_count()
  *  Estimation des parametres d'une chaine de Markov non-homogene
  *  a partir d'un echantillon de sequences.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              identificateurs evolution des probabilites de rester dans un etat,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov* Markovian_sequences::nonhomogeneous_markov_estimation(Format_error &error , int *ident ,
-                                                                             bool counting_flag) const
+NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatError &error , int *ident ,
+                                                                           bool counting_flag) const
 
 {
   bool status = true;
   register int i;
-  Nonhomogeneous_markov *markov;
-  Nonhomogeneous_markov_data *seq;
+  NonhomogeneousMarkov *markov;
+  NonhomogeneousMarkovData *seq;
 
 
   markov = NULL;
@@ -1247,8 +1247,8 @@ Nonhomogeneous_markov* Markovian_sequences::nonhomogeneous_markov_estimation(For
   }
 
   if (status) {
-    markov = new Nonhomogeneous_markov(marginal[0]->nb_value , ident);
-    markov->markov_data = new Nonhomogeneous_markov_data(*this);
+    markov = new NonhomogeneousMarkov(marginal[0]->nb_value , ident);
+    markov->markov_data = new NonhomogeneousMarkovData(*this);
 
     seq = markov->markov_data;
     seq->state_variable_init();
@@ -1322,22 +1322,23 @@ Nonhomogeneous_markov* Markovian_sequences::nonhomogeneous_markov_estimation(For
  *
  *  Simulation par une chaine de Markov non-homogene.
  *
- *  arguments : reference sur un objet Format_error,
- *              histogramme des longueurs des sequences,
+ *  arguments : reference sur un objet StatError,
+ *              loi empirique des longueurs des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &error , const Histogram &hlength ,
-                                                              bool counting_flag) const
+NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error ,
+                                                           const FrequencyDistribution &hlength ,
+                                                           bool counting_flag) const
 
 {
   bool status = true;
   register int i , j , k;
   int cumul_length , *pstate;
   Chain *index_chain;
-  Nonhomogeneous_markov *markov;
-  Nonhomogeneous_markov_data *seq;
+  NonhomogeneousMarkov *markov;
+  NonhomogeneousMarkovData *seq;
 
 
   seq = NULL;
@@ -1372,10 +1373,10 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
 
     // initialisations
 
-    seq = new Nonhomogeneous_markov_data(hlength);
+    seq = new NonhomogeneousMarkovData(hlength);
     seq->type[0] = STATE;
 
-    seq->markov = new Nonhomogeneous_markov(*this , false);
+    seq->markov = new NonhomogeneousMarkov(*this , false);
 
     markov = seq->markov;
     markov->create_cumul();
@@ -1425,7 +1426,7 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
 
     for (i = 0;i < seq->nb_variable;i++) {
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
 
     seq->self_transition_computation(markov->homogeneity);
@@ -1462,18 +1463,18 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
  *
  *  Simulation par une chaine de Markov non-homogene.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              nombre et longueur des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &error , int nb_sequence ,
-                                                              int length , bool counting_flag) const
+NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , int nb_sequence ,
+                                                           int length , bool counting_flag) const
 
 {
   bool status = true;
-  Nonhomogeneous_markov_data *seq;
+  NonhomogeneousMarkovData *seq;
 
 
   seq = NULL;
@@ -1493,7 +1494,7 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
   }
 
   if (status) {
-    Histogram hlength(length + 1);
+    FrequencyDistribution hlength(length + 1);
 
     hlength.nb_element = nb_sequence;
     hlength.offset = length;
@@ -1513,18 +1514,19 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &erro
  *
  *  Simulation par une chaine de Markov non-homogene.
  *
- *  arguments : reference sur un objet Format_error, nombre de sequences,
- *              reference sur un objet Markovian_sequences,
+ *  arguments : reference sur un objet StatError, nombre de sequences,
+ *              reference sur un objet MarkovianSequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data* Nonhomogeneous_markov::simulation(Format_error &error , int nb_sequence ,
-                                                              const Markovian_sequences &iseq , bool counting_flag) const
+NonhomogeneousMarkovData* NonhomogeneousMarkov::simulation(StatError &error , int nb_sequence ,
+                                                           const MarkovianSequences &iseq ,
+                                                           bool counting_flag) const
 
 {
-  Histogram *hlength;
-  Nonhomogeneous_markov_data *seq;
+  FrequencyDistribution *hlength;
+  NonhomogeneousMarkovData *seq;
 
 
   error.init();
