@@ -64,11 +64,11 @@ extern char* label(const char *file_name);
  *
  *  Construction d'un objet Sequences a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, flag format.
+ *  arguments : reference sur un objet StatError, path, flag format.
  *
  *--------------------------------------------------------------*/
 
-Sequences* sequences_ascii_read(Format_error &error , const char *path , bool old_format)
+Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_format)
 
 {
   RWLocaleSnapshot locale("en");
@@ -714,7 +714,7 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path , bool ol
       }
 
       if (seq->index_parameter) {
-        seq->build_index_parameter_histogram();
+        seq->build_index_parameter_frequency_distribution();
       }
       if ((seq->index_parameter_type == TIME) || ((seq->index_parameter_type == POSITION) &&
           (seq->type[0] != NB_INTERNODE))) {
@@ -724,7 +724,7 @@ Sequences* sequences_ascii_read(Format_error &error , const char *path , bool ol
       for (i = 0;i < nb_variable;i++) {
         seq->min_value_computation(i);
         seq->max_value_computation(i);
-        seq->build_marginal_histogram(i);
+        seq->build_marginal_frequency_distribution(i);
       }
     }
 
@@ -788,7 +788,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       os << "# ";
     }
     os << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
-       << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     hindex_parameter->ascii_characteristic_print(os , false , comment_flag);
 
     if (exhaustive) {
@@ -797,7 +797,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
         os << "# ";
       }
       os << "   | " << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
-         << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hindex_parameter->ascii_print(os , comment_flag);
     }
   }
@@ -812,7 +812,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       os << "# ";
     }
     os << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-       << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     index_interval->ascii_characteristic_print(os , false , comment_flag);
 
     if (exhaustive) {
@@ -821,7 +821,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
         os << "# ";
       }
       os << "   | " << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-         << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       index_interval->ascii_print(os , comment_flag);
     }
   }
@@ -848,7 +848,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
         if (comment_flag) {
           os << "# ";
         }
-        os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+        os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
         marginal[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
 
@@ -857,7 +857,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
           if (comment_flag) {
             os << "# ";
           }
-          os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+          os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
           marginal[i]->ascii_print(os , comment_flag);
         }
       }
@@ -898,7 +898,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
   if (comment_flag) {
     os << "# ";
   }
-  os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+  os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
   hlength->ascii_characteristic_print(os , false , comment_flag);
 
   if (exhaustive) {
@@ -906,7 +906,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
     if (comment_flag) {
       os << "# ";
     }
-    os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+    os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
     hlength->ascii_print(os , comment_flag);
   }
 
@@ -939,12 +939,12 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Sequences dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::ascii_write(Format_error &error , const char *path ,
+bool Sequences::ascii_write(StatError &error , const char *path ,
                             bool exhaustive) const
 
 {
@@ -1332,12 +1332,12 @@ ostream& Sequences::ascii_data_write(ostream &os , char format , bool exhaustive
  *
  *  Ecriture d'un objet Sequences dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              format (ligne/colonne), flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::ascii_data_write(Format_error &error , const char *path ,
+bool Sequences::ascii_data_write(StatError &error , const char *path ,
                                  char format , bool exhaustive) const
 
 {
@@ -1368,11 +1368,11 @@ bool Sequences::ascii_data_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet Sequences dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
+bool Sequences::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1401,11 +1401,11 @@ bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
                << "\t\t" << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << hindex_parameter->nb_value - 1 << endl;
 
       out_file << "\n" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
-               << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+               << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       hindex_parameter->spreadsheet_characteristic_print(out_file);
 
       out_file << "\n\t" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
-               << " " << STAT_label[STATL_HISTOGRAM] << endl;
+               << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hindex_parameter->spreadsheet_print(out_file);
     }
 
@@ -1415,11 +1415,11 @@ bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
 
     if (index_interval) {
       out_file << "\n" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-               << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+               << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       index_interval->spreadsheet_characteristic_print(out_file);
 
       out_file << "\n\t" << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-               << " " << STAT_label[STATL_HISTOGRAM] << endl;
+               << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       index_interval->spreadsheet_print(out_file);
     }
 
@@ -1437,10 +1437,10 @@ bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
                  << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
 
         if (marginal[i]) {
-          out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+          out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
           marginal[i]->spreadsheet_characteristic_print(out_file);
 
-          out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+          out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
           marginal[i]->spreadsheet_print(out_file);
         }
 
@@ -1466,10 +1466,10 @@ bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
       }
     }
 
-    out_file << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+    out_file << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     hlength->spreadsheet_characteristic_print(out_file);
 
-    out_file << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+    out_file << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
     hlength->spreadsheet_print(out_file);
 
     out_file << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << cumul_length << endl;
@@ -1483,19 +1483,19 @@ bool Sequences::spreadsheet_write(Format_error &error , const char *path) const
  *
  *  Sortie Gnuplot d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::plot_write(Format_error &error , const char *prefix ,
+bool Sequences::plot_write(StatError &error , const char *prefix ,
                            const char *title) const
 
 {
   bool status;
   register int i , j , k;
   int nb_histo;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   ostringstream data_file_name;
 
 
@@ -1505,7 +1505,7 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
 
   data_file_name << prefix << ".dat";
 
-  phisto = new const Histogram*[nb_variable + 2];
+  phisto = new const FrequencyDistribution*[nb_variable + 2];
 
   nb_histo = 0;
 
@@ -1575,7 +1575,7 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
                  << (int)(hindex_parameter->max * YSCALE) + 1 << "] \""
                  << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
                  << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
-                 << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                 << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
         if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
@@ -1602,7 +1602,7 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
                  << (int)(index_interval->max * YSCALE) + 1 << "] \""
                  << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
                  << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-                 << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                 << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
         if (index_interval->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
@@ -1632,7 +1632,7 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
           if (nb_variable > 1) {
             out_file << STAT_label[STATL_VARIABLE] << " " << k + 1 << " - ";
           }
-          out_file << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
+          out_file << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1659,7 +1659,7 @@ bool Sequences::plot_write(Format_error &error , const char *prefix ,
       out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
                << (int)(hlength->max * YSCALE) + 1 << "] \""
                << label((data_file_name.str()).c_str()) << "\" using 1 title \""
-               << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM]
+               << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
       if (hlength->nb_value - 1 < TIC_THRESHOLD) {
@@ -1720,7 +1720,7 @@ MultiPlotSet* Sequences::get_plotable() const
 
   if (hindex_parameter) {
 
-    // vue : histogramme des parametres d'index
+    // vue : loi empirique des parametres d'index
 
     plot[i].xrange = Range(hindex_parameter->offset , hindex_parameter->nb_value - 1);
     plot[i].yrange = Range(0 , ceil(hindex_parameter->max * YSCALE));
@@ -1736,7 +1736,7 @@ MultiPlotSet* Sequences::get_plotable() const
 
     legend.str("");
     legend << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
-           << " " << STAT_label[STATL_HISTOGRAM];
+           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
     plot[i][0].style = "impulses";
@@ -1747,7 +1747,7 @@ MultiPlotSet* Sequences::get_plotable() const
 
   if (index_interval) {
 
-    // vue : histogramme des intervalles entre parametres d'index successifs
+    // vue : loi empirique des intervalles entre parametres d'index successifs
 
     plot[i].xrange = Range(0 , index_interval->nb_value - 1);
     plot[i].yrange = Range(0 , ceil(index_interval->max * YSCALE));
@@ -1763,7 +1763,7 @@ MultiPlotSet* Sequences::get_plotable() const
 
     legend.str("");
     legend << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
-           << " " << STAT_label[STATL_HISTOGRAM];
+           << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
     plot[i][0].style = "impulses";
@@ -1793,7 +1793,7 @@ MultiPlotSet* Sequences::get_plotable() const
       if (nb_variable > 1) {
         legend << STAT_label[STATL_VARIABLE] << " " << j + 1 << " - ";
       }
-      legend << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+      legend << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[i][0].legend = legend.str();
 
       plot[i][0].style = "impulses";
@@ -1803,7 +1803,7 @@ MultiPlotSet* Sequences::get_plotable() const
     }
   }
 
-  // vue : histogramme des longueurs des sequences
+  // vue : loi empirique des longueurs des sequences
 
   plot[i].xrange = Range(0 , hlength->nb_value - 1);
   plot[i].yrange = Range(0 , ceil(hlength->max * YSCALE));
@@ -1818,7 +1818,7 @@ MultiPlotSet* Sequences::get_plotable() const
   plot[i].resize(1);
 
   legend.str("");
-  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   plot[i][0].legend = legend.str();
 
   plot[i][0].style = "impulses";
@@ -1887,12 +1887,12 @@ bool Sequences::plot_print(const char *path , int ilength) const
  *
  *  Sortie Gnuplot d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
+bool Sequences::plot_data_write(StatError &error , const char *prefix ,
                                 const char *title) const
 
 {
@@ -2108,11 +2108,11 @@ bool Sequences::plot_data_write(Format_error &error , const char *prefix ,
  *
  *  Sortie graphique d'un objet Sequences.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Sequences::get_plotable_data(Format_error &error) const
+MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 
 {
   register int i , j , k , m , n;
