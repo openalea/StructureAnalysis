@@ -51,7 +51,7 @@ class WRAP
 public:
 
   WRAP_METHOD2(Vectors,linear_regression, Regression, int, int);
-  WRAP_METHOD2(Vectors,comparison, Distance_matrix, Vector_distance, bool);
+  WRAP_METHOD2(Vectors,comparison, DistanceMatrix, VectorDistance, bool);
   WRAP_METHOD_SPREADSHEET_WRITE( Vectors);WRAP_METHOD2(Vectors,scaling,
        Vectors, int, int);
   WRAP_METHOD2(Vectors,round, Vectors, int, int);
@@ -61,7 +61,7 @@ public:
   read_from_file(char *filename)
   {
     Vectors *vec;
-    Format_error error;
+    StatError error;
 
     vec = vectors_ascii_read(error, filename);
 
@@ -285,7 +285,7 @@ public:
   file_ascii_data_write(const Vectors& d, const char* path, bool exhaustive)
   {
     bool result = true;
-    Format_error error;
+    StatError error;
 
     result = d.ascii_data_write(error, path, exhaustive);
     if (!result)
@@ -297,7 +297,7 @@ public:
   value_select(const Vectors& v, int variable, const object& min,
       const object& max, bool keep)
   {
-    Format_error error;
+    StatError error;
     Vectors * ret = NULL;
     std::stringstream s;
 
@@ -330,7 +330,7 @@ public:
   select_variable(const Vectors& v, const boost::python::list& variables,
       bool keep)
   {
-    Format_error error;
+    StatError error;
     Vectors * ret = NULL;
 
     int nb_var = len(variables);
@@ -351,7 +351,7 @@ public:
   select_individual(const Vectors& v, const boost::python::list& identifiers,
       bool keep)
   {
-    Format_error error;
+    StatError error;
     Vectors * ret = NULL;
 
     int nb_id = len(identifiers);
@@ -372,7 +372,7 @@ public:
   static Vectors*
   shift(const Vectors& v, int var, double param)
   {
-    Format_error error;
+    StatError error;
     Vectors * ret = NULL;
 
     if (v.get_type(var - 1) == REAL_VALUE)
@@ -390,7 +390,7 @@ public:
   static Vectors*
   merge(const Vectors& v, const boost::python::list& vecs)
   {
-    Format_error error;
+    StatError error;
     Vectors * ret = NULL;
 
     int nb_vec = len(vecs);
@@ -412,7 +412,7 @@ public:
   merge_variable(const Vectors& v, const boost::python::list& vecs,
       int ref_sample)
   {
-    Format_error error;
+    StatError error;
     Vectors * ret = NULL;
 
     int nb_vec = len(vecs);
@@ -434,7 +434,7 @@ public:
   static bool
   check(Vectors& v)
   {
-    Format_error error;
+    StatError error;
     bool ret = v.check(error);
     return ret;
   }
@@ -443,7 +443,7 @@ public:
   static Vectors*
   cluster_step(const Vectors& v, int variable, int step)
   {
-    Format_error error;
+    StatError error;
     Vectors* ret = v.cluster(error, variable, step);
 
     if (!ret)
@@ -456,7 +456,7 @@ public:
   cluster_limit(const Vectors& v, int variable, boost::python::list& limit)
   {
 
-    Format_error error;
+    StatError error;
 
     int nb_limit = len(limit);
     bool is_float = true;
@@ -507,7 +507,7 @@ public:
   transcode(const Vectors& v, int variable, boost::python::list& symbol)
   {
 
-    Format_error error;
+    StatError error;
 
     int nb_symbol = len(symbol);
     stat_tool::wrap_util::auto_ptr_array<int> l(new int[nb_symbol]);
@@ -533,7 +533,7 @@ public:
   static Mv_Mixture_data*
   mixture_cluster(const Vectors& v, const Mv_Mixture& m)
   {
-    Format_error error;
+    StatError error;
     Mv_Mixture_data* ret = NULL;
     ret = m.cluster(error, v);
     if (ret == NULL)
@@ -542,11 +542,11 @@ public:
   }
 
   // Extract
-  static Distribution_data*
+  static DiscreteDistributionData*
   extract_histogram(const Vectors& v, int variable)
   {
-    Format_error error;
-    Distribution_data* ret = NULL;
+    StatError error;
+    DiscreteDistributionData* ret = NULL;
     ret = v.extract(error, variable);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -557,7 +557,7 @@ public:
   moving_average_dist(const Vectors& v, int explanatory_var, int response_var,
       const Distribution &dist, char algo)
   {
-    Format_error error;
+    StatError error;
     Regression * ret = NULL;
     ret = v.moving_average(error, explanatory_var, response_var, dist, algo);
     if (!ret)
@@ -569,7 +569,7 @@ public:
   moving_average_list(const Vectors& v, int explanatory_var, int response_var,
       const boost::python::list& filter, char algo)
   {
-    Format_error error;
+    StatError error;
     Regression * ret = NULL;
     double sum = 0;
     int nb_var = len(filter);
@@ -609,7 +609,7 @@ public:
   nearest_neighbours(const Vectors& v, int explanatory_var, int response_var,
       double span, bool weighting)
   {
-    Format_error error;
+    StatError error;
     Regression * ret = NULL;
 
     ret = v.nearest_neighbor_smoother(error, explanatory_var, response_var,
@@ -628,7 +628,7 @@ public:
     bool status = true, several_errors = false;
     Mv_Mixture* ret = NULL;
     bool *fparam = NULL;
-    Format_error error;
+    StatError error;
     ostringstream error_message;
     int nb_fparam, p;
     const int nb_variables = v.get_nb_variable();
@@ -724,7 +724,7 @@ public:
     bool status = true, several_errors = false;
     Mv_Mixture* ret = NULL;
     bool *fparam = NULL;
-    Format_error error;
+    StatError error;
     ostringstream error_message;
     int nb_fparam, p;
     const int nb_variables = v.get_nb_variable();
@@ -817,7 +817,7 @@ public:
   contingency_table(const Vectors& v, int variable1, int variable2,
       const string& filename, char format)
   {
-    Format_error error;
+    StatError error;
     std::stringstream s;
     bool ret;
     ret = v.contingency_table(error, s, variable1, variable2, filename.c_str(),
@@ -834,7 +834,7 @@ public:
       int response_variable, int response_type, const string& filename,
       char format)
   {
-    Format_error error;
+    StatError error;
     std::stringstream s;
     bool ret;
 
@@ -850,7 +850,7 @@ public:
   static bool
   rank_correlation_computation(const Vectors& input, int type, const char* path)
   {
-    Format_error error;
+    StatError error;
     std::stringstream os;
     bool ret;
     ret = input.rank_correlation_computation(error, os, type, path);
@@ -871,7 +871,7 @@ void
 class_vectors()
 {
 
-  class_< Vectors, bases< STAT_interface > >
+  class_< Vectors, bases< StatInterface > >
   ("_Vectors", "Vectors (2 dimensions list)", init<>())
   // constructors
   .def("__init__", make_constructor(VectorsWrap::build_from_lists))
@@ -984,9 +984,9 @@ class_vectors()
    Vectors();
    Vectors(const Vectors &vec , int inb_vector , int *index);
 
-   bool check(Format_error &error);
+   bool check(StatError &error);
 
-   -->bool plot_write(Format_error &error , const char *prefix ,
+   -->bool plot_write(StatError &error , const char *prefix ,
    const char *title = 0) const;
 
    double mean_absolute_deviation_computation(int variable) const;
@@ -995,7 +995,7 @@ class_vectors()
    double kurtosis_computation(int variable) const;
 
    // acces membres de la classe
-   --     Histogram* get_marginal(int variable) const { return marginal[variable]; }
+   --     FrequencyDistribution* get_marginal(int variable) const { return marginal[variable]; }
    --double get_covariance(int variable1, int variable2) const { return covariance[variable1][variable2]; }
    */
 
@@ -1008,11 +1008,11 @@ class VectorDistanceWrap
 
 public:
 
-  static boost::shared_ptr<Vector_distance>
+  static boost::shared_ptr<VectorDistance>
   build_from_types(boost::python::list& types, boost::python::list& weigths,
       int distance_type)
   {
-    Vector_distance* dist;
+    VectorDistance* dist;
     int nb_variable;
 
     nb_variable = boost::python::len(types);
@@ -1030,37 +1030,37 @@ public:
         variable_weight[i] = boost::python::extract<double>(weigths[i]);
       }
 
-    dist = new Vector_distance(nb_variable, variable_type.get(),
+    dist = new VectorDistance(nb_variable, variable_type.get(),
         variable_weight.get(), distance_type);
 
-    return boost::shared_ptr<Vector_distance>(dist);
+    return boost::shared_ptr<VectorDistance>(dist);
   }
 
-  static boost::shared_ptr<Vector_distance>
+  static boost::shared_ptr<VectorDistance>
   read_from_file(char* filename)
   {
-    Vector_distance* dist;
-    Format_error error;
+    VectorDistance* dist;
+    StatError error;
     dist = vector_distance_ascii_read(error, filename);
 
     if (!dist)
       stat_tool::wrap_util::throw_error(error);
 
-    return boost::shared_ptr<Vector_distance>(dist);
+    return boost::shared_ptr<VectorDistance>(dist);
   }
 
   static void
-  file_ascii_write(const Vector_distance& d, const char* path, bool exhaustive)
+  file_ascii_write(const VectorDistance& d, const char* path, bool exhaustive)
   {
     bool result = true;
-    Format_error error;
+    StatError error;
 
     result = d.ascii_write(error, path, exhaustive);
     if (!result)
       stat_tool::wrap_util::throw_error(error);
 
   }
-  WRAP_METHOD_SPREADSHEET_WRITE( Distance_matrix);
+  WRAP_METHOD_SPREADSHEET_WRITE(DistanceMatrix);
 
 };
 
@@ -1069,33 +1069,33 @@ public:
 void class_vectordistance()
 {
 
-  class_< Vector_distance, bases< STAT_interface > >
+  class_< VectorDistance, bases< StatInterface > >
   ("_VectorDistance", "Distance class", init<>())
   // constructors
   .def("__init__", make_constructor(VectorDistanceWrap::build_from_types))
   .def("__init__", make_constructor(VectorDistanceWrap::read_from_file))
 
   .def(self_ns::str(self))
-  .def("__len__", &Vector_distance::get_nb_variable)
+  .def("__len__", &VectorDistance::get_nb_variable)
   .def("file_ascii_write", VectorDistanceWrap::file_ascii_write, "Save vector distance summary into a file")
 
-  .add_property("nb_variable", &Vector_distance::get_nb_variable, "returns number of variable")
-  .add_property("distance_type", &Vector_distance::get_distance_type, "returns distance type")
+  .add_property("nb_variable", &VectorDistance::get_nb_variable, "returns number of variable")
+  .add_property("distance_type", &VectorDistance::get_distance_type, "returns distance type")
   //   .def("spreadsheet_write", VectorDistanceWrap::spreadsheet_write, "Save data into CSV file")
     ;
 
   /*
-  Vector_distance();
-    Vector_distance(int inb_variable , int idistance_type , int *ivariable_type ,
-                    double *iweight , int *inb_value , double ***isymbol_distance ,
-                    int *iperiod);
+  VectorDistance();
+    VectorDistance(int inb_variable , int idistance_type , int *ivariable_type ,
+                   double *iweight , int *inb_value , double ***isymbol_distance ,
+                   int *iperiod);
 
 
-    // fonctions pour la compatibilite avec la classe STAT_interface
+    // fonctions pour la compatibilite avec la classe StatInterface
 
     double* max_symbol_distance_computation(int variable) const;
 
-    void dispersion_computation(int variable , const Histogram *marginal , double *rank = 0) const;
+    void dispersion_computation(int variable , const FrequencyDistribution *marginal , double *rank = 0) const;
 
     // acces membres de la classe
 
