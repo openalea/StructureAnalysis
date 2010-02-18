@@ -107,7 +107,7 @@ void Distribution::convolution(Distribution &dist1 , Distribution &dist2 , int i
  *
  *--------------------------------------------------------------*/
 
-void Parametric::binomial_computation(int inb_value , char mode)
+void DiscreteParametric::binomial_computation(int inb_value , char mode)
 
 {
   register int i;
@@ -261,8 +261,8 @@ void Parametric::binomial_computation(int inb_value , char mode)
  *
  *--------------------------------------------------------------*/
 
-void Parametric::poisson_computation(int inb_value , double cumul_threshold ,
-                                     char mode)
+void DiscreteParametric::poisson_computation(int inb_value , double cumul_threshold ,
+                                             char mode)
 
 {
   register int i;
@@ -420,8 +420,8 @@ void Parametric::poisson_computation(int inb_value , double cumul_threshold ,
  *
  *--------------------------------------------------------------*/
 
-void Parametric::negative_binomial_computation(int inb_value , double cumul_threshold ,
-                                               char mode)
+void DiscreteParametric::negative_binomial_computation(int inb_value , double cumul_threshold ,
+                                                       char mode)
 
 {
   register int i;
@@ -580,7 +580,7 @@ void Parametric::negative_binomial_computation(int inb_value , double cumul_thre
  *
  *--------------------------------------------------------------*/
 
-void Parametric::uniform_computation()
+void DiscreteParametric::uniform_computation()
 
 {
   register int i;
@@ -627,10 +627,10 @@ int nb_value_computation(int ident , int inf_bound , int sup_bound ,
 
   else {
     if ((ident == POISSON) || (ident == NEGATIVE_BINOMIAL)) {
-      Parametric *dist;
+      DiscreteParametric *dist;
 
-      dist = new Parametric(ident , inf_bound , sup_bound , parameter , probability ,
-                            cumul_threshold);
+      dist = new DiscreteParametric(ident , inf_bound , sup_bound , parameter ,
+                                    probability , cumul_threshold);
       nb_value = dist->nb_value;
       delete dist;
     }
@@ -650,7 +650,7 @@ int nb_value_computation(int ident , int inf_bound , int sup_bound ,
  *
  *--------------------------------------------------------------*/
 
-void Parametric::computation(int min_nb_value , double cumul_threshold)
+void DiscreteParametric::computation(int min_nb_value , double cumul_threshold)
 
 {
   if (ident > 0) {
@@ -685,7 +685,7 @@ void Parametric::computation(int min_nb_value , double cumul_threshold)
  *
  *--------------------------------------------------------------*/
 
-void Forward::computation(const Parametric &dist)
+void Forward::computation(const DiscreteParametric &dist)
 
 {
   register int i;
@@ -724,14 +724,13 @@ void Forward::computation(const Parametric &dist)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la vraisemblance d'un histogramme pour la fonction de
- *  survie d'une loi donnee.
+ *  Calcul de la vraisemblance pour la fonction de survie d'une loi donnee.
  *
- *  argument : reference sur un objet Histogram.
+ *  argument : reference sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-double Distribution::survivor_likelihood_computation(const Histogram &histo) const
+double Distribution::survivor_likelihood_computation(const FrequencyDistribution &histo) const
 
 {
   register int i;
@@ -773,11 +772,11 @@ double Distribution::survivor_likelihood_computation(const Histogram &histo) con
  *
  *  Calcul de la valeur du chi2 pour une loi.
  *
- *  argument : reference sur un objet Histogram.
+ *  argument : reference sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-double Distribution::chi2_value_computation(const Histogram &histo) const
+double Distribution::chi2_value_computation(const FrequencyDistribution &histo) const
 
 {
   register int i;
@@ -837,29 +836,29 @@ double Distribution::chi2_value_computation(const Histogram &histo) const
  *  Regroupement des valeurs, calcul du nombre de degres de liberte et
  *  de la valeur du chi2.
  *
- *  arguments : reference sur un objet Histogram et sur un objet Test.
+ *  arguments : reference sur un objet FrequencyDistribution et sur un objet Test.
  *
  *--------------------------------------------------------------*/
 
-void Distribution::chi2_degree_of_freedom(const Histogram &histo , Test &test) const
+void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const
 
 {
   register int i , j;
   int *pfrequency , *filter_frequency;
   double *pmass , *pcumul , *filter_mass;
   Distribution *filter_dist;
-  Histogram *filter_histo;
+  FrequencyDistribution *filter_histo;
 
 
   if ((histo.offset >= offset) && (histo.nb_value <= nb_value)) {
 
-    // creation et initialisation des objets Distribution et Histogram
+    // creation et initialisation des objets Distribution et FrequencyDistribution
 
     filter_dist = new Distribution(nb_value);
     filter_dist->offset = offset;
     filter_dist->nb_parameter = nb_parameter;
 
-    filter_histo = new Histogram(histo.nb_value);
+    filter_histo = new FrequencyDistribution(histo.nb_value);
     filter_histo->nb_element = histo.nb_element;
 
     // regroupement des valeurs
@@ -927,13 +926,13 @@ void Distribution::chi2_degree_of_freedom(const Histogram &histo , Test &test) c
 
 /*--------------------------------------------------------------*
  *
- *  Test de l'ajustement d'une loi a un histogramme.
+ *  Test d'ajustement d'une loi.
  *
- *  arguments : reference sur un objet Histogram et sur un objet Test.
+ *  arguments : reference sur un objet FrequencyDistribution et sur un objet Test.
  *
  *--------------------------------------------------------------*/
 
-void Distribution::chi2_fit(const Histogram &histo , Test &test) const
+void Distribution::chi2_fit(const FrequencyDistribution &histo , Test &test) const
 
 {
   if ((histo.offset >= offset) && (histo.nb_value <= nb_value)) {
@@ -949,16 +948,16 @@ void Distribution::chi2_fit(const Histogram &histo , Test &test) const
  *
  *  Troncature d'une loi.
  *
- *  arguments : reference sur un objet Format_error, valeur maximum.
+ *  arguments : reference sur un objet StatError, valeur maximum.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Distribution::truncate(Format_error &error , int imax_value) const
+DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_value) const
 
 {
   register int i;
   double *pmass , *pcumul , *cmass , *ccumul;
-  Parametric_model *dist;
+  DiscreteParametricModel *dist;
 
 
   error.init();
@@ -970,9 +969,9 @@ Parametric_model* Distribution::truncate(Format_error &error , int imax_value) c
 
   else {
 
-    // creation d'un objet Parametric_model
+    // creation d'un objet DiscreteParametricModel
 
-    dist = new Parametric_model(MIN(imax_value + 1 , nb_value));
+    dist = new DiscreteParametricModel(MIN(imax_value + 1 , nb_value));
 
     pmass = dist->mass;
     cmass = mass;
@@ -998,17 +997,18 @@ Parametric_model* Distribution::truncate(Format_error &error , int imax_value) c
 
 /*--------------------------------------------------------------*
  *
- *  Ajustement d'une loi a un histogramme.
+ *  Ajustement d'une loi.
  *
- *  arguments : references sur un objet Format_error et
- *              sur un objet Parametric.
+ *  arguments : references sur un objet StatError et
+ *              sur un objet DiscreteParametric.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Histogram::fit(Format_error &error , const Parametric &idist) const
+DiscreteParametricModel* FrequencyDistribution::fit(StatError &error ,
+                                                    const DiscreteParametric &idist) const
 
 {
-  Parametric_model *dist;
+  DiscreteParametricModel *dist;
 
 
   error.init();
@@ -1019,7 +1019,7 @@ Parametric_model* Histogram::fit(Format_error &error , const Parametric &idist) 
   }
 
   else {
-    dist = new Parametric_model(idist , this);
+    dist = new DiscreteParametricModel(idist , this);
   }
 
   return dist;
@@ -1029,24 +1029,24 @@ Parametric_model* Histogram::fit(Format_error &error , const Parametric &idist) 
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un histogramme.
+ *  (binomiale negative, binomiale, Poisson).
  *
  *  arguments : identificateur de la loi, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Parametric* Histogram::parametric_estimation(int ident , int min_inf_bound ,
-                                             bool flag , double cumul_threshold) const
+DiscreteParametric* FrequencyDistribution::parametric_estimation(int ident , int min_inf_bound ,
+                                                                 bool flag , double cumul_threshold) const
 
 {
   double likelihood;
-  Parametric *dist;
+  DiscreteParametric *dist;
 
 
-  // creation d'un objet Parametric
+  // creation d'un objet DiscreteParametric
 
-  dist = new Parametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF) , ident);
+  dist = new DiscreteParametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF) , ident);
 
   // estimation des parametres de la loi
 
@@ -1070,21 +1070,21 @@ Parametric* Histogram::parametric_estimation(int ident , int min_inf_bound ,
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un histogramme.
+ *  (binomiale negative, binomiale, Poisson).
  *
- *  arguments : reference sur un objet Format_error, identificateur de la loi,
+ *  arguments : reference sur un objet StatError, identificateur de la loi,
  *              borne inferieure minimum, flag sur la borne inferieure,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Histogram::parametric_estimation(Format_error &error , int ident ,
-                                                   int min_inf_bound , bool flag ,
-                                                   double cumul_threshold) const
+DiscreteParametricModel* FrequencyDistribution::parametric_estimation(StatError &error , int ident ,
+                                                                      int min_inf_bound , bool flag ,
+                                                                      double cumul_threshold) const
 
 {
   double likelihood;
-  Parametric_model *dist;
+  DiscreteParametricModel *dist;
 
 
   error.init();
@@ -1096,10 +1096,10 @@ Parametric_model* Histogram::parametric_estimation(Format_error &error , int ide
 
   else {
 
-    // creation d'un objet Parametric_model
+    // creation d'un objet DiscreteParametricModel
 
-    dist = new Parametric_model((int)(nb_value * SAMPLE_NB_VALUE_COEFF) , ident);
-    dist->histogram = new Distribution_data(*this);
+    dist = new DiscreteParametricModel((int)(nb_value * SAMPLE_NB_VALUE_COEFF) , ident);
+    dist->frequency_distribution = new DiscreteDistributionData(*this);
 
     // estimation des parametres de la loi
 
@@ -1134,20 +1134,20 @@ Parametric_model* Histogram::parametric_estimation(Format_error &error , int ide
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un histogramme.
+ *  (binomiale negative, binomiale, Poisson).
  *
- *  arguments : reference sur un objet Format_error, borne inferieure minimum,
+ *  arguments : reference sur un objet StatError, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Histogram::type_parametric_estimation(Format_error &error ,
-                                                        int min_inf_bound , bool flag ,
-                                                        double cumul_threshold) const
+DiscreteParametricModel* FrequencyDistribution::type_parametric_estimation(StatError &error ,
+                                                                           int min_inf_bound , bool flag ,
+                                                                           double cumul_threshold) const
 
 {
   double likelihood;
-  Parametric_model *dist;
+  DiscreteParametricModel *dist;
 
 
   error.init();
@@ -1159,10 +1159,10 @@ Parametric_model* Histogram::type_parametric_estimation(Format_error &error ,
 
   else {
 
-    // creation d'un objet Parametric_model
+    // creation d'un objet DiscreteParametricModel
 
-    dist = new Parametric_model((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
-    dist->histogram = new Distribution_data(*this);
+    dist = new DiscreteParametricModel((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
+    dist->frequency_distribution = new DiscreteDistributionData(*this);
 
     // estimation des parametres de la loi
 
@@ -1311,7 +1311,7 @@ void Distribution::penalty_computation(double weight , int type , double *penalt
  *
  *--------------------------------------------------------------*/
 
-void Parametric::reestimation(const Reestimation<double> *reestim , int nb_estim)
+void DiscreteParametric::reestimation(const Reestimation<double> *reestim , int nb_estim)
 
 {
   switch (ident) {
@@ -1433,7 +1433,7 @@ int Distribution::simulation() const
  *
  *--------------------------------------------------------------*/
 
-int Parametric::simulation() const
+int DiscreteParametric::simulation() const
 
 {
   int range = nb_value - offset , value;
@@ -1461,17 +1461,18 @@ int Parametric::simulation() const
 
 /*--------------------------------------------------------------*
  *
- *  Constitution d'un histogramme par simulation d'une loi parametrique.
+ *  Constitution d'un echantillon par simulation d'une loi parametrique.
  *
- *  arguments : reference sur un objet Format_error, effectif.
+ *  arguments : reference sur un objet StatError, effectif.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Parametric_model::simulation(Format_error &error , int nb_element) const
+DiscreteDistributionData* DiscreteParametricModel::simulation(StatError &error ,
+                                                              int nb_element) const
 
 {
   register int i;
-  Distribution_data *histo;
+  DiscreteDistributionData *histo;
 
 
   error.init();
@@ -1483,18 +1484,18 @@ Distribution_data* Parametric_model::simulation(Format_error &error , int nb_ele
 
   else {
 
-    // creation de l'histogramme
+    // creation de la loi empirique
 
-    histo = new Distribution_data(*this);
-    histo->distribution = new Parametric_model(*this , false);
+    histo = new DiscreteDistributionData(*this);
+    histo->distribution = new DiscreteParametricModel(*this , false);
 
     // simulation
 
     for (i = 0;i < nb_element;i++) {
-      (histo->frequency[Parametric::simulation()])++;
+      (histo->frequency[DiscreteParametric::simulation()])++;
     }
 
-    // extraction des caracteristiques de l'histogramme
+    // extraction des caracteristiques de la loi empirique
 
     histo->nb_value_computation();
     histo->offset_computation();
