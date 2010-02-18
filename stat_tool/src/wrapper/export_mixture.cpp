@@ -49,9 +49,9 @@ class WRAP
 public:
 
   static boost::shared_ptr<Mixture>
-  mixture_from_file(char* filename)
+  mixture_from_file(char *filename)
   {
-    Format_error error;
+    StatError error;
     Mixture *mix = NULL;
     mix = mixture_ascii_read(error, filename);
     if (!mix)
@@ -62,7 +62,7 @@ public:
   static boost::shared_ptr<Mixture>
   mixture_from_dists(boost::python::list& weights, boost::python::list& dists)
   {
-    Format_error error;
+    StatError error;
     Mixture *mix = NULL;
     int nb_component = 0;
 
@@ -83,22 +83,22 @@ public:
     stat_tool::wrap_util::auto_ptr_array<double> weight(
         new double[nb_component]);
 
-    stat_tool::wrap_util::auto_ptr_array<const Parametric*> component(
-        new const Parametric*[nb_component]);
+    stat_tool::wrap_util::auto_ptr_array<const DiscreteParametric*> component(
+        new const DiscreteParametric*[nb_component]);
 
     int i = 0;
     for (i = 0; i < nb_component; i++)
       {
         weight[i] = boost::python::extract<double>(weights[i]);
 
-        boost::python::extract<Parametric*> get_param(dists[i]);
+        boost::python::extract<DiscreteParametric*> get_param(dists[i]);
         if (get_param.check())
           {
-            component[i] = new Parametric(*get_param());
+            component[i] = new DiscreteParametric(*get_param());
           }
         else
           {
-            component[i] = new Parametric(
+            component[i] = new DiscreteParametric(
                 *boost::python::extract<Distribution*>(dists[i])());
           }
 
@@ -115,7 +115,7 @@ public:
   static boost::shared_ptr<Mixture>
   mixture_from_unknown_component(boost::python::list& dists)
   {
-    Format_error error;
+    StatError error;
     Mixture *mix = NULL;
     int nb_component = 0;
 
@@ -125,12 +125,12 @@ public:
     if (nb_component == 0)
       stat_tool::wrap_util::throw_error("Input list cannot be empty");
 
-    stat_tool::wrap_util::auto_ptr_array<const Parametric *> component(
-        new const Parametric*[nb_component]);
+    stat_tool::wrap_util::auto_ptr_array<const DiscreteParametric *> component(
+        new const DiscreteParametric*[nb_component]);
 
     for (int i = 0; i < nb_component; i++)
       {
-        component[i] = boost::python::extract<Parametric *>(dists[i]);
+        component[i] = boost::python::extract<DiscreteParametric *>(dists[i]);
       }
 
     mix = new Mixture(nb_component, component.get());
@@ -140,43 +140,43 @@ public:
     return boost::shared_ptr<Mixture>(mix);
   }
 
-  static Parametric_model*
-  extract_weight(const Mixture& mixt)
+  static DiscreteParametricModel*
+  extract_weight(const Mixture &mixt)
   {
-    Format_error error;
-    Parametric_model* ret;
-    Mixture_data* mixt_data = NULL;
+    StatError error;
+    DiscreteParametricModel *ret;
+    MixtureData *mixt_data = NULL;
 
     mixt_data = mixt.get_mixture_data();
-    ret = new Parametric_model(*(mixt.get_weight()),
+    ret = new DiscreteParametricModel(*(mixt.get_weight()),
         (mixt_data ? mixt_data->get_weight() : NULL));
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
     return ret;
   }
 
-  static Parametric_model*
-  extract_mixture(Mixture& mixture_input)
+  static DiscreteParametricModel*
+  extract_mixture(Mixture &mixture_input)
   {
-    Format_error error;
-    Parametric_model* ret;
-    Mixture_data* mixture_data = NULL;
+    StatError error;
+    DiscreteParametricModel *ret;
+    MixtureData *mixture_data = NULL;
 
     mixture_data = mixture_input.get_mixture_data();
 
-    ret = new Parametric_model(*((Distribution*) (&mixture_input)),
-        (Histogram*) mixture_data);
+    ret = new DiscreteParametricModel(*((Distribution*) (&mixture_input)),
+        (FrequencyDistribution*) mixture_data);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
     return ret;
   }
 
-  static Parametric_model*
-  extract_component(const Mixture& input, int var1)
+  static DiscreteParametricModel*
+  extract_component(const Mixture &input, int var1)
   {
-    Format_error error;
-    Parametric_model* ret = NULL;
+    StatError error;
+    DiscreteParametricModel *ret = NULL;
 
     ret = input.extract(error, var1);
     if (!ret)
@@ -186,11 +186,11 @@ public:
   }
 
   // component case
-  static Mixture_data*
-  extract_data(const Mixture& input)
+  static MixtureData*
+  extract_data(const Mixture &input)
   {
-    Format_error error;
-    Mixture_data* ret = NULL;
+    StatError error;
+    MixtureData* ret = NULL;
 
     ret = input.extract_data(error);
     if (!ret)
@@ -199,24 +199,24 @@ public:
     return ret;
   }
 
-  WRAP_METHOD1(Mixture, simulation, Mixture_data, int);
+  WRAP_METHOD1(Mixture, simulation, MixtureData, int);
   WRAP_METHOD_FILE_ASCII_WRITE( Mixture);
   WRAP_METHOD_SPREADSHEET_WRITE( Mixture);
 
   static MultiPlotSet*
-  get_plotable(const Mixture& mixt)
+  get_plotable(const Mixture &mixt)
   {
-    Format_error error;
-    MultiPlotSet* ret = mixt.get_plotable();
+    StatError error;
+    MultiPlotSet *ret = mixt.get_plotable();
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
     return ret;
   }
 
   static MultiPlotSet*
-  survival_get_plotable(const Mixture& p)
+  survival_get_plotable(const Mixture &p)
   {
-    Format_error error;
+    StatError error;
     MultiPlotSet* ret = p.survival_get_plotable(error);
     if (!ret)
       ERROR;
@@ -231,7 +231,7 @@ public:
 void class_mixture()
 {
 
-  class_< Mixture, bases< Distribution, STAT_interface > >
+  class_< Mixture, bases< Distribution, StatInterface > >
   ("_Mixture", "Mixture Distribution")
   // constructors
 
@@ -268,7 +268,7 @@ void class_mixture()
 
 
   //others
-  //  DEF_RETURN_VALUE_NO_ARGS("get_plotable", &STAT_interface::get_plotable,"Return a plotable (no parameters)");
+  //  DEF_RETURN_VALUE_NO_ARGS("get_plotable", &StatInterface::get_plotable,"Return a plotable (no parameters)");
   .def("file_ascii_write", WRAP::file_ascii_write,
       "Save Compound into a file")
   .def("spreadsheet_write", WRAP::spreadsheet_write,
@@ -284,47 +284,47 @@ void class_mixture()
 
   Mixture();
   Mixture(const Mixture &mixt , bool *component_flag , int inb_value);
-  Mixture(int inb_component , const Parametric **pcomponent);
+  Mixture(int inb_component , const DiscreteParametric **pcomponent);
   Mixture(const Mixture &mixt , bool data_flag = true)    :Distribution(mixt)
     { copy(mixt , data_flag); }
 
 
   void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
                      bool component_flag = true);
-  double likelihood_computation(const Mixture_data &mixt_histo) const;
+  double likelihood_computation(const MixtureData &mixt_histo) const;
 
   // acces membres de la classe
 
-  Parametric* get_component(int index) const { return component[index]; }
+  DiscreteParametric* get_component(int index) const { return component[index]; }
 */
 }
 #undef WRAP
 
 
-////////////////////////// Class Mixture_data //////////////////////////////////
+////////////////////////// Class MixtureData //////////////////////////////////
 #define WRAP MixtureDataWrap
 class MixtureDataWrap
 {
 
 public:
 
-  WRAP_METHOD1(Mixture_data, extract, Distribution_data, int);
-  WRAP_METHOD_FILE_ASCII_WRITE( Mixture_data);
+  WRAP_METHOD1(MixtureData, extract, DiscreteDistributionData, int);
+  WRAP_METHOD_FILE_ASCII_WRITE( MixtureData);
 
-  static Distribution_data*
-  extract_weight(const Mixture_data& mixt_histo)
+  static DiscreteDistributionData*
+  extract_weight(const MixtureData &mixt_histo)
   {
-    Distribution_data* ret;
-    ret = new Distribution_data(*(mixt_histo.get_weight()),
+    DiscreteDistributionData *ret;
+    ret = new DiscreteDistributionData(*(mixt_histo.get_weight()),
         mixt_histo.get_mixture()->get_weight());
     return ret;
   }
 
-  static Distribution_data*
-  extract_mixture(const Mixture_data& mixt_histo)
+  static DiscreteDistributionData*
+  extract_mixture(const MixtureData &mixt_histo)
   {
-    Distribution_data* ret;
-    ret = new Distribution_data(mixt_histo, mixt_histo.get_mixture());
+    DiscreteDistributionData *ret;
+    ret = new DiscreteDistributionData(mixt_histo, mixt_histo.get_mixture());
     return ret;
   }
 
@@ -332,18 +332,18 @@ public:
 
 void class_mixture_data()
 {
-  class_< Mixture_data, bases< Histogram, STAT_interface > >
+  class_< MixtureData, bases< FrequencyDistribution, StatInterface > >
   ("_MixtureData",  "Mixture Data")
 
   // Python Operators
   .def(self_ns::str(self)) //str
 
   // properties
- .add_property("nb_component", &Mixture_data::get_nb_component,
+ .add_property("nb_component", &MixtureData::get_nb_component,
       "Return the number of components.")
 
   // getters
-  DEF_RETURN_VALUE("get_component", &Mixture_data::get_component,
+  DEF_RETURN_VALUE("get_component", &MixtureData::get_component,
       args("index"), "Return the number of components.")
 
   // Used in Python modules such as:
@@ -361,17 +361,17 @@ void class_mixture_data()
   .def("file_ascii_write", WRAP::file_ascii_write, "Save Compound into a file")
 
   /*
-    Mixture_data(const Histogram &histo , int inb_component);
-    Mixture_data(const Mixture &mixt);
-    Mixture_data(const Mixture_data &mixt_histo , bool model_flag = true) :Histogram(mixt_histo) { copy(mixt_histo , model_flag); }
+    MixtureData(const FrequencyDistribution &histo , int inb_component);
+    MixtureData(const Mixture &mixt);
+    MixtureData(const MixtureData &mixt_histo , bool model_flag = true) :FrequencyDistribution(mixt_histo) { copy(mixt_histo , model_flag); }
 
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix , const char *title = 0) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = 0) const;
     plotable::MultiPlotSet* get_plotable() const;
 
     double information_computation() const;
 
-    Histogram* get_component(int index) const { return component[index]; }
+    FrequencyDistribution* get_component(int index) const { return component[index]; }
     */
     ;
 }
@@ -391,7 +391,7 @@ public:
   static boost::shared_ptr<Mv_Mixture>
   mv_mixture_from_file(char* filename)
   {
-    Format_error error;
+    StatError error;
     Mv_Mixture *mix = NULL;
     mix = mv_mixture_ascii_read(error, filename);
 
@@ -417,11 +417,11 @@ public:
   mv_mixture_from_components(boost::python::list& weights,
       boost::python::list& dists)
   {
-    Format_error error;
+    StatError error;
     Mv_Mixture *mix = NULL;
     int nb_component = 0;
     int nb_variable = 0;
-    // Parametric *pcomp = NULL;
+    // DiscreteParametric *pcomp = NULL;
     // boost::python::list comp_list;
 
 
@@ -448,11 +448,11 @@ public:
     stat_tool::wrap_util::auto_ptr_array<double> weight(
         new double[nb_component]);
 
-    stat_tool::wrap_util::auto_ptr_array<Parametric_process *> pcomponent(
-        new Parametric_process*[nb_variable]);
+    stat_tool::wrap_util::auto_ptr_array<DiscreteParametricProcess *> pcomponent(
+        new DiscreteParametricProcess*[nb_variable]);
 
-    stat_tool::wrap_util::auto_ptr_array<Nonparametric_process *> npcomponent(
-        new Nonparametric_process*[nb_variable]);
+    stat_tool::wrap_util::auto_ptr_array<NonparametricProcess *> npcomponent(
+        new NonparametricProcess*[nb_variable]);
 
     stat_tool::wrap_util::auto_ptr_array<bool> is_parametric(
         new bool[nb_variable]);
@@ -465,7 +465,7 @@ public:
     for (var = 0; var < nb_variable; var++)
       {
 
-        Parametric **pprocess = new Parametric*[nb_component];
+        DiscreteParametric **pprocess = new DiscreteParametric*[nb_component];
         Distribution **npprocess = new Distribution*[nb_component];
 
         pprocess[0] = NULL;
@@ -473,7 +473,7 @@ public:
 
         for (i = 0; i < nb_component; i++)
           {
-            boost::python::extract<Parametric*> x(dists[i][var]);
+            boost::python::extract<DiscreteParametric*> x(dists[i][var]);
             if (x.check())
               {
                 pprocess[i] = x();
@@ -505,19 +505,19 @@ public:
                   }
                 else
                   stat_tool::wrap_util::throw_error(
-                      "Bad type for list element: must be Parametric or Distribution");
+                      "Bad type for list element: must be DiscreteParametric or Distribution");
 
               }
           } // end for (i)
         if (pprocess[0] != NULL)
           {
-            pcomponent[var] = new Parametric_process(nb_component, pprocess);
+            pcomponent[var] = new DiscreteParametricProcess(nb_component, pprocess);
             npcomponent[var] = NULL;
           }
         else
           {
             pcomponent[var] = NULL;
-            npcomponent[var] = new Nonparametric_process(nb_component,
+            npcomponent[var] = new NonparametricProcess(nb_component,
                 npprocess);
           }
 
@@ -549,26 +549,26 @@ public:
     return boost::shared_ptr<Mv_Mixture>(mix);
   }
 
-  static Parametric_model*
+  static DiscreteParametricModel*
   extract_weight(const Mv_Mixture& mixt)
   {
-    Parametric_model* ret;
+    DiscreteParametricModel* ret;
     Mv_Mixture_data* mixt_data = NULL;
 
     mixt_data = mixt.get_mixture_data();
-    ret = new Parametric_model(*(mixt.get_weight()),
+    ret = new DiscreteParametricModel(*(mixt.get_weight()),
         (mixt_data ? mixt_data->get_weight() : NULL));
     return ret;
   }
 
-  static Parametric_model*
+  static DiscreteParametricModel*
   extract_mixture(const Mv_Mixture& mixt, int ivariable)
   {
-    Format_error error;
-    Parametric_model* ret;
+    StatError error;
+    DiscreteParametricModel* ret;
     Mv_Mixture_data* mixt_data = NULL;
     Distribution *marginal = mixt.extract_distribution(error, ivariable);
-    Histogram *marginal_hist = NULL;
+    FrequencyDistribution *marginal_hist = NULL;
 
     if (marginal == NULL)
       stat_tool::wrap_util::throw_error(error);
@@ -578,7 +578,7 @@ public:
     if (mixt_data != NULL)
       marginal_hist = mixt_data->get_marginal(ivariable);
 
-    ret = new Parametric_model(*marginal, marginal_hist);
+    ret = new DiscreteParametricModel(*marginal, marginal_hist);
 
     // margina_hist is only a reference, included in mixt_data
     /* if (marginal_hist != NULL)
@@ -615,7 +615,7 @@ public:
     int llength, i;
     ostringstream error_message;
     object o;
-    Format_error error;
+    StatError error;
     int *iperm = NULL;
 
     llength = boost::python::len(perm);
@@ -691,7 +691,7 @@ public:
 
 void class_mv_mixture()
 {
-  class_< Mv_Mixture, bases< STAT_interface > >
+  class_< Mv_Mixture, bases<StatInterface> >
     ("_MvMixture", "Multivariate Mixture Distribution")
 
     // constructors
@@ -745,26 +745,26 @@ void class_mv_mixture()
 
     /*
 
-      Mv_Mixture(int inb_component , double *pweight , int inb_variable, Parametric_process **ppcomponent, Nonparametric_process **pnpcomponent);
-      Mv_Mixture(int inb_component , int inb_variable, const Parametric_process **ppcomponent,  const Nonparametric_process **pnpcomponent);
+      Mv_Mixture(int inb_component , double *pweight , int inb_variable, DiscreteParametricProcess **ppcomponent, NonparametricProcess **pnpcomponent);
+      Mv_Mixture(int inb_component , int inb_variable, const DiscreteParametricProcess **ppcomponent,  const NonparametricProcess **pnpcomponent);
       Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag , int inb_variable);
       Mv_Mixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
 
-      Parametric_model* extract_parametric_model(Format_error &error , int ivariable,
+      DiscreteParametricModel* extract_parametric_model(StatError &error , int ivariable,
                              int index) const;
-      Distribution* extract_nonparametric_model(Format_error &error , int ivariable,
+      Distribution* extract_nonparametric_model(StatError &error , int ivariable,
                             int index) const;
 
       plotable::MultiPlotSet* get_plotable() const;
 
       double likelihood_computation(const Vectors &mixt_data, bool log_computation=false) const;
 
-      Mv_Mixture_data* cluster(Format_error &error,  const Vectors &vec,int algorithm=VITERBI) const;
+      Mv_Mixture_data* cluster(StatError &error,  const Vectors &vec,int algorithm=VITERBI) const;
 
       Mv_Mixture_data* get_mixture_data() const { return mixture_data; }
-      Parametric_process* get_parametric_process(int variable) const;
-      Nonparametric_process* get_nonparametric_process(int variable) const;
-      Parametric* get_parametric_component(int variable, int index) const;
+      DiscreteParametricProcess* get_parametric_process(int variable) const;
+      NonparametricProcess* get_nonparametric_process(int variable) const;
+      DiscreteParametric* get_parametric_component(int variable, int index) const;
       Distribution* get_nonparametric_component(int variable, int index) const;*/
 }
 
@@ -788,12 +788,12 @@ public:
     return boost::shared_ptr<Mv_Mixture_data>(mix_cp);
   }
 
-  static Distribution_data*
+  static DiscreteDistributionData*
   extract_weight(const Mv_Mixture_data& mixt_histo)
   {
-    Distribution_data* ret;
+    DiscreteDistributionData* ret;
 
-    ret = new Distribution_data(*(mixt_histo.get_weight()),
+    ret = new DiscreteDistributionData(*(mixt_histo.get_weight()),
         mixt_histo.get_mixture()->get_weight());
 
     return ret;
@@ -816,8 +816,8 @@ public:
           "No mixture model available for Mixture Data");
     return ret;
   }
-  WRAP_METHOD2(Mv_Mixture_data, extract, Distribution_data, int, int);
-  WRAP_METHOD1(Mv_Mixture_data, extract_marginal, Distribution_data, int);
+  WRAP_METHOD2(Mv_Mixture_data, extract, DiscreteDistributionData, int, int);
+  WRAP_METHOD1(Mv_Mixture_data, extract_marginal, DiscreteDistributionData, int);
   WRAP_METHOD_FILE_ASCII_WRITE( Mv_Mixture_data);
   WRAP_METHOD_PLOT_WRITE( Mv_Mixture_data);
   WRAP_METHOD_SPREADSHEET_WRITE( Mv_Mixture_data);
@@ -851,7 +851,7 @@ void class_mv_mixture_data()
 
     double information_computation() const;
 
-    Histogram* get_component(int variable, int index) const { return component[variable][index]; }
+    FrequencyDistribution* get_component(int variable, int index) const { return component[variable][index]; }
 */
 
 };
