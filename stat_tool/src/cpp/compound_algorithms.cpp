@@ -408,7 +408,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
  *
  *  Estimation des parametres d'une loi composee par l'algorithme EM.
  *
- *  arguments : references sur un objet Format_error, stream, references sur les lois,
+ *  arguments : references sur un objet StatError, stream, references sur les lois,
  *              type de la loi inconnue ('s' : loi de la somme, 'e' : loi elementaire),
  *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
  *              estimation d'une loi parametrique), nombre d'iterations,
@@ -418,7 +418,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
  *
  *--------------------------------------------------------------*/
 
-Compound* FrequencyDistribution::compound_estimation(Format_error &error , ostream &os ,
+Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
                                                      const DiscreteParametric &sum_dist ,
                                                      const DiscreteParametric &dist , char type ,
                                                      int estimator , int nb_iter , double weight ,
@@ -776,7 +776,7 @@ Compound* FrequencyDistribution::compound_estimation(Format_error &error , ostre
  *
  *  Estimation des parametres d'une loi composee par l'algorithme EM.
  *
- *  arguments : references sur un objet Format_error, stream, reference sur la loi connue,
+ *  arguments : references sur un objet StatError, stream, reference sur la loi connue,
  *              type de la loi inconnue ('s' : loi de la somme, 'e' : loi elementaire),
  *              borne inferieure minimum de la loi inconnue, type d'estimateur
  *              (vraisemblance, vraisemblance penalisee ou estimation d'une loi parametrique),
@@ -786,7 +786,7 @@ Compound* FrequencyDistribution::compound_estimation(Format_error &error , ostre
  *
  *--------------------------------------------------------------*/
 
-Compound* FrequencyDistribution::compound_estimation(Format_error &error , ostream &os ,
+Compound* FrequencyDistribution::compound_estimation(StatError &error , ostream &os ,
                                                      const DiscreteParametric &known_dist , char type ,
                                                      int min_inf_bound , int estimator , int nb_iter ,
                                                      double weight , int penalty_type , int outside) const
@@ -850,11 +850,11 @@ Compound* FrequencyDistribution::compound_estimation(Format_error &error , ostre
  *
  *  Simulation par une loi composee.
  *
- *  arguments : reference sur un objet Format_error, effectif.
+ *  arguments : reference sur un objet StatError, effectif.
  *
  *--------------------------------------------------------------*/
 
-CompoundData* Compound::simulation(Format_error &error , int nb_element) const
+CompoundData* Compound::simulation(StatError &error , int nb_element) const
 
 {
   register int i , j;
