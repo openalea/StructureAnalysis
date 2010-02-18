@@ -67,18 +67,18 @@ const int CONVOLUTION_COEFF = 10;      // coefficient arrondi estimateur
  */
 
 
-class Histogram;
-class Convolution_data;
+class FrequencyDistribution;
+class ConvolutionData;
 
 
-// class Convolution : public STAT_interface , protected Distribution {
-class Convolution : public STAT_interface , public Distribution {  // produit de convolution
-                                                                   // de lois discretes
-    friend class Histogram;
-    friend class Convolution_data;
+// class Convolution : public StatInterface , protected Distribution {
+class Convolution : public StatInterface , public Distribution {  // produit de convolution
+                                                                  // de lois discretes
+    friend class FrequencyDistribution;
+    friend class ConvolutionData;
 
     friend Convolution* convolution_building(Format_error &error , int nb_dist ,
-                                             const Parametric **dist);
+                                             const DiscreteParametric **dist);
     friend Convolution* convolution_ascii_read(Format_error &error , const char *path ,
                                                double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Convolution &convol)
@@ -86,35 +86,35 @@ class Convolution : public STAT_interface , public Distribution {  // produit de
 
 private :
 
-    Convolution_data *convolution_data;  // pointeur sur un objet Convolution_data
+    ConvolutionData *convolution_data;  // pointeur sur un objet ConvolutionData
     int nb_distribution;    // nombre de lois elementaires
-    Parametric **distribution;  // lois elementaires
+    DiscreteParametric **distribution;  // lois elementaires
 
     void copy(const Convolution &convol , bool data_flag = true);
     void remove();
 
-    std::ostream& ascii_write(std::ostream &os , const Convolution_data *convol_histo ,
+    std::ostream& ascii_write(std::ostream &os , const ConvolutionData *convol_histo ,
                               bool exhaustive , bool file_flag) const;
-    std::ostream& spreadsheet_write(std::ostream &os , const Convolution_data *convol_histo) const;
+    std::ostream& spreadsheet_write(std::ostream &os , const ConvolutionData *convol_histo) const;
     bool plot_write(const char *prefix , const char *title ,
-                    const Convolution_data *convol_histo) const;
-    MultiPlotSet* get_plotable(const Convolution_data *convol_histo) const;
+                    const ConvolutionData *convol_histo) const;
+    MultiPlotSet* get_plotable(const ConvolutionData *convol_histo) const;
 
-    void expectation_step(const Histogram &histo , const Distribution **partial_convol ,
+    void expectation_step(const FrequencyDistribution &histo , const Distribution **partial_convol ,
                           Reestimation<double> **reestim) const;
 
 public :
 
     Convolution();
-    Convolution(int nb_dist , const Parametric **pdist);
-    Convolution(const Parametric &known_dist , const Parametric &unknown_dist);
+    Convolution(int nb_dist , const DiscreteParametric **pdist);
+    Convolution(const DiscreteParametric &known_dist , const DiscreteParametric &unknown_dist);
     Convolution(const Convolution &convol , bool data_flag = true)
     :Distribution(convol) { copy(convol , data_flag); }
     ~Convolution();
     Convolution& operator=(const Convolution &convol);
 
-    Parametric_model* extract(Format_error &error , int index) const;
-    Convolution_data* extract_data(Format_error &error) const;
+    DiscreteParametricModel* extract(Format_error &error , int index) const;
+    ConvolutionData* extract_data(Format_error &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -128,52 +128,52 @@ public :
 
     void computation(int min_nb_value = 1 , double cumul_threshold = CONVOLUTION_THRESHOLD ,
                      bool *dist_flag = NULL);
-    Convolution_data* simulation(Format_error &error , int nb_element) const;
+    ConvolutionData* simulation(Format_error &error , int nb_element) const;
 
 //     // acces membres de la classe
 
-    Convolution_data* get_convolution_data() const { return convolution_data; }
+    ConvolutionData* get_convolution_data() const { return convolution_data; }
     int get_nb_distribution() const { return nb_distribution; }
-    Parametric* get_distribution(int index) const { return distribution[index]; }
+    DiscreteParametric* get_distribution(int index) const { return distribution[index]; }
 };
 
 
 Convolution* convolution_building(Format_error &error , int nb_dist ,
-                                  const Parametric **dist);
+                                  const DiscreteParametric **dist);
 Convolution* convolution_ascii_read(Format_error &error , const char *path ,
                                     double cumul_threshold = CONVOLUTION_THRESHOLD);
 
 
 
-// class Convolution_data : public STAT_interface , protected Histogram {
-class Convolution_data : public STAT_interface , public Histogram {  // structure de donnees correspondant
-                                                                     // a un produit de convolution
-    friend class Histogram;
+// class ConvolutionData : public StatInterface , protected FrequencyDistribution {
+class ConvolutionData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                               // a un produit de convolution de lois discretes
+    friend class FrequencyDistribution;
     friend class Convolution;
 
-    friend std::ostream& operator<<(std::ostream &os , const Convolution_data &convol_histo)
+    friend std::ostream& operator<<(std::ostream &os , const ConvolutionData &convol_histo)
     { return convol_histo.ascii_write(os , false); }
 
 private :
 
     Convolution *convolution;  // pointeur sur un objet Convolution
-    int nb_histogram;       // nombre d'histogrammes
-    Histogram **histogram;  // histogrammes correspondant aux lois elementaires
+    int nb_distribution;       // nombre de lois elementaires empiriques
+    FrequencyDistribution **frequency_distribution;  // lois elementaires empiriques
 
-    void copy(const Convolution_data &convol_histo , bool model_flag = true);
+    void copy(const ConvolutionData &convol_histo , bool model_flag = true);
     void remove();
 
 public :
 
-    Convolution_data();
-    Convolution_data(const Histogram &histo , int nb_histo);
-    Convolution_data(const Convolution &convol);
-    Convolution_data(const Convolution_data &convol_histo , bool model_flag = true)
-    :Histogram(convol_histo) { copy(convol_histo , model_flag); }
-    virtual ~Convolution_data();
-    Convolution_data& operator=(const Convolution_data &convol_histo);
+    ConvolutionData();
+    ConvolutionData(const FrequencyDistribution &histo , int nb_dist);
+    ConvolutionData(const Convolution &convol);
+    ConvolutionData(const ConvolutionData &convol_histo , bool model_flag = true)
+    :FrequencyDistribution(convol_histo) { copy(convol_histo , model_flag); }
+    virtual ~ConvolutionData();
+    ConvolutionData& operator=(const ConvolutionData &convol_histo);
 
-    Distribution_data* extract(Format_error &error , int index) const;
+    DiscreteDistributionData* extract(Format_error &error , int index) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -188,8 +188,8 @@ public :
     // acces membres de la classe
 
     Convolution* get_convolution() const { return convolution; }
-    int get_nb_histogram() const { return nb_histogram; }
-    Histogram* get_histogram(int index) const { return histogram[index]; }
+    int get_nb_distribution() const { return nb_distribution; }
+    FrequencyDistribution* get_frequency_distribution(int index) const { return frequency_distribution[index]; }
 };
 
 
