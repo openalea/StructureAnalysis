@@ -230,37 +230,37 @@ begin_aligned_map = {
 end_aligned_map = begin_aligned_map
 
 from openalea.sequence_analysis._sequence_analysis import \
-    _Sequences, _Markovian_sequences, _Variable_order_markov_data, \
-    _Semi_markov_data, _Nonhomogeneous_markov_data, _Variable_order_markov,\
-    _Hidden_variable_order_markov, _Hidden_semi_markov, _Semi_markov
+    _Sequences, _MarkovianSequences, _VariableOrderMarkovData, \
+    _SemiMarkovData, _NonHomogeneousMarkovData, _VariableOrderMarkov,\
+    _HiddenVariableOrderMarkov, _HiddenSemiMarkov, _SemiMarkov
     
 sequence_alignment_first_arg = [_Sequences,
-                                _Markovian_sequences,
-                                _Variable_order_markov_data,
-                                _Semi_markov_data,
-                                _Nonhomogeneous_markov_data]
+                                _MarkovianSequences,
+                                _VariableOrderMarkovData,
+                                _SemiMarkovData,
+                                _NonHomogeneousMarkovData]
     
 markov_model_comparison_first_arg = \
-    [_Variable_order_markov,
-     _Hidden_variable_order_markov,
-     _Hidden_semi_markov,
-     _Semi_markov]
+    [_VariableOrderMarkov,
+     _HiddenVariableOrderMarkov,
+     _HiddenSemiMarkov,
+     _SemiMarkov]
     
 markov_model_for_sequences_first_arg = \
-    [_Markovian_sequences,
-     _Variable_order_markov_data,
-     _Semi_markov_data,
-     _Nonhomogeneous_markov_data]
+    [_MarkovianSequences,
+     _VariableOrderMarkovData,
+     _SemiMarkovData,
+     _NonHomogeneousMarkovData]
    
 markov_model_for_sequences_second_arg = \
-    [_Variable_order_markov,
-     _Semi_markov,
-     _Hidden_variable_order_markov,
-     _Hidden_semi_markov]
+    [_VariableOrderMarkov,
+     _SemiMarkov,
+     _HiddenVariableOrderMarkov,
+     _HiddenSemiMarkov]
 
-ms_vomd_smd_list = [_Markovian_sequences,
-                    _Variable_order_markov_data,
-                    _Semi_markov_data]
+ms_vomd_smd_list = [_MarkovianSequences,
+                    _VariableOrderMarkovData,
+                    _SemiMarkovData]
 
 # todo: use those simpler naming convention: 
 ms_vomd_smd_nhmd = markov_model_for_sequences_first_arg

@@ -13,21 +13,21 @@ from openalea.stat_tool._stat_tool import _CompoundData
 from openalea.stat_tool._stat_tool import _ConvolutionData
 from openalea.stat_tool._stat_tool import _DistributionData
 
-from openalea.sequence_analysis._sequence_analysis import _Time_events
-from openalea.sequence_analysis._sequence_analysis import _Renewal_data
+from openalea.sequence_analysis._sequence_analysis import _TimeEvents
+from openalea.sequence_analysis._sequence_analysis import _RenewalData
 from openalea.sequence_analysis._sequence_analysis import _Sequences
 
 #import _sequence_analysis
 from openalea.stat_tool import error
 
 __all__ = ['TimeEvents',
-           '_Time_events', 
+           '_TimeEvents', 
            'NbEventSelect']
 
 
 
 # Extend dynamically class
-interface.extend_class( _Time_events, interface.StatInterface)
+interface.extend_class( _TimeEvents, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -98,7 +98,7 @@ def TimeEvents(*args, **kargs):
     if len(args) == 1 and isinstance(args[0], str):
         filename = args[0]
         if os.path.isfile(filename):
-            time_events =  _Time_events(filename)
+            time_events =  _TimeEvents(filename)
         else:
             raise IOError("bad file name")
     elif isinstance(args[0], _Sequences):
@@ -125,7 +125,7 @@ def TimeEvents(*args, **kargs):
                                      _ConvolutionData, _CompoundData], int])
         distribution = args[0]
         time = args[1]
-        time_events = _Time_events(distribution, time)
+        time_events = _TimeEvents(distribution, time)
         
         
     return time_events
@@ -157,6 +157,6 @@ def NbEventSelect(obj, imin, imax):
         :func:`~openalea.sequence_analysis.data_transform.TimeSelect`.
     """
     error.CheckType([obj, imin, imax], 
-                    [[_Time_events, _Renewal_data], int, int])
+                    [[_TimeEvents, _RenewalData], int, int])
 
     return obj.nb_event_select(imin, imax)

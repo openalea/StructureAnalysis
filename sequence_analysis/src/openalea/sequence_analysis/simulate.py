@@ -8,25 +8,25 @@ __revision__ = "$Id$"
 
 from openalea.stat_tool.simulate import Simulate as SimulateDistribution
 
-from openalea.stat_tool._stat_tool import _Histogram
+from openalea.stat_tool._stat_tool import _FrequencyDistribution
 from openalea.stat_tool._stat_tool import _MixtureData
 from openalea.stat_tool._stat_tool import _ConvolutionData
 from openalea.stat_tool._stat_tool import _CompoundData
 
 from openalea.sequence_analysis._sequence_analysis import _Renewal
-from openalea.sequence_analysis._sequence_analysis import _Top_parameters
-from openalea.sequence_analysis._sequence_analysis import _Time_events
+from openalea.sequence_analysis._sequence_analysis import _TopParameters
+from openalea.sequence_analysis._sequence_analysis import _TimeEvents
 from openalea.sequence_analysis._sequence_analysis import \
-    _Variable_order_markov,\
-    _Hidden_variable_order_markov,\
-    _Semi_markov,\
-    _Nonhomogeneous_markov,\
-    _Hidden_semi_markov
+    _VariableOrderMarkov,\
+    _HiddenVariableOrderMarkov,\
+    _SemiMarkov,\
+    _NonHomogeneousMarkov,\
+    _HiddenSemiMarkov
 from openalea.sequence_analysis._sequence_analysis import \
-    _Markovian_sequences,\
-    _Variable_order_markov_data,\
-    _Semi_markov_data,\
-    _Nonhomogeneous_markov_data
+    _MarkovianSequences,\
+    _VariableOrderMarkovData,\
+    _SemiMarkovData,\
+    _NonHomogeneousMarkovData
                     
 from openalea.stat_tool import error
 from enumerate import stochastic_process_type
@@ -143,14 +143,14 @@ def Simulate(obj, *args, **kargs):
         :func:`~openalea.sequence_analysis.top_parameters.TopParameters`,    
     """
     
-    _valid_dists = [_Histogram, _MixtureData, \
+    _valid_dists = [_FrequencyDistribution, _MixtureData, \
                               _ConvolutionData, _CompoundData]
     
     # standard distribution case
     if len(args) == 1  and isinstance(args[0], int):
         return SimulateDistribution(obj, args[0])
     # top parameters case
-    elif isinstance(obj, _Top_parameters):
+    elif isinstance(obj, _TopParameters):
         error.CheckArgumentsLength(args, 2, 2)
         NbAxillary = kargs.get("NbAxillary", 1)
         error.CheckType([args[0], args[1], NbAxillary], [int, int, int])
@@ -163,13 +163,13 @@ def Simulate(obj, *args, **kargs):
         
         
         
-        error.CheckType([args[1]], [[_Histogram, _MixtureData, \
+        error.CheckType([args[1]], [[_FrequencyDistribution, _MixtureData, \
                                      _ConvolutionData, _CompoundData, int]])
         
         if type(args[1]) in _valid_dists:
             ret = obj.simulation_histogram(Type, args[1])
         elif isinstance(args[1], int):
-            error.CheckType([args[2]], [[int, _Time_events]])
+            error.CheckType([args[2]], [[int, _TimeEvents]])
             if isinstance(args[2], int):
                 ret = obj.simulation_nb_elements(Type, args[1], args[2])
             else: 
@@ -179,12 +179,12 @@ def Simulate(obj, *args, **kargs):
     else:
        
     
-        error.CheckType([obj], [[_Variable_order_markov, _Semi_markov,
-                                 _Hidden_variable_order_markov,
-                                 _Nonhomogeneous_markov, _Hidden_semi_markov]])
+        error.CheckType([obj], [[_VariableOrderMarkov, _SemiMarkov,
+                                 _HiddenVariableOrderMarkov,
+                                 _NonHomogeneousMarkov, _HiddenSemiMarkov]])
         
         Counting = error.ParseKargs(kargs, "Counting", True, bool_type)
-        if type(obj) not in [_Semi_markov, _Hidden_semi_markov]:
+        if type(obj) not in [_SemiMarkov, _HiddenSemiMarkov]:
             Counting = True 
         
         #order of the if statements is important ! Keep it that way
@@ -194,10 +194,10 @@ def Simulate(obj, *args, **kargs):
         #here the second arguments is data structure such as Sequences
         elif isinstance(args[0], int):
             
-            error.CheckType([args[1]], [[_Markovian_sequences, 
-                                         _Variable_order_markov_data, 
-                                         _Semi_markov_data, 
-                                         _Nonhomogeneous_markov_data]])
+            error.CheckType([args[1]], [[_MarkovianSequences, 
+                                         _VariableOrderMarkovData, 
+                                         _SemiMarkovData, 
+                                         _NonHomogeneousMarkovData]])
             ret = obj.simulation_markovian_sequences(args[0],
                                                       args[1], Counting)
             

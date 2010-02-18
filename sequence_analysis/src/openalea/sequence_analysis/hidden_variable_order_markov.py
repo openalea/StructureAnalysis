@@ -10,7 +10,7 @@ import os
 
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import \
-    _Hidden_variable_order_markov
+    _HiddenVariableOrderMarkov
 
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 from openalea.sequence_analysis._sequence_analysis import OCCUPANCY_THRESHOLD
@@ -18,11 +18,11 @@ from openalea.sequence_analysis._sequence_analysis import OCCUPANCY_THRESHOLD
 from openalea.stat_tool import error
 
 __all__ = ['HiddenVariableOrderMarkov',
-           '_Hidden_variable_order_markov']
+           '_HiddenVariableOrderMarkov']
 
 
 # Extend dynamically class
-interface.extend_class( _Hidden_variable_order_markov, interface.StatInterface)
+interface.extend_class( _HiddenVariableOrderMarkov, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -39,7 +39,7 @@ def HiddenVariableOrderMarkov(filename=None, Length=DEFAULT_LENGTH,
     if not os.path.isfile(filename):
         raise IOError("Invalid filename")
     else: 
-        return _Hidden_variable_order_markov(filename, Length,  CumulThreshold)
+        return _HiddenVariableOrderMarkov(filename, Length,  CumulThreshold)
         
 
 

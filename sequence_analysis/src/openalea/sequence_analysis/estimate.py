@@ -1,4 +1,4 @@
-""" Estimation functions 
+""" Estimation functions
 
 :Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
 
@@ -37,19 +37,19 @@ from openalea.sequence_analysis.enumerate import stochastic_process_type
 
 # structure class
 from openalea.sequence_analysis._sequence_analysis import\
-    _Hidden_semi_markov,\
-    _Hidden_variable_order_markov,\
+    _HiddenSemiMarkov,\
+    _HiddenVariableOrderMarkov,\
     _Tops,\
-    _Variable_order_markov,\
-    _Renewal_data,\
-    _Time_events
+    _VariableOrderMarkov,\
+    _RenewalData,\
+    _TimeEvents
 
 from openalea.stat_tool._stat_tool import _Mixture
 from openalea.stat_tool._stat_tool import _Compound
-from openalea.stat_tool._stat_tool import _Histogram
+from openalea.stat_tool._stat_tool import _FrequencyDistribution
 from openalea.stat_tool._stat_tool import _Convolution
-from openalea.stat_tool._stat_tool import _Parametric
-from openalea.stat_tool._stat_tool import _ParametricModel
+from openalea.stat_tool._stat_tool import _DiscreteParametric
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 from openalea.stat_tool._stat_tool import _Distribution
 
 __all__ = ['Estimate']
@@ -66,9 +66,9 @@ def _estimate_non_homogeneous_markov(obj, *args, **kargs):
     #nb_state = obj.get_marginal(0).nb_value
     # error.CheckType(args, 2+nb_state)
     CountingFlag = kargs.get("Counting", True)
-    
+
     ident = [ident_map[x] for x in args]
-    
+
     return obj.nonhomogeneous_markov_estimation(ident, CountingFlag)
 
 
@@ -82,8 +82,8 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
         NB_STATE_SEQUENCE_PARAMETER
     from openalea.stat_tool._stat_tool import \
         FORWARD_BACKWARD, \
-        FORWARD_BACKWARD_SAMPLING 
-    
+        FORWARD_BACKWARD_SAMPLING
+
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     NbIteration = kargs.get("NbIteration", 80)
     Counting = kargs.get("Counting", True)
@@ -93,15 +93,15 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
     MaxNbSequence = kargs.get("MaxNbStateSequence", MAX_NB_STATE_SEQUENCE)
     Algorithm = error.ParseKargs(kargs, "Algorithm", 'EM', \
                                  sub_markovian_algorithms)
-    
-    error.CheckType([Counting, GlobalInitialTransition, NbIteration, 
+
+    error.CheckType([Counting, GlobalInitialTransition, NbIteration,
                      MinNbSequence, MaxNbSequence, Parameter, StateSequence],
                      [bool, bool, int, int, int, [int, float], bool])
-    
-    error.CheckType([args[0]], [_Hidden_variable_order_markov])
-        
+
+    error.CheckType([args[0]], [_HiddenVariableOrderMarkov])
+
     #sanity check on arguments
-    # this one can be check only whne Chain will be public and exported in 
+    # this one can be check only whne Chain will be public and exported in
     # export_variable_order_markov
     #if type == 'e' and kargs.get("GlobalInitialTransition")" raise Error
     if Algorithm != sub_markovian_algorithms["MCEM"]:
@@ -110,7 +110,7 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
             if kargs.get(option):
                 raise ValueError("If % is provided, Algorithm cannot be MCEM" %
                                  option)
-    
+
     if Algorithm == FORWARD_BACKWARD:
         hmarkov = obj.hidden_variable_order_markov_estimation(
                 args[0], GlobalInitialTransition,
@@ -123,14 +123,14 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
                         StateSequence, NbIteration)
 
     return hmarkov
-      
+
 def _estimate_renewal_count_data(obj, itype, **kargs):
     """
     Estimate switch renewal_count_data
     """
     Type = 'v'
-    error.CheckType([obj, itype], [[_Time_events, _Renewal_data], str])
-    if isinstance(itype, str):  
+    error.CheckType([obj, itype], [[_TimeEvents, _RenewalData], str])
+    if isinstance(itype, str):
         if itype == "Ordinary":
             Type = 'o'
         elif itype == "Equilibrium":
@@ -139,16 +139,16 @@ def _estimate_renewal_count_data(obj, itype, **kargs):
             raise AttributeError("type must be Ordinary or Equilibrium")
     else:
         raise AttributeError("type must be Ordinary or Equilibrium")
-        
+
 
     Estimator = error.ParseKargs(kargs, "Estimator",
                                  'Likelihood', estimator_type)
-    
+
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     error.CheckType([NbIteration], [int])
-    
+
     InitialInterEvent = kargs.get("InitialInterEvent", None)
-    error.CheckType([InitialInterEvent], [[type(None), _ParametricModel,
+    error.CheckType([InitialInterEvent], [[type(None), _DiscreteParametricModel,
                                            _Mixture, _Convolution, _Compound]])
 
     EquilibriumEstimator = error.ParseKargs(kargs, "EquilibriumEstimator",
@@ -157,19 +157,19 @@ def _estimate_renewal_count_data(obj, itype, **kargs):
     InterEventMean = error.ParseKargs(kargs, "InterEventMean",
                             'Computed', mean_computation_map)
 
-    Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference", 
+    Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference",
                                smoothing_penalty_type)
-    
+
     Outside = error.ParseKargs(kargs, "Outside", "Zero", outside_type)
     Weight = kargs.get("Weight", -1.)
     error.CheckType([Weight], [[int, float]])
-    
+
     if Type != 'e':
         if kargs.get("EquilibriumEstimator"):
             raise Exception("EquilibriumEstimator cannot be used with type='e'")
         if kargs.get("InterEventMean"):
             raise Exception("InterEventMean be used with type='e'")
-        
+
     if Estimator == estimator_type['PenalizedLikelihood']:
         if kargs.get("InterEventMean") is None:
             InterEventMean = ONE_STEP_LATE
@@ -183,63 +183,63 @@ def _estimate_renewal_count_data(obj, itype, **kargs):
             raise ValueError("""Incompatible options Weight with type o""")
         if kargs.get("Outside"):
             raise ValueError("""Incompatible options Outside with type o""")
-        
+
     if InitialInterEvent:
         #cast from InitialInterEvent to Mixture, Compound should be done
-        
-        if isinstance(InitialInterEvent, _ParametricModel):
-            InitialInterEvent = _Parametric(InitialInterEvent)
+
+        if isinstance(InitialInterEvent, _DiscreteParametricModel):
+            InitialInterEvent = _DiscreteParametric(InitialInterEvent)
         else:
             InitialInterEvent = _Distribution(InitialInterEvent)
         renew = obj.estimation_inter_event_type(Type, InitialInterEvent,
                                            Estimator, NbIteration,
                                            EquilibriumEstimator,
-                                           InterEventMean, Weight, 
+                                           InterEventMean, Weight,
                                            Penalty, Outside)
     else:
         renew = obj.estimation_type(Type, Estimator, NbIteration,
                                EquilibriumEstimator, InterEventMean ,
                                Weight, Penalty, Outside)
-    
+
     return renew
 
 
 def _estimate_renewal_interval_data(obj, **kargs):
     """
     Estimate switch renewal_count_data
-    
+
     .. todo:: to be completed and validated with tests
-    
-    see stat_func4 in aml 
-    """        
+
+    see stat_func4 in aml
+    """
     #only LIKELIHOOD and PENALIZED_LIKELIHOOD
     Estimator = error.ParseKargs(kargs, "Estimator",
                                  'Likelihood', estimator_type)
-    
-    
+
+
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     error.CheckType([NbIteration], [int])
-    
+
     # distribution
     InitialInterEvent = kargs.get("InitialInterEvent", None)
-    error.CheckType([InitialInterEvent], [[type(None), _ParametricModel,
+    error.CheckType([InitialInterEvent], [[type(None), _DiscreteParametricModel,
                                            _Mixture, _Convolution, _Compound]])
-    if isinstance(InitialInterEvent, _ParametricModel):
-        InitialInterEvent = _Parametric(InitialInterEvent)
+    if isinstance(InitialInterEvent, _DiscreteParametricModel):
+        InitialInterEvent = _DiscreteParametric(InitialInterEvent)
     else:
         InitialInterEvent = _Distribution(InitialInterEvent)
-    #cast initialInterEvent to parametric ? 
-    Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference", 
+    #cast initialInterEvent to parametric ?
+    Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference",
                                smoothing_penalty_type)
     Weight = kargs.get("Weight", D_DEFAULT)
     error.CheckType([Weight], [[int, float]])
     Outside = error.ParseKargs(kargs, "Outside", "Zero", outside_type)
     error.CheckType([Weight], [[int, float]])
-    
+
     InterEventMean = error.ParseKargs(kargs, "InterEventMean",
                             'Computed', mean_computation_map)
 
-             
+
     if Estimator == estimator_type['PenalizedLikelihood']:
         if kargs.get("InterEventMean") is None:
             InterEventMean = ONE_STEP_LATE
@@ -253,12 +253,12 @@ def _estimate_renewal_interval_data(obj, **kargs):
             raise ValueError("""Incompatible options Weight with type o""")
         if kargs.get("Outside"):
             raise ValueError("""Incompatible options Outside with type o""")
-        
-    if isinstance(obj, _Histogram):
+
+    if isinstance(obj, _FrequencyDistribution):
         if InitialInterEvent:
             renew = obj.estimation_inter_event(InitialInterEvent,
                                            Estimator, NbIteration,
-                                           InterEventMean, Weight, 
+                                           InterEventMean, Weight,
                                            Penalty, Outside)
         else:
             renew = obj.estimation(Estimator, NbIteration,
@@ -268,61 +268,61 @@ def _estimate_renewal_interval_data(obj, **kargs):
         if InitialInterEvent:
             renew = obj.estimation_inter_event(InitialInterEvent,
                                            Estimator, NbIteration,
-                                           InterEventMean, Weight, 
+                                           InterEventMean, Weight,
                                            Penalty, Outside)
         else:
             renew = obj.estimation(Estimator, NbIteration,
                                    InterEventMean ,
                                    Weight, Penalty, Outside)
-    
+
     return renew
 
 def _estimate_semi_markov(obj, *args, **kargs):
- 
+
     Type = 'v'
     #error.CheckType([args[0]], [str])
-    
+
     Type = error.CheckDictKeys(args[0], stochastic_process_type)
-       
+
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     Counting = kargs.get("Counting", True)
     Estimator = error.ParseKargs(kargs, "Estimator", "CompleteLikelihood",
                                  estimator_semi_markov_type)
-    
+
     OccupancyMean = error.ParseKargs(kargs, "OccupancyMean",
                                       'Computed', mean_computation_map)
-    
+
     error.CheckType([Counting, NbIteration], [bool, int])
-    
+
     if Type != 'e' or Estimator == PARTIAL_LIKELIHOOD:
         if kargs.get(NbIteration):
             raise ValueError("Forbidden options Estimate NbIteration")
         if kargs.get("OccupancyMean"):
             raise ValueError("Forbidden options Estimate OccupancyMean")
-    
+
     return obj.semi_markov_estimation(Type , Estimator , Counting,
                                         NbIteration , OccupancyMean)
 
 
-       
+
 def _estimate_hidden_semi_markov(obj, *args, **kargs):
     """
     >>> hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
-             
+
     """
-        
+
     from openalea.sequence_analysis._sequence_analysis import \
         MIN_NB_STATE_SEQUENCE, \
         MAX_NB_STATE_SEQUENCE, \
         NB_STATE_SEQUENCE_PARAMETER
-        
-    
-        
+
+
+
     from openalea.stat_tool._stat_tool import \
         FORWARD_BACKWARD, \
         FORWARD_BACKWARD_SAMPLING, \
         KAPLAN_MEIER
-    
+
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     Counting = kargs.get("Counting", True)
@@ -338,12 +338,12 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                                       mean_computation_map)
     InitialOccupancyMean = kargs.get("InitialOccupancyMean", D_DEFAULT)
 
-    error.CheckType([Counting, GlobalInitialTransition, NbIteration, 
+    error.CheckType([Counting, GlobalInitialTransition, NbIteration,
                      MinNbSequence, MaxNbSequence, Parameter, StateSequence,
                      InitialOccupancyMean],
                      [bool, bool, int, int, int, [int, float], bool,
                      [float, int]])
-    
+
     if Algorithm != sub_markovian_algorithms["MCEM"]:
         options = ["Parameter", "MaxNbStateSequence", "MinNbStateSequence"]
         for option in options:
@@ -354,12 +354,12 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         if Estimator == KAPLAN_MEIER:
             raise ValueError(
                 "Estimator= KaplanMeier and Algorithm = MCEM not possible")
-                
-       
-    error.CheckType([args[0]], [[str, _Hidden_semi_markov]])
-    if isinstance(args[0], str):  
+
+
+    error.CheckType([args[0]], [[str, _HiddenSemiMarkov]])
+    if isinstance(args[0], str):
         Type = 'v'
-        
+
         error.CheckType([args[1]], [int])
         NbState = args[1]
 
@@ -374,39 +374,39 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                 LeftRight = True
         elif args[0] == "Equilibrium":
             error.CheckArgumentsLength(args, 2, 2)
-            Type = 'e' 
+            Type = 'e'
             LeftRight = False
         else:
             raise AttributeError("type must be Ordinary or Equilibrium")
-   
+
         if ((Type != 'e') or (Estimator == PARTIAL_LIKELIHOOD) or \
             (Algorithm != FORWARD_BACKWARD)) and \
             kargs.get(InitialOccupancyMean):
-            raise ValueError("Incompatible user arguments") 
-    
+            raise ValueError("Incompatible user arguments")
+
         if Algorithm == FORWARD_BACKWARD:
             hsmarkov = obj.hidden_semi_markov_estimation_model( Type , NbState ,
                          LeftRight , Estimator , Counting , StateSequence ,
                          InitialOccupancyMean ,NbIteration , MeanComputation)
             return hsmarkov
 
-        elif Algorithm == FORWARD_BACKWARD_SAMPLING: 
+        elif Algorithm == FORWARD_BACKWARD_SAMPLING:
             hsmarkov = obj.hidden_semi_markov_stochastic_estimation_model(
                 Type, NbState, LeftRight, MinNbSequence, MaxNbSequence,
                 Parameter, Estimator, Counting, StateSequence,
                 InitialOccupancyMean, NbIteration)
             return hsmarkov
-        
-    elif isinstance(args[0], _Hidden_semi_markov):
-        
+
+    elif isinstance(args[0], _HiddenSemiMarkov):
+
         #todo: add these lines once Chain is public
-        #if ((( (args[0].type == 'o')) or 
+        #if ((( (args[0].type == 'o')) or
         #     (Estimator == PARTIAL_LIKELIHOOD) or
         # (Algorithm != FORWARD_BACKWARD)) and \
         # kargs.get("InitialOccupancyMean")):
         #    raise ValueError("Incompatible arguments")
-    
-        hsmarkov = args[0] 
+
+        hsmarkov = args[0]
         if Algorithm == FORWARD_BACKWARD:
             output = obj.hidden_semi_markov_estimation(hsmarkov,
                                 Estimator, Counting, StateSequence,
@@ -417,8 +417,8 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                             MinNbSequence, MaxNbSequence,
                             Parameter, Estimator, Counting,
                             StateSequence, NbIteration)
-   
-   
+
+
 
 
 def _estimate_variable_order_markov(obj, *args, **kargs):
@@ -437,29 +437,29 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
         LOCAL_BIC
 
     Order = kargs.get("Order", None)
-    MaxOrder = kargs.get("MaxOrder", ORDER) 
+    MaxOrder = kargs.get("MaxOrder", ORDER)
     MinOrder = kargs.get("MinOrder", 0)
     Threshold = kargs.get("Threshold", LOCAL_BIC_THRESHOLD)
-    
+
     error.CheckType([Threshold, MaxOrder, MinOrder], [[int, float], int, int])
-    
-    
+
+
     Algorithm = error.ParseKargs(kargs, "Algorithm", "LocalBIC", algorithm)
     Estimator = error.ParseKargs(kargs, "Estimator", "Laplace", estimator)
     Penalty = error.ParseKargs(kargs, "Penalty", "BIC", likelihood_penalty_type)
-    
+
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     GlobalSample = kargs.get("GlobalSample", True)
     CountingFlag = kargs.get("CountingFlag", True)
-        
+
     error.CheckType([CountingFlag, GlobalSample, GlobalInitialTransition],
                     [bool, bool, bool])
-        
+
     #args0 is a string
     if len(args)>0 and isinstance(args[0], str):
         Type = 'v'
         Type = error.CheckDictKeys(args[0], stochastic_process_type)
-        
+
         # check validity of the input arguments following AML's code
         if Algorithm != LOCAL_BIC and not kargs.get("Threshold"):
             if Algorithm == CTM_BIC:
@@ -470,13 +470,13 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
                 Threshold = CONTEXT_THRESHOLD
         if Algorithm == CTM_KT and kargs.get("Estimator"):
             raise ValueError("Forbidden combinaison of Algorithm and Estimator")
-            
+
         order_estimation = True
-        
+
         if Order is not None:
             order_estimation = False
             MaxOrder = Order
-        
+
         if not order_estimation:
             options = ["Algorithm", "Estimator", "GlobalSample", "MinOrder",
                        "Threshold"]
@@ -487,27 +487,27 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
         if Type == 'e' and kargs.get("GlobalInitialTransition"):
             raise ValueError("""
             Type e and GlobalInitialTransition cannot be used together""")
-         
+
         if order_estimation is True:
-            markov = obj.variable_order_markov_estimation1( 
-                Type, MinOrder, MaxOrder, Algorithm, Threshold, Estimator , 
+            markov = obj.variable_order_markov_estimation1(
+                Type, MinOrder, MaxOrder, Algorithm, Threshold, Estimator ,
                   GlobalInitialTransition , GlobalSample , CountingFlag)
         else:
             markov = obj.variable_order_markov_estimation2(
                     Type, MaxOrder, GlobalInitialTransition, CountingFlag)
-     
-    #Variable order markov case       
-    elif isinstance(args[0], _Variable_order_markov):
+
+    #Variable order markov case
+    elif isinstance(args[0], _VariableOrderMarkov):
         vom = args[0]
         # can be implemted once Chain class is public and exported
         # in export_variable_order_markov
      #   if vom.type == 'e' and kargs.get("GlobalInitialTransition"):
      #       raise ValueError("""
      #       Type e and GlobalInitialTransition cannot be used together""")
-       
-        markov = obj.variable_order_markov_estimation3(vom, 
+
+        markov = obj.variable_order_markov_estimation3(vom,
                       GlobalInitialTransition, CountingFlag)
-    
+
     # array case
     elif isinstance(args[0], list):
         symbol = args[0]
@@ -516,7 +516,7 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
 
     else:
         raise KeyError("jfjf")
-    
+
     return markov
 
 
@@ -526,25 +526,25 @@ def _estimate_top(obj, **kargs):
     Top parameters Estimate switch
     """
     error.CheckType([obj], [_Tops])
-    
+
     MinPosition = kargs.get("MinPosition", 1)
     MaxPosition = kargs.get("MaxPosition", obj.max_position)
     Neighbourhood = kargs.get("Neighbourhood", 1)
-    # user may use us of uk spelling. 
-    Neighbourhood = kargs.get("Neighborhood", Neighbourhood) 
+    # user may use us of uk spelling.
+    Neighbourhood = kargs.get("Neighborhood", Neighbourhood)
     EqualProbability = kargs.get("EqualProbability", False)
-    
-    
+
+
     error.CheckType([MinPosition, MaxPosition], [int, int])
-    return obj.estimation(MinPosition, MaxPosition, Neighbourhood, 
+    return obj.estimation(MinPosition, MaxPosition, Neighbourhood,
                           EqualProbability)
 
 
 
 def _estimate_dispatch(obj, itype, *args, **kargs):
     """
-    
-    
+
+
         fct_map = {
         "VARIABLE_ORDER_MARKOV": "estimate_variable_order_markov",
         "HIDDEN_VARIABLE_ORDER_MARKOV": "estimate_hidden_variable_order_markov",
@@ -577,13 +577,13 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
                "MARKOV"
                ]
     if (itype not in fct_map_distribution) and (itype not in fct_map):
-        raise KeyError("Valid type are %s or %s" 
+        raise KeyError("Valid type are %s or %s"
                        % (str(fct_map),
                           str(fct_map_distribution)))
-    
-    if itype == "VARIABLE_ORDER_MARKOV":    
+
+    if itype == "VARIABLE_ORDER_MARKOV":
         return _estimate_variable_order_markov(obj, *args, **kargs)
-    elif itype == "MARKOV":    
+    elif itype == "MARKOV":
         return _estimate_variable_order_markov(obj, *args, **kargs)
     elif itype == "HIDDEN_VARIABLE_ORDER_MARKOV":
         return _estimate_hidden_variable_order_markov(obj, *args, **kargs)
@@ -595,63 +595,63 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
         return _estimate_non_homogeneous_markov(obj, *args, **kargs)
     # the two following elif are together and should be kept in this order
     # the first one expect the obj to be Time_events or Renewal_data only
-    elif itype in ["Equilibrium", "Ordinary"]: 
+    elif itype in ["Equilibrium", "Ordinary"]:
         return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
-    elif (type(obj) in [_Time_events, _Renewal_data]) or \
-           (isinstance(obj, _Histogram) and isinstance(args[1], _Histogram)): 
+    elif (type(obj) in [_TimeEvents, _RenewalData]) or \
+           (isinstance(obj, _FrequencyDistribution) and isinstance(args[1], _FrequencyDistribution)):
         return  _estimate_renewal_interval_data(obj, itype, *args, **kargs)
     else:
         from openalea.stat_tool.estimate import Estimate as HistoEstimate
         return HistoEstimate(obj, itype, *args, **kargs)
-    
-    
-    
+
+
+
 def Estimate(obj, *args, **kargs):
     """Estimate
-    
+
     * Estimation of distributions.
     * Estimation of 'top' parameters.
     * Estimation of a renewal process from count data.
     * Estimation of (hidden) Markovian models.
 
     :Usage:
-    
+
     >>> Estimate(histo, "NON-PARAMETRIC")
     >>> Estimate(histo, "NB", MinInfBound=1, InfBoundStatus="Fixed")
-    >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound=1, InfBoundStatus="Fixed", 
-        DistInfBoundStatus="Fixed") 
-    >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound=1, InfBoundStatus="Fixed", 
-        DistInfBoundStatus="Fixed", NbComponent="Estimated", Penalty="AIC") 
-    >>> Estimate(histo, "CONVOLUTION", dist,MinInfBound=1, Parametric=False) 
-    >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution=initial_dist, Parametric=False) 
-    >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric=False, MinInfBound=0) 
-    >>> Estimate(histo, "COMPOUND", dist, unknown, InitialDistribution=initial_dist, Parametric=False) 
-    
+    >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound=1, InfBoundStatus="Fixed",
+        DistInfBoundStatus="Fixed")
+    >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound=1, InfBoundStatus="Fixed",
+        DistInfBoundStatus="Fixed", NbComponent="Estimated", Penalty="AIC")
+    >>> Estimate(histo, "CONVOLUTION", dist,MinInfBound=1, Parametric=False)
+    >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution=initial_dist, Parametric=False)
+    >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric=False, MinInfBound=0)
+    >>> Estimate(histo, "COMPOUND", dist, unknown, InitialDistribution=initial_dist, Parametric=False)
+
     >>> Estimate(top, MinPosition=1, MaxPosition=5, Neighbourhood=2,    EqualProba=True)
-    
+
     >>> Estimate(timev, type, NbIteration=10,Parametric=True)
-    >>> Estimate(timev, type, InitialInterEvent=initial_dist,    NbIteration=10, Parametric=True)      
-    
+    >>> Estimate(timev, type, InitialInterEvent=initial_dist,    NbIteration=10, Parametric=True)
+
     >>> Estimate(seq, "MARKOV", Order=2, Counting=False)
-    >>> Estimate(seq, "MARKOV", MaxOrder=3, Penalty="AIC", Counting=False) 
-    >>> Estimate(seq, "MARKOV", states, Penalty="AIC", Order=2, Counting=False) 
-    >>> Estimate(seq, "NON-HOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting=False) 
+    >>> Estimate(seq, "MARKOV", MaxOrder=3, Penalty="AIC", Counting=False)
+    >>> Estimate(seq, "MARKOV", states, Penalty="AIC", Order=2, Counting=False)
+    >>> Estimate(seq, "NON-HOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting=False)
     >>> Estimate(seq, "SEMI-MARKOV", Counting=False)
-    >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, SelfTransition=0.9, NbIteration=10, 
-        StateSequences="Viterbi", Counting=False) 
+    >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, SelfTransition=0.9, NbIteration=10,
+        StateSequences="Viterbi", Counting=False)
     >>> Estimate(seq, "HIDDEN_MARKOV", hmc, Algorithm="Viterbi",
-        NbIteration=10, Order=2, Counting=False) 
+        NbIteration=10, Order=2, Counting=False)
     >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", min_nb_state,
-        max_nb_state, Penalty="AIC", Order=2, Counting=False) 
+        max_nb_state, Penalty="AIC", Order=2, Counting=False)
     >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", hmc, state,
-        max_nb_state, Penalty="AIC", SelfTransition=0.9, Counting=False) 
+        max_nb_state, Penalty="AIC", SelfTransition=0.9, Counting=False)
     >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", nb_state, structure,
         OccupancyMean=20, NbIteration=10, Estimator="PartialLikelihood",
-        StateSequences="Viterbi", Counting=False) 
-    >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm="Viterbi", NbIteration=10, Counting=False) 
-    
+        StateSequences="Viterbi", Counting=False)
+    >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm="Viterbi", NbIteration=10, Counting=False)
+
     :Arguments:
-    
+
     * histo (histogram, mixture_data, convolution_data, compound_data),
     * dist (distribution, mixture, convolution, compound),
     * unknown (string): type of unknown distribution: "Sum" or "Elementary".
@@ -660,10 +660,10 @@ def Estimate(obj, *args, **kargs):
     * type (string): type or renewal process: "Ordinary" or "Equilibrium".
     * seq (discrete_sequences, markov_data, semi-markov_data),
     * states, ... (array(int)):  new states corresponding to a partition of the
-      original state space, 
+      original state space,
     * hmc (hidden_markov),
-    * structure (string): structural properties of  the underlying Markov chain: 
-      "Irreductible" or "LeftRight" (i.e. a succession of transient states and a 
+    * structure (string): structural properties of  the underlying Markov chain:
+      "Irreductible" or "LeftRight" (i.e. a succession of transient states and a
       final absorbing state),
     * nb_state (int): number of states with 2 <= nb_state <=  15,
     * min_nb_state (int): minimum number of states,
@@ -673,57 +673,57 @@ def Estimate(obj, *args, **kargs):
     * hsmc (hidden_semi-markov).
 
     :Optional Arguments:
-    
+
     **distribution case**
-    
+
     * MinInfBound (int): lower bound to the range of possible values (0 - default
-      value - or 1). This optional argument cannot be used in conjunction with the 
+      value - or 1). This optional argument cannot be used in conjunction with the
       optional argument InitialDistribution.
     * InfBoundStatus (string): shifting or not of the distribution: "Free" (default
-      value) or "Fixed". This optional argument cannot be used if the second mandatory 
+      value) or "Fixed". This optional argument cannot be used if the second mandatory
       argument giving the model type is "NON-PARAMETRIC" ("NP").
     * DistInfBoundStatus (string): shifting or not of the subsequent components of
-      the mixture: "Free" (default value) or "Fixed". This optional argument can 
+      the mixture: "Free" (default value) or "Fixed". This optional argument can
       only be used if the second mandatory argument giving the distribution type is "MIXTURE".
     * NbComponent (string): estimation of the number of components of the mixture:
-      "Fixed" (default value) or "Estimated". This optional argument can only be 
+      "Fixed" (default value) or "Estimated". This optional argument can only be
       used if the second mandatory argument giving the distribution type is "MIXTURE".
       the number of estimated components is comprised between 1 and a maximum number
-      which is given by the number of specified parametric distributions in the 
+      which is given by the number of specified parametric distributions in the
       mandatory arguments (all of these distributions are assumed to be unknown).
-    * Penalty (string): type of penalty function for model selection: "AIC" 
-      (Akaike Information Criterion), "AICc" (corrected Akaike Information Criterion 
-      - default value) or "BIC" (Bayesian Information Criterion). This optional 
-      argument can only be used if the second mandatory argument giving the distribution 
+    * Penalty (string): type of penalty function for model selection: "AIC"
+      (Akaike Information Criterion), "AICc" (corrected Akaike Information Criterion
+      - default value) or "BIC" (Bayesian Information Criterion). This optional
+      argument can only be used if the second mandatory argument giving the distribution
       type is "MIXTURE" and if the optional argument NbComponent is set at "Estimated".
-    * Parametric (bool): reestimation of a discrete nonparametric or parametric 
+    * Parametric (bool): reestimation of a discrete nonparametric or parametric
       distribution (default value: True). This optional argument can only be used if
-      the second mandatory argument giving the distribution type is "CONVOLUTION" 
+      the second mandatory argument giving the distribution type is "CONVOLUTION"
       or "COMPOUND".
     * InitialDistribution (distribution, mixture, convolution, compound): initial
       distribution for the EM deconvolution-type algorithm. This optional argument
       can only be used if the second mandatory argument giving the distribution type
-      is "CONVOLUTION" or "COMPOUND". This optional argument cannot be used in 
+      is "CONVOLUTION" or "COMPOUND". This optional argument cannot be used in
       conjunction with the optional argument MinInfBound.
-      
+
     .. note:: the optional arguments MinInfBound and InitialDistribution are mutually exclusive.
-    
-    
+
+
     **top case**
-    
+
     * MinPosition (int): lower position taken into account for the estimation of 'top' parameters.
     * MaxPosition (int): upper position taken into account for the estimation of 'top' parameters.
     * Neighbourhood (int): neighbourhood taken into account for the estimation of 'top' parameters.
     * EqualProba (bool): growth probabilities of the parent shoot and of the offspring shoots equal or not (default value: False).
-    
+
     **renewal case**
-    
+
     * InitialInterEvent (distribution, mixture, convolution, compound): initial inter-event distribution for the EM algorithm.
     * NbIteration (int): number of iterations of the EM algorithm.
     * Parametric (bool): reestimation of a discrete nonparametric or parametric distribution (default value: False).
-    
+
     **markovian case**
-    
+
     * Counting (bool): computation of counting distributions (default value: True).
     * Order (int): Markov chain order (default value: 1). This optional argument can only be used if the second mandatory argument giving the model type is "MARKOV", "NON-HOMOGENEOUS_MARKOV" or "HIDDEN_MARKOV".
     * MaxOrder (int): maximum order of the Markov chain (default value: 4). This optional argument can only be used if the second mandatory argument giving the model type is "MARKOV".
@@ -732,93 +732,93 @@ def Estimate(obj, *args, **kargs):
     * NbIteration (int): number of iterations of the estimation algorithm.
     * SelfTransition (real): self-transition probability. This optional argument can only be used if the second mandatory argument giving the model type is "HIDDEN_MARKOV" and if the initial model used in the iterative estimation procedure (EM algorithm) is only specified by its number of states, its structural properties and eventually its order.
     * OccupancyMean (int/real): average state occupancy. This optional argument can only be used if the second mandatory argument giving the model type is "HIDDEN_SEMI-MARKOV" and if the initial model used in the iterative estimation procedure (EM algorithm) is only specified by its number of states and its structural properties.
-    * Estimator (string): type of estimator: "CompleteLikelihood" (the default) or "PartialLikelihood". In this latter case, the contribution of the time spent in the last visited state is not taken into account inthe estimation of the state occupancy distributions. This optional argument can only be used if the second mandatory argument giving the model type is "HIDDEN_SEMI-MARKOV" and the optional argument Algorithm is set at "ForwardBackward". 
+    * Estimator (string): type of estimator: "CompleteLikelihood" (the default) or "PartialLikelihood". In this latter case, the contribution of the time spent in the last visited state is not taken into account inthe estimation of the state occupancy distributions. This optional argument can only be used if the second mandatory argument giving the model type is "HIDDEN_SEMI-MARKOV" and the optional argument Algorithm is set at "ForwardBackward".
     * StateSequences (string): Computation of the optimal state sequences: no computation (the default), "ForwardBackward" or "Viterbi". This optional argument can only be used if the second mandatory argument giving the model type is "HIDDEN_MARKOV" or "HIDDEN_SEMI-MARKOV" and if the optional argument Algorithm is not set at "Viterbi".
-    
-    
+
+
     :Returned Object:
-    
+
     **distribution case**
-    
-    In case of success of the estimation procedure, the type of the returned object 
-    (chosen among distribution, mixture, convolution or compound) is given by the 
+
+    In case of success of the estimation procedure, the type of the returned object
+    (chosen among distribution, mixture, convolution or compound) is given by the
     second mandatory argument. Otherwise no object is returned. The returned object
-    of type distribution, mixture, convolution or compound contains both the estimated 
+    of type distribution, mixture, convolution or compound contains both the estimated
     distribution and the data used in the estimation procedure. In the case of
-    mixtures, convolutions, or compound (or stopped-sum) distributions, the returned 
-    object contains pseudo-data computed as a byproduct of the EM algorithm which 
+    mixtures, convolutions, or compound (or stopped-sum) distributions, the returned
+    object contains pseudo-data computed as a byproduct of the EM algorithm which
     can be extracted by the function ExtractData.
-    
+
     **top case**
-    
-    In case of success of the estimation procedure, an object of type top_parameters 
+
+    In case of success of the estimation procedure, an object of type top_parameters
     is returned, otherwise no object is returned. The returned object of type top_parameters
-    contains both the estimated model and the data used for the estimation.    
+    contains both the estimated model and the data used for the estimation.
 
     **renewal case**
-    
+
     In case of success of the estimation procedure, an object of type renewal is
     returned, otherwise no object is returned. The returned object of type renewal
-    contains both the estimated renewal process and the count data used in the 
+    contains both the estimated renewal process and the count data used in the
     estimation procedure.
-    
+
     **markovian case**
-    
-    In case of success of the estimation procedure, the type of the returned object 
+
+    In case of success of the estimation procedure, the type of the returned object
     (chosen among markov, semi-markov, hidden_markov, hidden_semi-markov) is given
-    by the second mandatory argument. Otherwise no object is returned. If the 
+    by the second mandatory argument. Otherwise no object is returned. If the
     second mandatory argument is "NON-HOMOGENEOUS_MARKOV", in case of success
     of the estimation procedure, the returned object is of type markov. If the
-    second mandatory argument is "NON-HOMOGENEOUS_MARKOV", the subsequent 
-    arguments chosen among "VOID" (homogeneous state), "MONOMOLECULAR" or 
-    "LOGISTIC", specify the evolution of the self-transition probabilities 
+    second mandatory argument is "NON-HOMOGENEOUS_MARKOV", the subsequent
+    arguments chosen among "VOID" (homogeneous state), "MONOMOLECULAR" or
+    "LOGISTIC", specify the evolution of the self-transition probabilities
     as a function of the index parameter. The returned object of type markov,
-    semi-markov, hidden_markov or hidden_semi-markov contains both the estimated 
+    semi-markov, hidden_markov or hidden_semi-markov contains both the estimated
     distribution and the data used in the estimation procedure. In the case of
-    the estimation of a hidden Markov chain or a hidden semi-Markov chain, 
-    the returned object contains pseudo-data (optimal state sequences 
+    the estimation of a hidden Markov chain or a hidden semi-Markov chain,
+    the returned object contains pseudo-data (optimal state sequences
     corresponding to the observed sequences used in the estimation procedure)
     computed as a byproduct of the EM algorithm which can be extracted by the
     function ExtractData.
 
 
     :Background:
-    
-    The aim of the model of 'tops' is to related the growth of offspring shoots 
-    to the growth of their parent shoot in the case of immediate branching. A 
+
+    The aim of the model of 'tops' is to related the growth of offspring shoots
+    to the growth of their parent shoot in the case of immediate branching. A
     model of 'tops' is defined by three parameters, namely the growth probability
     of the parent shoot, the growth probability of the offspring shoots (both in
-    the sense of Bernoulli processes) and the growth rhythm ratio offspring 
+    the sense of Bernoulli processes) and the growth rhythm ratio offspring
     shoots / parent shoot.
 
     :Description (markovian case):
-    
+
     In the case of hidden Markovian models (second mandatory argument "HIDDEN_MARKOV"
     or "HIDDEN_SEMI-MARKOV"), either the forward-backward algorithm or the Viterbi
     algorithm can be used for estimation. The Viterbi algorithm should only be
-    used for the estimation of hidden Markovian models based on an underlying 
-    "left-right" Markov chain (i.e. constituted of a succession of transient states 
+    used for the estimation of hidden Markovian models based on an underlying
+    "left-right" Markov chain (i.e. constituted of a succession of transient states
     and a final absorbing state). Hence, in this case, the model structure is
-    implicitly "LeftRight" and should not be given as argument (only the number of 
+    implicitly "LeftRight" and should not be given as argument (only the number of
     states should be given as argument). Since the optimal state sequences are computed
-    by the Viterbi algorithm, the optional argument StateSequences cannot be used if 
+    by the Viterbi algorithm, the optional argument StateSequences cannot be used if
     the optional argument Algorithm is set at "Viterbi".
 
     .. seealso::
-        
-        :func:`~openalea.stat_tool.data_transform.ExtractData`, 
+
+        :func:`~openalea.stat_tool.data_transform.ExtractData`,
         :func:`~openalea.stat_tool.data_transform.ExtractDistribution`.
         :func:`~openalea.sequence_analysis.data_transform.AddAbsorbingRun`,
         :func:`ModelSelectionTest`.
 
     """
-   
-    # top case (no type specified and args  may be empty) 
+
+    # top case (no type specified and args  may be empty)
     if isinstance(obj, _Tops):
-        return _estimate_top(obj, *args, **kargs) 
+        return _estimate_top(obj, *args, **kargs)
     # generic case
     elif isinstance(args[0], str):
         return _estimate_dispatch(obj, args[0], *args[1:], **kargs)
     else:
         raise NotImplemented
-    
+

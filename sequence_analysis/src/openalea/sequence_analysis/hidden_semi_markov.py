@@ -8,18 +8,18 @@ __revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _Hidden_semi_markov
+from openalea.sequence_analysis._sequence_analysis import _HiddenSemiMarkov
 
 from openalea.stat_tool import error
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 from openalea.sequence_analysis._sequence_analysis import OCCUPANCY_THRESHOLD
 
 __all__ = ['HiddenSemiMarkov',
-           '_Hidden_semi_markov']
+           '_HiddenSemiMarkov']
 
 
 # Extend dynamically class
-interface.extend_class( _Hidden_semi_markov, interface.StatInterface)
+interface.extend_class( _HiddenSemiMarkov, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -77,7 +77,7 @@ def HiddenSemiMarkov(*args, **kargs):
     filename = args[0]
     if os.path.isfile(filename):
             
-        hsm = _Hidden_semi_markov(filename, Length, CountingFlag,
+        hsm = _HiddenSemiMarkov(filename, Length, CountingFlag,
                                    OCCUPANCY_THRESHOLD, OldFormat)
     else:
         raise IOError("bad file name")

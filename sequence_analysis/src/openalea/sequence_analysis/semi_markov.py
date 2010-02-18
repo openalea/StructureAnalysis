@@ -7,17 +7,17 @@ __revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _Semi_markov
+from openalea.sequence_analysis._sequence_analysis import _SemiMarkov
 from openalea.stat_tool import error
 
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 
 __all__ = ['SemiMarkov',
-           '_Semi_markov']
+           '_SemiMarkov']
 
 
 # Extend dynamically class
-interface.extend_class( _Semi_markov, interface.StatInterface)
+interface.extend_class( _SemiMarkov, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -71,7 +71,7 @@ def SemiMarkov(filename=None, length=DEFAULT_LENGTH, counting=True,
     if not os.path.isfile(filename):
         raise IOError("Invalid filename")
     else:
-        return _Semi_markov(filename, length, counting, cumul_threshold)
+        return _SemiMarkov(filename, length, counting, cumul_threshold)
 
 
 

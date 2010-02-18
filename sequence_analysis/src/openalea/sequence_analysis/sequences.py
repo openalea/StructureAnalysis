@@ -10,11 +10,11 @@ import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import \
     _Sequences, \
-    _Renewal_data,\
-    _Markovian_sequences,\
-    _Variable_order_markov_data,\
-    _Semi_markov_data,\
-    _Nonhomogeneous_markov_data
+    _RenewalData,\
+    _MarkovianSequences,\
+    _VariableOrderMarkovData,\
+    _SemiMarkovData,\
+    _NonHomogeneousMarkovData
     
     
 #import _sequence_analysis
@@ -136,7 +136,7 @@ def Sequences(obj, **kargs):
         
     sequence = None
 
-    error.CheckType([obj], [[str, _Renewal_data, list]])
+    error.CheckType([obj], [[str, _RenewalData, list]])
     
     if isinstance(obj, str):
         filename = obj
@@ -146,7 +146,7 @@ def Sequences(obj, **kargs):
         else:
             raise IOError("bad file name")
         
-    elif isinstance(obj, _Renewal_data):
+    elif isinstance(obj, _RenewalData):
         sequence = _Sequences(obj)
     # otherwise, we switch to a list constructor that requires a list of seqs
     # and a list of identifiers. The latter being optional        
@@ -181,8 +181,8 @@ def LumpabilityTest(obj, *args, **kargs):
     """.. todo:: documenation"""
     
     error.CheckArgumentsLength(args, 1, 1)
-    error.CheckType([obj], [[_Markovian_sequences, _Variable_order_markov_data,
-                            _Semi_markov_data, _Nonhomogeneous_markov_data]])
+    error.CheckType([obj], [[_MarkovianSequences, _VariableOrderMarkovData,
+                            _SemiMarkovData, _NonHomogeneousMarkovData]])
     
     
     symbol = args[0]
@@ -202,9 +202,9 @@ def RemoveIndexParameter(obj):
     input can be sequence, markovian_sequences, 
     nonhomogeneous_markov, variable_order_markov"""
     
-    error.CheckType([obj], [[_Sequences, _Markovian_sequences,
-                             _Variable_order_markov_data, _Semi_markov_data, 
-                             _Nonhomogeneous_markov_data]])
+    error.CheckType([obj], [[_Sequences, _MarkovianSequences,
+                             _VariableOrderMarkovData, _SemiMarkovData, 
+                             _NonHomogeneousMarkovData]])
     if isinstance(obj, _Sequences):
         return obj.remove_index_parameter().markovian_sequences()
     else:
@@ -228,8 +228,8 @@ def ComputeInitialRun(obj):
     input can be sequence, markovian_sequences, nonhomogeneous_markov, 
     variable_order_markov
     """
-    error.CheckType([obj], [[_Markovian_sequences, _Variable_order_markov_data,
-                             _Semi_markov_data, _Nonhomogeneous_markov_data]])
+    error.CheckType([obj], [[_MarkovianSequences, _VariableOrderMarkovData,
+                             _SemiMarkovData, _NonHomogeneousMarkovData]])
     return obj.initial_run_computation()
 
 
@@ -238,8 +238,8 @@ def Split(obj, step):
     
     input markovian
     """
-    error.CheckType([obj], [[_Markovian_sequences, _Variable_order_markov_data, 
-                            _Semi_markov_data, _Nonhomogeneous_markov_data]])
+    error.CheckType([obj], [[_MarkovianSequences, _VariableOrderMarkovData, 
+                            _SemiMarkovData, _NonHomogeneousMarkovData]])
     error.CheckType([step], [int])
     
     return obj.split(step)

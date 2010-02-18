@@ -8,7 +8,7 @@ __revision__ = "$Id$"
 import os
 import openalea.stat_tool.interface as interface
 
-from openalea.sequence_analysis._sequence_analysis import _Top_parameters
+from openalea.sequence_analysis._sequence_analysis import _TopParameters
 from openalea.sequence_analysis._sequence_analysis import MAX_POSITION
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_MAX_POSITION
 from openalea.sequence_analysis._sequence_analysis import TOP_MIN_PROBABILITY
@@ -17,11 +17,11 @@ from openalea.sequence_analysis._sequence_analysis import MIN_RHYTHM_RATIO
 from openalea.stat_tool import error
 
 __all__ = ['TopParameters',
-           '_Top_parameters']
+           '_TopParameters']
 
 
 # Extend dynamically class
-interface.extend_class( _Top_parameters, interface.StatInterface)
+interface.extend_class( _TopParameters, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -72,7 +72,7 @@ def TopParameters(*args, **kargs):
         #filename case
         filename = args[0]
         if os.path.isfile(filename):
-            return _Top_parameters(filename, MaxPosition)
+            return _TopParameters(filename, MaxPosition)
         else:
             raise IOError("bad file name")
     else: #sequences case
@@ -93,7 +93,7 @@ def TopParameters(*args, **kargs):
         assert rhythm_ratio >= MIN_RHYTHM_RATIO
         assert rhythm_ratio <= 1./ MIN_RHYTHM_RATIO
         
-        return _Top_parameters(probability, axillary_probability, rhythm_ratio,
+        return _TopParameters(probability, axillary_probability, rhythm_ratio,
                                MaxPosition)
     
     

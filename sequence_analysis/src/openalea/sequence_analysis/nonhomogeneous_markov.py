@@ -8,17 +8,17 @@ __revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _Nonhomogeneous_markov
+from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkov
 from openalea.stat_tool import error
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 
 
 __all__ = ['NonhomogeneousMarkov',
-           '_Nonhomogeneous_markov']
+           '_NonHomogeneousMarkov']
 
 
 # Extend dynamically class
-interface.extend_class( _Nonhomogeneous_markov, interface.StatInterface)
+interface.extend_class( _NonHomogeneousMarkov, interface.StatInterface)
 
 # Add methods to _Vectors
 
@@ -36,7 +36,7 @@ def NonhomogeneousMarkov(*args, **kargs):
     
         
     if os.path.isfile(filename):
-        output = _Nonhomogeneous_markov(filename, Length)
+        output = _NonHomogeneousMarkov(filename, Length)
     else:
         raise IOError("bad file name")
         
