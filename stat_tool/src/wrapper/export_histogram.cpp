@@ -39,31 +39,31 @@
 using namespace boost::python;
 using namespace boost;
 
-////////////////////// Export Histogram ////////////////////////////////////////
+////////////////////// Export FrequencyDistribution ////////////////////////////////////////
 
 
 // Wrapper class class
-class HistogramWrap
+class FrequencyDistributionWrap
 {
 
 public:
 
   // __len__
   static int
-  histo_get_nb_value(Histogram& h)
+  histo_get_nb_value(FrequencyDistribution &h)
   {
     return h.nb_value;
   }
 
   static int
-  histo_get_nb_element(Histogram& h)
+  histo_get_nb_element(FrequencyDistribution &h)
   {
     return h.nb_element;
   }
 
   // __getitem__
   static int
-  histo_get_item(Histogram& h, const object& key)
+  histo_get_item(FrequencyDistribution &h, const object& key)
   {
     int val = extract<int> (key);
 
@@ -77,7 +77,7 @@ public:
   }
 
   static std::string
-  f_comparison(const Histogram& h, const Histogram &histo)
+  f_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
     ostringstream output;
     h.F_comparison(output, histo);
@@ -86,7 +86,7 @@ public:
   }
 
   static std::string
-  t_comparison(const Histogram& h, const Histogram &histo)
+  t_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
     ostringstream output;
     h.t_comparison(output, histo);
@@ -94,10 +94,10 @@ public:
   }
 
   static std::string
-  wmw_comparison(const Histogram& h, const Histogram &histo)
+  wmw_comparison(const FrequencyDistribution &h, const FrequencyDistribution &histo)
   {
     ostringstream output;
-    Format_error error;
+    StatError error;
     if (!h.wilcoxon_mann_whitney_comparison(error, output, histo))
       {
         stat_tool::wrap_util::throw_error(error);
@@ -107,23 +107,23 @@ public:
   }
 
   static std::string
-  comparison(const Histogram& h, boost::python::tuple& histos, int type,
+  comparison(const FrequencyDistribution &h, boost::python::tuple& histos, int type,
       const char* filename, char format)
   {
     ostringstream output;
-    Format_error error;
+    StatError error;
     int nb_histo = boost::python::len(histos);
 
     // Test list length
     if (nb_histo == 0)
-      stat_tool::wrap_util::throw_error("No histogram to compare");
+      stat_tool::wrap_util::throw_error("No frequency distribution to compare");
 
-    stat_tool::wrap_util::auto_ptr_array<const Histogram*> ihisto(
-        new const Histogram*[nb_histo]);
+    stat_tool::wrap_util::auto_ptr_array<const FrequencyDistribution*> ihisto(
+        new const FrequencyDistribution*[nb_histo]);
 
     // Extract list element
     for (int i = 0; i < nb_histo; i++)
-      ihisto[i] = boost::python::extract<Histogram *>(histos[i]);
+      ihisto[i] = boost::python::extract<FrequencyDistribution*>(histos[i]);
 
     // call comparaison
     bool res = h.comparison(error, output, nb_histo, ihisto.get(), type,
@@ -138,12 +138,12 @@ public:
   // Estimation functions
 
   static Mixture*
-  mixture_estimation1(const Histogram& h, const Mixture& imixt,
+  mixture_estimation1(const FrequencyDistribution &h, const Mixture& imixt,
       boost::python::list& estimate_tuple, int min_inf_bound, bool flag,
       bool component_flag)
   {
     Mixture* ret;
-    Format_error error;
+    StatError error;
     bool estimate[MIXTURE_NB_COMPONENT];
 
     //Parse estimate list
@@ -163,12 +163,12 @@ public:
   }
 
   static Mixture*
-  mixture_estimation2(const Histogram& h, boost::python::list& ident_list,
+  mixture_estimation2(const FrequencyDistribution &h, boost::python::list& ident_list,
       int min_inf_bound, bool flag, bool component_flag, int penalty)
   {
     Mixture* ret;
     ostringstream output;
-    Format_error error;
+    StatError error;
 
     int nb_component = boost::python::len(ident_list);
     int ident[MIXTURE_NB_COMPONENT];
@@ -188,13 +188,13 @@ public:
   }
 
   static Convolution*
-  convolution_estimation1(const Histogram& h, const Parametric &known_dist,
-      const Parametric &unknown_dist, int estimator, int nb_iter,
+  convolution_estimation1(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
+      const DiscreteParametric &unknown_dist, int estimator, int nb_iter,
       double weight, int penalty_type, int outside)
   {
     Convolution* ret;
     ostringstream output;
-    Format_error error;
+    StatError error;
 
     ret = h.convolution_estimation(error, output, known_dist, unknown_dist,
         estimator, nb_iter, weight, penalty_type, outside);
@@ -206,13 +206,13 @@ public:
   }
 
   static Convolution*
-  convolution_estimation2(const Histogram& h, const Parametric &known_dist,
+  convolution_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
       int min_inf_bound, int estimator, int nb_iter, double weight,
       int penalty_type, int outside)
   {
     Convolution* ret;
     ostringstream output;
-    Format_error error;
+    StatError error;
 
     ret = h.convolution_estimation(error, output, known_dist, min_inf_bound,
         estimator, nb_iter, weight, penalty_type, outside);
@@ -224,13 +224,13 @@ public:
   }
 
   static Compound*
-  compound_estimation1(const Histogram& h, const Parametric &sum_dist,
-      const Parametric &dist, char type, int estimator, int nb_iter,
+  compound_estimation1(const FrequencyDistribution &h, const DiscreteParametric &sum_dist,
+      const DiscreteParametric &dist, char type, int estimator, int nb_iter,
       double weight, int penalty_type, int outside)
   {
     Compound* ret;
     ostringstream output;
-    Format_error error;
+    StatError error;
 
     ret = h.compound_estimation(error, output, sum_dist, dist, type, estimator,
         nb_iter, weight, penalty_type, outside);
@@ -242,13 +242,13 @@ public:
   }
 
   static Compound*
-  compound_estimation2(const Histogram& h, const Parametric &known_dist,
+  compound_estimation2(const FrequencyDistribution &h, const DiscreteParametric &known_dist,
       char type, int min_inf_bound, int estimator, int nb_iter, double weight,
       int penalty_type, int outside)
   {
     Compound* ret;
     ostringstream output;
-    Format_error error;
+    StatError error;
 
     ret = h.compound_estimation(error, output, known_dist, type, min_inf_bound,
         estimator, nb_iter, weight, penalty_type, outside);
@@ -259,41 +259,41 @@ public:
     return ret;
   }
 
-  // Merge Histogram in a distribution_data
-  static Distribution_data*
-  merge_histograms(const Histogram& h, const boost::python::list& histo_list)
+  // Merge FrequencyDistribution in a distribution_data
+  static DiscreteDistributionData*
+  merge_frequency_distributions(const FrequencyDistribution &h, const boost::python::list& histo_list)
   {
-    Distribution_data *histo = NULL;
+    DiscreteDistributionData *histo = NULL;
     int nb_element = boost::python::len(histo_list) + 1;
 
-    stat_tool::wrap_util::auto_ptr_array<const Histogram*> pelement(
-        new const Histogram*[nb_element]);
+    stat_tool::wrap_util::auto_ptr_array<const FrequencyDistribution*> pelement(
+        new const FrequencyDistribution*[nb_element]);
 
     pelement[0] = &h;
 
     for (int i = 1; i < nb_element; i++)
-      pelement[i] = extract<Histogram*> (histo_list[i - 1]);
+      pelement[i] = extract<FrequencyDistribution*> (histo_list[i - 1]);
 
     // create new distribution_data object
-    histo = new Distribution_data(nb_element, pelement.get());
+    histo = new DiscreteDistributionData(nb_element, pelement.get());
     if (!histo)
       stat_tool::wrap_util::throw_error(
-          "Could not initialize Histogram from arguments");
+          "Could not initialize FrequencyDistribution from arguments");
 
     return histo;
   }
 
-  WRAP_METHOD3(Histogram, parametric_estimation, Parametric_model, int, int, bool);
-  WRAP_METHOD3(Histogram, value_select, Distribution_data, int, int, bool);
-  WRAP_METHOD1(Histogram, shift, Distribution_data, int);
-  WRAP_METHOD1(Histogram, fit, Parametric_model, Parametric);
+  WRAP_METHOD3(FrequencyDistribution, parametric_estimation, DiscreteParametricModel, int, int, bool);
+  WRAP_METHOD3(FrequencyDistribution, value_select, DiscreteDistributionData, int, int, bool);
+  WRAP_METHOD1(FrequencyDistribution, shift, DiscreteDistributionData, int);
+  WRAP_METHOD1(FrequencyDistribution, fit, DiscreteParametricModel, DiscreteParametric);
 
   // Cluster
-  static Distribution_data*
-  cluster_step(const Histogram& h, int step)
+  static DiscreteDistributionData*
+  cluster_step(const FrequencyDistribution &h, int step)
   {
-    Format_error error;
-    Distribution_data* ret = h.cluster(error, step);
+    StatError error;
+    DiscreteDistributionData* ret = h.cluster(error, step);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -301,13 +301,13 @@ public:
     return ret;
   }
 
-  static Distribution_data*
-  cluster_information(const Histogram& h, float ratio)
+  static DiscreteDistributionData*
+  cluster_information(const FrequencyDistribution &h, float ratio)
   {
-    Format_error error;
+    StatError error;
     std::stringstream output;
 
-    Distribution_data* ret = h.cluster(error, ratio, output);
+    DiscreteDistributionData* ret = h.cluster(error, ratio, output);
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -315,11 +315,11 @@ public:
     return ret;
   }
 
-  static Distribution_data*
-  cluster_limit(const Histogram& h, boost::python::list& limit)
+  static DiscreteDistributionData*
+  cluster_limit(const FrequencyDistribution &h, boost::python::list& limit)
   {
 
-    Format_error error;
+    StatError error;
 
     int nb_limit = len(limit);
     stat_tool::wrap_util::auto_ptr_array<int> l(new int[nb_limit]);
@@ -327,7 +327,7 @@ public:
     for (int i = 0; i < nb_limit; i++)
       l[i] = extract<int> (limit[i]);
 
-    Distribution_data* ret = h.cluster(error, nb_limit + 1, l.get());
+    DiscreteDistributionData* ret = h.cluster(error, nb_limit + 1, l.get());
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -335,11 +335,11 @@ public:
     return ret;
   }
 
-  static Distribution_data*
-  transcode(const Histogram& h, boost::python::list& symbol)
+  static DiscreteDistributionData*
+  transcode(const FrequencyDistribution &h, boost::python::list& symbol)
   {
 
-    Format_error error;
+    StatError error;
 
     int nb_symbol = len(symbol);
     stat_tool::wrap_util::auto_ptr_array<int> l(new int[nb_symbol]);
@@ -351,7 +351,7 @@ public:
     for (int i = 0; i < nb_symbol; i++)
       l[i] = extract<int> (symbol[i]);
 
-    Distribution_data* ret = h.transcode(error, l.get());
+    DiscreteDistributionData* ret = h.transcode(error, l.get());
 
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
@@ -360,19 +360,19 @@ public:
   }
 
   static MultiPlotSet*
-  get_plotable(const Histogram& p, const boost::python::list& hist_list)
+  get_plotable(const FrequencyDistribution &p, const boost::python::list& hist_list)
   {
-    Format_error error;
+    StatError error;
     int nb_hist = boost::python::len(hist_list);
-    stat_tool::wrap_util::auto_ptr_array<const Histogram *> hists(
-        new const Histogram*[nb_hist]);
+    stat_tool::wrap_util::auto_ptr_array<const FrequencyDistribution *> hists(
+        new const FrequencyDistribution*[nb_hist]);
 
     for (int i = 0; i < nb_hist; i++)
-      hists[i] = extract<const Histogram*> (hist_list[i]);
+      hists[i] = extract<const FrequencyDistribution*> (hist_list[i]);
 
-    const Histogram** d = hists.get();
+    const FrequencyDistribution** d = hists.get();
 
-    MultiPlotSet* ret = p.get_plotable_histograms(error, nb_hist, d);
+    MultiPlotSet* ret = p.get_plotable_frequency_distributions(error, nb_hist, d);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
 
@@ -385,70 +385,70 @@ public:
 
 // Boost declaration
 
-void class_histogram()
+void class_frequency_distribution()
 {
 
-   // _Histogram
-   class_<Histogram> ("_Histogram", no_init)
+   // _FrequencyDistribution
+   class_<FrequencyDistribution> ("_FrequencyDistribution", no_init)
   .def(self == self)
   .def(self != self) .def(self_ns::str(self))
-  .def("__len__", HistogramWrap::histo_get_nb_element)
-  .def("__getitem__", HistogramWrap::histo_get_item)
+  .def("__len__", FrequencyDistributionWrap::histo_get_nb_element)
+  .def("__getitem__", FrequencyDistributionWrap::histo_get_item)
 
   // Comparison
-  .def("compare", HistogramWrap::comparison,
-      args("histogram"),"Comparison of histograms")
-  .def("f_comparison", HistogramWrap::f_comparison,
-      args("histogram"), "F comparison of histograms")
-  .def("t_comparison", HistogramWrap::t_comparison, args("histogram"),
-      "T comparison of histograms")
-  .def("wmw_comparison", HistogramWrap::wmw_comparison,
-      args("histogram"),
-      " Wilcoxon-Mann-Whitney comparison of histograms")
+  .def("compare", FrequencyDistributionWrap::comparison,
+      args("frequency distribution"),"Comparison of frequency distributions")
+  .def("f_comparison", FrequencyDistributionWrap::f_comparison,
+      args("frequency distribution"), "F comparison of frequency distributions")
+  .def("t_comparison", FrequencyDistributionWrap::t_comparison, args("frequency distribution"),
+      "T comparison of frequency distributions")
+  .def("wmw_comparison", FrequencyDistributionWrap::wmw_comparison,
+      args("frequency distribution"),
+      " Wilcoxon-Mann-Whitney comparison of frequency distributions")
 
   // Estimation
-  .def("parametric_estimation", HistogramWrap::parametric_estimation,
+  .def("parametric_estimation", FrequencyDistributionWrap::parametric_estimation,
       return_value_policy<manage_new_object> (), "Parametric model estimation")
-  .def("mixture_estimation1", HistogramWrap::mixture_estimation1,
+  .def("mixture_estimation1", FrequencyDistributionWrap::mixture_estimation1,
       return_value_policy<manage_new_object> (), "Mixture Estimation")
-  .def("mixture_estimation2", HistogramWrap::mixture_estimation2,
+  .def("mixture_estimation2", FrequencyDistributionWrap::mixture_estimation2,
       return_value_policy<manage_new_object> (), "Mixture Estimation")
-  .def("convolution_estimation1", HistogramWrap::convolution_estimation1,
+  .def("convolution_estimation1", FrequencyDistributionWrap::convolution_estimation1,
       return_value_policy<manage_new_object> (), "Convolution Estimation")
-  .def("convolution_estimation2", HistogramWrap::convolution_estimation2,
+  .def("convolution_estimation2", FrequencyDistributionWrap::convolution_estimation2,
       return_value_policy<manage_new_object> (), "Convolution Estimation")
-  .def("compound_estimation1", HistogramWrap::compound_estimation1,
+  .def("compound_estimation1", FrequencyDistributionWrap::compound_estimation1,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
-  .def("compound_estimation2", HistogramWrap::compound_estimation2,
+  .def("compound_estimation2", FrequencyDistributionWrap::compound_estimation2,
       return_value_policy<manage_new_object> (), "Compound  Estimation")
 
   // Select
-  .def("value_select", HistogramWrap::value_select, return_value_policy<
+  .def("value_select", FrequencyDistributionWrap::value_select, return_value_policy<
       manage_new_object> (), args("min", "max", "keep"),
       "Selection of individuals according to the values taken by a variable")
 
   // Cluster
-  .def("cluster_step", HistogramWrap::cluster_step, return_value_policy<
+  .def("cluster_step", FrequencyDistributionWrap::cluster_step, return_value_policy<
       manage_new_object> (), args("step"), "See Cluster")
-  .def("cluster_information", HistogramWrap::cluster_information,
+  .def("cluster_information", FrequencyDistributionWrap::cluster_information,
       return_value_policy<manage_new_object> (), args("ratio"),
       "Cluster with information")
-  .def("cluster_limit", HistogramWrap::cluster_limit, return_value_policy<
+  .def("cluster_limit", FrequencyDistributionWrap::cluster_limit, return_value_policy<
       manage_new_object> (), args("limits"), "See Cluster")
-  .def("transcode", HistogramWrap::transcode, return_value_policy<
+  .def("transcode", FrequencyDistributionWrap::transcode, return_value_policy<
       manage_new_object> (), "See Transcode")
 
   // Others
-  .def("merge", HistogramWrap::merge_histograms, return_value_policy<
-      manage_new_object> (), args("histograms"), "Merge histograms")
-  .def("shift", HistogramWrap::shift,
+  .def("merge", FrequencyDistributionWrap::merge_frequency_distributions, return_value_policy<
+      manage_new_object> (), args("frequency distributions"), "Merge frequency distributions")
+  .def("shift", FrequencyDistributionWrap::shift,
       return_value_policy<manage_new_object> (), args("shift_param"),
-      "Shift Histogram")
-  .def("fit", HistogramWrap::fit, return_value_policy<manage_new_object> (),
-      args("parametric_model"), "Fit histogram")
-  .def("get_plotable_list", HistogramWrap::get_plotable, return_value_policy<
-      manage_new_object> (), "Return a plotable for a list of histograms")
-  .def("get_plotable", &STAT_interface::get_plotable, return_value_policy<
+      "Shift FrequencyDistribution")
+  .def("fit", FrequencyDistributionWrap::fit, return_value_policy<manage_new_object> (),
+      args("parametric_model"), "Fit frequency distribution")
+  .def("get_plotable_list", FrequencyDistributionWrap::get_plotable, return_value_policy<
+      manage_new_object> (), "Return a plotable for a list of frequency distributions")
+  .def("get_plotable", &StatInterface::get_plotable, return_value_policy<
       manage_new_object> (), "Return a plotable (no parameters)")
 
   ;
@@ -456,7 +456,7 @@ void class_histogram()
   /*
 
    bool concentration_flag = false) const;
-   bool plot_print(const char *path , int nb_histo = 0 ,  const Histogram **histo = 0) const;
+   bool plot_print(const char *path , int nb_histo = 0 ,  const FrequencyDistribution **histo = 0) const;
    bool plot_print(const char *path , double *cumul , double *concentration ,  double shift = 0.) const;
    bool survival_plot_print(const char *path , double *survivor) const;
    std::ostream& plot_title_print(std::ostream &os) const   { return os; }
@@ -474,23 +474,23 @@ void class_histogram()
    double* survivor_function_computation(double scale = D_DEFAULT) const;
    double* concentration_function_computation(double scale = D_DEFAULT) const;
 
-   Test* kruskal_wallis_test(int nb_histo , const Histogram **ihisto) const;
+   Test* kruskal_wallis_test(int nb_histo , const FrequencyDistribution **ihisto) const;
 
-   std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,  const Histogram **ihisto ,   int type , double **dissimilarity) const;
-   bool dissimilarity_ascii_write(Format_error &error , const char *path ,   int nb_histo , const Histogram **ihisto ,   int type , double **dissimilarity) const;
-   bool dissimilarity_spreadsheet_write(Format_error &error , const char *path ,   int nb_histo , const Histogram **ihisto ,   int type , double **dissimilarity) const;
+   std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,  const FrequencyDistribution **ihisto ,   int type , double **dissimilarity) const;
+   bool dissimilarity_ascii_write(StatError &error , const char *path ,   int nb_histo , const FrequencyDistribution **ihisto ,   int type , double **dissimilarity) const;
+   bool dissimilarity_spreadsheet_write(StatError &error , const char *path ,   int nb_histo , const FrequencyDistribution **ihisto ,   int type , double **dissimilarity) const;
 
    void update(const Reestimation<double> *reestim , int inb_element);
-   Histogram* frequency_scale(int inb_element) const;
+   FrequencyDistribution* frequency_scale(int inb_element) const;
 
-   Histogram(int inb_value = 0)      :Reestimation<int>(inb_value) {}
-   Histogram(const Distribution &dist)      :Reestimation<int>(dist.nb_value) {}
-   Histogram(int inb_element , int *pelement);
-   Histogram(const Histogram &histo , char transform , int param , int mode = FLOOR);
+   FrequencyDistribution(int inb_value = 0)      :Reestimation<int>(inb_value) {}
+   FrequencyDistribution(const Distribution &dist)      :Reestimation<int>(dist.nb_value) {}
+   FrequencyDistribution(int inb_element , int *pelement);
+   FrequencyDistribution(const FrequencyDistribution &histo , char transform , int param , int mode = FLOOR);
 
 
-   bool comparison(Format_error &error , std::ostream &os , int nb_histo ,
-   const Histogram **ihisto , int type , const char *path = 0 ,   char format = 'a') const;
+   bool comparison(StatError &error , std::ostream &os , int nb_histo ,
+   const FrequencyDistribution **ihisto , int type , const char *path = 0 ,   char format = 'a') const;
 
 
 
@@ -498,7 +498,7 @@ void class_histogram()
 
 }
 
-////////////////////// Export Distribution_data ////////////////////////////////
+////////////////////// Export DiscreteDistributionData ////////////////////////////////
 
 // Wrapper class
 
@@ -507,50 +507,50 @@ class DistributionDataWrap
 
 public:
 
-  // Histogram constructor from a python list
-  static boost::shared_ptr<Distribution_data>
+  // FrequencyDistribution constructor from a python list
+  static boost::shared_ptr<DiscreteDistributionData>
   distribution_data_from_list(boost::python::list& int_list)
   {
-    Distribution_data *histo = NULL;
+    DiscreteDistributionData *histo = NULL;
     int nb_element = boost::python::len(int_list);
 
     if (!nb_element)
       stat_tool::wrap_util::throw_error("At least one observation"
-        "is required to initialize Histogram");
+        "is required to initialize FrequencyDistribution");
 
     stat_tool::wrap_util::auto_ptr_array<int> pelement(new int[nb_element]);
     for (int i = 0; i < nb_element; i++)
       pelement[i] = extract<int> (int_list[i]);
 
     // create new distribution_data object
-    histo = new Distribution_data(nb_element, pelement.get());
+    histo = new DiscreteDistributionData(nb_element, pelement.get());
     if (!histo)
       stat_tool::wrap_util::throw_error(
-          "Could not initialize Histogram from argument");
+          "Could not initialize FrequencyDistribution from argument");
 
-    return boost::shared_ptr<Distribution_data>(histo);
+    return boost::shared_ptr<DiscreteDistributionData>(histo);
   }
 
-  static boost::shared_ptr<Distribution_data>
+  static boost::shared_ptr<DiscreteDistributionData>
   distribution_data_from_file(char* filename)
   {
-    Format_error error;
-    Distribution_data *histo = NULL;
-    histo = histogram_ascii_read(error, filename);
+    StatError error;
+    DiscreteDistributionData *histo = NULL;
+    histo = frequency_distribution_ascii_read(error, filename);
 
     if (!histo)
       stat_tool::wrap_util::throw_error(error);
 
-    return boost::shared_ptr<Distribution_data>(histo);
+    return boost::shared_ptr<DiscreteDistributionData>(histo);
 
   }
 
-  WRAP_METHOD_FILE_ASCII_WRITE(Distribution_data);
-  WRAP_METHOD_SURVIVAL_ASCII_WRITE(Distribution_data);
-  WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE(Distribution_data);
-  WRAP_METHOD_SURVIVAL_PLOT_WRITE(Distribution_data);
-  WRAP_METHOD0(Distribution_data, extract_model, Parametric_model);
-  WRAP_METHOD0(Distribution_data, survival_get_plotable, MultiPlotSet);
+  WRAP_METHOD_FILE_ASCII_WRITE(DiscreteDistributionData);
+  WRAP_METHOD_SURVIVAL_ASCII_WRITE(DiscreteDistributionData);
+  WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE(DiscreteDistributionData);
+  WRAP_METHOD_SURVIVAL_PLOT_WRITE(DiscreteDistributionData);
+  WRAP_METHOD0(DiscreteDistributionData, extract_model, DiscreteParametricModel);
+  WRAP_METHOD0(DiscreteDistributionData, survival_get_plotable, MultiPlotSet);
 
 
 };
@@ -561,8 +561,8 @@ public:
 
 void class_distribution_data()
 {
-    // _Distribution_data
-  class_<Distribution_data, bases<Histogram, STAT_interface> >
+    // _DiscreteDistributionData
+  class_<DiscreteDistributionData, bases<FrequencyDistribution, StatInterface> >
     ("_DistributionData", "_DistributionData", init< optional< int > >())
 
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_list ))
@@ -575,22 +575,22 @@ void class_distribution_data()
     .def("survival_plot_write", DistributionDataWrap::survival_plot_write, args("prefix", "title"), "Write GNUPLOT files (survival viewpoint)")
     .def("survival_spreadsheet_write", DistributionDataWrap::survival_spreadsheet_write, args("filename"), "Write object to filename (spreadsheet format)")
     DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", DistributionDataWrap::survival_get_plotable, "Return a plotable object")
-    .def("file_ascii_write", DistributionDataWrap::file_ascii_write, "Save histogram into a file")
+    .def("file_ascii_write", DistributionDataWrap::file_ascii_write, "Save frequency distribution into a file")
 
-    DEF_RETURN_VALUE_NO_ARGS("extract_model", DistributionDataWrap::extract_model, "Return the 'model' part of the histogram")
+    DEF_RETURN_VALUE_NO_ARGS("extract_model", DistributionDataWrap::extract_model, "Return the 'model' part of the frequency distribution")
 
     ;
 
 /*
-    Distribution_data(const Distribution &dist)    :Histogram(dist) { distribution = 0; }
-    Distribution_data(const Histogram &histo)    :Histogram(histo) { distribution = 0; }
-    Distribution_data(int inb_element , int *pelement)    :Histogram(inb_element , pelement) { distribution = 0; }
-    Distribution_data(const Histogram &histo , char transform , int param , int mode = FLOOR)    :Histogram(histo , transform , param , mode) { distribution = 0; }
-    Distribution_data(int nb_histo , const Histogram **phisto)    :Histogram(nb_histo , phisto) { distribution = 0; }
-    Distribution_data(const Histogram &histo , const Distribution *dist);
-    Distribution_data(const Histogram &histo , const Parametric *dist);
-    Distribution_data(const Distribution_data &histo , bool model_flag = true);
-    Parametric* get_distribution() const { return distribution; }
+    DiscreteDistributionData(const Distribution &dist)    :FrequencyDistribution(dist) { distribution = 0; }
+    DiscreteDistributionData(const FrequencyDistribution &histo)    :FrequencyDistribution(histo) { distribution = 0; }
+    DiscreteDistributionData(int inb_element , int *pelement)    :FrequencyDistribution(inb_element , pelement) { distribution = 0; }
+    DiscreteDistributionData(const FrequencyDistribution &histo , char transform , int param , int mode = FLOOR)    :FrequencyDistribution(histo , transform , param , mode) { distribution = 0; }
+    DiscreteDistributionData(int nb_histo , const FrequencyDistribution **phisto)    :FrequencyDistribution(nb_histo , phisto) { distribution = 0; }
+    DiscreteDistributionData(const FrequencyDistribution &histo , const Distribution *dist);
+    DiscreteDistributionData(const FrequencyDistribution &histo , const DiscreteParametric *dist);
+    DiscreteDistributionData(const DiscreteDistributionData &histo , bool model_flag = true);
+    DiscreteParametric* get_distribution() const { return distribution; }
 */
 
 }
