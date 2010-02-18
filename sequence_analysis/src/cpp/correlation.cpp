@@ -227,12 +227,12 @@ Correlation& Correlation::operator=(const Correlation &correl)
  *
  *  Fusion d'objets Correlation.
  *
- *  arguments : reference sur un objet Format_error, nombre d'objets Correlation,
+ *  arguments : reference sur un objet StatError, nombre d'objets Correlation,
  *              pointeurs sur les objets Correlation.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Correlation::merge(Format_error &error , int nb_correl ,
+Correlation* Correlation::merge(StatError &error , int nb_correl ,
                                 const Correlation **icorrel) const
 
 {
@@ -592,12 +592,12 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Correlation dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::ascii_write(Format_error &error , const char *path , bool exhaustive) const
+bool Correlation::ascii_write(StatError &error , const char *path , bool exhaustive) const
 
 {
   bool status;
@@ -624,11 +624,11 @@ bool Correlation::ascii_write(Format_error &error , const char *path , bool exha
  *
  *  Ecriture d'un objet Correlation dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::spreadsheet_write(Format_error &error , const char *path) const
+bool Correlation::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status , autocorrelation , cross_correlation;
@@ -810,12 +810,12 @@ bool Correlation::plot_print(const char *path , double *confidence_limit) const
  *
  *  Sortie Gnuplot d'un objet Correlation.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::plot_write(Format_error &error , const char *prefix ,
+bool Correlation::plot_write(StatError &error , const char *prefix ,
                              const char *title) const
 
 {
@@ -1613,7 +1613,7 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
         vec->max_value_computation(j);
 
         delete vec->marginal[j];
-        vec->build_marginal_histogram(j);
+        vec->build_marginal_frequency_distribution(j);
       }
 
       // calcul du coefficient de correlation
@@ -1643,13 +1643,13 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
  *
  *  Calcul d'une fonction de correlation a partir d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, indices des variables,
+ *  arguments : reference sur un objet StatError, indices des variables,
  *              type de coefficient (PEARSON/SPEARMAN/KENDALL), decalage maximum,
  *              normalisation (APPROXIMATED/EXACT), calcul des moyennes par individu ou non.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Sequences::correlation_computation(Format_error &error , int variable1 ,
+Correlation* Sequences::correlation_computation(StatError &error , int variable1 ,
                                                 int variable2 , int itype , int max_lag ,
                                                 int normalization , bool individual_mean) const
 
@@ -1757,12 +1757,12 @@ Correlation* Sequences::correlation_computation(Format_error &error , int variab
  *  Calcul de la fonction de correlation theorique d'un bruit blanc
  *  pour une filtre donne.
  *
- *  arguments : reference sur un objet Format_error, taille du filtre, filtre,
+ *  arguments : reference sur un objet StatError, taille du filtre, filtre,
  *              flag calcul du filtre correspondant aux residus.
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::white_noise_correlation(Format_error &error , int nb_point , double *filter ,
+bool Correlation::white_noise_correlation(StatError &error , int nb_point , double *filter ,
                                           int residual)
 
 {
@@ -1830,11 +1830,11 @@ bool Correlation::white_noise_correlation(Format_error &error , int nb_point , d
  *  Calcul de la fonction de correlation theorique d'un bruit blanc
  *  pour une filtre donne.
  *
- *  arguments : reference sur un objet Format_error, loi symmetrique.
+ *  arguments : reference sur un objet StatError, loi symmetrique.
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::white_noise_correlation(Format_error &error , const Distribution &dist)
+bool Correlation::white_noise_correlation(StatError &error , const Distribution &dist)
 
 {
   bool status = true;
@@ -1868,11 +1868,11 @@ bool Correlation::white_noise_correlation(Format_error &error , const Distributi
  *  Calcul de la fonction de correlation theorique d'un bruit blanc
  *  pour une differenciation.
  *
- *  arguments : reference sur un objet Format_error, ordre de la differenciation.
+ *  arguments : reference sur un objet StatError, ordre de la differenciation.
  *
  *--------------------------------------------------------------*/
 
-bool Correlation::white_noise_correlation(Format_error &error , int order)
+bool Correlation::white_noise_correlation(StatError &error , int order)
 
 {
   bool status = true;
@@ -1916,12 +1916,12 @@ bool Correlation::white_noise_correlation(Format_error &error , int order)
  *
  *  Calcul d'une fonction d'autocorrelation partielle a partir d'un objet Sequences.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              type de coefficient (PEARSON/KENDALL), decalage maximum.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Sequences::partial_autocorrelation_computation(Format_error &error , int variable ,
+Correlation* Sequences::partial_autocorrelation_computation(StatError &error , int variable ,
                                                             int itype , int max_lag) const
 
 {
