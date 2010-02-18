@@ -891,13 +891,13 @@ void Chain::log_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Chain_data.
+ *  Constructeur par copie de la classe ChainData.
  *
- *  argument : reference sur un objet Chain_data.
+ *  argument : reference sur un objet ChainData.
  *
  *--------------------------------------------------------------*/
 
-Chain_data::Chain_data(const Chain_data &chain_data)
+ChainData::ChainData(const ChainData &chain_data)
 
 {
   copy(chain_data);
