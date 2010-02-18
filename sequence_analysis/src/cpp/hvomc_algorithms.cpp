@@ -71,14 +71,14 @@ extern char* label(const char *file_name);
  *  Calcul de la vraisemblance de sequences pour une chaine de Markov
  *  d'ordre variable cachee par l'algorithme forward.
  *
- *  arguments : reference sur un objet Markovian_sequences, pointeur sur
+ *  arguments : reference sur un objet MarkovianSequences, pointeur sur
  *              les probabilites a posteriori des sequences d'etats
  *              les plus probables, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_variable_order_markov::likelihood_computation(const Markovian_sequences &seq ,
-                                                            double *posterior_probability , int index) const
+double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq ,
+                                                         double *posterior_probability , int index) const
 
 {
   register int i , j , k , m;
@@ -255,18 +255,18 @@ double Hidden_variable_order_markov::likelihood_computation(const Markovian_sequ
  *  Estimation des parametres d'une chaine de Markov d'ordre variable cachee
  *  a partir d'un echantillon de sequences par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, stream, chaine de Markov cachee initiale,
+ *  arguments : reference sur un objet StatError, stream, chaine de Markov cachee initiale,
  *              type d'estimation des probabilites de transition initiale (cas ordinaire),
  *              flags sur le calcul des lois de comptage et sur le calcul des sequences
  *              d'etats optimales, nombre d'iterations.
  *
  *--------------------------------------------------------------*/
 
-Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_estimation(Format_error &error , ostream &os ,
-                                                                                           const Hidden_variable_order_markov &ihmarkov ,
-                                                                                           bool global_initial_transition ,
-                                                                                           bool counting_flag , bool state_sequence ,
-                                                                                           int nb_iter) const
+HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_estimation(StatError &error , ostream &os ,
+                                                                                       const HiddenVariableOrderMarkov &ihmarkov ,
+                                                                                       bool global_initial_transition ,
+                                                                                       bool counting_flag , bool state_sequence ,
+                                                                                       int nb_iter) const
 
 {
   bool status;
@@ -274,11 +274,11 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
   int nb_terminal , max_nb_value , iter , **poutput;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , min_likelihood ,
          **forward , norm , **predicted , buff , *backward , *auxiliary , *reestim;
-  Chain_reestimation<double> *chain_reestim;
+  ChainReestimation<double> *chain_reestim;
   Reestimation<double> ***observation_reestim;
-  Histogram *hobservation;
-  Hidden_variable_order_markov *hmarkov;
-  Variable_order_markov_data *seq;
+  FrequencyDistribution *hobservation;
+  HiddenVariableOrderMarkov *hmarkov;
+  VariableOrderMarkovData *seq;
 
 
   hmarkov = NULL;
@@ -351,7 +351,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     // creation de la chaine de Markov cachee
 
-    hmarkov = new Hidden_variable_order_markov(ihmarkov , false);
+    hmarkov = new HiddenVariableOrderMarkov(ihmarkov , false);
 
     if (hmarkov->type == 'e') {
       nb_terminal = (hmarkov->nb_row - 1) * (hmarkov->nb_state - 1) / hmarkov->nb_state + 1;
@@ -385,8 +385,8 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
     backward = new double[hmarkov->nb_row];
     auxiliary = new double[hmarkov->nb_row];
 
-    chain_reestim = new Chain_reestimation<double>((hmarkov->type == 'o' ?  'o' : 'v') ,
-                                                   hmarkov->nb_state , hmarkov->nb_row);
+    chain_reestim = new ChainReestimation<double>((hmarkov->type == 'o' ?  'o' : 'v') ,
+                                                  hmarkov->nb_state , hmarkov->nb_row);
 
     observation_reestim = new Reestimation<double>**[hmarkov->nb_output_process];
     for (i = 0;i < hmarkov->nb_output_process;i++) {
@@ -404,7 +404,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
     }
 
     if (max_nb_value > 0) {
-      hobservation = new Histogram(max_nb_value);
+      hobservation = new FrequencyDistribution(max_nb_value);
     }
     else {
       hobservation = NULL;
@@ -812,7 +812,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     else {
       if (state_sequence) {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , 'a' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'a' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
 
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
@@ -832,11 +832,11 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
         seq->min_value_computation(0);
         seq->max_value_computation(0);
-        seq->build_marginal_histogram(0);
+        seq->build_marginal_frequency_distribution(0);
         seq->build_characteristic(0);
 
         seq->build_transition_count(*hmarkov);
-        seq->build_observation_histogram();
+        seq->build_observation_frequency_distribution();
 
         // calcul des lois d'observation parametriques
 
@@ -851,13 +851,13 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
 #       ifdef MESSAGE
         cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood
-             << " | " << hmarkov->Variable_order_markov::likelihood_computation(*seq) << endl;
+             << " | " << hmarkov->VariableOrderMarkov::likelihood_computation(*seq) << endl;
 #       endif
 
       }
 
       else {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , 'c' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'c' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
         seq->state_variable_init(INT_VALUE);
 
@@ -915,7 +915,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
  *  Estimation des parametres d'une chaine de Markov d'ordre variable cachee
  *  a partir d'un echantillon de sequences par l'algorithme MCEM.
  *
- *  arguments : reference sur un objet Format_error, stream, chaine de Markov cachee initiale,
+ *  arguments : reference sur un objet StatError, stream, chaine de Markov cachee initiale,
  *              type d'estimation des probabilites de transition initiale (cas ordinaire),
  *              parametres pour le nombre de sequences d'etats simulees, flags sur le calcul
  *              des lois de comptage et sur le calcul des sequences d'etats optimales,
@@ -923,13 +923,13 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
  *
  *--------------------------------------------------------------*/
 
-Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_stochastic_estimation(Format_error &error , ostream &os ,
-                                                                                                      const Hidden_variable_order_markov &ihmarkov ,
-                                                                                                      bool global_initial_transition ,
-                                                                                                      int min_nb_state_sequence ,
-                                                                                                      int max_nb_state_sequence ,
-                                                                                                      double parameter , bool counting_flag ,
-                                                                                                      bool state_sequence , int nb_iter) const
+HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stochastic_estimation(StatError &error , ostream &os ,
+                                                                                                  const HiddenVariableOrderMarkov &ihmarkov ,
+                                                                                                  bool global_initial_transition ,
+                                                                                                  int min_nb_state_sequence ,
+                                                                                                  int max_nb_state_sequence ,
+                                                                                                  double parameter , bool counting_flag ,
+                                                                                                  bool state_sequence , int nb_iter) const
 
 {
   bool status;
@@ -937,10 +937,10 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
   int nb_terminal , iter , nb_state_sequence , memory , *state_seq , *pstate , **poutput;
   double likelihood = D_INF , previous_likelihood , observation_likelihood , min_likelihood ,
          **forward , norm , **predicted , *backward , *cumul_backward , *reestim;
-  Chain_reestimation<double> *chain_reestim;
+  ChainReestimation<double> *chain_reestim;
   Reestimation<double> ***observation_reestim;
-  Hidden_variable_order_markov *hmarkov;
-  Variable_order_markov_data *seq;
+  HiddenVariableOrderMarkov *hmarkov;
+  VariableOrderMarkovData *seq;
 
 # ifdef DEBUG
   double sum;
@@ -1022,7 +1022,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     // creation de la chaine de Markov cachee
 
-    hmarkov = new Hidden_variable_order_markov(ihmarkov , false);
+    hmarkov = new HiddenVariableOrderMarkov(ihmarkov , false);
 
     if (hmarkov->type == 'e') {
       nb_terminal = (hmarkov->nb_row - 1) * (hmarkov->nb_state - 1) / hmarkov->nb_state + 1;
@@ -1058,8 +1058,8 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     state_seq = new int[max_length];
 
-    chain_reestim = new Chain_reestimation<double>((hmarkov->type == 'o' ?  'o' : 'v') ,
-                                                   hmarkov->nb_state , hmarkov->nb_row);
+    chain_reestim = new ChainReestimation<double>((hmarkov->type == 'o' ?  'o' : 'v') ,
+                                                  hmarkov->nb_state , hmarkov->nb_row);
 
     observation_reestim = new Reestimation<double>**[hmarkov->nb_output_process];
     for (i = 0;i < hmarkov->nb_output_process;i++) {
@@ -1467,7 +1467,7 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
     else {
       if  (state_sequence) {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , 'a' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'a' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
 
         for (i = 1;i <= hmarkov->nb_output_process;i++) {
@@ -1487,11 +1487,11 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
         seq->min_value_computation(0);
         seq->max_value_computation(0);
-        seq->build_marginal_histogram(0);
+        seq->build_marginal_frequency_distribution(0);
         seq->build_characteristic(0);
 
         seq->build_transition_count(*hmarkov);
-        seq->build_observation_histogram();
+        seq->build_observation_frequency_distribution();
 
         // calcul des lois d'observation parametriques
 
@@ -1506,13 +1506,13 @@ Hidden_variable_order_markov* Markovian_sequences::hidden_variable_order_markov_
 
 #       ifdef MESSAGE
         cout << "\n" << SEQ_label[SEQL_STATE_SEQUENCES_LIKELIHOOD] << ": " << seq->likelihood
-             << " | " << hmarkov->Variable_order_markov::likelihood_computation(*seq) << endl;
+             << " | " << hmarkov->VariableOrderMarkov::likelihood_computation(*seq) << endl;
 #       endif
 
       }
 
       else {
-        hmarkov->markov_data = new Variable_order_markov_data(*this , 'c' , (hmarkov->type == 'e' ? true : false));
+        hmarkov->markov_data = new VariableOrderMarkovData(*this , 'c' , (hmarkov->type == 'e' ? true : false));
         seq = hmarkov->markov_data;
         seq->state_variable_init(INT_VALUE);
 
@@ -1883,17 +1883,17 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
  *
  *  Calcul des profils d'etats et d'entropie par l'algorithme forward-backward.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
+ *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
  *              stream, pointeur sur un objet MultiPlotSet, format de sortie ('a' : ASCII,
  *              's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable), references sur
  *              l'entropie marginale maximum et l'entropie (pour la visualisation).
  *
  *--------------------------------------------------------------*/
 
-double Hidden_variable_order_markov::forward_backward(const Markovian_sequences &seq , int index ,
-                                                      ostream *os , MultiPlotSet *plot_set ,
-                                                      char format , double &max_marginal_entropy ,
-                                                      double &entropy1) const
+double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq , int index ,
+                                                   ostream *os , MultiPlotSet *plot_set ,
+                                                   char format , double &max_marginal_entropy ,
+                                                   double &entropy1) const
 
 {
   register int i , j , k;
@@ -2403,7 +2403,7 @@ double Hidden_variable_order_markov::forward_backward(const Markovian_sequences 
       pstate++;
     }
 
-    state_seq_likelihood = Variable_order_markov::likelihood_computation(seq , index);
+    state_seq_likelihood = VariableOrderMarkov::likelihood_computation(seq , index);
 
 /*    begin_conditional_entropy[0] = begin_partial_entropy[0];
     for (i = 1;i < seq.length[index];i++) {
@@ -2689,15 +2689,15 @@ double Hidden_variable_order_markov::forward_backward(const Markovian_sequences 
  *  Simulation de sequences d'etats correspondant a une sequence observee
  *  par l'algorithme forward-backward de simulation.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
+ *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
  *              stream, format de fichier ('a' : ASCII, 's' : Spreadsheet),
  *              nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_variable_order_markov::forward_backward_sampling(const Markovian_sequences &seq ,
-                                                               int index , ostream &os , char format ,
-                                                               int nb_state_sequence) const
+double HiddenVariableOrderMarkov::forward_backward_sampling(const MarkovianSequences &seq ,
+                                                            int index , ostream &os , char format ,
+                                                            int nb_state_sequence) const
 
 {
   register int i , j , k;
@@ -2896,7 +2896,7 @@ double Hidden_variable_order_markov::forward_backward_sampling(const Markovian_s
 #     endif
 
 #     ifdef MESSAGE
-      state_seq_likelihood = Variable_order_markov::likelihood_computation(seq , index);
+      state_seq_likelihood = VariableOrderMarkov::likelihood_computation(seq , index);
 
       pstate = seq.int_sequence[index][0];
 
@@ -2980,7 +2980,7 @@ double Hidden_variable_order_markov::forward_backward_sampling(const Markovian_s
  *
  *--------------------------------------------------------------*/
 
-void Hidden_variable_order_markov::log_computation()
+void HiddenVariableOrderMarkov::log_computation()
 
 {
   register int i , j;
@@ -3009,14 +3009,14 @@ void Hidden_variable_order_markov::log_computation()
  *
  *  Calcul des sequences d'etats les plus probables par l'algorithme de Viterbi.
  *
- *  arguments : reference sur un objet Markovian_sequences,
+ *  arguments : reference sur un objet MarkovianSequences,
  *              pointeur sur les probabilites a posteriori des sequences d'etats
  *              les plus probables, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_variable_order_markov::viterbi(const Markovian_sequences &seq ,
-                                             double *posterior_probability , int index) const
+double HiddenVariableOrderMarkov::viterbi(const MarkovianSequences &seq ,
+                                          double *posterior_probability , int index) const
 
 {
   register int i , j , k , m;
@@ -3235,15 +3235,15 @@ double Hidden_variable_order_markov::viterbi(const Markovian_sequences &seq ,
  *  Calcul des N sequences d'etats les plus probables correspondant a
  *  une sequence observee par l'algorithme de Viterbi generalise.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
+ *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
  *              stream, vraisemblance des donnees, format de fichier
  *              ('a' : ASCII, 's' : Spreadsheet), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_variable_order_markov::generalized_viterbi(const Markovian_sequences &seq , int index ,
-                                                         ostream &os , double seq_likelihood ,
-                                                         char format , int inb_state_sequence) const
+double HiddenVariableOrderMarkov::generalized_viterbi(const MarkovianSequences &seq , int index ,
+                                                      ostream &os , double seq_likelihood ,
+                                                      char format , int inb_state_sequence) const
 
 {
   bool **active_cell;
@@ -3642,15 +3642,15 @@ double Hidden_variable_order_markov::generalized_viterbi(const Markovian_sequenc
  *
  *  Calcul des profils d'etats par l'algorithme de Viterbi forward-backward.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence,
+ *  arguments : reference sur un objet MarkovianSequences, indice de la sequence,
  *              stream, pointeur sur un objet MultiPlot, format de sortie ('a' : ASCII,
  *              's' : Spreadsheet, 'g' : Gnuplot, 'p' : plotable), vraisemblance des donnees.
  *
  *--------------------------------------------------------------*/
 
-double Hidden_variable_order_markov::viterbi_forward_backward(const Markovian_sequences &seq ,
-                                                              int index , ostream *os , MultiPlot *plot ,
-                                                              char format , double seq_likelihood) const
+double HiddenVariableOrderMarkov::viterbi_forward_backward(const MarkovianSequences &seq ,
+                                                           int index , ostream *os , MultiPlot *plot ,
+                                                           char format , double seq_likelihood) const
 
 {
   register int i , j , k;
@@ -4026,25 +4026,25 @@ double Hidden_variable_order_markov::viterbi_forward_backward(const Markovian_se
  *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
  *  ecriture des resultats.
  *
- *  arguments : reference sur un objet Format_error, stream, sequences,
+ *  arguments : reference sur un objet StatError, stream, sequences,
  *              identificateur de la sequence, format ('a' : ASCII, 's' : Spreadsheet),
  *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
  *              algorithme forward-backward de simulation), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ostream &os ,
-                                                       const Markovian_sequences &iseq ,
-                                                       int identifier , char format ,
-                                                       int state_sequence , int nb_state_sequence) const
+bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &os ,
+                                                    const MarkovianSequences &iseq ,
+                                                    int identifier , char format ,
+                                                    int state_sequence , int nb_state_sequence) const
 
 {
   bool status = true;
   register int i;
   int offset = I_DEFAULT , nb_value , index = I_DEFAULT;
   double seq_likelihood , max_marginal_entropy , entropy;
-  Hidden_variable_order_markov *hmarkov;
-  Variable_order_markov_data *seq;
+  HiddenVariableOrderMarkov *hmarkov;
+  VariableOrderMarkovData *seq;
 
 
   error.init();
@@ -4112,13 +4112,13 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ost
 
   if (status) {
     if (iseq.type[0] != STATE) {
-      seq = new Variable_order_markov_data(iseq);
+      seq = new VariableOrderMarkovData(iseq);
     }
     else {
-      seq = new Variable_order_markov_data(iseq , 'c' , (type == 'e' ? true : false));
+      seq = new VariableOrderMarkovData(iseq , 'c' , (type == 'e' ? true : false));
     }
 
-    hmarkov = new Hidden_variable_order_markov(*this , false);
+    hmarkov = new HiddenVariableOrderMarkov(*this , false);
     hmarkov->create_cumul();
     hmarkov->log_computation();
 
@@ -4174,17 +4174,17 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , ost
  *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
  *  ecriture des resultats dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, sequences,
+ *  arguments : reference sur un objet StatError, path, sequences,
  *              identificateur de la sequence, format de fichier ('a' : ASCII, 's' : Spreadsheet),
  *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
  *              algorithme forward-backward de simulation), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::state_profile_write(Format_error &error , const char *path ,
-                                                       const Markovian_sequences &iseq ,
-                                                       int identifier , char format ,
-                                                       int state_sequence , int nb_state_sequence) const
+bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const char *path ,
+                                                    const MarkovianSequences &iseq ,
+                                                    int identifier , char format ,
+                                                    int state_sequence , int nb_state_sequence) const
 
 {
   bool status = true;
@@ -4214,15 +4214,15 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , con
  *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
  *  ecriture des resultats.
  *
- *  arguments : reference sur un objet Format_error, stream, identificateur de la sequence,
+ *  arguments : reference sur un objet StatError, stream, identificateur de la sequence,
  *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
  *              algorithme forward-backward de simulation), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::state_profile_ascii_write(Format_error &error , ostream &os ,
-                                                             int identifier , int state_sequence ,
-                                                             int nb_state_sequence) const
+bool HiddenVariableOrderMarkov::state_profile_ascii_write(StatError &error , ostream &os ,
+                                                          int identifier , int state_sequence ,
+                                                          int nb_state_sequence) const
 
 {
   bool status;
@@ -4251,16 +4251,16 @@ bool Hidden_variable_order_markov::state_profile_ascii_write(Format_error &error
  *  simulation de sequences d'etats par l'algorithme forward-backward de simulation et
  *  ecriture des resultats dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, identificateur de la sequence,
+ *  arguments : reference sur un objet StatError, path, identificateur de la sequence,
  *              format de fichier ('a' : ASCII, 's' : Spreadsheet),
  *              methode de calcul des sequences d'etats (algorithme de Viterbi generalise ou
  *              algorithme forward-backward de simulation), nombre de sequences d'etats.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::state_profile_write(Format_error &error , const char *path ,
-                                                       int identifier , char format ,
-                                                       int state_sequence , int nb_state_sequence) const
+bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , const char *path ,
+                                                    int identifier , char format ,
+                                                    int state_sequence , int nb_state_sequence) const
 
 {
   bool status = true;
@@ -4293,22 +4293,22 @@ bool Hidden_variable_order_markov::state_profile_write(Format_error &error , con
  *  des profils d'etats par l'algorithme de Viterbi forward-backward et
  *  affichage des resultats au format Gnuplot.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              sequences, identificateur de la sequence, titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error , const char *prefix ,
-                                                            const Markovian_sequences &iseq ,
-                                                            int identifier , const char *title) const
+bool HiddenVariableOrderMarkov::state_profile_plot_write(StatError &error , const char *prefix ,
+                                                         const MarkovianSequences &iseq ,
+                                                         int identifier , const char *title) const
 
 {
   bool status = true;
   register int i , j;
   int offset = I_DEFAULT , nb_value , index;
   double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
-  Hidden_variable_order_markov *hmarkov;
-  Variable_order_markov_data *seq;
+  HiddenVariableOrderMarkov *hmarkov;
+  VariableOrderMarkovData *seq;
   ostringstream data_file_name[2];
   ofstream *out_data_file;
 
@@ -4383,10 +4383,10 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
 
     else {
       if (iseq.type[0] != STATE) {
-        seq = new Variable_order_markov_data(iseq);
+        seq = new VariableOrderMarkovData(iseq);
       }
       else {
-        seq = new Variable_order_markov_data(iseq , 'c' , (type == 'e' ? true : false));
+        seq = new VariableOrderMarkovData(iseq , 'c' , (type == 'e' ? true : false));
       }
 
       seq_likelihood = forward_backward(*seq , index , out_data_file , 0 , 'g' ,
@@ -4403,7 +4403,7 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
         data_file_name[1] << prefix << 1 << ".dat";
         out_data_file = new ofstream((data_file_name[1].str()).c_str());
 
-        hmarkov = new Hidden_variable_order_markov(*this , false);
+        hmarkov = new HiddenVariableOrderMarkov(*this , false);
 
         hmarkov->create_cumul();
         hmarkov->log_computation();
@@ -4640,14 +4640,14 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
  *  des profils d'etats par l'algorithme de Viterbi forward-backward et
  *  affichage des resultats au format Gnuplot.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              identificateur de la sequence, titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error ,
-                                                            const char *prefix , int identifier ,
-                                                            const char *title) const
+bool HiddenVariableOrderMarkov::state_profile_plot_write(StatError &error ,
+                                                         const char *prefix , int identifier ,
+                                                         const char *title) const
 
 {
   bool status;
@@ -4673,22 +4673,22 @@ bool Hidden_variable_order_markov::state_profile_plot_write(Format_error &error 
  *  des profils d'etats par l'algorithme de Viterbi forward-backward et
  *  sortie graphique des resultats.
  *
- *  arguments : reference sur un objet Format_error, sequences,
+ *  arguments : reference sur un objet StatError, sequences,
  *              identificateur de la sequence.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_error &error ,
-                                                                         const Markovian_sequences &iseq ,
-                                                                         int identifier) const
+MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError &error ,
+                                                                      const MarkovianSequences &iseq ,
+                                                                      int identifier) const
 
 {
   bool status = true;
   register int i;
   int offset = I_DEFAULT , nb_value , index;
   double seq_likelihood , max_marginal_entropy , entropy , state_seq_likelihood;
-  Hidden_variable_order_markov *hmarkov;
-  Variable_order_markov_data *seq;
+  HiddenVariableOrderMarkov *hmarkov;
+  VariableOrderMarkovData *seq;
   ostringstream legend;
   MultiPlotSet *plot_set;
 
@@ -4758,10 +4758,10 @@ MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_
     plot.border = "15 lw 0";
 
     if (iseq.type[0] != STATE) {
-      seq = new Variable_order_markov_data(iseq);
+      seq = new VariableOrderMarkovData(iseq);
     }
     else {
-      seq = new Variable_order_markov_data(iseq , 'c' , (type == 'e' ? true : false));
+      seq = new VariableOrderMarkovData(iseq , 'c' , (type == 'e' ? true : false));
     }
 
     seq_likelihood = forward_backward(*seq , index , 0 , plot_set , 'p' ,
@@ -4774,7 +4774,7 @@ MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_
     }
 
     else {
-      hmarkov = new Hidden_variable_order_markov(*this , false);
+      hmarkov = new HiddenVariableOrderMarkov(*this , false);
 
       hmarkov->create_cumul();
       hmarkov->log_computation();
@@ -4912,13 +4912,13 @@ MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_
  *  des profils d'etats par l'algorithme de Viterbi forward-backward et
  *  sortie graphique des resultats.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              identificateur de la sequence.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_error &error ,
-                                                                         int identifier) const
+MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError &error ,
+                                                                      int identifier) const
 
 {
   MultiPlotSet *plot_set;
@@ -4942,21 +4942,21 @@ MultiPlotSet* Hidden_variable_order_markov::state_profile_plotable_write(Format_
  *
  *  Calcul des sequences d'etats les plus probables.
  *
- *  arguments : references sur un objet Format_error et sur un objet Markovian_sequences,
+ *  arguments : references sur un objet StatError et sur un objet MarkovianSequences,
  *              flag sur le calcul des caracteristiques.
  *
  *--------------------------------------------------------------*/
 
-Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computation(Format_error &error ,
-                                                                                     const Markovian_sequences &iseq ,
-                                                                                     bool characteristic_flag) const
+VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(StatError &error ,
+                                                                               const MarkovianSequences &iseq ,
+                                                                               bool characteristic_flag) const
 
 {
   bool status = true;
   register int i;
   int nb_value;
-  Hidden_variable_order_markov *hmarkov;
-  Variable_order_markov_data *seq;
+  HiddenVariableOrderMarkov *hmarkov;
+  VariableOrderMarkovData *seq;
 
 
   seq = NULL;
@@ -4997,11 +4997,11 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
   }
 
   if (status) {
-    seq = new Variable_order_markov_data(iseq , 'a' , (type == 'e' ? true : false));
+    seq = new VariableOrderMarkovData(iseq , 'a' , (type == 'e' ? true : false));
 
-    seq->markov = new Variable_order_markov(*this , false);
+    seq->markov = new VariableOrderMarkov(*this , false);
 
-    hmarkov = new Hidden_variable_order_markov(*this , false);
+    hmarkov = new HiddenVariableOrderMarkov(*this , false);
 
     hmarkov->create_cumul();
     hmarkov->log_computation();
@@ -5026,11 +5026,11 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
 
       seq->min_value[0] = 0;
       seq->max_value[0] = nb_state - 1;
-      seq->build_marginal_histogram(0);
+      seq->build_marginal_frequency_distribution(0);
       seq->build_characteristic(0);
 
       seq->build_transition_count(*hmarkov);
-      seq->build_observation_histogram();
+      seq->build_observation_frequency_distribution();
 
 /*      if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
         delete seq;
@@ -5056,23 +5056,23 @@ Variable_order_markov_data* Hidden_variable_order_markov::state_sequence_computa
  *  Comparaison de differentes chaines de Markov d'ordre variable cachees
  *  pour un ensemble de sequences.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de chaines
  *              de Markov cachees, pointeur sur les chaines de Markov cachees,
  *              type algorithme (forward ou Viterbi), path.
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_model ,
-                                     const Hidden_variable_order_markov **ihmarkov ,
-                                     int algorithm , const char *path) const
+bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
+                                    const HiddenVariableOrderMarkov **ihmarkov ,
+                                    int algorithm , const char *path) const
 
 {
   bool status = true;
   register int i , j;
   int nb_value;
   double **likelihood;
-  Hidden_variable_order_markov **hmarkov;
-  Variable_order_markov_data *seq;
+  HiddenVariableOrderMarkov **hmarkov;
+  VariableOrderMarkovData *seq;
 
 
   error.init();
@@ -5126,14 +5126,14 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
     }
 
     if (algorithm == VITERBI) {
-      hmarkov = new Hidden_variable_order_markov*[nb_model];
+      hmarkov = new HiddenVariableOrderMarkov*[nb_model];
       for (i = 0;i < nb_model;i++) {
-        hmarkov[i] = new Hidden_variable_order_markov(*(ihmarkov[i]) , false);
+        hmarkov[i] = new HiddenVariableOrderMarkov(*(ihmarkov[i]) , false);
         hmarkov[i]->create_cumul();
         hmarkov[i]->log_computation();
       }
 
-      seq = new Variable_order_markov_data(*this);
+      seq = new VariableOrderMarkovData(*this);
     }
 
     // pour chaque sequence, calcul de la vraisemblance (FORWARD) ou de la vraisemblance
@@ -5185,30 +5185,30 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
  *
  *  Simulation par une chaine de Markov d'ordre variable cachee.
  *
- *  arguments : reference sur un objet Format_error,
- *              histogramme des longueurs des sequences,
+ *  arguments : reference sur un objet StatError,
+ *              loi empirique des longueurs des sequences,
  *              flag sur le calcul des lois de comptage,
  *              flag calcul d'une divergence de Kullback-Leibler.
  *
  *--------------------------------------------------------------*/
 
-Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_error &error ,
-                                                                     const Histogram &hlength ,
-                                                                     bool counting_flag ,
-                                                                     bool divergence_flag) const
+VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error ,
+                                                               const FrequencyDistribution &hlength ,
+                                                               bool counting_flag ,
+                                                               bool divergence_flag) const
 
 {
   register int i;
-  Markovian_sequences *observ_seq;
-  Variable_order_markov_data *seq;
+  MarkovianSequences *observ_seq;
+  VariableOrderMarkovData *seq;
 
 
-  seq = Variable_order_markov::simulation(error , hlength , counting_flag , divergence_flag);
+  seq = VariableOrderMarkov::simulation(error , hlength , counting_flag , divergence_flag);
 
   if ((seq) && (!divergence_flag)) {
     seq->posterior_probability = new double[seq->nb_sequence];
     for (i = 0;i < seq->nb_sequence;i++) {
-      seq->posterior_probability[i] = Variable_order_markov::likelihood_computation(*seq , i);
+      seq->posterior_probability[i] = VariableOrderMarkov::likelihood_computation(*seq , i);
     }
 
     observ_seq = seq->remove_variable_1();
@@ -5224,27 +5224,27 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
  *
  *  Simulation par une chaine de Markov d'ordre variable cachee.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              nombre et longueur des sequences.
  *
  *--------------------------------------------------------------*/
 
-Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_error &error ,
-                                                                     int nb_sequence , int length ,
-                                                                     bool counting_flag) const
+VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error ,
+                                                               int nb_sequence , int length ,
+                                                               bool counting_flag) const
 
 {
   register int i;
-  Markovian_sequences *observ_seq;
-  Variable_order_markov_data *seq;
+  MarkovianSequences *observ_seq;
+  VariableOrderMarkovData *seq;
 
 
-  seq = Variable_order_markov::simulation(error , nb_sequence , length , counting_flag);
+  seq = VariableOrderMarkov::simulation(error , nb_sequence , length , counting_flag);
 
   if (seq) {
     seq->posterior_probability = new double[seq->nb_sequence];
     for (i = 0;i < seq->nb_sequence;i++) {
-      seq->posterior_probability[i] = Variable_order_markov::likelihood_computation(*seq , i);
+      seq->posterior_probability[i] = VariableOrderMarkov::likelihood_computation(*seq , i);
     }
 
     observ_seq = seq->remove_variable_1();
@@ -5260,28 +5260,28 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
  *
  *  Simulation par une chaine de Markov d'ordre variable cachee.
  *
- *  arguments : reference sur un objet Format_error, nombre de sequences,
- *              reference sur un objet Markovian_sequences.
+ *  arguments : reference sur un objet StatError, nombre de sequences,
+ *              reference sur un objet MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_error &error ,
-                                                                     int nb_sequence ,
-                                                                     const Markovian_sequences &iseq ,
-                                                                     bool counting_flag) const
+VariableOrderMarkovData* HiddenVariableOrderMarkov::simulation(StatError &error ,
+                                                               int nb_sequence ,
+                                                               const MarkovianSequences &iseq ,
+                                                               bool counting_flag) const
 
 {
   register int i;
-  Markovian_sequences *observ_seq;
-  Variable_order_markov_data *seq;
+  MarkovianSequences *observ_seq;
+  VariableOrderMarkovData *seq;
 
 
-  seq = Variable_order_markov::simulation(error , nb_sequence , iseq , counting_flag);
+  seq = VariableOrderMarkov::simulation(error , nb_sequence , iseq , counting_flag);
 
   if (seq) {
     seq->posterior_probability = new double[seq->nb_sequence];
     for (i = 0;i < seq->nb_sequence;i++) {
-      seq->posterior_probability[i] = Variable_order_markov::likelihood_computation(*seq , i);
+      seq->posterior_probability[i] = VariableOrderMarkov::likelihood_computation(*seq , i);
     }
 
     observ_seq = seq->remove_variable_1();
@@ -5298,25 +5298,25 @@ Variable_order_markov_data* Hidden_variable_order_markov::simulation(Format_erro
  *  Comparaison de chaines de Markov d'ordre variable cachees par calcul
  *  de divergences de Kullback-Leibler.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de chaines
  *              de Markov cachees, pointeur sur les chaines de Markov cachees,
- *              histogramme des longueurs des sequences, path.
+ *              loi empirique des longueurs des sequences, path.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_error &error , ostream &os , int nb_model ,
-                                                                      const Hidden_variable_order_markov **ihmarkov ,
-                                                                      Histogram **hlength , const char *path) const
+DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream &os , int nb_model ,
+                                                                  const HiddenVariableOrderMarkov **ihmarkov ,
+                                                                  FrequencyDistribution **hlength , const char *path) const
 
 {
   bool status = true , lstatus;
   register int i , j , k;
   int cumul_length;
   double ref_likelihood , target_likelihood , **likelihood;
-  const Hidden_variable_order_markov **hmarkov;
-  Markovian_sequences *seq;
-  Variable_order_markov_data *simul_seq;
-  Distance_matrix *dist_matrix;
+  const HiddenVariableOrderMarkov **hmarkov;
+  MarkovianSequences *seq;
+  VariableOrderMarkovData *simul_seq;
+  DistanceMatrix *dist_matrix;
   ofstream *out_file;
 
 
@@ -5361,21 +5361,21 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
     if ((hlength[i]->nb_element < 1) || (hlength[i]->nb_element > NB_SEQUENCE)) {
       lstatus = false;
       ostringstream error_message;
-      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_NB_SEQUENCE];
       error.update((error_message.str()).c_str());
     }
     if (hlength[i]->offset < 2) {
       lstatus = false;
       ostringstream error_message;
-      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_SHORT_SEQUENCE_LENGTH];
       error.update((error_message.str()).c_str());
     }
     if (hlength[i]->nb_value - 1 > MAX_LENGTH) {
       lstatus = false;
       ostringstream error_message;
-      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_LONG_SEQUENCE_LENGTH];
       error.update((error_message.str()).c_str());
     }
@@ -5393,7 +5393,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
       if (cumul_length > CUMUL_LENGTH) {
         status = false;
         ostringstream error_message;
-        error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+        error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                       << i + 1 << ": "  << SEQ_error[SEQR_CUMUL_SEQUENCE_LENGTH];
         error.update((error_message.str()).c_str());
       }
@@ -5416,14 +5416,14 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
       }
     }
 
-    hmarkov = new const Hidden_variable_order_markov*[nb_model];
+    hmarkov = new const HiddenVariableOrderMarkov*[nb_model];
 
     hmarkov[0] = this;
     for (i = 1;i < nb_model;i++) {
       hmarkov[i] = ihmarkov[i - 1];
     }
 
-    dist_matrix = new Distance_matrix(nb_model , SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN]);
+    dist_matrix = new DistanceMatrix(nb_model , SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN]);
 
     for (i = 0;i < nb_model;i++) {
 
@@ -5504,21 +5504,21 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
  *  Comparaison de chaines de Markov d'ordre variable cachees par calcul
  *  de divergences de Kullback-Leibler.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de chaines
  *              de Markov cachees, pointeur sur les chaines de Markov cachees,
  *              nombre et longueur des sequences, path.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_error &error , ostream &os ,
-                                                                      int nb_model , const Hidden_variable_order_markov **hmarkov ,
-                                                                      int nb_sequence , int length , const char *path) const
+DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream &os ,
+                                                                  int nb_model , const HiddenVariableOrderMarkov **hmarkov ,
+                                                                  int nb_sequence , int length , const char *path) const
 
 {
   bool status = true;
   register int i;
-  Histogram **hlength;
-  Distance_matrix *dist_matrix;
+  FrequencyDistribution **hlength;
+  DistanceMatrix *dist_matrix;
 
 
   dist_matrix = NULL;
@@ -5538,9 +5538,9 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
   }
 
   if (status) {
-    hlength = new Histogram*[nb_model];
+    hlength = new FrequencyDistribution*[nb_model];
 
-    hlength[0] = new Histogram(length + 1);
+    hlength[0] = new FrequencyDistribution(length + 1);
 
     hlength[0]->nb_element = nb_sequence;
     hlength[0]->offset = length;
@@ -5550,7 +5550,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
     hlength[0]->frequency[length] = nb_sequence;
 
     for (i = 1;i < nb_model;i++) {
-      hlength[i] = new Histogram(*hlength[0]);
+      hlength[i] = new FrequencyDistribution(*hlength[0]);
     }
 
     dist_matrix = divergence_computation(error , os , nb_model , hmarkov , hlength , path);
@@ -5570,21 +5570,21 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
  *  Comparaison de chaines de Markov d'ordre variable cachees par calcul
  *  de divergences de Kullback-Leibler.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de chaines
  *              de Markov cachees, pointeur sur les chaines de Markov cachees,
- *              pointeurs sur des objets Markovian_sequences, path.
+ *              pointeurs sur des objets MarkovianSequences, path.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_error &error , ostream &os ,
-                                                                      int nb_model , const Hidden_variable_order_markov **hmarkov ,
-                                                                      int nb_sequence , const Markovian_sequences **seq ,
-                                                                      const char *path) const
+DistanceMatrix* HiddenVariableOrderMarkov::divergence_computation(StatError &error , ostream &os ,
+                                                                  int nb_model , const HiddenVariableOrderMarkov **hmarkov ,
+                                                                  int nb_sequence , const MarkovianSequences **seq ,
+                                                                  const char *path) const
 
 {
   register int i;
-  Histogram **hlength;
-  Distance_matrix *dist_matrix;
+  FrequencyDistribution **hlength;
+  DistanceMatrix *dist_matrix;
 
 
   error.init();
@@ -5595,7 +5595,7 @@ Distance_matrix* Hidden_variable_order_markov::divergence_computation(Format_err
   }
 
   else {
-    hlength = new Histogram*[nb_model];
+    hlength = new FrequencyDistribution*[nb_model];
     for (i = 0;i < nb_model;i++) {
       hlength[i] = seq[i]->hlength->frequency_scale(nb_sequence);
     }
