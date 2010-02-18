@@ -66,15 +66,15 @@ const int REGRESSION_NB_ITER = 1000;   // nombre d'iterations pour la regression
  */
 
 
-class Function : public Regression_kernel {  // fonction d'evolution des probabilites
-                                             // de rester dans un etat
+class Function : public RegressionKernel {  // fonction d'evolution des probabilites
+                                            // de rester dans un etat
 
-    friend class Self_transition;
-    friend class Nonhomogeneous_markov;
-    friend class Markovian_sequences;
-    friend class Nonhomogeneous_markov_data;
+    friend class SelfTransition;
+    friend class NonhomogeneousMarkov;
+    friend class MarkovianSequences;
+    friend class NonhomogeneousMarkovData;
 
-    friend Function* function_parsing(Format_error &error , std::ifstream &in_file , int &line ,
+    friend Function* function_parsing(StatError &error , std::ifstream &in_file , int &line ,
                                       int length , double min, double max);
 
 private :
@@ -91,7 +91,7 @@ private :
     bool plot_print(const char *path , double residual_standard_deviation = D_DEFAULT) const;
 
     double regression_square_sum_computation(double self_transition_mean) const;
-    void residual_computation(const Self_transition &self_transition);
+    void residual_computation(const SelfTransition &self_transition);
     double residual_mean_computation() const;
     double residual_variance_computation(double residual_mean) const;
     double residual_square_sum_computation() const;
@@ -112,40 +112,40 @@ public :
 };
 
 
-Function* function_parsing(Format_error &error , std::ifstream &in_file , int &line ,
+Function* function_parsing(StatError &error , std::ifstream &in_file , int &line ,
                            int length , double min = 0. , double max = 1.);
 
 
 
-// class Nonhomogeneous_markov : public STAT_interface , public Chain {
-class Nonhomogeneous_markov : public STAT_interface , protected Chain {  // chaine de Markov non-homogene
+// class NonhomogeneousMarkov : public StatInterface , public Chain {
+class NonhomogeneousMarkov : public StatInterface , protected Chain {  // chaine de Markov non-homogene
 
-    friend class Markovian_sequences;
-    friend class Nonhomogeneous_markov_data;
+    friend class MarkovianSequences;
+    friend class NonhomogeneousMarkovData;
 
-    friend Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , const char *path ,
-                                                                   int length);
-    friend std::ostream& operator<<(std::ostream &os , const Nonhomogeneous_markov &markov)
+    friend NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const char *path ,
+                                                                  int length);
+    friend std::ostream& operator<<(std::ostream &os , const NonhomogeneousMarkov &markov)
     { return markov.ascii_write(os , markov.markov_data); }
 
 protected :
 
-    Nonhomogeneous_markov_data *markov_data;  // pointeur sur un objet Nonhomogeneous_markov_data
+    NonhomogeneousMarkovData *markov_data;  // pointeur sur un objet NonhomogeneousMarkovData
     bool *homogeneity;      // homogeneite des etats
     Function **self_transition;  // fonction d'evolution des probabilites
                                  // de rester dans un etat
-    Nonparametric_sequence_process *process;
+    NonparametricSequenceProcess *process;
 
-    void copy(const Nonhomogeneous_markov &markov , bool data_flag = true ,
+    void copy(const NonhomogeneousMarkov &markov , bool data_flag = true ,
               bool characteristic_flag = true);
     void remove();
 
-    std::ostream& ascii_write(std::ostream &os , const Nonhomogeneous_markov_data *seq ,
+    std::ostream& ascii_write(std::ostream &os , const NonhomogeneousMarkovData *seq ,
                               bool exhaustive = false , bool file_flag  = false) const;
-    std::ostream& spreadsheet_write(std::ostream &os , const Nonhomogeneous_markov_data *seq) const;
+    std::ostream& spreadsheet_write(std::ostream &os , const NonhomogeneousMarkovData *seq) const;
     bool plot_write(const char *prefix , const char *title ,
-                    const Nonhomogeneous_markov_data *seq) const;
-    MultiPlotSet* get_plotable(const Nonhomogeneous_markov_data *seq) const;
+                    const NonhomogeneousMarkovData *seq) const;
+    MultiPlotSet* get_plotable(const NonhomogeneousMarkovData *seq) const;
 
     int nb_parameter_computation() const;
 
@@ -158,92 +158,92 @@ protected :
 
 public :
 
-    Nonhomogeneous_markov();
-    Nonhomogeneous_markov(int inb_state , int *ident);
-    Nonhomogeneous_markov(const Chain *pchain , const Function **pself_transition , int length);
-    Nonhomogeneous_markov(const Nonhomogeneous_markov &markov , bool data_flag = true ,
-                          bool characteristic_flag = true)
+    NonhomogeneousMarkov();
+    NonhomogeneousMarkov(int inb_state , int *ident);
+    NonhomogeneousMarkov(const Chain *pchain , const Function **pself_transition , int length);
+    NonhomogeneousMarkov(const NonhomogeneousMarkov &markov , bool data_flag = true ,
+                         bool characteristic_flag = true)
     :Chain(markov) { copy(markov , data_flag , characteristic_flag); }
-    virtual ~Nonhomogeneous_markov();
-    Nonhomogeneous_markov& operator=(const Nonhomogeneous_markov &markov);
+    virtual ~NonhomogeneousMarkov();
+    NonhomogeneousMarkov& operator=(const NonhomogeneousMarkov &markov);
 
-    Parametric_model* extract(Format_error &error , int type , int state) const;
+    DiscreteParametricModel* extract(StatError &error , int type , int state) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag);
-    void characteristic_computation(const Nonhomogeneous_markov_data &seq , bool counting_flag ,
+    void characteristic_computation(const NonhomogeneousMarkovData &seq , bool counting_flag ,
                                     bool length_flag = true);
 
-    double likelihood_computation(const Markovian_sequences &seq ,
+    double likelihood_computation(const MarkovianSequences &seq ,
                                   int index = I_DEFAULT) const;
 
-    Nonhomogeneous_markov_data* simulation(Format_error &error , const Histogram &hlength ,
-                                           bool counting_flag = true) const;
-    Nonhomogeneous_markov_data* simulation(Format_error &error , int nb_sequence , int length ,
-                                           bool counting_flag = true) const;
-    Nonhomogeneous_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                           const Markovian_sequences &iseq ,
-                                           bool counting_flag = true) const;
+    NonhomogeneousMarkovData* simulation(StatError &error , const FrequencyDistribution &hlength ,
+                                         bool counting_flag = true) const;
+    NonhomogeneousMarkovData* simulation(StatError &error , int nb_sequence , int length ,
+                                         bool counting_flag = true) const;
+    NonhomogeneousMarkovData* simulation(StatError &error , int nb_sequence ,
+                                         const MarkovianSequences &iseq ,
+                                         bool counting_flag = true) const;
 
     // acces membres de la classe
 
-    Nonhomogeneous_markov_data* get_markov_data() const { return markov_data; }
+    NonhomogeneousMarkovData* get_markov_data() const { return markov_data; }
     bool get_homogeneity(int state) const { return homogeneity[state]; }
     Function* get_self_transition(int state) const { return self_transition[state]; }
-    Nonparametric_sequence_process* get_process() const { return process; }
+    NonparametricSequenceProcess* get_process() const { return process; }
 };
 
 
-Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , const char *path ,
-                                                        int length = DEFAULT_LENGTH);
+NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const char *path ,
+                                                       int length = DEFAULT_LENGTH);
 
 
 
-class Nonhomogeneous_markov_data : public Markovian_sequences {  // structure de donnees correspondant
-                                                                 // a une chaine de Markov non-homogene
+class NonhomogeneousMarkovData : public MarkovianSequences {  // structure de donnees correspondant
+                                                              // a une chaine de Markov non-homogene
 
-    friend class Markovian_sequences;
-    friend class Nonhomogeneous_markov;
+    friend class MarkovianSequences;
+    friend class NonhomogeneousMarkov;
 
-    friend std::ostream& operator<<(std::ostream &os , const Nonhomogeneous_markov_data &seq)
+    friend std::ostream& operator<<(std::ostream &os , const NonhomogeneousMarkovData &seq)
     { return seq.ascii_write(os , false); }
 
 private :
 
-    Nonhomogeneous_markov *markov;  // pointeur sur un objet Nonhomogeneous_markov
-    Chain_data *chain_data;  // etats initaux et transitions
+    NonhomogeneousMarkov *markov;  // pointeur sur un objet NonhomogeneousMarkov
+    ChainData *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences
 
-    void copy(const Nonhomogeneous_markov_data &seq , bool model_flag = true);
+    void copy(const NonhomogeneousMarkovData &seq , bool model_flag = true);
 
 public :
 
-    Nonhomogeneous_markov_data();
-    Nonhomogeneous_markov_data(const Histogram &ihlength);
-    Nonhomogeneous_markov_data(const Markovian_sequences &seq);
-    Nonhomogeneous_markov_data(const Nonhomogeneous_markov_data &seq , bool model_flag = true ,
-                               char transform = 'c')
-    :Markovian_sequences(seq , transform) { copy(seq , model_flag); }
-    ~Nonhomogeneous_markov_data();
-    Nonhomogeneous_markov_data& operator=(const Nonhomogeneous_markov_data &seq);
+    NonhomogeneousMarkovData();
+    NonhomogeneousMarkovData(const FrequencyDistribution &ihlength);
+    NonhomogeneousMarkovData(const MarkovianSequences &seq);
+    NonhomogeneousMarkovData(const NonhomogeneousMarkovData &seq , bool model_flag = true ,
+                             char transform = 'c')
+    :MarkovianSequences(seq , transform) { copy(seq , model_flag); }
+    ~NonhomogeneousMarkovData();
+    NonhomogeneousMarkovData& operator=(const NonhomogeneousMarkovData &seq);
 
-    Distribution_data* extract(Format_error &error , int type , int state) const;
-    Nonhomogeneous_markov_data* remove_index_parameter(Format_error &error) const;
+    DiscreteDistributionData* extract(StatError &error , int type , int state) const;
+    NonhomogeneousMarkovData* remove_index_parameter(StatError &error) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -251,8 +251,8 @@ public :
 
     // acces membres de la classe
 
-    Nonhomogeneous_markov* get_markov() const { return markov; }
-    Chain_data* get_chain_data() const { return chain_data; }
+    NonhomogeneousMarkov* get_markov() const { return markov; }
+    ChainData* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
 };
 
