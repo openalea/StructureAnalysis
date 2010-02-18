@@ -384,12 +384,12 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , int correlation_typ
  *
  *  Ecriture d'une matrice des coefficients de correlation des rangs dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, type de coefficient
+ *  arguments : reference sur un objet StatError, path, type de coefficient
  *              (SPEARMAN/KENDALL), pointeur sur les coefficients.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::rank_correlation_ascii_write(Format_error &error , const char *path ,
+bool Vectors::rank_correlation_ascii_write(StatError &error , const char *path ,
                                            int correlation_type , double **correlation) const
 
 {
@@ -418,12 +418,12 @@ bool Vectors::rank_correlation_ascii_write(Format_error &error , const char *pat
  *  Calcul de la matrice des coefficients de correlation des rangs
  *  de Spearman ou de Kendall.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              type de coefficient (SPEARMAN / KENDALL), path.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::rank_correlation_computation(Format_error &error , ostream &os ,
+bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
                                            int correlation_type , const char *path) const
 
 {
@@ -664,20 +664,20 @@ double Vectors::kendall_rank_single_correlation_computation() const
  *
  *  Comparaison de vecteurs.
  *
- *  arguments : references sur un objet Format_error et sur un objet Vector_distance,
+ *  arguments : references sur un objet StatError et sur un objet VectorDistance,
  *              flag standardisation (uniquement variables de meme type).
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance &ivector_dist ,
-                                     bool standardization) const
+DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ivector_dist ,
+                                    bool standardization) const
 {
   bool status = true;
   register int i , j , k;
   double distance , ldistance , **rank;
-  Histogram *merged_marginal;
-  Vector_distance *vector_dist;
-  Distance_matrix *dist_matrix;
+  FrequencyDistribution *merged_marginal;
+  VectorDistance *vector_dist;
+  DistanceMatrix *dist_matrix;
 
 
   dist_matrix = NULL;
@@ -708,7 +708,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -747,7 +747,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
   }
 
   if (status) {
-    vector_dist = new Vector_distance(ivector_dist);
+    vector_dist = new VectorDistance(ivector_dist);
 
     // calcul des rangs pour les variables ordinales
 
@@ -757,7 +757,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
 
     case false : {
       if (vector_dist->variable_type[0] == ORDINAL) {
-        merged_marginal = new Histogram(nb_variable , (const Histogram**)marginal);
+        merged_marginal = new FrequencyDistribution(nb_variable , (const FrequencyDistribution**)marginal);
         rank[0] = merged_marginal->rank_computation();
 
 #       ifdef MESSAGE
@@ -783,6 +783,13 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
           rank[i] = NULL;
         }
       }
+
+#     ifdef DEBUG
+      for (i = 0;i < nb_variable;i++) {
+        vector_dist->weight[i] = 1.;
+      }
+#     endif
+
       break;
     }
 
@@ -844,7 +851,7 @@ Distance_matrix* Vectors::comparison(Format_error &error , const Vector_distance
 
     }
 
-    dist_matrix = new Distance_matrix(nb_vector , STAT_label[STATL_VECTOR] , identifier);
+    dist_matrix = new DistanceMatrix(nb_vector , STAT_label[STATL_VECTOR] , identifier);
 
     for (i = 0;i < nb_vector;i++) {
       for (j = i + 1;j < nb_vector;j++) {
@@ -1134,13 +1141,13 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
  *
  *  Ecriture d'un tableau de contingence dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, indices des 2 variables,
+ *  arguments : reference sur un objet StatError, path, indices des 2 variables,
  *              pointeurs sur les tableaux de contingence, d'ecarts et
  *              de contributions au chi2, reference sur le resultat du test du chi2.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::contingency_table_ascii_write(Format_error &error , const char *path ,
+bool Vectors::contingency_table_ascii_write(StatError &error , const char *path ,
                                             int variable1 , int variable2 , int **frequency ,
                                             double **deviation , double **chi2_contribution ,
                                             const Test &test) const
@@ -1171,13 +1178,13 @@ bool Vectors::contingency_table_ascii_write(Format_error &error , const char *pa
  *
  *  Ecriture d'un tableau de contingence dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path, indices des 2 variables,
+ *  arguments : reference sur un objet StatError, path, indices des 2 variables,
  *              pointeurs sur les tableaux de contingence, d'ecarts et
  *              de contributions au chi2, reference sur le resultat du test du chi2.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::contingency_table_spreadsheet_write(Format_error &error , const char *path ,
+bool Vectors::contingency_table_spreadsheet_write(StatError &error , const char *path ,
                                                   int variable1 , int variable2 , int **frequency ,
                                                   double **deviation , double **chi2_contribution ,
                                                   const Test &test) const
@@ -1265,12 +1272,12 @@ bool Vectors::contingency_table_spreadsheet_write(Format_error &error , const ch
  *
  *  Tableau de contingence entre 2 variables.
  *
- *  arguments : reference sur un objet Format_error, stream, indices des 2 variables,
+ *  arguments : reference sur un objet StatError, stream, indices des 2 variables,
  *              path, format de fichier ('a' : ASCII, 's' : Spreadsheet).
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::contingency_table(Format_error &error , ostream &os , int variable1 ,
+bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
                                 int variable2 , const char *path , char format) const
 
 {
@@ -1656,17 +1663,17 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
     }
     width[2] += ASCII_SPACE;
 
-    // ecriture des histogrammes et des fonctions de repartition
+    // ecriture des lois empiriques et des fonctions de repartition
 
     os << "\n  ";
     for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
       if (marginal[0]->frequency[i] > 0) {
-        os << " | " << STAT_label[STATL_HISTOGRAM] << " " << i;
+        os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i;
       }
     }
     for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
       if (marginal[0]->frequency[i] > 0) {
-        os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+        os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
            << i << " " << STAT_label[STATL_FUNCTION];
       }
     }
@@ -1709,10 +1716,10 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
 
   case ORDINAL : {
     int nb_histo;
-    const Histogram **value_marginal;
+    const FrequencyDistribution **value_marginal;
 
 
-    value_marginal = new const Histogram*[marginal[0]->nb_value];
+    value_marginal = new const FrequencyDistribution*[marginal[0]->nb_value];
     nb_histo = 0;
     for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
       if (marginal[0]->frequency[i] > 0) {
@@ -1803,13 +1810,13 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
  *
  *  Ecriture des resultats d'une analyse de variance a un facteur dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              type de la variable reponse (ORDINAL/NUMERIC), pointeurs sur les sous-echantillons
  *              pour chaque niveau possible, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis_ascii_write(Format_error &error , const char *path , int response_type ,
+bool Vectors::variance_analysis_ascii_write(StatError &error , const char *path , int response_type ,
                                             const Vectors **value_vec , bool exhaustive) const
 
 {
@@ -1838,13 +1845,13 @@ bool Vectors::variance_analysis_ascii_write(Format_error &error , const char *pa
  *  Ecriture des resultats d'une analyse de variance a un facteur
  *  dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              type de la variable reponse (ORDINAL/NUMERIC),
  *              pointeurs sur les sous-echantillons pour chaque niveau possible.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis_spreadsheet_write(Format_error &error , const char *path ,
+bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char *path ,
                                                   int response_type , const Vectors **value_vec) const
 
 {
@@ -1952,12 +1959,12 @@ bool Vectors::variance_analysis_spreadsheet_write(Format_error &error , const ch
       out_file << "\n";
       for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
         if (marginal[0]->frequency[i] > 0) {
-          out_file << "\t" << STAT_label[STATL_HISTOGRAM] << " " << i;
+          out_file << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i;
         }
       }
       for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
         if (marginal[0]->frequency[i] > 0) {
-          out_file << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+          out_file << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
                    << i << " " << STAT_label[STATL_FUNCTION];
         }
       }
@@ -1996,10 +2003,10 @@ bool Vectors::variance_analysis_spreadsheet_write(Format_error &error , const ch
 
     case ORDINAL : {
       int nb_histo;
-      const Histogram **value_marginal;
+      const FrequencyDistribution **value_marginal;
 
 
-      value_marginal = new const Histogram*[marginal[0]->nb_value];
+      value_marginal = new const FrequencyDistribution*[marginal[0]->nb_value];
       nb_histo = 0;
       for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
         if (marginal[0]->frequency[i] > 0) {
@@ -2080,14 +2087,15 @@ bool Vectors::variance_analysis_spreadsheet_write(Format_error &error , const ch
  *
  *  Analyse de variance a un facteur.
  *
- *  arguments : reference sur un objet Format_error, stream, indices des 2 variables,
+ *  arguments : reference sur un objet StatError, stream, indices des 2 variables,
  *              type de la variable reponse (ORDINAL/NUMERIC), path,
  *              format de fichier ('a' : ASCII, 's' : Spreadsheet).
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::variance_analysis(Format_error &error , ostream &os , int class_variable ,
-                                int response_variable , int response_type , const char *path , char format) const
+bool Vectors::variance_analysis(StatError &error , ostream &os , int class_variable ,
+                                int response_variable , int response_type ,
+                                const char *path , char format) const
 
 {
   bool status = true;
