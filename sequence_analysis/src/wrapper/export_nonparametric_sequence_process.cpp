@@ -42,7 +42,7 @@ class NonParametricSequenceProcessWrap {
 public:
 
   static Distribution*
-  get_first_occurrence(const Nonparametric_sequence_process& input, int index)
+  get_first_occurrence(const NonparametricSequenceProcess &input, int index)
   {
     HEADER(Distribution);
     ret = input.get_first_occurrence(index);
@@ -50,7 +50,7 @@ public:
   }
 
     static Distribution*
-  get_recurrence_time(const Nonparametric_sequence_process& input, int index)
+  get_recurrence_time(const NonparametricSequenceProcess &input, int index)
   {
     HEADER(Distribution);
     ret = input.get_recurrence_time(index);
@@ -58,7 +58,7 @@ public:
   }
 
   static Distribution*
-  get_nb_run(const Nonparametric_sequence_process& input, int index)
+  get_nb_run(const NonparametricSequenceProcess &input, int index)
   {
     HEADER(Distribution);
     ret = input.get_nb_run(index);
@@ -66,17 +66,17 @@ public:
   }
 
   static Distribution*
-  get_nb_occurrence(const Nonparametric_sequence_process& input, int index)
+  get_nb_occurrence(const NonparametricSequenceProcess &input, int index)
   {
     HEADER(Distribution);
     ret = input.get_nb_occurrence(index);
     FOOTER;
   }
 
-  static Parametric*
-  get_sojourn_time(const Nonparametric_sequence_process& input, int index)
+  static DiscreteParametric*
+  get_sojourn_time(const NonparametricSequenceProcess &input, int index)
   {
-    HEADER(Parametric);
+    HEADER(DiscreteParametric);
     ret = input.get_sojourn_time(index);
     FOOTER;
   }
@@ -84,20 +84,20 @@ public:
 };
 
 // Boost declaration
-//class Nonparametric_sequence_process : public Nonparametric_process {  // processus d'observation non-parametrique
+//class NonparametricSequenceProcess : public NonparametricProcess {  // processus d'observation non-parametrique
 
 void class_nonparametric_sequence_process() {
 
-  class_<Nonparametric_sequence_process, bases<Nonparametric_process> > ("_Nonparametric_sequence_process", "Nonparametric_sequence_process")
+  class_<NonparametricSequenceProcess, bases<NonparametricProcess> > ("_NonparametricSequenceProcess", "NonparametricSequenceProcess")
     .def(init <int, int, int>())
 
-    DEF_RETURN_VALUE_NO_ARGS("get_length", &Nonparametric_sequence_process::get_length,  "get length")
-    DEF_RETURN_VALUE_NO_ARGS("get_index_value", &Nonparametric_sequence_process::get_index_value, "get index value")
+    DEF_RETURN_VALUE_NO_ARGS("get_length", &NonparametricSequenceProcess::get_length,  "get length")
+    DEF_RETURN_VALUE_NO_ARGS("get_index_value", &NonparametricSequenceProcess::get_index_value, "get index value")
 
 
-    .def("get_absorption", &Nonparametric_sequence_process::get_absorption, args("value"), "get absorption")
-    .def("get_leave", &Nonparametric_sequence_process::get_leave, args("value"),  "get leave")
-    .def("get_no_occurrence", &Nonparametric_sequence_process::get_no_occurrence, args("value"),  "get no occurrence")
+    .def("get_absorption", &NonparametricSequenceProcess::get_absorption, args("value"), "get absorption")
+    .def("get_leave", &NonparametricSequenceProcess::get_leave, args("value"),  "get leave")
+    .def("get_no_occurrence", &NonparametricSequenceProcess::get_no_occurrence, args("value"),  "get no occurrence")
 
     DEF_RETURN_VALUE("get_nb_occurrence", &NonParametricSequenceProcessWrap::get_nb_occurrence, args("value"), "get nb absorption")
     DEF_RETURN_VALUE("get_nb_run", &NonParametricSequenceProcessWrap::get_nb_run, args("value"),  "get nb run")
@@ -108,9 +108,9 @@ void class_nonparametric_sequence_process() {
     ;
 
 /*
-    Nonparametric_sequence_process(int inb_state , Parametric **occupancy);
-    Nonparametric_sequence_process(const Nonparametric_process &process);
-    Nonparametric_sequence_process(const Nonparametric_sequence_process &process , char manip = 'c' , int param = true);
+    NonparametricSequenceProcess(int inb_state , DiscreteParametric **occupancy);
+    NonparametricSequenceProcess(const NonparametricProcess &process);
+    NonparametricSequenceProcess(const NonparametricSequenceProcess &process , char manip = 'c' , int param = true);
     //
 
 */
