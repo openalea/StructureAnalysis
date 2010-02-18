@@ -58,114 +58,115 @@ const int VARIABLE_ORDER_MARKOV_NB_ITER = 100;  // nombre maximum d'iterations E
  */
 
 
-class Hidden_variable_order_markov : public Variable_order_markov {  // chaine de Markov
-                                                                     // d'ordre variable cachee
-    friend class Markovian_sequences;
+class HiddenVariableOrderMarkov : public VariableOrderMarkov {  // chaine de Markov
+                                                                // d'ordre variable cachee
+    friend class MarkovianSequences;
 
-    friend Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_error &error ,
-                                                                                 const char *path ,
-                                                                                 int length,
-                                                                                 double cumul_threshold);
-    friend std::ostream& operator<<(std::ostream &os , const Hidden_variable_order_markov &hmarkov)
+    friend HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &error ,
+                                                                              const char *path ,
+                                                                              int length,
+                                                                              double cumul_threshold);
+    friend std::ostream& operator<<(std::ostream &os , const HiddenVariableOrderMarkov &hmarkov)
     { return hmarkov.ascii_write(os); }
 
 private :
 
-    double forward_backward(const Markovian_sequences &seq , int index ,
+    double forward_backward(const MarkovianSequences &seq , int index ,
                             std::ostream *os , MultiPlotSet *plot_set , char format ,
                             double &max_marginal_entropy , double &entropy1) const;
-    double forward_backward_sampling(const Markovian_sequences &seq , int index ,
+    double forward_backward_sampling(const MarkovianSequences &seq , int index ,
                                      std::ostream &os , char format = 'a' ,
                                      int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
     void log_computation();
-    double viterbi(const Markovian_sequences &seq , double *posterior_probability = NULL ,
+    double viterbi(const MarkovianSequences &seq , double *posterior_probability = NULL ,
                    int index = I_DEFAULT) const;
-    double generalized_viterbi(const Markovian_sequences &seq , int index ,
+    double generalized_viterbi(const MarkovianSequences &seq , int index ,
                                std::ostream &os , double seq_likelihood , char format ,
                                int inb_state_sequence) const;
-    double viterbi_forward_backward(const Markovian_sequences &seq , int index ,
+    double viterbi_forward_backward(const MarkovianSequences &seq , int index ,
                                     std::ostream *os , MultiPlot *plot , char format ,
                                     double seq_likelihood = D_INF) const;
 
 public :
 
-    Hidden_variable_order_markov() {}
-    Hidden_variable_order_markov(const Variable_order_markov *pmarkov , int inb_output_process ,
-                                 Nonparametric_process **nonparametric_observation ,
-                                 Parametric_process **parametric_observation , int length)
-    :Variable_order_markov(pmarkov , inb_output_process , nonparametric_observation ,
+    HiddenVariableOrderMarkov() {}
+    HiddenVariableOrderMarkov(const VariableOrderMarkov *pmarkov , int inb_output_process ,
+                              NonparametricProcess **nonparametric_observation ,
+                              DiscreteParametricProcess **parametric_observation , int length)
+    :VariableOrderMarkov(pmarkov , inb_output_process , nonparametric_observation ,
                            parametric_observation , length) {}
-    Hidden_variable_order_markov(const Hidden_variable_order_markov &hmarkov , bool data_flag = true)
-    :Variable_order_markov(hmarkov , data_flag) {}
-    ~Hidden_variable_order_markov();
+    HiddenVariableOrderMarkov(const HiddenVariableOrderMarkov &hmarkov , bool data_flag = true)
+    :VariableOrderMarkov(hmarkov , data_flag) {}
+    ~HiddenVariableOrderMarkov();
 
-    Hidden_variable_order_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
+    HiddenVariableOrderMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
 
-    double likelihood_computation(const Markovian_sequences &seq , double *posterior_probability = NULL ,
+    double likelihood_computation(const MarkovianSequences &seq , double *posterior_probability = NULL ,
                                   int index = I_DEFAULT) const;
 
-    bool state_profile_write(Format_error &error , std::ostream &os , const Markovian_sequences &iseq ,
+    bool state_profile_write(StatError &error , std::ostream &os , const MarkovianSequences &iseq ,
                              int identifier = I_DEFAULT , char format = 'a' ,
                              int state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(Format_error &error , const char *path , const Markovian_sequences &iseq ,
+    bool state_profile_write(StatError &error , const char *path , const MarkovianSequences &iseq ,
                              int identifier = I_DEFAULT , char format = 'a' ,
                              int state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_ascii_write(Format_error &error , std::ostream &os , int identifier ,
+    bool state_profile_ascii_write(StatError &error , std::ostream &os , int identifier ,
                                    int state_sequence = GENERALIZED_VITERBI ,
                                    int nb_state_sequence = NB_STATE_SEQUENCE) const;
-    bool state_profile_write(Format_error &error , const char *path ,
+    bool state_profile_write(StatError &error , const char *path ,
                              int identifier = I_DEFAULT , char format = 'a' ,
                              int state_sequence = GENERALIZED_VITERBI ,
                              int nb_state_sequence = NB_STATE_SEQUENCE) const;
 
-    bool state_profile_plot_write(Format_error &error , const char *prefix ,
-                                  const Markovian_sequences &iseq ,
+    bool state_profile_plot_write(StatError &error , const char *prefix ,
+                                  const MarkovianSequences &iseq ,
                                   int identifier , const char *title = NULL) const;
-    bool state_profile_plot_write(Format_error &error , const char *prefix ,
+    bool state_profile_plot_write(StatError &error , const char *prefix ,
                                   int identifier , const char *title = NULL) const;
 
-    MultiPlotSet* state_profile_plotable_write(Format_error &error ,
-                                               const Markovian_sequences &iseq ,
+    MultiPlotSet* state_profile_plotable_write(StatError &error ,
+                                               const MarkovianSequences &iseq ,
                                                int identifier) const;
-    MultiPlotSet* state_profile_plotable_write(Format_error &error ,
+    MultiPlotSet* state_profile_plotable_write(StatError &error ,
                                                int identifier) const;
 
-    Variable_order_markov_data* state_sequence_computation(Format_error &error ,
-                                                           const Markovian_sequences &seq ,
-                                                           bool characteristic_flag = true) const;
+    VariableOrderMarkovData* state_sequence_computation(StatError &error ,
+                                                        const MarkovianSequences &seq ,
+                                                        bool characteristic_flag = true) const;
 
-    Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength ,
-                                           bool counting_flag = true , bool divergence_flag = false) const;
-    Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                           int length , bool counting_flag = true) const;
-    Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                           const Markovian_sequences &iseq ,
-                                           bool counting_flag = true) const;
+    VariableOrderMarkovData* simulation(StatError &error , const FrequencyDistribution &hlength ,
+                                        bool counting_flag = true , bool divergence_flag = false) const;
+    VariableOrderMarkovData* simulation(StatError &error , int nb_sequence ,
+                                        int length , bool counting_flag = true) const;
+    VariableOrderMarkovData* simulation(StatError &error , int nb_sequence ,
+                                        const MarkovianSequences &iseq ,
+                                        bool counting_flag = true) const;
 
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Hidden_variable_order_markov **ihmarkov ,
-                                            Histogram **hlength , const char *path = NULL) const;
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Hidden_variable_order_markov **hmarkov , int nb_sequence ,
-                                            int length , const char *path = NULL) const;
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Hidden_variable_order_markov **hmarkov , int nb_sequence ,
-                                            const Markovian_sequences **seq , const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const HiddenVariableOrderMarkov **ihmarkov ,
+                                           FrequencyDistribution **hlength ,
+                                           const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const HiddenVariableOrderMarkov **hmarkov , int nb_sequence ,
+                                           int length , const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const HiddenVariableOrderMarkov **hmarkov , int nb_sequence ,
+                                           const MarkovianSequences **seq , const char *path = NULL) const;
 };
 
 
-Hidden_variable_order_markov* hidden_variable_order_markov_ascii_read(Format_error &error ,
-                                                                      const char *path ,
-                                                                      int length = DEFAULT_LENGTH ,
-                                                                      double cumul_threshold = OCCUPANCY_THRESHOLD);
+HiddenVariableOrderMarkov* hidden_variable_order_markov_ascii_read(StatError &error ,
+                                                                   const char *path ,
+                                                                   int length = DEFAULT_LENGTH ,
+                                                                   double cumul_threshold = OCCUPANCY_THRESHOLD);
 
 
 
