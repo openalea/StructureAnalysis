@@ -84,8 +84,8 @@ Mv_Mixture::Mv_Mixture()
  *--------------------------------------------------------------*/
 
 Mv_Mixture::Mv_Mixture(int inb_component , double *pweight , int inb_variable,
-               Parametric_process **ppcomponent,
-               Nonparametric_process **pnpcomponent)
+               DiscreteParametricProcess **ppcomponent,
+               NonparametricProcess **pnpcomponent)
 
 {
   register int var, i;
@@ -94,7 +94,7 @@ Mv_Mixture::Mv_Mixture(int inb_component , double *pweight , int inb_variable,
   nb_component = inb_component;
   nb_var = inb_variable;
 
-  weight = new Parametric(nb_component);
+  weight = new DiscreteParametric(nb_component);
   for (i = 0;i < nb_component;i++) {
     weight->mass[i] = *pweight++;
   }
@@ -105,19 +105,19 @@ Mv_Mixture::Mv_Mixture(int inb_component , double *pweight , int inb_variable,
     weight->computation(1 , CUMUL_THRESHOLD);
   }
 
-  pcomponent = new Parametric_process*[nb_var];
-  npcomponent = new Nonparametric_process*[nb_var];
+  pcomponent = new DiscreteParametricProcess*[nb_var];
+  npcomponent = new NonparametricProcess*[nb_var];
 
   for (var = 0;var < nb_var;var++) {
     if ((pnpcomponent != NULL) && (pnpcomponent[var] != NULL))
       {
-         npcomponent[var]= new Nonparametric_process(*(pnpcomponent[var]));
+         npcomponent[var]= new NonparametricProcess(*(pnpcomponent[var]));
          pcomponent[var]= NULL;
       }
       else
       {
          npcomponent[var]= NULL;
-         pcomponent[var]= new Parametric_process(*(ppcomponent[var]));
+         pcomponent[var]= new DiscreteParametricProcess(*(ppcomponent[var]));
       }
    }
 }
@@ -141,21 +141,21 @@ Mv_Mixture::Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag, int inb_var
   mixture_data = NULL;
   nb_component = mixt.nb_component;
 
-  weight = new Parametric(nb_component);
+  weight = new DiscreteParametric(nb_component);
 
   nb_var = inb_variable;
-  pcomponent = new Parametric_process*[nb_var];
-  npcomponent = new Nonparametric_process*[nb_var];
+  pcomponent = new DiscreteParametricProcess*[nb_var];
+  npcomponent = new NonparametricProcess*[nb_var];
 
   for (var = 0;var < nb_var;var++) {
     if (variable_flag[var]) {
       if (mixt.pcomponent[var] != NULL) {
-    pcomponent[var] = new Parametric_process(*mixt.pcomponent[var]);
+    pcomponent[var] = new DiscreteParametricProcess(*mixt.pcomponent[var]);
     npcomponent[var] = NULL;
       }
       else {
     pcomponent[var] = NULL;
-    npcomponent[var] = new Nonparametric_process(*mixt.npcomponent[var]);
+    npcomponent[var] = new NonparametricProcess(*mixt.npcomponent[var]);
       }
     }
   }
@@ -171,8 +171,8 @@ Mv_Mixture::Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag, int inb_var
  *--------------------------------------------------------------*/
 
 Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
-                       const Parametric_process **ppcomponent,
-               const Nonparametric_process **pnpcomponent)
+                       const DiscreteParametricProcess **ppcomponent,
+               const NonparametricProcess **pnpcomponent)
 
 {
   register int var;
@@ -184,17 +184,17 @@ Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
 
   weight = NULL;
 
-  pcomponent = new Parametric_process*[nb_var];
-  npcomponent = new Nonparametric_process*[nb_var];
+  pcomponent = new DiscreteParametricProcess*[nb_var];
+  npcomponent = new NonparametricProcess*[nb_var];
 
   for (var = 0;var < nb_var;var++) {
     if (ppcomponent[var] != NULL) {
-    pcomponent[var] = new Parametric_process(*ppcomponent[var]);
+    pcomponent[var] = new DiscreteParametricProcess(*ppcomponent[var]);
     npcomponent[var] = NULL;
     }
     else {
        pcomponent[var] = NULL;
-       npcomponent[var] = new Nonparametric_process(*pnpcomponent[var]);
+       npcomponent[var] = new NonparametricProcess(*pnpcomponent[var]);
     }
   }
 }
@@ -217,7 +217,7 @@ Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
   double param;
   bool *fparam = NULL;
 
-  Parametric *rand = new Parametric(UNIFORM, 0, 10 , D_DEFAULT , D_DEFAULT);
+  DiscreteParametric *rand = new DiscreteParametric(UNIFORM, 0, 10 , D_DEFAULT , D_DEFAULT);
 
   mixture_data = NULL;
   nb_component = inb_component;
@@ -225,8 +225,8 @@ Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
 
   weight = NULL;
 
-  pcomponent = new Parametric_process*[nb_var];
-  npcomponent = new Nonparametric_process*[nb_var];
+  pcomponent = new DiscreteParametricProcess*[nb_var];
+  npcomponent = new NonparametricProcess*[nb_var];
 
   fparam= new bool[nb_var];
   if (force_param == NULL) {
@@ -238,22 +238,22 @@ Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
       fparam[var]= force_param[var];
   }
 
-  npcomponent= new Nonparametric_process*[nb_var];
-  pcomponent= new Parametric_process*[nb_var];
+  npcomponent= new NonparametricProcess*[nb_var];
+  pcomponent= new DiscreteParametricProcess*[nb_var];
 
   for(var = 0; var < nb_var; var++) {
     if ((*nb_value <= NB_OUTPUT) && !(fparam[var])) {
-      npcomponent[var] = new Nonparametric_process(nb_component, *nb_value++, true);
+      npcomponent[var] = new NonparametricProcess(nb_component, *nb_value++, true);
       pcomponent[var] = NULL;
     }
     else {
       npcomponent[var] = NULL;
-      pcomponent[var] = new Parametric_process(nb_component, (int)(*nb_value * SAMPLE_NB_VALUE_COEFF));
+      pcomponent[var] = new DiscreteParametricProcess(nb_component, (int)(*nb_value * SAMPLE_NB_VALUE_COEFF));
       for(i = 0; i < nb_component; i++) {
     delete pcomponent[var]->observation[i];
     param = (cumul_method(10, rand->cumul, 1.) + 1);
     pcomponent[var]->observation[i] =
-      new Parametric(NEGATIVE_BINOMIAL, 0, I_DEFAULT , 1., 1. / (double)((param * *nb_value)+1.));
+      new DiscreteParametric(NEGATIVE_BINOMIAL, 0, I_DEFAULT , 1., 1. / (double)((param * *nb_value)+1.));
       }
       nb_value++;
     }
@@ -287,19 +287,19 @@ void Mv_Mixture::copy(const Mv_Mixture &mixt , bool data_flag)
   nb_component = mixt.nb_component;
   nb_var = mixt.nb_var;
 
-  pcomponent = new Parametric_process*[nb_var];
-  npcomponent = new Nonparametric_process*[nb_var];
+  pcomponent = new DiscreteParametricProcess*[nb_var];
+  npcomponent = new NonparametricProcess*[nb_var];
 
-  weight = new Parametric(*(mixt.weight));
+  weight = new DiscreteParametric(*(mixt.weight));
 
   for (var = 0;var < nb_var;var++) {
     if (mixt.pcomponent[var] != NULL) {
-    pcomponent[var] = new Parametric_process(*mixt.pcomponent[var]);
+    pcomponent[var] = new DiscreteParametricProcess(*mixt.pcomponent[var]);
     npcomponent[var] = NULL;
     }
     else {
        pcomponent[var] = NULL;
-       npcomponent[var] = new Nonparametric_process(*mixt.npcomponent[var]);
+       npcomponent[var] = new NonparametricProcess(*mixt.npcomponent[var]);
     }
   }
 }
@@ -382,18 +382,18 @@ Mv_Mixture& Mv_Mixture::operator=(const Mv_Mixture &mixt)
  *
  *  Extraction d'une composante parametrique.
  *
- *  arguments : reference sur un objet Format_error, variable,
+ *  arguments : reference sur un objet StatError, variable,
  *  indice de la composante.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Mv_Mixture::extract_parametric_model(Format_error &error , int ivariable,
-                                                       int index) const
+DiscreteParametricModel* Mv_Mixture::extract_parametric_model(StatError &error , int ivariable,
+                                                              int index) const
 
 {
   bool status = true;
-  Parametric_model *ppcomponent = NULL;
-  Histogram *hcomponent = NULL;
+  DiscreteParametricModel *ppcomponent = NULL;
+  FrequencyDistribution *hcomponent = NULL;
 
   if ((index < 1) || (index > nb_component)) {
     status = false;
@@ -418,7 +418,7 @@ Parametric_model* Mv_Mixture::extract_parametric_model(Format_error &error , int
         hcomponent = mixture_data->component[ivariable][index];
     }
       }
-      ppcomponent = new Parametric_model(*pcomponent[ivariable]->observation[index] ,
+      ppcomponent = new DiscreteParametricModel(*pcomponent[ivariable]->observation[index] ,
                      hcomponent);
     }
   }
@@ -430,12 +430,12 @@ Parametric_model* Mv_Mixture::extract_parametric_model(Format_error &error , int
  *
  *  Extraction d'une composante non parametrique.
  *
- *  arguments : reference sur un objet Format_error, variable,
+ *  arguments : reference sur un objet StatError, variable,
  *  indice de la composante.
  *
  *--------------------------------------------------------------*/
 
-Distribution* Mv_Mixture::extract_nonparametric_model(Format_error &error ,
+Distribution* Mv_Mixture::extract_nonparametric_model(StatError &error ,
                                                       int ivariable, int index) const
 
 {
@@ -468,11 +468,11 @@ Distribution* Mv_Mixture::extract_nonparametric_model(Format_error &error ,
  *
  *  Extraction d'une loi marginale du melange
  *
- *  argument : reference sur un objet Format_error, index de la variable
+ *  argument : reference sur un objet StatError, index de la variable
  *
  *--------------------------------------------------------------*/
 
-Distribution* Mv_Mixture::extract_distribution(Format_error &error , int ivariable) const
+Distribution* Mv_Mixture::extract_distribution(StatError &error , int ivariable) const
 {
   bool status = true;
   register int i , j, variable = ivariable - 1;
@@ -560,11 +560,11 @@ Distribution* Mv_Mixture::extract_distribution(Format_error &error , int ivariab
  *
  *  Extraction de la partie "donnees" d'un objet Mv_Mixture.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data* Mv_Mixture::extract_data(Format_error &error) const
+Mv_Mixture_data* Mv_Mixture::extract_data(StatError &error) const
 
 {
   Mv_Mixture_data *mixt_data;
@@ -590,14 +590,14 @@ Mv_Mixture_data* Mv_Mixture::extract_data(Format_error &error) const
  *
  *  Construction d'un objet Mv_Mixture a partir de poids et de composantes.
  *
- *  arguments : reference sur un objet Format_error, nombre de composantes,
+ *  arguments : reference sur un objet StatError, nombre de composantes,
  *              poids, pointeurs sur les composantes.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , int nb_variable ,
-                                double *weight, Parametric_process **ppcomponent,
-                                Nonparametric_process **pnpcomponent)
+Mv_Mixture* mv_mixture_building(StatError &error , int nb_component , int nb_variable ,
+                                double *weight, DiscreteParametricProcess **ppcomponent,
+                                NonparametricProcess **pnpcomponent)
 
 {
   bool status;
@@ -643,12 +643,12 @@ Mv_Mixture* mv_mixture_building(Format_error &error , int nb_component , int nb_
  *
  *  Construction d'un objet Mv_Mixture a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
+Mv_Mixture* mv_mixture_ascii_read(StatError &error , const char *path ,
                                   double cumul_threshold)
 
 {
@@ -660,8 +660,8 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
   int line, nb_variable;
   long index , nb_component, value;
   double cumul , *weight = NULL;
-  Nonparametric_process **np_observation;
-  Parametric_process **p_observation;
+  NonparametricProcess **np_observation;
+  DiscreteParametricProcess **p_observation;
   Mv_Mixture *mixt;
   ifstream in_file(path);
 
@@ -938,8 +938,8 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
             }
             else
             {
-               np_observation= new Nonparametric_process*[nb_variable];
-               p_observation = new Parametric_process*[nb_variable];
+               np_observation= new NonparametricProcess*[nb_variable];
+               p_observation = new DiscreteParametricProcess*[nb_variable];
                for(i= 0; i < nb_variable; i++)
                {
                   np_observation[i]= NULL;
@@ -1136,7 +1136,7 @@ Mv_Mixture* mv_mixture_ascii_read(Format_error &error , const char *path ,
  *
  **/
 
-void Mv_Mixture::state_permutation(Format_error& error,
+void Mv_Mixture::state_permutation(StatError& error,
                                    int* perm) const
 {
    register int i, j;
@@ -1228,8 +1228,8 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
   int *var_array = NULL;
   // double *scale;
 // const Distribution *ptComponent[MIXTURE_NB_COMPONENT];
-  Histogram **observation= NULL;
-  Format_error error;
+  FrequencyDistribution **observation= NULL;
+  StatError error;
   Vectors *vect_data = NULL;
 
   os << STAT_word[STATW_MIXTURE] << endl << endl;
@@ -1298,14 +1298,14 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
       }
       os << "  ";
       if (mixt_data != NULL) {
-        os << " | " << STAT_label[STATL_HISTOGRAM];
+        os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
       os << " | " << STAT_label[STATL_MIXTURE];
       for (i = 0;i < nb_component;i++) {
         os << " | " << STAT_label[STATL_DISTRIBUTION] << " " << var;
       }
       if (mixt_data != NULL) {
-        os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+        os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
            << STAT_label[STATL_FUNCTION];
       }
       os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE] << " "
@@ -1421,14 +1421,14 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     mixt_data->weight->ascii_characteristic_print(os , false , file_flag);
 
     os << "\n";
     if (file_flag) {
       os << "# ";
     }
-    os << "   | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << " "
+    os << "   | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
        << " | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
     weight->Distribution::ascii_print(os , file_flag , false , false , mixt_data->weight);
@@ -1465,12 +1465,12 @@ ostream& Mv_Mixture::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Mv_Mixture dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::ascii_write(Format_error &error , const char *path ,
+bool Mv_Mixture::ascii_write(StatError &error , const char *path ,
                              bool exhaustive) const
 
 {
@@ -1512,8 +1512,8 @@ ostream& Mv_Mixture::spreadsheet_write(ostream &os , const Mv_Mixture_data *mixt
     data_var; // index that corresponds to var in mixt_data
   int bnb_parameter;
   int *var_array = NULL;
-  Histogram **observation= NULL;
-  Format_error error;
+  FrequencyDistribution **observation= NULL;
+  StatError error;
   Vectors *vect_data = NULL;
 
   os << STAT_word[STATW_MIXTURE] << endl << endl;
@@ -1626,11 +1626,11 @@ ostream& Mv_Mixture::spreadsheet_write(ostream &os , const Mv_Mixture_data *mixt
 
   if (mixt_data != NULL) {
     os << "\n";
-    os << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     mixt_data->weight->spreadsheet_print(os);
 
     os << "\n";
-    os << "   | " << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_HISTOGRAM] << "\t"
+    os << "   | " << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t"
        << " | " << STAT_label[STATL_WEIGHT] << "\t" << STAT_label[STATL_DISTRIBUTION] << endl;
 
     weight->Distribution::spreadsheet_print(os, false , false , false , mixt_data->weight);
@@ -1652,11 +1652,11 @@ ostream& Mv_Mixture::spreadsheet_write(ostream &os , const Mv_Mixture_data *mixt
  *
  *  Ecriture d'un objet Mv_Mixture dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::spreadsheet_write(Format_error &error , const char *path) const
+bool Mv_Mixture::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1694,13 +1694,13 @@ bool Mv_Mixture::plot_write(const char *prefix , const char *title ,
 {
   bool status = true;
   int var = 0, cvariable = 0; // variable index that corresponds to var in mixture_data
-  Parametric_model *pparam = NULL;
-  Histogram **observation = NULL;
-  Format_error error;
+  DiscreteParametricModel *pparam = NULL;
+  FrequencyDistribution **observation = NULL;
+  StatError error;
 
   // affiche la loi des poids
   if (mixt_data != NULL) {
-    pparam = new Parametric_model(*weight, mixt_data->weight);
+    pparam = new DiscreteParametricModel(*weight, mixt_data->weight);
     status= pparam->plot_write(error, prefix, title);
     delete pparam;
     pparam = NULL;
@@ -1741,12 +1741,12 @@ bool Mv_Mixture::plot_write(const char *prefix , const char *title ,
  *
  *  Sortie Gnuplot d'un objet Mv_Mixture.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::plot_write(Format_error &error , const char *prefix ,
+bool Mv_Mixture::plot_write(StatError &error , const char *prefix ,
                 const char *title) const
 
 {
@@ -1809,7 +1809,7 @@ MultiPlotSet* Mv_Mixture::get_plotable(const Mv_Mixture_data *mixt_data) const
 //                                    * YSCALE));
 
 //     set[0].resize(nb_component + 2);
-//     set[0][i].legend = STAT_label[STATL_HISTOGRAM];
+//     set[0][i].legend = STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 //     set[0][i].style = "impulses";
 
 //     mixt_data->plotable_frequency_write(set[0][i++]);
@@ -1861,7 +1861,7 @@ MultiPlotSet* Mv_Mixture::get_plotable(const Mv_Mixture_data *mixt_data) const
 //     set[1].resize(2);
 
 //     legend.str("");
-//     legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM];
+//     legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 //     set[1][0].legend = legend.str();
 //     set[1][0].style = "impulses";
 
@@ -1898,7 +1898,7 @@ MultiPlotSet* Mv_Mixture::get_plotable(const Mv_Mixture_data *mixt_data) const
 //         set[i].resize(2);
 
 //         legend.str("");
-//         legend << STAT_label[STATL_HISTOGRAM] << " " << j + 1;
+//         legend << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << j + 1;
 //         set[i][0].legend = legend.str();
 //         set[i][0].style = "impulses";
 
@@ -1995,13 +1995,13 @@ double Mv_Mixture::penalty_computation() const
  *
  *--------------------------------------------------------------*/
 
-Parametric_process* Mv_Mixture::get_parametric_process(int variable) const
+DiscreteParametricProcess* Mv_Mixture::get_parametric_process(int variable) const
 {
-  Parametric_process *ppcomponent = NULL;
+  DiscreteParametricProcess *ppcomponent = NULL;
 
   assert((variable >= 0) && (variable < nb_var));
   if (pcomponent[variable] != NULL)
-    ppcomponent = new Parametric_process(*pcomponent[variable]);
+    ppcomponent = new DiscreteParametricProcess(*pcomponent[variable]);
 
   return ppcomponent;
 }
@@ -2012,13 +2012,13 @@ Parametric_process* Mv_Mixture::get_parametric_process(int variable) const
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process* Mv_Mixture::get_nonparametric_process(int variable) const
+NonparametricProcess* Mv_Mixture::get_nonparametric_process(int variable) const
 {
-  Nonparametric_process *pnpcomponent = NULL;
+  NonparametricProcess *pnpcomponent = NULL;
 
   assert((variable >= 0) && (variable < nb_var));
   if (npcomponent[variable] != NULL)
-    pnpcomponent = new Nonparametric_process(*npcomponent[variable]);
+    pnpcomponent = new NonparametricProcess(*npcomponent[variable]);
 
   return pnpcomponent;
 }
@@ -2029,13 +2029,13 @@ Nonparametric_process* Mv_Mixture::get_nonparametric_process(int variable) const
  *
  *--------------------------------------------------------------*/
 
-Parametric* Mv_Mixture::get_parametric_component(int variable, int index) const
+DiscreteParametric* Mv_Mixture::get_parametric_component(int variable, int index) const
 {
-  Parametric *ppcomponent = NULL;
+  DiscreteParametric *ppcomponent = NULL;
 
   assert((variable >= 0) && (variable < nb_var));
   if (pcomponent[variable] != NULL)
-    ppcomponent = new Parametric(*pcomponent[variable]->observation[index]);
+    ppcomponent = new DiscreteParametric(*pcomponent[variable]->observation[index]);
 
   return ppcomponent;
 }
@@ -2092,8 +2092,8 @@ Mv_Mixture_data::Mv_Mixture_data()
  *
  *  Constructeur de la classe Mv_Mixture_data.
  *
- *  arguments : reference sur un objet Histogram,
- *              nombre d'histogrammes.
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              nombre de composantes.
  *
  *--------------------------------------------------------------*/
 
@@ -2107,15 +2107,15 @@ Mv_Mixture_data::Mv_Mixture_data(const Vectors &vec , int inb_component)
   mixture = NULL;
   nb_component = inb_component;
 
-  weight = new Histogram(nb_component);
+  weight = new FrequencyDistribution(nb_component);
 
   if (nb_variable > 0) {
-    component = new Histogram**[nb_variable];
+    component = new FrequencyDistribution**[nb_variable];
     for (var = 0;var < nb_variable;var++) {
-      component[var] = new Histogram*[nb_component];
+      component[var] = new FrequencyDistribution*[nb_component];
       for (i = 0;i < nb_component;i++) {
     nb_val = (int)ceil(get_max_value(var))+1;
-    component[var][i] = new Histogram(nb_val);
+    component[var][i] = new FrequencyDistribution(nb_val);
       }
     }
   }
@@ -2139,16 +2139,16 @@ Mv_Mixture_data::Mv_Mixture_data(const Mv_Mixture &mixt)
   mixture = NULL;
   nb_component = mixt.nb_component;
 
-  weight = new Histogram(*(mixt.weight));
+  weight = new FrequencyDistribution(*(mixt.weight));
 
-  component = new Histogram**[nb_variables];
+  component = new FrequencyDistribution**[nb_variables];
   for (var = 0; var < nb_variables; var++) {
-    component[var] = new Histogram*[nb_component];
+    component[var] = new FrequencyDistribution*[nb_component];
     for (i = 0;i < nb_component;i++) {
       if (mixt.pcomponent[var] != NULL)
-    component[var][i] = new Histogram(*mixt.pcomponent[var]->observation[i]);
+    component[var][i] = new FrequencyDistribution(*mixt.pcomponent[var]->observation[i]);
       else
-    component[var][i] = new Histogram(*mixt.npcomponent[var]->get_observation(i));
+    component[var][i] = new FrequencyDistribution(*mixt.npcomponent[var]->get_observation(i));
     }}
 }
 
@@ -2177,14 +2177,14 @@ void Mv_Mixture_data::copy(const Mv_Mixture_data &mixt_data , bool model_flag)
 
   nb_component = mixt_data.nb_component;
 
-  weight = new Histogram(*(mixt_data.weight));
+  weight = new FrequencyDistribution(*(mixt_data.weight));
 
-  component = new Histogram**[nb_variable];
+  component = new FrequencyDistribution**[nb_variable];
   for (var = 0; var < nb_variable; var++) {
     if (mixt_data.component[var] != NULL) {
-      component[var] = new Histogram*[nb_component];
+      component[var] = new FrequencyDistribution*[nb_component];
       for (i = 0;i < nb_component;i++)
-    component[var][i] = new Histogram(*mixt_data.component[var][i]);
+    component[var][i] = new FrequencyDistribution(*mixt_data.component[var][i]);
     }
     else
       component[var] = NULL;
@@ -2237,13 +2237,13 @@ void Mv_Mixture_data::state_permutation(int* perm)
    register int i, var, n;
    if ((component != NULL) && (weight != NULL))
    {
-      Histogram*** pobservation = new Histogram**[nb_variable];
+      FrequencyDistribution*** pobservation = new FrequencyDistribution**[nb_variable];
       double* pmass = new double[nb_component];
 
       for(var = 0; var < nb_variable; var++)
       {
          if (component[var] != NULL)
-            pobservation[var] = new Histogram*[nb_component];
+            pobservation[var] = new FrequencyDistribution*[nb_component];
          for (i = 0; i < nb_component; i++)
          {
             if (component[var] != NULL)
@@ -2315,19 +2315,19 @@ Mv_Mixture_data& Mv_Mixture_data::operator=(const Mv_Mixture_data &mixt_data)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un histogramme correspondant a une composante
+ *  Extraction d'une composante empirique.
  *
- *  arguments : reference sur un objet Format_error, variable,
- *  indice de l'histogramme.
+ *  arguments : reference sur un objet StatError, variable,
+ *  indice de la composante.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Mv_Mixture_data::extract(Format_error &error , int ivariable,
+DiscreteDistributionData* Mv_Mixture_data::extract(StatError &error , int ivariable,
                         int index) const
 
 {
   bool status = true;
-  Distribution_data *ppcomponent = NULL;
+  DiscreteDistributionData *ppcomponent = NULL;
 
   error.init();
 
@@ -2337,30 +2337,30 @@ Distribution_data* Mv_Mixture_data::extract(Format_error &error , int ivariable,
   }
   if ((index < 1) || (index > nb_component)) {
     status = false;
-    error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
+    error.update(STAT_error[STATR_FREQUENCY_DISTRIBUTION_INDEX]);
   }
   if (type[ivariable] == STATE) {
     status = false;
-    error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
+    error.update(STAT_error[STATR_FREQUENCY_DISTRIBUTION_INDEX]);
   }
   if (status) {
     index--;
     if (component[ivariable][index]->nb_element == 0) {
       status = false;
-      error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+      error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
   }
   if (status) {
     if (mixture != NULL) {
       if (mixture->pcomponent[ivariable] != NULL)
-    ppcomponent = new Distribution_data(*component[ivariable][index] ,
+    ppcomponent = new DiscreteDistributionData(*component[ivariable][index] ,
                         mixture->pcomponent[ivariable]->observation[index]);
       else
-    ppcomponent = new Distribution_data(*component[ivariable][index] ,
+    ppcomponent = new DiscreteDistributionData(*component[ivariable][index] ,
                         mixture->npcomponent[ivariable]->get_observation(index));
     }
     else
-      ppcomponent = new Distribution_data(*component[ivariable][index] , (Distribution*)NULL);
+      ppcomponent = new DiscreteDistributionData(*component[ivariable][index] , (Distribution*)NULL);
   }
 
   return ppcomponent;
@@ -2370,21 +2370,21 @@ Distribution_data* Mv_Mixture_data::extract(Format_error &error , int ivariable,
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un sous-histogramme.
+ *  Extraction d'une composante empirique.
  *
- *  arguments : reference sur un objet Format_error, variable,
- *  indice de l'histogramme.
+ *  arguments : reference sur un objet StatError, variable,
+ *  indice de la composante.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Mv_Mixture_data::extract_marginal(Format_error &error , int ivariable) const
+DiscreteDistributionData* Mv_Mixture_data::extract_marginal(StatError &error , int ivariable) const
 
 {
   bool status = true;
   register int var;
   Distribution *pDistribution = NULL;
-  Histogram *pHistogram = NULL;
-  Distribution_data *marginal = NULL;
+  FrequencyDistribution *pFrequencyDistribution = NULL;
+  DiscreteDistributionData *marginal = NULL;
 
   if ((ivariable < 1) || (ivariable > nb_variable)) {
     status = false;
@@ -2392,16 +2392,16 @@ Distribution_data* Mv_Mixture_data::extract_marginal(Format_error &error , int i
   }
   if (type[ivariable] == STATE) {
     status = false;
-    error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
+    error.update(STAT_error[STATR_FREQUENCY_DISTRIBUTION_INDEX]);
   }
   if (status) {
 
     var = ivariable-1;
-    pHistogram = get_marginal(var);
+    pFrequencyDistribution = get_marginal(var);
     if (mixture != NULL)
       pDistribution = mixture->extract_distribution(error, ivariable);
 
-    marginal = new Distribution_data(*pHistogram, pDistribution);
+    marginal = new DiscreteDistributionData(*pFrequencyDistribution, pDistribution);
   }
 
   return marginal;
@@ -2449,12 +2449,12 @@ ostream& Mv_Mixture_data::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Mv_Mixture_data dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture_data::ascii_write(Format_error &error , const char *path ,
+bool Mv_Mixture_data::ascii_write(StatError &error , const char *path ,
                   bool exhaustive) const
 
 {
@@ -2485,11 +2485,11 @@ bool Mv_Mixture_data::ascii_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet Mv_Mixture_data dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture_data::spreadsheet_write(Format_error &error , const char *path) const
+bool Mv_Mixture_data::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
@@ -2519,12 +2519,12 @@ bool Mv_Mixture_data::spreadsheet_write(Format_error &error , const char *path) 
  *
  *  Sortie Gnuplot d'un objet Mv_Mixture_data.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture_data::plot_write(Format_error &error , const char *prefix ,
+bool Mv_Mixture_data::plot_write(StatError &error , const char *prefix ,
                  const char *title) const
 
 {
