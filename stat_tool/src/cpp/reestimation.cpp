@@ -179,7 +179,7 @@ Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo
     }
   }
 
-  // calcul des caracteristiques de l'histogramme
+  // calcul des caracteristiques de la loi empirique
 
   offset_computation();
   max_computation();
@@ -296,7 +296,7 @@ ostream& Reestimation<Type>::print(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul du nombre de valeurs d'un histogramme.
+ *  Calcul du nombre de valeurs d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -340,7 +340,7 @@ void Reestimation<Type>::offset_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de l'effectif total d'un histogramme.
+ *  Calcul de l'effectif total d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -363,7 +363,7 @@ void Reestimation<Type>::nb_element_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Recherche de la valeur de frequence maximum d'un histogramme.
+ *  Recherche de la valeur de frequence maximum d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -389,7 +389,7 @@ void Reestimation<Type>::max_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la moyenne d'un histogramme.
+ *  Calcul de la moyenne d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -416,7 +416,7 @@ void Reestimation<Type>::mean_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la variance d'un histogramme.
+ *  Calcul de la variance d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -447,7 +447,7 @@ void Reestimation<Type>::variance_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de l'ecart absolu moyen d'un histogramme.
+ *  Calcul de l'ecart absolu moyen d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -477,7 +477,7 @@ double Reestimation<Type>::mean_absolute_deviation_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul du coefficient d'asymetrie d'un histogramme.
+ *  Calcul du coefficient d'asymetrie d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -510,7 +510,7 @@ double Reestimation<Type>::skewness_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de l'exces d'applatissement d'un histogramme :
+ *  Calcul de l'exces d'applatissement d'une loi empirique :
  *  exces d'applatissement = coefficient d'applatissement - 3.
  *
  *--------------------------------------------------------------*/
@@ -548,7 +548,7 @@ double Reestimation<Type>::kurtosis_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la quantite d'information d'un histogramme.
+ *  Calcul de la quantite d'information d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -579,7 +579,7 @@ double Reestimation<Type>::information_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la vraisemblance d'un histogramme pour une loi donnee.
+ *  Calcul de la vraisemblance d'une loi donnee pour un echantillon.
  *
  *  argument : reference sur un objet Distribution.
  *
@@ -630,7 +630,7 @@ double Reestimation<Type>::likelihood_computation(const Distribution &dist) cons
 
 /*--------------------------------------------------------------*
  *
- *  Estimation d'une loi discrete a partir d'un histogramme.
+ *  Estimation d'une loi discrete a partir d'un echantillon.
  *
  *  argument : pointeur sur une loi discrete.
  *
@@ -670,7 +670,7 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 
 /*--------------------------------------------------------------*
  *
- *  Estimation d'une loi discrete a partir d'un histogramme au sens
+ *  Estimation d'une loi discrete a partir d'un echantillon au sens
  *  d'une vraisemblance penalisee.
  *
  *  arguments : pointeur sur une loi discrete, poids de la penalisation,
@@ -843,7 +843,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une loi binomiale a partir
- *  d'un histogramme.
+ *  d'un echantillon.
  *
  *  arguments : loi parametrique, borne inferieure minimum,
  *              flag sur la borne inferieure.
@@ -851,7 +851,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
  *--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::binomial_estimation(Parametric *dist , int min_inf_bound ,
+double Reestimation<Type>::binomial_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                bool min_inf_bound_flag) const
 
 {
@@ -890,7 +890,7 @@ double Reestimation<Type>::binomial_estimation(Parametric *dist , int min_inf_bo
                           (int)(nb_value * SAMPLE_NB_VALUE_COEFF)) - 1;
 
       // estimation pour chaque bornes inferieure et superieure possibles
-      // de la probabilite a partir de la moyenne de l'histogramme
+      // de la probabilite a partir de la moyenne de l'echantillon
 
 #     ifdef DEBUG
 //      cout << "\nplage de recherche : " << min_inf_bound
@@ -977,7 +977,7 @@ double Reestimation<Type>::binomial_estimation(Parametric *dist , int min_inf_bo
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une loi de Poisson a partir
- *  d'un histogramme.
+ *  d'un echantillon.
  *
  *  arguments : loi parametrique, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
@@ -985,7 +985,7 @@ double Reestimation<Type>::binomial_estimation(Parametric *dist , int min_inf_bo
  *--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::poisson_estimation(Parametric *dist , int min_inf_bound ,
+double Reestimation<Type>::poisson_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                               bool min_inf_bound_flag , double cumul_threshold) const
 
 {
@@ -1014,7 +1014,7 @@ double Reestimation<Type>::poisson_estimation(Parametric *dist , int min_inf_bou
       ((mean - min_inf_bound) / POISSON_RATIO > variance)) {
 
     // estimation pour chaque borne inferieure possible du parametre
-    // a partir de la moyenne de l'histogramme
+    // a partir de la moyenne de l'echantillon
 
 #   ifdef DEBUG
 //    cout << "\nplage de recherche : " << min_inf_bound
@@ -1060,7 +1060,7 @@ double Reestimation<Type>::poisson_estimation(Parametric *dist , int min_inf_bou
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une loi binomiale negative
- *  a partir d'un histogramme.
+ *  a partir d'un echantillon.
  *
  *  arguments : loi parametrique, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
@@ -1068,7 +1068,7 @@ double Reestimation<Type>::poisson_estimation(Parametric *dist , int min_inf_bou
  *--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::negative_binomial_estimation(Parametric *dist , int min_inf_bound ,
+double Reestimation<Type>::negative_binomial_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                         bool min_inf_bound_flag , double cumul_threshold) const
 
 {
@@ -1096,7 +1096,7 @@ double Reestimation<Type>::negative_binomial_estimation(Parametric *dist , int m
   if (mean - max_inf_bound < variance) {
 
     // estimation pour chaque borne inferieure possible du parametre et
-    // de la probabilite a partir de la moyenne et de la variance de l'histogramme
+    // de la probabilite a partir de la moyenne et de la variance de l'echantillon
 
 #   ifdef DEBUG
 //    cout << "\nplage de recherche : " << min_inf_bound
@@ -1150,7 +1150,7 @@ double Reestimation<Type>::negative_binomial_estimation(Parametric *dist , int m
 /*--------------------------------------------------------------*
  *
  *  Estimation des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un histogramme.
+ *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
  *
  *  arguments : loi parametrique, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
@@ -1158,7 +1158,7 @@ double Reestimation<Type>::negative_binomial_estimation(Parametric *dist , int m
  *--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::parametric_estimation(Parametric *dist , int min_inf_bound ,
+double Reestimation<Type>::parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                  bool min_inf_bound_flag , double cumul_threshold) const
 
 {
@@ -1184,7 +1184,7 @@ double Reestimation<Type>::parametric_estimation(Parametric *dist , int min_inf_
 /*--------------------------------------------------------------*
  *
  *  Estimation du type et des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un histogramme.
+ *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
  *
  *  arguments : loi parametrique, borne inferieure minimum,
  *              flag sur la borne inferieure, seuil sur la fonction de repartition.
@@ -1192,15 +1192,15 @@ double Reestimation<Type>::parametric_estimation(Parametric *dist , int min_inf_
  *--------------------------------------------------------------*/
 
 template <typename Type>
-double Reestimation<Type>::type_parametric_estimation(Parametric *dist , int min_inf_bound ,
+double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist , int min_inf_bound ,
                                                       bool min_inf_bound_flag , double cumul_threshold) const
 
 {
   double likelihood , max_likelihood;
-  Parametric *bdist;
+  DiscreteParametric *bdist;
 
 
-  bdist = new Parametric(dist->alloc_nb_value);
+  bdist = new DiscreteParametric(dist->alloc_nb_value);
 
   max_likelihood = binomial_estimation(dist , min_inf_bound , min_inf_bound_flag);
   if (max_likelihood != D_INF) {
@@ -1232,7 +1232,7 @@ double Reestimation<Type>::type_parametric_estimation(Parametric *dist , int min
 /*--------------------------------------------------------------*
  *
  *  Estimation du type et des parametres d'une loi discrete elementaire
- *  (binomiale negative, binomiale, Poisson) a partir d'un histogramme.
+ *  (binomiale negative, binomiale, Poisson) a partir d'un echantillon.
  *
  *  arguments : borne inferieure minimum, flag sur la borne inferieure,
  *              seuil sur la fonction de repartition.
@@ -1240,17 +1240,17 @@ double Reestimation<Type>::type_parametric_estimation(Parametric *dist , int min
  *--------------------------------------------------------------*/
 
 template <typename Type>
-Parametric* Reestimation<Type>::type_parametric_estimation(int min_inf_bound , bool flag ,
-                                                           double cumul_threshold) const
+DiscreteParametric* Reestimation<Type>::type_parametric_estimation(int min_inf_bound , bool flag ,
+                                                                   double cumul_threshold) const
 
 {
   double likelihood;
-  Parametric *dist;
+  DiscreteParametric *dist;
 
 
-  // creation d'un objet Parametric
+  // creation d'un objet DiscreteParametric
 
-  dist = new Parametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
+  dist = new DiscreteParametric((int)(nb_value * SAMPLE_NB_VALUE_COEFF));
 
   // estimation des parametres de la loi
 
