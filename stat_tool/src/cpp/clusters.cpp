@@ -660,12 +660,12 @@ ostream& Clusters::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Clusters dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Clusters::ascii_write(Format_error &error , const char *path ,
+bool Clusters::ascii_write(StatError &error , const char *path ,
                            bool exhaustive) const
 
 {
@@ -693,11 +693,11 @@ bool Clusters::ascii_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet Clusters dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Clusters::spreadsheet_write(Format_error &error , const char *path) const
+bool Clusters::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -902,12 +902,12 @@ bool Clusters::spreadsheet_write(Format_error &error , const char *path) const
  *
  *  Sortie Gnuplot d'un objet Clusters.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Clusters::plot_write(Format_error &error , const char *prefix ,
+bool Clusters::plot_write(StatError &error , const char *prefix ,
                           const char *title) const
 
 {
@@ -1101,11 +1101,11 @@ bool Clusters::plot_write(Format_error &error , const char *prefix ,
  *
  *  Sortie graphique d'un objet Clusters.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Clusters::get_plotable(Format_error &error) const
+MultiPlotSet* Clusters::get_plotable(StatError &error) const
 
 {
   register int i , j , k;
@@ -1243,7 +1243,7 @@ MultiPlotSet* Clusters::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
-  Format_error error;
+  StatError error;
 
 
   return get_plotable(error);
@@ -2417,12 +2417,12 @@ void Clusters::algorithmic_step_2()
  *
  *  Algorithme de clustering par partitionnement.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de groupes,
+ *  arguments : reference sur un objet StatError, stream, nombre de groupes,
  *              prototypes initiaux.
  *
  *--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(Format_error &error , ostream &os , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_cluster ,
                                        int *prototype , int initialization , int algorithm) const
 
 {
@@ -2570,12 +2570,12 @@ Clusters* DistanceMatrix::partitioning(Format_error &error , ostream &os , int n
  *
  *  Algorithme de clustering par partitionnement.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de groupes,
+ *  arguments : reference sur un objet StatError, stream, nombre de groupes,
  *              effectifs et composition des groupes.
  *
  *--------------------------------------------------------------*/
 
-Clusters* DistanceMatrix::partitioning(Format_error &error , ostream &os , int nb_cluster ,
+Clusters* DistanceMatrix::partitioning(StatError &error , ostream &os , int nb_cluster ,
                                        int *cluster_nb_pattern , int **cluster_pattern) const
 
 {
