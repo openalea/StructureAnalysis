@@ -199,12 +199,12 @@ bool** Chain::logic_transition_computation() const
  *
  *  Recherche d'une composante connexe dans une chaine de Markov.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              matrice des transitions possibles entre etats.
  *
  *--------------------------------------------------------------*/
 
-bool Chain::connex_component_research(Format_error &error , bool **ilogic_transition) const
+bool Chain::connex_component_research(StatError &error , bool **ilogic_transition) const
 
 {
   bool status = true , **logic_transition;
