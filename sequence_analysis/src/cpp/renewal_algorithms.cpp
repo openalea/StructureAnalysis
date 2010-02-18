@@ -54,11 +54,11 @@ extern int column_width(int value);
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la quantite d'information d'un objet Time_events.
+ *  Calcul de la quantite d'information d'un objet TimeEvents.
  *
  *--------------------------------------------------------------*/
 
-double Time_events::information_computation() const
+double TimeEvents::information_computation() const
 
 {
   register int i;
@@ -92,11 +92,11 @@ double Time_events::information_computation() const
  *  Calcul de la  vraisemblance d'echantillons {temps, nombre d'evenements}
  *  pour une melange de lois du nombre d'evenements donne.
  *
- *  argument : reference sur un objet Time_events.
+ *  argument : reference sur un objet TimeEvents.
  *
  *--------------------------------------------------------------*/
 
-double Renewal::likelihood_computation(const Time_events &timev) const
+double Renewal::likelihood_computation(const TimeEvents &timev) const
 
 {
   register int i;
@@ -135,7 +135,7 @@ double Renewal::likelihood_computation(const Time_events &timev) const
  *
  *--------------------------------------------------------------*/
 
-void Renewal::expectation_step(const Time_events &timev ,
+void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim) const
 
 {
@@ -336,7 +336,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
  *
  *--------------------------------------------------------------*/
 
-void Renewal::expectation_step(const Time_events &timev ,
+void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim ,
                                Reestimation<double> *length_bias_reestim , int estimator ,
                                bool combination , int mean_computation) const
@@ -575,7 +575,7 @@ void Renewal::expectation_step(const Time_events &timev ,
  *  Estimation des parametres d'un processus de renouvellement par l'algorithme EM
  *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              type de processus ('o' : ordinaire, 'e' : en equilibre),
  *              reference sur la loi inter-evenement initiale,
  *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
@@ -588,19 +588,19 @@ void Renewal::expectation_step(const Time_events &timev ,
  *
  *--------------------------------------------------------------*/
 
-Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
-                                 const Parametric &iinter_event , int estimator ,
-                                 int nb_iter , int equilibrium_estimator , int mean_computation ,
-                                 double weight , int penalty_type , int outside) const
+Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
+                                const DiscreteParametric &iinter_event , int estimator ,
+                                int nb_iter , int equilibrium_estimator , int mean_computation ,
+                                double weight , int penalty_type , int outside) const
 
 {
   bool status = true;
   register int i;
   int nb_likelihood_decrease;
   double likelihood , previous_likelihood , information , hlikelihood , inter_event_mean , *penalty;
-  Parametric *pinter_ev;
+  DiscreteParametric *pinter_ev;
   Reestimation<double> *inter_event_reestim , *length_bias_reestim;
-  Histogram *hreestim;
+  FrequencyDistribution *hreestim;
   Renewal *renew;
 
 
@@ -637,7 +637,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
     // creation du processus de renouvellement
 
     renew = new Renewal(type , *htime , iinter_event);
-    renew->renewal_data = new Renewal_data(*this , type);
+    renew->renewal_data = new RenewalData(*this , type);
 
     pinter_ev = renew->inter_event;
 
@@ -777,7 +777,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
 #     endif
 
       if (estimator == PARAMETRIC_REGULARIZATION) {
-        hreestim = new Histogram(pinter_ev->alloc_nb_value);
+        hreestim = new FrequencyDistribution(pinter_ev->alloc_nb_value);
 
         likelihood = D_INF;
         nb_likelihood_decrease = 0;
@@ -894,7 +894,7 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
  *  Estimation des parametres d'un processus de renouvellement par l'algorithme EM
  *  a partir d'echantillons {temps d'observation, nombre d'evenements}.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              type de processus ('o' : ordinaire, 'e' : en equilibre),
  *              type d'estimateur (vraisemblance, vraisemblance penalisee ou
  *              estimation d'une loi parametrique), nombre d'iterations,
@@ -906,14 +906,14 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
  *
  *--------------------------------------------------------------*/
 
-Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
-                                 int estimator , int nb_iter , int equilibrium_estimator ,
-                                 int mean_computation , double weight , int penalty_type ,
-                                 int outside) const
+Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
+                                int estimator , int nb_iter , int equilibrium_estimator ,
+                                int mean_computation , double weight , int penalty_type ,
+                                int outside) const
 
 {
   double proba;
-  Parametric *iinter_event;
+  DiscreteParametric *iinter_event;
   Renewal *renew;
 
 
@@ -925,8 +925,8 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
     proba = RENEWAL_INIT_PROBABILITY;
   }
 
-  iinter_event = new Parametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
-                                proba , RENEWAL_THRESHOLD);
+  iinter_event = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
+                                        proba , RENEWAL_THRESHOLD);
 
 # ifdef DEBUG
   iinter_event->ascii_print(cout);
@@ -944,25 +944,27 @@ Renewal* Time_events::estimation(Format_error &error , ostream &os , char type ,
  *
  *  Calcul de la vraisemblance des donnees d'intervalles de temps.
  *
- *  arguments : loi de l'intervalle de temps residuel, histogrammes des intervalles
+ *  arguments : loi de l'intervalle de temps residuel, lois empiriques des intervalles
  *              de temps complets, censures a gauche, a droite et
  *              de la longueur de la periode d'observation dans le cas 0 evenement.
  *
  *--------------------------------------------------------------*/
 
-double Parametric::renewal_likelihood_computation(const Forward &forward_dist , const Histogram &within ,
-                                                  const Histogram &backward , const Histogram &forward ,
-                                                  const Histogram *no_event) const
+double DiscreteParametric::renewal_likelihood_computation(const Forward &forward_dist ,
+                                                          const FrequencyDistribution &within ,
+                                                          const FrequencyDistribution &backward ,
+                                                          const FrequencyDistribution &forward ,
+                                                          const FrequencyDistribution *no_event) const
 
 {
   double likelihood , buff;
-  Histogram *histo;
+  FrequencyDistribution *histo;
 
 
   likelihood = likelihood_computation(within);
 
   if (likelihood != D_INF) {
-    histo = new Histogram(backward , 's' , 1);
+    histo = new FrequencyDistribution(backward , 's' , 1);
     buff = survivor_likelihood_computation(*histo);
     delete histo;
 
@@ -974,7 +976,7 @@ double Parametric::renewal_likelihood_computation(const Forward &forward_dist , 
         likelihood += buff;
 
         if (no_event) {
-          histo = new Histogram(*no_event , 's' , 1);
+          histo = new FrequencyDistribution(*no_event , 's' , 1);
           buff = forward_dist.survivor_likelihood_computation(*histo);
           delete histo;
 
@@ -1007,17 +1009,19 @@ double Parametric::renewal_likelihood_computation(const Forward &forward_dist , 
  *  (estimateur EM d'un processus de renouvellement en equilibre a partir
  *   de donnees d'intervalles de temps).
  *
- *  arguments : histogrammes des intervalles de temps complets, censures a gauche,
+ *  arguments : lois empiriques des intervalles de temps complets, censures a gauche,
  *              a droite et de la longueur de la periode d'observation dans le cas 0 evenement,
  *              pointeurs sur les quantites de reestimation de la loi inter-evenement et
  *              de la loi biaisee par la longueur.
  *
  *--------------------------------------------------------------*/
 
-void Parametric::expectation_step(const Histogram &within ,const Histogram &backward ,
-                                  const Histogram &forward , const Histogram *no_event ,
-                                  Reestimation<double> *inter_event_reestim ,
-                                  Reestimation<double> *length_bias_reestim , int iter) const
+void DiscreteParametric::expectation_step(const FrequencyDistribution &within ,
+                                          const FrequencyDistribution &backward ,
+                                          const FrequencyDistribution &forward ,
+                                          const FrequencyDistribution *no_event ,
+                                          Reestimation<double> *inter_event_reestim ,
+                                          Reestimation<double> *length_bias_reestim , int iter) const
 
 {
   register int i , j;
@@ -1149,7 +1153,7 @@ void Parametric::expectation_step(const Histogram &within ,const Histogram &back
  *  Estimation des parametres d'un processus de renouvellement en equilibre
  *  par l'algorithme EM a partir de donnees d'intervalles de temps.
  *
- *  arguments : reference sur un objet Format_error, stream, histogrammes des intervalles
+ *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
  *              de temps censures a gauche, a droite et de la longueur
  *              de la periode d'observation dans le cas 0 evenement,
  *              reference sur la loi inter-evenement initiale, type d'estimateur
@@ -1161,22 +1165,25 @@ void Parametric::expectation_step(const Histogram &within ,const Histogram &back
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Histogram::estimation(Format_error &error , ostream &os , const Histogram &backward ,
-                                        const Histogram &forward , const Histogram *no_event ,
-                                        const Parametric &iinter_event , int estimator , int nb_iter ,
-                                        int mean_computation , double weight , int penalty_type ,
-                                        int outside , double iinter_event_mean) const
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+                                                           const FrequencyDistribution &backward ,
+                                                           const FrequencyDistribution &forward ,
+                                                           const FrequencyDistribution *no_event ,
+                                                           const DiscreteParametric &iinter_event ,
+                                                           int estimator , int nb_iter , int mean_computation ,
+                                                           double weight , int penalty_type ,
+                                                           int outside , double iinter_event_mean) const
 
 {
   bool status = true;
   register int i;
   int inb_value , max_nb_value;
   double likelihood , previous_likelihood , inter_event_mean , *penalty;
-  Parametric_model *inter_event;
+  DiscreteParametricModel *inter_event;
   Forward *forward_dist;
   Reestimation<double> *inter_event_reestim , *length_bias_reestim;
-  Histogram *backward_forward;
-  const Histogram *phisto[2];
+  FrequencyDistribution *backward_forward;
+  const FrequencyDistribution *phisto[2];
 
 
   inter_event = NULL;
@@ -1236,9 +1243,9 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
   }
 
   if (status) {
-    phisto[0] = new Histogram(backward , 's' , 1);
+    phisto[0] = new FrequencyDistribution(backward , 's' , 1);
     phisto[1] = &forward;
-    backward_forward = new Histogram(2 , phisto);
+    backward_forward = new FrequencyDistribution(2 , phisto);
     delete phisto[0];
 
 #   ifdef MESSAGE
@@ -1260,11 +1267,11 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
       }
       width[1] = column_width(max_nb_element) + ASCII_SPACE;
 
-      os << "\n   | " << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_HISTOGRAM]
+      os << "\n   | " << SEQ_label[SEQL_OBSERVATION_INTER_EVENT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
          << " | " << SEQ_label[SEQL_BACKWARD] << "/" << SEQ_label[SEQL_FORWARD]
-         << " " << STAT_label[STATL_HISTOGRAM];
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       if (no_event) {
-        os << " | no-event " << STAT_label[STATL_HISTOGRAM];
+        os << " | no-event " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
       os << endl;
 
@@ -1328,7 +1335,7 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
 
     // creation de la loi inter-evenement
 
-    inter_event = new Parametric_model(iinter_event , this);
+    inter_event = new DiscreteParametricModel(iinter_event , this);
     inter_event->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
     forward_dist = new Forward(*inter_event);
 
@@ -1507,7 +1514,7 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
  *  Estimation des parametres d'un processus de renouvellement en equilibre
  *  par l'algorithme EM a partir de donnees d'intervalles de temps.
  *
- *  arguments : reference sur un objet Format_error, stream, histogrammes des intervalles
+ *  arguments : reference sur un objet StatError, stream, lois empiriques des intervalles
  *              de temps censures a gauche, a droite et de la longueur de la periode
  *              d'observation dans le cas 0 evenement, type d'estimateur
  *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
@@ -1518,37 +1525,39 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Histogram::estimation(Format_error &error , ostream &os , const Histogram &backward ,
-                                        const Histogram &forward , const Histogram *no_event ,
-                                        int estimator , int nb_iter , int mean_computation ,
-                                        double weight , int penalty_type , int outside) const
+DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , ostream &os ,
+                                                           const FrequencyDistribution &backward ,
+                                                           const FrequencyDistribution &forward ,
+                                                           const FrequencyDistribution *no_event ,
+                                                           int estimator , int nb_iter , int mean_computation ,
+                                                           double weight , int penalty_type , int outside) const
 
 {
   register int i;
   int nb_histo , *pfrequency;
   double *pmass;
-  Parametric *iinter_event;
-  Parametric_model *inter_event;
-  Histogram *interval;
-  const Histogram *phisto[4];
+  DiscreteParametric *iinter_event;
+  DiscreteParametricModel *inter_event;
+  FrequencyDistribution *interval;
+  const FrequencyDistribution *phisto[4];
 
 
   nb_histo = 3;
   phisto[0] = this;
-  phisto[1] = new Histogram(backward , 's' , 1);
+  phisto[1] = new FrequencyDistribution(backward , 's' , 1);
   phisto[2] = &forward;
   if (no_event) {
     nb_histo++;
-    phisto[3] = new Histogram(*no_event , 's' , 1);
+    phisto[3] = new FrequencyDistribution(*no_event , 's' , 1);
   }
 
-  interval = new Histogram(nb_histo , phisto);
+  interval = new FrequencyDistribution(nb_histo , phisto);
   delete phisto[1];
   if (no_event) {
     delete phisto[3];
   }
 
-  iinter_event = new Parametric((int)(interval->nb_value * MAX_VALUE_COEFF));
+  iinter_event = new DiscreteParametric((int)(interval->nb_value * MAX_VALUE_COEFF));
 
   iinter_event->offset = interval->offset;
 
@@ -1592,7 +1601,7 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
  *  Estimation des parametres d'un processus de renouvellement en equilibre
  *  par l'algorithme EM a partir de donnees d'intervalles de temps.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur la loi inter-evenement initiale, type d'estimateur
  *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
  *              methode de calcul de la moyenne de la loi inter-evenement,
@@ -1602,21 +1611,22 @@ Parametric_model* Histogram::estimation(Format_error &error , ostream &os , cons
  *
  *--------------------------------------------------------------*/
 
-Renewal* Renewal_data::estimation(Format_error &error , ostream &os , const Parametric &iinter_event ,
-                                  int estimator , int nb_iter , int mean_computation ,
-                                  double weight , int penalty_type , int outside) const
+Renewal* RenewalData::estimation(StatError &error , ostream &os ,
+                                 const DiscreteParametric &iinter_event ,
+                                 int estimator , int nb_iter , int mean_computation ,
+                                 double weight , int penalty_type , int outside) const
 
 {
   register int i , j;
   int *psequence;
-  Parametric_model *inter_event;
+  DiscreteParametricModel *inter_event;
   Renewal *renew;
-  Histogram *within_backward , *within_forward , *no_event;
+  FrequencyDistribution *within_backward , *within_forward , *no_event;
 
 
-  within_backward = new Histogram(MIN(backward->nb_value , htime->nb_value - 1));
-  within_forward = new Histogram(MIN(forward->nb_value , htime->nb_value));
-  no_event = new Histogram(htime->nb_value);
+  within_backward = new FrequencyDistribution(MIN(backward->nb_value , htime->nb_value - 1));
+  within_forward = new FrequencyDistribution(MIN(forward->nb_value , htime->nb_value));
+  no_event = new FrequencyDistribution(htime->nb_value);
 
   for (i = 0;i < nb_element;i++) {
     psequence = sequence[i] + length[i];
@@ -1692,7 +1702,7 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , const Para
   delete no_event;
 
   if (inter_event) {
-    renew = new Renewal(*this , *((Parametric*)inter_event));
+    renew = new Renewal(*this , *((DiscreteParametric*)inter_event));
   }
   else {
     renew = NULL;
@@ -1707,7 +1717,7 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , const Para
  *  Estimation des parametres d'un processus de renouvellement en equilibre
  *  par l'algorithme EM a partir de donnees d'intervalles de temps.
  *
- *  arguments : reference sur un objet Format_error, stream, type d'estimateur
+ *  arguments : reference sur un objet StatError, stream, type d'estimateur
  *              (vraisemblance ou vraisemblance penalisee), nombre d'iterations,
  *              methode de calcul de la moyenne de la loi inter-evenement,
  *              poids de la penalisation, type de penalisation,
@@ -1716,13 +1726,13 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , const Para
  *
  *--------------------------------------------------------------*/
 
-Renewal* Renewal_data::estimation(Format_error &error , ostream &os , int estimator ,
-                                  int nb_iter , int mean_computation , double weight ,
-                                  int penalty_type , int outside) const
+Renewal* RenewalData::estimation(StatError &error , ostream &os , int estimator ,
+                                 int nb_iter , int mean_computation , double weight ,
+                                 int penalty_type , int outside) const
 
 {
   double proba;
-  Parametric *iinter_event;
+  DiscreteParametric *iinter_event;
   Renewal *renew;
 
 
@@ -1734,8 +1744,8 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , int estima
     proba = RENEWAL_INIT_PROBABILITY;
   }
 
-  iinter_event = new Parametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
-                                proba , RENEWAL_THRESHOLD);
+  iinter_event = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
+                                        proba , RENEWAL_THRESHOLD);
 
 # ifdef DEBUG
   iinter_event->ascii_print(cout);
@@ -1753,14 +1763,14 @@ Renewal* Renewal_data::estimation(Format_error &error , ostream &os , int estima
  *
  *  Simulation par un processus de renouvellement.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
- *              histogramme du temps d'observation.
+ *              loi empirique du temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-Renewal_data* Renewal::simulation(Format_error &error , char itype ,
-                                  const Histogram &ihtime) const
+RenewalData* Renewal::simulation(StatError &error , char itype ,
+                                 const FrequencyDistribution &ihtime) const
 
 {
   bool status = true , compute;
@@ -1768,7 +1778,7 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
   int offset , time_interval , cumul_time , *ptime , *pnb_event , *psequence;
   Distribution *dtime;
   Renewal *renew;
-  Renewal_data *timev;
+  RenewalData *timev;
 
 
   timev = NULL;
@@ -1797,9 +1807,9 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
       compute = false;
     }
 
-    // creation d'un objet Renewal_data
+    // creation d'un objet RenewalData
 
-    timev = new Renewal_data(itype , *this);
+    timev = new RenewalData(itype , *this);
 
     timev->renewal = new Renewal(*this , false);
     renew = timev->renewal;
@@ -1905,13 +1915,13 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
     pnb_event -= ihtime.nb_element;
 
     // construction des echantillons {temps, nombre d'evenements, frequence} et
-    // des histogrammes du temps d'observation et du nombre d'evenements
+    // des lois empiriques du temps d'observation et du nombre d'evenements
 
     timev->build(ihtime.nb_element , ptime , pnb_event);
     delete [] ptime;
     delete [] pnb_event;
 
-    // extraction des caracteristiques des histogrammes des intervalles de temps entre 2 evenements,
+    // extraction des caracteristiques des lois empiriques des intervalles de temps entre 2 evenements,
     // des intervalles de temps entre 2 evenements a l'interieur de la periode d'observation,
     // des intervalles de temps recouvrant une date d'observation,
     // des intervalles de temps apres le dernier evenement, des intervalles de temps residuel
@@ -1969,18 +1979,18 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
  *
  *  Simulation par un processus de renouvellement.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
  *              nombre d'echantillons, temps d'observation.
  *
  *--------------------------------------------------------------*/
 
-Renewal_data* Renewal::simulation(Format_error &error , char itype ,
-                                  int nb_element , int itime) const
+RenewalData* Renewal::simulation(StatError &error , char itype ,
+                                 int nb_element , int itime) const
 
 {
   bool status = true;
-  Renewal_data *timev;
+  RenewalData *timev;
 
 
   timev = NULL;
@@ -2000,7 +2010,7 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
   }
 
   if (status) {
-    Histogram htime(itime + 1);
+    FrequencyDistribution htime(itime + 1);
 
     htime.nb_element = nb_element;
     htime.offset = itime;
@@ -2020,18 +2030,18 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
  *
  *  Simulation par un processus de renouvellement.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              type de simulation ('o' : ordinaire, 'e' : en equilibre),
- *              nombre d'echantillons, reference sur un objet Time_events.
+ *              nombre d'echantillons, reference sur un objet TimeEvents.
  *
  *--------------------------------------------------------------*/
 
-Renewal_data* Renewal::simulation(Format_error &error , char itype ,
-                                  int nb_element , const Time_events &itimev) const
+RenewalData* Renewal::simulation(StatError &error , char itype ,
+                                 int nb_element , const TimeEvents &itimev) const
 
 {
-  Histogram *htime;
-  Renewal_data *timev;
+  FrequencyDistribution *htime;
+  RenewalData *timev;
 
 
   error.init();
@@ -2054,13 +2064,13 @@ Renewal_data* Renewal::simulation(Format_error &error , char itype ,
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Renewal_iterator.
+ *  Constructeur de la classe RenewalIterator.
  *
  *  arguments : pointeur sur un objet Renewal, longueur de la sequence.
  *
  *--------------------------------------------------------------*/
 
-Renewal_iterator::Renewal_iterator(Renewal *irenewal , int ilength)
+RenewalIterator::RenewalIterator(Renewal *irenewal , int ilength)
 
 {
   renewal = irenewal;
@@ -2076,13 +2086,13 @@ Renewal_iterator::Renewal_iterator(Renewal *irenewal , int ilength)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Renewal_iterator.
+ *  Copie d'un objet RenewalIterator.
  *
- *  argument : reference sur un objet Renewal_iterator.
+ *  argument : reference sur un objet RenewalIterator.
  *
  *--------------------------------------------------------------*/
 
-void Renewal_iterator::copy(const Renewal_iterator &_it)
+void RenewalIterator::copy(const RenewalIterator &_it)
 
 {
   register int i;
@@ -2108,11 +2118,11 @@ void Renewal_iterator::copy(const Renewal_iterator &_it)
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Renewal_iterator.
+ *  Destructeur de la classe RenewalIterator.
  *
  *--------------------------------------------------------------*/
 
-Renewal_iterator::~Renewal_iterator()
+RenewalIterator::~RenewalIterator()
 
 {
   (renewal->nb_iterator)--;
@@ -2122,13 +2132,13 @@ Renewal_iterator::~Renewal_iterator()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Renewal_iterator.
+ *  Operateur d'assignement de la classe RenewalIterator.
  *
- *  argument : reference sur un objet Renewal_iterator.
+ *  argument : reference sur un objet RenewalIterator.
  *
  *--------------------------------------------------------------*/
 
-Renewal_iterator& Renewal_iterator::operator=(const Renewal_iterator &_it)
+RenewalIterator& RenewalIterator::operator=(const RenewalIterator &_it)
 
 {
   if (&_it != this) {
@@ -2151,7 +2161,7 @@ Renewal_iterator& Renewal_iterator::operator=(const Renewal_iterator &_it)
  *
  *--------------------------------------------------------------*/
 
-void Renewal_iterator::simulation(int ilength , char type)
+void RenewalIterator::simulation(int ilength , char type)
 
 {
   register int i;
