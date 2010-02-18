@@ -41,18 +41,18 @@ class DistanceMatrixWrap
 
 public:
 
-  WRAP_METHOD_FILE_ASCII_WRITE( Distance_matrix);
+  WRAP_METHOD_FILE_ASCII_WRITE( DistanceMatrix);
 
-  WRAP_METHOD0(Distance_matrix, symmetrize, Distance_matrix);
+  WRAP_METHOD0(DistanceMatrix, symmetrize, DistanceMatrix);
 
-  WRAP_METHOD0(Distance_matrix, unnormalize, Distance_matrix);
+  WRAP_METHOD0(DistanceMatrix, unnormalize, DistanceMatrix);
 
   static Clusters*
-  partitioning_prototype(const Distance_matrix& dm, int nb_cluster,
+  partitioning_prototype(const DistanceMatrix& dm, int nb_cluster,
       const boost::python::list& prototype, int initialization, int algorithm)
   {
     Clusters *ret;
-    Format_error error;
+    StatError error;
     bool berror = false;
 
     std::stringstream output;
@@ -83,11 +83,11 @@ public:
   }
 
   static Clusters*
-  partitioning_clusters(const Distance_matrix& dm,
+  partitioning_clusters(const DistanceMatrix& dm,
       const boost::python::list& clusters)
   {
     Clusters *ret;
-    Format_error error;
+    StatError error;
 
     std::stringstream output;
     int nb_cluster = len(clusters);
@@ -142,10 +142,10 @@ public:
   }
 
   static std::string
-  hierarchical_clustering(const Distance_matrix& dm, int algorithm,
+  hierarchical_clustering(const DistanceMatrix& dm, int algorithm,
       int criterion, const char*path, char format)
   {
-    Format_error error;
+    StatError error;
     std::stringstream output;
     bool ret;
 
@@ -159,11 +159,11 @@ public:
 
   }
 
-  static Distance_matrix*
+  static DistanceMatrix*
   read_from_file(char *filename)
   {
-    Distance_matrix * data;
-    Format_error error;
+    DistanceMatrix * data;
+    StatError error;
 
     // not implemented. see vectors.cpp for an exmaple.
     //data = distance_matrix_ascii_read(error, filename);
@@ -180,12 +180,12 @@ public:
   }
   ;
 
-  static Distance_matrix*
-  select_individual(const Distance_matrix& v,
+  static DistanceMatrix*
+  select_individual(const DistanceMatrix& v,
       const boost::python::list& identifiers, bool keep)
   {
-    Format_error error;
-    Distance_matrix * ret = NULL;
+    StatError error;
+    DistanceMatrix * ret = NULL;
 
     int nb_id = len(identifiers);
 
@@ -203,7 +203,7 @@ public:
   }
 
   static double
-  get_length(Distance_matrix &input, int i, int j)
+  get_length(DistanceMatrix &input, int i, int j)
   {
     double ret;
     int row_max = input.get_nb_row();
@@ -221,7 +221,7 @@ public:
   }
 
   static double
-  get_distance(Distance_matrix &input, int i, int j)
+  get_distance(DistanceMatrix &input, int i, int j)
   {
     double ret;
     int row_max = input.get_nb_row();
@@ -244,15 +244,15 @@ public:
 };
 
 #define WRAP DistanceMatrixWrap
-#define CLASS Distance_matrix
+#define CLASS DistanceMatrix
 
 void
 class_distance_matrix()
 {
 
 
-  class_< Distance_matrix, bases< STAT_interface> >
-  ("_DistanceMatrix", "Distance Matrix", init< const Distance_matrix&>())
+  class_< DistanceMatrix, bases< StatInterface> >
+  ("_DistanceMatrix", "Distance Matrix", init< const DistanceMatrix&>())
 
   DEF_INIT_MAKE_CONSTRUCTOR(WRAP::read_from_file, "todo")
 
@@ -291,12 +291,12 @@ class_distance_matrix()
 ;
 
 /*
- Distance_matrix();
- Distance_matrix(int nb_pattern , const char *ilabel , int *pattern_identifier = 0);
- Distance_matrix(int nb_pattern , int irow_identifier , int icolumn_identifier , const char *ilabel , int *pattern_identifier = 0 ,                     bool substitution_flag = true , bool transposition_flag = false);
- Distance_matrix(const Distance_matrix &dist_matrix , int inb_pattern , int *iidentifier , bool keep = true);
- Distance_matrix(const Distance_matrix &dist_matrix , int nb_cluster , const char *ilabel);
- Distance_matrix(const Distance_matrix &dist_matrix , char transform = 'c')     { copy(dist_matrix , transform); }
+ DistanceMatrix();
+ DistanceMatrix(int nb_pattern , const char *ilabel , int *pattern_identifier = 0);
+ DistanceMatrix(int nb_pattern , int irow_identifier , int icolumn_identifier , const char *ilabel , int *pattern_identifier = 0 ,                     bool substitution_flag = true , bool transposition_flag = false);
+ DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_pattern , int *iidentifier , bool keep = true);
+ DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluster , const char *ilabel);
+ DistanceMatrix(const DistanceMatrix &dist_matrix , char transform = 'c')     { copy(dist_matrix , transform); }
 
  void update(...
  void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
@@ -325,8 +325,8 @@ class_distance_matrix()
 void
 class_cluster()
 {
-  class_<Clusters, bases<Distance_matrix> > ("_Cluster", "Cluster", no_init)
-  .def(init <const Distance_matrix &, int>())
+  class_<Clusters, bases<DistanceMatrix> > ("_Cluster", "Cluster", no_init)
+  .def(init <const DistanceMatrix &, int>())
 
   .def(self_ns::str(self)) // __str__
 
@@ -334,17 +334,17 @@ class_cluster()
 
   /*
   Clusters();
-     Clusters(const Distance_matrix &dist_matrix , int inb_cluster ,
+     Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
               int *icluster_nb_pattern , int **cluster_pattern);
-     Clusters(const Clusters &clusters):Distance_matrix(clusters) { copy(clusters); }
+     Clusters(const Clusters &clusters):DistanceMatrix(clusters) { copy(clusters); }
 
 
      std::ostream& line_write(std::ostream &os) const;
 
      std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-     bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
-     bool spreadsheet_write(Format_error &error , const char *path) const;
-     bool plot_write(Format_error &error , const char *prefix ,
+     bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+     bool spreadsheet_write(StatError &error , const char *path) const;
+     bool plot_write(StatError &error , const char *prefix ,
                      const char *title = 0) const;
      MultiPlotSet* get_plotable() const;
 
@@ -356,7 +356,7 @@ class_cluster()
 
      // acces membres de la classe
 
-     Distance_matrix* get_distance_matrix() { return distance_matrix; }
+     DistanceMatrix* get_distance_matrix() { return distance_matrix; }
      int get_nb_pattern() const { return nb_pattern; }
      int get_nb_cluster() const { return nb_cluster; }
      int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
@@ -371,8 +371,8 @@ class_cluster()
 void
 class_dendrogram()
 {
-  class_<Dendrogram, bases<STAT_interface> > ("_Dendrogram", "Dendrogram", no_init)
-  .def(init <const Distance_matrix &, int>())
+  class_<Dendrogram, bases<StatInterface> > ("_Dendrogram", "Dendrogram", no_init)
+  .def(init <const DistanceMatrix &, int>())
 
   .def(self_ns::str(self)) // __str__
 ;
@@ -385,13 +385,13 @@ Dendrogram();
    std::ostream& line_write(std::ostream &os) const;
 
    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-   bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
-   bool spreadsheet_write(Format_error &error , const char *path) const;
-   bool plot_write(Format_error &error , const char *prefix ,
+   bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+   bool spreadsheet_write(StatError &error , const char *path) const;
+   bool plot_write(StatError &error , const char *prefix ,
                    const char *title = 0) const { return false; }
    // acces membres de la classe
 
-   Distance_matrix* get_distance_matrix() { return distance_matrix; }
+   DistanceMatrix* get_distance_matrix() { return distance_matrix; }
    int get_scale() const { return scale; }
    int get_nb_cluster() const { return nb_cluster; }
    int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
