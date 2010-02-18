@@ -60,11 +60,11 @@ extern double standard_normal_value_computation(double critical_probability);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Regression_kernel.
+ *  Constructeur par defaut de la classe RegressionKernel.
  *
  *--------------------------------------------------------------*/
 
-Regression_kernel::Regression_kernel()
+RegressionKernel::RegressionKernel()
 
 {
   ident = I_DEFAULT;
@@ -84,15 +84,15 @@ Regression_kernel::Regression_kernel()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Regression_kernel.
+ *  Constructeur de la classe RegressionKernel.
  *
  *  arguments : identificateur, valeurs minimum et maximum de la variable explicative.
  *
  *--------------------------------------------------------------*/
 
-// Regression_kernel::Regression_kernel(int iident , double imin_value ,
-//                                      double imax_value , double istep)
-Regression_kernel::Regression_kernel(int iident , int imin_value , int imax_value)
+// RegressionKernel::RegressionKernel(int iident , double imin_value ,
+//                                    double imax_value , double istep)
+RegressionKernel::RegressionKernel(int iident , int imin_value , int imax_value)
 
 {
   ident = iident;
@@ -140,13 +140,13 @@ Regression_kernel::Regression_kernel(int iident , int imin_value , int imax_valu
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Regression_kernel.
+ *  Copie d'un objet RegressionKernel.
  *
- *  argument : reference sur un objet Regression_kernel.
+ *  argument : reference sur un objet RegressionKernel.
  *
  *--------------------------------------------------------------*/
 
-void Regression_kernel::copy(const Regression_kernel &regression)
+void RegressionKernel::copy(const RegressionKernel &regression)
 
 {
   register int i;
@@ -185,11 +185,11 @@ void Regression_kernel::copy(const Regression_kernel &regression)
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Regression_kernel.
+ *  Destruction des champs d'un objet RegressionKernel.
  *
  *--------------------------------------------------------------*/
 
-void Regression_kernel::remove()
+void RegressionKernel::remove()
 
 {
   delete [] parameter;
@@ -199,11 +199,11 @@ void Regression_kernel::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Regression_kernel.
+ *  Destructeur de la classe RegressionKernel.
  *
  *--------------------------------------------------------------*/
 
-Regression_kernel::~Regression_kernel()
+RegressionKernel::~RegressionKernel()
 
 {
   remove();
@@ -212,13 +212,13 @@ Regression_kernel::~Regression_kernel()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Regression_kernel.
+ *  Operateur d'assignement de la classe RegressionKernel.
  *
- *  argument : reference sur un objet Regression_kernel.
+ *  argument : reference sur un objet RegressionKernel.
  *
  *--------------------------------------------------------------*/
 
-Regression_kernel& Regression_kernel::operator=(const Regression_kernel &regression)
+RegressionKernel& RegressionKernel::operator=(const RegressionKernel &regression)
 
 {
   if (&regression != this) {
@@ -238,7 +238,7 @@ Regression_kernel& Regression_kernel::operator=(const Regression_kernel &regress
  *
  *--------------------------------------------------------------*/
 
-ostream& Regression_kernel::ascii_parameter_print(ostream &os) const
+ostream& RegressionKernel::ascii_parameter_print(ostream &os) const
 
 {
   if (ident == STAT_LINEAR) {
@@ -268,7 +268,7 @@ ostream& Regression_kernel::ascii_parameter_print(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& Regression_kernel::ascii_formal_print(ostream &os) const
+ostream& RegressionKernel::ascii_formal_print(ostream &os) const
 
 {
   switch (ident) {
@@ -321,7 +321,7 @@ ostream& Regression_kernel::ascii_formal_print(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& Regression_kernel::ascii_print(ostream &os) const
+ostream& RegressionKernel::ascii_print(ostream &os) const
 
 {
   register int i;
@@ -351,7 +351,7 @@ ostream& Regression_kernel::ascii_print(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& Regression_kernel::spreadsheet_print(ostream &os) const
+ostream& RegressionKernel::spreadsheet_print(ostream &os) const
 
 {
   register int i;
@@ -376,7 +376,7 @@ ostream& Regression_kernel::spreadsheet_print(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-bool Regression_kernel::plot_print(const char *path) const
+bool RegressionKernel::plot_print(const char *path) const
 
 {
   bool status = false;
@@ -413,7 +413,7 @@ bool Regression_kernel::plot_print(const char *path) const
  *
  *--------------------------------------------------------------*/
 
-void Regression_kernel::plotable_write(SinglePlot &plot) const
+void RegressionKernel::plotable_write(SinglePlot &plot) const
 
 {
   if (ident == STAT_LINEAR) {
@@ -439,7 +439,7 @@ void Regression_kernel::plotable_write(SinglePlot &plot) const
  *
  *--------------------------------------------------------------*/
 
-void Regression_kernel::computation()
+void RegressionKernel::computation()
 
 {
   register int i;
@@ -480,7 +480,7 @@ void Regression_kernel::computation()
  *
  *--------------------------------------------------------------*/
 
-double Regression_kernel::min_computation() const
+double RegressionKernel::min_computation() const
 
 {
   register int i;
@@ -507,7 +507,7 @@ double Regression_kernel::min_computation() const
  *
  *--------------------------------------------------------------*/
 
-double Regression_kernel::max_computation() const
+double RegressionKernel::max_computation() const
 
 {
   register int i;
@@ -554,7 +554,7 @@ Regression::Regression()
  *--------------------------------------------------------------*/
 
 Regression::Regression(int iident , int explanatory_variable , int response_variable , const Vectors &vec)
-  :Regression_kernel(iident , (int)vec.min_value[explanatory_variable] , (int)vec.max_value[explanatory_variable])
+:RegressionKernel(iident , (int)vec.min_value[explanatory_variable] , (int)vec.max_value[explanatory_variable])
 
 {
   register int i;
@@ -612,7 +612,7 @@ void Regression::copy(const Regression &regression)
 Regression::Regression(const Regression &regression)
 
 {
-  Regression_kernel::copy(regression);
+  RegressionKernel::copy(regression);
   copy(regression);
 }
 
@@ -657,9 +657,9 @@ Regression& Regression::operator=(const Regression &regression)
 {
   if (&regression != this) {
     remove();
-    Regression_kernel::remove();
+    RegressionKernel::remove();
 
-    Regression_kernel::copy(regression);
+    RegressionKernel::copy(regression);
     copy(regression);
   }
 
@@ -717,13 +717,13 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
        << "   (" << STAT_label[STATL_MIN_VALUE] << ": " << vectors->min_value[i] << ", "
        << STAT_label[STATL_MAX_VALUE] << ": " << vectors->max_value[i] << ")" << endl;
 
-    os << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
     if (vectors->marginal[i]) {
       vectors->marginal[i]->ascii_characteristic_print(os , exhaustive);
 
       if ((vectors->marginal[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
-        os << "\n   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        os << "\n   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         vectors->marginal[i]->ascii_print(os);
       }
     }
@@ -967,12 +967,12 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Regression dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Regression::ascii_write(Format_error &error , const char *path ,
+bool Regression::ascii_write(StatError &error , const char *path ,
                              bool exhaustive) const
 
 {
@@ -1000,11 +1000,11 @@ bool Regression::ascii_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet Regression dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Regression::spreadsheet_write(Format_error &error , const char *path) const
+bool Regression::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1034,12 +1034,12 @@ bool Regression::spreadsheet_write(Format_error &error , const char *path) const
                << "\t\t" << STAT_label[STATL_MIN_VALUE] << "\t" << vectors->min_value[i]
                << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << vectors->max_value[i] << endl;
 
-      out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
 
       if (vectors->marginal[i]) {
         vectors->marginal[i]->spreadsheet_characteristic_print(out_file);
 
-        out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         vectors->marginal[i]->spreadsheet_print(out_file);
       }
 
@@ -1207,12 +1207,12 @@ bool Regression::spreadsheet_write(Format_error &error , const char *path) const
  *
  *  Sortie Gnuplot d'un objet Regression.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Regression::plot_write(Format_error &error , const char *prefix ,
+bool Regression::plot_write(StatError &error , const char *prefix ,
                             const char *title) const
 
 {
@@ -1703,12 +1703,12 @@ double Regression::residual_square_sum_computation() const
  *
  *  Regression lineaire.
  *
- *  arguments : reference sur un objet Format_error, indices des variables
+ *  arguments : reference sur un objet StatError, indices des variables
  *              explicative et expliquee.
  *
  *--------------------------------------------------------------*/
 
-Regression* Vectors::linear_regression(Format_error &error , int explanatory_variable ,
+Regression* Vectors::linear_regression(StatError &error , int explanatory_variable ,
                                        int response_variable) const
 
 {
@@ -1782,13 +1782,13 @@ Regression* Vectors::linear_regression(Format_error &error , int explanatory_var
  *
  *  Regression non-parametrique de type moyenne mobile.
  *
- *  arguments : reference sur un objet Format_error, indices des variables
+ *  arguments : reference sur un objet StatError, indices des variables
  *              explicative et expliquee, demi-largeur du filtre, filtre,
  *              calcul de la reponse : 'a' : averaging, 's' : least-squares.
  *
  *--------------------------------------------------------------*/
 
-Regression* Vectors::moving_average(Format_error &error , int explanatory_variable ,
+Regression* Vectors::moving_average(StatError &error , int explanatory_variable ,
                                     int response_variable , int nb_point ,
                                     double *filter , char algorithm) const
 
@@ -2090,13 +2090,13 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
  *
  *  Regression non-parametrique de type moyenne mobile.
  *
- *  arguments : reference sur un objet Format_error, indices des variables
+ *  arguments : reference sur un objet StatError, indices des variables
  *              explicative et expliquee, loi symmetrique,
  *              calcul de la reponse : 'a' : averaging, 's' : least-squares.
  *
  *--------------------------------------------------------------*/
 
-Regression* Vectors::moving_average(Format_error &error , int explanatory_variable ,
+Regression* Vectors::moving_average(StatError &error , int explanatory_variable ,
                                     int response_variable , const Distribution &dist ,
                                     char algorithm) const
 
@@ -2134,14 +2134,15 @@ Regression* Vectors::moving_average(Format_error &error , int explanatory_variab
  *
  *  Regression non-parametrique de type plus proches voisins.
  *
- *  arguments : reference sur un objet Format_error, indices des variables
+ *  arguments : reference sur un objet StatError, indices des variables
  *              explicative et expliquee, proportion du voisinage par rapport
  *              a la taille de l'echantillon, ponderation des voisins ou non.
  *
  *--------------------------------------------------------------*/
 
-Regression* Vectors::nearest_neighbor_smoother(Format_error &error , int explanatory_variable ,
-                                               int response_variable , double span , bool weighting) const
+Regression* Vectors::nearest_neighbor_smoother(StatError &error , int explanatory_variable ,
+                                               int response_variable , double span ,
+                                               bool weighting) const
 
 {
   bool status = true , greater;
