@@ -387,13 +387,13 @@ Chain& Chain::operator=(const Chain &chain)
  *
  *  Analyse du format d'un objet Chain.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, type du processus
  *              ('o' : ordinaire, 'e' : en equilibre).
  *
  *--------------------------------------------------------------*/
 
-Chain* chain_parsing(Format_error &error , ifstream &in_file , int &line , char type)
+Chain* chain_parsing(StatError &error , ifstream &in_file , int &line , char type)
 
 {
   RWLocaleSnapshot locale("en");
