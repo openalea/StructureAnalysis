@@ -54,13 +54,13 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::index_state_distribution()
+void SemiMarkov::index_state_distribution()
 
 {
   register int i , j , k;
   double sum , *state_out , **state_in;
   Curves *index_state;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   index_state = nonparametric_process[0]->index_value;
@@ -172,12 +172,12 @@ void Semi_markov::index_state_distribution()
  *
  *--------------------------------------------------------------*/
 
-double* Semi_markov::memory_computation() const
+double* SemiMarkov::memory_computation() const
 
 {
   register int i , j , k;
   double sum , *memory , *state_out , **state_in;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   memory = new double[nb_state];
@@ -357,7 +357,7 @@ double* Semi_markov::memory_computation() const
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::state_no_occurrence_probability(int state , double increment)
+void SemiMarkov::state_no_occurrence_probability(int state , double increment)
 
 {
   register int i;
@@ -373,7 +373,7 @@ void Semi_markov::state_no_occurrence_probability(int state , double increment)
     int min_time;
     double sum , *state_out , **state_in ,
            &no_occurrence = nonparametric_process[0]->no_occurrence[state];
-    Parametric *occupancy;
+    DiscreteParametric *occupancy;
 
 
     state_out = new double[nb_state];
@@ -505,13 +505,13 @@ void Semi_markov::state_no_occurrence_probability(int state , double increment)
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::state_first_occurrence_distribution(int state , int min_nb_value ,
-                                                      double cumul_threshold)
+void SemiMarkov::state_first_occurrence_distribution(int state , int min_nb_value ,
+                                                     double cumul_threshold)
 
 {
   register int i , j , k;
   double *state_out , **state_in , *pmass , *pcumul;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
   Distribution *first_occurrence;
 
 
@@ -630,14 +630,14 @@ void Semi_markov::state_first_occurrence_distribution(int state , int min_nb_val
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::state_leave_probability(int state , double increment)
+void SemiMarkov::state_leave_probability(int state , double increment)
 
 {
   if (state_type[state] == 't') {
     register int i , j , k;
     int min_time;
     double sum , *state_out , **state_in , &leave = nonparametric_process[0]->leave[state];
-    Parametric *occupancy;
+    DiscreteParametric *occupancy;
 
 
     state_out = new double[nb_state];
@@ -774,14 +774,14 @@ void Semi_markov::state_leave_probability(int state , double increment)
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::state_recurrence_time_distribution(int state , int min_nb_value ,
-                                                     double cumul_threshold)
+void SemiMarkov::state_recurrence_time_distribution(int state , int min_nb_value ,
+                                                    double cumul_threshold)
 
 {
   register int i , j , k;
   double occupancy_mean , *state_out , **state_in , *pmass , *pcumul;
   Distribution *recurrence_time;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   recurrence_time = nonparametric_process[0]->recurrence_time[state];
@@ -915,7 +915,7 @@ void Semi_markov::state_recurrence_time_distribution(int state , int min_nb_valu
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::index_output_distribution(int variable)
+void SemiMarkov::index_output_distribution(int variable)
 
 {
   register int i , j , k;
@@ -957,8 +957,8 @@ void Semi_markov::index_output_distribution(int variable)
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::output_no_occurrence_probability(int variable , int output ,
-                                                   double increment)
+void SemiMarkov::output_no_occurrence_probability(int variable , int output ,
+                                                  double increment)
 
 {
   bool status = false , *output_accessibility;
@@ -966,7 +966,7 @@ void Semi_markov::output_no_occurrence_probability(int variable , int output ,
   int min_time;
   double sum , *state_out , **state_in , *observation , **obs_power ,
          &no_occurrence = nonparametric_process[variable]->no_occurrence[output];
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   observation = new double[nb_state];
@@ -1151,13 +1151,13 @@ void Semi_markov::output_no_occurrence_probability(int variable , int output ,
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::output_first_occurrence_distribution(int variable , int output ,
-                                                       int min_nb_value , double cumul_threshold)
+void SemiMarkov::output_first_occurrence_distribution(int variable , int output ,
+                                                      int min_nb_value , double cumul_threshold)
 
 {
   register int i , j , k;
   double sum , *state_out , **state_in , *observation , **obs_power , *pmass , *pcumul;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
   Distribution *first_occurrence;
 
 
@@ -1305,8 +1305,8 @@ void Semi_markov::output_first_occurrence_distribution(int variable , int output
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::output_leave_probability(const double *memory , int variable ,
-                                           int output , double increment)
+void SemiMarkov::output_leave_probability(const double *memory , int variable ,
+                                          int output , double increment)
 
 {
   bool status = false , *output_accessibility;
@@ -1314,7 +1314,7 @@ void Semi_markov::output_leave_probability(const double *memory , int variable ,
   int min_time;
   double sum0 , sum1 , *observation , **obs_power , *input_proba , *state_out ,
          **state_in , &leave = nonparametric_process[variable]->leave[output];
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   observation = new double[nb_state];
@@ -1536,16 +1536,16 @@ void Semi_markov::output_leave_probability(const double *memory , int variable ,
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::output_recurrence_time_distribution(const double *memory , int variable ,
-                                                      int output , int min_nb_value ,
-                                                      double cumul_threshold)
+void SemiMarkov::output_recurrence_time_distribution(const double *memory , int variable ,
+                                                     int output , int min_nb_value ,
+                                                     double cumul_threshold)
 
 {
   register int i , j , k , m;
   double sum0 , sum1 , *observation , **obs_power , *input_proba , *output_proba ,
          *state_out , **state_in , *pmass , *pcumul;
   Distribution *recurrence_time;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   recurrence_time = nonparametric_process[variable]->recurrence_time[output];
@@ -1760,16 +1760,16 @@ void Semi_markov::output_recurrence_time_distribution(const double *memory , int
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::output_sojourn_time_distribution(const double *memory , int variable ,
-                                                   int output , int min_nb_value ,
-                                                   double cumul_threshold)
+void SemiMarkov::output_sojourn_time_distribution(const double *memory , int variable ,
+                                                  int output , int min_nb_value ,
+                                                  double cumul_threshold)
 
 {
   register int i , j , k , m;
   double sum0 , sum1 , *observation , **obs_power , **input_proba ,
          *output_proba , *state_out , **state_in , *pmass , *pcumul ,
          &absorption = nonparametric_process[variable]->absorption[output];
-  Parametric *sojourn_time , *occupancy;
+  DiscreteParametric *sojourn_time , *occupancy;
 
 
   sojourn_time = nonparametric_process[variable]->sojourn_time[output];
