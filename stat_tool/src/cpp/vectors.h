@@ -47,7 +47,7 @@
  */
 
 
-const int VECTOR_NB_VARIABLE = 50;     // nombre maximum de variables
+const int VECTOR_NB_VARIABLE = 60;     // nombre maximum de variables
 const int DISTANCE_NB_VECTOR = 2000;   // nombre maximum de vecteurs pour le calcul
                                        // d'une matrice des distances
 const int CONTINGENCY_NB_VALUE = 100;  // nombre maximum de valeurs pour le calcul
@@ -75,22 +75,22 @@ enum {
  */
 
 
-class Distance_matrix;
+class DistanceMatrix;
 class Regression;
 class Sequences;
 class TreeMatch;
-class Vector_distance;
+class VectorDistance;
 class Vectors;
 class Mv_Mixture;
 
 
-class Vectors : public STAT_interface {  // vecteurs
+class Vectors : public StatInterface {  // vecteurs
 
     friend class Regression;
     friend class Sequences;
     friend class Mv_Mixture;
 
-    friend Vectors* vectors_ascii_read(Format_error &error , const char *path);
+    friend Vectors* vectors_ascii_read(StatError &error , const char *path);
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
     { return vec.ascii_write(os); }
 
@@ -102,7 +102,7 @@ protected :
     int *type;              // type de chaque variable (INT_VALUE/REAL_VALUE)
     double *min_value;      // valeurs minimums
     double *max_value;      // valeurs maximums
-    Histogram **marginal;   // lois marginales empiriques
+    FrequencyDistribution **marginal;  // lois marginales empiriques
     double *mean;           // vecteur moyenne
     double **covariance;    // matrice de variance-covariance
     /// int_vector[vector_id][variable]
@@ -131,7 +131,7 @@ protected :
     void min_value_computation(int variable);
     void max_value_computation(int variable);
     int* order_computation(int variable) const;
-    void build_marginal_histogram(int variable);
+    void build_marginal_frequency_distribution(int variable);
 
     void mean_computation(int variable);
     void variance_computation(int variable);
@@ -144,7 +144,7 @@ protected :
 
     std::ostream& rank_correlation_ascii_write(std::ostream &os , int correlation_type ,
                                                double **correlation) const;
-    bool rank_correlation_ascii_write(Format_error &error , const char *path , int correlation_type ,
+    bool rank_correlation_ascii_write(StatError &error , const char *path , int correlation_type ,
                                       double **correlation) const;
 
     double spearman_rank_single_correlation_computation() const;
@@ -156,18 +156,18 @@ protected :
                                                 int **frequency , double **deviation ,
                                                 double **chi2_contribution , const Test &test ,
                                                 bool file_flag = false) const;
-    bool contingency_table_ascii_write(Format_error &error , const char *path , int variable1 ,
+    bool contingency_table_ascii_write(StatError &error , const char *path , int variable1 ,
                                        int variable2 , int **frequency , double **deviation ,
                                        double **chi2_contribution , const Test &test) const;
-    bool contingency_table_spreadsheet_write(Format_error &error , const char *path , int variable1 ,
+    bool contingency_table_spreadsheet_write(StatError &error , const char *path , int variable1 ,
                                              int variable2 , int **frequency , double **deviation ,
                                              double **chi2_contribution , const Test &test) const;
 
     std::ostream& variance_analysis_ascii_write(std::ostream &os , int type , const Vectors **value_vec ,
                                                 bool exhaustive = false) const;
-    bool variance_analysis_ascii_write(Format_error &error , const char *path , int response_type ,
+    bool variance_analysis_ascii_write(StatError &error , const char *path , int response_type ,
                                        const Vectors **value_vec , bool exhaustive = false) const;
-    bool variance_analysis_spreadsheet_write(Format_error &error , const char *path ,
+    bool variance_analysis_spreadsheet_write(StatError &error , const char *path ,
                                              int response_type , const Vectors **value_vec) const;
 
 public :
@@ -184,47 +184,47 @@ public :
     virtual ~Vectors();
     Vectors& operator=(const Vectors &vec);
 
-    Distribution_data* extract(Format_error &error , int variable) const;
+    DiscreteDistributionData* extract(StatError &error , int variable) const;
 
-    bool check(Format_error &error);
+    bool check(StatError &error);
 
-    Vectors* merge(Format_error &error, int nb_sample , const Vectors **ivec) const;
-    Vectors* shift(Format_error &error , int variable , int shift_param) const;
-    Vectors* shift(Format_error &error , int variable , double shift_param) const;
-    Vectors* transcode(Format_error &error , int variable , int *symbol) const;
-    Vectors* cluster(Format_error &error , int variable , int step ,
+    Vectors* merge(StatError &error, int nb_sample , const Vectors **ivec) const;
+    Vectors* shift(StatError &error , int variable , int shift_param) const;
+    Vectors* shift(StatError &error , int variable , double shift_param) const;
+    Vectors* transcode(StatError &error , int variable , int *symbol) const;
+    Vectors* cluster(StatError &error , int variable , int step ,
                      int mode = FLOOR) const;
-    Vectors* cluster(Format_error &error , int variable , int inb_value ,
+    Vectors* cluster(StatError &error , int variable , int inb_value ,
                      int *ilimit) const;
-    Vectors* cluster(Format_error &error , int variable , int nb_class ,
+    Vectors* cluster(StatError &error , int variable , int nb_class ,
                      double *ilimit) const;
-    Vectors* scaling(Format_error &error , int variable , int scaling_coeff) const;
-    Vectors* round(Format_error &error , int variable = I_DEFAULT ,
+    Vectors* scaling(StatError &error , int variable , int scaling_coeff) const;
+    Vectors* round(StatError &error , int variable = I_DEFAULT ,
                    int mode = ROUND) const;
 
-    Vectors* value_select(Format_error &error , std::ostream &os , int variable ,
+    Vectors* value_select(StatError &error , std::ostream &os , int variable ,
                           int imin_value , int imax_value , bool keep = true) const;
-    Vectors* value_select(Format_error &error , std::ostream &os , int variable ,
+    Vectors* value_select(StatError &error , std::ostream &os , int variable ,
                           double imin_value , double imax_value , bool keep = true) const;
 
-    Vectors* select_individual(Format_error &error , int inb_vector , int *iidentifier ,
+    Vectors* select_individual(StatError &error , int inb_vector , int *iidentifier ,
                                bool keep = true) const;
-    Vectors* select_variable(Format_error &error , int inb_variable , int *ivariable ,
+    Vectors* select_variable(StatError &error , int inb_variable , int *ivariable ,
                              bool keep = true) const;
-    Vectors* merge_variable(Format_error &error , int nb_sample , const Vectors **ivec ,
+    Vectors* merge_variable(StatError &error , int nb_sample , const Vectors **ivec ,
                             int ref_sample = I_DEFAULT) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_data_write(std::ostream &os , bool exhaustive = false ,
                                    bool comment_flag = false) const;
-    bool ascii_data_write(Format_error &error , const char *path , bool exhaustive = false) const;
+    bool ascii_data_write(StatError &error , const char *path , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -233,35 +233,35 @@ public :
     double skewness_computation(int variable) const;
     double kurtosis_computation(int variable) const;
 
-    bool rank_correlation_computation(Format_error &error , std::ostream &os ,
+    bool rank_correlation_computation(StatError &error , std::ostream &os ,
                                       int correlation_type , const char *path = NULL) const;
 
-    Distance_matrix* comparison(Format_error &error , const Vector_distance &ivector_dist ,
-                                bool standardization = true) const;
+    DistanceMatrix* comparison(StatError &error , const VectorDistance &ivector_dist ,
+                               bool standardization = true) const;
 
-    bool contingency_table(Format_error &error , std::ostream &os , int variable1 ,
+    bool contingency_table(StatError &error , std::ostream &os , int variable1 ,
                            int variable2 , const char *path = NULL , char format = 'a') const;
 
-    bool variance_analysis(Format_error &error , std::ostream &os , int class_variable ,
+    bool variance_analysis(StatError &error , std::ostream &os , int class_variable ,
                            int response_variable , int response_type ,
                            const char *path = NULL , char format = 'a') const;
 
-    Regression* linear_regression(Format_error &error , int explanatory_variable ,
+    Regression* linear_regression(StatError &error , int explanatory_variable ,
                                   int response_variable) const;
-    Regression* moving_average(Format_error &error , int explanatory_variable ,
+    Regression* moving_average(StatError &error , int explanatory_variable ,
                                int response_variable , int nb_point ,
                                double *filter , char algorithm = 'a') const;
-    Regression* moving_average(Format_error &error , int explanatory_variable ,
+    Regression* moving_average(StatError &error , int explanatory_variable ,
                                int response_variable , const Distribution &dist ,
                                char algorithm = 'a') const;
-    Regression* nearest_neighbor_smoother(Format_error &error , int explanatory_variable ,
+    Regression* nearest_neighbor_smoother(StatError &error , int explanatory_variable ,
                                           int response_variable , double span ,
                                           bool weighting = true) const;
 
-    Mv_Mixture* mixture_estimation(Format_error &error , std::ostream &os ,
+    Mv_Mixture* mixture_estimation(StatError &error , std::ostream &os ,
                                    const Mv_Mixture &imixture, int nb_iter = I_DEFAULT ,
                                    bool *force_param = NULL) const;
-    Mv_Mixture* mixture_estimation(Format_error &error , std::ostream& os , int nb_component ,
+    Mv_Mixture* mixture_estimation(StatError &error , std::ostream& os , int nb_component ,
                                    int nb_iter = I_DEFAULT , bool *force_param = NULL) const;
 
     // acces membres de la classe
@@ -272,7 +272,7 @@ public :
     int get_type(int variable) const { return type[variable]; }
     double get_min_value(int variable) const { return min_value[variable]; }
     double get_max_value(int variable) const { return max_value[variable]; }
-    Histogram* get_marginal(int variable) const { return marginal[variable]; }
+    FrequencyDistribution* get_marginal(int variable) const { return marginal[variable]; }
     double get_mean(int variable) const { return mean[variable]; }
     double get_covariance(int variable1, int variable2) const
     { return covariance[variable1][variable2]; }
@@ -283,20 +283,20 @@ public :
 };
 
 
-Vectors* vectors_ascii_read(Format_error &error , const char *path);
+Vectors* vectors_ascii_read(StatError &error , const char *path);
 
 
 
-class Vector_distance : public STAT_interface {  // parametres de definition
-                                                 // d'une distance entre vecteurs
+class VectorDistance : public StatInterface {  // parametres de definition
+                                               // d'une distance entre vecteurs
 
     friend class Vectors;
     friend class Sequences;
 
     friend class TreeMatch;
 
-    friend Vector_distance* vector_distance_ascii_read(Format_error &error , const char *path);
-    friend std::ostream& operator<<(std::ostream &os , const Vector_distance &param)
+    friend VectorDistance* vector_distance_ascii_read(StatError &error , const char *path);
+    friend std::ostream& operator<<(std::ostream &os , const VectorDistance &param)
     { return param.ascii_write(os); }
 
 private :
@@ -310,37 +310,37 @@ private :
     double ***symbol_distance;  // matrice des distances entre symboles
     int *period;            // periode (variable circulaire)
 
-    void copy(const Vector_distance &param);
+    void copy(const VectorDistance &param);
     void remove();
 
 public :
 
-    Vector_distance();
-    Vector_distance(int inb_variable , int *ivariable_type , double *iweight ,
-                    int idistance_type = ABSOLUTE_VALUE);
-    Vector_distance(int inb_variable , int idistance_type , int *ivariable_type ,
-                    double *iweight , int *inb_value , double ***isymbol_distance ,
-                    int *iperiod);
-    Vector_distance(const Vector_distance &vector_dist)
+    VectorDistance();
+    VectorDistance(int inb_variable , int *ivariable_type , double *iweight ,
+                   int idistance_type = ABSOLUTE_VALUE);
+    VectorDistance(int inb_variable , int idistance_type , int *ivariable_type ,
+                   double *iweight , int *inb_value , double ***isymbol_distance ,
+                   int *iperiod);
+    VectorDistance(const VectorDistance &vector_dist)
     { copy(vector_dist); }
-    virtual ~Vector_distance();
-    Vector_distance& operator=(const Vector_distance &vector_dist);
+    virtual ~VectorDistance();
+    VectorDistance& operator=(const VectorDistance &vector_dist);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
 
-    // fonctions pour la compatibilite avec la classe STAT_interface
+    // fonctions pour la compatibilite avec la classe StatInterface
 
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
 
     double* max_symbol_distance_computation(int variable) const;
 
-    void dispersion_computation(int variable , const Histogram *marginal ,
+    void dispersion_computation(int variable , const FrequencyDistribution *marginal ,
                                 double *rank = NULL) const;
 
     // acces membres de la classe
@@ -357,7 +357,7 @@ public :
 };
 
 
-Vector_distance* vector_distance_ascii_read(Format_error &error , const char *path);
+VectorDistance* vector_distance_ascii_read(StatError &error , const char *path);
 
 
 
