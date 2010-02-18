@@ -2,7 +2,7 @@
 // two internal macros used by other macros
 #define METHOD_HEADER(OUTPUT_TYPE) \
 	{\
-		Format_error error; \
+		StatError error; \
 		OUTPUT_TYPE* ret = NULL;\
 
 #define ERROR \
@@ -55,7 +55,7 @@ static OUTPUT_TYPE* METHOD_NAME(const INPUT_TYPE& input_class, VARTYPE1 var1, VA
   static void file_ascii_write(const INPUT_CLASS& m, const char* path, bool exhaustive)\
   {\
      bool result = true;\
-     Format_error error;\
+     StatError error;\
      result = m.ascii_write(error, path, exhaustive);\
      if (!result) ERROR;\
    }
@@ -75,7 +75,7 @@ static std::string ascii_write(const INPUT_CLASS& input, bool exhaustive)\
 #define WRAP_METHOD_PLOT_WRITE(INPUT_CLASS) \
   static void plot_write(const INPUT_CLASS& input, const std::string& prefix, const std::string& title)\
   {\
-	  Format_error error;\
+	  StatError error;\
       if(! input.plot_write(error, prefix.c_str(), title.c_str()))\
          ERROR;\
   }
@@ -84,7 +84,7 @@ static std::string ascii_write(const INPUT_CLASS& input, bool exhaustive)\
 #define WRAP_METHOD_SPREADSHEET_WRITE(INPUT_CLASS) \
   static void spreadsheet_write(const INPUT_CLASS& input, const std::string& filename)\
   {\
-    Format_error error;\
+    StatError error;\
     if(! input.spreadsheet_write(error, filename.c_str()))\
        ERROR;\
   }
@@ -94,7 +94,7 @@ static std::string ascii_write(const INPUT_CLASS& input, bool exhaustive)\
 #define WRAP_METHOD_SURVIVAL_GET_PLOTABLE(INPUT_CLASS) \
 static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
   { \
-    Format_error error; \
+    StatError error; \
     MultiPlotSet* ret = p.survival_get_plotable(error); \
     if (!ret) ERROR;\
     return ret;\
@@ -104,7 +104,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
 #define WRAP_METHOD_SURVIVAL_PLOT_WRITE(INPUT_CLASS) \
   static void survival_plot_write(const INPUT_CLASS& p, const std::string& prefix, const std::string& title) \
   {\
-    Format_error error;\
+    StatError error;\
     if(!p.survival_plot_write(error, prefix.c_str(), title.c_str()))\
      ERROR;\
   }
@@ -114,7 +114,7 @@ static MultiPlotSet* survival_get_plotable(const INPUT_CLASS& p) \
 #define WRAP_METHOD_SURVIVAL_SPREADSHEET_WRITE(INPUT_CLASS) \
  static void survival_spreadsheet_write(const INPUT_CLASS& p, const std::string& filename) \
   {\
-    Format_error error;\
+    StatError error;\
     if(!p.survival_spreadsheet_write(error, filename.c_str()))\
       ERROR;\
   }
