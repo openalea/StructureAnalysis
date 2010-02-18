@@ -67,7 +67,7 @@ enum {
  */
 
 
-class Regression_kernel {  // noyau de regression
+class RegressionKernel {  // noyau de regression
 
 protected :
 
@@ -81,7 +81,7 @@ protected :
 //    double step;            // pas pour representer la fonction de regression
     double *point;          // points
 
-    void copy(const Regression_kernel&);
+    void copy(const RegressionKernel&);
     void remove();
 
     std::ostream& ascii_parameter_print(std::ostream &os) const;
@@ -97,12 +97,12 @@ protected :
 
 public :
 
-    Regression_kernel();
-//    Regression_kernel(int iident , double imin_value , double imax_value , double istep = 1);
-    Regression_kernel(int iident , int imin_value , int imax_value);
-    Regression_kernel(const Regression_kernel &regression) { copy(regression); }
-    ~Regression_kernel();
-    Regression_kernel& operator=(const Regression_kernel &regression);
+    RegressionKernel();
+//    RegressionKernel(int iident , double imin_value , double imax_value , double istep = 1);
+    RegressionKernel(int iident , int imin_value , int imax_value);
+    RegressionKernel(const RegressionKernel &regression) { copy(regression); }
+    ~RegressionKernel();
+    RegressionKernel& operator=(const RegressionKernel &regression);
 
     // acces membres de la classe
 
@@ -121,7 +121,7 @@ public :
 
 class Vectors;
 
-class Regression : public STAT_interface , public Regression_kernel {  // fonction de regression
+class Regression : public StatInterface , public RegressionKernel {  // fonction de regression
 
     friend class Vectors;
 
@@ -154,10 +154,10 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
