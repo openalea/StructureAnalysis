@@ -44,7 +44,7 @@ void class_curves()
   .def(init<const Curves &, optional<char, int> >())
 
   .def(init<Distribution> ())
-  .def(init<Histogram> ())
+  .def(init<FrequencyDistribution> ())
 
   .def_readonly("nb_curve", &Curves::nb_curve)
   .def_readonly("length", &Curves::nb_curve)
