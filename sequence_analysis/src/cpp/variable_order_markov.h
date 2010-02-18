@@ -67,28 +67,28 @@ enum {
  */
 
 
-// class Variable_order_markov : public STAT_interface , public Chain {
-class Variable_order_markov : public STAT_interface , protected Chain {  // chaine de Markov
-                                                                         // d'ordre variable
+// class VariableOrderMarkov : public StatInterface , public Chain {
+class VariableOrderMarkov : public StatInterface , protected Chain {  // chaine de Markov
+                                                                       // d'ordre variable
 
-    friend class Markovian_sequences;
-    friend class Variable_order_markov_iterator;
-    friend class Variable_order_markov_data;
-    friend class Variable_order_chain_data;
+    friend class MarkovianSequences;
+    friend class VariableOrderMarkovIterator;
+    friend class VariableOrderMarkovData;
+    friend class VariableOrderChainData;
 
-    friend Variable_order_markov* variable_order_markov_parsing(Format_error &error ,
-                                                                ifstream &in_file ,
-                                                                int &line , char type);
-    friend Variable_order_markov* variable_order_markov_ascii_read(Format_error &error ,
-                                                                   const char *path ,
-                                                                   int length);
-    friend std::ostream& operator<<(std::ostream &os , const Variable_order_markov &markov)
+    friend VariableOrderMarkov* variable_order_markov_parsing(StatError &error ,
+                                                              ifstream &in_file ,
+                                                              int &line , char type);
+    friend VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
+                                                                 const char *path ,
+                                                                 int length);
+    friend std::ostream& operator<<(std::ostream &os , const VariableOrderMarkov &markov)
     { return markov.ascii_write(os); }
 
 protected :
 
     int nb_iterator;        // nombre d'iterateurs pointant sur l'objet
-    Variable_order_markov_data *markov_data;  // pointeur sur un objet Variable_order_markov_data
+    VariableOrderMarkovData *markov_data;  // pointeur sur un objet VariableOrderMarkovData
     int *memory_type;       // types des memoires (NON_TERMINAL/TERMINAL/COMPLETION)
     int *order;             // ordres des memoires
     int max_order;          // ordre maximum des memoires
@@ -99,15 +99,15 @@ protected :
     int *nb_memory;         // nombre de memoires precedentes
     int **previous;         // memoires precedentes
     int nb_output_process;  // nombre de processus d'observation
-    Nonparametric_sequence_process **nonparametric_process;  // processus d'observation non-parametriques
-    Parametric_process **parametric_process;  // processus d'observation parametriques
+    NonparametricSequenceProcess **nonparametric_process;  // processus d'observation non-parametriques
+    DiscreteParametricProcess **parametric_process;  // processus d'observation parametriques
 
-    Variable_order_markov(const Variable_order_markov *pmarkov , int inb_output_process ,
-                          Nonparametric_process **nonparametric_observation ,
-                          Parametric_process **parametric_observation , int length);
+    VariableOrderMarkov(const VariableOrderMarkov *pmarkov , int inb_output_process ,
+                        NonparametricProcess **nonparametric_observation ,
+                        DiscreteParametricProcess **parametric_observation , int length);
 
-    void memory_tree_completion(const Variable_order_markov &markov);
-    void copy(const Variable_order_markov &markov , bool data_flag = true);
+    void memory_tree_completion(const VariableOrderMarkov &markov);
+    void copy(const VariableOrderMarkov &markov , bool data_flag = true);
     void remove();
 
     std::ostream& ascii_memory_tree_print(std::ostream &os , bool file_flag = false) const;
@@ -115,14 +115,14 @@ protected :
     std::ostream& ascii_print(std::ostream &os , bool file_flag = false) const;
     std::ostream& spreadsheet_print(std::ostream &os) const;
 
-    std::ostream& ascii_write(std::ostream &os , const Variable_order_markov_data *seq ,
+    std::ostream& ascii_write(std::ostream &os , const VariableOrderMarkovData *seq ,
                               bool exhaustive = false , bool file_flag = false ,
                               bool hidden = false) const;
-    std::ostream& spreadsheet_write(std::ostream &os , const Variable_order_markov_data *seq ,
+    std::ostream& spreadsheet_write(std::ostream &os , const VariableOrderMarkovData *seq ,
                                     bool hidden = false) const;
     bool plot_write(const char *prefix , const char *title ,
-                    const Variable_order_markov_data *seq) const;
-    MultiPlotSet* get_plotable(const Variable_order_markov_data *seq) const;
+                    const VariableOrderMarkovData *seq) const;
+    MultiPlotSet* get_plotable(const VariableOrderMarkovData *seq) const;
 
     void find_parent_memory(int index);
     void build_memory_transition();
@@ -176,90 +176,91 @@ protected :
     void output_nb_run_mixture(int variable , int output);
     void output_nb_occurrence_mixture(int variable , int output);
 
-    Correlation* state_autocorrelation_computation(Format_error &error ,
+    Correlation* state_autocorrelation_computation(StatError &error ,
                                                    int istate , int max_lag ,
-                                                   const Variable_order_markov_data *seq) const;
-    Correlation* output_autocorrelation_computation(Format_error &error , int variable ,
+                                                   const VariableOrderMarkovData *seq) const;
+    Correlation* output_autocorrelation_computation(StatError &error , int variable ,
                                                     int output , int max_lag ,
-                                                    const Variable_order_markov_data *seq) const;
+                                                    const VariableOrderMarkovData *seq) const;
 
-    double likelihood_computation(const Variable_order_chain_data &chain_data) const;
+    double likelihood_computation(const VariableOrderChainData &chain_data) const;
 
-    double likelihood_correction(const Variable_order_markov_data &seq) const;
+    double likelihood_correction(const VariableOrderMarkovData &seq) const;
 
     std::ostream& transition_count_ascii_write(std::ostream &os , bool begin) const;
 
 public :
 
-    Variable_order_markov();
-    Variable_order_markov(char itype , int inb_state , int inb_row);
-    Variable_order_markov(char itype , int inb_state , int inb_row ,
-                          int imax_order);
-    Variable_order_markov(char itype , int inb_state , int iorder , bool init_flag ,
-                          int inb_output_process = 0 , int nb_value = 0);
-    Variable_order_markov(const Variable_order_markov &markov ,
-                          int inb_output_process , int nb_value);
-/*    Variable_order_markov(const Variable_order_markov &markov ,
-                          int inb_output_process , int *nb_value); */
-    Variable_order_markov(const Variable_order_markov *pmarkov ,
-                          const Nonparametric_process *pobservation , int length);
-    Variable_order_markov(const Variable_order_markov &markov , bool data_flag = true)
+    VariableOrderMarkov();
+    VariableOrderMarkov(char itype , int inb_state , int inb_row);
+    VariableOrderMarkov(char itype , int inb_state , int inb_row ,
+                        int imax_order);
+    VariableOrderMarkov(char itype , int inb_state , int iorder , bool init_flag ,
+                        int inb_output_process = 0 , int nb_value = 0);
+    VariableOrderMarkov(const VariableOrderMarkov &markov ,
+                        int inb_output_process , int nb_value);
+/*    VariableOrderMarkov(const VariableOrderMarkov &markov ,
+                        int inb_output_process , int *nb_value); */
+    VariableOrderMarkov(const VariableOrderMarkov *pmarkov ,
+                        const NonparametricProcess *pobservation , int length);
+    VariableOrderMarkov(const VariableOrderMarkov &markov , bool data_flag = true)
     :Chain(markov) { copy(markov , data_flag); }
-    virtual ~Variable_order_markov();
-    Variable_order_markov& operator=(const Variable_order_markov &markov);
+    virtual ~VariableOrderMarkov();
+    VariableOrderMarkov& operator=(const VariableOrderMarkov &markov);
 
-    Parametric_model* extract(Format_error &error , int type ,
-                              int variable , int value) const;
-    Variable_order_markov_data* extract_data(Format_error &error) const;
+    DiscreteParametricModel* extract(StatError &error , int type ,
+                                     int variable , int value) const;
+    VariableOrderMarkovData* extract_data(StatError &error) const;
 
-    Variable_order_markov* thresholding(double min_probability = MIN_PROBABILITY) const;
+    VariableOrderMarkov* thresholding(double min_probability = MIN_PROBABILITY) const;
 
-    // fonctions pour la compatibilite avec la classe STAT_interface
+    // fonctions pour la compatibilite avec la classe StatInterface
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
-    void characteristic_computation(const Variable_order_markov_data &seq , bool counting_flag ,
+    void characteristic_computation(const VariableOrderMarkovData &seq , bool counting_flag ,
                                     int variable = I_DEFAULT , bool length_flag = true);
 
-    Correlation* state_autocorrelation_computation(Format_error &error , int istate ,
+    Correlation* state_autocorrelation_computation(StatError &error , int istate ,
                                                    int max_lag = MAX_LAG) const;
-    Correlation* output_autocorrelation_computation(Format_error &error , int variable ,
+    Correlation* output_autocorrelation_computation(StatError &error , int variable ,
                                                     int output , int max_lag = MAX_LAG) const;
 
-    double likelihood_computation(const Markovian_sequences &seq , int index) const;
-    double likelihood_computation(const Variable_order_markov_data &seq) const;
+    double likelihood_computation(const MarkovianSequences &seq , int index) const;
+    double likelihood_computation(const VariableOrderMarkovData &seq) const;
 
-    Variable_order_markov_data* simulation(Format_error &error , const Histogram &hlength ,
-                                           bool counting_flag = true , bool divergence_flag = false) const;
-    Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                           int length , bool counting_flag = true) const;
-    Variable_order_markov_data* simulation(Format_error &error , int nb_sequence ,
-                                           const Markovian_sequences &iseq ,
-                                           bool counting_flag = true) const;
+    VariableOrderMarkovData* simulation(StatError &error , const FrequencyDistribution &hlength ,
+                                        bool counting_flag = true , bool divergence_flag = false) const;
+    VariableOrderMarkovData* simulation(StatError &error , int nb_sequence ,
+                                        int length , bool counting_flag = true) const;
+    VariableOrderMarkovData* simulation(StatError &error , int nb_sequence ,
+                                        const MarkovianSequences &iseq ,
+                                        bool counting_flag = true) const;
 
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Variable_order_markov **imarkov , Histogram **hlength ,
-                                            const char *path = NULL) const;
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Variable_order_markov **markov , int nb_sequence ,
-                                            int length , const char *path = NULL) const;
-    Distance_matrix* divergence_computation(Format_error &error , std::ostream &os , int nb_model ,
-                                            const Variable_order_markov **markov , int nb_sequence ,
-                                            const Markovian_sequences **seq , const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const VariableOrderMarkov **imarkov ,
+                                           FrequencyDistribution **hlength ,
+                                           const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const VariableOrderMarkov **markov , int nb_sequence ,
+                                           int length , const char *path = NULL) const;
+    DistanceMatrix* divergence_computation(StatError &error , std::ostream &os , int nb_model ,
+                                           const VariableOrderMarkov **markov , int nb_sequence ,
+                                           const MarkovianSequences **seq , const char *path = NULL) const;
 
     // acces membres de la classe
 
     int get_nb_iterator() const { return nb_iterator; }
-    Variable_order_markov_data* get_markov_data() const { return markov_data; }
+    VariableOrderMarkovData* get_markov_data() const { return markov_data; }
     int get_memory_type(int memory) const { return memory_type[memory]; }
     int get_order(int memory) const { return order[memory]; }
     int get_max_order() const { return max_order; }
@@ -270,132 +271,133 @@ public :
     int get_nb_memory(int memory) const { return nb_memory[memory]; }
     int get_previous(int memory , int istate) const { return previous[memory][istate]; }
     int get_nb_output_process() const { return nb_output_process; }
-    Nonparametric_sequence_process* get_nonparametric_process(int variable) const
+    NonparametricSequenceProcess* get_nonparametric_process(int variable) const
     { return nonparametric_process[variable]; }
-    Parametric_process** get_parametric_process() const { return parametric_process; }
-    Parametric_process* get_parametric_process(int variable)
+    DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
+    DiscreteParametricProcess* get_parametric_process(int variable)
     const { return parametric_process[variable]; }
 };
 
 
-Variable_order_markov* variable_order_markov_parsing(Format_error &error ,
-                                                     ifstream &in_file ,
-                                                     int &line , char type);
-Variable_order_markov* variable_order_markov_ascii_read(Format_error &error ,
-                                                        const char *path ,
-                                                        int length = DEFAULT_LENGTH);
+VariableOrderMarkov* variable_order_markov_parsing(StatError &error ,
+                                                   ifstream &in_file ,
+                                                   int &line , char type);
+VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
+                                                      const char *path ,
+                                                      int length = DEFAULT_LENGTH);
 
 
 
-class Variable_order_markov_iterator {  // iterateur chaine de Markov d'ordre variable
+class VariableOrderMarkovIterator {  // iterateur chaine de Markov d'ordre variable
 
 private :
 
-    Variable_order_markov *markov;  // pointeur sur un objet Variable_order_markov
+    VariableOrderMarkov *markov;  // pointeur sur un objet VariableOrderMarkov
     int memory;             // memoire
 
-    void copy(const Variable_order_markov_iterator &it);
+    void copy(const VariableOrderMarkovIterator &it);
 
 public :
 
-    Variable_order_markov_iterator(Variable_order_markov *imarkov);
-    Variable_order_markov_iterator(const Variable_order_markov_iterator &it)
+    VariableOrderMarkovIterator(VariableOrderMarkov *imarkov);
+    VariableOrderMarkovIterator(const VariableOrderMarkovIterator &it)
     { copy(it); }
-    ~Variable_order_markov_iterator();
-    Variable_order_markov_iterator& operator=(const Variable_order_markov_iterator &it);
+    ~VariableOrderMarkovIterator();
+    VariableOrderMarkovIterator& operator=(const VariableOrderMarkovIterator &it);
 
     bool simulation(int **int_seq , int ilength = 1 , bool initialization = false);
     int** simulation(int ilength = 1 , bool initialization = false);
 
     // acces membres de la classe
 
-    Variable_order_markov* get_markov() const { return markov; }
+    VariableOrderMarkov* get_markov() const { return markov; }
     int get_memory() const { return memory; }
     int get_nb_variable() const { return (markov ? markov->nb_output_process + 1 : 0); }
 };
 
 
 
-class Variable_order_chain_data : public Chain_data {  // structure de donnees correspondant
-                                                       // a une chaine de Markov d'ordre variable
+class VariableOrderChainData : public ChainData {  // structure de donnees correspondant
+                                                   // a une chaine de Markov d'ordre variable
 
 public :
 
-    Variable_order_chain_data(char type , int inb_state , int inb_row , bool init_flag = false)
-    :Chain_data(type , inb_state , inb_row , init_flag) {}
+    VariableOrderChainData(char type , int inb_state , int inb_row , bool init_flag = false)
+    :ChainData(type , inb_state , inb_row , init_flag) {}
 
-    void estimation(Variable_order_markov &markov , bool non_terminal = false ,
+    void estimation(VariableOrderMarkov &markov , bool non_terminal = false ,
                     int estimator = MAXIMUM_LIKELIHOOD ,
                     double laplace_coeff = LAPLACE_COEFF) const;
 };
 
 
 
-class Variable_order_markov_data : public Markovian_sequences {  // structure de donnees correspondant
-                                                                 // a une chaine de Markov d'ordre variable
+class VariableOrderMarkovData : public MarkovianSequences {  // structure de donnees correspondant
+                                                             // a une chaine de Markov d'ordre variable
 
-    friend class Markovian_sequences;
-    friend class Variable_order_markov;
-    friend class Hidden_variable_order_markov;
+    friend class MarkovianSequences;
+    friend class VariableOrderMarkov;
+    friend class HiddenVariableOrderMarkov;
 
-    friend std::ostream& operator<<(std::ostream &os , const Variable_order_markov_data &seq)
+    friend std::ostream& operator<<(std::ostream &os , const VariableOrderMarkovData &seq)
     { return seq.ascii_write(os , false); }
 
 private :
 
-    Variable_order_markov *markov;  // pointeur sur un objet Variable_order_markov
-    Variable_order_chain_data *chain_data;  // etats initaux et transitions
+    VariableOrderMarkov *markov;  // pointeur sur un objet VariableOrderMarkov
+    VariableOrderChainData *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences
     double hidden_likelihood;  // vraisemblance de toutes les sequences possibles
     double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
 
-    void copy(const Variable_order_markov_data &seq , bool model_flag = true);
-    void observation_histogram_correction(Histogram **corrected_observation ,
-                                          int variable , int start) const;
+    void copy(const VariableOrderMarkovData &seq , bool model_flag = true);
+    void observation_frequency_distribution_correction(FrequencyDistribution **corrected_observation ,
+                                                       int variable , int start) const;
 
 public :
 
-    Variable_order_markov_data();
-    Variable_order_markov_data(const Histogram &ihlength , int inb_variable , bool init_flag = false);
-    Variable_order_markov_data(const Markovian_sequences &seq);
-    Variable_order_markov_data(const Markovian_sequences &seq , char transform ,
-                               bool initial_run_flag);
-    Variable_order_markov_data(const Variable_order_markov_data &seq , bool model_flag = true ,
-                               char transform = 'c')
-    :Markovian_sequences(seq , transform) { copy(seq , model_flag); }
-    ~Variable_order_markov_data();
-    Variable_order_markov_data& operator=(const Variable_order_markov_data &seq);
+    VariableOrderMarkovData();
+    VariableOrderMarkovData(const FrequencyDistribution &ihlength ,
+                            int inb_variable , bool init_flag = false);
+    VariableOrderMarkovData(const MarkovianSequences &seq);
+    VariableOrderMarkovData(const MarkovianSequences &seq , char transform ,
+                            bool initial_run_flag);
+    VariableOrderMarkovData(const VariableOrderMarkovData &seq , bool model_flag = true ,
+                            char transform = 'c')
+    :MarkovianSequences(seq , transform) { copy(seq , model_flag); }
+    ~VariableOrderMarkovData();
+    VariableOrderMarkovData& operator=(const VariableOrderMarkovData &seq);
 
-    Distribution_data* extract(Format_error &error , int type ,
-                               int variable , int value) const;
-    Variable_order_markov_data* remove_index_parameter(Format_error &error) const;
+    DiscreteDistributionData* extract(StatError &error , int type ,
+                                      int variable , int value) const;
+    VariableOrderMarkovData* remove_index_parameter(StatError &error) const;
 
-    Correlation* state_autocorrelation_computation(Format_error &error , int istate ,
+    Correlation* state_autocorrelation_computation(StatError &error , int istate ,
                                                    int max_lag = MAX_LAG) const;
-    Correlation* output_autocorrelation_computation(Format_error &error , int variable ,
+    Correlation* output_autocorrelation_computation(StatError &error , int variable ,
                                                     int output , int max_lag = MAX_LAG) const;
 
     std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
                                    bool exhaustive = false) const;
-    bool ascii_data_write(Format_error &error , const char *path ,
+    bool ascii_data_write(StatError &error , const char *path ,
                           char format = 'c' , bool exhaustive = false) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    void build_transition_count(const Variable_order_markov &markov ,
+    void build_transition_count(const VariableOrderMarkov &markov ,
                                 bool begin = true , bool non_terminal = false);
-    void order0_estimation(Variable_order_markov &markov) const;
+    void order0_estimation(VariableOrderMarkov &markov) const;
 
     // acces membres de la classe
 
-    Variable_order_markov* get_markov() const { return markov; }
-    Variable_order_chain_data* get_chain_data() const { return chain_data; }
+    VariableOrderMarkov* get_markov() const { return markov; }
+    VariableOrderChainData* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
     double get_hidden_likelihood() const { return hidden_likelihood; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
