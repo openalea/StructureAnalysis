@@ -49,7 +49,7 @@ public:
   static boost::shared_ptr<Convolution>
   convolution_from_file(char* filename)
   {
-    Format_error error;
+    StatError error;
     Convolution *conv = NULL;
     conv = convolution_ascii_read(error, filename);
 
@@ -64,7 +64,7 @@ public:
   static boost::shared_ptr<Convolution>
   convolution_from_dists(boost::python::list& dists)
   {
-    Format_error error;
+    StatError error;
     Convolution *conv = NULL;
     int nb_dist = 0;
 
@@ -74,21 +74,21 @@ public:
         stat_tool::wrap_util::throw_error("Input list cannot be empty");
       }
 
-    stat_tool::wrap_util::auto_ptr_array<const Parametric *> dist(
-        new const Parametric*[nb_dist]);
+    stat_tool::wrap_util::auto_ptr_array<const DiscreteParametric *> dist(
+        new const DiscreteParametric*[nb_dist]);
 
     int i = 0;
     for (i = 0; i < nb_dist; i++)
       {
 
-        boost::python::extract<Parametric*> get_param(dists[i]);
+        boost::python::extract<DiscreteParametric*> get_param(dists[i]);
         if (get_param.check())
           {
-            dist[i] = new Parametric(*get_param());
+            dist[i] = new DiscreteParametric(*get_param());
           }
         else
           {
-            dist[i] = new Parametric(*boost::python::extract<Distribution*>(
+            dist[i] = new DiscreteParametric(*boost::python::extract<Distribution*>(
                 dists[i])());
           }
       }
@@ -106,37 +106,37 @@ public:
     return boost::shared_ptr<Convolution>(conv);
   }
 
-  WRAP_METHOD1(Convolution, simulation, Convolution_data, int); // simulate
-  WRAP_METHOD1(Convolution, extract, Parametric_model, int); //extract_elementary
-  WRAP_METHOD0(Convolution, extract_data, Convolution_data); //extract_data
+  WRAP_METHOD1(Convolution, simulation, ConvolutionData, int); // simulate
+  WRAP_METHOD1(Convolution, extract, DiscreteParametricModel, int); //extract_elementary
+  WRAP_METHOD0(Convolution, extract_data, ConvolutionData); //extract_data
   WRAP_METHOD_FILE_ASCII_WRITE( Convolution);
 
-  static Parametric_model*
+  static DiscreteParametricModel*
   extract_elementary(const Convolution& input, int index)
   {
-    Format_error error;
-    Parametric_model* ret = NULL;
+    StatError error;
+    DiscreteParametricModel *ret = NULL;
     ret = input.extract(error, index);
     if (!ret)
       stat_tool::wrap_util::throw_error(error);
     return ret;
   }
 
-  static Parametric_model*
+  static DiscreteParametricModel*
   extract_convolution(const Convolution& convolution_input)
   {
-    Parametric_model* ret;
-    Convolution_data* convolution_data = NULL;
+    DiscreteParametricModel *ret;
+    ConvolutionData *convolution_data = NULL;
     convolution_data = convolution_input.get_convolution_data();
-    ret = new Parametric_model(*((Distribution*) (&convolution_input)),
-        (Histogram*) convolution_data);
+    ret = new DiscreteParametricModel(*((Distribution*) (&convolution_input)),
+        (FrequencyDistribution*) convolution_data);
     return ret;
   }
 
   static MultiPlotSet*
-  survival_get_plotable(const Convolution& p)
+  survival_get_plotable(const Convolution &p)
   {
-    Format_error error;
+    StatError error;
     MultiPlotSet* ret = p.survival_get_plotable(error);
     if (!ret)
       ERROR;
@@ -144,9 +144,9 @@ public:
   }
 
   static MultiPlotSet*
-  get_plotable(const Convolution& p)
+  get_plotable(const Convolution &p)
   {
-    Format_error error;
+    StatError error;
     MultiPlotSet* ret = p.get_plotable();
     if (!ret)
       ERROR;
@@ -163,7 +163,7 @@ public:
 void class_convolution()
 {
 
-  class_< Convolution, bases< Distribution, STAT_interface > >
+  class_< Convolution, bases< Distribution, StatInterface > >
     ("_Convolution", "Convolution Distribution")
     .def("__init__", make_constructor(WRAP::convolution_from_dists))
     .def("__init__", make_constructor(WRAP::convolution_from_file))
@@ -195,7 +195,7 @@ void class_convolution()
 
    Convolution(const Convolution &convol , bool data_flag = true):Distribution(convol) { copy(convol , data_flag); }
    void computation(int min_nb_value = 1 , double cumul_threshold = CONVOLUTION_THRESHOLD ,  bool *dist_flag = 0);
-   Parametric* get_distribution(int index) const { return distribution[index]; }
+   DiscreteParametric* get_distribution(int index) const { return distribution[index]; }
    */
 
 
@@ -206,29 +206,29 @@ void class_convolution()
 
 #define WRAP ConvolutionDataWrap
 
-////////////////////////// Class Convolution_data //////////////////////////////////
+////////////////////////// Class ConvolutionData //////////////////////////////////
 
 class ConvolutionDataWrap
 {
 
 public:
 
-  static Distribution_data* extract(const Convolution_data& convol, int index)
+  static DiscreteDistributionData* extract(const ConvolutionData &convol_histo, int index)
   {
-    Format_error error;
-    Distribution_data* ret = NULL;
+    StatError error;
+    DiscreteDistributionData* ret = NULL;
 
-    ret = convol.extract(error, index);
+    ret = convol_histo.extract(error, index);
     if(!ret) stat_tool::wrap_util::throw_error(error);
 
     return ret;
   }
 
 
-  static Distribution_data* extract_convolution(const Convolution_data& convol_histo)
+  static DiscreteDistributionData* extract_convolution(const ConvolutionData &convol_histo)
   {
-    Distribution_data* ret;
-    ret = new Distribution_data(convol_histo, convol_histo.get_convolution());
+    DiscreteDistributionData* ret;
+    ret = new DiscreteDistributionData(convol_histo, convol_histo.get_convolution());
     return ret;
   }
 
@@ -239,11 +239,11 @@ public:
 
 void class_convolution_data()
 {
-  class_< Convolution_data, bases< Histogram, STAT_interface > >
+  class_< ConvolutionData, bases< FrequencyDistribution, StatInterface > >
     ("_ConvolutionData", "Convolution Data")
     .def(self_ns::str(self))
-    .def("nb_histogram", &Convolution_data::get_nb_histogram)
-    .def("get_histogram", &Convolution_data::get_histogram,
+    .def("nb_distribution", &ConvolutionData::get_nb_distribution)
+    .def("get_frequency_distribution", &ConvolutionData::get_frequency_distribution,
         return_value_policy< manage_new_object >(), args("index"),"todo")
     DEF_RETURN_VALUE("extract", ConvolutionDataWrap::extract,
         args("index"), "Extract a particular element. First index is 1")
@@ -254,10 +254,10 @@ void class_convolution_data()
     ;
 
   /*
-    Convolution_data(const Histogram &histo , int nb_histo);
-    Convolution_data(const Convolution &convol);
-    Convolution_data(const Convolution_data &convol_histo , bool model_flag = true):Histogram(convol_histo) { copy(convol_histo , model_flag); }
-    Histogram* get_histogram(int index) const { return histogram[index]; }
+    ConvolutionData(const FrequencyDistribution &histo , int nb_histo);
+    ConvolutionData(const Convolution &convol);
+    ConvolutionData(const ConvolutionData &convol_histo , bool model_flag = true):FrequencyDistribution(convol_histo) { copy(convol_histo , model_flag); }
+    FrequencyDistribution* get_frequency_distribution(int index) const { return histogram[index]; }
     */
 
 
