@@ -59,11 +59,11 @@ extern char* label(const char *file_name);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Distance_matrix.
+ *  Constructeur par defaut de la classe DistanceMatrix.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix::Distance_matrix()
+DistanceMatrix::DistanceMatrix()
 
 {
   nb_row = 0;
@@ -92,13 +92,13 @@ Distance_matrix::Distance_matrix()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Distance_matrix.
+ *  Constructeur de la classe DistanceMatrix.
  *
  *  arguments : nombre de formes, label, identificateurs des formes,
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix::Distance_matrix(int nb_pattern , const char *ilabel , int *pattern_identifier)
+DistanceMatrix::DistanceMatrix(int nb_pattern , const char *ilabel , int *pattern_identifier)
 
 {
   register int i , j;
@@ -171,7 +171,7 @@ Distance_matrix::Distance_matrix(int nb_pattern , const char *ilabel , int *patt
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Distance_matrix.
+ *  Constructeur de la classe DistanceMatrix.
  *
  *  arguments : nombre de formes, identificateurs de ligne et de colonne, label,
  *              identificateurs des formes, flags operations de substitution et
@@ -179,9 +179,9 @@ Distance_matrix::Distance_matrix(int nb_pattern , const char *ilabel , int *patt
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix::Distance_matrix(int nb_pattern , int irow_identifier , int icolumn_identifier ,
-                                 const char *ilabel , int *pattern_identifier ,
-                                 bool substitution_flag , bool transposition_flag)
+DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolumn_identifier ,
+                               const char *ilabel , int *pattern_identifier ,
+                               bool substitution_flag , bool transposition_flag)
 
 {
   register int i , j;
@@ -333,16 +333,16 @@ Distance_matrix::Distance_matrix(int nb_pattern , int irow_identifier , int icol
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Distance_matrix.
+ *  Constructeur de la classe DistanceMatrix.
  *
- *  arguments : reference sur un objet Distance_matrix,
+ *  arguments : reference sur un objet DistanceMatrix,
  *              nombre et identificateurs des formes selectionnees,
  *              flag pour conserver ou rejeter les formes selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int inb_pattern ,
-                                 int *iidentifier , bool keep)
+DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_pattern ,
+                               int *iidentifier , bool keep)
 
 {
   register int i , j , k;
@@ -540,14 +540,14 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int inb_pa
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Distance_matrix.
+ *  Constructeur de la classe DistanceMatrix.
  *
- *  arguments : reference sur un objet Distance_matrix, nombre de groupes, label.
+ *  arguments : reference sur un objet DistanceMatrix, nombre de groupes, label.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int nb_cluster ,
-                                 const char *ilabel)
+DistanceMatrix::DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluster ,
+                               const char *ilabel)
 
 {
   register int i , j;
@@ -671,14 +671,14 @@ Distance_matrix::Distance_matrix(const Distance_matrix &dist_matrix , int nb_clu
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Distance_matrix.
+ *  Copie d'un objet DistanceMatrix.
  *
- *  arguments : reference sur un objet Distance_matrix,
+ *  arguments : reference sur un objet DistanceMatrix,
  *              transformation de la matrice ('s' :  symetrisation, 'u' : denormalisation).
  *
  *--------------------------------------------------------------*/
 
-void Distance_matrix::copy(const Distance_matrix &dist_matrix , char transform)
+void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
 
 {
   register int i , j;
@@ -1016,11 +1016,11 @@ void Distance_matrix::copy(const Distance_matrix &dist_matrix , char transform)
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Distance_matrix.
+ *  Destruction des champs d'un objet DistanceMatrix.
  *
  *--------------------------------------------------------------*/
 
-void Distance_matrix::remove()
+void DistanceMatrix::remove()
 
 {
   register int i;
@@ -1112,11 +1112,11 @@ void Distance_matrix::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Distance_matrix.
+ *  Destructeur de la classe DistanceMatrix.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix::~Distance_matrix()
+DistanceMatrix::~DistanceMatrix()
 
 {
   remove();
@@ -1125,13 +1125,13 @@ Distance_matrix::~Distance_matrix()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Distance_matrix.
+ *  Operateur d'assignement de la classe DistanceMatrix.
  *
- *  argument : reference sur un objet Distance_matrix.
+ *  argument : reference sur un objet DistanceMatrix.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix& Distance_matrix::operator=(const Distance_matrix &dist_matrix)
+DistanceMatrix& DistanceMatrix::operator=(const DistanceMatrix &dist_matrix)
 
 {
   if (&dist_matrix != this) {
@@ -1153,14 +1153,14 @@ Distance_matrix& Distance_matrix::operator=(const Distance_matrix &dist_matrix)
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Distance_matrix::select_individual(Format_error &error , int inb_pattern ,
-                                                    int *iidentifier , bool keep) const
+DistanceMatrix* DistanceMatrix::select_individual(Format_error &error , int inb_pattern ,
+                                                  int *iidentifier , bool keep) const
 
 {
   bool status = true , *selected_pattern;
   register int i , j;
   int nb_pattern , max_identifier , *identifier;
-  Distance_matrix *dist_matrix;
+  DistanceMatrix *dist_matrix;
 
 
   dist_matrix = NULL;
@@ -1231,7 +1231,7 @@ Distance_matrix* Distance_matrix::select_individual(Format_error &error , int in
   }
 
   if (status) {
-    dist_matrix = new Distance_matrix(*this , inb_pattern , iidentifier , keep);
+    dist_matrix = new DistanceMatrix(*this , inb_pattern , iidentifier , keep);
   }
 
   return dist_matrix;
@@ -1246,10 +1246,10 @@ Distance_matrix* Distance_matrix::select_individual(Format_error &error , int in
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Distance_matrix::symmetrize(Format_error &error) const
+DistanceMatrix* DistanceMatrix::symmetrize(Format_error &error) const
 
 {
-  Distance_matrix *dist_matrix;
+  DistanceMatrix *dist_matrix;
 
 
   error.init();
@@ -1259,7 +1259,7 @@ Distance_matrix* Distance_matrix::symmetrize(Format_error &error) const
     error.update(STAT_error[STATR_SYMMETRICAL_MATRIX]);
   }
   else {
-    dist_matrix = new Distance_matrix(*this , 's');
+    dist_matrix = new DistanceMatrix(*this , 's');
   }
 
   return dist_matrix;
@@ -1274,12 +1274,12 @@ Distance_matrix* Distance_matrix::symmetrize(Format_error &error) const
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Distance_matrix::unnormalize(Format_error &error) const
+DistanceMatrix* DistanceMatrix::unnormalize(Format_error &error) const
 
 {
   bool status = false;
   register int i , j;
-  Distance_matrix *dist_matrix;
+  DistanceMatrix *dist_matrix;
 
 
   error.init();
@@ -1307,7 +1307,7 @@ Distance_matrix* Distance_matrix::unnormalize(Format_error &error) const
   }
 
   if (status) {
-    dist_matrix = new Distance_matrix(*this , 'u');
+    dist_matrix = new DistanceMatrix(*this , 'u');
   }
 
   return dist_matrix;
@@ -1316,13 +1316,13 @@ Distance_matrix* Distance_matrix::unnormalize(Format_error &error) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Distance_matrix.
+ *  Ecriture sur une ligne d'un objet DistanceMatrix.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Distance_matrix::line_write(ostream &os) const
+ostream& DistanceMatrix::line_write(ostream &os) const
 
 {
   os << STAT_label[STATL_NB_ROW] << ": " << nb_row << "   "
@@ -1341,8 +1341,8 @@ ostream& Distance_matrix::line_write(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& Distance_matrix::property_print(double **normalized_distance ,
-                                         ostream &os , char format) const
+ostream& DistanceMatrix::property_print(double **normalized_distance ,
+                                        ostream &os , char format) const
 
 {
   bool status = true;
@@ -1562,13 +1562,13 @@ int* pattern_sort(int nb_pattern , double *distance , int nb_sorted_pattern)
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distance_matrix.
+ *  Ecriture d'un objet DistanceMatrix.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Distance_matrix::ascii_write(ostream &os , bool exhaustive) const
+ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
 
 {
   register int i , j;
@@ -1863,15 +1863,15 @@ ostream& Distance_matrix::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distance_matrix dans un fichier.
+ *  Ecriture d'un objet DistanceMatrix dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Distance_matrix::ascii_write(Format_error &error , const char *path ,
-                                  bool exhaustive) const
+bool DistanceMatrix::ascii_write(Format_error &error , const char *path ,
+                                 bool exhaustive) const
 
 {
   bool status;
@@ -1896,13 +1896,13 @@ bool Distance_matrix::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distance_matrix au format tableur.
+ *  Ecriture d'un objet DistanceMatrix au format tableur.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Distance_matrix::spreadsheet_write(ostream &os) const
+ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
 
 {
   register int i , j;
@@ -2122,13 +2122,13 @@ ostream& Distance_matrix::spreadsheet_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Distance_matrix dans un fichier au format tableur.
+ *  Ecriture d'un objet DistanceMatrix dans un fichier au format tableur.
  *
  *  arguments : reference sur un objet Format_error, path.
  *
  *--------------------------------------------------------------*/
 
-bool Distance_matrix::spreadsheet_write(Format_error &error , const char *path) const
+bool DistanceMatrix::spreadsheet_write(Format_error &error , const char *path) const
 
 {
   bool status;
@@ -2153,15 +2153,15 @@ bool Distance_matrix::spreadsheet_write(Format_error &error , const char *path) 
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Distance_matrix.
+ *  Sortie Gnuplot d'un objet DistanceMatrix.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Distance_matrix::plot_write(Format_error &error , const char *prefix ,
-                                 const char *title) const
+bool DistanceMatrix::plot_write(Format_error &error , const char *prefix ,
+                                const char *title) const
 
 {
   bool status = true;
@@ -2328,13 +2328,13 @@ bool Distance_matrix::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Distance_matrix.
+ *  Sortie graphique d'un objet DistanceMatrix.
  *
  *  argument : reference sur un objet Format_error.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
+MultiPlotSet* DistanceMatrix::get_plotable(Format_error &error) const
 
 {
   MultiPlotSet *plot_set;
@@ -2460,11 +2460,11 @@ MultiPlotSet* Distance_matrix::get_plotable(Format_error &error) const
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Distance_matrix.
+ *  Sortie graphique d'un objet DistanceMatrix.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Distance_matrix::get_plotable() const
+MultiPlotSet* DistanceMatrix::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
@@ -2481,7 +2481,7 @@ MultiPlotSet* Distance_matrix::get_plotable() const
  *
  *--------------------------------------------------------------*/
 
-bool Distance_matrix::test_symmetry() const
+bool DistanceMatrix::test_symmetry() const
 
 {
   bool symmetry = false;
@@ -2522,7 +2522,7 @@ bool Distance_matrix::test_symmetry() const
 
 /*--------------------------------------------------------------*
  *
- *  Mise a jour d'un objet Distance_matrix avec le resultat d'un alignement.
+ *  Mise a jour d'un objet DistanceMatrix avec le resultat d'un alignement.
  *
  *  arguments : identificateurs des 2 formes, distance, longueur de l'alignement,
  *              distances et nombres d'elisions, d'insertions, nombre de matchs,
@@ -2530,11 +2530,11 @@ bool Distance_matrix::test_symmetry() const
  *
  *--------------------------------------------------------------*/
 
-void Distance_matrix::update(int irow_identifier , int icolumn_identifier , double idistance ,
-                             int alignment_length , double ideletion_distance , int inb_deletion ,
-                             double iinsertion_distance , int inb_insertion , int inb_match ,
-                             double isubstitution_distance , int inb_substitution ,
-                             double itransposition_distance , int inb_transposition)
+void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , double idistance ,
+                            int alignment_length , double ideletion_distance , int inb_deletion ,
+                            double iinsertion_distance , int inb_insertion , int inb_match ,
+                            double isubstitution_distance , int inb_substitution ,
+                            double itransposition_distance , int inb_transposition)
 
 {
   if (idistance != -D_INF) {
@@ -2576,14 +2576,14 @@ void Distance_matrix::update(int irow_identifier , int icolumn_identifier , doub
 
 /*--------------------------------------------------------------*
  *
- *  Mise a jour d'un objet Distance_matrix avec le resultat d'une comparaison.
+ *  Mise a jour d'un objet DistanceMatrix avec le resultat d'une comparaison.
  *
  *  arguments : identificateurs des 2 formes, distance, longueur.
  *
  *--------------------------------------------------------------*/
 
-void Distance_matrix::update(int irow_identifier , int icolumn_identifier , double idistance ,
-                             int ilength)
+void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , double idistance ,
+                            int ilength)
 
 {
   if (idistance != -D_INF) {
@@ -2615,7 +2615,7 @@ void Distance_matrix::update(int irow_identifier , int icolumn_identifier , doub
  *
  *--------------------------------------------------------------*/
 
-int Distance_matrix::cumul_length_computation(bool *row_flag , bool *column_flag) const
+int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag) const
 
 {
   bool *pcolumn_flag;
@@ -2649,7 +2649,7 @@ int Distance_matrix::cumul_length_computation(bool *row_flag , bool *column_flag
  *
  *--------------------------------------------------------------*/
 
-double Distance_matrix::cumul_distance_computation(bool *row_flag , bool *column_flag) const
+double DistanceMatrix::cumul_distance_computation(bool *row_flag , bool *column_flag) const
 
 {
   bool *pcolumn_flag;
