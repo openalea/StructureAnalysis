@@ -54,14 +54,15 @@ extern char* label(const char*);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonparametric_process.
+ *  Constructeur de la classe NonparametricProcess.
  *
  *  arguments : nombre d'etats, nombre de valeurs,
  *              flag sur les lois d'observation.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process::Nonparametric_process(int inb_state , int inb_value , int observation_flag)
+NonparametricProcess::NonparametricProcess(int inb_state , int inb_value ,
+                                           int observation_flag)
 
 {
   nb_state = inb_state;
@@ -85,15 +86,15 @@ Nonparametric_process::Nonparametric_process(int inb_state , int inb_value , int
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonparametric_process.
+ *  Constructeur de la classe NonparametricProcess.
  *
  *  arguments : nombre d'etats, nombre de valeurs,
  *              probabilites d'observation.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process::Nonparametric_process(int inb_state , int inb_value ,
-                                             double **observation_probability)
+NonparametricProcess::NonparametricProcess(int inb_state , int inb_value ,
+                                           double **observation_probability)
 
 {
   register int i , j;
@@ -118,13 +119,13 @@ Nonparametric_process::Nonparametric_process(int inb_state , int inb_value ,
 }
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonparametric_process.
+ *  Constructeur de la classe NonparametricProcess.
  *
  *  arguments : nombre d'etats, lois d'observation.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process::Nonparametric_process(int inb_state , Distribution **pobservation)
+NonparametricProcess::NonparametricProcess(int inb_state , Distribution **pobservation)
 
 {
   register int i;
@@ -147,13 +148,13 @@ Nonparametric_process::Nonparametric_process(int inb_state , Distribution **pobs
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Nonparametric_process.
+ *  Copie d'un objet NonparametricProcess.
  *
- *  argument : reference sur un objet Nonparametric_process.
+ *  argument : reference sur un objet NonparametricProcess.
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_process::copy(const Nonparametric_process &process)
+void NonparametricProcess::copy(const NonparametricProcess &process)
 
 {
   nb_state = process.nb_state;
@@ -177,13 +178,13 @@ void Nonparametric_process::copy(const Nonparametric_process &process)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Nonparametric_process avec ajout d'un etat.
+ *  Copie d'un objet NonparametricProcess avec ajout d'un etat.
  *
- *  arguments : reference sur un objet Nonparametric_process, etat de reference.
+ *  arguments : reference sur un objet NonparametricProcess, etat de reference.
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_process::add_state(const Nonparametric_process &process , int state)
+void NonparametricProcess::add_state(const NonparametricProcess &process , int state)
 
 {
   nb_state = process.nb_state + 1;
@@ -210,14 +211,15 @@ void Nonparametric_process::add_state(const Nonparametric_process &process , int
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Nonparametric_process.
+ *  Constructeur par copie de la classe NonparametricProcess.
  *
- *  arguments : reference sur un objet Nonparametric_process,
+ *  arguments : reference sur un objet NonparametricProcess,
  *              type de manipulation ('c' : copy, 's' : state), etat de reference.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process::Nonparametric_process(const Nonparametric_process &process , char manip , int state)
+NonparametricProcess::NonparametricProcess(const NonparametricProcess &process ,
+                                           char manip , int state)
 
 {
   switch (manip) {
@@ -233,11 +235,11 @@ Nonparametric_process::Nonparametric_process(const Nonparametric_process &proces
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Nonparametric_process.
+ *  Destruction des champs d'un objet NonparametricProcess.
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_process::remove()
+void NonparametricProcess::remove()
 
 {
   if (observation) {
@@ -256,11 +258,11 @@ void Nonparametric_process::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Nonparametric_process.
+ *  Destructeur de la classe NonparametricProcess.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process::~Nonparametric_process()
+NonparametricProcess::~NonparametricProcess()
 
 {
   remove();
@@ -269,13 +271,13 @@ Nonparametric_process::~Nonparametric_process()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Nonparametric_process.
+ *  Operateur d'assignement de la classe NonparametricProcess.
  *
- *  argument : reference sur un objet Nonparametric_process.
+ *  argument : reference sur un objet NonparametricProcess.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process& Nonparametric_process::operator=(const Nonparametric_process &process)
+NonparametricProcess& NonparametricProcess::operator=(const NonparametricProcess &process)
 
 {
   if (&process != this) {
@@ -293,7 +295,7 @@ Nonparametric_process& Nonparametric_process::operator=(const Nonparametric_proc
  *
  *--------------------------------------------------------------*/
 
-bool Nonparametric_process::test_hidden() const
+bool NonparametricProcess::test_hidden() const
 
 {
   bool hidden = false;
@@ -327,7 +329,7 @@ bool Nonparametric_process::test_hidden() const
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_process::thresholding(double min_probability)
+void NonparametricProcess::thresholding(double min_probability)
 
 {
   bool stop;
@@ -387,32 +389,36 @@ void Nonparametric_process::thresholding(double min_probability)
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_process::state_permutation(int *perm) const
+void NonparametricProcess::state_permutation(int *perm) const
+
 {
   register int i;
-  Distribution **pobservation= new Distribution*[nb_state];
-  
-  for (i= 0; i < nb_state; i++)
+  Distribution **pobservation = new Distribution*[nb_state];
+
+
+  for (i= 0;i < nb_state;i++) {
     pobservation[perm[i]]= observation[i];
-  for (i= 0; i < nb_state; i++)
+  }
+  for (i= 0;i < nb_state;i++) {
     observation[i]= pobservation[i];
+  }
   delete [] pobservation;
   pobservation= NULL;
-
 }
+
 
 /*--------------------------------------------------------------*
  *
  *  Analyse du format des lois d'observation.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, nombre d'etats,
  *              nombre de processus d'observation, flag sur le recouvrement.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
-                                           int &line , int nb_state , bool hidden)
+NonparametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
+                                          int &line , int nb_state , bool hidden)
 
 {
   RWLocaleSnapshot locale("en");
@@ -424,7 +430,7 @@ Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_fi
   int type , state , output , nb_value;
   long value;
   double proba , cumul , **observation_probability;
-  Nonparametric_process *process;
+  NonparametricProcess *process;
 
 
   process = NULL;
@@ -631,7 +637,7 @@ Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_fi
   }
 
   if (status) {
-    process = new Nonparametric_process(nb_state , nb_value , observation_probability);
+    process = new NonparametricProcess(nb_state , nb_value , observation_probability);
 
     // test recouvrement ou pas entre les lois d'observation
 
@@ -667,14 +673,15 @@ Nonparametric_process* observation_parsing(Format_error &error , ifstream &in_fi
  *  Analyse du format des lois d'observation pour les
  *  differents processus d'observation.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, nombre d'etats,
  *              nombre de processus d'observation.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_file , int &line ,
-                                            int nb_state , int &nb_output_process)
+NonparametricProcess** observation_parsing(StatError &error , ifstream &in_file ,
+                                           int &line , int nb_state ,
+                                           int &nb_output_process)
 
 {
   RWLocaleSnapshot locale("en");
@@ -684,7 +691,7 @@ Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_f
   register int i;
   int index;
   long value;
-  Nonparametric_process **process;
+  NonparametricProcess **process;
 
 
   nb_output_process = I_DEFAULT;
@@ -758,7 +765,7 @@ Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_f
   }
 
   else {
-    process = new Nonparametric_process*[nb_output_process];
+    process = new NonparametricProcess*[nb_output_process];
     for (i = 0;i < nb_output_process;i++) {
       process[i] = NULL;
     }
@@ -872,14 +879,15 @@ Nonparametric_process** observation_parsing(Format_error &error , ifstream &in_f
  *  Analyse du format des lois d'observation pour les
  *  differents processus d'observation.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, nombre d'etats,
  *              nombre de processus d'observation.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &in_file , int &line ,
-                                                int nb_state , int &nb_output_process)
+NonparametricProcess** old_observation_parsing(StatError &error , ifstream &in_file ,
+                                               int &line , int nb_state ,
+                                               int &nb_output_process)
 
 {
   RWLocaleSnapshot locale("en");
@@ -889,7 +897,7 @@ Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &
   register int i;
   int index;
   long value;
-  Nonparametric_process **process;
+  NonparametricProcess **process;
 
 
   nb_output_process = I_DEFAULT;
@@ -1001,7 +1009,7 @@ Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &
   }
 
   else {
-    process = new Nonparametric_process*[nb_output_process];
+    process = new NonparametricProcess*[nb_output_process];
     for (i = 0;i < nb_output_process;i++) {
       process[i] = NULL;
     }
@@ -1099,7 +1107,7 @@ Nonparametric_process** old_observation_parsing(Format_error &error , ifstream &
  *
  *--------------------------------------------------------------*/
 
-int Nonparametric_process::nb_parameter_computation(double min_probability) const
+int NonparametricProcess::nb_parameter_computation(double min_probability) const
 
 {
   register int i , j;
@@ -1126,7 +1134,7 @@ int Nonparametric_process::nb_parameter_computation(double min_probability) cons
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_process::init()
+void NonparametricProcess::init()
 
 {
   bool *active_output;
@@ -1246,17 +1254,18 @@ void Nonparametric_process::init()
   delete [] state_nb_value;
 }
 
+
 /*--------------------------------------------------------------*
  *
  *  Affichage des lois d'observation a partir d'un flux de sortie,
- *  des histogrammes correspondant aux observations pour chaque etat,
+ *  des lois empiriques correspondant aux observations pour chaque etat,
  *  des flags sur l'affichage exhaustif et dans un fichier
  *
  *--------------------------------------------------------------*/
 
-std::ostream& Nonparametric_process::ascii_print(std::ostream &os, 
-						 Histogram **empirical_observation, 
-						 bool exhaustive, bool file_flag) const {
+std::ostream& NonparametricProcess::ascii_print(std::ostream &os, 
+                                                FrequencyDistribution **empirical_observation, 
+                                                bool exhaustive, bool file_flag) const {
 
   register int i , j;
   int buff , width[2];
@@ -1278,7 +1287,8 @@ std::ostream& Nonparametric_process::ascii_print(std::ostream &os,
             pmass++;
          }
 
-	 // affichage des histogrammes correspondants
+         // affichage des lois empiriques correspondantes
+
          if ((empirical_observation != NULL) && (exhaustive))
          {
             os << "\n";
@@ -1286,7 +1296,7 @@ std::ostream& Nonparametric_process::ascii_print(std::ostream &os,
                os << "# ";
 
             os << "   | " << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << " | " << STAT_label[STATL_STATE] << " " << i << " "
                << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
@@ -1341,13 +1351,13 @@ std::ostream& Nonparametric_process::ascii_print(std::ostream &os,
 /*--------------------------------------------------------------*
  *
  *  Affichage des lois d'observation au format tableur 
- *  a partir d'un flux de sortie et des histogrammes correspondant 
+ *  a partir d'un flux de sortie et des lois empiriques correspondant 
  *  aux observations pour chaque etat.
  *
  *--------------------------------------------------------------*/
 
-std::ostream& Nonparametric_process::spreadsheet_print(std::ostream &os, 
-						       Histogram **empirical_observation) const {
+std::ostream& NonparametricProcess::spreadsheet_print(std::ostream &os, 
+                                                      FrequencyDistribution **empirical_observation) const {
 
   register int i , j;
   int buff , width[2];
@@ -1369,13 +1379,13 @@ std::ostream& Nonparametric_process::spreadsheet_print(std::ostream &os,
             pmass++;
          }
 
-	 // affichage des histogrammes correspondants
+         // affichage des lois empiriques correspondantes
          if ((empirical_observation != NULL))
          {
             os << "\n";
 
             os << "   | " << STAT_label[STATL_STATE] << "\t" << i << "\t"
-               << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_HISTOGRAM]
+               << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << " | " << STAT_label[STATL_STATE] << "\t" << i << "\t"
                << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_DISTRIBUTION] << endl;
 
@@ -1393,8 +1403,8 @@ std::ostream& Nonparametric_process::spreadsheet_print(std::ostream &os,
 
       for(i= 0; i < nb_state; i++) {
         for(j= 0; j < observation[i]->nb_value; j++) 
-	  os << observation[i]->mass[j] << "\t";
-	os << "\n";
+          os << observation[i]->mass[j] << "\t";
+        os << "\n";
       }
 
     }
@@ -1403,25 +1413,25 @@ std::ostream& Nonparametric_process::spreadsheet_print(std::ostream &os,
 
 }
 
+
 /*--------------------------------------------------------------*
  *
  *  Sortie gnuplot d'un processus non parametrique a partir du
  *  prefixe de nom de fichier, le titre du graphe, la valeur 
- *  de l'etat, et les histogrammes correspondants aux lois
- *  d'observation
+ *  de l'etat, et les lois empiriques d'observation
  *
  *--------------------------------------------------------------*/
 
-bool Nonparametric_process::plot_print(const char *prefix, const char *title, 
-				       int process, Histogram **empirical_observation) const {
-				       
+bool NonparametricProcess::plot_print(const char *prefix , const char *title , int process ,
+                                      FrequencyDistribution **empirical_observation) const {
+                                       
    bool status= false, start;
    register int val, i, j= 0, k= 0;
    int nb_histo, nb_dist, histo_index,
        dist_index, plot_index, *dist_nb_value, *index_dist; 
    double *scale;
    const Distribution **pdist;
-   const Histogram **phisto;
+   const FrequencyDistribution **phisto;
    ostringstream data_file_name[2];
 
    // data file printing
@@ -1438,7 +1448,7 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
    // scales for printing distributions and histograms together
    scale= new double[1 * nb_value + nb_state];
    // list of the successive histograms to be printed
-   phisto= new const Histogram*[1 + 2 * nb_value + nb_state];
+   phisto= new const FrequencyDistribution*[1 + 2 * nb_value + nb_state];
    // correspondance between the histograms and the distributions ?
    index_dist= new int[1 + 2 * nb_value + nb_state];
 
@@ -1467,7 +1477,7 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
    // the values for all the gnuplot graphs
 
    status= ::plot_print((data_file_name[1].str()).c_str(), nb_dist, pdist,
-			scale, dist_nb_value, nb_histo, phisto, index_dist);
+                        scale, dist_nb_value, nb_histo, phisto, index_dist);
 
    // write the command and printing files
    if (status) {
@@ -1525,7 +1535,7 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
                            << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
                            << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
                            << " title \"" << STAT_label[STATL_STATE] << "\t" << val << "\t"
-                           << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_HISTOGRAM]
+                           << STAT_label[STATL_OBSERVATION] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                            << "\" with impulses,\\" << endl;
                   out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
                            << " title \"" << STAT_label[STATL_STATE] << "\t" << val << "\t"
@@ -1567,5 +1577,4 @@ bool Nonparametric_process::plot_print(const char *prefix, const char *title,
    }
 
    return status;
-
 }
