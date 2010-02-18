@@ -76,7 +76,7 @@ class Compound : public StatInterface , public Distribution {  // loi composee
     friend class FrequencyDistribution;
     friend class CompoundData;
 
-    friend Compound* compound_ascii_read(Format_error &error , const char *path ,
+    friend Compound* compound_ascii_read(StatError &error , const char *path ,
                                          double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Compound &compound)
     { return compound.ascii_write(os , compound.compound_data , false , false); }
@@ -112,22 +112,22 @@ public :
     ~Compound();
     Compound& operator=(const Compound &compound);
 
-    CompoundData* extract_data(Format_error &error) const;
+    CompoundData* extract_data(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void computation(int min_nb_value = 1 ,
                      double cumul_threshold = COMPOUND_THRESHOLD ,
                      bool sum_flag = true , bool dist_flag = true);
-    CompoundData* simulation(Format_error &error , int nb_element) const;
+    CompoundData* simulation(StatError &error , int nb_element) const;
 
     // acces membres de la classe
 
@@ -137,7 +137,7 @@ public :
 };
 
 
-Compound* compound_ascii_read(Format_error &error , const char *path ,
+Compound* compound_ascii_read(StatError &error , const char *path ,
                               double cumul_threshold = COMPOUND_THRESHOLD);
 
 
@@ -169,15 +169,15 @@ public :
     virtual ~CompoundData();
     CompoundData& operator=(const CompoundData &compound_histo);
 
-    DiscreteDistributionData* extract(Format_error &error , char type) const;
+    DiscreteDistributionData* extract(StatError &error , char type) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
