@@ -165,7 +165,8 @@ void Format_error::update(const char *ilabel , int iline , int icolumn)
  *
  *--------------------------------------------------------------*/
 
-void Format_error::correction_update(const char *ilabel , const char *correction , int iline , int icolumn)
+void Format_error::correction_update(const char *ilabel , const char *correction ,
+                                     int iline , int icolumn)
 
 {
   if (nb_error < max_nb_error) {
@@ -190,7 +191,8 @@ void Format_error::correction_update(const char *ilabel , const char *correction
  *
  *--------------------------------------------------------------*/
 
-void Format_error::correction_update(const char *ilabel , int correction , int iline , int icolumn)
+void Format_error::correction_update(const char *ilabel , int correction ,
+                                     int iline , int icolumn)
 
 {
   if (nb_error < max_nb_error) {
