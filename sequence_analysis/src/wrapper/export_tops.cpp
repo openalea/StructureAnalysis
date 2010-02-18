@@ -44,27 +44,27 @@ class WRAP
 
 public:
 
-  static boost::shared_ptr<Top_parameters>
-  top_parameters_from_file(char* filename, int max_position)
+  static boost::shared_ptr<TopParameters>
+  top_parameters_from_file(char *filename, int max_position)
   {
-    Format_error error;
-    Top_parameters *top_parameters = NULL;
+    StatError error;
+    TopParameters *top_parameters = NULL;
 
     top_parameters = top_parameters_ascii_read(error, filename, max_position);
     if (!top_parameters)
         sequence_analysis::wrap_util::throw_error(error);
 
-    return boost::shared_ptr<Top_parameters>(top_parameters);
+    return boost::shared_ptr<TopParameters>(top_parameters);
   }
 
-  static Parametric_model*
-  extract(const Top_parameters& top, int position)
+  static DiscreteParametricModel*
+  extract(const TopParameters &top, int position)
   {
-    SIMPLE_METHOD_TEMPLATE_1(top, extract, Parametric_model, position);
+    SIMPLE_METHOD_TEMPLATE_1(top, extract, DiscreteParametricModel, position);
   }
 
   static Tops*
-  simulation_dists(const Top_parameters& top, int nb_top,
+  simulation_dists(const TopParameters &top, int nb_top,
       const Distribution &nb_trial, const Distribution &nb_axillary)
   {
     SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops, nb_top, nb_trial,
@@ -72,7 +72,7 @@ public:
   }
 
   static Tops*
-  simulate(const Top_parameters& top, int nb_top, int nb_trial,
+  simulate(const TopParameters &top, int nb_top, int nb_trial,
       int nb_axillary)
   {
     SIMPLE_METHOD_TEMPLATE_1(top, simulation, Tops, nb_top, nb_trial,
@@ -80,9 +80,9 @@ public:
   }
 
   static MultiPlotSet*
-  get_plotable(const Top_parameters& p)
+  get_plotable(const TopParameters &p)
   {
-    Format_error error;
+    StatError error;
     MultiPlotSet* ret = p.get_plotable();
     if (!ret)
       ERROR;
@@ -90,7 +90,7 @@ public:
   }
 
   static Distribution*
-  get_axillary_nb_internode(const Top_parameters& input, int position)
+  get_axillary_nb_internode(const TopParameters &input, int position)
   {
     Distribution *res;
 
@@ -114,18 +114,18 @@ void class_top_parameters() {
 
   //todo : constructors
 
-  class_<Top_parameters, bases<STAT_interface> >
-  ("_Top_parameters", "Top parameters")
+  class_<TopParameters, bases<StatInterface> >
+  ("_TopParameters", "Top parameters")
     .def("__init__", make_constructor(TopParametersWrap::top_parameters_from_file))
     .def(init< optional <double, double, double, int> >())
-    .def(init< const Top_parameters& ,optional <bool> >())
+    .def(init< const TopParameters& ,optional <bool> >())
 
     .def(self_ns::str(self)) //__str__
 
-    .add_property("probability", &Top_parameters::get_probability)
-    .add_property("axillary_probability", &Top_parameters::get_axillary_probability)
-    .add_property("rhythm_ratio", &Top_parameters::get_rhythm_ratio)
-    .add_property("max_position", &Top_parameters::get_max_position)
+    .add_property("probability", &TopParameters::get_probability)
+    .add_property("axillary_probability", &TopParameters::get_axillary_probability)
+    .add_property("rhythm_ratio", &TopParameters::get_rhythm_ratio)
+    .add_property("max_position", &TopParameters::get_max_position)
 
     DEF_RETURN_VALUE("get_axillary_nb_internode", WRAP::get_axillary_nb_internode, args("position"),
         "returns axillary nb internode distribution")
@@ -133,7 +133,7 @@ void class_top_parameters() {
     DEF_RETURN_VALUE("simulation_dists", WRAP::simulation_dists,args("position"), "simulation type1")
     DEF_RETURN_VALUE("simulate", WRAP::simulate,args("position"), "simulate ")
     
-    DEF_RETURN_VALUE_NO_ARGS("get_tops", &Top_parameters::get_tops,     "returns tops")
+    DEF_RETURN_VALUE_NO_ARGS("get_tops", &TopParameters::get_tops,     "returns tops")
     DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
 
     ;
@@ -143,9 +143,9 @@ void class_top_parameters() {
   /*
     std::ostream& line_write(std::ostream &os) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,  const char *title = 0) const;
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,  const char *title = 0) const;
 
     void axillary_nb_internode_computation(int imax_position);
   */
@@ -160,9 +160,9 @@ class WRAP
 public:
 
   static boost::shared_ptr<Tops>
-  tops_from_file(char* filename, bool old_format)
+  tops_from_file(char *filename, bool old_format)
   {
-    Format_error error;
+    StatError error;
     Tops *tops = NULL;
     tops = tops_ascii_read(error, filename, old_format);
     if (!tops)
@@ -189,19 +189,19 @@ public:
   }
 
   static Tops*
-  shift(const Tops& top, int nb_internode)
+  shift(const Tops &top, int nb_internode)
   {
     SIMPLE_METHOD_TEMPLATE_1(top, shift, Tops, nb_internode);
   }
 
-  static Distribution_data*
-  extract(const Tops& top, int position)
+  static DiscreteDistributionData*
+  extract(const Tops &top, int position)
   {
-    SIMPLE_METHOD_TEMPLATE_1(top, extract, Distribution_data, position);
+    SIMPLE_METHOD_TEMPLATE_1(top, extract, DiscreteDistributionData, position);
   }
 
   static Tops*
-  select_individual(const Tops& top, const boost::python::list& identifiers,
+  select_individual(const Tops &top, const boost::python::list& identifiers,
       bool keep)
   {
     CREATE_ARRAY(identifiers, int, data);
@@ -210,39 +210,39 @@ public:
   }
 
   static Tops*
-  reverse(const Tops& top)
+  reverse(const Tops &top)
   {
     SIMPLE_METHOD_TEMPLATE_0(top, reverse, Tops);
   }
 
-  static Top_parameters*
-  estimation(const Tops& top, int imin_position, int imax_position,
+  static TopParameters*
+  estimation(const Tops &top, int imin_position, int imax_position,
       int neighborhood, bool equal_probability)
   {
-    SIMPLE_METHOD_TEMPLATE_1(top, estimation, Top_parameters, imin_position,
+    SIMPLE_METHOD_TEMPLATE_1(top, estimation, TopParameters, imin_position,
         imax_position, neighborhood, equal_probability);
   }
 
-  static Top_parameters*
-  estimation2(const Tops& top, int neighborhood, bool equal_probability = false)
+  static TopParameters*
+  estimation2(const Tops &top, int neighborhood, bool equal_probability = false)
   {
-    SIMPLE_METHOD_TEMPLATE_1(top, estimation, Top_parameters, neighborhood,
+    SIMPLE_METHOD_TEMPLATE_1(top, estimation, TopParameters, neighborhood,
         equal_probability);
   }
 
   static Tops*
-  merge(const Tops& input, const boost::python::list input_timev)
+  merge(const Tops &input, const boost::python::list input_timev)
    {
      HEADER(Tops);
-     CREATE_ARRAY(input_timev, const Tops *, timev)
+     CREATE_ARRAY(input_timev, const Tops*, timev)
      ret = new Tops(timev_size, timev.get());
      FOOTER;
    }
   
-  static Histogram*
-  get_axillary_nb_internode(const Tops& input, int position)
+  static FrequencyDistribution*
+  get_axillary_nb_internode(const Tops &input, int position)
   {
-    Histogram *res;
+    FrequencyDistribution *res;
     if (position <=0 || position > input.get_max_position())
     {
       PyErr_SetString(PyExc_IndexError,
@@ -250,7 +250,7 @@ public:
       boost::python::throw_error_already_set();
     }
 
-    res = new Histogram(*input.get_axillary_nb_internode(position));
+    res = new FrequencyDistribution(*input.get_axillary_nb_internode(position));
     return res;
   }
 
@@ -273,7 +273,7 @@ void class_tops() {
 
     .add_property("max_position", &Tops::get_max_position, "returns max position attribute")
 
-    .def("build_nb_internode_histogram", &Tops::build_nb_internode_histogram)
+    .def("build_nb_internode_frequency_distribution", &Tops::build_nb_internode_frequency_distribution)
 
     DEF_RETURN_VALUE("get_axillary_nb_internode", WRAP::get_axillary_nb_internode, args("position"), "returns histogram of axillary nb internode")
     DEF_RETURN_VALUE("select_individual", WRAP::select_individual,args("identifiers", "keep"), "select individual")
@@ -296,13 +296,13 @@ void class_tops() {
 
   std::ostream& line_write(std::ostream &os) const;
   std::ostream& ascii_data_write(std::ostream &os , char format = 'c' , bool exhaustive = false) const;
-  bool ascii_data_write(Format_error &error , const char *path , char format = 'c' , bool exhaustive = false) const;
+  bool ascii_data_write(StatError &error , const char *path , char format = 'c' , bool exhaustive = false) const;
   std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-  bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
-  bool spreadsheet_write(Format_error &error , const char *path) const;
-  bool plot_write(Format_error &error , const char *prefix, const char *title = 0) const;
+  bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+  bool spreadsheet_write(StatError &error , const char *path) const;
+  bool plot_write(StatError &error , const char *prefix, const char *title = 0) const;
 
-  void build_nb_internode_histogram();
+  void build_nb_internode_frequency_distribution();
 */
 
 }
