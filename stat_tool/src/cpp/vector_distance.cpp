@@ -58,11 +58,11 @@ extern int column_width(int nb_value , const double *value , double scale = 1.);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Vector_distance.
+ *  Constructeur par defaut de la classe VectorDistance.
  *
  *--------------------------------------------------------------*/
 
-Vector_distance::Vector_distance()
+VectorDistance::VectorDistance()
 
 {
   nb_variable = 0;
@@ -81,15 +81,15 @@ Vector_distance::Vector_distance()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Vector_distance.
+ *  Constructeur de la classe VectorDistance.
  *
  *  arguments : nombre de variables, type et poids de chaque variable,
  *              type de distance (ABSOLUTE_VALUE/QUADRATIC).
  *
  *--------------------------------------------------------------*/
 
-Vector_distance::Vector_distance(int inb_variable , int *ivariable_type ,
-                                 double *iweight , int idistance_type)
+VectorDistance::VectorDistance(int inb_variable , int *ivariable_type ,
+                               double *iweight , int idistance_type)
 
 {
   register int i;
@@ -131,7 +131,7 @@ Vector_distance::Vector_distance(int inb_variable , int *ivariable_type ,
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Vector_distance.
+ *  Constructeur de la classe VectorDistance.
  *
  *  arguments : nombre de variables, type de distance (ABSOLUTE_VALUE/QUADRATIC),
  *              type et poids de chaque variable, nombre de valeurs,
@@ -139,9 +139,9 @@ Vector_distance::Vector_distance(int inb_variable , int *ivariable_type ,
  *
  *--------------------------------------------------------------*/
 
-Vector_distance::Vector_distance(int inb_variable , int idistance_type , int *ivariable_type ,
-                                 double *iweight , int *inb_value , double ***isymbol_distance ,
-                                 int *iperiod)
+VectorDistance::VectorDistance(int inb_variable , int idistance_type , int *ivariable_type ,
+                               double *iweight , int *inb_value , double ***isymbol_distance ,
+                               int *iperiod)
 
 {
   register int i , j , k;
@@ -193,13 +193,13 @@ Vector_distance::Vector_distance(int inb_variable , int idistance_type , int *iv
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Vector_distance.
+ *  Copie d'un objet VectorDistance.
  *
- *  argument : reference sur un objet Vector_distance.
+ *  argument : reference sur un objet VectorDistance.
  *
  *--------------------------------------------------------------*/
 
-void Vector_distance::copy(const Vector_distance &vector_dist)
+void VectorDistance::copy(const VectorDistance &vector_dist)
 
 {
   register int i , j , k;
@@ -252,11 +252,11 @@ void Vector_distance::copy(const Vector_distance &vector_dist)
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Vector_distance.
+ *  Destruction des champs d'un objet VectorDistance.
  *
  *--------------------------------------------------------------*/
 
-void Vector_distance::remove()
+void VectorDistance::remove()
 
 {
   register int i , j;
@@ -286,11 +286,11 @@ void Vector_distance::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Vector_distance.
+ *  Destructeur de la classe VectorDistance.
  *
  *--------------------------------------------------------------*/
 
-Vector_distance::~Vector_distance()
+VectorDistance::~VectorDistance()
 
 {
   remove();
@@ -299,13 +299,13 @@ Vector_distance::~Vector_distance()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Vector_distance.
+ *  Operateur d'assignement de la classe VectorDistance.
  *
- *  argument : reference sur un objet Vector_distance.
+ *  argument : reference sur un objet VectorDistance.
  *
  *--------------------------------------------------------------*/
 
-Vector_distance& Vector_distance::operator=(const Vector_distance &vector_dist)
+VectorDistance& VectorDistance::operator=(const VectorDistance &vector_dist)
 
 {
   if (&vector_dist != this) {
@@ -319,13 +319,13 @@ Vector_distance& Vector_distance::operator=(const Vector_distance &vector_dist)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Vector_distance a partir d'un fichier.
+ *  Construction d'un objet VectorDistance a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-Vector_distance* vector_distance_ascii_read(Format_error &error , const char *path)
+VectorDistance* vector_distance_ascii_read(StatError &error , const char *path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -338,7 +338,7 @@ Vector_distance* vector_distance_ascii_read(Format_error &error , const char *pa
       period[VECTOR_NB_VARIABLE];
   long value;
   double cumul , weight[VECTOR_NB_VARIABLE] , ***symbol_distance;
-  Vector_distance *vector_dist;
+  VectorDistance *vector_dist;
   ifstream in_file(path);
 
 
@@ -856,8 +856,8 @@ Vector_distance* vector_distance_ascii_read(Format_error &error , const char *pa
       }
 
       if (status) {
-        vector_dist = new Vector_distance(nb_variable , distance_type , variable_type ,
-                                          weight , nb_value , symbol_distance , period);
+        vector_dist = new VectorDistance(nb_variable , distance_type , variable_type ,
+                                         weight , nb_value , symbol_distance , period);
       }
     }
   }
@@ -868,13 +868,13 @@ Vector_distance* vector_distance_ascii_read(Format_error &error , const char *pa
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Vector_distance.
+ *  Ecriture sur une ligne d'un objet VectorDistance.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Vector_distance::line_write(ostream &os) const
+ostream& VectorDistance::line_write(ostream &os) const
 
 {
   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES];
@@ -888,13 +888,13 @@ ostream& Vector_distance::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Vector_distance.
+ *  Ecriture d'un objet VectorDistance.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Vector_distance::ascii_write(ostream &os , bool exhaustive) const
+ostream& VectorDistance::ascii_write(ostream &os , bool exhaustive) const
 
 {
   register int i , j , k;
@@ -970,12 +970,12 @@ ostream& Vector_distance::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Fonctions pour la compatibilite avec la classe STAT_interface.
+ *  Fonctions pour la compatibilite avec la classe StatInterface.
  *
  *--------------------------------------------------------------*/
 
-bool Vector_distance::ascii_write(Format_error &error , const char *path ,
-                                  bool exhaustive) const
+bool VectorDistance::ascii_write(StatError &error , const char *path ,
+                                 bool exhaustive) const
 
 {
   bool status;
@@ -999,15 +999,15 @@ bool Vector_distance::ascii_write(Format_error &error , const char *path ,
 }
 
 
-bool Vector_distance::spreadsheet_write(Format_error &error , const char *path) const
+bool VectorDistance::spreadsheet_write(StatError &error , const char *path) const
 
 {
   return false;
 }
 
 
-bool Vector_distance::plot_write(Format_error &error , const char *prefix ,
-                                 const char *title) const
+bool VectorDistance::plot_write(StatError &error , const char *prefix ,
+                                const char *title) const
 
 {
   return false;
@@ -1022,7 +1022,7 @@ bool Vector_distance::plot_write(Format_error &error , const char *prefix ,
  *
  *--------------------------------------------------------------*/
 
-double* Vector_distance::max_symbol_distance_computation(int variable) const
+double* VectorDistance::max_symbol_distance_computation(int variable) const
 
 {
   register int i , j;
@@ -1054,7 +1054,8 @@ double* Vector_distance::max_symbol_distance_computation(int variable) const
  *
  *--------------------------------------------------------------*/
 
-void Vector_distance::dispersion_computation(int variable , const Histogram *marginal , double *rank) const
+void VectorDistance::dispersion_computation(int variable , const FrequencyDistribution *marginal ,
+                                            double *rank) const
 
 {
   register int i , j;
