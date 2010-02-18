@@ -77,9 +77,9 @@ class Convolution : public StatInterface , public Distribution {  // produit de 
     friend class FrequencyDistribution;
     friend class ConvolutionData;
 
-    friend Convolution* convolution_building(Format_error &error , int nb_dist ,
+    friend Convolution* convolution_building(StatError &error , int nb_dist ,
                                              const DiscreteParametric **dist);
-    friend Convolution* convolution_ascii_read(Format_error &error , const char *path ,
+    friend Convolution* convolution_ascii_read(StatError &error , const char *path ,
                                                double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Convolution &convol)
     { return convol.ascii_write(os , convol.convolution_data , false , false); }
@@ -113,22 +113,22 @@ public :
     ~Convolution();
     Convolution& operator=(const Convolution &convol);
 
-    DiscreteParametricModel* extract(Format_error &error , int index) const;
-    ConvolutionData* extract_data(Format_error &error) const;
+    DiscreteParametricModel* extract(StatError &error , int index) const;
+    ConvolutionData* extract_data(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void computation(int min_nb_value = 1 , double cumul_threshold = CONVOLUTION_THRESHOLD ,
                      bool *dist_flag = NULL);
-    ConvolutionData* simulation(Format_error &error , int nb_element) const;
+    ConvolutionData* simulation(StatError &error , int nb_element) const;
 
 //     // acces membres de la classe
 
@@ -138,9 +138,9 @@ public :
 };
 
 
-Convolution* convolution_building(Format_error &error , int nb_dist ,
+Convolution* convolution_building(StatError &error , int nb_dist ,
                                   const DiscreteParametric **dist);
-Convolution* convolution_ascii_read(Format_error &error , const char *path ,
+Convolution* convolution_ascii_read(StatError &error , const char *path ,
                                     double cumul_threshold = CONVOLUTION_THRESHOLD);
 
 
@@ -173,15 +173,15 @@ public :
     virtual ~ConvolutionData();
     ConvolutionData& operator=(const ConvolutionData &convol_histo);
 
-    DiscreteDistributionData* extract(Format_error &error , int index) const;
+    DiscreteDistributionData* extract(StatError &error , int index) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
