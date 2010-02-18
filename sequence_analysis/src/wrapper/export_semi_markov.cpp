@@ -46,57 +46,57 @@ class SemiMarkovWrap
 
 public:
 
-  static boost::shared_ptr<Semi_markov>
+  static boost::shared_ptr<SemiMarkov>
   semi_markov_from_file(char* filename, int length, bool counting_flag, double cumul_threshold)
   {
-    Format_error error;
+    StatError error;
 
-    Semi_markov *semi_markov = NULL;
+    SemiMarkov *semi_markov = NULL;
 
     semi_markov = semi_markov_ascii_read(error, filename, length,
         counting_flag, cumul_threshold);
 
 
-    return boost::shared_ptr<Semi_markov>(semi_markov);
+    return boost::shared_ptr<SemiMarkov>(semi_markov);
   }
 
-  static Semi_markov_data*
-  extract_data(const Semi_markov& input)
+  static SemiMarkovData*
+  extract_data(const SemiMarkov &input)
   {
-    Format_error err;
-    Semi_markov_data *ret;
+    StatError err;
+    SemiMarkovData *ret;
     ret = input.extract_data(err);
     return ret;
-    //SIMPLE_METHOD_TEMPLATE_1(input, extract_data, Semi_markov_data);
+    //SIMPLE_METHOD_TEMPLATE_1(input, extract_data, SemiMarkovData);
   }
 
-  static Parametric_model*
-  extract_histogram(const Semi_markov& input, int state, int histogram_type)
+  static DiscreteParametricModel*
+  extract_histogram(const SemiMarkov &input, int state, int histogram_type)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, Parametric_model, state, histogram_type);
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, state, histogram_type);
   }
 
-  static Parametric_model*
-  extract(const Semi_markov& input, int type, int variable, int value)
+  static DiscreteParametricModel*
+  extract(const SemiMarkov &input, int type, int variable, int value)
   {
 
-    SIMPLE_METHOD_TEMPLATE_1(input, extract, Parametric_model, type, variable,
+    SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel, type, variable,
         value);
   }
 
 
 
-  static Parametric_model*
-  get_forward(const Semi_markov& input)
+  static DiscreteParametricModel*
+  get_forward(const SemiMarkov &input)
   {
     // todo: output must be list of Forward
     // todo: export Forward in stat_tool!
-    Parametric_model *ret = NULL;
+    DiscreteParametricModel *ret = NULL;
     return ret;
   }
 
   static Forward*
-  get_forward(const Semi_markov& input, int state)
+  get_forward(const SemiMarkov &input, int state)
   {
     Forward *ret;
     ret = input.get_forward(state);
@@ -106,10 +106,10 @@ public:
 
 
   static void
-  file_ascii_write(const Semi_markov& d, const char* path, bool exhaustive)
+  file_ascii_write(const SemiMarkov &d, const char *path, bool exhaustive)
   {
     bool result = true;
-    Format_error error;
+    StatError error;
 
     result = d.ascii_write(error, path, exhaustive);
     if (!result)
@@ -118,75 +118,75 @@ public:
 
 
 
-  static Semi_markov*
-  thresholding(const Semi_markov& input, double min_probability)
+  static SemiMarkov*
+  thresholding(const SemiMarkov &input, double min_probability)
   {
 	return input.thresholding(min_probability);
   }
 
-  static Semi_markov_data*
-  simulation_histogram(const Semi_markov& input,
-	   const Histogram &hlength , bool counting_flag, bool divergence_flag)
+  static SemiMarkovData*
+  simulation_histogram(const SemiMarkov &input,
+	   const FrequencyDistribution &hlength , bool counting_flag, bool divergence_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Semi_markov_data,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, SemiMarkovData,
    	    hlength, counting_flag, divergence_flag);
   }
 
-  static Semi_markov_data*
-  simulation_nb_elements(const Semi_markov& input,
+  static SemiMarkovData*
+  simulation_nb_elements(const SemiMarkov &input,
 		 int nb_sequence , int length , bool counting_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Semi_markov_data,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, SemiMarkovData,
    	    nb_sequence, length, counting_flag);
 
   }
 
-  static Semi_markov_data*
-  simulation_markovian_sequences(const Semi_markov& input,
-		  int nb_sequence , const Markovian_sequences &iseq , bool counting_flag)
+  static SemiMarkovData*
+  simulation_markovian_sequences(const SemiMarkov &input,
+		  int nb_sequence , const MarkovianSequences &iseq , bool counting_flag)
   {
-    SIMPLE_METHOD_TEMPLATE_1(input, simulation, Semi_markov_data,
+    SIMPLE_METHOD_TEMPLATE_1(input, simulation, SemiMarkovData,
    	    nb_sequence, iseq, counting_flag);
   }
 
 
-  static Distance_matrix*
-  divergence_computation_histo(const Semi_markov &input,
+  static DistanceMatrix*
+  divergence_computation_histo(const SemiMarkov &input,
       boost::python::list input_markov,
       boost::python::list input_histogram_length,  const char *filename)
   {
-    HEADER_OS(Distance_matrix);
-    CREATE_ARRAY(input_markov, const Semi_markov *, markov);
-    CREATE_ARRAY(input_histogram_length, Histogram *, hlength);
+    HEADER_OS(DistanceMatrix);
+    CREATE_ARRAY(input_markov, const SemiMarkov*, markov);
+    CREATE_ARRAY(input_histogram_length, FrequencyDistribution*, hlength);
     ret = input.divergence_computation(error, os, markov_size, markov.get(), hlength.get(), filename);
     FOOTER_OS;
   }
 
-  static Distance_matrix*
-  divergence_computation_length(const Semi_markov &input,
+  static DistanceMatrix*
+  divergence_computation_length(const SemiMarkov &input,
      boost::python::list input_markov , int nb_sequence ,
      int length , const char *filename)
   {
-    HEADER_OS(Distance_matrix);
-    CREATE_ARRAY(input_markov, const Semi_markov *, markov);
+    HEADER_OS(DistanceMatrix);
+    CREATE_ARRAY(input_markov, const SemiMarkov*, markov);
     ret = input.divergence_computation(error, os, markov_size, markov.get(),
         nb_sequence, length, filename);
     FOOTER_OS;
   }
 
 
-  static Distance_matrix*
-  divergence_computation_sequences(const Semi_markov &input,
+  static DistanceMatrix*
+  divergence_computation_sequences(const SemiMarkov &input,
       boost::python::list &input_markov, boost::python::list &input_sequences,
       int nb_seq, const char *filename)
   {
-    // there is as much Variable_order_markov elmts as Markovian elts
+    // there is as much VariableOrderMarkov elmts as Markovian elts
     // 1 for input and N-1 for input_markov and N input_sequence
 
-    HEADER_OS(Distance_matrix);
+    HEADER_OS(DistanceMatrix);
 
-    CREATE_ARRAY(input_markov, const Semi_markov *, markov);
-    CREATE_ARRAY(input_sequences, const Markovian_sequences *, sequences);
+    CREATE_ARRAY(input_markov, const SemiMarkov*, markov);
+    CREATE_ARRAY(input_sequences, const MarkovianSequences*, sequences);
 
     ret = input.divergence_computation(error, os, markov_size, markov.get(),
         nb_seq, sequences.get(), filename);
@@ -201,25 +201,25 @@ void
 class_semi_markov()
 {
 
-  class_<Semi_markov, bases<STAT_interface> >
-  ("_Semi_markov",  "Semi_markov\n"
+  class_<SemiMarkov, bases<StatInterface> >
+  ("_SemiMarkov",  "SemiMarkov\n"
       "Constructors from a file required 3 arguments: length(int), counting_flag(boolean) and cumul_threshold (double)")
     .def("__init__", make_constructor(SemiMarkovWrap::semi_markov_from_file))
 
     .def(self_ns::str(self)) //__str__
 
-    .add_property("nb_iterator", &Semi_markov::get_nb_iterator, "returns nb iterator")
-    .add_property("nb_output_process", &Semi_markov::get_nb_output_process, "returns nb output process")
+    .add_property("nb_iterator", &SemiMarkov::get_nb_iterator, "returns nb iterator")
+    .add_property("nb_output_process", &SemiMarkov::get_nb_output_process, "returns nb output process")
 
-    .def("get_state_subtype", &Semi_markov::get_state_subtype, args("index"), "returns state subtype")
+    .def("get_state_subtype", &SemiMarkov::get_state_subtype, args("index"), "returns state subtype")
 
-    //DEF_RETURN_VALUE("get_parametric_process", &Semi_markov::get_parametric_process, args("variable_index"), "returns parametric process corresponding to the given variable")
+    //DEF_RETURN_VALUE("get_parametric_process", &SemiMarkov::get_parametric_process, args("variable_index"), "returns parametric process corresponding to the given variable")
     .def("extract_histogram", SemiMarkovWrap::extract_histogram, return_value_policy< manage_new_object >(), "todo")
     .def("extract", SemiMarkovWrap::extract, return_value_policy< manage_new_object >(), "todo")
 
-    .def("get_forward", (Forward *(*)(const Semi_markov&, int)) SemiMarkovWrap::get_forward, return_value_policy< manage_new_object >(), SemiMarkovWrap::get_forward_overloads())
+    .def("get_forward", (Forward *(*)(const SemiMarkov&, int)) SemiMarkovWrap::get_forward, return_value_policy< manage_new_object >(), SemiMarkovWrap::get_forward_overloads())
 
-    DEF_RETURN_VALUE_NO_ARGS("get_semi_markov_data", &Semi_markov::get_semi_markov_data, "returns semi_markov_data")
+    DEF_RETURN_VALUE_NO_ARGS("get_semi_markov_data", &SemiMarkov::get_semi_markov_data, "returns semi_markov_data")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", SemiMarkovWrap::extract_data, "returns semi_markov_data")
 
     .def("file_ascii_write", SemiMarkovWrap::file_ascii_write,"Save vector summary into a file")
@@ -239,25 +239,25 @@ class_semi_markov()
   //todo file_ascii_write not accessible ?
   /*
    *
-   Semi_markov();
-   Semi_markov(char itype , int inb_state , int inb_output_process , int *nb_value);
-   Semi_markov(const Chain *pchain , const Nonparametric_sequence_process *poccupancy , const Nonparametric_process *pobservation , int length ,  bool counting_flag);
-   Semi_markov(const Semi_markov &smarkov , bool data_flag = true ,  int param = I_DEFAULT)  :Chain(smarkov) { copy(smarkov , data_flag , param); }
+   SemiMarkov();
+   SemiMarkov(char itype , int inb_state , int inb_output_process , int *nb_value);
+   SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy , const NonparametricProcess *pobservation , int length ,  bool counting_flag);
+   SemiMarkov(const SemiMarkov &smarkov , bool data_flag = true ,  int param = I_DEFAULT)  :Chain(smarkov) { copy(smarkov , data_flag , param); }
 
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,const char *title = 0) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,const char *title = 0) const;
 
    void characteristic_computation(int length , bool counting_flag , int variable = I_DEFAULT);
-   void characteristic_computation(const Semi_markov_data &seq , bool counting_flag, int variable = I_DEFAULT , bool length_flag = true);
+   void characteristic_computation(const SemiMarkovData &seq , bool counting_flag, int variable = I_DEFAULT , bool length_flag = true);
 
-   double likelihood_computation(const Markovian_sequences &seq , int index) const;
-   double likelihood_computation(const Semi_markov_data &seq) const;
+   double likelihood_computation(const MarkovianSequences &seq , int index) const;
+   double likelihood_computation(const SemiMarkovData &seq) const;
 
 
    Forward** get_forward() const { return forward; }
 
-   Nonparametric_sequence_process* get_nonparametric_process(int variable)   const { return nonparametric_process[variable]; }
-   Parametric_process** get_parametric_process() const { return parametric_process; }
+   NonparametricSequenceProcess* get_nonparametric_process(int variable)   const { return nonparametric_process[variable]; }
+   DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
 
 
    */
@@ -272,16 +272,16 @@ class SemiMarkovDataWrap
 
 public:
 
-   static Semi_markov_data*
-   remove_index_parameter(const Semi_markov_data& input)
+   static SemiMarkovData*
+   remove_index_parameter(const SemiMarkovData &input)
    {
-     SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, Semi_markov_data);
+     SIMPLE_METHOD_TEMPLATE_0(input, remove_index_parameter, SemiMarkovData);
    }
 
-   static Distribution_data*
-   extract(const Semi_markov_data& input, int type, int variable, int value)
+   static DiscreteDistributionData*
+   extract(const SemiMarkovData &input, int type, int variable, int value)
    {
-     SIMPLE_METHOD_TEMPLATE_1(input, extract, Distribution_data, type, variable, value);
+     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, type, variable, value);
    }
 
 };
@@ -290,18 +290,18 @@ void
 class_semi_markov_data()
 {
 
-  class_<Semi_markov_data, bases<Markovian_sequences> > ("_Semi_markov_data", "Semi_markov_data")
-    .def(init<Markovian_sequences> ())
-    .def(init< Markovian_sequences, char, bool> ())
-    .def(init<Semi_markov_data, bool, char> ())
+  class_<SemiMarkovData, bases<MarkovianSequences> > ("_SemiMarkovData", "SemiMarkovData")
+    .def(init<MarkovianSequences> ())
+    .def(init< MarkovianSequences, char, bool> ())
+    .def(init<SemiMarkovData, bool, char> ())
 
-    .add_property("likelihood", &Semi_markov_data::get_likelihood, "returns likelihood")
-    .add_property("hidden_likelihood", &Semi_markov_data::get_hidden_likelihood, "returns hidden likelihood")
+    .add_property("likelihood", &SemiMarkovData::get_likelihood, "returns likelihood")
+    .add_property("hidden_likelihood", &SemiMarkovData::get_hidden_likelihood, "returns hidden likelihood")
 
-    .def("get_posterior_probability", &Semi_markov_data::get_posterior_probability, args("index"))
+    .def("get_posterior_probability", &SemiMarkovData::get_posterior_probability, args("index"))
 
-    DEF_RETURN_VALUE_NO_ARGS("get_semi_markov", &Semi_markov_data::get_semi_markov, "returns semi_markov")
-    DEF_RETURN_VALUE_NO_ARGS("get_chain_data", &Semi_markov_data::get_chain_data, "returns chain data")
+    DEF_RETURN_VALUE_NO_ARGS("get_semi_markov", &SemiMarkovData::get_semi_markov, "returns semi_markov")
+    DEF_RETURN_VALUE_NO_ARGS("get_chain_data", &SemiMarkovData::get_chain_data, "returns chain data")
     DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", &SemiMarkovDataWrap::remove_index_parameter, "remove index parameter")
 
  ;
@@ -309,9 +309,9 @@ class_semi_markov_data()
   // DONE
   // todo do we need the constructor and build_transition?
   /*
-   Semi_markov_data();
-   Semi_markov_data(const Histogram &ihlength , int inb_variable , bool init_flag = false);
-   void build_transition_count(const Semi_markov *smarkov = 0);
+   SemiMarkovData();
+   SemiMarkovData(const FrequencyDistribution &ihlength , int inb_variable , bool init_flag = false);
+   void build_transition_count(const SemiMarkov *smarkov = 0);
    */
 
 }
@@ -324,13 +324,13 @@ public:
 
 
   static boost::python::list
-  simulation(Semi_markov_iterator& input, int nb_sequence=1,
+  simulation(SemiMarkovIterator &input, int nb_sequence = 1,
       bool initialisation=false)
   {
-    Format_error error;
+    StatError error;
     int **sequence;
 
-    Semi_markov * sm;
+    SemiMarkov *sm;
     sm = input.get_semi_markov();
 
     sequence = input.simulation(nb_sequence, initialisation);
@@ -364,16 +364,16 @@ void
 class_semi_markov_iterator()
 {
 
-  class_<Semi_markov_iterator, boost::shared_ptr<Semi_markov_iterator> >
-  ("_Semi_markov_iterator", "Semi_markov_iterator", no_init)
+  class_<SemiMarkovIterator, boost::shared_ptr<SemiMarkovIterator> >
+  ("_SemiMarkovIterator", "SemiMarkovIterator", no_init)
 
-  .def(init<Semi_markov*>() [with_custodian_and_ward_postcall<1, 2>()])
+  .def(init<SemiMarkov*>() [with_custodian_and_ward_postcall<1, 2>()])
 
 
-  .add_property("state", &Semi_markov_iterator::get_state)
-  .add_property("occupancy", &Semi_markov_iterator::get_occupancy)
-  .add_property("counter", &Semi_markov_iterator::get_counter)
-  .add_property("nb_variable", &Semi_markov_iterator::get_nb_variable)
+  .add_property("state", &SemiMarkovIterator::get_state)
+  .add_property("occupancy", &SemiMarkovIterator::get_occupancy)
+  .add_property("counter", &SemiMarkovIterator::get_counter)
+  .add_property("nb_variable", &SemiMarkovIterator::get_nb_variable)
 
 
   .def("simulation", SemiMarkovIteratorWrap::simulation,
