@@ -89,7 +89,7 @@ const int NB_CRITICAL_PROBABILITY = 2;
 const double ref_critical_probability[NB_CRITICAL_PROBABILITY] = {0.05 , 0.01};
 
 const int NB_VALUE = 1000;             // nombre de valeurs prises par une v.a.
-const int SAMPLE_NB_VALUE = NB_VALUE;  // nombre de valeurs d'un histogramme
+const int SAMPLE_NB_VALUE = NB_VALUE;  // nombre de valeurs d'un echantillon
 
 enum {
   FLOOR ,
@@ -206,7 +206,7 @@ const double P_THRESHOLD = 90.;        // seuil pour utiliser le calcul en log d
 const double NB_THRESHOLD = 500.;      // seuil pour utiliser le calcul en log de la loi binomiale negative
 
 const double SAMPLE_NB_VALUE_COEFF = 5.;  // facteur pour deduire le nombre de valeurs prises
-                                          // par une v.a. du nombre de valeurs d'un histogramme
+                                          // par une v.a. du nombre de valeurs d'un echantillon
 const int INF_BOUND_MARGIN = 5;        // plage de recherche pour la borne inferieure
 const int SUP_BOUND_MARGIN = 3;        // plage de recherche pour la borne superieure
 const double POISSON_RATIO = 0.7;      // rapport moyenne/variance minimum pour      
@@ -321,9 +321,9 @@ public :
 
 
 
-class Format_error {    // erreurs
+class StatError {       // erreurs
 
-    friend std::ostream& operator<<(std::ostream &os , const Format_error &error)
+    friend std::ostream& operator<<(std::ostream &os , const StatError &error)
     { return error.ascii_write(os , ERROR); }
 
 private :
@@ -336,8 +336,8 @@ private :
 
 public :
 
-    Format_error(int imax_nb_error = NB_ERROR);
-    ~Format_error();
+    StatError(int imax_nb_error = NB_ERROR);
+    ~StatError();
 
     std::ostream& ascii_write(std::ostream &os , int type = ERROR) const;
 
@@ -356,7 +356,7 @@ public :
 
 
 
-class STAT_interface {  // classe abstraite pour les interfaces
+class StatInterface {  // classe abstraite pour les interfaces
 
 public :
 
@@ -365,54 +365,53 @@ public :
     virtual std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const = 0;
 //    virtual std::ostream& spreadsheet_write(std::ostream &os) const = 0;
 
-    virtual bool ascii_write(Format_error &error , const char *path ,
+    virtual bool ascii_write(StatError &error , const char *path ,
                              bool exhaustive = false) const = 0;
-    virtual bool spreadsheet_write(Format_error &error , const char *path) const = 0;
-    virtual bool plot_write(Format_error &error , const char *prefix ,
+    virtual bool spreadsheet_write(StatError &error , const char *path) const = 0;
+    virtual bool plot_write(StatError &error , const char *prefix ,
                             const char *title = NULL) const = 0;
 
     virtual MultiPlotSet* get_plotable() const { return 0; };
 
-//    bool binary_write(Format_error &error , const char *path) const;
+//    bool binary_write(StatError &error , const char *path) const;
 };
 
 
 
-class Histogram;
-class Parametric_model;
+class FrequencyDistribution;
+class DiscreteParametricModel;
 
 class Distribution {    // loi de probabilite discrete
 
 /*    template <typename Type> friend class Reestimation;  probleme Windows
-    friend class Histogram;
-    friend class Parametric_model;
-    friend class Distribution_data;
+    friend class FrequencyDistribution;
+    friend class DiscreteParametricModel;
+    friend class DiscreteDistributionData;
     friend class Convolution;
-    friend class Compound_data;
+    friend class CompoundData;
     friend class Vectors;
-    friend class Vector_distance;
+    friend class VectorDistance;
     friend class Backward;
     friend class Renewal;
-    friend class Time_events;
+    friend class TimeEvents;
     friend class Curves;
-    friend class Chain_data;
-    friend class Nonparametric_process;
-    friend class Nonparametric_sequence_process;
-    friend class Markov;
-    friend class Hidden_markov;
-    friend class Variable_order_markov;
-    friend class Hidden_variable_order_markov;
-    friend class Semi_markov;
-    friend class Hidden_semi_markov;
+    friend class ChainData;
+    friend class NonparametricProcess;
+    friend class NonparametricSequenceProcess;
+    friend class NonhomogeneousMarkov;
+    friend class VariableOrderMarkov;
+    friend class HiddenVariableOrderMarkov;
+    friend class SemiMarkov;
+    friend class HiddenSemiMarkov;
     friend class Sequences;
-    friend class Markovian_sequences;
+    friend class MarkovianSequences;
     friend class Correlation;
-    friend class Top_parameters; */
+    friend class TopParameters; */
 
     friend std::ostream& operator<<(std::ostream& , const Distribution&);
     friend bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                            double *scale , int *dist_nb_value , int nb_histo ,
-                           const Histogram **histo , int *index_dist);
+                           const FrequencyDistribution **histo , int *index_dist);
 
 // protected :
   public :
@@ -441,25 +440,27 @@ class Distribution {    // loi de probabilite discrete
 
     std::ostream& ascii_characteristic_print(std::ostream &os , bool shape = false ,
                                              bool comment_flag = false) const;
-    std::ostream& ascii_print(std::ostream &os , bool comment_flag , bool cumul_flag ,
-                              bool nb_value_flag , const Histogram *histo = NULL) const;
+    std::ostream& ascii_print(std::ostream &os , bool comment_flag ,
+                              bool cumul_flag , bool nb_value_flag ,
+                              const FrequencyDistribution *histo = NULL) const;
 
     std::ostream& ascii_print(std::ostream &os , int nb_dist , const Distribution **dist ,
                               double *dist_scale , bool comment_flag , bool cumul_flag ,
-                              const Histogram *histo = NULL) const;
+                              const FrequencyDistribution *histo = NULL) const;
 
     std::ostream& spreadsheet_characteristic_print(std::ostream &os , bool shape = false) const;
 
-    std::ostream& spreadsheet_print(std::ostream &os , bool cumul_flag , bool concentration_flag ,
-                                    bool nb_value_flag , const Histogram *histo = NULL) const;
+    std::ostream& spreadsheet_print(std::ostream &os , bool cumul_flag ,
+                                    bool concentration_flag , bool nb_value_flag ,
+                                    const FrequencyDistribution *histo = NULL) const;
 
     std::ostream& spreadsheet_print(std::ostream &os , int nb_dist , const Distribution **dist ,
                                     double *dist_scale , bool cumul_flag ,
-                                    const Histogram *histo = NULL) const;
+                                    const FrequencyDistribution *histo = NULL) const;
 
-    int plot_nb_value_computation(const Histogram *histo = NULL) const;
+    int plot_nb_value_computation(const FrequencyDistribution *histo = NULL) const;
     bool plot_print(const char *path , double *concentration , double scale) const;
-    bool plot_print(const char *path , const Histogram *histo = NULL) const;
+    bool plot_print(const char *path , const FrequencyDistribution *histo = NULL) const;
     virtual std::ostream& plot_title_print(std::ostream &os) const
     { return os; }
     bool survival_plot_print(const char *path , double *survivor) const;
@@ -483,9 +484,9 @@ class Distribution {    // loi de probabilite discrete
     double* concentration_function_computation() const;
     void log_computation();
 
-    double survivor_likelihood_computation(const Histogram &histo) const;
-    double chi2_value_computation(const Histogram &histo) const;
-    void chi2_degree_of_freedom(const Histogram &histo , Test &test) const;
+    double survivor_likelihood_computation(const FrequencyDistribution &histo) const;
+    double chi2_value_computation(const FrequencyDistribution &histo) const;
+    void chi2_degree_of_freedom(const FrequencyDistribution &histo , Test &test) const;
 
     void penalty_computation(double weight , int type , double *penalty , int outside) const;
 
@@ -493,7 +494,7 @@ class Distribution {    // loi de probabilite discrete
 
     Distribution(int inb_value = 0);
     Distribution(const Distribution &dist , double scaling_coeff);
-    Distribution(const Histogram &histo);
+    Distribution(const FrequencyDistribution &histo);
     Distribution(const Distribution &dist , char transform = 'c' ,
                  int ialloc_nb_value = I_DEFAULT);
     virtual ~Distribution();
@@ -501,18 +502,18 @@ class Distribution {    // loi de probabilite discrete
     bool operator==(const Distribution&) const;
     bool operator!=(const Distribution &dist) const { return !(*this == dist); }
 
-    bool plot_write(Format_error &error , const char *prefix , int nb_dist ,
+    bool plot_write(StatError &error , const char *prefix , int nb_dist ,
                     const Distribution **idist , const char *title) const;
     MultiPlotSet* get_plotable() const;
-    MultiPlotSet* get_plotable_distributions(Format_error &error , int nb_dist ,
+    MultiPlotSet* get_plotable_distributions(StatError &error , int nb_dist ,
                                              const Distribution **idist) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
-    bool survival_ascii_write(Format_error &error , const char *path) const;
-    bool survival_spreadsheet_write(Format_error &error , const char *path) const;
-    bool survival_plot_write(Format_error &error , const char *prefix ,
+    bool survival_ascii_write(StatError &error , const char *path) const;
+    bool survival_spreadsheet_write(StatError &error , const char *path) const;
+    bool survival_plot_write(StatError &error , const char *prefix ,
                              const char *title = NULL) const;
-    MultiPlotSet* survival_get_plotable(Format_error &error) const;
+    MultiPlotSet* survival_get_plotable(StatError &error) const;
 
     double mean_absolute_deviation_computation() const;
     double skewness_computation() const;
@@ -526,10 +527,10 @@ class Distribution {    // loi de probabilite discrete
     { return histo.likelihood_computation(*this); }
     double likelihood_computation(const Reestimation<double> &histo) const
     { return histo.likelihood_computation(*this); }
-    void chi2_fit(const Histogram &histo , Test &test) const;
+    void chi2_fit(const FrequencyDistribution &histo , Test &test) const;
     int simulation() const;
 
-    Parametric_model* truncate(Format_error &error , int imax_value) const;
+    DiscreteParametricModel* truncate(StatError &error , int imax_value) const;
 
     // acces membres de la classe
 
@@ -547,44 +548,45 @@ class Distribution {    // loi de probabilite discrete
 
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
-                const Histogram **histo , int *index_dist);
+                const FrequencyDistribution **histo , int *index_dist);
 
 
 
 class Forward;
 
-class Parametric : public Distribution {  // loi de probabilite parametrique
+class DiscreteParametric : public Distribution {  // loi de probabilite parametrique
 
 /*    template <typename Type> friend class Reestimation;  probleme Windows
-    friend class Histogram;
-    friend class Distribution_data;
+    friend class FrequencyDistribution;
+    friend class DiscreteDistributionData;
     friend class Compound;
     friend class Convolution;
     friend class Mixture;
     friend class Backward;
     friend class Forward;
-    friend class Length_bias;
-    friend class Nb_event;
+    friend class LengthBias;
+    friend class NbEvent;
     friend class Renewal;
-    friend class Time_events;
-    friend class Renewal_data;
-    friend class Nonparametric_sequence_process;
-    friend class Parametric_process;
-    friend class Markov;
-    friend class Variable_order_markov;
-    friend class Semi_markov;
-    friend class Hidden_semi_markov;
-    friend class Markovian_sequences;
-    friend class Top_parameters; */
+    friend class TimeEvents;
+    friend class RenewalData;
+    friend class NonparametricSequenceProcess;
+    friend class DiscreteParametricProcess;
+    friend class NonhomogeneousMarkov;
+    friend class VariableOrderMarkov;
+    friend class SemiMarkov;
+    friend class HiddenSemiMarkov;
+    friend class MarkovianSequences;
+    friend class TopParameters; */
 
     friend int nb_value_computation(int ident , int inf_bound , int sup_bound ,
                                     double parameter , double probability ,
                                     double cumul_threshold);
-    friend Parametric* parametric_parsing(Format_error &error , std::ifstream &in_file ,
-                                          int &line , int last_ident,
-                                          double cumul_threshold,
-                                          int min_inf_bound);
-    friend std::ostream& operator<<(std::ostream& , const Parametric&);
+    friend DiscreteParametric* discrete_parametric_parsing(StatError &error ,
+                                                           std::ifstream &in_file ,
+                                                           int &line , int last_ident ,
+                                                           double cumul_threshold,
+                                                           int min_inf_bound);
+    friend std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
 // protected :
 public :
@@ -597,7 +599,7 @@ public :
 
     void init(int iinf_bound , int isup_bound , double iparameter , double iprobability);
     void init(int iident , int iinf_bound , int isup_bound , double iparameter , double iprobability);
-    void copy(const Parametric &dist);
+    void copy(const DiscreteParametric &dist);
     std::ostream& ascii_print(std::ostream &os) const;
     std::ostream& spreadsheet_print(std::ostream &os) const;
     std::ostream& plot_title_print(std::ostream &os) const;
@@ -611,43 +613,52 @@ public :
                                        char mode);
     void uniform_computation();
 
-    double renewal_likelihood_computation(const Forward &forward_dist , const Histogram &within ,  // sequence_analysis
-                                          const Histogram &backward , const Histogram &forward ,
-                                          const Histogram *no_event) const;
-    void expectation_step(const Histogram &within ,const Histogram &backward ,  // sequence_analysis
-                          const Histogram &forward , const Histogram *no_event ,
+    double renewal_likelihood_computation(const Forward &forward_dist ,  // sequence_analysis
+                                          const FrequencyDistribution &within ,
+                                          const FrequencyDistribution &backward ,
+                                          const FrequencyDistribution &forward ,
+                                          const FrequencyDistribution *no_event) const;
+    void expectation_step(const FrequencyDistribution &within ,  // sequence_analysis
+                          const FrequencyDistribution &backward ,
+                          const FrequencyDistribution &forward ,
+                          const FrequencyDistribution *no_event ,
                           Reestimation<double> *inter_event_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter) const;
 
     void reestimation(const Reestimation<double> *reestim , int nb_estim = 1);
 
-    double state_occupancy_likelihood_computation(const Histogram &sojourn_time ,  // sequence_analysis
-                                                  const Histogram &final_run) const;
-    double state_occupancy_likelihood_computation(const Forward &forward , const Histogram &sojourn_time ,  // sequence_analysis
-                                                  const Histogram &final_run , const Histogram &initial_run ,
-                                                  const Histogram &single_run) const;
-    void expectation_step(const Histogram &sojourn_time , const Histogram &final_run ,  // sequence_analysis
+    double state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,  // sequence_analysis
+                                                  const FrequencyDistribution &final_run) const;
+    double state_occupancy_likelihood_computation(const Forward &forward ,  // sequence_analysis
+                                                  const FrequencyDistribution &sojourn_time ,
+                                                  const FrequencyDistribution &final_run ,
+                                                  const FrequencyDistribution &initial_run ,
+                                                  const FrequencyDistribution &single_run) const;
+    void expectation_step(const FrequencyDistribution &sojourn_time ,  // sequence_analysis
+                          const FrequencyDistribution &final_run ,
                           Reestimation<double> *occupancy_reestim , int iter) const;
-    void expectation_step(const Histogram &sojourn_time ,const Histogram &final_run ,  // sequence_analysis
-                          const Histogram &initial_run , const Histogram &single_run ,
+    void expectation_step(const FrequencyDistribution &sojourn_time ,  // sequence_analysis
+                          const FrequencyDistribution &final_run ,
+                          const FrequencyDistribution &initial_run ,
+                          const FrequencyDistribution &single_run ,
                           Reestimation<double> *occupancy_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter ,
                           bool combination = false , int mean_computation = COMPUTED) const;
 
 // public :
 
-    Parametric(int inb_value = 0 , int iident = NONPARAMETRIC ,
-               int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
-               double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
-    Parametric(int iident , int iinf_bound , int isup_bound , double iparameter ,
-               double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
-    Parametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
-    Parametric(const Distribution &dist , double scaling_coeff);
-    Parametric(const Parametric &dist , double scaling_coeff);
-    Parametric(const Histogram &histo);
-    Parametric(const Parametric &dist , char transform = 'c' ,
-               int ialloc_nb_value = I_DEFAULT);
-    Parametric& operator=(const Parametric &dist);
+    DiscreteParametric(int inb_value = 0 , int iident = NONPARAMETRIC ,
+                       int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
+                       double iparameter = D_DEFAULT , double iprobability = D_DEFAULT);
+    DiscreteParametric(int iident , int iinf_bound , int isup_bound , double iparameter ,
+                       double iprobability , double cumul_threshold = CUMUL_THRESHOLD);
+    DiscreteParametric(const Distribution &dist , int ialloc_nb_value = I_DEFAULT);
+    DiscreteParametric(const Distribution &dist , double scaling_coeff);
+    DiscreteParametric(const DiscreteParametric &dist , double scaling_coeff);
+    DiscreteParametric(const FrequencyDistribution &histo);
+    DiscreteParametric(const DiscreteParametric &dist , char transform = 'c' ,
+                       int ialloc_nb_value = I_DEFAULT);
+    DiscreteParametric& operator=(const DiscreteParametric &dist);
 
     int nb_parameter_computation();
 
@@ -673,15 +684,15 @@ public :
 int nb_value_computation(int ident , int inf_bound , int sup_bound ,
                          double parameter , double probability ,
                          double cumul_threshold = CUMUL_THRESHOLD);
-Parametric* parametric_parsing(Format_error &error , std::ifstream &in_file ,
-                               int &line , int last_ident = NEGATIVE_BINOMIAL ,
-                               double cumul_threshold = CUMUL_THRESHOLD ,
-                               int min_inf_bound = 0);
-std::ostream& operator<<(std::ostream& , const Parametric&);
+DiscreteParametric* discrete_parametric_parsing(StatError &error , std::ifstream &in_file ,
+                                                int &line , int last_ident = NEGATIVE_BINOMIAL ,
+                                                double cumul_threshold = CUMUL_THRESHOLD ,
+                                                int min_inf_bound = 0);
+std::ostream& operator<<(std::ostream& , const DiscreteParametric&);
 
 
 
-class Forward : public Parametric {  // loi de l'intervalle de temps residuel
+class Forward : public DiscreteParametric {  // loi de l'intervalle de temps residuel
 
 /*    friend class Renewal;
     friend class Renewal_data;
@@ -692,73 +703,73 @@ public :
     Forward(int inb_value = 0 , int iident = NONPARAMETRIC ,
             int iinf_bound = I_DEFAULT , int isup_bound = I_DEFAULT ,
             double iparameter = D_DEFAULT , double iprobability = D_DEFAULT)
-    :Parametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
-    Forward(const Parametric &dist , int ialloc_nb_value = I_DEFAULT)
-    :Parametric(dist , 'c' , ialloc_nb_value) { computation(dist); }
+    :DiscreteParametric(inb_value , iident , iinf_bound , isup_bound , iparameter , iprobability) {}
+    Forward(const DiscreteParametric &dist , int ialloc_nb_value = I_DEFAULT)
+    :DiscreteParametric(dist , 'c' , ialloc_nb_value) { computation(dist); }
     Forward(const Forward &forward , int ialloc_nb_value = I_DEFAULT)
-    :Parametric((Parametric&)forward , 'c' , ialloc_nb_value) {}
+    :DiscreteParametric((DiscreteParametric&)forward , 'c' , ialloc_nb_value) {}
 
-    void computation(const Parametric &dist);
+    void computation(const DiscreteParametric &dist);
 };
 
 
 
-class Distribution_data;
-class Time_events;
+class DiscreteDistributionData;
+class TimeEvents;
 class Mixture;
 class Convolution;
 class Compound;
 
-// class Histogram : protected Reestimation<int> {
-class Histogram : public Reestimation<int> {  // histogramme
+// class FrequencyDistribution : protected Reestimation<int> {
+class FrequencyDistribution : public Reestimation<int> {  // loi discrete empirique
 
 /*    friend class Distribution;
-    friend class Parametric;
-    friend class Parametric_model;
-    friend class Distribution_data;
+    friend class DiscreteParametric;
+    friend class DiscreteParametricModel;
+    friend class DiscreteDistributionData;
     friend class Compound;
-    friend class Compound_data;
+    friend class CompoundData;
     friend class Convolution;
-    friend class Convolution_data;
+    friend class ConvolutionData;
     friend class Mixture;
-    friend class Mixture_data;
+    friend class MixtureData;
     friend class Vectors;
     friend class Regression;
-    friend class Vector_distance;
+    friend class VectorDistance;
     friend class Renewal;
-    friend class Time_events;
-    friend class Renewal_data;
+    friend class TimeEvents;
+    friend class RenewalData;
     friend class Curves;
-    friend class Chain_data;
-    friend class Nonparametric_sequence_process;
+    friend class ChainData;
+    friend class NonparametricSequenceProcess;
     friend class Nonparametric_tree_process;
-    friend class Parametric_process;
-    friend class Markov;
-    friend class Markov_data;
-    friend class Hidden_markov;
-    friend class Variable_order_markov;
-    friend class Variable_order_markov_data;
-    friend class Hidden_variable_order_markov;
-    friend class Semi_markov;
-    friend class Semi_markov_data;
-    friend class Hidden_semi_markov;
+    friend class DiscreteParametricProcess;
+    friend class NonhomogeneousMarkov;
+    friend class NonhomogeneousMarkovData;
+    friend class VariableOrderMarkov;
+    friend class VariableOrderMarkovData;
+    friend class HiddenVariableOrderMarkov;
+    friend class SemiMarkov;
+    friend class SemiMarkovData;
+    friend class HiddenSemiMarkov;
     friend class Sequences;
-    friend class Sequence_characteristics;
-    friend class Markovian_sequences;
-    friend class Top_parameters;
+    friend class SequenceCharacteristics;
+    friend class MarkovianSequences;
+    friend class TopParameters;
     friend class Tops; */
 
-    friend Distribution_data* histogram_ascii_read(Format_error &error , const char *path);
+    friend DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error ,
+                                                                       const char *path);
 
     friend bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                            double *scale , int *dist_nb_value , int nb_histo ,
-                           const Histogram **histo , int *index_dist);
+                           const FrequencyDistribution **histo , int *index_dist);
 
 // protected :
 public :
 
-    void shift(const Histogram &histo , int shift_param);
-    void cluster(const Histogram &histo , int step , int mode);
+    void shift(const FrequencyDistribution &histo , int shift_param);
+    void cluster(const FrequencyDistribution &histo , int step , int mode);
 
     std::ostream& ascii_print(std::ostream &os , int comment_flag = false , bool cumul_flag = false) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
@@ -766,7 +777,7 @@ public :
     std::ostream& spreadsheet_print(std::ostream &os , bool cumul_flag = false ,
                                     bool concentration_flag = false) const;
     bool plot_print(const char *path , int nb_histo = 0 ,
-                    const Histogram **histo = NULL) const;
+                    const FrequencyDistribution **histo = NULL) const;
     bool plot_print(const char *path , double *cumul , double *concentration ,
                     double shift = 0.) const;
     bool survival_plot_print(const char *path , double *survivor) const;
@@ -790,124 +801,131 @@ public :
     double* survivor_function_computation(double scale = D_DEFAULT) const;
     double* concentration_function_computation(double scale = D_DEFAULT) const;
 
-    Test* kruskal_wallis_test(int nb_histo , const Histogram **ihisto) const;
+    Test* kruskal_wallis_test(int nb_histo , const FrequencyDistribution **ihisto) const;
 
     std::ostream& dissimilarity_ascii_write(std::ostream &os , int nb_histo ,
-                                            const Histogram **ihisto ,
+                                            const FrequencyDistribution **ihisto ,
                                             int type , double **dissimilarity) const;
-    bool dissimilarity_ascii_write(Format_error &error , const char *path ,
-                                   int nb_histo , const Histogram **ihisto ,
+    bool dissimilarity_ascii_write(StatError &error , const char *path ,
+                                   int nb_histo , const FrequencyDistribution **ihisto ,
                                    int type , double **dissimilarity) const;
-    bool dissimilarity_spreadsheet_write(Format_error &error , const char *path ,
-                                         int nb_histo , const Histogram **ihisto ,
+    bool dissimilarity_spreadsheet_write(StatError &error , const char *path ,
+                                         int nb_histo , const FrequencyDistribution **ihisto ,
                                          int type , double **dissimilarity) const;
 
     void update(const Reestimation<double> *reestim , int inb_element);
-    Histogram* frequency_scale(int inb_element) const;
+    FrequencyDistribution* frequency_scale(int inb_element) const;
     double* rank_computation() const;
 
-    Parametric* parametric_estimation(int ident , int min_inf_bound = 0 , bool flag = true ,
-                                      double cumul_threshold = CUMUL_THRESHOLD) const;
+    DiscreteParametric* parametric_estimation(int ident , int min_inf_bound = 0 , bool flag = true ,
+                                              double cumul_threshold = CUMUL_THRESHOLD) const;
 
 // public :
 
-    Histogram(int inb_value = 0)
+    FrequencyDistribution(int inb_value = 0)
     :Reestimation<int>(inb_value) {}
-    Histogram(const Distribution &dist)
+    FrequencyDistribution(const Distribution &dist)
     :Reestimation<int>(dist.nb_value) {}
-    Histogram(int inb_element , int *pelement);
-    Histogram(int nb_histo , const Histogram **histo)
+    FrequencyDistribution(int inb_element , int *pelement);
+    FrequencyDistribution(int nb_histo , const FrequencyDistribution **histo)
     :Reestimation<int>(nb_histo , (const Reestimation<int>**)histo) {}
-    Histogram(const Histogram &histo , char transform , int param , int mode = FLOOR);
+    FrequencyDistribution(const FrequencyDistribution &histo , char transform ,
+                          int param , int mode = FLOOR);
 
-    bool operator==(const Histogram&) const;
-    bool operator!=(const Histogram &histo) const { return !(*this == histo); }
+    bool operator==(const FrequencyDistribution&) const;
+    bool operator!=(const FrequencyDistribution &histo) const { return !(*this == histo); }
 
-    Distribution_data* shift(Format_error &error , int shift_param) const;
-    Distribution_data* cluster(Format_error &error , int step , int mode = FLOOR) const;
-    Distribution_data* cluster(Format_error &error , double ratio , std::ostream &os) const;
-    Distribution_data* cluster(Format_error &error , int nb_class , int *ilimit) const;
-    Distribution_data* transcode(Format_error &error , int *isymbol) const;
-    Distribution_data* value_select(Format_error &error , int min_value ,
-                                    int max_value , bool keep = true) const;
+    DiscreteDistributionData* shift(StatError &error , int shift_param) const;
+    DiscreteDistributionData* cluster(StatError &error , int step , int mode = FLOOR) const;
+    DiscreteDistributionData* cluster(StatError &error , double ratio , std::ostream &os) const;
+    DiscreteDistributionData* cluster(StatError &error , int nb_class , int *ilimit) const;
+    DiscreteDistributionData* transcode(StatError &error , int *isymbol) const;
+    DiscreteDistributionData* value_select(StatError &error , int min_value ,
+                                           int max_value , bool keep = true) const;
 
-    Time_events* build_time_events(Format_error &error , int itime) const;  // sequence_analysis
+    TimeEvents* build_time_events(StatError &error , int itime) const;  // sequence_analysis
 
-    bool ascii_write(Format_error &error , const char *path) const;
+    bool ascii_write(StatError &error , const char *path) const;
 
-    bool plot_write(Format_error &error , const char *prefix , int nb_histo ,
-                    const Histogram **ihisto , const char *title) const;
+    bool plot_write(StatError &error , const char *prefix , int nb_histo ,
+                    const FrequencyDistribution **ihisto , const char *title) const;
 
     MultiPlotSet* get_plotable() const;
-    MultiPlotSet* get_plotable_histograms(Format_error &error , int nb_histo ,
-                                          const Histogram **ihisto) const;
+    MultiPlotSet* get_plotable_frequency_distributions(StatError &error , int nb_histo ,
+                                                       const FrequencyDistribution **ihisto) const;
 
     std::ostream& survival_ascii_write(std::ostream &os) const;
-    bool survival_ascii_write(Format_error &error , const char *path) const;
-    bool survival_spreadsheet_write(Format_error &error , const char *path) const;
-    bool survival_plot_write(Format_error &error , const char *prefix ,
+    bool survival_ascii_write(StatError &error , const char *path) const;
+    bool survival_spreadsheet_write(StatError &error , const char *path) const;
+    bool survival_plot_write(StatError &error , const char *prefix ,
                              const char *title = NULL) const;
-    MultiPlotSet* survival_get_plotable(Format_error &error) const;
+    MultiPlotSet* survival_get_plotable(StatError &error) const;
 
-    bool comparison(Format_error &error , std::ostream &os , int nb_histo ,
-                    const Histogram **ihisto , int type , const char *path = NULL ,
+    bool comparison(StatError &error , std::ostream &os , int nb_histo ,
+                    const FrequencyDistribution **ihisto , int type , const char *path = NULL ,
                     char format = 'a') const;
 
-    void F_comparison(std::ostream &os , const Histogram &histo) const;
-    void t_comparison(std::ostream &os , const Histogram &histo) const;
-    bool wilcoxon_mann_whitney_comparison(Format_error &error , std::ostream &os ,
-                                          const Histogram &ihisto) const;
+    void F_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
+    void t_comparison(std::ostream &os , const FrequencyDistribution &histo) const;
+    bool wilcoxon_mann_whitney_comparison(StatError &error , std::ostream &os ,
+                                          const FrequencyDistribution &ihisto) const;
 
-    Parametric_model* fit(Format_error &error , const Parametric &idist) const;
+    DiscreteParametricModel* fit(StatError &error , const DiscreteParametric &idist) const;
 
-    Parametric_model* parametric_estimation(Format_error &error , int ident ,
-                                            int min_inf_bound = 0 , bool flag = true ,
-                                            double cumul_threshold = CUMUL_THRESHOLD) const;
-    Parametric_model* type_parametric_estimation(Format_error &error ,
-                                                 int min_inf_bound = 0 , bool flag = true ,
-                                                 double cumul_threshold = CUMUL_THRESHOLD) const;
+    DiscreteParametricModel* parametric_estimation(StatError &error , int ident ,
+                                                   int min_inf_bound = 0 , bool flag = true ,
+                                                   double cumul_threshold = CUMUL_THRESHOLD) const;
+    DiscreteParametricModel* type_parametric_estimation(StatError &error ,
+                                                        int min_inf_bound = 0 , bool flag = true ,
+                                                        double cumul_threshold = CUMUL_THRESHOLD) const;
 
-    Mixture* mixture_estimation(Format_error &error , const Mixture &imixt , bool *estimate ,
+    Mixture* mixture_estimation(StatError &error , const Mixture &imixt , bool *estimate ,
                                 int min_inf_bound = 0 , bool mixt_flag = true ,
                                 bool component_flag = true , double weight_step = 0.1) const;
-    Mixture* mixture_estimation(Format_error &error , const Mixture &imixt ,
+    Mixture* mixture_estimation(StatError &error , const Mixture &imixt ,
                                 int min_inf_bound = 0 , bool mixt_flag = true ,
                                 bool component_flag = true , double weight_step = 0.1) const;
-    Mixture* mixture_estimation(Format_error &error , int nb_component , int *ident ,
+    Mixture* mixture_estimation(StatError &error , int nb_component , int *ident ,
                                 int min_inf_bound = 0 , bool mixt_flag = true ,
                                 bool component_flag = true , double weight_step = 0.1) const;
-    Mixture* mixture_estimation(Format_error &error , std::ostream &os , int min_nb_component ,
+    Mixture* mixture_estimation(StatError &error , std::ostream &os , int min_nb_component ,
                                 int max_nb_component , int *ident , int min_inf_bound = 0 ,
                                 bool mixt_flag = true , bool component_flag = true ,
                                 int penalty_type = BICc , double weight_step = 0.1) const;
 
-    Convolution* convolution_estimation(Format_error &error , std::ostream &os , const Parametric &known_dist ,
-                                        const Parametric &unknown_dist , int estimator = LIKELIHOOD ,
+    Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
+                                        const DiscreteParametric &unknown_dist , int estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
-    Convolution* convolution_estimation(Format_error &error , std::ostream &os , const Parametric &known_dist ,
+    Convolution* convolution_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
                                         int min_inf_bound , int estimator = LIKELIHOOD ,
                                         int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
-    Compound* compound_estimation(Format_error &error , std::ostream &os , const Parametric &sum_dist ,
-                                  const Parametric &dist , char type , int estimator = LIKELIHOOD ,
+    Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &sum_dist ,
+                                  const DiscreteParametric &dist , char type , int estimator = LIKELIHOOD ,
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
-    Compound* compound_estimation(Format_error &error , std::ostream &os , const Parametric &known_dist ,
+    Compound* compound_estimation(StatError &error , std::ostream &os , const DiscreteParametric &known_dist ,
                                   char type , int min_inf_bound = 0 , int estimator = LIKELIHOOD ,
                                   int nb_iter = I_DEFAULT , double weight = D_DEFAULT ,
                                   int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,                                 const Histogram &forward , const Histogram *no_event ,
-                                 const Parametric &iinter_event , int estimator = LIKELIHOOD ,
-                                 int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
-                                 double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
-                                 int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
-    Parametric_model* estimation(Format_error &error , std::ostream &os , const Histogram &backward ,                                 const Histogram &forward , const Histogram *no_event ,
-                                 int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-                                 int mean_computation = COMPUTED , double weight = D_DEFAULT ,
-                                 int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
+    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
+                                        const FrequencyDistribution &backward ,
+                                        const FrequencyDistribution &forward ,
+                                        const FrequencyDistribution *no_event ,
+                                        const DiscreteParametric &iinter_event , int estimator = LIKELIHOOD ,
+                                        int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
+                                        double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
+                                        int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
+    DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
+                                        const FrequencyDistribution &backward ,
+                                        const FrequencyDistribution &forward ,
+                                        const FrequencyDistribution *no_event ,
+                                        int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
+                                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
     // acces membres de la classe
 
@@ -923,11 +941,11 @@ public :
 };
 
 
-Distribution_data* histogram_ascii_read(Format_error &error , const char *path);
+DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , const char *path);
 
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
-                const Histogram **histo , int *index_dist);
+                const FrequencyDistribution **histo , int *index_dist);
 
 
 
