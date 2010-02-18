@@ -60,7 +60,7 @@ BOOST_PYTHON_MODULE(_stat_tool)
 
 
   class_constant();
-  class_format_error();
+  class_stat_error();
   class_stat_interface();
 
   class_regression_kernel();
@@ -69,20 +69,18 @@ BOOST_PYTHON_MODULE(_stat_tool)
   class_vectors();
   class_vectordistance();
 
-
   class_distance_matrix();
   class_cluster();
   class_dendrogram();
 
   class_distribution();
-  class_parametric();
-  class_parametric_model();
+  class_discrete_parametric();
+  class_discrete_parametric_model();
 
   // depends on parametric
   class_forward();
 
-
-  class_histogram();
+  class_frequency_distribution();
   class_distribution_data();
 
   class_mixture();
