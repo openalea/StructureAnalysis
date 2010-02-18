@@ -408,7 +408,7 @@ void class_discrete_parametric_model()
 
   // DiscreteParametricModel
   class_< DiscreteParametricModel, bases< DiscreteParametric, StatInterface > >
-  ("_ParametricModel", "Parametric model", init <const FrequencyDistribution& >())
+  ("_DiscreteParametricModel", "Parametric model", init <const FrequencyDistribution& >())
 
   .def(init< int, int, int, double, double, optional< double > >())
   // this constructor clashes with the previous one and fail to pass tests.
