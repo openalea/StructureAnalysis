@@ -47,13 +47,13 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Format_error.
+ *  Constructeur de la classe StatError.
  *
  *  argument : nombre maximum d'erreurs.
  *
  *--------------------------------------------------------------*/
 
-Format_error::Format_error(int imax_nb_error)
+StatError::StatError(int imax_nb_error)
 
 {
   register int i;
@@ -74,11 +74,11 @@ Format_error::Format_error(int imax_nb_error)
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Format_error.
+ *  Destructeur de la classe StatError.
  *
  *--------------------------------------------------------------*/
 
-Format_error::~Format_error()
+StatError::~StatError()
 
 {
   register int i;
@@ -98,13 +98,13 @@ Format_error::~Format_error()
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Format_error.
+ *  Ecriture d'un objet StatError.
  *
  *  arguments : stream, type des erreurs (ERROR / WARNING).
  *
  *--------------------------------------------------------------*/
 
-ostream& Format_error::ascii_write(ostream &os , int type) const
+ostream& StatError::ascii_write(ostream &os , int type) const
 
 {
   register int i;
@@ -139,13 +139,13 @@ ostream& Format_error::ascii_write(ostream &os , int type) const
 
 /*--------------------------------------------------------------*
  *
- *  Mise a jour d'un objet Format_error.
+ *  Mise a jour d'un objet StatError.
  *
  *  arguments : label, ligne, colonne.
  *
  *--------------------------------------------------------------*/
 
-void Format_error::update(const char *ilabel , int iline , int icolumn)
+void StatError::update(const char *ilabel , int iline , int icolumn)
 
 {
   if (nb_error < max_nb_error) {
@@ -159,14 +159,14 @@ void Format_error::update(const char *ilabel , int iline , int icolumn)
 
 /*--------------------------------------------------------------*
  *
- *  Mise a jour d'un objet Format_error.
+ *  Mise a jour d'un objet StatError.
  *
  *  arguments : label, correction, ligne, colonne.
  *
  *--------------------------------------------------------------*/
 
-void Format_error::correction_update(const char *ilabel , const char *correction ,
-                                     int iline , int icolumn)
+void StatError::correction_update(const char *ilabel , const char *correction ,
+                                  int iline , int icolumn)
 
 {
   if (nb_error < max_nb_error) {
@@ -185,14 +185,14 @@ void Format_error::correction_update(const char *ilabel , const char *correction
 
 /*--------------------------------------------------------------*
  *
- *  Mise a jour d'un objet Format_error.
+ *  Mise a jour d'un objet StatError.
  *
  *  arguments : label, correction, ligne, colonne.
  *
  *--------------------------------------------------------------*/
 
-void Format_error::correction_update(const char *ilabel , int correction ,
-                                     int iline , int icolumn)
+void StatError::correction_update(const char *ilabel , int correction ,
+                                  int iline , int icolumn)
 
 {
   if (nb_error < max_nb_error) {
