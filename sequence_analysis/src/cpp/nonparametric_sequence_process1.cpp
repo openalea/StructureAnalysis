@@ -52,7 +52,7 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  creation des lois d'un objet Nonparametric_sequence_process
+ *  creation des lois d'un objet NonparametricSequenceProcess
  *  a l'exception des lois d'observation.
  *
  *  arguments : loi des longueurs des sequences, homogeneite des etats,
@@ -60,9 +60,9 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_sequence_process::create_characteristic(const Distribution &ilength ,
-                                                           bool *homogeneity ,
-                                                           bool counting_flag)
+void NonparametricSequenceProcess::create_characteristic(const Distribution &ilength ,
+                                                         bool *homogeneity ,
+                                                         bool counting_flag)
 
 {
   bool homogeneous = true;
@@ -115,12 +115,12 @@ void Nonparametric_sequence_process::create_characteristic(const Distribution &i
     }
   }
   else {
-    sojourn_time = new Parametric*[nb_value];
+    sojourn_time = new DiscreteParametric*[nb_value];
   }
 
   for (i = 0;i < nb_value;i++) {
     if (homogeneity[i]) {
-      sojourn_time[i] = new Parametric(NB_VALUE);
+      sojourn_time[i] = new DiscreteParametric(NB_VALUE);
     }
     else {
       sojourn_time[i] = NULL;
@@ -184,7 +184,7 @@ void Nonparametric_sequence_process::create_characteristic(const Distribution &i
 
 /*--------------------------------------------------------------*
  *
- *  creation des lois d'un objet Nonparametric_sequence_process
+ *  creation des lois d'un objet NonparametricSequenceProcess
  *  a l'exception des lois d'observation.
  *
  *  arguments : loi des longueurs des sequences, flags sur les lois
@@ -192,8 +192,8 @@ void Nonparametric_sequence_process::create_characteristic(const Distribution &i
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_sequence_process::create_characteristic(const Distribution &ilength ,
-                                                           bool sojourn_time_flag , bool counting_flag)
+void NonparametricSequenceProcess::create_characteristic(const Distribution &ilength ,
+                                                         bool sojourn_time_flag , bool counting_flag)
 
 {
   register int i;
@@ -267,11 +267,11 @@ void Nonparametric_sequence_process::create_characteristic(const Distribution &i
       }
     }
     else {
-      sojourn_time = new Parametric*[nb_value];
+      sojourn_time = new DiscreteParametric*[nb_value];
     }
 
     for (i = 0;i < nb_value;i++) {
-      sojourn_time[i] = new Parametric(NB_VALUE);
+      sojourn_time[i] = new DiscreteParametric(NB_VALUE);
     }
   }
 
@@ -308,16 +308,16 @@ void Nonparametric_sequence_process::create_characteristic(const Distribution &i
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonparametric_sequence_process.
+ *  Constructeur de la classe NonparametricSequenceProcess.
  *
  *  arguments : nombre d'etats, nombre de valeurs,
  *              flag sur les lois d'observation.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , int inb_value ,
-                                                               int observation_flag)
-:Nonparametric_process(inb_state , inb_value , observation_flag)
+NonparametricSequenceProcess::NonparametricSequenceProcess(int inb_state , int inb_value ,
+                                                           int observation_flag)
+:NonparametricProcess(inb_state , inb_value , observation_flag)
 
 {
   length = NULL;
@@ -335,13 +335,14 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , i
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonparametric_sequence_process.
+ *  Constructeur de la classe NonparametricSequenceProcess.
  *
  *  arguments : nombre d'etats, lois d'occupation des etats.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , Parametric **occupancy)
+NonparametricSequenceProcess::NonparametricSequenceProcess(int inb_state ,
+                                                           DiscreteParametric **occupancy)
 
 {
   register int i;
@@ -360,10 +361,10 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , P
   recurrence_time = NULL;
 
   absorption = new double[nb_state];
-  sojourn_time = new Parametric*[nb_state];
+  sojourn_time = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
     if (occupancy[i]) {
-      sojourn_time[i] = new Parametric(*occupancy[i]);
+      sojourn_time[i] = new DiscreteParametric(*occupancy[i]);
     }
     else {
       sojourn_time[i] = NULL;
@@ -377,15 +378,15 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(int inb_state , P
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Nonparametric_sequence_process a partir
- *  d'un objet Nonparametric_process.
+ *  Construction d'un objet NonparametricSequenceProcess a partir
+ *  d'un objet NonparametricProcess.
  *
- *  argument : reference sur un objet Nonparametric_process.
+ *  argument : reference sur un objet NonparametricProcess.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_sequence_process::Nonparametric_sequence_process(const Nonparametric_process &process)
-:Nonparametric_process(process)
+NonparametricSequenceProcess::NonparametricSequenceProcess(const NonparametricProcess &process)
+:NonparametricProcess(process)
 
 {
   length = NULL;
@@ -403,15 +404,15 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(const Nonparametr
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Nonparametric_sequence_process.
+ *  Copie d'un objet NonparametricSequenceProcess.
  *
- *  arguments : reference sur un objet Nonparametric_sequence_process,
+ *  arguments : reference sur un objet NonparametricSequenceProcess,
  *              flag copie des lois caracteristiques.
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &process ,
-                                          bool characteristic_flag)
+void NonparametricSequenceProcess::copy(const NonparametricSequenceProcess &process ,
+                                        bool characteristic_flag)
 
 {
   if (characteristic_flag) {
@@ -488,10 +489,10 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
     }
 
     if (process.sojourn_time) {
-      sojourn_time = new Parametric*[nb_value];
+      sojourn_time = new DiscreteParametric*[nb_value];
       for (i = 0;i < nb_value;i++) {
         if (process.sojourn_time[i]) {
-          sojourn_time[i] = new Parametric(*(process.sojourn_time[i]));
+          sojourn_time[i] = new DiscreteParametric(*(process.sojourn_time[i]));
         }
         else {
           sojourn_time[i] = NULL;
@@ -542,13 +543,13 @@ void Nonparametric_sequence_process::copy(const Nonparametric_sequence_process &
  *
  *  Copie des lois d'occupation des etats.
  *
- *  arguments : reference sur un objet Nonparametric_sequence_process,
+ *  arguments : reference sur un objet NonparametricSequenceProcess,
  *              nombre de valeurs allouees pour les lois d'occupation des etats.
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_sequence_process::init_occupancy(const Nonparametric_sequence_process &process ,
-                                                    int occupancy_nb_value)
+void NonparametricSequenceProcess::init_occupancy(const NonparametricSequenceProcess &process ,
+                                                  int occupancy_nb_value)
 
 {
   register int i;
@@ -567,11 +568,12 @@ void Nonparametric_sequence_process::init_occupancy(const Nonparametric_sequence
   recurrence_time = NULL;
 
   absorption = new double[nb_value];
-  sojourn_time = new Parametric*[nb_value];
+  sojourn_time = new DiscreteParametric*[nb_value];
   for (i = 0;i < nb_value;i++) {
     absorption[i] = process.absorption[i];
     if ((process.sojourn_time[i]) && (process.sojourn_time[i]->ident != NONPARAMETRIC)) {
-      sojourn_time[i] = new Parametric(*(process.sojourn_time[i]) , 'c' , occupancy_nb_value);
+      sojourn_time[i] = new DiscreteParametric(*(process.sojourn_time[i]) ,
+                                               'c' , occupancy_nb_value);
     }
     else {
       sojourn_time[i] = NULL;
@@ -585,9 +587,9 @@ void Nonparametric_sequence_process::init_occupancy(const Nonparametric_sequence
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Nonparametric_sequence_process.
+ *  Constructeur par copie de la classe NonparametricSequenceProcess.
  *
- *  arguments : reference sur un objet Nonparametric_sequence_process,
+ *  arguments : reference sur un objet NonparametricSequenceProcess,
  *              type de manipulation ('c' : copy, 's' : state, 'o' :occupancy),
  *              parametre (flag sur le calcul des lois caracteristiques /
  *              nombre de valeurs allouees pour les lois d'occupation des etats /
@@ -595,14 +597,14 @@ void Nonparametric_sequence_process::init_occupancy(const Nonparametric_sequence
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_sequence_process::Nonparametric_sequence_process(const Nonparametric_sequence_process &process ,
-                                                               char manip , int param)
+NonparametricSequenceProcess::NonparametricSequenceProcess(const NonparametricSequenceProcess &process ,
+                                                           char manip , int param)
 
 {
   switch (manip) {
 
   case 'c' : {
-    Nonparametric_process::copy(process);
+    NonparametricProcess::copy(process);
     copy(process , param);
     break;
   }
@@ -633,11 +635,11 @@ Nonparametric_sequence_process::Nonparametric_sequence_process(const Nonparametr
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Nonparametric_sequence_process.
+ *  Destruction des champs d'un objet NonparametricSequenceProcess.
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_sequence_process::remove()
+void NonparametricSequenceProcess::remove()
 
 {
   register int i;
@@ -722,11 +724,11 @@ void Nonparametric_sequence_process::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Nonparametric_sequence_process.
+ *  Destructeur de la classe NonparametricSequenceProcess.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_sequence_process::~Nonparametric_sequence_process()
+NonparametricSequenceProcess::~NonparametricSequenceProcess()
 
 {
   remove();
@@ -735,20 +737,20 @@ Nonparametric_sequence_process::~Nonparametric_sequence_process()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Nonparametric_sequence_process.
+ *  Operateur d'assignement de la classe NonparametricSequenceProcess.
  *
- *  argument : reference sur un objet Nonparametric_sequence_process.
+ *  argument : reference sur un objet NonparametricSequenceProcess.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_sequence_process& Nonparametric_sequence_process::operator=(const Nonparametric_sequence_process &process)
+NonparametricSequenceProcess& NonparametricSequenceProcess::operator=(const NonparametricSequenceProcess &process)
 
 {
   if (&process != this) {
     remove();
-    Nonparametric_process::remove();
+    NonparametricProcess::remove();
 
-    Nonparametric_process::copy(process);
+    NonparametricProcess::copy(process);
     copy(process);
   }
 
@@ -764,7 +766,7 @@ Nonparametric_sequence_process& Nonparametric_sequence_process::operator=(const 
  *
  *--------------------------------------------------------------*/
 
-bool test_hidden(int nb_output_process , Nonparametric_sequence_process **process)
+bool test_hidden(int nb_output_process , NonparametricSequenceProcess **process)
 
 {
   bool hidden = false;
@@ -793,15 +795,15 @@ bool test_hidden(int nb_output_process , Nonparametric_sequence_process **proces
  *
  *  Analyse du format des lois d'occupation des etats.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue et sur un objet Chain,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Nonparametric_sequence_process* occupancy_parsing(Format_error &error , ifstream &in_file ,
-                                                  int &line , const Chain &chain ,
-                                                  double cumul_threshold)
+NonparametricSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
+                                                int &line , const Chain &chain ,
+                                                double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -810,13 +812,13 @@ Nonparametric_sequence_process* occupancy_parsing(Format_error &error , ifstream
   bool status = true , lstatus;
   register int i , j;
   long index;
-  Parametric **dist;
-  Nonparametric_sequence_process *process;
+  DiscreteParametric **dist;
+  NonparametricSequenceProcess *process;
 
 
   process = NULL;
 
-  dist = new Parametric*[chain.nb_state];
+  dist = new DiscreteParametric*[chain.nb_state];
   for (i = 0;i < chain.nb_state;i++) {
     dist[i] = NULL;
   }
@@ -886,8 +888,8 @@ Nonparametric_sequence_process* occupancy_parsing(Format_error &error , ifstream
             error.update(STAT_parsing[STATP_FORMAT] , line);
           }
 
-          dist[i] = parametric_parsing(error , in_file , line , UNIFORM ,
-                                       cumul_threshold , 1);
+          dist[i] = discrete_parametric_parsing(error , in_file , line , UNIFORM ,
+                                                cumul_threshold , 1);
           if (!dist[i]) {
             status = false;
           }
@@ -903,7 +905,7 @@ Nonparametric_sequence_process* occupancy_parsing(Format_error &error , ifstream
   }
 
   if (status) {
-    process = new Nonparametric_sequence_process(chain.nb_state , dist);
+    process = new NonparametricSequenceProcess(chain.nb_state , dist);
   }
 
   for (i = 0;i < chain.nb_state;i++) {
