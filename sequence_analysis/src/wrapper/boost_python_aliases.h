@@ -19,7 +19,7 @@
 // OUTPUT_TYPE: type returned by METHOD_NAME
 // optional list of arguments to be used by METHOD_NAME
 #define SIMPLE_METHOD_TEMPLATE_1(INPUT, METHOD_NAME, OUTPUT_TYPE, ...)\
-    Format_error error; \
+    StatError error; \
     OUTPUT_TYPE* ret;\
     ret = INPUT.METHOD_NAME(error, __VA_ARGS__ );\
     if (!ret)\
@@ -27,7 +27,7 @@
     return ret;\
 
 #define SIMPLE_METHOD_TEMPLATE_0(INPUT, METHOD_NAME, OUTPUT_TYPE)\
-    Format_error error; \
+    StatError error; \
     OUTPUT_TYPE* ret;\
     ret = INPUT.METHOD_NAME(error);\
     if (!ret)\
@@ -47,12 +47,12 @@
 
 // !! don't use if TYPE=bool
 #define HEADER(TYPE) \
-    Format_error error; \
+    StatError error; \
     TYPE* ret;\
 
 
 #define HEADER_OS(TYPE) \
-    Format_error error; \
+    StatError error; \
     TYPE* ret;\
     std::stringstream os;\
 
