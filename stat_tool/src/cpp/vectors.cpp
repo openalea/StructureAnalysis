@@ -125,7 +125,7 @@ void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = itype[i];
@@ -197,7 +197,7 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
-    build_marginal_histogram(i);
+    build_marginal_frequency_distribution(i);
   }
 
   covariance_computation();
@@ -274,7 +274,7 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = vec.type[i];
@@ -302,7 +302,7 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
-    build_marginal_histogram(i);
+    build_marginal_frequency_distribution(i);
   }
 
   covariance_computation();
@@ -335,7 +335,7 @@ void Vectors::copy(const Vectors &vec)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = vec.type[i];
@@ -343,7 +343,7 @@ void Vectors::copy(const Vectors &vec)
     max_value[i] = vec.max_value[i];
 
     if (vec.marginal[i]) {
-      marginal[i] = new Histogram(*(vec.marginal[i]));
+      marginal[i] = new FrequencyDistribution(*(vec.marginal[i]));
     }
     else {
       marginal[i] = NULL;
@@ -488,15 +488,15 @@ void Vectors::build_real_vector(int variable)
  *
  *  Extraction de la loi marginale empirique pour une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, variable.
+ *  arguments : reference sur un objet StatError, variable.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Vectors::extract(Format_error &error , int variable) const
+DiscreteDistributionData* Vectors::extract(StatError &error , int variable) const
 
 {
   bool status = true;
-  Distribution_data *histo;
+  DiscreteDistributionData *histo;
 
 
   histo = NULL;
@@ -517,12 +517,12 @@ Distribution_data* Vectors::extract(Format_error &error , int variable) const
 
     else if (!marginal[variable]) {
       status = false;
-      error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+      error.update(STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION]);
     }
   }
 
   if (status) {
-    histo = new Distribution_data(*(marginal[variable]));
+    histo = new DiscreteDistributionData(*(marginal[variable]));
   }
 
   return histo;
@@ -533,12 +533,12 @@ Distribution_data* Vectors::extract(Format_error &error , int variable) const
  *
  *  Verification de la liste complete des identificateurs.
  *
- *  arguments : reference sur un objet Format_error, nombre d'individus,
+ *  arguments : reference sur un objet StatError, nombre d'individus,
  *              identificateurs des individus.
  *
  *--------------------------------------------------------------*/
 
-bool identifier_checking(Format_error &error , int nb_individual , int *identifier)
+bool identifier_checking(StatError &error , int nb_individual , int *identifier)
 
 {
   bool status = true , *selected_identifier;
@@ -581,11 +581,11 @@ bool identifier_checking(Format_error &error , int nb_individual , int *identifi
  *
  *  Verification d'un objet Vectors.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::check(Format_error &error)
+bool Vectors::check(StatError &error)
 
 {
   bool status = true , lstatus;
@@ -611,18 +611,18 @@ bool Vectors::check(Format_error &error)
  *
  *  Fusion d'objets Vectors.
  *
- *  argument : reference sur un objet Format_error, nombre d'objets Vectors,
+ *  argument : reference sur un objet StatError, nombre d'objets Vectors,
  *             pointeurs sur les objets Vectors.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::merge(Format_error &error , int nb_sample , const Vectors **ivec) const
+Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec) const
 
 {
   bool status = true;
   register int i , j , k , m;
   int inb_vector;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   Vectors *vec;
   const Vectors **pvec;
 
@@ -682,7 +682,7 @@ Vectors* Vectors::merge(Format_error &error , int nb_sample , const Vectors **iv
       }
     }
 
-    phisto = new const Histogram*[nb_sample];
+    phisto = new const FrequencyDistribution*[nb_sample];
 
     for (i = 0;i < vec->nb_variable;i++) {
       vec->min_value[i] = pvec[0]->min_value[i];
@@ -706,7 +706,7 @@ Vectors* Vectors::merge(Format_error &error , int nb_sample , const Vectors **iv
       }
 
       if (j == nb_sample) {
-        vec->marginal[i] = new Histogram(nb_sample , phisto);
+        vec->marginal[i] = new FrequencyDistribution(nb_sample , phisto);
         vec->mean[i] = vec->marginal[i]->mean;
         vec->covariance[i][i] = vec->marginal[i]->variance;
       }
@@ -731,12 +731,12 @@ Vectors* Vectors::merge(Format_error &error , int nb_sample , const Vectors **iv
  *
  *  Translation des valeurs d'une variable.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              parametre de translation.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::shift(Format_error &error , int variable , int shift_param) const
+Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
 
 {
   bool status = true;
@@ -819,11 +819,11 @@ Vectors* Vectors::shift(Format_error &error , int variable , int shift_param) co
         if ((vec->type[i] == INT_VALUE) && (vec->min_value[i] >= 0) &&
             (vec->max_value[i] <= MARGINAL_MAX_VALUE)) {
           if (marginal[i]) {
-            vec->marginal[i] = new Histogram(*(marginal[i]) , 's' , shift_param);
+            vec->marginal[i] = new FrequencyDistribution(*(marginal[i]) , 's' , shift_param);
             vec->mean[i] = vec->marginal[i]->mean;
           }
           else {
-            vec->build_marginal_histogram(i);
+            vec->build_marginal_frequency_distribution(i);
           }
         }
 
@@ -837,7 +837,7 @@ Vectors* Vectors::shift(Format_error &error , int variable , int shift_param) co
         vec->max_value[i] = max_value[i];
 
         if (marginal[i]) {
-          vec->marginal[i] = new Histogram(*(marginal[i]));
+          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
         }
         vec->mean[i] = mean[i];
       }
@@ -856,12 +856,12 @@ Vectors* Vectors::shift(Format_error &error , int variable , int shift_param) co
  *
  *  Translation des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              parametre de translation.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::shift(Format_error &error , int variable , double shift_param) const
+Vectors* Vectors::shift(StatError &error , int variable , double shift_param) const
 
 {
   bool status = true;
@@ -928,7 +928,7 @@ Vectors* Vectors::shift(Format_error &error , int variable , double shift_param)
         vec->max_value[i] = max_value[i];
 
         if (marginal[i]) {
-          vec->marginal[i] = new Histogram(*(marginal[i]));
+          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
         }
         vec->mean[i] = mean[i];
       }
@@ -947,12 +947,12 @@ Vectors* Vectors::shift(Format_error &error , int variable , double shift_param)
  *
  *  Regroupement des valeurs d'une variable.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::cluster(Format_error &error , int variable , int step , int mode) const
+Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode) const
 
 {
   bool status = true;
@@ -1048,12 +1048,12 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int step , int mo
           }
 
           if (marginal[i]) {
-            vec->marginal[i] = new Histogram(*(marginal[i]) , 'c' , step , mode);
+            vec->marginal[i] = new FrequencyDistribution(*(marginal[i]) , 'c' , step , mode);
             vec->mean[i] = vec->marginal[i]->mean;
             vec->covariance[i][i] = vec->marginal[i]->variance;
           }
           else {
-            vec->build_marginal_histogram(i);
+            vec->build_marginal_frequency_distribution(i);
           }
         }
 
@@ -1071,7 +1071,7 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int step , int mo
         vec->max_value[i] = max_value[i];
 
         if (marginal[i]) {
-          vec->marginal[i] = new Histogram(*(marginal[i]));
+          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
         }
         vec->mean[i] = mean[i];
         for (j = 0;j < vec->nb_variable;j++) {
@@ -1133,7 +1133,7 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
       min_value[i] = min_symbol;
       max_value[i] = max_symbol;
 
-      build_marginal_histogram(i);
+      build_marginal_frequency_distribution(i);
     }
 
     else {
@@ -1141,7 +1141,7 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
       max_value[i] = vec.max_value[i];
 
       if (vec.marginal[i]) {
-        marginal[i] = new Histogram(*(vec.marginal[i]));
+        marginal[i] = new FrequencyDistribution(*(vec.marginal[i]));
       }
       mean[i] = vec.mean[i];
       for (j = 0;j < nb_variable;j++) {
@@ -1158,12 +1158,12 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
  *
  *  Transcodage des symboles d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              table de transcodage des symboles.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::transcode(Format_error &error , int variable , int *symbol) const
+Vectors* Vectors::transcode(StatError &error , int variable , int *symbol) const
 
 {
   bool status = true , *presence;
@@ -1252,12 +1252,12 @@ Vectors* Vectors::transcode(Format_error &error , int variable , int *symbol) co
  *
  *  Regroupement des valeurs d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre de classes, bornes pour regrouper les valeurs.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::cluster(Format_error &error , int variable , int nb_class ,
+Vectors* Vectors::cluster(StatError &error , int variable , int nb_class ,
                           int *ilimit) const
 
 {
@@ -1408,7 +1408,7 @@ void Vectors::cluster(const Vectors &vec , int variable , int nb_class ,
       min_value_computation(i);
       max_value_computation(i);
 
-      build_marginal_histogram(i);
+      build_marginal_frequency_distribution(i);
     }
 
     else {
@@ -1416,7 +1416,7 @@ void Vectors::cluster(const Vectors &vec , int variable , int nb_class ,
       max_value[i] = vec.max_value[i];
 
       if (vec.marginal[i]) {
-        marginal[i] = new Histogram(*(vec.marginal[i]));
+        marginal[i] = new FrequencyDistribution(*(vec.marginal[i]));
       }
       mean[i] = vec.mean[i];
       for (j = 0;j < nb_variable;j++) {
@@ -1433,12 +1433,12 @@ void Vectors::cluster(const Vectors &vec , int variable , int nb_class ,
  *
  *  Regroupement des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre de classes, bornes pour regrouper les valeurs.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::cluster(Format_error &error , int variable , int nb_class ,
+Vectors* Vectors::cluster(StatError &error , int variable , int nb_class ,
                           double *ilimit) const
 
 {
@@ -1510,11 +1510,11 @@ Vectors* Vectors::cluster(Format_error &error , int variable , int nb_class ,
  *
  *  Changement d'unite d'une variable.
  *
- *  arguments : reference sur un objet Format_error, variable, facteur d'echelle.
+ *  arguments : reference sur un objet StatError, variable, facteur d'echelle.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::scaling(Format_error &error , int variable , int scaling_coeff) const
+Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) const
 
 {
   bool status = true;
@@ -1589,7 +1589,7 @@ Vectors* Vectors::scaling(Format_error &error , int variable , int scaling_coeff
         vec->min_value[i] = min_value[i] * scaling_coeff;
         vec->max_value[i] = max_value[i] * scaling_coeff;
 
-        vec->build_marginal_histogram(i);
+        vec->build_marginal_frequency_distribution(i);
       }
 
       else {
@@ -1597,7 +1597,7 @@ Vectors* Vectors::scaling(Format_error &error , int variable , int scaling_coeff
         vec->max_value[i] = max_value[i];
 
         if (marginal[i]) {
-          vec->marginal[i] = new Histogram(*(marginal[i]));
+          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
         }
         vec->mean[i] = mean[i];
         for (j = 0;j < vec->nb_variable;j++) {
@@ -1617,12 +1617,12 @@ Vectors* Vectors::scaling(Format_error &error , int variable , int scaling_coeff
  *
  *  Arrondi des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::round(Format_error &error , int variable , int mode) const
+Vectors* Vectors::round(StatError &error , int variable , int mode) const
 
 {
   bool status = true;
@@ -1746,7 +1746,7 @@ Vectors* Vectors::round(Format_error &error , int variable , int mode) const
           break;
         }
 
-        vec->build_marginal_histogram(i);
+        vec->build_marginal_frequency_distribution(i);
       }
 
       else {
@@ -1754,7 +1754,7 @@ Vectors* Vectors::round(Format_error &error , int variable , int mode) const
         vec->max_value[i] = max_value[i];
 
         if (marginal[i]) {
-          vec->marginal[i] = new Histogram(*(marginal[i]));
+          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
         }
         vec->mean[i] = mean[i];
         for (j = 0;j < vec->nb_variable;j++) {
@@ -1774,13 +1774,13 @@ Vectors* Vectors::round(Format_error &error , int variable , int mode) const
  *
  *  Selection de vecteurs sur les valeurs prises par une variable.
  *
- *  arguments : reference sur un objet Format_error, stream, indice de la variable,
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les vecteurs selectionnes.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
                                int imin_value , int imax_value , bool keep) const
 
 {
@@ -1882,13 +1882,13 @@ Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable 
  *
  *  Selection de vecteurs sur les valeurs prises par une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, stream, indice de la variable,
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
  *              bornes sur les valeurs, flag pour conserver ou rejeter
  *              les vecteurs selectionnes.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable ,
+Vectors* Vectors::value_select(StatError &error , ostream &os , int variable ,
                                double imin_value , double imax_value , bool keep) const
 
 {
@@ -1977,13 +1977,13 @@ Vectors* Vectors::value_select(Format_error &error , ostream &os , int variable 
  *
  *  Verification d'une liste d'identificateurs.
  *
- *  arguments : reference sur un objet Format_error, nombre d'individus,
+ *  arguments : reference sur un objet StatError, nombre d'individus,
  *              identificateurs des individus, nombre d'individus selectionnes,
  *              identificateurs des individus selectionnes, label du type de donnees.
  *
  *--------------------------------------------------------------*/
 
-bool selected_identifier_checking(Format_error &error , int nb_individual , int *identifier ,
+bool selected_identifier_checking(StatError &error , int nb_individual , int *identifier ,
                                   int nb_selected_individual , int *selected_identifier ,
                                   const char *data_label)
 
@@ -2099,13 +2099,13 @@ int* identifier_select(int nb_individual , int *identifier , int nb_selected_ind
  *
  *  Selection de vecteurs par l'identificateur.
  *
- *  arguments : reference sur un objet Format_error, nombre de vecteurs,
+ *  arguments : reference sur un objet StatError, nombre de vecteurs,
  *              identificateurs des vecteurs, flag pour conserver ou rejeter
  *              les vecteurs selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::select_individual(Format_error &error , int inb_vector ,
+Vectors* Vectors::select_individual(StatError &error , int inb_vector ,
                                     int *iidentifier , bool keep) const
 
 {
@@ -2165,7 +2165,7 @@ void Vectors::select_variable(const Vectors &vec , int *variable)
     max_value[i] = vec.max_value[variable[i]];
 
     if (vec.marginal[variable[i]]) {
-      marginal[i] = new Histogram(*(vec.marginal[variable[i]]));
+      marginal[i] = new FrequencyDistribution(*(vec.marginal[variable[i]]));
     }
     mean[i] = vec.mean[variable[i]];
     for (j = 0;j < nb_variable;j++) {
@@ -2264,13 +2264,13 @@ int* select_variable(int nb_variable , int nb_selected_variable ,
  *
  *  Selection de variables.
  *
- *  arguments : reference sur un objet Format_error, nombre de variables,
+ *  arguments : reference sur un objet StatError, nombre de variables,
  *              indices des variables, flag pour conserver ou rejeter
  *              les variables selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::select_variable(Format_error &error , int inb_variable ,
+Vectors* Vectors::select_variable(StatError &error , int inb_variable ,
                                   int *ivariable , bool keep) const
 
 {
@@ -2342,12 +2342,12 @@ Vectors* Vectors::select_variable(Format_error &error , int inb_variable ,
  *
  *  Concatenation des variables d'objets Vectors.
  *
- *  arguments : reference sur un objet Format_error, nombre d'objets Vectors,
+ *  arguments : reference sur un objet StatError, nombre d'objets Vectors,
  *              pointeurs sur les objets Vectors, echantillon de reference pour les identificateurs.
  *
  *--------------------------------------------------------------*/
 
-Vectors* Vectors::merge_variable(Format_error &error , int nb_sample ,
+Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
                                  const Vectors **ivec , int ref_sample) const
 
 {
@@ -2443,7 +2443,7 @@ Vectors* Vectors::merge_variable(Format_error &error , int nb_sample ,
         vec->max_value[inb_variable] = pvec[i]->max_value[j];
 
         if (pvec[i]->marginal[j]) {
-          vec->marginal[inb_variable] = new Histogram(*(pvec[i]->marginal[j]));
+          vec->marginal[inb_variable] = new FrequencyDistribution(*(pvec[i]->marginal[j]));
         }
         vec->mean[inb_variable] = pvec[i]->mean[j];
         vec->covariance[inb_variable][inb_variable] = pvec[i]->covariance[j][j];
@@ -2465,11 +2465,11 @@ Vectors* Vectors::merge_variable(Format_error &error , int nb_sample ,
  *  Construction d'un objet Vectors a partir d'un fichier.
  *  Format : chaque ligne represente un individu.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-Vectors* vectors_ascii_read(Format_error &error , const char *path)
+Vectors* vectors_ascii_read(StatError &error , const char *path)
 
 {
   RWLocaleSnapshot locale("en");
@@ -2777,7 +2777,7 @@ Vectors* vectors_ascii_read(Format_error &error , const char *path)
       for (i = 0;i < vec->nb_variable;i++) {
         vec->min_value_computation(i);
         vec->max_value_computation(i);
-        vec->build_marginal_histogram(i);
+        vec->build_marginal_frequency_distribution(i);
       }
 
       vec->covariance_computation();
@@ -2848,7 +2848,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
       if (comment_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+      os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
       marginal[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
 
@@ -2857,7 +2857,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         marginal[i]->ascii_print(os , comment_flag);
       }
     }
@@ -3065,12 +3065,12 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Vectors dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::ascii_write(Format_error &error , const char *path ,
+bool Vectors::ascii_write(StatError &error , const char *path ,
                           bool exhaustive) const
 
 {
@@ -3186,12 +3186,12 @@ ostream& Vectors::ascii_data_write(ostream &os , bool exhaustive,
  *
  *  Ecriture d'un objet Vectors dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::ascii_data_write(Format_error &error , const char *path , bool exhaustive) const
+bool Vectors::ascii_data_write(StatError &error , const char *path , bool exhaustive) const
 
 {
   bool status = false;
@@ -3219,11 +3219,11 @@ bool Vectors::ascii_data_write(Format_error &error , const char *path , bool exh
  *
  *  Ecriture d'un objet Vectors dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::spreadsheet_write(Format_error &error , const char *path) const
+bool Vectors::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -3255,10 +3255,10 @@ bool Vectors::spreadsheet_write(Format_error &error , const char *path) const
                << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
 
       if (marginal[i]) {
-        out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+        out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         marginal[i]->spreadsheet_characteristic_print(out_file);
 
-        out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         marginal[i]->spreadsheet_print(out_file);
       }
 
@@ -3400,19 +3400,19 @@ bool Vectors::plot_print(const char *path , double *standard_residual) const
  *
  *  Sortie Gnuplot d'un objet Vectors.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Vectors::plot_write(Format_error &error , const char *prefix ,
+bool Vectors::plot_write(StatError &error , const char *prefix ,
                          const char *title) const
 
 {
   bool status;
   register int i , j , k , m , n;
   int nb_histo , histo_index , **frequency;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   ostringstream data_file_name[2];
 
 
@@ -3428,7 +3428,7 @@ bool Vectors::plot_write(Format_error &error , const char *prefix ,
   }
 
   else {
-    phisto = new const Histogram*[nb_variable];
+    phisto = new const FrequencyDistribution*[nb_variable];
 
     nb_histo = 0;
     for (i = 0;i < nb_variable;i++) {
@@ -3508,7 +3508,7 @@ bool Vectors::plot_write(Format_error &error , const char *prefix ,
                    << (int)(marginal[i]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[1].str()).c_str()) << "\" using " << histo_index
                    << " title \"" << STAT_label[STATL_VARIABLE] << " " << i + 1 << " "
-                   << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
+                   << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (marginal[i]->nb_value - 1 < TIC_THRESHOLD) {
@@ -3738,7 +3738,7 @@ MultiPlotSet* Vectors::get_plotable() const
 
       legend.str("");
       legend << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
-             << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+             << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[i][0].legend = legend.str();
 
       plot[i][0].style = "impulses";
@@ -3892,7 +3892,7 @@ void Vectors::max_value_computation(int variable)
  *
  *--------------------------------------------------------------*/
 
-void Vectors::build_marginal_histogram(int variable)
+void Vectors::build_marginal_frequency_distribution(int variable)
 
 {
   if ((type[variable] == INT_VALUE) && (min_value[variable] >= 0) &&
@@ -3900,7 +3900,7 @@ void Vectors::build_marginal_histogram(int variable)
     register int i;
 
 
-    marginal[variable] = new Histogram((int)max_value[variable] + 1);
+    marginal[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
 
     for (i = 0;i < nb_vector;i++) {
       (marginal[variable]->frequency[int_vector[i][variable]])++;
