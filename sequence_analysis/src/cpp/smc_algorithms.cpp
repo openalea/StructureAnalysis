@@ -62,12 +62,12 @@ extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov::initial_probability_computation()
+void SemiMarkov::initial_probability_computation()
 
 {
   register int i , j , k;
   double sum , *state , *state_out , **state_in;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
 
 
   state = new double[nb_state];
@@ -203,11 +203,11 @@ void Semi_markov::initial_probability_computation()
  *
  *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov.
  *
- *  arguments : reference sur un objet Markovian_sequences, indice de la sequence.
+ *  arguments : reference sur un objet MarkovianSequences, indice de la sequence.
  *
  *--------------------------------------------------------------*/
 
-double Semi_markov::likelihood_computation(const Markovian_sequences &seq , int index) const
+double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int index) const
 
 {
   register int i , j , k , m;
@@ -375,17 +375,17 @@ double Semi_markov::likelihood_computation(const Markovian_sequences &seq , int 
  *
  *  Calcul de la vraisemblance de sequences pour une semi-chaine de Markov.
  *
- *  argument : reference sur un objet Semi_markov_data.
+ *  argument : reference sur un objet SemiMarkovData.
  *
  *--------------------------------------------------------------*/
 
-double Semi_markov::likelihood_computation(const Semi_markov_data &seq) const
+double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
 {
   register int i , j;
   int nb_value;
   double buff , likelihood;
-  Histogram **initial_run , **final_run , **single_run;
+  FrequencyDistribution **initial_run , **final_run , **single_run;
 
 
   // verification de la compatibilite entre le modele et les donnees
@@ -416,26 +416,26 @@ double Semi_markov::likelihood_computation(const Semi_markov_data &seq) const
     if (likelihood != D_INF) {
       if (type == 'e') {
 
-        // creation des histogrammes des temps de sejour censures
+        // creation des lois empiriques des temps de sejour censures
 
-        initial_run = new Histogram*[seq.marginal[0]->nb_value];
+        initial_run = new FrequencyDistribution*[seq.marginal[0]->nb_value];
         for (i = 0;i < seq.marginal[0]->nb_value;i++) {
-          initial_run[i] = new Histogram(seq.max_length);
+          initial_run[i] = new FrequencyDistribution(seq.max_length);
         }
 
-        final_run = new Histogram*[seq.marginal[0]->nb_value];
+        final_run = new FrequencyDistribution*[seq.marginal[0]->nb_value];
         for (i = 0;i < seq.marginal[0]->nb_value;i++) {
-          final_run[i] = new Histogram(seq.max_length);
+          final_run[i] = new FrequencyDistribution(seq.max_length);
         }
 
-        single_run = new Histogram*[seq.marginal[0]->nb_value];
+        single_run = new FrequencyDistribution*[seq.marginal[0]->nb_value];
         for (i = 0;i < seq.marginal[0]->nb_value;i++) {
-          single_run[i] = new Histogram(seq.max_length + 1);
+          single_run[i] = new FrequencyDistribution(seq.max_length + 1);
         }
 
-        // mise a jour des histogrammes des temps de sejour censures
+        // mise a jour des lois empiriques des temps de sejour censures
 
-        seq.censored_sojourn_time_histogram_computation(initial_run , final_run , single_run);
+        seq.censored_sojourn_time_frequency_distribution_computation(initial_run , final_run , single_run);
       }
 
       for (i = 0;i < nb_state;i++) {
@@ -564,13 +564,13 @@ double Semi_markov::likelihood_computation(const Semi_markov_data &seq) const
  *
  *  Comptage des etats initiaux et des transitions.
  *
- *  arguments : reference sur un objet Chain_data,
+ *  arguments : reference sur un objet ChainData,
  *              flags sur les probabilites de rester dans un etat.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::transition_count_computation(const Chain_data &chain_data ,
-                                                       const Semi_markov *smarkov) const
+void MarkovianSequences::transition_count_computation(const ChainData &chain_data ,
+                                                      const SemiMarkov *smarkov) const
 
 {
   register int i , j;
@@ -617,10 +617,10 @@ void Markovian_sequences::transition_count_computation(const Chain_data &chain_d
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov_data::build_transition_count(const Semi_markov *smarkov)
+void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
 
 {
-  chain_data = new Chain_data('o' , marginal[0]->nb_value , marginal[0]->nb_value);
+  chain_data = new ChainData('o' , marginal[0]->nb_value , marginal[0]->nb_value);
   transition_count_computation(*chain_data , smarkov);
 }
 
@@ -630,12 +630,12 @@ void Semi_markov_data::build_transition_count(const Semi_markov *smarkov)
  *  Calcul de la vraisemblance des temps de sejour dans un etat pour
  *  une semi-chaine de Markov ordinaire.
  *
- *  arguments : histogrammes des temps de sejour complets et censures a droite.
+ *  arguments : lois empiriques des temps de sejour complets et censures a droite.
  *
  *--------------------------------------------------------------*/
 
-double Parametric::state_occupancy_likelihood_computation(const Histogram &sojourn_time ,
-                                                          const Histogram &final_run) const
+double DiscreteParametric::state_occupancy_likelihood_computation(const FrequencyDistribution &sojourn_time ,
+                                                                  const FrequencyDistribution &final_run) const
 
 {
   double likelihood , buff;
@@ -663,15 +663,17 @@ double Parametric::state_occupancy_likelihood_computation(const Histogram &sojou
  *  Calcul de la vraisemblance des temps de sejour dans un etat pour
  *  une semi-chaine de Markov en equilibre.
  *
- *  arguments : loi de l'intervalle de temps residuel, histogrammes des temps
+ *  arguments : loi de l'intervalle de temps residuel, lois empiriques des temps
  *              de sejour complets, censures a droite, a gauche et
  *              de la longueur des sequences dans le cas d'un seul etat visite.
  *
  *--------------------------------------------------------------*/
 
-double Parametric::state_occupancy_likelihood_computation(const Forward &forward , const Histogram &sojourn_time ,
-                                                          const Histogram &final_run , const Histogram &initial_run ,
-                                                          const Histogram &single_run) const
+double DiscreteParametric::state_occupancy_likelihood_computation(const Forward &forward ,
+                                                                  const FrequencyDistribution &sojourn_time ,
+                                                                  const FrequencyDistribution &final_run ,
+                                                                  const FrequencyDistribution &initial_run ,
+                                                                  const FrequencyDistribution &single_run) const
 
 {
   double likelihood , buff;
@@ -717,13 +719,14 @@ double Parametric::state_occupancy_likelihood_computation(const Forward &forward
  *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
  *  (estimateur EM d'une semi-chaine de Markov ordinaire).
  *
- *  arguments : histogrammes des temps de sejour complets et censures a droite,
+ *  arguments : lois empiriques des temps de sejour complets et censures a droite,
  *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat.
  *
  *--------------------------------------------------------------*/
 
-void Parametric::expectation_step(const Histogram &sojourn_time , const Histogram &final_run ,
-                                  Reestimation<double> *occupancy_reestim , int iter) const
+void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
+                                          const FrequencyDistribution &final_run ,
+                                          Reestimation<double> *occupancy_reestim , int iter) const
 
 {
   register int i;
@@ -783,7 +786,7 @@ void Parametric::expectation_step(const Histogram &sojourn_time , const Histogra
  *  Calcul des quantites de reestimation correspondant a la loi d'occupation d'un etat
  *  (estimateur EM d'une semi-chaine de Markov en equilibre).
  *
- *  arguments : histogrammes des temps de sejour complets, censures a droite, a gauche et
+ *  arguments : lois empiriques des temps de sejour complets, censures a droite, a gauche et
  *              de la longueur des sequences dans le cas d'un seul etat visite,
  *              pointeurs sur les quantites de reestimation de la loi d'occupation de l'etat et
  *              de la loi biaisee par la longueur, combinaison ou non des quantites de reestimation,
@@ -791,11 +794,13 @@ void Parametric::expectation_step(const Histogram &sojourn_time , const Histogra
  *
  *--------------------------------------------------------------*/
 
-void Parametric::expectation_step(const Histogram &sojourn_time , const Histogram &final_run ,
-                                  const Histogram &initial_run , const Histogram &single_run ,
-                                  Reestimation<double> *occupancy_reestim ,
-                                  Reestimation<double> *length_bias_reestim , int iter ,
-                                  bool combination , int mean_computation) const
+void DiscreteParametric::expectation_step(const FrequencyDistribution &sojourn_time ,
+                                          const FrequencyDistribution &final_run ,
+                                          const FrequencyDistribution &initial_run ,
+                                          const FrequencyDistribution &single_run ,
+                                          Reestimation<double> *occupancy_reestim ,
+                                          Reestimation<double> *length_bias_reestim , int iter ,
+                                          bool combination , int mean_computation) const
 
 {
   register int i , j;
@@ -955,7 +960,7 @@ void Parametric::expectation_step(const Histogram &sojourn_time , const Histogra
  *  Estimation des parametres d'une semi-chaine de Markov
  *  a partir d'un echantillon de sequences.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              type de processus ('o' : ordinaire, 'e' : en equilibre),
  *              type d'estimateur pour la reestimation des lois d'occupation des etats,
  *              flag sur le calcul des lois de comptage, nombre d'iterations,
@@ -964,23 +969,23 @@ void Parametric::expectation_step(const Histogram &sojourn_time , const Histogra
  *
  *--------------------------------------------------------------*/
 
-Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , ostream &os ,
-                                                         char model_type , int estimator , bool counting_flag ,
-                                                         int nb_iter , int mean_computation) const
+SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostream &os ,
+                                                       char model_type , int estimator , bool counting_flag ,
+                                                       int nb_iter , int mean_computation) const
 
 {
   bool status = true;
   register int i , j;
   int nb_likelihood_decrease , *occupancy_survivor , *censored_occupancy_survivor , nb_value[1];
   double likelihood , previous_likelihood , hlikelihood , occupancy_mean;
-  Parametric *occupancy;
+  DiscreteParametric *occupancy;
   Forward *forward;
   Reestimation<double> *occupancy_reestim , *length_bias_reestim;
-  Semi_markov *smarkov;
-  Semi_markov_data *seq;
-  Histogram *complete_run , *censored_run , *pfinal_run , *hreestim , **initial_run ,
-            **final_run , **single_run;
-  const Histogram *prun[3];
+  SemiMarkov *smarkov;
+  SemiMarkovData *seq;
+  FrequencyDistribution *complete_run , *censored_run , *pfinal_run , *hreestim ,
+                        **initial_run , **final_run , **single_run;
+  const FrequencyDistribution *prun[3];
 
 
   smarkov = NULL;
@@ -1062,34 +1067,34 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
     if (model_type == 'e') {
 
-      // creation des histogrammes des temps de sejour censures
+      // creation des lois empiriques des temps de sejour censures
 
-      initial_run = new Histogram*[marginal[0]->nb_value];
+      initial_run = new FrequencyDistribution*[marginal[0]->nb_value];
       for (i = 0;i < marginal[0]->nb_value;i++) {
-        initial_run[i] = new Histogram(max_length);
+        initial_run[i] = new FrequencyDistribution(max_length);
       }
 
-      final_run = new Histogram*[marginal[0]->nb_value];
+      final_run = new FrequencyDistribution*[marginal[0]->nb_value];
       for (i = 0;i < marginal[0]->nb_value;i++) {
-        final_run[i] = new Histogram(max_length);
+        final_run[i] = new FrequencyDistribution(max_length);
       }
 
-      single_run = new Histogram*[marginal[0]->nb_value];
+      single_run = new FrequencyDistribution*[marginal[0]->nb_value];
       for (i = 0;i < marginal[0]->nb_value;i++) {
-        single_run[i] = new Histogram(max_length + 1);
+        single_run[i] = new FrequencyDistribution(max_length + 1);
       }
 
-      // mise a jour des histogrammes des temps de sejour censures
+      // mise a jour des lois empiriques des temps de sejour censures
 
-      censored_sojourn_time_histogram_computation(initial_run , final_run , single_run);
+      censored_sojourn_time_frequency_distribution_computation(initial_run , final_run , single_run);
     }
 
     if (nb_variable == 2) {
       nb_value[0] = marginal[1]->nb_value;
     }
 
-    smarkov = new Semi_markov(model_type , marginal[0]->nb_value , nb_variable - 1 , nb_value);
-    smarkov->semi_markov_data = new Semi_markov_data(*this , 'c' , (model_type == 'e' ? true : false));
+    smarkov = new SemiMarkov(model_type , marginal[0]->nb_value , nb_variable - 1 , nb_value);
+    smarkov->semi_markov_data = new SemiMarkovData(*this , 'c' , (model_type == 'e' ? true : false));
 
     seq = smarkov->semi_markov_data;
     seq->state_variable_init();
@@ -1125,7 +1130,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
       smarkov->state_subtype = new int[smarkov->nb_state];
       smarkov->nonparametric_process[0]->absorption = new double[smarkov->nb_state];
-      smarkov->nonparametric_process[0]->sojourn_time = new Parametric*[smarkov->nb_state];
+      smarkov->nonparametric_process[0]->sojourn_time = new DiscreteParametric*[smarkov->nb_state];
       smarkov->forward = new Forward*[smarkov->nb_state];
       for (i = 0;i < smarkov->nb_state;i++) {
         smarkov->forward[i] = NULL;
@@ -1153,19 +1158,19 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
             prun[0] = seq->characteristics[0]->sojourn_time[i];
             prun[1] = seq->characteristics[0]->sojourn_time[i];
-            complete_run = new Histogram(2 , prun);
+            complete_run = new FrequencyDistribution(2 , prun);
 
 //            prun[0] = seq->initial_run[0][i];
 //            prun[1] = final_run[i];
 
 //            prun[0] = initial_run[i];
 //            prun[1] = seq->characteristics[0]->final_run[i];
-//            censored_run = new Histogram(2 , prun);
+//            censored_run = new FrequencyDistribution(2 , prun);
 
             prun[0] = initial_run[i];
             prun[1] = final_run[i];
             prun[2] = single_run[i];
-            censored_run = new Histogram(3 , prun);
+            censored_run = new FrequencyDistribution(3 , prun);
 
             complete_run->state_occupancy_estimation(censored_run , occupancy_reestim ,
                                                      occupancy_survivor ,
@@ -1178,9 +1183,9 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
             }
 
             else {
-              occupancy = new Parametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
-                                         (occupancy_reestim->mean > 1. ? 1. / occupancy_reestim->mean : 0.99) ,
-                                         OCCUPANCY_THRESHOLD);
+              occupancy = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
+                                                 (occupancy_reestim->mean > 1. ? 1. / occupancy_reestim->mean : 0.99) ,
+                                                 OCCUPANCY_THRESHOLD);
               occupancy->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
               forward = new Forward(*occupancy , occupancy->alloc_nb_value);
 
@@ -1241,7 +1246,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
                    << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
 #               endif
 
-                hreestim = new Histogram(MAX(occupancy->alloc_nb_value , max_length + 1));
+                hreestim = new FrequencyDistribution(MAX(occupancy->alloc_nb_value , max_length + 1));
 
                 likelihood = D_INF;
                 nb_likelihood_decrease = 0;
@@ -1343,8 +1348,8 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
             seq->characteristics[0]->sojourn_time[i]->state_occupancy_estimation(pfinal_run , occupancy_reestim ,
                                                                                  occupancy_survivor ,
                                                                                  censored_occupancy_survivor);
-            occupancy = new Parametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
-                                       1. / occupancy_reestim->mean , OCCUPANCY_THRESHOLD);
+            occupancy = new DiscreteParametric(NEGATIVE_BINOMIAL , 1 , I_DEFAULT , 1. ,
+                                               1. / occupancy_reestim->mean , OCCUPANCY_THRESHOLD);
             occupancy->init(NONPARAMETRIC , I_DEFAULT , I_DEFAULT , D_DEFAULT , D_DEFAULT);
 
             delete occupancy_reestim;
@@ -1388,7 +1393,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
                  << STAT_label[STATL_SMOOTHNESS] << ": " << occupancy->second_difference_norm_computation() << "\n" << endl;
 #             endif
 
-              hreestim = new Histogram(MAX(occupancy->alloc_nb_value , max_length + 1));
+              hreestim = new FrequencyDistribution(MAX(occupancy->alloc_nb_value , max_length + 1));
 
               likelihood = D_INF;
               nb_likelihood_decrease = 0;
@@ -1472,7 +1477,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
             occupancy = occupancy_reestim->type_parametric_estimation(1 , true , OCCUPANCY_THRESHOLD);
 
-/*          occupancy = new Parametric(occupancy_reestim->nb_value);
+/*          occupancy = new DiscreteParametric(occupancy_reestim->nb_value);
             occupancy_reestim->distribution_estimation(occupancy); */
           }
 
@@ -1488,7 +1493,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
 
             else {
               smarkov->state_subtype[i] = SEMI_MARKOVIAN;
-              smarkov->nonparametric_process[0]->sojourn_time[i] = new Parametric(*occupancy);
+              smarkov->nonparametric_process[0]->sojourn_time[i] = new DiscreteParametric(*occupancy);
               if (smarkov->state_type[i] == 'r') {
                 smarkov->forward[i] = new Forward(*(smarkov->nonparametric_process[0]->sojourn_time[i]));
               }
@@ -1541,7 +1546,7 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
       // estimation des lois d'observation
 
       if (smarkov->nb_output_process == 1) {
-        seq->build_observation_histogram();
+        seq->build_observation_frequency_distribution();
 
         for (i = 0;i < smarkov->nb_state;i++) {
           seq->observation[1][i]->distribution_estimation(smarkov->nonparametric_process[1]->observation[i]);
@@ -1578,13 +1583,13 @@ Semi_markov* Markovian_sequences::semi_markov_estimation(Format_error &error , o
  *  Comparaison de differentes semi-chaines de Markov pour un ensemble
  *  de sequences.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de semi-chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
  *              de Markov, pointeur sur les semi-chaines de Markov, path.
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_model ,
-                                     const Semi_markov **ismarkov , const char *path) const
+bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_model ,
+                                    const SemiMarkov **ismarkov , const char *path) const
 
 {
   bool status = true;
@@ -1717,22 +1722,22 @@ bool Markovian_sequences::comparison(Format_error &error , ostream &os , int nb_
  *
  *  Simulation par une semi-chaine de Markov.
  *
- *  arguments : reference sur un objet Format_error,
- *              histogramme des longueurs des sequences,
+ *  arguments : reference sur un objet StatError,
+ *              loi empirique des longueurs des sequences,
  *              flag sur le calcul des lois de comptage,
  *              flag calcul d'une divergence de Kullback-Leibler.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram &hlength ,
-                                          bool counting_flag , bool divergence_flag) const
+SemiMarkovData* SemiMarkov::simulation(StatError &error , const FrequencyDistribution &hlength ,
+                                       bool counting_flag , bool divergence_flag) const
 
 {
   bool status = true;
   register int i , j , k , m;
   int cumul_length , occupancy , *pstate , **poutput;
-  Semi_markov *smarkov;
-  Semi_markov_data *seq;
+  SemiMarkov *smarkov;
+  SemiMarkovData *seq;
 
 
   seq = NULL;
@@ -1770,10 +1775,10 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
 
     // initialisations
 
-    seq = new Semi_markov_data(hlength , nb_output_process + 1);
+    seq = new SemiMarkovData(hlength , nb_output_process + 1);
     seq->type[0] = STATE;
 
-    seq->semi_markov = new Semi_markov(*this , false);
+    seq->semi_markov = new SemiMarkov(*this , false);
 
     smarkov = seq->semi_markov;
     smarkov->create_cumul();
@@ -1856,16 +1861,16 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
 
     seq->min_value[0] = 0;
     seq->max_value[0] = nb_state - 1;
-    seq->build_marginal_histogram(0);
+    seq->build_marginal_frequency_distribution(0);
 
     for (i = 1;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
 
     seq->build_transition_count(smarkov);
-    seq->build_observation_histogram();
+    seq->build_observation_frequency_distribution();
     seq->build_characteristic(I_DEFAULT , true , (type == 'e' ? true : false));
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
@@ -1892,18 +1897,18 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , const Histogram 
  *
  *  Simulation par une semi-chaine de Markov.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              nombre et longueur des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_data* Semi_markov::simulation(Format_error &error , int nb_sequence ,
-                                          int length , bool counting_flag) const
+SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
+                                       int length , bool counting_flag) const
 
 {
   bool status = true;
-  Semi_markov_data *seq;
+  SemiMarkovData *seq;
 
 
   seq = NULL;
@@ -1923,7 +1928,7 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , int nb_sequence 
   }
 
   if (status) {
-    Histogram hlength(length + 1);
+    FrequencyDistribution hlength(length + 1);
 
     hlength.nb_element = nb_sequence;
     hlength.offset = length;
@@ -1943,18 +1948,18 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , int nb_sequence 
  *
  *  Simulation par une semi-chaine de Markov.
  *
- *  arguments : reference sur un objet Format_error, nombre de sequences,
- *              reference sur un objet Markovian_sequences,
+ *  arguments : reference sur un objet StatError, nombre de sequences,
+ *              reference sur un objet MarkovianSequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_data* Semi_markov::simulation(Format_error &error , int nb_sequence ,
-                                          const Markovian_sequences &iseq , bool counting_flag) const
+SemiMarkovData* SemiMarkov::simulation(StatError &error , int nb_sequence ,
+                                       const MarkovianSequences &iseq , bool counting_flag) const
 
 {
-  Histogram *hlength;
-  Semi_markov_data *seq;
+  FrequencyDistribution *hlength;
+  SemiMarkovData *seq;
 
 
   error.init();
@@ -1979,25 +1984,25 @@ Semi_markov_data* Semi_markov::simulation(Format_error &error , int nb_sequence 
  *
  *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de semi-chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
  *              de Markov, pointeur sur les semi-chaines de Markov,
- *              histogramme des longueurs des sequences, path.
+ *              loi empirique des longueurs des sequences, path.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostream &os ,
-                                                     int nb_model , const Semi_markov **ismarkov ,
-                                                     Histogram **hlength , const char *path) const
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
+                                                   int nb_model , const SemiMarkov **ismarkov ,
+                                                   FrequencyDistribution **hlength , const char *path) const
 
 {
   bool status = true , lstatus;
   register int i , j , k;
   int cumul_length;
   double ref_likelihood , target_likelihood , **likelihood;
-  const Semi_markov **smarkov;
-  Markovian_sequences *iseq , *seq;
-  Semi_markov_data *simul_seq;
-  Distance_matrix *dist_matrix;
+  const SemiMarkov **smarkov;
+  MarkovianSequences *iseq , *seq;
+  SemiMarkovData *simul_seq;
+  DistanceMatrix *dist_matrix;
   ofstream *out_file;
 
 
@@ -2060,21 +2065,21 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
     if ((hlength[i]->nb_element < 1) || (hlength[i]->nb_element > NB_SEQUENCE)) {
       lstatus = false;
       ostringstream error_message;
-      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_NB_SEQUENCE];
       error.update((error_message.str()).c_str());
     }
     if (hlength[i]->offset < 2) {
       lstatus = false;
       ostringstream error_message;
-      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_SHORT_SEQUENCE_LENGTH];
       error.update((error_message.str()).c_str());
     }
     if (hlength[i]->nb_value - 1 > MAX_LENGTH) {
       lstatus = false;
       ostringstream error_message;
-      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                     << i + 1 << ": "  << SEQ_error[SEQR_LONG_SEQUENCE_LENGTH];
       error.update((error_message.str()).c_str());
     }
@@ -2092,7 +2097,7 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
       if (cumul_length > CUMUL_LENGTH) {
         status = false;
         ostringstream error_message;
-        error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " "
+        error_message << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                       << i + 1 << ": "  << SEQ_error[SEQR_CUMUL_SEQUENCE_LENGTH];
         error.update((error_message.str()).c_str());
       }
@@ -2115,14 +2120,14 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
       }
     }
 
-    smarkov = new const Semi_markov*[nb_model];
+    smarkov = new const SemiMarkov*[nb_model];
 
     smarkov[0] = this;
     for (i = 1;i < nb_model;i++) {
       smarkov[i] = ismarkov[i - 1];
     }
 
-    dist_matrix = new Distance_matrix(nb_model , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
+    dist_matrix = new DistanceMatrix(nb_model , SEQ_label[SEQL_SEMI_MARKOV_CHAIN]);
 
     for (i = 0;i < nb_model;i++) {
 
@@ -2221,21 +2226,21 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
  *
  *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de semi-chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
  *              de Markov, pointeur sur les semi-chaines de Markov,
  *              nombre et longueur des sequences, path.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostream &os ,
-                                                     int nb_model , const Semi_markov **smarkov ,
-                                                     int nb_sequence , int length , const char *path) const
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
+                                                   int nb_model , const SemiMarkov **smarkov ,
+                                                   int nb_sequence , int length , const char *path) const
 
 {
   bool status = true;
   register int i;
-  Histogram **hlength;
-  Distance_matrix *dist_matrix;
+  FrequencyDistribution **hlength;
+  DistanceMatrix *dist_matrix;
 
 
   dist_matrix = NULL;
@@ -2255,9 +2260,9 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
   }
 
   if (status) {
-    hlength = new Histogram*[nb_model];
+    hlength = new FrequencyDistribution*[nb_model];
 
-    hlength[0] = new Histogram(length + 1);
+    hlength[0] = new FrequencyDistribution(length + 1);
 
     hlength[0]->nb_element = nb_sequence;
     hlength[0]->offset = length;
@@ -2267,7 +2272,7 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
     hlength[0]->frequency[length] = nb_sequence;
 
     for (i = 1;i < nb_model;i++) {
-      hlength[i] = new Histogram(*hlength[0]);
+      hlength[i] = new FrequencyDistribution(*hlength[0]);
     }
 
     dist_matrix = divergence_computation(error , os , nb_model , smarkov , hlength , path);
@@ -2286,21 +2291,21 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
  *
  *  Comparaison de semi-chaines de Markov par calcul de divergences de Kullback-Leibler.
  *
- *  arguments : reference sur un objet Format_error, stream, nombre de semi-chaines
+ *  arguments : reference sur un objet StatError, stream, nombre de semi-chaines
  *              de Markov, pointeur sur les semi-chaines de Markov,
- *              pointeurs sur des objets Markovian_sequences, path.
+ *              pointeurs sur des objets MarkovianSequences, path.
  *
  *--------------------------------------------------------------*/
 
-Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostream &os ,
-                                                     int nb_model , const Semi_markov **smarkov ,
-                                                     int nb_sequence , const Markovian_sequences **seq ,
-                                                     const char *path) const
+DistanceMatrix* SemiMarkov::divergence_computation(StatError &error , ostream &os ,
+                                                   int nb_model , const SemiMarkov **smarkov ,
+                                                   int nb_sequence , const MarkovianSequences **seq ,
+                                                   const char *path) const
 
 {
   register int i;
-  Histogram **hlength;
-  Distance_matrix *dist_matrix;
+  FrequencyDistribution **hlength;
+  DistanceMatrix *dist_matrix;
 
 
   error.init();
@@ -2311,7 +2316,7 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
   }
 
   else {
-    hlength = new Histogram*[nb_model];
+    hlength = new FrequencyDistribution*[nb_model];
     for (i = 0;i < nb_model;i++) {
       hlength[i] = seq[i]->hlength->frequency_scale(nb_sequence);
     }
@@ -2330,13 +2335,13 @@ Distance_matrix* Semi_markov::divergence_computation(Format_error &error , ostre
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Semi_markov_iterator.
+ *  Constructeur de la classe SemiMarkovIterator.
  *
- *  argument : pointeur sur un objet Semi_markov.
+ *  argument : pointeur sur un objet SemiMarkov.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_iterator::Semi_markov_iterator(Semi_markov *ismarkov)
+SemiMarkovIterator::SemiMarkovIterator(SemiMarkov *ismarkov)
 
 {
   semi_markov = ismarkov;
@@ -2355,13 +2360,13 @@ Semi_markov_iterator::Semi_markov_iterator(Semi_markov *ismarkov)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Semi_markov_iterator.
+ *  Copie d'un objet SemiMarkovIterator.
  *
- *  argument : reference sur un objet Semi_markov_iterator.
+ *  argument : reference sur un objet SemiMarkovIterator.
  *
  *--------------------------------------------------------------*/
 
-void Semi_markov_iterator::copy(const Semi_markov_iterator &it)
+void SemiMarkovIterator::copy(const SemiMarkovIterator &it)
 
 {
   semi_markov = it.semi_markov;
@@ -2375,11 +2380,11 @@ void Semi_markov_iterator::copy(const Semi_markov_iterator &it)
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Semi_markov_iterator.
+ *  Destructeur de la classe SemiMarkovIterator.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_iterator::~Semi_markov_iterator()
+SemiMarkovIterator::~SemiMarkovIterator()
 
 {
   (semi_markov->nb_iterator)--;
@@ -2388,13 +2393,13 @@ Semi_markov_iterator::~Semi_markov_iterator()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Semi_markov_iterator.
+ *  Operateur d'assignement de la classe SemiMarkovIterator.
  *
- *  argument : reference sur un objet Semi_markov_iterator.
+ *  argument : reference sur un objet SemiMarkovIterator.
  *
  *--------------------------------------------------------------*/
 
-Semi_markov_iterator& Semi_markov_iterator::operator=(const Semi_markov_iterator &it)
+SemiMarkovIterator& SemiMarkovIterator::operator=(const SemiMarkovIterator &it)
 
 {
   if (&it != this) {
@@ -2414,7 +2419,7 @@ Semi_markov_iterator& Semi_markov_iterator::operator=(const Semi_markov_iterator
  *
  *--------------------------------------------------------------*/
 
-bool Semi_markov_iterator::simulation(int **int_seq , int length , bool initialization)
+bool SemiMarkovIterator::simulation(int **int_seq , int length , bool initialization)
 
 {
   bool status;
@@ -2513,7 +2518,7 @@ bool Semi_markov_iterator::simulation(int **int_seq , int length , bool initiali
  *
  *--------------------------------------------------------------*/
 
-int** Semi_markov_iterator::simulation(int length , bool initialization)
+int** SemiMarkovIterator::simulation(int length , bool initialization)
 
 {
   register int i;
