@@ -43,12 +43,12 @@
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut d'un objet Chain_reestimation.
+ *  Constructeur par defaut d'un objet ChainReestimation.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-Chain_reestimation<Type>::Chain_reestimation()
+ChainReestimation<Type>::ChainReestimation()
 
 {
   type = 'v';
@@ -62,12 +62,12 @@ Chain_reestimation<Type>::Chain_reestimation()
 
 /*--------------------------------------------------------------*
  *
- *  Initialisation d'un objet Chain_reestimation.
+ *  Initialisation d'un objet ChainReestimation.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-void Chain_reestimation<Type>::init()
+void ChainReestimation<Type>::init()
 
 {
   register int i , j;
@@ -92,7 +92,7 @@ void Chain_reestimation<Type>::init()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Chain_reestimation.
+ *  Constructeur de la classe ChainReestimation.
  *
  *  arguments : type, nombre d'etats, nombre de lignes de la matrice
  *              des probabilites de transition, flag initialisation.
@@ -100,8 +100,8 @@ void Chain_reestimation<Type>::init()
  *--------------------------------------------------------------*/
 
 template <typename Type>
-Chain_reestimation<Type>::Chain_reestimation(char itype , int inb_state ,
-                                             int inb_row , bool init_flag)
+ChainReestimation<Type>::ChainReestimation(char itype , int inb_state ,
+                                           int inb_row , bool init_flag)
 
 {
   register int i;
@@ -134,14 +134,14 @@ Chain_reestimation<Type>::Chain_reestimation(char itype , int inb_state ,
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Chain_reestimation.
+ *  Copie d'un objet ChainReestimation.
  *
- *  argument : reference sur un objet Chain_reestimation.
+ *  argument : reference sur un objet ChainReestimation.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-void Chain_reestimation<Type>::copy(const Chain_reestimation<Type> &chain_data)
+void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
 
 {
   register int i , j;
@@ -180,12 +180,12 @@ void Chain_reestimation<Type>::copy(const Chain_reestimation<Type> &chain_data)
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Chain_reestimation.
+ *  Destruction des champs d'un objet ChainReestimation.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-void Chain_reestimation<Type>::remove()
+void ChainReestimation<Type>::remove()
 
 {
   delete [] initial;
@@ -203,12 +203,12 @@ void Chain_reestimation<Type>::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Chain_reestimation.
+ *  Destructeur de la classe ChainReestimation.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-Chain_reestimation<Type>::~Chain_reestimation()
+ChainReestimation<Type>::~ChainReestimation()
 
 {
   remove();
@@ -217,14 +217,14 @@ Chain_reestimation<Type>::~Chain_reestimation()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Chain_reestimation.
+ *  Operateur d'assignement de la classe ChainReestimation.
  *
- *  argument : reference sur un objet Chain_reestimation.
+ *  argument : reference sur un objet ChainReestimation.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-Chain_reestimation<Type>& Chain_reestimation<Type>::operator=(const Chain_reestimation<Type> &chain_data)
+ChainReestimation<Type>& ChainReestimation<Type>::operator=(const ChainReestimation<Type> &chain_data)
 
 {
   if (&chain_data != this) {
@@ -238,14 +238,14 @@ Chain_reestimation<Type>& Chain_reestimation<Type>::operator=(const Chain_reesti
 
 /*--------------------------------------------------------------*
  *
- *  Visualisation d'un objet Chain_reestimation.
+ *  Visualisation d'un objet ChainReestimation.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-ostream& Chain_reestimation<Type>::print(ostream &os) const
+ostream& ChainReestimation<Type>::print(ostream &os) const
 
 {
   register int i , j;
