@@ -53,13 +53,13 @@ extern char* label(const char *file_name);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Parametric_process.
+ *  Constructeur de la classe DiscreteParametricProcess.
  *
  *  argument : nombre d'etats, nombre de valeurs.
  *
  *--------------------------------------------------------------*/
 
-Parametric_process::Parametric_process(int inb_state , int inb_value)
+DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , int inb_value)
 
 {
   register int i;
@@ -69,10 +69,10 @@ Parametric_process::Parametric_process(int inb_state , int inb_value)
   nb_value = inb_value;
 
   if (nb_state > 0) {
-    observation = new Parametric*[nb_state];
+    observation = new DiscreteParametric*[nb_state];
     if (nb_value > 0) {
       for (i = 0;i < nb_state;i++) {
-        observation[i] = new Parametric(UNIFORM, 0, nb_value , D_DEFAULT , D_DEFAULT);
+        observation[i] = new DiscreteParametric(UNIFORM, 0, nb_value , D_DEFAULT , D_DEFAULT);
       }
     }
 
@@ -91,13 +91,13 @@ Parametric_process::Parametric_process(int inb_state , int inb_value)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Parametric_process.
+ *  Constructeur de la classe DiscreteParametricProcess.
  *
  *  arguments : nombre d'etats, lois d'observation.
  *
  *--------------------------------------------------------------*/
 
-Parametric_process::Parametric_process(int inb_state , Parametric **pobservation)
+DiscreteParametricProcess::DiscreteParametricProcess(int inb_state , DiscreteParametric **pobservation)
 
 {
   register int i;
@@ -112,22 +112,22 @@ Parametric_process::Parametric_process(int inb_state , Parametric **pobservation
     }
   }
 
-  observation = new Parametric*[nb_state];
+  observation = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = new Parametric(*pobservation[i] , 'c' , nb_value);
+    observation[i] = new DiscreteParametric(*pobservation[i] , 'c' , nb_value);
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Parametric_process.
+ *  Copie d'un objet DiscreteParametricProcess.
  *
- *  argument : reference sur un objet Parametric_process.
+ *  argument : reference sur un objet DiscreteParametricProcess.
  *
  *--------------------------------------------------------------*/
 
-void Parametric_process::copy(const Parametric_process &process)
+void DiscreteParametricProcess::copy(const DiscreteParametricProcess &process)
 
 {
   register int i;
@@ -136,9 +136,9 @@ void Parametric_process::copy(const Parametric_process &process)
   nb_state = process.nb_state;
   nb_value = process.nb_value;
 
-  observation = new Parametric*[nb_state];
+  observation = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
-    observation[i] = new Parametric(*(process.observation[i]) , 'c' , nb_value);
+    observation[i] = new DiscreteParametric(*(process.observation[i]) , 'c' , nb_value);
   }
 }
 
@@ -150,29 +150,33 @@ void Parametric_process::copy(const Parametric_process &process)
  *
  *--------------------------------------------------------------*/
 
-void Parametric_process::state_permutation(int *perm) const
+void DiscreteParametricProcess::state_permutation(int *perm) const
+
 {
   register int i;
-  Parametric **pobservation= new Parametric*[nb_state];
-  
-  for (i= 0; i < nb_state; i++)
+  DiscreteParametric **pobservation= new DiscreteParametric*[nb_state];
+
+
+  for (i= 0;i < nb_state;i++) {
     pobservation[perm[i]]= observation[i];
-  for (i= 0; i < nb_state; i++)
+  }
+  for (i= 0;i < nb_state;i++) {
     observation[i]= pobservation[i];
+  }
   delete [] pobservation;
   pobservation= NULL;
-
 }
+
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Parametric_process avec ajout d'un etat.
+ *  Copie d'un objet DiscreteParametricProcess avec ajout d'un etat.
  *
- *  arguments : reference sur un objet Parametric_process, etat de reference.
+ *  arguments : reference sur un objet DiscreteParametricProcess, etat de reference.
  *
  *--------------------------------------------------------------*/
 
-void Parametric_process::add_state(const Parametric_process &process , int state)
+void DiscreteParametricProcess::add_state(const DiscreteParametricProcess &process , int state)
 
 {
   register int i;
@@ -181,26 +185,27 @@ void Parametric_process::add_state(const Parametric_process &process , int state
   nb_state = process.nb_state + 1;
   nb_value = process.nb_value;
 
-  observation = new Parametric*[nb_state];
+  observation = new DiscreteParametric*[nb_state];
   for (i = 0;i <= state;i++) {
-    observation[i] = new Parametric(*(process.observation[i]) , 'c' , nb_value);
+    observation[i] = new DiscreteParametric(*(process.observation[i]) , 'c' , nb_value);
   }
   for (i = state + 1;i < nb_state;i++) {
-    observation[i] = new Parametric(*(process.observation[i - 1]) , 'c' , nb_value);
+    observation[i] = new DiscreteParametric(*(process.observation[i - 1]) , 'c' , nb_value);
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Parametric_process.
+ *  Constructeur par copie de la classe DiscreteParametricProcess.
  *
- *  arguments : reference sur un objet Parametric_process,
+ *  arguments : reference sur un objet DiscreteParametricProcess,
  *              type de manipulation ('c' : copy, 's' : state), etat de reference.
  *
  *--------------------------------------------------------------*/
 
-Parametric_process::Parametric_process(const Parametric_process &process , char manip , int state)
+DiscreteParametricProcess::DiscreteParametricProcess(const DiscreteParametricProcess &process ,
+                                                     char manip , int state)
 
 {
   switch (manip) {
@@ -216,11 +221,11 @@ Parametric_process::Parametric_process(const Parametric_process &process , char 
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Parametric_process.
+ *  Destruction des champs d'un objet DiscreteParametricProcess.
  *
  *--------------------------------------------------------------*/
 
-void Parametric_process::remove()
+void DiscreteParametricProcess::remove()
 
 {
   if (observation) {
@@ -239,11 +244,11 @@ void Parametric_process::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Parametric_process.
+ *  Destructeur de la classe DiscreteParametricProcess.
  *
  *--------------------------------------------------------------*/
 
-Parametric_process::~Parametric_process()
+DiscreteParametricProcess::~DiscreteParametricProcess()
 
 {
   remove();
@@ -252,13 +257,13 @@ Parametric_process::~Parametric_process()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Parametric_process.
+ *  Operateur d'assignement de la classe DiscreteParametricProcess.
  *
- *  argument : reference sur un objet Parametric_process.
+ *  argument : reference sur un objet DiscreteParametricProcess.
  *
  *--------------------------------------------------------------*/
 
-Parametric_process& Parametric_process::operator=(const Parametric_process &process)
+DiscreteParametricProcess& DiscreteParametricProcess::operator=(const DiscreteParametricProcess &process)
 
 {
   if (&process != this) {
@@ -274,14 +279,14 @@ Parametric_process& Parametric_process::operator=(const Parametric_process &proc
  *
  *  Analyse du format des lois d'observation.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, nombre d'etats,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Parametric_process* observation_parsing(Format_error &error , ifstream &in_file ,
-                                        int &line , int nb_state , double cumul_threshold)
+DiscreteParametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
+                                               int &line , int nb_state , double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -290,13 +295,13 @@ Parametric_process* observation_parsing(Format_error &error , ifstream &in_file 
   bool status = true , lstatus;
   register int i , j;
   long index;
-  Parametric **dist;
-  Parametric_process *process;
+  DiscreteParametric **dist;
+  DiscreteParametricProcess *process;
 
 
   process = NULL;
 
-  dist = new Parametric*[nb_state];
+  dist = new DiscreteParametric*[nb_state];
   for (i = 0;i < nb_state;i++) {
     dist[i] = NULL;
   }
@@ -365,7 +370,8 @@ Parametric_process* observation_parsing(Format_error &error , ifstream &in_file 
           error.update(STAT_parsing[STATP_FORMAT] , line);
         }
 
-        dist[i] = parametric_parsing(error , in_file , line , UNIFORM , cumul_threshold);
+        dist[i] = discrete_parametric_parsing(error , in_file , line ,
+                                              UNIFORM , cumul_threshold);
         if (!dist[i]) {
           status = false;
         }
@@ -376,7 +382,7 @@ Parametric_process* observation_parsing(Format_error &error , ifstream &in_file 
   }
 
   if (status) {
-    process = new Parametric_process(nb_state , dist);
+    process = new DiscreteParametricProcess(nb_state , dist);
   }
 
   for (i = 0;i < nb_state;i++) {
@@ -390,15 +396,15 @@ Parametric_process* observation_parsing(Format_error &error , ifstream &in_file 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Parametric_process.
+ *  Ecriture d'un objet DiscreteParametricProcess.
  *
  *  arguments : stream, pointeurs sur les lois d'observation empiriques,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric_process::ascii_print(ostream &os , Histogram **empirical_observation ,
-                                         bool exhaustive , bool file_flag) const
+ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribution **empirical_observation ,
+                                                bool exhaustive , bool file_flag) const
 
 {
   register int i;
@@ -416,7 +422,7 @@ ostream& Parametric_process::ascii_print(ostream &os , Histogram **empirical_obs
         os << "# ";
       }
       os << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
-         << STAT_label[STATL_HISTOGRAM] << " - ";
+         << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       empirical_observation[i]->ascii_characteristic_print(os , false , file_flag);
     }
 
@@ -428,12 +434,12 @@ ostream& Parametric_process::ascii_print(ostream &os , Histogram **empirical_obs
       os << "  ";
       if (empirical_observation) {
         os << " | " << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM];
+           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
       os << " | " << STAT_label[STATL_STATE] << " " << i << " "
          << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
       if (empirical_observation) {
-        os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+        os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
            << STAT_label[STATL_FUNCTION];
       }
       os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -450,13 +456,13 @@ ostream& Parametric_process::ascii_print(ostream &os , Histogram **empirical_obs
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Parametric_process au format tableur.
+ *  Ecriture d'un objet DiscreteParametricProcess au format tableur.
  *
  *  arguments : stream, pointeurs sur les lois d'observation empiriques.
  *
  *--------------------------------------------------------------*/
 
-ostream& Parametric_process::spreadsheet_print(ostream &os , Histogram **empirical_observation) const
+ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDistribution **empirical_observation) const
 
 {
   register int i;
@@ -470,19 +476,19 @@ ostream& Parametric_process::spreadsheet_print(ostream &os , Histogram **empiric
 
     if (empirical_observation) {
       os << "\n" << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       empirical_observation[i]->spreadsheet_characteristic_print(os);
     }
 
     os << "\n";
     if (empirical_observation) {
       os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
-         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM];
+         << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
     os << "\t" << STAT_label[STATL_STATE] << " " << i << " "
        << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
     if (empirical_observation) {
-      os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
          << STAT_label[STATL_FUNCTION];
     }
     os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -498,7 +504,7 @@ ostream& Parametric_process::spreadsheet_print(ostream &os , Histogram **empiric
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Parametric_process.
+ *  Sortie Gnuplot d'un objet DiscreteParametricProcess.
  *
  *  arguments : prefixe des fichiers, titre des figures,
  *              indice du processus d'observation,
@@ -506,8 +512,8 @@ ostream& Parametric_process::spreadsheet_print(ostream &os , Histogram **empiric
  *
  *--------------------------------------------------------------*/
 
-bool Parametric_process::plot_print(const char *prefix , const char *title , int process ,
-                                    Histogram **empirical_observation) const
+bool DiscreteParametricProcess::plot_print(const char *prefix , const char *title , int process ,
+                                           FrequencyDistribution **empirical_observation) const
 
 {
   bool status;
@@ -515,7 +521,7 @@ bool Parametric_process::plot_print(const char *prefix , const char *title , int
   int *dist_nb_value , *index_dist;
   double *scale;
   const Distribution **pdist;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   ostringstream data_file_name;
 
 
@@ -528,7 +534,7 @@ bool Parametric_process::plot_print(const char *prefix , const char *title , int
   scale = new double[nb_state];
 
   if (empirical_observation) {
-    phisto = new const Histogram*[nb_state];
+    phisto = new const FrequencyDistribution*[nb_state];
     index_dist = new int[nb_state];
   }
   else {
@@ -596,7 +602,7 @@ bool Parametric_process::plot_print(const char *prefix , const char *title , int
                    << (int)(MAX(empirical_observation[j]->max , observation[j]->max * scale[j]) * YSCALE) + 1
                    << "] \"" << label((data_file_name.str()).c_str()) << "\" using " << j + 1
                    << " title \"" << STAT_label[STATL_STATE] << " " << j << " "
-                   << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+                   << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses,\\" << endl;
           out_file << "\"" << label((data_file_name.str()).c_str()) << "\" using " << nb_state + j + 1
                    << " title \"" << STAT_label[STATL_STATE] << " " << j << " "
@@ -647,7 +653,7 @@ bool Parametric_process::plot_print(const char *prefix , const char *title , int
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Parametric_process.
+ *  Sortie graphique d'un objet DiscreteParametricProcess.
  *
  *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
  *              indice du processus d'observation,
@@ -655,8 +661,8 @@ bool Parametric_process::plot_print(const char *prefix , const char *title , int
  *
  *--------------------------------------------------------------*/
 
-void Parametric_process::plotable_write(MultiPlotSet &plot , int &index , int process ,
-                                        Histogram **empirical_observation) const
+void DiscreteParametricProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
+                                               FrequencyDistribution **empirical_observation) const
 
 {
   register int i , j;
@@ -691,7 +697,7 @@ void Parametric_process::plotable_write(MultiPlotSet &plot , int &index , int pr
 
       legend.str("");
       legend << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM];
+             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
       plot[index][0].style = "impulses";
@@ -727,7 +733,7 @@ void Parametric_process::plotable_write(MultiPlotSet &plot , int &index , int pr
  *
  *--------------------------------------------------------------*/
 
-void Parametric_process::nb_value_computation()
+void DiscreteParametricProcess::nb_value_computation()
 
 {
   register int i;
@@ -749,7 +755,7 @@ void Parametric_process::nb_value_computation()
  *
  *--------------------------------------------------------------*/
 
-int Parametric_process::nb_parameter_computation() const
+int DiscreteParametricProcess::nb_parameter_computation() const
 
 {
   register int i;
@@ -770,7 +776,7 @@ int Parametric_process::nb_parameter_computation() const
  *
  *--------------------------------------------------------------*/
 
-void Parametric_process::init()
+void DiscreteParametricProcess::init()
 
 {
   register int i , j;
