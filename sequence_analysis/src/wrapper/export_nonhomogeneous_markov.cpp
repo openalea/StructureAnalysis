@@ -98,7 +98,7 @@ public:
 
 void class_nonhomogeneous_markov() {
 
-  class_<NonhomogeneousMarkov, bases<StatInterface> > ("_NonhomogeneousMarkov", "NonhomogeneousMarkov")
+  class_<NonhomogeneousMarkov, bases<StatInterface> > ("_NonHomogeneousMarkov", "NonHomogeneousMarkov")
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_nb_state_and_ident_list))
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_chain_and_self_transition))
     .def("__init__", make_constructor(WRAP::nonhomogeneous_markov_from_file))
@@ -160,7 +160,7 @@ public:
 void class_nonhomogeneous_markov_data()
 {
   class_<NonhomogeneousMarkovData, bases<MarkovianSequences > >
-  ("_NonhomogeneousMarkovData", "NonhomogeneousMarkovData")
+  ("_NonHomogeneousMarkovData", "NonHomogeneousMarkovData")
 
     .def(init<MarkovianSequences& >())
 
