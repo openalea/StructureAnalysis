@@ -61,15 +61,15 @@ extern int* identifier_select(int nb_pattern , int *pattern_identifier , int sel
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Top_parameters.
+ *  Constructeur de la classe TopParameters.
  *
  *  arguments : probabilite axe porteur, probabilite axes portes,
  *              rapport de rythme, position maximum.
  *
  *--------------------------------------------------------------*/
 
-Top_parameters::Top_parameters(double iprobability , double iaxillary_probability ,
-                               double irhythm_ratio , int imax_position)
+TopParameters::TopParameters(double iprobability , double iaxillary_probability ,
+                             double irhythm_ratio , int imax_position)
 
 {
   tops = NULL;
@@ -91,14 +91,14 @@ Top_parameters::Top_parameters(double iprobability , double iaxillary_probabilit
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Top_parameters.
+ *  Copie d'un objet TopParameters.
  *
- *  arguments : reference sur un objet Top_parameters,
+ *  arguments : reference sur un objet TopParameters,
  *              flag copie de l'objet Tops.
  *
  *--------------------------------------------------------------*/
 
-void Top_parameters::copy(const Top_parameters &parameters , bool data_flag)
+void TopParameters::copy(const TopParameters &parameters , bool data_flag)
 
 {
   register int i;
@@ -127,11 +127,11 @@ void Top_parameters::copy(const Top_parameters &parameters , bool data_flag)
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Top_parameters.
+ *  Destruction des champs d'un objet TopParameters.
  *
  *--------------------------------------------------------------*/
 
-void Top_parameters::remove()
+void TopParameters::remove()
 
 {
   delete tops;
@@ -149,11 +149,11 @@ void Top_parameters::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Top_parameters.
+ *  Destructeur de la classe TopParameters.
  *
  *--------------------------------------------------------------*/
 
-Top_parameters::~Top_parameters()
+TopParameters::~TopParameters()
 
 {
   remove();
@@ -165,14 +165,14 @@ Top_parameters::~Top_parameters()
  *  Extraction de la loi du nombre d'entrenoeuds des axes portes
  *  pour une position donnee.
  *
- *  arguments : reference sur un objet Format_error, position.
+ *  arguments : reference sur un objet StatError, position.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Top_parameters::extract(Format_error &error , int position) const
+DiscreteParametricModel* TopParameters::extract(StatError &error , int position) const
 
 {
-  Parametric_model *dist;
+  DiscreteParametricModel *dist;
 
 
   error.init();
@@ -183,8 +183,8 @@ Parametric_model* Top_parameters::extract(Format_error &error , int position) co
   }
 
   else {
-    dist = new Parametric_model(*axillary_nb_internode[position] ,
-                                (tops ? tops->axillary_nb_internode[position] : 0));
+    dist = new DiscreteParametricModel(*axillary_nb_internode[position] ,
+                                       (tops ? tops->axillary_nb_internode[position] : 0));
   }
 
   return dist;
@@ -193,13 +193,13 @@ Parametric_model* Top_parameters::extract(Format_error &error , int position) co
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Top_parameters.
+ *  Operateur d'assignement de la classe TopParameters.
  *
- *  argument : reference sur un objet Top_parameters.
+ *  argument : reference sur un objet TopParameters.
  *
  *--------------------------------------------------------------*/
 
-Top_parameters& Top_parameters::operator=(const Top_parameters &parameters)
+TopParameters& TopParameters::operator=(const TopParameters &parameters)
 
 {
   if (&parameters != this) {
@@ -213,15 +213,15 @@ Top_parameters& Top_parameters::operator=(const Top_parameters &parameters)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Top_parameters a partir d'un fichier.
+ *  Construction d'un objet TopParameters a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              position maximum.
  *
  *--------------------------------------------------------------*/
 
-Top_parameters* top_parameters_ascii_read(Format_error &error , const char *path ,
-                                          int max_position)
+TopParameters* top_parameters_ascii_read(StatError &error , const char *path ,
+                                         int max_position)
 
 {
   RWLocaleSnapshot locale("en");
@@ -231,7 +231,7 @@ Top_parameters* top_parameters_ascii_read(Format_error &error , const char *path
   register int i;
   int line , read_line;
   double fvalue , probability , axillary_probability , rhythm_ratio;
-  Top_parameters *parameters;
+  TopParameters *parameters;
   ifstream in_file(path);
 
 
@@ -431,7 +431,8 @@ Top_parameters* top_parameters_ascii_read(Format_error &error , const char *path
     }
 
     if (status) {
-      parameters = new Top_parameters(probability , axillary_probability , rhythm_ratio , max_position);
+      parameters = new TopParameters(probability , axillary_probability ,
+                                     rhythm_ratio , max_position);
     }
   }
 
@@ -441,13 +442,13 @@ Top_parameters* top_parameters_ascii_read(Format_error &error , const char *path
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Top_parameters.
+ *  Ecriture sur une ligne d'un objet TopParameters.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Top_parameters::line_write(ostream &os) const
+ostream& TopParameters::line_write(ostream &os) const
 
 {
   os << STAT_word[STATW_PROBABILITY] << " : " << probability << "   "
@@ -467,8 +468,8 @@ ostream& Top_parameters::line_write(ostream &os) const
  *
  *--------------------------------------------------------------*/
 
-ostream& Top_parameters::ascii_write(ostream &os , const Tops *itops ,
-                                     bool exhaustive , bool file_flag) const
+ostream& TopParameters::ascii_write(ostream &os , const Tops *itops ,
+                                    bool exhaustive , bool file_flag) const
 
 {
   register int i;
@@ -486,13 +487,13 @@ ostream& Top_parameters::ascii_write(ostream &os , const Tops *itops ,
 
   if (itops) {
 
-    // ecriture de l'histogramme du nombre d'entrenoeuds de l'axe porteur
+    // ecriture de la loi empirique du nombre d'entrenoeuds de l'axe porteur
 
     os << "\n";
     if (file_flag) {
       os << "# ";
     }
-    os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     itops->nb_internode->ascii_characteristic_print(os , exhaustive , file_flag);
 
     if (exhaustive) {
@@ -500,12 +501,12 @@ ostream& Top_parameters::ascii_write(ostream &os , const Tops *itops ,
       if (file_flag) {
         os << "# ";
       }
-      os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       itops->nb_internode->ascii_print(os , file_flag);
     }
   }
 
-  // ecriture des lois et des histogrammes du nombre d'entrenoeuds des axes portes
+  // ecriture des lois et des lois empiriques du nombre d'entrenoeuds des axes portes
 
   for (i = 1;i <= max_position;i++) {
     os << "\n";
@@ -520,7 +521,7 @@ ostream& Top_parameters::ascii_write(ostream &os , const Tops *itops ,
       if (file_flag) {
         os << "# ";
       }
-      os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i << " - ";
+      os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i << " - ";
       itops->axillary_nb_internode[i]->ascii_characteristic_print(os , exhaustive , file_flag);
 
       if (exhaustive) {
@@ -528,9 +529,9 @@ ostream& Top_parameters::ascii_write(ostream &os , const Tops *itops ,
         if (file_flag) {
           os << "# ";
         }
-        os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i
+        os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i
            << " | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_DISTRIBUTION] << " " << i
-           << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i
+           << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i
            << " " << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE] << " "
            << STAT_label[STATL_DISTRIBUTION] << " " << i << " " << STAT_label[STATL_FUNCTION] << endl;
 
@@ -570,13 +571,13 @@ ostream& Top_parameters::ascii_write(ostream &os , const Tops *itops ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Top_parameters.
+ *  Ecriture d'un objet TopParameters.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Top_parameters::ascii_write(ostream &os , bool exhaustive) const
+ostream& TopParameters::ascii_write(ostream &os , bool exhaustive) const
 
 {
   return ascii_write(os , tops , exhaustive , false);
@@ -585,15 +586,15 @@ ostream& Top_parameters::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Top_parameters dans un fichier.
+ *  Ecriture d'un objet TopParameters dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Top_parameters::ascii_write(Format_error &error , const char *path ,
-                                 bool exhaustive) const
+bool TopParameters::ascii_write(StatError &error , const char *path ,
+                                bool exhaustive) const
 
 {
   bool status;
@@ -624,7 +625,7 @@ bool Top_parameters::ascii_write(Format_error &error , const char *path ,
  *
  *--------------------------------------------------------------*/
 
-ostream& Top_parameters::spreadsheet_write(ostream &os , const Tops *itops) const
+ostream& TopParameters::spreadsheet_write(ostream &os , const Tops *itops) const
 
 {
   register int i;
@@ -642,28 +643,28 @@ ostream& Top_parameters::spreadsheet_write(ostream &os , const Tops *itops) cons
 
   if (itops) {
 
-    // ecriture de l'histogramme du nombre d'entrenoeuds de l'axe porteur
+    // ecriture de la loi empirique du nombre d'entrenoeuds de l'axe porteur
 
-    os << "\n" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     itops->nb_internode->spreadsheet_characteristic_print(os , true);
 
-    os << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+    os << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
     itops->nb_internode->spreadsheet_print(os);
   }
 
-  // ecriture des lois et des histogrammes du nombre d'entrenoeuds des axes portes
+  // ecriture des lois et des lois empiriques du nombre d'entrenoeuds des axes portes
 
   for (i = 1;i <= max_position;i++) {
     os << "\n" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_DISTRIBUTION] << " " << i << endl;
     axillary_nb_internode[i]->spreadsheet_characteristic_print(os , true);
 
     if ((itops) && (itops->axillary_nb_internode[i])) {
-      os << "\n" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i << "\t";
+      os << "\n" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i << "\t";
       itops->axillary_nb_internode[i]->spreadsheet_characteristic_print(os , true);
 
-      os << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i
+      os << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i
          << "\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_DISTRIBUTION] << " " << i
-         << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i
+         << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i
          << " " << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE] << " "
          << STAT_label[STATL_DISTRIBUTION] << " " << i << " " << STAT_label[STATL_FUNCTION] << endl;
 
@@ -696,13 +697,13 @@ ostream& Top_parameters::spreadsheet_write(ostream &os , const Tops *itops) cons
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Top_parameters dans un fichier au format tableur.
+ *  Ecriture d'un objet TopParameters dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Top_parameters::spreadsheet_write(Format_error &error , const char *path) const
+bool TopParameters::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -734,8 +735,8 @@ bool Top_parameters::spreadsheet_write(Format_error &error , const char *path) c
  *
  *--------------------------------------------------------------*/
 
-bool Top_parameters::plot_write(const char *prefix , const char *title ,
-                                const Tops *itops) const
+bool TopParameters::plot_write(const char *prefix , const char *title ,
+                               const Tops *itops) const
 
 {
   bool status;
@@ -743,7 +744,7 @@ bool Top_parameters::plot_write(const char *prefix , const char *title ,
   int nb_dist , nb_histo , *index_dist;
   double *scale;
   const Distribution **pdist;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   ostringstream *data_file_name;
 
 
@@ -771,7 +772,7 @@ bool Top_parameters::plot_write(const char *prefix , const char *title ,
         }
       }
 
-      phisto = new const Histogram*[nb_histo];
+      phisto = new const FrequencyDistribution*[nb_histo];
       index_dist = new int[nb_histo];
       pdist = new const Distribution*[nb_histo - 1];
       scale = new double[nb_histo - 1];
@@ -858,7 +859,7 @@ bool Top_parameters::plot_write(const char *prefix , const char *title ,
         out_file << "plot [0:" << itops->nb_internode->nb_value - 1 << "] [0:"
                  << (int)(itops->nb_internode->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[nb_dist].str()).c_str()) << "\" using 1 title \""
-                 << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+                 << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
         if (itops->nb_internode->nb_value - 1 < TIC_THRESHOLD) {
@@ -884,7 +885,7 @@ bool Top_parameters::plot_write(const char *prefix , const char *title ,
                      << (int)(MAX(itops->axillary_nb_internode[k]->max ,
                                   axillary_nb_internode[k]->max * itops->axillary_nb_internode[k]->nb_element) * YSCALE) + 1
                      << "] \"" << label((data_file_name[nb_dist].str()).c_str()) << "\" using " << j
-                     << " title \"" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+                     << " title \"" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << " " << k << "\" with impulses,\\" << endl;
             out_file << "\"" << label((data_file_name[nb_dist].str()).c_str()) << "\" using " << nb_histo - 1 + j++
                      << " title \"" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_DISTRIBUTION]
@@ -920,15 +921,15 @@ bool Top_parameters::plot_write(const char *prefix , const char *title ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Top_parameters.
+ *  Sortie Gnuplot d'un objet TopParameters.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Top_parameters::plot_write(Format_error &error , const char *prefix ,
-                                const char *title) const
+bool TopParameters::plot_write(StatError &error , const char *prefix ,
+                               const char *title) const
 
 {
   bool status = plot_write(prefix , title , tops);
@@ -951,7 +952,7 @@ bool Top_parameters::plot_write(Format_error &error , const char *prefix ,
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Top_parameters::get_plotable(const Tops *itops) const
+MultiPlotSet* TopParameters::get_plotable(const Tops *itops) const
 
 {
   register int i , j;
@@ -1020,7 +1021,7 @@ MultiPlotSet* Top_parameters::get_plotable(const Tops *itops) const
     plot[1].resize(1);
 
     legend.str("");
-    legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[1][0].legend = legend.str();
 
     plot[1][0].style = "impulses";
@@ -1043,7 +1044,7 @@ MultiPlotSet* Top_parameters::get_plotable(const Tops *itops) const
         plot[i].resize(2);
 
         legend.str("");
-        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << " " << j;
         plot[i][0].legend = legend.str();
 
@@ -1070,11 +1071,11 @@ MultiPlotSet* Top_parameters::get_plotable(const Tops *itops) const
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Top_parameters.
+ *  Sortie graphique d'un objet TopParameters.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Top_parameters::get_plotable() const
+MultiPlotSet* TopParameters::get_plotable() const
 
 {
   return get_plotable(tops);
@@ -1138,7 +1139,7 @@ Tops::Tops(const Sequences &seq)
   top_parameters = NULL;
 
   max_position = 0;
-  build_nb_internode_histogram();
+  build_nb_internode_frequency_distribution();
 }
 
 
@@ -1158,7 +1159,7 @@ Tops::Tops(const Tops &tops , int inb_sequence , int *index)
   top_parameters = NULL;
 
   max_position = 0;
-  build_nb_internode_histogram();
+  build_nb_internode_frequency_distribution();
 }
 
 
@@ -1167,7 +1168,7 @@ Tops::Tops(const Tops &tops , int inb_sequence , int *index)
  *  Copie d'un objet Tops.
  *
  *  arguments : reference sur un objet Tops,
- *              flag copie de l'objet Top_parameters.
+ *              flag copie de l'objet TopParameters.
  *
  *--------------------------------------------------------------*/
 
@@ -1178,21 +1179,21 @@ void Tops::copy(const Tops &tops , bool model_flag)
 
 
   if ((model_flag) && (tops.top_parameters)) {
-    top_parameters = new Top_parameters(*(tops.top_parameters) , false);
+    top_parameters = new TopParameters(*(tops.top_parameters) , false);
   }
   else {
     top_parameters = NULL;
   }
 
-  nb_internode = new Histogram(*(tops.nb_internode));
+  nb_internode = new FrequencyDistribution(*(tops.nb_internode));
 
   max_position = tops.max_position;
-  axillary_nb_internode = new Histogram*[max_position + 1];
+  axillary_nb_internode = new FrequencyDistribution*[max_position + 1];
   axillary_nb_internode[0] = NULL;
 
   for (i = 1;i <= max_position;i++) {
     if (tops.axillary_nb_internode[i]) {
-      axillary_nb_internode[i] = new Histogram(*(tops.axillary_nb_internode[i]));
+      axillary_nb_internode[i] = new FrequencyDistribution(*(tops.axillary_nb_internode[i]));
     }
     else {
       axillary_nb_internode[i] = NULL;
@@ -1206,7 +1207,7 @@ void Tops::copy(const Tops &tops , bool model_flag)
  *  Constructeur par copie de la classe Tops.
  *
  *  arguments : reference sur un objet Tops,
- *              flag copie de l'objet Top_parameters et flag inversion.
+ *              flag copie de l'objet TopParameters et flag inversion.
  *
  *--------------------------------------------------------------*/
 
@@ -1226,7 +1227,7 @@ Tops::Tops(const Tops &tops , bool model_flag , bool reverse_flag)
     top_parameters = NULL;
 
     max_position = 0;
-    build_nb_internode_histogram();
+    build_nb_internode_frequency_distribution();
     break;
   }
   }
@@ -1246,10 +1247,10 @@ Tops::Tops(int nb_sample , const Tops **ptops)
 {
   register int i , j , k , m , n;
   int nb_histo , *pposition , *cposition , *plength , *clength;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
 
 
-  phisto = new const Histogram*[nb_sample];
+  phisto = new const FrequencyDistribution*[nb_sample];
 
   // calcul du nombre et de la longueur des cimes
 
@@ -1281,14 +1282,14 @@ Tops::Tops(int nb_sample , const Tops **ptops)
     phisto[j] = ptops[j]->hlength;
   }
 
-  hlength = new Histogram(nb_sample , phisto);
+  hlength = new FrequencyDistribution(nb_sample , phisto);
 
   index_parameter_type = POSITION;
 
   for (i = 0;i < nb_sample;i++) {
     phisto[i] = ptops[i]->hindex_parameter;
   }
-  hindex_parameter = new Histogram(nb_sample , phisto);
+  hindex_parameter = new FrequencyDistribution(nb_sample , phisto);
 
   index_interval = NULL;
 
@@ -1311,12 +1312,12 @@ Tops::Tops(int nb_sample , const Tops **ptops)
     }
   }
 
-  marginal = new Histogram*[nb_variable];
+  marginal = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_sample;i++) {
     phisto[i] = ptops[i]->marginal[0];
   }
-  marginal[0] = new Histogram(nb_sample , phisto);
+  marginal[0] = new FrequencyDistribution(nb_sample , phisto);
 
   // copie des sequences
 
@@ -1353,7 +1354,7 @@ Tops::Tops(int nb_sample , const Tops **ptops)
 
   top_parameters = NULL;
 
-  // calcul de la position maximum et fusion des histogrammes
+  // calcul de la position maximum et fusion des lois empiriques
   // du nombre d'entrenoeuds axe porteur/axes portes
 
   max_position = 0;
@@ -1364,9 +1365,9 @@ Tops::Tops(int nb_sample , const Tops **ptops)
     phisto[i] = ptops[i]->nb_internode;
   }
 
-  nb_internode = new Histogram(nb_sample , phisto);
+  nb_internode = new FrequencyDistribution(nb_sample , phisto);
 
-  axillary_nb_internode = new Histogram*[max_position + 1];
+  axillary_nb_internode = new FrequencyDistribution*[max_position + 1];
   axillary_nb_internode[0] = NULL;
 
   for (i = 1;i <= max_position;i++) {
@@ -1378,7 +1379,7 @@ Tops::Tops(int nb_sample , const Tops **ptops)
     }
 
     if (nb_histo > 0) {
-      axillary_nb_internode[i] = new Histogram(nb_histo , phisto);
+      axillary_nb_internode[i] = new FrequencyDistribution(nb_histo , phisto);
     }
     else {
       axillary_nb_internode[i] = NULL;
@@ -1451,18 +1452,18 @@ Tops& Tops::operator=(const Tops &tops)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de l'histogramme du nombre d'entrenoeuds des axes portes
+ *  Extraction de la loi empirique du nombre d'entrenoeuds des axes portes
  *  pour une position donnee.
  *
- *  arguments : reference sur un objet Format_error, position.
+ *  arguments : reference sur un objet StatError, position.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Tops::extract(Format_error &error , int position) const
+DiscreteDistributionData* Tops::extract(StatError &error , int position) const
 
 {
   bool status = true;
-  Distribution_data *histo;
+  DiscreteDistributionData *histo;
 
 
   histo = NULL;
@@ -1474,12 +1475,12 @@ Distribution_data* Tops::extract(Format_error &error , int position) const
   }
   else if (!axillary_nb_internode[position]) {
     status = false;
-    error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+    error.update(STAT_error[STATR_EMPTY_SAMPLE]);
   }
 
   if (status) {
-    histo = new Distribution_data(*axillary_nb_internode[position] ,
-                                  (top_parameters ? top_parameters->axillary_nb_internode[position] : 0));
+    histo = new DiscreteDistributionData(*axillary_nb_internode[position] ,
+                                         (top_parameters ? top_parameters->axillary_nb_internode[position] : 0));
   }
 
   return histo;
@@ -1490,11 +1491,11 @@ Distribution_data* Tops::extract(Format_error &error , int position) const
  *
  *  Suppression des premiers entrenoeuds de l'axe porteur.
  *
- *  arguments : reference sur un objet Format_error, nombre d'entrenoeuds.
+ *  arguments : reference sur un objet StatError, nombre d'entrenoeuds.
  *
  *--------------------------------------------------------------*/
 
-Tops* Tops::shift(Format_error &error , int inb_internode) const
+Tops* Tops::shift(StatError &error , int inb_internode) const
 
 {
   bool status = true;
@@ -1544,9 +1545,9 @@ Tops* Tops::shift(Format_error &error , int inb_internode) const
 
     tops->min_value[0] = min_value[0];
     tops->max_value[0] = max_value[0];
-    tops->marginal[0] = new Histogram(*marginal[0]);
+    tops->marginal[0] = new FrequencyDistribution(*marginal[0]);
 
-    tops->build_nb_internode_histogram();
+    tops->build_nb_internode_frequency_distribution();
   }
 
   return tops;
@@ -1557,13 +1558,13 @@ Tops* Tops::shift(Format_error &error , int inb_internode) const
  *
  *  Selection de cimes par l'identificateur.
  *
- *  arguments : reference sur un objet Format_error, nombre de cimes,
+ *  arguments : reference sur un objet StatError, nombre de cimes,
  *              identificateur des cimes, flag pour conserver ou rejeter
  *              les cimes selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Tops* Tops::select_individual(Format_error &error , int inb_sequence ,
+Tops* Tops::select_individual(StatError &error , int inb_sequence ,
                               int *iidentifier , bool keep) const
 
 {
@@ -1639,11 +1640,11 @@ Tops* Tops::select_individual(Format_error &error , int inb_sequence ,
  *
  *  Inversion du sens de parcours de cimes.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Tops* Tops::reverse(Format_error &error) const
+Tops* Tops::reverse(StatError &error) const
 
 {
   bool status = true;
@@ -1676,11 +1677,11 @@ Tops* Tops::reverse(Format_error &error) const
  *
  *  Construction d'un objet Tops a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, flag format.
+ *  arguments : reference sur un objet StatError, path, flag format.
  *
  *--------------------------------------------------------------*/
 
-Tops* tops_ascii_read(Format_error &error , const char *path , bool old_format)
+Tops* tops_ascii_read(StatError &error , const char *path , bool old_format)
 
 {
   Sequences *seq;
@@ -1712,7 +1713,7 @@ ostream& Tops::line_write(ostream &os) const
 
 {
   os << nb_sequence << " " << SEQ_label[SEQL_TOPS] << " - "
-     << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << "   "
+     << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "   "
      << STAT_label[STATL_MEAN] << ": " << nb_internode->mean << "   "
      << STAT_label[STATL_VARIANCE] << ": " << nb_internode->variance;
 
@@ -1734,12 +1735,12 @@ ostream& Tops::ascii_write(ostream &os , bool exhaustive , bool comment_flag) co
   register int i;
 
 
-  // ecriture de l'histogramme du nombre d'entrenoeuds de l'axe porteur
+  // ecriture de la loi empirique du nombre d'entrenoeuds de l'axe porteur
 
   if (comment_flag) {
     os << "# ";
   }
-  os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+  os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
   nb_internode->ascii_characteristic_print(os , exhaustive , comment_flag);
 
   if (exhaustive) {
@@ -1747,11 +1748,11 @@ ostream& Tops::ascii_write(ostream &os , bool exhaustive , bool comment_flag) co
     if (comment_flag) {
       os << "# ";
     }
-    os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+    os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
     nb_internode->ascii_print(os , comment_flag);
   }
 
-  // ecriture des histogrammes du nombre d'entrenoeuds des axes portes
+  // ecriture des lois empiriques du nombre d'entrenoeuds des axes portes
 
   for (i = 1;i <= max_position;i++) {
     if (axillary_nb_internode[i]) {
@@ -1759,7 +1760,7 @@ ostream& Tops::ascii_write(ostream &os , bool exhaustive , bool comment_flag) co
       if (comment_flag) {
         os << "# ";
       }
-      os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i << " - ";
+      os << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i << " - ";
       axillary_nb_internode[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
 
       if (exhaustive) {
@@ -1767,7 +1768,7 @@ ostream& Tops::ascii_write(ostream &os , bool exhaustive , bool comment_flag) co
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i << endl;
+        os << "   | " << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i << endl;
 
         axillary_nb_internode[i]->ascii_print(os , comment_flag);
       }
@@ -1804,12 +1805,12 @@ ostream& Tops::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Tops dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Tops::ascii_write(Format_error &error , const char *path , bool exhaustive) const
+bool Tops::ascii_write(StatError &error , const char *path , bool exhaustive) const
 
 {
   bool status;
@@ -1871,12 +1872,12 @@ ostream& Tops::ascii_data_write(ostream &os , char format , bool exhaustive) con
  *
  *  Ecriture d'un objet Tops dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              format (lignes/colonnes), flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Tops::ascii_data_write(Format_error &error , const char *path ,
+bool Tops::ascii_data_write(StatError &error , const char *path ,
                             char format , bool exhaustive) const
 
 {
@@ -1915,11 +1916,11 @@ bool Tops::ascii_data_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet Tops dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Tops::spreadsheet_write(Format_error &error , const char *path) const
+bool Tops::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1943,22 +1944,22 @@ bool Tops::spreadsheet_write(Format_error &error , const char *path) const
 
     else {
 
-      // ecriture de l'histogramme du nombre d'entrenoeuds de l'axe porteur
+      // ecriture de la loi empirique du nombre d'entrenoeuds de l'axe porteur
 
-      out_file << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      out_file << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       nb_internode->spreadsheet_characteristic_print(out_file , true);
 
-      out_file << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      out_file << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       nb_internode->spreadsheet_print(out_file);
 
-      // ecriture des lois et des histogrammes du nombre d'entrenoeuds des axes portes
+      // ecriture des lois et des lois empiriques du nombre d'entrenoeuds des axes portes
 
       for (i = 1;i <= max_position;i++) {
         if (axillary_nb_internode[i]) {
-          out_file << "\n" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i << "\t";
+          out_file << "\n" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i << "\t";
           axillary_nb_internode[i]->spreadsheet_characteristic_print(out_file , true);
 
-          out_file << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM] << " " << i << endl;
+          out_file << "\n\t" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i << endl;
           axillary_nb_internode[i]->spreadsheet_print(out_file);
         }
       }
@@ -1973,12 +1974,12 @@ bool Tops::spreadsheet_write(Format_error &error , const char *path) const
  *
  *  Sortie Gnuplot d'un objet Tops.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Tops::plot_write(Format_error &error , const char *prefix ,
+bool Tops::plot_write(StatError &error , const char *prefix ,
                       const char *title) const
 
 {
@@ -1994,7 +1995,7 @@ bool Tops::plot_write(Format_error &error , const char *prefix ,
   else {
     register int i , j , k;
     int nb_histo;
-    const Histogram **phisto;
+    const FrequencyDistribution **phisto;
     ostringstream data_file_name;
 
 
@@ -2009,7 +2010,7 @@ bool Tops::plot_write(Format_error &error , const char *prefix ,
       }
     }
 
-    phisto = new const Histogram*[nb_histo];
+    phisto = new const FrequencyDistribution*[nb_histo];
 
     nb_histo = 0;
     for (i = 1;i <= max_position;i++) {
@@ -2061,7 +2062,7 @@ bool Tops::plot_write(Format_error &error , const char *prefix ,
         out_file << "plot [0:" << nb_internode->nb_value - 1 << "] [0:"
                  << (int)(nb_internode->max * YSCALE) + 1 << "] \""
                  << label((data_file_name.str()).c_str()) << "\" using 1 title \""
-                 << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+                 << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
         if (nb_internode->nb_value - 1 < TIC_THRESHOLD) {
@@ -2089,7 +2090,7 @@ bool Tops::plot_write(Format_error &error , const char *prefix ,
             out_file << "plot [0:" << axillary_nb_internode[k]->nb_value - 1 << "] [0:"
                      << (int)(axillary_nb_internode[k]->max * YSCALE) + 1 << "] \""
                      << label((data_file_name.str()).c_str()) << "\" using " << j++
-                     << " title \"" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+                     << " title \"" << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << " " << k << "\" with impulses" << endl;
 
             if (axillary_nb_internode[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2139,7 +2140,7 @@ MultiPlotSet* Tops::get_plotable() const
   else {
     register int i , j;
     int nb_histo;
-    const Histogram *phisto[2] , **merged_histo;
+    const FrequencyDistribution *phisto[2] , **merged_histo;
     ostringstream legend;
 
 
@@ -2170,7 +2171,7 @@ MultiPlotSet* Tops::get_plotable() const
     plot[0].resize(1);
 
     legend.str("");
-    legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[0][0].legend = legend.str();
 
     plot[0][0].style = "impulses";
@@ -2179,19 +2180,19 @@ MultiPlotSet* Tops::get_plotable() const
 
     // 2eme vue : lois empiriques du nombre d'entrenoeuds des axes portes superposees
 
-    merged_histo = new const Histogram*[nb_histo];
+    merged_histo = new const FrequencyDistribution*[nb_histo];
 
     i = nb_histo - 1;
     for (j = max_position;j >= 1;j--) {
       if (axillary_nb_internode[j]) {
         if (i == nb_histo - 1) {
-          merged_histo[i] = new Histogram(*axillary_nb_internode[j]);
+          merged_histo[i] = new FrequencyDistribution(*axillary_nb_internode[j]);
         }
 
         else {
           phisto[0] = merged_histo[i + 1];
           phisto[1] = axillary_nb_internode[j];
-          merged_histo[i] = new Histogram(2 , phisto);
+          merged_histo[i] = new FrequencyDistribution(2 , phisto);
         }
 
         i--;
@@ -2214,7 +2215,7 @@ MultiPlotSet* Tops::get_plotable() const
     for (j = 1;j <= max_position;j++) {
       if (axillary_nb_internode[j]) {
         legend.str("");
-        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << " " << j;
         plot[1][i].legend = legend.str();
 
@@ -2248,7 +2249,7 @@ MultiPlotSet* Tops::get_plotable() const
         plot[i].resize(1);
 
         legend.str("");
-        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_HISTOGRAM]
+        legend << SEQ_label[SEQL_NB_INTERNODE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << " " << j;
         plot[i][0].legend = legend.str();
 
