@@ -24,7 +24,7 @@
 
 // Boost.Python Wrapper export function
 void class_distribution();
-void class_parametric();
-void class_parametric_model();
+void class_discrete_parametric();
+void class_discrete_parametric_model();
 
 #endif
