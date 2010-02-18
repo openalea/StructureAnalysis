@@ -76,14 +76,14 @@ Compound::Compound()
  *
  *--------------------------------------------------------------*/
 
-Compound::Compound(const Parametric &sum_dist , const Parametric &dist ,
+Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist ,
                    double cumul_threshold)
 
 {
   compound_data = NULL;
 
-  sum_distribution = new Parametric(sum_dist , 'n');
-  distribution = new Parametric(dist , 'n');
+  sum_distribution = new DiscreteParametric(sum_dist , 'n');
+  distribution = new DiscreteParametric(dist , 'n');
 
   Distribution::init((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1);
 
@@ -100,7 +100,7 @@ Compound::Compound(const Parametric &sum_dist , const Parametric &dist ,
  *
  *--------------------------------------------------------------*/
 
-Compound::Compound(const Parametric &sum_dist , const Parametric &dist , char type)
+Compound::Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist , char type)
 
 {
   compound_data = NULL;
@@ -108,20 +108,20 @@ Compound::Compound(const Parametric &sum_dist , const Parametric &dist , char ty
   switch (type) {
 
   case 's' : {
-    sum_distribution = new Parametric(sum_dist , 'c' , (int)(sum_dist.nb_value * NB_VALUE_COEFF));
+    sum_distribution = new DiscreteParametric(sum_dist , 'c' , (int)(sum_dist.nb_value * NB_VALUE_COEFF));
     if ((dist.ident == POISSON) || (dist.ident == NEGATIVE_BINOMIAL)) {
-      distribution = new Parametric(dist.ident , dist.inf_bound , dist.sup_bound ,
-                                    dist.parameter , dist.probability , COMPOUND_THRESHOLD);
+      distribution = new DiscreteParametric(dist.ident , dist.inf_bound , dist.sup_bound ,
+                                            dist.parameter , dist.probability , COMPOUND_THRESHOLD);
     }
     else {
-      distribution = new Parametric(dist , 'n');
+      distribution = new DiscreteParametric(dist , 'n');
     }
     break;
   }
 
   case 'e' : {
-    sum_distribution = new Parametric(sum_dist , 'n');
-    distribution = new Parametric(dist , 'c' , (int)(dist.nb_value * NB_VALUE_COEFF));
+    sum_distribution = new DiscreteParametric(sum_dist , 'n');
+    distribution = new DiscreteParametric(dist , 'c' , (int)(dist.nb_value * NB_VALUE_COEFF));
     break;
   }
   }
@@ -135,7 +135,7 @@ Compound::Compound(const Parametric &sum_dist , const Parametric &dist , char ty
  *  Copie d'un objet Compound.
  *
  *  arguments : reference sur un objet Compound,
- *              flag copie de l'objet Compound_data.
+ *              flag copie de l'objet CompoundData.
  *
  *--------------------------------------------------------------*/
 
@@ -143,14 +143,14 @@ void Compound::copy(const Compound &compound , bool data_flag)
 
 {
   if ((data_flag) && (compound.compound_data)) {
-    compound_data = new Compound_data(*(compound.compound_data) , false);
+    compound_data = new CompoundData(*(compound.compound_data) , false);
   }
   else {
     compound_data = NULL;
   }
 
-  sum_distribution = new Parametric(*(compound.sum_distribution));
-  distribution = new Parametric(*(compound.distribution));
+  sum_distribution = new DiscreteParametric(*(compound.sum_distribution));
+  distribution = new DiscreteParametric(*(compound.distribution));
 }
 
 
@@ -206,10 +206,10 @@ Compound& Compound::operator=(const Compound &compound)
  *
  *--------------------------------------------------------------*/
 
-Compound_data* Compound::extract_data(Format_error &error) const
+CompoundData* Compound::extract_data(Format_error &error) const
 
 {
-  Compound_data *compound_histo;
+  CompoundData *compound_histo;
 
 
   error.init();
@@ -220,7 +220,7 @@ Compound_data* Compound::extract_data(Format_error &error) const
   }
 
   else {
-    compound_histo = new Compound_data(*compound_data);
+    compound_histo = new CompoundData(*compound_data);
     compound_histo->compound = new Compound(*this , false);
   }
 
@@ -247,7 +247,7 @@ Compound* compound_ascii_read(Format_error &error , const char *path ,
   bool status;
   register int i;
   int line , read_line;
-  Parametric *sum_dist , *dist;
+  DiscreteParametric *sum_dist , *dist;
   Compound *compound;
   ifstream in_file(path);
 
@@ -328,8 +328,8 @@ Compound* compound_ascii_read(Format_error &error , const char *path ,
         switch (read_line) {
 
         case 1 : {
-          sum_dist = parametric_parsing(error , in_file , line ,
-                                        NEGATIVE_BINOMIAL , CUMUL_THRESHOLD);
+          sum_dist = discrete_parametric_parsing(error , in_file , line ,
+                                                 NEGATIVE_BINOMIAL , CUMUL_THRESHOLD);
           if (!sum_dist) {
             status = false;
           }
@@ -337,8 +337,8 @@ Compound* compound_ascii_read(Format_error &error , const char *path ,
         }
 
         case 2 : {
-          dist = parametric_parsing(error , in_file , line ,
-                                    NEGATIVE_BINOMIAL , cumul_threshold);
+          dist = discrete_parametric_parsing(error , in_file , line ,
+                                             NEGATIVE_BINOMIAL , cumul_threshold);
           if (!dist) {
             status = false;
           }
@@ -411,12 +411,12 @@ ostream& Compound::line_write(ostream &os) const
  *  Ecriture d'une loi composee et de la structure de donnees associee
  *  dans un fichier.
  *
- *  arguments : stream, pointeur sur un objet Compound_data,
+ *  arguments : stream, pointeur sur un objet CompoundData,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Compound::ascii_write(ostream &os , const Compound_data *compound_histo ,
+ostream& Compound::ascii_write(ostream &os , const CompoundData *compound_histo ,
                                bool exhaustive , bool file_flag) const
 
 {
@@ -432,7 +432,7 @@ ostream& Compound::ascii_write(ostream &os , const Compound_data *compound_histo
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     compound_histo->ascii_characteristic_print(os , exhaustive , file_flag);
 
     likelihood = likelihood_computation(*compound_histo);
@@ -468,11 +468,11 @@ ostream& Compound::ascii_write(ostream &os , const Compound_data *compound_histo
     }
     os << "  ";
     if (compound_histo) {
-      os << " | " << STAT_label[STATL_HISTOGRAM];
+      os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
     os << " | " << STAT_label[STATL_COMPOUND] << " " << STAT_label[STATL_DISTRIBUTION];
     if (compound_histo) {
-      os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+      os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
          << " " << STAT_label[STATL_FUNCTION];
     }
     os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_COMPOUND]
@@ -489,8 +489,8 @@ ostream& Compound::ascii_write(ostream &os , const Compound_data *compound_histo
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
-    compound_histo->sum_histogram->ascii_characteristic_print(os , exhaustive , file_flag);
+    os << STAT_label[STATL_SUM] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+    compound_histo->sum_frequency_distribution->ascii_characteristic_print(os , exhaustive , file_flag);
   }
 
   if (exhaustive) {
@@ -500,18 +500,18 @@ ostream& Compound::ascii_write(ostream &os , const Compound_data *compound_histo
     }
     os << "  ";
     if (compound_histo) {
-      os << " | " << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM];
+      os << " | " << STAT_label[STATL_SUM] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
     os << " | " << STAT_label[STATL_SUM] << " " << STAT_label[STATL_DISTRIBUTION];
     if (compound_histo) {
       os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_SUM]
-         << " " << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_FUNCTION];
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
     }
     os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_SUM]
        << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
     sum_distribution->Distribution::ascii_print(os , file_flag , true , false ,
-                                                (compound_histo ? compound_histo->sum_histogram : 0));
+                                                (compound_histo ? compound_histo->sum_frequency_distribution : 0));
   }
 
   os << "\n" << STAT_word[STATW_ELEMENTARY] << endl;
@@ -523,8 +523,8 @@ ostream& Compound::ascii_write(ostream &os , const Compound_data *compound_histo
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
-    compound_histo->histogram->ascii_characteristic_print(os , exhaustive , file_flag);
+    os << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+    compound_histo->frequency_distribution->ascii_characteristic_print(os , exhaustive , file_flag);
   }
 
   if (exhaustive) {
@@ -533,20 +533,20 @@ ostream& Compound::ascii_write(ostream &os , const Compound_data *compound_histo
       os << "# ";
     }
     os << "  ";
-    if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
-      os << " | " << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM];
+    if ((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) {
+      os << " | " << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
     os << " | " << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_DISTRIBUTION];
-    if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
+    if ((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) {
       os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_ELEMENTARY]
-         << " " << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_FUNCTION];
+         << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
     }
     os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_ELEMENTARY]
        << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
     distribution->Distribution::ascii_print(os , file_flag , true , false ,
-                                            (((compound_histo) && (compound_histo->histogram->nb_element > 0)) ?
-                                             compound_histo->histogram : 0));
+                                            (((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) ?
+                                             compound_histo->frequency_distribution : 0));
   }
 
   return os;
@@ -606,11 +606,11 @@ bool Compound::ascii_write(Format_error &error , const char *path ,
  *  Ecriture d'une loi composee  et de la structure de donnees associee
  *  dans un fichier au format tableur.
  *
- *  arguments : stream, pointeur sur une famille d'histogrammes.
+ *  arguments : stream, pointeur sur une famille de lois empiriques.
  *
  *--------------------------------------------------------------*/
 
-ostream& Compound::spreadsheet_write(ostream &os , const Compound_data *compound_histo) const
+ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_histo) const
 
 {
   os << STAT_word[STATW_COMPOUND] << endl;
@@ -621,7 +621,7 @@ ostream& Compound::spreadsheet_write(ostream &os , const Compound_data *compound
     Test test(CHI2);
 
 
-    os << "\n" << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     compound_histo->spreadsheet_characteristic_print(os , true);
 
     likelihood = likelihood_computation(*compound_histo);
@@ -640,11 +640,11 @@ ostream& Compound::spreadsheet_write(ostream &os , const Compound_data *compound
 
   os << "\n";
   if (compound_histo) {
-    os << "\t" << STAT_label[STATL_HISTOGRAM];
+    os << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
   os << "\t" << STAT_label[STATL_COMPOUND] << " " << STAT_label[STATL_DISTRIBUTION];
   if (compound_histo) {
-    os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+    os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
        << " " << STAT_label[STATL_FUNCTION];
   }
   os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_COMPOUND]
@@ -657,49 +657,49 @@ ostream& Compound::spreadsheet_write(ostream &os , const Compound_data *compound
   sum_distribution->spreadsheet_characteristic_print(os , true);
 
   if (compound_histo) {
-    os << "\n" << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
-    compound_histo->sum_histogram->spreadsheet_characteristic_print(os , true);
+    os << "\n" << STAT_label[STATL_SUM] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+    compound_histo->sum_frequency_distribution->spreadsheet_characteristic_print(os , true);
   }
 
   os << "\n";
   if (compound_histo) {
-    os << "\t" << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM];
+    os << "\t" << STAT_label[STATL_SUM] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
   os << "\t" << STAT_label[STATL_SUM] << " " << STAT_label[STATL_DISTRIBUTION];
   if (compound_histo) {
     os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_SUM]
-       << " " << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_FUNCTION];
+       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
   }
   os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_SUM]
      << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
   sum_distribution->Distribution::spreadsheet_print(os , true , false , false ,
-                                                    (compound_histo ? compound_histo->sum_histogram : 0));
+                                                    (compound_histo ? compound_histo->sum_frequency_distribution : 0));
 
   os << "\n" << STAT_word[STATW_ELEMENTARY] << endl;
   distribution->spreadsheet_print(os);
   distribution->spreadsheet_characteristic_print(os , true);
 
   if (compound_histo) {
-    os << "\n" << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
-    compound_histo->histogram->spreadsheet_characteristic_print(os , true);
+    os << "\n" << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+    compound_histo->frequency_distribution->spreadsheet_characteristic_print(os , true);
   }
 
   os << "\n";
-  if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
-    os << "\t" << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM];
+  if ((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) {
+    os << "\t" << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
   os << "\t" << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_DISTRIBUTION];
-  if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
+  if ((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) {
     os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_ELEMENTARY]
-       << " " << STAT_label[STATL_HISTOGRAM] << " " << STAT_label[STATL_FUNCTION];
+       << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION];
   }
   os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_ELEMENTARY]
      << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
   distribution->Distribution::spreadsheet_print(os , true , false , false ,
-                                                (((compound_histo) && (compound_histo->histogram->nb_element > 0)) ?
-                                                 compound_histo->histogram : 0));
+                                                (((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) ?
+                                                 compound_histo->frequency_distribution : 0));
 
   return os;
 }
@@ -741,12 +741,12 @@ bool Compound::spreadsheet_write(Format_error &error , const char *path) const
  *  Sortie Gnuplot d'une loi composee et de la structure de donnees associee.
  *
  *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur une famille d'histogrammes.
+ *              pointeur sur une famille de lois empiriques.
  *
  *--------------------------------------------------------------*/
 
 bool Compound::plot_write(const char *prefix , const char *title ,
-                          const Compound_data *compound_histo) const
+                          const CompoundData *compound_histo) const
 
 {
   bool status;
@@ -754,7 +754,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
   int nb_histo = 0 , index_dist[3];
   double scale[3];
   const Distribution *pdist[3];
-  const Histogram *phisto[3];
+  const FrequencyDistribution *phisto[3];
   ostringstream data_file_name;
 
 
@@ -771,14 +771,14 @@ bool Compound::plot_write(const char *prefix , const char *title ,
     index_dist[nb_histo++] = 0;
     scale[0] = compound_histo->nb_element;
 
-    phisto[nb_histo] = compound_histo->sum_histogram;
+    phisto[nb_histo] = compound_histo->sum_frequency_distribution;
     index_dist[nb_histo++] = 1;
-    scale[1] = compound_histo->sum_histogram->nb_element;
+    scale[1] = compound_histo->sum_frequency_distribution->nb_element;
 
-    if (compound_histo->histogram->nb_element > 0) {
-      phisto[nb_histo] = compound_histo->histogram;
+    if (compound_histo->frequency_distribution->nb_element > 0) {
+      phisto[nb_histo] = compound_histo->frequency_distribution;
       index_dist[nb_histo++] = 2;
-      scale[2] = compound_histo->histogram->nb_element;
+      scale[2] = compound_histo->frequency_distribution->nb_element;
     }
     else {
       scale[2] = 1.;
@@ -834,7 +834,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
         out_file << "plot [0:" << nb_value - 1 << "] [0:"
                  << (int)(MAX(compound_histo->max , max * compound_histo->nb_element) * YSCALE) + 1
                  << "] \"" << label((data_file_name.str()).c_str()) << "\" using 1 title \""
-                 << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
+                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
         out_file << "\"" << label((data_file_name.str()).c_str()) << "\" using " << nb_histo + 1 << " title \""
                  << STAT_label[STATL_COMPOUND] << " " << STAT_label[STATL_DISTRIBUTION]
                  << "\" with linespoints" << endl;
@@ -863,10 +863,10 @@ bool Compound::plot_write(const char *prefix , const char *title ,
 
       if (compound_histo) {
         out_file << "plot [0:" << sum_distribution->nb_value - 1 << "] [0:"
-                 << (int)(MAX(compound_histo->sum_histogram->max ,
-                              sum_distribution->max * compound_histo->sum_histogram->nb_element) * YSCALE) + 1
+                 << (int)(MAX(compound_histo->sum_frequency_distribution->max ,
+                              sum_distribution->max * compound_histo->sum_frequency_distribution->nb_element) * YSCALE) + 1
                  << "] \"" << label((data_file_name.str()).c_str()) << "\" using 2 title \""
-                 << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM]
+                 << STAT_label[STATL_SUM] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses,\\" << endl;
         out_file << "\"" << label((data_file_name.str()).c_str()) << "\" using " << nb_histo + 2 << " title \""
                  << STAT_label[STATL_SUM] << " " << STAT_label[STATL_DISTRIBUTION];
@@ -896,12 +896,12 @@ bool Compound::plot_write(const char *prefix , const char *title ,
         out_file << "set xtics 0,1" << endl;
       }
 
-      if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
+      if ((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) {
         out_file << "plot [0:" << distribution->nb_value - 1 << "] [0:"
-                 << (int)(MAX(compound_histo->histogram->max ,
-                              distribution->max * compound_histo->histogram->nb_element) * YSCALE) + 1
+                 << (int)(MAX(compound_histo->frequency_distribution->max ,
+                              distribution->max * compound_histo->frequency_distribution->nb_element) * YSCALE) + 1
                  << "] \"" << label((data_file_name.str()).c_str()) << "\" using 3 title \""
-                 << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM]
+                 << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses,\\" << endl;
         out_file << "\"" << label((data_file_name.str()).c_str()) << "\" using " << nb_histo + 3 << " title \""
                  << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_DISTRIBUTION];
@@ -963,11 +963,11 @@ bool Compound::plot_write(Format_error &error , const char *prefix ,
  *
  *  Sortie graphique d'une loi composee et de la structure de donnees associee.
  *
- *  argument : pointeur sur un objet Compound_data.
+ *  argument : pointeur sur un objet CompoundData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
+MultiPlotSet* Compound::get_plotable(const CompoundData *compound_histo) const
 
 {
   register int i , j;
@@ -1007,7 +1007,7 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
 
     plot[0].resize(2);
 
-    plot[0][0].legend = STAT_label[STATL_HISTOGRAM];
+    plot[0][0].legend = STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
     plot[0][0].style = "impulses";
 
@@ -1046,8 +1046,8 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     plot[1].resize(2);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-           << STAT_label[STATL_FUNCTION];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+           << " " << STAT_label[STATL_FUNCTION];
     plot[1][0].legend = legend.str();
 
     plot[1][0].style = "linespoints";
@@ -1084,20 +1084,20 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
   }
 
   if (compound_histo) {
-    plot[i].yrange = Range(0. , ceil(MAX(compound_histo->sum_histogram->max ,
-                                         sum_distribution->max * compound_histo->sum_histogram->nb_element) * YSCALE));
+    plot[i].yrange = Range(0. , ceil(MAX(compound_histo->sum_frequency_distribution->max ,
+                                         sum_distribution->max * compound_histo->sum_frequency_distribution->nb_element) * YSCALE));
 
     plot[i].resize(2);
 
     legend.str("");
-    legend << STAT_label[STATL_SUM] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << STAT_label[STATL_SUM] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
     plot[i][0].style = "impulses";
 
-    compound_histo->sum_histogram->plotable_frequency_write(plot[i][0]);
+    compound_histo->sum_frequency_distribution->plotable_frequency_write(plot[i][0]);
 
-    scale = compound_histo->sum_histogram->nb_element;
+    scale = compound_histo->sum_frequency_distribution->nb_element;
     j = 1;
   }
 
@@ -1132,20 +1132,20 @@ MultiPlotSet* Compound::get_plotable(const Compound_data *compound_histo) const
     plot[i].xtics = 1;
   }
 
-  if ((compound_histo) && (compound_histo->histogram->nb_element > 0)) {
-    plot[i].yrange = Range(0. , ceil(MAX(compound_histo->histogram->max ,
-                                         distribution->max * compound_histo->histogram->nb_element) * YSCALE));
+  if ((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) {
+    plot[i].yrange = Range(0. , ceil(MAX(compound_histo->frequency_distribution->max ,
+                                         distribution->max * compound_histo->frequency_distribution->nb_element) * YSCALE));
 
     plot[i].resize(2);
     legend.str("");
-    legend << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << STAT_label[STATL_ELEMENTARY] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[i][0].legend = legend.str();
 
     plot[i][0].style = "impulses";
 
-    compound_histo->histogram->plotable_frequency_write(plot[i][0]);
+    compound_histo->frequency_distribution->plotable_frequency_write(plot[i][0]);
 
-    scale = compound_histo->histogram->nb_element;
+    scale = compound_histo->frequency_distribution->nb_element;
     j = 1;
   }
 
@@ -1186,68 +1186,68 @@ MultiPlotSet* Compound::get_plotable() const
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Compound_data.
+ *  Constructeur par defaut de la classe CompoundData.
  *
  *--------------------------------------------------------------*/
 
-Compound_data::Compound_data()
+CompoundData::CompoundData()
 
 {
   compound = NULL;
-  sum_histogram = NULL;
-  histogram = NULL;
+  sum_frequency_distribution = NULL;
+  frequency_distribution = NULL;
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Compound_data.
+ *  Constructeur de la classe CompoundData.
  *
- *  arguments : reference sur un objet Histogram et
+ *  arguments : reference sur un objet FrequencyDistribution et
  *              sur un objet Compound.
  *
  *--------------------------------------------------------------*/
 
-Compound_data::Compound_data(const Histogram &histo , const Compound &icompound)
-:Histogram(histo)
+CompoundData::CompoundData(const FrequencyDistribution &histo , const Compound &icompound)
+:FrequencyDistribution(histo)
 
 {
   compound = NULL;
 
-  sum_histogram = new Histogram(icompound.sum_distribution->alloc_nb_value);
-  histogram = new Histogram(icompound.distribution->alloc_nb_value);
+  sum_frequency_distribution = new FrequencyDistribution(icompound.sum_distribution->alloc_nb_value);
+  frequency_distribution = new FrequencyDistribution(icompound.distribution->alloc_nb_value);
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Compound_data.
+ *  Constructeur de la classe CompoundData.
  *
  *  argument : reference sur un objet Compound.
  *
  *--------------------------------------------------------------*/
 
-Compound_data::Compound_data(const Compound &icompound)
-:Histogram(icompound)
+CompoundData::CompoundData(const Compound &icompound)
+:FrequencyDistribution(icompound)
 
 {
   compound = NULL;
 
-  sum_histogram = new Histogram(*(icompound.sum_distribution));
-  histogram = new Histogram(*(icompound.distribution));
+  sum_frequency_distribution = new FrequencyDistribution(*(icompound.sum_distribution));
+  frequency_distribution = new FrequencyDistribution(*(icompound.distribution));
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Compound_data.
+ *  Copie d'un objet CompoundData.
  *
- *  arguments : reference sur un objet Compound_data,
+ *  arguments : reference sur un objet CompoundData,
  *              flag copie de l'objet Compound.
  *
  *--------------------------------------------------------------*/
 
-void Compound_data::copy(const Compound_data &compound_histo , bool model_flag)
+void CompoundData::copy(const CompoundData &compound_histo , bool model_flag)
 
 {
   if ((model_flag) && (compound_histo.compound)) {
@@ -1257,47 +1257,47 @@ void Compound_data::copy(const Compound_data &compound_histo , bool model_flag)
     compound = NULL;
   }
 
-  sum_histogram = new Histogram(*(compound_histo.sum_histogram));
-  histogram = new Histogram(*(compound_histo.histogram));
+  sum_frequency_distribution = new FrequencyDistribution(*(compound_histo.sum_frequency_distribution));
+  frequency_distribution = new FrequencyDistribution(*(compound_histo.frequency_distribution));
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Compound_data.
+ *  Destructeur de la classe CompoundData.
  *
  *--------------------------------------------------------------*/
 
-Compound_data::~Compound_data()
+CompoundData::~CompoundData()
 
 {
   delete compound;
 
-  delete sum_histogram;
-  delete histogram;
+  delete sum_frequency_distribution;
+  delete frequency_distribution;
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Compound_data.
+ *  Operateur d'assignement de la classe CompoundData.
  *
- *  argument : reference sur un objet Compound_data.
+ *  argument : reference sur un objet CompoundData.
  *
  *--------------------------------------------------------------*/
 
-Compound_data& Compound_data::operator=(const Compound_data &compound_histo)
+CompoundData& CompoundData::operator=(const CompoundData &compound_histo)
 
 {
   if (&compound_histo != this) {
     delete compound;
 
-    delete sum_histogram;
-    delete histogram;
+    delete sum_frequency_distribution;
+    delete frequency_distribution;
 
     delete [] frequency;
 
-    Histogram::copy(compound_histo);
+    FrequencyDistribution::copy(compound_histo);
     copy(compound_histo);
   }
 
@@ -1307,17 +1307,17 @@ Compound_data& Compound_data::operator=(const Compound_data &compound_histo)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de l'histogramme correspondant a la loi de la somme ou
- *  de l'histogramme correspondant a la loi elementaire.
+ *  Extraction de la loi empirique de la somme ou
+ *  de la loi empirique elementaire.
  *
- *  arguments : reference sur un objet Format_error, type de l'histogramme.
+ *  arguments : reference sur un objet Format_error, type de loi empirique.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Compound_data::extract(Format_error &error , char type) const
+DiscreteDistributionData* CompoundData::extract(Format_error &error , char type) const
 
 {
-  Distribution_data *phisto;
+  DiscreteDistributionData *phisto;
 
 
   error.init();
@@ -1325,24 +1325,26 @@ Distribution_data* Compound_data::extract(Format_error &error , char type) const
   switch (type) {
 
   case 's' : {
-    phisto = new Distribution_data(*sum_histogram , (compound ? compound->sum_distribution : 0));
+    phisto = new DiscreteDistributionData(*sum_frequency_distribution ,
+                                          (compound ? compound->sum_distribution : 0));
     break;
   }
 
   case 'e' : {
-    if (histogram->nb_element == 0) {
+    if (frequency_distribution->nb_element == 0) {
       phisto = NULL;
-      error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+      error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
 
     else {
-      phisto = new Distribution_data(*histogram , (compound ? compound->distribution : 0));
+      phisto = new DiscreteDistributionData(*frequency_distribution ,
+                                            (compound ? compound->distribution : 0));
     }
     break;
   }
 
   case 'c' : {
-    phisto = new Distribution_data(*this , compound);
+    phisto = new DiscreteDistributionData(*this , compound);
     break;
   }
   }
@@ -1353,13 +1355,13 @@ Distribution_data* Compound_data::extract(Format_error &error , char type) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Compound_data.
+ *  Ecriture sur une ligne d'un objet CompoundData.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Compound_data::line_write(ostream &os) const
+ostream& CompoundData::line_write(ostream &os) const
 
 {
   os << STAT_label[STATL_SAMPLE_SIZE] << ": " << nb_element << "   "
@@ -1372,13 +1374,13 @@ ostream& Compound_data::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Compound_data.
+ *  Ecriture d'un objet CompoundData.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Compound_data::ascii_write(ostream &os , bool exhaustive) const
+ostream& CompoundData::ascii_write(ostream &os , bool exhaustive) const
 
 {
   if (compound) {
@@ -1391,15 +1393,15 @@ ostream& Compound_data::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Compound_data dans un fichier.
+ *  Ecriture d'un objet CompoundData dans un fichier.
  *
  *  arguments : reference sur un objet Format_error, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Compound_data::ascii_write(Format_error &error , const char *path ,
-                                bool exhaustive) const
+bool CompoundData::ascii_write(Format_error &error , const char *path ,
+                               bool exhaustive) const
 
 {
   bool status = false;
@@ -1427,13 +1429,13 @@ bool Compound_data::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Compound_data dans un fichier au format tableur.
+ *  Ecriture d'un objet CompoundData dans un fichier au format tableur.
  *
  *  arguments : reference sur un objet Format_error, path.
  *
  *--------------------------------------------------------------*/
 
-bool Compound_data::spreadsheet_write(Format_error &error , const char *path) const
+bool CompoundData::spreadsheet_write(Format_error &error , const char *path) const
 
 {
   bool status = false;
@@ -1461,15 +1463,15 @@ bool Compound_data::spreadsheet_write(Format_error &error , const char *path) co
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Compound_data.
+ *  Sortie Gnuplot d'un objet CompoundData.
  *
  *  arguments : reference sur un objet Format_error, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Compound_data::plot_write(Format_error &error , const char *prefix ,
-                               const char *title) const
+bool CompoundData::plot_write(Format_error &error , const char *prefix ,
+                              const char *title) const
 
 {
   bool status = false;
@@ -1491,11 +1493,11 @@ bool Compound_data::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Compound_data.
+ *  Sortie graphique d'un objet CompoundData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Compound_data::get_plotable() const
+MultiPlotSet* CompoundData::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
