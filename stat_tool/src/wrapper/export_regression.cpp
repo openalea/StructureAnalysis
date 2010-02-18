@@ -46,13 +46,13 @@ class RegressionKernelWrap
 
 public:
 
-  static boost::shared_ptr<Regression_kernel>
+  static boost::shared_ptr<RegressionKernel>
   regression_constructor(int ident, int min_value, int max_value)
   {
-    Regression_kernel *ret = NULL;
-    ret = new Regression_kernel(ident, min_value, max_value);
+    RegressionKernel *ret = NULL;
+    ret = new RegressionKernel(ident, min_value, max_value);
 
-    return boost::shared_ptr<Regression_kernel>(ret);
+    return boost::shared_ptr<RegressionKernel>(ret);
   }
 
 };
@@ -61,24 +61,24 @@ public:
 
 void class_regression_kernel()
 {
-  class_< Regression_kernel>("_Regression_kernel", "Regression kernel class")
+  class_< RegressionKernel>("_RegressionKernel", "Regression kernel class")
     //.def( init<int, int, int>()) // seems to cause memory problem inside python
     .def("__init__", make_constructor(WRAP::regression_constructor),  "Build from 3 ints" )
 
-    .add_property("ident", &Regression_kernel::get_ident, "returns ident")
-    .add_property("min_value", &Regression_kernel::get_min_value, "returns min value")
-    .add_property("max_value", &Regression_kernel::get_max_value, "returns max value")
-    .add_property("regression_df", &Regression_kernel::get_regression_df, "returns regression df")
-    .add_property("residual_df", &Regression_kernel::get_residual_df, "returns residual df")
-    .add_property("nb_parameter", &Regression_kernel::get_nb_parameter, "returns nb parameter")
+    .add_property("ident", &RegressionKernel::get_ident, "returns ident")
+    .add_property("min_value", &RegressionKernel::get_min_value, "returns min value")
+    .add_property("max_value", &RegressionKernel::get_max_value, "returns max value")
+    .add_property("regression_df", &RegressionKernel::get_regression_df, "returns regression df")
+    .add_property("residual_df", &RegressionKernel::get_residual_df, "returns residual df")
+    .add_property("nb_parameter", &RegressionKernel::get_nb_parameter, "returns nb parameter")
 
-    .def("get_parameter", &Regression_kernel::get_parameter,args("index"), "returns parameter")
-    .def("get_point", &Regression_kernel::get_point,args("index"), "returns point")
+    .def("get_parameter", &RegressionKernel::get_parameter,args("index"), "returns parameter")
+    .def("get_point", &RegressionKernel::get_point,args("index"), "returns point")
 
     //DONE
     //TODO: check index validity of get_parameter and get_point
     /*
-    Regression_kernel(const Regression_kernel &regression) { copy(regression); }
+    RegressionKernel(const RegressionKernel &regression) { copy(regression); }
     */
   ;
 }
@@ -110,7 +110,7 @@ public:
 
 void class_regression()
 {
-  class_< Regression, bases< STAT_interface > >
+  class_< Regression, bases<StatInterface> >
   ("_Regression", "Regression class")
     .def(init <int, int, int, const Vectors&>())
     .def(init <const Regression &>())
@@ -129,7 +129,7 @@ void class_regression()
 
   //DONE
   /*
-    bool plot_write(Format_error &error , const char *prefix , const char *title = 0) const;
+    bool plot_write(StatError &error , const char *prefix , const char *title = 0) const;
     plotable::MultiPlotSet* get_plotable() const;
     */
 }
