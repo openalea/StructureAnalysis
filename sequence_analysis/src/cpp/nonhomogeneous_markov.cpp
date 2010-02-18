@@ -86,7 +86,7 @@ Function::Function()
  *--------------------------------------------------------------*/
 
 Function::Function(int iident , int length , double *iparameter)
-:Regression_kernel(iident , 0 , length - 1)
+:RegressionKernel(iident , 0 , length - 1)
 
 {
   register int i;
@@ -112,7 +112,7 @@ Function::Function(int iident , int length , double *iparameter)
  *--------------------------------------------------------------*/
 
 Function::Function(int iident , int length)
-:Regression_kernel(iident , 0 , length - 1)
+:RegressionKernel(iident , 0 , length - 1)
 
 {
   register int i;
@@ -174,7 +174,7 @@ void Function::copy(const Function &function)
 Function::Function(const Function &function)
 
 {
-  Regression_kernel::copy(function);
+  RegressionKernel::copy(function);
   copy(function);
 }
 
@@ -219,9 +219,9 @@ Function& Function::operator=(const Function &function)
 {
   if (&function != this) {
     remove();
-    Regression_kernel::remove();
+    RegressionKernel::remove();
 
-    Regression_kernel::copy(function);
+    RegressionKernel::copy(function);
     copy(function);
   }
 
@@ -233,13 +233,13 @@ Function& Function::operator=(const Function &function)
  *
  *  Analyse du format d'un objet Function.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              reference sur l'indice de la ligne lue, longueur,
  *              bornes sur les valeurs de la fonction.
  *
  *--------------------------------------------------------------*/
 
-Function* function_parsing(Format_error &error , ifstream &in_file , int &line ,
+Function* function_parsing(StatError &error , ifstream &in_file , int &line ,
                            int length , double min , double max)
 
 {
@@ -770,11 +770,11 @@ bool Curves::plot_print_standard_residual(const char *path , double *standard_re
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Nonhomogeneous_markov.
+ *  Constructeur par defaut de la classe NonhomogeneousMarkov.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov::Nonhomogeneous_markov()
+NonhomogeneousMarkov::NonhomogeneousMarkov()
 
 {
   markov_data = NULL;
@@ -788,14 +788,14 @@ Nonhomogeneous_markov::Nonhomogeneous_markov()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonhomogeneous_markov.
+ *  Constructeur de la classe NonhomogeneousMarkov.
  *
  *  arguments : nombre d'etats, identificateurs evolution
  *              des probabilites de transition.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov::Nonhomogeneous_markov(int inb_state , int *ident)
+NonhomogeneousMarkov::NonhomogeneousMarkov(int inb_state , int *ident)
 :Chain('o' , inb_state)
 
 {
@@ -817,21 +817,21 @@ Nonhomogeneous_markov::Nonhomogeneous_markov(int inb_state , int *ident)
     self_transition[i] = NULL;
   }
 
-  process = new Nonparametric_sequence_process(nb_state , nb_state);
+  process = new NonparametricSequenceProcess(nb_state , nb_state);
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonhomogeneous_markov.
+ *  Constructeur de la classe NonhomogeneousMarkov.
  *
  *  arguments : pointeur sur un objet Chain, pointeurs sur des objets Function,
  *              longueur des sequences.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov::Nonhomogeneous_markov(const Chain *pchain , const Function **pself_transition ,
-                                             int length)
+NonhomogeneousMarkov::NonhomogeneousMarkov(const Chain *pchain , const Function **pself_transition ,
+                                           int length)
 :Chain(*pchain)
 
 {
@@ -855,7 +855,7 @@ Nonhomogeneous_markov::Nonhomogeneous_markov(const Chain *pchain , const Functio
     }
   }
 
-  process = new Nonparametric_sequence_process(nb_state , nb_state);
+  process = new NonparametricSequenceProcess(nb_state , nb_state);
 
   characteristic_computation(length , true);
 }
@@ -863,23 +863,23 @@ Nonhomogeneous_markov::Nonhomogeneous_markov(const Chain *pchain , const Functio
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Nonhomogeneous_markov.
+ *  Copie d'un objet NonhomogeneousMarkov.
  *
- *  arguments : reference sur un objet Nonhomogeneous_markov,
- *              flag copie de l'objet Nonhomogeneous_markov_data,
+ *  arguments : reference sur un objet NonhomogeneousMarkov,
+ *              flag copie de l'objet NonhomogeneousMarkovData,
  *              flag copie des lois caracteristiques.
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::copy(const Nonhomogeneous_markov &markov , bool data_flag ,
-                                 bool characteristic_flag)
+void NonhomogeneousMarkov::copy(const NonhomogeneousMarkov &markov , bool data_flag ,
+                                bool characteristic_flag)
 
 {
   register int i;
 
 
   if ((data_flag) && (markov.markov_data)) {
-    markov_data = new Nonhomogeneous_markov_data(*(markov.markov_data) , false);
+    markov_data = new NonhomogeneousMarkovData(*(markov.markov_data) , false);
   }
   else {
     markov_data = NULL;
@@ -898,17 +898,17 @@ void Nonhomogeneous_markov::copy(const Nonhomogeneous_markov &markov , bool data
     }
   }
 
-  process = new Nonparametric_sequence_process(*(markov.process) , 'c' , characteristic_flag);
+  process = new NonparametricSequenceProcess(*(markov.process) , 'c' , characteristic_flag);
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Nonhomogeneous_markov.
+ *  Destruction des champs d'un objet NonhomogeneousMarkov.
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov::remove()
+void NonhomogeneousMarkov::remove()
 
 {
   register int i;
@@ -933,11 +933,11 @@ void Nonhomogeneous_markov::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Nonhomogeneous_markov.
+ *  Destructeur de la classe NonhomogeneousMarkov.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov::~Nonhomogeneous_markov()
+NonhomogeneousMarkov::~NonhomogeneousMarkov()
 
 {
   remove();
@@ -946,13 +946,13 @@ Nonhomogeneous_markov::~Nonhomogeneous_markov()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Nonhomogeneous_markov.
+ *  Operateur d'assignement de la classe NonhomogeneousMarkov.
  *
- *  argument : reference sur un objet Nonhomogeneous_markov.
+ *  argument : reference sur un objet NonhomogeneousMarkov.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov& Nonhomogeneous_markov::operator=(const Nonhomogeneous_markov &markov)
+NonhomogeneousMarkov& NonhomogeneousMarkov::operator=(const NonhomogeneousMarkov &markov)
 
 {
   if (&markov != this) {
@@ -971,19 +971,19 @@ Nonhomogeneous_markov& Nonhomogeneous_markov::operator=(const Nonhomogeneous_mar
  *
  *  Extraction d'une loi.
  *
- *  arguments : reference sur un objet Format_error, type de loi, etat.
+ *  arguments : reference sur un objet StatError, type de loi, etat.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Nonhomogeneous_markov::extract(Format_error &error , int type ,
-                                                 int state) const
+DiscreteParametricModel* NonhomogeneousMarkov::extract(StatError &error , int type ,
+                                                       int state) const
 
 {
   bool status = true;
   Distribution *pdist;
-  Parametric *pparam;
-  Parametric_model *dist;
-  Histogram *phisto;
+  DiscreteParametric *pparam;
+  DiscreteParametricModel *dist;
+  FrequencyDistribution *phisto;
 
 
   dist = NULL;
@@ -1067,10 +1067,10 @@ Parametric_model* Nonhomogeneous_markov::extract(Format_error &error , int type 
     }
 
     if (pdist) {
-      dist = new Parametric_model(*pdist , phisto);
+      dist = new DiscreteParametricModel(*pdist , phisto);
     }
     else if (pparam) {
-      dist = new Parametric_model(*pparam , phisto);
+      dist = new DiscreteParametricModel(*pparam , phisto);
     }
   }
 
@@ -1080,15 +1080,15 @@ Parametric_model* Nonhomogeneous_markov::extract(Format_error &error , int type 
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Nonhomogeneous_markov a partir d'un fichier.
+ *  Construction d'un objet NonhomogeneousMarkov a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              longueur des sequences.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , const char *path ,
-                                                        int length)
+NonhomogeneousMarkov* nonhomogeneous_markov_ascii_read(StatError &error , const char *path ,
+                                                       int length)
 
 {
   RWLocaleSnapshot locale("en");
@@ -1100,7 +1100,7 @@ Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , co
   double index;
   const Chain *chain;
   const Function **self_transition;
-  Nonhomogeneous_markov *markov;
+  NonhomogeneousMarkov *markov;
   ifstream in_file(path);
 
 
@@ -1285,7 +1285,7 @@ Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , co
       }
 
       if (status) {
-        markov = new Nonhomogeneous_markov(chain , self_transition , length);
+        markov = new NonhomogeneousMarkov(chain , self_transition , length);
       }
 
       delete chain;
@@ -1303,13 +1303,13 @@ Nonhomogeneous_markov* nonhomogeneous_markov_ascii_read(Format_error &error , co
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Nonhomogeneous_markov.
+ *  Ecriture sur une ligne d'un objet NonhomogeneousMarkov.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Nonhomogeneous_markov::line_write(ostream &os) const
+ostream& NonhomogeneousMarkov::line_write(ostream &os) const
 
 {
   os << nb_state << " " << STAT_word[STATW_STATES];
@@ -1320,15 +1320,15 @@ ostream& Nonhomogeneous_markov::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov et de la structure de donnees associee.
+ *  Ecriture d'un objet NonhomogeneousMarkov et de la structure de donnees associee.
  *
- *  arguments : stream, pointeur sur un objet Nonhomogeneous_markov_data,
+ *  arguments : stream, pointeur sur un objet NonhomogeneousMarkovData,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Nonhomogeneous_markov::ascii_write(ostream &os , const Nonhomogeneous_markov_data *seq ,
-                                            bool exhaustive , bool file_flag) const
+ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMarkovData *seq ,
+                                           bool exhaustive , bool file_flag) const
 
 {
   register int i;
@@ -1365,13 +1365,13 @@ ostream& Nonhomogeneous_markov::ascii_write(ostream &os , const Nonhomogeneous_m
     double information , likelihood;
 
 
-    // ecriture de l'histogramme des longueurs des sequences
+    // ecriture de la loi empirique des longueurs des sequences
 
     os << "\n";
     if (file_flag) {
       os << "# ";
     }
-    os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     seq->hlength->ascii_characteristic_print(os , false , file_flag);
 
     if (exhaustive) {
@@ -1379,7 +1379,7 @@ ostream& Nonhomogeneous_markov::ascii_write(ostream &os , const Nonhomogeneous_m
       if (file_flag) {
         os << "# ";
       }
-      os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       seq->hlength->ascii_print(os , file_flag);
     }
 
@@ -1447,13 +1447,13 @@ ostream& Nonhomogeneous_markov::ascii_write(ostream &os , const Nonhomogeneous_m
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov.
+ *  Ecriture d'un objet NonhomogeneousMarkov.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Nonhomogeneous_markov::ascii_write(ostream &os , bool exhaustive) const
+ostream& NonhomogeneousMarkov::ascii_write(ostream &os , bool exhaustive) const
 
 {
   return ascii_write(os , markov_data , exhaustive , false);
@@ -1462,15 +1462,15 @@ ostream& Nonhomogeneous_markov::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov dans un fichier.
+ *  Ecriture d'un objet NonhomogeneousMarkov dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Nonhomogeneous_markov::ascii_write(Format_error &error , const char *path ,
-                                        bool exhaustive) const
+bool NonhomogeneousMarkov::ascii_write(StatError &error , const char *path ,
+                                       bool exhaustive) const
 
 {
   bool status;
@@ -1495,14 +1495,14 @@ bool Nonhomogeneous_markov::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov et de la structure de donnees associee
+ *  Ecriture d'un objet NonhomogeneousMarkov et de la structure de donnees associee
  *  dans un fichier au format tableur.
  *
- *  arguments : stream, pointeur sur un objet Nonhomogeneous_markov_data.
+ *  arguments : stream, pointeur sur un objet NonhomogeneousMarkovData.
  *
  *--------------------------------------------------------------*/
 
-ostream& Nonhomogeneous_markov::spreadsheet_write(ostream &os , const Nonhomogeneous_markov_data *seq) const
+ostream& NonhomogeneousMarkov::spreadsheet_write(ostream &os , const NonhomogeneousMarkovData *seq) const
 
 {
   register int i;
@@ -1538,12 +1538,12 @@ ostream& Nonhomogeneous_markov::spreadsheet_write(ostream &os , const Nonhomogen
     double information , likelihood;
 
 
-    // ecriture de l'histogramme des longueurs des sequences
+    // ecriture de la loi empirique des longueurs des sequences
 
-    os << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     seq->hlength->spreadsheet_characteristic_print(os);
 
-    os << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+    os << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
     seq->hlength->spreadsheet_print(os);
 
     os << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << seq->cumul_length << endl;
@@ -1586,13 +1586,13 @@ ostream& Nonhomogeneous_markov::spreadsheet_write(ostream &os , const Nonhomogen
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov dans un fichier au format tableur.
+ *  Ecriture d'un objet NonhomogeneousMarkov dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Nonhomogeneous_markov::spreadsheet_write(Format_error &error , const char *path) const
+bool NonhomogeneousMarkov::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1617,15 +1617,15 @@ bool Nonhomogeneous_markov::spreadsheet_write(Format_error &error , const char *
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Nonhomogeneous_markov et de la structure de donnees associee.
+ *  Sortie Gnuplot d'un objet NonhomogeneousMarkov et de la structure de donnees associee.
  *
  *  arguments : prefixe des fichiers, titre des figures,
  *              pointeur sur les sequences observees.
  *
  *--------------------------------------------------------------*/
 
-bool Nonhomogeneous_markov::plot_write(const char *prefix , const char *title ,
-                                       const Nonhomogeneous_markov_data *seq) const
+bool NonhomogeneousMarkov::plot_write(const char *prefix , const char *title ,
+                                      const NonhomogeneousMarkovData *seq) const
 
 {
   bool status;
@@ -1840,15 +1840,15 @@ bool Nonhomogeneous_markov::plot_write(const char *prefix , const char *title ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Nonhomogeneous_markov.
+ *  Sortie Gnuplot d'un objet NonhomogeneousMarkov.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Nonhomogeneous_markov::plot_write(Format_error &error , const char *prefix ,
-                                       const char *title) const
+bool NonhomogeneousMarkov::plot_write(StatError &error , const char *prefix ,
+                                      const char *title) const
 
 {
   bool status = plot_write(prefix , title , markov_data);
@@ -1865,14 +1865,14 @@ bool Nonhomogeneous_markov::plot_write(Format_error &error , const char *prefix 
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Nonhomogeneous_markov et
+ *  Sortie graphique d'un objet NonhomogeneousMarkov et
  *  de la structure de donnees associee.
  *
  *  argument : pointeur sur les sequences observees.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Nonhomogeneous_markov::get_plotable(const Nonhomogeneous_markov_data *seq) const
+MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData *seq) const
 
 {
   register int i , j , k;
@@ -1880,8 +1880,8 @@ MultiPlotSet* Nonhomogeneous_markov::get_plotable(const Nonhomogeneous_markov_da
   double residual_mean , residual_standard_deviation , min_standard_residual ,
          max_standard_residual , *standard_residual , *presidual;
   ostringstream legend;
-  Histogram *hlength;
-  Sequence_characteristics *characteristics;
+  FrequencyDistribution *hlength;
+  SequenceCharacteristics *characteristics;
   MultiPlotSet *plot_set;
 
 
@@ -2140,7 +2140,7 @@ MultiPlotSet* Nonhomogeneous_markov::get_plotable(const Nonhomogeneous_markov_da
         }
         index++;
 
-        // vue : histogramme des comptages de transition indexes
+        // vue : loi empirique des comptages de transition indexes
 
         plot.variable[index] = 0;
         plot.viewpoint[index] = SELF_TRANSITION;
@@ -2184,11 +2184,11 @@ MultiPlotSet* Nonhomogeneous_markov::get_plotable(const Nonhomogeneous_markov_da
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Nonhomogeneous_markov.
+ *  Sortie graphique d'un objet NonhomogeneousMarkov.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Nonhomogeneous_markov::get_plotable() const
+MultiPlotSet* NonhomogeneousMarkov::get_plotable() const
 
 {
   return get_plotable(markov_data);
@@ -2197,11 +2197,11 @@ MultiPlotSet* Nonhomogeneous_markov::get_plotable() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul du nombre de parametres independants d'un objet Nonhomogeneous_markov.
+ *  Calcul du nombre de parametres independants d'un objet NonhomogeneousMarkov.
  *
  *--------------------------------------------------------------*/
 
-int Nonhomogeneous_markov::nb_parameter_computation() const
+int NonhomogeneousMarkov::nb_parameter_computation() const
 
 {
   register int i;
@@ -2220,11 +2220,11 @@ int Nonhomogeneous_markov::nb_parameter_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Nonhomogeneous_markov_data.
+ *  Constructeur par defaut de la classe NonhomogeneousMarkovData.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data::Nonhomogeneous_markov_data()
+NonhomogeneousMarkovData::NonhomogeneousMarkovData()
 
 {
   markov = NULL;
@@ -2235,14 +2235,14 @@ Nonhomogeneous_markov_data::Nonhomogeneous_markov_data()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Nonhomogeneous_markov_data.
+ *  Constructeur de la classe NonhomogeneousMarkovData.
  *
- *  argument : histogramme des longueurs des sequences.
+ *  argument : loi empirique des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data::Nonhomogeneous_markov_data(const Histogram &ihlength)
-:Markovian_sequences(ihlength , 1 , false)
+NonhomogeneousMarkovData::NonhomogeneousMarkovData(const FrequencyDistribution &ihlength)
+:MarkovianSequences(ihlength , 1 , false)
 
 {
   markov = NULL;
@@ -2253,15 +2253,15 @@ Nonhomogeneous_markov_data::Nonhomogeneous_markov_data(const Histogram &ihlength
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Nonhomogeneous_markov_data a partir
- *  d'un objet Markovian_sequences.
+ *  Construction d'un objet NonhomogeneousMarkovData a partir
+ *  d'un objet MarkovianSequences.
  *
- *  argument : reference sur un objet Markovian_sequences.
+ *  argument : reference sur un objet MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data::Nonhomogeneous_markov_data(const Markovian_sequences &seq)
-:Markovian_sequences(seq)
+NonhomogeneousMarkovData::NonhomogeneousMarkovData(const MarkovianSequences &seq)
+:MarkovianSequences(seq)
 
 {
   markov = NULL;
@@ -2272,25 +2272,25 @@ Nonhomogeneous_markov_data::Nonhomogeneous_markov_data(const Markovian_sequences
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Nonhomogeneous_markov_data.
+ *  Copie d'un objet NonhomogeneousMarkovData.
  *
- *  arguments : reference sur un objet Nonhomogeneous_markov_data,
- *              flag copie de l'objet Nonhomogeneous_markov.
+ *  arguments : reference sur un objet NonhomogeneousMarkovData,
+ *              flag copie de l'objet NonhomogeneousMarkov.
  *
  *--------------------------------------------------------------*/
 
-void Nonhomogeneous_markov_data::copy(const Nonhomogeneous_markov_data &seq , bool model_flag)
+void NonhomogeneousMarkovData::copy(const NonhomogeneousMarkovData &seq , bool model_flag)
 
 {
   if ((model_flag) && (seq.markov)) {
-    markov = new Nonhomogeneous_markov(*(seq.markov) , false);
+    markov = new NonhomogeneousMarkov(*(seq.markov) , false);
   }
   else {
     markov = NULL;
   }
 
   if (seq.chain_data) {
-    chain_data = new Chain_data(*(seq.chain_data));
+    chain_data = new ChainData(*(seq.chain_data));
   }
   else {
     chain_data = NULL;
@@ -2302,11 +2302,11 @@ void Nonhomogeneous_markov_data::copy(const Nonhomogeneous_markov_data &seq , bo
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Nonhomogeneous_markov_data.
+ *  Destructeur de la classe NonhomogeneousMarkovData.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data::~Nonhomogeneous_markov_data()
+NonhomogeneousMarkovData::~NonhomogeneousMarkovData()
 
 {
   delete markov;
@@ -2316,13 +2316,13 @@ Nonhomogeneous_markov_data::~Nonhomogeneous_markov_data()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Nonhomogeneous_markov_data.
+ *  Operateur d'assignement de la classe NonhomogeneousMarkovData.
  *
- *  argument : reference sur un objet Nonhomogeneous_markov_data.
+ *  argument : reference sur un objet NonhomogeneousMarkovData.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data& Nonhomogeneous_markov_data::operator=(const Nonhomogeneous_markov_data &seq)
+NonhomogeneousMarkovData& NonhomogeneousMarkovData::operator=(const NonhomogeneousMarkovData &seq)
 
 {
   if (&seq != this) {
@@ -2333,7 +2333,7 @@ Nonhomogeneous_markov_data& Nonhomogeneous_markov_data::operator=(const Nonhomog
     Sequences::remove();
 
     Sequences::copy(seq);
-    Markovian_sequences::copy(seq);
+    MarkovianSequences::copy(seq);
     copy(seq);
   }
 
@@ -2343,21 +2343,21 @@ Nonhomogeneous_markov_data& Nonhomogeneous_markov_data::operator=(const Nonhomog
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un histogramme.
+ *  Extraction d'une loi empirique.
  *
- *  arguments : reference sur un objet Format_error, type d'histogramme, etat.
+ *  arguments : reference sur un objet StatError, type de loi empirique, etat.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Nonhomogeneous_markov_data::extract(Format_error &error , int type ,
-                                                       int state) const
+DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , int type ,
+                                                            int state) const
 
 {
   bool status = true;
   Distribution *pdist;
-  Parametric *pparam;
-  Histogram *phisto;
-  Distribution_data *histo;
+  DiscreteParametric *pparam;
+  FrequencyDistribution *phisto;
+  DiscreteDistributionData *histo;
 
 
   histo = NULL;
@@ -2395,7 +2395,7 @@ Distribution_data* Nonhomogeneous_markov_data::extract(Format_error &error , int
 
     if (phisto->nb_element == 0) {
       status = false;
-      error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+      error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
   }
 
@@ -2426,10 +2426,10 @@ Distribution_data* Nonhomogeneous_markov_data::extract(Format_error &error , int
     }
 
     if (pdist) {
-      histo = new Distribution_data(*phisto , pdist);
+      histo = new DiscreteDistributionData(*phisto , pdist);
     }
     else {
-      histo = new Distribution_data(*phisto , pparam);
+      histo = new DiscreteDistributionData(*phisto , pparam);
     }
   }
 
@@ -2441,14 +2441,14 @@ Distribution_data* Nonhomogeneous_markov_data::extract(Format_error &error , int
  *
  *  Suppression du parametre d'index.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Nonhomogeneous_markov_data* Nonhomogeneous_markov_data::remove_index_parameter(Format_error &error) const
+NonhomogeneousMarkovData* NonhomogeneousMarkovData::remove_index_parameter(StatError &error) const
 
 {
-  Nonhomogeneous_markov_data *seq;
+  NonhomogeneousMarkovData *seq;
 
 
   error.init();
@@ -2458,7 +2458,7 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov_data::remove_index_parameter(F
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new Nonhomogeneous_markov_data(*this , true , 'r');
+    seq = new NonhomogeneousMarkovData(*this , true , 'r');
   }
 
   return seq;
@@ -2467,13 +2467,13 @@ Nonhomogeneous_markov_data* Nonhomogeneous_markov_data::remove_index_parameter(F
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov_data.
+ *  Ecriture d'un objet NonhomogeneousMarkovData.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Nonhomogeneous_markov_data::ascii_write(ostream &os , bool exhaustive) const
+ostream& NonhomogeneousMarkovData::ascii_write(ostream &os , bool exhaustive) const
 
 {
   if (markov) {
@@ -2486,15 +2486,15 @@ ostream& Nonhomogeneous_markov_data::ascii_write(ostream &os , bool exhaustive) 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov_data dans un fichier.
+ *  Ecriture d'un objet NonhomogeneousMarkovData dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Nonhomogeneous_markov_data::ascii_write(Format_error &error , const char *path ,
-                                             bool exhaustive) const
+bool NonhomogeneousMarkovData::ascii_write(StatError &error , const char *path ,
+                                           bool exhaustive) const
 
 {
   bool status = false;
@@ -2522,13 +2522,13 @@ bool Nonhomogeneous_markov_data::ascii_write(Format_error &error , const char *p
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonhomogeneous_markov_data dans un fichier au format tableur.
+ *  Ecriture d'un objet NonhomogeneousMarkovData dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Nonhomogeneous_markov_data::spreadsheet_write(Format_error &error , const char *path) const
+bool NonhomogeneousMarkovData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
@@ -2556,15 +2556,15 @@ bool Nonhomogeneous_markov_data::spreadsheet_write(Format_error &error , const c
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Nonhomogeneous_markov_data.
+ *  Sortie Gnuplot d'un objet NonhomogeneousMarkovData.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Nonhomogeneous_markov_data::plot_write(Format_error &error , const char *prefix ,
-                                            const char *title) const
+bool NonhomogeneousMarkovData::plot_write(StatError &error , const char *prefix ,
+                                          const char *title) const
 
 {
   bool status = false;
@@ -2586,11 +2586,11 @@ bool Nonhomogeneous_markov_data::plot_write(Format_error &error , const char *pr
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Nonhomogeneous_markov_data.
+ *  Sortie graphique d'un objet NonhomogeneousMarkovData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Nonhomogeneous_markov_data::get_plotable() const
+MultiPlotSet* NonhomogeneousMarkovData::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
