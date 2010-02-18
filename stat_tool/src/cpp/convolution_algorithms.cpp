@@ -156,7 +156,7 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
  *  Estimation des parametres d'un produit de convolution de lois
  *  par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, stream, references sur
+ *  arguments : reference sur un objet StatError, stream, references sur
  *              la loi connue et sur la loi inconnue, type d'estimateur (vraisemblance,
  *              vraisemblance penalisee ou estimation d'une loi parametrique),
  *              nombre d'iterations, poids de la penalisation, type de penalisation,
@@ -165,7 +165,7 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
  *
  *--------------------------------------------------------------*/
 
-Convolution* FrequencyDistribution::convolution_estimation(Format_error &error , ostream &os ,
+Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
                                                            const DiscreteParametric &known_dist ,
                                                            const DiscreteParametric &unknown_dist ,
                                                            int estimator , int nb_iter , double weight ,
@@ -399,7 +399,7 @@ Convolution* FrequencyDistribution::convolution_estimation(Format_error &error ,
  *  Estimation des parametres d'un produit de convolution de lois
  *  par l'algorithme EM.
  *
- *  arguments : reference sur un objet Format_error, stream, reference sur la loi connue,
+ *  arguments : reference sur un objet StatError, stream, reference sur la loi connue,
  *              borne inferieure minimum, type d'estimateur (vraisemblance,
  *              vraisemblance penalisee ou estimation d'une loi parametrique),
  *              nombre d'iterations, poids de la penalisation, type de penalisation,
@@ -408,7 +408,7 @@ Convolution* FrequencyDistribution::convolution_estimation(Format_error &error ,
  *
  *--------------------------------------------------------------*/
 
-Convolution* FrequencyDistribution::convolution_estimation(Format_error &error , ostream &os ,
+Convolution* FrequencyDistribution::convolution_estimation(StatError &error , ostream &os ,
                                                            const DiscreteParametric &known_dist ,
                                                            int min_inf_bound , int estimator ,
                                                            int nb_iter , double weight ,
@@ -468,11 +468,11 @@ Convolution* FrequencyDistribution::convolution_estimation(Format_error &error ,
  *
  *  Simulation par un produit de convolution de lois.
  *
- *  arguments : reference sur un objet Format_error, effectif.
+ *  arguments : reference sur un objet StatError, effectif.
  *
  *--------------------------------------------------------------*/
 
-ConvolutionData* Convolution::simulation(Format_error &error , int nb_element) const
+ConvolutionData* Convolution::simulation(StatError &error , int nb_element) const
 
 {
   register int i , j;
