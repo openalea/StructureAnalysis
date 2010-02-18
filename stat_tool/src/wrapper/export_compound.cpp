@@ -40,14 +40,14 @@ class CompoundWrap
 
   public:
 
-  WRAP_METHOD1(Compound, simulation, Compound_data, int);
-  WRAP_METHOD0(Compound, extract_data, Compound_data);
+  WRAP_METHOD1(Compound, simulation, CompoundData, int);
+  WRAP_METHOD0(Compound, extract_data, CompoundData);
   WRAP_METHOD_FILE_ASCII_WRITE( Compound);
 
   static boost::shared_ptr<Compound>
-  compound_from_file(char* filename)
+  compound_from_file(char *filename)
   {
-    Format_error error;
+    StatError error;
     Compound *compound = NULL;
     compound = compound_ascii_read(error, filename);
     if (!compound)
@@ -67,7 +67,7 @@ class CompoundWrap
   compound_from_dists_and_threshold(boost::python::list& dists,
       double cumul_threshold)
   {
-    Format_error error;
+    StatError error;
     Compound *compound = NULL;
 
     // Test list length
@@ -76,20 +76,20 @@ class CompoundWrap
         stat_tool::wrap_util::throw_error("Input lists must contains 2 objects");
       }
 
-    stat_tool::wrap_util::auto_ptr_array<const Parametric*> dist(
-        new const Parametric*[2]);
+    stat_tool::wrap_util::auto_ptr_array<const DiscreteParametric*> dist(
+        new const DiscreteParametric*[2]);
 
     int i = 0;
     for (i = 0; i < 2; i++)
       {
-        boost::python::extract<Parametric*> get_param(dists[i]);
+        boost::python::extract<DiscreteParametric*> get_param(dists[i]);
         if (get_param.check())
           {
-            dist[i] = new Parametric(*get_param());
+            dist[i] = new DiscreteParametric(*get_param());
           }
         else
           {
-            dist[i] = new Parametric(*boost::python::extract<Distribution*>(
+            dist[i] = new DiscreteParametric(*boost::python::extract<Distribution*>(
                 dists[i])());
           }
       }
@@ -107,45 +107,45 @@ class CompoundWrap
     return boost::shared_ptr<Compound>(compound);
   }
 
-  static Parametric_model*
+  static DiscreteParametricModel*
   extract_compound(const Compound& compound)
   {
-    Parametric_model* ret;
-    Compound_data* compound_data = NULL;
+    DiscreteParametricModel *ret;
+    CompoundData *compound_data = NULL;
     compound_data = compound.get_compound_data();
-    ret = new Parametric_model(*((Distribution*) (&compound)),
-        (Histogram*) compound_data);
+    ret = new DiscreteParametricModel(*((Distribution*) (&compound)),
+        (FrequencyDistribution*) compound_data);
     return ret;
   }
 
-  static Parametric_model*
-  extract_sum(const Compound& compound)
+  static DiscreteParametricModel*
+  extract_sum(const Compound &compound)
   {
-    Parametric_model* ret;
-    Compound_data* compound_data = NULL;
+    DiscreteParametricModel *ret;
+    CompoundData *compound_data = NULL;
     compound_data = compound.get_compound_data();
-    ret = new Parametric_model(*(compound.get_sum_distribution()),
-        (compound_data ? compound_data->get_sum_histogram() : NULL));
+    ret = new DiscreteParametricModel(*(compound.get_sum_distribution()),
+        (compound_data ? compound_data->get_sum_frequency_distribution() : NULL));
     return ret;
   }
 
-  static Parametric_model*
-  extract_elementary(const Compound& compound)
+  static DiscreteParametricModel*
+  extract_elementary(const Compound &compound)
   {
-    Parametric_model* ret;
-    Compound_data* compound_data = NULL;
+    DiscreteParametricModel *ret;
+    CompoundData *compound_data = NULL;
     compound_data = compound.get_compound_data();
 
-    ret = new Parametric_model(*(compound.get_distribution()),
-        (compound_data ? compound_data->get_histogram() : NULL));
+    ret = new DiscreteParametricModel(*(compound.get_distribution()),
+        (compound_data ? compound_data->get_frequency_distribution() : NULL));
     return ret;
   }
 
   static MultiPlotSet*
-  survival_get_plotable(const Compound& p)
+  survival_get_plotable(const Compound &p)
   {
-    Format_error error;
-    MultiPlotSet* ret = p.survival_get_plotable(error);
+    StatError error;
+    MultiPlotSet *ret = p.survival_get_plotable(error);
     if (!ret)
       ERROR;
     return ret;
@@ -158,11 +158,11 @@ class CompoundWrap
 #define WRAP CompoundWrap
 void class_compound()
 {
-    class_< Compound, bases<STAT_interface, Distribution> >
+    class_< Compound, bases<StatInterface, Distribution> >
     ("_Compound", "Compound" )
 
     //"constructor from 2 distribution and an optional cumul threshold")
-    // .def(init<Parametric, Parametric, optional<double> >())
+    // .def(init<DiscreteParametric, DiscreteParametric, optional<double> >())
     .def("__init__", make_constructor(WRAP::compound_from_file),
         "Build from a filename")
     .def("__init__", make_constructor(WRAP::compound_from_dists),
@@ -189,7 +189,7 @@ void class_compound()
     ;
 
     /*
-     * Compound(const Parametric &sum_dist , const Parametric &dist , char type);
+     * Compound(const DiscreteParametric &sum_dist , const DiscreteParametric &dist , char type);
       Compound(const Compound &compound , bool data_flag = true)
       void computation(int min_nb_value = 1 ,
 	                     double cumul_threshold = COMPOUND_THRESHOLD ,
@@ -205,22 +205,22 @@ class CompoundDataWrap
 
 public:
 
-  WRAP_METHOD1(Compound_data, extract, Distribution_data, char);
+  WRAP_METHOD1(CompoundData, extract, DiscreteDistributionData, char);
 
-  static Distribution_data*
-  extract_sum_distribution(const Compound_data& input)
+  static DiscreteDistributionData*
+  extract_sum_distribution(const CompoundData &input)
   {
-    Distribution_data* ret;
-    ret = new Distribution_data(*(input.get_sum_histogram()),
+    DiscreteDistributionData *ret;
+    ret = new DiscreteDistributionData(*(input.get_sum_frequency_distribution()),
         input.get_compound()->get_sum_distribution());
     return ret;
   }
 
-  static Distribution_data*
-  extract_distribution(const Compound_data& input)
+  static DiscreteDistributionData*
+  extract_distribution(const CompoundData &input)
   {
-    Distribution_data* ret;
-    ret = new Distribution_data(*(input.get_histogram()),
+    DiscreteDistributionData *ret;
+    ret = new DiscreteDistributionData(*(input.get_frequency_distribution()),
         input.get_compound()->get_distribution());
     return ret;
   }
@@ -230,7 +230,7 @@ public:
 #define WRAP CompoundDataWrap
 void class_compound_data()
 {
-  class_< Compound_data, bases< STAT_interface, Histogram > >
+  class_< CompoundData, bases< StatInterface, FrequencyDistribution > >
   ("_CompoundData", "Compound data")
 
 
@@ -246,16 +246,16 @@ void class_compound_data()
 
 
   /*
-  Compound_data();
-    Compound_data(const Histogram &histo , const Compound &icompound);
-    Compound_data(const Compound &icompound);
-    Compound_data(const Compound_data &compound_histo , bool model_flag = true)    :Histogram(compound_histo) { copy(compound_histo , model_flag); }
+  CompoundData();
+    CompoundData(const FrequencyDistribution &histo , const Compound &icompound);
+    CompoundData(const Compound &icompound);
+    CompoundData(const CompoundData &compound_histo , bool model_flag = true)    :FrequencyDistribution(compound_histo) { copy(compound_histo , model_flag); }
 
     std::ostream& line_write(std::ostream &os) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,  bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,  const char *title = 0) const;
+    bool ascii_write(StatError &error , const char *path ,  bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,  const char *title = 0) const;
 
     Compound* get_compound() const { return compound; }
 */
