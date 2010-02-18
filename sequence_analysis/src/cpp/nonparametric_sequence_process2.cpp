@@ -58,7 +58,7 @@ extern char* label(const char *file_name);
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonparametric_sequence_process.
+ *  Ecriture d'un objet NonparametricSequenceProcess.
  *
  *  arguments : stream, indice du processus d'observation,
  *              pointeurs sur les lois d'observation empiriques et
@@ -68,10 +68,10 @@ extern char* label(const char *file_name);
  *
  *--------------------------------------------------------------*/
 
-ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
-                                                     Histogram **empirical_observation ,
-                                                     const Sequence_characteristics *characteristics ,
-                                                     bool exhaustive , bool file_flag , Forward **forward) const
+ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
+                                                   FrequencyDistribution **empirical_observation ,
+                                                   const SequenceCharacteristics *characteristics ,
+                                                   bool exhaustive , bool file_flag , Forward **forward) const
 
 {
   register int i , j;
@@ -101,7 +101,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         os << "   | " << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
            << " | " << STAT_label[STATL_STATE] << " " << i << " "
            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
@@ -191,7 +191,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[SEQL_NO_OCCURRENCE] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << SEQ_label[SEQL_NO_OCCURRENCE] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << no_occurrence[i] << endl;
         }
 
@@ -200,7 +200,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           first_occurrence[i]->ascii_characteristic_print(os , false , file_flag);
         }
@@ -211,8 +211,8 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-           << " " << i << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+        os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+           << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->first_occurrence[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
@@ -226,16 +226,16 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         os << "  ";
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->first_occurrence[i]->nb_element > 0)) {
-          os << " | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-             << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+          os << " | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+             << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((first_occurrence) && (first_occurrence[i])) {
-          os << " | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << " | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->first_occurrence[i]->nb_element > 0)) {
-            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -261,7 +261,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[SEQL_LEAVING] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << SEQ_label[SEQL_LEAVING] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << leave[i] << endl;
         }
 
@@ -282,7 +282,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         os << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+           << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->recurrence_time[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
@@ -297,7 +297,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->recurrence_time[i]->nb_element > 0)) {
           os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((recurrence_time) && (recurrence_time[i])) {
@@ -305,7 +305,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
              << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->recurrence_time[i]->nb_element > 0)) {
-            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -332,7 +332,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           if (file_flag) {
             os << "# ";
           }
-          os << SEQ_label[SEQL_ABSORPTION] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << SEQ_label[SEQL_ABSORPTION] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << absorption[i] << endl;
         }
 
@@ -361,7 +361,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         os << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->sojourn_time[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
@@ -376,7 +376,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->sojourn_time[i]->nb_element > 0)) {
           os << " | " << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((sojourn_time) && (sojourn_time[i])) {
@@ -384,7 +384,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
              << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->sojourn_time[i]->nb_element > 0)) {
-            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -419,7 +419,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         }
         os << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->initial_run[i]->ascii_characteristic_print(os , false , file_flag);
 
         if ((characteristics->initial_run[i]->nb_element > 0) && (exhaustive)) {
@@ -429,12 +429,12 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           }
           os << "   | " << SEQ_label[SEQL_INITIAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
           if ((forward) && (forward[i])) {
             os << " | " << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
                << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
-               << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+               << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE]
                << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
@@ -456,7 +456,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         }
         os << SEQ_label[SEQL_FINAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->final_run[i]->ascii_characteristic_print(os , false , file_flag);
       }
 
@@ -472,7 +472,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
             (characteristics->final_run[i]->nb_element > 0)) {
           os << " | " << SEQ_label[SEQL_FINAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((forward) && (forward[i])) {
@@ -480,7 +480,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
              << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->final_run[i]->nb_element > 0)) {
-            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -507,13 +507,13 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         if (length->variance == 0.) {
-          os << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
           os << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
-             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
              << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_run[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
@@ -525,8 +525,8 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+        os << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+           << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->nb_run[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
       }
 
@@ -538,24 +538,24 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         os << "  ";
         if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
             (characteristics->nb_run[i]->nb_element > 0)) {
-          os << " | " << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-             << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+          os << " | " << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+             << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if (nb_run) {
           if (length->variance == 0.) {
-            os << " | " << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+            os << " | " << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
           }
           else {
             os << " | " << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
-               << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
           }
           if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
               (characteristics->nb_run[i]->nb_element > 0)) {
-            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           if (length->variance == 0.) {
@@ -587,13 +587,13 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
           os << "# ";
         }
         if (length->variance == 0.) {
-          os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
           os << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
              << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_occurrence[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
@@ -605,8 +605,8 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if (file_flag) {
           os << "# ";
         }
-        os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+        os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         characteristics->nb_occurrence[i]->ascii_characteristic_print(os , (length->variance > 0. ? false : true) , file_flag);
       }
 
@@ -619,25 +619,25 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->nb_occurrence) &&
             (characteristics->nb_occurrence[i]->nb_element > 0)) {
-          os << " | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-             << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+          os << " | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+             << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if (nb_occurrence) {
           if (length->variance == 0.) {
-            os << " | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+            os << " | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
           }
           else {
             os << " | " << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-               << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+               << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
           }
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->nb_occurrence) &&
               (characteristics->nb_occurrence[i]->nb_element > 0)) {
-            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           if (length->variance == 0.) {
@@ -669,7 +669,7 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Nonparametric_sequence_process au format tableur.
+ *  Ecriture d'un objet NonparametricSequenceProcess au format tableur.
  *
  *  arguments : stream, indice du processus d'observation,
  *              pointeurs sur les lois d'observation empiriques,
@@ -678,10 +678,10 @@ ostream& Nonparametric_sequence_process::ascii_print(ostream &os , int process ,
  *
  *--------------------------------------------------------------*/
 
-ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int process ,
-                                                           Histogram **empirical_observation ,
-                                                           const Sequence_characteristics *characteristics ,
-                                                           Forward **forward) const
+ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int process ,
+                                                         FrequencyDistribution **empirical_observation ,
+                                                         const SequenceCharacteristics *characteristics ,
+                                                         Forward **forward) const
 
 {
   register int i , j;
@@ -703,7 +703,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
 
       if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
         os << "\n\t" << STAT_label[STATL_STATE] << " " << i << " "
-           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+           << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
            << "\t" << STAT_label[STATL_STATE] << " " << i << " "
            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
@@ -767,20 +767,20 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (first_occurrence) {
         if (no_occurrence[i] > 0.) {
-          os << "\n" << SEQ_label[SEQL_NO_OCCURRENCE] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\n" << SEQ_label[SEQL_NO_OCCURRENCE] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << no_occurrence[i] << endl;
         }
 
         if (first_occurrence[i]) {
-          os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION] << endl;
           first_occurrence[i]->spreadsheet_characteristic_print(os);
         }
       }
 
       if ((characteristics) && (i < characteristics->nb_value)) {
-        os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-           << " " << i << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+        os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+           << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->first_occurrence[i]->spreadsheet_characteristic_print(os);
       }
 
@@ -790,16 +790,16 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
         os << "\n";
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->first_occurrence[i]->nb_element > 0)) {
-          os << "\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-             << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+          os << "\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+             << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((first_occurrence) && (first_occurrence[i])) {
-          os << "\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->first_occurrence[i]->nb_element > 0)) {
-            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -821,7 +821,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (recurrence_time) {
         if (leave[i] > 0.) {
-          os << "\n" << SEQ_label[SEQL_LEAVING] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\n" << SEQ_label[SEQL_LEAVING] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << leave[i] << endl;
         }
 
@@ -834,7 +834,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
 
       if ((characteristics) && (i < characteristics->nb_value)) {
         os << "\n" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+           << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->recurrence_time[i]->spreadsheet_characteristic_print(os);
       }
 
@@ -845,7 +845,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->recurrence_time[i]->nb_element > 0)) {
           os << "\t" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((recurrence_time) && (recurrence_time[i])) {
@@ -853,7 +853,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
              << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->recurrence_time[i]->nb_element > 0)) {
-            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -876,7 +876,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (sojourn_time) {
         if (absorption[i] > 0.) {
-          os << "\n" << SEQ_label[SEQL_ABSORPTION] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\n" << SEQ_label[SEQL_ABSORPTION] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << ": " << absorption[i] << endl;
         }
 
@@ -896,7 +896,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
 
       if ((characteristics) && (i < characteristics->nb_value)) {
         os << "\n" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->sojourn_time[i]->spreadsheet_characteristic_print(os);
       }
 
@@ -907,7 +907,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->sojourn_time[i]->nb_element > 0)) {
           os << "\t" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((sojourn_time) && (sojourn_time[i])) {
@@ -915,7 +915,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
              << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->sojourn_time[i]->nb_element > 0)) {
-            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -942,18 +942,18 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
           (characteristics->initial_run)) {
         os << "\n" << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->initial_run[i]->spreadsheet_characteristic_print(os);
 
         if (characteristics->initial_run[i]->nb_element > 0) {
           os << "\n\t" << SEQ_label[SEQL_INITIAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
           if ((forward) && (forward[i])) {
             os << "\t" << STAT_label[STATL_STATE] << " " << i << " " << SEQ_label[SEQL_FORWARD] << " "
                << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION]
-               << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+               << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE] << " "
                << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
@@ -971,7 +971,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
       if ((characteristics) && (i < characteristics->nb_value)) {
         os << "\n" << SEQ_label[SEQL_FINAL_RUN] << " - "
            << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->final_run[i]->spreadsheet_characteristic_print(os);
       }
 
@@ -982,7 +982,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
             (characteristics->final_run[i]->nb_element > 0)) {
           os << "\t" << SEQ_label[SEQL_FINAL_RUN] << " - "
              << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+             << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         }
 
         if ((forward) && (forward[i])) {
@@ -990,7 +990,7 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
              << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->final_run[i]->nb_element > 0)) {
-            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+            os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                << STAT_label[STATL_FUNCTION];
           }
           os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
@@ -1014,45 +1014,45 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (nb_run) {
         if (length->variance == 0.) {
-          os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
           os << "\n" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
-             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
              << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_run[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
       }
 
       if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run)) {
-        os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+        os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->nb_run[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
       }
 
       os << "\n";
       if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
           (characteristics->nb_run[i]->nb_element > 0)) {
-        os << "\t" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        os << "\t" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
 
       if (nb_run) {
         if (length->variance == 0.) {
-          os << "\t" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\t" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         else {
           os << "\t" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
-             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
              << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
         }
         if ((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) &&
             (characteristics->nb_run[i]->nb_element > 0)) {
-          os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+          os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
              << STAT_label[STATL_FUNCTION];
         }
         if (length->variance == 0.) {
@@ -1079,13 +1079,13 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
     for (i = 0;i < nb_value;i++) {
       if (nb_occurrence) {
         if (length->variance == 0.) {
-          os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
         }
         else {
           os << "\n" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
         }
         nb_occurrence[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
@@ -1093,8 +1093,8 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
 
       if ((characteristics) && (i < characteristics->nb_value) &&
           (characteristics->nb_occurrence)) {
-        os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+        os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         characteristics->nb_occurrence[i]->spreadsheet_characteristic_print(os , (length->variance > 0. ? false : true));
       }
 
@@ -1102,25 +1102,25 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
       if ((characteristics) && (i < characteristics->nb_value) &&
           (characteristics->nb_occurrence) &&
           (characteristics->nb_occurrence[i]->nb_element > 0)) {
-        os << "\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        os << "\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       }
 
       if (nb_occurrence) {
         if (length->variance == 0.) {
-          os << "\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          os << "\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
              << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         else {
           os << "\t" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-             << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+             << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
              << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTIONS];
         }
         if ((characteristics) && (i < characteristics->nb_value) &&
             (characteristics->nb_occurrence) &&
             (characteristics->nb_occurrence[i]->nb_element > 0)) {
-          os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
+          os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
              << STAT_label[STATL_FUNCTION];
         }
         if (length->variance == 0.) {
@@ -1149,21 +1149,21 @@ ostream& Nonparametric_sequence_process::spreadsheet_print(ostream &os , int pro
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Nonparametric_sequence_process.
+ *  Sortie Gnuplot d'un objet NonparametricSequenceProcess.
  *
  *  arguments : prefixe des fichiers, titre des figures,
  *              indice du processus d'observation,
  *              pointeurs sur les lois d'observation empiriques,
  *              sur les caracteristiques des sequences observees,
- *              sur l'histogramme des longueurs des sequences et
+ *              sur la loi empirique des longueurs des sequences et
  *              sur les lois de l'intervalle de temps residuel.
  *
  *--------------------------------------------------------------*/
 
-bool Nonparametric_sequence_process::plot_print(const char *prefix , const char *title ,
-                                                int process , Histogram **empirical_observation ,
-                                                const Sequence_characteristics *characteristics ,
-                                                const Histogram *hlength , Forward **forward) const
+bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *title ,
+                                              int process , FrequencyDistribution **empirical_observation ,
+                                              const SequenceCharacteristics *characteristics ,
+                                              const FrequencyDistribution *hlength , Forward **forward) const
 
 {
   bool status = false , start;
@@ -1173,7 +1173,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
   double *scale;
   Curves *smoothed_curves;
   const Distribution **pdist;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   ostringstream data_file_name[2];
 
 
@@ -1218,7 +1218,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
     pdist = new const Distribution*[6 * nb_value + nb_state];
     dist_nb_value = new int[6 * nb_value + nb_state];
     scale = new double[6 * nb_value + nb_state];
-    phisto = new const Histogram*[1 + 7 * nb_value + nb_state];
+    phisto = new const FrequencyDistribution*[1 + 7 * nb_value + nb_state];
     index_dist = new int[1 + 7 * nb_value + nb_state];
 
     nb_histo = 0;
@@ -1587,7 +1587,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
           out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
                    << (int)(hlength->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
-                   << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM]
+                   << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (hlength->nb_value - 1 < TIC_THRESHOLD) {
@@ -1710,10 +1710,10 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                         << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
+                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                         << " " << m << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
                 j++;
               }
@@ -1722,7 +1722,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << MAX(dist_nb_value[k] , 2) - 1 << "] [0:"
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                         << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << STAT_label[STATL_DISTRIBUTION] << "\" with linespoints" << endl;
               }
 
@@ -1754,8 +1754,8 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
               out_file << "plot [0:" << MAX(phisto[j]->nb_value , 2) - 1 << "] [0:"
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                       << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                       << " " << m << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                       << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                       << " " << m << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
               if (MAX(phisto[j]->nb_value , 2) - 1 < TIC_THRESHOLD) {
                 out_file << "set xtics autofreq" << endl;
@@ -1842,7 +1842,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                         << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                         << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
                          << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
@@ -1889,7 +1889,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                        << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                       << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                       << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses" << endl;
 
               if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1977,7 +1977,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
                          << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
@@ -2026,7 +2026,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                        << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                       << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                       << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses" << endl;
 
               if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2060,7 +2060,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << SEQ_label[SEQL_INITIAL_RUN] << " - " << STAT_label[STATL_STATE]
-                         << " " << m << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                         << " " << m << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
                          << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << SEQ_label[SEQL_FORWARD]
@@ -2086,7 +2086,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                          << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << SEQ_label[SEQL_INITIAL_RUN] << " - "
                          << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                         << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses" << endl;
 
                 if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2121,7 +2121,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                          << " title \"" << SEQ_label[SEQL_FINAL_RUN] << " - " << STAT_label[STATL_STATE]
-                         << " " << m << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                         << " " << m << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
                          << " title \"" << STAT_label[STATL_STATE] << " " << m << " " << SEQ_label[SEQL_FORWARD]
@@ -2169,7 +2169,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                        << " title \"" << SEQ_label[SEQL_FINAL_RUN] << " - "
                        << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << m
-                       << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                       << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses" << endl;
 
               if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2258,18 +2258,18 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                         << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                         << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                         << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                         << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1;
                 if (length->variance == 0.) {
-                  out_file << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                  out_file << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                            << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 else {
                   out_file << " title \"" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
-                           << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                           << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 out_file << "\" with linespoints" << endl;
@@ -2280,7 +2280,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                         << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                          << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION]
                          << "\" with linespoints" << endl;
@@ -2315,8 +2315,8 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
               out_file << "plot [0:" << phisto[j]->nb_value - 1 << "] [0:"
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                       << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                       << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                       << " title \"" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                       << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses" << endl;
 
               if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2349,18 +2349,18 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                          << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                         << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                         << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                         << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                         << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                          << "\" with impulses,\\" << endl;
                 out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1;
                 if (length->variance == 0.) {
-                  out_file << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                  out_file << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                            << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 else {
                   out_file << " title \"" << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-                           << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                           << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                            << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
                 }
                 out_file << "\" with linespoints" << endl;
@@ -2371,7 +2371,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                 out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
                          << MIN(pdist[k]->max * YSCALE , 1.) << "] \""
                          << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
-                         << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                         << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                          << " " << m << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                          << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION]
                          << "\" with linespoints" << endl;
@@ -2401,8 +2401,8 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
               out_file << "plot [0:" << phisto[j]->nb_value - 1 << "] [0:"
                        << (int)(phisto[j]->max * YSCALE) + 1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
-                       << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                       << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                       << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                       << " " << m << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses" << endl;
 
               if (phisto[j]->nb_value - 1 < TIC_THRESHOLD) {
@@ -2431,7 +2431,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
             out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
                      << (int)(hlength->max * YSCALE) + 1 << "] \""
                      << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
-                     << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM]
+                     << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << "\" with impulses" << endl;
 
             if (hlength->nb_value - 1 < TIC_THRESHOLD) {
@@ -2495,7 +2495,7 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
                        << (int)(MAX(phisto[j]->max , pdist[k]->max * scale[k]) * YSCALE) + 1
                        << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j + 1
                        << " title \"" << STAT_label[STATL_STATE] << " " << m << " "
-                       << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM]
+                       << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                        << "\" with impulses,\\" << endl;
               out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo + k + 1
                        << " title \"" << STAT_label[STATL_STATE] << " " << m << " "
@@ -2546,21 +2546,21 @@ bool Nonparametric_sequence_process::plot_print(const char *prefix , const char 
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Nonparametric_sequence_process.
+ *  Sortie graphique d'un objet NonparametricSequenceProcess.
  *
  *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
  *              indice du processus d'observation,
  *              pointeurs sur les lois d'observation empiriques,
  *              sur les caracteristiques des sequences observees,
- *              sur l'histogramme des longueurs des sequences et
+ *              sur la loi empirique des longueurs des sequences et
  *              sur les lois de l'intervalle de temps residuel.
  *
  *--------------------------------------------------------------*/
 
-void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &index , int process ,
-                                                    Histogram **empirical_observation ,
-                                                    const Sequence_characteristics *characteristics ,
-                                                    const Histogram *hlength , Forward **forward) const
+void NonparametricSequenceProcess::plotable_write(MultiPlotSet &plot , int &index , int process ,
+                                                  FrequencyDistribution **empirical_observation ,
+                                                  const SequenceCharacteristics *characteristics ,
+                                                  const FrequencyDistribution *hlength , Forward **forward) const
 
 {
   register int i , j;
@@ -2785,7 +2785,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
     }
     index++;
 
-    // vue : histogramme des longueurs des sequences
+    // vue : loi empirique des longueurs des sequences
 
     plot.variable[index] = process;
     plot.viewpoint[index] = INTENSITY;
@@ -2803,7 +2803,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
     plot[index].resize(1);
 
     legend.str("");
-    legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[index][0].legend = legend.str();
 
     plot[index][0].style = "impulses";
@@ -2877,8 +2877,8 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
           plot[index].resize(2);
 
           legend.str("");
-          legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                 << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+          legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -2896,7 +2896,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
         }
 
         legend.str("");
-        legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+        legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                << " " << i << " " << STAT_label[STATL_DISTRIBUTION];
         plot[index][j].legend = legend.str();
 
@@ -2933,8 +2933,8 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
         plot[index].resize(1);
 
         legend.str("");
-        legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-               << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+        legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+               << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -2976,7 +2976,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
 
           legend.str("");
           legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-                 << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+                 << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3074,7 +3074,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
 
           legend.str("");
           legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3130,7 +3130,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
 
         legend.str("");
         legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -3168,7 +3168,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
           legend.str("");
           legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
                  << STAT_label[STATL_STATE] << " " << i << " "
-                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3214,7 +3214,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
           legend.str("");
           legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
                  << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3253,7 +3253,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
           legend.str("");
           legend << SEQ_label[SEQL_FINAL_RUN] << " - "
                  << STAT_label[STATL_STATE] << " " << i << " "
-                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+                 << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3311,7 +3311,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
         legend.str("");
         legend << SEQ_label[SEQL_FINAL_RUN] << " - "
                << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
-               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+               << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -3350,8 +3350,8 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
           plot[index].resize(2);
 
           legend.str("");
-          legend << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                 << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+          legend << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3377,13 +3377,13 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
 
         legend.str("");
         if (length->variance == 0.) {
-          legend << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          legend << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                  << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                  << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         else {
           legend << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_RUN_OF]
-                 << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
+                 << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                  << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         plot[index][j].legend = legend.str();
@@ -3422,8 +3422,8 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
         plot[index].resize(1);
 
         legend.str("");
-        legend << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-               << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        legend << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+               << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -3457,8 +3457,8 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
           plot[index].resize(2);
 
           legend.str("");
-          legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-                 << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+          legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
           plot[index][0].legend = legend.str();
 
           plot[index][0].style = "impulses";
@@ -3484,13 +3484,13 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
 
         legend.str("");
         if (length->variance == 0.) {
-          legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+          legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                  << " " << i << " " << SEQ_label[SEQL_PER_LENGTH] << " " << length->offset << " "
                  << SEQ_label[SEQL_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         else {
           legend << SEQ_label[SEQL_MIXTURE_OF] << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-                 << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+                 << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
                  << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_DISTRIBUTION];
         }
         plot[index][j].legend = legend.str();
@@ -3529,8 +3529,8 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
         plot[index].resize(1);
 
         legend.str("");
-        legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
-               << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+        legend << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT]
+               << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -3542,7 +3542,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
 
     if ((characteristics) && (characteristics->nb_run) && (characteristics->nb_occurrence)) {
 
-      // vue : histogramme des longueurs des sequences
+      // vue : loi empirique des longueurs des sequences
 
       plot.variable[index] = process;
       plot.viewpoint[index] = COUNTING;
@@ -3560,7 +3560,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
       plot[index].resize(1);
 
       legend.str("");
-      legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+      legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
       plot[index][0].style = "impulses";
@@ -3596,7 +3596,7 @@ void Nonparametric_sequence_process::plotable_write(MultiPlotSet &plot , int &in
 
         legend.str("");
         legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_HISTOGRAM];
+               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
