@@ -78,14 +78,14 @@ enum {
 class Sequences;
 class Clusters;
 class Dendrogram;
-class Distance_matrix;
+class DistanceMatrix;
 
-class Distance_matrix : public STAT_interface {  // matrice des distances
+class DistanceMatrix : public StatInterface {  // matrice des distances
 
     friend class Clusters;
     friend class Dendrogram;
 
-    friend std::ostream& operator<<(std::ostream &os , const Distance_matrix &dist_matrix)
+    friend std::ostream& operator<<(std::ostream &os , const DistanceMatrix &dist_matrix)
     { return dist_matrix.ascii_write(os); }
 
 protected :
@@ -108,7 +108,7 @@ protected :
     int label_size;         // taille du label
     char *label;            // label
 
-    void copy(const Distance_matrix &dist_matrix , char transform = 'c');
+    void copy(const DistanceMatrix &dist_matrix , char transform = 'c');
     void remove();
 
     std::ostream& property_print(double **normalized_distance , std::ostream &os ,
@@ -117,37 +117,37 @@ protected :
     int cumul_length_computation(bool *row_flag , bool *column_flag) const;
     double cumul_distance_computation(bool *row_flag , bool *column_flag) const;
 
-    MultiPlotSet* get_plotable(Format_error &error) const;
+    MultiPlotSet* get_plotable(StatError &error) const;
 
 public :
 
-    Distance_matrix();
-    Distance_matrix(int nb_pattern , const char *ilabel , int *pattern_identifier = NULL);
-    Distance_matrix(int nb_pattern , int irow_identifier , int icolumn_identifier ,
-                    const char *ilabel , int *pattern_identifier = NULL ,
-                    bool substitution_flag = true , bool transposition_flag = false);
-    Distance_matrix(const Distance_matrix &dist_matrix , int inb_pattern ,
-                    int *iidentifier , bool keep = true);
-    Distance_matrix(const Distance_matrix &dist_matrix , int nb_cluster ,
-                    const char *ilabel);
-    Distance_matrix(const Distance_matrix &dist_matrix , char transform = 'c')
+    DistanceMatrix();
+    DistanceMatrix(int nb_pattern , const char *ilabel , int *pattern_identifier = NULL);
+    DistanceMatrix(int nb_pattern , int irow_identifier , int icolumn_identifier ,
+                   const char *ilabel , int *pattern_identifier = NULL ,
+                   bool substitution_flag = true , bool transposition_flag = false);
+    DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_pattern ,
+                   int *iidentifier , bool keep = true);
+    DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluster ,
+                   const char *ilabel);
+    DistanceMatrix(const DistanceMatrix &dist_matrix , char transform = 'c')
     { copy(dist_matrix , transform); }
-    virtual ~Distance_matrix();
-    Distance_matrix& operator=(const Distance_matrix &dist_matrix);
+    virtual ~DistanceMatrix();
+    DistanceMatrix& operator=(const DistanceMatrix &dist_matrix);
 
-    Distance_matrix* select_individual(Format_error &error , int inb_pattern ,
+    DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
                                        int *iidentifier , bool keep = true) const;
-    Distance_matrix* symmetrize(Format_error &error) const;
-    Distance_matrix* unnormalize(Format_error &error) const;
+    DistanceMatrix* symmetrize(StatError &error) const;
+    DistanceMatrix* unnormalize(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
     std::ostream& spreadsheet_write(std::ostream &os) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -160,15 +160,15 @@ public :
                 double itransposition_distance = 0. , int inb_transposition = 0);
     void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
 
-    Clusters* partitioning(Format_error &error , std::ostream &os , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream &os , int nb_cluster ,
                            int *prototype = NULL , int initialization = 1 , int algorithm = 1) const;
-    Clusters* partitioning(Format_error &error , std::ostream &os , int nb_cluster ,
+    Clusters* partitioning(StatError &error , std::ostream &os , int nb_cluster ,
                            int *cluster_nb_pattern , int **cluster_pattern) const;
 
     Dendrogram* agglomerative_hierarchical_clustering(int algorithm , int criterion = AVERAGING) const;
     Dendrogram* divisive_hierarchical_clustering() const;
 
-    bool hierarchical_clustering(Format_error &error , std::ostream &os ,
+    bool hierarchical_clustering(StatError &error , std::ostream &os ,
                                  int algorithm = AGGLOMERATIVE , int criterion = AVERAGING ,
                                  const char *path = NULL , char format = 'a') const;
 
@@ -206,16 +206,16 @@ public :
 
 
 
-class Clusters : public Distance_matrix {  // resultats du clustering par partitionnement
+class Clusters : public DistanceMatrix {  // resultats du clustering par partitionnement
 
-    friend class Distance_matrix;
+    friend class DistanceMatrix;
 
     friend std::ostream& operator<<(std::ostream &os , const Clusters &clusters)
     { return clusters.ascii_write(os); }
 
 private :
 
-    Distance_matrix *distance_matrix;  // pointeur sur un objet Distance_matrix
+    DistanceMatrix *distance_matrix;  // pointeur sur un objet DistanceMatrix
     int nb_pattern;         // nombre de formes
     int nb_cluster;         // nombre de groupes
     int *cluster_nb_pattern;  // effectifs des groupes
@@ -226,7 +226,7 @@ private :
     void copy(const Clusters &clusters);
     void remove();
 
-    MultiPlotSet* get_plotable(Format_error &error) const;
+    MultiPlotSet* get_plotable(StatError &error) const;
 
     int* pattern_sort(int cluster) const;
 
@@ -250,20 +250,20 @@ private :
 public :
 
     Clusters();
-    Clusters(const Distance_matrix &dist_matrix , int inb_cluster);
-    Clusters(const Distance_matrix &dist_matrix , int inb_cluster ,
+    Clusters(const DistanceMatrix &dist_matrix , int inb_cluster);
+    Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
              int *icluster_nb_pattern , int **cluster_pattern);
     Clusters(const Clusters &clusters)
-    :Distance_matrix(clusters) { copy(clusters); }
+    :DistanceMatrix(clusters) { copy(clusters); }
     ~Clusters();
     Clusters& operator=(const Clusters &clusters);
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -274,7 +274,7 @@ public :
 
     // acces membres de la classe
 
-    Distance_matrix* get_distance_matrix() { return distance_matrix; }
+    DistanceMatrix* get_distance_matrix() { return distance_matrix; }
     int get_nb_pattern() const { return nb_pattern; }
     int get_nb_cluster() const { return nb_cluster; }
     int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
@@ -287,9 +287,9 @@ public :
 
 
 
-class Dendrogram : public STAT_interface {      // resultats du clustering hierarchique
+class Dendrogram : public StatInterface {  // resultats du clustering hierarchique
 
-    friend class Distance_matrix;
+    friend class DistanceMatrix;
     friend class Sequences;
 
     friend std::ostream& operator<<(std::ostream &os , const Dendrogram &dendrogram)
@@ -297,7 +297,7 @@ class Dendrogram : public STAT_interface {      // resultats du clustering hiera
 
 private :
 
-    Distance_matrix *distance_matrix;  // pointeur sur un objet Distance_matrix
+    DistanceMatrix *distance_matrix;  // pointeur sur un objet DistanceMatrix
     int scale;              // echelle pour representer les distances entre groupes
     int nb_cluster;         // nombre de groupes
     int *cluster_nb_pattern;  // effectifs des groupes
@@ -320,7 +320,7 @@ private :
 public :
 
     Dendrogram();
-    Dendrogram(const Distance_matrix &dist_matrix , int iscale);
+    Dendrogram(const DistanceMatrix &dist_matrix , int iscale);
     Dendrogram(const Dendrogram &dendrogram)
     { copy(dendrogram); }
     ~Dendrogram();
@@ -329,13 +329,13 @@ public :
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path , bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool ascii_write(StatError &error , const char *path , bool exhaustive = false) const;
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const { return false; }
     // acces membres de la classe
 
-    Distance_matrix* get_distance_matrix() { return distance_matrix; }
+    DistanceMatrix* get_distance_matrix() { return distance_matrix; }
     int get_scale() const { return scale; }
     int get_nb_cluster() const { return nb_cluster; }
     int get_cluster_nb_pattern(int cluster) const { return cluster_nb_pattern[cluster]; }
