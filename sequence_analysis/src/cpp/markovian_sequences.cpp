@@ -61,11 +61,11 @@ extern char* label(const char *file_name);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Markovian_sequences.
+ *  Constructeur par defaut de la classe MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences::Markovian_sequences()
+MarkovianSequences::MarkovianSequences()
 
 {
   self_transition = NULL;
@@ -76,11 +76,11 @@ Markovian_sequences::Markovian_sequences()
 
 /*--------------------------------------------------------------*
  *
- *  Initialisation par defaut des champs de la classe Markovian_sequences.
+ *  Initialisation par defaut des champs de la classe MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::init()
+void MarkovianSequences::init()
 
 {
   register int i;
@@ -89,7 +89,7 @@ void Markovian_sequences::init()
   self_transition = NULL;
   observation = NULL;
 
-  characteristics = new Sequence_characteristics*[nb_variable];
+  characteristics = new SequenceCharacteristics*[nb_variable];
   for (i = 0;i < nb_variable;i++) {
     characteristics[i] = NULL;
   }
@@ -98,13 +98,13 @@ void Markovian_sequences::init()
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Markovian_sequences a partir d'un objet Sequences.
+ *  Construction d'un objet MarkovianSequences a partir d'un objet Sequences.
  *
  *  argument : reference sur un objet Sequences.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences::Markovian_sequences(const Sequences &seq)
+MarkovianSequences::MarkovianSequences(const Sequences &seq)
 :Sequences(seq)
 
 {
@@ -115,14 +115,14 @@ Markovian_sequences::Markovian_sequences(const Sequences &seq)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Markovian_sequences.
+ *  Copie d'un objet MarkovianSequences.
  *
- *  arguments : reference sur un objet Markovian_sequences, inversion /
- *              ajout/suppression des histogrammes de temps de sejour initial.
+ *  arguments : reference sur un objet MarkovianSequences, inversion /
+ *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
+void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
 
 {
   bool initial_run_flag;
@@ -130,10 +130,10 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
 
 
   if ((seq.self_transition) && (param != REVERSE)) {
-    self_transition = new Self_transition*[marginal[0]->nb_value];
+    self_transition = new SelfTransition*[marginal[0]->nb_value];
     for (i = 0;i < marginal[0]->nb_value;i++) {
       if (seq.self_transition[i]) {
-        self_transition[i] = new Self_transition(*(seq.self_transition[i]));
+        self_transition[i] = new SelfTransition(*(seq.self_transition[i]));
       }
       else {
         self_transition[i] = NULL;
@@ -146,13 +146,13 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
   }
 
   if (seq.observation) {
-    observation = new Histogram**[nb_variable];
+    observation = new FrequencyDistribution**[nb_variable];
     observation[0] = NULL;
 
     for (i = 1;i < nb_variable;i++) {
-      observation[i] = new Histogram*[marginal[0]->nb_value];
+      observation[i] = new FrequencyDistribution*[marginal[0]->nb_value];
       for (j = 0;j < marginal[0]->nb_value;j++) {
-        observation[i][j] = new Histogram(*(seq.observation[i][j]));
+        observation[i][j] = new FrequencyDistribution(*(seq.observation[i][j]));
       }
     }
   }
@@ -161,7 +161,7 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
     observation = NULL;
   }
 
-  characteristics = new Sequence_characteristics*[nb_variable];
+  characteristics = new SequenceCharacteristics*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     if (seq.characteristics[i]) {
@@ -175,27 +175,27 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
           break;
         }
 
-        characteristics[i] = new Sequence_characteristics(*(seq.characteristics[i]) , initial_run_flag);
+        characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]) , initial_run_flag);
 
         if (((seq.characteristics[i]->initial_run) && (!initial_run_flag)) ||
             ((!(seq.characteristics[i]->initial_run)) && (initial_run_flag))) {
-           build_sojourn_time_histogram(i , initial_run_flag);
+           build_sojourn_time_frequency_distribution(i , initial_run_flag);
         }
       }
 
       else if (param == REVERSE) {
-        characteristics[i] = new Sequence_characteristics(*(seq.characteristics[i]), 'r');
+        characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]), 'r');
 
         build_index_value(i);
-        build_first_occurrence_histogram(i);
+        build_first_occurrence_frequency_distribution(i);
 
         if (!(seq.characteristics[i]->initial_run)) {
-          build_sojourn_time_histogram(i);
+          build_sojourn_time_frequency_distribution(i);
         }
       }
 
       else {
-        characteristics[i] = new Sequence_characteristics(*(seq.characteristics[i]));
+        characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[i]));
       }
     }
 
@@ -208,14 +208,14 @@ void Markovian_sequences::copy(const Markovian_sequences &seq , int param)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Markovian_sequences avec ajout d'une variable d'etat.
+ *  Copie d'un objet MarkovianSequences avec ajout d'une variable d'etat.
  *
- *  arguments : reference sur un objet Markovian_sequences,
- *              ajout/suppression des histogrammes de temps de sejour initial.
+ *  arguments : reference sur un objet MarkovianSequences,
+ *              ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::add_state_variable(const Markovian_sequences &seq , int param)
+void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , int param)
 
 {
   bool initial_run_flag;
@@ -225,7 +225,7 @@ void Markovian_sequences::add_state_variable(const Markovian_sequences &seq , in
   self_transition = NULL;
   observation = NULL;
 
-  characteristics = new Sequence_characteristics*[nb_variable];
+  characteristics = new SequenceCharacteristics*[nb_variable];
   characteristics[0] = NULL;
 
   for (i = 0;i < seq.nb_variable;i++) {
@@ -240,16 +240,16 @@ void Markovian_sequences::add_state_variable(const Markovian_sequences &seq , in
           break;
         }
 
-        characteristics[i + 1] = new Sequence_characteristics(*(seq.characteristics[i]) , initial_run_flag);
+        characteristics[i + 1] = new SequenceCharacteristics(*(seq.characteristics[i]) , initial_run_flag);
 
         if (((seq.characteristics[i]->initial_run) && (!initial_run_flag)) ||
             ((!(seq.characteristics[i]->initial_run)) && (initial_run_flag))) {
-          build_sojourn_time_histogram(i + 1 , initial_run_flag);
+          build_sojourn_time_frequency_distribution(i + 1 , initial_run_flag);
         }
       }
 
       else {
-        characteristics[i + 1] = new Sequence_characteristics(*(seq.characteristics[i]));
+        characteristics[i + 1] = new SequenceCharacteristics(*(seq.characteristics[i]));
       }
     }
 
@@ -262,16 +262,16 @@ void Markovian_sequences::add_state_variable(const Markovian_sequences &seq , in
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Markovian_sequences.
+ *  Constructeur par copie de la classe MarkovianSequences.
  *
- *  arguments : reference sur un objet Markovian_sequences, type de transformation ('c' : copie,
+ *  arguments : reference sur un objet MarkovianSequences, type de transformation ('c' : copie,
  *              'a' : addition d'une variable d'etat, 'r' : suppression du parametre d'index),
- *              inversion / ajout/suppression des histogrammes de temps de sejour initial.
+ *              inversion / ajout/suppression des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences::Markovian_sequences(const Markovian_sequences &seq , char transform ,
-                                         int param)
+MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , char transform ,
+                                       int param)
 
 {
   switch (transform) {
@@ -297,11 +297,11 @@ Markovian_sequences::Markovian_sequences(const Markovian_sequences &seq , char t
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur des champs de la classe Markovian_sequences.
+ *  Destructeur des champs de la classe MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::remove()
+void MarkovianSequences::remove()
 
 {
   register int i , j;
@@ -335,11 +335,11 @@ void Markovian_sequences::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Markovian_sequences.
+ *  Destructeur de la classe MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences::~Markovian_sequences()
+MarkovianSequences::~MarkovianSequences()
 
 {
   remove();
@@ -348,13 +348,13 @@ Markovian_sequences::~Markovian_sequences()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Markovian_sequences.
+ *  Operateur d'assignement de la classe MarkovianSequences.
  *
- *  argument : reference sur un objet Markovian_sequences.
+ *  argument : reference sur un objet MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences& Markovian_sequences::operator=(const Markovian_sequences &seq)
+MarkovianSequences& MarkovianSequences::operator=(const MarkovianSequences &seq)
 
 {
   if (&seq != this) {
@@ -377,7 +377,7 @@ Markovian_sequences& Markovian_sequences::operator=(const Markovian_sequences &s
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::state_variable_init(int itype)
+void MarkovianSequences::state_variable_init(int itype)
 
 {
   register int i , j;
@@ -418,20 +418,20 @@ void Markovian_sequences::state_variable_init(int itype)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un histogramme.
+ *  Extraction d'un loi empirique.
  *
- *  arguments : reference sur un objet Format_error, type d'histogramme,
+ *  arguments : reference sur un objet StatError, type de loi empirique,
  *              variable, valeur.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
-                                                int variable , int value) const
+DiscreteDistributionData* MarkovianSequences::extract(StatError &error , int type ,
+                                                      int variable , int value) const
 
 {
   bool status = true;
-  Histogram *phisto;
-  Distribution_data *histo;
+  FrequencyDistribution *phisto;
+  DiscreteDistributionData *histo;
 
 
   histo = NULL;
@@ -483,7 +483,7 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
         else {
           phisto = NULL;
           status = false;
-          error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
+          error.update(STAT_error[STATR_NON_EXISTING_FREQUENCY_DISTRIBUTION]);
         }
         break;
       }
@@ -500,7 +500,7 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
         else {
           phisto = NULL;
           status = false;
-          error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
+          error.update(STAT_error[STATR_NON_EXISTING_FREQUENCY_DISTRIBUTION]);
         }
         break;
       }
@@ -512,7 +512,7 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
         else {
           phisto = NULL;
           status = false;
-          error.update(STAT_error[STATR_NON_EXISTING_HISTOGRAM]);
+          error.update(STAT_error[STATR_NON_EXISTING_FREQUENCY_DISTRIBUTION]);
         }
         break;
       }
@@ -520,13 +520,13 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
 
       if ((phisto) && (phisto->nb_element == 0)) {
         status = false;
-        error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+        error.update(STAT_error[STATR_EMPTY_SAMPLE]);
       }
     }
   }
 
   if (status) {
-    histo = new Distribution_data(*phisto);
+    histo = new DiscreteDistributionData(*phisto);
   }
 
   return histo;
@@ -535,15 +535,15 @@ Distribution_data* Markovian_sequences::extract(Format_error &error , int type ,
 
 /*--------------------------------------------------------------*
  *
- *  Fusion d'objets Markovian_sequences.
+ *  Fusion d'objets MarkovianSequences.
  *
- *  arguments : reference sur un objet Format_error, nombre d'objets Markovian_sequences,
- *              pointeurs sur les objets Markovian_sequences.
+ *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
+ *              pointeurs sur les objets MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sample ,
-                                                const Markovian_sequences **iseq) const
+MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
+                                              const MarkovianSequences **iseq) const
 
 {
   bool status = true;
@@ -551,9 +551,9 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
   int inb_sequence , nb_histo , *ilength , *pindex_param , *cindex_param ,
       *pisequence , *cisequence;
   double *prsequence , *crsequence;
-  const Histogram **phisto;
-  Markovian_sequences *seq;
-  const Markovian_sequences **pseq;
+  const FrequencyDistribution **phisto;
+  MarkovianSequences *seq;
+  const MarkovianSequences **pseq;
 
 
   seq = NULL;
@@ -600,7 +600,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
 
   if (status) {
     nb_sample++;
-    pseq = new const Markovian_sequences*[nb_sample];
+    pseq = new const MarkovianSequences*[nb_sample];
 
     pseq[0] = this;
     for (i = 1;i < nb_sample;i++) {
@@ -623,11 +623,11 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
       }
     }
 
-    seq = new Markovian_sequences(inb_sequence , 0 , ilength , index_parameter_type , 
-                                  nb_variable , type);
+    seq = new MarkovianSequences(inb_sequence , 0 , ilength , index_parameter_type , 
+                                 nb_variable , type);
     delete [] ilength;
 
-    phisto = new const Histogram*[nb_sample];
+    phisto = new const FrequencyDistribution*[nb_sample];
 
     // copie des sequences
 
@@ -647,12 +647,12 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
       for (i = 0;i < nb_sample;i++) {
         phisto[i] = pseq[i]->hindex_parameter;
       }
-      seq->hindex_parameter = new Histogram(nb_sample , phisto);
+      seq->hindex_parameter = new FrequencyDistribution(nb_sample , phisto);
 
       for (i = 0;i < nb_sample;i++) {
         phisto[i] = pseq[i]->index_interval;
       }
-      seq->index_interval = new Histogram(nb_sample , phisto);
+      seq->index_interval = new FrequencyDistribution(nb_sample , phisto);
     }
 
     i = 0;
@@ -695,7 +695,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
         for (j = 0;j < nb_sample;j++) {
           phisto[j] = pseq[j]->marginal[i];
         }
-        seq->marginal[i] = new Histogram(nb_sample , phisto);
+        seq->marginal[i] = new FrequencyDistribution(nb_sample , phisto);
       }
 
       for (j = 0;j < nb_sample;j++) {
@@ -705,14 +705,14 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
       }
 
       if (j == nb_sample) {
-        seq->characteristics[i] = new Sequence_characteristics();
+        seq->characteristics[i] = new SequenceCharacteristics();
 
         seq->characteristics[i]->nb_value = seq->marginal[i]->nb_value;
 
         seq->build_index_value(i);
 
-        seq->characteristics[i]->first_occurrence = new Histogram*[seq->marginal[i]->nb_value];
-        seq->characteristics[i]->recurrence_time = new Histogram*[seq->marginal[i]->nb_value];
+        seq->characteristics[i]->first_occurrence = new FrequencyDistribution*[seq->marginal[i]->nb_value];
+        seq->characteristics[i]->recurrence_time = new FrequencyDistribution*[seq->marginal[i]->nb_value];
 
         for (j = 0;j < seq->marginal[i]->nb_value;j++) {
           nb_histo = 0;
@@ -721,7 +721,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
               phisto[nb_histo++] = pseq[k]->characteristics[i]->first_occurrence[j];
             }
           }
-          seq->characteristics[i]->first_occurrence[j] = new Histogram(nb_histo , phisto);
+          seq->characteristics[i]->first_occurrence[j] = new FrequencyDistribution(nb_histo , phisto);
 
           nb_histo = 0;
           for (k = 0;k < nb_sample;k++) {
@@ -729,7 +729,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
               phisto[nb_histo++] = pseq[k]->characteristics[i]->recurrence_time[j];
             }
           }
-          seq->characteristics[i]->recurrence_time[j] = new Histogram(nb_histo , phisto);
+          seq->characteristics[i]->recurrence_time[j] = new FrequencyDistribution(nb_histo , phisto);
         }
 
         for (j = 1;j < nb_sample;j++) {
@@ -740,11 +740,11 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
         }
 
         if (j == nb_sample) {
-          seq->characteristics[i]->sojourn_time = new Histogram*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->sojourn_time = new FrequencyDistribution*[seq->marginal[i]->nb_value];
           if (pseq[0]->characteristics[i]->initial_run) {
-            seq->characteristics[i]->initial_run = new Histogram*[seq->marginal[i]->nb_value];
+            seq->characteristics[i]->initial_run = new FrequencyDistribution*[seq->marginal[i]->nb_value];
           }
-          seq->characteristics[i]->final_run = new Histogram*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->final_run = new FrequencyDistribution*[seq->marginal[i]->nb_value];
 
           for (j = 0;j < seq->marginal[i]->nb_value;j++) {
             nb_histo = 0;
@@ -753,7 +753,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->sojourn_time[j];
               }
             }
-            seq->characteristics[i]->sojourn_time[j] = new Histogram(nb_histo , phisto);
+            seq->characteristics[i]->sojourn_time[j] = new FrequencyDistribution(nb_histo , phisto);
 
             if (pseq[0]->characteristics[i]->initial_run) {
               nb_histo = 0;
@@ -762,7 +762,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
                   phisto[nb_histo++] = pseq[k]->characteristics[i]->initial_run[j];
                 }
               }
-              seq->characteristics[i]->initial_run[j] = new Histogram(nb_histo , phisto);
+              seq->characteristics[i]->initial_run[j] = new FrequencyDistribution(nb_histo , phisto);
             }
 
             nb_histo = 0;
@@ -771,12 +771,12 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->final_run[j];
               }
             }
-            seq->characteristics[i]->final_run[j] = new Histogram(nb_histo , phisto);
+            seq->characteristics[i]->final_run[j] = new FrequencyDistribution(nb_histo , phisto);
           }
         }
 
         else {
-          seq->build_sojourn_time_histogram(i , (characteristics[i]->initial_run ? true : false));
+          seq->build_sojourn_time_frequency_distribution(i , (characteristics[i]->initial_run ? true : false));
         }
 
         for (j = 0;j < nb_sample;j++) {
@@ -786,8 +786,8 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
         }
 
         if (j == nb_sample) {
-          seq->characteristics[i]->nb_run = new Histogram*[seq->marginal[i]->nb_value];
-          seq->characteristics[i]->nb_occurrence = new Histogram*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->nb_run = new FrequencyDistribution*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->nb_occurrence = new FrequencyDistribution*[seq->marginal[i]->nb_value];
 
           for (j = 0;j < seq->marginal[i]->nb_value;j++) {
             nb_histo = 0;
@@ -796,7 +796,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_run[j];
               }
             }
-            seq->characteristics[i]->nb_run[j] = new Histogram(nb_histo , phisto);
+            seq->characteristics[i]->nb_run[j] = new FrequencyDistribution(nb_histo , phisto);
 
             nb_histo = 0;
             for (k = 0;k < nb_sample;k++) {
@@ -804,7 +804,7 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_occurrence[j];
               }
             }
-            seq->characteristics[i]->nb_occurrence[j] = new Histogram(nb_histo , phisto);
+            seq->characteristics[i]->nb_occurrence[j] = new FrequencyDistribution(nb_histo , phisto);
           }
         }
       }
@@ -826,18 +826,18 @@ Markovian_sequences* Markovian_sequences::merge(Format_error &error , int nb_sam
  *
  *  Regroupement des valeurs d'une variable.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              pas de regroupement, mode (FLOOR/ROUND/CEIL).
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int variable ,
-                                                  int step , int mode) const
+MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
+                                                int step , int mode) const
 
 {
   bool status = true;
   register int i;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -865,8 +865,8 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
   }
 
   if (status) {
-    seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
-                                  nb_variable , type);
+    seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
+                                 nb_variable , type);
     seq->Sequences::cluster(*this , variable , step , mode);
 
     for (i = 0;i < seq->nb_variable;i++) {
@@ -874,7 +874,7 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
         seq->build_characteristic(i , true , (((characteristics[i]) && (characteristics[i]->initial_run)) ? true : false));
       }
       else if (characteristics[i]) {
-        seq->characteristics[i] = new Sequence_characteristics(*(characteristics[i]));
+        seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i]));
       }
     }
   }
@@ -887,19 +887,19 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
  *
  *  Transcodage des symboles d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              table de transcodage des symboles, flag pour ajouter une variable.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::transcode(Format_error &error , int ivariable ,
-                                                    int *symbol , bool add_flag) const
+MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariable ,
+                                                  int *symbol , bool add_flag) const
 
 {
   bool status = true , *presence;
   register int i;
   int variable , offset , min_symbol , max_symbol , *itype;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -989,8 +989,8 @@ Markovian_sequences* Markovian_sequences::transcode(Format_error &error , int iv
       }
       itype[variable] = INT_VALUE;
 
-      seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
-                                    nb_variable + offset , itype);
+      seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
+                                   nb_variable + offset , itype);
       delete [] itype;
 
       seq->Sequences::transcode(*this , ivariable , 0 , max_symbol , symbol , add_flag);
@@ -1000,7 +1000,7 @@ Markovian_sequences* Markovian_sequences::transcode(Format_error &error , int iv
           seq->build_characteristic(i , true , (((characteristics[ivariable]) && (characteristics[ivariable]->initial_run)) ? true : false));
         }
         else if (characteristics[i - offset]) {
-          seq->characteristics[i] = new Sequence_characteristics(*(characteristics[i - offset]));
+          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
         }
       }
     }
@@ -1014,18 +1014,18 @@ Markovian_sequences* Markovian_sequences::transcode(Format_error &error , int iv
  *
  *  Transcodage des symboles d'une variable entiere.
  *
- *  arguments : references sur un objet Format_error et
- *              sur un objet Nonparametric_sequence_process.
+ *  arguments : references sur un objet StatError et
+ *              sur un objet NonparametricSequenceProcess.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::transcode(Format_error &error ,
-                                                    const Nonparametric_sequence_process *process) const
+MarkovianSequences* MarkovianSequences::transcode(StatError &error ,
+                                                  const NonparametricSequenceProcess *process) const
 
 {
   register int i , j;
   int *symbol;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   symbol = new int[process->nb_value];
@@ -1048,19 +1048,19 @@ Markovian_sequences* Markovian_sequences::transcode(Format_error &error ,
  *
  *  Suppression des valeurs non-representees d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, stream, indice de la variable,
+ *  arguments : reference sur un objet StatError, stream, indice de la variable,
  *              flag pour ajouter une variable.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::consecutive_values(Format_error &error , ostream &os ,
-                                                             int ivariable , bool add_flag) const
+MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , ostream &os ,
+                                                           int ivariable , bool add_flag) const
 
 {
   bool status = true;
   register int i , j;
   int variable , offset , max , *symbol , *itype;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -1149,8 +1149,8 @@ Markovian_sequences* Markovian_sequences::consecutive_values(Format_error &error
     }
     itype[variable] = INT_VALUE;
 
-    seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
-                                  nb_variable + offset , itype);
+    seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
+                                 nb_variable + offset , itype);
     delete [] itype;
 
     seq->Sequences::transcode(*this , ivariable , 0 , max , symbol , add_flag);
@@ -1161,7 +1161,7 @@ Markovian_sequences* Markovian_sequences::consecutive_values(Format_error &error
         seq->build_characteristic(i , true , (((characteristics[ivariable]) && (characteristics[ivariable]->initial_run)) ? true : false));
       }
       else if (characteristics[i - offset]) {
-        seq->characteristics[i] = new Sequence_characteristics(*(characteristics[i - offset]));
+        seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
       }
     }
   }
@@ -1174,20 +1174,20 @@ Markovian_sequences* Markovian_sequences::consecutive_values(Format_error &error
  *
  *  Regroupement des symboles d'une variable entiere.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombres de classes, bornes pour regrouper les symboles,
  *              flag pour ajouter une variable.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int ivariable , int nb_class ,
-                                                  int *ilimit , bool add_flag) const
+MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable , int nb_class ,
+                                                int *ilimit , bool add_flag) const
 
 {
   bool status = true;
   register int i , j , k;
   int variable , offset , *symbol , *limit , *itype;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -1256,8 +1256,8 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int ivar
       }
       itype[variable] = INT_VALUE;
 
-      seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
-                                    nb_variable + offset , itype);
+      seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
+                                   nb_variable + offset , itype);
       delete [] itype;
 
       seq->Sequences::transcode(*this , ivariable , 0 , nb_class - 1 , symbol , add_flag);
@@ -1268,7 +1268,7 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int ivar
           seq->build_characteristic(i , true , (((characteristics[ivariable]) && (characteristics[ivariable]->initial_run)) ? true : false));
         }
         else if (characteristics[i - offset]) {
-          seq->characteristics[i] = new Sequence_characteristics(*(characteristics[i - offset]));
+          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
         }
       }
     }
@@ -1284,20 +1284,20 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int ivar
  *
  *  Regroupement des valeurs d'une variable reelle.
  *
- *  arguments : reference sur un objet Format_error, indice de la variable,
+ *  arguments : reference sur un objet StatError, indice de la variable,
  *              nombre de classes, bornes pour regrouper les valeurs.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int variable ,
-                                                  int nb_class , double *ilimit) const
+MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable ,
+                                                int nb_class , double *ilimit) const
 
 {
   bool status = true;
   register int i;
   int *itype;
   double *limit;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -1345,8 +1345,8 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
       }
       itype[variable] = INT_VALUE;
 
-      seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
-                                    nb_variable , itype);
+      seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
+                                   nb_variable , itype);
       delete [] itype;
 
       seq->Sequences::cluster(*this , variable , nb_class , limit);
@@ -1356,7 +1356,7 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
           seq->build_characteristic(i);
         }
         else if (characteristics[i]) {
-          seq->characteristics[i] = new Sequence_characteristics(*(characteristics[i]));
+          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i]));
         }
       }
     }
@@ -1372,14 +1372,14 @@ Markovian_sequences* Markovian_sequences::cluster(Format_error &error , int vari
  *
  *  Suppression du parametre d'index.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::remove_index_parameter(Format_error &error) const
+MarkovianSequences* MarkovianSequences::remove_index_parameter(StatError &error) const
 
 {
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   error.init();
@@ -1389,7 +1389,7 @@ Markovian_sequences* Markovian_sequences::remove_index_parameter(Format_error &e
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
   }
   else {
-    seq = new Markovian_sequences(*this , 'r');
+    seq = new MarkovianSequences(*this , 'r');
   }
 
   return seq;
@@ -1400,20 +1400,20 @@ Markovian_sequences* Markovian_sequences::remove_index_parameter(Format_error &e
  *
  *  Selection de variables.
  *
- *  arguments : reference sur un objet Format_error, nombre de variables,
+ *  arguments : reference sur un objet StatError, nombre de variables,
  *              indices des variables, flag pour conserver ou rejeter
  *              les variables selectionnees.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::select_variable(Format_error &error , int inb_variable ,
-                                                          int *ivariable , bool keep) const
+MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int inb_variable ,
+                                                        int *ivariable , bool keep) const
 
 {
   bool status = true , *selected_variable;
   register int i;
   int bnb_variable , *variable , *itype;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -1463,14 +1463,14 @@ Markovian_sequences* Markovian_sequences::select_variable(Format_error &error , 
       itype[i] = type[variable[i]];
     }
 
-    seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
-                                  bnb_variable , itype);
+    seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
+                                 bnb_variable , itype);
 
     seq->Sequences::select_variable(*this , variable);
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (characteristics[variable[i]]) {
-        seq->characteristics[i] = new Sequence_characteristics(*(characteristics[variable[i]]));
+        seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[variable[i]]));
       }
     }
 
@@ -1488,12 +1488,12 @@ Markovian_sequences* Markovian_sequences::select_variable(Format_error &error , 
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::remove_variable_1() const
+MarkovianSequences* MarkovianSequences::remove_variable_1() const
 
 {
   register int i;
   int *variable , *itype;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   variable = new int[nb_variable - 1];
@@ -1503,14 +1503,14 @@ Markovian_sequences* Markovian_sequences::remove_variable_1() const
     itype[i] = type[i + 1];
   }
 
-  seq = new Markovian_sequences(nb_sequence , identifier , length , index_parameter_type ,
-                                nb_variable - 1 , itype);
+  seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
+                               nb_variable - 1 , itype);
 
   seq->Sequences::select_variable(*this , variable);
 
   for (i = 0;i < seq->nb_variable;i++) {
     if (characteristics[i + 1]) {
-      seq->characteristics[i] = new Sequence_characteristics(*(characteristics[i + 1]));
+      seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i + 1]));
     }
   }
 
@@ -1523,23 +1523,23 @@ Markovian_sequences* Markovian_sequences::remove_variable_1() const
 
 /*--------------------------------------------------------------*
  *
- *  Concatenation des variables d'objets Markovian_sequences.
+ *  Concatenation des variables d'objets MarkovianSequences.
  *
- *  arguments : reference sur un objet Format_error, nombre d'objets Markovian_sequences,
- *              pointeurs sur les objets Markovian_sequences, echantillon de reference pour les identificateurs.
+ *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
+ *              pointeurs sur les objets MarkovianSequences, echantillon de reference pour les identificateurs.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , int nb_sample ,
-                                                         const Markovian_sequences **iseq , int ref_sample) const
+MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb_sample ,
+                                                       const MarkovianSequences **iseq , int ref_sample) const
 
 {
   bool status = true;
   register int i , j , k , m;
   int inb_variable , *iidentifier , *itype , *pisequence , *cisequence;
   double *prsequence , *crsequence;
-  Markovian_sequences *seq;
-  const Markovian_sequences **pseq;
+  MarkovianSequences *seq;
+  const MarkovianSequences **pseq;
 
 
   seq = NULL;
@@ -1605,7 +1605,7 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
 
   if (status) {
     nb_sample++;
-    pseq = new const Markovian_sequences*[nb_sample];
+    pseq = new const MarkovianSequences*[nb_sample];
 
     pseq[0] = this;
     inb_variable = nb_variable;
@@ -1652,17 +1652,17 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
       }
     }
 
-    seq = new Markovian_sequences(nb_sequence , iidentifier , length , index_parameter_type ,
-                                  inb_variable , itype);
+    seq = new MarkovianSequences(nb_sequence , iidentifier , length , index_parameter_type ,
+                                 inb_variable , itype);
     delete [] itype;
 
     // copie des sequences
 
     if (hindex_parameter) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
     }
     if (index_interval) {
-      seq->index_interval = new Histogram(*index_interval);
+      seq->index_interval = new FrequencyDistribution(*index_interval);
     }
 
     if (index_parameter) {
@@ -1702,10 +1702,10 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
         seq->min_value[inb_variable] = pseq[i]->min_value[j];
         seq->max_value[inb_variable] = pseq[i]->max_value[j];
         if (pseq[i]->marginal[j]) {
-          seq->marginal[inb_variable] = new Histogram(*(pseq[i]->marginal[j]));
+          seq->marginal[inb_variable] = new FrequencyDistribution(*(pseq[i]->marginal[j]));
         }
         if (pseq[i]->characteristics[j]) {
-          seq->characteristics[inb_variable] = new Sequence_characteristics(*(pseq[i]->characteristics[j]));
+          seq->characteristics[inb_variable] = new SequenceCharacteristics(*(pseq[i]->characteristics[j]));
         }
         inb_variable++;
       }
@@ -1722,15 +1722,15 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
  *
  *  Copie des sequence avec extraction des temps de sejour initiaux.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
- Markovian_sequences* Markovian_sequences::initial_run_computation(Format_error &error) const
+ MarkovianSequences* MarkovianSequences::initial_run_computation(StatError &error) const
 
 {
   register int i;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   error.init();
@@ -1747,7 +1747,7 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
   }
 
   else {
-    seq = new Markovian_sequences(*this , 'c' , ADD_INITIAL_RUN);
+    seq = new MarkovianSequences(*this , 'c' , ADD_INITIAL_RUN);
   }
 
   return seq;
@@ -1758,21 +1758,21 @@ Markovian_sequences* Markovian_sequences::merge_variable(Format_error &error , i
  *
  *  Ajout d'une serie de vecteurs absorbants a la fin de chaque sequence.
  *
- *  arguments : reference sur un objet Format_error, longueur des sequences,
+ *  arguments : reference sur un objet StatError, longueur des sequences,
  *              longueur des series finales absorbantes.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error ,
-                                                            int sequence_length ,
-                                                            int run_length) const
+MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
+                                                          int sequence_length ,
+                                                          int run_length) const
 
 {
   bool status = true , initial_run_flag;
   register int i , j , k;
   int end_value , *ilength , *pisequence , *cisequence;
   double *prsequence , *crsequence;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   seq = NULL;
@@ -1814,8 +1814,8 @@ Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error 
       }
     }
 
-    seq = new Markovian_sequences(nb_sequence , identifier , ilength , index_parameter_type ,
-                                  nb_variable , type);
+    seq = new MarkovianSequences(nb_sequence , identifier , ilength , index_parameter_type ,
+                                 nb_variable , type);
     delete [] ilength;
 
     for (i = 0;i < seq->nb_sequence;i++) {
@@ -1883,7 +1883,7 @@ Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error 
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
-      seq->build_marginal_histogram(i);
+      seq->build_marginal_frequency_distribution(i);
     }
 
     initial_run_flag = false;
@@ -1905,19 +1905,19 @@ Markovian_sequences* Markovian_sequences::add_absorbing_run(Format_error &error 
  *
  *  Segmentation de sequences.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              longueur des sequences.
  *
  *--------------------------------------------------------------*/
 
-Markovian_sequences* Markovian_sequences::split(Format_error &error , int step) const
+MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
 
 {
   register int i , j , k , m;
   int inb_sequence , last_length , nb_segment , *ilength , *pindex_param , *cindex_param ,
       *pisequence , *cisequence;
   double *prsequence , *crsequence;
-  Markovian_sequences *seq;
+  MarkovianSequences *seq;
 
 
   error.init();
@@ -1945,8 +1945,8 @@ Markovian_sequences* Markovian_sequences::split(Format_error &error , int step) 
     cout << "\nTEST: " << inb_sequence << " | " << cumul_length / step + nb_sequence << endl;
 #   endif
 
-    seq = new Markovian_sequences(inb_sequence , 0 , ilength , index_parameter_type ,
-                                  nb_variable , type);
+    seq = new MarkovianSequences(inb_sequence , 0 , ilength , index_parameter_type ,
+                                 nb_variable , type);
     delete [] ilength;
 
     // copie des sequences
@@ -1991,7 +1991,7 @@ Markovian_sequences* Markovian_sequences::split(Format_error &error , int step) 
     }
 
     if (seq->index_parameter_type == TIME) {
-      seq->hindex_parameter = new Histogram(*hindex_parameter);
+      seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
       seq->index_interval_computation();
     }
 
@@ -1999,7 +1999,7 @@ Markovian_sequences* Markovian_sequences::split(Format_error &error , int step) 
       seq->min_value[i] = min_value[i];
       seq->max_value[i] = max_value[i];
       if (marginal[i]) {
-        seq->marginal[i] = new Histogram(*marginal[i]);
+        seq->marginal[i] = new FrequencyDistribution(*marginal[i]);
       }
     }
 
@@ -2017,7 +2017,7 @@ Markovian_sequences* Markovian_sequences::split(Format_error &error , int step) 
  *
  *--------------------------------------------------------------*/
 
-double Markovian_sequences::iid_information_computation() const
+double MarkovianSequences::iid_information_computation() const
 
 {
   register int i;
@@ -2041,7 +2041,7 @@ double Markovian_sequences::iid_information_computation() const
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::self_transition_computation(int state)
+void MarkovianSequences::self_transition_computation(int state)
 
 {
   register int i , j;
@@ -2099,7 +2099,7 @@ void Markovian_sequences::self_transition_computation(int state)
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::self_transition_computation()
+void MarkovianSequences::self_transition_computation()
 
 {
   if (!self_transition) {
@@ -2107,10 +2107,10 @@ void Markovian_sequences::self_transition_computation()
 
 
     state_variable_init();
-    self_transition = new Self_transition*[marginal[0]->nb_value];
+    self_transition = new SelfTransition*[marginal[0]->nb_value];
 
     for (i = 0;i < marginal[0]->nb_value;i++) {
-      self_transition[i] = new Self_transition(max_length - 1);
+      self_transition[i] = new SelfTransition(max_length - 1);
       self_transition_computation(i);
     }
   }
@@ -2126,7 +2126,7 @@ void Markovian_sequences::self_transition_computation()
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::self_transition_computation(bool *homogeneity)
+void MarkovianSequences::self_transition_computation(bool *homogeneity)
 
 {
   if (!self_transition) {
@@ -2134,12 +2134,12 @@ void Markovian_sequences::self_transition_computation(bool *homogeneity)
 
 
     state_variable_init();
-    self_transition = new Self_transition*[marginal[0]->nb_value];
+    self_transition = new SelfTransition*[marginal[0]->nb_value];
 
     for (i = 0;i < marginal[0]->nb_value;i++) {
       switch (homogeneity[i]) {
       case false :
-        self_transition[i] = new Self_transition(max_length - 1);
+        self_transition[i] = new SelfTransition(max_length - 1);
         self_transition_computation(i);
         break;
       case true :
@@ -2159,14 +2159,14 @@ void Markovian_sequences::self_transition_computation(bool *homogeneity)
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::observation_histogram_computation(int variable)
+void MarkovianSequences::observation_frequency_distribution_computation(int variable)
 
 {
   register int i , j;
   int *pfrequency , *pstate , *poutput;
 
 
-  // initialisation des histogrammes
+  // initialisation des lois empiriques
 
   for (i = 0;i < marginal[0]->nb_value;i++) {
     pfrequency = observation[variable][i]->frequency;
@@ -2175,7 +2175,7 @@ void Markovian_sequences::observation_histogram_computation(int variable)
     }
   }
 
-  // mise a jour des histogrammes
+  // mise a jour des lois empiriques
 
   for (i = 0;i < nb_sequence;i++) {
     pstate = int_sequence[i][0];
@@ -2185,7 +2185,7 @@ void Markovian_sequences::observation_histogram_computation(int variable)
     }
   }
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des lois empiriques
 
   for (i = 0;i < marginal[0]->nb_value;i++) {
     if (!characteristics[variable]) {
@@ -2209,41 +2209,40 @@ void Markovian_sequences::observation_histogram_computation(int variable)
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::observation_histogram_computation()
+void MarkovianSequences::observation_frequency_distribution_computation()
 
 {
   register int i;
 
 
   for (i = 1;i < nb_variable;i++) {
-    observation_histogram_computation(i);
+    observation_frequency_distribution_computation(i);
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes correspondant aux probabilites
- *  d'observation.
+ *  Construction des lois empiriques d'observation.
  *
  *  argument : nombre d'etats.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::create_observation_histogram(int nb_state)
+void MarkovianSequences::create_observation_frequency_distribution(int nb_state)
 
 {
   if ((nb_variable > 1) && (!observation)) {
     register int i , j;
 
 
-    observation = new Histogram**[nb_variable];
+    observation = new FrequencyDistribution**[nb_variable];
     observation[0] = NULL;
 
     for (i = 1;i < nb_variable;i++) {
-      observation[i] = new Histogram*[nb_state];
+      observation[i] = new FrequencyDistribution*[nb_state];
       for (j = 0;j < nb_state;j++) {
-        observation[i][j] = new Histogram(marginal[i]->nb_value);
+        observation[i][j] = new FrequencyDistribution(marginal[i]->nb_value);
       }
     }
   }
@@ -2252,16 +2251,15 @@ void Markovian_sequences::create_observation_histogram(int nb_state)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes correspondant aux probabilites
- *  d'observation.
+ *  Construction des lois empiriques d'observation.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_observation_histogram()
+void MarkovianSequences::build_observation_frequency_distribution()
 
 {
-  create_observation_histogram(marginal[0]->nb_value);
-  observation_histogram_computation();
+  create_observation_frequency_distribution(marginal[0]->nb_value);
+  observation_frequency_distribution_computation();
 }
 
 
@@ -2273,7 +2271,7 @@ void Markovian_sequences::build_observation_histogram()
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::test_hidden(int variable) const
+bool MarkovianSequences::test_hidden(int variable) const
 
 {
   bool hidden = true;
@@ -2335,7 +2333,7 @@ bool Markovian_sequences::test_hidden(int variable) const
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_index_value(int variable)
+void MarkovianSequences::build_index_value(int variable)
 
 {
   register int i , j;
@@ -2377,35 +2375,35 @@ void Markovian_sequences::build_index_value(int variable)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes du temps avant la 1ere occurrence
+ *  Construction des lois empiriques du temps avant la 1ere occurrence
  *  d'une valeur entiere (pour une variable donnee).
  *
  *  argument : indice de la variable.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_first_occurrence_histogram(int variable)
+void MarkovianSequences::build_first_occurrence_frequency_distribution(int variable)
 
 {
   bool *occurrence;
   register int i , j;
   int nb_value , *pisequence;
-  Histogram **first_occurrence;
+  FrequencyDistribution **first_occurrence;
 
 
-  // creation des histogrammes
+  // creation des lois empiriques
 
-  first_occurrence = new Histogram*[marginal[variable]->nb_value];
+  first_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    first_occurrence[i] = new Histogram(max_length);
+    first_occurrence[i] = new FrequencyDistribution(max_length);
   }
 
-/*  characteristics[variable]->first_occurrence = new Histogram*[marginal[variable]->nb_value];
+/*  characteristics[variable]->first_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->first_occurrence[i] = new Histogram(max_length);
+    characteristics[variable]->first_occurrence[i] = new FrequencyDistribution(max_length);
   } */
 
-  // mise a jour des histogrammes
+  // mise a jour des lois empiriques
 
   occurrence = new bool[marginal[variable]->nb_value];
 
@@ -2434,7 +2432,7 @@ void Markovian_sequences::build_first_occurrence_histogram(int variable)
 
   delete [] occurrence;
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des lois empiriques
 
   for (i = 0;i < marginal[variable]->nb_value;i++) {
     first_occurrence[i]->nb_value_computation();
@@ -2454,9 +2452,9 @@ void Markovian_sequences::build_first_occurrence_histogram(int variable)
     characteristics[variable]->first_occurrence[i]->variance_computation();
   } */
 
-  characteristics[variable]->first_occurrence = new Histogram*[marginal[variable]->nb_value];
+  characteristics[variable]->first_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->first_occurrence[i] = new Histogram(*(first_occurrence[i]));
+    characteristics[variable]->first_occurrence[i] = new FrequencyDistribution(*(first_occurrence[i]));
     delete first_occurrence[i];
   }
   delete [] first_occurrence;
@@ -2465,34 +2463,34 @@ void Markovian_sequences::build_first_occurrence_histogram(int variable)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes du temps de retour dans une valeur entiere
+ *  Construction des lois empiriques du temps de retour dans une valeur entiere
  *  (pour une variable donnee).
  *
  *  argument : indice de la variable.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_recurrence_time_histogram(int variable)
+void MarkovianSequences::build_recurrence_time_frequency_distribution(int variable)
 
 {
   register int i , j;
   int *index , *pisequence;
-  Histogram **recurrence_time;
+  FrequencyDistribution **recurrence_time;
 
 
-  // creation des histogrammes
+  // creation des lois empiriques
 
-  recurrence_time = new Histogram*[marginal[variable]->nb_value];
+  recurrence_time = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    recurrence_time[i] = new Histogram(max_length);
+    recurrence_time[i] = new FrequencyDistribution(max_length);
   }
 
-/*  characteristics[variable]->recurrence_time = new Histogram*[marginal[variable]->nb_value];
+/*  characteristics[variable]->recurrence_time = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->recurrence_time[i] = new Histogram(max_length);
+    characteristics[variable]->recurrence_time[i] = new FrequencyDistribution(max_length);
   } */
 
-  // mise a jour des histogrammes
+  // mise a jour des lois empiriques
 
   index = new int[marginal[variable]->nb_value];
 
@@ -2513,7 +2511,7 @@ void Markovian_sequences::build_recurrence_time_histogram(int variable)
 
   delete [] index;
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des lois empiriques
 
   for (i = 0;i < marginal[variable]->nb_value;i++) {
     recurrence_time[i]->nb_value_computation();
@@ -2533,9 +2531,9 @@ void Markovian_sequences::build_recurrence_time_histogram(int variable)
     characteristics[variable]->recurrence_time[i]->variance_computation();
   } */
 
-  characteristics[variable]->recurrence_time = new Histogram*[marginal[variable]->nb_value];
+  characteristics[variable]->recurrence_time = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->recurrence_time[i] = new Histogram(*(recurrence_time[i]));
+    characteristics[variable]->recurrence_time[i] = new FrequencyDistribution(*(recurrence_time[i]));
     delete recurrence_time[i];
   }
   delete [] recurrence_time;
@@ -2544,47 +2542,47 @@ void Markovian_sequences::build_recurrence_time_histogram(int variable)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes du temps de sejour dans une valeur entiere
+ *  Construction des lois empiriques du temps de sejour dans une valeur entiere
  *  (pour une variable donnee).
  *
- *  arguments : indice de la variable, flag sur la creation des histogrammes
+ *  arguments : indice de la variable, flag sur la creation des lois empiriques
  *              de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_sojourn_time_histogram(int variable , int initial_run_flag)
+void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable , int initial_run_flag)
 
 /* {
-  characteristics[variable]->create_sojourn_time_histogram(max_length , initial_run_flag);
-  sojourn_time_histogram_computation(variable);
+  characteristics[variable]->create_sojourn_time_frequency_distribution(max_length , initial_run_flag);
+  sojourn_time_frequency_distribution_computation(variable);
 } */
 
 {
   register int i , j;
   int run_length , *pisequence;
-  Histogram **sojourn_time , **initial_run , **final_run;
+  FrequencyDistribution **sojourn_time , **initial_run , **final_run;
 
 
-  // creation des histogrammes
+  // creation des lois empiriques
 
-  sojourn_time = new Histogram*[marginal[variable]->nb_value];
+  sojourn_time = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    sojourn_time[i] = new Histogram(max_length + 1);
+    sojourn_time[i] = new FrequencyDistribution(max_length + 1);
   }
 
   if (initial_run_flag) {
-    initial_run = new Histogram*[marginal[variable]->nb_value];
+    initial_run = new FrequencyDistribution*[marginal[variable]->nb_value];
     for (i = 0;i < marginal[variable]->nb_value;i++) {
-      initial_run[i] = new Histogram(max_length + 1);
+      initial_run[i] = new FrequencyDistribution(max_length + 1);
     }
   }
 
-  final_run = new Histogram*[marginal[variable]->nb_value];
+  final_run = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    final_run[i] = new Histogram(max_length + 1);
+    final_run[i] = new FrequencyDistribution(max_length + 1);
   }
 
-  // mise a jour des histogrammes
+  // mise a jour des lois empiriques
 
   for (i = 0;i < nb_sequence;i++) {
     pisequence = int_sequence[i][variable];
@@ -2610,7 +2608,7 @@ void Markovian_sequences::build_sojourn_time_histogram(int variable , int initia
     (final_run[*pisequence]->frequency[run_length])++;
   }
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des lois empiriques
 
   for (i = 0;i < marginal[variable]->nb_value;i++) {
     sojourn_time[i]->nb_value_computation();
@@ -2641,25 +2639,25 @@ void Markovian_sequences::build_sojourn_time_histogram(int variable , int initia
     final_run[i]->variance_computation();
   }
 
-  characteristics[variable]->sojourn_time = new Histogram*[marginal[variable]->nb_value];
+  characteristics[variable]->sojourn_time = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->sojourn_time[i] = new Histogram(*(sojourn_time[i]));
+    characteristics[variable]->sojourn_time[i] = new FrequencyDistribution(*(sojourn_time[i]));
     delete sojourn_time[i];
   }
   delete [] sojourn_time;
 
   if (initial_run_flag) {
-    characteristics[variable]->initial_run = new Histogram*[marginal[variable]->nb_value];
+    characteristics[variable]->initial_run = new FrequencyDistribution*[marginal[variable]->nb_value];
     for (i = 0;i < marginal[variable]->nb_value;i++) {
-      characteristics[variable]->initial_run[i] = new Histogram(*(initial_run[i]));
+      characteristics[variable]->initial_run[i] = new FrequencyDistribution(*(initial_run[i]));
       delete initial_run[i];
     }
     delete [] initial_run;
   }
 
-  characteristics[variable]->final_run = new Histogram*[marginal[variable]->nb_value];
+  characteristics[variable]->final_run = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->final_run[i] = new Histogram(*(final_run[i]));
+    characteristics[variable]->final_run[i] = new FrequencyDistribution(*(final_run[i]));
     delete final_run[i];
   }
   delete [] final_run;
@@ -2675,14 +2673,14 @@ void Markovian_sequences::build_sojourn_time_histogram(int variable , int initia
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::sojourn_time_histogram_computation(int variable)
+void MarkovianSequences::sojourn_time_frequency_distribution_computation(int variable)
 
 {
   register int i , j;
   int run_length , *pfrequency , *pisequence;
 
 
-  // initialisation des histogrammes
+  // initialisation des lois empiriques
 
   for (i = 0;i < marginal[variable]->nb_value;i++) {
     characteristics[variable]->sojourn_time[i]->offset = 1;
@@ -2712,7 +2710,7 @@ void Markovian_sequences::sojourn_time_histogram_computation(int variable)
     }
   }
 
-  // mise a jour des histogrammes
+  // mise a jour des lois empiriques
 
   for (i = 0;i < nb_sequence;i++) {
     pisequence = int_sequence[i][variable];
@@ -2738,7 +2736,7 @@ void Markovian_sequences::sojourn_time_histogram_computation(int variable)
     (characteristics[variable]->final_run[*pisequence]->frequency[run_length])++;
   }
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des lois empiriques
 
   for (i = 0;i < marginal[variable]->nb_value;i++) {
     characteristics[variable]->sojourn_time[i]->nb_value_computation();
@@ -2775,14 +2773,14 @@ void Markovian_sequences::sojourn_time_histogram_computation(int variable)
  *
  *  Accumulation du temps de sejour censures dans un etat.
  *
- *  arguments : pointeurs sur les histogrammes des temps de sejour initiaux et finaux et
+ *  arguments : pointeurs sur les lois empiriques des temps de sejour initiaux et finaux et
  *              des longueurs des sequences dans le cas d'un seul etat visite.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::censored_sojourn_time_histogram_computation(Histogram **initial_run ,
-                                                                      Histogram **final_run ,
-                                                                      Histogram **single_run) const
+void MarkovianSequences::censored_sojourn_time_frequency_distribution_computation(FrequencyDistribution **initial_run ,
+                                                                                  FrequencyDistribution **final_run ,
+                                                                                  FrequencyDistribution **single_run) const
 
 {
   register int i , j;
@@ -2815,7 +2813,7 @@ void Markovian_sequences::censored_sojourn_time_histogram_computation(Histogram 
     }
   }
 
-  // extraction des caracteristiques des histogrammes des temps de sejour censures
+  // extraction des caracteristiques des lois empiriques des temps de sejour censures
 
   for (i = 0;i < marginal[0]->nb_value;i++) {
     initial_run[i]->nb_value_computation();
@@ -2860,36 +2858,36 @@ void Markovian_sequences::censored_sojourn_time_histogram_computation(Histogram 
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes du nombre de series d'une valeur entiere
+ *  Construction des lois empiriques du nombre de series d'une valeur entiere
  *  par sequence (pour une variable donnee).
  *
  *  argument : indice de la variable.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_nb_run_histogram(int variable)
+void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 
 {
   register int i , j;
   int *pisequence , *count;
-  Histogram **nb_run;
+  FrequencyDistribution **nb_run;
 
 
-  // creation des histogrammes
+  // creation des lois empiriques
 
-  nb_run = new Histogram*[marginal[variable]->nb_value];
+  nb_run = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    nb_run[i] = new Histogram((max_length % 2 == 0 ?
+    nb_run[i] = new FrequencyDistribution((max_length % 2 == 0 ?
                                max_length / 2 : max_length / 2 + 1) + 1);
   }
 
-/*  characteristics[variable]->nb_run = new Histogram*[marginal[variable]->nb_value];
+/*  characteristics[variable]->nb_run = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->nb_run[i] = new Histogram((max_length % 2 == 0 ?
-                                                          max_length / 2 : max_length / 2 + 1) + 1);
+    characteristics[variable]->nb_run[i] = new FrequencyDistribution((max_length % 2 == 0 ?
+                                                                     max_length / 2 : max_length / 2 + 1) + 1);
   } */
 
-  // mise a jour des histogrammes
+  // mise a jour des lois empiriques
 
   count = new int[marginal[variable]->nb_value];
 
@@ -2915,7 +2913,7 @@ void Markovian_sequences::build_nb_run_histogram(int variable)
 
   delete [] count;
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des lois empiriques
 
   for (i = 0;i < marginal[variable]->nb_value;i++) {
     nb_run[i]->nb_value_computation();
@@ -2935,9 +2933,9 @@ void Markovian_sequences::build_nb_run_histogram(int variable)
     characteristics[variable]->nb_run[i]->variance_computation();
   } */
 
-  characteristics[variable]->nb_run = new Histogram*[marginal[variable]->nb_value];
+  characteristics[variable]->nb_run = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->nb_run[i] = new Histogram(*(nb_run[i]));
+    characteristics[variable]->nb_run[i] = new FrequencyDistribution(*(nb_run[i]));
     delete nb_run[i];
   }
   delete [] nb_run;
@@ -2946,34 +2944,34 @@ void Markovian_sequences::build_nb_run_histogram(int variable)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des histogrammes du nombre d'occurrences
+ *  Construction des lois empiriques du nombre d'occurrences
  *  d'une valeur entiere par sequence (pour une variable donnee).
  *
  *  argument : indice de la variable.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_nb_occurrence_histogram(int variable)
+void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable)
 
 {
   register int i , j;
   int *pisequence , *count;
-  Histogram **nb_occurrence;
+  FrequencyDistribution **nb_occurrence;
 
 
-  // creation des histogrammes
+  // creation des lois empiriques
 
-  nb_occurrence = new Histogram*[marginal[variable]->nb_value];
+  nb_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    nb_occurrence[i] = new Histogram(max_length + 1);
+    nb_occurrence[i] = new FrequencyDistribution(max_length + 1);
   }
 
-/*  characteristics[variable]->nb_occurrence = new Histogram*[marginal[variable]->nb_value];
+/*  characteristics[variable]->nb_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->nb_occurrence[i] = new Histogram(max_length + 1);
+    characteristics[variable]->nb_occurrence[i] = new FrequencyDistribution(max_length + 1);
   } */
 
-  // mise a jour des histogrammes
+  // mise a jour des lois empiriques
 
   count = new int[marginal[variable]->nb_value];
 
@@ -2995,7 +2993,7 @@ void Markovian_sequences::build_nb_occurrence_histogram(int variable)
 
   delete [] count;
 
-  // extraction des caracteristiques des histogrammes
+  // extraction des caracteristiques des lois empiriques
 
   for (i = 0;i < marginal[variable]->nb_value;i++) {
     nb_occurrence[i]->nb_value_computation();
@@ -3015,9 +3013,9 @@ void Markovian_sequences::build_nb_occurrence_histogram(int variable)
     characteristics[variable]->nb_occurrence[i]->variance_computation();
   } */
 
-  characteristics[variable]->nb_occurrence = new Histogram*[marginal[variable]->nb_value];
+  characteristics[variable]->nb_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
   for (i = 0;i < marginal[variable]->nb_value;i++) {
-    characteristics[variable]->nb_occurrence[i] = new Histogram(*(nb_occurrence[i]));
+    characteristics[variable]->nb_occurrence[i] = new FrequencyDistribution(*(nb_occurrence[i]));
     delete nb_occurrence[i];
   }
   delete [] nb_occurrence;
@@ -3029,21 +3027,20 @@ void Markovian_sequences::build_nb_occurrence_histogram(int variable)
  *  Extraction des caracteristiques d'un echantillon de sequences pour
  *  les variables entieres ayant un petit nombre de valeurs positives consecutives.
  *
- *  Calcul du nombre de valeurs et de l'histogramme des valeurs,
+ *  Calcul du nombre de valeurs et de la loi marginale empirique des valeurs,
  *  extraction des probabilites des valeurs en fonction de l'index,
- *  construction des histogrammes du temps avant la 1ere occurrence d'une valeur,
- *  des histogrammes du temps de retour dans une valeur,
- *  des histogrammes du temps de sejour dans une valeur,
- *  des histogrammes du nombre de series d'une valeur par sequence et
- *  des histogrammes du nombre d'occurrences d'une valeur par sequence.
+ *  construction des lois empiriques du temps avant la 1ere occurrence d'une valeur,
+ *  du temps de retour dans une valeur, du temps de sejour dans une valeur,
+ *  du nombre de series d'une valeur par sequence et
+ *  du nombre d'occurrences d'une valeur par sequence.
  *
- *  argument : indice de la variable, flags sur la construction des histogrammes
+ *  argument : indice de la variable, flags sur la construction des lois empiriques
  *             du temps de sejour et de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::build_characteristic(int variable , bool sojourn_time_flag ,
-                                               bool initial_run_flag)
+void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_flag ,
+                                              bool initial_run_flag)
 
 {
   register int i , j;
@@ -3069,31 +3066,31 @@ void Markovian_sequences::build_characteristic(int variable , bool sojourn_time_
 
       if (build) {
         if (sojourn_time_flag) {
-          characteristics[i] = new Sequence_characteristics(marginal[i]->nb_value);
+          characteristics[i] = new SequenceCharacteristics(marginal[i]->nb_value);
         }
 
         build_index_value(i);
 
-        build_first_occurrence_histogram(i);
-        build_recurrence_time_histogram(i);
+        build_first_occurrence_frequency_distribution(i);
+        build_recurrence_time_frequency_distribution(i);
 
 /*        if (sojourn_time_flag) {
-          characteristics[i]->create_sojourn_time_histogram(max_length , initial_run_flag);
+          characteristics[i]->create_sojourn_time_frequency_distribution(max_length , initial_run_flag);
         }
-        sojourn_time_histogram_computation(i); */
+        sojourn_time_frequency_distribution_computation(i); */
 
         switch (sojourn_time_flag) {
         case false :
-          sojourn_time_histogram_computation(i);
+          sojourn_time_frequency_distribution_computation(i);
           break;
         case true :
-          build_sojourn_time_histogram(i , initial_run_flag);
+          build_sojourn_time_frequency_distribution(i , initial_run_flag);
           break;
         }
 
         if (max_length <= COUNT_MAX_LENGTH) {
-          build_nb_run_histogram(i);
-          build_nb_occurrence_histogram(i);
+          build_nb_run_frequency_distribution(i);
+          build_nb_occurrence_frequency_distribution(i);
         }
       }
     }
@@ -3105,14 +3102,14 @@ void Markovian_sequences::build_characteristic(int variable , bool sojourn_time_
  *
  *  Comptage des frequences des mots de longueur donnee.
  *
- *  argument : reference sur un objet Format_error, stream, indice de la variable,
+ *  argument : reference sur un objet StatError, stream, indice de la variable,
  *             longueur des mots, etats de debut et de fin, frequence minimum.
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::word_count(Format_error &error , ostream &os , int variable ,
-                                     int word_length , int begin_state , int end_state ,
-                                     int min_frequency) const
+bool MarkovianSequences::word_count(StatError &error , ostream &os , int variable ,
+                                    int word_length , int begin_state , int end_state ,
+                                    int min_frequency) const
 
 {
   bool status = true , *selected_word;
@@ -3316,13 +3313,13 @@ bool Markovian_sequences::word_count(Format_error &error , ostream &os , int var
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Markovian_sequences.
+ *  Ecriture d'un objet MarkovianSequences.
  *
  *  arguments : stream, flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
+ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool comment_flag) const
 
 {
   register int i;
@@ -3342,7 +3339,7 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool c
     if (comment_flag) {
       os << "# ";
     }
-    os << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     hindex_parameter->ascii_characteristic_print(os , false , comment_flag);
 
     if (exhaustive) {
@@ -3350,7 +3347,7 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool c
       if (comment_flag) {
         os << "# ";
       }
-      os << "   | " << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hindex_parameter->ascii_print(os , comment_flag);
     }
     os << endl;
@@ -3395,7 +3392,7 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool c
         os << "# ";
       }
       os << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-         << STAT_label[STATL_HISTOGRAM] << " - ";
+         << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       marginal[i]->ascii_characteristic_print(os , false , comment_flag);
 
       if ((marginal[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
@@ -3404,7 +3401,7 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool c
           os << "# ";
         }
         os << "   | " << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-           << STAT_label[STATL_HISTOGRAM] << endl;
+           << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         marginal[i]->ascii_print(os , comment_flag);
       }
     }
@@ -3444,7 +3441,7 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool c
   if (comment_flag) {
     os << "# ";
   }
-  os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+  os << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
   hlength->ascii_characteristic_print(os , false , comment_flag);
 
   if (exhaustive) {
@@ -3452,7 +3449,7 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool c
     if (comment_flag) {
       os << "# ";
     }
-    os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+    os << "   | " << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
     hlength->ascii_print(os , comment_flag);
   }
 
@@ -3468,13 +3465,13 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive , bool c
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Markovian_sequences.
+ *  Ecriture d'un objet MarkovianSequences.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive) const
+ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive) const
 
 {
   return ascii_write(os , exhaustive , false);
@@ -3483,15 +3480,15 @@ ostream& Markovian_sequences::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Markovian_sequences dans un fichier.
+ *  Ecriture d'un objet MarkovianSequences dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::ascii_write(Format_error &error , const char *path ,
-                                      bool exhaustive) const
+bool MarkovianSequences::ascii_write(StatError &error , const char *path ,
+                                     bool exhaustive) const
 
 {
   bool status;
@@ -3516,13 +3513,13 @@ bool Markovian_sequences::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Markovian_sequences.
+ *  Ecriture d'un objet MarkovianSequences.
  *
  *  arguments : stream, format (ligne/colonne), flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Markovian_sequences::ascii_data_write(ostream &os , char format , bool exhaustive) const
+ostream& MarkovianSequences::ascii_data_write(ostream &os , char format , bool exhaustive) const
 
 {
   ascii_write(os , exhaustive , false);
@@ -3534,15 +3531,15 @@ ostream& Markovian_sequences::ascii_data_write(ostream &os , char format , bool 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Markovian_sequences dans un fichier.
+ *  Ecriture d'un objet MarkovianSequences dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              format (ligne/colonne), flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::ascii_data_write(Format_error &error , const char *path ,
-                                           char format , bool exhaustive) const
+bool MarkovianSequences::ascii_data_write(StatError &error , const char *path ,
+                                          char format , bool exhaustive) const
 
 {
   bool status = false;
@@ -3570,13 +3567,13 @@ bool Markovian_sequences::ascii_data_write(Format_error &error , const char *pat
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Markovian_sequences dans un fichier au format tableur.
+ *  Ecriture d'un objet MarkovianSequences dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::spreadsheet_write(Format_error &error , const char *path) const
+bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -3602,10 +3599,10 @@ bool Markovian_sequences::spreadsheet_write(Format_error &error , const char *pa
                << SEQ_label[SEQL_MIN_INDEX_PARAMETER] << "\t" << hindex_parameter->offset << "\t\t"
                << SEQ_label[SEQL_MAX_INDEX_PARAMETER] << "\t" << hindex_parameter->nb_value - 1 << endl;
 
-      out_file << "\n" << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      out_file << "\n" << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       hindex_parameter->spreadsheet_characteristic_print(out_file);
 
-      out_file << "\n\t" << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      out_file << "\n\t" << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hindex_parameter->spreadsheet_print(out_file);
       out_file << endl;
     }
@@ -3645,11 +3642,11 @@ bool Markovian_sequences::spreadsheet_write(Format_error &error , const char *pa
 
       if (marginal[i]) {
         out_file << "\n" << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-                 << STAT_label[STATL_HISTOGRAM] << "\t";
+                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
         marginal[i]->spreadsheet_characteristic_print(out_file);
 
         out_file << "\n\t" << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-                 << STAT_label[STATL_HISTOGRAM] << endl;
+                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         marginal[i]->spreadsheet_print(out_file);
       }
 
@@ -3674,10 +3671,10 @@ bool Markovian_sequences::spreadsheet_write(Format_error &error , const char *pa
       }
     }
 
-    out_file << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+    out_file << "\n" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     hlength->spreadsheet_characteristic_print(out_file);
 
-    out_file << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+    out_file << "\n\t" << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
     hlength->spreadsheet_print(out_file);
 
     out_file << "\n" << SEQ_label[SEQL_CUMUL_LENGTH] << "\t" << cumul_length << endl;
@@ -3689,7 +3686,7 @@ bool Markovian_sequences::spreadsheet_write(Format_error &error , const char *pa
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Markovian_sequences pour une variable donnee
+ *  Sortie Gnuplot d'un objet MarkovianSequences pour une variable donnee
  *  dans le cas d'absence de lois caracteristiques.
  *
  *  arguments : prefixe des fichiers, titre des figures, indice de la variable,
@@ -3697,14 +3694,14 @@ bool Markovian_sequences::spreadsheet_write(Format_error &error , const char *pa
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::plot_print(const char *prefix , const char *title , int variable ,
-                                     int nb_variable) const
+bool MarkovianSequences::plot_print(const char *prefix , const char *title , int variable ,
+                                    int nb_variable) const
 
 {
   bool status;
   register int i;
   int nb_histo;
-  const Histogram *phisto[2];
+  const FrequencyDistribution *phisto[2];
   ostringstream data_file_name;
 
 
@@ -3782,7 +3779,7 @@ bool Markovian_sequences::plot_print(const char *prefix , const char *title , in
                  << label((data_file_name.str()).c_str()) << "\" using 1 title \""
                  << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
                  << STAT_label[type[variable] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-                 << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
         if (marginal[variable]->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
@@ -3807,7 +3804,7 @@ bool Markovian_sequences::plot_print(const char *prefix , const char *title , in
       out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
                << (int)(hlength->max * YSCALE) + 1 << "] \""
                << label((data_file_name.str()).c_str()) << "\" using 2 title \""
-               << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM]
+               << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
       if (hlength->nb_value - 1 < TIC_THRESHOLD) {
@@ -3834,7 +3831,7 @@ bool Markovian_sequences::plot_print(const char *prefix , const char *title , in
                  << hindex_parameter->nb_value - 1 << "] [0:"
                  << (int)(hindex_parameter->max * YSCALE) + 1 << "] \""
                  << label((data_file_name.str()).c_str()) << "\" using 3 title \""
-                 << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                 << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
         if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
@@ -3859,15 +3856,15 @@ bool Markovian_sequences::plot_print(const char *prefix , const char *title , in
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Markovian_sequences.
+ *  Sortie Gnuplot d'un objet MarkovianSequences.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::plot_write(Format_error &error , const char *prefix ,
-                                     const char *title) const
+bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
+                                    const char *title) const
 
 {
   bool status , start;
@@ -4018,14 +4015,14 @@ bool Markovian_sequences::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Markovian_sequences pour une variable donnee
+ *  Sortie graphique d'un objet MarkovianSequences pour une variable donnee
  *  dans le cas d'absence de lois caracteristiques.
  *
  *  arguments : indice de la variable, nombre de variables.
  *
  *--------------------------------------------------------------*/
 
-void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int variable) const
+void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int variable) const
 
 {
   ostringstream legend;
@@ -4061,7 +4058,7 @@ void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int v
 
     legend.str("");
     legend << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
-           << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+           << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[index][0].legend = legend.str();
 
     plot[index][0].style = "impulses";
@@ -4070,7 +4067,7 @@ void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int v
     index++;
   }
 
-  // vue : histogramme des longueurs des sequences
+  // vue : loi empirique des longueurs des sequences
 
   plot.variable[index] = variable;
 
@@ -4087,7 +4084,7 @@ void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int v
   plot[index].resize(1);
 
   legend.str("");
-  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   plot[index][0].legend = legend.str();
 
   plot[index][0].style = "impulses";
@@ -4097,7 +4094,7 @@ void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int v
 
   if (hindex_parameter) {
 
-    // vue : histogramme des parametres d'index
+    // vue : loi empirique des parametres d'index
 
     plot.variable[index] = variable;
 
@@ -4114,7 +4111,7 @@ void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int v
     plot[index].resize(1);
 
     legend.str("");
-    legend << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[index][0].legend = legend.str();
 
     plot[index][0].style = "impulses";
@@ -4127,11 +4124,11 @@ void Markovian_sequences::plotable_write(MultiPlotSet &plot , int &index , int v
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Markovian_sequences.
+ *  Sortie graphique d'un objet MarkovianSequences.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Markovian_sequences::get_plotable() const
+MultiPlotSet* MarkovianSequences::get_plotable() const
 
 {
   register int i , j;
@@ -4253,7 +4250,7 @@ MultiPlotSet* Markovian_sequences::get_plotable() const
         self_transition[i]->plotable_write(0 , plot[index][0]);
         index++;
 
-        // vue : histogramme des comptages de transition indexes
+        // vue : loi empirique des comptages de transition indexes
 
         if (nb_variable > 1) {
           title.str("");
@@ -4305,14 +4302,14 @@ MultiPlotSet* Markovian_sequences::get_plotable() const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Markovian_sequences dans un fichier au format MTG.
+ *  Ecriture d'un objet MarkovianSequences dans un fichier au format MTG.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              type de chaque variable (NUMERIC/SYMBOLIC).
  *
  *--------------------------------------------------------------*/
 
-bool Markovian_sequences::mtg_write(Format_error &error , const char *path , int *itype) const
+bool MarkovianSequences::mtg_write(StatError &error , const char *path , int *itype) const
 
 {
   bool status;
