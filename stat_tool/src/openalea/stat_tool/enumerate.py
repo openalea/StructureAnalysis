@@ -7,9 +7,9 @@ __version__ = "$Id$"
 
 import _stat_tool
 
-from _stat_tool import _Histogram, _MixtureData, \
+from _stat_tool import _FrequencyDistribution, _MixtureData, \
     _CompoundData,_ConvolutionData, _DistributionData, _Mixture, _Compound, \
-    _Convolution, _ParametricModel
+    _Convolution, _DiscreteParametricModel
 
 
 # map to enumerate in boost python
@@ -64,7 +64,7 @@ sub_variable_type = {
     "N" : _stat_tool.VariableType.NUMERIC,
     "NUMERIC" : _stat_tool.VariableType.NUMERIC,
     "S" : _stat_tool.VariableType.SYMBOLIC,
-    "SYMBOLIC" : _stat_tool.VariableType.SYMBOLIC,                      
+    "SYMBOLIC" : _stat_tool.VariableType.SYMBOLIC,
     }
 
 pearson_type = {
@@ -178,9 +178,9 @@ algo_map = {"Averaging": 'a',
             }
 
 
-histogram_types = [_Histogram, _MixtureData, _CompoundData, _ConvolutionData,
+histogram_types = [_FrequencyDistribution, _MixtureData, _CompoundData, _ConvolutionData,
                     _DistributionData]
     
 
-model_distribution_type = [_Mixture, _Compound, _Convolution, _ParametricModel]
+model_distribution_type = [_Mixture, _Compound, _Convolution, _DiscreteParametricModel]
     

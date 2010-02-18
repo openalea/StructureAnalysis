@@ -9,14 +9,14 @@ import error
 
 import _stat_tool
 
-from _stat_tool import _ParametricModel
+from _stat_tool import _DiscreteParametricModel
 from _stat_tool import _DistributionData
 from _stat_tool import _Distribution
 
 from enumerate import distribution_identifier_type
 
 __all__ = ["_Distribution",
-           "_ParametricModel",
+           "_DiscreteParametricModel",
            "Distribution",
            "Binomial",
            "Poisson",
@@ -66,7 +66,7 @@ def Distribution(utype, *args):
 
     .. doctest::
         :options: +SKIP
-    
+
         >>> Distribution("BINOMIAL", inf_bound, sup_bound, proba)
         >>> Distribution("POISSON", inf_bound, param)
         >>> Distribution("NEGATIVE_BINOMIAL", inf_bound, param, proba)
@@ -79,18 +79,18 @@ def Distribution(utype, *args):
         :func:`~openalea.stat_tool.simulate.Simulate`.
     """
     # Constructor from Filename or Histogram or parametricmodel
-    if(len(args) == 0):  
-        error.CheckType([utype], 
-                        [[str, _DistributionData, _ParametricModel]], 
+    if(len(args) == 0):
+        error.CheckType([utype],
+                        [[str, _DistributionData, _DiscreteParametricModel]],
                         arg_id=[1])
-        result =  _ParametricModel(utype)
-    # from parameters 
+        result =  _DiscreteParametricModel(utype)
+    # from parameters
     if len(args)>0:
         error.CheckArgumentsLength(args, 1)
         if utype in ["B",  "BINOMIAL"]:
             result = Binomial(*args)
         elif utype in ["P", "POISSON"]:
-            result = Poisson(*args)    
+            result = Poisson(*args)
         elif utype in ["M", "MULTINOMIAL"]:
             raise NotImplemented
         elif utype in ["NB", "NEGATIVE_BINOMIAL"]:
@@ -98,7 +98,7 @@ def Distribution(utype, *args):
         elif utype in ["U", "UNIFORM"]:
             result = Uniform(*args)
         else:
-            raise KeyError(" %s not found. Allowed keys are %s" 
+            raise KeyError(" %s not found. Allowed keys are %s"
                            % (utype, distribution_identifier_type.keys()))
 
     return result
@@ -114,13 +114,13 @@ def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT, \
         (shift parameter)
       * `sup_bound` (int) : upper bound to the range of possilbe values
       * `proba` (int, float) : probability of 'success'
-    """    
-    # todo: seg fault when passing -1 as first arguments if there 
+    """
+    # todo: seg fault when passing -1 as first arguments if there
     # is no assert here below
-    # memory leak ? 
-    # todo:  returns error if ((inf_bound < min_inf_bound) || 
+    # memory leak ?
+    # todo:  returns error if ((inf_bound < min_inf_bound) ||
     # (inf_bound > MAX_INF_BOUND)) {
-    
+
     error.CheckType([inf_bound, sup_bound, proba], [int, int, [int, float]])
     assert inf_bound >= 0
     assert inf_bound < sup_bound
@@ -128,8 +128,8 @@ def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT, \
     assert proba <= 1. and proba > 0
 
     param = _stat_tool.D_DEFAULT
-    
-    return _ParametricModel(_stat_tool.BINOMIAL, \
+
+    return _DiscreteParametricModel(_stat_tool.BINOMIAL, \
         inf_bound, sup_bound, param, proba)
 
 
@@ -150,7 +150,7 @@ def Poisson(inf_bound, param=_stat_tool.D_DEFAULT):
     sup_bound = _stat_tool.I_DEFAULT
     proba = _stat_tool.D_DEFAULT
 
-    return _ParametricModel(_stat_tool.POISSON, \
+    return _DiscreteParametricModel(_stat_tool.POISSON, \
         inf_bound, sup_bound, param, proba)
 
 
@@ -174,7 +174,7 @@ def NegativeBinomial(inf_bound, param=_stat_tool.D_DEFAULT, \
 
     sup_bound = _stat_tool.I_DEFAULT
 
-    return _ParametricModel(_stat_tool.NEGATIVE_BINOMIAL, \
+    return _DiscreteParametricModel(_stat_tool.NEGATIVE_BINOMIAL, \
         inf_bound, sup_bound, param, proba)
 
 
@@ -189,7 +189,7 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
     """
 
     # Check parameters
-    #todo:  returns error if ((inf_bound < min_inf_bound) || 
+    #todo:  returns error if ((inf_bound < min_inf_bound) ||
     # (inf_bound > MAX_INF_BOUND)) {
     assert inf_bound >= 0
     assert sup_bound >= 0
@@ -199,7 +199,7 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
     param = _stat_tool.D_DEFAULT
     proba = _stat_tool.D_DEFAULT
     cumul_threshold = _stat_tool.CUMUL_THRESHOLD
-    return _ParametricModel(_stat_tool.UNIFORM, \
+    return _DiscreteParametricModel(_stat_tool.UNIFORM, \
         inf_bound, sup_bound, param, proba, cumul_threshold)
 
 
@@ -207,8 +207,8 @@ def Multinomial():
     """to be done"""
     raise NotImplemented
 
-# Extend _ParametricModel
-interface.extend_class( _ParametricModel, interface.StatInterface)
+# Extend _DiscreteParametricModel
+interface.extend_class( _DiscreteParametricModel, interface.StatInterface)
 
 # Cast Functions
 
@@ -229,7 +229,7 @@ def ToDistribution(histo):
 
     .. doctest::
         :options: +SKIP
-    
+
         >>> ToDistribution(histo)
 
     .. seealso::

@@ -12,7 +12,7 @@ import error
 
 from _stat_tool import _Mixture
 from _stat_tool import _MixtureData
-from _stat_tool import _ParametricModel
+from _stat_tool import _DiscreteParametricModel
 from _stat_tool import _Compound
 from _stat_tool import _Convolution
 
@@ -32,7 +32,7 @@ def Mixture(*args):
       * `weight1`, `weight2`, ... (float) - weights of each component.
          These weights should sum to one (they constitute a discrete
          distribution).
-      * `dist1`, `dist2`, ... (`_ParametricModel`, `_Mixture`, `_Convolution`,
+      * `dist1`, `dist2`, ... (`_DiscreteParametricModel`, `_Mixture`, `_Convolution`,
         `_Compound`) elementary distributions (or components).
       * `filename` (string) -
 
@@ -56,7 +56,7 @@ def Mixture(*args):
     """
     error.CheckArgumentsLength(args, 1)
 
-    types = [_ParametricModel, _Mixture, _Compound, _Convolution]
+    types = [_DiscreteParametricModel, _Mixture, _Compound, _Convolution]
 
     # filename 
     if (len(args) == 1):

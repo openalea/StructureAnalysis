@@ -1,4 +1,4 @@
-""" Estimation functions 
+""" Estimation functions
 
 :Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
 
@@ -11,19 +11,19 @@ import _stat_tool
 import interface
 
 from enumerate import likelihood_penalty_type
-from enumerate import smoothing_penalty_type 
+from enumerate import smoothing_penalty_type
 from enumerate import outside_type
 from enumerate import compound_type
 from enumerate import estimator_type
 from enumerate import distribution_identifier_type as dist_type
 
-from _stat_tool import _ParametricModel
-from _stat_tool import _Parametric
+from _stat_tool import _DiscreteParametricModel
+from _stat_tool import _DiscreteParametric
 from _stat_tool import _Compound
 from _stat_tool import _Convolution
 from _stat_tool import _Distribution
 from _stat_tool import _Mixture
-from _stat_tool import _Histogram
+from _stat_tool import _FrequencyDistribution
 
 
 __all__ = ["Estimate"]
@@ -34,7 +34,7 @@ class EstimateFunctions(object):
     This class must not be used alone, but through an histogram object
     """
 
-    
+
     def estimate_nonparametric(histo):
         """
         Estimate a non parametric distribution
@@ -48,19 +48,19 @@ class EstimateFunctions(object):
             :options: +SKIP
 
             >>> estimate_nonparametric(histo)
-            
+
         :Usage:
-        
+
             >>> Estimate(histo, "NON-PARAMETRIC")
 
         """
-        return  _ParametricModel(histo)
+        return  _DiscreteParametricModel(histo)
 
-    
-    def estimate_parametric(histo, ident, 
-                            MinInfBound=0, 
+
+    def estimate_parametric(histo, ident,
+                            MinInfBound=0,
                             InfBoundStatus="Free"):
-        """ Estimate a parametric discrete distribution (binomial, 
+        """ Estimate a parametric discrete distribution (binomial,
         Poisson or negative binomial distribution with an additional shift
         parameter)
 
@@ -80,10 +80,10 @@ class EstimateFunctions(object):
             >>> Estimate(histo, "NB", MinInfBound=1, InfBoundStatus="Fixed")
 
         """
-        
+
         error.CheckType([ident, MinInfBound, InfBoundStatus],
                         [str, int, str])
-        
+
         flag = bool(InfBoundStatus == "Free")
 
         try:
@@ -96,10 +96,10 @@ class EstimateFunctions(object):
 
 
 
-    
-    def estimate_mixture(histo, *args, **kargs): 
-                         
-                         
+
+    def estimate_mixture(histo, *args, **kargs):
+
+
         """ Estimate a finite  mixture of discrete distributions
 
 
@@ -145,20 +145,20 @@ class EstimateFunctions(object):
                                MinInfBound=1, InfBoundStatus="Fixed",
                                DistInfBoundStatus="Fixed",
                                NbComponent="Estimated", Penalty="AIC")
-            Estimate(histo, "MIXTURE", "B", dist, MinInfBound->1, InfBoundStatus->"Fixed", 
-                DistInfBoundStatus->"Fixed") 
-    
-            Estimate(histo, "MIXTURE", "B", "NB", 
-                MinInfBound=1, InfBoundStatus="Fixed", 
-                DistInfBoundStatus="Fixed", 
-                NbComponent="Estimated", Penalty="AIC") 
-    
+            Estimate(histo, "MIXTURE", "B", dist, MinInfBound->1, InfBoundStatus->"Fixed",
+                DistInfBoundStatus->"Fixed")
+
+            Estimate(histo, "MIXTURE", "B", "NB",
+                MinInfBound=1, InfBoundStatus="Fixed",
+                DistInfBoundStatus="Fixed",
+                NbComponent="Estimated", Penalty="AIC")
+
 
         """
         #alias
-        
+
         #error.CheckArgumentsLength(args, 1, 1)
-        
+
         # get user arguments
         # list of distributions can be either a list or several arguments
         # e.g.: estimate_mixture(["B","B"]) or estimate_mixture("B", "B")
@@ -166,52 +166,52 @@ class EstimateFunctions(object):
             distributions = args[0]
         else:
             distributions = list(args)
-            
+
         InfBoundStatus = kargs.get("InfBoundStatus","Free")
         DistInfBoundStatus = kargs.get("DistInfBoundStatus", "Free")
         NbComponent = kargs.get("NbComponent", "Fixed")
-        
-        
+
+
         MinInfBound = kargs.get("MinInfBound", 0)
-        Penalty = error.ParseKargs(kargs, "Penalty", "AIC", 
+        Penalty = error.ParseKargs(kargs, "Penalty", "AIC",
                                 likelihood_penalty_type)
-        
+
         #should be before the conversion to booleans
         error.CheckType([MinInfBound, InfBoundStatus, DistInfBoundStatus,
                          NbComponent, Penalty],
                         [int, str, str, str, _stat_tool.LikelihoodPenaltyType])
-        
+
 
         # transform into boolean when needed
         InfBoundStatus = bool(InfBoundStatus == "Free")
         DistInfBoundStatus = bool(DistInfBoundStatus == "Free")
         NbComponent = bool(NbComponent == "Estimated")
 
-                
+
         estimate = [] # list of bool
-        pcomponent = [] # list of distribution 
+        pcomponent = [] # list of distribution
         ident = [] # list of distribution identifier
 
-        # Parse list of distribution that could be defined by a distribution, 
-        # compound, mixture, convolution or simplya string such as "B", 
+        # Parse list of distribution that could be defined by a distribution,
+        # compound, mixture, convolution or simplya string such as "B",
         # "Mixture", ...
-        
+
         for dist in distributions:
-            
+
             if isinstance(dist, str):
                 dist_authorised = ["BINOMIAL", "B", "POISSON",
                                    "P", "NB", "NEGATIVE_BINOMIAL"]
                 if dist not in dist_authorised:
-                    raise ValueError("""If distribution is a string, then it 
-                        must be in %s. You provided %s""" 
+                    raise ValueError("""If distribution is a string, then it
+                        must be in %s. You provided %s"""
                         % (dist_authorised, dist))
                 #todo: check that poisson is allowed
-                
-                pcomponent.append(_Parametric(0, dist_type[dist]))
+
+                pcomponent.append(_DiscreteParametric(0, dist_type[dist]))
                 ident.append(dist_type[dist])
                 estimate.append(True)
-            elif isinstance(dist, _ParametricModel):
-                pcomponent.append(_Parametric(dist))
+            elif isinstance(dist, _DiscreteParametricModel):
+                pcomponent.append(_DiscreteParametric(dist))
                 ident.append(None)
                 estimate.append(False)
             elif type(dist) in [_Mixture, _Convolution, _Compound]:
@@ -219,12 +219,12 @@ class EstimateFunctions(object):
                 ident.append(None)
                 estimate.append(False)
             else:
-                raise ValueError("""In the case of a MIXTURE estimation, 
-                argument related to distributions must be either string, or 
+                raise ValueError("""In the case of a MIXTURE estimation,
+                argument related to distributions must be either string, or
                 Distribution, Mixture, Convolution, Compound. %s provided"""
                 % dist)
 
-        # check parameters        
+        # check parameters
         if not NbComponent and Penalty:
             raise TypeError("""
             Penalty can only be used with NbComponent set to 'Estimated'""")
@@ -233,51 +233,51 @@ class EstimateFunctions(object):
             imixt = _Mixture(pcomponent)
             ret = histo.mixture_estimation1(imixt, estimate, MinInfBound,
                                             InfBoundStatus, DistInfBoundStatus)
-            
+
             return ret
         else:  # "ESTIMATED"
             ret = histo.mixture_estimation2(ident, MinInfBound, InfBoundStatus,
                                             DistInfBoundStatus, Penalty)
-            return ret 
-    
+            return ret
+
     def estimate_compound(histo, *args, **kargs):
         """estimate a compound
-        
-        
-    
+
+
+
         Estimate(histo, "COMPOUND", dist, unknown,
-            Parametric->False, MinInfBound->0) 
+            Parametric->False, MinInfBound->0)
             Estimate(histo, "COMPOUND", dist, unknown,
-            InitialDistribution->initial_dist, Parametric->False) 
+            InitialDistribution->initial_dist, Parametric->False)
         """
-        
+
         if len(args)<2:
             raise ValueError("expect at least three arguments")
-        
+
         known_distribution = args[0]
-        ##if isinstance(known_distribution, _ParametricModel):
-        #    known_distribution = _Parametric(known_distribution)
+        ##if isinstance(known_distribution, _DiscreteParametricModel):
+        #    known_distribution = _DiscreteParametric(known_distribution)
         #elif type(known_distribution) in [_Mixture, _Convolution, _Compound]:
         #    known_distribution = _Distribution(known_distribution)
         #else:
         #    raise TypeError("""
         #    argument "known_distribution" must be of type _Mixture,
-        #     _COnvolution, _Compound or _ParametricModel""")
-        
+        #     _COnvolution, _Compound or _DiscreteParametricModel""")
+
         Type = args[1]
         error.CheckType([Type], [str])
-        
+
         Weight = kargs.get("Weight", -1)
         NbIteration = kargs.get("NbIteration", -1)
         InitialDistribution = kargs.get("InitialDistribution", None)
         MinInfBound = kargs.get("MinInfBound", 0)
-        
-        Estimator = error.ParseKargs(kargs, "Estimator", "Likelihood", 
+
+        Estimator = error.ParseKargs(kargs, "Estimator", "Likelihood",
                                 estimator_type)
-        Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference", 
+        Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference",
                                 smoothing_penalty_type)
         Outside = error.ParseKargs(kargs, "Outside", "Zero", outside_type)
-        
+
         if MinInfBound and InitialDistribution:
             raise ValueError("""MinInfBound and InitialDistribution cannot be
                              used together.""")
@@ -285,8 +285,8 @@ class EstimateFunctions(object):
         #    if Penalty or Weight or Outside:
         #        raise ValueError("""Estimator cannot be used with O
         #            utside or Weight or Penalty option""")
-                
-	    #The second argument is either a string (e.g.,"Sum") or an unknown 
+
+	    #The second argument is either a string (e.g.,"Sum") or an unknown
         #distribution.
         try:
             if Type:
@@ -295,23 +295,23 @@ class EstimateFunctions(object):
             raise AttributeError("Bad type. Possible types are %s"
                                  % (str(compound_type.keys())))
 
-        #The second argument is either a string (e.g.,"Sum") or an unknown 
+        #The second argument is either a string (e.g.,"Sum") or an unknown
         #distribution.
         unknown_distribution = None
 
         if InitialDistribution:
             unknown_distribution = InitialDistribution
             if isinstance(unknown_distribution, _Distribution):
-                unknown_distribution = _Parametric(unknown_distribution)
+                unknown_distribution = _DiscreteParametric(unknown_distribution)
             elif type(unknown_distribution) in \
                 [_Mixture, _Convolution, _Compound]:
                 unknown_distribution = _Distribution(unknown_distribution)
             else:
                 raise TypeError("""
-                    argument "known_distribution" must be of type 
-                     _Mixture, _COnvolution, _Compound or _ParametricModel""")
+                    argument "known_distribution" must be of type
+                     _Mixture, _COnvolution, _Compound or _DiscreteParametricModel""")
             if Type == 's':
-                
+
                 return histo.compound_estimation1(
                     unknown_distribution, known_distribution, Type,
                     Estimator, NbIteration, Weight, Penalty, Outside)
@@ -319,7 +319,7 @@ class EstimateFunctions(object):
 
                 return histo.compound_estimation1(
                            known_distribution, unknown_distribution, Type,
-                           Estimator, NbIteration, Weight, Penalty, Outside)  
+                           Estimator, NbIteration, Weight, Penalty, Outside)
             else:
                 raise KeyError("should not enter here.")	
         else:
@@ -327,17 +327,17 @@ class EstimateFunctions(object):
                             known_distribution, Type, MinInfBound,  Estimator,
                             NbIteration, Weight, Penalty, Outside)
 
-    
+
     def estimate_convolution(histo, *args, **kargs):
         """ Estimate a convolution
-        
+
         Estimate(histo, "CONVOLUTION", dist,
-            MinInfBound->1, Parametric->False) 
-            Estimate(histo, "CONVOLUTION", dist,    
-            InitialDistribution->initial_dist, Parametric->False) 
-    
+            MinInfBound->1, Parametric->False)
+            Estimate(histo, "CONVOLUTION", dist,
+            InitialDistribution->initial_dist, Parametric->False)
+
         """
-        
+
         if len(args)==0:
             raise ValueError("expect at least two argument")
         known_distribution = args[0]
@@ -345,26 +345,26 @@ class EstimateFunctions(object):
         NbIteration = kargs.get("NbIteration", -1)
         InitialDistribution = kargs.get("InitialDistribution", None)
         MinInfBound = kargs.get("MinInfBound", 0)
-        
-        Estimator = error.ParseKargs(kargs, "Estimator", "Likelihood", 
+
+        Estimator = error.ParseKargs(kargs, "Estimator", "Likelihood",
                                 estimator_type)
-        Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference", 
+        Penalty = error.ParseKargs(kargs, "Penalty", "SecondDifference",
                                 smoothing_penalty_type)
         Outside = error.ParseKargs(kargs, "Outside", "Zero", outside_type)
-        
-        if isinstance(known_distribution, _ParametricModel):
-            known_distribution = _Parametric(known_distribution)
+
+        if isinstance(known_distribution, _DiscreteParametricModel):
+            known_distribution = _DiscreteParametric(known_distribution)
         elif type(known_distribution) in [_Mixture, _Convolution, _Compound]:
             known_distribution = _Distribution(known_distribution)
         else:
             raise TypeError("""
             argument "known_distribution" must be of type _Mixture, _COnvolution,
-            _Compound or _ParametricModel""")
-            
+            _Compound or _DiscreteParametricModel""")
+
         if InitialDistribution:
-            return histo.convolution_estimation1(known_distribution, 
+            return histo.convolution_estimation1(known_distribution,
                                                 InitialDistribution, Estimator,
-                                                NbIteration, Weight, Penalty, 
+                                                NbIteration, Weight, Penalty,
                                                 Outside)
 
         else :
@@ -375,7 +375,7 @@ class EstimateFunctions(object):
 
 
 # Extend _Histogram class
-_Histogram = interface.extend_class( _Histogram, EstimateFunctions)
+_FrequencyDistribution = interface.extend_class( _FrequencyDistribution, EstimateFunctions)
 
 
 
@@ -393,46 +393,38 @@ def Estimate(histo, itype, *args, **kargs):
     """
 
     fct_map = {
-        "NONPARAMETRIC" : _Histogram.estimate_nonparametric,
-        "NP" : _Histogram.estimate_nonparametric,
-        "B" :  _Histogram.estimate_parametric,
-        "BINOMIAL" :  _Histogram.estimate_parametric,
-        "P" :  _Histogram.estimate_parametric,
-        "POISSON" :  _Histogram.estimate_parametric,
-        "NB" :  _Histogram.estimate_parametric,
-        "NEGATIVE_BINOMIAL" :  _Histogram.estimate_parametric,
-        "U" : _Histogram.estimate_parametric,
-        "UNIFORM" : _Histogram.estimate_parametric,
-        "MIXTURE" : _Histogram.estimate_mixture,
-        "CONVOLUTION" : _Histogram.estimate_convolution,
-        "COMPOUND": _Histogram.estimate_compound,
+        "NONPARAMETRIC" : _FrequencyDistribution.estimate_nonparametric,
+        "NP" : _FrequencyDistribution.estimate_nonparametric,
+        "B" :  _FrequencyDistribution.estimate_parametric,
+        "BINOMIAL" :  _FrequencyDistribution.estimate_parametric,
+        "P" :  _FrequencyDistribution.estimate_parametric,
+        "POISSON" :  _FrequencyDistribution.estimate_parametric,
+        "NB" :  _FrequencyDistribution.estimate_parametric,
+        "NEGATIVE_BINOMIAL" :  _FrequencyDistribution.estimate_parametric,
+        "U" : _FrequencyDistribution.estimate_parametric,
+        "UNIFORM" : _FrequencyDistribution.estimate_parametric,
+        "MIXTURE" : _FrequencyDistribution.estimate_mixture,
+        "CONVOLUTION" : _FrequencyDistribution.estimate_convolution,
+        "COMPOUND": _FrequencyDistribution.estimate_compound,
         }
-    
+
     Type = itype.upper()
 
     # sequence analysis case
     if Type not in fct_map.keys():
         try:
             from openalea.sequence_analysis.estimate import Estimate \
-                as SeqEstimate   
+                as SeqEstimate
         except:
             raise ImportError("Could not import sequence_analysis")
         return SeqEstimate(histo, itype, *args, **kargs)
     else:
         fct = fct_map[Type]
-        
-        if fct == _Histogram.estimate_parametric:
+
+        if fct == _FrequencyDistribution.estimate_parametric:
             return fct(histo, Type, *args, **kargs)
-        elif fct == _Histogram.estimate_mixture:
+        elif fct == _FrequencyDistribution.estimate_mixture:
             return fct(histo, *args, **kargs)
         else:
             return fct(histo, *args, **kargs)
-
-
-    #except KeyError:
-    
-       #raise KeyError("Valid type are %s" % (str(fct_map.keys())))
-
-
-
 

@@ -10,7 +10,7 @@ import interface
 
 from _stat_tool import _Regression
 from _stat_tool import _Vectors
-from _stat_tool import _ParametricModel
+from _stat_tool import _DiscreteParametricModel
 from _stat_tool import _Compound
 from _stat_tool import _Convolution
 from _stat_tool import _Mixture
@@ -117,7 +117,7 @@ def Regression(vec, utype, explanatory, response,
         # todo: test case of compound, convolution, mixture 
         else:
             error.CheckType([param],
-                            [[_ParametricModel, _Mixture,
+                            [[_DiscreteParametricModel, _Mixture,
                              _Convolution, _Compound]])
             return vec.moving_average_regression_distribution(
                             explanatory, response,

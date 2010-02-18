@@ -13,7 +13,7 @@ from _stat_tool import _Compound
 from _stat_tool import _Convolution
 from _stat_tool import _Mixture
 from _stat_tool import _CompoundData
-from _stat_tool import _ParametricModel
+from _stat_tool import _DiscreteParametricModel
 
 __all__ = ['Compound',
             '_Compound',
@@ -25,8 +25,8 @@ def Compound(*args, **kargs):
     """
     Construction of a compound of distributions from a sum distribution and an
     elementary distribution or from an ASCII file.
-    
-    A compound (or stopped-sum) distribution is defined as the distribution 
+
+    A compound (or stopped-sum) distribution is defined as the distribution
     of the sum of n independent and identically distributed random variables :math:`X_i`
     where `n` is the value taken by the random variable `N`. The distribution of N is referred
     to as the sum distribution while the distribution of the :math:`X_i` is referred to as
@@ -38,10 +38,10 @@ def Compound(*args, **kargs):
       * `filename` (STRING) -
 
     :Returns:
-  
+
         If the construction succeeds, an object of type `COMPOUND` is returned,
         otherwise no object is returned.
-        
+
     :Examples:
 
     .. doctest::
@@ -66,19 +66,19 @@ def Compound(*args, **kargs):
         error.CheckType([args[0]], [str], arg_id=[1])
         result =  _Compound(args[0])
 
-    possible_types = [_ParametricModel, _Mixture, _Compound, _Convolution]
+    possible_types = [_DiscreteParametricModel, _Mixture, _Compound, _Convolution]
 
     # build from two objects and optional threshold
     if len(args)==2:
         error.CheckType([args[0], args[1]],
-                        [possible_types, possible_types], 
+                        [possible_types, possible_types],
                         variable_id=[1,2])
-       
+
         if Threshold:
             result =  _Compound([args[0], args[1]], Threshold)
         else:
             result =  _Compound([args[0], args[1]])
-   
+
     return result
 
 
