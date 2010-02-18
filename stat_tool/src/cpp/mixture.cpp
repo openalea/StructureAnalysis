@@ -77,7 +77,8 @@ Mixture::Mixture()
  *
  *--------------------------------------------------------------*/
 
-Mixture::Mixture(int inb_component , double *pweight , const Parametric **pcomponent)
+Mixture::Mixture(int inb_component , double *pweight ,
+                 const DiscreteParametric **pcomponent)
 
 {
   register int i;
@@ -86,7 +87,7 @@ Mixture::Mixture(int inb_component , double *pweight , const Parametric **pcompo
   mixture_data = NULL;
   nb_component = inb_component;
 
-  weight = new Parametric(nb_component);
+  weight = new DiscreteParametric(nb_component);
   for (i = 0;i < nb_component;i++) {
     weight->mass[i] = *pweight++;
   }
@@ -94,10 +95,10 @@ Mixture::Mixture(int inb_component , double *pweight , const Parametric **pcompo
   weight->max_computation();
 
   nb_value = 0;
-  component = new Parametric*[nb_component];
+  component = new DiscreteParametric*[nb_component];
 
   for (i = 0;i < nb_component;i++) {
-    component[i] = new Parametric(*pcomponent[i] , 'n');
+    component[i] = new DiscreteParametric(*pcomponent[i] , 'n');
     if (component[i]->nb_value > nb_value) {
       nb_value = component[i]->nb_value;
     }
@@ -127,17 +128,17 @@ Mixture::Mixture(const Mixture &mixt , bool *component_flag , int inb_value)
   mixture_data = NULL;
   nb_component = mixt.nb_component;
 
-  weight = new Parametric(nb_component);
+  weight = new DiscreteParametric(nb_component);
 
   nb_value = inb_value;
-  component = new Parametric*[nb_component];
+  component = new DiscreteParametric*[nb_component];
 
   for (i = 0;i < nb_component;i++) {
     if (component_flag[i]) {
-      component[i] = new Parametric(inb_value , mixt.component[i]->ident);
+      component[i] = new DiscreteParametric(inb_value , mixt.component[i]->ident);
     }
     else {
-      component[i] = new Parametric(*(mixt.component[i]));
+      component[i] = new DiscreteParametric(*(mixt.component[i]));
       if (component[i]->nb_value > nb_value) {
         nb_value = component[i]->nb_value;
       }
@@ -156,7 +157,7 @@ Mixture::Mixture(const Mixture &mixt , bool *component_flag , int inb_value)
  *
  *--------------------------------------------------------------*/
 
-Mixture::Mixture(int inb_component , const Parametric **pcomponent)
+Mixture::Mixture(int inb_component , const DiscreteParametric **pcomponent)
 
 {
   register int i;
@@ -167,9 +168,9 @@ Mixture::Mixture(int inb_component , const Parametric **pcomponent)
 
   weight = NULL;
 
-  component = new Parametric*[nb_component];
+  component = new DiscreteParametric*[nb_component];
   for (i = 0;i < nb_component;i++) {
-    component[i] = new Parametric(*pcomponent[i] , 'n');
+    component[i] = new DiscreteParametric(*pcomponent[i] , 'n');
   }
 }
 
@@ -179,7 +180,7 @@ Mixture::Mixture(int inb_component , const Parametric **pcomponent)
  *  Copie d'un objet Mixture.
  *
  *  arguments : reference sur un objet Mixture,
- *              flag copie de l'objet Mixture_data.
+ *              flag copie de l'objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
@@ -190,7 +191,7 @@ void Mixture::copy(const Mixture &mixt , bool data_flag)
 
 
   if ((data_flag) && (mixt.mixture_data)) {
-    mixture_data = new Mixture_data(*(mixt.mixture_data) , false);
+    mixture_data = new MixtureData(*(mixt.mixture_data) , false);
   }
   else {
     mixture_data = NULL;
@@ -198,11 +199,11 @@ void Mixture::copy(const Mixture &mixt , bool data_flag)
 
   nb_component = mixt.nb_component;
 
-  weight = new Parametric(*(mixt.weight));
+  weight = new DiscreteParametric(*(mixt.weight));
 
-  component = new Parametric*[nb_component];
+  component = new DiscreteParametric*[nb_component];
   for (i = 0;i < nb_component;i++) {
-    component[i] = new Parametric(*(mixt.component[i]));
+    component[i] = new DiscreteParametric(*(mixt.component[i]));
   }
 }
 
@@ -272,14 +273,14 @@ Mixture& Mixture::operator=(const Mixture &mixt)
  *
  *  Extraction d'une composante.
  *
- *  arguments : reference sur un objet Format_error, indice de la composante.
+ *  arguments : reference sur un objet StatError, indice de la composante.
  *
  *--------------------------------------------------------------*/
 
-Parametric_model* Mixture::extract(Format_error &error , int index) const
+DiscreteParametricModel* Mixture::extract(StatError &error , int index) const
 
 {
-  Parametric_model *pcomponent;
+  DiscreteParametricModel *pcomponent;
 
 
   if ((index < 1) || (index > nb_component)) {
@@ -289,8 +290,8 @@ Parametric_model* Mixture::extract(Format_error &error , int index) const
 
   else {
     index--;
-    pcomponent = new Parametric_model(*component[index] ,
-                                      (mixture_data ? mixture_data->component[index] : 0));
+    pcomponent = new DiscreteParametricModel(*component[index] ,
+                                             (mixture_data ? mixture_data->component[index] : 0));
   }
 
   return pcomponent;
@@ -301,14 +302,14 @@ Parametric_model* Mixture::extract(Format_error &error , int index) const
  *
  *  Extraction de la partie "donnees" d'un objet Mixture.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Mixture_data* Mixture::extract_data(Format_error &error) const
+MixtureData* Mixture::extract_data(StatError &error) const
 
 {
-  Mixture_data *mixt_histo;
+  MixtureData *mixt_histo;
 
 
   error.init();
@@ -319,7 +320,7 @@ Mixture_data* Mixture::extract_data(Format_error &error) const
   }
 
   else {
-    mixt_histo = new Mixture_data(*mixture_data);
+    mixt_histo = new MixtureData(*mixture_data);
     mixt_histo->mixture = new Mixture(*this , false);
   }
 
@@ -331,13 +332,13 @@ Mixture_data* Mixture::extract_data(Format_error &error) const
  *
  *  Construction d'un objet Mixture a partir de poids et de composantes.
  *
- *  arguments : reference sur un objet Format_error, nombre de composantes,
+ *  arguments : reference sur un objet StatError, nombre de composantes,
  *              poids, pointeurs sur les composantes.
  *
  *--------------------------------------------------------------*/
 
-Mixture* mixture_building(Format_error &error , int nb_component , double *weight ,
-                          const Parametric **component)
+Mixture* mixture_building(StatError &error , int nb_component , double *weight ,
+                          const DiscreteParametric **component)
 
 {
   bool status;
@@ -380,12 +381,12 @@ Mixture* mixture_building(Format_error &error , int nb_component , double *weigh
  *
  *  Construction d'un objet Mixture a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Mixture* mixture_ascii_read(Format_error &error , const char *path ,
+Mixture* mixture_ascii_read(StatError &error , const char *path ,
                             double cumul_threshold)
 
 {
@@ -397,7 +398,7 @@ Mixture* mixture_ascii_read(Format_error &error , const char *path ,
   int line;
   long index , nb_component;
   double cumul , weight[MIXTURE_NB_COMPONENT];
-  const Parametric **component;
+  const DiscreteParametric **component;
   Mixture *mixt;
   ifstream in_file(path);
 
@@ -487,7 +488,7 @@ Mixture* mixture_ascii_read(Format_error &error , const char *path ,
     }
 
     if (status) {
-      component = new const Parametric*[nb_component];
+      component = new const DiscreteParametric*[nb_component];
       for (i = 0;i < nb_component;i++) {
         component[i] = NULL;
       }
@@ -588,8 +589,8 @@ Mixture* mixture_ascii_read(Format_error &error , const char *path ,
               error.update(STAT_parsing[STATP_FORMAT] , line);
             }
 
-            component[i] = parametric_parsing(error , in_file , line ,
-                                              NEGATIVE_BINOMIAL , cumul_threshold);
+            component[i] = discrete_parametric_parsing(error , in_file , line ,
+                                                       NEGATIVE_BINOMIAL , cumul_threshold);
             break;
           }
         }
@@ -660,12 +661,12 @@ ostream& Mixture::line_write(ostream &os) const
  *
  *  Ecriture d'un melange et de la structure de donnees associee.
  *
- *  arguments : stream, pointeur sur un objet Mixture_data,
+ *  arguments : stream, pointeur sur un objet MixtureData,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mixture::ascii_write(ostream &os , const Mixture_data *mixt_histo ,
+ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
                               bool exhaustive , bool file_flag) const
 
 {
@@ -687,11 +688,11 @@ ostream& Mixture::ascii_write(ostream &os , const Mixture_data *mixt_histo ,
     if (file_flag) {
       os << "# ";
     }
-    os << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     mixt_histo->ascii_characteristic_print(os , false , file_flag);
 
     likelihood = Distribution::likelihood_computation(*mixt_histo);
-    information = mixt_histo->Histogram::information_computation();
+    information = mixt_histo->FrequencyDistribution::information_computation();
 
     os << "\n";
     if (file_flag) {
@@ -794,18 +795,18 @@ ostream& Mixture::ascii_write(ostream &os , const Mixture_data *mixt_histo ,
     }
     os << "  ";
     if (mixt_histo) {
-      os << " | " << STAT_label[STATL_HISTOGRAM];
+      os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
     os << " | " << STAT_label[STATL_MIXTURE];
     for (i = 0;i < nb_component;i++) {
       os << " | " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
     }
     if (mixt_histo) {
-      os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-         << STAT_label[STATL_FUNCTION];
+      os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+         << " " << STAT_label[STATL_FUNCTION];
     }
-    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE] << " "
-       << STAT_label[STATL_FUNCTION] << endl;
+    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE]
+       << " " << STAT_label[STATL_FUNCTION] << endl;
 
     ascii_print(os , nb_component , pcomponent , scale , file_flag , true , mixt_histo);
   }
@@ -816,14 +817,14 @@ ostream& Mixture::ascii_write(ostream &os , const Mixture_data *mixt_histo ,
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+      os << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       mixt_histo->weight->ascii_characteristic_print(os , false , file_flag);
 
       os << "\n";
       if (file_flag) {
         os << "# ";
       }
-      os << "   | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << " "
+      os << "   | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
          << " | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
       weight->Distribution::ascii_print(os , file_flag , false , false , mixt_histo->weight);
@@ -839,7 +840,7 @@ ostream& Mixture::ascii_write(ostream &os , const Mixture_data *mixt_histo ,
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_HISTOGRAM] << " " << i + 1 << " - ";
+      os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1 << " - ";
       mixt_histo->component[i]->ascii_characteristic_print(os , exhaustive , file_flag);
 
       if ((exhaustive) && (mixt_histo->component[i]->nb_element > 0)) {
@@ -847,9 +848,9 @@ ostream& Mixture::ascii_write(ostream &os , const Mixture_data *mixt_histo ,
         if (file_flag) {
           os << "# ";
         }
-        os << "   | " << STAT_label[STATL_HISTOGRAM] << " " << i + 1
+        os << "   | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1
            << " | " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1
-           << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+           << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
            << " " << i + 1 << " " << STAT_label[STATL_FUNCTION]
            << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
            << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
@@ -882,12 +883,12 @@ ostream& Mixture::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Mixture dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Mixture::ascii_write(Format_error &error , const char *path ,
+bool Mixture::ascii_write(StatError &error , const char *path ,
                           bool exhaustive) const
 
 {
@@ -916,11 +917,11 @@ bool Mixture::ascii_write(Format_error &error , const char *path ,
  *  Ecriture d'un melange et de la structure de donnees associee
  *  dans un fichier au format tableur.
  *
- *  arguments : stream, pointeur sur un objet Mixture_data.
+ *  arguments : stream, pointeur sur un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mixture::spreadsheet_write(ostream &os , const Mixture_data *mixt_histo) const
+ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo) const
 
 {
   register int i;
@@ -937,11 +938,11 @@ ostream& Mixture::spreadsheet_write(ostream &os , const Mixture_data *mixt_histo
     Test test(CHI2);
 
 
-    os << "\n" << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     mixt_histo->spreadsheet_characteristic_print(os);
 
     likelihood = Distribution::likelihood_computation(*mixt_histo);
-    information = mixt_histo->Histogram::information_computation();
+    information = mixt_histo->FrequencyDistribution::information_computation();
 
     os << "\n" << STAT_label[STATL_LIKELIHOOD] << "\t" << likelihood << "\t"
        << STAT_label[STATL_NORMALIZED] << "\t" << likelihood / mixt_histo->nb_element << endl;
@@ -1005,26 +1006,26 @@ ostream& Mixture::spreadsheet_write(ostream &os , const Mixture_data *mixt_histo
 
   os << "\n";
   if (mixt_histo) {
-    os << "\t" << STAT_label[STATL_HISTOGRAM];
+    os << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
   os << "\t" << STAT_label[STATL_MIXTURE];
   for (i = 0;i < nb_component;i++) {
     os << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
   }
   if (mixt_histo) {
-    os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-       << STAT_label[STATL_FUNCTION];
+    os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+       << " " << STAT_label[STATL_FUNCTION];
   }
-  os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE] << " "
-     << STAT_label[STATL_FUNCTION] << endl;
+  os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE]
+     << " " << STAT_label[STATL_FUNCTION] << endl;
 
   spreadsheet_print(os , nb_component , pcomponent , scale , true , mixt_histo);
 
   if (mixt_histo) {
-    os << "\n" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     mixt_histo->weight->spreadsheet_characteristic_print(os);
 
-    os << "\n\t" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM] << " "
+    os << "\n\t" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
        << "\t" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
     weight->Distribution::spreadsheet_print(os , false , false , false , mixt_histo->weight);
@@ -1035,13 +1036,13 @@ ostream& Mixture::spreadsheet_write(ostream &os , const Mixture_data *mixt_histo
       component[i]->spreadsheet_print(os);
       component[i]->spreadsheet_characteristic_print(os , true);
 
-      os << "\n" << STAT_label[STATL_HISTOGRAM] << " " << i + 1 << "\t";
+      os << "\n" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1 << "\t";
       mixt_histo->component[i]->spreadsheet_characteristic_print(os , true);
 
       if (mixt_histo->component[i]->nb_element > 0) {
-        os << "\n\t" << STAT_label[STATL_HISTOGRAM] << " " << i + 1
+        os << "\n\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i + 1
            << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1
-           << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM]
+           << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
            << " " << i + 1 << " " << STAT_label[STATL_FUNCTION]
            << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
            << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
@@ -1059,11 +1060,11 @@ ostream& Mixture::spreadsheet_write(ostream &os , const Mixture_data *mixt_histo
  *
  *  Ecriture d'un objet Mixture dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Mixture::spreadsheet_write(Format_error &error , const char *path) const
+bool Mixture::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1091,12 +1092,12 @@ bool Mixture::spreadsheet_write(Format_error &error , const char *path) const
  *  Sortie Gnuplot d'un melange et de la structure de donnees associee.
  *
  *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur un objet Mixture_data.
+ *              pointeur sur un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
 bool Mixture::plot_write(const char *prefix , const char *title ,
-                         const Mixture_data *mixt_histo) const
+                         const MixtureData *mixt_histo) const
 
 {
   bool status;
@@ -1104,7 +1105,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
   int nb_histo = 0 , index_dist[MIXTURE_NB_COMPONENT + 2];
   double scale[MIXTURE_NB_COMPONENT + 2];
   const Distribution *pdist[MIXTURE_NB_COMPONENT + 2];
-  const Histogram *phisto[MIXTURE_NB_COMPONENT + 2];
+  const FrequencyDistribution *phisto[MIXTURE_NB_COMPONENT + 2];
   ostringstream data_file_name[MIXTURE_NB_COMPONENT + 1];
 
 
@@ -1196,7 +1197,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
         out_file << "plot [0:" << nb_value - 1 << "] [0:"
                  << (int)(MAX(mixt_histo->max , max * mixt_histo->nb_element) * YSCALE) + 1
                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
-                 << STAT_label[STATL_HISTOGRAM] << "\" with impulses,\\" << endl;
+                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
         out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_histo + 1
                  << " title \"" << STAT_label[STATL_MIXTURE] << "\" with linespoints";
       }
@@ -1235,7 +1236,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
                  << (int)(MAX(mixt_histo->weight->max ,
                               weight->max * mixt_histo->weight->nb_element) * YSCALE) + 1
                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << 2
-                 << " title \"" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM]
+                 << " title \"" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses,\\" << endl;
         out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_histo + 2
                  << " title \"" << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION]
@@ -1261,7 +1262,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
                      << (int)(MAX(mixt_histo->component[k]->max ,
                                   component[k]->max * mixt_histo->component[k]->nb_element) * YSCALE) + 1
                      << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using " << j++
-                     << " title \"" << STAT_label[STATL_HISTOGRAM] << " " << k + 1
+                     << " title \"" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << k + 1
                      << "\" with impulses,\\" << endl;
             out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_histo + k + 3
                      << " title \"" << STAT_label[STATL_DISTRIBUTION] << " " << k + 1;
@@ -1291,12 +1292,12 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
  *
  *  Sortie Gnuplot d'un objet Mixture.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Mixture::plot_write(Format_error &error , const char *prefix ,
+bool Mixture::plot_write(StatError &error , const char *prefix ,
                          const char *title) const
 
 {
@@ -1316,11 +1317,11 @@ bool Mixture::plot_write(Format_error &error , const char *prefix ,
  *
  *  Sortie graphique d'un melange et de la structure de donnees associee.
  *
- *  argument : pointeur sur un objet Mixture_data.
+ *  argument : pointeur sur un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
+MultiPlotSet* Mixture::get_plotable(const MixtureData *mixt_histo) const
 
 {
   register int i , j;
@@ -1372,7 +1373,7 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
 
     plot[0].resize(nb_component + 2);
 
-    plot[0][0].legend = STAT_label[STATL_HISTOGRAM];
+    plot[0][0].legend = STAT_label[STATL_FREQUENCY_DISTRIBUTION];
 
     plot[0][0].style = "impulses";
 
@@ -1427,8 +1428,8 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
     plot[1].resize(2);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_HISTOGRAM] << " "
-           << STAT_label[STATL_FUNCTION];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+           << " " << STAT_label[STATL_FUNCTION];
     plot[1][0].legend = legend.str();
 
     plot[1][0].style = "linespoints";
@@ -1436,8 +1437,8 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
     mixt_histo->plotable_cumul_write(plot[1][0]);
 
     legend.str("");
-    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE] << " "
-           << STAT_label[STATL_FUNCTION];
+    legend << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_MIXTURE]
+           << " " << STAT_label[STATL_FUNCTION];
     plot[1][1].legend = legend.str();
 
     plot[1][1].style = "linespoints";
@@ -1458,7 +1459,7 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
     plot[2].resize(2);
 
     legend.str("");
-    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[2][0].legend = legend.str();
 
     plot[2][0].style = "impulses";
@@ -1497,7 +1498,7 @@ MultiPlotSet* Mixture::get_plotable(const Mixture_data *mixt_histo) const
         plot[i].resize(2);
 
         legend.str("");
-        legend << STAT_label[STATL_HISTOGRAM] << " " << j + 1;
+        legend << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << j + 1;
         plot[i][0].legend = legend.str();
 
         plot[i][0].style = "impulses";
@@ -1582,11 +1583,11 @@ double Mixture::penalty_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Mixture_data.
+ *  Constructeur par defaut de la classe MixtureData.
  *
  *--------------------------------------------------------------*/
 
-Mixture_data::Mixture_data()
+MixtureData::MixtureData()
 
 {
   mixture = NULL;
@@ -1598,15 +1599,15 @@ Mixture_data::Mixture_data()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mixture_data.
+ *  Constructeur de la classe MixtureData.
  *
- *  arguments : reference sur un objet Histogram,
- *              nombre d'histogrammes.
+ *  arguments : reference sur un objet FrequencyDistribution,
+ *              nombre de composantes.
  *
  *--------------------------------------------------------------*/
 
-Mixture_data::Mixture_data(const Histogram &histo , int inb_component)
-:Histogram(histo)
+MixtureData::MixtureData(const FrequencyDistribution &histo , int inb_component)
+:FrequencyDistribution(histo)
 
 {
   register int i;
@@ -1615,25 +1616,25 @@ Mixture_data::Mixture_data(const Histogram &histo , int inb_component)
   mixture = NULL;
   nb_component = inb_component;
 
-  weight = new Histogram(nb_component);
+  weight = new FrequencyDistribution(nb_component);
 
-  component = new Histogram*[nb_component];
+  component = new FrequencyDistribution*[nb_component];
   for (i = 0;i < nb_component;i++) {
-    component[i] = new Histogram(nb_value);
+    component[i] = new FrequencyDistribution(nb_value);
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mixture_data.
+ *  Constructeur de la classe MixtureData.
  *
  *  argument : reference sur un objet Mixture.
  *
  *--------------------------------------------------------------*/
 
-Mixture_data::Mixture_data(const Mixture &mixt)
-:Histogram(mixt)
+MixtureData::MixtureData(const Mixture &mixt)
+:FrequencyDistribution(mixt)
 
 {
   register int i;
@@ -1642,25 +1643,25 @@ Mixture_data::Mixture_data(const Mixture &mixt)
   mixture = NULL;
   nb_component = mixt.nb_component;
 
-  weight = new Histogram(*(mixt.weight));
+  weight = new FrequencyDistribution(*(mixt.weight));
 
-  component = new Histogram*[nb_component];
+  component = new FrequencyDistribution*[nb_component];
   for (i = 0;i < mixt.nb_component;i++) {
-    component[i] = new Histogram(*(mixt.component[i]));
+    component[i] = new FrequencyDistribution(*(mixt.component[i]));
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Mixture_data.
+ *  Copie d'un objet MixtureData.
  *
- *  arguments : reference sur un objet Mixture_data,
+ *  arguments : reference sur un objet MixtureData,
  *              flag copie de l'objet Mixture.
  *
  *--------------------------------------------------------------*/
 
-void Mixture_data::copy(const Mixture_data &mixt_histo , bool model_flag)
+void MixtureData::copy(const MixtureData &mixt_histo , bool model_flag)
 
 {
   register int i;
@@ -1675,22 +1676,22 @@ void Mixture_data::copy(const Mixture_data &mixt_histo , bool model_flag)
 
   nb_component = mixt_histo.nb_component;
 
-  weight = new Histogram(*(mixt_histo.weight));
+  weight = new FrequencyDistribution(*(mixt_histo.weight));
 
-  component = new Histogram*[nb_component];
+  component = new FrequencyDistribution*[nb_component];
   for (i = 0;i < nb_component;i++) {
-    component[i] = new Histogram(*(mixt_histo.component[i]));
+    component[i] = new FrequencyDistribution(*(mixt_histo.component[i]));
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Mixture_data.
+ *  Destruction des champs d'un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
-void Mixture_data::remove()
+void MixtureData::remove()
 
 {
   delete mixture;
@@ -1710,11 +1711,11 @@ void Mixture_data::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Mixture_data.
+ *  Destructeur de la classe MixtureData.
  *
  *--------------------------------------------------------------*/
 
-Mixture_data::~Mixture_data()
+MixtureData::~MixtureData()
 
 {
   remove();
@@ -1723,20 +1724,20 @@ Mixture_data::~Mixture_data()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Mixture_data.
+ *  Operateur d'assignement de la classe MixtureData.
  *
- *  argument : reference sur un objet Mixture_data.
+ *  argument : reference sur un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
-Mixture_data& Mixture_data::operator=(const Mixture_data &mixt_histo)
+MixtureData& MixtureData::operator=(const MixtureData &mixt_histo)
 
 {
   if (&mixt_histo != this) {
     remove();
     delete [] frequency;
 
-    Histogram::copy(mixt_histo);
+    FrequencyDistribution::copy(mixt_histo);
     copy(mixt_histo);
   }
 
@@ -1746,17 +1747,17 @@ Mixture_data& Mixture_data::operator=(const Mixture_data &mixt_histo)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction d'un sous-histogramme.
+ *  Extraction d'une composante empirique.
  *
- *  arguments : reference sur un objet Format_error, indice de l'histogramme.
+ *  arguments : reference sur un objet StatError, indice de la composante.
  *
  *--------------------------------------------------------------*/
 
-Distribution_data* Mixture_data::extract(Format_error &error , int index) const
+DiscreteDistributionData* MixtureData::extract(StatError &error , int index) const
 
 {
   bool status = true;
-  Distribution_data *pcomponent;
+  DiscreteDistributionData *pcomponent;
 
 
   pcomponent = NULL;
@@ -1764,19 +1765,19 @@ Distribution_data* Mixture_data::extract(Format_error &error , int index) const
 
   if ((index < 1) || (index > nb_component)) {
     status = false;
-    error.update(STAT_error[STATR_HISTOGRAM_INDEX]);
+    error.update(STAT_error[STATR_FREQUENCY_DISTRIBUTION_INDEX]);
   }
   else {
     index--;
     if (component[index]->nb_element == 0) {
       status = false;
-      error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+      error.update(STAT_error[STATR_EMPTY_SAMPLE]);
     }
   }
 
   if (status) {
-    pcomponent = new Distribution_data(*component[index] ,
-                                       (mixture ? mixture->component[index] : 0));
+    pcomponent = new DiscreteDistributionData(*component[index] ,
+                                              (mixture ? mixture->component[index] : 0));
   }
 
   return pcomponent;
@@ -1785,13 +1786,13 @@ Distribution_data* Mixture_data::extract(Format_error &error , int index) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Mixture_data.
+ *  Ecriture sur une ligne d'un objet MixtureData.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mixture_data::line_write(ostream &os) const
+ostream& MixtureData::line_write(ostream &os) const
 
 {
   os << STAT_label[STATL_SAMPLE_SIZE] << ": " << nb_element << "   "
@@ -1804,13 +1805,13 @@ ostream& Mixture_data::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mixture_data.
+ *  Ecriture d'un objet MixtureData.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mixture_data::ascii_write(ostream &os , bool exhaustive) const
+ostream& MixtureData::ascii_write(ostream &os , bool exhaustive) const
 
 {
   if (mixture) {
@@ -1823,15 +1824,15 @@ ostream& Mixture_data::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mixture_data dans un fichier.
+ *  Ecriture d'un objet MixtureData dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Mixture_data::ascii_write(Format_error &error , const char *path ,
-                               bool exhaustive) const
+bool MixtureData::ascii_write(StatError &error , const char *path ,
+                              bool exhaustive) const
 
 {
   bool status = false;
@@ -1859,13 +1860,13 @@ bool Mixture_data::ascii_write(Format_error &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mixture_data dans un fichier au format tableur.
+ *  Ecriture d'un objet MixtureData dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Mixture_data::spreadsheet_write(Format_error &error , const char *path) const
+bool MixtureData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
@@ -1893,15 +1894,15 @@ bool Mixture_data::spreadsheet_write(Format_error &error , const char *path) con
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Mixture_data.
+ *  Sortie Gnuplot d'un objet MixtureData.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Mixture_data::plot_write(Format_error &error , const char *prefix ,
-                              const char *title) const
+bool MixtureData::plot_write(StatError &error , const char *prefix ,
+                             const char *title) const
 
 {
   bool status = false;
@@ -1923,11 +1924,11 @@ bool Mixture_data::plot_write(Format_error &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Mixture_data.
+ *  Sortie graphique d'un objet MixtureData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Mixture_data::get_plotable() const
+MultiPlotSet* MixtureData::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
