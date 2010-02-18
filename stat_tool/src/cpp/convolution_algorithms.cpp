@@ -90,12 +90,13 @@ void Convolution::computation(int min_nb_value , double cumul_threshold , bool *
  *
  *  Calcul des quantites de reestimation (estimateur EM).
  *
- *  arguments : reference sur l'histogramme, pointeurs sur les produits
+ *  arguments : reference sur la loi empirique, pointeurs sur les produits
  *              de convolution "partiels" et sur les quantites de reestimation.
  *
  *--------------------------------------------------------------*/
 
-void Convolution::expectation_step(const Histogram &histo , const Distribution **partial_convol ,
+void Convolution::expectation_step(const FrequencyDistribution &histo ,
+                                   const Distribution **partial_convol ,
                                    Reestimation<double> **reestim) const
 
 {
@@ -164,10 +165,11 @@ void Convolution::expectation_step(const Histogram &histo , const Distribution *
  *
  *--------------------------------------------------------------*/
 
-Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os , const Parametric &known_dist ,
-                                               const Parametric &unknown_dist , int estimator ,
-                                               int nb_iter , double weight , int penalty_type ,
-                                               int outside) const
+Convolution* FrequencyDistribution::convolution_estimation(Format_error &error , ostream &os ,
+                                                           const DiscreteParametric &known_dist ,
+                                                           const DiscreteParametric &unknown_dist ,
+                                                           int estimator , int nb_iter , double weight ,
+                                                           int penalty_type , int outside) const
 
 {
   bool status = true , dist_flag[2];
@@ -177,7 +179,7 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
   const Distribution *partial_convol[2];
   Reestimation<double> *reestim[2];
   Convolution *convol;
-  Convolution_data *convol_histo;
+  ConvolutionData *convol_histo;
 
 
   convol = NULL;
@@ -207,7 +209,7 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
     // creation d'un objet Convolution
 
     convol = new Convolution(known_dist , unknown_dist);
-    convol->convolution_data = new Convolution_data(*this , convol->nb_distribution);
+    convol->convolution_data = new ConvolutionData(*this , convol->nb_distribution);
     convol_histo = convol->convolution_data;
 
     if (estimator == PENALIZED_LIKELIHOOD) {
@@ -309,11 +311,12 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
           // calcul des quantites de reestimation
 
           convol->expectation_step(*this , partial_convol , reestim);
-          convol_histo->histogram[1]->update(reestim[1] , (int)(reestim[1]->nb_element *
-                                                                MAX(sqrt(reestim[1]->variance) , 1.) * CONVOLUTION_COEFF));
-          hlikelihood = convol_histo->histogram[1]->Reestimation<int>::type_parametric_estimation(convol->distribution[1] ,
-                                                                                                  MIN(unknown_dist.offset , 1) ,
-                                                                                                  true , CONVOLUTION_THRESHOLD);
+          convol_histo->frequency_distribution[1]->update(reestim[1] ,
+                                                          (int)(reestim[1]->nb_element *
+                                                          MAX(sqrt(reestim[1]->variance) , 1.) * CONVOLUTION_COEFF));
+          hlikelihood = convol_histo->frequency_distribution[1]->Reestimation<int>::type_parametric_estimation(convol->distribution[1] ,
+                                                                                                               MIN(unknown_dist.offset , 1) , true ,
+                                                                                                               CONVOLUTION_THRESHOLD);
 
           if (hlikelihood == D_INF) {
             likelihood = D_INF;
@@ -368,8 +371,8 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
       reestim[0] = new Reestimation<double>(convol->distribution[0]->nb_value);
 
       convol->expectation_step(*this , partial_convol , reestim);
-      convol_histo->histogram[0]->update(reestim[0] , nb_element);
-      convol_histo->histogram[1]->update(reestim[1] , nb_element);
+      convol_histo->frequency_distribution[0]->update(reestim[0] , nb_element);
+      convol_histo->frequency_distribution[1]->update(reestim[1] , nb_element);
 
       delete reestim[0];
     }
@@ -405,14 +408,16 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
  *
  *--------------------------------------------------------------*/
 
-Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os , const Parametric &known_dist ,
-                                               int min_inf_bound , int estimator , int nb_iter ,
-                                               double weight , int penalty_type , int outside) const
+Convolution* FrequencyDistribution::convolution_estimation(Format_error &error , ostream &os ,
+                                                           const DiscreteParametric &known_dist ,
+                                                           int min_inf_bound , int estimator ,
+                                                           int nb_iter , double weight ,
+                                                           int penalty_type , int outside) const
 
 {
   bool status = true;
   double proba;
-  Parametric *unknown_dist;
+  DiscreteParametric *unknown_dist;
   Convolution *convol;
 
 
@@ -442,8 +447,8 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
       proba = CONVOLUTION_INIT_PROBABILITY;
     }
 
-    unknown_dist = new Parametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT , 1. ,
-                                  proba , CONVOLUTION_THRESHOLD);
+    unknown_dist = new DiscreteParametric(NEGATIVE_BINOMIAL , min_inf_bound , I_DEFAULT ,
+                                          1. , proba , CONVOLUTION_THRESHOLD);
 
 #   ifdef DEBUG
     unknown_dist->ascii_print(os);
@@ -467,12 +472,12 @@ Convolution* Histogram::convolution_estimation(Format_error &error , ostream &os
  *
  *--------------------------------------------------------------*/
 
-Convolution_data* Convolution::simulation(Format_error &error , int nb_element) const
+ConvolutionData* Convolution::simulation(Format_error &error , int nb_element) const
 
 {
   register int i , j;
   int value , sum;
-  Convolution_data *convol_histo;
+  ConvolutionData *convol_histo;
 
 
   error.init();
@@ -484,9 +489,9 @@ Convolution_data* Convolution::simulation(Format_error &error , int nb_element) 
 
   else {
 
-    // creation d'un objet Convolution_data
+    // creation d'un objet ConvolutionData
 
-    convol_histo = new Convolution_data(*this);
+    convol_histo = new ConvolutionData(*this);
     convol_histo->convolution = new Convolution(*this , false);
 
     for (i = 0;i < nb_element;i++) {
@@ -499,7 +504,7 @@ Convolution_data* Convolution::simulation(Format_error &error , int nb_element) 
         value = distribution[j]->simulation();
         sum += value;
 
-        (convol_histo->histogram[j]->frequency[value])++;
+        (convol_histo->frequency_distribution[j]->frequency[value])++;
       }
 
       // loi resultante
@@ -507,7 +512,7 @@ Convolution_data* Convolution::simulation(Format_error &error , int nb_element) 
       (convol_histo->frequency[sum])++;
     }
 
-    // extraction des caracteristiques des histogrammes
+    // extraction des caracteristiques des lois empiriques
 
     convol_histo->nb_value_computation();
     convol_histo->offset_computation();
@@ -516,13 +521,13 @@ Convolution_data* Convolution::simulation(Format_error &error , int nb_element) 
     convol_histo->mean_computation();
     convol_histo->variance_computation();
 
-    for (i = 0;i < convol_histo->nb_histogram;i++) {
-      convol_histo->histogram[i]->nb_value_computation();
-      convol_histo->histogram[i]->offset_computation();
-      convol_histo->histogram[i]->nb_element = nb_element;
-      convol_histo->histogram[i]->max_computation();
-      convol_histo->histogram[i]->mean_computation();
-      convol_histo->histogram[i]->variance_computation();
+    for (i = 0;i < convol_histo->nb_distribution;i++) {
+      convol_histo->frequency_distribution[i]->nb_value_computation();
+      convol_histo->frequency_distribution[i]->offset_computation();
+      convol_histo->frequency_distribution[i]->nb_element = nb_element;
+      convol_histo->frequency_distribution[i]->max_computation();
+      convol_histo->frequency_distribution[i]->mean_computation();
+      convol_histo->frequency_distribution[i]->variance_computation();
     }
   }
 
