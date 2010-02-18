@@ -19,11 +19,11 @@
  *                                                                       
  *-----------------------------------------------------------------------------*/
 
-#ifndef __CLASS_HISTOGRAM__
-#define __CLASS_HISTOGRAM__
+#ifndef __CLASS_FREQUENCY_DISTRIBUTION__
+#define __CLASS_FREQUENCY_DISTRIBUTION__
 
 // Boost.Python Wrapper export function
-void class_histogram();
+void class_frequency_distribution();
 void class_distribution_data();
 
 #endif
