@@ -49,95 +49,95 @@ public:
 
 
 
-  static boost::shared_ptr<Time_events>
-  time_events_from_file(char* filename)
+  static boost::shared_ptr<TimeEvents>
+  time_events_from_file(char *filename)
   {
-    Format_error error;
-    Time_events *time_events = NULL;
+    StatError error;
+    TimeEvents *time_events = NULL;
     time_events = time_events_ascii_read(error, filename);
     if(!time_events)
     {
       sequence_analysis::wrap_util::throw_error(error);
     }
-    return boost::shared_ptr<Time_events>(time_events);
+    return boost::shared_ptr<TimeEvents>(time_events);
   }
 
 
-  static boost::shared_ptr<Time_events>
-  time_events_from_histogram(const Histogram& input, int itime)
+  static boost::shared_ptr<TimeEvents>
+  time_events_from_histogram(const FrequencyDistribution &input, int itime)
   {
-    Format_error error;
-    Time_events *time_events = NULL;
+    StatError error;
+    TimeEvents *time_events = NULL;
     time_events = input.build_time_events(error, itime);
     if(!time_events)
     {
       sequence_analysis::wrap_util::throw_error(error);
     }
-    return boost::shared_ptr<Time_events>(time_events);
+    return boost::shared_ptr<TimeEvents>(time_events);
   }
 
 
-  static Distribution_data*
-  extract(const Time_events& input, int histo_type, int itime)
+  static DiscreteDistributionData*
+  extract(const TimeEvents &input, int histo_type, int itime)
   {
 
     // to finish !!. This function does not work. core dumped,seg fault!!
-    Format_error error;
-    Distribution_data* ret;
-    ret = new Distribution_data(*input.extract(error, histo_type, itime));
+    StatError error;
+    DiscreteDistributionData* ret;
+    ret = new DiscreteDistributionData(*input.extract(error, histo_type, itime));
     if (!ret)
        sequence_analysis::wrap_util::throw_error(error);
     return ret;
   }
   
-  static Histogram*
-  get_mixture(const Time_events& input)
+  static FrequencyDistribution*
+  get_mixture(const TimeEvents &input)
   {
-    Histogram* ret;
-    ret = new Histogram(*input.get_mixture());
+    FrequencyDistribution *ret;
+    ret = new FrequencyDistribution(*input.get_mixture());
     return ret;
    }
 
-  static Histogram*
-  get_hnb_event(const Time_events& input, int index)
+  static FrequencyDistribution*
+  get_hnb_event(const TimeEvents &input, int index)
   {
-    Histogram* ret;
+    FrequencyDistribution *ret;
     //todo
     //check value index is in time
     //same results as get_hmixture!!
-    ret = new Histogram(*input.get_hnb_event(index));
+    ret = new FrequencyDistribution(*input.get_hnb_event(index));
     return ret;
   }
 
-  static Histogram*
-  get_htime(const Time_events& input)
+  static FrequencyDistribution*
+  get_htime(const TimeEvents &input)
   {
-    // check that it is a Histogram cast or Distribution_data
-    Histogram* ret;
-    ret = new Histogram(*input.get_htime());
+    // check that it is a FrequencyDistribution cast or DiscreteDistributionData
+    FrequencyDistribution* ret;
+    ret = new FrequencyDistribution(*input.get_htime());
     return ret;
   }
 
-  static Time_events*
-  time_scaling(const Time_events& input, int scaling){
-    SIMPLE_METHOD_TEMPLATE_1(input, time_scaling, Time_events, scaling);
+  static TimeEvents*
+  time_scaling(const TimeEvents &input, int scaling){
+    SIMPLE_METHOD_TEMPLATE_1(input, time_scaling, TimeEvents, scaling);
   }
 
-  static Time_events*
-  time_select(const Time_events& input, int min, int max){
-    SIMPLE_METHOD_TEMPLATE_1(input, time_select, Time_events, min, max);
+  static TimeEvents*
+  time_select(const TimeEvents &input, int min, int max){
+    SIMPLE_METHOD_TEMPLATE_1(input, time_select, TimeEvents, min, max);
   }
 
-  static Time_events*
-  nb_event_select(const Time_events& input, int min, int max){
-    SIMPLE_METHOD_TEMPLATE_1(input, nb_event_select, Time_events, min, max);
+  static TimeEvents*
+  nb_event_select(const TimeEvents &input, int min, int max){
+    SIMPLE_METHOD_TEMPLATE_1(input, nb_event_select, TimeEvents, min, max);
   }
 
   static void
-  file_ascii_write(const Time_events& d, const char* path, bool exhaustive)
+  file_ascii_write(const TimeEvents &d, const char* path, bool exhaustive)
   {
     bool result = true;
-    Format_error error;
+    StatError error;
 
     result = d.ascii_write(error, path, exhaustive);
     if (!result)
@@ -145,33 +145,33 @@ public:
    }
 
 
-  static Time_events*
-  merge(const Time_events& input, const boost::python::list input_timev)
+  static TimeEvents*
+  merge(const TimeEvents &input, const boost::python::list input_timev)
   {
-    HEADER(Time_events);
-    CREATE_ARRAY(input_timev, const Time_events *, timev)
+    HEADER(TimeEvents);
+    CREATE_ARRAY(input_timev, const TimeEvents*, timev)
 
-    ret = new Time_events(timev_size, timev.get());
+    ret = new TimeEvents(timev_size, timev.get());
 
     FOOTER;
   }
 
   static Renewal*
-  estimation_type(const Time_events& input, char type, int estimator, int nb_iter,
+  estimation_type(const TimeEvents &input, char type, int estimator, int nb_iter,
                  int equilibrium_estimator, int mean_computation, double weight,
                  int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
     ret = input.estimation(error, os, type, estimator, nb_iter, equilibrium_estimator,
-                          mean_computation, weight, penalty_type, outside);
+                           mean_computation, weight, penalty_type, outside);
 
     FOOTER_OS;
   }
 
 
   static Renewal*
-  estimation_inter_event_type(const Time_events& input, char type,
-      const Parametric& input_dist, int estimator, int nb_iter,
+  estimation_inter_event_type(const TimeEvents &input, char type,
+      const DiscreteParametric& input_dist, int estimator, int nb_iter,
       int equilibrium_estimator, int mean_computation, double weight,
       int penalty_type, int outside)
   {
@@ -184,9 +184,9 @@ public:
     FOOTER_OS;
   }
 
-  static MultiPlotSet* get_plotable(const Time_events& p)
+  static MultiPlotSet* get_plotable(const TimeEvents &p)
   {
-    Format_error error;
+    StatError error;
     MultiPlotSet* ret = p.get_plotable();
     if (!ret) ERROR;
     return ret;
@@ -200,7 +200,7 @@ public:
 void class_time_events() {
 
 
-  class_<Time_events, bases<STAT_interface> > ("_Time_events", "Time_events")
+  class_<TimeEvents, bases<StatInterface> > ("_TimeEvents", "TimeEvents")
     .def("__init__", make_constructor(TimeEventsWrap::time_events_from_file))
     .def("__init__", make_constructor(TimeEventsWrap::time_events_from_histogram))
 
@@ -209,8 +209,8 @@ void class_time_events() {
 
     .def(self_ns::str(self)) //__str__
 
-    .add_property("nb_element", &Time_events::get_nb_element,"nb elements")
-    .add_property("nb_class", &Time_events::get_nb_class,"nb class")
+    .add_property("nb_element", &TimeEvents::get_nb_element,"nb elements")
+    .add_property("nb_class", &TimeEvents::get_nb_class,"nb class")
 
     DEF_RETURN_VALUE_NO_ARGS("get_htime", &TimeEventsWrap::get_htime, "returns htime histogram")
     DEF_RETURN_VALUE_NO_ARGS("get_mixture", &TimeEventsWrap::get_mixture, "returns mixture Mixture histogram")
@@ -243,8 +243,8 @@ void class_time_events() {
       void nb_element_computation();
       double min_inter_event_computation() const;
 
-      Time_events(int inb_element , int *itime , int *inb_event){ build(inb_element , itime , inb_event); }
-    Time_events(const Time_events &timev) { copy(timev); }
+      TimeEvents(int inb_element , int *itime , int *inb_event){ build(inb_element , itime , inb_event); }
+    TimeEvents(const TimeEvents &timev) { copy(timev); }
 
 
 
