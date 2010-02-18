@@ -1147,13 +1147,13 @@ DistanceMatrix& DistanceMatrix::operator=(const DistanceMatrix &dist_matrix)
  *
  *  Selection de formes par l'identificateur.
  *
- *  arguments : reference sur un objet Format_error, nombre de formes,
+ *  arguments : reference sur un objet StatError, nombre de formes,
  *              identificateurs des formes, flag pour conserver ou rejeter
  *              les formes selectionnees.
  *
  *--------------------------------------------------------------*/
 
-DistanceMatrix* DistanceMatrix::select_individual(Format_error &error , int inb_pattern ,
+DistanceMatrix* DistanceMatrix::select_individual(StatError &error , int inb_pattern ,
                                                   int *iidentifier , bool keep) const
 
 {
@@ -1242,11 +1242,11 @@ DistanceMatrix* DistanceMatrix::select_individual(Format_error &error , int inb_
  *
  *  Symetrisation d'une matrice des distances.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-DistanceMatrix* DistanceMatrix::symmetrize(Format_error &error) const
+DistanceMatrix* DistanceMatrix::symmetrize(StatError &error) const
 
 {
   DistanceMatrix *dist_matrix;
@@ -1270,11 +1270,11 @@ DistanceMatrix* DistanceMatrix::symmetrize(Format_error &error) const
  *
  *  Denormalisation d'une matrice des distances.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-DistanceMatrix* DistanceMatrix::unnormalize(Format_error &error) const
+DistanceMatrix* DistanceMatrix::unnormalize(StatError &error) const
 
 {
   bool status = false;
@@ -1865,12 +1865,12 @@ ostream& DistanceMatrix::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet DistanceMatrix dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool DistanceMatrix::ascii_write(Format_error &error , const char *path ,
+bool DistanceMatrix::ascii_write(StatError &error , const char *path ,
                                  bool exhaustive) const
 
 {
@@ -2124,11 +2124,11 @@ ostream& DistanceMatrix::spreadsheet_write(ostream &os) const
  *
  *  Ecriture d'un objet DistanceMatrix dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool DistanceMatrix::spreadsheet_write(Format_error &error , const char *path) const
+bool DistanceMatrix::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -2155,12 +2155,12 @@ bool DistanceMatrix::spreadsheet_write(Format_error &error , const char *path) c
  *
  *  Sortie Gnuplot d'un objet DistanceMatrix.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool DistanceMatrix::plot_write(Format_error &error , const char *prefix ,
+bool DistanceMatrix::plot_write(StatError &error , const char *prefix ,
                                 const char *title) const
 
 {
@@ -2330,11 +2330,11 @@ bool DistanceMatrix::plot_write(Format_error &error , const char *prefix ,
  *
  *  Sortie graphique d'un objet DistanceMatrix.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* DistanceMatrix::get_plotable(Format_error &error) const
+MultiPlotSet* DistanceMatrix::get_plotable(StatError &error) const
 
 {
   MultiPlotSet *plot_set;
@@ -2468,7 +2468,7 @@ MultiPlotSet* DistanceMatrix::get_plotable() const
 
 {
   MultiPlotSet *plot_set;
-  Format_error error;
+  StatError error;
 
 
   return get_plotable(error);
