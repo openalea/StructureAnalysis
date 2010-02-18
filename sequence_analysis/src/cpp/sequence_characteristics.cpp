@@ -54,13 +54,13 @@ extern char* label(const char *file_name);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Sequence_characteristics.
+ *  Constructeur par defaut de la classe SequenceCharacteristics.
  *
  *  argument : nombre de valeurs.
  *
  *--------------------------------------------------------------*/
 
-Sequence_characteristics::Sequence_characteristics(int inb_value)
+SequenceCharacteristics::SequenceCharacteristics(int inb_value)
 
 {
   nb_value = inb_value;
@@ -78,16 +78,16 @@ Sequence_characteristics::Sequence_characteristics(int inb_value)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Sequence_characteristics avec ajout/suppression
- *  des histogrammes de temps de sejour initial.
+ *  Constructeur de la classe SequenceCharacteristics avec ajout/suppression
+ *  des lois empiriques de temps de sejour initial.
  *
- *  arguments : reference sur un objet Sequence_characteristics,
- *              flag construction des histogrammes de temps de sejour initial.
+ *  arguments : reference sur un objet SequenceCharacteristics,
+ *              flag construction des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-Sequence_characteristics::Sequence_characteristics(const Sequence_characteristics &characteristics ,
-                                                   bool initial_run_flag)
+SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &characteristics ,
+                                                 bool initial_run_flag)
 
 {
   register int i;
@@ -97,32 +97,32 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
 
   index_value = new Curves(*(characteristics.index_value));
 
-  first_occurrence = new Histogram*[nb_value];
+  first_occurrence = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
-    first_occurrence[i] = new Histogram(*(characteristics.first_occurrence[i]));
+    first_occurrence[i] = new FrequencyDistribution(*(characteristics.first_occurrence[i]));
   }
 
-  recurrence_time = new Histogram*[nb_value];
+  recurrence_time = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
-    recurrence_time[i] = new Histogram(*(characteristics.recurrence_time[i]));
+    recurrence_time[i] = new FrequencyDistribution(*(characteristics.recurrence_time[i]));
   }
 
-  sojourn_time = new Histogram*[nb_value];
+  sojourn_time = new FrequencyDistribution*[nb_value];
 
   if (initial_run_flag) {
-    initial_run = new Histogram*[nb_value];
+    initial_run = new FrequencyDistribution*[nb_value];
   }
   else {
     initial_run = NULL;
   }
 
-  final_run = new Histogram*[nb_value];
+  final_run = new FrequencyDistribution*[nb_value];
 
   for (i = 0;i < nb_value;i++) {
     if (((characteristics.initial_run) && (initial_run_flag)) ||
         ((!(characteristics.initial_run)) && (!initial_run_flag))) {
-      sojourn_time[i] = new Histogram(*(characteristics.sojourn_time[i]));
-      final_run[i] = new Histogram(*(characteristics.final_run[i]));
+      sojourn_time[i] = new FrequencyDistribution(*(characteristics.sojourn_time[i]));
+      final_run[i] = new FrequencyDistribution(*(characteristics.final_run[i]));
     }
     else {
       sojourn_time[i] = NULL;
@@ -130,14 +130,14 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
     }
 
     if ((characteristics.initial_run) && (initial_run_flag)) {
-      initial_run[i] = new Histogram(*(characteristics.initial_run[i]));
+      initial_run[i] = new FrequencyDistribution(*(characteristics.initial_run[i]));
     }
   }
 
   if (characteristics.nb_run) {
-    nb_run = new Histogram*[nb_value];
+    nb_run = new FrequencyDistribution*[nb_value];
     for (i = 0;i < nb_value;i++) {
-      nb_run[i] = new Histogram(*(characteristics.nb_run[i]));
+      nb_run[i] = new FrequencyDistribution(*(characteristics.nb_run[i]));
     }
   }
   else {
@@ -145,9 +145,9 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
   }
 
   if (characteristics.nb_occurrence) {
-    nb_occurrence = new Histogram*[nb_value];
+    nb_occurrence = new FrequencyDistribution*[nb_value];
     for (i = 0;i < nb_value;i++) {
-      nb_occurrence[i] = new Histogram(*(characteristics.nb_occurrence[i]));
+      nb_occurrence[i] = new FrequencyDistribution(*(characteristics.nb_occurrence[i]));
     }
   }
   else {
@@ -161,11 +161,11 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
  *  Copie des caracteristiques d'un echantillon de sequences
  *  pour une variable donnee.
  *
- *  argument : reference sur un objet Sequence_characteristics.
+ *  argument : reference sur un objet SequenceCharacteristics.
  *
  *--------------------------------------------------------------*/
 
-void Sequence_characteristics::copy(const Sequence_characteristics &characteristics)
+void SequenceCharacteristics::copy(const SequenceCharacteristics &characteristics)
 
 {
   register int i;
@@ -175,39 +175,39 @@ void Sequence_characteristics::copy(const Sequence_characteristics &characterist
 
   index_value = new Curves(*(characteristics.index_value));
 
-  first_occurrence = new Histogram*[nb_value];
+  first_occurrence = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
-    first_occurrence[i] = new Histogram(*(characteristics.first_occurrence[i]));
+    first_occurrence[i] = new FrequencyDistribution(*(characteristics.first_occurrence[i]));
   }
 
-  recurrence_time = new Histogram*[nb_value];
+  recurrence_time = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
-    recurrence_time[i] = new Histogram(*(characteristics.recurrence_time[i]));
+    recurrence_time[i] = new FrequencyDistribution(*(characteristics.recurrence_time[i]));
   }
 
-  sojourn_time = new Histogram*[nb_value];
+  sojourn_time = new FrequencyDistribution*[nb_value];
 
   if (characteristics.initial_run) {
-    initial_run = new Histogram*[nb_value];
+    initial_run = new FrequencyDistribution*[nb_value];
   }
   else {
     initial_run = NULL;
   }
 
-  final_run = new Histogram*[nb_value];
+  final_run = new FrequencyDistribution*[nb_value];
 
   for (i = 0;i < nb_value;i++) {
-    sojourn_time[i] = new Histogram(*(characteristics.sojourn_time[i]));
+    sojourn_time[i] = new FrequencyDistribution(*(characteristics.sojourn_time[i]));
     if (characteristics.initial_run) {
-      initial_run[i] = new Histogram(*(characteristics.initial_run[i]));
+      initial_run[i] = new FrequencyDistribution(*(characteristics.initial_run[i]));
     }
-    final_run[i] = new Histogram(*(characteristics.final_run[i]));
+    final_run[i] = new FrequencyDistribution(*(characteristics.final_run[i]));
   }
 
   if (characteristics.nb_run) {
-    nb_run = new Histogram*[nb_value];
+    nb_run = new FrequencyDistribution*[nb_value];
     for (i = 0;i < nb_value;i++) {
-      nb_run[i] = new Histogram(*(characteristics.nb_run[i]));
+      nb_run[i] = new FrequencyDistribution(*(characteristics.nb_run[i]));
     }
   }
   else {
@@ -215,9 +215,9 @@ void Sequence_characteristics::copy(const Sequence_characteristics &characterist
   }
 
   if (characteristics.nb_occurrence) {
-    nb_occurrence = new Histogram*[nb_value];
+    nb_occurrence = new FrequencyDistribution*[nb_value];
     for (i = 0;i < nb_value;i++) {
-      nb_occurrence[i] = new Histogram(*(characteristics.nb_occurrence[i]));
+      nb_occurrence[i] = new FrequencyDistribution(*(characteristics.nb_occurrence[i]));
     }
   }
   else {
@@ -231,11 +231,11 @@ void Sequence_characteristics::copy(const Sequence_characteristics &characterist
  *  Copie des caracteristiques inchangees d'un echantillon de sequences
  *  pour une variable donnee dans le cas d'une inversion des sequences.
  *
- *  argument : reference sur un objet Sequence_characteristics.
+ *  argument : reference sur un objet SequenceCharacteristics.
  *
  *--------------------------------------------------------------*/
 
-void Sequence_characteristics::reverse(const Sequence_characteristics &characteristics)
+void SequenceCharacteristics::reverse(const SequenceCharacteristics &characteristics)
 
 {
   register int i;
@@ -246,20 +246,20 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
   index_value = NULL;
   first_occurrence = NULL;
 
-  recurrence_time = new Histogram*[nb_value];
+  recurrence_time = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
-    recurrence_time[i] = new Histogram(*(characteristics.recurrence_time[i]));
+    recurrence_time[i] = new FrequencyDistribution(*(characteristics.recurrence_time[i]));
   }
 
   if (characteristics.initial_run) {
-    sojourn_time = new Histogram*[nb_value];
-    initial_run = new Histogram*[nb_value];
-    final_run = new Histogram*[nb_value];
+    sojourn_time = new FrequencyDistribution*[nb_value];
+    initial_run = new FrequencyDistribution*[nb_value];
+    final_run = new FrequencyDistribution*[nb_value];
 
     for (i = 0;i < nb_value;i++) {
-      sojourn_time[i] = new Histogram(*(characteristics.sojourn_time[i]));
-      initial_run[i] = new Histogram(*(characteristics.final_run[i]));
-      final_run[i] = new Histogram(*(characteristics.initial_run[i]));
+      sojourn_time[i] = new FrequencyDistribution(*(characteristics.sojourn_time[i]));
+      initial_run[i] = new FrequencyDistribution(*(characteristics.final_run[i]));
+      final_run[i] = new FrequencyDistribution(*(characteristics.initial_run[i]));
     }
   }
 
@@ -270,9 +270,9 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
   }
 
   if (characteristics.nb_run) {
-    nb_run = new Histogram*[nb_value];
+    nb_run = new FrequencyDistribution*[nb_value];
     for (i = 0;i < nb_value;i++) {
-      nb_run[i] = new Histogram(*(characteristics.nb_run[i]));
+      nb_run[i] = new FrequencyDistribution(*(characteristics.nb_run[i]));
     }
   }
   else {
@@ -280,9 +280,9 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
   }
 
   if (characteristics.nb_occurrence) {
-    nb_occurrence = new Histogram*[nb_value];
+    nb_occurrence = new FrequencyDistribution*[nb_value];
     for (i = 0;i < nb_value;i++) {
-      nb_occurrence[i] = new Histogram(*(characteristics.nb_occurrence[i]));
+      nb_occurrence[i] = new FrequencyDistribution(*(characteristics.nb_occurrence[i]));
     }
   }
   else {
@@ -293,15 +293,15 @@ void Sequence_characteristics::reverse(const Sequence_characteristics &character
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par copie de la classe Sequence_characteristics.
+ *  Constructeur par copie de la classe SequenceCharacteristics.
  *
- *  arguments : reference sur un objet Sequence_characteristics,
+ *  arguments : reference sur un objet SequenceCharacteristics,
  *              type de transformation ('r' : inversion).
  *
  *--------------------------------------------------------------*/
 
-Sequence_characteristics::Sequence_characteristics(const Sequence_characteristics &characteristics ,
-                                                   char transform)
+SequenceCharacteristics::SequenceCharacteristics(const SequenceCharacteristics &characteristics ,
+                                                 char transform)
 
 {
   switch (transform) {
@@ -317,11 +317,11 @@ Sequence_characteristics::Sequence_characteristics(const Sequence_characteristic
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur des champs de la classe Sequence_characteristics.
+ *  Destructeur des champs de la classe SequenceCharacteristics.
  *
  *--------------------------------------------------------------*/
 
-void Sequence_characteristics::remove()
+void SequenceCharacteristics::remove()
 
 {
   register int i;
@@ -382,11 +382,11 @@ void Sequence_characteristics::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Sequence_characteristics.
+ *  Destructeur de la classe SequenceCharacteristics.
  *
  *--------------------------------------------------------------*/
 
-Sequence_characteristics::~Sequence_characteristics()
+SequenceCharacteristics::~SequenceCharacteristics()
 
 {
   remove();
@@ -395,13 +395,13 @@ Sequence_characteristics::~Sequence_characteristics()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Sequence_characteristics.
+ *  Operateur d'assignement de la classe SequenceCharacteristics.
  *
- *  argument : reference sur un objet Sequence_characteristics.
+ *  argument : reference sur un objet SequenceCharacteristics.
  *
  *--------------------------------------------------------------*/
 
-Sequence_characteristics& Sequence_characteristics::operator=(const Sequence_characteristics &characteristics)
+SequenceCharacteristics& SequenceCharacteristics::operator=(const SequenceCharacteristics &characteristics)
 
 {
   if (&characteristics != this) {
@@ -415,50 +415,50 @@ Sequence_characteristics& Sequence_characteristics::operator=(const Sequence_cha
 
 /*--------------------------------------------------------------*
  *
- *  Creation des histogrammes de temps de sejour dans une valeur
+ *  Creation des lois empiriques de temps de sejour dans une valeur
  *  pour une variable donnee.
  *
  *  arguments : longueur maximum des sequences, flag sur la creation
- *              des histogrammes de temps de sejour initial.
+ *              des lois empiriques de temps de sejour initial.
  *
  *--------------------------------------------------------------*/
 
-void Sequence_characteristics::create_sojourn_time_histogram(int max_length , int initial_run_flag)
+void SequenceCharacteristics::create_sojourn_time_frequency_distribution(int max_length , int initial_run_flag)
 
 {
   register int i;
 
 
-  sojourn_time = new Histogram*[nb_value];
+  sojourn_time = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
-    sojourn_time[i] = new Histogram(max_length + 1);
+    sojourn_time[i] = new FrequencyDistribution(max_length + 1);
   }
 
   if (initial_run_flag) {
-    initial_run = new Histogram*[nb_value];
+    initial_run = new FrequencyDistribution*[nb_value];
     for (i = 0;i < nb_value;i++) {
-      initial_run[i] = new Histogram(max_length + 1);
+      initial_run[i] = new FrequencyDistribution(max_length + 1);
     }
   }
 
-  final_run = new Histogram*[nb_value];
+  final_run = new FrequencyDistribution*[nb_value];
   for (i = 0;i < nb_value;i++) {
-    final_run[i] = new Histogram(max_length + 1);
+    final_run[i] = new FrequencyDistribution(max_length + 1);
   }
 }
 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Sequence_characteristics.
+ *  Ecriture d'un objet SequenceCharacteristics.
  *
- *  arguments : stream, type de la variable, histogramme
+ *  arguments : stream, type de la variable, loi empirique
  *              des longueurs des sequences, flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Histogram &hlength ,
-                                               bool exhaustive , bool comment_flag) const
+ostream& SequenceCharacteristics::ascii_print(ostream &os , int type , const FrequencyDistribution &hlength ,
+                                              bool exhaustive , bool comment_flag) const
 
 {
   register int i;
@@ -484,8 +484,8 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
     if (comment_flag) {
       os << "# ";
     }
-    os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-       << " " << i << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+    os << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+       << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     first_occurrence[i]->ascii_characteristic_print(os , false , comment_flag);
 
     if ((first_occurrence[i]->nb_element > 0) && (exhaustive)) {
@@ -493,8 +493,8 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       if (comment_flag) {
         os << "# ";
       }
-      os << "   | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-         << " " << i << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+         << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       first_occurrence[i]->ascii_print(os , comment_flag);
     }
   }
@@ -505,7 +505,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       os << "# ";
     }
     os << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+       << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     recurrence_time[i]->ascii_characteristic_print(os , false , comment_flag);
 
     if ((recurrence_time[i]->nb_element > 0) && (exhaustive)) {
@@ -514,7 +514,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
         os << "# ";
       }
       os << "   | " << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       recurrence_time[i]->ascii_print(os , comment_flag);
     }
   }
@@ -525,7 +525,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       os << "# ";
     }
     os << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     sojourn_time[i]->ascii_characteristic_print(os , false , comment_flag);
 
     if ((sojourn_time[i]->nb_element > 0) && (exhaustive)) {
@@ -534,7 +534,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
         os << "# ";
       }
       os << "   | " << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       sojourn_time[i]->ascii_print(os , comment_flag);
     }
 
@@ -545,7 +545,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       }
       os << SEQ_label[SEQL_INITIAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       initial_run[i]->ascii_characteristic_print(os , false , comment_flag);
 
       if ((initial_run[i]->nb_element > 0) && (exhaustive)) {
@@ -555,7 +555,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
         }
         os << "   | " << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         initial_run[i]->ascii_print(os , comment_flag);
       }
     }
@@ -566,7 +566,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
     }
     os << SEQ_label[SEQL_FINAL_RUN] << " - "
        << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
     final_run[i]->ascii_characteristic_print(os , false , comment_flag);
 
     if ((final_run[i]->nb_element > 0) && (exhaustive)) {
@@ -576,7 +576,7 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       }
       os << "   | " << SEQ_label[SEQL_FINAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       final_run[i]->ascii_print(os , comment_flag);
     }
   }
@@ -587,8 +587,8 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       if (comment_flag) {
         os << "# ";
       }
-      os << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+      os << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       nb_run[i]->ascii_characteristic_print(os , (hlength.variance > 0. ? false : true) , comment_flag);
 
       if ((nb_run[i]->nb_element > 0) && (exhaustive)) {
@@ -596,8 +596,8 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        os << "   | " << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         nb_run[i]->ascii_print(os , comment_flag);
       }
     }
@@ -609,8 +609,8 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
       if (comment_flag) {
         os << "# ";
       }
-      os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+      os << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
       nb_occurrence[i]->ascii_characteristic_print(os , (hlength.variance > 0. ? false : true) , comment_flag);
 
       if ((nb_occurrence[i]->nb_element > 0) && (exhaustive)) {
@@ -618,8 +618,8 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        os << "   | " << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         nb_occurrence[i]->ascii_print(os , comment_flag);
       }
     }
@@ -631,15 +631,15 @@ ostream& Sequence_characteristics::ascii_print(ostream &os , int type , const Hi
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Sequence_characteristics au format tableur.
+ *  Ecriture d'un objet SequenceCharacteristics au format tableur.
  *
- *  arguments : stream, type de la variable, histogramme
+ *  arguments : stream, type de la variable, loi empirique
  *              des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
 
-ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
-                                                     const Histogram &hlength) const
+ostream& SequenceCharacteristics::spreadsheet_print(ostream &os , int type ,
+                                                    const FrequencyDistribution &hlength) const
 
 {
   register int i;
@@ -667,76 +667,76 @@ ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
   delete smoothed_curves;
 
   for (i = 0;i < nb_value;i++) {
-    os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-       << " " << i << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+    os << "\n" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+       << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     first_occurrence[i]->spreadsheet_characteristic_print(os);
 
     if (first_occurrence[i]->nb_element > 0) {
-      os << "\n\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-         << " " << i << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "\n\t" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+         << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       first_occurrence[i]->spreadsheet_print(os);
     }
   }
 
   for (i = 0;i < nb_value;i++) {
     os << "\n" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+       << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     recurrence_time[i]->spreadsheet_characteristic_print(os);
 
     if (recurrence_time[i]->nb_element > 0) {
       os << "\n\t" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       recurrence_time[i]->spreadsheet_print(os);
     }
   }
 
   for (i = 0;i < nb_value;i++) {
     os << "\n" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     sojourn_time[i]->spreadsheet_characteristic_print(os);
 
     if (sojourn_time[i]->nb_element > 0) {
       os << "\n\t" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       sojourn_time[i]->spreadsheet_print(os);
     }
 
     if (initial_run) {
       os << "\n" << SEQ_label[SEQL_INITIAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       initial_run[i]->spreadsheet_characteristic_print(os);
 
       if (initial_run[i]->nb_element > 0) {
         os << "\n\t" << SEQ_label[SEQL_INITIAL_RUN] << " - "
            << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+           << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         initial_run[i]->spreadsheet_print(os);
       }
     }
 
     os << "\n" << SEQ_label[SEQL_FINAL_RUN] << " - "
        << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+       << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
     final_run[i]->spreadsheet_characteristic_print(os);
 
     if (final_run[i]->nb_element > 0) {
       os << "\n\t" << SEQ_label[SEQL_FINAL_RUN] << " - "
          << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+         << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       final_run[i]->spreadsheet_print(os);
     }
   }
 
   if (nb_run) {
     for (i = 0;i < nb_value;i++) {
-      os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      os << "\n" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       nb_run[i]->spreadsheet_characteristic_print(os , (hlength.variance > 0. ? false : true));
 
       if (nb_run[i]->nb_element > 0) {
-        os << "\n\t" << SEQ_label[SEQL_NB_RUN_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        os << "\n\t" << SEQ_label[SEQL_NB_RUN_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         nb_run[i]->spreadsheet_print(os);
       }
     }
@@ -744,13 +744,13 @@ ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
 
   if (nb_occurrence) {
     for (i = 0;i < nb_value;i++) {
-      os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      os << "\n" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+         << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       nb_occurrence[i]->spreadsheet_characteristic_print(os , (hlength.variance > 0. ? false : true));
 
       if (nb_occurrence[i]->nb_element > 0) {
-        os << "\n\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        os << "\n\t" << SEQ_label[SEQL_NB_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+           << " " << i << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
         nb_occurrence[i]->spreadsheet_print(os);
       }
     }
@@ -766,20 +766,20 @@ ostream& Sequence_characteristics::spreadsheet_print(ostream &os , int type ,
  *
  *  arguments : prefixe des fichiers, titre des figures, indice de la variable,
  *              nombre de variables, type de la variable,
- *              histogramme des longueurs des sequences.
+ *              loi empirique des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
 
-bool Sequence_characteristics::plot_print(const char *prefix , const char *title ,
-                                          int variable , int nb_variable , int type ,
-                                          const Histogram &hlength) const
+bool SequenceCharacteristics::plot_print(const char *prefix , const char *title ,
+                                         int variable , int nb_variable , int type ,
+                                         const FrequencyDistribution &hlength) const
 
 {
   bool status , start;
   register int i , j , k;
   int index_length , nb_histo , histo_index;
   Curves *smoothed_curves;
-  const Histogram **phisto;
+  const FrequencyDistribution **phisto;
   ostringstream data_file_name[2];
 
 
@@ -801,7 +801,7 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
   delete smoothed_curves;
 
   if (status) {
-    phisto = new const Histogram*[1 + NB_OUTPUT * 6];
+    phisto = new const FrequencyDistribution*[1 + NB_OUTPUT * 6];
 
     data_file_name[1] << prefix << variable + 1 << 1 << ".dat";
 
@@ -950,7 +950,7 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
       out_file << "plot [0:" << hlength.nb_value - 1 << "] [0:"
                << (int)(hlength.max * YSCALE) + 1 << "] \"" 
                << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
-               << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM]
+               << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
       if (hlength.nb_value - 1 < TIC_THRESHOLD) {
@@ -1032,8 +1032,8 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
                    << (int)(first_occurrence[k]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << SEQ_label[SEQL_FIRST_OCCURRENCE_OF]
-                   << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                   << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                   << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
+                   << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
           if (MAX(1 , first_occurrence[k]->nb_value - 1) < TIC_THRESHOLD) {
             out_file << "set xtics autofreq" << endl;
@@ -1116,7 +1116,7 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
                    << (int)(recurrence_time[k]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
-                   << " " << k << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                   << " " << k << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (recurrence_time[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1200,7 +1200,7 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
                    << (int)(sojourn_time[k]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (sojourn_time[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1234,7 +1234,7 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << SEQ_label[SEQL_INITIAL_RUN] << " - "
                    << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (initial_run[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1268,7 +1268,7 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
                    << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                    << " title \"" << SEQ_label[SEQL_FINAL_RUN] << " - "
                    << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAM]
+                   << " " << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
           if (final_run[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1353,8 +1353,8 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
                      << (int)(nb_run[k]->max * YSCALE) + 1 << "] \""
                      << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                      << " title \"" << SEQ_label[SEQL_NB_RUN_OF]
-                     << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                     << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                     << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
+                     << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << "\" with impulses" << endl;
 
             if (nb_run[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1380,8 +1380,8 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
                      << (int)(nb_occurrence[k]->max * YSCALE) + 1 << "] \""
                      << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                      << " title \"" << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-                     << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
-                     << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM]
+                     << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << k
+                     << " " << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << "\" with impulses" << endl;
 
             if (nb_occurrence[k]->nb_value - 1 < TIC_THRESHOLD) {
@@ -1408,7 +1408,7 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
         out_file << "plot [0:" << hlength.nb_value - 1 << "] [0:"
                  << (int)(hlength.max * YSCALE) + 1 << "] \"" 
                  << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
-                 << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM]
+                 << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
         if (hlength.nb_value - 1 < TIC_THRESHOLD) {
@@ -1439,13 +1439,13 @@ bool Sequence_characteristics::plot_print(const char *prefix , const char *title
  *
  *  arguments : reference sur un objet MultiPlotSet, indice du MultiPlot,
  *              indice et type de la variable,
- *              histogramme des longueurs des sequences.
+ *              loi empirique des longueurs des sequences.
  *
  *--------------------------------------------------------------*/
 
-void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
-                                              int variable , int type ,
-                                              const Histogram &hlength) const
+void SequenceCharacteristics::plotable_write(MultiPlotSet &plot , int &index ,
+                                             int variable , int type ,
+                                             const FrequencyDistribution &hlength) const
 
 {
   register int i , j , k;
@@ -1577,7 +1577,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
   index_value->plotable_write(plot[index]);
   index++;
 
-  // vue : histogramme des longueurs des sequences
+  // vue : loi empirique des longueurs des sequences
 
   plot.variable[index] = variable;
   plot.viewpoint[index] = INTENSITY;
@@ -1595,7 +1595,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
   plot[index].resize(1);
 
   legend.str("");
-  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+  legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   plot[index][0].legend = legend.str();
 
   plot[index][0].style = "impulses";
@@ -1612,7 +1612,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
   if (plot.nb_variable > 1) {
     title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
   }
-  title << SEQ_label[SEQL_FIRST_OCCURRENCE] << " " << STAT_label[STATL_HISTOGRAMS];
+  title << SEQ_label[SEQL_FIRST_OCCURRENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
   plot[index].title = title.str();
 
   // calcul du temps maximum et de la frequence maximum
@@ -1702,8 +1702,8 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       plot[index].resize(1);
 
       legend.str("");
-      legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE]
-             << " " << i << " " << STAT_label[STATL_HISTOGRAM];
+      legend << SEQ_label[SEQL_FIRST_OCCURRENCE_OF] << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE]
+             << " " << i << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
       plot[index][0].style = "impulses";
@@ -1722,7 +1722,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
   if (plot.nb_variable > 1) {
     title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
   }
-  title << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_HISTOGRAMS];
+  title << SEQ_label[SEQL_RECURRENCE_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
   plot[index].title = title.str();
 
   // calcul du temps maximum et de la frequence maximum
@@ -1814,7 +1814,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       legend.str("");
       legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
              << i << " " << SEQ_label[SEQL_RECURRENCE_TIME] << " "
-             << STAT_label[STATL_HISTOGRAM];
+             << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
       plot[index][0].style = "impulses";
@@ -1833,7 +1833,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
   if (plot.nb_variable > 1) {
     title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
   }
-  title << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_HISTOGRAMS];
+  title << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
   plot[index].title = title.str();
 
   // calcul du temps maximum et de la frequence maximum
@@ -1925,7 +1925,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       legend.str("");
       legend << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
              << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
-             << STAT_label[STATL_HISTOGRAM];
+             << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
       plot[index][0].style = "impulses";
@@ -1963,7 +1963,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       legend << SEQ_label[SEQL_INITIAL_RUN] << " - "
              << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
              << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
-             << STAT_label[STATL_HISTOGRAM];
+             << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
       plot[index][0].style = "impulses";
@@ -1999,7 +1999,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       legend << SEQ_label[SEQL_FINAL_RUN] << " - "
              << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " "
              << i << " " << SEQ_label[SEQL_SOJOURN_TIME] << " "
-             << STAT_label[STATL_HISTOGRAM];
+             << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
       plot[index][0].legend = legend.str();
 
       plot[index][0].style = "impulses";
@@ -2021,7 +2021,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
     }
     title << SEQ_label[SEQL_NB_RUN] << " " << SEQ_label[SEQL_PER_SEQUENCE] << " "
-          << STAT_label[STATL_HISTOGRAMS];
+          << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
     plot[index].title = title.str();
 
     // calcul du nombre de series maximum et de la frequence maximum
@@ -2094,7 +2094,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       title << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - ";
     }
     title << SEQ_label[SEQL_NB_OCCURRENCE] << " " << SEQ_label[SEQL_PER_SEQUENCE] << " "
-          << STAT_label[STATL_HISTOGRAMS];
+          << STAT_label[STATL_FREQUENCY_DISTRIBUTIONS];
     plot[index].title = title.str();
 
     // calcul du nombre d'occurrences maximum et de la frequence maximum
@@ -2185,8 +2185,8 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
         legend.str("");
         legend << SEQ_label[SEQL_NB_RUN_OF]
-               << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-               << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+               << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
+               << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -2219,8 +2219,8 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
 
         legend.str("");
         legend << SEQ_label[SEQL_NB_OCCURRENCE_OF]
-               << SEQ_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
-               << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_HISTOGRAM];
+               << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << i << " "
+               << SEQ_label[SEQL_PER_SEQUENCE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
         plot[index][0].legend = legend.str();
 
         plot[index][0].style = "impulses";
@@ -2230,7 +2230,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
       }
     }
 
-    // vue : histogramme des longueurs des sequences
+    // vue : loi empirique des longueurs des sequences
 
     plot.variable[index] = variable;
     plot.viewpoint[index] = COUNTING;
@@ -2248,7 +2248,7 @@ void Sequence_characteristics::plotable_write(MultiPlotSet &plot , int &index ,
     plot[index].resize(1);
 
     legend.str("");
-    legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_HISTOGRAM];
+    legend << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     plot[index][0].legend = legend.str();
 
     plot[index][0].style = "impulses";
