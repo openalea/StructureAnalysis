@@ -824,11 +824,11 @@ void Chain::thresholding(double min_probability)
  *  Calcul de la vraisemblance des etats initiaux et des transitions
  *  pour une chaine de Markov.
  *
- *  arguments : reference sur un objet Chain_data, prise en compte ou non loi initiale.
+ *  arguments : reference sur un objet ChainData, prise en compte ou non loi initiale.
  *
  *--------------------------------------------------------------*/
 
-double Chain::likelihood_computation(const Chain_data &chain_data , bool initial_flag) const
+double Chain::likelihood_computation(const ChainData &chain_data , bool initial_flag) const
 
 {
   register int i , j;
@@ -913,11 +913,11 @@ int Chain::nb_parameter_computation(double min_probability) const
  *
  *  Calcul de la valeur du chi2 pour une chaine de Markov.
  *
- *  argument : reference sur un objet Chain_data.
+ *  argument : reference sur un objet ChainData.
  *
  *--------------------------------------------------------------*/
 
-double Chain::chi2_value_computation(const Chain_data &chain_data) const
+double Chain::chi2_value_computation(const ChainData &chain_data) const
 
 {
   register int i , j;
@@ -964,11 +964,11 @@ double Chain::chi2_value_computation(const Chain_data &chain_data) const
  *
  *  Mesure de l'ajustement d'une chaine de Markov a des sequences.
  *
- *  arguments : reference sur un objet Chain_data et sur un objet Test.
+ *  arguments : reference sur un objet ChainData et sur un objet Test.
  *
  *--------------------------------------------------------------*/
 
-void Chain::chi2_fit(const Chain_data &chain_data , Test &test) const
+void Chain::chi2_fit(const ChainData &chain_data , Test &test) const
 
 {
   if ((chain_data.nb_state == nb_state) || (chain_data.nb_row == nb_row)) {
@@ -990,7 +990,7 @@ void Chain::chi2_fit(const Chain_data &chain_data , Test &test) const
  *
  *--------------------------------------------------------------*/
 
-void Chain_data::estimation(Chain &chain) const
+void ChainData::estimation(Chain &chain) const
 
 {
   register int i , j;
@@ -1043,7 +1043,7 @@ void Chain_data::estimation(Chain &chain) const
  *
  *--------------------------------------------------------------*/
 
-int Chain_data::nb_parameter_computation() const
+int ChainData::nb_parameter_computation() const
 
 {
   register int i , j;
