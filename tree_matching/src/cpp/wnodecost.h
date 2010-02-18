@@ -66,9 +66,9 @@ class WeightedNodeCost : public NodeCost
     /** Destructor. */
     ~WeightedNodeCost(){}
 
-    /** Constructs a NodeCost with the type /e type and with a Vector Distance, a dispersion, a maximum and minimum values.and a product coefficient for indel cost. */
+    /** Constructs a NodeCost with the type /e type and with a VectorDistance, a dispersion, a maximum and minimum values.and a product coefficient for indel cost. */
     WeightedNodeCost(NodeCostType,
-		     const Vector_distance&,
+		     const VectorDistance&,
 		     const ValueVector&,
 		     const ValueVector&,
 		     const ValueVector&,DistanceType);
@@ -85,7 +85,7 @@ class WeightedNodeCost : public NodeCost
   private :
     WeightList       _weights;
     DistanceType     _InsDelCost;
-    Vector_distance  _vectDist;
+    VectorDistance   _vectDist;
     ValueVector      _dispersion;
     ValueVector      _maxValue;
     ValueVector      _minValue;
