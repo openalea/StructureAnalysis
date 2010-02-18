@@ -173,13 +173,13 @@ Curves::Curves(const Distribution &dist)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Curves a partir d'un objet Histogram.
+ *  Construction d'un objet Curves a partir d'un objet FrequencyDistribution.
  *
- *  argument : reference sur un objet Histogram.
+ *  argument : reference sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-Curves::Curves(const Histogram &histo)
+Curves::Curves(const FrequencyDistribution &histo)
 
 {
   register int i;
