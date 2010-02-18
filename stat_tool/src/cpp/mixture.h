@@ -64,133 +64,133 @@ const int MIXTURE_NB_ITER = 500;        // nombre maximum d'iterations EM
  */
 
 
-class Histogram;
-class Mixture_data;
+class FrequencyDistribution;
+class MixtureData;
 
 
-// class Mixture : public STAT_interface , protected Distribution {
-class Mixture : public STAT_interface , public Distribution {  // melange de lois discretes
+// class Mixture : public StatInterface , protected Distribution {
+class Mixture : public StatInterface , public Distribution {  // melange de lois discretes
 
-    friend class Histogram;
-    friend class Mixture_data;
+    friend class FrequencyDistribution;
+    friend class MixtureData;
 
-    friend Mixture* mixture_building(Format_error &error , int nb_component , double *weight ,
-                                     const Parametric **component);
-    friend Mixture* mixture_ascii_read(Format_error &error , const char *path ,
+    friend Mixture* mixture_building(StatError &error , int nb_component , double *weight ,
+                                     const DiscreteParametric **component);
+    friend Mixture* mixture_ascii_read(StatError &error , const char *path ,
                                        double cumul_threshold);
     friend std::ostream& operator<<(std::ostream &os , const Mixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
 
 private :
 
-    Mixture_data *mixture_data;  // pointeur sur un objet Mixture_data
+    MixtureData *mixture_data;  // pointeur sur un objet MixtureData
     int nb_component;       // nombre de composantes
-    Parametric *weight;     // poids de chaque composante
-    Parametric **component; // composantes
+    DiscreteParametric *weight;  // poids de chaque composante
+    DiscreteParametric **component; // composantes
 
     void copy(const Mixture &mixt , bool data_flag = true);
     void remove();
 
-    std::ostream& ascii_write(std::ostream &os , const Mixture_data *mixt_histo ,
+    std::ostream& ascii_write(std::ostream &os , const MixtureData *mixt_histo ,
                               bool exhaustive , bool file_flag) const;
-    std::ostream& spreadsheet_write(std::ostream &os , const Mixture_data *mixt_histo) const;
+    std::ostream& spreadsheet_write(std::ostream &os , const MixtureData *mixt_histo) const;
     bool plot_write(const char *prefix , const char *title ,
-                    const Mixture_data *mixt_histo) const;
-    MultiPlotSet* get_plotable(const Mixture_data *mixt_histo) const;
+                    const MixtureData *mixt_histo) const;
+    MultiPlotSet* get_plotable(const MixtureData *mixt_histo) const;
 
     int nb_parameter_computation() const;
     double penalty_computation() const;
 
-    void init(const Histogram &histo , bool *estimate , int min_inf_bound ,
+    void init(const FrequencyDistribution &histo , bool *estimate , int min_inf_bound ,
               bool component_flag);
-    void expectation_step(Mixture_data *mixt_histo , int nb_element) const;
-    void variance_correction(Mixture_data *mixt_histo , bool *estimate ,
+    void expectation_step(MixtureData *mixt_histo , int nb_element) const;
+    void variance_correction(MixtureData *mixt_histo , bool *estimate ,
                              int min_inf_bound) const;
     bool component_order_test() const;
 
 public :
 
     Mixture();
-    Mixture(int inb_component , double *pweight , const Parametric **pcomponent);
+    Mixture(int inb_component , double *pweight , const DiscreteParametric **pcomponent);
     Mixture(const Mixture &mixt , bool *component_flag , int inb_value);
-    Mixture(int inb_component , const Parametric **pcomponent);
+    Mixture(int inb_component , const DiscreteParametric **pcomponent);
     Mixture(const Mixture &mixt , bool data_flag = true)
     :Distribution(mixt) { copy(mixt , data_flag); }
     ~Mixture();
     Mixture& operator=(const Mixture &mixt);
 
-    Parametric_model* extract(Format_error &error , int index) const;
-    Mixture_data* extract_data(Format_error &error) const;
+    DiscreteParametricModel* extract(StatError &error , int index) const;
+    MixtureData* extract_data(StatError &error) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
     void computation(int min_nb_value = 1 , double cumul_threshold = CUMUL_THRESHOLD ,
                      bool component_flag = true);
-    double likelihood_computation(const Mixture_data &mixt_histo) const;
-    Mixture_data* simulation(Format_error &error , int nb_element) const;
-  
+    double likelihood_computation(const MixtureData &mixt_histo) const;
+    MixtureData* simulation(StatError &error , int nb_element) const;
+
     // acces membres de la classe
 
-    Mixture_data* get_mixture_data() const { return mixture_data; }
+    MixtureData* get_mixture_data() const { return mixture_data; }
     int get_nb_component() const { return nb_component; }
-    Parametric* get_weight() const { return weight; }
-    Parametric* get_component(int index) const { return component[index]; }
+    DiscreteParametric* get_weight() const { return weight; }
+    DiscreteParametric* get_component(int index) const { return component[index]; }
 };
 
 
-Mixture* mixture_building(Format_error &error , int nb_component , double *weight ,
-                          const Parametric **component);
-Mixture* mixture_ascii_read(Format_error &error , const char *path ,
+Mixture* mixture_building(StatError &error , int nb_component , double *weight ,
+                          const DiscreteParametric **component);
+Mixture* mixture_ascii_read(StatError &error , const char *path ,
                             double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
-// class Mixture_data : public STAT_interface , protected Histogram {
-class Mixture_data : public STAT_interface , public Histogram {  // structure de donnees correspondant
-                                                                 // a un melange
-    friend class Histogram;
+// class MixtureData : public StatInterface , protected FrequencyDistribution {
+class MixtureData : public StatInterface , public FrequencyDistribution {  // structure de donnees correspondant
+                                                                           // a un melange de lois discretes
+    friend class FrequencyDistribution;
     friend class Mixture;
 
-    friend std::ostream& operator<<(std::ostream &os , const Mixture_data &mixt_histo)
+    friend std::ostream& operator<<(std::ostream &os , const MixtureData &mixt_histo)
     { return mixt_histo.ascii_write(os , false); }
 
 private :
 
     Mixture *mixture;       // pointeur sur un objet Mixture
     int nb_component;       // nombre de composantes
-    Histogram *weight;      // histogramme des poids
-    Histogram **component;  // histogrammes correspondant aux composantes
+    FrequencyDistribution *weight;      // loi empirique des poids
+    FrequencyDistribution **component;  // composantes empiriques
 
-    void copy(const Mixture_data &mixt_histo , bool model_flag = true);
+    void copy(const MixtureData &mixt_histo , bool model_flag = true);
     void remove();
 
 public :
 
-    Mixture_data();
-    Mixture_data(const Histogram &histo , int inb_component);
-    Mixture_data(const Mixture &mixt);
-    Mixture_data(const Mixture_data &mixt_histo , bool model_flag = true)
-      :Histogram(mixt_histo) { copy(mixt_histo , model_flag); }
-    virtual ~Mixture_data();
-    Mixture_data& operator=(const Mixture_data &mixt_histo);
+    MixtureData();
+    MixtureData(const FrequencyDistribution &histo , int inb_component);
+    MixtureData(const Mixture &mixt);
+    MixtureData(const MixtureData &mixt_histo , bool model_flag = true)
+    :FrequencyDistribution(mixt_histo) { copy(mixt_histo , model_flag); }
+    virtual ~MixtureData();
+    MixtureData& operator=(const MixtureData &mixt_histo);
 
-    Distribution_data* extract(Format_error &error , int index) const;
+    DiscreteDistributionData* extract(StatError &error , int index) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
-    bool ascii_write(Format_error &error , const char *path ,
+    bool ascii_write(StatError &error , const char *path ,
                      bool exhaustive = false) const;
-    bool spreadsheet_write(Format_error &error , const char *path) const;
-    bool plot_write(Format_error &error , const char *prefix ,
+    bool spreadsheet_write(StatError &error , const char *path) const;
+    bool plot_write(StatError &error , const char *prefix ,
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
@@ -200,8 +200,8 @@ public :
 
     Mixture* get_mixture() const { return mixture; }
     int get_nb_component() const { return nb_component; }
-    Histogram* get_weight() const { return weight; }
-    Histogram* get_component(int index) const { return component[index]; }
+    FrequencyDistribution* get_weight() const { return weight; }
+    FrequencyDistribution* get_component(int index) const { return component[index]; }
 };
 
 
