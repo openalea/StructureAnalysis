@@ -238,13 +238,13 @@ Distribution::Distribution(const Distribution &dist , double scaling_coeff)
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Distribution a partir d'un objet Histogram.
+ *  Construction d'un objet Distribution a partir d'un objet FrequencyDistribution.
  *
- *  argument : reference sur un objet Histogram.
+ *  argument : reference sur un objet FrequencyDistribution.
  *
  *--------------------------------------------------------------*/
 
-Distribution::Distribution(const Histogram &histo)
+Distribution::Distribution(const FrequencyDistribution &histo)
 
 {
   nb_value = histo.nb_value;
@@ -565,16 +565,16 @@ int column_width(int nb_value , const double *value , double scale)
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une loi et d'un histogramme.
+ *  Ecriture d'une loi et d'une loi empirique.
  *
  *  arguments : stream, flag commentaire, flags sur l'ecriture de la fonction
  *              de repartition et sur le calcul du nombre de valeurs,
- *              pointeur sur un histogramme.
+ *              pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
 ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_flag ,
-                                   bool nb_value_flag , const Histogram *histo) const
+                                   bool nb_value_flag , const FrequencyDistribution *histo) const
 
 {
   register int i;
@@ -586,7 +586,7 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
   // calcul du facteur d'echelle, de la fonction de repartition deduite de
-  // l'histogramme et du nombre de valeurs
+  // la loi empirique et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -670,18 +670,18 @@ ostream& Distribution::ascii_print(ostream &os , bool comment_flag , bool cumul_
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une famille de lois et d'un histogramme.
+ *  Ecriture d'une famille de lois et d'une loi empirique.
  *
  *  arguments : stream, nombre de lois, pointeurs sur les lois,
  *              facteurs d'echelle, flag commentaire,
  *              flag sur l'ecriture de la fonction de repartition,
- *              pointeur sur un histogramme.
+ *              pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
 ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distribution **dist ,
                                    double *dist_scale , bool comment_flag , bool cumul_flag ,
-                                   const Histogram *histo) const
+                                   const FrequencyDistribution *histo) const
 
 {
   register int i , j;
@@ -695,7 +695,7 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
   width = new int[nb_dist + 5];
 
   // calcul du facteur d'echelle, de la fonction de repartition deduite de
-  // l'histogramme et du nombre de valeurs
+  // la loi empirique et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -820,16 +820,17 @@ ostream& Distribution::spreadsheet_characteristic_print(ostream &os , bool shape
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une loi et d'un histogramme au format tableur.
+ *  Ecriture d'une loi et d'une loi empirique au format tableur.
  *
  *  arguments : stream, flags sur l'ecriture de la fonction de repartition et
  *              de la fonction de concentration, flag sur le calcul du nombre de valeurs,
- *              pointeur sur un histogramme.
+ *              pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag , bool concentration_flag ,
-                                         bool nb_value_flag , const Histogram *histo) const
+ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag ,
+                                         bool concentration_flag , bool nb_value_flag ,
+                                         const FrequencyDistribution *histo) const
 
 {
   register int i;
@@ -842,7 +843,7 @@ ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag , bool co
   }
 
   // calcul du facteur d'echelle, de la fonction de repartition deduite de
-  // l'histogramme, des fonctions de concentration et du nombre de valeurs
+  // la loi empirique, des fonctions de concentration et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -930,17 +931,17 @@ ostream& Distribution::spreadsheet_print(ostream &os , bool cumul_flag , bool co
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une famille de lois et d'un histogramme au format tableur.
+ *  Ecriture d'une famille de lois et d'une loi empirique au format tableur.
  *
  *  arguments : stream, nombre de lois, pointeurs sur les lois,
  *              facteurs d'echelle, flag sur l'ecriture de la fonction
- *              de repartition, pointeur sur un histogramme.
+ *              de repartition, pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
 ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distribution **dist ,
                                          double *dist_scale , bool cumul_flag ,
-                                         const Histogram *histo) const
+                                         const FrequencyDistribution *histo) const
 
 {
   register int i , j;
@@ -949,7 +950,7 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
 
 
   // calcul du facteur d'echelle, de la fonction de repartition deduite de
-  // l'histogramme et du nombre de valeurs
+  // la loi empirique et du nombre de valeurs
 
   if (histo) {
     scale = histo->nb_element / (1. - complement);
@@ -1019,11 +1020,11 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
  *
  *  Calcul du nombre de valeurs a afficher (sortie Gnuplot).
  *
- *  argument : pointeur sur un histogramme.
+ *  argument : pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-int Distribution::plot_nb_value_computation(const Histogram *histo) const
+int Distribution::plot_nb_value_computation(const FrequencyDistribution *histo) const
 
 {
   int plot_nb_value = nb_value;
@@ -1089,13 +1090,13 @@ bool Distribution::plot_print(const char *path , double *concentration ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une loi et d'un histogramme au format Gnuplot.
+ *  Ecriture d'une loi et d'une loi empirique au format Gnuplot.
  *
- *  arguments : path, pointeur sur un histogramme.
+ *  arguments : path, pointeur sur une loi empirique.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution::plot_print(const char *path , const Histogram *histo) const
+bool Distribution::plot_print(const char *path , const FrequencyDistribution *histo) const
 
 {
   bool status = false;
@@ -1138,19 +1139,19 @@ bool Distribution::plot_print(const char *path , const Histogram *histo) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une famille de lois et d'une famille d'histogrammes
+ *  Ecriture d'une famille de lois et d'une famille de lois empiriques
  *  au format Gnuplot.
  *
  *  arguments : path, nombre de lois, pointeurs sur les lois,
  *              facteurs d'echelle, nombre de valeurs des lois,
- *              nombre d'histogrammes, pointeurs sur les histogrammes
+ *              nombre de lois empiriques, pointeurs sur les lois empiriques
  *              indice des lois correspondantes.
  *
  *--------------------------------------------------------------*/
 
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
-                const Histogram **histo , int *index_dist)
+                const FrequencyDistribution **histo , int *index_dist)
 
 {
   bool status = false;
@@ -1346,12 +1347,12 @@ char* label(const char *file_name)
  *  - mise en correspondance des fonctions de repartition,
  *  - courbes de concentration.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              nombre de lois, pointeurs sur les lois, titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution::plot_write(Format_error &error , const char *prefix , int nb_dist ,
+bool Distribution::plot_write(StatError &error , const char *prefix , int nb_dist ,
                               const Distribution **idist , const char *title) const
 
 {
@@ -1747,12 +1748,12 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
  *  - mise en correspondance des fonctions de repartition,
  *  - courbes de concentration.
  *
- *  arguments : reference sur un objet Format_error,
+ *  arguments : reference sur un objet StatError,
  *              nombre de lois, pointeurs sur les lois.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int nb_dist ,
+MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb_dist ,
                                                        const Distribution **idist) const
 
 {
@@ -1981,7 +1982,7 @@ MultiPlotSet* Distribution::get_plotable_distributions(Format_error &error , int
 MultiPlotSet* Distribution::get_plotable() const
 
 {
-  Format_error error;
+  StatError error;
 
   return get_plotable_distributions(error , 0 , 0);
 }
@@ -2024,11 +2025,11 @@ ostream& Distribution::survival_ascii_write(ostream &os) const
  *  Calcul des taux de survie a partir d'une loi et
  *  ecriture du resultat dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution::survival_ascii_write(Format_error &error , const char *path) const
+bool Distribution::survival_ascii_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -2056,11 +2057,11 @@ bool Distribution::survival_ascii_write(Format_error &error , const char *path) 
  *  Calcul des taux de survie a partir d'une loi et ecriture
  *  du resultat dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution::survival_spreadsheet_write(Format_error &error , const char *path) const
+bool Distribution::survival_spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -2130,12 +2131,12 @@ bool Distribution::survival_plot_print(const char *path , double *survivor) cons
  *
  *  Calcul des taux de survie a partir d'une loi et sortie Gnuplot du resultat.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Distribution::survival_plot_write(Format_error &error , const char *prefix ,
+bool Distribution::survival_plot_write(StatError &error , const char *prefix ,
                                        const char *title) const
 
 {
@@ -2286,11 +2287,11 @@ void Distribution::plotable_survivor_write(SinglePlot &plot) const
  *
  *  Calcul des taux de survie a partir d'une loi et sortie graphique du resultat.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Distribution::survival_get_plotable(Format_error &error) const
+MultiPlotSet* Distribution::survival_get_plotable(StatError &error) const
 
 {
   MultiPlotSet *plot_set;
