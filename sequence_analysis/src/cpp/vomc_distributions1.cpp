@@ -55,7 +55,7 @@ using namespace std;
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::index_state_distribution()
+void VariableOrderMarkov::index_state_distribution()
 
 {
   register int i , j , k;
@@ -144,7 +144,7 @@ void Variable_order_markov::index_state_distribution()
  *
  *--------------------------------------------------------------*/
 
-double* Variable_order_markov::memory_computation() const
+double* VariableOrderMarkov::memory_computation() const
 
 {
   register int i , j , k;
@@ -213,7 +213,7 @@ double* Variable_order_markov::memory_computation() const
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::state_no_occurrence_probability(int istate , double increment)
+void VariableOrderMarkov::state_no_occurrence_probability(int istate , double increment)
 
 {
   register int i;
@@ -325,8 +325,8 @@ void Variable_order_markov::state_no_occurrence_probability(int istate , double 
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::state_first_occurrence_distribution(int istate , int min_nb_value ,
-                                                                double cumul_threshold)
+void VariableOrderMarkov::state_first_occurrence_distribution(int istate , int min_nb_value ,
+                                                              double cumul_threshold)
 
 {
   register int i , j , k;
@@ -470,8 +470,8 @@ void Variable_order_markov::state_first_occurrence_distribution(int istate , int
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::state_leave_probability(const double *imemory , int istate ,
-                                                    double increment)
+void VariableOrderMarkov::state_leave_probability(const double *imemory , int istate ,
+                                                  double increment)
 
 {
   if (state_type[istate] == 't') {
@@ -569,8 +569,8 @@ void Variable_order_markov::state_leave_probability(const double *imemory , int 
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::state_recurrence_time_distribution(const double *imemory , int istate ,
-                                                               int min_nb_value , double cumul_threshold)
+void VariableOrderMarkov::state_recurrence_time_distribution(const double *imemory , int istate ,
+                                                             int min_nb_value , double cumul_threshold)
 
 {
   register int i , j , k;
@@ -689,14 +689,14 @@ void Variable_order_markov::state_recurrence_time_distribution(const double *ime
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::state_sojourn_time_distribution(const double *imemory , int istate ,
-                                                            int min_nb_value , double cumul_threshold)
+void VariableOrderMarkov::state_sojourn_time_distribution(const double *imemory , int istate ,
+                                                          int min_nb_value , double cumul_threshold)
 
 {
   register int i , j , k;
   int self_index;
   double sum , *memory , *previous_memory , *pmass , *pcumul;
-  Parametric *sojourn_time;
+  DiscreteParametric *sojourn_time;
 
 
   sojourn_time = nonparametric_process[0]->sojourn_time[istate];
@@ -822,7 +822,7 @@ void Variable_order_markov::state_sojourn_time_distribution(const double *imemor
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::index_output_distribution(int variable)
+void VariableOrderMarkov::index_output_distribution(int variable)
 
 {
   register int i , j , k;
@@ -864,8 +864,8 @@ void Variable_order_markov::index_output_distribution(int variable)
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::output_no_occurrence_probability(int variable , int output ,
-                                                             double increment)
+void VariableOrderMarkov::output_no_occurrence_probability(int variable , int output ,
+                                                           double increment)
 
 {
   bool status = false , *output_accessibility;
@@ -987,9 +987,9 @@ void Variable_order_markov::output_no_occurrence_probability(int variable , int 
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::output_first_occurrence_distribution(int variable , int output ,
-                                                                 int min_nb_value ,
-                                                                 double cumul_threshold)
+void VariableOrderMarkov::output_first_occurrence_distribution(int variable , int output ,
+                                                               int min_nb_value ,
+                                                               double cumul_threshold)
 
 {
   register int i , j , k;
@@ -1101,8 +1101,8 @@ void Variable_order_markov::output_first_occurrence_distribution(int variable , 
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::output_leave_probability(const double *imemory , int variable ,
-                                                     int output , double increment)
+void VariableOrderMarkov::output_leave_probability(const double *imemory , int variable ,
+                                                   int output , double increment)
 
 {
   bool status = false , *output_accessibility;
@@ -1225,9 +1225,9 @@ void Variable_order_markov::output_leave_probability(const double *imemory , int
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::output_recurrence_time_distribution(const double *imemory , int variable ,
-                                                                int output , int min_nb_value ,
-                                                                double cumul_threshold)
+void VariableOrderMarkov::output_recurrence_time_distribution(const double *imemory , int variable ,
+                                                              int output , int min_nb_value ,
+                                                              double cumul_threshold)
 
 {
   register int i , j , k;
@@ -1334,15 +1334,15 @@ void Variable_order_markov::output_recurrence_time_distribution(const double *im
  *
  *--------------------------------------------------------------*/
 
-void Variable_order_markov::output_sojourn_time_distribution(const double *imemory , int variable ,
-                                                             int output , int min_nb_value ,
-                                                             double cumul_threshold)
+void VariableOrderMarkov::output_sojourn_time_distribution(const double *imemory , int variable ,
+                                                           int output , int min_nb_value ,
+                                                           double cumul_threshold)
 
 {
   register int i , j , k;
   double sum , *observation , *memory , *previous_memory , *pmass , *pcumul ,
          &absorption = nonparametric_process[variable]->absorption[output];
-  Parametric *sojourn_time;
+  DiscreteParametric *sojourn_time;
 
 
   sojourn_time = nonparametric_process[variable]->sojourn_time[output];
@@ -1466,14 +1466,14 @@ void Variable_order_markov::output_sojourn_time_distribution(const double *imemo
  *  Calcul de la fonction d'autocorrelation correspondant a un etat
  *  pour une chaine de Markov d'ordre variable.
  *
- *  arguments : reference sur un objet Format_error, etat, decalage maximum,
- *              pointeur sur un objet Variable_order_markov_data.
+ *  arguments : reference sur un objet StatError, etat, decalage maximum,
+ *              pointeur sur un objet VariableOrderMarkovData.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Variable_order_markov::state_autocorrelation_computation(Format_error &error ,
-                                                                      int istate , int max_lag ,
-                                                                      const Variable_order_markov_data *seq) const
+Correlation* VariableOrderMarkov::state_autocorrelation_computation(StatError &error ,
+                                                                    int istate , int max_lag ,
+                                                                    const VariableOrderMarkovData *seq) const
 
 {
   bool status = true;
@@ -1481,7 +1481,7 @@ Correlation* Variable_order_markov::state_autocorrelation_computation(Format_err
   int *symbol;
   double sum , norm , mean , *average_memory , *memory , *previous_memory , *ppoint;
   Correlation *correl;
-  Markovian_sequences *binary_seq;
+  MarkovianSequences *binary_seq;
 
 
   correl = NULL;
@@ -1641,12 +1641,12 @@ Correlation* Variable_order_markov::state_autocorrelation_computation(Format_err
  *  Calcul de la fonction d'autocorrelation correspondant a un etat
  *  pour une chaine de Markov d'ordre variable.
  *
- *  arguments : reference sur un objet Format_error, etat, decalage maximum.
+ *  arguments : reference sur un objet StatError, etat, decalage maximum.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Variable_order_markov::state_autocorrelation_computation(Format_error &error ,
-                                                                      int istate , int max_lag) const
+Correlation* VariableOrderMarkov::state_autocorrelation_computation(StatError &error ,
+                                                                    int istate , int max_lag) const
 
 {
   Correlation *correl;
@@ -1663,12 +1663,12 @@ Correlation* Variable_order_markov::state_autocorrelation_computation(Format_err
  *  Calcul de la fonction d'autocorrelation correspondant a un etat
  *  pour une chaine de Markov d'ordre variable.
  *
- *  arguments : reference sur un objet Format_error, etat, decalage maximum.
+ *  arguments : reference sur un objet StatError, etat, decalage maximum.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Variable_order_markov_data::state_autocorrelation_computation(Format_error &error ,
-                                                                           int istate , int max_lag) const
+Correlation* VariableOrderMarkovData::state_autocorrelation_computation(StatError &error ,
+                                                                        int istate , int max_lag) const
 
 {
   Correlation *correl;
@@ -1685,14 +1685,14 @@ Correlation* Variable_order_markov_data::state_autocorrelation_computation(Forma
  *  Calcul de la fonction d'autocorrelation correspondant a une observation
  *  pour une chaine de Markov d'ordre variable cachee.
  *
- *  arguments : reference sur un objet Format_error, observation, decalage maximum,
- *              pointeur sur un objet Variable_order_markov_data.
+ *  arguments : reference sur un objet StatError, observation, decalage maximum,
+ *              pointeur sur un objet VariableOrderMarkovData.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Variable_order_markov::output_autocorrelation_computation(Format_error &error , int variable ,
-                                                                       int output , int max_lag ,
-                                                                       const Variable_order_markov_data *seq) const
+Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &error , int variable ,
+                                                                     int output , int max_lag ,
+                                                                     const VariableOrderMarkovData *seq) const
 
 {
   bool status = true;
@@ -1701,7 +1701,7 @@ Correlation* Variable_order_markov::output_autocorrelation_computation(Format_er
   double sum , norm , mean , *average_memory , *observation , *memory ,
          *previous_memory , *ppoint;
   Correlation *correl;
-  Markovian_sequences *binary_seq;
+  MarkovianSequences *binary_seq;
 
 
   correl = NULL;
@@ -1866,14 +1866,14 @@ Correlation* Variable_order_markov::output_autocorrelation_computation(Format_er
  *  Calcul de la fonction d'autocorrelation correspondant a une observation
  *  pour une chaine de Markov d'ordre variable cachee.
  *
- *  arguments : reference sur un objet Format_error, indice du processus d'observation,
+ *  arguments : reference sur un objet StatError, indice du processus d'observation,
  *              observation, decalage maximum.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Variable_order_markov::output_autocorrelation_computation(Format_error &error ,
-                                                                       int variable , int output ,
-                                                                       int max_lag) const
+Correlation* VariableOrderMarkov::output_autocorrelation_computation(StatError &error ,
+                                                                     int variable , int output ,
+                                                                     int max_lag) const
 
 {
   Correlation *correl;
@@ -1890,14 +1890,14 @@ Correlation* Variable_order_markov::output_autocorrelation_computation(Format_er
  *  Calcul de la fonction d'autocorrelation correspondant a une observation
  *  pour une chaine de Markov d'ordre variable cachee.
  *
- *  arguments : reference sur un objet Format_error, indice du processus d'observation,
+ *  arguments : reference sur un objet StatError, indice du processus d'observation,
  *              observation, decalage maximum.
  *
  *--------------------------------------------------------------*/
 
-Correlation* Variable_order_markov_data::output_autocorrelation_computation(Format_error &error ,
-                                                                            int variable , int output ,
-                                                                            int max_lag) const
+Correlation* VariableOrderMarkovData::output_autocorrelation_computation(StatError &error ,
+                                                                         int variable , int output ,
+                                                                         int max_lag) const
 
 {
   Correlation *correl;
