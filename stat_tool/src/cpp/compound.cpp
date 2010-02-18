@@ -202,11 +202,11 @@ Compound& Compound::operator=(const Compound &compound)
  *
  *  Extraction de la partie "donnees" d'un objet Compound.
  *
- *  argument : reference sur un objet Format_error.
+ *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-CompoundData* Compound::extract_data(Format_error &error) const
+CompoundData* Compound::extract_data(StatError &error) const
 
 {
   CompoundData *compound_histo;
@@ -232,12 +232,12 @@ CompoundData* Compound::extract_data(Format_error &error) const
  *
  *  Construction d'un objet Compound a partir d'un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Compound* compound_ascii_read(Format_error &error , const char *path ,
+Compound* compound_ascii_read(StatError &error , const char *path ,
                               double cumul_threshold)
 
 {
@@ -572,12 +572,12 @@ ostream& Compound::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet Compound dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Compound::ascii_write(Format_error &error , const char *path ,
+bool Compound::ascii_write(StatError &error , const char *path ,
                            bool exhaustive) const
 
 {
@@ -709,11 +709,11 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
  *
  *  Ecriture d'un objet Compound dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Compound::spreadsheet_write(Format_error &error , const char *path) const
+bool Compound::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -938,12 +938,12 @@ bool Compound::plot_write(const char *prefix , const char *title ,
  *
  *  Sortie Gnuplot d'un objet Compound.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Compound::plot_write(Format_error &error , const char *prefix ,
+bool Compound::plot_write(StatError &error , const char *prefix ,
                           const char *title) const
 
 {
@@ -1310,11 +1310,11 @@ CompoundData& CompoundData::operator=(const CompoundData &compound_histo)
  *  Extraction de la loi empirique de la somme ou
  *  de la loi empirique elementaire.
  *
- *  arguments : reference sur un objet Format_error, type de loi empirique.
+ *  arguments : reference sur un objet StatError, type de loi empirique.
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* CompoundData::extract(Format_error &error , char type) const
+DiscreteDistributionData* CompoundData::extract(StatError &error , char type) const
 
 {
   DiscreteDistributionData *phisto;
@@ -1395,12 +1395,12 @@ ostream& CompoundData::ascii_write(ostream &os , bool exhaustive) const
  *
  *  Ecriture d'un objet CompoundData dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path,
+ *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool CompoundData::ascii_write(Format_error &error , const char *path ,
+bool CompoundData::ascii_write(StatError &error , const char *path ,
                                bool exhaustive) const
 
 {
@@ -1431,11 +1431,11 @@ bool CompoundData::ascii_write(Format_error &error , const char *path ,
  *
  *  Ecriture d'un objet CompoundData dans un fichier au format tableur.
  *
- *  arguments : reference sur un objet Format_error, path.
+ *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool CompoundData::spreadsheet_write(Format_error &error , const char *path) const
+bool CompoundData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
@@ -1465,12 +1465,12 @@ bool CompoundData::spreadsheet_write(Format_error &error , const char *path) con
  *
  *  Sortie Gnuplot d'un objet CompoundData.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool CompoundData::plot_write(Format_error &error , const char *prefix ,
+bool CompoundData::plot_write(StatError &error , const char *prefix ,
                               const char *title) const
 
 {
