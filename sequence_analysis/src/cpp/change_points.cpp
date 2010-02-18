@@ -1044,13 +1044,13 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
  *
  *  Segmentation d'une sequence.
  *
- *  arguments : reference sur un objet Format_error, stream, identificateur de la sequence,
+ *  arguments : reference sur un objet StatError, stream, identificateur de la sequence,
  *              nombre de segments, ruptures, types des modeles,
  *              sortie (sequence ou residus).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iidentifier ,
+Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
                                    int nb_segment , int *ichange_point , int *model_type ,
                                    int output) const
 
@@ -1099,7 +1099,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -1452,7 +1452,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
 
     seq->min_value[0] = 0;
     seq->max_value[0] = nb_segment - 1;
-    seq->build_marginal_histogram(0);
+    seq->build_marginal_frequency_distribution(0);
 
 #   ifdef MESSAGE
     if (segmentation_likelihood != D_INF) {
@@ -1967,7 +1967,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
   min_value[0] = 0;
   max_value[0] = max_nb_segment - 1;
   delete marginal[0];
-  build_marginal_histogram(0);
+  build_marginal_frequency_distribution(0);
 
   delete [] frequency;
 
@@ -2003,13 +2003,13 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
  *
  *  Segmentation optimale de sequences.
  *
- *  arguments : reference sur un objet Format_error, stream, nombres de segments,
+ *  arguments : reference sur un objet StatError, stream, nombres de segments,
  *              types des modeles, identificateur de la sequence,
  *              sortie (sequence ou residus).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_segment ,
+Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segment ,
                                    int *model_type , int iidentifier , int output) const
 
 {
@@ -2055,7 +2055,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -2207,13 +2207,13 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int *nb_s
  *
  *  Segmentation optimale d'une sequence.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              identificateur de la sequence, nombre de segments maximum,
  *              types des modeles.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iidentifier ,
+Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentifier ,
                                    int max_nb_segment , int *model_type) const
 
 {
@@ -2262,7 +2262,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -2689,7 +2689,7 @@ Sequences* Sequences::segmentation(Format_error &error , ostream &os , int iiden
         seq->one_segment_likelihood(0 , model_type , rank);
         seq->min_value[0] = 0;
         seq->max_value[0] = 0;
-        seq->build_marginal_histogram(0);
+        seq->build_marginal_frequency_distribution(0);
       }
 
       else {
@@ -7043,7 +7043,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
  *  Calcul des N segmentations les plus probables et
  *  des profils de segments/ruptures d'une sequence.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              identificateur de la sequence, nombre de segments, types des modeles,
  *              type de sortie, format ('a' : ASCII, 's' : Spreadsheet),
  *              methode de calcul des segmentations (algorithme de programmation dynamique ou
@@ -7051,7 +7051,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_write(Format_error &error , ostream &os , int iidentifier ,
+bool Sequences::segment_profile_write(StatError &error , ostream &os , int iidentifier ,
                                       int nb_segment , int *model_type , int output ,
                                       char format , int segmentation , int nb_segmentation) const
 
@@ -7097,7 +7097,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -7223,7 +7223,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
  *  Calcul des N segmentations les plus probables, des profils de
  *  segments/ruptures d'une sequence et ecriture des resultats dans un fichier.
  *
- *  arguments : reference sur un objet Format_error, path, identificateur de la sequence,
+ *  arguments : reference sur un objet StatError, path, identificateur de la sequence,
  *              nombre de segments, types des modeles, type de sortie, format de fichier
  *              ('a' : ASCII, 's' : Spreadsheet), methode de calcul des segmentations
  *              (algorithme de programmation dynamique ou algorithme forward-backward
@@ -7231,7 +7231,7 @@ bool Sequences::segment_profile_write(Format_error &error , ostream &os , int ii
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_write(Format_error &error , const char *path ,
+bool Sequences::segment_profile_write(StatError &error , const char *path ,
                                       int iidentifier , int nb_segment , int *model_type ,
                                       int output , char format , int segmentation ,
                                       int nb_segmentation) const
@@ -7262,13 +7262,13 @@ bool Sequences::segment_profile_write(Format_error &error , const char *path ,
  *  Calcul des profils de segments/ruptures d'une sequence et
  *  affichage des resultats au format Gnuplot.
  *
- *  arguments : reference sur un objet Format_error, prefixe des fichiers,
+ *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              identificateur de la sequence, nombre de segments, types des modeles,
  *              type de sortie, titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::segment_profile_plot_write(Format_error &error , const char *prefix ,
+bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix ,
                                            int iidentifier , int nb_segment , int *model_type ,
                                            int output , const char *title) const
 
@@ -7316,7 +7316,7 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -7769,12 +7769,12 @@ bool Sequences::segment_profile_plot_write(Format_error &error , const char *pre
  *  Calcul des profils de segments/ruptures d'une sequence et
  *  sortie graphique des resultats.
  *
- *  arguments : reference sur un objet Format_error, identificateur de la sequence,
+ *  arguments : reference sur un objet StatError, identificateur de la sequence,
  *              nombre de segments, types des modeles, type de sortie.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Sequences::segment_profile_plotable_write(Format_error &error , int iidentifier ,
+MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int iidentifier ,
                                                         int nb_segment , int *model_type ,
                                                         int output) const
 
@@ -7823,7 +7823,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(Format_error &error , in
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -8123,13 +8123,13 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(Format_error &error , in
  *
  *  Segmentation hierarchique d'une sequence.
  *
- *  arguments : reference sur un objet Format_error, stream,
+ *  arguments : reference sur un objet StatError, stream,
  *              identificateur de la sequence, nombre de segments maximum,
  *              types des modeles.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &os , int iidentifier ,
+Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os , int iidentifier ,
                                                 int max_nb_segment , int *model_type) const
 
 {
@@ -8185,7 +8185,7 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                        << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                        << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
           error.update((error_message.str()).c_str());
         }
 
@@ -10194,14 +10194,14 @@ Sequences* Sequences::hierarchical_segmentation(Format_error &error , ostream &o
  *
  *  Segmentation optimale d'une sequence.
  *
- *  arguments : reference sur un objet Format_error, identificateur de la sequence,
- *              nombre de segments, reference sur un objet Vector_distance,
+ *  arguments : reference sur un objet StatError, identificateur de la sequence,
+ *              nombre de segments, reference sur un objet VectorDistance,
  *              stream, type de sortie.
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
-                                   int nb_segment , const Vector_distance &ivector_dist ,
+Sequences* Sequences::segmentation(StatError &error , int iidentifier ,
+                                   int nb_segment , const VectorDistance &ivector_dist ,
                                    ostream &os , int output) const
 
 {
@@ -10210,7 +10210,7 @@ Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
   int index , *psegment , *pisequence , **optimal_length;
   double sum , diff , buff , backward_min , exponent , *mean_square_diff , *contrast ,
          *prsequence , **rank , **forward , **backward , **backward_output , **mean;
-  Vector_distance *vector_dist;
+  VectorDistance *vector_dist;
   Sequences *seq , *oseq;
 
 
@@ -10254,7 +10254,7 @@ Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
-                          << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                          << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
             error.update((error_message.str()).c_str());
           }
 
@@ -10311,7 +10311,7 @@ Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
   if (status) {
     seq = new Sequences(*this , 'a');
 
-    vector_dist = new Vector_distance(ivector_dist);
+    vector_dist = new VectorDistance(ivector_dist);
 
     // calcul des rangs pour les variables ordinales
 
@@ -10841,7 +10841,7 @@ Sequences* Sequences::segmentation(Format_error &error , int iidentifier ,
 
       oseq->min_value[0] = 0;
       oseq->max_value[0] = nb_segment - 1;
-      oseq->build_marginal_histogram(0);
+      oseq->build_marginal_frequency_distribution(0);
     }
 
     delete vector_dist;
