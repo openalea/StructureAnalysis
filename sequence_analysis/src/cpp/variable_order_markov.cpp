@@ -4418,6 +4418,7 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
     characteristics = NULL;
   }
 
+  return plot_set;
   index = 0;
   plot_set->variable_nb_viewpoint[0] = 0;
   nonparametric_process[0]->plotable_write(*plot_set , index , 0 , 0 , characteristics ,

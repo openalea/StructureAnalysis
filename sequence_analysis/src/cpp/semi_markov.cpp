@@ -1584,7 +1584,6 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
   SequenceCharacteristics *characteristics;
   MultiPlotSet *plot_set;
 
-
   if ((seq) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
   }
@@ -1811,6 +1810,8 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
   else {
     characteristics = NULL;
   }
+
+  return plot_set;
 
   index = 0;
   plot_set->variable_nb_viewpoint[0] = 0;
