@@ -530,11 +530,11 @@ public:
   }
 
   // Mixture cluster
-  static Mv_Mixture_data*
-  mixture_cluster(const Vectors& v, const Mv_Mixture& m)
+  static MultivariateMixtureData*
+  mixture_cluster(const Vectors& v, const MultivariateMixture& m)
   {
     StatError error;
-    Mv_Mixture_data* ret = NULL;
+    MultivariateMixtureData* ret = NULL;
     ret = m.cluster(error, v);
     if (ret == NULL)
       stat_tool::wrap_util::throw_error(error);
@@ -621,12 +621,12 @@ public:
     return ret;
   }
 
-  static Mv_Mixture*
-  mixture_estimation_model(const Vectors& v, const Mv_Mixture& mixt, int nb_iter,
+  static MultivariateMixture*
+  mixture_estimation_model(const Vectors& v, const MultivariateMixture& mixt, int nb_iter,
       boost::python::list force_param)
   {
     bool status = true, several_errors = false;
-    Mv_Mixture* ret = NULL;
+    MultivariateMixture* ret = NULL;
     bool *fparam = NULL;
     StatError error;
     ostringstream error_message;
@@ -717,12 +717,12 @@ public:
     return ret;
   }
 
-  static Mv_Mixture*
+  static MultivariateMixture*
   mixture_estimation_nb_component(const Vectors& v, int nb_component, int nb_iter,
       boost::python::list force_param)
   {
     bool status = true, several_errors = false;
-    Mv_Mixture* ret = NULL;
+    MultivariateMixture* ret = NULL;
     bool *fparam = NULL;
     StatError error;
     ostringstream error_message;
