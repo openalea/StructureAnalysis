@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/generic_typed_edge_tree.cpp,v $
+ *       $Source$
  *       $Id: generic_typed_edge_tree.cpp 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -317,14 +317,13 @@ void Unlabelled_typed_edge_tree::simulation(const Distribution& distrib,
 
 /*****************************************************************
  *
- *  Simulation of Unlabelled_typed_edge_tree using a given empirical
- *  distribution (i.e. a histogram)
+ *  Simulation of Unlabelled_typed_edge_tree using a given frequency distribution
  *
  **/
 
-void Unlabelled_typed_edge_tree::simulation(const Histogram& hist,
-                                 int max_size,
-                                 int max_depth)
+void Unlabelled_typed_edge_tree::simulation(const FrequencyDistribution& hist,
+                                            int max_size,
+                                            int max_depth)
 {
    Distribution distrib(hist);
 
