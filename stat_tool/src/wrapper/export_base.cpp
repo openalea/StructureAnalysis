@@ -274,13 +274,13 @@ void class_constant()
   .export_values()
   ;
 
-  enum_<stat_tool::wrap_util::UniqueInt<3, 13> > ("AlgoType")
+  enum_<stat_tool::wrap_util::UniqueInt<3, 14> > ("AlgoType")
   .value("AGGLOMERATIVE", AGGLOMERATIVE)
   .value("DIVISIVE", DIVISIVE)
   .value("ORDERING", ORDERING)
   .export_values();
 
-  enum_<stat_tool::wrap_util::UniqueInt<6, 14> >("VariableTypeBis")
+  enum_<stat_tool::wrap_util::UniqueInt<6, 15> >("VariableTypeBis")
   .value("INT_VALUE", INT_VALUE)
   .value("REAL_VALUE", REAL_VALUE)
   .value("STATE", STATE)
@@ -290,8 +290,27 @@ void class_constant()
   .export_values()
   ;
 
+  enum_<stat_tool::wrap_util::UniqueInt<6, 16> >("GraphicalType")
+  .value("SELF_TRANSITION", SELF_TRANSITION)
+  .value("OBSERVATION", OBSERVATION)
+  .value("INTENSITY", INTENSITY)
+  .value("FIRST_OCCURRENCE" , FIRST_OCCURRENCE)
+  .value("RECURRENCE_TIME" , RECURRENCE_TIME)
+  .value("SOJOURN_TIME" , SOJOURN_TIME)
+  .value("INITIAL_RUN" , INITIAL_RUN)
+  .value("FINAL_RUN" , FINAL_RUN)
+  .value("NB_RUN" , NB_RUN)
+  .value("NB_OCCURRENCE" , NB_OCCURRENCE)
+  .value("COUNTING" , COUNTING)
+  .value("LENGTH" , LENGTH)
+  .value("SEQUENCE_CUMUL", SEQUENCE_CUMUL)
+  .value("SEQUENCE_MEAN", SEQUENCE_MEAN)
+  .export_values()
+  ;
+
+
   // regression
-  enum_<stat_tool::wrap_util::UniqueInt<4, 15> >("RegressionType")
+  enum_<stat_tool::wrap_util::UniqueInt<4, 17> >("RegressionType")
   .value("STAT_LINEAR", STAT_LINEAR)
   .value("STAT_LOGISTIC", STAT_LOGISTIC)
   .value("STAT_MONOMOLECULAR", STAT_MONOMOLECULAR)
