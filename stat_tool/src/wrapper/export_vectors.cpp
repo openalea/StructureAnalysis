@@ -29,7 +29,7 @@
 #include "stat_tool/regression.h"
 #include "stat_tool/distance_matrix.h"
 #include "stat_tool/distribution.h"
-#include "stat_tool/mv_mixture.h"
+#include "stat_tool/multivariate_mixture.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
