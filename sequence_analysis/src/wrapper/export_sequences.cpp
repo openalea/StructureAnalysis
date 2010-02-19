@@ -1048,6 +1048,19 @@ public:
     FOOTER;
   }
 
+  static MultiPlotSet*
+  get_plotable(const Sequences &p)
+  {
+    StatError error;
+    // todo check this piece of code. IT works since it calls the correct plotable in sequences2.cpp  but it this cast optimal ?
+    Sequences seq;
+    seq = (Sequences )p;
+    MultiPlotSet* ret = seq.get_plotable();
+    if (!ret)
+      ERROR;
+    return ret;
+  }
+
 
 
 
@@ -1137,11 +1150,11 @@ class_sequences()
    DEF_RETURN_VALUE_NO_ARGS("merge", SequencesWrap::merge, "Merge sequences")
    DEF_RETURN_VALUE_NO_ARGS("merge_variable", SequencesWrap::merge_variable, "Merge variables")
    DEF_RETURN_VALUE_NO_ARGS("markovian_sequences", SequencesWrap::markovian_sequences , "returns markovian sequence")
+   DEF_RETURN_VALUE_NO_ARGS("get_plotable", SequencesWrap::get_plotable, "Return a plotable")
 
    .def("plot_write", SequencesWrap::plot_write, args("prefix", "title"), "Write GNUPLOT files")
    .def("plot_data_write", SequencesWrap::plot_data_write, args("prefix", "title"), "Write GNUPLOT files")
    .def("segment_profile_write", SequencesWrap::segment_profile_write, args("todo"), "Write segment_profile")
-
 
 ;
 

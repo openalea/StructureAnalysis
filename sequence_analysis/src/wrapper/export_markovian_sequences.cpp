@@ -510,6 +510,16 @@ public:
       input.plot_write(error, prefix.c_str(), title.c_str());
   }
 
+/*  static MultiPlotSet*
+  get_plotable(const MarkovianSequences &p)
+  {
+    StatError error;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret)
+      ERROR;
+    return ret;
+  }*/
+  
 };
 
 // Boost declaration
@@ -573,6 +583,7 @@ void class_markovian_sequences() {
 
     .def("mtg_write", WRAP::mtg_write, args(""), "")
     .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")
+   //DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
 
     ;
 

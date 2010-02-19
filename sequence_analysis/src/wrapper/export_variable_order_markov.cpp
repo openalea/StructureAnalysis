@@ -182,6 +182,17 @@ public:
         nb_sequence, length, counting_flag);
   }
 
+  static MultiPlotSet*
+  get_plotable(const VariableOrderMarkov &p)
+  {
+    StatError error;
+    cout << "here vom"<<endl;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret)
+      ERROR;
+    return ret;
+    }
+
 
 };
 
@@ -223,6 +234,7 @@ void class_variable_order_markov() {
     .def("get_previous", &VariableOrderMarkov::get_previous,args("memory", "state"), "todo")
 
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "returns variable_order_markov_data")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
 
     DEF_RETURN_VALUE("extract", WRAP::extract, args("type","variable","value"), "returns parametric model")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data, "returns variable_order_markov_data")

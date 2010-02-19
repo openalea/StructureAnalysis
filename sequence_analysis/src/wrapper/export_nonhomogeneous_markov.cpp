@@ -90,7 +90,17 @@ public:
   {
     SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteParametricModel,
         type, state);
-    }
+  }
+
+ static MultiPlotSet*
+  get_plotable(const NonhomogeneousMarkov &p)
+  {
+    StatError error;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret)
+      ERROR;
+    return ret;
+  }
 
 };
 
@@ -110,6 +120,8 @@ void class_nonhomogeneous_markov() {
     DEF_RETURN_VALUE("simulation_histogram", WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
     DEF_RETURN_VALUE("simulation_nb_sequences", WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
     DEF_RETURN_VALUE("simulation_markovian_sequences", WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
+
 
     ;
 

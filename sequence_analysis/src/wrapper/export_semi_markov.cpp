@@ -193,6 +193,18 @@ public:
     FOOTER_OS;
   }
 
+  static MultiPlotSet*
+  get_plotable(const SemiMarkov &p)
+  {
+    StatError error;
+    cout << "test semi markov"<<endl;
+    MultiPlotSet* ret = p.get_plotable();
+    if (!ret)
+      ERROR;
+    return ret;
+  }
+
+
 };
 
 // Boost declaration
@@ -232,6 +244,7 @@ class_semi_markov()
     DEF_RETURN_VALUE("divergence_computation_histo", WRAP::divergence_computation_histo, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_length", WRAP::divergence_computation_length, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_sequences", WRAP::divergence_computation_sequences, args("input", "input_markov", "input_sequence", "filename"), "todo")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
 
     ;
 
