@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/tree_labels.cpp,v $
+ *       $Source$
  *       $Id: tree_labels.cpp 3186 2007-05-25 15:10:30Z dufourko $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
