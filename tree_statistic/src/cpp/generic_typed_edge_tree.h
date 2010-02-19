@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/generic_typed_edge_tree.h,v $
+ *       $Source$
  *       $Id: generic_typed_edge_tree.h 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.f
+ *       Forum for OpenAlea developers: Openalea-devlp@lists.gforge.inria.f
  *
  *  ----------------------------------------------------------------------------
  *
@@ -213,7 +213,7 @@ public:
    void simulation(const Distribution& distrib,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
-   void simulation(const Histogram& hist,
+   void simulation(const FrequencyDistribution& hist,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
 
