@@ -20,7 +20,7 @@ seq24 = Sequences(path + "granny1.seq")
 seq25 = Sequences(path + "reinet1.seq")
 seq26 = Sequences(path + "wij1.seq")
 
-# Display(seq25, ViewPoint="Data")
+Display(seq25, ViewPoint="Data")
 # Plot(seq25, "Intensity")
 # Plot(seq25, "Sojourn")
 
@@ -123,3 +123,4 @@ matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholdi
 # matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 10000, 90, FileName="ASCII/cultivar1_models_90.txt")
 
 
+Plot(matrix20)

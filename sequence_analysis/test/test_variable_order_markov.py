@@ -64,7 +64,7 @@ class Test(interface):
         seq = self.data
         pass
 
-    def _test_plot(self):
+    def test_plot(self):
         self.plot()
 
     def test_save(self):
@@ -81,7 +81,12 @@ class Test(interface):
 
     def _test_simulate(self):
         sm = self.data
-        #sm.simulation_nb_elements(1, 10000, True)
+        #simulation_markovian_sequences", WRAP::simulation_markovian_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+        #simulation_histogram", WRAP::simulation_histogram, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+        #simulation_nb_sequences", WRAP::simulation_nb_sequences, args("nb_sequence", "input_seq", "counting_flag"), "todo")
+
+
+        sm.simulation_nb_elements(1, 10000, True)
         Simulate(sm,1, 10000, True)
         pass
 

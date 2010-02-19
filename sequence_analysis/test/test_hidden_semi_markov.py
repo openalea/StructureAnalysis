@@ -67,7 +67,7 @@ class Test(interface):
     def test_len(self):
         seq = self.data
 
-    def _test_plot(self):
+    def test_plot(self):
         self.plot()
 
     def test_save(self):
