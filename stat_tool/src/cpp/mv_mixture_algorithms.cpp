@@ -1,16 +1,17 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand and Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
+ *                       Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: mixture_algorithms.cpp 3256 2007-06-06 12:32:54Z dufourko $
+ *       $Id: multivariate_mixture_algorithms.cpp 3256 2007-06-06 12:32:54Z dufourko $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -56,11 +57,11 @@ using namespace std;
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la quantite d'information d'un objet Mv_Mixture_data.
+ *  Calcul de la quantite d'information d'un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-double Mv_Mixture_data::information_computation() const
+double MultivariateMixtureData::information_computation() const
 
 {
   register int i, var;
@@ -99,9 +100,9 @@ double Mv_Mixture_data::information_computation() const
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture::get_output_conditional_distribution(const Vectors &mixt_data,
-                             double** &output_cond,
-                             bool log_computation) const
+void MultivariateMixture::get_output_conditional_distribution(const Vectors &mixt_data,
+                                                              double** &output_cond,
+                                                              bool log_computation) const
 {
   int n, i, var;
   const int nb_vector = mixt_data.get_nb_vector(),
@@ -162,9 +163,9 @@ void Mv_Mixture::get_output_conditional_distribution(const Vectors &mixt_data,
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture::get_posterior_distribution(const Vectors &mixt_data,
-                        double** output_cond,
-                        double** &posterior_dist) const {
+void MultivariateMixture::get_posterior_distribution(const Vectors &mixt_data,
+                                                     double** output_cond,
+                                                     double** &posterior_dist) const {
   int n, i;
   const int nb_vector = mixt_data.get_nb_vector();
   double marginal;
@@ -204,10 +205,9 @@ void Mv_Mixture::get_posterior_distribution(const Vectors &mixt_data,
  *
  *--------------------------------------------------------------*/
 
-std::vector<int>* Mv_Mixture::state_computation(StatError &error, const Vectors &vec,
-                        int algorithm,
-                        int index,
-                        double** posterior_dist) const {
+std::vector<int>* MultivariateMixture::state_computation(StatError &error, const Vectors &vec,
+                                                         int algorithm, int index,
+                                                         double** posterior_dist) const {
 
   bool status = true, delete_cond = false;
   int n, i, s;
@@ -266,14 +266,15 @@ std::vector<int>* Mv_Mixture::state_computation(StatError &error, const Vectors 
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la vraisemblance d'un objet Mv_Mixture_data pour un melange de lois.
+ *  Calcul de la vraisemblance d'un objet MultivariateMixtureData
+ *  pour un melange de lois.
  *
- *  argument : reference sur un objet Mv_Mixture_data.
+ *  argument : reference sur un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
-                      bool log_computation) const
+double MultivariateMixture::likelihood_computation(const Vectors &mixt_data,
+                                                   bool log_computation) const
 
 {
   register int n, i, var, nb_vector = mixt_data.get_nb_vector();
@@ -321,7 +322,7 @@ double Mv_Mixture::likelihood_computation(const Vectors &mixt_data,
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture::init() {
+void MultivariateMixture::init() {
 
   unsigned int j, var;
 
@@ -358,9 +359,9 @@ void Mv_Mixture::init() {
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* Vectors::mixture_estimation(StatError &error,
-                    ostream& os, const Mv_Mixture &imixture,
-                    int nb_iter, bool *force_param) const {
+MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
+                                                 const MultivariateMixture &imixture,
+                                                 int nb_iter, bool *force_param) const {
 
   bool status, state_simulation, all_states_used;
   register int i , j , var;
@@ -375,8 +376,8 @@ Mv_Mixture* Vectors::mixture_estimation(StatError &error,
   Reestimation<double> ***observation_reestim = NULL;
   Reestimation<double> *weight_reestim = NULL;
   FrequencyDistribution *hobservation= NULL;
-  Mv_Mixture *mixt = NULL,  *best_mixt= NULL; // best model for SEM
-  Mv_Mixture_data *mixt_data = NULL,
+  MultivariateMixture *mixt = NULL,  *best_mixt= NULL; // best model for SEM
+  MultivariateMixtureData *mixt_data = NULL,
     *state_restoration= NULL;
 
 # ifdef DEBUG
@@ -463,17 +464,17 @@ Mv_Mixture* Vectors::mixture_estimation(StatError &error,
 
     // create mixture
 
-    mixt = new Mv_Mixture(imixture, false);
+    mixt = new MultivariateMixture(imixture, false);
 
     if (state_simulation) {
-      best_mixt = new Mv_Mixture(*mixt, false);
+      best_mixt = new MultivariateMixture(*mixt, false);
       // initialize hidden states for state simulation
 
       /*         if (algorithm == GIBBS_SAMPLING)
          mixt_data= mixt->state_tree_computation(error_v, *this, VITERBI, false); */
 
       if (mixt_data == NULL)
-    mixt_data = new Mv_Mixture_data(*this, false);
+    mixt_data = new MultivariateMixtureData(*this, false);
 
       /* if (mixt_data->state_trees == NULL)
      mixt_data->build_state_trees(); */
@@ -951,14 +952,15 @@ Mv_Mixture* Vectors::mixture_estimation(StatError &error,
  *--------------------------------------------------------------*/
 #include <boost/scoped_array.hpp>
 
-Mv_Mixture* Vectors::mixture_estimation(StatError &error, std::ostream& os ,
-                    int nb_component, int nb_iter, bool *force_param) const {
+MultivariateMixture* Vectors::mixture_estimation(StatError &error, std::ostream& os ,
+                                                 int nb_component, int nb_iter,
+                                                 bool *force_param) const {
 
   // note: length of force_param must be checked before call
   bool status= true;
   register int var;
   boost::scoped_array<int> nb_value(new int[nb_variable]);
-  Mv_Mixture *imixt = NULL, *mixt = NULL;
+  MultivariateMixture *imixt = NULL, *mixt = NULL;
 
   error.init();
 
@@ -974,8 +976,8 @@ Mv_Mixture* Vectors::mixture_estimation(StatError &error, std::ostream& os ,
 
     // initial Mixture
 
-    imixt = new Mv_Mixture(nb_component, nb_variable,
-               nb_value.get(), force_param);
+    imixt = new MultivariateMixture(nb_component, nb_variable,
+                                    nb_value.get(), force_param);
 
     imixt->init();
 
@@ -996,13 +998,14 @@ Mv_Mixture* Vectors::mixture_estimation(StatError &error, std::ostream& os ,
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data* Mv_Mixture::simulation(StatError &error , int nb_element) const
+MultivariateMixtureData* MultivariateMixture::simulation(StatError &error ,
+                                                         int nb_element) const
 
 {
   int k , n, var;
   int value;
   int *iidentifier, **iint_vector;
-  Mv_Mixture_data *mixt_data = NULL;
+  MultivariateMixtureData *mixt_data = NULL;
   Vectors *vec = NULL;
   FrequencyDistribution *hweight = NULL;
   FrequencyDistribution ***hcomponent = NULL;
@@ -1014,7 +1017,7 @@ Mv_Mixture_data* Mv_Mixture::simulation(StatError &error , int nb_element) const
     error.update(STAT_error[STATR_SAMPLE_SIZE]);
   else {
 
-    // creation d'un objet Mv_Mixture_data
+    // creation d'un objet MultivariateMixtureData
     iidentifier = new int[nb_element];
     iint_vector = new int*[nb_element];
     hweight = new FrequencyDistribution(nb_component);
@@ -1079,8 +1082,8 @@ Mv_Mixture_data* Mv_Mixture::simulation(StatError &error , int nb_element) const
     iidentifier = NULL;
 
     // extraction des caracteristiques des lois empiriques
-    mixt_data = new Mv_Mixture_data(*vec, nb_component);
-    mixt_data->mixture = new Mv_Mixture(*this , false);
+    mixt_data = new MultivariateMixtureData(*vec, nb_component);
+    mixt_data->mixture = new MultivariateMixture(*this , false);
 
     mixt_data->weight = hweight;
     mixt_data->component = hcomponent;
@@ -1097,15 +1100,15 @@ Mv_Mixture_data* Mv_Mixture::simulation(StatError &error , int nb_element) const
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data* Mv_Mixture::cluster(StatError &error,  const Vectors &vec,
-                                     int algorithm) const {
+MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const Vectors &vec,
+                                                      int algorithm) const {
 
   int n, var, s, k;
   int nb_vector = vec.get_nb_vector(),
     nb_variable = vec.get_nb_variable();
   int **iint_vector = NULL;
   std::vector<int> *states = NULL;
-  Mv_Mixture_data* clusters_vec = NULL;
+  MultivariateMixtureData* clusters_vec = NULL;
   Vectors* state_vec = NULL;
   FrequencyDistribution *hweight = NULL, ***hcomponent = NULL;
 
@@ -1130,8 +1133,8 @@ Mv_Mixture_data* Mv_Mixture::cluster(StatError &error,  const Vectors &vec,
     iint_vector = NULL;
 
     state_vec->type[0] = STATE;
-    clusters_vec = new Mv_Mixture_data(*state_vec, nb_component);
-    clusters_vec->mixture = new Mv_Mixture(*this, false);
+    clusters_vec = new MultivariateMixtureData(*state_vec, nb_component);
+    clusters_vec->mixture = new MultivariateMixture(*this, false);
 
     assert(clusters_vec->type[0] = STATE);
 
