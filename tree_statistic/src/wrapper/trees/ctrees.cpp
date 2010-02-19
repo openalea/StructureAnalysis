@@ -182,7 +182,7 @@ Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
    ostringstream error_message;
    bool status= true;
    bool several_errors= false;
-   Format_error error;
+   StatError error;
    Trees *trees= NULL;
    Trees::int_array isymbols= NULL;
 
@@ -257,7 +257,7 @@ Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
 Trees* Trees_wrapper_cluster_step(const Trees& reftree, int variable,
                                   int step)
 {
-   Format_error error;
+   StatError error;
    Trees *trees= NULL;
    ostringstream error_message;
 
@@ -279,7 +279,7 @@ Trees* Trees_wrapper_cluster_limit(const Trees& reftree, int variable,
    ostringstream error_message;
    bool status= true;
    bool several_errors= false;
-   Format_error error;
+   StatError error;
    Trees *trees= NULL;
    Trees::int_array ilimits= NULL;
 
@@ -331,7 +331,7 @@ Trees* Trees_wrapper_difference(const Trees& reftree, int variable)
 {
    ostringstream error_message;
    bool status= true;
-   Format_error error;
+   StatError error;
    Trees *trees= NULL;
 
    trees= reftree.difference(error, variable);
@@ -362,7 +362,7 @@ void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
 {
    ostringstream error_message;
    bool status= true;
-   Format_error error;
+   StatError error;
    Sequences* seq= NULL;
 
 
@@ -389,7 +389,7 @@ Sequences* Trees_wrapper_build_py_sequences(const Trees& reftree,
 {
    ostringstream error_message;
    bool status= true;
-   Format_error error;
+   StatError error;
    Sequences* seq= NULL;
 
 
@@ -410,7 +410,7 @@ void Trees_wrapper_build_vectors_path(const Trees& reftree, const char* prefix)
 {
    ostringstream error_message;
    bool status= true;
-   Format_error error;
+   StatError error;
    Vectors* vec= NULL;
 
 
@@ -436,7 +436,7 @@ Vectors* Trees_wrapper_build_vectors_object(const Trees& reftree)
 {
    ostringstream error_message;
    bool status= true;
-   Format_error error;
+   StatError error;
    Vectors* vec= NULL;
 
 
@@ -453,12 +453,12 @@ Vectors* Trees_wrapper_build_vectors_object(const Trees& reftree)
    return vec;
 }
 
-Distribution_data* Trees_wrapper_extract_value(const Trees& reftree, int variable)
+DiscreteDistributionData* Trees_wrapper_extract_value(const Trees& reftree, int variable)
 {
    ostringstream error_message;
    // bool status= true;
-   Format_error error;
-   Distribution_data *histo= NULL;
+   StatError error;
+   DiscreteDistributionData *histo= NULL;
 
 
    histo= reftree.extract(error, variable);
@@ -471,14 +471,14 @@ Distribution_data* Trees_wrapper_extract_value(const Trees& reftree, int variabl
    return histo;
 }
 
-Distribution_data* Trees_wrapper_extract_feature(const Trees& reftree,
-                                                 int type,
-                                                 int variable,
-                                                 int value)
+DiscreteDistributionData* Trees_wrapper_extract_feature(const Trees& reftree,
+                                                        int type,
+                                                        int variable,
+                                                        int value)
 {
    ostringstream error_message;
-   Format_error error;
-   Distribution_data *histo= NULL;
+   StatError error;
+   DiscreteDistributionData *histo= NULL;
 
    histo= reftree.extract(error, type, variable, value);
    if (histo == NULL)
@@ -527,7 +527,7 @@ Trees* Trees_wrapper_select_variable(const Trees& reftree,
    int *variable_list;
    bool several_errors= false;
    object o;
-   Format_error error;
+   StatError error;
    ostringstream error_message;
    bool status= true;
    Trees *trees= NULL;
@@ -596,7 +596,7 @@ Trees* Trees_wrapper_select_individual(const Trees& reftree,
    int *id_list;
    bool several_errors= false;
    object o;
-   Format_error error;
+   StatError error;
    ostringstream error_message;
    bool status= true;
    Trees *trees= NULL;
@@ -662,7 +662,7 @@ Trees* Trees_wrapper_segmentation_extract_value(const Trees& reftree,
                                                 bool keep)
 {
    int *ivalue= new int[1];
-   Format_error error;
+   StatError error;
    ostringstream error_message;
    bool status= true;
    Trees *trees= NULL;
@@ -690,7 +690,7 @@ Trees* Trees_wrapper_segmentation_extract_values(const Trees& reftree,
 {
    int nb_values, val;
    int *ivalue= NULL;
-   Format_error error;
+   StatError error;
    ostringstream error_message;
    bool status= true;
    object o;
@@ -756,7 +756,7 @@ Trees* Trees_wrapper_segmentation_extract_values(const Trees& reftree,
 Trees* Trees_wrapper_shift_int(const Trees& reftree, int variable, int shift)
 {
    ostringstream error_message;
-   Format_error error;
+   StatError error;
    Trees *trees= NULL;
 
    trees= reftree.shift(error, variable, shift);
@@ -772,7 +772,7 @@ Trees* Trees_wrapper_shift_int(const Trees& reftree, int variable, int shift)
 Trees* Trees_wrapper_shift_float(const Trees& reftree, int variable, double shift)
 {
    ostringstream error_message;
-   Format_error error;
+   StatError error;
    Trees *trees= NULL;
 
    trees= reftree.shift(error, variable, shift);
@@ -785,7 +785,7 @@ Trees* Trees_wrapper_shift_float(const Trees& reftree, int variable, double shif
    return trees;
 }
 
-Trees* Trees_wrapper_merge(const Trees& reftree, Format_error& error,
+Trees* Trees_wrapper_merge(const Trees& reftree, StatError& error,
                            boost::python::list tree_list)
 {
    int nb_trees, t; //, nb_variables, var;
@@ -889,7 +889,7 @@ Trees* Trees_wrapper_merge2(const Trees& reftree, boost::python::list tree_list)
    Trees::pt_observed_trees_array otrees;
    bool several_errors= false;
    object o;
-   Format_error error;
+   StatError error;
    ostringstream error_message;
    bool status= true, current_status;
    Trees *trees= NULL;
@@ -988,7 +988,7 @@ Trees* Trees_wrapper_merge_variable(const Trees& reftree, boost::python::list tr
    Trees::pt_observed_trees_array otrees;
    bool several_errors= false;
    object o;
-   Format_error error;
+   StatError error;
    ostringstream error_message;
    bool status= true, current_status;
    Trees *trees= NULL;
@@ -1069,7 +1069,7 @@ MultiPlotSet* Trees_wrapper_get_plotable(const Trees& reftree,
                      int plot_type,
                      int variable)
 {
-   Format_error error;
+   StatError error;
    ostringstream error_message;
    MultiPlotSet *plotset= NULL;
 
@@ -1091,7 +1091,7 @@ void Trees_wrapper_plot_write(const Trees& reftree,
 {
    bool status= true;
    ostringstream error_message;
-   Format_error error;
+   StatError error;
 
    status= reftree.plot_write(error, prefix, title);
    if (not status)
@@ -1121,7 +1121,7 @@ BOOST_PYTHON_MODULE(ctrees)
 {
     class_< Trees >("CTrees", init< const Trees& >())
         .def(init< optional< int, int, int > > ())
-        .def(init< int, int, const Histogram&, const Histogram&,
+        .def(init< int, int, const FrequencyDistribution&, const FrequencyDistribution&,
                    optional< bool, bool > >())
         .def(init< const Trees&, int, Trees::int_array>())
         .def("__init__", make_constructor(Trees_wrapper_init1))
@@ -1155,15 +1155,15 @@ BOOST_PYTHON_MODULE(ctrees)
 	                      return_value_policy< manage_new_object >(),
                              "BuildVectors(self, path) -> void \n\n"
                              "Build vectors object from trees.")
-        .def("ExtractSizeHistogram", &Trees::extract_size,
-                                     return_value_policy< manage_new_object >(),
-                                     "ExtractSizeHistogram(self) -> Histogram \n\n"
-                                     "Extract the histogram of tree size.")
-        .def("ExtractNbChildrenHistogram", &Trees::extract_nb_children,
-                                           return_value_policy< manage_new_object >())
-        .def("ExtractValueHistogram", &Trees_wrapper_extract_value,
-                                      return_value_policy< manage_new_object >())
-        .def("ExtractFeatureHistogram", &Trees_wrapper_extract_feature,
+        .def("ExtractSizeFrequencyDistribution", &Trees::extract_size,
+                                                 return_value_policy< manage_new_object >(),
+                                                "ExtractSizeFrequencyDistribution(self) -> FrequencyDistribution \n\n"
+                                                "Extract the frequency distribution of tree size.")
+        .def("ExtractNbChildrenFrequencyDistribution", &Trees::extract_nb_children,
+                                                       return_value_policy< manage_new_object >())
+        .def("ExtractValueFrequencyDistribution", &Trees_wrapper_extract_value,
+                                                  return_value_policy< manage_new_object >())
+        .def("ExtractFeatureFrequencyDistribution", &Trees_wrapper_extract_feature,
                                         return_value_policy< manage_new_object >())
         .def("IsCharacteristic", &Trees::is_characteristic,
                              "IsCharacteristic(self, variable, charac) -> bool \n\n",
