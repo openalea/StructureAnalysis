@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/hidden_markov_out_tree.cpp,v $
+ *       $Source$
  *       $Id: hidden_markov_out_tree.cpp 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -45,7 +45,7 @@
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/distribution.h"   // definition of Parametric_model class
+#include "stat_tool/distribution.h"   // definition of DiscreteParametricModel class
 #include "stat_tool/vectors.h"
 #include "sequence_analysis/sequences.h"
 #include "int_fl_containers.h"
@@ -62,17 +62,17 @@ using namespace Stat_trees;
 
 /*****************************************************************
  *
- *  Default constructor of class Hidden_markov_out_tree
+ *  Default constructor of class HiddenMarkovOutTree
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree()
- : Hidden_markov_tree()
+HiddenMarkovOutTree::HiddenMarkovOutTree()
+ : HiddenMarkovTree()
 {}
 
 /*****************************************************************
  *
- *  Constructor of Hidden_markov_out_tree class
+ *  Constructor of HiddenMarkovOutTree class
  *  using the type of markov tree ('o'rdinary or 'e'quilibrium),
  *  the number of states, the number of observed integral
  *  and floating processes and the number of observed values
@@ -80,96 +80,96 @@ Hidden_markov_out_tree::Hidden_markov_out_tree()
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree(char itype, int inb_state,
-                                               int inb_ioutputprocess,
-                                               int inb_doutputprocess,
-                                               int* nb_value,
-                                               bool* force_param)
- : Hidden_markov_tree(itype, inb_state, 1, inb_ioutputprocess,
-                      inb_doutputprocess, nb_value, force_param)
+HiddenMarkovOutTree::HiddenMarkovOutTree(char itype, int inb_state,
+                                         int inb_ioutputprocess,
+                                         int inb_doutputprocess,
+                                         int* nb_value,
+                                         bool* force_param)
+ : HiddenMarkovTree(itype, inb_state, 1, inb_ioutputprocess,
+                    inb_doutputprocess, nb_value, force_param)
 {}
 
 /*****************************************************************
  *
- *  Constructor of Hidden_markov_out_tree class
+ *  Constructor of HiddenMarkovOutTree class
  *  using a Chain object, the number of observed integral processes,
  *  the processes themselves, the tree size
  *  and a flag on the counting distribution computation
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree(const Chain * pchain,
-                                               int inb_ioutput_process,
-                                               Nonparametric_process** pobservation,
-                                               int size, bool counting_flag)
- : Hidden_markov_tree(pchain, 1, inb_ioutput_process, pobservation, size, counting_flag)
+HiddenMarkovOutTree::HiddenMarkovOutTree(const Chain * pchain,
+                                         int inb_ioutput_process,
+                                         NonparametricProcess** pobservation,
+                                         int size, bool counting_flag)
+ : HiddenMarkovTree(pchain, 1, inb_ioutput_process, pobservation, size, counting_flag)
 {}
 
 /*****************************************************************
  *
- *  Constructor of Hidden_markov_out_tree class
+ *  Constructor of HiddenMarkovOutTree class
  *  using a Chain object, the number of observed integral and
  *  floating processes,the processes themselves, the tree size
  *  and a flag on the counting distribution computation
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree(const Chain * pchain,
-                                               int inb_ioutput_process,
-                                               int inb_doutput_process,
-                                               Nonparametric_process** np_observation,
-                                               Parametric_process** ip_observation,
-                                               Parametric_process** dp_observation,
-                                               int size, bool counting_flag)
- : Hidden_markov_tree(pchain, 1, inb_ioutput_process, inb_doutput_process,
-                      np_observation, ip_observation, dp_observation,
-                      size, counting_flag)
+HiddenMarkovOutTree::HiddenMarkovOutTree(const Chain * pchain,
+                                         int inb_ioutput_process,
+                                         int inb_doutput_process,
+                                         NonparametricProcess** np_observation,
+                                         DiscreteParametricProcess** ip_observation,
+                                         DiscreteParametricProcess** dp_observation,
+                                         int size, bool counting_flag)
+ : HiddenMarkovTree(pchain, 1, inb_ioutput_process, inb_doutput_process,
+                    np_observation, ip_observation, dp_observation,
+                    size, counting_flag)
  {}
 
 /*****************************************************************
  *
- *  Copy constructor of Hidden_markov_out_tree class
- *  using a flag on the Hidden_markov_tree_data copy
+ *  Copy constructor of HiddenMarkovOutTree class
+ *  using a flag on the HiddenMarkovTreeData copy
  *  and one on the characteristic distribution copy
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree(const Hidden_markov_out_tree& markov,
-                                               bool data_flag,
-                                               bool characteristic_flag)
- : Hidden_markov_tree(markov, data_flag, characteristic_flag)
+HiddenMarkovOutTree::HiddenMarkovOutTree(const HiddenMarkovOutTree& markov,
+                                         bool data_flag,
+                                         bool characteristic_flag)
+ : HiddenMarkovTree(markov, data_flag, characteristic_flag)
 {}
 
 /*****************************************************************
  *
- *  Constructor of Hidden_markov_out_tree class
- *  converting a Hidden_markov_tree to a Hidden_markov_out_tree,
+ *  Constructor of HiddenMarkovOutTree class
+ *  converting a HiddenMarkovTree to a HiddenMarkovOutTree,
  *  assuming that _ch_order is equal to one
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree(const Hidden_markov_tree& markov,
-                                               bool data_flag,
-                                               bool characteristic_flag)
- : Hidden_markov_tree()
+HiddenMarkovOutTree::HiddenMarkovOutTree(const HiddenMarkovTree& markov,
+                                         bool data_flag,
+                                         bool characteristic_flag)
+ : HiddenMarkovTree()
 {
    if (_ch_order == 1)
    {
        Chain::copy(markov);
-       Hidden_markov_tree::copy(markov, data_flag, characteristic_flag);
+       HiddenMarkovTree::copy(markov, data_flag, characteristic_flag);
    }
 }
 
 /*****************************************************************
  *
- *  Copy constructor of Hidden_markov_out_tree class
+ *  Copy constructor of HiddenMarkovOutTree class
  *  using a default self transition probability
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree(const Hidden_markov_out_tree& markov,
-                                               double self_transition)
- : Hidden_markov_tree(markov, false)
+HiddenMarkovOutTree::HiddenMarkovOutTree(const HiddenMarkovOutTree& markov,
+                                         double self_transition)
+ : HiddenMarkovTree(markov, false)
 {
    register int i;
 
@@ -192,40 +192,40 @@ Hidden_markov_out_tree::Hidden_markov_out_tree(const Hidden_markov_out_tree& mar
 
 /*****************************************************************
  *
- *  Copy constructor for Hidden_markov_out_tree class
+ *  Copy constructor for HiddenMarkovOutTree class
  *  with a structural transformation
  *  using the type of transformation ('s' : state, 'o' : "children order"),
  *  and a parameter (reference state/ "children order")
  *
  **/
 
-Hidden_markov_out_tree::Hidden_markov_out_tree(const Hidden_markov_out_tree& markov,
-                                               char manip,
-                                               int param)
- : Hidden_markov_tree(markov, manip, param)
+HiddenMarkovOutTree::HiddenMarkovOutTree(const HiddenMarkovOutTree& markov,
+                                         char manip,
+                                         int param)
+ : HiddenMarkovTree(markov, manip, param)
 {}
 
 /*****************************************************************
  *
- *  Destructor for Hidden_markov_out_tree class
+ *  Destructor for HiddenMarkovOutTree class
  *
  **/
 
-Hidden_markov_out_tree::~Hidden_markov_out_tree()
+HiddenMarkovOutTree::~HiddenMarkovOutTree()
 {}
-// calls Hidden_markov_tree::~Hidden_markov_tree()
+// calls HiddenMarkovTree::~HiddenMarkovTree()
 
 /*****************************************************************
  *
- *  Return the data part of a Hidden_markov_out_tree
- *  using a Format_error object, keeping a reference on self
+ *  Return the data part of a HiddenMarkovOutTree
+ *  using a StatError object, keeping a reference on self
  *
  **/
 
-Hidden_markov_tree_data* Hidden_markov_out_tree::extract_data(Format_error& error) const
+HiddenMarkovTreeData* HiddenMarkovOutTree::extract_data(StatError& error) const
 {
    bool status= true;
-   Hidden_markov_tree_data *tree= NULL;
+   HiddenMarkovTreeData *tree= NULL;
 
    error.init();
 
@@ -245,8 +245,8 @@ Hidden_markov_tree_data* Hidden_markov_out_tree::extract_data(Format_error& erro
 
    if (status)
    {
-      tree= new Hidden_markov_tree_data(*markov_data);
-      tree->markov= new Hidden_markov_out_tree(*this, false);
+      tree= new HiddenMarkovTreeData(*markov_data);
+      tree->markov= new HiddenMarkovOutTree(*this, false);
    }
 
    return tree;
@@ -254,12 +254,12 @@ Hidden_markov_tree_data* Hidden_markov_out_tree::extract_data(Format_error& erro
 
 /*****************************************************************
  *
- *  Prints a Hidden_markov_out_tree on a single line
+ *  Prints a HiddenMarkovOutTree on a single line
  *  using an output stream
  *
  **/
 
-std::ostream& Hidden_markov_out_tree::line_write(std::ostream& os) const
+std::ostream& HiddenMarkovOutTree::line_write(std::ostream& os) const
 {
    os << nb_state << " " << STAT_word[STATW_STATES];
 
@@ -268,25 +268,25 @@ std::ostream& Hidden_markov_out_tree::line_write(std::ostream& os) const
 
 /*****************************************************************
  *
- *  Prints a Hidden_markov_out_tree
+ *  Prints a HiddenMarkovOutTree
  *  using an output stream and a flag on the level of detail
  *
  **/
 
-ostream& Hidden_markov_out_tree::ascii_write(ostream& os, bool exhaustive) const
+ostream& HiddenMarkovOutTree::ascii_write(ostream& os, bool exhaustive) const
 { return ascii_write(os, markov_data, exhaustive, false); }
 
 
 /*****************************************************************
  *
- *  Prints a Hidden_markov_out_tree into a file
- *  using a Format_error object, the path
+ *  Prints a HiddenMarkovOutTree into a file
+ *  using a StatError object, the path
  *  and a flag on the level of detail
  *
  **/
 
-bool Hidden_markov_out_tree::ascii_write(Format_error& error, const char * path,
-                                         bool exhaustive) const
+bool HiddenMarkovOutTree::ascii_write(StatError& error, const char * path,
+                                      bool exhaustive) const
 {
    bool status;
    ofstream out_file(path);
@@ -310,13 +310,13 @@ bool Hidden_markov_out_tree::ascii_write(Format_error& error, const char * path,
 
 /*****************************************************************
  *
- *  Prints a Hidden_markov_out_tree in a spreadsheet fashion
- *  using a Format_error object and the path
+ *  Prints a HiddenMarkovOutTree in a spreadsheet fashion
+ *  using a StatError object and the path
  *
  **/
 
-bool Hidden_markov_out_tree::spreadsheet_write(Format_error& error,
-                                           const char * path) const
+bool HiddenMarkovOutTree::spreadsheet_write(StatError& error,
+                                            const char * path) const
 {
    bool status;
    ofstream out_file(path);
@@ -341,15 +341,15 @@ bool Hidden_markov_out_tree::spreadsheet_write(Format_error& error,
 
 /*****************************************************************
  *
- *  Gnuplot output for Hidden_markov_out_tree class
- *  using a Format_error object, a prefix for the files
+ *  Gnuplot output for HiddenMarkovOutTree class
+ *  using a StatError object, a prefix for the files
  *  and the title for figures
  *
  **/
 
-bool Hidden_markov_out_tree::plot_write(Format_error& error,
-                                        const char * prefix,
-                                        const char * title) const
+bool HiddenMarkovOutTree::plot_write(StatError& error,
+                                     const char * prefix,
+                                     const char * title) const
 {
    bool status= plot_write(prefix, title, markov_data);
 
@@ -363,23 +363,23 @@ bool Hidden_markov_out_tree::plot_write(Format_error& error,
 
 /*****************************************************************
  *
- *  Prints a Hidden_markov_out_tree and the corresponding data structure
- *  using an output stream, a Hidden_markov_tree_data object,
+ *  Prints a HiddenMarkovOutTree and the corresponding data structure
+ *  using an output stream, a HiddenMarkovTreeData object,
  *  a flag on the level of detail, a flag on the file use
  *  and a Test object
  *
  **/
 
-ostream& Hidden_markov_out_tree::ascii_write(ostream& os,
-                                             const Hidden_markov_tree_data * otrees,
-                                             bool exhaustive,
-                                             bool file_flag,
-                                             const Test* test) const
+ostream& HiddenMarkovOutTree::ascii_write(ostream& os,
+                                          const HiddenMarkovTreeData * otrees,
+                                          bool exhaustive,
+                                          bool file_flag,
+                                          const Test* test) const
 {
    // register int i;
    // int variable, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
-   // Histogram **observation= NULL;
-   // Tree_characteristics *characteristics= NULL;
+   // FrequencyDistribution **observation= NULL;
+   // TreeCharacteristics *characteristics= NULL;
 
    switch (type)
    {
@@ -392,27 +392,27 @@ ostream& Hidden_markov_out_tree::ascii_write(ostream& os,
    }
 
    // printing of the hidden Markov tree parameters
-   Hidden_markov_tree::ascii_write(os, otrees, exhaustive, file_flag, test, false);
+   HiddenMarkovTree::ascii_write(os, otrees, exhaustive, file_flag, test, false);
 
    return os;
 }
 
 /*****************************************************************
  *
- *  Prints a Hidden_markov_out_tree and the corresponding data structure
+ *  Prints a HiddenMarkovOutTree and the corresponding data structure
  *  in a spreadsheet fashion
- *  using an output stream, a Hidden_markov_tree_data object
+ *  using an output stream, a HiddenMarkovTreeData object
  *  and a Test object
  *
  **/
 
-ostream& Hidden_markov_out_tree::spreadsheet_write(ostream& os, const Hidden_markov_tree_data * otrees,
-                                                   const Test * test) const
+ostream& HiddenMarkovOutTree::spreadsheet_write(ostream& os, const HiddenMarkovTreeData * otrees,
+                                                const Test * test) const
 {
    register int i;
    int variable= 0, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
-   Histogram **observation= NULL;
-   Tree_characteristics *characteristics= NULL;
+   FrequencyDistribution **observation= NULL;
+   TreeCharacteristics *characteristics= NULL;
 
    switch (type)
    {
@@ -505,10 +505,10 @@ ostream& Hidden_markov_out_tree::spreadsheet_write(ostream& os, const Hidden_mar
       // printing of the quantities for which the characteristic distributions
       // are invariant - if any
 
-      os << "\n" << STAT_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+      os << "\n" << STAT_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
       otrees->hsize->spreadsheet_characteristic_print(os);
 
-      os << "\n\t" << STAT_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "\n\t" << STAT_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       otrees->hsize->spreadsheet_print(os);
 
       cumul_size= otrees->cumul_size_computation();
@@ -564,20 +564,20 @@ ostream& Hidden_markov_out_tree::spreadsheet_write(ostream& os, const Hidden_mar
 
 /*****************************************************************
  *
- *  Gnuplot output for Hidden_markov_out_tree class
+ *  Gnuplot output for HiddenMarkovOutTree class
  *  using a prefix for the files, the title of figures
  *  and the observed trees
  *
  **/
 
-bool Hidden_markov_out_tree::plot_write(const char * prefix, const char * title,
-                                        const Hidden_markov_tree_data * otrees) const
+bool HiddenMarkovOutTree::plot_write(const char * prefix, const char * title,
+                                     const HiddenMarkovTreeData * otrees) const
 {
    bool status;
    register int i;
    int variable= 0; //, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
-   Histogram *hsize= NULL, **observation= NULL;
-   Tree_characteristics *characteristics= NULL;
+   FrequencyDistribution *hsize= NULL, **observation= NULL;
+   TreeCharacteristics *characteristics= NULL;
 
    // print characteristic distributions for state process
    if ((otrees != NULL) && (otrees->_type[0] == STATE))
@@ -635,37 +635,37 @@ bool Hidden_markov_out_tree::plot_write(const char * prefix, const char * title,
    return status;
 }
 
-void Hidden_markov_out_tree::get_state_marginal_distribution (const Hidden_markov_tree_data& trees,
-                                                              double_array_3d& res) const
+void HiddenMarkovOutTree::get_state_marginal_distribution (const HiddenMarkovTreeData& trees,
+                                                           double_array_3d& res) const
 { state_marginal_distribution(trees, res); }
 
-void Hidden_markov_out_tree::get_output_conditional_distribution(const Hidden_markov_tree_data& trees,
-                                                                 double_array_3d& res) const
+void HiddenMarkovOutTree::get_output_conditional_distribution(const HiddenMarkovTreeData& trees,
+                                                              double_array_3d& res) const
 { output_conditional_distribution(trees, res); }
 
-double Hidden_markov_out_tree::get_upward_step(const Hidden_markov_tree_data& trees,
-                                               double_array_3d& upward_prob,
-                                               double_array_3d& upward_parent_prob,
-                                               double_array_3d& state_entropy,
-                                               double_array_3d marginal_prob,
-                                               double_array_3d output_cond_prob,
-                                               double& entropy1) const
+double HiddenMarkovOutTree::get_upward_step(const HiddenMarkovTreeData& trees,
+                                            double_array_3d& upward_prob,
+                                            double_array_3d& upward_parent_prob,
+                                            double_array_3d& state_entropy,
+                                            double_array_3d marginal_prob,
+                                            double_array_3d output_cond_prob,
+                                            double& entropy1) const
 { return upward_step(trees, upward_prob, upward_parent_prob, state_entropy,
                      marginal_prob, output_cond_prob, entropy1); }
 
-void Hidden_markov_out_tree::get_downward_step(const Hidden_markov_tree_data& trees,
-                                               double_array_3d& downward_prob,
-                                               double_array_3d*& downward_pair_prob,
-                                               double_array_3d upward_prob,
-                                               double_array_3d upward_parent_prob,
-                                               double_array_3d marginal_prob,
-                                               double_array_3d output_cond_prob,
-                                               double& entropy2) const
+void HiddenMarkovOutTree::get_downward_step(const HiddenMarkovTreeData& trees,
+                                            double_array_3d& downward_prob,
+                                            double_array_3d*& downward_pair_prob,
+                                            double_array_3d upward_prob,
+                                            double_array_3d upward_parent_prob,
+                                            double_array_3d marginal_prob,
+                                            double_array_3d output_cond_prob,
+                                            double& entropy2) const
 { return downward_step(trees, downward_prob, downward_pair_prob, upward_prob, upward_parent_prob,
                        marginal_prob, output_cond_prob, entropy2);}
 
-double Hidden_markov_out_tree::get_viterbi(const Hidden_markov_tree_data& trees,
-                                           int index)
+double HiddenMarkovOutTree::get_viterbi(const HiddenMarkovTreeData& trees,
+                                        int index)
 {
    double res;
 
@@ -676,10 +676,10 @@ double Hidden_markov_out_tree::get_viterbi(const Hidden_markov_tree_data& trees,
    return res;
 }
 
-double Hidden_markov_out_tree::get_upward_downward(const Hidden_markov_tree_data& trees,
-                                                   int index,
-                                                   ostream* os,
-                                                   char format) const
+double HiddenMarkovOutTree::get_upward_downward(const HiddenMarkovTreeData& trees,
+                                                int index,
+                                                ostream* os,
+                                                char format) const
 {
    double max_marginal_entropy, entropy1, likelihood, state_likelihood;
    std::deque<int> *path= NULL;
@@ -695,11 +695,11 @@ double Hidden_markov_out_tree::get_upward_downward(const Hidden_markov_tree_data
 
 /*****************************************************************
  *
- *  Computation of the parameter number of a Hidden_markov_out_tree
+ *  Computation of the parameter number of a HiddenMarkovOutTree
  *
  **/
 
-int Hidden_markov_out_tree::nb_parameter_computation(double min_probability) const
+int HiddenMarkovOutTree::nb_parameter_computation(double min_probability) const
 {
    int nb_parameter= Chain::nb_parameter_computation(min_probability);
    register int var; //, j, val
@@ -720,12 +720,12 @@ int Hidden_markov_out_tree::nb_parameter_computation(double min_probability) con
 
 /*****************************************************************
  *
- *  Likelihood correction for a Hidden_markov_out_tree,
- *  using a given set of trees (Hidden_markov_tree_data)
+ *  Likelihood correction for a HiddenMarkovOutTree,
+ *  using a given set of trees (HiddenMarkovTreeData)
  *
  **/
 
-double Hidden_markov_out_tree::likelihood_correction(const Hidden_markov_tree_data& otrees) const
+double HiddenMarkovOutTree::likelihood_correction(const HiddenMarkovTreeData& otrees) const
 {
    register int j, var, t, s, val;
    int *cinitial;
@@ -758,11 +758,11 @@ double Hidden_markov_out_tree::likelihood_correction(const Hidden_markov_tree_da
 }
 
 
-Hidden_markov_out_tree* Stat_trees::hidden_markov_out_tree_ascii_read(Format_error& error,
-                                                                      const char * path,
-                                                                      int size,
-                                                                      bool counting_flag,
-                                                                      double cumul_threshold)
+HiddenMarkovOutTree* Stat_trees::hidden_markov_out_tree_ascii_read(StatError& error,
+                                                                  const char * path,
+                                                                  int size,
+                                                                  bool counting_flag,
+                                                                  double cumul_threshold)
 {
    RWLocaleSnapshot locale("en");
    RWCString buffer, token;
@@ -771,8 +771,8 @@ Hidden_markov_out_tree* Stat_trees::hidden_markov_out_tree_ascii_read(Format_err
    bool status;
    register int i;
    int line;
-   Hidden_markov_tree *markov= NULL;
-   Hidden_markov_out_tree *res= NULL;
+   HiddenMarkovTree *markov= NULL;
+   HiddenMarkovOutTree *res= NULL;
    ifstream in_file(path);
 
    error.init();
@@ -863,7 +863,7 @@ Hidden_markov_out_tree* Stat_trees::hidden_markov_out_tree_ascii_read(Format_err
       }
 
       if (status)
-         res= new Hidden_markov_out_tree(*markov, false, false);
+         res= new HiddenMarkovOutTree(*markov, false, false);
 
       if (markov != NULL)
          delete markov;
@@ -874,9 +874,9 @@ Hidden_markov_out_tree* Stat_trees::hidden_markov_out_tree_ascii_read(Format_err
 
 /*****************************************************************
  *
- *  Left (bit) shift operator of Hidden_markov_out_tree
+ *  Left (bit) shift operator of HiddenMarkovOutTree
  *
  **/
 
-ostream& Stat_trees::operator<<(ostream &os, const Hidden_markov_out_tree& hmarkov)
+ostream& Stat_trees::operator<<(ostream &os, const HiddenMarkovOutTree& hmarkov)
 { return hmarkov.ascii_write(os); }
