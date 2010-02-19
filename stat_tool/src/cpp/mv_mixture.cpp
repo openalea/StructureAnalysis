@@ -1,16 +1,17 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand and Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
+ *                       Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: mixture.cpp 5353 2008-07-29 12:33:46Z guedon $
+ *       $Id: multivariate_mixture.cpp 5353 2008-07-29 12:33:46Z guedon $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -58,11 +59,11 @@ extern int cumul_method(int nb_value, const double *cumul, double scale= 1.);
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Mv_Mixture.
+ *  Constructeur par defaut de la classe MultivariateMixture.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture::Mv_Mixture()
+MultivariateMixture::MultivariateMixture()
 
 {
   mixture_data = NULL;
@@ -76,16 +77,16 @@ Mv_Mixture::Mv_Mixture()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mv_Mixture.
+ *  Constructeur de la classe MultivariateMixture.
  *
  *  arguments : nombre de composantes, poids, pointeurs sur les composantes parametriques
  *  et non parametriques
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture::Mv_Mixture(int inb_component , double *pweight , int inb_variable,
-               DiscreteParametricProcess **ppcomponent,
-               NonparametricProcess **pnpcomponent)
+MultivariateMixture::MultivariateMixture(int inb_component , double *pweight , int inb_variable,
+                                         DiscreteParametricProcess **ppcomponent,
+                                         NonparametricProcess **pnpcomponent)
 
 {
   register int var, i;
@@ -125,14 +126,15 @@ Mv_Mixture::Mv_Mixture(int inb_component , double *pweight , int inb_variable,
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mv_Mixture.
+ *  Constructeur de la classe MultivariateMixture.
  *
- *  arguments : reference sur un objet Mv_Mixture, flag sur les variables a copier,
+ *  arguments : reference sur un objet MultivariateMixture, flag sur les variables a copier,
  *              nombre de variables a copier.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture::Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag, int inb_variable)
+MultivariateMixture::MultivariateMixture(const MultivariateMixture &mixt ,
+                                         bool *variable_flag, int inb_variable)
 
 {
   register int var;
@@ -163,16 +165,16 @@ Mv_Mixture::Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag, int inb_var
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mv_Mixture.
+ *  Constructeur de la classe MultivariateMixture.
  *
  *  arguments : nombre de composantes, nombre de variables,
  *  pointeurs sur les composantes.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
-                       const DiscreteParametricProcess **ppcomponent,
-               const NonparametricProcess **pnpcomponent)
+MultivariateMixture::MultivariateMixture(int inb_component , int inb_variable,
+                                         const DiscreteParametricProcess **ppcomponent,
+                                         const NonparametricProcess **pnpcomponent)
 
 {
   register int var;
@@ -201,7 +203,7 @@ Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mv_Mixture.
+ *  Constructeur de la classe MultivariateMixture.
  *
  *  arguments : nombre de composantes, nombre de variables,
  *  nombre de valeurs pour chaque variable,
@@ -209,8 +211,8 @@ Mv_Mixture::Mv_Mixture(int inb_component , int inb_variable,
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
-                       int *nb_value, bool *force_param) {
+MultivariateMixture::MultivariateMixture(int inb_component, int inb_variable,
+                                         int *nb_value, bool *force_param) {
 
 
   register int var, i;
@@ -264,21 +266,21 @@ Mv_Mixture::Mv_Mixture(int inb_component, int inb_variable,
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Mv_Mixture.
+ *  Copie d'un objet MultivariateMixture.
  *
- *  arguments : reference sur un objet Mv_Mixture,
- *              flag copie de l'objet Mv_Mixture_data.
+ *  arguments : reference sur un objet MultivariateMixture,
+ *              flag copie de l'objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture::copy(const Mv_Mixture &mixt , bool data_flag)
+void MultivariateMixture::copy(const MultivariateMixture &mixt , bool data_flag)
 
 {
   register int var;
 
 
   if ((data_flag) && (mixt.mixture_data != NULL)) {
-    mixture_data = new Mv_Mixture_data(*(mixt.mixture_data) , false);
+    mixture_data = new MultivariateMixtureData(*(mixt.mixture_data) , false);
   }
   else {
     mixture_data = NULL;
@@ -307,11 +309,11 @@ void Mv_Mixture::copy(const Mv_Mixture &mixt , bool data_flag)
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Mv_Mixture.
+ *  Destruction des champs d'un objet MultivariateMixture.
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture::remove()
+void MultivariateMixture::remove()
 
 {
   if (mixture_data != NULL) {
@@ -347,11 +349,11 @@ void Mv_Mixture::remove()
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Mv_Mixture.
+ *  Destructeur de la classe MultivariateMixture.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture::~Mv_Mixture()
+MultivariateMixture::~MultivariateMixture()
 
 {
   remove();
@@ -360,13 +362,13 @@ Mv_Mixture::~Mv_Mixture()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Mv_Mixture.
+ *  Operateur d'assignement de la classe MultivariateMixture.
  *
- *  argument : reference sur un objet Mv_Mixture.
+ *  argument : reference sur un objet MultivariateMixture.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture& Mv_Mixture::operator=(const Mv_Mixture &mixt)
+MultivariateMixture& MultivariateMixture::operator=(const MultivariateMixture &mixt)
 
 {
   if (&mixt != this) {
@@ -387,8 +389,9 @@ Mv_Mixture& Mv_Mixture::operator=(const Mv_Mixture &mixt)
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricModel* Mv_Mixture::extract_parametric_model(StatError &error , int ivariable,
-                                                              int index) const
+DiscreteParametricModel* MultivariateMixture::extract_parametric_model(StatError &error ,
+                                                                       int ivariable,
+                                                                       int index) const
 
 {
   bool status = true;
@@ -435,8 +438,8 @@ DiscreteParametricModel* Mv_Mixture::extract_parametric_model(StatError &error ,
  *
  *--------------------------------------------------------------*/
 
-Distribution* Mv_Mixture::extract_nonparametric_model(StatError &error ,
-                                                      int ivariable, int index) const
+Distribution* MultivariateMixture::extract_nonparametric_model(StatError &error ,
+                                                               int ivariable, int index) const
 
 {
   bool status = true;
@@ -472,7 +475,7 @@ Distribution* Mv_Mixture::extract_nonparametric_model(StatError &error ,
  *
  *--------------------------------------------------------------*/
 
-Distribution* Mv_Mixture::extract_distribution(StatError &error , int ivariable) const
+Distribution* MultivariateMixture::extract_distribution(StatError &error , int ivariable) const
 {
   bool status = true;
   register int i , j, variable = ivariable - 1;
@@ -558,16 +561,16 @@ Distribution* Mv_Mixture::extract_distribution(StatError &error , int ivariable)
 
 /*--------------------------------------------------------------*
  *
- *  Extraction de la partie "donnees" d'un objet Mv_Mixture.
+ *  Extraction de la partie "donnees" d'un objet MultivariateMixture.
  *
  *  argument : reference sur un objet StatError.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data* Mv_Mixture::extract_data(StatError &error) const
+MultivariateMixtureData* MultivariateMixture::extract_data(StatError &error) const
 
 {
-  Mv_Mixture_data *mixt_data;
+  MultivariateMixtureData *mixt_data;
 
 
   error.init();
@@ -578,8 +581,8 @@ Mv_Mixture_data* Mv_Mixture::extract_data(StatError &error) const
   }
 
   else {
-    mixt_data = new Mv_Mixture_data(*mixture_data);
-    mixt_data->mixture = new Mv_Mixture(*this , false);
+    mixt_data = new MultivariateMixtureData(*mixture_data);
+    mixt_data->mixture = new MultivariateMixture(*this , false);
   }
 
   return mixt_data;
@@ -588,22 +591,23 @@ Mv_Mixture_data* Mv_Mixture::extract_data(StatError &error) const
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Mv_Mixture a partir de poids et de composantes.
+ *  Construction d'un objet MultivariateMixture a partir de poids et de composantes.
  *
  *  arguments : reference sur un objet StatError, nombre de composantes,
  *              poids, pointeurs sur les composantes.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* mv_mixture_building(StatError &error , int nb_component , int nb_variable ,
-                                double *weight, DiscreteParametricProcess **ppcomponent,
-                                NonparametricProcess **pnpcomponent)
+MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
+                                                   int nb_variable , double *weight,
+                                                   DiscreteParametricProcess **ppcomponent,
+                                                   NonparametricProcess **pnpcomponent)
 
 {
   bool status;
   register int i;
   double cumul;
-  Mv_Mixture *mixt;
+  MultivariateMixture *mixt;
 
 
   mixt = NULL;
@@ -630,8 +634,8 @@ Mv_Mixture* mv_mixture_building(StatError &error , int nb_component , int nb_var
     }
 
     if (status) {
-      mixt = new Mv_Mixture(nb_component , weight , nb_variable ,
-                ppcomponent , pnpcomponent);
+      mixt = new MultivariateMixture(nb_component , weight , nb_variable ,
+                                     ppcomponent , pnpcomponent);
     }
   }
 
@@ -641,15 +645,15 @@ Mv_Mixture* mv_mixture_building(StatError &error , int nb_component , int nb_var
 
 /*--------------------------------------------------------------*
  *
- *  Construction d'un objet Mv_Mixture a partir d'un fichier.
+ *  Construction d'un objet MultivariateMixture a partir d'un fichier.
  *
  *  arguments : reference sur un objet StatError, path,
  *              seuil sur la fonction de repartition.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture* mv_mixture_ascii_read(StatError &error , const char *path ,
-                                  double cumul_threshold)
+MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
+                                                     double cumul_threshold)
 
 {
   RWLocaleSnapshot locale("en");
@@ -662,7 +666,7 @@ Mv_Mixture* mv_mixture_ascii_read(StatError &error , const char *path ,
   double cumul , *weight = NULL;
   NonparametricProcess **np_observation;
   DiscreteParametricProcess **p_observation;
-  Mv_Mixture *mixt;
+  MultivariateMixture *mixt;
   ifstream in_file(path);
 
 
@@ -1105,8 +1109,8 @@ Mv_Mixture* mv_mixture_ascii_read(StatError &error , const char *path ,
            }
 
            if (status) {
-         mixt = new Mv_Mixture(nb_component , weight , nb_variable ,
-                       p_observation, np_observation);
+         mixt = new MultivariateMixture(nb_component , weight , nb_variable ,
+                                        p_observation, np_observation);
            }
 
                if (nb_variable > 0)
@@ -1136,8 +1140,8 @@ Mv_Mixture* mv_mixture_ascii_read(StatError &error , const char *path ,
  *
  **/
 
-void Mv_Mixture::state_permutation(StatError& error,
-                                   int* perm) const
+void MultivariateMixture::state_permutation(StatError& error,
+                                            int* perm) const
 {
    register int i, j;
    bool status = true;
@@ -1194,13 +1198,13 @@ void Mv_Mixture::state_permutation(StatError& error,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Mv_Mixture.
+ *  Ecriture sur une ligne d'un objet MultivariateMixture.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mv_Mixture::line_write(ostream &os) const
+ostream& MultivariateMixture::line_write(ostream &os) const
 
 {
   os << nb_component << " " << STAT_word[STATW_DISTRIBUTIONS] ;
@@ -1213,13 +1217,13 @@ ostream& Mv_Mixture::line_write(ostream &os) const
  *
  *  Ecriture d'un melange et de la structure de donnees associee.
  *
- *  arguments : stream, pointeur sur un objet Mv_Mixture_data,
+ *  arguments : stream, pointeur sur un objet MultivariateMixtureData,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data ,
-                                 bool exhaustive , bool file_flag) const
+ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtureData *mixt_data ,
+                                          bool exhaustive , bool file_flag) const
 
 {
   register int i, var,
@@ -1448,13 +1452,13 @@ ostream& Mv_Mixture::ascii_write(ostream &os , const Mv_Mixture_data *mixt_data 
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mv_Mixture.
+ *  Ecriture d'un objet MultivariateMixture.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mv_Mixture::ascii_write(ostream &os , bool exhaustive) const
+ostream& MultivariateMixture::ascii_write(ostream &os , bool exhaustive) const
 
 {
   return ascii_write(os , mixture_data , exhaustive , false);
@@ -1463,15 +1467,15 @@ ostream& Mv_Mixture::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mv_Mixture dans un fichier.
+ *  Ecriture d'un objet MultivariateMixture dans un fichier.
  *
  *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::ascii_write(StatError &error , const char *path ,
-                             bool exhaustive) const
+bool MultivariateMixture::ascii_write(StatError &error , const char *path ,
+                                      bool exhaustive) const
 
 {
   bool status;
@@ -1502,11 +1506,12 @@ bool Mv_Mixture::ascii_write(StatError &error , const char *path ,
  *  et aussi pour les lois non-parametriques mais au niveau
  *  des histogrammes
  *
- *  arguments : stream, pointeur sur un objet Mv_Mixture_data.
+ *  arguments : stream, pointeur sur un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mv_Mixture::spreadsheet_write(ostream &os , const Mv_Mixture_data *mixt_data) const
+ostream& MultivariateMixture::spreadsheet_write(ostream &os ,
+                                                const MultivariateMixtureData *mixt_data) const
 {
   register int i, var,
     data_var; // index that corresponds to var in mixt_data
@@ -1650,13 +1655,13 @@ ostream& Mv_Mixture::spreadsheet_write(ostream &os , const Mv_Mixture_data *mixt
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mv_Mixture dans un fichier au format tableur.
+ *  Ecriture d'un objet MultivariateMixture dans un fichier au format tableur.
  *
  *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::spreadsheet_write(StatError &error , const char *path) const
+bool MultivariateMixture::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status;
@@ -1684,12 +1689,12 @@ bool Mv_Mixture::spreadsheet_write(StatError &error , const char *path) const
  *  Sortie Gnuplot d'un melange et de la structure de donnees associee.
  *
  *  arguments : prefixe des fichiers, titre des figures,
- *              pointeur sur un objet Mv_Mixture_data.
+ *              pointeur sur un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::plot_write(const char *prefix , const char *title ,
-                const Mv_Mixture_data *mixt_data) const
+bool MultivariateMixture::plot_write(const char *prefix , const char *title ,
+                                     const MultivariateMixtureData *mixt_data) const
 
 {
   bool status = true;
@@ -1739,15 +1744,15 @@ bool Mv_Mixture::plot_write(const char *prefix , const char *title ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Mv_Mixture.
+ *  Sortie Gnuplot d'un objet MultivariateMixture.
  *
  *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::plot_write(StatError &error , const char *prefix ,
-                const char *title) const
+bool MultivariateMixture::plot_write(StatError &error , const char *prefix ,
+                                     const char *title) const
 
 {
   bool status = plot_write(prefix , title , mixture_data);
@@ -1766,11 +1771,11 @@ bool Mv_Mixture::plot_write(StatError &error , const char *prefix ,
  *
  *  Sortie graphique d'un melange et de la structure de donnees associee.
  *
- *  argument : pointeur sur un objet Mv_Mixture_data.
+ *  argument : pointeur sur un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Mv_Mixture::get_plotable(const Mv_Mixture_data *mixt_data) const
+MultiPlotSet* MultivariateMixture::get_plotable(const MultivariateMixtureData *mixt_data) const
 
 {
 //   register int i , j;
@@ -1784,7 +1789,7 @@ MultiPlotSet* Mv_Mixture::get_plotable(const Mv_Mixture_data *mixt_data) const
    MultiPlotSet *plotset = new MultiPlotSet(mixt_data ? nb_component + 2 : 1);
 //   MultiPlotSet &set = *plotset;
 
-//   set.title = "Mv_Mixture fit";
+//   set.title = "MultivariateMixture fit";
 //   set.border = "15 lw 0";
 
 //   // 1ere vue : melange ajuste
@@ -1921,11 +1926,11 @@ MultiPlotSet* Mv_Mixture::get_plotable(const Mv_Mixture_data *mixt_data) const
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Mv_Mixture.
+ *  Sortie graphique d'un objet MultivariateMixture.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Mv_Mixture::get_plotable() const
+MultiPlotSet* MultivariateMixture::get_plotable() const
 
 {
   return get_plotable(mixture_data);
@@ -1938,7 +1943,7 @@ MultiPlotSet* Mv_Mixture::get_plotable() const
  *
  *--------------------------------------------------------------*/
 
-int Mv_Mixture::nb_parameter_computation(double min_probability) const
+int MultivariateMixture::nb_parameter_computation(double min_probability) const
 
 {
   register int i, var;
@@ -1964,7 +1969,7 @@ int Mv_Mixture::nb_parameter_computation(double min_probability) const
  *
  *--------------------------------------------------------------*/
 
-double Mv_Mixture::penalty_computation() const
+double MultivariateMixture::penalty_computation() const
 
 {
   register int i, var;
@@ -1995,7 +2000,7 @@ double Mv_Mixture::penalty_computation() const
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametricProcess* Mv_Mixture::get_parametric_process(int variable) const
+DiscreteParametricProcess* MultivariateMixture::get_parametric_process(int variable) const
 {
   DiscreteParametricProcess *ppcomponent = NULL;
 
@@ -2012,7 +2017,7 @@ DiscreteParametricProcess* Mv_Mixture::get_parametric_process(int variable) cons
  *
  *--------------------------------------------------------------*/
 
-NonparametricProcess* Mv_Mixture::get_nonparametric_process(int variable) const
+NonparametricProcess* MultivariateMixture::get_nonparametric_process(int variable) const
 {
   NonparametricProcess *pnpcomponent = NULL;
 
@@ -2029,7 +2034,7 @@ NonparametricProcess* Mv_Mixture::get_nonparametric_process(int variable) const
  *
  *--------------------------------------------------------------*/
 
-DiscreteParametric* Mv_Mixture::get_parametric_component(int variable, int index) const
+DiscreteParametric* MultivariateMixture::get_parametric_component(int variable, int index) const
 {
   DiscreteParametric *ppcomponent = NULL;
 
@@ -2046,7 +2051,7 @@ DiscreteParametric* Mv_Mixture::get_parametric_component(int variable, int index
  *
  *--------------------------------------------------------------*/
 
-Distribution* Mv_Mixture::get_nonparametric_component(int variable, int index) const
+Distribution* MultivariateMixture::get_nonparametric_component(int variable, int index) const
 {
   Distribution *pnpcomponent = NULL;
 
@@ -2063,23 +2068,23 @@ Distribution* Mv_Mixture::get_nonparametric_component(int variable, int index) c
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture::is_parametric(int ivariable) const {
+bool MultivariateMixture::is_parametric(int ivariable) const {
 
   assert((ivariable >= 0) && (ivariable < nb_var));
   return (pcomponent[ivariable] != NULL);
 }
 
-// ###################### Mv_Mixture_data #########################################
+// ###################### MultivariateMixtureData #########################################
 
 
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur par defaut de la classe Mv_Mixture_data.
+ *  Constructeur par defaut de la classe MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data::Mv_Mixture_data()
+MultivariateMixtureData::MultivariateMixtureData()
 {
   mixture = NULL;
   nb_component = 0;
@@ -2090,14 +2095,14 @@ Mv_Mixture_data::Mv_Mixture_data()
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mv_Mixture_data.
+ *  Constructeur de la classe MultivariateMixtureData.
  *
  *  arguments : reference sur un objet FrequencyDistribution,
  *              nombre de composantes.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data::Mv_Mixture_data(const Vectors &vec , int inb_component)
+MultivariateMixtureData::MultivariateMixtureData(const Vectors &vec , int inb_component)
 :Vectors(vec)
 
 {
@@ -2126,13 +2131,13 @@ Mv_Mixture_data::Mv_Mixture_data(const Vectors &vec , int inb_component)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Mv_Mixture_data.
+ *  Constructeur de la classe MultivariateMixtureData.
  *
- *  argument : reference sur un objet Mv_Mixture.
+ *  argument : reference sur un objet MultivariateMixture.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data::Mv_Mixture_data(const Mv_Mixture &mixt)
+MultivariateMixtureData::MultivariateMixtureData(const MultivariateMixture &mixt)
 {
   register int i, var, nb_variables = mixt.nb_var;
 
@@ -2155,21 +2160,21 @@ Mv_Mixture_data::Mv_Mixture_data(const Mv_Mixture &mixt)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet Mv_Mixture_data.
+ *  Copie d'un objet MultivariateMixtureData.
  *
- *  arguments : reference sur un objet Mv_Mixture_data,
- *              flag copie de l'objet Mv_Mixture.
+ *  arguments : reference sur un objet MultivariateMixtureData,
+ *              flag copie de l'objet MultivariateMixture.
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture_data::copy(const Mv_Mixture_data &mixt_data , bool model_flag)
+void MultivariateMixtureData::copy(const MultivariateMixtureData &mixt_data , bool model_flag)
 
 {
   register int i, var;
 
 
   if ((model_flag) && (mixt_data.mixture != NULL)) {
-    mixture = new Mv_Mixture(*(mixt_data.mixture) , false);
+    mixture = new MultivariateMixture(*(mixt_data.mixture) , false);
   }
   else {
     mixture = NULL;
@@ -2194,11 +2199,11 @@ void Mv_Mixture_data::copy(const Mv_Mixture_data &mixt_data , bool model_flag)
 
 /*--------------------------------------------------------------*
  *
- *  Destruction des champs d'un objet Mv_Mixture_data.
+ *  Destruction des champs d'un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-void Mv_Mixture_data::remove()
+void MultivariateMixtureData::remove()
 
 {
   delete mixture;
@@ -2226,13 +2231,13 @@ void Mv_Mixture_data::remove()
 
 /*****************************************************************
 *
-*  Permutation des etats d'un Mv_Mixture_data
+*  Permutation des etats d'un MultivariateMixtureData
 *  a partir d'une permutation donnee.
 *  La validite de la permutation doit etre verifiee avant l'appel
 *
 **/
 
-void Mv_Mixture_data::state_permutation(int* perm)
+void MultivariateMixtureData::state_permutation(int* perm)
 {
    register int i, var, n;
    if ((component != NULL) && (weight != NULL))
@@ -2280,11 +2285,11 @@ void Mv_Mixture_data::state_permutation(int* perm)
 
 /*--------------------------------------------------------------*
  *
- *  Destructeur de la classe Mv_Mixture_data.
+ *  Destructeur de la classe MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data::~Mv_Mixture_data()
+MultivariateMixtureData::~MultivariateMixtureData()
 
 {
   remove();
@@ -2293,13 +2298,13 @@ Mv_Mixture_data::~Mv_Mixture_data()
 
 /*--------------------------------------------------------------*
  *
- *  Operateur d'assignement de la classe Mv_Mixture_data.
+ *  Operateur d'assignement de la classe MultivariateMixtureData.
  *
- *  argument : reference sur un objet Mv_Mixture_data.
+ *  argument : reference sur un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-Mv_Mixture_data& Mv_Mixture_data::operator=(const Mv_Mixture_data &mixt_data)
+MultivariateMixtureData& MultivariateMixtureData::operator=(const MultivariateMixtureData &mixt_data)
 
 {
   if (&mixt_data != this) {
@@ -2322,8 +2327,8 @@ Mv_Mixture_data& Mv_Mixture_data::operator=(const Mv_Mixture_data &mixt_data)
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* Mv_Mixture_data::extract(StatError &error , int ivariable,
-                        int index) const
+DiscreteDistributionData* MultivariateMixtureData::extract(StatError &error , int ivariable,
+                                                           int index) const
 
 {
   bool status = true;
@@ -2377,7 +2382,8 @@ DiscreteDistributionData* Mv_Mixture_data::extract(StatError &error , int ivaria
  *
  *--------------------------------------------------------------*/
 
-DiscreteDistributionData* Mv_Mixture_data::extract_marginal(StatError &error , int ivariable) const
+DiscreteDistributionData* MultivariateMixtureData::extract_marginal(StatError &error ,
+                                                                    int ivariable) const
 
 {
   bool status = true;
@@ -2409,13 +2415,13 @@ DiscreteDistributionData* Mv_Mixture_data::extract_marginal(StatError &error , i
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture sur une ligne d'un objet Mv_Mixture_data.
+ *  Ecriture sur une ligne d'un objet MultivariateMixtureData.
  *
  *  argument : stream.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mv_Mixture_data::line_write(ostream &os) const
+ostream& MultivariateMixtureData::line_write(ostream &os) const
 
 {
   os << STAT_label[STATL_SAMPLE_SIZE] << ": " << nb_vector << "   "
@@ -2428,13 +2434,13 @@ ostream& Mv_Mixture_data::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mv_Mixture_data.
+ *  Ecriture d'un objet MultivariateMixtureData.
  *
  *  arguments : stream, flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-ostream& Mv_Mixture_data::ascii_write(ostream &os , bool exhaustive) const
+ostream& MultivariateMixtureData::ascii_write(ostream &os , bool exhaustive) const
 
 {
   if (mixture != NULL) {
@@ -2447,15 +2453,15 @@ ostream& Mv_Mixture_data::ascii_write(ostream &os , bool exhaustive) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mv_Mixture_data dans un fichier.
+ *  Ecriture d'un objet MultivariateMixtureData dans un fichier.
  *
  *  arguments : reference sur un objet StatError, path,
  *              flag niveau de detail.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture_data::ascii_write(StatError &error , const char *path ,
-                  bool exhaustive) const
+bool MultivariateMixtureData::ascii_write(StatError &error , const char *path ,
+                                          bool exhaustive) const
 
 {
   bool status = false;
@@ -2483,13 +2489,13 @@ bool Mv_Mixture_data::ascii_write(StatError &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'un objet Mv_Mixture_data dans un fichier au format tableur.
+ *  Ecriture d'un objet MultivariateMixtureData dans un fichier au format tableur.
  *
  *  arguments : reference sur un objet StatError, path.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture_data::spreadsheet_write(StatError &error , const char *path) const
+bool MultivariateMixtureData::spreadsheet_write(StatError &error , const char *path) const
 
 {
   bool status = false;
@@ -2517,15 +2523,15 @@ bool Mv_Mixture_data::spreadsheet_write(StatError &error , const char *path) con
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'un objet Mv_Mixture_data.
+ *  Sortie Gnuplot d'un objet MultivariateMixtureData.
  *
  *  arguments : reference sur un objet StatError, prefixe des fichiers,
  *              titre des figures.
  *
  *--------------------------------------------------------------*/
 
-bool Mv_Mixture_data::plot_write(StatError &error , const char *prefix ,
-                 const char *title) const
+bool MultivariateMixtureData::plot_write(StatError &error , const char *prefix ,
+                                         const char *title) const
 
 {
   bool status = false;
@@ -2547,11 +2553,11 @@ bool Mv_Mixture_data::plot_write(StatError &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'un objet Mv_Mixture_data.
+ *  Sortie graphique d'un objet MultivariateMixtureData.
  *
  *--------------------------------------------------------------*/
 
-MultiPlotSet* Mv_Mixture_data::get_plotable() const
+MultiPlotSet* MultivariateMixtureData::get_plotable() const
 
 {
   MultiPlotSet *set;
