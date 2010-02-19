@@ -251,8 +251,12 @@ class mplotlib(plotter):
                     lines.append(l)
                     legends.append(legend)
             # Legend
-            lg = pylab.legend(lines, legends)
-            lg.legendPatch.set_alpha(0.1) # transparency
+            try:
+                lg = pylab.legend(lines, legends)
+                lg.legendPatch.set_alpha(0.1) # transparency
+            except:
+                import warnings
+                warnings.warn('legend failed')
 
             # Grid
             pylab.grid(bool(multiplot.grid))
