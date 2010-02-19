@@ -781,7 +781,7 @@ public :
    void setitem(int index, const object& value)
    {
       object o;
-      Format_error error;
+      StatError error;
       ostringstream error_message;
 
       error.init();
