@@ -27,7 +27,7 @@
 #include "stat_tool/convolution.h"
 #include "stat_tool/mixture.h"
 #include "stat_tool/markovian.h"
-#include "stat_tool/mv_mixture.h"
+#include "stat_tool/multivariate_mixture.h"
 #include "stat_tool/compound.h"
 
 #include <boost/python.hpp>
