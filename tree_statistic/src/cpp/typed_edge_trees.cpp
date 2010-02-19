@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/typed_edge_trees.cpp,v $
+ *       $Source$
  *       $Id: typed_edge_trees.cpp 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.fr
+ *       Forum for OpenAlea developers: Openalea-devlp@lists.gforge.inria.fr
  *
  *  ----------------------------------------------------------------------------
  *
@@ -53,10 +53,10 @@ using namespace Stat_trees;
 
 /*****************************************************************
  *
- *  Default constructor of Tree_characteristics class
+ *  Default constructor of TreeCharacteristics class
  **/
 
-Tree_characteristics::Tree_characteristics()
+TreeCharacteristics::TreeCharacteristics()
   :  _variable(I_DEFAULT)
   ,  _min_value(0)
   ,  _max_value(0)
@@ -71,17 +71,17 @@ Tree_characteristics::Tree_characteristics()
 
 /*****************************************************************
  *
- *  Constructor of Tree_characteristics class using observations
+ *  Constructor of TreeCharacteristics class using observations
  *
  **/
 
-Tree_characteristics::Tree_characteristics(int imin_value,
-                                           int imax_value,
-                                           int imax_size,
-                                           int imax_depth,
-                                           int inb_trees,
-                                           Typed_edge_one_int_tree** otrees1,
-                                           int ivariable)
+TreeCharacteristics::TreeCharacteristics(int imin_value,
+                                         int imax_value,
+                                         int imax_size,
+                                         int imax_depth,
+                                         int inb_trees,
+                                         Typed_edge_one_int_tree** otrees1,
+                                         int ivariable)
   :  _variable(ivariable)
   ,  _min_value(imin_value)
   ,  _max_value(imax_value)
@@ -102,11 +102,11 @@ Tree_characteristics::Tree_characteristics(int imin_value,
 
 /*****************************************************************
  *
- *  Copy constructor of Tree_characteristics class
+ *  Copy constructor of TreeCharacteristics class
  *
  **/
 
-Tree_characteristics::Tree_characteristics(const Tree_characteristics& t_char)
+TreeCharacteristics::TreeCharacteristics(const TreeCharacteristics& t_char)
  :  _variable(t_char._variable)
  ,  _min_value(t_char._min_value)
  ,  _max_value(t_char._max_value)
@@ -121,20 +121,20 @@ Tree_characteristics::Tree_characteristics(const Tree_characteristics& t_char)
 
 /*****************************************************************
  *
- *  Destructor of Tree_characteristics class
+ *  Destructor of TreeCharacteristics class
  *
  **/
 
-Tree_characteristics::~Tree_characteristics()
+TreeCharacteristics::~TreeCharacteristics()
 { remove(); }
 
 /*****************************************************************
  *
- *  Copy operator of Tree_characteristics class
+ *  Copy operator of TreeCharacteristics class
  *
  **/
 
-void Tree_characteristics::copy(const Tree_characteristics& t_char)
+void TreeCharacteristics::copy(const TreeCharacteristics& t_char)
 {
    int value, nb_values;
 
@@ -145,17 +145,17 @@ void Tree_characteristics::copy(const Tree_characteristics& t_char)
    nb_values= _max_value - _min_value + 1;
 
    if (t_char.marginal != NULL)
-      marginal= new Histogram(*(t_char.marginal));
+      marginal= new FrequencyDistribution(*(t_char.marginal));
    else
       marginal= NULL;
 
    if (t_char.first_occurrence_root != NULL)
    {
-      first_occurrence_root= new Histogram*[nb_values];
+      first_occurrence_root= new FrequencyDistribution*[nb_values];
       for(value= 0; value < nb_values; value++)
       {
           if (t_char.first_occurrence_root[value] != NULL)
-             first_occurrence_root[value]= new Histogram(*(t_char.first_occurrence_root[value]));
+             first_occurrence_root[value]= new FrequencyDistribution(*(t_char.first_occurrence_root[value]));
           else
              first_occurrence_root[value]= NULL;
       }
@@ -165,11 +165,11 @@ void Tree_characteristics::copy(const Tree_characteristics& t_char)
 
    if (t_char.first_occurrence_leaves != NULL)
    {
-       first_occurrence_leaves= new Histogram*[nb_values];
+       first_occurrence_leaves= new FrequencyDistribution*[nb_values];
        for(value= 0; value < nb_values; value++)
        {
            if (t_char.first_occurrence_leaves[value] != NULL)
-              first_occurrence_leaves[value]= new Histogram(*(t_char.first_occurrence_leaves[value]));
+              first_occurrence_leaves[value]= new FrequencyDistribution(*(t_char.first_occurrence_leaves[value]));
            else
               first_occurrence_leaves[value]= NULL;
        }
@@ -179,11 +179,11 @@ void Tree_characteristics::copy(const Tree_characteristics& t_char)
 
    if (t_char.sojourn_size != NULL)
    {
-       sojourn_size= new Histogram*[nb_values];
+       sojourn_size= new FrequencyDistribution*[nb_values];
        for(value= 0; value < nb_values; value++)
        {
            if (t_char.sojourn_size[value] != NULL)
-              sojourn_size[value]= new Histogram(*(t_char.sojourn_size[value]));
+              sojourn_size[value]= new FrequencyDistribution(*(t_char.sojourn_size[value]));
            else
               sojourn_size[value]= NULL;
        }
@@ -193,11 +193,11 @@ void Tree_characteristics::copy(const Tree_characteristics& t_char)
 
    if (t_char.nb_zones != NULL)
    {
-       nb_zones= new Histogram*[nb_values];
+       nb_zones= new FrequencyDistribution*[nb_values];
        for(value= 0; value < nb_values; value++)
        {
            if (t_char.nb_zones[value] != NULL)
-              nb_zones[value]= new Histogram(*(t_char.nb_zones[value]));
+              nb_zones[value]= new FrequencyDistribution(*(t_char.nb_zones[value]));
            else
               nb_zones[value]= NULL;
        }
@@ -207,11 +207,11 @@ void Tree_characteristics::copy(const Tree_characteristics& t_char)
 
    if (t_char.nb_occurrences != NULL)
    {
-       nb_occurrences= new Histogram*[nb_values];
+       nb_occurrences= new FrequencyDistribution*[nb_values];
        for(value= 0; value < nb_values; value++)
        {
            if (t_char.nb_occurrences[value] != NULL)
-              nb_occurrences[value]= new Histogram(*(t_char.nb_occurrences[value]));
+              nb_occurrences[value]= new FrequencyDistribution(*(t_char.nb_occurrences[value]));
            else
               nb_occurrences[value]= NULL;
        }
@@ -222,12 +222,12 @@ void Tree_characteristics::copy(const Tree_characteristics& t_char)
 
 /*****************************************************************
  *
- *  Assignement operator of Tree_characteristics class
+ *  Assignement operator of TreeCharacteristics class
  *
  **/
 
-Tree_characteristics&
-Tree_characteristics::operator=(const Tree_characteristics &t_char)
+TreeCharacteristics&
+TreeCharacteristics::operator=(const TreeCharacteristics &t_char)
 {
    if (&t_char != this)
    {
@@ -241,7 +241,7 @@ Tree_characteristics::operator=(const Tree_characteristics &t_char)
 /*****************************************************************
  *
  *  Extract the characteristic quantities from a sample
- *  of trees and build histograms:
+ *  of trees and build frequency distributions:
  *     path length before the first occurrence of a given value:
  *        - starting from the root
  *        - starting from all the terminal vertices
@@ -251,13 +251,13 @@ Tree_characteristics::operator=(const Tree_characteristics &t_char)
  *
  **/
 
-void Tree_characteristics::build_characteristics(int imin_value,
-                                                 int imax_value,
-                                                 int imax_size,
-                                                 int imax_depth,
-                                                 int inb_trees,
-                                                 Typed_edge_one_int_tree** otrees1,
-                                                 int ivariable)
+void TreeCharacteristics::build_characteristics(int imin_value,
+                                                int imax_value,
+                                                int imax_size,
+                                                int imax_depth,
+                                                int inb_trees,
+                                                Typed_edge_one_int_tree** otrees1,
+                                                int ivariable)
 {
    bool build= true;
    int val, nb_values= _max_value - _min_value + 1,
@@ -272,9 +272,9 @@ void Tree_characteristics::build_characteristics(int imin_value,
    if (nb_values <= NB_OUTPUT)
       init(imax_size, imax_depth);
    else
-      marginal= new Histogram(_max_value+1);
+      marginal= new FrequencyDistribution(_max_value+1);
 
-   build_marginal_histogram(otrees1);
+   build_marginal_frequency_distribution(otrees1);
 
    nb_values= marginal->nb_value;
 
@@ -291,11 +291,11 @@ void Tree_characteristics::build_characteristics(int imin_value,
 
    if (build)
    {
-      build_first_occurrence_root_histogram(otrees1, imax_depth);
-      build_first_occurrence_leaves_histogram(otrees1, imax_depth);
-      build_zone_histograms(otrees1, imax_size);
-      build_nb_occurrences_histogram(otrees1, imax_size);
-      // build_children_pairs_histogram(otrees1)
+      build_first_occurrence_root_frequency_distribution(otrees1, imax_depth);
+      build_first_occurrence_leaves_frequency_distribution(otrees1, imax_depth);
+      build_zone_frequency_distributions(otrees1, imax_size);
+      build_nb_occurrences_frequency_distribution(otrees1, imax_size);
+      // build_children_pairs_frequency_distribution(otrees1)
    }
    else
    {
@@ -309,28 +309,28 @@ void Tree_characteristics::build_characteristics(int imin_value,
 
 /*****************************************************************
  *
- *  Access to class members of Tree_characteristics
+ *  Access to class members of TreeCharacteristics
  *
  **/
 
-int Tree_characteristics::get_variable() const
+int TreeCharacteristics::get_variable() const
 { return _variable; }
 
-int Tree_characteristics::get_nb_values() const
+int TreeCharacteristics::get_nb_values() const
 { return(_max_value-_min_value+1); }
 
 /*****************************************************************
  *
- *  Access to the characteristic quantity histograms
+ *  Access to the characteristic quantity frequency distributions
  *
  **/
 
-Histogram* Tree_characteristics::get_marginal() const
+FrequencyDistribution* TreeCharacteristics::get_marginal() const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    if (marginal != NULL)
-      res= new Histogram(*marginal);
+      res= new FrequencyDistribution(*marginal);
    else
       res= NULL;
    return res;
@@ -341,16 +341,16 @@ Histogram* Tree_characteristics::get_marginal() const
   //  { return depth_value; }
 
 
-Histogram* Tree_characteristics::get_characteristic(int value,
-                                                    Histogram** h) const
+FrequencyDistribution* TreeCharacteristics::get_characteristic(int value,
+                                                               FrequencyDistribution** h) const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    assert((_min_value <= value) && (value <= _max_value));
    if (h != NULL)
    {
       if (h[value] != NULL)
-         res= new Histogram(*(h[value-_min_value]));
+         res= new FrequencyDistribution(*(h[value-_min_value]));
       else
          res= NULL;
    }
@@ -366,7 +366,7 @@ Histogram* Tree_characteristics::get_characteristic(int value,
  *
  **/
 
-bool Tree_characteristics::is_characteristic(int charac) const
+bool TreeCharacteristics::is_characteristic(int charac) const
 {
    bool present= true;
    const int nb_values= _max_value - _min_value + 1;
@@ -419,43 +419,43 @@ bool Tree_characteristics::is_characteristic(int charac) const
 }
 
 
-Histogram* Tree_characteristics::get_first_occurrence_root(int value) const
+FrequencyDistribution* TreeCharacteristics::get_first_occurrence_root(int value) const
 { return get_characteristic(value, first_occurrence_root); }
 
-Histogram* Tree_characteristics::get_first_occurrence_leaves(int value) const
+FrequencyDistribution* TreeCharacteristics::get_first_occurrence_leaves(int value) const
 { return get_characteristic(value, first_occurrence_leaves); }
 
-Histogram* Tree_characteristics::get_sojourn_size(int value) const
+FrequencyDistribution* TreeCharacteristics::get_sojourn_size(int value) const
 { return get_characteristic(value, sojourn_size); }
 
-Histogram* Tree_characteristics::get_nb_zones(int value) const
+FrequencyDistribution* TreeCharacteristics::get_nb_zones(int value) const
 { return get_characteristic(value, nb_zones); }
 
-Histogram* Tree_characteristics::get_nb_occurrences(int value) const
+FrequencyDistribution* TreeCharacteristics::get_nb_occurrences(int value) const
 { return get_characteristic(value, nb_occurrences); }
 
-int Tree_characteristics::get_nb_value_first_occurrence_root(int value) const
+int TreeCharacteristics::get_nb_value_first_occurrence_root(int value) const
 { return first_occurrence_root[value]->nb_value; }
 
-int Tree_characteristics::get_nb_value_sojourn_size(int value) const
+int TreeCharacteristics::get_nb_value_sojourn_size(int value) const
 { return sojourn_size[value]->nb_value; }
 
-std::ostream& Tree_characteristics::ascii_write_marginal(std::ostream &os,
-                                                         bool exhaustive,
-                                                         bool file_flag) const
+std::ostream& TreeCharacteristics::ascii_write_marginal(std::ostream &os,
+                                                        bool exhaustive,
+                                                        bool file_flag) const
 {
    if (marginal != NULL)
       marginal->ascii_write(os, exhaustive, file_flag);
    return os;
 }
 
-void Tree_characteristics::ascii_write_characteristic(Histogram** c,
-                                                      int inb_values,
-                                                      std::ostream& os,
-                                                      std::string c1,
-                                                      std::string c2,
-                                                      bool exhaustive,
-                                                      bool file_flag) const
+void TreeCharacteristics::ascii_write_characteristic(FrequencyDistribution** c,
+                                                     int inb_values,
+                                                     std::ostream& os,
+                                                     std::string c1,
+                                                     std::string c2,
+                                                     bool exhaustive,
+                                                     bool file_flag) const
 {
    int value;
 
@@ -471,17 +471,17 @@ void Tree_characteristics::ascii_write_characteristic(Histogram** c,
 
 /*****************************************************************
  *
- *  Print the Tree_characteristics using an output stream,
- *  the variable type (STATE / VALUE), a histogram for the tree size,
+ *  Print the TreeCharacteristics using an output stream,
+ *  the variable type (STATE / VALUE), a frequency distribution for the tree size,
  *  a flag on the level of detail and one on printing into a file
  *
  **/
 
-std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
-                                                int type,
-                                                const Histogram& hsize,
-                                                bool exhaustive,
-                                                bool comment_flag) const
+std::ostream& TreeCharacteristics::ascii_print(std::ostream& os,
+                                               int type,
+                                               const FrequencyDistribution& hsize,
+                                               bool exhaustive,
+                                               bool comment_flag) const
 
 {
    register int val;
@@ -503,7 +503,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
       // index_value->ascii_print(os , comment_flag);
    }
 
-   // histograms of first occurrence
+   // frequency distributions of first occurrence
    if (first_occurrence_root != NULL)
    {
       for (val= 0; val < nb_value; val++)
@@ -513,7 +513,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
             os << "# ";
 
          os << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
-            << " " << val << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+            << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
          first_occurrence_root[val]->ascii_characteristic_print(os, false, comment_flag);
 
          if (exhaustive)
@@ -523,7 +523,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
                os << "# ";
 
             os << "   | " << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
-               << " " << val << " " << STAT_label[STATL_HISTOGRAM] << endl;
+               << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
             first_occurrence_root[val]->ascii_print(os, comment_flag);
          }
       }
@@ -538,7 +538,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
             os << "# ";
 
          os << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
-            << " " << val << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+            << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
          first_occurrence_leaves[val]->ascii_characteristic_print(os, false, comment_flag);
 
          if (exhaustive)
@@ -548,7 +548,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
                os << "# ";
 
             os << "   | " << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
-               << " " << val << " " << STAT_label[STATL_HISTOGRAM] << endl;
+               << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
             first_occurrence_leaves[val]->ascii_print(os, comment_flag);
          }
       }
@@ -564,7 +564,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
             os << "# ";
 
          os << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << val << " "
-            << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+            << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
          sojourn_size[val]->ascii_characteristic_print(os, false, comment_flag);
 
          if ((sojourn_size[val]->nb_element > 0) && (exhaustive))
@@ -574,7 +574,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
                os << "# ";
 
             os << "   | " << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << val << " "
-               << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+               << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
             sojourn_size[val]->ascii_print(os, comment_flag);
           }
       }
@@ -590,7 +590,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
             os << "# ";
 
          os << STAT_TREES_label[type == STATE ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
-            << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+            << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
          nb_zones[val]->ascii_characteristic_print(os , (hsize.variance > 0. ? false : true) , comment_flag);
 
          if (exhaustive)
@@ -600,7 +600,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
                os << "# ";
 
             os << "   | " << STAT_TREES_label[type == STATE ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
-               << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+               << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
             nb_zones[val]->ascii_print(os, comment_flag);
          }
       }
@@ -616,7 +616,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
            os << "# ";
 
         os << STAT_TREES_label[type == STATE ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
-           << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+           << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
         nb_occurrences[val]->ascii_characteristic_print(os, (hsize.variance > 0. ? false : true) , comment_flag);
 
         if (exhaustive)
@@ -626,7 +626,7 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
               os << "# ";
 
            os << "   | " << STAT_TREES_label[type == STATE ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
-              << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+              << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
            nb_occurrences[val]->ascii_print(os , comment_flag);
         }
       }
@@ -634,30 +634,30 @@ std::ostream& Tree_characteristics::ascii_print(std::ostream& os,
    return os;
 }
 
-std::ostream& Tree_characteristics::spreadsheet_print(std::ostream& os,
-                                                      int type,
-                                                      const Histogram& hsize) const
+std::ostream& TreeCharacteristics::spreadsheet_print(std::ostream& os,
+                                                     int type,
+                                                     const FrequencyDistribution& hsize) const
 { return os; }
 
 /*****************************************************************
- *  Gnuplot output of Tree_characteristics using
+ *  Gnuplot output of TreeCharacteristics using
  *  a prefix for the files, the title of the output figures,
  *  the considered variable, the total number of variables,
  *  the variable type (STATE / INT_VALUE)
- *  and the histogram of the tree sizes.
+ *  and the frequency distribution of the tree sizes.
  **/
 
-bool Tree_characteristics::plot_print(const char * prefix,
-                                      const char * title,
-                                      int variable,
-                                      int nb_variables,
-                                      int type,
-                                      const Histogram& hsize) const
+bool TreeCharacteristics::plot_print(const char * prefix,
+                                     const char * title,
+                                     int variable,
+                                     int nb_variables,
+                                     int type,
+                                     const FrequencyDistribution& hsize) const
 {
    bool status= true, start;
    register int val, i, j, nb_values;
    int nb_histo, histo_index;
-   const Histogram **phisto;
+   const FrequencyDistribution **phisto;
    ostringstream data_file_name[2];
 
    nb_values= _max_value - _min_value + 1;
@@ -666,13 +666,13 @@ bool Tree_characteristics::plot_print(const char * prefix,
    // used only for smoothed probabilities
    // data_file_name[0] << prefix << variable+1 << 0 << ".dat";
 
-   phisto= new const Histogram*[NB_OUTPUT*5];
+   phisto= new const FrequencyDistribution*[NB_OUTPUT*5];
 
    // name of the file containing the data for all the graphs
    data_file_name[1] << prefix << variable+1 << 1 << ".dat";
 
    nb_histo= 0;
-   // create a list of the successive histograms to be printed
+   // create a list of the successive frequency distributions to be printed
    if (first_occurrence_root != NULL)
       for (val= 0; val < nb_values; val++)
          phisto[nb_histo++]= first_occurrence_root[val];
@@ -766,7 +766,7 @@ bool Tree_characteristics::plot_print(const char * prefix,
       out_file << "plot [0:" << hsize.nb_value - 1 << "] [0:"
                << (int)(hsize.max * YSCALE) + 1 << "] \""
                << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
-               << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+               << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
       if (hsize.nb_value - 1 < TIC_THRESHOLD) {
@@ -858,7 +858,7 @@ bool Tree_characteristics::plot_print(const char * prefix,
                        << (int)(first_occurrence_root[val]->max*YSCALE)+1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                        << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
-                       << " " << val << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                       << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
             if (MAX(1 , first_occurrence_root[val]->nb_value-1) < TIC_THRESHOLD)
                out_file << "set xtics autofreq" << endl;
@@ -945,7 +945,7 @@ bool Tree_characteristics::plot_print(const char * prefix,
                        << (int)(first_occurrence_leaves[val]->max*YSCALE)+1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                        << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
-                       << " " << val << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                       << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
             if (MAX(1 , first_occurrence_leaves[val]->nb_value-1) < TIC_THRESHOLD)
                out_file << "set xtics autofreq" << endl;
@@ -1033,7 +1033,7 @@ bool Tree_characteristics::plot_print(const char * prefix,
                         << (int)(sojourn_size[val]->max*YSCALE)+1 << "] \""
                         << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                         << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_OUTPUT] << " " << val
-                        << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+                        << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                         << "\" with impulses" << endl;
 
                if (sojourn_size[val]->nb_value-1 < TIC_THRESHOLD)
@@ -1111,7 +1111,7 @@ bool Tree_characteristics::plot_print(const char * prefix,
                     << (int)(nb_zones[val]->max * YSCALE) + 1 << "] \""
                     << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
-                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM]
+                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
 
            if (nb_zones[val]->nb_value-1 < TIC_THRESHOLD)
@@ -1135,7 +1135,7 @@ bool Tree_characteristics::plot_print(const char * prefix,
                     << (int)(nb_occurrences[val]->max*YSCALE)+1 << "] \""
                     << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
-                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM]
+                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
 
            if (nb_occurrences[val]->nb_value-1 < TIC_THRESHOLD)
@@ -1159,7 +1159,7 @@ bool Tree_characteristics::plot_print(const char * prefix,
          out_file << "plot [0:" << hsize.nb_value - 1 << "] [0:"
                   << (int)(hsize.max*YSCALE)+1 << "] \""
                   << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
-                  << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+                  << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                   << "\" with impulses" << endl;
 
          if (hsize.nb_value-1 < TIC_THRESHOLD)
@@ -1183,15 +1183,15 @@ bool Tree_characteristics::plot_print(const char * prefix,
 
 /*****************************************************************
  *
- *  Graphical output of Tree_characteristics
+ *  Graphical output of TreeCharacteristics
  *  using a plotable data structure and the type of characteristic
  *
  **/
 
-MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
-                                                 int variable,
-                                                 int nb_variables,
-                                                 int type) const
+MultiPlotSet* TreeCharacteristics::get_plotable(int plot_type,
+                                                int variable,
+                                                int nb_variables,
+                                                int type) const
 {
    bool status= true, start;
    const int nb_values= _max_value - _min_value + 1;;
@@ -1226,7 +1226,7 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
             plot[val].xrange= Range(0, MAX(first_occurrence_root[val]->nb_value-1 , 1));
             plot[val].yrange= Range(0, (int)(first_occurrence_root[val]->max*YSCALE)+1);
             vstring << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
-                    << " " << val << " " << STAT_label[STATL_HISTOGRAM];
+                    << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
             plot[val].title= vstring.str();
             first_occurrence_root[val]->plotable_frequency_write(plot[val][0]);
 
@@ -1323,7 +1323,7 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
                        << (int)(first_occurrence_leaves[val]->max*YSCALE)+1 << "] \""
                        << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                        << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES]
-                       << " " << val << " " << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                       << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
             if (MAX(1 , first_occurrence_leaves[val]->nb_value-1) < TIC_THRESHOLD)
                out_file << "set xtics autofreq" << endl;
@@ -1411,7 +1411,7 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
                         << (int)(sojourn_size[val]->max*YSCALE)+1 << "] \""
                         << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                         << " title \"" << STAT_label[type == STATE ? STATL_STATE : STATL_OUTPUT] << " " << val
-                        << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+                        << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                         << "\" with impulses" << endl;
 
                if (sojourn_size[val]->nb_value-1 < TIC_THRESHOLD)
@@ -1489,7 +1489,7 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
                     << (int)(nb_zones[val]->max * YSCALE) + 1 << "] \""
                     << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
-                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM]
+                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
 
            if (nb_zones[val]->nb_value-1 < TIC_THRESHOLD)
@@ -1513,7 +1513,7 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
                     << (int)(nb_occurrences[val]->max*YSCALE)+1 << "] \""
                     << label((data_file_name[1].str()).c_str()) << "\" using " << j++
                     << " title \"" << STAT_TREES_label[type == STATE ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
-                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_HISTOGRAM]
+                    << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                     << "\" with impulses" << endl;
 
            if (nb_occurrences[val]->nb_value-1 < TIC_THRESHOLD)
@@ -1537,7 +1537,7 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
          out_file << "plot [0:" << hsize.nb_value - 1 << "] [0:"
                   << (int)(hsize.max*YSCALE)+1 << "] \""
                   << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
-                  << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+                  << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                   << "\" with impulses" << endl;
 
          if (hsize.nb_value-1 < TIC_THRESHOLD)
@@ -1558,9 +1558,9 @@ MultiPlotSet* Tree_characteristics::get_plotable(int plot_type,
 }
 
 
-std::ostream& Tree_characteristics::ascii_write_first_occurrence_root(std::ostream &os,
-                                                                      bool exhaustive,
-                                                                      bool file_flag) const
+std::ostream& TreeCharacteristics::ascii_write_first_occurrence_root(std::ostream &os,
+                                                                     bool exhaustive,
+                                                                     bool file_flag) const
 {
    ascii_write_characteristic(first_occurrence_root,
                               _max_value-_min_value+1,
@@ -1572,9 +1572,9 @@ std::ostream& Tree_characteristics::ascii_write_first_occurrence_root(std::ostre
    return os;
 }
 
-std::ostream& Tree_characteristics::ascii_write_first_occurrence_leaves(std::ostream &os,
-                                                                        bool exhaustive,
-                                                                        bool file_flag) const
+std::ostream& TreeCharacteristics::ascii_write_first_occurrence_leaves(std::ostream &os,
+                                                                       bool exhaustive,
+                                                                       bool file_flag) const
 {
    ascii_write_characteristic(first_occurrence_leaves,
                               _max_value-_min_value+1,
@@ -1586,9 +1586,9 @@ std::ostream& Tree_characteristics::ascii_write_first_occurrence_leaves(std::ost
    return os;
 }
 
-std::ostream& Tree_characteristics::ascii_write_sojourn_size(std::ostream &os,
-                                                             bool exhaustive,
-                                                             bool file_flag) const
+std::ostream& TreeCharacteristics::ascii_write_sojourn_size(std::ostream &os,
+                                                            bool exhaustive,
+                                                            bool file_flag) const
 {
    ascii_write_characteristic(sojourn_size,
                               _max_value-_min_value+1,
@@ -1600,9 +1600,9 @@ std::ostream& Tree_characteristics::ascii_write_sojourn_size(std::ostream &os,
    return os;
 }
 
-std::ostream& Tree_characteristics::ascii_write_nb_zones(std::ostream &os,
-                                                         bool exhaustive,
-                                                         bool file_flag) const
+std::ostream& TreeCharacteristics::ascii_write_nb_zones(std::ostream &os,
+                                                        bool exhaustive,
+                                                        bool file_flag) const
 {
    ascii_write_characteristic(nb_zones,
                               _max_value-_min_value+1,
@@ -1614,9 +1614,9 @@ std::ostream& Tree_characteristics::ascii_write_nb_zones(std::ostream &os,
    return os;
 }
 
-std::ostream& Tree_characteristics::ascii_write_nb_occurrences(std::ostream &os,
-                                                               bool exhaustive,
-                                                               bool file_flag) const
+std::ostream& TreeCharacteristics::ascii_write_nb_occurrences(std::ostream &os,
+                                                              bool exhaustive,
+                                                              bool file_flag) const
 {
    ascii_write_characteristic(nb_occurrences,
                               _max_value-_min_value+1,
@@ -1630,12 +1630,12 @@ std::ostream& Tree_characteristics::ascii_write_nb_occurrences(std::ostream &os,
 
 /*****************************************************************
  *
- *  Deallocation of the pointers for Tree_characteristics
+ *  Deallocation of the pointers for TreeCharacteristics
  *
  **/
 
-void Tree_characteristics::remove_characteristic(Histogram**& c,
-                                                 int inb_values)
+void TreeCharacteristics::remove_characteristic(FrequencyDistribution**& c,
+                                                int inb_values)
 {
    int value;
 
@@ -1652,7 +1652,7 @@ void Tree_characteristics::remove_characteristic(Histogram**& c,
    }
 }
 
-void Tree_characteristics::remove()
+void TreeCharacteristics::remove()
 { // deallocation
   int nb_values= _max_value - _min_value + 1; //value,
 
@@ -1676,34 +1676,34 @@ void Tree_characteristics::remove()
 
 /*****************************************************************
  *
- *  Allocation of the histograms given the number of values
+ *  Allocation of the frequency distributions given the number of values
  *  of the variable
  *
  **/
 
-void Tree_characteristics::init_characteristic(Histogram**& c,
-                                               int inb_values,
-                                               int imax_val)
+void TreeCharacteristics::init_characteristic(FrequencyDistribution**& c,
+                                              int inb_values,
+                                              int imax_val)
 {
    int value;
 
-   c= new Histogram*[inb_values];
+   c= new FrequencyDistribution*[inb_values];
 
    for(value= 0; value < inb_values; value++)
-      c[value]= new Histogram(imax_val+1);
+      c[value]= new FrequencyDistribution(imax_val+1);
 };
 
 
-void Tree_characteristics::init(int imax_size, int imax_depth)
+void TreeCharacteristics::init(int imax_size, int imax_depth)
 {
 
    // int value;
    int nb_values= _max_value - _min_value + 1;
 
    assert(nb_values > 0);
-   // allocating non existing histograms is pointless
+   // allocating non existing frequency distributions is pointless
 
-   marginal= new Histogram(_max_value+1);
+   marginal= new FrequencyDistribution(_max_value+1);
 
    init_characteristic(first_occurrence_root, nb_values, imax_depth);
 
@@ -1719,12 +1719,12 @@ void Tree_characteristics::init(int imax_size, int imax_depth)
 
 /*****************************************************************
  *
- *  Construction of the histogram for the marginal distribution
+ *  Construction of the frequency distribution for the marginal distribution
  *
  **/
 
-void Tree_characteristics::build_marginal_histogram(Typed_edge_one_int_tree** otrees1)
-{ // marginal histogram
+void TreeCharacteristics::build_marginal_frequency_distribution(Typed_edge_one_int_tree** otrees1)
+{ // marginal frequency distribution
 
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
 
@@ -1734,7 +1734,7 @@ void Tree_characteristics::build_marginal_histogram(Typed_edge_one_int_tree** ot
    if ((otrees1 != NULL) &&(_min_value >= 0) && (_max_value <= MARGINAL_MAX_VALUE))
    {
       if (marginal == NULL)
-         marginal = new Histogram(_max_value+1);
+         marginal = new FrequencyDistribution(_max_value+1);
 
       for(t = 0; t < _nb_trees; t++)
       {
@@ -1759,14 +1759,14 @@ void Tree_characteristics::build_marginal_histogram(Typed_edge_one_int_tree** ot
 
 /*****************************************************************
  *
- *  Construction of the histogram for the distribution of the
+ *  Construction of the frequency distribution for the distribution of the
  *  1st occurrence depth for a given value, starting from root
  *
  **/
 
-void Tree_characteristics::build_first_occurrence_root_histogram(Typed_edge_one_int_tree** otrees1,
-                                                                 int imax_depth)
-{ //  histogram of first occurrence (root)
+void TreeCharacteristics::build_first_occurrence_root_frequency_distribution(Typed_edge_one_int_tree** otrees1,
+                                                                             int imax_depth)
+{ //  frequency distribution of first occurrence (root)
 
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
    typedef Typed_edge_one_int_tree::vertex_array vertex_array;
@@ -1777,22 +1777,22 @@ void Tree_characteristics::build_first_occurrence_root_histogram(Typed_edge_one_
    generic_visitor<Typed_edge_one_int_tree> visitor;
    bool *occurrence;
 
-//      first_occurrence_root= new  Histogram*[_nb_values];
+//      first_occurrence_root= new  FrequencyDistribution*[_nb_values];
 //     for(value= 0; value < nb_values; value++)
-//       first_occurrence_root[value]= new Histogram(imax_depth);
+//       first_occurrence_root[value]= new FrequencyDistribution(imax_depth);
 
    if (otrees1 != NULL)
    {
       if (first_occurrence_root == NULL)
       {
-         first_occurrence_root= new Histogram*[nb_values];
+         first_occurrence_root= new FrequencyDistribution*[nb_values];
          for(v=0; v < nb_values; v++)
             first_occurrence_root[v]= NULL;
       }
 
       for(v= 0; v < nb_values; v++)
          if (first_occurrence_root[v] == NULL)
-            first_occurrence_root[v]= new Histogram(imax_depth+1);
+            first_occurrence_root[v]= new FrequencyDistribution(imax_depth+1);
 
       occurrence= new bool[nb_values];
 
@@ -1839,14 +1839,14 @@ void Tree_characteristics::build_first_occurrence_root_histogram(Typed_edge_one_
 
 /*****************************************************************
  *
- *  Construction of the histogram for the distribution of the
+ *  Construction of the frequency distribution for the distribution of the
  *  1st occurrence depth for a given value, starting from the leaves
  *
  **/
 
-void Tree_characteristics::build_first_occurrence_leaves_histogram(Typed_edge_one_int_tree** otrees1,
-                                                                   int imax_depth)
-{ //  histogram of first occurrence (leaves)
+void TreeCharacteristics::build_first_occurrence_leaves_frequency_distribution(Typed_edge_one_int_tree** otrees1,
+                                                                               int imax_depth)
+{ //  frequency distribution of first occurrence (leaves)
 
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
    typedef Typed_edge_one_int_tree::vertex_array vertex_array;
@@ -1862,14 +1862,14 @@ void Tree_characteristics::build_first_occurrence_leaves_histogram(Typed_edge_on
    {
       if (first_occurrence_leaves == NULL)
       {
-         first_occurrence_leaves= new Histogram*[nb_values];
+         first_occurrence_leaves= new FrequencyDistribution*[nb_values];
          for(v= 0; v < nb_values; v++)
             first_occurrence_leaves[v]= NULL;
       }
 
       for(v= 0; v < nb_values; v++)
          if (first_occurrence_leaves[v] == NULL)
-            first_occurrence_leaves[v]= new Histogram(imax_depth+1);
+            first_occurrence_leaves[v]= new FrequencyDistribution(imax_depth+1);
 
       occurrence= new bool[nb_values];
 
@@ -1916,14 +1916,14 @@ void Tree_characteristics::build_first_occurrence_leaves_histogram(Typed_edge_on
 
 /*****************************************************************
  *
- *  Construction of the histograms for the distribution of the
+ *  Construction of the frequency distributions for the distribution of the
  *  numbers and sizes of the homogeneous zones
  *
  **/
 
-void Tree_characteristics::build_zone_histograms(Typed_edge_one_int_tree** otrees1,
-                                                 int imax_size)
-{ //  histogram of homogeneous zones
+void TreeCharacteristics::build_zone_frequency_distributions(Typed_edge_one_int_tree** otrees1,
+                                                             int imax_size)
+{ //  frequency distribution of homogeneous zones
 
    typedef Typed_edge_one_int_tree::children_iterator children_iterator;
    typedef Typed_edge_one_int_tree::key key;
@@ -1942,25 +1942,25 @@ void Tree_characteristics::build_zone_histograms(Typed_edge_one_int_tree** otree
    {
       if (sojourn_size == NULL)
       {
-         sojourn_size= new Histogram*[nb_values];
+         sojourn_size= new FrequencyDistribution*[nb_values];
          for(val= 0; val < nb_values; val++)
             sojourn_size[val]= NULL;
       }
 
       for(val= 0; val < nb_values; val++)
          if (sojourn_size[val] == NULL)
-            sojourn_size[val]= new Histogram(imax_size+1);
+            sojourn_size[val]= new FrequencyDistribution(imax_size+1);
 
       if (nb_zones == NULL)
       {
-         nb_zones= new Histogram*[nb_values];
+         nb_zones= new FrequencyDistribution*[nb_values];
          for(val= 0; val < nb_values; val++)
             nb_zones[val]= NULL;
       }
 
       for(val= 0; val < nb_values; val++)
          if (nb_zones[val] == NULL)
-            nb_zones[val]= new Histogram(imax_size+1);
+            nb_zones[val]= new FrequencyDistribution(imax_size+1);
 
       for(t= 0; t < _nb_trees; t++)
       {
@@ -2058,13 +2058,13 @@ void Tree_characteristics::build_zone_histograms(Typed_edge_one_int_tree** otree
 
 /*****************************************************************
  *
- *  Construction of the histograms for the number of occurrences
+ *  Construction of the frequency distributions for the number of occurrences
  *  of a given value
  *
  **/
 
-void Tree_characteristics::build_nb_occurrences_histogram(Typed_edge_one_int_tree** otrees1,
-                                                          int imax_size)
+void TreeCharacteristics::build_nb_occurrences_frequency_distribution(Typed_edge_one_int_tree** otrees1,
+                                                                      int imax_size)
 {
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
 
@@ -2075,14 +2075,14 @@ void Tree_characteristics::build_nb_occurrences_histogram(Typed_edge_one_int_tre
 
    if (nb_occurrences == NULL)
    {
-      nb_occurrences= new Histogram*[nb_values];
+      nb_occurrences= new FrequencyDistribution*[nb_values];
       for(val= 0; val < nb_values; val++)
          nb_occurrences[val]= NULL;
    }
 
    for(val= 0; val < nb_values; val++)
       if (nb_occurrences[val] == NULL)
-         nb_occurrences[val]= new Histogram(imax_size+1);
+         nb_occurrences[val]= new FrequencyDistribution(imax_size+1);
 
    for(t = 0; t < _nb_trees; t++)
    {
