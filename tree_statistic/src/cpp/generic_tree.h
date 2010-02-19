@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/generic_tree.h,v $
+ *       $Source$
  *       $Id: generic_tree.h 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -67,12 +67,12 @@ const double D_DEFAULT_PROBABILITY= 0.5;       // parameter value for default di
 const int I_DEFAULT_IDENT= BINOMIAL;           // default type of distribution
 const double D_DEFAULT_PARAMETER= D_DEFAULT;   // cf. Distribution()
 const char C_DEFAULT_CHAR= '*';                // default label for char trees
-const Parametric P_DEFAULT_DISTRIBUTION(I_DEFAULT_SUP_BOUND-I_DEFAULT_INF_BOUND+1,
-                                        I_DEFAULT_IDENT,
-                                        I_DEFAULT_INF_BOUND,
-                                        I_DEFAULT_SUP_BOUND,
-                                        D_DEFAULT_PARAMETER,
-                                        D_DEFAULT_PROBABILITY);
+const DiscreteParametric P_DEFAULT_DISTRIBUTION(I_DEFAULT_SUP_BOUND-I_DEFAULT_INF_BOUND+1,
+                                                I_DEFAULT_IDENT,
+                                                I_DEFAULT_INF_BOUND,
+                                                I_DEFAULT_SUP_BOUND,
+                                                D_DEFAULT_PARAMETER,
+                                                D_DEFAULT_PROBABILITY);
                                                // default distribution
 
 /****************************************************************
@@ -361,7 +361,7 @@ public:
    void simulation(const Distribution& distrib,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
-   void simulation(const Histogram& hist,
+   void simulation(const FrequencyDistribution& hist,
                    int max_size= I_DEFAULT_TREE_SIZE,
                    int max_depth= I_DEFAULT_TREE_DEPTH);
 
