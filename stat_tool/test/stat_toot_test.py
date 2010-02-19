@@ -231,8 +231,8 @@ cdist3 = Estimate(histo34, "COMPOUND", Distribution("B", 0, 1, 0.7), "Sum",
 #########################################################################
 
 
-seq0 = Sequences("data//chene_sessile_15pa.seq")
-Plot(seq0, ViewPoint="Data")
+seq0 = Sequences("data/chene_sessile_15pa.seq")
+#Plot(seq0, ViewPoint="Data")
 
 # change of unit for the variable diameter of the annual shoot
 
