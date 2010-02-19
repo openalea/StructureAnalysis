@@ -221,7 +221,7 @@ public :
 
 class NonparametricProcess {  // processus d'observation discret non-parametrique
 
-    friend class Mv_Mixture;
+    friend class MultivariateMixture;
 
     friend NonparametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
                                                      int &line , int nb_state , bool hidden);
