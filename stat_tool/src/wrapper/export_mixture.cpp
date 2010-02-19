@@ -380,45 +380,45 @@ void class_mixture_data()
 
 
 
-////////////////////////// Class Mv_Mixture //////////////////////////////////
+////////////////////////// Class MultivariateMixture //////////////////////////////////
 
-#define WRAP MvMixtureWrap
-class MvMixtureWrap
+#define WRAP MultivariateMixtureWrap
+class MultivariateMixtureWrap
 {
 
 public:
 
-  static boost::shared_ptr<Mv_Mixture>
-  mv_mixture_from_file(char* filename)
+  static boost::shared_ptr<MultivariateMixture>
+  multivariate_mixture_from_file(char* filename)
   {
     StatError error;
-    Mv_Mixture *mix = NULL;
-    mix = mv_mixture_ascii_read(error, filename);
+    MultivariateMixture *mix = NULL;
+    mix = multivariate_mixture_ascii_read(error, filename);
 
     if (mix == NULL)
       {
         stat_tool::wrap_util::throw_error(error);
       }
 
-    return boost::shared_ptr<Mv_Mixture>(mix);
+    return boost::shared_ptr<MultivariateMixture>(mix);
   }
 
-  static boost::shared_ptr<Mv_Mixture>
-  mv_mixture_from_mixture(const Mv_Mixture& mixt)
+  static boost::shared_ptr<MultivariateMixture>
+  multivariate_mixture_from_mixture(const MultivariateMixture& mixt)
   {
-    Mv_Mixture *mix_cp = NULL;
+    MultivariateMixture *mix_cp = NULL;
 
-    mix_cp = new Mv_Mixture(mixt, true);
+    mix_cp = new MultivariateMixture(mixt, true);
 
-    return boost::shared_ptr<Mv_Mixture>(mix_cp);
+    return boost::shared_ptr<MultivariateMixture>(mix_cp);
   }
 
-  static boost::shared_ptr<Mv_Mixture>
-  mv_mixture_from_components(boost::python::list& weights,
+  static boost::shared_ptr<MultivariateMixture>
+  multivariate_mixture_from_components(boost::python::list& weights,
       boost::python::list& dists)
   {
     StatError error;
-    Mv_Mixture *mix = NULL;
+    MultivariateMixture *mix = NULL;
     int nb_component = 0;
     int nb_variable = 0;
     // DiscreteParametric *pcomp = NULL;
@@ -532,7 +532,7 @@ public:
         delete[] npprocess;
       } // end for (var)
 
-    mix = mv_mixture_building(error, nb_component, nb_variable, weight.get(),
+    mix = multivariate_mixture_building(error, nb_component, nb_variable, weight.get(),
         pcomponent.get(), npcomponent.get());
 
     for (var = 0; var < nb_variable; var++)
@@ -546,14 +546,14 @@ public:
     if (mix == NULL)
       stat_tool::wrap_util::throw_error(error);
 
-    return boost::shared_ptr<Mv_Mixture>(mix);
+    return boost::shared_ptr<MultivariateMixture>(mix);
   }
 
   static DiscreteParametricModel*
-  extract_weight(const Mv_Mixture& mixt)
+  extract_weight(const MultivariateMixture& mixt)
   {
     DiscreteParametricModel* ret;
-    Mv_Mixture_data* mixt_data = NULL;
+    MultivariateMixtureData* mixt_data = NULL;
 
     mixt_data = mixt.get_mixture_data();
     ret = new DiscreteParametricModel(*(mixt.get_weight()),
@@ -562,11 +562,11 @@ public:
   }
 
   static DiscreteParametricModel*
-  extract_mixture(const Mv_Mixture& mixt, int ivariable)
+  extract_mixture(const MultivariateMixture& mixt, int ivariable)
   {
     StatError error;
     DiscreteParametricModel* ret;
-    Mv_Mixture_data* mixt_data = NULL;
+    MultivariateMixtureData* mixt_data = NULL;
     Distribution *marginal = mixt.extract_distribution(error, ivariable);
     FrequencyDistribution *marginal_hist = NULL;
 
@@ -594,7 +594,7 @@ public:
   }
 
   static bool
-  _is_parametric(const Mv_Mixture& mixt, int ivariable)
+  _is_parametric(const MultivariateMixture& mixt, int ivariable)
   {
     ostringstream error_message;
 
@@ -609,7 +609,7 @@ public:
   }
 
   static void
-  state_permutation(const Mv_Mixture& mix, boost::python::list perm)
+  state_permutation(const MultivariateMixture& mix, boost::python::list perm)
   {
     bool status = true, several_errors = false;
     int llength, i;
@@ -675,11 +675,11 @@ public:
       }
   }
 
-    WRAP_METHOD0(Mv_Mixture, extract_data, Mv_Mixture_data);
-    WRAP_METHOD_FILE_ASCII_WRITE( Mv_Mixture);
-    WRAP_METHOD_PLOT_WRITE( Mv_Mixture);
-    WRAP_METHOD_SPREADSHEET_WRITE( Mv_Mixture);
-    WRAP_METHOD1(Mv_Mixture, simulation, Mv_Mixture_data, int);
+    WRAP_METHOD0(MultivariateMixture, extract_data, MultivariateMixtureData);
+    WRAP_METHOD_FILE_ASCII_WRITE( MultivariateMixture);
+    WRAP_METHOD_PLOT_WRITE( MultivariateMixture);
+    WRAP_METHOD_SPREADSHEET_WRITE( MultivariateMixture);
+    WRAP_METHOD1(MultivariateMixture, simulation, MultivariateMixtureData, int);
 
 };
 
@@ -689,49 +689,49 @@ public:
 
 
 
-void class_mv_mixture()
+void class_multivariate_mixture()
 {
-  class_< Mv_Mixture, bases<StatInterface> >
-    ("_MvMixture", "Multivariate Mixture Distribution")
+  class_< MultivariateMixture, bases<StatInterface> >
+    ("_MultivariateMixture", "Multivariate Mixture Distribution")
 
     // constructors
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_file),
+    .def("__init__", make_constructor(MultivariateMixtureWrap::multivariate_mixture_from_file),
         "Build from a filename")
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_mixture),
-        "Build from a _MvMixture object")
-    .def("__init__", make_constructor(MvMixtureWrap::mv_mixture_from_components),
+    .def("__init__", make_constructor(MultivariateMixtureWrap::multivariate_mixture_from_mixture),
+        "Build from a _MultivariateMixture object")
+    .def("__init__", make_constructor(MultivariateMixtureWrap::multivariate_mixture_from_components),
         "Build from a list of weights and a list of list of distributions\n" "(components and variables)")
 
     // Python Operators
     .def(self_ns::str(self)) // __str__
-    .def("__len__", &Mv_Mixture::get_nb_component,
+    .def("__len__", &MultivariateMixture::get_nb_component,
         "Return the number of components") // __len__
 
     // properties
-    .add_property("nb_variable", &Mv_Mixture::get_nb_variable,
+    .add_property("nb_variable", &MultivariateMixture::get_nb_variable,
         "Return the number of variables")
-    .add_property("nb_component", &Mv_Mixture::get_nb_component,
+    .add_property("nb_component", &MultivariateMixture::get_nb_component,
         "Return the number of variables")
 
     // return object and no arguments needed
     DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight,
         "Return the weight distribution")
     DEF_RETURN_VALUE_NO_ARGS("extract_data", WRAP::extract_data,
-        "Return the associated _MvMixtureData object")
+        "Return the associated _MultivariateMixtureData object")
 
 
     // return object and arguments needed
     DEF_RETURN_VALUE("simulate", WRAP::simulation,
-        args("nb_element"), "simulate(self, nb_element) -> _MvMixtureData. \n\n" "Simulate nb_element elements")
+        args("nb_element"), "simulate(self, nb_element) -> _MultivariateMixtureData. \n\n" "Simulate nb_element elements")
     DEF_RETURN_VALUE("extract_mixture", WRAP::extract_mixture,
-        args("variable"), "extract_mixture(self, variable) -> _Distribution. \n\n" "Return the _MvMixture distribution")
+        args("variable"), "extract_mixture(self, variable) -> _Distribution. \n\n" "Return the _MultivariateMixture distribution")
 
 
     // no object returned, args required
     .def("_is_parametric", WRAP::_is_parametric,
         args("variable"),"_is_parametric(self, variable) -> bool. \n\n" "Return True if the variable is parametric")
     .def("file_ascii_write", WRAP::file_ascii_write,
-        args("path", "exhaustive_flag"), "file_ascii_write(self, path, exhaustive_flag) -> None. \n\n""Save _MvMixture into a file")
+        args("path", "exhaustive_flag"), "file_ascii_write(self, path, exhaustive_flag) -> None. \n\n""Save _MultivariateMixture into a file")
     .def("plot_write", WRAP::plot_write,
         args("prefix", "title"),"plot_write(self, prefix, title) -> None. \n\n" "Write GNUPLOT files")
 
@@ -745,10 +745,10 @@ void class_mv_mixture()
 
     /*
 
-      Mv_Mixture(int inb_component , double *pweight , int inb_variable, DiscreteParametricProcess **ppcomponent, NonparametricProcess **pnpcomponent);
-      Mv_Mixture(int inb_component , int inb_variable, const DiscreteParametricProcess **ppcomponent,  const NonparametricProcess **pnpcomponent);
-      Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag , int inb_variable);
-      Mv_Mixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
+      MultivariateMixture(int inb_component , double *pweight , int inb_variable, DiscreteParametricProcess **ppcomponent, NonparametricProcess **pnpcomponent);
+      MultivariateMixture(int inb_component , int inb_variable, const DiscreteParametricProcess **ppcomponent,  const NonparametricProcess **pnpcomponent);
+      MultivariateMixture(const MultivariateMixture &mixt , bool *variable_flag , int inb_variable);
+      MultivariateMixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
 
       DiscreteParametricModel* extract_parametric_model(StatError &error , int ivariable,
                              int index) const;
@@ -759,9 +759,9 @@ void class_mv_mixture()
 
       double likelihood_computation(const Vectors &mixt_data, bool log_computation=false) const;
 
-      Mv_Mixture_data* cluster(StatError &error,  const Vectors &vec,int algorithm=VITERBI) const;
+      MultivariateMixtureData* cluster(StatError &error,  const Vectors &vec,int algorithm=VITERBI) const;
 
-      Mv_Mixture_data* get_mixture_data() const { return mixture_data; }
+      MultivariateMixtureData* get_mixture_data() const { return mixture_data; }
       DiscreteParametricProcess* get_parametric_process(int variable) const;
       NonparametricProcess* get_nonparametric_process(int variable) const;
       DiscreteParametric* get_parametric_component(int variable, int index) const;
@@ -770,26 +770,26 @@ void class_mv_mixture()
 
 #undef WRAP
 
-////////////////////////// Class Mv_Mixture_data //////////////////////////////////
+////////////////////////// Class MultivariateMixtureData //////////////////////////////////
 
-#define WRAP MvMixtureDataWrap
+#define WRAP MultivariateMixtureDataWrap
 class WRAP
 {
 
 public:
 
-  static boost::shared_ptr<Mv_Mixture_data>
-  mv_mixture_data_from_mixture_data(const Mv_Mixture_data& mixt)
+  static boost::shared_ptr<MultivariateMixtureData>
+  multivariate_mixture_data_from_mixture_data(const MultivariateMixtureData& mixt)
   {
-    Mv_Mixture_data *mix_cp = NULL;
+    MultivariateMixtureData *mix_cp = NULL;
 
-    mix_cp = new Mv_Mixture_data(mixt, true);
+    mix_cp = new MultivariateMixtureData(mixt, true);
 
-    return boost::shared_ptr<Mv_Mixture_data>(mix_cp);
+    return boost::shared_ptr<MultivariateMixtureData>(mix_cp);
   }
 
   static DiscreteDistributionData*
-  extract_weight(const Mv_Mixture_data& mixt_histo)
+  extract_weight(const MultivariateMixtureData& mixt_histo)
   {
     DiscreteDistributionData* ret;
 
@@ -799,16 +799,16 @@ public:
     return ret;
   }
 
-  static Mv_Mixture*
-  extract_mixture(const Mv_Mixture_data& mixt_histo)
+  static MultivariateMixture*
+  extract_mixture(const MultivariateMixtureData& mixt_histo)
   {
-    Mv_Mixture* ret, *cp_ret = NULL;
+    MultivariateMixture* ret, *cp_ret = NULL;
 
     cp_ret = mixt_histo.get_mixture();
 
     if (cp_ret != NULL)
       {
-        ret = new Mv_Mixture(*cp_ret);
+        ret = new MultivariateMixture(*cp_ret);
         delete cp_ret;
       }
     else
@@ -816,37 +816,37 @@ public:
           "No mixture model available for Mixture Data");
     return ret;
   }
-  WRAP_METHOD2(Mv_Mixture_data, extract, DiscreteDistributionData, int, int);
-  WRAP_METHOD1(Mv_Mixture_data, extract_marginal, DiscreteDistributionData, int);
-  WRAP_METHOD_FILE_ASCII_WRITE( Mv_Mixture_data);
-  WRAP_METHOD_PLOT_WRITE( Mv_Mixture_data);
-  WRAP_METHOD_SPREADSHEET_WRITE( Mv_Mixture_data);
+  WRAP_METHOD2(MultivariateMixtureData, extract, DiscreteDistributionData, int, int);
+  WRAP_METHOD1(MultivariateMixtureData, extract_marginal, DiscreteDistributionData, int);
+  WRAP_METHOD_FILE_ASCII_WRITE( MultivariateMixtureData);
+  WRAP_METHOD_PLOT_WRITE( MultivariateMixtureData);
+  WRAP_METHOD_SPREADSHEET_WRITE( MultivariateMixtureData);
 
 };
 
-void class_mv_mixture_data()
+void class_multivariate_mixture_data()
 {
-  class_< Mv_Mixture_data, bases< Vectors > >
-    ("_MvMixtureData", "Multivariate Mixture Data")
+  class_< MultivariateMixtureData, bases< Vectors > >
+    ("_MultivariateMixtureData", "Multivariate Mixture Data")
 
-    .def("__init__", make_constructor(WRAP::mv_mixture_data_from_mixture_data), "Build from a _MvMixture_data object")
+    .def("__init__", make_constructor(WRAP::multivariate_mixture_data_from_mixture_data), "Build from a _MultivariateMixture_data object")
     .def(self_ns::str(self))
-    //.def("__len__", &Mv_Mixture_data::get_nb_component)
-    .def("get_nb_component", &Mv_Mixture_data::get_nb_component, "Return the number of components.")
+    //.def("__len__", &MultivariateMixtureData::get_nb_component)
+    .def("get_nb_component", &MultivariateMixtureData::get_nb_component, "Return the number of components.")
     DEF_RETURN_VALUE("extract_component", WRAP::extract, args("index"), "Get a particular component for a particular variable. First index is 1")
-    DEF_RETURN_VALUE_NO_ARGS("extract_marginal", WRAP::extract_marginal, "Return a _MvMixtureData for a particular variable.")
-    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight, "Return a _MvMixtureData for mixture weights.")
-    DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture, "Return a _MvMixtureData for mixture model")
-    .def("file_ascii_write", WRAP::file_ascii_write, "Save _MvMixtureData into a file")
-    .def("file_spreadsheet_write", WRAP::spreadsheet_write, "Save _MvMixtureData into a file")
+    DEF_RETURN_VALUE_NO_ARGS("extract_marginal", WRAP::extract_marginal, "Return a _MultivariateMixtureData for a particular variable.")
+    DEF_RETURN_VALUE_NO_ARGS("extract_weight", WRAP::extract_weight, "Return a _MultivariateMixtureData for mixture weights.")
+    DEF_RETURN_VALUE_NO_ARGS("extract_mixture", WRAP::extract_mixture, "Return a _MultivariateMixtureData for mixture model")
+    .def("file_ascii_write", WRAP::file_ascii_write, "Save _MultivariateMixtureData into a file")
+    .def("file_spreadsheet_write", WRAP::spreadsheet_write, "Save _MultivariateMixtureData into a file")
     .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")
     .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
 
     ;
 
 /*
-    Mv_Mixture_data(const Vectors &vec, int inb_component);
-    Mv_Mixture_data(const Mv_Mixture &mixt);
+    MultivariateMixtureData(const Vectors &vec, int inb_component);
+    MultivariateMixtureData(const MultivariateMixture &mixt);
     plotable::MultiPlotSet* get_plotable() const;
 
     double information_computation() const;
