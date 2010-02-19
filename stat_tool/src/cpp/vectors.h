@@ -81,14 +81,14 @@ class Sequences;
 class TreeMatch;
 class VectorDistance;
 class Vectors;
-class Mv_Mixture;
+class MultivariateMixture;
 
 
 class Vectors : public StatInterface {  // vecteurs
 
     friend class Regression;
     friend class Sequences;
-    friend class Mv_Mixture;
+    friend class MultivariateMixture;
 
     friend Vectors* vectors_ascii_read(StatError &error , const char *path);
     friend std::ostream& operator<<(std::ostream &os , const Vectors &vec)
@@ -258,11 +258,13 @@ public :
                                           int response_variable , double span ,
                                           bool weighting = true) const;
 
-    Mv_Mixture* mixture_estimation(StatError &error , std::ostream &os ,
-                                   const Mv_Mixture &imixture, int nb_iter = I_DEFAULT ,
-                                   bool *force_param = NULL) const;
-    Mv_Mixture* mixture_estimation(StatError &error , std::ostream& os , int nb_component ,
-                                   int nb_iter = I_DEFAULT , bool *force_param = NULL) const;
+    MultivariateMixture* mixture_estimation(StatError &error , std::ostream &os ,
+                                            const MultivariateMixture &imixture,
+                                            int nb_iter = I_DEFAULT ,
+                                            bool *force_param = NULL) const;
+    MultivariateMixture* mixture_estimation(StatError &error , std::ostream& os ,
+                                            int nb_component , int nb_iter = I_DEFAULT ,
+                                            bool *force_param = NULL) const;
 
     // acces membres de la classe
 
