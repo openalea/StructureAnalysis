@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/typed_edge_trees.tcc,v $
+ *       $Source$
  *       $Id: typed_edge_trees.hpp 3186 2007-05-25 15:10:30Z dufourko $
  *
- *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.f
+ *       Forum for OpenAlea developers: Openalea-devlp@lists.gforge.inria.f
  *
  *  ----------------------------------------------------------------------------
  *
@@ -406,14 +406,14 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_trees& otrees,
                                                              bool characteristic_flag)
- : STAT_interface()
+ : StatInterface()
 { copy(otrees, characteristic_flag); }
 
 /*****************************************************************
  *
  *  Constructor of Typed_edge_trees class using the number of trees,
  *  the type of each variable, the (multidimensional) observed trees
- *  and a flag on the computation of the histograms
+ *  and a flag on the computation of the frequency distributions
  *
  **/
 
@@ -421,7 +421,7 @@ template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_trees,
                                                          int const * itype,
                                                          Typed_edge_int_fl_tree<Generic_Int_fl_container>** otrees,
-                                                         bool histogram_flag)
+                                                         bool frequency_distribution_flag)
  : _nb_integral(0)
  , _nb_float(0)
  , _type(NULL)
@@ -437,7 +437,7 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_trees,
    typedef typename treetype::value value;
 
    treetype tparadigm;
-   // Tree_characteristics tc;
+   // TreeCharacteristics tc;
    value vparadigm;
    int var, t, nb_variables;
 
@@ -466,11 +466,11 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_trees,
           trees[t]= new Typed_edge_int_fl_tree<Generic_Int_fl_container>(*(otrees[t]));
        }
 
-       if (histogram_flag)
+       if (frequency_distribution_flag)
        {
           build_characteristics();
-          build_size_histogram();
-          build_nb_children_histogram();
+          build_size_frequency_distribution();
+          build_nb_children_frequency_distribution();
        }
    }
    else
@@ -482,7 +482,7 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_trees,
  *
  *  Constructor of Typed_edge_trees class
  *  using the number of integral and float variables,
- *  histograms for the size and number of children of the trees,
+ *  frequency distributions for the size and number of children of the trees,
  *  a flag on the possibility for a node to have no child due to random
  *  and a flag on the (random) tree initialization
  *
@@ -490,11 +490,11 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_trees,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
-                                                         int inb_float,
-                                                         const Histogram& ihsize,
-                                                         const Histogram& ihnb_children,
-                                                         bool no_child_flag,
-                                                         bool init_flag)
+                                                             int inb_float,
+                                                             const FrequencyDistribution& ihsize,
+                                                             const FrequencyDistribution& ihnb_children,
+                                                             bool no_child_flag,
+                                                             bool init_flag)
  : _nb_integral(inb_integral)
  , _nb_float(inb_float)
  , _type(NULL)
@@ -538,7 +538,7 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
 
       trees= new Typed_edge_int_fl_tree<Generic_Int_fl_container>*[_nb_trees];
 
-      hnb_children= new Histogram(ihnb_children);
+      hnb_children= new FrequencyDistribution(ihnb_children);
 
       if (init_flag)
       {
@@ -559,14 +559,14 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
             trees[t]->set_structure(utree, default_value);
          }
          build_characteristics();
-         build_size_histogram();
-         build_nb_children_histogram();
+         build_size_frequency_distribution();
+         build_nb_children_frequency_distribution();
       }
       else
       {
          for(t= 0; t < _nb_trees; t++)
             trees[t]= NULL;
-         hsize= new Histogram(ihsize);
+         hsize= new FrequencyDistribution(ihsize);
       }
    }
 }
@@ -597,7 +597,7 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_tr
    typedef typename treetype::value value;
 
    treetype tparadigm;
-   // Tree_characteristics tc;
+   // TreeCharacteristics tc;
    value vparadigm;
    int var, t, nb_variables;
 
@@ -620,8 +620,8 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_tr
           trees[t]= new Typed_edge_int_fl_tree<Generic_Int_fl_container>(*(otrees.trees[index[t]]));
 
        build_characteristics();
-       build_size_histogram();
-       build_nb_children_histogram();
+       build_size_frequency_distribution();
+       build_nb_children_frequency_distribution();
    }
    else
      Typed_edge_trees<Generic_Int_fl_container>(0);
@@ -656,17 +656,17 @@ Typed_edge_trees<Generic_Int_fl_container>::operator=(const Typed_edge_trees<Gen
 
 /*****************************************************************
  *
- *  Extract marginal distribution histogram from Typed_edge_trees
- *  using a Format_error and the considered integral variable
+ *  Extract marginal frequency distributions from Typed_edge_trees
+ *  using a StatError and the considered integral variable
  *
  **/
 
 template<typename Generic_Int_fl_container>
-Distribution_data* Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error,
-                                                                       int variable) const
+DiscreteDistributionData* Typed_edge_trees<Generic_Int_fl_container>::extract(StatError &error,
+                                                                              int variable) const
 {
   bool status= true;
-  Distribution_data *histo= NULL;
+  DiscreteDistributionData *histo= NULL;
 
   error.init();
 
@@ -693,13 +693,13 @@ Distribution_data* Typed_edge_trees<Generic_Int_fl_container>::extract(Format_er
         status= false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << variable+1 << ": "
-                      << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                      << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
         error.update((error_message.str()).c_str());
      }
   }
 
   if (status)
-     histo= new Distribution_data(*(characteristics[variable]->marginal));
+     histo= new DiscreteDistributionData(*(characteristics[variable]->marginal));
 
   return histo;
 
@@ -707,20 +707,20 @@ Distribution_data* Typed_edge_trees<Generic_Int_fl_container>::extract(Format_er
 
 /*****************************************************************
  *
- *  Extract a characteristic distribution histogram from Typed_edge_trees
- *  using a Format_error, the characteristic type,
+ *  Extract a characteristic frequency distribution from Typed_edge_trees
+ *  using a StatError, the characteristic type,
  *  the considered variable and value
  *
  **/
 
-template<typename Generic_Int_fl_container> Distribution_data*
-Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error, int type,
-                                                  int variable, int value) const
+template<typename Generic_Int_fl_container> DiscreteDistributionData*
+Typed_edge_trees<Generic_Int_fl_container>::extract(StatError &error, int type,
+                                                    int variable, int value) const
 {
    bool status= true;
    // Distribution *pdist= NULL;
-   Histogram *phisto= NULL;
-   Distribution_data *histo= NULL;
+   FrequencyDistribution *phisto= NULL;
+   DiscreteDistributionData *histo= NULL;
 
    error.init();
 
@@ -797,10 +797,10 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error, int typ
             if (phisto->nb_element == 0)
             {
                status= false;
-               error.update(STAT_error[STATR_EMPTY_HISTOGRAM]);
+               error.update(STAT_error[STATR_EMPTY_SAMPLE]);
             }
             else
-               histo= new Distribution_data(*phisto);
+               histo= new DiscreteDistributionData(*phisto);
          }
       }
    }
@@ -820,7 +820,7 @@ Typed_edge_trees<Generic_Int_fl_container>::extract(Format_error &error, int typ
  *
  **/
 template<typename Generic_Int_fl_container> Vectors*
-Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) const
+Typed_edge_trees<Generic_Int_fl_container>::build_vectors(StatError& error) const
 {
    bool status= true;
    int var, t, vector_id= 0;
@@ -888,14 +888,14 @@ Typed_edge_trees<Generic_Int_fl_container>::build_vectors(Format_error& error) c
 
 /*****************************************************************
  *
- *  Extract sequences from Typed_edge_trees, using a Format_error object
+ *  Extract sequences from Typed_edge_trees, using a StatError object
  *  and a flag on considering all possible sequences from root
  *  to leaf nodes or on avoiding redundancy
  *
  **/
 
 template<typename Generic_Int_fl_container> Sequences*
-Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
+Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
                                                             bool all_paths) const
 {
    typedef typename generic_visitor<tree_type>::vertex_array vertex_array;
@@ -1055,7 +1055,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
 
 /*****************************************************************
  *
- *  Merge Typed_edge_trees, using a Format_error object,
+ *  Merge Typed_edge_trees, using a StatError object,
  *  the number of Typed_edge_trees objects and a collection
  *  of Typed_edge_trees objects.
  *  The collection otrees of Typed_edge_trees objects is
@@ -1066,7 +1066,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(Format_error& error,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::merge(Format_error& error,
+Typed_edge_trees<Generic_Int_fl_container>::merge(StatError& error,
                                                   int nb_sample,
                                                   const pt_observed_trees_array otrees) const
 {
@@ -1144,16 +1144,16 @@ Typed_edge_trees<Generic_Int_fl_container>::merge(Format_error& error,
 /*****************************************************************
  *
  *  Translation of the values of a given integral variable
- *  for Typed_edge_trees, using a Format_error object,
+ *  for Typed_edge_trees, using a StatError object,
  *  the variable index and the translation parameter
  *
  **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::shift(Format_error& error,
-                                                int variable,
-                                                int shift_param) const
+Typed_edge_trees<Generic_Int_fl_container>::shift(StatError& error,
+                                                  int variable,
+                                                  int shift_param) const
 {
    const int nb_variables= _nb_integral + _nb_integral;
    bool status= true;
@@ -1230,16 +1230,16 @@ Typed_edge_trees<Generic_Int_fl_container>::shift(Format_error& error,
 /*****************************************************************
  *
  *  Translation of the values of a given floating variable
- *  for Typed_edge_trees, using a Format_error object,
+ *  for Typed_edge_trees, using a StatError object,
  *  the variable index and the translation parameter
  *
  **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::shift(Format_error& error,
-                                                int variable,
-                                                double shift_param) const
+Typed_edge_trees<Generic_Int_fl_container>::shift(StatError& error,
+                                                  int variable,
+                                                  double shift_param) const
 {
    const int nb_variables= _nb_integral + _nb_float;
    bool status= true;
@@ -1314,14 +1314,14 @@ Typed_edge_trees<Generic_Int_fl_container>::shift(Format_error& error,
 /*****************************************************************
  *
  *  Cluster the values of a given integral variable
- *  for Typed_edge_trees, using a Format_error object,
+ *  for Typed_edge_trees, using a StatError object,
  *  the variable index and the clustering step
  *
  **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::cluster(Format_error &error,
+Typed_edge_trees<Generic_Int_fl_container>::cluster(StatError &error,
                                                     int variable,
                                                     int step) const
 {
@@ -1367,14 +1367,14 @@ Typed_edge_trees<Generic_Int_fl_container>::cluster(Format_error &error,
 /*****************************************************************
  *
  *  Transcoding of the values of a given integral variable
- *  for Typed_edge_trees, using a Format_error object,
+ *  for Typed_edge_trees, using a StatError object,
  *  the variable index and a transcoding table
  *
  **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::transcode(Format_error& error,
+Typed_edge_trees<Generic_Int_fl_container>::transcode(StatError& error,
                                                       int variable,
                                                       int_array symbol) const
 {
@@ -1463,7 +1463,7 @@ Typed_edge_trees<Generic_Int_fl_container>::transcode(Format_error& error,
 /*****************************************************************
  *
  *  Cluster the values (e.g. symbols) of a given integral
- *  variable for Typed_edge_trees, using a Format_error object,
+ *  variable for Typed_edge_trees, using a StatError object,
  *  the variable index, the number of clusters and the cluster limits.
  *  If the size of the array exceeds the number of clusters,
  *  the exceeding clusters are ignored (i.e. the array is truncated).
@@ -1472,7 +1472,7 @@ Typed_edge_trees<Generic_Int_fl_container>::transcode(Format_error& error,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::cluster(Format_error& error,
+Typed_edge_trees<Generic_Int_fl_container>::cluster(StatError& error,
                                                     int variable,
                                                     int nb_class,
                                                     int_array ilimit) const
@@ -1546,14 +1546,14 @@ Typed_edge_trees<Generic_Int_fl_container>::cluster(Format_error& error,
 /*****************************************************************
  *
  *  Cluster the values (e.g. symbols) of a given integral
- *  variable for Typed_edge_trees, using a Format_error object,
+ *  variable for Typed_edge_trees, using a StatError object,
  *  the variable index, the number of clusters and the cluster limits
  *
  **/
 /*
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::cluster(Format_error& error,
+Typed_edge_trees<Generic_Int_fl_container>::cluster(StatError& error,
                                                     int variable,
                                                     int nb_class,
                                                     double_array ilimit) const
@@ -1629,7 +1629,7 @@ Typed_edge_trees<Generic_Int_fl_container>::cluster(Format_error& error,
 /*****************************************************************
  *
  *  Selection of Typed_edge_trees on values taken by a given integral
- *  variable, using a Format_error object, the variable index,
+ *  variable, using a StatError object, the variable index,
  *  bounds on the values and a flag on keeping or rejecting
  *  the concerned trees. Trees having one node at least
  *  whose value is between the bounds are selected.
@@ -1638,11 +1638,11 @@ Typed_edge_trees<Generic_Int_fl_container>::cluster(Format_error& error,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::value_select(Format_error& error,
-                                                       int variable,
-                                                       int imin_value,
-                                                       int imax_value,
-                                                       bool keep) const
+Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
+                                                         int variable,
+                                                         int imin_value,
+                                                         int imax_value,
+                                                         bool keep) const
 {
    bool status= true;
    register int t;
@@ -1728,7 +1728,7 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(Format_error& error,
 /*****************************************************************
  *
  *  Selection of Typed_edge_trees on values taken by a given floating
- *  variable, using a Format_error object, the variable index,
+ *  variable, using a StatError object, the variable index,
  *  bounds on the values and a flag on keeping or rejecting
  *  the concerned trees. Trees having one node at least
  *  whose value is between the bounds are selected.
@@ -1737,11 +1737,11 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(Format_error& error,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::value_select(Format_error& error,
-                                                       int variable,
-                                                       double dmin_value,
-                                                       double dmax_value,
-                                                       bool keep) const
+Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
+                                                         int variable,
+                                                         double dmin_value,
+                                                         double dmax_value,
+                                                         bool keep) const
 {
    bool status= true;
    register int t;
@@ -1825,17 +1825,17 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(Format_error& error,
 /*****************************************************************
  *
  *  Typed_edge_trees selection by identifier
- *  using a Format_error object, the number of trees, a tree identifier
+ *  using a StatError object, the number of trees, a tree identifier
  *  and a flag on keeping or rejecting the selected trees
  *
  **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::select_individual(Format_error& error,
-                                                            int inb_trees,
-                                                            int_array iidentifier,
-                                                            bool keep) const
+Typed_edge_trees<Generic_Int_fl_container>::select_individual(StatError& error,
+                                                              int inb_trees,
+                                                              int_array iidentifier,
+                                                              bool keep) const
 
 {
    bool status= true , *selected_trees;
@@ -1906,7 +1906,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_individual(Format_error& erro
 /*****************************************************************
  *
  *  Variables selection for Typed_edge_trees
- *  using a Format_error object, the number of variables,
+ *  using a StatError object, the number of variables,
  *  the array of their indices and a flag on keeping or rejecting
  *  the selected variables
  *
@@ -1914,7 +1914,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_individual(Format_error& erro
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::select_variable(Format_error& error,
+Typed_edge_trees<Generic_Int_fl_container>::select_variable(StatError& error,
                                                             int inb_variable,
                                                             int_array ivariable,
                                                             bool keep) const
@@ -2011,7 +2011,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_variable(Format_error& error,
 /*****************************************************************
  *
  *  Variable concatenation for Typed_edge_trees
- *  using a Format_error object, the number of Typed_edge_trees objects,
+ *  using a StatError object, the number of Typed_edge_trees objects,
  *  an array of pointers on these objects and a reference sample
  *  for the tree identifiers
  *
@@ -2019,10 +2019,10 @@ Typed_edge_trees<Generic_Int_fl_container>::select_variable(Format_error& error,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::merge_variable(Format_error& error,
-                                                         int nb_sample,
-                                                         const pt_observed_trees_array otrees,
-                                                         int ref_sample) const
+Typed_edge_trees<Generic_Int_fl_container>::merge_variable(StatError& error,
+                                                           int nb_sample,
+                                                           const pt_observed_trees_array otrees,
+                                                           int ref_sample) const
 {
    bool status= true;
    ostringstream error_message, correction_message;
@@ -2176,11 +2176,11 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(Format_error& error,
       res= new observed_trees(inb_integral, inb_float, NULL, _nb_trees, true);
 
       if (hsize != NULL)
-         res->hsize= new Histogram(*hsize);
+         res->hsize= new FrequencyDistribution(*hsize);
       else
          res->hsize= NULL;
       if (hnb_children != NULL)
-         res->hnb_children= new Histogram(*hnb_children);
+         res->hnb_children= new FrequencyDistribution(*hnb_children);
       else
          res->hnb_children= NULL;
 
@@ -2240,7 +2240,7 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(Format_error& error,
             res->_max_value.Int(inb_integral)= ptrees[s]->_max_value.Int(var);
             if (ptrees[s]->characteristics[var] != NULL)
                res->characteristics[inb_integral]
-                  = new Tree_characteristics(*(ptrees[s]->characteristics[var]));
+                  = new TreeCharacteristics(*(ptrees[s]->characteristics[var]));
             else
                res->build_characteristics(inb_integral);
             res->_type[inb_integral]= ptrees[s]->_type[var];
@@ -2266,17 +2266,17 @@ Typed_edge_trees<Generic_Int_fl_container>::merge_variable(Format_error& error,
 /*****************************************************************
  *
  *  Typed_edge_trees selection on a size criterion,
- *  using a Format_error object, size bounds and
+ *  using a StatError object, size bounds and
  *  a flag on keeping or rejecting the selected trees
  *
  **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::size_select(Format_error& error,
-                                                      int imin_size,
-                                                      int imax_size,
-                                                      bool keep) const
+Typed_edge_trees<Generic_Int_fl_container>::size_select(StatError& error,
+                                                        int imin_size,
+                                                        int imax_size,
+                                                        bool keep) const
 {
    bool status= true;
    register int t;
@@ -2335,7 +2335,7 @@ Typed_edge_trees<Generic_Int_fl_container>::size_select(Format_error& error,
 
 /*****************************************************************
  *
- *  Select subtrees of Typed_edge_trees using a Format_error object,
+ *  Select subtrees of Typed_edge_trees using a StatError object,
  *  the subtree root index, the tree index (all trees if I_DEFAULT)
  *  and a flag on keeping or pruning the subtree.
  *  Pruning at root node results in a tree with one single node.
@@ -2346,10 +2346,10 @@ Typed_edge_trees<Generic_Int_fl_container>::size_select(Format_error& error,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::select_subtrees(Format_error& error,
-                                                          int iindex,
-                                                          int itree,
-                                                          bool keep) const
+Typed_edge_trees<Generic_Int_fl_container>::select_subtrees(StatError& error,
+                                                            int iindex,
+                                                            int itree,
+                                                            bool keep) const
 {
    bool status= true;
    register int t;
@@ -2407,7 +2407,7 @@ Typed_edge_trees<Generic_Int_fl_container>::select_subtrees(Format_error& error,
 
 /*****************************************************************
  *
- *  Select homogeneous subtrees, using a Format_error object
+ *  Select homogeneous subtrees, using a StatError object
  *  the variable for testing homogeneity,
  *  the number of values defining the homogeneous zones,
  *  the values that define the homogeneous zones
@@ -2417,11 +2417,11 @@ Typed_edge_trees<Generic_Int_fl_container>::select_subtrees(Format_error& error,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(Format_error& error,
-                                                               int variable,
-                                                               int nb_value,
-                                                               int *ivalue,
-                                                               bool keep) const
+Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& error,
+                                                                 int variable,
+                                                                 int nb_value,
+                                                                 int *ivalue,
+                                                                 bool keep) const
 
 {
    const int _nb_variables= _nb_integral + _nb_float;
@@ -2438,7 +2438,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(Format_error& e
    key *clist= NULL;
    value tvalue;
    value *ptvalue= new value(_nb_integral-1, _nb_float);
-   Histogram *marginal= NULL;
+   FrequencyDistribution *marginal= NULL;
    std::deque<std::deque<key> > zones;
    std::deque<key> node_list, zone_id;
    // set of the homogeneous zones
@@ -2487,7 +2487,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(Format_error& e
             status= false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << variable+1 << ": "
-                          << STAT_error[STATR_MARGINAL_HISTOGRAM];
+                          << STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION];
             error.update((error_message.str()).c_str());
          }
          else
@@ -2730,8 +2730,8 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(Format_error& e
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>*
-Typed_edge_trees<Generic_Int_fl_container>::difference(Format_error &error,
-                                                     int variable) const
+Typed_edge_trees<Generic_Int_fl_container>::difference(StatError &error,
+                                                       int variable) const
 {
    bool status= true;
    const int nb_variables= _nb_integral + _nb_float;
@@ -2857,8 +2857,8 @@ Typed_edge_trees<Generic_Int_fl_container>::line_write(std::ostream& os) const
 
 template<typename Generic_Int_fl_container>
 ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_data_write(ostream& os,
-                                                                    char format,
-                                                                    bool exhaustive) const
+                                                                      char format,
+                                                                      bool exhaustive) const
 {
    ascii_write(os, exhaustive, false);
    ascii_print(os, format, false);
@@ -2869,16 +2869,16 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_data_write(ostream& o
 /*****************************************************************
  *
  *  Writing of Typed_edge_trees into a file
- *  using a Format_error object, the path,
+ *  using a StatError object, the path,
  *  the format (line/column) and a flag on the level of detail.
  *
  **/
 
 template<typename Generic_Int_fl_container>
-bool Typed_edge_trees<Generic_Int_fl_container>::ascii_data_write(Format_error& error,
-                                                                const char * path,
-                                                                char format,
-                                                                bool exhaustive) const
+bool Typed_edge_trees<Generic_Int_fl_container>::ascii_data_write(StatError& error,
+                                                                  const char * path,
+                                                                  char format,
+                                                                  bool exhaustive) const
 {
    bool status= false;
    ofstream out_file(path);
@@ -2903,15 +2903,15 @@ bool Typed_edge_trees<Generic_Int_fl_container>::ascii_data_write(Format_error& 
 
 /*****************************************************************
  *
- *  Gnuplot output of Trees using a Format_error
+ *  Gnuplot output of Trees using a StatError
  *  a prefix for the files and the title of the figures
  *
  **/
 
 template<typename Generic_Int_fl_container>
-bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(Format_error& error,
-                                                               const char * prefix,
-                                                               const char * title) const
+bool Typed_edge_trees<Generic_Int_fl_container>::plot_data_write(StatError& error,
+                                                                 const char * prefix,
+                                                                 const char * title) const
 {
    bool status;
    register int i, j, k;
@@ -3166,7 +3166,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
             os << "# ";
 
          os << STAT_label[_type[var] == STATE ? STATL_STATE : STATL_VALUE] << " "
-            << STAT_label[STATL_HISTOGRAM] << " - ";
+            << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
          (characteristics[var]->marginal)->ascii_characteristic_print(os, false, comment_flag);
 
@@ -3177,7 +3177,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
                os << "# ";
 
             os << "   | " << STAT_label[_type[var] == STATE ? STATL_STATE : STATL_VALUE] << " "
-               << STAT_label[STATL_HISTOGRAM] << endl;
+               << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
             characteristics[var]->marginal->ascii_print(os, comment_flag);
          }
          characteristics[var]->ascii_print(os, _type[var], *hsize,
@@ -3207,7 +3207,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    if (comment_flag)
       os << "# ";
 
-   os << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+   os << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
    hsize->ascii_characteristic_print(os, false, comment_flag);
 
    if (exhaustive)
@@ -3216,7 +3216,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
       if (comment_flag)
          os << "# ";
 
-      os << "   | " << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hsize->ascii_print(os, comment_flag);
    }
 
@@ -3230,7 +3230,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    if (comment_flag)
       os << "# ";
 
-   os << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+   os << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
    hnb_children->ascii_characteristic_print(os, false, comment_flag);
 
    if (exhaustive)
@@ -3239,7 +3239,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
       if (comment_flag)
          os << "# ";
 
-      os << "   | " << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hnb_children->ascii_print(os, comment_flag);
    }
 
@@ -3285,7 +3285,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
             os << "# ";
 
          os << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
-            << STAT_label[STATL_HISTOGRAM] << " - ";
+            << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
          if (characteristics[var]->marginal != NULL)
          {
@@ -3298,7 +3298,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
                   os << "# ";
 
                os << "   | " << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
-                  << STAT_label[STATL_HISTOGRAM] << endl;
+                  << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
                characteristics[var]->marginal->ascii_print(os, comment_flag);
             }
          }
@@ -3351,7 +3351,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    if (comment_flag)
       os << "# ";
 
-   os << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+   os << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
    hsize->ascii_characteristic_print(os, false, comment_flag);
 
    if (exhaustive)
@@ -3360,7 +3360,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
       if (comment_flag)
          os << "# ";
 
-      os << "   | " << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hsize->ascii_print(os, comment_flag);
    }
 
@@ -3370,7 +3370,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
 
    os << STAT_TREES_label[STATL_CUMULATIVE_SIZE] << ": " << cumul_size << endl;
 
-   os << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_HISTOGRAM] << " - ";
+   os << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
    hnb_children->ascii_characteristic_print(os, false, comment_flag);
 
    if (exhaustive)
@@ -3379,7 +3379,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
       if (comment_flag)
          os << "# ";
 
-      os << "   | " << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+      os << "   | " << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
       hnb_children->ascii_print(os, comment_flag);
    }
 
@@ -3414,15 +3414,15 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_print(ostream& os,
 
 /*****************************************************************
  *
- *  Prints Typed_edge_trees into a file using a Format_error object,
+ *  Prints Typed_edge_trees into a file using a StatError object,
  *  the file path and a flag on the level of detail
  *
  **/
 
 template<typename Generic_Int_fl_container>
-bool Typed_edge_trees<Generic_Int_fl_container>::ascii_write(Format_error& error,
-                                                           const char * path,
-                                                           bool exhaustive) const
+bool Typed_edge_trees<Generic_Int_fl_container>::ascii_write(StatError& error,
+                                                             const char * path,
+                                                             bool exhaustive) const
 {
    bool status;
    ofstream out_file(path);
@@ -3446,13 +3446,13 @@ bool Typed_edge_trees<Generic_Int_fl_container>::ascii_write(Format_error& error
 /*****************************************************************
  *
  *  Prints Typed_edge_trees in a spreadsheet fashion
- *  using a Format_error object and the file path
+ *  using a StatError object and the file path
  *
  **/
 
 template<typename Generic_Int_fl_container>
-bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(Format_error& error,
-                                                                 const char * path) const
+bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(StatError& error,
+                                                                   const char * path) const
 {
    register int var, nb_variable= _nb_integral+_nb_float,
                 cumul_size= cumul_size_computation(),
@@ -3487,14 +3487,14 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(Format_error&
 
             out_file << "\n";
             out_file << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
-                     << STAT_label[STATL_HISTOGRAM] << "\t";
+                     << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
 
             if (characteristics[var]->marginal != NULL)
             {
                (characteristics[var]->marginal)->spreadsheet_characteristic_print(out_file);
 
                 out_file << "\n\t" << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
-                         << STAT_label[STATL_HISTOGRAM] << endl;
+                         << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
                 (characteristics[var]->marginal)->spreadsheet_print(out_file);
             }
             else
@@ -3521,10 +3521,10 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(Format_error&
 
    out_file << "\n";
 
-   out_file << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+   out_file << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
    hsize->spreadsheet_characteristic_print(out_file);
 
-   out_file << "\n\t" << STAT_TREES_label[STATL_TREE_SIZE] << "\t" << STAT_label[STATL_HISTOGRAM] << endl;
+   out_file << "\n\t" << STAT_TREES_label[STATL_TREE_SIZE] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
    hsize->spreadsheet_print(out_file);
 
    out_file << "\n";
@@ -3533,10 +3533,10 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(Format_error&
 
    out_file << "\n";
 
-   out_file << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_HISTOGRAM] << "\t";
+   out_file << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
    hnb_children->spreadsheet_characteristic_print(out_file);
 
-   out_file << "\n\t" << STAT_TREES_label[STATL_TREE_CHILDREN] << "\t" << STAT_label[STATL_HISTOGRAM] << endl;
+   out_file << "\n\t" << STAT_TREES_label[STATL_TREE_CHILDREN] << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
    hnb_children->spreadsheet_print(out_file);
 
    out_file << "\n";
@@ -3549,13 +3549,13 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(Format_error&
 /*****************************************************************
  *
  *  Gnuplot output of Typed_edge_trees
- *  using a Format_error object, a prefix for the files
+ *  using a StatError object, a prefix for the files
  *  and the title of the output figures
  *
  **/
 
 template<typename Generic_Int_fl_container>
-bool Typed_edge_trees<Generic_Int_fl_container>::plot_write(Format_error& error,
+bool Typed_edge_trees<Generic_Int_fl_container>::plot_write(StatError& error,
                                                             const char * prefix,
                                                             const char * title) const
 {
@@ -3602,13 +3602,13 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_write(Format_error& error,
  **/
 
 template<typename Generic_Int_fl_container>
-MultiPlotSet* Typed_edge_trees<Generic_Int_fl_container>::get_plotable(Format_error& error,
+MultiPlotSet* Typed_edge_trees<Generic_Int_fl_container>::get_plotable(StatError& error,
                                                                        int plot_type,
                                                                        int variable) const
 {
    bool characteristics_computed;
    MultiPlotSet *plotset= NULL;
-   Histogram **charac= NULL;
+   FrequencyDistribution **charac= NULL;
 
    error.init();
 
@@ -3660,15 +3660,15 @@ MultiPlotSet* Typed_edge_trees<Generic_Int_fl_container>::get_plotable(Format_er
 
 /*****************************************************************
  *
- *  Print the histograms corresponding to the tree size and
+ *  Print the frequency distributions corresponding to the tree size and
  *  children number for Typed_edge_trees class
  *
  **/
 
 template<typename Generic_Int_fl_container>
-std::ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write_size_histogram(std::ostream &os,
-                                                                                   bool exhaustive,
-                                                                                   bool file_flag) const
+std::ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write_size_frequency_distribution(std::ostream &os,
+                                                                                                  bool exhaustive,
+                                                                                                  bool file_flag) const
 {
    if (hsize != NULL)
       hsize->ascii_write(os, exhaustive, file_flag);
@@ -3676,9 +3676,9 @@ std::ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write_size_histo
 }
 
 template<typename Generic_Int_fl_container>
-std::ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write_nb_children_histogram(std::ostream &os,
-                                                                                          bool exhaustive,
-                                                                                          bool file_flag) const
+std::ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write_nb_children_frequency_distribution(std::ostream &os,
+                                                                                                         bool exhaustive,
+                                                                                                         bool file_flag) const
 {
    if (hnb_children != NULL)
       hnb_children->ascii_write(os, exhaustive, file_flag);
@@ -3999,29 +3999,29 @@ Typed_edge_trees<Generic_Int_fl_container>::get_identifier_tree(int index)
 
 /*****************************************************************
  *
- *  Access to the histograms of topological indicators
+ *  Access to the frequency distributions of topological indicators
  *  for Typed_edge_trees
  *
  **/
 
 template<typename Generic_Int_fl_container>
-Distribution_data* Typed_edge_trees<Generic_Int_fl_container>::extract_size() const
-{  // access to the histogram of tree sizes
-   Distribution_data *res= NULL;
+DiscreteDistributionData* Typed_edge_trees<Generic_Int_fl_container>::extract_size() const
+{  // access to the frequency distribution of tree sizes
+   DiscreteDistributionData *res= NULL;
 
    if (hsize != NULL)
-      res= new Distribution_data(*hsize);
+      res= new DiscreteDistributionData(*hsize);
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-Distribution_data* Typed_edge_trees<Generic_Int_fl_container>::extract_nb_children() const
-{ // access to the histogram of tree sizes
-   Distribution_data *res= NULL;
+DiscreteDistributionData* Typed_edge_trees<Generic_Int_fl_container>::extract_nb_children() const
+{ // access to the frequency distribution of tree sizes
+   DiscreteDistributionData *res= NULL;
 
    if (hnb_children != NULL)
-      res= new Distribution_data(*hnb_children);
+      res= new DiscreteDistributionData(*hnb_children);
 
    return res;
 }
@@ -4068,19 +4068,19 @@ int Typed_edge_trees<Generic_Int_fl_container>::get_nb_values(int variable) cons
 
 /*****************************************************************
  *
- *  Access to the histogram for the marginal distribution
+ *  Access to the marginal frequency distribution
  *
  **/
 
 template<typename Generic_Int_fl_container>
-Histogram* Typed_edge_trees<Generic_Int_fl_container>::get_marginal(int variable) const
+FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_marginal(int variable) const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->get_marginal() != NULL)
-            res= new Histogram(*(characteristics[variable]->get_marginal()));
+            res= new FrequencyDistribution(*(characteristics[variable]->get_marginal()));
 
    return res;
 }
@@ -4102,19 +4102,19 @@ const { return _nb_trees; }
  **/
 
 template<typename Generic_Int_fl_container>
-Tree_characteristics** Typed_edge_trees<Generic_Int_fl_container>::get_characteristics() const
+TreeCharacteristics** Typed_edge_trees<Generic_Int_fl_container>::get_characteristics() const
 {
-   Tree_characteristics **res;
+   TreeCharacteristics **res;
    int var;
 
    if (characteristics != NULL)
    {
-      res= new Tree_characteristics*[this->_nb_variable];
+      res= new TreeCharacteristics*[this->_nb_variable];
 
       for(var= 0; var < this->_nb_variable; var++)
       {
          if (characteristics[var] != NULL)
-            res[var]= new Tree_characteristics(*(characteristics[var]));
+            res[var]= new TreeCharacteristics(*(characteristics[var]));
          else
             res[var]= NULL;
       }
@@ -4126,14 +4126,14 @@ Tree_characteristics** Typed_edge_trees<Generic_Int_fl_container>::get_character
 }
 
 template<typename Generic_Int_fl_container>
-Tree_characteristics* Typed_edge_trees<Generic_Int_fl_container>::get_characteristics(int variable) const
+TreeCharacteristics* Typed_edge_trees<Generic_Int_fl_container>::get_characteristics(int variable) const
 {
-   Tree_characteristics *res;
+   TreeCharacteristics *res;
 
    if (characteristics != NULL)
    {
       if (characteristics[variable] != NULL)
-         res= new Tree_characteristics(*(characteristics[variable]));
+         res= new TreeCharacteristics(*(characteristics[variable]));
       else
          res= NULL;
    }
@@ -4167,76 +4167,77 @@ bool Typed_edge_trees<Generic_Int_fl_container>::is_characteristic(int variable,
 
 /*****************************************************************
  *
- *  Access to the individual histograms for the characteristic
+ *  Access to the individual frequency distributions for the characteristic
  *  quantity distributions
  *
  **/
 
 template<typename Generic_Int_fl_container>
-Histogram* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_root(int variable,
-                                                                                 int value) const
+FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_root(int variable,
+                                                                                             int value) const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->first_occurrence_root != NULL)
-            res= new Histogram(*(characteristics[variable]->get_first_occurrence_root(value)));
+            res= new FrequencyDistribution(*(characteristics[variable]->get_first_occurrence_root(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-Histogram* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_leaves(int variable,
-                                                                                   int value) const
+FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_first_occurrence_leaves(int variable,
+                                                                                               int value) const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->first_occurrence_leaves != NULL)
-            res= new Histogram(*(characteristics[variable]->get_first_occurrence_leaves(value)));
+            res= new FrequencyDistribution(*(characteristics[variable]->get_first_occurrence_leaves(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-Histogram* Typed_edge_trees<Generic_Int_fl_container>::get_sojourn_size(int variable,
-                                                                      int value) const
+FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_sojourn_size(int variable,
+                                                                                    int value) const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->sojourn_size != NULL)
-            res= new Histogram(*(characteristics[variable]->get_sojourn_size(value)));
+            res= new FrequencyDistribution(*(characteristics[variable]->get_sojourn_size(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-Histogram* Typed_edge_trees<Generic_Int_fl_container>::get_nb_zones(int variable, int value) const
+FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_nb_zones(int variable,
+                                                                                int value) const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
          if (characteristics[variable]->nb_zones != NULL)
-            res= new Histogram(*(characteristics[variable]->get_nb_zones(value)));
+            res= new FrequencyDistribution(*(characteristics[variable]->get_nb_zones(value)));
 
    return res;
 }
 
 template<typename Generic_Int_fl_container>
-Histogram* Typed_edge_trees<Generic_Int_fl_container>::get_nb_occurrence(int variable,
-                                                                         int value) const
+FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_nb_occurrence(int variable,
+                                                                                     int value) const
 {
-   Histogram *res;
+   FrequencyDistribution *res;
 
    if (this->characteristics != NULL)
       if (this->characteristics[variable] != NULL)
          if (this->characteristics[variable]->nb_occurrence != NULL)
-            res= new Histogram(*(this->characteristics[variable]->get_nb_occurrence(value)));
+            res= new FrequencyDistribution(*(this->characteristics[variable]->get_nb_occurrence(value)));
 
    return res;
 }
@@ -4418,11 +4419,11 @@ void Typed_edge_trees<Generic_Int_fl_container>::copy(const Typed_edge_trees& ot
    {
       if (otrees.characteristics != NULL)
       {
-         characteristics= new Tree_characteristics*[_nb_integral];
+         characteristics= new TreeCharacteristics*[_nb_integral];
          for(var= 0; var < _nb_integral; var++)
          {
             if (otrees.characteristics[var] != NULL)
-               characteristics[var]= new Tree_characteristics(*(otrees.characteristics[var]));
+               characteristics[var]= new TreeCharacteristics(*(otrees.characteristics[var]));
             else
                characteristics[var]= NULL;
          }
@@ -4446,12 +4447,12 @@ void Typed_edge_trees<Generic_Int_fl_container>::copy(const Typed_edge_trees& ot
    }
 
    if (otrees.hsize != NULL)
-      hsize= new Histogram(*(otrees.hsize));
+      hsize= new FrequencyDistribution(*(otrees.hsize));
    else
       hsize= NULL;
 
    if (otrees.hnb_children != NULL)
-      hnb_children= new Histogram(*(otrees.hnb_children));
+      hnb_children= new FrequencyDistribution(*(otrees.hnb_children));
    else
       hnb_children= NULL;
 
@@ -4502,7 +4503,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::init(int inb_integral,
 
       if (_nb_integral > 0)
       {
-         characteristics= new Tree_characteristics*[_nb_integral];
+         characteristics= new TreeCharacteristics*[_nb_integral];
          for(var= 0; var < _nb_integral; var++)
             characteristics[var]= NULL;
       }
@@ -4621,7 +4622,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::select_variable(const Typed_edg
    }
 
    if ((_nb_integral > 0) && (otrees.characteristics != NULL))
-      characteristics= new Tree_characteristics*[_nb_integral];
+      characteristics= new TreeCharacteristics*[_nb_integral];
 
    for(var= 0; var < _nb_integral; var++)
    {
@@ -4630,7 +4631,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::select_variable(const Typed_edg
         _min_value.Int(var)= otrees._min_value.Int(variable[var]);
         _max_value.Int(var)= otrees._max_value.Int(variable[var]);
         if (otrees.characteristics[variable[var]] != NULL)
-           characteristics[var]= new Tree_characteristics(*(otrees.characteristics[variable[var]]));
+           characteristics[var]= new TreeCharacteristics(*(otrees.characteristics[variable[var]]));
            // new Tree_characterics(*(otrees.characteristics[variable[var]]));
       }
    }
@@ -4645,17 +4646,17 @@ void Typed_edge_trees<Generic_Int_fl_container>::select_variable(const Typed_edg
    _max_depth= otrees._max_depth;
 
    if (otrees.hsize != NULL)
-      hsize= new Histogram(*otrees.hsize);
+      hsize= new FrequencyDistribution(*otrees.hsize);
 
    if (otrees.hnb_children != NULL)
-      hnb_children= new Histogram(*otrees.hnb_children);
+      hnb_children= new FrequencyDistribution(*otrees.hnb_children);
 
 }
 
 /*****************************************************************
  *
  *  Gnuplot output of Typed_edge_trees in the case of no other characteristic
- *  than the marginal histogram, using a prefix for the files,
+ *  than the marginal frequency distribution, using a prefix for the files,
  *  the title of output figures, the considered variable
  *  and the total number of variables
  *
@@ -4669,7 +4670,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
 {
    bool status= false;
    register int i;
-   const Histogram *phisto[1];
+   const FrequencyDistribution *phisto[1];
    ostringstream data_file_name;
 
    // print the data file
@@ -4742,7 +4743,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
                      << label((data_file_name.str()).c_str()) << "\" using 1 title \""
                      << STAT_label[STATL_VARIABLE] << " " << variable+1 << " - "
                      << STAT_label[_type[variable] == STATE ? STATL_STATE : STATL_OUTPUT] << " "
-                     << STAT_label[STATL_HISTOGRAM] << "\" with impulses" << endl;
+                     << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
             if (characteristics[variable]->marginal->nb_value-1 < TIC_THRESHOLD)
                out_file << "set xtics autofreq" << endl;
@@ -4764,7 +4765,7 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
             out_file << "plot [0:" << hsize->nb_value-1 << "] [0:"
                      << (int)(hsize->max*YSCALE)+1 << "] \""
                      << label((data_file_name.str()).c_str()) << "\" using 2 title \""
-                     << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_HISTOGRAM]
+                     << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                      << "\" with impulses" << endl;
 
             if (hsize->nb_value-1 < TIC_THRESHOLD)
@@ -4904,7 +4905,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::state_variable_init(int istate_
 
 /*****************************************************************
  *
- *  Computation of the histograms of the size and children number
+ *  Computation of the frequency distributions of the size and children number
  *  and their cumulated numbers for Observed_tree class
  *
  **/
@@ -4923,14 +4924,14 @@ int Typed_edge_trees<Generic_Int_fl_container>::cumul_size_computation() const
 }
 
 template<typename Generic_Int_fl_container>
-void Typed_edge_trees<Generic_Int_fl_container>::build_size_histogram()
-{  // computation of the size histogram
+void Typed_edge_trees<Generic_Int_fl_container>::build_size_frequency_distribution()
+{  // computation of the size frequency distribution
    register int t;
 
    if (hsize != NULL)
       delete hsize;
 
-   hsize= new Histogram(_max_size+1);
+   hsize= new FrequencyDistribution(_max_size+1);
    hsize->nb_element= _nb_trees;
    for(t= 0; t < _nb_trees; t++)
       (hsize->frequency[trees[t]->get_size()])++;
@@ -4960,8 +4961,8 @@ int Typed_edge_trees<Generic_Int_fl_container>::cumul_nb_children_computation() 
 }
 
 template<typename Generic_Int_fl_container>
-void Typed_edge_trees<Generic_Int_fl_container>::build_nb_children_histogram()
-{  // computation of histogram for the number of children
+void Typed_edge_trees<Generic_Int_fl_container>::build_nb_children_frequency_distribution()
+{  // computation of frequency distribution for the number of children
    register int t;
    int nb_vertices= cumul_size_computation();
    vertex_iterator it, end;
@@ -4969,7 +4970,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_nb_children_histogram()
    if (hnb_children != NULL)
       delete hnb_children;
 
-   hnb_children= new Histogram(max_nb_children_computation()+1);
+   hnb_children= new FrequencyDistribution(max_nb_children_computation()+1);
    hnb_children->nb_element= nb_vertices;
    for(t= 0; t < _nb_trees; t++)
       if (trees[t] != NULL)
@@ -4988,7 +4989,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_nb_children_histogram()
 
 /*****************************************************************
  *
- *  Computation of the characteristic quantity histograms
+ *  Computation of the characteristic quantity frequency distributions
  *  of Observed_tree class for one given discrete variable
  *
  **/
@@ -5010,13 +5011,13 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_characteristics(int varia
       characteristics[variable]= NULL;
    }
 
-   characteristics[variable]= new Tree_characteristics(_min_value.Int(variable),
-                                                       _max_value.Int(variable),
-                                                       _max_size,
-                                                       _max_depth,
-                                                       _nb_trees,
-                                                       otrees1,
-                                                       variable);
+   characteristics[variable]= new TreeCharacteristics(_min_value.Int(variable),
+                                                      _max_value.Int(variable),
+                                                      _max_size,
+                                                      _max_depth,
+                                                      _nb_trees,
+                                                      otrees1,
+                                                      variable);
    for(t= 0; t < _nb_trees; t++)
    {
        delete otrees1[t];
@@ -5029,7 +5030,7 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_characteristics(int varia
 
 /*****************************************************************
  *
- *  Computation of the characteristic quantity histograms
+ *  Computation of the characteristic quantity frequency distributions
  *  of Typed_edge_trees class for each discrete variable
  *
  **/
@@ -5046,13 +5047,13 @@ void Typed_edge_trees<Generic_Int_fl_container>::build_characteristics()
    max_depth_computation();
 
    // for(var= _nb_integral; var < _nb_integral; var++)
-   //    build_value_histogram(var);
+   //    build_value_frequency_distribution(var);
 
    if (_nb_integral > 0)
    {
        if (characteristics == NULL)
        {
-          characteristics= new Tree_characteristics*[_nb_integral];
+          characteristics= new TreeCharacteristics*[_nb_integral];
           for(var= 0; var < _nb_integral; var++)
               characteristics[var] = NULL;
        }
