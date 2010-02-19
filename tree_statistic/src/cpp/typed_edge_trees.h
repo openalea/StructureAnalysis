@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/typed_edge_trees.h,v $
+ *       $Source$
  *       $Id: typed_edge_trees.h 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for OpenAlea developers    : Openalea-devlp@lists.gforge.inria.fr
+ *       Forum for OpenAlea developers: Openalea-devlp@lists.gforge.inria.fr
  *
  *  ----------------------------------------------------------------------------
  *
@@ -112,8 +112,8 @@ enum {
 template<typename Generic_Int_fl_container> class Typed_edge_int_fl_tree;
 typedef Typed_edge_int_fl_tree<One_int_container> Typed_edge_one_int_tree;
 typedef Typed_edge_one_int_tree** pt_One_int_tree_array;
-class Tree_characteristics;
-class Hidden_markov_out_tree;
+class TreeCharacteristics;
+class HiddenMarkovOutTree;
 
 /**
    \class Edged_typed_int_fl_tree
@@ -189,19 +189,19 @@ public :
 */
 
 template <typename Generic_Int_fl_container>
-class Typed_edge_trees : public STAT_interface
+class Typed_edge_trees : public StatInterface
 {  // set of tree-structured data assumed to be the realizations
    // of a common mixed multidimensional tree process
    // (nb_integral of integer type, nb_float of float type)
 
 
    // friend classes
-   // friend class Tree_characteristics;
-   friend class Hidden_markov_tree;
-   friend class Hidden_markov_out_tree;
+   // friend class TreeCharacteristics;
+   friend class HiddenMarkovTree;
+   friend class HiddenMarkovOutTree;
 
    // template <typename Type> friend
-   //    Typed_edge_trees<Type>* observed_trees_ascii_read(Format_error& error,
+   //    Typed_edge_trees<Type>* observed_trees_ascii_read(StatError& error,
    //                                                     const char * path);
    template <typename Type> friend
       std::ostream& operator<<(std::ostream& os, const Typed_edge_trees<Type>& otrees);
@@ -216,8 +216,8 @@ public :
    typedef typename tree_type::children_iterator children_iterator;
    typedef typename tree_type::vertex_iterator vertex_iterator;
 
-   typedef Tree_characteristics* Tree_characteristics_array;
-   typedef Tree_characteristics** pt_Tree_characteristics_array;
+   typedef TreeCharacteristics* TreeCharacteristics_array;
+   typedef TreeCharacteristics** pt_TreeCharacteristics_array;
    typedef tree_type** pt_tree_type_array;
    typedef Typed_edge_trees<Generic_Int_fl_container> observed_trees;
    typedef observed_trees** pt_observed_trees_array;
@@ -252,18 +252,18 @@ protected :
 
    // [quantities for which the characteristic distributions are invariant
    // - if any - to determine]
-   // [histograms of those quantities]
-   /// histogram of the tree size
-   Histogram *hsize;
-   /// histogram of the number of children
-   Histogram *hnb_children;
+   // [frequency distributions of those quantities]
+   /// frequency distribution of the tree size
+   FrequencyDistribution *hsize;
+   /// frequency distribution of the number of children
+   FrequencyDistribution *hnb_children;
 
    /// observed trees
    pt_tree_type_array trees;
 
-   /// histogram of the characteristic quantities
+   /// frequency distribution of the characteristic quantities
    /// for each discrete variable
-   pt_Tree_characteristics_array characteristics;
+   pt_TreeCharacteristics_array characteristics;
 
    Typed_edge_trees(int inb_integral, int inb_float, int_array itype,
                   int inb_trees, bool init_flag= true);
@@ -284,12 +284,12 @@ protected :
 
     // ostream& ascii_print(ostream& os, Typed_edge_tree<double>** real_tree_sequence, char format);
 //    // Typed_edge_tree<double>** real_tree_sequence : supposedly to be revised
-//    bool ascii_print(Format_error &error, const char* path, Typed_edge_tree<double>** real_tree_sequence, char format);
+//    bool ascii_print(StatError &error, const char* path, Typed_edge_tree<double>** real_tree_sequence, char format);
 //    // idem
 //    int scaling_coefficient(int variable,  Typed_edge_tree<double>** real_tree_sequence);
 //    // idem
    /** Gnuplot output of \e self in the case of no other characteristic
-       than the marginal histogram*/
+       than the marginal frequency distribution*/
    bool plot_print(const char * prefix, const char * title,
                    int variable, int nb_variable) const;
 
@@ -303,90 +303,90 @@ protected :
 //    bool plot_print(const char *path, int ilength) const;
 
    // [computation of quantities for which the characteristic distributions are invariant]
-   // [computation of their histograms]
+   // [computation of their frequency distributions]
 
    // void state_variable_init(int istate_variable);
 
    int cumul_size_computation() const;
-   void build_size_histogram();
+   void build_size_frequency_distribution();
    int cumul_nb_children_computation() const;
-   void build_nb_children_histogram();
+   void build_nb_children_frequency_distribution();
 
    void build_characteristics(int variable);
    void build_characteristics();
-   // computation of the characteristic quantity histograms for each discrete variable
-   // except the observation histograms
+   // computation of the characteristic quantity frequency distributions for each discrete variable
+   // except the observation frequency distributions
 
 public :
 
    Typed_edge_trees(int inb_integral= 1, int inb_float= 0, int inb_trees= 0);
    Typed_edge_trees(const Typed_edge_trees& otrees, bool characteristic_flag= true);
    Typed_edge_trees(int inb_trees,
-                  int const * itype,
-                  pt_tree_type_array otrees,
-                  bool histogram_flag= true);
+                    int const * itype,
+                    pt_tree_type_array otrees,
+                    bool frequency_distribution_flag= true);
    Typed_edge_trees(int inb_integral,
-                  int inb_float,
-                  const Histogram& ihsize,
-                  const Histogram& ihnb_children,
-                  bool no_child_flag= false,
-                  bool init_flag= true);
+                    int inb_float,
+                    const FrequencyDistribution& ihsize,
+                    const FrequencyDistribution& ihnb_children,
+                    bool no_child_flag= false,
+                    bool init_flag= true);
    Typed_edge_trees(const Typed_edge_trees& otrees, int inb_trees, int_array index);
    virtual ~Typed_edge_trees();
    observed_trees& operator=(const observed_trees& otrees);
 
-   Distribution_data* extract(Format_error& error, int variable) const;
+   DiscreteDistributionData* extract(StatError& error, int variable) const;
 
-   /** Extract the histogram of characteristic distribution from \e self*/
-   Distribution_data* extract(Format_error& error, int type,
-                              int variable, int value) const;
+   /** Extract the frequency distribution of characteristic distribution from \e self*/
+   DiscreteDistributionData* extract(StatError& error, int type,
+                                     int variable, int value) const;
    /** Extract all vertex values from \e self*/
-   Vectors* build_vectors(Format_error& error) const;
+   Vectors* build_vectors(StatError& error) const;
    // should be a constructor of Vectors ?
    /** Extract all sequences from \e self along paths*/
-   Sequences* build_sequences(Format_error& error, bool all_paths= true) const;
+   Sequences* build_sequences(StatError& error, bool all_paths= true) const;
 
     // Distributions of the tree-characteristics
-    // ?    Vectors* extract_vectors(Format_error &error, int type, int variable = I_DEFAULT,
+    // ?    Vectors* extract_vectors(StatError &error, int type, int variable = I_DEFAULT,
     //                         int value = I_DEFAULT) const;
 
-    // ? Tops* tops(Format_error &error) const;
+    // ? Tops* tops(StatError &error) const;
 
-    // ? bool check(Format_error &error, const char *pattern_label);
+    // ? bool check(StatError &error, const char *pattern_label);
 
-   Typed_edge_trees* merge(Format_error& error, int nb_sample,
+   Typed_edge_trees* merge(StatError& error, int nb_sample,
                            const pt_observed_trees_array otrees) const;
-   Typed_edge_trees* shift(Format_error& error, int variable, double shift_param) const;
-   Typed_edge_trees* shift(Format_error& error, int variable, int shift_param) const;
+   Typed_edge_trees* shift(StatError& error, int variable, double shift_param) const;
+   Typed_edge_trees* shift(StatError& error, int variable, int shift_param) const;
 
    /** Cluster the values of a variable of \e self (using a given step)*/
-   Typed_edge_trees* cluster(Format_error& error, int variable, int step) const;
+   Typed_edge_trees* cluster(StatError& error, int variable, int step) const;
    /** Transcode the values of a variable of \e self (using an array of new values)*/
-   Typed_edge_trees* transcode(Format_error& error, int variable, int_array symbol) const;
+   Typed_edge_trees* transcode(StatError& error, int variable, int_array symbol) const;
 
    /** Cluster the values of a variable of \e self (using given classes and limits)*/
-   Typed_edge_trees* cluster(Format_error& error, int variable, int nb_class,
+   Typed_edge_trees* cluster(StatError& error, int variable, int nb_class,
                              int_array ilimit) const;
-//    Typed_edge_trees* cluster(Format_error& error, int variable, int nb_class,
-//                            double_array dlimit) const;
-   Typed_edge_trees* value_select(Format_error& error, int variable, int imin_value,
-                                int imax_value, bool keep= true) const;
-   Typed_edge_trees* value_select(Format_error& error, int variable, double dmin_value,
-                                double dmax_value, bool keep= true) const;
-   Typed_edge_trees* select_individual(Format_error& error, int inb_trees,
-                                     int_array iidentifier, bool keep= true) const;
-   Typed_edge_trees* select_variable(Format_error& error, int inb_variable,
-                                   int_array ivariable, bool keep= true) const;
-   Typed_edge_trees* merge_variable(Format_error& error, int nb_sample,
-                                  const pt_observed_trees_array otrees,
-                                  int ref_sample= I_DEFAULT) const;
-   Typed_edge_trees* size_select(Format_error& error, int imin_size, int imax_size,
-                               bool keep= true) const;
+//    Typed_edge_trees* cluster(StatError& error, int variable, int nb_class,
+//                              double_array dlimit) const;
+   Typed_edge_trees* value_select(StatError& error, int variable, int imin_value,
+                                  int imax_value, bool keep= true) const;
+   Typed_edge_trees* value_select(StatError& error, int variable, double dmin_value,
+                                  double dmax_value, bool keep= true) const;
+   Typed_edge_trees* select_individual(StatError& error, int inb_trees,
+                                       int_array iidentifier, bool keep= true) const;
+   Typed_edge_trees* select_variable(StatError& error, int inb_variable,
+                                     int_array ivariable, bool keep= true) const;
+   Typed_edge_trees* merge_variable(StatError& error, int nb_sample,
+                                    const pt_observed_trees_array otrees,
+                                    int ref_sample= I_DEFAULT) const;
+   Typed_edge_trees* size_select(StatError& error, int imin_size, int imax_size,
+                                 bool keep= true) const;
 
    /** Select subtrees using the subtree root index, the tree index
        and a flag on keeping or pruning the subtree */
-   Typed_edge_trees* select_subtrees(Format_error& error, int iindex,
-                                   int itree= I_DEFAULT, bool keep= true) const;
+   Typed_edge_trees* select_subtrees(StatError& error, int iindex,
+                                     int itree= I_DEFAULT, bool keep= true) const;
    // would be more interesting with true vertex and tree identifiers
 
 //     Sequences* extract_sequences(int* tree_list) const;
@@ -394,59 +394,59 @@ public :
 //     // starting from tree root
 
    /** Extraction of homogeneous trees */
-   Typed_edge_trees* segmentation_extract(Format_error& error, int variable,
-                                        int nb_value, int *ivalue,
-                                        bool keep = true) const;
+   Typed_edge_trees* segmentation_extract(StatError& error, int variable,
+                                          int nb_value, int *ivalue,
+                                          bool keep = true) const;
 
-//     // ? Typed_edge_trees* cumulate(Format_error &error, int variable = I_DEFAULT) const;
+//     // ? Typed_edge_trees* cumulate(StatError &error, int variable = I_DEFAULT) const;
    /** First-order differentiation for trees */
-   Typed_edge_trees* difference(Format_error &error, int variable= I_DEFAULT) const;
-//     // Typed_edge_trees* moving_average(Format_error &error, ostream& os, int nb_point, double *filter,
+   Typed_edge_trees* difference(StatError &error, int variable= I_DEFAULT) const;
+//     // Typed_edge_trees* moving_average(StatError &error, ostream& os, int nb_point, double *filter,
 //     //                          int variable = I_DEFAULT, bool begin_end = false,
 //     //                          int output = TREND, const char *path = 0, char format = 's') const;
-//     // Typed_edge_trees* moving_average(Format_error &error, ostream& os, const Distribution &dist,
+//     // Typed_edge_trees* moving_average(StatError &error, ostream& os, const Distribution &dist,
 //     //                         int variable = I_DEFAULT, bool begin_end = false,
 //     //                         int output = TREND, const char *path = 0, char format = 's') const;
 //     // somewhat tricky in the case of oriented trees : postponed or cancelled
 
-//     Typed_edge_trees* transform_position(Format_error &error, int step) const;
+//     Typed_edge_trees* transform_position(StatError &error, int step) const;
 //     // Discretization of a variable with type POSITION
 
-//     // Typed_edge_trees* scaling(Format_error &error, int variable, int scaling_coeff) const;
+//     // Typed_edge_trees* scaling(StatError &error, int variable, int scaling_coeff) const;
 //     // not most useful, unless we want to use 'moving_average' in the case of a discrete
 //     // variables taking a small number of values
 
-//     // Typed_edge_trees* cross(Format_error &error) const;
+//     // Typed_edge_trees* cross(StatError &error) const;
 
     std::ostream& line_write(std::ostream& os) const;
 
     virtual ostream& ascii_data_write(ostream& os, char format= 'c', bool exhaustive= false) const;
-    virtual bool ascii_data_write(Format_error& error, const char * path,
+    virtual bool ascii_data_write(StatError& error, const char * path,
                                   char format= 'c', bool exhaustive= false) const;
-    bool plot_data_write(Format_error& error, const char * prefix,
+    bool plot_data_write(StatError& error, const char * prefix,
                          const char * title= NULL) const;
 
     std::ostream& ascii_write(std::ostream& os, bool exhaustive= false) const;
-    bool ascii_write(Format_error& error, const char * path,
+    bool ascii_write(StatError& error, const char * path,
                      bool exhaustive= false) const;
-    bool spreadsheet_write(Format_error& error, const char * path) const;
+    bool spreadsheet_write(StatError& error, const char * path) const;
 
     /** Gnuplot output of \e self*/
-    bool plot_write(Format_error& error, const char * prefix,
+    bool plot_write(StatError& error, const char * prefix,
                     const char * title= NULL) const;
 
     /** Graphical output of \e self*/
-    MultiPlotSet* get_plotable(Format_error& error,
+    MultiPlotSet* get_plotable(StatError& error,
                                int plot_type,
                                int variable) const;
 
-    std::ostream& ascii_write_size_histogram(std::ostream& os,
-                                             bool exhaustive,
-                                             bool file_flag) const;
+    std::ostream& ascii_write_size_frequency_distribution(std::ostream& os,
+                                                          bool exhaustive,
+                                                          bool file_flag) const;
 
-    std::ostream& ascii_write_nb_children_histogram(std::ostream& os,
-                                                    bool exhaustive,
-                                                    bool file_flag) const;
+    std::ostream& ascii_write_nb_children_frequency_distribution(std::ostream& os,
+                                                                 bool exhaustive,
+                                                                 bool file_flag) const;
 
     double mean_computation(int variable) const;
     double variance_computation(int variable, double mean) const;
@@ -456,10 +456,10 @@ public :
     double kurtosis_computation(int variable, double mean, double variance) const;
    // computation of statistical indicators associated with each variable
 
-   // Correlation* correlation_computation(Format_error &error, int variable1, int variable2,
+   // Correlation* correlation_computation(StatError &error, int variable1, int variable2,
    //                                     int itype = PEARSON, int max_lag = I_DEFAULT,
    //                                      int normalization = APPROXIMATED) const;
-   // Correlation* partial_autocorrelation_computation(Format_error &error, int variable,
+   // Correlation* partial_autocorrelation_computation(StatError &error, int variable,
    //                                                 int itype = PEARSON, int max_lag = I_DEFAULT) const;
    // is this relevant for tree-structured data ? Postponed or cancelled
 
@@ -487,9 +487,9 @@ public :
    pt_One_int_tree_array get_identifier_trees();
    Typed_edge_one_int_tree* get_identifier_tree(int index);
 
-   Distribution_data* extract_size() const;
-   Distribution_data* extract_nb_children() const;
-   // access to the histograms of topological indicators
+   DiscreteDistributionData* extract_size() const;
+   DiscreteDistributionData* extract_nb_children() const;
+   // access to the frequency distributions of topological indicators
 
    /** Return the maximal value for each variable of \e self*/
    Generic_Int_fl_container get_max_value() const;
@@ -497,15 +497,15 @@ public :
    Generic_Int_fl_container get_min_value() const;
    /** return the number of values of a variable with finite values*/
    int get_nb_values(int variable) const;
-   Histogram* get_marginal(int variable) const;
+   FrequencyDistribution* get_marginal(int variable) const;
    int get_nb_trees() const;
     // ? int get_identifier(int itree) const { return identifier[itree]; }
 
     // [access to the quantities for which the characteristic distributions are invariant]
-    // [access to their histograms]
+    // [access to their frequency distributions]
 
-   Tree_characteristics_array* get_characteristics() const;
-   Tree_characteristics* get_characteristics(int variable) const;
+   TreeCharacteristics_array* get_characteristics() const;
+   TreeCharacteristics* get_characteristics(int variable) const;
    // access to the characteristic quantity distributions
    // for the observed variables
 
@@ -516,11 +516,11 @@ public :
    // ? Tree_curves** get_index_value() const;
    // ? Curves* get_depth_value(int variable) const;
    // ? Curves** get_depth_value() const;
-   Histogram* get_first_occurrence_root(int variable, int value) const;
-   Histogram* get_first_occurrence_leaves(int variable, int value) const;
-   Histogram* get_sojourn_size(int variable, int value) const;
-   Histogram* get_nb_zones(int variable, int value) const;
-   Histogram* get_nb_occurrence(int variable, int value) const;
+   FrequencyDistribution* get_first_occurrence_root(int variable, int value) const;
+   FrequencyDistribution* get_first_occurrence_leaves(int variable, int value) const;
+   FrequencyDistribution* get_sojourn_size(int variable, int value) const;
+   FrequencyDistribution* get_nb_zones(int variable, int value) const;
+   FrequencyDistribution* get_nb_occurrence(int variable, int value) const;
 
    pt_tree_type_array get_trees() const;
    tree_type* get_tree(int itree) const;
@@ -530,72 +530,72 @@ public :
 
 //     // plain hidden Markov out tree models
 
-//     Hidden_markov_out_tree* out_tree_estimation(Format_error &error, ostream& os,
-//                                                             const Hidden_markov_tree &ihmarkov,
+//     HiddenMarkovOutTree* out_tree_estimation(StatError &error, ostream& os,
+//                                                             const HiddenMarkovTree &ihmarkov,
 //                                                             bool counting_flag = true,
 //                                                             int state_trees = NO_COMPUTATION,
 //                                                             int nb_iter = I_DEFAULT,
 //                                                             bool characteristic_flag = true) const;
-//     Hidden_markov_out_tree* out_tree_estimation(Format_error &error, ostream& os, int nb_state,
+//     HiddenMarkovOutTree* out_tree_estimation(StatError &error, ostream& os, int nb_state,
 //                                                             int left_right, int order = 1,
 //                                                             bool counting_flag = true,
 //                                                             int state_trees = NO_COMPUTATION,
 //                                                             double self_transition = D_DEFAULT,
 //                                                             int nb_iter = I_DEFAULT) const;
-//     Hidden_markov_out_tree* nb_state_out_tree_estimation(Format_error &error, ostream& os,
-//                                                                      const Hidden_markov_tree &ihmarkov,
+//     HiddenMarkovOutTree* nb_state_out_tree_estimation(StatError &error, ostream& os,
+//                                                                      const HiddenMarkovTree &ihmarkov,
 //                                                                      int state, int max_nb_state,
 //                                                                      int penalty_type = AICc,
 //                                                                      bool counting_flag = true,
 //                                                                      int state_trees = NO_COMPUTATION,
 //                                                                      double self_transition = D_DEFAULT) const;
-//     Hidden_markov_out_tree* nb_state_out_tree_estimation(Format_error &error, ostream& os,
+//     HiddenMarkovOutTree* nb_state_out_tree_estimation(StatError &error, ostream& os,
 //                                                                      int min_nb_state, int max_nb_state,
 //                                                                      int penalty_type = AICc, int order = 1,
 //                                                                      bool counting_flag = true,
 //                                                                      int state_trees = NO_COMPUTATION,
 //                                                                      double self_transition = D_DEFAULT) const;
-//     Hidden_markov_out_tree* viterbi_out_tree_estimation(Format_error &error, ostream& os,
-//                                                                     const Hidden_markov_tree &ihmarkov,
+//     HiddenMarkovOutTree* viterbi_out_tree_estimation(StatError &error, ostream& os,
+//                                                                     const HiddenMarkovTree &ihmarkov,
 //                                                                     bool counting_flag = true,
 //                                                                     int nb_iter = I_DEFAULT) const;
-//     Hidden_markov_out_tree* viterbi_out_tree_estimation(Format_error &error, ostream& os,
+//     HiddenMarkovOutTree* viterbi_out_tree_estimation(StatError &error, ostream& os,
 //                                                                     int nb_state,
 //                                                                     int order = 1, bool counting_flag = true,
 //                                                                     double self_transition = D_DEFAULT,
 //                                                                     int nb_iter = I_DEFAULT) const;
 //     // general hidden Markov out tree models
 
-//     Hidden_markov_general_out_tree* general_out_tree_estimation(Format_error &error, ostream& os,
-//                                                                 const Hidden_markov_tree &ihmarkov,
+//     Hidden_markov_general_out_tree* general_out_tree_estimation(StatError &error, ostream& os,
+//                                                                 const HiddenMarkovTree &ihmarkov,
 //                                                                 bool counting_flag = true,
 //                                                                 int state_trees = NO_COMPUTATION,
 //                                                                 int nb_iter = I_DEFAULT,
 //                                                             bool characteristic_flag = true) const;
-//     Hidden_markov_general_out_tree* general_out_tree_estimation(Format_error &error, ostream& os, int nb_state,
+//     Hidden_markov_general_out_tree* general_out_tree_estimation(StatError &error, ostream& os, int nb_state,
 //                                                                 int left_right, int order = 1,
 //                                                                 bool counting_flag = true,
 //                                                                 int state_trees = NO_COMPUTATION,
 //                                                                 double self_transition = D_DEFAULT,
 //                                                                 int nb_iter = I_DEFAULT) const;
-//     Hidden_markov_general_out_tree* nb_state_general_out_tree_estimation(Format_error &error, ostream& os,
-//                                                                          const Hidden_markov_tree &ihmarkov,
+//     Hidden_markov_general_out_tree* nb_state_general_out_tree_estimation(StatError &error, ostream& os,
+//                                                                          const HiddenMarkovTree &ihmarkov,
 //                                                                          int state, int max_nb_state,
 //                                                                          int penalty_type = AICc,
 //                                                                          bool counting_flag = true,
 //                                                                          int state_trees = NO_COMPUTATION,
 //                                                                          double self_transition = D_DEFAULT) const;
-//     Hidden_markov_general_out_tree* nb_state_general_out_tree_estimation(Format_error &error, ostream& os,
+//     Hidden_markov_general_out_tree* nb_state_general_out_tree_estimation(StatError &error, ostream& os,
 //                                                                          int min_nb_state, int max_nb_state,
 //                                                                          int penalty_type = AICc, int order = 1,
 //                                                                          bool counting_flag = true,
 //                                                                          int state_trees = NO_COMPUTATION,
 //                                                                          double self_transition = D_DEFAULT) const;
-//     Hidden_markov_general_out_tree* viterbi_general_out_tree_estimation(Format_error &error, ostream& os,
-//                                                                         const Hidden_markov_tree &ihmarkov,
+//     Hidden_markov_general_out_tree* viterbi_general_out_tree_estimation(StatError &error, ostream& os,
+//                                                                         const HiddenMarkovTree &ihmarkov,
 //                                                                         bool counting_flag = true,
 //                                                                         int nb_iter = I_DEFAULT) const;
-//     Hidden_markov_general_out_tree* viterbi_general_out_tree_estimation(Format_error &error, ostream& os,
+//     Hidden_markov_general_out_tree* viterbi_general_out_tree_estimation(StatError &error, ostream& os,
 //                                                                         int nb_state,
 //                                                                         int order = 1, bool counting_flag = true,
 //                                                                         double self_transition = D_DEFAULT,
@@ -603,45 +603,45 @@ public :
 
 //     // hidden Markov in tree models
 
-//     Hidden_markov_in_tree* in_tree_estimation(Format_error &error, ostream& os,
-//                                               const Hidden_markov_tree &ihmarkov,
-//                                               bool counting_flag = true,
-//                                               int state_trees = NO_COMPUTATION,
-//                                               int nb_iter = I_DEFAULT,
-//                                               bool characteristic_flag = true) const;
-//     Hidden_markov_in_tree* in_tree_estimation(Format_error &error, ostream& os, int nb_state,
-//                                               int left_right, int order = 1,
-//                                               bool counting_flag = true,
-//                                               int state_trees = NO_COMPUTATION,
-//                                               double self_transition = D_DEFAULT,
-//                                               int nb_iter = I_DEFAULT) const;
-//     Hidden_markov_in_tree* nb_state_in_tree_estimation(Format_error &error, ostream& os,
-//                                                        const Hidden_markov_tree &ihmarkov,
-//                                                        int state, int max_nb_state,
-//                                                        int penalty_type = AICc,
-//                                                        bool counting_flag = true,
-//                                                        int state_trees = NO_COMPUTATION,
-//                                                        double self_transition = D_DEFAULT) const;
-//     Hidden_markov_in_tree* nb_state_in_tree_estimation(Format_error &error, ostream& os,
-//                                                        int min_nb_state, int max_nb_state,
-//                                                        int penalty_type = AICc, int order = 1,
-//                                                        bool counting_flag = true,
-//                                                        int state_trees = NO_COMPUTATION,
-//                                                        double self_transition = D_DEFAULT) const;
-//     Hidden_markov_in_tree* viterbi_in_tree_estimation(Format_error &error, ostream& os,
-//                                                       const Hidden_markov_tree &ihmarkov,
-//                                                       bool counting_flag = true,
-//                                                       int nb_iter = I_DEFAULT) const;
-//     Hidden_markov_in_tree* viterbi_in_tree_estimation(Format_error &error, ostream& os,
-//                                                       int nb_state,
-//                                                       int order = 1, bool counting_flag = true,
-//                                                       double self_transition = D_DEFAULT,
-//                                                       int nb_iter = I_DEFAULT) const;
+//     HiddenMarkovInTree* in_tree_estimation(StatError &error, ostream& os,
+//                                            const HiddenMarkovTree &ihmarkov,
+//                                            bool counting_flag = true,
+//                                            int state_trees = NO_COMPUTATION,
+//                                            int nb_iter = I_DEFAULT,
+//                                            bool characteristic_flag = true) const;
+//     HiddenMarkovInTree* in_tree_estimation(StatError &error, ostream& os, int nb_state,
+//                                            int left_right, int order = 1,
+//                                            bool counting_flag = true,
+//                                            int state_trees = NO_COMPUTATION,
+//                                            double self_transition = D_DEFAULT,
+//                                            int nb_iter = I_DEFAULT) const;
+//     HiddenMarkovInTree* nb_state_in_tree_estimation(StatError &error, ostream& os,
+//                                                     const HiddenMarkovTree &ihmarkov,
+//                                                     int state, int max_nb_state,
+//                                                     int penalty_type = AICc,
+//                                                     bool counting_flag = true,
+//                                                     int state_trees = NO_COMPUTATION,
+//                                                     double self_transition = D_DEFAULT) const;
+//     HiddenMarkovInTree* nb_state_in_tree_estimation(StatError &error, ostream& os,
+//                                                     int min_nb_state, int max_nb_state,
+//                                                     int penalty_type = AICc, int order = 1,
+//                                                     bool counting_flag = true,
+//                                                     int state_trees = NO_COMPUTATION,
+//                                                     double self_transition = D_DEFAULT) const;
+//     HiddenMarkovInTree* viterbi_in_tree_estimation(StatError &error, ostream& os,
+//                                                    const HiddenMarkovTree &ihmarkov,
+//                                                    bool counting_flag = true,
+//                                                    int nb_iter = I_DEFAULT) const;
+//     HiddenMarkovInTree* viterbi_in_tree_estimation(StatError &error, ostream& os,
+//                                                    int nb_state,
+//                                                    int order = 1, bool counting_flag = true,
+//                                                    double self_transition = D_DEFAULT,
+//                                                    int nb_iter = I_DEFAULT) const;
 };
 
 
-class Tree_characteristics
-{  //  set of histograms for characteristic
+class TreeCharacteristics
+{  //  set of frequency distributions for characteristic
    //  quantity distributions
 
    // friend classes
@@ -651,14 +651,14 @@ class Tree_characteristics
 
    template <typename Generic_Int_fl_container> friend class Typed_edge_trees;
    friend class Observed_int_trees;
-   friend class Hidden_markov_tree;
-   // friend class Hidden_markov_out_tree;
-   friend class Hidden_markov_tree_data;
-   friend class Nonparametric_tree_process;
+   friend class HiddenMarkovTree;
+   // friend class HiddenMarkovOutTree;
+   friend class HiddenMarkovTreeData;
+   friend class NonparametricTreeProcess;
 
 public :
 
-   typedef Histogram** ptHistogram_array;
+   typedef FrequencyDistribution** ptHistogram_array;
 
 protected :
 
@@ -668,61 +668,64 @@ protected :
    int _min_value;
    /// maximal value of the variable
    int _max_value;
-   /// number of trees used for the histograms
+   /// number of trees used for the frequency distributions
    int _nb_trees;
-   /// histogram of the (marginal) observation distribution
-   Histogram *marginal;
+   /// frequency distribution of the (marginal) observation distribution
+   FrequencyDistribution *marginal;
    // ?  Tree_curves *index_value;   // empirical probability of each value, as
    // a function of the index
    // ? Curves * depth_value;  empirical probability of each value, as
    // a function of the tree depth
-   /// histogram of the path length before the first occurrence
+   /// frequency distribution of the path length before the first occurrence
    /// of a given value, starting from the root
    ptHistogram_array first_occurrence_root;
-   /// histogram of the path length before the first occurrence
+   /// frequency distribution of the path length before the first occurrence
    /// of a given value, starting from all the terminal vertices
    ptHistogram_array  first_occurrence_leaves;
-   /// histogram of the sizes of the homogeneous zones
+   /// frequency distribution of the sizes of the homogeneous zones
    /// for a given value of the variable
    ptHistogram_array sojourn_size;
-   /// histogram of the number of homogeneous zones in the tree
+   /// frequency distribution of the number of homogeneous zones in the tree
    /// for a given value of the variable
    ptHistogram_array nb_zones;
-   /// histogram of the number of occurrences for a given value
+   /// frequency distribution of the number of occurrences for a given value
    // of the variable in the whole tree
    ptHistogram_array nb_occurrences;
 
-   // Histogram2D *children_pairs; // 2D histogram of the pairs of children of vertices
+   // Histogram2D *children_pairs; // 2D frequency distribution of the pairs of children of vertices
 
    // ?  void init(bool initial_run_flag = false);
    // ?   void copy_characteristics(int variable , const Discrete_sequences &seq ,
    //                             int cvariable , bool initial_run_flag = false);
-   // ?   void copy(const Tree_characteristics &tchar , int param = DEFAULT);
-   // ?   void add_variable(const Tree_characteristics &tchar , int variable = 0);
+   // ?   void copy(const TreeCharacteristics &tchar , int param = DEFAULT);
+   // ?   void add_variable(const TreeCharacteristics &tchar , int variable = 0);
    void remove_characteristic(ptHistogram_array& c, int inb_values);
 
    void remove();
-   void copy(const Tree_characteristics& t_char);
+   void copy(const TreeCharacteristics& t_char);
 
    void init_characteristic(ptHistogram_array& c, int inb_values, int imax_val);
    void init(int imax_size, int imax_depth);
-   // allocation of the histograms
+   // allocation of the frequency distributions
 
    // ? void build_index_value();
    // ? void build_depth_value();
 
-   Histogram* get_characteristic(int value, ptHistogram_array h) const;
+   FrequencyDistribution* get_characteristic(int value, ptHistogram_array h) const;
 
    // check whether given characteristic is present
    bool is_characteristic(int charac) const;
 
-   void build_marginal_histogram(Typed_edge_one_int_tree** otrees1);
-   void build_first_occurrence_root_histogram(Typed_edge_one_int_tree** otrees1, int imax_depth);
-   void build_first_occurrence_leaves_histogram(Typed_edge_one_int_tree** otrees1, int imax_depth);
-   void build_zone_histograms(Typed_edge_one_int_tree** otrees1, int imax_size);
-   void build_nb_occurrences_histogram(Typed_edge_one_int_tree** otrees1, int imax_size);
+   void build_marginal_frequency_distribution(Typed_edge_one_int_tree** otrees1);
+   void build_first_occurrence_root_frequency_distribution(Typed_edge_one_int_tree** otrees1,
+                                                           int imax_depth);
+   void build_first_occurrence_leaves_frequency_distribution(Typed_edge_one_int_tree** otrees1,
+                                                             int imax_depth);
+   void build_zone_frequency_distributions(Typed_edge_one_int_tree** otrees1, int imax_size);
+   void build_nb_occurrences_frequency_distribution(Typed_edge_one_int_tree** otrees1,
+                                                    int imax_size);
 // template <typename Generic_Int_fl_container>
-// void build_children_pairs_histogram(Typed_edge_one_int_tree** otrees1);
+// void build_children_pairs_frequency_distribution(Typed_edge_one_int_tree** otrees1);
 
    void ascii_write_characteristic(ptHistogram_array c,
                                    int inb_values,
@@ -732,13 +735,13 @@ protected :
                                    bool exhaustive,
                                    bool file_flag) const;
 
-   std::ostream& ascii_print(std::ostream& os, int type, const Histogram& hsize,
+   std::ostream& ascii_print(std::ostream& os, int type, const FrequencyDistribution& hsize,
                              bool exhaustive, bool comment_flag) const;
-   std::ostream& spreadsheet_print(std::ostream& os, int type, const Histogram& hsize) const;
+   std::ostream& spreadsheet_print(std::ostream& os, int type, const FrequencyDistribution& hsize) const;
 
   /** Gnuplot output of \e self*/
    bool plot_print(const char * prefix, const char * title, int variable,
-                   int nb_variables, int type, const Histogram& hsize) const;
+                   int nb_variables, int type, const FrequencyDistribution& hsize) const;
 
   /** Graphical output of \e self*/
   MultiPlotSet* get_plotable(int plot_type,
@@ -748,17 +751,17 @@ protected :
 
 public :
 
-   Tree_characteristics();
-   Tree_characteristics(int imin_value,
-                        int imax_value,
-                        int imax_size,
-                        int imax_depth,
-                        int inb_trees,
-                        Typed_edge_one_int_tree** otrees1,
-                        int ivariable= I_DEFAULT);
-   Tree_characteristics(const Tree_characteristics& t_char);
-   ~Tree_characteristics();
-   Tree_characteristics&  operator=(const Tree_characteristics &t_char);
+   TreeCharacteristics();
+   TreeCharacteristics(int imin_value,
+                       int imax_value,
+                       int imax_size,
+                       int imax_depth,
+                       int inb_trees,
+                       Typed_edge_one_int_tree** otrees1,
+                       int ivariable= I_DEFAULT);
+   TreeCharacteristics(const TreeCharacteristics& t_char);
+   ~TreeCharacteristics();
+   TreeCharacteristics&  operator=(const TreeCharacteristics &t_char);
 
    void  build_characteristics(int imin_value,
                                int imax_value,
@@ -767,7 +770,7 @@ public :
                                int inb_trees,
                                Typed_edge_one_int_tree** otrees1,
                                int ivariable= I_DEFAULT);
-   // construction of the histograms
+   // construction of the frequency distributions
 
    // access to class members
 
@@ -777,12 +780,12 @@ public :
    //  { return index_value; }
    // ? Curves* get_depth_value() const
    //  { return depth_value; }
-   Histogram* get_marginal() const;
-   Histogram* get_first_occurrence_root(int value) const;
-   Histogram* get_first_occurrence_leaves(int value) const;
-   Histogram* get_sojourn_size(int value) const;
-   Histogram* get_nb_zones(int value) const;
-   Histogram* get_nb_occurrences(int value) const;
+   FrequencyDistribution* get_marginal() const;
+   FrequencyDistribution* get_first_occurrence_root(int value) const;
+   FrequencyDistribution* get_first_occurrence_leaves(int value) const;
+   FrequencyDistribution* get_sojourn_size(int value) const;
+   FrequencyDistribution* get_nb_zones(int value) const;
+   FrequencyDistribution* get_nb_occurrences(int value) const;
 
    int get_nb_value_first_occurrence_root(int value) const;
    int get_nb_value_sojourn_size(int value) const;
