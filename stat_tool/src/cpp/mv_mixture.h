@@ -1,16 +1,17 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand and Y. Guedon (yann.guedon@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr) and
+ *                       Y. Guedon (yann.guedon@cirad.fr)
  *
  *       $Source$
- *       $Id: mv_mixture.h 5336 2008-07-24 15:40:10Z guedon $
+ *       $Id: multivariate_mixture.h 5336 2008-07-24 15:40:10Z guedon $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -54,44 +55,45 @@ const double MVMIXTURE_LIKELIHOOD_DIFF = 1.e-6;
 #include "vectors.h"
 
 class FrequencyDistribution;
-class Mv_Mixture_data;
+class MultivariateMixtureData;
 class DiscreteParametricProcess;
 class NonparametricProcess;
 
 // melange de lois multivariees
 // a variables independantes
 
-class Mv_Mixture : public StatInterface {
+class MultivariateMixture : public StatInterface {
 
     friend class FrequencyDistribution;
     friend class Vectors;
-    friend class Mv_Mixture_data;
+    friend class MultivariateMixtureData;
 
-    friend Mv_Mixture* mv_mixture_building(StatError &error , int nb_component , double *weight ,
-                                           const DiscreteParametricProcess **component);
-    friend Mv_Mixture* mv_mixture_ascii_read(StatError &error , const char *path ,
-                                             double cumul_threshold);
-    friend std::ostream& operator<<(std::ostream &os , const Mv_Mixture &mixt)
+    friend MultivariateMixture* multivariate_mixture_building(StatError &error ,
+                                                              int nb_component , double *weight ,
+                                                              const DiscreteParametricProcess **component);
+    friend MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
+                                                                double cumul_threshold);
+    friend std::ostream& operator<<(std::ostream &os , const MultivariateMixture &mixt)
     { return mixt.ascii_write(os , mixt.mixture_data , false , false); }
 
 private :
 
-    Mv_Mixture_data *mixture_data;  // pointeur sur un objet Mv_Mixture_data
+    MultivariateMixtureData *mixture_data;  // pointeur sur un objet MultivariateMixtureData
     int nb_component;       // nombre de composantes
     int nb_var;       // dimension
     DiscreteParametric *weight;     // poids de chaque composante
     DiscreteParametricProcess **pcomponent; // composantes parametriques
     NonparametricProcess **npcomponent; // composantes non parametriques
 
-    void copy(const Mv_Mixture &mixt , bool data_flag = true);
+    void copy(const MultivariateMixture &mixt , bool data_flag = true);
     void remove();
 
-    std::ostream& ascii_write(std::ostream &os , const Mv_Mixture_data *mixt_data ,
+    std::ostream& ascii_write(std::ostream &os , const MultivariateMixtureData *mixt_data ,
                               bool exhaustive , bool file_flag) const;
-    std::ostream& spreadsheet_write(std::ostream &os , const Mv_Mixture_data *mixt_data) const;
+    std::ostream& spreadsheet_write(std::ostream &os , const MultivariateMixtureData *mixt_data) const;
     bool plot_write(const char *prefix , const char *title ,
-                    const Mv_Mixture_data *mixt_data) const;
-    plotable::MultiPlotSet* get_plotable(const Mv_Mixture_data *mixt_data) const;
+                    const MultivariateMixtureData *mixt_data) const;
+    plotable::MultiPlotSet* get_plotable(const MultivariateMixtureData *mixt_data) const;
 
     int nb_parameter_computation(double min_probability) const;
     double penalty_computation() const;
@@ -116,17 +118,21 @@ private :
 
 public :
 
-    Mv_Mixture();
-    Mv_Mixture(int inb_component , double *pweight , int inb_variable,
-           DiscreteParametricProcess **ppcomponent, NonparametricProcess **pnpcomponent);
-    Mv_Mixture(int inb_component , int inb_variable, const DiscreteParametricProcess **ppcomponent,
-           const NonparametricProcess **pnpcomponent);
-    Mv_Mixture(const Mv_Mixture &mixt , bool *variable_flag , int inb_variable);
-    Mv_Mixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
-    Mv_Mixture(const Mv_Mixture &mixt , bool data_flag = true)
+    MultivariateMixture();
+    MultivariateMixture(int inb_component , double *pweight , int inb_variable,
+                        DiscreteParametricProcess **ppcomponent,
+                        NonparametricProcess **pnpcomponent);
+    MultivariateMixture(int inb_component , int inb_variable,
+                        const DiscreteParametricProcess **ppcomponent,
+                        const NonparametricProcess **pnpcomponent);
+    MultivariateMixture(const MultivariateMixture &mixt , bool *variable_flag ,
+                        int inb_variable);
+    MultivariateMixture(int inb_component, int inb_variable, int *nb_value,
+                        bool *force_param=NULL);
+    MultivariateMixture(const MultivariateMixture &mixt , bool data_flag = true)
     { copy(mixt , data_flag); }
-    ~Mv_Mixture();
-    Mv_Mixture& operator=(const Mv_Mixture &mixt);
+    ~MultivariateMixture();
+    MultivariateMixture& operator=(const MultivariateMixture &mixt);
 
     /** extract parametric component */
     DiscreteParametricModel* extract_parametric_model(StatError &error , int ivariable,
@@ -136,7 +142,7 @@ public :
                           int index) const;
     /** extract marginal mixture distribution */
     Distribution* extract_distribution(StatError &error , int ivariable) const;
-    Mv_Mixture_data* extract_data(StatError &error) const;
+    MultivariateMixtureData* extract_data(StatError &error) const;
 
    /** Permutation of the states of \e self */
    void state_permutation(StatError& error, int* perm) const;
@@ -152,20 +158,20 @@ public :
     plotable::MultiPlotSet* get_plotable() const;
 
     double likelihood_computation(const Vectors &mixt_data,
-                  bool log_computation=false) const;
+                                  bool log_computation=false) const;
 
-    Mv_Mixture_data* simulation(StatError &error , int nb_element) const;
+    MultivariateMixtureData* simulation(StatError &error , int nb_element) const;
 
     /** add restored states to Vectors */
-    Mv_Mixture_data* cluster(StatError &error,  const Vectors &vec,
-                             int algorithm=VITERBI) const;
+    MultivariateMixtureData* cluster(StatError &error,  const Vectors &vec,
+                                     int algorithm=VITERBI) const;
 
     /** return "true" if process ivariable is parametric */
     bool is_parametric(int ivariable) const;
 
     // acces membres de la classe
 
-    Mv_Mixture_data* get_mixture_data() const { return mixture_data; }
+    MultivariateMixtureData* get_mixture_data() const { return mixture_data; }
     int get_nb_component() const { return nb_component; }
     int get_nb_variable() const { return nb_var; }
     DiscreteParametric* get_weight() const { return weight; }
@@ -176,35 +182,35 @@ public :
 };
 
 
-Mv_Mixture* mv_mixture_building(StatError &error , int nb_component ,
-                int nb_variable, double *weight,
-                DiscreteParametricProcess **ppcomponent,
-                NonparametricProcess **pnpcomponent);
-Mv_Mixture* mv_mixture_ascii_read(StatError &error , const char *path ,
-                  double cumul_threshold = CUMUL_THRESHOLD);
+MultivariateMixture* multivariate_mixture_building(StatError &error , int nb_component ,
+                                                   int nb_variable, double *weight,
+                                                   DiscreteParametricProcess **ppcomponent,
+                                                   NonparametricProcess **pnpcomponent);
+MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const char *path ,
+                                                     double cumul_threshold = CUMUL_THRESHOLD);
 
 
 
 // structure de donnees correspondant
  // a un melange
-class Mv_Mixture_data : public Vectors {
+class MultivariateMixtureData : public Vectors {
 
     friend class FrequencyDistribution;
-    friend class Mv_Mixture;
+    friend class MultivariateMixture;
     friend class Vectors;
 
-    friend std::ostream& operator<<(std::ostream &os , const Mv_Mixture_data &mixt_data)
+    friend std::ostream& operator<<(std::ostream &os , const MultivariateMixtureData &mixt_data)
     { return mixt_data.ascii_write(os , false); }
 
 private :
 
-    Mv_Mixture *mixture;       // pointeur sur un objet Mv_Mixture
+    MultivariateMixture *mixture;       // pointeur sur un objet MultivariateMixture
     int nb_component;          // nombre de composantes
     FrequencyDistribution *weight;      // loi empirique des poids
     /// component[variable][state]
     FrequencyDistribution ***component;  // composantes empiriques pour chaque variable
 
-    void copy(const Mv_Mixture_data &mixt_data , bool model_flag = true);
+    void copy(const MultivariateMixtureData &mixt_data , bool model_flag = true);
     void remove();
 
     /** Permutation of the states of \e self.*/
@@ -212,13 +218,13 @@ private :
 
 public :
 
-    Mv_Mixture_data();
-    Mv_Mixture_data(const Vectors &vec, int inb_component);
-    Mv_Mixture_data(const Mv_Mixture &mixt);
-    Mv_Mixture_data(const Mv_Mixture_data &mixt_data , bool model_flag = true)
+    MultivariateMixtureData();
+    MultivariateMixtureData(const Vectors &vec, int inb_component);
+    MultivariateMixtureData(const MultivariateMixture &mixt);
+    MultivariateMixtureData(const MultivariateMixtureData &mixt_data , bool model_flag = true)
       :Vectors(mixt_data) { copy(mixt_data , model_flag); }
-    virtual ~Mv_Mixture_data();
-    Mv_Mixture_data& operator=(const Mv_Mixture_data &mixt_data);
+    virtual ~MultivariateMixtureData();
+    MultivariateMixtureData& operator=(const MultivariateMixtureData &mixt_data);
 
     DiscreteDistributionData* extract(StatError &error , int variable, int index) const;
     DiscreteDistributionData* extract_marginal(StatError &error , int variable) const;
@@ -237,7 +243,7 @@ public :
 
     // acces membres de la classe
 
-    Mv_Mixture* get_mixture() const { return mixture; }
+    MultivariateMixture* get_mixture() const { return mixture; }
     int get_nb_component() const { return nb_component; }
     FrequencyDistribution* get_weight() const { return weight; }
     FrequencyDistribution* get_component(int variable, int index) const { return component[variable][index]; }
