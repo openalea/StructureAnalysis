@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/int_trees.cpp,v $
+ *       $Source$
  *       $Id: int_trees.cpp 3193 2007-05-29 10:03:19Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -92,15 +92,15 @@ Int_trees::Int_trees(int inb_trees,
  *
  *  Constructor of Int_trees class
  *  using the number of integral variables,
- *  histograms for the size and number of children of the trees,
+ *  frequency distributions for the size and number of children of the trees,
  *  a flag on the possibility for a node to have no child due to random
  *  and a flag on the (random) tree initialization
  *
  **/
 
 Int_trees::Int_trees(int inb_integral,
-                     const Histogram& ihsize,
-                     const Histogram& ihnb_children,
+                     const FrequencyDistribution& ihsize,
+                     const FrequencyDistribution& ihnb_children,
                      bool no_child_flag,
                      bool init_flag)
  : Typed_edge_trees<Int_fl_container>(inb_integral, 0,
@@ -146,8 +146,8 @@ void Int_trees::iid_simulation(const Distribution& distrib)
 
        }
        build_characteristics();
-       build_size_histogram();
-       build_nb_children_histogram();
+       build_size_frequency_distribution();
+       build_nb_children_frequency_distribution();
    }
 }
 
