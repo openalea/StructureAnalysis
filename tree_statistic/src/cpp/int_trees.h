@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/int_trees.h,v $
+ *       $Source$
  *       $Id: int_trees.h 3186 2007-05-25 15:10:30Z dufourko $
  *
- *       Forum for AMAPmod developers    : amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -82,7 +82,7 @@ public :
    typedef tree_type::children_iterator children_iterator;
    typedef tree_type::vertex_iterator vertex_iterator;
 
-   typedef Tree_characteristics* Tree_characteristics_array;
+   typedef TreeCharacteristics* TreeCharacteristics_array;
    typedef tree_type** pt_tree_type_array;
 
    typedef Typed_edge_trees<Int_fl_container> int_trees;
@@ -94,8 +94,8 @@ public :
                       int* itype,
                       pt_tree_type_array otrees);
    Int_trees(int inb_integral,
-             const Histogram& ihsize,
-             const Histogram& ihnb_children,
+             const FrequencyDistribution& ihsize,
+             const FrequencyDistribution& ihnb_children,
              bool no_child_flag= false,
              bool init_flag= true);
 
