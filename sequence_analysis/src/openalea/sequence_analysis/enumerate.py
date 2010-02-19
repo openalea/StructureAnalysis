@@ -9,7 +9,7 @@ sequence original code.
 """
 __version__ = "$Id$"
 
-from openalea.stat_tool._stat_tool import *
+from openalea.stat_tool._stat_tool import GraphicalType
 
 import openalea.stat_tool._stat_tool as _stat_tool
 from openalea.sequence_analysis import _sequence_analysis as _sequence_analysis
@@ -52,8 +52,8 @@ BACKWARD_RECURRENCE_TIME = \
 FORWARD_RECURRENCE_TIME = _sequence_analysis.RenewalType.FORWARD_RECURRENCE_TIME
 NB_EVENT = _sequence_analysis.RenewalType.NB_EVENT
 MIXTURE = _sequence_analysis.RenewalType.MIXTURE
-     
-renewal_nb_event_map = { 
+
+renewal_nb_event_map = {
     "InterEvent":   _sequence_analysis.RenewalType.INTER_EVENT,
     "LengthBias":   _sequence_analysis.RenewalType.LENGTH_BIAS,
     "Backward":     _sequence_analysis.RenewalType.BACKWARD_RECURRENCE_TIME,
@@ -80,7 +80,7 @@ func_map = {
     }
 #todo: simplify
 output_sequence_map = func_map
-output_map = func_map 
+output_map = func_map
 
 estimator_map = {
     "MaximumLikelihood": _sequence_analysis.Estimator.MAXIMUM_LIKELIHOOD,
@@ -96,41 +96,22 @@ SEQUENCE = 0
 SUBTRACTION_RESIDUAL = 1
 STANDARDIZED_RESIDUAL = 2
 
-"""
+#todo: replace by appropriate enumerate from_se uence_analysis
+seq_map = {
+            "Observation":      GraphicalType.OBSERVATION,
+            "FirstOccurrence":  GraphicalType.FIRST_OCCURRENCE,
+            "Recurrence":       GraphicalType.RECURRENCE_TIME,
+            "Sojourn":          GraphicalType.SOJOURN_TIME,
+            "NbRun":            GraphicalType.NB_RUN,
+            "NbOccurrence":     GraphicalType.NB_OCCURRENCE,
+            "Forward": -1}
 
-enum {
-  SELF_TRANSITION ,
-  OBSERVATION ,
-  INTENSITY ,
-  FIRST_OCCURRENCE ,
-  RECURRENCE_TIME ,
-  SOJOURN_TIME ,
-  INITIAL_RUN ,
-  FINAL_RUN ,
-  NB_RUN ,
-  NB_OCCURRENCE ,
-  COUNTING ,
-  LENGTH ,
-  SEQUENCE_CUMUL ,
-  SEQUENCE_MEAN
-};
-"""
-
-#todo: replace by appropriate enumerate from_se uence_analysis    
-seq_map = {"Observation":1, 
-               "FirstOccurrence":3,
-               "Recurrence":4, 
-               "Sojourn":5,
-               "NbRun":7,
-               "NbOccurrence":8,
-               "Forward": -1}
-    
 _INITIAL_RUN = 4
 _FINAL_RUN = 5
 _LENGTH = 8
 _SEQUENCE_CUMUL = 9
 _SEQUENCE_MEAN = 10
-   
+
 histogram_type = {
                   "FinalRun":5,
                   "InitialRun":4,
@@ -140,7 +121,7 @@ model_type = {
               "Multinomial": _sequence_analysis.ChangeType.MULTINOMIAL_CHANGE,
               "Poisson": _sequence_analysis.ChangeType.POISSON_CHANGE,
               "Ordinal": _sequence_analysis.ChangeType.ORDINAL_GAUSSIAN_CHANGE,
-              "Gaussian": _sequence_analysis.ChangeType.GAUSSIAN_CHANGE,        
+              "Gaussian": _sequence_analysis.ChangeType.GAUSSIAN_CHANGE,
               "Mean": _sequence_analysis.ChangeType.MEAN_CHANGE,
               "Variance": _sequence_analysis.ChangeType.VARIANCE_CHANGE,
               "MeanVariance": _sequence_analysis.ChangeType.MEAN_VARIANCE_CHANGE
@@ -148,13 +129,13 @@ model_type = {
 
 # todo:: ckean the 2 next enums ?
 type_map = {
-            "INT": _sequence_analysis.INT_VALUE, 
+            "INT": _sequence_analysis.INT_VALUE,
             "REAL" : _sequence_analysis.REAL_VALUE,
             "STATE": _sequence_analysis.STATE,
             "NB_INTERNODE":  _sequence_analysis.NB_INTERNODE,
             "AUXILIARY":  _sequence_analysis.AUXILIARY,
             }
-    
+
 index_parameter_type_map = {
         "IMPLICIT_TYPE": _sequence_analysis.IMPLICIT_TYPE,
         "TIME": _sequence_analysis.TIME,
@@ -163,43 +144,43 @@ index_parameter_type_map = {
         "POSITION_INTERVAL": _sequence_analysis.POSITION_INTERVAL
         }
 
- 
+
 stochastic_process_type = {
     'Ordinary': 'o',
     'Equilibrium' : 'e'
     }
 
 markovian_algorithms = {
-    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
-    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
-    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
+    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,
+    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,
+    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
     'ForwardBackwardSampling': \
         _stat_tool.RestorationAlgorithm.FORWARD_DYNAMIC_PROGRAMMING,
     'GeneralizedViterbi': \
         _stat_tool.RestorationAlgorithm.GENERALIZED_VITERBI,
-    'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,             
-    'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,             
+    'Gibbs':_stat_tool.RestorationAlgorithm.GIBBS_SAMPLING,
+    'NoComputation':_stat_tool.RestorationAlgorithm.NO_COMPUTATION,
     'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
     }
 
-sub_markovian_algorithms = {                    
-    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,           
-    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,  
-    }               
+sub_markovian_algorithms = {
+    'EM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD,
+    'MCEM':_stat_tool.RestorationAlgorithm.FORWARD_BACKWARD_SAMPLING,
+    }
 
 
 sub_markovian_algorithms_2 = {
-    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,                    
+    'Forward':_stat_tool.RestorationAlgorithm.FORWARD,
     'Viterbi':_stat_tool.RestorationAlgorithm.VITERBI,
     }
 
-  
+
 algorithm = {
-    'CTM_BIC': _sequence_analysis.Algorithm.CTM_BIC , 
+    'CTM_BIC': _sequence_analysis.Algorithm.CTM_BIC ,
     'BIC': _sequence_analysis.Algorithm.CTM_BIC ,
-    'CTM_KT': _sequence_analysis.Algorithm.CTM_KT,   
+    'CTM_KT': _sequence_analysis.Algorithm.CTM_KT,
     'KT': _sequence_analysis.Algorithm.CTM_KT,
-    'LocalBIC': _sequence_analysis.Algorithm.LOCAL_BIC, 
+    'LocalBIC': _sequence_analysis.Algorithm.LOCAL_BIC,
     'Context': _sequence_analysis.Algorithm.CONTEXT
 }
 
@@ -218,7 +199,7 @@ likelihood_penalty_type = {
 mean_computation_map = {
     "Computed" : _stat_tool.ClusterType.COMPUTED,
     "Estimated" : _stat_tool.ClusterType.ESTIMATED,
-    "OneStepLate" : _stat_tool.ClusterType.ONE_STEP_LATE        
+    "OneStepLate" : _stat_tool.ClusterType.ONE_STEP_LATE
     }
 
 estimator_semi_markov_type = {
@@ -237,20 +218,20 @@ ident_map = {
 
              }
 
-output_type = { 
+output_type = {
                "ChangePoint" : _sequence_analysis.ChangePointType.CHANGE_POINT,
                "Segment" : _sequence_analysis.ChangePointType.SEGMENT
                }
 
 nb_segment_map = {
                   "Fixed": False,
-                  "Estimated":True 
+                  "Estimated":True
                   }
 
 
 begin_aligned_map = {
                   "Aligned": False,
-                  "Free":True 
+                  "Free":True
                   }
 end_aligned_map = begin_aligned_map
 
@@ -258,25 +239,25 @@ from openalea.sequence_analysis._sequence_analysis import \
     _Sequences, _MarkovianSequences, _VariableOrderMarkovData, \
     _SemiMarkovData, _NonHomogeneousMarkovData, _VariableOrderMarkov,\
     _HiddenVariableOrderMarkov, _HiddenSemiMarkov, _SemiMarkov
-    
+
 sequence_alignment_first_arg = [_Sequences,
                                 _MarkovianSequences,
                                 _VariableOrderMarkovData,
                                 _SemiMarkovData,
                                 _NonHomogeneousMarkovData]
-    
+
 markov_model_comparison_first_arg = \
     [_VariableOrderMarkov,
      _HiddenVariableOrderMarkov,
      _HiddenSemiMarkov,
      _SemiMarkov]
-    
+
 markov_model_for_sequences_first_arg = \
     [_MarkovianSequences,
      _VariableOrderMarkovData,
      _SemiMarkovData,
      _NonHomogeneousMarkovData]
-   
+
 markov_model_for_sequences_second_arg = \
     [_VariableOrderMarkov,
      _SemiMarkov,
@@ -287,7 +268,7 @@ ms_vomd_smd_list = [_MarkovianSequences,
                     _VariableOrderMarkovData,
                     _SemiMarkovData]
 
-# todo: use those simpler naming convention: 
+# todo: use those simpler naming convention:
 ms_vomd_smd_nhmd = markov_model_for_sequences_first_arg
 
 output_sequence = {
@@ -295,5 +276,5 @@ output_sequence = {
                    "Sequences": 's'
                    }
 
-indel_cost_map = {"Adaptative": _sequence_analysis.IndelCost.ADAPTATIVE, 
-                     "Fixed": _sequence_analysis.IndelCost.FIXED} 
+indel_cost_map = {"Adaptative": _sequence_analysis.IndelCost.ADAPTATIVE,
+                     "Fixed": _sequence_analysis.IndelCost.FIXED}
