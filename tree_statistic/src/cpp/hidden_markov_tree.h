@@ -1,16 +1,16 @@
 /* -*-c++-*-
  *  ----------------------------------------------------------------------------
  *
- *       AMAPmod: Exploring and Modeling Plant Architecture
+ *       V-Plants: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2002 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 CIRAD/INRIA Virtual Plants
  *
- *       File author(s): J.-B. Durand (jean-baptiste.durand@cirad.fr)
+ *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
- *       $Source: /usr/cvsmaster/AMAPmod/src/STAT_TREES/src/hidden_markov_tree.h,v $
+ *       $Source$
  *       $Id: hidden_markov_tree.h 2722 2007-02-16 14:17:56Z jbdurand $
  *
- *       Forum for AMAPmod developers: amldevlp@cirad.fr
+ *       Forum for V-Plants developers:
  *
  *  ----------------------------------------------------------------------------
  *
@@ -38,8 +38,8 @@
 #define HIDDEN_MARKOV_TREE_H
 
 class Distribution;
-class Parametric_model;
-class Distribution_data;
+class DiscreteParametricModel;
+class DiscreteDistributionData;
 
 namespace Stat_trees
 {
@@ -49,12 +49,12 @@ namespace Stat_trees
      provide the class "Non_parametric_tree_process" for the representation
         of tree processes controlled by a discrete tree process. Includes
         the characteristic quantity distributions for each random variable and
-     the class "Hidden_markov_tree", which corresponds to hidden Markov trees and
-     the class "Hidden_markov_tree_data", which combines a "Trees" object
-        and a "Hidden_markov_tree"
+     the class "HiddenMarkovTree", which corresponds to hidden Markov trees and
+     the class "HiddenMarkovTreeData", which combines a "Trees" object
+        and a "HiddenMarkovTree"
 */
 
-class Hidden_markov_tree_data;
+class HiddenMarkovTreeData;
 
 /****************************************************************
  *
@@ -85,27 +85,27 @@ enum {
  */
 
 /**
-   \class Nonparametric_tree_process
+   \class NonparametricTreeProcess
    \brief a collection of nonparametric distributions, mainly used for
           the representation of emission distributions given
           a state variable (e.g. a hidden state)
           and that of the distribution of characteristic quantities
 */
 
-class Nonparametric_tree_process : public Nonparametric_process
+class NonparametricTreeProcess : public NonparametricProcess
 {  // a collection of nonparametric distributions, mainly used for
    // the representation of emission distributions given
    // a state variable (e.g. a hidden state)
    // and that of the distribution of characteristic quantities
 
-   friend class Hidden_markov_tree;
-   friend class Hidden_markov_out_tree;
-   friend class Hidden_markov_tree_data;
+   friend class HiddenMarkovTree;
+   friend class HiddenMarkovOutTree;
+   friend class HiddenMarkovTreeData;
 
-   // friend Nonparametric_tree_process* occupancy_parsing(Format_error &error , ifstream &in_file ,
-   //                                                          int &line , const Chain &chain ,
-   //                                                          double cumul_threshold = CUMUL_THRESHOLD);
-   friend bool test_hidden(int nb_output_process, Nonparametric_tree_process **process);
+   // friend NonparametricTreeProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
+   //                                                    int &line , const Chain &chain ,
+   //                                                    double cumul_threshold = CUMUL_THRESHOLD);
+   friend bool test_hidden(int nb_output_process, NonparametricTreeProcess **process);
 
 private :
 
@@ -135,12 +135,12 @@ private :
    /// distribution of the occurrence number for a given
    /// value of the variable in the whole tree
    Distribution **nb_occurrences;
-   // N.B. check whether these Distributions are Parametric or not
+   // N.B. check whether these Distributions are DiscreteParametric or not
 
    void create_characteristic(const Distribution& hsize, bool sojourn_time_flag= true,
                               bool counting_flag= true);
 
-   void copy(const Nonparametric_tree_process& process, bool characteristic_flag= true);
+   void copy(const NonparametricTreeProcess& process, bool characteristic_flag= true);
 
    void copy_double_array(double*& dest, const double* source, int inb_value);
    void copy_Distribution_array(Distribution**& dest,
@@ -152,7 +152,7 @@ private :
    void remove_Distribution_array(Distribution**& d, int inb_value);
 
    void init_Distribution_array(Distribution**& d, int inb_value);
-   void init_occupancy(const Nonparametric_tree_process& process, int occupancy_nb_value);
+   void init_occupancy(const NonparametricTreeProcess& process, int occupancy_nb_value);
 
    /** Permutation of the states of \e self */
    void state_permutation(int* perm) const;
@@ -162,29 +162,30 @@ private :
    Distribution* get_ptDistribution_characteristic(Distribution** d,
                                                    int value) const;
 
-   std::ostream& ascii_print(std::ostream &os, int process, Histogram** empirical_observation,
-                             const Tree_characteristics* characteristics ,
+   std::ostream& ascii_print(std::ostream &os, int process,
+                             FrequencyDistribution** empirical_observation,
+                             const TreeCharacteristics* characteristics ,
                              bool exhaustive, bool file_flag) const;
    std::ostream& spreadsheet_print(std::ostream &os, int process,
-                              Histogram** empirical_observation= NULL,
-                              const Tree_characteristics* characteristics= NULL) const;
+                                   FrequencyDistribution** empirical_observation= NULL,
+                                   const TreeCharacteristics* characteristics= NULL) const;
 
    /** Gnuplot output of \e self*/
    bool plot_print(const char * prefix, const char * title, int process,
-                   Histogram** empirical_observation= NULL,
-                   const Tree_characteristics * characteristics= NULL,
-                   const Histogram * hsize= NULL) const;
+                   FrequencyDistribution** empirical_observation= NULL,
+                   const TreeCharacteristics * characteristics= NULL,
+                   const FrequencyDistribution * hsize= NULL) const;
 
 public :
 
-   Nonparametric_tree_process(int inb_state= 0, int inb_value= 0,
+   NonparametricTreeProcess(int inb_state= 0, int inb_value= 0,
                               int observation_flag= false);
-   // Nonparametric_tree_process(int inb_state , Distribution **occupancy);
-   Nonparametric_tree_process(const Nonparametric_process& process);
-   Nonparametric_tree_process(const Nonparametric_tree_process& process ,
-                              char manip= 'c', int param= true);
-   ~Nonparametric_tree_process();
-   Nonparametric_tree_process& operator=(const Nonparametric_tree_process& process);
+   // NonparametricTreeProcess(int inb_state , Distribution **occupancy);
+   NonparametricTreeProcess(const NonparametricProcess& process);
+   NonparametricTreeProcess(const NonparametricTreeProcess& process ,
+                            char manip= 'c', int param= true);
+   ~NonparametricTreeProcess();
+   NonparametricTreeProcess& operator=(const NonparametricTreeProcess& process);
 
    // access to class members
 
@@ -197,7 +198,7 @@ public :
    double get_absorption(int value) const;
 
    /** Permutation of the state of \e self*/
-   void state_permutation(Format_error& error, int* perm) const;
+   void state_permutation(StatError& error, int* perm) const;
 
    Distribution** get_first_occurrence_root() const;
    Distribution* get_first_occurrence_root(int value) const;
@@ -211,24 +212,24 @@ public :
    Distribution* get_nb_occurrences(int value) const;
 };
 
-bool test_hidden(int nb_output_process, Nonparametric_tree_process **process);
+bool test_hidden(int nb_output_process, NonparametricTreeProcess **process);
 
 /**
-   \class Hidden_markov_tree
+   \class HiddenMarkovTree
    \brief the common part of all hidden Markov trees
 */
-class Hidden_markov_tree : public STAT_interface , protected Chain
+class HiddenMarkovTree : public StatInterface , protected Chain
 {  // hidden Markov tree
 
-   friend class Hidden_markov_tree_data;
-   friend class Hidden_markov_out_tree;
+   friend class HiddenMarkovTreeData;
+   friend class HiddenMarkovOutTree;
 
-   friend Hidden_markov_tree* hidden_markov_tree_ascii_read(Format_error& error,
-                                                            const char * path,
-                                                            int size, bool counting_flag,
-                                                            double cumul_threshold);
+   friend HiddenMarkovTree* hidden_markov_tree_ascii_read(StatError& error,
+                                                          const char * path,
+                                                          int size, bool counting_flag,
+                                                          double cumul_threshold);
 
-   friend std::ostream& operator<<(std::ostream &os, const Hidden_markov_tree& markov);
+   friend std::ostream& operator<<(std::ostream &os, const HiddenMarkovTree& markov);
 
 public :
 
@@ -239,7 +240,7 @@ public :
 protected :
 
    /// data associated with the model
-   Hidden_markov_tree_data *markov_data;
+   HiddenMarkovTreeData *markov_data;
    /// (maximal) number of children involved in the transition
    /// probability matrix
    int _ch_order;
@@ -250,44 +251,44 @@ protected :
    /// number of double (parametric) observation processes
    int _nb_doutput_process;
    /// non-parametric observation processes
-   Nonparametric_tree_process **npprocess;
+   NonparametricTreeProcess **npprocess;
    /// integer parametric observation processes
-   Parametric_process **piprocess;
+   DiscreteParametricProcess **piprocess;
    /// double (i.e. floating) parametric observation processes
-   Parametric_process **pdprocess;
+   DiscreteParametricProcess **pdprocess;
 
-   /* Hidden_markov_tree(const Chain * pchain, int inb_nonparam, int inb_param,
-                      Nonparametric_process** pobservation, int size);
-   Hidden_markov_tree(const Hidden_markov_tree& markov,
-                      char manip,
-                      int param);
+   /* HiddenMarkovTree(const Chain * pchain, int inb_nonparam, int inb_param,
+                     NonparametricProcess** pobservation, int size);
+   HiddenMarkovTree(const HiddenMarkovTree& markov,
+                    char manip,
+                    int param);
    */
 
-   void copy(const Hidden_markov_tree& markov, bool data_flag= true,
+   void copy(const HiddenMarkovTree& markov, bool data_flag= true,
              bool characteristic_flag= true);
    void remove();
 
    virtual std::ostream& ascii_write(std::ostream& os,
-                                     const Hidden_markov_tree_data* otrees,
+                                     const HiddenMarkovTreeData* otrees,
                                      bool exhaustive= false, bool file_flag= false,
                                      const Test * test= NULL, bool ch_order_flag= true) const;
-   virtual std::ostream& spreadsheet_write(std::ostream& os, const Hidden_markov_tree_data * tree,
+   virtual std::ostream& spreadsheet_write(std::ostream& os, const HiddenMarkovTreeData * tree,
                                            const Test * test= NULL) const;
    virtual bool plot_write(const char * prefix, const char * title,
-                           const Hidden_markov_tree_data * otrees) const;
+                           const HiddenMarkovTreeData * otrees) const;
 
    void self_row_computation();  // ?
    void component_computation(); // ?
 
    // void index_state_distribution();
    double* memory_computation() const;
-   bool state_profile_write(Format_error& error, std::ostream& os,
-                            const Hidden_markov_tree_data& tree,
+   bool state_profile_write(StatError& error, std::ostream& os,
+                            const HiddenMarkovTreeData& tree,
                             int identifier= I_DEFAULT, char format= 'a',
                             int algorithm= UPWARD) const;
    /** Write Gnuplot output of state and entropy profiles */
-   bool state_profile_plot_write(Format_error& error, const char* prefix ,
-                                 const Hidden_markov_tree_data& tree, int identifier,
+   bool state_profile_plot_write(StatError& error, const char* prefix ,
+                                 const HiddenMarkovTreeData& tree, int identifier,
                                  int vertex, const char* title= NULL,
                                  int algorithm= UPWARD) const;
 
@@ -330,21 +331,21 @@ protected :
    /**Compute an adaptive penalty for \e self used for model selection*/
    double penalty_computation(double min_probability= 0.) const;
 
-   virtual double_array_3d state_marginal_distribution(const Hidden_markov_tree_data& trees) const;
+   virtual double_array_3d state_marginal_distribution(const HiddenMarkovTreeData& trees) const;
    virtual double** state_marginal_distribution(const Trees& trees,
                                                 int index) const;
 
-   virtual double likelihood_correction(const Hidden_markov_tree_data& trees) const;
+   virtual double likelihood_correction(const HiddenMarkovTreeData& trees) const;
 
    /**Compute the conditional distributions of the observations*/
-   void output_conditional_distribution(const Hidden_markov_tree_data& trees,
+   void output_conditional_distribution(const HiddenMarkovTreeData& trees,
                                         double_array_3d& output_cond,
                                         bool logcomputation= false,
                                         int index= I_DEFAULT) const;
 
    /**Compute the maximal marginal entropy, the state tree entropy
    and return the completed likelihood */
-   virtual double upward_downward(const Hidden_markov_tree_data& trees,
+   virtual double upward_downward(const HiddenMarkovTreeData& trees,
                                   double& max_marginal_entropy,
                                   double& entropy1,
                                   double& likelihood,
@@ -355,7 +356,7 @@ protected :
                                   int entropy_algo=UPWARD) const;
 
    /** Compute the entropy of partial state processes */
-   double partial_entropy_computation(const Hidden_markov_tree_data& trees,
+   double partial_entropy_computation(const HiddenMarkovTreeData& trees,
                                       int t,
                                       double_array_3d output_cond_prob,
                                       double_array_3d marginal_prob,
@@ -368,7 +369,7 @@ protected :
                                       int entropy_algo= UPWARD) const;
 
    /** Compute the entropy of partial state processes by a downward algorithm*/
-   virtual double downward_partial_entropy_computation(const Hidden_markov_tree_data& trees,
+   virtual double downward_partial_entropy_computation(const HiddenMarkovTreeData& trees,
                                                        int t,
                                                        double_array_3d output_cond_prob,
                                                        double_array_3d marginal_prob,
@@ -380,14 +381,14 @@ protected :
                                                        double*& partial_entropy) const;
 
    /** Compute the entropy of partial state processes by an upward algorithm*/
-   virtual double upward_partial_entropy_computation(const Hidden_markov_tree_data& trees,
+   virtual double upward_partial_entropy_computation(const HiddenMarkovTreeData& trees,
                                                      int t,
                                                      double_array_3d downward_prob,
                                                      double_array_3d state_entropy,
                                                      double*& partial_entropy) const;
 
    /** Compute the conditional entropy*/
-   void conditional_entropy_computation(const Hidden_markov_tree_data& trees,
+   void conditional_entropy_computation(const HiddenMarkovTreeData& trees,
                                         double_array_3d marginal_prob,
                                         double_array_3d upward_prob,
                                         double_array_3d upward_parent_prob,
@@ -400,7 +401,7 @@ protected :
                                         int entropy_algo= UPWARD) const;
 
    /** Compute the conditional entropy by an upward algorithm*/
-   virtual void upward_conditional_entropy_computation(const Hidden_markov_tree_data& trees,
+   virtual void upward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
                                                        double_array_3d marginal_prob,
                                                        double_array_3d upward_prob,
                                                        double_array_3d upward_parent_prob,
@@ -409,7 +410,7 @@ protected :
                                                        int index= I_DEFAULT) const;
 
    /** Compute the conditional entropy by a downward algorithm*/
-   virtual void downward_conditional_entropy_computation(const Hidden_markov_tree_data& trees,
+   virtual void downward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
                                                          double_array_3d marginal_prob,
                                                          double_array_3d downward_prob,
                                                          double_array_3d upward_prob,
@@ -421,7 +422,7 @@ protected :
                                                          int index= I_DEFAULT) const;
 
    /**Compute the smoothed probabilities and return the likelihood */
-   virtual double smoothed_probabilities(const Hidden_markov_tree_data& trees,
+   virtual double smoothed_probabilities(const HiddenMarkovTreeData& trees,
                                          double_array_3d& smoothed_prob,
                                          double_array_2d& marginal_entropy,
                                          double_array_2d& conditional_entropy,
@@ -430,85 +431,85 @@ protected :
                                          int entropy_algo= UPWARD) const;
 
    /**Compute the maximal completed likelihood */
-   virtual double viterbi(const Hidden_markov_tree_data& trees,
+   virtual double viterbi(const HiddenMarkovTreeData& trees,
                           int index= I_DEFAULT) const;
 
    /**Compute the number of possible state trees */
-   virtual long double nb_state_trees(const Hidden_markov_tree_data& trees,
+   virtual long double nb_state_trees(const HiddenMarkovTreeData& trees,
                                       int index= I_DEFAULT) const;
 
    /**Upward_downward Viterbi algorithm */
-   virtual Hidden_markov_tree_data* viterbi_upward_downward(const Hidden_markov_tree_data& trees,
-                                                            std::vector<ostringstream*>& messages,
-                                                            double likelihood,
-                                                            double& state_likelihood,
-                                                            std::deque<int>*& vd,
-                                                            int index= I_DEFAULT,
-                                                            std::ostream* os= NULL,
-                                                            char format= 'a',
-                                                            int vertex= I_DEFAULT) const;
+   virtual HiddenMarkovTreeData* viterbi_upward_downward(const HiddenMarkovTreeData& trees,
+                                                         std::vector<ostringstream*>& messages,
+                                                         double likelihood,
+                                                         double& state_likelihood,
+                                                         std::deque<int>*& vd,
+                                                         int index= I_DEFAULT,
+                                                         std::ostream* os= NULL,
+                                                         char format= 'a',
+                                                         int vertex= I_DEFAULT) const;
    /**Upward_downward Viterbi algorithm */
-   virtual Hidden_markov_tree_data* generalized_viterbi(const Hidden_markov_tree_data& trees,
-                                                        std::vector<ostringstream*>& messages,
-                                                        int nb_state_trees,
-                                                        double likelihood,
-                                                        int index,
-                                                        int sroot= I_DEFAULT) const;
+   virtual HiddenMarkovTreeData* generalized_viterbi(const HiddenMarkovTreeData& trees,
+                                                     std::vector<ostringstream*>& messages,
+                                                     int nb_state_trees,
+                                                     double likelihood,
+                                                     int index,
+                                                     int sroot= I_DEFAULT) const;
 
    /**Compute the completed likelihood for a given set of trees and state trees*/
-   virtual double state_likelihood_computation(const Hidden_markov_tree_data& trees) const;
+   virtual double state_likelihood_computation(const HiddenMarkovTreeData& trees) const;
 
    /**Compute the completed likelihood for one tree and one state tree*/
-   virtual double state_likelihood_computation(const Hidden_markov_tree_data& trees,
+   virtual double state_likelihood_computation(const HiddenMarkovTreeData& trees,
                                                int index) const;
 
 public :
 
-   Hidden_markov_tree();
+   HiddenMarkovTree();
    /** Create a Hidden Markov Tree from the type of transition probability matrix,
    the number of states, the number of integer and floating observation processes,
    the number of values for each integer process
    and an indicator array for forcing parametric integer processes */
-   Hidden_markov_tree(char itype, int inb_state, int ich_order,
-                      int inb_ioutput_process, int inb_doutput_process,
-                      int* nb_value, bool* force_param= NULL);
-   Hidden_markov_tree(const Chain * pchain, int ich_order, int inb_ioutput_process,
-                      Nonparametric_process** pobservation,
-                      int size, bool counting_flag);
-   Hidden_markov_tree(const Chain * pchain,
-                      int ich_order, int inb_ioutput_process, int inb_doutput_process,
-                      Nonparametric_process** nonparametric_observation,
-                      Parametric_process** iparametric_observation,
-                      Parametric_process** dparametric_observation,
-                      int size, bool counting_flag);
-   Hidden_markov_tree(const Hidden_markov_tree& markov, bool data_flag= true,
-                      bool characteristic_flag= true);
-   virtual ~Hidden_markov_tree();
-   Hidden_markov_tree& operator=(const Hidden_markov_tree& markov);
+   HiddenMarkovTree(char itype, int inb_state, int ich_order,
+                    int inb_ioutput_process, int inb_doutput_process,
+                    int* nb_value, bool* force_param= NULL);
+   HiddenMarkovTree(const Chain * pchain, int ich_order, int inb_ioutput_process,
+                    NonparametricProcess** pobservation,
+                    int size, bool counting_flag);
+   HiddenMarkovTree(const Chain * pchain,
+                    int ich_order, int inb_ioutput_process, int inb_doutput_process,
+                    NonparametricProcess** nonparametric_observation,
+                    DiscreteParametricProcess** iparametric_observation,
+                    DiscreteParametricProcess** dparametric_observation,
+                    int size, bool counting_flag);
+   HiddenMarkovTree(const HiddenMarkovTree& markov, bool data_flag= true,
+                    bool characteristic_flag= true);
+   virtual ~HiddenMarkovTree();
+   HiddenMarkovTree& operator=(const HiddenMarkovTree& markov);
 
-   Parametric_model* extract(Format_error& error, int type,
-                             int variable, int value) const;
-   /** Return the data part of a Hidden_markov_tree,
+   DiscreteParametricModel* extract(StatError& error, int type,
+                                    int variable, int value) const;
+   /** Return the data part of a HiddenMarkovTree,
        keeping a reference on \e self */
-   virtual Hidden_markov_tree_data* extract_data(Format_error& error) const;
+   virtual HiddenMarkovTreeData* extract_data(StatError& error) const;
 
-   Hidden_markov_tree* thresholding(double min_probability= MIN_PROBABILITY) const;
+   HiddenMarkovTree* thresholding(double min_probability= MIN_PROBABILITY) const;
 
    /** Permutation of the states of \e self */
-   void state_permutation(Format_error& error, int* perm) const;
+   void state_permutation(StatError& error, int* perm) const;
 
    virtual std::ostream& line_write(std::ostream& os) const;
 
    virtual std::ostream& ascii_write(std::ostream& os, bool exhaustive= false) const;
-   virtual bool ascii_write(Format_error& error, const char * path,
+   virtual bool ascii_write(StatError& error, const char * path,
                             bool exhaustive= false) const;
-   virtual bool spreadsheet_write(Format_error& error, const char * path) const;
-   virtual bool plot_write(Format_error& error, const char * prefix,
+   virtual bool spreadsheet_write(StatError& error, const char * path) const;
+   virtual bool plot_write(StatError& error, const char * prefix,
                            const char * title= NULL) const;
 
    void characteristic_computation(int size, bool counting_flag,
                                    int variable= I_DEFAULT);
-   void characteristic_computation(const Hidden_markov_tree_data& tree,
+   void characteristic_computation(const HiddenMarkovTreeData& tree,
                                    bool counting_flag,
                                    int variable= I_DEFAULT,
                                    bool size_flag= true);
@@ -516,13 +517,13 @@ public :
    /** Compute the state profiles for a given tree,
        including the smoothed probabilities,
        the upward-downward and the generalized Viterbi algorithms */
-   bool state_profile(Format_error& error,
-                      const Hidden_markov_tree_data& tree,
+   bool state_profile(StatError& error,
+                      const HiddenMarkovTreeData& tree,
                       int index,
-                      Hidden_markov_tree_data*& smoothed_state_tree,
-                      Hidden_markov_tree_data*& nstate_trees,
-                      Hidden_markov_tree_data*& viterbi_upward_downward,
-                      Hidden_markov_tree_data*& generalized_restoration,
+                      HiddenMarkovTreeData*& smoothed_state_tree,
+                      HiddenMarkovTreeData*& nstate_trees,
+                      HiddenMarkovTreeData*& viterbi_upward_downward,
+                      HiddenMarkovTreeData*& generalized_restoration,
                       std::vector<ostringstream*>& messages,
                       int state_tree= GENERALIZED_VITERBI,
                       unsigned int nb_state_trees= NB_STATE_TREES,
@@ -530,14 +531,14 @@ public :
                       int root= I_DEFAULT) const;
 
    /** Write Gnuplot output of state and entropy profiles */
-   virtual bool tree_state_profile_plot_write(Format_error &error, const char *prefix,
-                                              const Hidden_markov_tree_data& trees,
+   virtual bool tree_state_profile_plot_write(StatError &error, const char *prefix,
+                                              const HiddenMarkovTreeData& trees,
                                               int identifier, int vertex,
                                               const char *title= NULL,
                                               int entropy_algo= UPWARD) const;
 
    /** Write Gnuplot output of state and entropy profiles */
-   bool state_profile_plot_write(Format_error &error, const char *prefix,
+   bool state_profile_plot_write(StatError &error, const char *prefix,
                                  int identifier, int vertex,
                                  const char *title= NULL,
                                  int entropy_algo= UPWARD) const;
@@ -546,20 +547,20 @@ public :
    // virtual functions common to all hidden_markov_trees ?
 
    virtual double likelihood_computation(const Trees& trees, int index) const;
-   virtual double likelihood_computation(const Hidden_markov_tree_data& trees) const;
+   virtual double likelihood_computation(const HiddenMarkovTreeData& trees) const;
 
    /** Compute optimal state trees */
-   virtual Hidden_markov_tree_data* state_tree_computation(Format_error& error,
-                                                           const Trees& trees,
-                                                           int algorithm= VITERBI,
-                                                           bool characteristic_flag= false,
-                                                           int index= I_DEFAULT) const;
+   virtual HiddenMarkovTreeData* state_tree_computation(StatError& error,
+                                                        const Trees& trees,
+                                                        int algorithm= VITERBI,
+                                                        bool characteristic_flag= false,
+                                                        int index= I_DEFAULT) const;
 
     // access to class members
 
-   /** Return the data part of a Hidden_markov_tree,
+   /** Return the data part of a HiddenMarkovTree,
        losing a reference on \e self */
-   Hidden_markov_tree_data* get_markov_data() const;
+   HiddenMarkovTreeData* get_markov_data() const;
    int get_ch_order() const;
    /** return the number of states of \e self*/
    int get_nb_state() const;
@@ -572,34 +573,34 @@ public :
    int get_nb_values(int variable) const;
    /** return "true" if process ivariable is parametric */
    bool is_parametric(int ivariable) const;
-   Nonparametric_tree_process** get_non_parametric_process() const;
-   Nonparametric_tree_process* get_non_parametric_process(int variable) const;
-   Parametric_process** get_iparametric_process() const;
-   Parametric_process* get_iparametric_process(int variable) const;
-   Parametric_process** get_dparametric_process() const;
-   Parametric_process* get_dparametric_process(int variable) const;
+   NonparametricTreeProcess** get_non_parametric_process() const;
+   NonparametricTreeProcess* get_non_parametric_process(int variable) const;
+   DiscreteParametricProcess** get_iparametric_process() const;
+   DiscreteParametricProcess* get_iparametric_process(int variable) const;
+   DiscreteParametricProcess** get_dparametric_process() const;
+   DiscreteParametricProcess* get_dparametric_process(int variable) const;
 };
 
-Hidden_markov_tree* hidden_markov_tree_ascii_read(Format_error& error,
-                                                  const char * path,
-                                                  int size= I_DEFAULT_TREE_SIZE,
-                                                  bool counting_flag= true,
-                                                  double cumul_threshold= OCCUPANCY_THRESHOLD);
+HiddenMarkovTree* hidden_markov_tree_ascii_read(StatError& error,
+                                                const char * path,
+                                                int size= I_DEFAULT_TREE_SIZE,
+                                                bool counting_flag= true,
+                                                double cumul_threshold= OCCUPANCY_THRESHOLD);
 /**
-   \class Hidden_markov_tree_data
+   \class HiddenMarkovTreeData
    \brief set of tree-structured data potentially associated with
           a statistical model having an underlying structure (states)
 */
 
-class Hidden_markov_tree_data : public Trees
-{  // a pair (Hidden_markov_tree model, Trees)
+class HiddenMarkovTreeData : public Trees
+{  // a pair (HiddenMarkovTree model, Trees)
 
    // friend classes
-   friend class Hidden_markov_tree;
-   friend class Hidden_markov_out_tree;
+   friend class HiddenMarkovTree;
+   friend class HiddenMarkovOutTree;
    // Above lines may require to be added to Typed_edge_trees
 
-   friend std::ostream& operator<<(std::ostream &os, const Hidden_markov_tree_data& trees);
+   friend std::ostream& operator<<(std::ostream &os, const HiddenMarkovTreeData& trees);
 
 public :
 
@@ -614,18 +615,18 @@ public :
    typedef tree_type::children_iterator children_iterator;
    typedef tree_type::vertex_iterator vertex_iterator;
 
-   typedef Histogram*** ptHistogram_array_2d;
-   typedef Tree_characteristics::ptHistogram_array ptHistogram_array;
+   typedef FrequencyDistribution*** ptHistogram_array_2d;
+   typedef TreeCharacteristics::ptHistogram_array ptHistogram_array;
    typedef Typed_edge_one_int_tree** ptOne_int_tree_set;
-   typedef std::vector<Hidden_markov_tree_data*> pt_hmtd_vector;
+   typedef std::vector<HiddenMarkovTreeData*> pt_hmtd_vector;
    typedef double** double_array_2d;
 
 private :
 
    /// the hidden Markov tree model
-   Hidden_markov_tree* markov;
+   HiddenMarkovTree* markov;
    /// initial state and transitions
-   Chain_data* chain_data;
+   ChainData* chain_data;
    /// warning: the names of the following two private members
    /// are switched with respect to STAT::Hidden_markov_data
    /// likelihood for the given trees
@@ -638,24 +639,24 @@ private :
    /// hidden trees
    ptOne_int_tree_set state_trees;
 
-   /// histogram corresponding to the conditional observation distribution,
+   /// frequency distribution corresponding to the conditional observation distribution,
    /// depending on the considered observed (integral) variable
    /// and on the value of the state variable
    ptHistogram_array_2d observation;
 
-    /// histogram of the characteristic quantities
+    /// frequency distribution of the characteristic quantities
     /// for the hidden state variable
-   Tree_characteristics *state_characteristics;
+   TreeCharacteristics *state_characteristics;
 
-   void copy(const Hidden_markov_tree_data& otrees, bool model_flag= true,
+   void copy(const HiddenMarkovTreeData& otrees, bool model_flag= true,
              bool characteristic_flag= true);
 
    ///  Deallocation. The markov part is deleted if any.
    void remove();
 
    void nb_state_computation();
-   void observation_histogram_computation(int ivariable);
-   // computation of the histograms for the conditional distribution
+   void observation_frequency_distribution_computation(int ivariable);
+   // computation of the frequency distributions for the conditional distribution
    // of one observed variable
    void build_state_trees();
    void build_state_characteristics();
@@ -692,118 +693,118 @@ private :
 
 public :
 
-   Hidden_markov_tree_data();
-   Hidden_markov_tree_data(int inb_integral,
-                           int inb_float,
-                           const Histogram& ihsize,
-                           const Histogram& ihnb_children,
-                           bool no_child_flag,
-                           bool init_flag);
-   Hidden_markov_tree_data(int inb_integral, int inb_float, int inb_trees);
-   Hidden_markov_tree_data(int inb_trees,
-                           int* itype,
-                           Default_tree** otrees);
-   Hidden_markov_tree_data(const Trees& otrees);
-   Hidden_markov_tree_data(const Hidden_markov_tree_data& trees,
-                           bool model_flag= true,
-                           bool characteristic_flag= true);
-   ~Hidden_markov_tree_data();
-   Hidden_markov_tree_data& operator=(const Hidden_markov_tree_data& trees);
+   HiddenMarkovTreeData();
+   HiddenMarkovTreeData(int inb_integral,
+                        int inb_float,
+                        const FrequencyDistribution& ihsize,
+                        const FrequencyDistribution& ihnb_children,
+                        bool no_child_flag,
+                        bool init_flag);
+   HiddenMarkovTreeData(int inb_integral, int inb_float, int inb_trees);
+   HiddenMarkovTreeData(int inb_trees,
+                        int* itype,
+                        Default_tree** otrees);
+   HiddenMarkovTreeData(const Trees& otrees);
+   HiddenMarkovTreeData(const HiddenMarkovTreeData& trees,
+                        bool model_flag= true,
+                        bool characteristic_flag= true);
+   ~HiddenMarkovTreeData();
+   HiddenMarkovTreeData& operator=(const HiddenMarkovTreeData& trees);
 
-   Distribution_data* extract(Format_error& error, int type,
-                              int variable, int value) const;
+   DiscreteDistributionData* extract(StatError& error, int type,
+                                     int variable, int value) const;
 
    /*
-   Return mixture distribution with histogram for a given variable
-   Distribution_data* extract_marginal(Format_error& error, int variable) const;
+   Return mixture distribution with frequency distribution for a given variable
+   DiscreteDistributionData* extract_marginal(StatError& error, int variable) const;
 
-   Print mixture distribution with histogram for a given variable
-   bool marginal_ascii_write(Format_error& error, int variable,
+   Print mixture distribution with frequency distribution for a given variable
+   bool marginal_ascii_write(StatError& error, int variable,
                              const char *path, bool exhaustive= true) const; */
 
-   Hidden_markov_tree_data* merge(Format_error& error,
-                                  const pt_hmtd_vector& otrees) const;
+   HiddenMarkovTreeData* merge(StatError& error,
+                               const pt_hmtd_vector& otrees) const;
 
    /* Print \e self on a single line
    std::ostream& line_write(std::ostream& os) const; */
 
    std::ostream& ascii_write(std::ostream& os, bool exhaustive= false) const;
-   bool ascii_write(Format_error& error, const char *path,
+   bool ascii_write(StatError& error, const char *path,
                     bool exhaustive= false) const;
-   bool spreadsheet_write(Format_error& error, const char * path) const;
-   bool plot_write(Format_error& error, const char * prefix,
+   bool spreadsheet_write(StatError& error, const char * path) const;
+   bool plot_write(StatError& error, const char * prefix,
                    const char * title= NULL) const;
 
    // model identification
 
    /** Estimate a Hidden Markov Out Tree from an initial model and the data in \e self */
-   Hidden_markov_out_tree* hidden_markov_out_tree_estimation(Format_error& error,
-                                                             std::ostream& os,
-                                                             const Hidden_markov_out_tree& ihmarkov,
-                                                             bool counting_flag= true,
-                                                             int state_trees= VITERBI,
-                                                             int algorithm= FORWARD_BACKWARD,
-                                                             double saem_exponent= 1.,
-                                                             int nb_iter= I_DEFAULT,
-                                                             bool force_param= false) const;
+   HiddenMarkovOutTree* hidden_markov_out_tree_estimation(StatError& error,
+                                                          std::ostream& os,
+                                                          const HiddenMarkovOutTree& ihmarkov,
+                                                          bool counting_flag= true,
+                                                          int state_trees= VITERBI,
+                                                          int algorithm= FORWARD_BACKWARD,
+                                                          double saem_exponent= 1.,
+                                                          int nb_iter= I_DEFAULT,
+                                                          bool force_param= false) const;
 
-/*   Hidden_markov_out_tree* hidden_markov_out_tree_estimation2(Format_error& error,
-                                                              std::ostream& os,
-                                                              const Hidden_markov_out_tree& ihmarkov,
-                                                              bool counting_flag= true,
-                                                              int state_trees= VITERBI,
-                                                              int algorithm= FORWARD_BACKWARD,
-                                                              double saem_exponent= 1.,
-                                                              int nb_iter= I_DEFAULT,
-                                                              bool force_param= false) const;*/
+/*   HiddenMarkovOutTree* hidden_markov_out_tree_estimation2(StatError& error,
+                                                           std::ostream& os,
+                                                           const HiddenMarkovOutTree& ihmarkov,
+                                                           bool counting_flag= true,
+                                                           int state_trees= VITERBI,
+                                                           int algorithm= FORWARD_BACKWARD,
+                                                           double saem_exponent= 1.,
+                                                           int nb_iter= I_DEFAULT,
+                                                           bool force_param= false) const;*/
 
    /** Estimate a Hidden Markov Out Tree from the number of states and the data in \e self */
-   Hidden_markov_out_tree* hidden_markov_out_tree_estimation(Format_error& error,
-                                                             std::ostream& os,
-                                                             char type,
-                                                             int nb_state,
-                                                             bool left_right,
-                                                             bool counting_flag= true,
-                                                             int state_trees= VITERBI,
-                                                             int algorithm= FORWARD_BACKWARD,
-                                                             double saem_exponent= 1.,
-                                                             double self_transition= D_DEFAULT,
-                                                             int nb_iter= I_DEFAULT,
-                                                             bool* force_param= NULL) const;
+   HiddenMarkovOutTree* hidden_markov_out_tree_estimation(StatError& error,
+                                                          std::ostream& os,
+                                                          char type,
+                                                          int nb_state,
+                                                          bool left_right,
+                                                          bool counting_flag= true,
+                                                          int state_trees= VITERBI,
+                                                          int algorithm= FORWARD_BACKWARD,
+                                                          double saem_exponent= 1.,
+                                                          double self_transition= D_DEFAULT,
+                                                          int nb_iter= I_DEFAULT,
+                                                          bool* force_param= NULL) const;
 
-   void create_observation_histogram(int nb_state);
-   // allocation of the histograms corresponding to the observation distributions
-   void observation_histogram_computation();
-   // computation of the histograms corresponding to the observation distributions
-   void build_observation_histogram();
-   // allocation and computation of the histograms
+   void create_observation_frequency_distribution(int nb_state);
+   // allocation of the frequency distributions corresponding to the observation distributions
+   void observation_frequency_distribution_computation();
+   // computation of the frequency distributions corresponding to the observation distributions
+   void build_observation_frequency_distribution();
+   // allocation and computation of the frequency distributions
    // corresponding to the observation distributions
 
    // access to class members
 
-   Hidden_markov_tree* get_markov() const; // { return markov; }
-   Chain_data* get_chain_data() const; // { return chain_data; }
+   HiddenMarkovTree* get_markov() const; // { return markov; }
+   ChainData* get_chain_data() const; // { return chain_data; }
    double get_likelihood() const; // { return likelihood; }
    double get_hidden_likelihood() const; // { return hidden_likelihood; }
    int get_nb_states() const;
 
    ptHistogram_array_2d get_observation() const;
    ptHistogram_array get_observation(int variable) const;
-   Histogram* get_observation(int variable, int state) const;
+   FrequencyDistribution* get_observation(int variable, int state) const;
 
-   Tree_characteristics* get_state_characteristics() const;
+   TreeCharacteristics* get_state_characteristics() const;
    // access to the characteristic quantity distributions
    // for the state variable
 
    ptOne_int_tree_set get_state_trees() const;
    Typed_edge_one_int_tree* get_state_tree(int itree) const;
-   /** Return a Hidden_markov_tree_data containing the states
+   /** Return a HiddenMarkovTreeData containing the states
        as a variable */
-   Hidden_markov_tree_data* get_state_hidden_markov_tree_data() const;
+   HiddenMarkovTreeData* get_state_hidden_markov_tree_data() const;
    /** For a given tree, and using a given type of entropy profile,
-       return a Hidden_markov_tree_data containing the states,
+       return a HiddenMarkovTreeData containing the states,
        the entropy and the smoothed probabilities as variables */
-   Hidden_markov_tree_data*
+   HiddenMarkovTreeData*
       get_state_smoothed_hidden_markov_tree_data(int index= I_DEFAULT,
                                                  int algorithm= VITERBI,
                                                  int entropy_algo= UPWARD) const;
