@@ -17,7 +17,7 @@ if env_test['with_efence']:
     env_test.AppendUnique(LIBS= ['efence'])
 
 tests= Split("""
-test_mvmixture.cpp
+test_multivariate_mixture.cpp
 """)
 
 def prog(p):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Mv Mixture class"""
 __version__ = "$Id$"
 
@@ -13,9 +14,6 @@ __all__ = ['_MultivariateMixture',
            '_MultivariateMixtureData']
 
 
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# THW FOLLOWING HAS TO BE CHECK WITH JBD + tests 
 
 # Extend _MultivariateMixture
 interface.extend_class(_MultivariateMixture, interface.StatInterface)
@@ -123,7 +121,7 @@ _MultivariateMixture.state_permutation = _MultivariateMixture_state_permutation
 
 def _MultivariateMixtureData_old_plot(self, variable, Title=""):
     """Plot a given variable"""
-    if ((variable < 0) or (variable >= self.get_nb_variable())):
+    if ((variable < 0) or (variable >= self.nb_variable)):
         raise IndexError, "variable index out of range: "+str(variable)
     file_id = str(variable+1)
     interface.StatInterface.old_plot(self, Title=Title, Suffix=file_id)

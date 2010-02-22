@@ -8,7 +8,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/mixture.h"
-#include "stat_tool/mv_mixture.h"
+#include "stat_tool/multivariate_mixture.h"
 
 int main(void) {
 
@@ -17,34 +17,34 @@ int main(void) {
   double *pweight = NULL;
   bool *fparam = NULL;
   int* perm;
-  Format_error error;
+  StatError error;
   const char * mixpath= "./tmp.mix", * spmixpath= "./tmp_sp.mix";
   const char * gnupath = "./tmp_mix", * gnu_datapath = "./tmp_mix_data";
   const char * margpath= "./marg_mix", * gnu_tmppath = "./tmp_mix_d";
   const char * np_modelpath= "./np_model.mix", * gnu_tmpnppath = "./tmp_mix_d";
   Distribution *marginal = NULL;
-  Distribution_data *marginal_histo = NULL;
-  Mv_Mixture *mv1 = NULL, *mv_cp = NULL;
-  Mv_Mixture *mv_np1 = NULL, *mv_np_estim = NULL;
-  Mv_Mixture *mv_estim = NULL;
-  Mv_Mixture_data *mv_data = NULL, *cluster = NULL;
-  Parametric **dt1 = NULL, **dt2 = NULL;
-  Parametric_process **ppcomponent = NULL;
+  DiscreteDistributionData *marginal_histo = NULL;
+  MultivariateMixture *mv1 = NULL, *mv_cp = NULL;
+  MultivariateMixture *mv_np1 = NULL, *mv_np_estim = NULL;
+  MultivariateMixture *mv_estim = NULL;
+  MultivariateMixtureData *mv_data = NULL, *cluster = NULL;
+  DiscreteParametric **dt1 = NULL, **dt2 = NULL;
+  DiscreteParametricProcess **ppcomponent = NULL;
 
   // constructors of Mv_Mixture
-  mv1 = new Mv_Mixture();
+  mv1 = new MultivariateMixture();
 
-  // destructor of Mv_Mixture
+  // destructor of MultivariateMixture
   delete mv1;
   mv1= NULL;
 
   nb_variable = 2;
   nb_component = 3;
 
-  dt1 = new Parametric*[nb_component];
-  dt2 = new Parametric*[nb_component];
+  dt1 = new DiscreteParametric*[nb_component];
+  dt2 = new DiscreteParametric*[nb_component];
   pweight = new double[nb_component];
-  ppcomponent = new Parametric_process*[nb_variable];
+  ppcomponent = new DiscreteParametricProcess*[nb_variable];
 
   pweight[0] = 0.1;
   pweight[1] = 0.2;
@@ -52,21 +52,21 @@ int main(void) {
 
 
 
-  dt1[0] = new Parametric(0, BINOMIAL, 2, 12, D_DEFAULT, 0.1);
-  dt1[1] = new Parametric(0, BINOMIAL, 0, 10, D_DEFAULT, 0.5);
-  dt1[2] = new Parametric(0, BINOMIAL, 3, 10, D_DEFAULT, 0.8);
+  dt1[0] = new DiscreteParametric(0, BINOMIAL, 2, 12, D_DEFAULT, 0.1);
+  dt1[1] = new DiscreteParametric(0, BINOMIAL, 0, 10, D_DEFAULT, 0.5);
+  dt1[2] = new DiscreteParametric(0, BINOMIAL, 3, 10, D_DEFAULT, 0.8);
 
-  dt2[0] = new Parametric(0, POISSON, 2, I_DEFAULT, 8.0, D_DEFAULT);
-  dt2[1] = new Parametric(0, POISSON, 4, I_DEFAULT, 5.0, D_DEFAULT);
-  dt2[2] = new Parametric(0, POISSON, 0, I_DEFAULT, 2.0, D_DEFAULT);
+  dt2[0] = new DiscreteParametric(0, POISSON, 2, I_DEFAULT, 8.0, D_DEFAULT);
+  dt2[1] = new DiscreteParametric(0, POISSON, 4, I_DEFAULT, 5.0, D_DEFAULT);
+  dt2[2] = new DiscreteParametric(0, POISSON, 0, I_DEFAULT, 2.0, D_DEFAULT);
 
   cout << "Observation distributions for variable 1:" << endl;
   for (i = 0; i < nb_component; i++) {
     dt1[i]-> ascii_print(cout);
   }
 
-  ppcomponent[0] = new Parametric_process(nb_component, dt1);
-  ppcomponent[1] = new Parametric_process(nb_component, dt2);
+  ppcomponent[0] = new DiscreteParametricProcess(nb_component, dt1);
+  ppcomponent[1] = new DiscreteParametricProcess(nb_component, dt2);
 
   for (i = 0; i < nb_component; i++) {
     delete dt1[i];
@@ -77,7 +77,7 @@ int main(void) {
 
   cout << endl;
 
-  mv1 = new Mv_Mixture(nb_component, pweight, nb_variable, ppcomponent, NULL);
+  mv1 = new MultivariateMixture(nb_component, pweight, nb_variable, ppcomponent, NULL);
 
   cout << "Mixture of " << nb_component << " components with " <<
     nb_variable << " variables:" << endl;
@@ -86,22 +86,22 @@ int main(void) {
   cout << endl;
 
   // copy
-  mv_cp = new Mv_Mixture(*mv1);
-  cout << "Copy constructor of Mv_Mixture: " << endl;
+  mv_cp = new MultivariateMixture(*mv1);
+  cout << "Copy constructor of MultivariateMixture: " << endl;
   mv_cp->ascii_write(cout);
   cout << endl;
 
-  // destructor of Mv_Mixture
+  // destructor of MultivariateMixture
   delete mv_cp;
   mv_cp= NULL;
 
   delete mv1;
   mv1= NULL;
 
-  cout << "Mv_mixture_building (print into file " << mixpath << "): " << endl;
+  cout << "MultivariateMixture_building (print into file " << mixpath << "): " << endl;
 
-  mv1 = mv_mixture_building(error , nb_component , nb_variable, pweight,
-               ppcomponent, NULL);
+  mv1 = multivariate_mixture_building(error , nb_component , 
+                                      nb_variable, pweight, ppcomponent, NULL);
 
   if (mv1 == NULL)
     cout << error;
@@ -112,9 +112,9 @@ int main(void) {
   }
   cout << endl;
 
-  cout << "Read Mv_Mixture from file " << mixpath << ": " << endl;
+  cout << "Read MultivariateMixture from file " << mixpath << ": " << endl;
 
-  mv1 = mv_mixture_ascii_read(error , mixpath);
+  mv1 = multivariate_mixture_ascii_read(error , mixpath);
 
   if (mv1 == NULL) {
     cout << error;
@@ -135,11 +135,11 @@ int main(void) {
   }
   cout << endl;
 
-  cout << "Gnuplot output for Mv_Mixture ('" << gnupath << "' file)" << endl;
+  cout << "Gnuplot output for MultivariateMixture ('" << gnupath << "' file)" << endl;
   mv1->plot_write(error, gnupath, "");
   cout << error << endl;
 
-  cout << "Gnuplot output for Mv_Mixture_data ('" << gnu_datapath << "' file)" << endl;
+  cout << "Gnuplot output for MultivariateMixture_data ('" << gnu_datapath << "' file)" << endl;
   mv_data->plot_write(error, gnu_datapath, "");
   cout << error << endl;
 
@@ -162,7 +162,7 @@ int main(void) {
   else
     cout << error;
 
-  cout << "Estimate Mv_Mixture from initial model: " << endl;
+  cout << "Estimate MultivariateMixture from initial model: " << endl;
   mv_estim = mv_data->mixture_estimation(error, cout, *mv1);
 
   if (mv_estim == NULL) {
@@ -182,7 +182,7 @@ int main(void) {
   fparam[0] = true;
   fparam[1] = false;
 
-  cout << "Estimate Mv_Mixture from initial nb_component: " << endl;
+  cout << "Estimate MultivariateMixture from initial nb_component: " << endl;
   mv_estim = mv_data->mixture_estimation(error, cout, 3, I_DEFAULT, fparam);
 
   delete [] fparam;
@@ -210,7 +210,7 @@ int main(void) {
 
   cout << "Read non parametric model: " << endl;
 
-  mv_np1 = mv_mixture_ascii_read(error, np_modelpath);
+  mv_np1 = multivariate_mixture_ascii_read(error, np_modelpath);
 
   if (mv_np1 == NULL) {
     cout << error;
@@ -254,12 +254,12 @@ int main(void) {
   else
     cout << error;
 
-  cout << "Gnuplot output for Mv_Mixture_data ('" << gnu_tmpnppath << "' file)" << endl;
+  cout << "Gnuplot output for MultivariateMixture_data ('" << gnu_tmpnppath << "' file)" << endl;
   mv_data->plot_write(error, gnu_tmpnppath, "");
   cout << error << endl;
 
 
-  cout << "Estimate Mv_Mixture from initial nb_component: " << endl;
+  cout << "Estimate MultivariateMixture from initial nb_component: " << endl;
   mv_estim = mv_data->mixture_estimation(error, cout, 3);
 
   if (mv_estim == NULL) {

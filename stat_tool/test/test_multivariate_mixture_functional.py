@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 """tests on mv_mixture"""
 __version__ = "$Id$"
 
 
-from openalea.stat_tool.mvmixture import _MvMixture
+from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from openalea.stat_tool.distribution import Binomial, Poisson
 
 from openalea.stat_tool.output import Plot
@@ -21,16 +22,16 @@ def test1():
     d22 = Poisson(0, 5.0)
     d23 = Poisson(0, 0.2)
 
-    m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
+    m = _MultivariateMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
     print m
 
-    #m2 = _MvMixture("mixture_mv1.mixt")
+    #m2 = _MultivariateMixture("mixture_mv1.mixt")
     #print m2
 
     #print "Egalite des melanges construits par liste ",\
     #  "de distributions et par fichiers : ", str(str(m)==str(m2))
 
-    #m = _MvMixture("mixture_mv_nonparam.mixt")
+    #m = _MultivariateMixture("mixture_mv_nonparam.mixt")
    # print m
 
     print "Simulation de melanges multivaries : "
@@ -42,9 +43,11 @@ def test1():
     print "Estimation de melanges multivaries ", \
     #    "d'apres un modele initial : "
     m_estim_model = v.mixture_estimation(m, 100,  [True, True])
-      
+
+    extracted_mixture = m_estim_model.extract_mixture(1)
+    extracted_mixture.old_plot(variable=1, Title="Marginal distribution")
     Plot(m_estim_model, variable = 1, Title="Estimated mixture")
-    
+
     print "Estimation de melanges multivaries ", \
         "d'apres un nombre de composantes : "
         

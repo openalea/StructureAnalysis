@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Vectors function and class
 
 :Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
@@ -10,7 +11,7 @@ __version__ = "$Id$"
 import interface
 import error
 
-from openalea.stat_tool.mvmixture import _MultivariateMixture
+from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 
 from _stat_tool import _Vectors
 from _stat_tool import _VectorDistance
@@ -48,7 +49,7 @@ def _Vectors_mixture_estimation(self, model,
 
     error.CheckType([nb_iteration, force_param],[int, list])
 
-    # model is a mv_mixture class
+    # model is a MultivariateMixture class
     error.CheckType([model], [[int, _MultivariateMixture]])
     if type(model) == int:
         return _Vectors.mixture_estimation_nb_component(self, model,

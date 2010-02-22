@@ -1,35 +1,6 @@
-"""Mixture tests
+# -*- coding: utf-8 -*-
+"""Multivariate mixture tests
 #
-#  Frequency distributions
-#
-#  Objective: 
-    Analyzing the number of nodes of growth units in selected architectural
-    position considering the respective roles of preformation and neoformation,
-#
-#  Methods: comparison tests, one-way variance analysis,
-#           estimation of finite mixture of distributions.
-#
-#  Wild cherry tree: number of nodes per growth unit (GU)
-#
-#  Data: Dominique Fournier
-#
-#  meri1.his: order 1,
-#  meri1.his: order 2,
-#  meri1.his: order 3, GU 1,
-#  meri1.his: order 3, GU 2,
-#  meri5.his: short shoots.
-#
-#
-#  Poplar: number of nodes per growth unit
-#
-#  Data: Yves Caraglio and Herve Rey
-#
-#  peup1.his: order 2,
-#  peup2.his: order 3,
-#  peup3.his: order 4,
-#  peup4.his: order 5,
-#  peup5.his: order 3, GU 4,
-#  peup6.his: order 3, acrotony.
 #
 #########################################################################
 """
@@ -38,7 +9,7 @@ __version__ = "$Id$"
 
 from openalea.stat_tool.plot import DISABLE_PLOT
 
-from openalea.stat_tool.mvmixture import _MvMixture
+from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.distribution import Poisson
 
@@ -53,7 +24,7 @@ class Test(interface):
         interface.__init__(self,
                            self.build_data(),
                            "data/mixture_mv1.mixt",
-                           _MvMixture)
+                           _MultivariateMixture)
         
     def build_data(self):
         d11 = Binomial(0, 12, 0.1)
@@ -64,7 +35,7 @@ class Test(interface):
         d22 = Poisson(0, 5.0)
         d23 = Poisson(0, .20)
         
-        data = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
+        data = _MultivariateMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
         assert data.nb_component == 3
         assert data.nb_variable == 2
         return data
@@ -122,14 +93,13 @@ class Test(interface):
 
     def test_simulate2(self):
         
-        dummy = 1
         d11 = Binomial(0, 12, 0.1)
         d12 = Binomial(0, 12, 0.5)
         d13 = Binomial(0, 12, 0.8)
         d21 = Poisson(0, 18.0)
         d22 = Poisson(0, 5.0)
         d23 = Poisson(0, .20)
-        m = _MvMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
+        m = _MultivariateMixture([0.1, 0.2, 0.7], [[d11, d21], [d12, d22], [d13, d23]])
         v = m.simulate(5000)
         assert v
 
@@ -148,4 +118,5 @@ class Test(interface):
 
 
 if __name__ == "__main__":
-    runTestClass(Test())
+    test = Test()
+    runTestClass(test)
