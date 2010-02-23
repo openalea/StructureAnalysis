@@ -90,22 +90,22 @@ Ascii printing of Observed trees :
 
 VARIABLE 1 : INTEGER VALUE   5 values
 
-value histogram - sample size: 52
+value frequency distribution - sample size: 52
 mean: 2.67308   variance: 1.24397   standard deviation: 1.11533
 
-   | value histogram
+   | value frequency distribution
 0   0
 1  10
 2  13
 3  13
 4  16
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 10.4   variance: 1.8   standard deviation: 1.34164
 
 cumulative size: 52
 
-number of children histogram - sample size: 52
+number of children frequency distribution - sample size: 52
 mean: 0.903846   variance: 1.61802   standard deviation: 1.27202
 
 cumulative number of children: 47
@@ -114,13 +114,13 @@ Line writing of Observed trees :
 1 VARIABLE   5 trees   cumulative size: 52
 
 Histograms for the tree size : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 10.4   variance: 1.8   standard deviation: 1.34164
 coefficient of skewness: -2.23607   coefficient of kurtosis: -0.4
 mean absolute deviation: 0.96   coefficient of concentration: 0.0461538
 information: -2.50201 (-0.500402)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
  0  0    0
  1  0    0
  2  0    0
@@ -135,13 +135,13 @@ information: -2.50201 (-0.500402)
 11  4    1
 
 Histograms for the number of children  : 
-histogram - sample size: 52
+frequency distribution - sample size: 52
 mean: 0.903846   variance: 1.61802   standard deviation: 1.27202
 coefficient of skewness: 1.19738   coefficient of kurtosis: 0.00257888
 mean absolute deviation: 1.0429   coefficient of concentration: 0.691899
 information: -64.6996 (-1.24422)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  30  0.576923
 1   8  0.730769
 2   6  0.846154
@@ -195,13 +195,13 @@ Simulated structures :
       
 
 Histograms for the tree size : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 6.6   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: -2.23607   coefficient of kurtosis: -0.4
 mean absolute deviation: 0.64   coefficient of concentration: 0.0484848
 information: -2.50201 (-0.500402)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  0    0
 1  0    0
 2  0    0
@@ -212,13 +212,13 @@ information: -2.50201 (-0.500402)
 7  4    1
 
 Histograms for the number of children  : 
-histogram - sample size: 33
+frequency distribution - sample size: 33
 mean: 0.848485   variance: 1.94508   standard deviation: 1.39466
 coefficient of skewness: 1.46429   coefficient of kurtosis: 0.426034
 mean absolute deviation: 1.13131   coefficient of concentration: 0.746753
 information: -32.4032 (-0.981914)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  22  0.666667
 1   2  0.727273
 2   5  0.878788
@@ -315,13 +315,13 @@ Simulated random labels :
 (size 7, depth 3)
 
 Histogram for the marginal distribution (2nd variable) : 
-histogram - sample size: 52
+frequency distribution - sample size: 52
 mean: 2.76923   variance: 0.886878   standard deviation: 0.941742
 coefficient of skewness: -0.391805   coefficient of kurtosis: -0.741766
 mean absolute deviation: 0.763314   coefficient of concentration: 0.182692
 information: -67.0734 (-1.28987)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0   0         0
 1   6  0.115385
 2  12  0.346154
@@ -344,13 +344,13 @@ Last observed tree :
     |-(4, 3)
       
 Histogram for marginal distribution 
-histogram - sample size: 52
+frequency distribution - sample size: 52
 mean: 2.36538   variance: 1.4129   standard deviation: 1.18865
 coefficient of skewness: 0.115073   coefficient of kurtosis: -1.52174
 mean absolute deviation: 1.07175   coefficient of concentration: 0.276266
 information: -70.4997 (-1.35576)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0   0         0
 1  18  0.346154
 2   9  0.519231
@@ -373,20 +373,20 @@ Last observed tree :
     |-(4, 3)
       
 Histogram for marginal distribution (1st variable)
-histogram - sample size: 52
+frequency distribution - sample size: 52
 mean: 2.36538   variance: 1.4129   standard deviation: 1.18865
 coefficient of skewness: 0.115073   coefficient of kurtosis: -1.52174
 mean absolute deviation: 1.07175   coefficient of concentration: 0.276266
 information: -70.4997 (-1.35576)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0   0         0
 1  18  0.346154
 2   9  0.519231
 3  13  0.769231
 4  12         1
 Distribution_data for marginal distribution (1st variable)
-histogram - sample size: 52
+frequency distribution - sample size: 52
 mean: 2.36538   variance: 1.4129   standard deviation: 1.18865
 coefficient of skewness: 0.115073   coefficient of kurtosis: -1.52174
 mean absolute deviation: 1.07175   coefficient of concentration: 0.276266

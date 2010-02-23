@@ -46,117 +46,117 @@ Markovian sequences:
 
 VARIABLE 1 : INT   (minimum value: 0, maximum value: 4)
 
-marginal histogram - sample size: 510
+marginal frequency distribution - sample size: 510
 mean: 1.35686   variance: 2.17495   standard deviation: 1.47477
 
-   | marginal histogram
+   | marginal frequency distribution
 0  216
 1  107
 2   44
 3   75
 4   68
 
-time up to the first occurrence of value 0 histogram - sample size: 10
+time up to the first occurrence of value 0 frequency distribution - sample size: 10
 mean: 1   variance: 1.33333   standard deviation: 1.1547
 
-time up to the first occurrence of value 1 histogram - sample size: 10
+time up to the first occurrence of value 1 frequency distribution - sample size: 10
 mean: 3.6   variance: 6.71111   standard deviation: 2.59058
 
-time up to the first occurrence of value 2 histogram - sample size: 10
+time up to the first occurrence of value 2 frequency distribution - sample size: 10
 mean: 8.6   variance: 78.0444   standard deviation: 8.83428
 
-time up to the first occurrence of value 3 histogram - sample size: 10
+time up to the first occurrence of value 3 frequency distribution - sample size: 10
 mean: 8   variance: 44.4444   standard deviation: 6.66667
 
-time up to the first occurrence of value 4 histogram - sample size: 10
+time up to the first occurrence of value 4 frequency distribution - sample size: 10
 mean: 3.8   variance: 14.4   standard deviation: 3.79473
 
-value 0 recurrence time histogram - sample size: 206
+value 0 recurrence time frequency distribution - sample size: 206
 mean: 2.32524   variance: 3.00102   standard deviation: 1.73234
 
-value 1 recurrence time histogram - sample size: 97
+value 1 recurrence time frequency distribution - sample size: 97
 mean: 4.34021   variance: 13.956   standard deviation: 3.73577
 
-value 2 recurrence time histogram - sample size: 34
+value 2 recurrence time frequency distribution - sample size: 34
 mean: 8.14706   variance: 50.3111   standard deviation: 7.09303
 
-value 3 recurrence time histogram - sample size: 65
+value 3 recurrence time frequency distribution - sample size: 65
 mean: 5.12308   variance: 21.3909   standard deviation: 4.62503
 
-value 4 recurrence time histogram - sample size: 58
+value 4 recurrence time frequency distribution - sample size: 58
 mean: 7.13793   variance: 44.542   standard deviation: 6.67398
 
-value 0 sojourn time histogram - sample size: 127
+value 0 sojourn time frequency distribution - sample size: 127
 mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
 
-final run - value 0 sojourn time histogram - sample size: 4
+final run - value 0 sojourn time frequency distribution - sample size: 4
 mean: 2.75   variance: 2.91667   standard deviation: 1.70783
 
-value 1 sojourn time histogram - sample size: 95
+value 1 sojourn time frequency distribution - sample size: 95
 mean: 1.11579   variance: 0.124748   standard deviation: 0.353197
 
-final run - value 1 sojourn time histogram - sample size: 1
+final run - value 1 sojourn time frequency distribution - sample size: 1
 mean: 1   variance: 0   standard deviation: 0
 
-value 2 sojourn time histogram - sample size: 40
+value 2 sojourn time frequency distribution - sample size: 40
 mean: 1.075   variance: 0.0711538   standard deviation: 0.266747
 
-final run - value 2 sojourn time histogram - sample size: 1
+final run - value 2 sojourn time frequency distribution - sample size: 1
 mean: 1   variance: 0   standard deviation: 0
 
-value 3 sojourn time histogram - sample size: 64
+value 3 sojourn time frequency distribution - sample size: 64
 mean: 1.15625   variance: 0.197421   standard deviation: 0.44432
 
-final run - value 3 sojourn time histogram - sample size: 1
+final run - value 3 sojourn time frequency distribution - sample size: 1
 mean: 1   variance: 0   standard deviation: 0
 
-value 4 sojourn time histogram - sample size: 61
+value 4 sojourn time frequency distribution - sample size: 61
 mean: 1.06557   variance: 0.0622951   standard deviation: 0.24959
 
-final run - value 4 sojourn time histogram - sample size: 3
+final run - value 4 sojourn time frequency distribution - sample size: 3
 mean: 1   variance: 0   standard deviation: 0
 
-number of runs of value 0 per sequence histogram - sample size: 10
+number of runs of value 0 per sequence frequency distribution - sample size: 10
 mean: 13.1   variance: 2.54444   standard deviation: 1.59513
 coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
 
-number of runs of value 1 per sequence histogram - sample size: 10
+number of runs of value 1 per sequence frequency distribution - sample size: 10
 mean: 9.6   variance: 10.4889   standard deviation: 3.23866
 coefficient of skewness: 0.302228   coefficient of kurtosis: -1.20291
 
-number of runs of value 2 per sequence histogram - sample size: 10
+number of runs of value 2 per sequence frequency distribution - sample size: 10
 mean: 4.1   variance: 6.98889   standard deviation: 2.64365
 coefficient of skewness: 0.226418   coefficient of kurtosis: -1.637
 
-number of runs of value 3 per sequence histogram - sample size: 10
+number of runs of value 3 per sequence frequency distribution - sample size: 10
 mean: 6.5   variance: 4.94444   standard deviation: 2.22361
 coefficient of skewness: 0.265284   coefficient of kurtosis: -1.86548
 
-number of runs of value 4 per sequence histogram - sample size: 10
+number of runs of value 4 per sequence frequency distribution - sample size: 10
 mean: 6.4   variance: 6.26667   standard deviation: 2.50333
 coefficient of skewness: 0.758564   coefficient of kurtosis: -0.763377
 
-number of occurrences of value 0 per sequence histogram - sample size: 10
+number of occurrences of value 0 per sequence frequency distribution - sample size: 10
 mean: 21.6   variance: 23.3778   standard deviation: 4.83506
 coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
 
-number of occurrences of value 1 per sequence histogram - sample size: 10
+number of occurrences of value 1 per sequence frequency distribution - sample size: 10
 mean: 10.7   variance: 9.78889   standard deviation: 3.12872
 coefficient of skewness: 0.102307   coefficient of kurtosis: -1.07002
 
-number of occurrences of value 2 per sequence histogram - sample size: 10
+number of occurrences of value 2 per sequence frequency distribution - sample size: 10
 mean: 4.4   variance: 7.37778   standard deviation: 2.71621
 coefficient of skewness: 0.219566   coefficient of kurtosis: -1.72355
 
-number of occurrences of value 3 per sequence histogram - sample size: 10
+number of occurrences of value 3 per sequence frequency distribution - sample size: 10
 mean: 7.5   variance: 3.61111   standard deviation: 1.90029
 coefficient of skewness: 0.182158   coefficient of kurtosis: -1.74213
 
-number of occurrences of value 4 per sequence histogram - sample size: 10
+number of occurrences of value 4 per sequence frequency distribution - sample size: 10
 mean: 6.8   variance: 7.28889   standard deviation: 2.69979
 coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
 
-sequence length histogram - sample size: 10
+sequence length frequency distribution - sample size: 10
 mean: 51   variance: 0   standard deviation: 0
 
 cumulated length: 510
@@ -171,17 +171,17 @@ Sequences:
 
 VARIABLE 1 : INT   (minimum value: 0, maximum value: 4)
 
-marginal histogram - sample size: 510
+marginal frequency distribution - sample size: 510
 mean: 1.35686   variance: 2.17495   standard deviation: 1.47477
 
-   | marginal histogram
+   | marginal frequency distribution
 0  216
 1  107
 2   44
 3   75
 4   68
 
-sequence length histogram - sample size: 10
+sequence length frequency distribution - sample size: 10
 mean: 51   variance: 0   standard deviation: 0
 
 cumulated length: 510
@@ -707,140 +707,140 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 10
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 10
 mean: 1   variance: 1.33333   standard deviation: 1.1547
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 10
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 10
 mean: 3.6   variance: 6.71111   standard deviation: 2.59058
 
 path length (starting from root) up to the first occurrence of output 2 distribution
 
-path length (starting from root) up to the first occurrence of output 2 histogram - sample size: 10
+path length (starting from root) up to the first occurrence of output 2 frequency distribution - sample size: 10
 mean: 8.6   variance: 78.0444   standard deviation: 8.83428
 
 path length (starting from root) up to the first occurrence of output 3 distribution
 
-path length (starting from root) up to the first occurrence of output 3 histogram - sample size: 10
+path length (starting from root) up to the first occurrence of output 3 frequency distribution - sample size: 10
 mean: 8   variance: 44.4444   standard deviation: 6.66667
 
 path length (starting from root) up to the first occurrence of output 4 distribution
 
-path length (starting from root) up to the first occurrence of output 4 histogram - sample size: 10
+path length (starting from root) up to the first occurrence of output 4 frequency distribution - sample size: 10
 mean: 3.8   variance: 14.4   standard deviation: 3.79473
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 10
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 10
 mean: 1.1   variance: 1.21111   standard deviation: 1.1005
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 10
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 10
 mean: 4.3   variance: 34.2333   standard deviation: 5.85093
 
 path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 2 histogram - sample size: 10
+path length (starting from terminal nodes) up to the first occurrence of output 2 frequency distribution - sample size: 10
 mean: 13.7   variance: 269.567   standard deviation: 16.4185
 
 path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 3 histogram - sample size: 10
+path length (starting from terminal nodes) up to the first occurrence of output 3 frequency distribution - sample size: 10
 mean: 8.7   variance: 61.5667   standard deviation: 7.84644
 
 path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 4 histogram - sample size: 10
+path length (starting from terminal nodes) up to the first occurrence of output 4 frequency distribution - sample size: 10
 mean: 4.8   variance: 26.4   standard deviation: 5.13809
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 131
+output 0 sojourn size frequency distribution - sample size: 131
 mean: 1.64885   variance: 1.06036   standard deviation: 1.02974
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 96
+output 1 sojourn size frequency distribution - sample size: 96
 mean: 1.11458   variance: 0.123575   standard deviation: 0.351532
 
 output 2 sojourn size distribution
 
-output 2 sojourn size histogram - sample size: 41
+output 2 sojourn size frequency distribution - sample size: 41
 mean: 1.07317   variance: 0.0695122   standard deviation: 0.263652
 
 output 3 sojourn size distribution
 
-output 3 sojourn size histogram - sample size: 65
+output 3 sojourn size frequency distribution - sample size: 65
 mean: 1.15385   variance: 0.194712   standard deviation: 0.441261
 
 output 4 sojourn size distribution
 
-output 4 sojourn size histogram - sample size: 64
+output 4 sojourn size frequency distribution - sample size: 64
 mean: 1.0625   variance: 0.0595238   standard deviation: 0.243975
 
 number of zones of output 0 per size 51 tree distribution
 
-number of zones of output 0 per tree histogram - sample size: 10
+number of zones of output 0 per tree frequency distribution - sample size: 10
 mean: 13.1   variance: 2.54444   standard deviation: 1.59513
 coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
 
 number of zones of output 1 per size 51 tree distribution
 
-number of zones of output 1 per tree histogram - sample size: 10
+number of zones of output 1 per tree frequency distribution - sample size: 10
 mean: 9.6   variance: 10.4889   standard deviation: 3.23866
 coefficient of skewness: 0.302228   coefficient of kurtosis: -1.20291
 
 number of zones of output 2 per size 51 tree distribution
 
-number of zones of output 2 per tree histogram - sample size: 10
+number of zones of output 2 per tree frequency distribution - sample size: 10
 mean: 4.1   variance: 6.98889   standard deviation: 2.64365
 coefficient of skewness: 0.226418   coefficient of kurtosis: -1.637
 
 number of zones of output 3 per size 51 tree distribution
 
-number of zones of output 3 per tree histogram - sample size: 10
+number of zones of output 3 per tree frequency distribution - sample size: 10
 mean: 6.5   variance: 4.94444   standard deviation: 2.22361
 coefficient of skewness: 0.265284   coefficient of kurtosis: -1.86548
 
 number of zones of output 4 per size 51 tree distribution
 
-number of zones of output 4 per tree histogram - sample size: 10
+number of zones of output 4 per tree frequency distribution - sample size: 10
 mean: 6.4   variance: 6.26667   standard deviation: 2.50333
 coefficient of skewness: 0.758564   coefficient of kurtosis: -0.763377
 
 number of occurrences of output 0 per size 51 tree distribution
 
-number of occurrences of output 0 per tree histogram - sample size: 10
+number of occurrences of output 0 per tree frequency distribution - sample size: 10
 mean: 21.6   variance: 23.3778   standard deviation: 4.83506
 coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
 
 number of occurrences of output 1 per size 51 tree distribution
 
-number of occurrences of output 1 per tree histogram - sample size: 10
+number of occurrences of output 1 per tree frequency distribution - sample size: 10
 mean: 10.7   variance: 9.78889   standard deviation: 3.12872
 coefficient of skewness: 0.102307   coefficient of kurtosis: -1.07002
 
 number of occurrences of output 2 per size 51 tree distribution
 
-number of occurrences of output 2 per tree histogram - sample size: 10
+number of occurrences of output 2 per tree frequency distribution - sample size: 10
 mean: 4.4   variance: 7.37778   standard deviation: 2.71621
 coefficient of skewness: 0.219566   coefficient of kurtosis: -1.72355
 
 number of occurrences of output 3 per size 51 tree distribution
 
-number of occurrences of output 3 per tree histogram - sample size: 10
+number of occurrences of output 3 per tree frequency distribution - sample size: 10
 mean: 7.5   variance: 3.61111   standard deviation: 1.90029
 coefficient of skewness: 0.182158   coefficient of kurtosis: -1.74213
 
 number of occurrences of output 4 per size 51 tree distribution
 
-number of occurrences of output 4 per tree histogram - sample size: 10
+number of occurrences of output 4 per tree frequency distribution - sample size: 10
 mean: 6.8   variance: 7.28889   standard deviation: 2.69979
 coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
 
-tree size histogram - sample size: 10
+tree size frequency distribution - sample size: 10
 mean: 51   variance: 0   standard deviation: 0
 
 cumulative size: 510
@@ -883,71 +883,71 @@ recurrent class: states 0 1 2
 time up to the first occurrence of state 0 distribution
 mean: 1.79248   variance: 6.4236   standard deviation: 2.53448
 
-time up to the first occurrence of state 0 histogram - sample size: 10
+time up to the first occurrence of state 0 frequency distribution - sample size: 10
 mean: 1   variance: 1.33333   standard deviation: 1.1547
 
 time up to the first occurrence of state 1 distribution
 mean: 2.53903   variance: 3.91715   standard deviation: 1.97918
 
-time up to the first occurrence of state 1 histogram - sample size: 10
+time up to the first occurrence of state 1 frequency distribution - sample size: 10
 mean: 2.5   variance: 2.72222   standard deviation: 1.64992
 
 time up to the first occurrence of state 2 distribution
 mean: 0.977198   variance: 2.62464   standard deviation: 1.62007
 
-time up to the first occurrence of state 2 histogram - sample size: 10
+time up to the first occurrence of state 2 frequency distribution - sample size: 10
 mean: 1.3   variance: 4.23333   standard deviation: 2.05751
 
 state 0 recurrence time distribution
 mean: 3.35781   variance: 7.48933   standard deviation: 2.73666
 
-state 0 recurrence time histogram - sample size: 206
+state 0 recurrence time frequency distribution - sample size: 206
 mean: 2.32524   variance: 3.00102   standard deviation: 1.73234
 
 state 1 recurrence time distribution
 mean: 2.53396   variance: 4.03652   standard deviation: 2.00911
 
-state 1 recurrence time histogram - sample size: 125
+state 1 recurrence time frequency distribution - sample size: 125
 mean: 3.464   variance: 7.62168   standard deviation: 2.76074
 
 state 2 recurrence time distribution
 mean: 3.25074   variance: 4.24692   standard deviation: 2.06081
 
-state 2 recurrence time histogram - sample size: 149
+state 2 recurrence time frequency distribution - sample size: 149
 mean: 3.15436   variance: 1.92871   standard deviation: 1.38878
 
 state 0 sojourn time distribution
 mean: 1.37815   variance: 0.520579   standard deviation: 0.721512
 
-state 0 sojourn time histogram - sample size: 127
+state 0 sojourn time frequency distribution - sample size: 127
 mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
 
-final run - state 0 sojourn time histogram - sample size: 4
+final run - state 0 sojourn time frequency distribution - sample size: 4
 mean: 2.75   variance: 2.91667   standard deviation: 1.70783
 
 state 1 sojourn time distribution
 mean: 1.68776   variance: 1.1596   standard deviation: 1.07685
 
-state 1 sojourn time histogram - sample size: 102
+state 1 sojourn time frequency distribution - sample size: 102
 mean: 1.29412   variance: 0.387886   standard deviation: 0.622805
 
-final run - state 1 sojourn time histogram - sample size: 3
+final run - state 1 sojourn time frequency distribution - sample size: 3
 mean: 1   variance: 0   standard deviation: 0
 
 state 2 sojourn time distribution
 mean: 1.15598   variance: 0.180141   standard deviation: 0.42443
 
-state 2 sojourn time histogram - sample size: 156
+state 2 sojourn time frequency distribution - sample size: 156
 mean: 1   variance: 0   standard deviation: 0
 
-final run - state 2 sojourn time histogram - sample size: 3
+final run - state 2 sojourn time frequency distribution - sample size: 3
 mean: 1   variance: 0   standard deviation: 0
 
 number of runs of state 0 per length 51 sequence distribution
 mean: 11.2064   variance: 4.1894   standard deviation: 2.0468
 coefficient of skewness: -0.0163088   coefficient of kurtosis: -0.04461
 
-number of runs of state 0 per sequence histogram - sample size: 10
+number of runs of state 0 per sequence frequency distribution - sample size: 10
 mean: 13.1   variance: 2.54444   standard deviation: 1.59513
 coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
 
@@ -955,7 +955,7 @@ number of runs of state 1 per length 51 sequence distribution
 mean: 11.8541   variance: 3.45163   standard deviation: 1.85786
 coefficient of skewness: -0.0109528   coefficient of kurtosis: -0.0323153
 
-number of runs of state 1 per sequence histogram - sample size: 10
+number of runs of state 1 per sequence frequency distribution - sample size: 10
 mean: 10.5   variance: 5.61111   standard deviation: 2.36878
 coefficient of skewness: -0.250787   coefficient of kurtosis: -1.21915
 
@@ -963,7 +963,7 @@ number of runs of state 2 per length 51 sequence distribution
 mean: 13.8222   variance: 4.07865   standard deviation: 2.01957
 coefficient of skewness: -0.0775069   coefficient of kurtosis: -0.0315922
 
-number of runs of state 2 per sequence histogram - sample size: 10
+number of runs of state 2 per sequence frequency distribution - sample size: 10
 mean: 15.9   variance: 4.98889   standard deviation: 2.23358
 coefficient of skewness: -0.741865   coefficient of kurtosis: -1.31029
 
@@ -971,7 +971,7 @@ number of occurrences of state 0 per length 51 sequence distribution
 mean: 15.3324   variance: 10.1378   standard deviation: 3.18399
 coefficient of skewness: 0.108605   coefficient of kurtosis: -0.0262884
 
-number of occurrences of state 0 per sequence histogram - sample size: 10
+number of occurrences of state 0 per sequence frequency distribution - sample size: 10
 mean: 21.6   variance: 23.3778   standard deviation: 4.83506
 coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
 
@@ -979,7 +979,7 @@ number of occurrences of state 1 per length 51 sequence distribution
 mean: 19.7368   variance: 12.4092   standard deviation: 3.52267
 coefficient of skewness: 0.0654635   coefficient of kurtosis: -0.0381494
 
-number of occurrences of state 1 per sequence histogram - sample size: 10
+number of occurrences of state 1 per sequence frequency distribution - sample size: 10
 mean: 13.5   variance: 21.1667   standard deviation: 4.60072
 coefficient of skewness: 1.2836   coefficient of kurtosis: 0.38437
 
@@ -987,7 +987,7 @@ number of occurrences of state 2 per length 51 sequence distribution
 mean: 15.9307   variance: 6.35511   standard deviation: 2.52093
 coefficient of skewness: 0.0141849   coefficient of kurtosis: -0.0178128
 
-number of occurrences of state 2 per sequence histogram - sample size: 10
+number of occurrences of state 2 per sequence frequency distribution - sample size: 10
 mean: 15.9   variance: 4.98889   standard deviation: 2.23358
 coefficient of skewness: -0.741865   coefficient of kurtosis: -1.31029
 
@@ -1025,113 +1025,113 @@ observation probability matrix
 time up to the first occurrence of output 0 distribution
 mean: 1.08907   variance: 2.59266   standard deviation: 1.61017
 
-time up to the first occurrence of output 0 histogram - sample size: 10
+time up to the first occurrence of output 0 frequency distribution - sample size: 10
 mean: 1   variance: 1.33333   standard deviation: 1.1547
 
 time up to the first occurrence of output 1 distribution
 mean: 3.33438   variance: 15.3571   standard deviation: 3.91881
 
-time up to the first occurrence of output 1 histogram - sample size: 10
+time up to the first occurrence of output 1 frequency distribution - sample size: 10
 mean: 3.6   variance: 6.71111   standard deviation: 2.59058
 
 time up to the first occurrence of output 2 distribution
 mean: 11.2924   variance: 113.338   standard deviation: 10.646
 
-time up to the first occurrence of output 2 histogram - sample size: 10
+time up to the first occurrence of output 2 frequency distribution - sample size: 10
 mean: 8.6   variance: 78.0444   standard deviation: 8.83428
 
 time up to the first occurrence of output 3 distribution
 mean: 6.23694   variance: 37.5602   standard deviation: 6.12864
 
-time up to the first occurrence of output 3 histogram - sample size: 10
+time up to the first occurrence of output 3 frequency distribution - sample size: 10
 mean: 8   variance: 44.4444   standard deviation: 6.66667
 
 time up to the first occurrence of output 4 distribution
 mean: 6.26103   variance: 45.0635   standard deviation: 6.71294
 
-time up to the first occurrence of output 4 histogram - sample size: 10
+time up to the first occurrence of output 4 frequency distribution - sample size: 10
 mean: 3.8   variance: 14.4   standard deviation: 3.79473
 
 output 0 recurrence time distribution
 mean: 2.36332   variance: 2.9497   standard deviation: 1.71747
 
-output 0 recurrence time histogram - sample size: 206
+output 0 recurrence time frequency distribution - sample size: 206
 mean: 2.32524   variance: 3.00102   standard deviation: 1.73234
 
 output 1 recurrence time distribution
 mean: 4.76642   variance: 15.8457   standard deviation: 3.98067
 
-output 1 recurrence time histogram - sample size: 97
+output 1 recurrence time frequency distribution - sample size: 97
 mean: 4.34021   variance: 13.956   standard deviation: 3.73577
 
 output 2 recurrence time distribution
 mean: 11.2997   variance: 113.272   standard deviation: 10.643
 
-output 2 recurrence time histogram - sample size: 34
+output 2 recurrence time frequency distribution - sample size: 34
 mean: 8.14706   variance: 50.3111   standard deviation: 7.09303
 
 output 3 recurrence time distribution
 mean: 6.69293   variance: 37.388   standard deviation: 6.11458
 
-output 3 recurrence time histogram - sample size: 65
+output 3 recurrence time frequency distribution - sample size: 65
 mean: 5.12308   variance: 21.3909   standard deviation: 4.62503
 
 output 4 recurrence time distribution
 mean: 7.46946   variance: 45.1816   standard deviation: 6.72172
 
-output 4 recurrence time histogram - sample size: 58
+output 4 recurrence time frequency distribution - sample size: 58
 mean: 7.13793   variance: 44.542   standard deviation: 6.67398
 
 output 0 sojourn time distribution
 mean: 1.66418   variance: 1.07953   standard deviation: 1.03901
 
-output 0 sojourn time histogram - sample size: 127
+output 0 sojourn time frequency distribution - sample size: 127
 mean: 1.61417   variance: 0.984877   standard deviation: 0.99241
 
-final run - output 0 sojourn time histogram - sample size: 4
+final run - output 0 sojourn time frequency distribution - sample size: 4
 mean: 2.75   variance: 2.91667   standard deviation: 1.70783
 
 output 1 sojourn time distribution
 mean: 1.19856   variance: 0.2339   standard deviation: 0.483632
 
-output 1 sojourn time histogram - sample size: 95
+output 1 sojourn time frequency distribution - sample size: 95
 mean: 1.11579   variance: 0.124748   standard deviation: 0.353197
 
-final run - output 1 sojourn time histogram - sample size: 1
+final run - output 1 sojourn time frequency distribution - sample size: 1
 mean: 1   variance: 0   standard deviation: 0
 
 output 2 sojourn time distribution
 mean: 1.09804   variance: 0.103543   standard deviation: 0.321781
 
-output 2 sojourn time histogram - sample size: 40
+output 2 sojourn time frequency distribution - sample size: 40
 mean: 1.075   variance: 0.0711538   standard deviation: 0.266747
 
-final run - output 2 sojourn time histogram - sample size: 1
+final run - output 2 sojourn time frequency distribution - sample size: 1
 mean: 1   variance: 0   standard deviation: 0
 
 output 3 sojourn time distribution
 mean: 1.18117   variance: 0.207501   standard deviation: 0.455523
 
-output 3 sojourn time histogram - sample size: 64
+output 3 sojourn time frequency distribution - sample size: 64
 mean: 1.15625   variance: 0.197421   standard deviation: 0.44432
 
-final run - output 3 sojourn time histogram - sample size: 1
+final run - output 3 sojourn time frequency distribution - sample size: 1
 mean: 1   variance: 0   standard deviation: 0
 
 output 4 sojourn time distribution
 mean: 1.1313   variance: 0.147698   standard deviation: 0.384315
 
-output 4 sojourn time histogram - sample size: 61
+output 4 sojourn time frequency distribution - sample size: 61
 mean: 1.06557   variance: 0.0622951   standard deviation: 0.24959
 
-final run - output 4 sojourn time histogram - sample size: 3
+final run - output 4 sojourn time frequency distribution - sample size: 3
 mean: 1   variance: 0   standard deviation: 0
 
 number of runs of output 0 per length 51 sequence distribution
 mean: 13.1079   variance: 3.47823   standard deviation: 1.865
 coefficient of skewness: -0.0225094   coefficient of kurtosis: -0.0331746
 
-number of runs of output 0 per sequence histogram - sample size: 10
+number of runs of output 0 per sequence frequency distribution - sample size: 10
 mean: 13.1   variance: 2.54444   standard deviation: 1.59513
 coefficient of skewness: -0.81717   coefficient of kurtosis: -0.611424
 
@@ -1139,7 +1139,7 @@ number of runs of output 1 per length 51 sequence distribution
 mean: 8.93595   variance: 4.52099   standard deviation: 2.12626
 coefficient of skewness: 0.0520553   coefficient of kurtosis: -0.0657898
 
-number of runs of output 1 per sequence histogram - sample size: 10
+number of runs of output 1 per sequence frequency distribution - sample size: 10
 mean: 9.6   variance: 10.4889   standard deviation: 3.23866
 coefficient of skewness: 0.302228   coefficient of kurtosis: -1.20291
 
@@ -1147,7 +1147,7 @@ number of runs of output 2 per length 51 sequence distribution
 mean: 4.00744   variance: 3.05449   standard deviation: 1.74771
 coefficient of skewness: 0.309788   coefficient of kurtosis: -0.00585903
 
-number of runs of output 2 per sequence histogram - sample size: 10
+number of runs of output 2 per sequence frequency distribution - sample size: 10
 mean: 4.1   variance: 6.98889   standard deviation: 2.64365
 coefficient of skewness: 0.226418   coefficient of kurtosis: -1.637
 
@@ -1155,7 +1155,7 @@ number of runs of output 3 per length 51 sequence distribution
 mean: 6.36055   variance: 3.97724   standard deviation: 1.9943
 coefficient of skewness: 0.151767   coefficient of kurtosis: -0.062834
 
-number of runs of output 3 per sequence histogram - sample size: 10
+number of runs of output 3 per sequence frequency distribution - sample size: 10
 mean: 6.5   variance: 4.94444   standard deviation: 2.22361
 coefficient of skewness: 0.265284   coefficient of kurtosis: -1.86548
 
@@ -1163,7 +1163,7 @@ number of runs of output 4 per length 51 sequence distribution
 mean: 6.02205   variance: 3.96904   standard deviation: 1.99225
 coefficient of skewness: 0.17892   coefficient of kurtosis: -0.0562065
 
-number of runs of output 4 per sequence histogram - sample size: 10
+number of runs of output 4 per sequence frequency distribution - sample size: 10
 mean: 6.4   variance: 6.26667   standard deviation: 2.50333
 coefficient of skewness: 0.758564   coefficient of kurtosis: -0.763377
 
@@ -1171,7 +1171,7 @@ number of occurrences of output 0 per length 51 sequence distribution
 mean: 21.6006   variance: 11.7201   standard deviation: 3.42346
 coefficient of skewness: 0.0371498   coefficient of kurtosis: -0.0338057
 
-number of occurrences of output 0 per sequence histogram - sample size: 10
+number of occurrences of output 0 per sequence frequency distribution - sample size: 10
 mean: 21.6   variance: 23.3778   standard deviation: 4.83506
 coefficient of skewness: -0.460633   coefficient of kurtosis: -1.22677
 
@@ -1179,7 +1179,7 @@ number of occurrences of output 1 per length 51 sequence distribution
 mean: 10.6989   variance: 7.73315   standard deviation: 2.78085
 coefficient of skewness: 0.173101   coefficient of kurtosis: -0.00907058
 
-number of occurrences of output 1 per sequence histogram - sample size: 10
+number of occurrences of output 1 per sequence frequency distribution - sample size: 10
 mean: 10.7   variance: 9.78889   standard deviation: 3.12872
 coefficient of skewness: 0.102307   coefficient of kurtosis: -1.07002
 
@@ -1187,7 +1187,7 @@ number of occurrences of output 2 per length 51 sequence distribution
 mean: 4.40064   variance: 4.03925   standard deviation: 2.00979
 coefficient of skewness: 0.415347   coefficient of kurtosis: 0.134303
 
-number of occurrences of output 2 per sequence histogram - sample size: 10
+number of occurrences of output 2 per sequence frequency distribution - sample size: 10
 mean: 4.4   variance: 7.37778   standard deviation: 2.71621
 coefficient of skewness: 0.219566   coefficient of kurtosis: -1.72355
 
@@ -1195,7 +1195,7 @@ number of occurrences of output 3 per length 51 sequence distribution
 mean: 7.50038   variance: 6.47501   standard deviation: 2.5446
 coefficient of skewness: 0.284083   coefficient of kurtosis: 0.0423702
 
-number of occurrences of output 3 per sequence histogram - sample size: 10
+number of occurrences of output 3 per sequence frequency distribution - sample size: 10
 mean: 7.5   variance: 3.61111   standard deviation: 1.90029
 coefficient of skewness: 0.182158   coefficient of kurtosis: -1.74213
 
@@ -1203,11 +1203,11 @@ number of occurrences of output 4 per length 51 sequence distribution
 mean: 6.79951   variance: 5.70863   standard deviation: 2.38927
 coefficient of skewness: 0.28776   coefficient of kurtosis: 0.0404079
 
-number of occurrences of output 4 per sequence histogram - sample size: 10
+number of occurrences of output 4 per sequence frequency distribution - sample size: 10
 mean: 6.8   variance: 7.28889   standard deviation: 2.69979
 coefficient of skewness: 0.475985   coefficient of kurtosis: -1.10062
 
-sequence length histogram - sample size: 10
+sequence length frequency distribution - sample size: 10
 mean: 51   variance: 0   standard deviation: 0
 
 cumulated length: 510
@@ -1410,8 +1410,8 @@ Generalized viterbi:
                                                                                                   |-(1, 1, 1, 1, 1)
                                                                                                     
 
-         0        1        2        3        4
-|  -101.39  -101.39  -101.44  -101.64  -101.64|
-|     1.00     1.00     0.95     0.78     0.78|
-|     0.00     0.00     0.00     0.00     0.00|
-|       51       53       54       55       55|
+ 01234
+|-0.00-0.00-0.00-0.00-0.00|
+|1.001.001.001.001.00|
+|16907188112993064401040296307182272512.0033814376225986194915211352789397536768.0050721564338979075143958817180416475136.0067628752451972512611951260189570629632.0084535940564965562845892107887817261056.00|
+|5153545555|

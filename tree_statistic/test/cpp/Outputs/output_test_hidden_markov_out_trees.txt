@@ -107,6 +107,11 @@ STATE 2 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 15   PROBABILITY : 0.9
 mean: 13.5   variance: 1.35   standard deviation: 1.1619
 
+*** ERROR : line 109: word 1: bad key word: should be OUTPUT_PROCESS
+*** ERROR : line 109: word 2: bad output process index
+*** ERROR : line 109: word 4: bad key word: should be NONPARAMETRIC or PARAMETRIC
+*** ERROR : bad number of observation distributions
+*** ERROR : sum of probabilities different to 1
 HIDDEN_MARKOV_OUT_TREE
 
 2 STATES

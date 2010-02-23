@@ -3788,8 +3788,6 @@ HiddenMarkovOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& tre
                                                  int index, int root) const
 {
    typedef HiddenMarkovTreeData::tree_type tree_type;
-   typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
-   typedef HiddenMarkovTreeData::tree_type tree_type;
    typedef tree_type::vertex_descriptor vid;
    typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
    typedef generic_visitor<tree_type> visitor;

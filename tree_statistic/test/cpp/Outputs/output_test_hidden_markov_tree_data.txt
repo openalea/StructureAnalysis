@@ -116,140 +116,140 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0.6   variance: 0.8   standard deviation: 0.894427
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 1.5   variance: 1.66667   standard deviation: 1.29099
 
 path length (starting from root) up to the first occurrence of output 2 distribution
 
-path length (starting from root) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 1.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 3 distribution
 
-path length (starting from root) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 1.8   variance: 1.7   standard deviation: 1.30384
 
 path length (starting from root) up to the first occurrence of output 4 distribution
 
-path length (starting from root) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from root) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 2.66667   variance: 0.333333   standard deviation: 0.57735
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 0.25   variance: 0.25   standard deviation: 0.5
 
 path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 0.4   variance: 0.3   standard deviation: 0.547723
 
 path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from terminal nodes) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 14
+output 0 sojourn size frequency distribution - sample size: 14
 mean: 2   variance: 3.84615   standard deviation: 1.96116
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 8
+output 1 sojourn size frequency distribution - sample size: 8
 mean: 1.25   variance: 0.5   standard deviation: 0.707107
 
 output 2 sojourn size distribution
 
-output 2 sojourn size histogram - sample size: 7
+output 2 sojourn size frequency distribution - sample size: 7
 mean: 1.14286   variance: 0.142857   standard deviation: 0.377964
 
 output 3 sojourn size distribution
 
-output 3 sojourn size histogram - sample size: 10
+output 3 sojourn size frequency distribution - sample size: 10
 mean: 1.4   variance: 0.711111   standard deviation: 0.843274
 
 output 4 sojourn size distribution
 
-output 4 sojourn size histogram - sample size: 5
+output 4 sojourn size frequency distribution - sample size: 5
 mean: 1   variance: 0   standard deviation: 0
 
 number of zones of output 0 per size 13 tree distribution
 
-number of zones of output 0 per tree histogram - sample size: 5
+number of zones of output 0 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of zones of output 1 per size 13 tree distribution
 
-number of zones of output 1 per tree histogram - sample size: 5
+number of zones of output 1 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 
 number of zones of output 2 per size 13 tree distribution
 
-number of zones of output 2 per tree histogram - sample size: 5
+number of zones of output 2 per tree frequency distribution - sample size: 5
 mean: 1.4   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 2.23607   coefficient of kurtosis: -0.4
 
 number of zones of output 3 per size 13 tree distribution
 
-number of zones of output 3 per tree histogram - sample size: 5
+number of zones of output 3 per tree frequency distribution - sample size: 5
 mean: 2   variance: 0.5   standard deviation: 0.707107
 coefficient of skewness: 0   coefficient of kurtosis: -1
 
 number of zones of output 4 per size 13 tree distribution
 
-number of zones of output 4 per tree histogram - sample size: 5
+number of zones of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
 number of occurrences of output 0 per size 13 tree distribution
 
-number of occurrences of output 0 per tree histogram - sample size: 5
+number of occurrences of output 0 per tree frequency distribution - sample size: 5
 mean: 5.6   variance: 7.8   standard deviation: 2.79285
 coefficient of skewness: 0.339696   coefficient of kurtosis: -1.93846
 
 number of occurrences of output 1 per size 13 tree distribution
 
-number of occurrences of output 1 per tree histogram - sample size: 5
+number of occurrences of output 1 per tree frequency distribution - sample size: 5
 mean: 2   variance: 2.5   standard deviation: 1.58114
 coefficient of skewness: 0   coefficient of kurtosis: -1.64
 
 number of occurrences of output 2 per size 13 tree distribution
 
-number of occurrences of output 2 per tree histogram - sample size: 5
+number of occurrences of output 2 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 1.25779   coefficient of kurtosis: -1.3375
 
 number of occurrences of output 3 per size 13 tree distribution
 
-number of occurrences of output 3 per tree histogram - sample size: 5
+number of occurrences of output 3 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of occurrences of output 4 per size 13 tree distribution
 
-number of occurrences of output 4 per tree histogram - sample size: 5
+number of occurrences of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -367,140 +367,140 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0.6   variance: 0.8   standard deviation: 0.894427
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 1.5   variance: 1.66667   standard deviation: 1.29099
 
 path length (starting from root) up to the first occurrence of output 2 distribution
 
-path length (starting from root) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 1.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 3 distribution
 
-path length (starting from root) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 1.8   variance: 1.7   standard deviation: 1.30384
 
 path length (starting from root) up to the first occurrence of output 4 distribution
 
-path length (starting from root) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from root) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 2.66667   variance: 0.333333   standard deviation: 0.57735
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 0.25   variance: 0.25   standard deviation: 0.5
 
 path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 0.4   variance: 0.3   standard deviation: 0.547723
 
 path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from terminal nodes) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 14
+output 0 sojourn size frequency distribution - sample size: 14
 mean: 2   variance: 3.84615   standard deviation: 1.96116
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 8
+output 1 sojourn size frequency distribution - sample size: 8
 mean: 1.25   variance: 0.5   standard deviation: 0.707107
 
 output 2 sojourn size distribution
 
-output 2 sojourn size histogram - sample size: 7
+output 2 sojourn size frequency distribution - sample size: 7
 mean: 1.14286   variance: 0.142857   standard deviation: 0.377964
 
 output 3 sojourn size distribution
 
-output 3 sojourn size histogram - sample size: 10
+output 3 sojourn size frequency distribution - sample size: 10
 mean: 1.4   variance: 0.711111   standard deviation: 0.843274
 
 output 4 sojourn size distribution
 
-output 4 sojourn size histogram - sample size: 5
+output 4 sojourn size frequency distribution - sample size: 5
 mean: 1   variance: 0   standard deviation: 0
 
 number of zones of output 0 per size 13 tree distribution
 
-number of zones of output 0 per tree histogram - sample size: 5
+number of zones of output 0 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of zones of output 1 per size 13 tree distribution
 
-number of zones of output 1 per tree histogram - sample size: 5
+number of zones of output 1 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 
 number of zones of output 2 per size 13 tree distribution
 
-number of zones of output 2 per tree histogram - sample size: 5
+number of zones of output 2 per tree frequency distribution - sample size: 5
 mean: 1.4   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 2.23607   coefficient of kurtosis: -0.4
 
 number of zones of output 3 per size 13 tree distribution
 
-number of zones of output 3 per tree histogram - sample size: 5
+number of zones of output 3 per tree frequency distribution - sample size: 5
 mean: 2   variance: 0.5   standard deviation: 0.707107
 coefficient of skewness: 0   coefficient of kurtosis: -1
 
 number of zones of output 4 per size 13 tree distribution
 
-number of zones of output 4 per tree histogram - sample size: 5
+number of zones of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
 number of occurrences of output 0 per size 13 tree distribution
 
-number of occurrences of output 0 per tree histogram - sample size: 5
+number of occurrences of output 0 per tree frequency distribution - sample size: 5
 mean: 5.6   variance: 7.8   standard deviation: 2.79285
 coefficient of skewness: 0.339696   coefficient of kurtosis: -1.93846
 
 number of occurrences of output 1 per size 13 tree distribution
 
-number of occurrences of output 1 per tree histogram - sample size: 5
+number of occurrences of output 1 per tree frequency distribution - sample size: 5
 mean: 2   variance: 2.5   standard deviation: 1.58114
 coefficient of skewness: 0   coefficient of kurtosis: -1.64
 
 number of occurrences of output 2 per size 13 tree distribution
 
-number of occurrences of output 2 per tree histogram - sample size: 5
+number of occurrences of output 2 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 1.25779   coefficient of kurtosis: -1.3375
 
 number of occurrences of output 3 per size 13 tree distribution
 
-number of occurrences of output 3 per tree histogram - sample size: 5
+number of occurrences of output 3 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of occurrences of output 4 per size 13 tree distribution
 
-number of occurrences of output 4 per tree histogram - sample size: 5
+number of occurrences of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -596,140 +596,140 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0.6   variance: 0.8   standard deviation: 0.894427
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 1.5   variance: 1.66667   standard deviation: 1.29099
 
 path length (starting from root) up to the first occurrence of output 2 distribution
 
-path length (starting from root) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 1.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 3 distribution
 
-path length (starting from root) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 1.8   variance: 1.7   standard deviation: 1.30384
 
 path length (starting from root) up to the first occurrence of output 4 distribution
 
-path length (starting from root) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from root) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 2.66667   variance: 0.333333   standard deviation: 0.57735
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 0.25   variance: 0.25   standard deviation: 0.5
 
 path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 0.4   variance: 0.3   standard deviation: 0.547723
 
 path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from terminal nodes) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 14
+output 0 sojourn size frequency distribution - sample size: 14
 mean: 2   variance: 3.84615   standard deviation: 1.96116
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 8
+output 1 sojourn size frequency distribution - sample size: 8
 mean: 1.25   variance: 0.5   standard deviation: 0.707107
 
 output 2 sojourn size distribution
 
-output 2 sojourn size histogram - sample size: 7
+output 2 sojourn size frequency distribution - sample size: 7
 mean: 1.14286   variance: 0.142857   standard deviation: 0.377964
 
 output 3 sojourn size distribution
 
-output 3 sojourn size histogram - sample size: 10
+output 3 sojourn size frequency distribution - sample size: 10
 mean: 1.4   variance: 0.711111   standard deviation: 0.843274
 
 output 4 sojourn size distribution
 
-output 4 sojourn size histogram - sample size: 5
+output 4 sojourn size frequency distribution - sample size: 5
 mean: 1   variance: 0   standard deviation: 0
 
 number of zones of output 0 per size 13 tree distribution
 
-number of zones of output 0 per tree histogram - sample size: 5
+number of zones of output 0 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of zones of output 1 per size 13 tree distribution
 
-number of zones of output 1 per tree histogram - sample size: 5
+number of zones of output 1 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 
 number of zones of output 2 per size 13 tree distribution
 
-number of zones of output 2 per tree histogram - sample size: 5
+number of zones of output 2 per tree frequency distribution - sample size: 5
 mean: 1.4   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 2.23607   coefficient of kurtosis: -0.4
 
 number of zones of output 3 per size 13 tree distribution
 
-number of zones of output 3 per tree histogram - sample size: 5
+number of zones of output 3 per tree frequency distribution - sample size: 5
 mean: 2   variance: 0.5   standard deviation: 0.707107
 coefficient of skewness: 0   coefficient of kurtosis: -1
 
 number of zones of output 4 per size 13 tree distribution
 
-number of zones of output 4 per tree histogram - sample size: 5
+number of zones of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
 number of occurrences of output 0 per size 13 tree distribution
 
-number of occurrences of output 0 per tree histogram - sample size: 5
+number of occurrences of output 0 per tree frequency distribution - sample size: 5
 mean: 5.6   variance: 7.8   standard deviation: 2.79285
 coefficient of skewness: 0.339696   coefficient of kurtosis: -1.93846
 
 number of occurrences of output 1 per size 13 tree distribution
 
-number of occurrences of output 1 per tree histogram - sample size: 5
+number of occurrences of output 1 per tree frequency distribution - sample size: 5
 mean: 2   variance: 2.5   standard deviation: 1.58114
 coefficient of skewness: 0   coefficient of kurtosis: -1.64
 
 number of occurrences of output 2 per size 13 tree distribution
 
-number of occurrences of output 2 per tree histogram - sample size: 5
+number of occurrences of output 2 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 1.25779   coefficient of kurtosis: -1.3375
 
 number of occurrences of output 3 per size 13 tree distribution
 
-number of occurrences of output 3 per tree histogram - sample size: 5
+number of occurrences of output 3 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of occurrences of output 4 per size 13 tree distribution
 
-number of occurrences of output 4 per tree histogram - sample size: 5
+number of occurrences of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -800,13 +800,13 @@ Completed likelihood: -126.115
 Number of hidden states: 3
 
 Marginal output histogram (1st variable) : 
-histogram - sample size: 65
+frequency distribution - sample size: 65
 mean: 1.35385   variance: 2.01346   standard deviation: 1.41896
 coefficient of skewness: 0.49276   coefficient of kurtosis: -1.29039
 mean absolute deviation: 1.27527   coefficient of concentration: 0.565734
 information: -93.3781 (-1.43659)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  28  0.430769
 1  10  0.584615
 2   8  0.707692
@@ -814,26 +814,26 @@ information: -93.3781 (-1.43659)
 4   5         1
 
 Marginal state histogram: 
-histogram - sample size: 65
+frequency distribution - sample size: 65
 mean: 1.30769   variance: 0.622596   standard deviation: 0.789048
 coefficient of skewness: -0.612821   coefficient of kurtosis: -1.15516
 mean absolute deviation: 0.702959   coefficient of concentration: 0.313484
 information: -66.6617 (-1.02557)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  13       0.2
 1  19  0.492308
 2  33         1
 
 Occurrence output histogram (1st variable): 
 Number of occurrences for value 0 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 5.6   variance: 7.8   standard deviation: 2.79285
 coefficient of skewness: 0.339696   coefficient of kurtosis: -1.93846
 mean absolute deviation: 2.32   coefficient of concentration: 0.242857
 information: -6.6609 (-1.33218)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  0    0
 1  0    0
 2  0    0
@@ -846,13 +846,13 @@ information: -6.6609 (-1.33218)
 9  1    1
 
 Number of occurrences for value 1 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 2   variance: 2.5   standard deviation: 1.58114
 coefficient of skewness: 0   coefficient of kurtosis: -1.64
 mean absolute deviation: 1.2   coefficient of concentration: 0.4
 information: -8.04719 (-1.60944)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  1  0.2
 1  1  0.4
 2  1  0.6
@@ -860,26 +860,26 @@ information: -8.04719 (-1.60944)
 4  1    1
 
 Number of occurrences for value 2 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 1.6   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 1.25779   coefficient of kurtosis: -1.3375
 mean absolute deviation: 0.72   coefficient of concentration: 0.25
 information: -4.75135 (-0.950271)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  0    0
 1  3  0.6
 2  1  0.8
 3  1    1
 
 Number of occurrences for value 3 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 mean absolute deviation: 0.96   coefficient of concentration: 0.2
 information: -4.75135 (-0.950271)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  0    0
 1  0    0
 2  3  0.6
@@ -888,13 +888,13 @@ information: -4.75135 (-0.950271)
 5  1    1
 
 Number of occurrences for value 4 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 mean absolute deviation: 0.8   coefficient of concentration: 0.56
 information: -5.2746 (-1.05492)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  2  0.4
 1  2  0.8
 2  0  0.8
@@ -903,13 +903,13 @@ information: -5.2746 (-1.05492)
 
 Occurrence state histogram: 
 Number of occurrences for value 0 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 2.6   variance: 3.3   standard deviation: 1.81659
 coefficient of skewness: 0.567163   coefficient of kurtosis: -1.84628
 mean absolute deviation: 1.52   coefficient of concentration: 0.338462
 information: -6.6609 (-1.33218)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  0    0
 1  2  0.4
 2  1  0.6
@@ -918,13 +918,13 @@ information: -6.6609 (-1.33218)
 5  1    1
 
 Number of occurrences for value 1 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 3.8   variance: 2.7   standard deviation: 1.64317
 coefficient of skewness: 0.518421   coefficient of kurtosis: -1.73745
 mean absolute deviation: 1.36   coefficient of concentration: 0.210526
 information: -6.6609 (-1.33218)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  0    0
 1  0    0
 2  1  0.2
@@ -934,13 +934,13 @@ information: -6.6609 (-1.33218)
 6  1    1
 
 Number of occurrences for value 2 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 6.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 mean absolute deviation: 0.88   coefficient of concentration: 0.0848485
 information: -6.6609 (-1.33218)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  0    0
 1  0    0
 2  0    0
@@ -953,37 +953,37 @@ information: -6.6609 (-1.33218)
 
 
 State-conditional output histograms: 
-Observation histogram for state 0 and variable 0 : 
-histogram - sample size: 13
+Observation frequency distribution for state 0 and variable 0 : 
+frequency distribution - sample size: 13
 mean: 0   variance: 0   standard deviation: 0
 mean absolute deviation: 0
 information: 0 (0)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  13  1
 
-Observation histogram for state 1 and variable 0 : 
-histogram - sample size: 19
+Observation frequency distribution for state 1 and variable 0 : 
+frequency distribution - sample size: 19
 mean: 1.68421   variance: 2.00585   standard deviation: 1.41628
 coefficient of skewness: -0.0261554   coefficient of kurtosis: -1.6372
 mean absolute deviation: 1.27978   coefficient of concentration: 0.450658
 information: -26.8903 (-1.41528)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  6  0.315789
 1  3  0.473684
 2  2  0.578947
 3  7  0.947368
 4  1         1
 
-Observation histogram for state 2 and variable 0 : 
-histogram - sample size: 33
+Observation frequency distribution for state 2 and variable 0 : 
+frequency distribution - sample size: 33
 mean: 1.69697   variance: 1.9678   standard deviation: 1.40278
 coefficient of skewness: 0.218891   coefficient of kurtosis: -1.31296
 mean absolute deviation: 1.2213   coefficient of concentration: 0.457792
 information: -52.0713 (-1.57792)
 
-   | histogram | cumulative histogram function
+   | frequency distribution | cumulative distribution function
 0  9  0.272727
 1  7  0.484848
 2  6  0.666667
@@ -991,7 +991,7 @@ information: -52.0713 (-1.57792)
 4  4         1
 
 
-Hidden_markov_tree_data augmented with the state tree and the smoothed probabilities:
+HiddenMarkovTreeData augmented with the state tree and the smoothed probabilities:
 
 3 STATES
 
@@ -1113,7 +1113,7 @@ number of occurrences of output 3 per size 13 tree distribution
 
 number of occurrences of output 4 per size 13 tree distribution
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -1137,9 +1137,9 @@ log-likelihood of the observed trees: -97.0198   (normalized: -1.49261)
 -1 free parameters   2 * penalyzed log-likelihood (ICLc): -252.229
 
 
-Plot of the augmented Hidden_markov_tree_data:
+Plot of the augmented HiddenMarkovTreeData:
 
-Plain Hidden_markov_tree_data:
+Plain HiddenMarkovTreeData:
 
 3 STATES
 
@@ -1213,140 +1213,140 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0.6   variance: 0.8   standard deviation: 0.894427
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 1.5   variance: 1.66667   standard deviation: 1.29099
 
 path length (starting from root) up to the first occurrence of output 2 distribution
 
-path length (starting from root) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 1.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 3 distribution
 
-path length (starting from root) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 1.8   variance: 1.7   standard deviation: 1.30384
 
 path length (starting from root) up to the first occurrence of output 4 distribution
 
-path length (starting from root) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from root) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 2.66667   variance: 0.333333   standard deviation: 0.57735
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 4
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 4
 mean: 0.25   variance: 0.25   standard deviation: 0.5
 
 path length (starting from terminal nodes) up to the first occurrence of output 2 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 2 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 2 frequency distribution - sample size: 5
 mean: 0.4   variance: 0.3   standard deviation: 0.547723
 
 path length (starting from terminal nodes) up to the first occurrence of output 3 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 3 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 3 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 4 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 4 histogram - sample size: 3
+path length (starting from terminal nodes) up to the first occurrence of output 4 frequency distribution - sample size: 3
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 14
+output 0 sojourn size frequency distribution - sample size: 14
 mean: 2   variance: 3.84615   standard deviation: 1.96116
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 8
+output 1 sojourn size frequency distribution - sample size: 8
 mean: 1.25   variance: 0.5   standard deviation: 0.707107
 
 output 2 sojourn size distribution
 
-output 2 sojourn size histogram - sample size: 7
+output 2 sojourn size frequency distribution - sample size: 7
 mean: 1.14286   variance: 0.142857   standard deviation: 0.377964
 
 output 3 sojourn size distribution
 
-output 3 sojourn size histogram - sample size: 10
+output 3 sojourn size frequency distribution - sample size: 10
 mean: 1.4   variance: 0.711111   standard deviation: 0.843274
 
 output 4 sojourn size distribution
 
-output 4 sojourn size histogram - sample size: 5
+output 4 sojourn size frequency distribution - sample size: 5
 mean: 1   variance: 0   standard deviation: 0
 
 number of zones of output 0 per size 13 tree distribution
 
-number of zones of output 0 per tree histogram - sample size: 5
+number of zones of output 0 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of zones of output 1 per size 13 tree distribution
 
-number of zones of output 1 per tree histogram - sample size: 5
+number of zones of output 1 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 
 number of zones of output 2 per size 13 tree distribution
 
-number of zones of output 2 per tree histogram - sample size: 5
+number of zones of output 2 per tree frequency distribution - sample size: 5
 mean: 1.4   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 2.23607   coefficient of kurtosis: -0.4
 
 number of zones of output 3 per size 13 tree distribution
 
-number of zones of output 3 per tree histogram - sample size: 5
+number of zones of output 3 per tree frequency distribution - sample size: 5
 mean: 2   variance: 0.5   standard deviation: 0.707107
 coefficient of skewness: 0   coefficient of kurtosis: -1
 
 number of zones of output 4 per size 13 tree distribution
 
-number of zones of output 4 per tree histogram - sample size: 5
+number of zones of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
 number of occurrences of output 0 per size 13 tree distribution
 
-number of occurrences of output 0 per tree histogram - sample size: 5
+number of occurrences of output 0 per tree frequency distribution - sample size: 5
 mean: 5.6   variance: 7.8   standard deviation: 2.79285
 coefficient of skewness: 0.339696   coefficient of kurtosis: -1.93846
 
 number of occurrences of output 1 per size 13 tree distribution
 
-number of occurrences of output 1 per tree histogram - sample size: 5
+number of occurrences of output 1 per tree frequency distribution - sample size: 5
 mean: 2   variance: 2.5   standard deviation: 1.58114
 coefficient of skewness: 0   coefficient of kurtosis: -1.64
 
 number of occurrences of output 2 per size 13 tree distribution
 
-number of occurrences of output 2 per tree histogram - sample size: 5
+number of occurrences of output 2 per tree frequency distribution - sample size: 5
 mean: 1.6   variance: 0.8   standard deviation: 0.894427
 coefficient of skewness: 1.25779   coefficient of kurtosis: -1.3375
 
 number of occurrences of output 3 per size 13 tree distribution
 
-number of occurrences of output 3 per tree histogram - sample size: 5
+number of occurrences of output 3 per tree frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 
 number of occurrences of output 4 per size 13 tree distribution
 
-number of occurrences of output 4 per tree histogram - sample size: 5
+number of occurrences of output 4 per tree frequency distribution - sample size: 5
 mean: 1   variance: 1.5   standard deviation: 1.22474
 coefficient of skewness: 1.36083   coefficient of kurtosis: -1
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -1370,14 +1370,14 @@ log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -231.188
 
 
-Extract an observation distribution from plain Hidden_markov_tree_data:
+Extract an observation distribution from plain HiddenMarkovTreeData:
 *** ERROR : state trees not in the data
 
-Extract a observation distribution from augmented Hidden_markov_tree_data:
+Extract a observation distribution from augmented HiddenMarkovTreeData:
 NONPARAMETRIC   
 mean absolute deviation: -1
 
-histogram - sample size: 27
+frequency distribution - sample size: 27
 mean: 0   variance: 0   standard deviation: 0
 mean absolute deviation: 0
 
@@ -1386,14 +1386,14 @@ maximum possible log-likelihood: 0   (information: 0)
 deviance: 0
 
 
-Extract a characteristic distribution (zones) from plain Hidden_markov_tree_data:
+Extract a characteristic distribution (zones) from plain HiddenMarkovTreeData:
 *** ERROR : state trees not in the data
 
-Extract a characteristic distribution (zones) from augmented Hidden_markov_tree_data:
+Extract a characteristic distribution (zones) from augmented HiddenMarkovTreeData:
 NONPARAMETRIC   
 mean absolute deviation: -1
 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 2.8   variance: 1.7   standard deviation: 1.30384
 coefficient of skewness: 1.71439   coefficient of kurtosis: -0.867128
 mean absolute deviation: 0.96   coefficient of concentration: 0.2
@@ -1484,14 +1484,14 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
 mean: 90   variance: 81   standard deviation: 9
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
 mean: 450   variance: 225   standard deviation: 15
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
 OUTPUT_PROCESS 2 : PARAMETRIC
@@ -1500,17 +1500,17 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
 mean: 270   variance: 189   standard deviation: 13.7477
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -1595,14 +1595,14 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 56   SUP_BOUND : 509   PROBABILITY : 0.0719136
 mean: 88.5769   variance: 30.2342   standard deviation: 5.49856
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 702   PROBABILITY : 0.640509
 mean: 449.638   variance: 161.64   standard deviation: 12.7138
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
 OUTPUT_PROCESS 2 : PARAMETRIC
@@ -1611,17 +1611,17 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.300666
 mean: 270.6   variance: 189.24   standard deviation: 13.7564
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 661   SUP_BOUND : 900   PROBABILITY : 0.618557
 mean: 808.835   variance: 56.3907   standard deviation: 7.50937
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -1684,14 +1684,14 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
 mean: 90   variance: 81   standard deviation: 9
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
 mean: 450   variance: 225   standard deviation: 15
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
 OUTPUT_PROCESS 2 : PARAMETRIC
@@ -1700,17 +1700,17 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
 mean: 270   variance: 189   standard deviation: 13.7477
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -1781,14 +1781,14 @@ Completed likelihood: -521.89
 Number of hidden states: 2
 
 Marginal output histogram (1st variable) : 
-histogram - sample size: 65
+frequency distribution - sample size: 65
 mean: 227.446   variance: 31420.6   standard deviation: 177.259
 coefficient of skewness: 0.490053   coefficient of kurtosis: -1.77897
 mean absolute deviation: 170.918   coefficient of concentration: 0.385604
 information: -230.513 (-3.54635)
 
 Marginal state histogram: 
-histogram - sample size: 65
+frequency distribution - sample size: 65
 mean: 0.384615   variance: 0.240385   standard deviation: 0.49029
 coefficient of skewness: 0.485621   coefficient of kurtosis: -1.79385
 mean absolute deviation: 0.473373   coefficient of concentration: 0.615385
@@ -1798,14 +1798,14 @@ Occurrence output histogram (1st variable):
 
 Occurrence state histogram: 
 Number of occurrences for value 0 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 8   variance: 4   standard deviation: 2
 coefficient of skewness: -0.9375   coefficient of kurtosis: -1.4375
 mean absolute deviation: 1.6   coefficient of concentration: 0.12
 information: -6.6609 (-1.33218)
 
 Number of occurrences for value 1 : 
-histogram - sample size: 5
+frequency distribution - sample size: 5
 mean: 5   variance: 4   standard deviation: 2
 coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
 mean absolute deviation: 1.6   coefficient of concentration: 0.192
@@ -1813,36 +1813,36 @@ information: -6.6609 (-1.33218)
 
 
 State-conditional output histograms: 
-Observation histogram for state 0 and variable 0 : 
-histogram - sample size: 40
+Observation frequency distribution for state 0 and variable 0 : 
+frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
 coefficient of skewness: 0.131146   coefficient of kurtosis: -0.313654
 mean absolute deviation: 4.325   coefficient of concentration: 0.0349492
 information: -113.665 (-2.84161)
 
-Observation histogram for state 1 and variable 0 : 
-histogram - sample size: 25
+Observation frequency distribution for state 1 and variable 0 : 
+frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 coefficient of skewness: -0.0370793   coefficient of kurtosis: -0.767906
 mean absolute deviation: 10.5056   coefficient of concentration: 0.0161267
 information: -73.5404 (-2.94162)
 
-Observation histogram for state 0 and variable 1 : 
-histogram - sample size: 40
+Observation frequency distribution for state 0 and variable 1 : 
+frequency distribution - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 coefficient of skewness: -0.0754172   coefficient of kurtosis: 0.305483
 mean absolute deviation: 10.75   coefficient of concentration: 0.0283906
 information: -129.281 (-3.23202)
 
-Observation histogram for state 1 and variable 1 : 
-histogram - sample size: 25
+Observation frequency distribution for state 1 and variable 1 : 
+frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
 coefficient of skewness: 0.16221   coefficient of kurtosis: -1.01044
 mean absolute deviation: 6.4064   coefficient of concentration: 0.00533307
 information: -70.2446 (-2.80978)
 
 
-Hidden_markov_tree_data augmented with the state tree and the smoothed probabilities:
+HiddenMarkovTreeData augmented with the state tree and the smoothed probabilities:
 
 2 STATES
 
@@ -1857,55 +1857,55 @@ recurrent class: states 0 1
 
 path length (starting from root) up to the first occurrence of state 0 distribution
 
-path length (starting from root) up to the first occurrence of state 0 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of state 0 frequency distribution - sample size: 5
 mean: 0.6   variance: 0.3   standard deviation: 0.547723
 
 path length (starting from root) up to the first occurrence of state 1 distribution
 
-path length (starting from root) up to the first occurrence of state 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of state 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 1.2   standard deviation: 1.09545
 
 path length (starting from terminal node) up to the first occurrence of state 0 distribution
 
-path length (starting from terminal node) up to the first occurrence of state 0 histogram - sample size: 5
+path length (starting from terminal node) up to the first occurrence of state 0 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal node) up to the first occurrence of state 1 distribution
 
-path length (starting from terminal node) up to the first occurrence of state 1 histogram - sample size: 5
+path length (starting from terminal node) up to the first occurrence of state 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 state 0 sojourn size distribution
 
-state 0 sojourn size histogram - sample size: 10
+state 0 sojourn size frequency distribution - sample size: 10
 mean: 4   variance: 11.7778   standard deviation: 3.43188
 
 state 1 sojourn size distribution
 
-state 1 sojourn size histogram - sample size: 13
+state 1 sojourn size frequency distribution - sample size: 13
 mean: 1.92308   variance: 2.24359   standard deviation: 1.49786
 
 number of zones of state 0 per size 13 tree distribution
 
-number of zones of state 0 per tree histogram - sample size: 5
+number of zones of state 0 per tree frequency distribution - sample size: 5
 mean: 2   variance: 0.5   standard deviation: 0.707107
 coefficient of skewness: 0   coefficient of kurtosis: -1
 
 number of zones of state 1 per size 13 tree distribution
 
-number of zones of state 1 per tree histogram - sample size: 5
+number of zones of state 1 per tree frequency distribution - sample size: 5
 mean: 2.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 
 number of occurrences of state 0 per size 13 tree distribution
 
-number of occurrences of state 0 per tree histogram - sample size: 5
+number of occurrences of state 0 per tree frequency distribution - sample size: 5
 mean: 8   variance: 4   standard deviation: 2
 coefficient of skewness: -0.9375   coefficient of kurtosis: -1.4375
 
 number of occurrences of state 1 per size 13 tree distribution
 
-number of occurrences of state 1 per tree histogram - sample size: 5
+number of occurrences of state 1 per tree frequency distribution - sample size: 5
 mean: 5   variance: 4   standard deviation: 2
 coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
 
@@ -1917,14 +1917,14 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.1
 mean: 90   variance: 81   standard deviation: 9
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.5
 mean: 450   variance: 225   standard deviation: 15
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
 OUTPUT_PROCESS 2 : PARAMETRIC
@@ -1933,17 +1933,17 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
 mean: 270   variance: 189   standard deviation: 13.7477
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -1966,13 +1966,10 @@ log-likelihood of the observed trees: -521.89   (normalized: -8.02907)
 
 -1 free parameters   2 * penalyzed log-likelihood (ICLc): -1043.78
 
-chi-square test (2 degrees of freedom)
-chi-square value: 5.33442   critical probability: 0.069996
-reference chi-square value: 5.93876   reference critical probability: 0.05
 
-Plot of the augmented Hidden_markov_tree_data:
+Plot of the augmented HiddenMarkovTreeData:
 
-Plain Hidden_markov_tree_data:
+Plain HiddenMarkovTreeData:
 
 2 STATES
 
@@ -2013,14 +2010,14 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 56   SUP_BOUND : 509   PROBABILITY : 0.0719136
 mean: 88.5769   variance: 30.2342   standard deviation: 5.49856
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 702   PROBABILITY : 0.640509
 mean: 449.638   variance: 161.64   standard deviation: 12.7138
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 449.64   variance: 168.49   standard deviation: 12.9804
 
 OUTPUT_PROCESS 2 : PARAMETRIC
@@ -2029,17 +2026,17 @@ STATE 0 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.300666
 mean: 270.6   variance: 189.24   standard deviation: 13.7564
 
-state 0 observation histogram - sample size: 40
+state 0 observation frequency distribution - sample size: 40
 mean: 270.6   variance: 199.323   standard deviation: 14.1182
 
 STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 661   SUP_BOUND : 900   PROBABILITY : 0.618557
 mean: 808.835   variance: 56.3907   standard deviation: 7.50937
 
-state 1 observation histogram - sample size: 25
+state 1 observation frequency distribution - sample size: 25
 mean: 808.84   variance: 59.2233   standard deviation: 7.69567
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65
@@ -2062,21 +2059,17 @@ log-likelihood of the observed trees: -511.466   (normalized: -7.86871)
 
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -1022.93
 
-chi-square test (2 degrees of freedom)
-chi-square value: 1.00288e+09   critical probability: 6.42372e-241
-reference chi-square value: 5.93876   reference critical probability: 0.05
-reference chi-square value: 9.10382   reference critical probability: 0.01
 
-Extract an observation distribution from plain Hidden_markov_tree_data:
+Extract an observation distribution from plain HiddenMarkovTreeData:
 *** ERROR : state trees not in the data
 
-Extract an observation distribution from augmented Hidden_markov_tree_data:
+Extract an observation distribution from augmented HiddenMarkovTreeData:
 NONPARAMETRIC   
 mean: 90   variance: 81   standard deviation: 9
 coefficient of skewness: -8.88889e-39   coefficient of kurtosis: -3
 mean absolute deviation: 0   coefficient of concentration: 1
 
-histogram - sample size: 40
+frequency distribution - sample size: 40
 mean: 88.575   variance: 31.1224   standard deviation: 5.57875
 coefficient of skewness: 0.131146   coefficient of kurtosis: -0.313654
 mean absolute deviation: 4.325   coefficient of concentration: 0.0349492
@@ -2089,13 +2082,13 @@ chi-square test (1 degree of freedom)
 chi-square value: 3.31246e-26   critical probability: 0.954498
 reference chi-square value: 3.74866   reference critical probability: 0.05
 
-Extract an observation distribution from augmented Hidden_markov_tree_data with a wrong state identifier:
+Extract an observation distribution from augmented HiddenMarkovTreeData with a wrong state identifier:
 *** ERROR : state 2 not present
 
-Extract a characteristic distribution (zones) from plain Hidden_markov_tree_data:
+Extract a characteristic distribution (zones) from plain HiddenMarkovTreeData:
 *** ERROR : state trees not in the data
 
-Extract a characteristic distribution (zones) from augmented Hidden_markov_tree_data:
+Extract a characteristic distribution (zones) from augmented HiddenMarkovTreeData:
 *** ERROR : characteristics not computed
 iteration 1   log-likelihood of the observed trees: -43.8762
 
@@ -2118,55 +2111,55 @@ recurrent class: state 1 (absorbing state)
 
 path length (starting from root) up to the first occurrence of state 0 distribution
 
-path length (starting from root) up to the first occurrence of state 0 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of state 0 frequency distribution - sample size: 5
 mean: 0.6   variance: 0.3   standard deviation: 0.547723
 
 path length (starting from root) up to the first occurrence of state 1 distribution
 
-path length (starting from root) up to the first occurrence of state 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of state 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 1.2   standard deviation: 1.09545
 
 path length (starting from terminal node) up to the first occurrence of state 0 distribution
 
-path length (starting from terminal node) up to the first occurrence of state 0 histogram - sample size: 5
+path length (starting from terminal node) up to the first occurrence of state 0 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal node) up to the first occurrence of state 1 distribution
 
-path length (starting from terminal node) up to the first occurrence of state 1 histogram - sample size: 5
+path length (starting from terminal node) up to the first occurrence of state 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 state 0 sojourn size distribution
 
-state 0 sojourn size histogram - sample size: 10
+state 0 sojourn size frequency distribution - sample size: 10
 mean: 4   variance: 11.7778   standard deviation: 3.43188
 
 absorption probability of state 1: 1
 
-state 1 sojourn size histogram - sample size: 13
+state 1 sojourn size frequency distribution - sample size: 13
 mean: 1.92308   variance: 2.24359   standard deviation: 1.49786
 
 number of zones of state 0 per size 13 tree distribution
 
-number of zones of state 0 per tree histogram - sample size: 5
+number of zones of state 0 per tree frequency distribution - sample size: 5
 mean: 2   variance: 0.5   standard deviation: 0.707107
 coefficient of skewness: 0   coefficient of kurtosis: -1
 
 number of zones of state 1 per size 13 tree distribution
 
-number of zones of state 1 per tree histogram - sample size: 5
+number of zones of state 1 per tree frequency distribution - sample size: 5
 mean: 2.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 
 number of occurrences of state 0 per size 13 tree distribution
 
-number of occurrences of state 0 per tree histogram - sample size: 5
+number of occurrences of state 0 per tree frequency distribution - sample size: 5
 mean: 8   variance: 4   standard deviation: 2
 coefficient of skewness: -0.9375   coefficient of kurtosis: -1.4375
 
 number of occurrences of state 1 per size 13 tree distribution
 
-number of occurrences of state 1 per tree histogram - sample size: 5
+number of occurrences of state 1 per tree frequency distribution - sample size: 5
 mean: 5   variance: 4   standard deviation: 2
 coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
 
@@ -2190,59 +2183,59 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0.6   variance: 0.3   standard deviation: 0.547723
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 1.2   standard deviation: 1.09545
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 10
+output 0 sojourn size frequency distribution - sample size: 10
 mean: 4   variance: 11.7778   standard deviation: 3.43188
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 13
+output 1 sojourn size frequency distribution - sample size: 13
 mean: 1.92308   variance: 2.24359   standard deviation: 1.49786
 
 number of zones of output 0 per size 13 tree distribution
 
-number of zones of output 0 per tree histogram - sample size: 5
+number of zones of output 0 per tree frequency distribution - sample size: 5
 mean: 2   variance: 0.5   standard deviation: 0.707107
 coefficient of skewness: 0   coefficient of kurtosis: -1
 
 number of zones of output 1 per size 13 tree distribution
 
-number of zones of output 1 per tree histogram - sample size: 5
+number of zones of output 1 per tree frequency distribution - sample size: 5
 mean: 2.6   variance: 1.3   standard deviation: 1.14018
 coefficient of skewness: -0.404796   coefficient of kurtosis: -1.4355
 
 number of occurrences of output 0 per size 13 tree distribution
 
-number of occurrences of output 0 per tree histogram - sample size: 5
+number of occurrences of output 0 per tree frequency distribution - sample size: 5
 mean: 8   variance: 4   standard deviation: 2
 coefficient of skewness: -0.9375   coefficient of kurtosis: -1.4375
 
 number of occurrences of output 1 per size 13 tree distribution
 
-number of occurrences of output 1 per tree histogram - sample size: 5
+number of occurrences of output 1 per tree frequency distribution - sample size: 5
 mean: 5   variance: 4   standard deviation: 2
 coefficient of skewness: 0.9375   coefficient of kurtosis: -1.4375
 
-tree size histogram - sample size: 5
+tree size frequency distribution - sample size: 5
 mean: 13   variance: 0   standard deviation: 0
 
 cumulative size: 65

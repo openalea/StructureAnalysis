@@ -357,55 +357,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -512,55 +512,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -638,55 +638,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -769,55 +769,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -924,55 +924,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -994,10 +994,195 @@ log-likelihood of the observed trees: -32.4867   (normalized: -0.691207)
 3 free parameters   2 * penalyzed log-likelihood (ICL): -83.0047
 
 3 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+
+Testing estimation with auto-parametric distributions and self-transitions.
+iteration 1   log-likelihood of the observed trees: -836.795
+iteration 2   log-likelihood of the observed trees: -507.751
+iteration 3   log-likelihood of the observed trees: -507.75
+iteration 4   log-likelihood of the observed trees: -507.749
+iteration 5   log-likelihood of the observed trees: -507.744
+
+5 iterations
+
+log-likelihood of the state trees: -507.921 | -507.921
+
+estimated HMT (5 iterations)
+HIDDEN_MARKOV_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.972378     0.0276217    
+
+TRANSITION_PROBABILITIES
+0.999989     1.07946e-05  
+2.46819e-05  0.999975     
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+number of zones of state 0 per size 9 tree distribution
+
+number of zones of state 1 per size 9 tree distribution
+
+number of occurrences of state 0 per size 9 tree distribution
+
+number of occurrences of state 1 per size 9 tree distribution
+
+2 OUTPUT_PROCESSES
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 200.105   PROBABILITY : 0.402956
+mean: 296.396   variance: 727.19   standard deviation: 26.9665
+
+state 0 observation frequency distribution - sample size: 54
+mean: 296.37   variance: 750.464   standard deviation: 27.3946
+
+STATE 1 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 186.233   PROBABILITY : 0.389113
+mean: 292.281   variance: 742.541   standard deviation: 27.2496
+
+state 1 observation frequency distribution - sample size: 0
+
+OUTPUT_PROCESS 2 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+NEGATIVE_BINOMIAL   INF_BOUND : 0   PARAMETER : 25404.9   PROBABILITY : 0.974866
+mean: 654.903   variance: 665.214   standard deviation: 25.7917
+
+state 0 observation frequency distribution - sample size: 54
+mean: 654.889   variance: 683.912   standard deviation: 26.1517
+
+STATE 1 OBSERVATION_DISTRIBUTION
+POISSON   INF_BOUND : 3   PARAMETER : 648.732   
+mean: 651.651   variance: 642.132   standard deviation: 25.3403
+
+state 1 observation frequency distribution - sample size: 0
+
+tree size frequency distribution - sample size: 6
+mean: 9   variance: 0   standard deviation: 0
+
+cumulative size: 54
+
+information of the trees in the iid case: -394.06 (-7.29741)
+
+log-likelihood of the state trees: -507.921   (normalized: -9.40594)
+
+log-likelihood of the observed trees: -507.71   (normalized: -9.40204)
+
+13 free parameters   2 * penalyzed log-likelihood (AIC): -1041.42
+
+13 free parameters   2 * penalyzed log-likelihood (AICc): -1050.52
+
+13 free parameters   2 * penalyzed log-likelihood (BIC): -1067.28
+
+13 free parameters   2 * penalyzed log-likelihood (BICc): nan
+
+13 free parameters   2 * penalyzed log-likelihood (ICL): -1067.7
+
+13 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+
+Testing estimation with imposed parametric distributions  and self-transitions.
+iteration 1   log-likelihood of the observed trees: -110.817
+iteration 2   log-likelihood of the observed trees: -32.4841
+iteration 3   log-likelihood of the observed trees: -32.4833
+iteration 4   log-likelihood of the observed trees: -32.4831
+iteration 5   log-likelihood of the observed trees: -32.4831
+
+5 iterations
+
+log-likelihood of the state trees: -33.5638 | -33.5638
+
+estimated HMT (5 iterations)
+HIDDEN_MARKOV_OUT_TREE
+
+2 STATES
+
+INITIAL_PROBABILITIES
+0.835585     0.164415     
+
+TRANSITION_PROBABILITIES
+0.99999      1e-05        
+1.80644e-05  0.999982     
+
+recurrent class: states 0 1
+
+path length (starting from root) up to the first occurrence of state 0 distribution
+
+path length (starting from root) up to the first occurrence of state 1 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 0 distribution
+
+path length (starting from terminal node) up to the first occurrence of state 1 distribution
+
+state 0 sojourn size distribution
+
+state 1 sojourn size distribution
+
+mixture of number of zones of state 0 per tree distributions
+
+mixture of number of zones of state 1 per tree distributions
+
+mixture of number of occurrences of state 0 per tree distributions
+
+mixture of number of occurrences of state 1 per tree distributions
+
+1 OUTPUT_PROCESS
+
+OUTPUT_PROCESS 1 : PARAMETRIC
+
+STATE 0 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 1   PROBABILITY : 0.538071
+mean: 0.538071   variance: 0.248551   standard deviation: 0.498548
+
+state 0 observation frequency distribution - sample size: 47
+mean: 0.531915   variance: 0.254394   standard deviation: 0.504375
+
+STATE 1 OBSERVATION_DISTRIBUTION
+BINOMIAL   INF_BOUND : 0   SUP_BOUND : 1   PROBABILITY : 0.493333
+mean: 0.493333   variance: 0.249956   standard deviation: 0.499956
+
+state 1 observation frequency distribution - sample size: 0
+
+tree size frequency distribution - sample size: 6
+mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
+
+cumulative size: 47
+
+information of the trees in the iid case: -32.4821 (-0.691109)
+
+log-likelihood of the state trees: -33.5638   (normalized: -0.714124)
+
+log-likelihood of the observed trees: -32.4831   (normalized: -0.69113)
+
+7 free parameters   2 * penalyzed log-likelihood (AIC): -78.9662
+
+7 free parameters   2 * penalyzed log-likelihood (AICc): -81.838
+
+7 free parameters   2 * penalyzed log-likelihood (BIC): -91.9173
+
+7 free parameters   2 * penalyzed log-likelihood (BICc): nan
+
+7 free parameters   2 * penalyzed log-likelihood (ICL): -94.0787
+
+7 free parameters   2 * penalyzed log-likelihood (ICLc): nan
 Testing estimation using SEM algorithm
 iteration 1   log-likelihood of the observed trees: -32.5739
-iteration 2   log-likelihood of the observed trees: -32.938
-iteration 3   log-likelihood of the observed trees: -32.6466
+iteration 2   log-likelihood of the observed trees: -32.635
+iteration 3   log-likelihood of the observed trees: -32.9181
 
 3 iterations
 
@@ -1055,55 +1240,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -1187,55 +1372,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -1319,55 +1504,55 @@ observation probability matrix
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
@@ -1392,25 +1577,25 @@ log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 Testing estimation using SAEM algorithm
 iteration 1   log-likelihood of the observed trees: -32.5739
-iteration 2   log-likelihood of the observed trees: -32.5273
-iteration 3   log-likelihood of the observed trees: -32.49
-iteration 4   log-likelihood of the observed trees: -32.4897
-iteration 5   log-likelihood of the observed trees: -32.4927
-iteration 6   log-likelihood of the observed trees: -32.4849
-iteration 7   log-likelihood of the observed trees: -32.4851
-iteration 8   log-likelihood of the observed trees: -32.484
-iteration 9   log-likelihood of the observed trees: -32.4898
-iteration 10   log-likelihood of the observed trees: -32.4844
+iteration 2   log-likelihood of the observed trees: -32.4922
+iteration 3   log-likelihood of the observed trees: -32.4974
+iteration 4   log-likelihood of the observed trees: -32.4981
+iteration 5   log-likelihood of the observed trees: -32.4876
+iteration 6   log-likelihood of the observed trees: -32.4904
+iteration 7   log-likelihood of the observed trees: -32.4894
+iteration 8   log-likelihood of the observed trees: -32.49
+iteration 9   log-likelihood of the observed trees: -32.4844
+iteration 10   log-likelihood of the observed trees: -32.4841
 
 10 iterations
 
-log-likelihood of the state trees: -33.2697 | -33.2697
+log-likelihood of the state trees: -33.6989 | -33.6989
 HIDDEN_MARKOV_OUT_TREE
 
 2 STATES
 
 INITIAL_PROBABILITIES
-0.122446  0.877554  
+0.818395  0.181605  
 
 TRANSITION_PROBABILITIES
 0.99999   1e-05     
@@ -1443,118 +1628,118 @@ mixture of number of occurrences of state 1 per tree distributions
 OUTPUT_PROCESS 1 : NONPARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
-OUTPUT 0 : 0.526329
-OUTPUT 1 : 0.473671
+OUTPUT 0 : 0.480245
+OUTPUT 1 : 0.519755
 
 STATE 1 OBSERVATION_DISTRIBUTION
-OUTPUT 0 : 0.462023
-OUTPUT 1 : 0.537977
+OUTPUT 0 : 0.417753
+OUTPUT 1 : 0.582247
 
 observation probability matrix
 
           0         1
-0  0.526329  0.473671
-1  0.462023  0.537977
+0  0.480245  0.519755
+1  0.417753  0.582247
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
 
 information of the trees in the iid case: -32.4821 (-0.691109)
 
-log-likelihood of the state trees: -33.2697   (normalized: -0.707866)
+log-likelihood of the state trees: -33.6989   (normalized: -0.716998)
 
-log-likelihood of the observed trees: -32.484   (normalized: -0.691149)
+log-likelihood of the observed trees: -32.4841   (normalized: -0.691151)
 
-2 free parameters   2 * penalyzed log-likelihood (AIC): -68.968
+2 free parameters   2 * penalyzed log-likelihood (AIC): -68.9682
 
-2 free parameters   2 * penalyzed log-likelihood (AICc): -69.2407
+2 free parameters   2 * penalyzed log-likelihood (AICc): -69.241
 
-2 free parameters   2 * penalyzed log-likelihood (BIC): -72.6683
+2 free parameters   2 * penalyzed log-likelihood (BIC): -72.6685
 
 2 free parameters   2 * penalyzed log-likelihood (BICc): nan
 
-2 free parameters   2 * penalyzed log-likelihood (ICL): -74.2397
+2 free parameters   2 * penalyzed log-likelihood (ICL): -75.0981
 
 2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
 
 
 Testing estimation using SAEM algorithm and initial model specification
-iteration 1   log-likelihood of the observed trees: -32.484
-iteration 2   log-likelihood of the observed trees: -32.485
-iteration 3   log-likelihood of the observed trees: -32.4824
-iteration 4   log-likelihood of the observed trees: -32.4845
-iteration 5   log-likelihood of the observed trees: -32.4834
-iteration 6   log-likelihood of the observed trees: -32.4832
-iteration 7   log-likelihood of the observed trees: -32.4831
+iteration 1   log-likelihood of the observed trees: -32.4841
+iteration 2   log-likelihood of the observed trees: -32.4839
+iteration 3   log-likelihood of the observed trees: -32.4836
+iteration 4   log-likelihood of the observed trees: -32.486
+iteration 5   log-likelihood of the observed trees: -32.484
+iteration 6   log-likelihood of the observed trees: -32.4835
+iteration 7   log-likelihood of the observed trees: -32.4842
 iteration 8   log-likelihood of the observed trees: -32.483
-iteration 9   log-likelihood of the observed trees: -32.4832
-iteration 10   log-likelihood of the observed trees: -32.4838
+iteration 9   log-likelihood of the observed trees: -32.4844
+iteration 10   log-likelihood of the observed trees: -32.4832
 
 10 iterations
 
-log-likelihood of the state trees: -32.5748 | -32.5748
+log-likelihood of the state trees: -32.9753 | -32.9753
 HIDDEN_MARKOV_OUT_TREE
 
 2 STATES
 
 INITIAL_PROBABILITIES
-0.0151994    0.984801     
+0.921653   0.0783471  
 
 TRANSITION_PROBABILITIES
-0.999989     1.07792e-05  
-1e-05        0.99999      
+0.99999    1e-05      
+1e-05      0.99999    
 
 recurrent class: states 0 1
 
@@ -1583,90 +1768,90 @@ mixture of number of occurrences of state 1 per tree distributions
 OUTPUT_PROCESS 1 : NONPARAMETRIC
 
 STATE 0 OBSERVATION_DISTRIBUTION
-OUTPUT 0 : 0.52384
-OUTPUT 1 : 0.47616
+OUTPUT 0 : 0.473955
+OUTPUT 1 : 0.526045
 
 STATE 1 OBSERVATION_DISTRIBUTION
-OUTPUT 0 : 0.466088
-OUTPUT 1 : 0.533912
+OUTPUT 0 : 0.426782
+OUTPUT 1 : 0.573218
 
 observation probability matrix
 
           0         1
-0   0.52384   0.47616
-1  0.466088  0.533912
+0  0.473955  0.526045
+1  0.426782  0.573218
 
 path length (starting from root) up to the first occurrence of output 0 distribution
 
-path length (starting from root) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from root) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.5   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from root) up to the first occurrence of output 1 distribution
 
-path length (starting from root) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from root) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0.8   variance: 0.7   standard deviation: 0.83666
 
 path length (starting from terminal nodes) up to the first occurrence of output 0 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 0 histogram - sample size: 6
+path length (starting from terminal nodes) up to the first occurrence of output 0 frequency distribution - sample size: 6
 mean: 0.166667   variance: 0.166667   standard deviation: 0.408248
 
 path length (starting from terminal nodes) up to the first occurrence of output 1 distribution
 
-path length (starting from terminal nodes) up to the first occurrence of output 1 histogram - sample size: 5
+path length (starting from terminal nodes) up to the first occurrence of output 1 frequency distribution - sample size: 5
 mean: 0   variance: 0   standard deviation: 0
 
 output 0 sojourn size distribution
 
-output 0 sojourn size histogram - sample size: 13
+output 0 sojourn size frequency distribution - sample size: 13
 mean: 1.69231   variance: 1.89744   standard deviation: 1.37747
 
 output 1 sojourn size distribution
 
-output 1 sojourn size histogram - sample size: 16
+output 1 sojourn size frequency distribution - sample size: 16
 mean: 1.5625   variance: 0.929167   standard deviation: 0.963933
 
 mixture of number of zones of output 0 per tree distributions
 
-number of zones of output 0 per tree histogram - sample size: 6
+number of zones of output 0 per tree frequency distribution - sample size: 6
 mean: 2.16667   variance: 1.36667   standard deviation: 1.16905
 
 mixture of number of zones of output 1 per tree distributions
 
-number of zones of output 1 per tree histogram - sample size: 6
+number of zones of output 1 per tree frequency distribution - sample size: 6
 mean: 2.66667   variance: 1.86667   standard deviation: 1.36626
 
 mixture of number of occurrences of output 0 per tree distributions
 
-number of occurrences of output 0 per tree histogram - sample size: 6
+number of occurrences of output 0 per tree frequency distribution - sample size: 6
 mean: 3.66667   variance: 2.66667   standard deviation: 1.63299
 
 mixture of number of occurrences of output 1 per tree distributions
 
-number of occurrences of output 1 per tree histogram - sample size: 6
+number of occurrences of output 1 per tree frequency distribution - sample size: 6
 mean: 4.16667   variance: 6.16667   standard deviation: 2.48328
 
-tree size histogram - sample size: 6
+tree size frequency distribution - sample size: 6
 mean: 7.83333   variance: 8.16667   standard deviation: 2.85774
 
 cumulative size: 47
 
 information of the trees in the iid case: -32.4821 (-0.691109)
 
-log-likelihood of the state trees: -32.5748   (normalized: -0.693081)
+log-likelihood of the state trees: -32.9753   (normalized: -0.701602)
 
-log-likelihood of the observed trees: -32.4824   (normalized: -0.691116)
+log-likelihood of the observed trees: -32.483   (normalized: -0.691128)
 
-3 free parameters   2 * penalyzed log-likelihood (AIC): -70.9649
+2 free parameters   2 * penalyzed log-likelihood (AIC): -68.966
 
-3 free parameters   2 * penalyzed log-likelihood (AICc): -71.523
+2 free parameters   2 * penalyzed log-likelihood (AICc): -69.2387
 
-3 free parameters   2 * penalyzed log-likelihood (BIC): -76.5153
+2 free parameters   2 * penalyzed log-likelihood (BIC): -72.6663
 
-3 free parameters   2 * penalyzed log-likelihood (BICc): nan
+2 free parameters   2 * penalyzed log-likelihood (BICc): nan
 
-3 free parameters   2 * penalyzed log-likelihood (ICL): -76.7
+2 free parameters   2 * penalyzed log-likelihood (ICL): -73.6509
 
-3 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
 
 
