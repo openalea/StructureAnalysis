@@ -27,10 +27,10 @@ using namespace Stat_trees;
 
 int main(void)
 {
-   typedef Hidden_markov_tree_data::state_tree_type state_tree_type;
-   typedef Hidden_markov_tree_data::tree_type tree_type;
-   typedef Hidden_markov_tree_data::key key;
-   typedef Hidden_markov_tree_data::value value;
+   typedef HiddenMarkovTreeData::state_tree_type state_tree_type;
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   typedef HiddenMarkovTreeData::key key;
+   typedef HiddenMarkovTreeData::value value;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
@@ -44,17 +44,17 @@ int main(void)
    value default_value;
    visitor v;
    vertex_array va;
-   Format_error error;
+   StatError error;
    const char * hmotpath= "./hmot_np_2s.hmt";// "./hmot.hmt";
 
-   Hidden_markov_out_tree *hmot;
-   Hidden_markov_tree_data *hmtd=NULL, *hmtdv= NULL, *smoothed= NULL,
+   HiddenMarkovOutTree *hmot;
+   HiddenMarkovTreeData *hmtd=NULL, *hmtdv= NULL, *smoothed= NULL,
                            *vud= NULL, *generalized= NULL,
                            *hmtdman= NULL, *hmtdtmp= NULL;
    state_tree_type **ptrees;
    tree_type **potrees;
    std::vector<ostringstream*> messages;
-   std::vector<Hidden_markov_tree_data*> tree_list;
+   std::vector<HiddenMarkovTreeData*> tree_list;
 
    // read and print a hidden Markov out tree
    hmot= hidden_markov_out_tree_ascii_read(error, hmotpath);

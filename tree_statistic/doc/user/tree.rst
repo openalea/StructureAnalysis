@@ -99,10 +99,34 @@ Attributes
 The object **T1** has a few methods, among which some aims at printing
 information on the screen.
 The :meth:`~openalea.tree_statistic.trees.Tree.Attributes` method is one
-of them. This methods prints the name of the attributes. The default
+of them. This methods prints the name of the attributes 
+(also named variables). The default
 name of attribute number `i` is `"Variable"+str(i)`. The attributes
 can only be changed if the `Tree`_ instance was built from a MTG file
 (see below).
+
+The number of attributes can be accessed to, using 
+the :meth:`~openalea.tree_statistic.trees.Tree.NbVariables()` method.
+This number is the same for all the vertices of a given instance, 
+and cannot be changed directly for this instance. 
+
+The attributes have types, which can be either `INT_VALUE` (for integer 
+attributes) or `REAL_VALUE` (for floating attributes). The type of 
+variable `i` in instance **T1** is given by `T1.Type(i)`, and the list
+of every types by `T1.Types()`. 
+The :meth:`~openalea.tree_statistic.trees.Tree.NbInt` method returns
+the number of attributes with type `INT_VALUE`, whereas the 
+:meth:`~openalea.tree_statistic.trees.Tree.NbFloat` method returns
+the number of attributes with type `REAL_VALUE`.
+
+.. doctest::
+
+    >>> print(T1.NbVariables()) #doctest +SKIP
+    4
+    >>> print(T1.NbInt())
+    2
+    >>> print(T1.NbFloat())
+    2
 
 Display
 -------
@@ -153,6 +177,9 @@ effects than .Display(vids=False)
     | |-[1.0, 0, 1, 2.0]+
     |
     |-[1.0, 0, 1, 2.0]+
+
+Root vertex
+-----------
 
 Root vertex
 -----------
@@ -218,6 +245,7 @@ Then, you can construct a new `Tree`_ instance as follows:
     
     >>> T2 = Tree('test.mtg')
 
+
 Trees
 =====
 
@@ -279,7 +307,6 @@ can be accessed to using the method :meth:`~openalea.tree_statistic.trees.Trees.
 
 Display
 -------
-The :func:`print` functions prints
 
 The :meth:`~openalea.tree_statistic.trees.Trees.Display` method
 provides an ASCII output of a `Tree`, as shown below:
@@ -314,6 +341,16 @@ Thus, the first line also contains the names of the variables.
 
 The :func:`str` and the :func:`print` functions have the same
 effects than .Display(vids=False)
+
+.. todo:: Tree: EdgeType, Size, SelectSubTree
+    
+    Trees: Merge, SelectVariable, SelectIndividual, Shift, Transcode, Cluster, 
+    Merge, MergeVariable, NbVariables, Plot
+
+.. keep paragraph below
+    However, it is possible
+    to create other instances by adding or deleting attributes 
+    (see :ref:`Merging and Selecting variables <tree-save>`.)
 
 ..  comment lines below
     Plotting

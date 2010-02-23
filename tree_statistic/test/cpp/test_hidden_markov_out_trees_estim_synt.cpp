@@ -27,13 +27,13 @@ using namespace Stat_trees;
 
 int main(void)
 {
-   typedef Hidden_markov_tree_data::tree_type hmtd_tree_type;
-   typedef Hidden_markov_tree_data::pt_observed_trees_array pt_observed_trees_array;
-   typedef Hidden_markov_tree_data::observed_trees observed_trees;
-   typedef Hidden_markov_tree_data::value value;
-   typedef Hidden_markov_tree_data::vertex_iterator vertex_iterator;
-   typedef Stat_trees::Hidden_markov_tree::double_array_3d double_array_3d;
-   typedef Stat_trees::Hidden_markov_tree::double_array_4d double_array_4d;
+   typedef HiddenMarkovTreeData::tree_type hmtd_tree_type;
+   typedef HiddenMarkovTreeData::pt_observed_trees_array pt_observed_trees_array;
+   typedef HiddenMarkovTreeData::observed_trees observed_trees;
+   typedef HiddenMarkovTreeData::value value;
+   typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
+   typedef Stat_trees::HiddenMarkovTree::double_array_3d double_array_3d;
+   typedef Stat_trees::HiddenMarkovTree::double_array_4d double_array_4d;
    typedef generic_visitor<hmtd_tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
@@ -47,20 +47,20 @@ int main(void)
    visitor v;
    vertex_iterator it, end;
    vertex_array va;
-   Format_error error;
+   StatError error;
    bool *force_param= NULL;
    int *perm;
    const char * hmotpath= "./hmot_np_2s.hmt";
    const char * hmotinitpath= "./hmot_np_init_2s.hmt";
    const char * hmotparampath= "./hmot_init.hmt";
-   Hidden_markov_out_tree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL,
+   HiddenMarkovOutTree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL,
                           *hmot_estim= NULL, *hmot_param= NULL;
-   Hidden_markov_tree_data *hmtd= NULL, *hmtdman= NULL,
+   HiddenMarkovTreeData *hmtd= NULL, *hmtdman= NULL,
                            *hmtdtmp= NULL;
    Trees *ctrees= NULL;
    hmtd_tree_type **ptrees= NULL;
    observed_trees *merged_trees= NULL;
-   std::vector<Hidden_markov_tree_data*> tree_list;
+   std::vector<HiddenMarkovTreeData*> tree_list;
    hmtd_tree_type ctree;
    // const char * hsmcpath= "./laricio_3.hsc";
    double_array_3d state_marginal= NULL, output_cond= NULL,

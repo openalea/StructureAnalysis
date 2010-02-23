@@ -43,8 +43,8 @@ int main(void)
    const int ident= UNIFORM;
    const double parameter= D_DEFAULT;
    const int nb_trees= 1, nb_var_trees= 2;
-   const Parametric sdistrib(ident, sinf_bound, ssup_bound, parameter, probability);
-   const Parametric adistrib(ident, ainf_bound, asup_bound, parameter, probability);
+   const DiscreteParametric sdistrib(ident, sinf_bound, ssup_bound, parameter, probability);
+   const DiscreteParametric adistrib(ident, ainf_bound, asup_bound, parameter, probability);
    const int max_depth= 3;
    const int max_size= 20;
    register int t, o, *itype= NULL, *citype= NULL, i;
@@ -64,7 +64,7 @@ int main(void)
    int_array limit, symbol_array, iidentifier, ivariables;
    Typed_edge_one_int_tree *ident_tree= NULL; //*otrees1= NULL,
    Trees** potc= new Trees*[0];
-   Format_error error;
+   StatError error;
 
    pota= new int_trees*[nb_var_trees];
    pda= new Distribution*[2];
@@ -472,7 +472,7 @@ int main(void)
       otrees= NULL;
    }
 
-   // test of the Format_error messages
+   // test of the StatError messages
    // incompatible number of variables for merge
    delete default_base_tree;
    default_base_tree= NULL;
@@ -719,7 +719,7 @@ int main(void)
       res= NULL;
    }
 
-   // test of the Format_error messages
+   // test of the StatError messages
    // incompatible number of variables for select_variables
 
    delete [] ivariables;

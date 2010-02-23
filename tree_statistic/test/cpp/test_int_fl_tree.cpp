@@ -38,15 +38,15 @@ int main(void)
   // int max_depth= 3;
   // int nv= 15;
 
-  const Parametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
-  const Parametric cdistrib1(ident,1,5,parameter,probability);
+  const DiscreteParametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
+  const DiscreteParametric cdistrib1(ident,1,5,parameter,probability);
   Distribution **distrib;
 
   tree_type *pt, t, **trees;
   Typed_edge_one_int_tree o, *otrees1, *tmp_otree1;
   Unlabelled_typed_edge_tree utree, *tmp_utree;
   // default constructor;
-  Parametric var_distrib(BINOMIAL,inf_bound,sup_bound,parameter,probability);
+  DiscreteParametric var_distrib(BINOMIAL,inf_bound,sup_bound,parameter,probability);
   value v, val;
   vertex *vt= new vertex[n], child;
   int i, var;
@@ -54,8 +54,8 @@ int main(void)
   pt= new tree_type();
   distrib= new Distribution*[2];
 
-  distrib[0]= new Parametric(cdistrib0);
-  distrib[1]= new Parametric(cdistrib1);
+  distrib[0]= new DiscreteParametric(cdistrib0);
+  distrib[1]= new DiscreteParametric(cdistrib1);
 
   // Default Int_fl_tree
 

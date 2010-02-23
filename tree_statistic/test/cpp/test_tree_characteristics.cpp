@@ -31,8 +31,8 @@ int main(void)
   const int ident= UNIFORM;
   const double parameter= D_DEFAULT;
   int nb_trees= n;
-  const Parametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
-  const Parametric cdistribl(ident,0,5,parameter,probability);
+  const DiscreteParametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
+  const DiscreteParametric cdistribl(ident,0,5,parameter,probability);
   int cmax_depth= 20;
   int cmax_size= 20;
   int t, *itype, i;
@@ -44,9 +44,9 @@ int main(void)
   tree_type  **observed_trees;
   // Int_trees *b;
   Typed_edge_one_int_tree **otrees1;
-  Tree_characteristics **tc;
+  TreeCharacteristics **tc;
   Distribution **distrib;
-  Histogram h;
+  FrequencyDistribution h;
   v.reset(1,0);
   v.Int(0)= 1;
   _nb_integral= 1;
@@ -91,12 +91,12 @@ int main(void)
   cout << "_min_value == " << _min_value << ", _max_value == " << _max_value
        << " _max_depth == " << _max_depth << ", _max_size == " << _max_size << endl;
 
-  tc= new Tree_characteristics*[_nb_integral];
+  tc= new TreeCharacteristics*[_nb_integral];
 
   for (t= 0; t < nb_trees; t++)
       otrees1[t]= observed_trees[t]->select_int_variable(0);
 
-  tc[0]= new Tree_characteristics(_min_value,
+  tc[0]= new TreeCharacteristics(_min_value,
                                   _max_value,
                                   _max_size,
                                   _max_depth,
@@ -105,10 +105,10 @@ int main(void)
                                   0);
 
 
-  // copy of the Tree_characteristics objects;
+  // copy of the TreeCharacteristics objects;
 
-  cout << "Check assignement operator for 'Tree_characteristics' : " << endl;
-  Tree_characteristics *pt_copy_tc= new Tree_characteristics(*(tc[0])), copy_tc= *(tc[0]);
+  cout << "Check assignement operator for 'TreeCharacteristics' : " << endl;
+  TreeCharacteristics *pt_copy_tc= new TreeCharacteristics(*(tc[0])), copy_tc= *(tc[0]);
 
   cout << "Histogram of the marginal distribution: " << endl;
   tc[0]->ascii_write_marginal(cout, 1, 0);
@@ -131,7 +131,7 @@ int main(void)
   //cout << "Histogram of the copy (zones) : " << endl;
   //copy_tc.ascii_write_nb_zones(cout, 1, 0);
 
-  //cout << "Checking the copy constructor of 'Tree_characteristics' : " << endl;
+  //cout << "Checking the copy constructor of 'TreeCharacteristics' : " << endl;
 
   //cout << "Histogram of the copy (marginal) : " << endl;
   //pt_copy_tc->ascii_write_marginal(cout, 1, 0);

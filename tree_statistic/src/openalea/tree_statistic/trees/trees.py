@@ -1751,10 +1751,10 @@ class Trees(object):
                 ExtractHistogram("NbZones", variable, value)"""
         if type(nature)==str:
             if (nature.upper()=="SIZE"):
-                chisto=self.__ctrees.ExtractSizeHistogram()
+                chisto=self.__ctrees.ExtractSizeFrequencyDistribution()
                 return chisto
             elif (nature.upper()=="NBCHILDREN"):
-                chisto=self.__ctrees.ExtractNbChildrenHistogram()
+                chisto=self.__ctrees.ExtractNbChildrenFrequencyDistribution()
                 return chisto
             elif (nature.upper()=="VALUE"):
                 if variable is None:
@@ -1766,7 +1766,7 @@ class Trees(object):
                         raise TypeError, 'argument 2 is mandatory in ' \
                                          'ExtractHistogram("Value", variable)'
                 try:
-                    chisto=self.__ctrees.ExtractValueHistogram(
+                    chisto=self.__ctrees.ExtractValueFrequencyDistribution(
                         self._valid_cvariable(variable)+1)
                 except RuntimeError, error:
                     raise FormatError(error)
@@ -1805,7 +1805,7 @@ class Trees(object):
                     chartype=CharacteristicType.NB_OCCURRENCES
                 chartype+=0
                 try:
-                    chisto=self.__ctrees.ExtractFeatureHistogram(
+                    chisto=self.__ctrees.ExtractFeatureFrequencyDistribution(
                         chartype, self._valid_cvariable(variable)+1, value)
                 except RuntimeError, error:
                     raise FormatError(error)
@@ -1817,7 +1817,7 @@ class Trees(object):
                 except ValueError:
                     msg="unknown feature histogram: "+nature
                     raise ValueError, msg
-                chisto=self.__ctrees.ExtractValueHistogram(v+1)
+                chisto=self.__ctrees.ExtractValueFrequencyDistribution(v+1)
                 return chisto
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"

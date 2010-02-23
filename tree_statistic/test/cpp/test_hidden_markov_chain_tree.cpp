@@ -25,28 +25,28 @@ using namespace Stat_trees;
 
 int main(void)
 {
-   typedef Hidden_markov_tree_data::state_tree_type state_tree_type;
-   typedef Hidden_markov_tree_data::tree_type tree_type;
-   typedef Hidden_markov_tree_data::value value;
-   typedef Hidden_markov_tree_data::vertex_iterator vertex_iterator;
-   typedef Stat_trees::Hidden_markov_tree::double_array_3d double_array_3d;
+   typedef HiddenMarkovTreeData::state_tree_type state_tree_type;
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   typedef HiddenMarkovTreeData::value value;
+   typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
+   typedef Stat_trees::HiddenMarkovTree::double_array_3d double_array_3d;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
    register int var, t, u, nb_integral, cptm= 0; // j, i, nb_states,
    bool status;
    const int tid= 0; // id of the tree to be analyzed
-   Hidden_semi_markov *hmc= NULL, *hmc_init= NULL;
+   HiddenSemiMarkov *hmc= NULL, *hmc_init= NULL;
    // Hidden_variable_order_markov *hmc= NULL, *hmc_init= NULL;
-   Hidden_markov_out_tree *hmot= NULL, *hmot_init= NULL, *hmotref= NULL;
-   Hidden_markov_tree_data *hmtd= NULL, *hmtdv= NULL, *smoothed= NULL,
+   HiddenMarkovOutTree *hmot= NULL, *hmot_init= NULL, *hmotref= NULL;
+   HiddenMarkovTreeData *hmtd= NULL, *hmtdv= NULL, *smoothed= NULL,
                            *vud= NULL, *generalized= NULL;
-   Markovian_sequences *ms= NULL;
+   MarkovianSequences *ms= NULL;
    Sequences *seq= NULL;
    std::vector<ostringstream*> messages;
    tree_type *ctree, **potrees= NULL;
    state_tree_type **ptrees= NULL;
-   Format_error error;
+   StatError error;
    const char * hmotrefpath= "./hmot_np.hmt";
    const char * hmotinitpath= "./hmot_np_init.hmt";
    const char * hmcinitpath= "./hmc_init.hmc";
@@ -114,7 +114,7 @@ int main(void)
 
       seq= new Sequences(nb_trees, iidentifier, length, IMPLICIT_TYPE,
                          nb_integral, INT_VALUE, sequences);
-      ms= new Markovian_sequences(*seq);
+      ms= new MarkovianSequences(*seq);
       delete seq;
 #     ifdef DEBUG
       cout << "Markovian sequences: " << endl;
@@ -175,15 +175,15 @@ int main(void)
             likelihood= hmtd->get_likelihood();
             check_likelihood= hmot->likelihood_computation(*hmtd);
             if (abs(likelihood-check_likelihood) > DOUBLE_ERROR)
-               cout << "Warning: likelihood differs from Hidden_markov_tree_data"
-                    << " to Hidden_markov_tree::likelihood_computation" << endl;
+               cout << "Warning: likelihood differs from HiddenMarkovTreeData"
+                    << " to HiddenMarkovTree::likelihood_computation" << endl;
 
             // check the completed likelihood computation
             hidden_likelihood= hmtd->get_hidden_likelihood();
             check_hidden_likelihood= hmot->get_viterbi(*hmtd);
             if (abs(hidden_likelihood-check_hidden_likelihood) > DOUBLE_ERROR)
-               cout << "Warning: completed likelihood differs from Hidden_markov_tree_data"
-                    << " to Hidden_markov_tree::viterbi" << endl;
+               cout << "Warning: completed likelihood differs from HiddenMarkovTreeData"
+                    << " to HiddenMarkovTree::viterbi" << endl;
             cout << "Estimated HMT : " << endl;
             hmot->ascii_write(cout, false);
             cout << "log-likelihood of the state trees: " << hidden_likelihood << endl;

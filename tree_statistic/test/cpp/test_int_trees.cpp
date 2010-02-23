@@ -30,7 +30,7 @@ int main(void)
    const int ident= UNIFORM;
    const double parameter= D_DEFAULT;
    const int nb_trees= 5;
-   const Parametric distrib(ident, inf_bound, sup_bound, parameter, probability);
+   const DiscreteParametric distrib(ident, inf_bound, sup_bound, parameter, probability);
    const int max_depth= 3;
    const int max_size= 20;
    int t, *itype;
@@ -39,10 +39,10 @@ int main(void)
    tree_type *default_base_tree, tmp_base_tree;
    tree_type  **observed_trees;
    Int_trees *b;
-   Tree_characteristics **tc;
+   TreeCharacteristics **tc;
    // Typed_edge_one_int_tree *otrees1;
-   Distribution_data *mhisto, *ihsize, *ihnb_children;
-   Format_error error;
+   DiscreteDistributionData *mhisto, *ihsize, *ihnb_children;
+   StatError error;
 
 
    v.reset(1,0);
@@ -128,16 +128,16 @@ int main(void)
 
 
    cout << "Histograms for the tree size : " << endl;
-   b->ascii_write_size_histogram(cout, 1, 0);
+   b->ascii_write_size_frequency_distribution(cout, 1, 0);
    cout << endl;
    cout << "Histograms for the number of children  : " << endl;
-   b->ascii_write_nb_children_histogram(cout, 1, 0);
+   b->ascii_write_nb_children_frequency_distribution(cout, 1, 0);
    cout << endl;
 
    ihsize= b->extract_size();
    ihnb_children= b->extract_nb_children();
 
-   tc= new Tree_characteristics*[b->get_nb_int()];
+   tc= new TreeCharacteristics*[b->get_nb_int()];
    if (b->get_characteristics(0) != NULL)
    {
       tc[0]= b->get_characteristics(0);
@@ -172,10 +172,10 @@ int main(void)
    }
 
    cout << "Histograms for the tree size : " << endl;
-   b->ascii_write_size_histogram(cout, 1, 0);
+   b->ascii_write_size_frequency_distribution(cout, 1, 0);
    cout << endl;
    cout << "Histograms for the number of children  : " << endl;
-   b->ascii_write_nb_children_histogram(cout, 1, 0);
+   b->ascii_write_nb_children_frequency_distribution(cout, 1, 0);
    cout << endl;
 
    delete b;
@@ -238,7 +238,7 @@ int main(void)
        cout << endl;
    }
 
-   tc= new Tree_characteristics*[b->get_nb_int()];
+   tc= new TreeCharacteristics*[b->get_nb_int()];
    if (b->get_characteristics(0) != NULL)
    {
       tc[0]= b->get_characteristics(1);

@@ -326,19 +326,22 @@ CiHmot_wrapper_simulate_trees(const HiddenMarkovOutTree& hmt,
    return markov_data;
 }
 
-boost::python::list CiHmot_wrapper_state_profile(const HiddenMarkovOutTree& hmt,
+boost::python::list CiHmot_wrapper_state_profile5(const HiddenMarkovOutTree& hmt,
                                                  int viterbi_algorithm,
                                                  int nb_state_trees,
                                                  int index,
-                                                 int entropy_algorithm= Stat_trees::UPWARD,
-                                                 int root= I_DEFAULT)
+                                                 int entropy_algorithm,
+                                                 int root)
 {
-   bool status= false;
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   // typedef tree_type::vertex_descriptor vid;
+   bool status= true;
    unsigned int cpt_msg= 0;
    StatError error;
    boost::python::list res;
    str msg;
    ostringstream error_message;
+   tree_type *t= NULL;
    std::vector<ostringstream*> messages;
    HiddenMarkovTreeData *markov_data= NULL, *smoothed= NULL, *nstate_trees= NULL,
                         *viterbi_upward_downward= NULL,
@@ -353,10 +356,47 @@ boost::python::list CiHmot_wrapper_state_profile(const HiddenMarkovOutTree& hmt,
    }
    else
    {
+      if (index == I_DEFAULT)
+      {
+         error_message << "Bad value for argument 'TreeId'" << endl;
+         status= false;
+      }
+      if ((index < 0) || (index >= markov_data->get_nb_trees()))
+      {
+         error_message << "Bad value for argument 'TreeId': " << index << endl;
+         status= false;
+      }
+      if ((status) && (root != I_DEFAULT) &&
+          ((root < 0) || (root >= markov_data->get_size(index))))
+      {
+         error_message << "Bad value for argument 'RootVertex': " << root << endl;
+         status= false;
+      }
+      if (status)
+      {
+         t= markov_data->get_tree(index);
+
+         if (t->get_nb_children(root) < 2)
+         {
+            error_message << "Bad number of children for subtree rooted at: "
+            << root << endl;
+            status= false;
+         }
+         delete t;
+         t= NULL;
+      }
+      if (!status)
+      {
+         PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+         throw_error_already_set();
+      }
+      else
+      {
       status= hmt.state_profile(error, *markov_data, index, smoothed,
                                 nstate_trees, viterbi_upward_downward,
                                 generalized_restoration, messages, viterbi_algorithm,
                                 nb_state_trees, entropy_algorithm, root);
+      }
 
       if (!status)
       // if ((smoothed == NULL) || (viterbi_upward_downward == NULL)
@@ -439,6 +479,22 @@ boost::python::list CiHmot_wrapper_state_profile(const HiddenMarkovOutTree& hmt,
    }
    return res;
 }
+
+boost::python::list CiHmot_wrapper_state_profile4(const HiddenMarkovOutTree& hmt,
+                                                 int viterbi_algorithm,
+                                                 int nb_state_trees,
+                                                 int index,
+                                                 int entropy_algorithm)
+{ return CiHmot_wrapper_state_profile5(hmt, viterbi_algorithm, nb_state_trees,
+                                      index, entropy_algorithm, I_DEFAULT); }
+
+
+boost::python::list CiHmot_wrapper_state_profile3(const HiddenMarkovOutTree& hmt,
+                                                 int viterbi_algorithm,
+                                                 int nb_state_trees,
+                                                 int index)
+{ return CiHmot_wrapper_state_profile5(hmt, viterbi_algorithm, nb_state_trees,
+                                      index, Stat_trees::UPWARD, I_DEFAULT); }
 
 HiddenMarkovOutTree*
 Hmt_wrapper_ascii_read(const char * path, int size= I_DEFAULT_TREE_SIZE,
@@ -793,8 +849,16 @@ BOOST_PYTHON_MODULE(chmt)
         .def("StatePermutation", &CiHmot_wrapper_state_permutation,
                                  "StatePermutation(self, list) \n\n"
                                  "permutation of the model states\n")
-        .def("StateProfile", &CiHmot_wrapper_state_profile,
+        .def("StateProfile", &CiHmot_wrapper_state_profile5,
+                             "StateProfile(self, int, int, int, int, int) -> list \n\n"
+                             "return trees object and strings"
+                             "for the state tree analysis\n")
+        .def("StateProfile", &CiHmot_wrapper_state_profile4,
                              "StateProfile(self, int, int, int, int) -> list \n\n"
+                             "return trees object and strings"
+                             "for the state tree analysis\n")
+        .def("StateProfile", &CiHmot_wrapper_state_profile3,
+                             "StateProfile(self, int, int, int) -> list \n\n"
                              "return trees object and strings"
                              "for the state tree analysis\n")
         .def("state_profile_plot_write", &CiHmot_wrapper_state_profile_plot_write,

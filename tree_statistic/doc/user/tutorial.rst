@@ -14,7 +14,7 @@
 Tutorial
 ########
 
-.. .. contents::
+.. contents::
 
 .. note:: most of the docstrings provided in this tutorial are tested with 
     doctest and should work out of the box. However, you will need to import 
@@ -28,13 +28,11 @@ Tutorial
     >>> from pylab import savefig
 
 
-.. todo:: uncomment the tutorial_object_types.rst in the tutorial.rst file once commited
+.. .. todo:: uncomment the tutorial_object_types.rst in the tutorial.rst file once commited
 
-.. .. include:: tutorial_object_types.rst
+.. include:: tutorial_object_types.rst
 
-.. toctree:: 
-    
-    tree.rst
+.. include:: tree.rst
 
 ..    .. include:: trees.rst
 ..    .. include:: hmt.rst

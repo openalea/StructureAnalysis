@@ -32,8 +32,8 @@ int main(void)
   const int ident= UNIFORM;
   const double parameter= D_DEFAULT;
   int nb_trees= n;
-  const Parametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
-  const Parametric cdistribl(ident,2,5,parameter,probability);
+  const DiscreteParametric cdistrib0(ident,inf_bound,sup_bound,parameter,probability);
+  const DiscreteParametric cdistribl(ident,2,5,parameter,probability);
   int cmax_depth= 20;
   int cmax_size= 20;
   int t, *itype;
@@ -46,9 +46,9 @@ int main(void)
   tree_type  **observed_trees;
   Int_trees *b;
   Typed_edge_one_int_tree **otrees1;
-  Tree_characteristics **tc;
+  TreeCharacteristics **tc;
   Distribution **distrib;
-  Histogram h;
+  FrequencyDistribution h;
   vertex_array va;
   generic_visitor<tree_type> visitor;
 
@@ -105,13 +105,13 @@ int main(void)
   cout << "_min_value == " << _min_value << ", _max_value == " << _max_value
        << " _max_depth == " << _max_depth << ", _max_size == " << _max_size << endl;
 
-  tc= new Tree_characteristics*[_nb_integral];
+  tc= new TreeCharacteristics*[_nb_integral];
 
   for (t= 0; t < nb_trees; t++)
       otrees1[t]= observed_trees[t]->select_int_variable(0);
 
 
-  tc[0]= new Tree_characteristics(_min_value,
+  tc[0]= new TreeCharacteristics(_min_value,
                                   _max_value,
                                   _max_size,
                                   _max_depth,

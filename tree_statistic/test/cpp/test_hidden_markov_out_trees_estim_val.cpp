@@ -27,22 +27,22 @@ using namespace Stat_trees;
 
 int main(void)
 {
-   typedef Hidden_markov_tree_data::tree_type tree_type;
-   typedef Hidden_markov_tree_data::value value;
-   typedef Hidden_markov_tree_data::vertex_iterator vertex_iterator;
-   typedef Stat_trees::Hidden_markov_tree::double_array_3d double_array_3d;
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   typedef HiddenMarkovTreeData::value value;
+   typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
+   typedef Stat_trees::HiddenMarkovTree::double_array_3d double_array_3d;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
-   Hidden_markov_out_tree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL;
-   Hidden_markov_tree_data *hmtd;
+   HiddenMarkovOutTree *hmot= NULL, *hmot2= NULL, *hmot_init= NULL;
+   HiddenMarkovTreeData *hmtd;
    // tree_type **ptrees;
    tree_type ctree;
    value default_value;
    visitor v;
    vertex_iterator it, end;
    vertex_array va;
-   Format_error error;
+   StatError error;
    // const char * hsmcpath= "./laricio_3.hsc";
    // const char * hmtpath= "./hmt.hmt";
    const char * hmotpath= "./hmot.hmt";
@@ -63,7 +63,7 @@ int main(void)
    if (hmot != NULL)
    {
       cout << "Read a hidden Markov tree from file " << hmotpath << endl;
-      hmot2= new Hidden_markov_out_tree(*hmot, false, false);
+      hmot2= new HiddenMarkovOutTree(*hmot, false, false);
 
       hmot2->ascii_write(cout, false);
       cout << endl;

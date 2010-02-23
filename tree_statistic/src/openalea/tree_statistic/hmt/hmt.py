@@ -92,14 +92,22 @@ class HiddenMarkovTree:
                 if (TreeId is None):
                     raise TypeError, "Argument 'TreeId' is mandatory in "+\
                             'Display(ViewPoint="StateProfile", TreeId)'
+                if (type(TreeId) != int):
+                    msg='bad type for argument "TreeId": '\
+                        +str(type(TreeId))
+                    raise TypeError, msg
                 if (type(NbStateTrees)!=int):
                     msg='bad type for argument "NbStateTrees": '\
                         +str(type(NbStateTrees))
                     raise TypeError, msg
-                if not(RootVertex is None) and (type(RootVertex!=int)):
+                if not(RootVertex is None) and (type(RootVertex)!=int):
                     msg='bad type for argument "RootVertex": '\
                         +str(type(RootVertex))
                     raise TypeError, msg
+                elif RootVertex is None:
+                    rv = stat_tool.I_DEFAULT
+                else:
+                    rv = RootVertex
                 if (type(Entropy)!=str):
                     msg='bad type for argument "Entropy": '\
                         +str(type(Entropy))
@@ -116,7 +124,7 @@ class HiddenMarkovTree:
                     ## chmt_data=self.__chmt.ExtractData()
                     res = self.__chmt.StateProfile(0, NbStateTrees, 
                                                    TreeId, entropy_algo,
-                                                   RootVertex)
+                                                   rv)
                 except RuntimeError, error:
                     raise FormatError, error
                 else:
@@ -911,12 +919,12 @@ class HiddenMarkovTreeData(trees.Trees):
     def _state_marginal_distribution(self):
         # compute the (empirical) marginal distribution of the hidden states
         s=trees.Trees._ctrees_display(self)
-        i=s.find("state histogram - sample size", 0)
+        i=s.find("state frequency distribution - sample size", 0)
         msg="Could not find the (empirical) marginal distribution" \
             " of the hidden states"
         if i == -1:
             raise Warning, msg
-        i=s.find("state histogram", i+1)
+        i=s.find("state frequency distribution", i+1)
         if i == -1:
             raise Warning, msg
         nb_states=self.__ctrees.NbValues(0)

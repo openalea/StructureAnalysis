@@ -26,8 +26,8 @@ using namespace Stat_trees;
 
 int main(void)
 {
-   typedef Hidden_markov_tree_data::tree_type tree_type;
-   typedef Hidden_markov_tree_data::value value;
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   typedef HiddenMarkovTreeData::value value;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
@@ -38,7 +38,7 @@ int main(void)
    value default_value;
    visitor v;
    vertex_array va;
-   Format_error error;
+   StatError error;
    const char * hsmcpath= "./laricio_3.hsc";
    // const char * hmtpath= "./hmt.hmt";
    const char * hmotpath= "./hmot.hmt";
@@ -50,16 +50,16 @@ int main(void)
    int* perm;
    double*** state_marginal= NULL, ***output_cond= NULL;
    double** sum_state_marginal= NULL;
-   Hidden_semi_markov *hsmc;
-   // Hidden_markov_tree *hmt, *hmt2;
-   Hidden_markov_out_tree *hmot, *hmot2;
-   Hidden_markov_tree_data *hmtd;
+   HiddenSemiMarkov *hsmc;
+   // HiddenMarkovTree *hmt, *hmt2;
+   HiddenMarkovOutTree *hmot, *hmot2;
+   HiddenMarkovTreeData *hmtd;
    tree_type **ptrees;
 
-   // default constructor of Hidden_markov_tree_data
-   hmtd= new Hidden_markov_tree_data();
+   // default constructor of HiddenMarkovTreeData
+   hmtd= new HiddenMarkovTreeData();
 
-   // destructor of Hidden_markov_tree_data
+   // destructor of HiddenMarkovTreeData
    delete hmtd;
    hmtd= NULL;
 
@@ -119,7 +119,7 @@ int main(void)
       {
          // Copy constructor of a hidden Markov out tree
          // without the characteristics
-         hmot2= new Hidden_markov_out_tree(*hmot, false, false);
+         hmot2= new HiddenMarkovOutTree(*hmot, false, false);
 
          hmot2->ascii_write(cout, false);
          cout << endl;
@@ -223,7 +223,7 @@ int main(void)
 
          // Copy constructor of a hidden Markov out tree
          // with the characteristics
-         hmot2= new Hidden_markov_out_tree(*hmot, true, true);
+         hmot2= new HiddenMarkovOutTree(*hmot, true, true);
 
          /* delete hmt;
          delete hmt2; */

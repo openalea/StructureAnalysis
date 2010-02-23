@@ -479,12 +479,19 @@ bool HiddenMarkovOutTree::state_profile(StatError& error,
          messages.push_back(m);
       }
 
+      generalized_restoration= hmarkov->generalized_viterbi_subtree(*cptrees,
+                                                                    messages,
+                                                                    nb_state_trees,
+                                                                    likelihood,
+                                                                    index, iroot);
+
+/*
       generalized_restoration= hmarkov->generalized_viterbi(*cptrees,
                                                             messages,
                                                             nb_state_trees,
                                                             likelihood,
                                                             index,
-                                                            iroot);
+                                                            iroot);*/
       hmarkov->remove_cumul();
       delete hmarkov;
       hmarkov= NULL;
@@ -3782,11 +3789,15 @@ HiddenMarkovOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& tre
 {
    typedef HiddenMarkovTreeData::tree_type tree_type;
    typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   typedef tree_type::vertex_descriptor vid;
+   typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
    register int sroot, s;
    unsigned int u= 0, var;
+   vid croot;
    int _nb_integral= 1;
    vertex_iterator it, end;
    StatError error;
@@ -3804,24 +3815,35 @@ HiddenMarkovOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& tre
    Default_tree **otrees= NULL;
 
    assert((index >= 0) && (index < trees.get_nb_trees()));
-   assert((root >=0) && (root < trees.trees[index]->get_size()));
+   assert((root == I_DEFAULT) ||
+          ((root >=0) && (root < trees.trees[index]->get_size())));
 
    // generalized Viterbi algorithm starts at vertex iroot
-   // used classical Viterbi otherwise
+   // and uses classical Viterbi otherwise
    cp_trees= new HiddenMarkovTreeData(trees, true, false);
    hmarkov= new HiddenMarkovOutTree(*this, false, false);
    hmarkov->create_cumul();
    hmarkov->log_computation();
    cp_trees->build_state_trees();
 
+   // Viterbi algorithm on the whole tree
    hmarkov->viterbi(*cp_trees, index);
-   sroot= cp_trees->state_trees[index]->get(trees.trees[index]->parent(root)).Int();
-   sub_trees= trees.select_subtrees(error, root, index);
+   if (root == I_DEFAULT)
+      croot= trees.trees[index]->root();
+   else
+      croot= root;
+   // optimal value at root vertex
+   if (root != I_DEFAULT)
+      sroot= cp_trees->state_trees[index]->get(trees.trees[index]->parent(croot)).Int();
+   else
+      sroot= cp_trees->state_trees[index]->get(croot).Int();
+   sub_trees= trees.select_subtrees(error, croot, index);
 
+   // build correspondance table between the vids of both trees
    v= new generic_visitor<tree_type>;
    traverse_tree(trees.trees[index]->root(), *trees.trees[index], *v);
 
-   va_st= v->get_breadthorder(*trees.trees[index], root);
+   va_st= v->get_breadthorder(*trees.trees[index], croot);
    delete v;
    v= NULL;
 
@@ -3832,7 +3854,6 @@ HiddenMarkovOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& tre
    delete v;
    v= NULL;
 
-   // correspondance between the vids of both trees has to be kept
    assert(va_st.size() == va_e.size());
    tree2subtree.assign(trees.trees[index]->get_size(), I_DEFAULT);
    subtree2tree.resize(sub_trees->trees[index]->get_size());
@@ -3843,6 +3864,7 @@ HiddenMarkovOutTree::generalized_viterbi_subtree(const HiddenMarkovTreeData& tre
       u++;
    }
 
+   hmt_sub_trees= new HiddenMarkovTreeData(*sub_trees);
    hmt_sub_trees= new HiddenMarkovTreeData(*sub_trees);
    hmt_sub_trees->markov= hmarkov;
 
@@ -3994,6 +4016,8 @@ HiddenMarkovOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
    Unlabelled_typed_edge_tree *tmp_utree= NULL;
 
    assert(index < trees.get_nb_trees());
+   assert((state_root == I_DEFAULT) ||
+          ((0 <= state_root) && (state_root < nb_state)));
 
    if (index == I_DEFAULT)
       inb_trees= nb_trees;
@@ -4080,6 +4104,7 @@ HiddenMarkovOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
 #        endif
          current_tree= trees.trees[t];
          current_size= current_tree->get_size();
+         assert(current_size > 1);
 
          v= new generic_visitor<tree_type>;
          traverse_tree(current_tree->root(), *current_tree, *v);
@@ -4324,7 +4349,13 @@ HiddenMarkovOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
                }
             }
             else
+            {
                state= state_root;
+               if (current_tree->is_root(cnode))
+                  val_states[cnode][m]= state;
+               else
+                  val_states[current_tree->parent(cnode)][m]= state;
+            }
 
             // restoration
             v= new generic_visitor<tree_type>;
@@ -4430,13 +4461,19 @@ HiddenMarkovOutTree::generalized_viterbi(const HiddenMarkovTreeData& trees,
             for(u= 0; u < current_size; u++)
             {
                delete [] map_upward[j][u];
+               map_upward[j][u]= NULL;
                delete [] map2_upward[j][u];
+               map2_upward[j][u]= NULL;
             }
             delete [] map_upward[j];
+            map_upward[j]= NULL;
             delete [] map2_upward[j];
+            map2_upward[j]= NULL;
          }
          delete [] map_upward;
+         map_upward= NULL;
          delete [] map2_upward;
+         map2_upward= NULL;
 
       }
    // end for t

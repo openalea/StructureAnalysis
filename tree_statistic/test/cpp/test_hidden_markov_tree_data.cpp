@@ -26,11 +26,11 @@ using namespace Stat_trees;
 
 int main(void)
 {
-   typedef Hidden_markov_tree_data::tree_type tree_type;
-   typedef Hidden_markov_tree_data::state_tree_type state_tree_type;
-   typedef Hidden_markov_tree_data::value value;
-   typedef Hidden_markov_tree_data::vertex_iterator vertex_iterator;
-   typedef Stat_trees::Hidden_markov_tree::double_array_3d double_array_3d;
+   typedef HiddenMarkovTreeData::tree_type tree_type;
+   typedef HiddenMarkovTreeData::state_tree_type state_tree_type;
+   typedef HiddenMarkovTreeData::value value;
+   typedef HiddenMarkovTreeData::vertex_iterator vertex_iterator;
+   typedef Stat_trees::HiddenMarkovTree::double_array_3d double_array_3d;
    typedef generic_visitor<tree_type> visitor;
    typedef visitor::vertex_array vertex_array;
 
@@ -40,22 +40,22 @@ int main(void)
    visitor v;
    vertex_iterator it, end;
    vertex_array va;
-   Format_error error;
+   StatError error;
    const char *hmotpath= "./hmot_np.hmt";
    const char *hmotparampath= "./hmot.hmt";
    int * const variables= new int[1];
-   Hidden_markov_out_tree *hmot= NULL, *hmot_estim= NULL;
-   Hidden_markov_tree_data *hmtd, *state_hmtd, *ehmtd, *state_tree=NULL;
+   HiddenMarkovOutTree *hmot= NULL, *hmot_estim= NULL;
+   HiddenMarkovTreeData *hmtd, *state_hmtd, *ehmtd, *state_tree=NULL;
    tree_type **potrees= NULL;
    state_tree_type **pstrees= NULL;
-   const Distribution_data *pdd= NULL; //, *marginal=NULL;
+   const DiscreteDistributionData *pdd= NULL; //, *marginal=NULL;
    Trees *tmp_trees= NULL;
    // double likelihood;
 
-   // default constructor of Hidden_markov_tree_data
-   hmtd= new Hidden_markov_tree_data();
+   // default constructor of HiddenMarkovTreeData
+   hmtd= new HiddenMarkovTreeData();
 
-   // destructor of Hidden_markov_tree_data
+   // destructor of HiddenMarkovTreeData
    delete hmtd;
    hmtd= NULL;
 
@@ -133,7 +133,7 @@ int main(void)
    cout << endl << "State-conditional output histograms: " << endl;
    hmtd->ascii_write_observation(cout, true, false);
 
-   cout << endl << "Hidden_markov_tree_data augmented with the state tree"
+   cout << endl << "HiddenMarkovTreeData augmented with the state tree"
         <<" and the smoothed probabilities:" << endl;
    state_hmtd= hmtd->get_state_smoothed_hidden_markov_tree_data();
    state_hmtd->ascii_write(cout, false);
@@ -146,17 +146,17 @@ int main(void)
    marginal= NULL; */
 
 #ifdef DEBUG
-   cout << endl << "Plot of the augmented Hidden_markov_tree_data:" << endl;
+   cout << endl << "Plot of the augmented HiddenMarkovTreeData:" << endl;
    state_hmtd->plot_write(error, "/home/durand/tmpf");
    cout << error;
 #endif
 
    ehmtd= hmot_estim->extract_data(error);
    cout << error;
-   cout << endl << "Plain Hidden_markov_tree_data:" << endl;
+   cout << endl << "Plain HiddenMarkovTreeData:" << endl;
    ehmtd->ascii_write(cout, false);
    cout << endl << "Extract an observation distribution from "
-        << "plain Hidden_markov_tree_data:" << endl;
+        << "plain HiddenMarkovTreeData:" << endl;
    pdd= ehmtd->extract(error, Stat_trees::OBSERVATION, 1, 0);
    cout << error;
    if (pdd!= NULL)
@@ -167,7 +167,7 @@ int main(void)
    }
 
    cout << endl << "Extract a observation distribution from "
-        << "augmented Hidden_markov_tree_data:" << endl;
+        << "augmented HiddenMarkovTreeData:" << endl;
    pdd= state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, 0);
    cout << error;
    if (pdd!= NULL)
@@ -178,7 +178,7 @@ int main(void)
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
-        << "plain Hidden_markov_tree_data:" << endl;
+        << "plain HiddenMarkovTreeData:" << endl;
    pdd= ehmtd->extract(error, Stat_trees::NB_ZONES, 1, 0);
    cout << error;
    if (pdd!= NULL)
@@ -189,7 +189,7 @@ int main(void)
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
-        << "augmented Hidden_markov_tree_data:" << endl;
+        << "augmented HiddenMarkovTreeData:" << endl;
    pdd= state_hmtd->extract(error, Stat_trees::NB_ZONES, 2, 0);
    cout << error;
    if (pdd!= NULL)
@@ -280,22 +280,22 @@ int main(void)
    cout << endl << "State-conditional output histograms: " << endl;
    hmtd->ascii_write_observation(cout, false, false);
 
-   cout << endl << "Hidden_markov_tree_data augmented with the state tree"
+   cout << endl << "HiddenMarkovTreeData augmented with the state tree"
         <<" and the smoothed probabilities:" << endl;
    state_hmtd= hmtd->get_state_smoothed_hidden_markov_tree_data();
    state_hmtd->ascii_write(cout, false);
 #ifdef DEBUG
-   cout << endl << "Plot of the augmented Hidden_markov_tree_data:" << endl;
+   cout << endl << "Plot of the augmented HiddenMarkovTreeData:" << endl;
    state_hmtd->plot_write(error, "/home/durand/tmpg");
    cout << error;
 #endif
 
    ehmtd= hmot_estim->extract_data(error);
    cout << error;
-   cout << endl << "Plain Hidden_markov_tree_data:" << endl;
+   cout << endl << "Plain HiddenMarkovTreeData:" << endl;
    ehmtd->ascii_write(cout, false);
    cout << endl << "Extract an observation distribution from "
-        << "plain Hidden_markov_tree_data:" << endl;
+        << "plain HiddenMarkovTreeData:" << endl;
    pdd= ehmtd->extract(error, Stat_trees::OBSERVATION, 1, 0);
    cout << error;
    if (pdd!= NULL)
@@ -306,7 +306,7 @@ int main(void)
    }
 
    cout << endl << "Extract an observation distribution from "
-        << "augmented Hidden_markov_tree_data:" << endl;
+        << "augmented HiddenMarkovTreeData:" << endl;
    pdd= state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, 0);
    cout << error;
    if (pdd!= NULL)
@@ -317,7 +317,7 @@ int main(void)
    }
 
    cout << endl << "Extract an observation distribution from "
-        << "augmented Hidden_markov_tree_data with a "
+        << "augmented HiddenMarkovTreeData with a "
         << "wrong state identifier:" << endl;
    pdd= state_hmtd->extract(error, Stat_trees::OBSERVATION, 2, hmtd->get_nb_states());
    cout << error;
@@ -329,7 +329,7 @@ int main(void)
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
-        << "plain Hidden_markov_tree_data:" << endl;
+        << "plain HiddenMarkovTreeData:" << endl;
    pdd= ehmtd->extract(error, Stat_trees::NB_ZONES, 1, 0);
    cout << error;
    if (pdd!= NULL)
@@ -340,7 +340,7 @@ int main(void)
    }
 
    cout << endl << "Extract a characteristic distribution (zones) from "
-        << "augmented Hidden_markov_tree_data:" << endl;
+        << "augmented HiddenMarkovTreeData:" << endl;
    pdd= state_hmtd->extract(error, Stat_trees::NB_ZONES, 2, 0);
    cout << error;
    if (pdd!= NULL)
@@ -350,13 +350,13 @@ int main(void)
       pdd= NULL;
    }
 
-   // estimation of an HMT from augmented Hidden_markov_tree_data
+   // estimation of an HMT from augmented HiddenMarkovTreeData
    delete hmot_estim;
    hmot_estim=NULL;
 
    variables[0]=1;
    tmp_trees= state_hmtd->select_variable(error, 1, variables);
-   state_tree= new Hidden_markov_tree_data(*tmp_trees);
+   state_tree= new HiddenMarkovTreeData(*tmp_trees);
    delete tmp_trees;
    tmp_trees= NULL;
    hmot_estim= state_tree->hidden_markov_out_tree_estimation(error, cout, 'o', 2, true,

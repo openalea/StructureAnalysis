@@ -28,8 +28,8 @@ int main(void)
    std::vector<int> depth;
    unsigned int i, n= 5;
 
-   // const Parametric distrib(nb_value+3,ident);
-   const Parametric distrib(ident,inf_bound,sup_bound,parameter,probability);
+   // const DiscreteParametric distrib(nb_value+3,ident);
+   const DiscreteParametric distrib(ident,inf_bound,sup_bound,parameter,probability);
 
 
    tree_int t;
@@ -42,7 +42,7 @@ int main(void)
    typedef generic_visitor<tree_int>::vertex_deque vertex_deque;
    typedef Unlabelled_typed_edge_tree::vertex_descriptor char_vertex;
    typedef Unlabelled_typed_edge_tree::children_iterator char_children_iterator;
-   Parametric var_distrib(BINOMIAL,inf_bound,sup_bound,parameter,probability);
+   DiscreteParametric var_distrib(BINOMIAL,inf_bound,sup_bound,parameter,probability);
    vertex *v= new vertex[n];
 
 
