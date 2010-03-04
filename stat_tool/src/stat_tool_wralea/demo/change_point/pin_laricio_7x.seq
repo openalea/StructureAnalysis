@@ -1,15 +1,15 @@
 # 3 VARIABLES
 
 # VARIABLE 1 : TIME
-# VARIABLE 2 : VALUE    longueur de l'UC
-# VARIABLE 3 : VALUE    nombre de branches par UC
+# VARIABLE 2 : VALUE    Growth Unit (GU) length
+# VARIABLE 3 : VALUE    nu,ber of branches per GU
 
 INDEX_PARAMETER : TIME
 
 2 VARIABLES
 
-VARIABLE 1 : INT   # longueur de l'UC
-VARIABLE 2 : INT   # nombre de branches par UC
+VARIABLE 1 : INT   # GU's length
+VARIABLE 2 : INT   # number of branches per GU
 
 1927 330 7 | 1928 290 8 | 1929 250 6 | 1930 320 5 | 1931 440 5 | 1932 440 7 | 1933 480 4 | 1934 470 6 \
 1935 570 5 | 1936 640 7 | 1937 700 6 | 1938 650 1 | 1939 590 5 | 1940 680 6 | 1941 640 5 | 1942 630 6 \
