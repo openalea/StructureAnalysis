@@ -461,6 +461,7 @@ void Matching_U::ForestList(int input_vertex,int reference_vertex,Sequence& sequ
 
 DistanceType Matching_U::match()
 {
+  cerr<<"Unordered Matching"<<endl;
   const int size1 = T1->getNbVertex();
   const int size2 = T2->getNbVertex();
   DistanceType D=0;
@@ -472,7 +473,7 @@ DistanceType Matching_U::match()
 	{
 	  _distances.openDistancesVector(input_vertex);
 	  // cout<<"dist "<<input_vertex<<endl;			if (int(100. - 100*input_vertex/size1)%10 == 0)
-			  cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ... " << flush;
+			  cerr << "\x0d" << " ok Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ... " << flush;
 
 	  if (!_spaceOptimization){
 	    _insertCost.openDistancesVector(input_vertex);
@@ -490,7 +491,7 @@ DistanceType Matching_U::match()
 	      (_distanceMatrix[input_vertex])[reference_vertex]=d;
 	    }
 	  if (int(100. - 100*input_vertex/size1)%10 == 0)
-	    cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ... " << flush;
+	    cerr << "\x0d" << "ok Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ... " << flush;
 	  for (int i=1;i<=T1->getNbChild(input_vertex);i++)
 	    {
 	      _distances.closeDistancesVector(T1->child(input_vertex,i));

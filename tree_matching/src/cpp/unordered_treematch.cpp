@@ -161,6 +161,7 @@ TreeMatch_U::TreeMatch_U(MTG& mtg,
     {
       _localFun = (NodeFunctionList*) NULL;
     }
+  cerr<<"Func size -> "<<_localFun->size()<<endl;
 
   _distances.resize(_roots->entries());
   _time.resize(_roots->entries());
@@ -334,31 +335,32 @@ void TreeMatch_U::weightedMatching()
           cout<<endl<<"MATCHING TIME "<<i_tree<<" with "<<r_tree<<" : "<<Time<<endl;
           putDistance(matching_distance,i_tree,r_tree);
           putSequence(matching_sequence,i_tree,r_tree);
+	  cerr<<"put Sequence"<<endl;
+//           int seq_size=matching_sequence->getSize();
+//           int sub_number=0;
+//           int mat_number=0;
+//           matching_sequence->reset();
+//           do
+//             {
+//               if (matching_sequence->getCurrent()->getCost()<=0.01)
+//                 {
+//                   mat_number++;
+//                 }
+//               else
+//                 {
+//                   sub_number++;
+//                 }
+//             } while(matching_sequence->next());
 
-          int seq_size=matching_sequence->getSize();
-          int sub_number=0;
-          int mat_number=0;
-          matching_sequence->reset();
-          do
-            {
-              if (matching_sequence->getCurrent()->getCost()<=0.01)
-                {
-                  mat_number++;
-                }
-              else
-                {
-                  sub_number++;
-                }
-            } while(matching_sequence->next());
+//           matching_sequence->putNbMat(mat_number);
+//           matching_sequence->putNbSub(sub_number);
 
-          matching_sequence->putNbMat(mat_number);
-          matching_sequence->putNbSub(sub_number);
+//           int tree_size2=_trees[r_tree]->getNbVertex();
+//           int tree_size1=_trees[i_tree]->getNbVertex();
 
-          int tree_size2=_trees[r_tree]->getNbVertex();
-          int tree_size1=_trees[i_tree]->getNbVertex();
-
-          matching_sequence->putNbDel(tree_size1-seq_size);
-          matching_sequence->putNbIns(tree_size2-seq_size);
+//           matching_sequence->putNbDel(tree_size1-seq_size);
+//           matching_sequence->putNbIns(tree_size2-seq_size);
+	  cerr<<getDistance(0,1)<<endl;
         }
     }
 }
@@ -376,12 +378,15 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
 
   Matching_U *M;
   if (_localFun){
-  if (_mappingType == LOCAL)
-  {
-		  MCF=new WeightedNodeCost(SCORE,_vectorDist,_dispersion,_maxValue,_minValue,_InsDelCostCoeff);
-  }
-		  else
-    MCF = new WeightedNodeCost(WEIGTH,_vectorDist,_dispersion,_maxValue,_minValue,_InsDelCostCoeff);
+    if (_mappingType == LOCAL)
+      {
+	MCF=new WeightedNodeCost(SCORE,_vectorDist,_dispersion,_maxValue,_minValue,_InsDelCostCoeff);
+      }
+    else
+      { 
+	cerr<<"Weighted Node Cost"<<endl;
+	MCF = new WeightedNodeCost(WEIGTH,_vectorDist,_dispersion,_maxValue,_minValue,_InsDelCostCoeff);
+      }
   }
   else{
 	  if (_mappingType == LOCAL)
@@ -390,6 +395,8 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
           MCF=new NodeCost(TOPOLOGIC);
   }
   DistanceType D;
+
+  int spaceOpti = 0 ;
   if (_scaleType == SINGLESCALE){
     
     
@@ -397,7 +404,8 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
       if (_mappingType == GLOBAL){
 	if (_mapping == GENERAL){
 	  cerr<<"Matching by topology (VPlants)"<<endl;
-	  M = new Matching_U(Tree1,Tree2,*MCF);
+	  spaceOpti = 1 ;	  // modification qui ne permet pas de récupérer les listes d'alignements ...
+	  M = new Matching_U(Tree1,Tree2,*MCF,spaceOpti);
 			
 	}
 	else {
@@ -451,10 +459,13 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
   
   
   D = M->match();
-  Sequence* s=new Sequence();
-  
-  M->TreeList(M->getI_v(),M->getR_v(),*s);
+  cerr<<"   Distance = "<<D<<endl;
 
+  Sequence* s=new Sequence();
+  cerr<<M->getI_v()<<" - "<<M->getR_v()<<"  "<<spaceOpti<<endl;
+  if (spaceOpti == 0){
+  M->TreeList(M->getI_v(),M->getR_v(),*s);
+  cerr<<"Tree List"<<endl;
   int mat_number = 0;
   int sub_number = 0;
   DistanceType sub_cost = 0.0;
@@ -490,9 +501,13 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
   S->putNbSub(sub_number);
  
   delete (Sequence*) s;
+  }
+  cerr<<"Delete Node cost"<<endl;
   delete (NodeCost*) MCF;
 
   delete (Matching_U*) M;
+  cerr<<"Fin"<<endl;
+
   return(D);
 }
 
