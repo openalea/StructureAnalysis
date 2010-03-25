@@ -167,16 +167,19 @@ public:
     FOOTER_OS;
   }
 
-/*  static MultiPlotSet*
-  get_plotable(const HiddenSemiMarkov &p)
+ static MultiPlotSet*
+  stateprofile_get_plotable(const HiddenSemiMarkov &p, int identifier, int output = SSTATE)
   {
     StatError error;
-    MultiPlotSet* ret = p.get_plotable();
+    MultiPlotSet* ret = p.state_profile_plotable_write(error, identifier, output);
     if (!ret)
       ERROR;
     return ret;
   }
-*/
+
+
+
+
 };
 
 
@@ -202,7 +205,7 @@ void class_hidden_semi_markov() {
     DEF_RETURN_VALUE("divergence_computation_histo", WRAP::divergence_computation_histo, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_length", WRAP::divergence_computation_length, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_sequences", WRAP::divergence_computation_sequences, args("input", "input_markov", "input_sequence", "filename"), "todo")
-  //  DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
+    DEF_RETURN_VALUE("stateprofile_get_plotable", WRAP::stateprofile_get_plotable, args("identifier", "output"), "Return a plotable")
 
 ;
 
