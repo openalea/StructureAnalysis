@@ -1,6 +1,6 @@
 from openalea.core.alea import *
 # !!important!! import dataflowview, which defines the fields of each nodes
-from openalea.grapheditor import dataflowview
+#from openalea.grapheditor import dataflowview
 
 pm = PackageManager()
 pm.init(verbose=False)
@@ -12,17 +12,17 @@ pm.init(verbose=False)
 # nodes are run.
 # In order to have the gnuplot interface, run this script with python instead of nosetests 
 
-def _test_demo_corsican():
+def test_demo_corsican():
     """ Test changepoint demo corsican  """
     res = run(('demo.changepoint_stat_tool','Corsican pine change point'),{},pm=pm)
     assert res == []
 
-def _test_demo_dycorinia():
+def test_demo_dycorinia():
     """ Test dataflow demo dycorinia """
     res = run(('demo.changepoint_stat_tool','Dycorinia change point'),{},pm=pm)
     assert res == []
 
-def _test_stat_tool_tutorial():
+def test_stat_tool_tutorial():
     """ Test dataflow demo compound tutorial"""
     res = run(('demo.stat_tool demos and tutorials', 'compound tutorial'),{},pm=pm)
     assert res == []
