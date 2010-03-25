@@ -197,12 +197,12 @@ public:
   get_plotable(const SemiMarkov &p)
   {
     StatError error;
-    cout << "test semi markov"<<endl;
     MultiPlotSet* ret = p.get_plotable();
     if (!ret)
       ERROR;
     return ret;
   }
+
 
 
 };
