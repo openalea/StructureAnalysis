@@ -1451,15 +1451,15 @@ def Extract(obj, *args, **kargs):
                        _VariableOrderMarkovData,
                        _SemiMarkovData,
                        _NonHomogeneousMarkovData]:
-
         error.CheckType([args[0]], [str])
-
         if args[0] == 'Value':
             if obj.nb_variable == 1:
+                error.CheckArgumentsLength(args, 1, 1)
                 #todo: the following call does not work
                 #error.CheckArgumentsLength(args, 2, 2)
                 variable = 1
             else:
+                error.CheckArgumentsLength(args, 1, 2)
                 #todo: the following call does not work
                 #error.CheckArgumentsLength(args, 3, 3)
                 error.CheckType([args[1]], [int])
@@ -1472,8 +1472,21 @@ def Extract(obj, *args, **kargs):
             error.CheckArgumentsLength(args, 1, 1)
             ret = obj.extract_length()
         else:
-            raise ValueError("""With the given type, first argument must be
-            Value or Legnth string.""")
+            ident = args[0]
+            if ident not in markovian_sequence_type.keys():
+                print 'Wrong type %s. Use one of %s ' % (ident, markovian_sequence_type.keys())
+                raise ValueError('error in extract histogram to be done')
+            if obj.nb_variable == 1:
+                variable = 1
+                value = args[1]
+                error.CheckType([args[1]], [int])
+                ret = obj.extract(markovian_sequence_type[ident], variable, value)
+            else:
+                variable = args[1]
+                value = args[2]
+                error.CheckType([args[1], args[2]], [[int],[int]])
+                ret = obj.extract(markovian_sequence_type[ident], variable, value)
+
 
     elif type(obj) in [ _VariableOrderMarkov,
                        _HiddenVariableOrderMarkov,
