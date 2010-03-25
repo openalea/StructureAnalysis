@@ -29,6 +29,11 @@ norm_type = {"Approximated": _sequence_analysis.NormType.APPROXIMATED,
 
 # not complete !! see MarkovianSequnece
 markovian_sequence_type = {
+    "Observation": _sequence_analysis.MarkovianSequenceType.OBSERVATION,
+    "Recurrence": _sequence_analysis.MarkovianSequenceType.RECURRENCE_TIME,
+    "Sojourn": _sequence_analysis.MarkovianSequenceType.SOJOURN_TIME,
+    "InitialRun": _sequence_analysis.MarkovianSequenceType.INITIAL_RUN,
+    "FinalRun": _sequence_analysis.MarkovianSequenceType.FINAL_RUN,
     "Length": _sequence_analysis.MarkovianSequenceType.LENGTH,
     "NbRun": _sequence_analysis.MarkovianSequenceType.NB_RUN,
     "NbOccurrence": _sequence_analysis.MarkovianSequenceType.NB_OCCURRENCE,
@@ -37,7 +42,6 @@ markovian_sequence_type = {
     "Mean": _sequence_analysis.MarkovianSequenceType.SEQUENCE_MEAN,
     "Cumul": _sequence_analysis.MarkovianSequenceType.SEQUENCE_CUMUL
         }
-
 
 
 #todo: get rid if mode_type, rename the enumerate properly
@@ -97,6 +101,8 @@ SUBTRACTION_RESIDUAL = 1
 STANDARDIZED_RESIDUAL = 2
 
 #todo: replace by appropriate enumerate from_se uence_analysis
+
+
 seq_map = {
             "Observation":      GraphicalType.OBSERVATION,
             "FirstOccurrence":  GraphicalType.FIRST_OCCURRENCE,
