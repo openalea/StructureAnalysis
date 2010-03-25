@@ -208,7 +208,7 @@ void class_constant_sequence()
   const double INDEL_DISTANCE = 1.0;     // cout d'elision/insertion
 */
 
-  enum_<sequence_analysis::wrap_util::UniqueInt<2, 1062> > ("ChangePointType")
+  enum_<sequence_analysis::wrap_util::UniqueInt<2, 107> > ("ChangePointType")
      .value("CHANGE_POINT", CHANGE_POINT)
      .value("SEGMENT", SEGMENT)
      .export_values();
@@ -219,7 +219,7 @@ void class_constant_sequence()
     scope().attr("NB_SEGMENTATION") = NB_SEGMENTATION;
 
 
-  enum_<sequence_analysis::wrap_util::UniqueInt<2, 107> > ("NormType")
+  enum_<sequence_analysis::wrap_util::UniqueInt<2, 108> > ("NormType")
     .value("APPROXIMATED", APPROXIMATED)
     .value("EXACT", EXACT)
     .export_values();
@@ -243,7 +243,7 @@ const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale
 
 
   // others is this the same as in stat_tool, is it used ?
-   enum_<sequence_analysis::wrap_util::UniqueInt<6, 108> > ("Type")
+   enum_<sequence_analysis::wrap_util::UniqueInt<6, 109> > ("Type")
      .value("INT_VALUE", INT_VALUE)
      .value("REAL_VALUE", REAL_VALUE)
      .value("STATE", STATE)
@@ -267,7 +267,7 @@ const int MAX_ABSORBING_RUN_LENGTH = 20;  // longueur maximum de la serie finale
    const double MIN_SMOOTHED_PROBABILITY = 1.e-3;  // seuil sur les probabilites lissees
     */
 
-   enum_<sequence_analysis::wrap_util::UniqueInt<3, 109> >("SemiMarkovState")
+   enum_<sequence_analysis::wrap_util::UniqueInt<3, 110> >("SemiMarkovState")
        .value("SSTATE", SSTATE)
        .value("IN_STATE", IN_STATE)
        .value("OUT_STATE", OUT_STATE)
@@ -361,7 +361,7 @@ const int TOP_SIZE = 2000000;          // taille memoire maximum (en int) d'un e
 
    */
 
-   enum_<sequence_analysis::wrap_util::UniqueInt<3, 110> >("RenewalType")
+   enum_<sequence_analysis::wrap_util::UniqueInt<7, 111> >("RenewalType")
      .value("INTER_EVENT", INTER_EVENT)
      .value("WITHIN_OBSERVATION_PERIOD", WITHIN_OBSERVATION_PERIOD)
      .value("LENGTH_BIAS", LENGTH_BIAS)
