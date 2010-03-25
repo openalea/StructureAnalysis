@@ -1061,6 +1061,17 @@ public:
     return ret;
   }
 
+  static MultiPlotSet*
+  get_plotable_data(const Sequences &p)
+  {
+    StatError error;
+    Sequences seq;
+    seq = (Sequences )p;
+    MultiPlotSet* ret = seq.get_plotable_data(error);
+    if (!ret)
+      ERROR;
+    return ret;
+  }
 
 
 
@@ -1151,6 +1162,7 @@ class_sequences()
    DEF_RETURN_VALUE_NO_ARGS("merge_variable", SequencesWrap::merge_variable, "Merge variables")
    DEF_RETURN_VALUE_NO_ARGS("markovian_sequences", SequencesWrap::markovian_sequences , "returns markovian sequence")
    DEF_RETURN_VALUE_NO_ARGS("get_plotable", SequencesWrap::get_plotable, "Return a plotable")
+   DEF_RETURN_VALUE_NO_ARGS("get_plotable_data", SequencesWrap::get_plotable_data, "Return a plotable_data")
 
    .def("plot_write", SequencesWrap::plot_write, args("prefix", "title"), "Write GNUPLOT files")
    .def("plot_data_write", SequencesWrap::plot_data_write, args("prefix", "title"), "Write GNUPLOT files")
