@@ -595,11 +595,17 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
         return _estimate_non_homogeneous_markov(obj, *args, **kargs)
     # the two following elif are together and should be kept in this order
     # the first one expect the obj to be Time_events or Renewal_data only
-    elif itype in ["Equilibrium", "Ordinary"]:
-        return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
+    #elif itype in ["Equilibrium", "Ordinary"]:
+    #    return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
     elif (type(obj) in [_TimeEvents, _RenewalData]) or \
-           (isinstance(obj, _FrequencyDistribution) and isinstance(args[1], _FrequencyDistribution)):
-        return  _estimate_renewal_interval_data(obj, itype, *args, **kargs)
+        (len(args)>=1 \
+            and isinstance(obj, _FrequencyDistribution) \
+            and isinstance(itype, _FrequencyDistribution) \
+            and isinstance(args[0], _FrequencyDistribution)):
+        if len(args)>=0 and isinstance(obj, _FrequencyDistribution)==False and type(itype)==str:
+            return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
+        else:
+            return  _estimate_renewal_interval_data(obj, itype, *args, **kargs)
     else:
         from openalea.stat_tool.estimate import Estimate as HistoEstimate
         return HistoEstimate(obj, itype, *args, **kargs)
