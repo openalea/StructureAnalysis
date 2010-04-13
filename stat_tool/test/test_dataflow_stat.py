@@ -12,12 +12,12 @@ pm.init(verbose=False)
 # nodes are run.
 # In order to have the gnuplot interface, run this script with python instead of nosetests 
 
-def test_demo_corsican():
+def _test_demo_corsican():
     """ Test changepoint demo corsican  """
     res = run(('demo.changepoint_stat_tool','Corsican pine change point'),{},pm=pm)
     assert res == []
 
-def test_demo_dycorinia():
+def _test_demo_dycorinia():
     """ Test dataflow demo dycorinia """
     res = run(('demo.changepoint_stat_tool','Dycorinia change point'),{},pm=pm)
     assert res == []

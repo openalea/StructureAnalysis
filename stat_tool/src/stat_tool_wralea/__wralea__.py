@@ -421,7 +421,7 @@ estimate_convolution = Factory(name="EstimateConvolution",
 #__all__.append('nf')
 
 
-cmd = 'from openalea.stat_tool.enumerate import smoothing_penalty_type, estimator_type, outside_type'
+cmd = 'from openalea.stat_tool.enums import smoothing_penalty_type, estimator_type, outside_type'
 exec(cmd)
 
 estimate_compound = Factory(name="EstimateCompound",

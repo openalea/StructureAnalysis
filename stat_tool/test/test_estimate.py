@@ -14,7 +14,7 @@ from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool import  _stat_tool
-from openalea.stat_tool.enumerate import distribution_identifier_type
+from openalea.stat_tool.enums import distribution_identifier_type
 
 from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
 
