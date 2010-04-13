@@ -13,7 +13,7 @@ from _stat_tool import _DiscreteParametricModel
 from _stat_tool import _DistributionData
 from _stat_tool import _Distribution
 
-from enumerate import distribution_identifier_type
+from enums import distribution_identifier_type
 
 __all__ = ["_Distribution",
            "_DiscreteParametricModel",
@@ -92,7 +92,7 @@ def Distribution(utype, *args):
         elif utype in ["P", "POISSON"]:
             result = Poisson(*args)
         elif utype in ["M", "MULTINOMIAL"]:
-            raise NotImplemented
+            raise NotImplementedError("Multinomial not yet implemented")
         elif utype in ["NB", "NEGATIVE_BINOMIAL"]:
             result = NegativeBinomial(*args)
         elif utype in ["U", "UNIFORM"]:
@@ -205,7 +205,7 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
 
 def Multinomial():
     """to be done"""
-    raise NotImplemented
+    raise NotImplementedError("Multinomial not yet implemented")
 
 # Extend _DiscreteParametricModel
 interface.extend_class( _DiscreteParametricModel, interface.StatInterface)

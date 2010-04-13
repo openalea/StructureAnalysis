@@ -16,10 +16,10 @@ from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from _stat_tool import _Vectors
 from _stat_tool import _VectorDistance
 from _stat_tool import I_DEFAULT
-from enumerate import format_type
-from enumerate import variable_type
-from enumerate import variance_type
-from enumerate import distance_type
+from enums import format_type
+from enums import variable_type
+from enums import variance_type
+from enums import distance_type
 
 __all__ = ['Vectors',
            '_Vectors',
@@ -390,4 +390,5 @@ def ComputeRankCorrelation(*args, **kargs):
 
     error.CheckType([vec], [_Vectors])
 
-    vec.rank_correlation_computation(utype, filename)
+    a = vec.rank_correlation_computation(utype, filename)
+    return a

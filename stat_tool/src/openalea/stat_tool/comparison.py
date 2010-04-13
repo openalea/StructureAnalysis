@@ -6,8 +6,8 @@ __version__ = "$Id$"
 
 import error
 
-from enumerate import variable_type
-from enumerate import format_type
+from enums import variable_type
+from enums import format_type
 
 
 from _stat_tool import \
@@ -140,7 +140,7 @@ def Compare(arg1, *args, **kargs):
     elif isinstance(p1, _FrequencyDistribution):
         ret = compare_histo(arg1, *args, **kargs)
     else:
-        raise NotImplemented
+        raise NotImplementedError("First argument must be either Vectors or FrequencyDistribution")
 
 
     return ret

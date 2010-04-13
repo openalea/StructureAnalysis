@@ -16,8 +16,8 @@ from _stat_tool import _Convolution
 from _stat_tool import _Mixture
 
 
-from enumerate import algo_map
-from enumerate import  bool_type
+from enums import algo_map
+from enums import  bool_type
 
 
 __all__ = ['_Regression',

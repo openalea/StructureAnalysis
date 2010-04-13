@@ -12,10 +12,10 @@ from _stat_tool import _DistanceMatrix
 from _stat_tool import _Cluster
 from _stat_tool import _Dendrogram
 
-from enumerate import format_type
-from enumerate import criterion_type
-from enumerate import algorithm_type
-from enumerate import cluster_type
+from enums import format_type
+from enums import criterion_type
+from enums import algorithm_type
+from enums import cluster_type
 
 __all__ = [
      "_DistanceMatrix",

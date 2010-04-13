@@ -10,12 +10,12 @@ import error
 import _stat_tool
 import interface
 
-from enumerate import likelihood_penalty_type
-from enumerate import smoothing_penalty_type
-from enumerate import outside_type
-from enumerate import compound_type
-from enumerate import estimator_type
-from enumerate import distribution_identifier_type as dist_type
+from enums import likelihood_penalty_type
+from enums import smoothing_penalty_type
+from enums import outside_type
+from enums import compound_type
+from enums import estimator_type
+from enums import distribution_identifier_type as dist_type
 
 from _stat_tool import _DiscreteParametricModel
 from _stat_tool import _DiscreteParametric

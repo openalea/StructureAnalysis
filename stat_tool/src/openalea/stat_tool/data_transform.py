@@ -12,7 +12,7 @@ from _stat_tool import \
      _ConvolutionData,\
      _Vectors
 
-from enumerate import keep_type
+from enums import keep_type
 
 
 
