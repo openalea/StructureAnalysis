@@ -20,6 +20,7 @@ from openalea.stat_tool._stat_tool import _Mixture
 from openalea.stat_tool._stat_tool import _Convolution
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel
 from openalea.stat_tool._stat_tool import _Vectors
+from openalea.stat_tool._stat_tool import I_DEFAULT
 
 from _sequence_analysis import _MarkovianSequences
 from _sequence_analysis import _Sequences
@@ -46,14 +47,14 @@ from openalea.sequence_analysis._sequence_analysis import MEAN_VARIANCE_CHANGE
 from openalea.sequence_analysis._sequence_analysis import NB_EVENT
 from openalea.stat_tool._stat_tool import MIN_PROBABILITY
 
-from enumerate import markovian_sequence_type, output_map, histogram_type
-from enumerate import mode_type, func_map, estimator_map, model_type, seq_map
-from enumerate import renewal_nb_event_map, sub_func_map, nb_segment_map
-from enumerate import output_type
+from enums import markovian_sequence_type, output_map, histogram_type
+from enums import mode_type, func_map, estimator_map, model_type, seq_map
+from enums import renewal_nb_event_map, sub_func_map, nb_segment_map
+from enums import output_type
 
 
-from openalea.stat_tool.enumerate import keep_type, bool_type
-from openalea.stat_tool.enumerate import format_type
+from openalea.stat_tool.enums import keep_type, bool_type
+from openalea.stat_tool.enums import format_type
 
 
 
@@ -649,7 +650,7 @@ def Thresholding(obj, MinProbability=MIN_PROBABILITY):
     return obj.thresholding(MinProbability)
 
 
-def Cumulate(obj, Variable=1):
+def Cumulate(obj, Variable=I_DEFAULT):
     """Cumulate
 
     Sum of successive values along sequences.
@@ -1013,7 +1014,7 @@ def MovingAverage(obj, itype, *args, **kargs):
                              _NonHomogeneousMarkovData]])
     error.CheckType([itype], [[list, _DiscreteParametricModel, _Mixture,
                                _Convolution, _Compound]])
-    Variable = error.ParseKargs(kargs, "Variable", -1)
+    Variable = error.ParseKargs(kargs, "Variable", I_DEFAULT)
     Output = error.ParseKargs(kargs, "Output", "Trend", func_map)
     BeginEnd = error.ParseKargs(kargs, "BeginEnd", False,
                                 {"False":False, "True":True,
