@@ -21,14 +21,8 @@ from openalea.stat_tool import SelectIndividual
 from openalea.stat_tool import ExtractHistogram
 from openalea.stat_tool import Display
 
-try:
-    from openalea.sequence_analysis import Sequences
-    seq0 = Sequences("data/chene_sessile_15pa.seq")
-except ImportError:
-    pass
-
 def test():
-    vec10 = Vectors(seq0)
+    vec10 = Vectors('data/chene_sessile.vec')
     vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
     vec9596 = ValueSelect(vec10, 1, 1995, 1996)
 
