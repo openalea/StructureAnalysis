@@ -17,7 +17,7 @@ from openalea.sequence_analysis._sequence_analysis import \
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_TIME
 
 from openalea.stat_tool import error
-from openalea.stat_tool.enumerate import \
+from openalea.stat_tool.enums import \
     distribution_identifier_type, model_distribution_type
 
 __all__ = ['Renewal',

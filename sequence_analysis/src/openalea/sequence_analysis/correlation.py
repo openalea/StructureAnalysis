@@ -23,7 +23,7 @@ from _sequence_analysis import _MarkovianSequences
 from _sequence_analysis import _VariableOrderMarkov
 
 
-from enumerate import type_dict, norm_type
+from enums import type_dict, norm_type
 from data_transform import _check_nb_variable
 from openalea.stat_tool import error
 

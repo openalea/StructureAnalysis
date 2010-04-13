@@ -15,15 +15,15 @@ from openalea.sequence_analysis._sequence_analysis import \
     _VariableOrderMarkovData,\
     _SemiMarkovData,\
     _NonHomogeneousMarkovData
-    
-    
+
+
 #import _sequence_analysis
 from openalea.stat_tool import error
 
 
 
-from enumerate import index_parameter_type_map, ms_vomd_smd_nhmd
-from openalea.stat_tool.enumerate import bool_type
+from enums import index_parameter_type_map, ms_vomd_smd_nhmd
+from openalea.stat_tool.enums import bool_type
 
 __all__ = ['Sequences',
            '_Sequences',

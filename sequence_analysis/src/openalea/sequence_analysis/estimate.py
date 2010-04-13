@@ -24,16 +24,16 @@ from openalea.stat_tool.estimate import estimator_type
 from openalea.stat_tool.estimate import outside_type
 from openalea.stat_tool.estimate import smoothing_penalty_type
 
-from openalea.sequence_analysis.enumerate import estimator_semi_markov_type
-from openalea.sequence_analysis.enumerate import ident_map
-from openalea.sequence_analysis.enumerate import mean_computation_map
-#from openalea.sequence_analysis.enumerate import markovian_algorithms
-from openalea.sequence_analysis.enumerate import mean_computation_map
-from openalea.sequence_analysis.enumerate import sub_markovian_algorithms
-from openalea.sequence_analysis.enumerate import algorithm
-from openalea.sequence_analysis.enumerate import estimator
-from openalea.sequence_analysis.enumerate import likelihood_penalty_type
-from openalea.sequence_analysis.enumerate import stochastic_process_type
+from openalea.sequence_analysis.enums import estimator_semi_markov_type
+from openalea.sequence_analysis.enums import ident_map
+from openalea.sequence_analysis.enums import mean_computation_map
+#from openalea.sequence_analysis.enums import markovian_algorithms
+from openalea.sequence_analysis.enums import mean_computation_map
+from openalea.sequence_analysis.enums import sub_markovian_algorithms
+from openalea.sequence_analysis.enums import algorithm
+from openalea.sequence_analysis.enums import estimator
+from openalea.sequence_analysis.enums import likelihood_penalty_type
+from openalea.sequence_analysis.enums import stochastic_process_type
 
 # structure class
 from openalea.sequence_analysis._sequence_analysis import\
