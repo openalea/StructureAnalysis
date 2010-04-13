@@ -14,7 +14,7 @@ from openalea.stat_tool._stat_tool import GraphicalType
 import openalea.stat_tool._stat_tool as _stat_tool
 from openalea.sequence_analysis import _sequence_analysis as _sequence_analysis
 
-import openalea.stat_tool.enumerate as enumerate_st
+import openalea.stat_tool.enums as enumerate_st
 
 
 
@@ -29,7 +29,10 @@ norm_type = {"Approximated": _sequence_analysis.NormType.APPROXIMATED,
 
 # not complete !! see MarkovianSequnece
 markovian_sequence_type = {
+    "SelfTransition": _sequence_analysis.MarkovianSequenceType.SELF_TRANSITION,
     "Observation": _sequence_analysis.MarkovianSequenceType.OBSERVATION,
+    "Counting": _sequence_analysis.MarkovianSequenceType.COUNTING,
+    "Intensity": _sequence_analysis.MarkovianSequenceType.INTENSITY,
     "Recurrence": _sequence_analysis.MarkovianSequenceType.RECURRENCE_TIME,
     "Sojourn": _sequence_analysis.MarkovianSequenceType.SOJOURN_TIME,
     "InitialRun": _sequence_analysis.MarkovianSequenceType.INITIAL_RUN,
