@@ -27,7 +27,7 @@ class TestHisto():
         self.meri1 = Histogram("data/meri1.his")
         self.meri2 = Histogram("data/meri2.his")
         self.meri3 = Histogram("data/meri3.his")
-        
+
     def test_comparisontest(self):
         meri1 = self.meri1
         meri2 = self.meri2
@@ -53,20 +53,46 @@ class TestHisto():
         assert c1 == c1_long
         assert c2 == c2_long
         assert c3 == c3_long
-        
+
         assert meri1.compare_histo(meri2, meri3, "N") == c1
-        assert meri1.compare_histo(meri2, meri3, "S") == c3 
+        assert meri1.compare_histo(meri2, meri3, "S") == c3
         assert meri1.compare_histo(meri2, meri3, "O") == c2
-        
+
         assert meri1.compare_histo(meri2, meri3, "N") == c1_long
         assert meri1.compare_histo(meri2, meri3, "S") == c3_long
         assert meri1.compare_histo(meri2, meri3, "O") == c2_long
+
+    def test_comparison_wrong_argument_1(self):
+        meri1 = self.meri1
+        try:
+            Compare("N")
+            assert False
+        except NotImplementedError:
+            assert True
+
+    def test_comparison_wrong_argument_2(self):
+        meri1 = self.meri1
+        meri2 = self.meri2
+        try:
+            meri1.compare_histo(meri1, meri2, "F")
+            assert False
+        except KeyError:
+            assert True
         
+    def test_comparisontest_wrong_argument(self):
+        meri1 = self.meri1
+        meri2 = self.meri2
+        try:
+            ComparisonTest("N", meri1, meri2)
+            assert False
+        except TypeError:
+            assert True
+
     def test_comparison_histo_filename(self):
         meri1 = self.meri1
         meri2 = self.meri2
         meri3 = self.meri3
-        
+
         _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat')
         os.remove('result.dat')
         _c1 = Compare(meri1, meri2, meri3, 'N', Filename='result.dat', \
@@ -84,40 +110,23 @@ class TestHisto():
 
 
 class TestVectors():
-    
+
     def __init__(self):
         pass
-        
+
     def test_compare_vectors(self):
-        
+
         vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         assert vec15
 
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         assert matrix10
-        assert str(vec15.compare(VectorDistance("N", "N", "N"), 
+        assert str(vec15.compare(VectorDistance("N", "N", "N"),
                                  True)) == str(matrix10)
 
 
-class TestSequence():
-    """not yet implemented"""
-    def __init__(self):
-        pass
-    def test_compare_sequence(self):
-        pass
-        
 
-class TestMarkov():
-    """not yet implemented"""
-    def __init__(self):
-        pass
-    def test_compare_markov(self):
-        pass
-
-
-
- 
 if __name__ == "__main__":
     runTestClass(TestHisto())
-    runTestClass(TestVectors())  
+    runTestClass(TestVectors())
