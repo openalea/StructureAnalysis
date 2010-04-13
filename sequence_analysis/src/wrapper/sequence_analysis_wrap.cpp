@@ -58,6 +58,7 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
   class_function();
 
   class_sequences();
+  class_sequence_characteristics();
 
   class_markovian_sequences();
   class_self_transition();
