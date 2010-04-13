@@ -1,4 +1,4 @@
-"""Compound functional test extracted from original version 
+"""Compound functional test extracted from original version
 of stat_tool_test.aml
 
 
@@ -17,19 +17,19 @@ from openalea.stat_tool import Plot, Shift
 def test():
     cdist1 = Compound("data/compound1.cd")
     Plot(cdist1)
-    
+
     chisto1 = Simulate(cdist1, 200)
     Plot(chisto1)
-    
+
     histo30 = ExtractHistogram(chisto1, "Sum")
     Plot(histo30)
-    
+
     histo30e = ExtractHistogram(chisto1, "Elementary")
     Plot(histo30e)
-    
-    
-    cdist2 = Estimate(chisto1, "COMPOUND", 
-                      ExtractDistribution(cdist1, "Elementary"), 
+
+
+    cdist2 = Estimate(chisto1, "COMPOUND",
+                      ExtractDistribution(cdist1, "Elementary"),
                       "Sum", MinInfBound=0)
 
     histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
@@ -42,10 +42,10 @@ def test():
     histo34 = Shift(histo33, -11)
     Plot(histo34)
 
-    cdist3 = Estimate(histo34, "COMPOUND", 
+    cdist3 = Estimate(histo34, "COMPOUND",
                       Distribution("B", 0, 1, 0.7), "Sum")
     Plot(cdist3)
-    cdist3 = Estimate(histo34, "COMPOUND", 
+    cdist3 = Estimate(histo34, "COMPOUND",
                        Distribution("B", 0, 1, 0.7), "Sum", MinInfBound=0)
 
     Plot(cdist3)

@@ -57,16 +57,16 @@ def test():
     #
     #########################################################################
     """
-    
+
     plot.DISABLE_PLOT = DISABLE_PLOT
- 
+
     meri1 = Histogram("data/meri1.his")
     meri2 = Histogram("data/meri2.his")
     meri3 = Histogram("data/meri3.his")
     meri4 = Histogram("data/meri4.his")
     meri5 = Histogram("data/meri5.his")
 
-    
+
     Plot(meri1, meri2, meri3, meri4, meri5)
     Compare(meri1, meri2, meri3, meri4, meri5, "N")
 
@@ -79,55 +79,55 @@ def test():
     ComparisonTest("T", meri1, meri3)
     ComparisonTest("W", meri1, meri3)
 
-    # Estimation of a mixture of two distributions assuming a first 
-    # sub-population of GUs made only of a preformed part and a second 
+    # Estimation of a mixture of two distributions assuming a first
+    # sub-population of GUs made only of a preformed part and a second
     # sub-population made of both a preformed part and a neoformed part
-    
+
     _mixt1 = Estimate(meri2, "MIXTURE", "B", "B")
-    
+
     meri = Merge(meri1, meri2, meri3, meri4, meri5)
-    
+
     # model selection approach: estimation of both the mixture parameters and
-    # the number of components""" 
-    
-    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  
+    # the number of components"""
+
+    mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",
                      NbComponent="Estimated")
     mixt2 = Estimate(meri, "MIXTURE", "NB", "NB")
     Plot(mixt2)
     Plot(ExtractDistribution(mixt2, "Mixture"))
-    Plot(ExtractDistribution(mixt2, "Component", 1), 
+    Plot(ExtractDistribution(mixt2, "Component", 1),
          ExtractDistribution(mixt2, "Component", 2))
     Display(mixt2)
-    
+
     _mixt_data = ExtractData(mixt2)
 
     dist5 = Estimate(meri5, "BINOMIAL")
     Display(dist5, Detail=2)
     Plot(dist5)
-    
+
     histo5 = Simulate(dist5, 100)
     Display(histo5, Detail=2)
     Plot(histo5)
-    
-    
+
+
     peup1 = Histogram("data/peup1.his")
     peup2 = Histogram("data/peup2.his")
     peup3 = Histogram("data/peup3.his")
     peup4 = Histogram("data/peup4.his")
     peup5 = Histogram("data/peup5.his")
     peup6 = Histogram("data/peup6.his")
-    
-    _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB", 
+
+    _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB",
                       NbComponent="Estimated")
-    
+
     peup = Merge(peup1, peup2, peup3, peup4, peup5, peup6)
-    
+
     _histo1 = Shift(peup, -1)
     _histo2 = Cluster(peup, "Information", 0.8)
     _histo3 = Cluster(peup, "Step", 10)
     histo4 = Cluster(peup, "Limit", [13, 24])
     Display(histo4, Detail=2)
-    #Plot(histo4)
+    Plot(histo4)
 
     _mixt11 = Estimate(peup, "MIXTURE", "B", "NB", "NB", "NB",
                       NbComponent="Estimated")
@@ -137,14 +137,14 @@ def test():
 
 def test2():
     """finite mixture of discrete distributions"""
-    
+
     mixt1 = Mixture("data//mixture1.mixt")
     mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 0.4,
                     Distribution("NB", 10, 10, 0.5))
 
     mixt_histo1 = Simulate(mixt1, 200)
     Plot(mixt_histo1)
-    # extraction of histograms/frequency distributions corresponding 
+    # extraction of histograms/frequency distributions corresponding
     # to a given mixture component
     # (i.e. elementary distributions which are combined by mixture)
 
@@ -152,7 +152,7 @@ def test2():
     histo11 = ExtractHistogram(mixt_histo1, "Component", 2)
     _histo12 = Merge(histo10, histo11)
     _histo13 = ExtractHistogram(mixt_histo1, "Weight")
-    
+
     # estimation
 
     mixt2 = Estimate(mixt_histo1, "MIXTURE", "B", "NB", MinInfBound=0,
@@ -175,8 +175,8 @@ def test2():
     # NbComponent="Fixed" (default) / "Estimated"
     # Penalty="AIC"/ "AICc" / "BIC" / "BICc" (default), option
     # valide if NbComponent="Estimated"
-    
-    
+
+
     meri = Merge(meri1, meri2, meri3, meri4, meri5)
 
     mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",

@@ -13,4 +13,3 @@ class Test():
         """ Test AML Functions """
 
         # moved to test_mixture_funtional.py 
-        

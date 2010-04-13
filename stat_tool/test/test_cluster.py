@@ -17,7 +17,7 @@ from tools import runTestClass
 
 class Test:
     """Test class to test cluster function and classes"""
-    
+
     def __init__(self):
         self.data = self.build_data()
 
@@ -28,15 +28,15 @@ class Test:
     def test_cluster_histo(self):
         """test cluster on histograms"""
         fagus = self.data
-        
+
         histo2 = Cluster(fagus, "Step", 2)
         histo3 = Cluster(fagus, "Information", 0.8)
         histo4 = Cluster(fagus, "Limit", [2, 4, 6, 8, 10])
-        
+
         assert histo2
         assert histo3
         assert histo4
-        
+
         assert str(fagus.cluster_step(2)) == str(histo2)
         assert str(fagus.cluster_information(0.8)) == str(histo3)
         assert str(fagus.cluster_limit([2, 4, 6, 8, 10])) == str(histo4)
@@ -49,20 +49,20 @@ class Test:
             assert False
         except ValueError:
             assert True
-        
+
     def test_cluster_vectors(self):
         v = Vectors([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
-        assert str(Cluster(v, "Step", 1, 2)) == str(v.cluster_step(1, 2))  
+        assert str(Cluster(v, "Step", 1, 2)) == str(v.cluster_step(1, 2))
         assert str(Cluster(v, "Limit", 1, [2, 4, 6])) == \
             str(v.cluster_limit(1, [2, 4 ,6]))
-    
+
     def _test_cluster_vectors1(self):
         v = Vectors([[1], [2], [3]])
-        
-        assert str(Cluster(v, "Step", 2)) == str(v.cluster_step(1, 2))  
+
+        assert str(Cluster(v, "Step", 2)) == str(v.cluster_step(1, 2))
         assert str(Cluster(v, "Limit",  [2])) == \
             str(v.cluster_limit(1,[2]))
-                    
+
     def test_cluster_vectors_badtype(self):
         v = Vectors([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
         try:
@@ -71,7 +71,7 @@ class Test:
             assert False
         except KeyError:
             assert True
-            
+
     def test_cluster_vectors_information_failure(self):
         v = Vectors([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
         try:
@@ -80,7 +80,7 @@ class Test:
             assert False
         except KeyError:
             assert True
-            
+
     def test_cluster_discrete_sequence(self):
         """not yet implemented"""
         pass
@@ -95,7 +95,7 @@ class Test:
         vec = Vectors([[1, 2, 3], [1, 3, 1], [4, 5, 6]])
         assert  str(vec.transcode(1, [1, 2, 3, 4]))==\
             str(Transcode(vec, 1, [1, 2, 3, 4]))
-        
+
     def test_transcode_histo_err(self):
         fagus = self.data
         try:
@@ -104,20 +104,20 @@ class Test:
         except:
             assert True
 
-    def test_clustering(self):        
+    def test_clustering(self):
         vec10 = Vectors("data/chene_sessile.vec")
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 
         assert vec15
 
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
-                
-        c1 = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12], 
+
+        c1 = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12],
                         Algorithm="Divisive")
-        c1_bis = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12], 
+        c1_bis = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12],
                             Algorithm="Ordering")
 
-        
+
         c2 = Clustering(matrix10, "Hierarchy", Algorithm="Agglomerative")
         c3 = Clustering(matrix10, "Hierarchy", Algorithm="Divisive")
         c4 = Clustering(matrix10, "Hierarchy", Algorithm="Ordering")
@@ -133,18 +133,18 @@ class Test:
         #  * 1 for divisive
         # Second argument is the criterion
         #  * 2 for averaging
-        
+
         #those 3 tests works on my laptop (TC, April 2009) but not on buildbot
         #assert c2 == matrix10.hierarchical_clustering(0, 2, "test", "test")
         #assert c3 == matrix10.hierarchical_clustering(1, 1, "test", "test")
         #assert c4 == matrix10.hierarchical_clustering(2, 0, "test", "test")
-        
+
         # 1 for initialisation and 1 for divisive
         assert str(c1) == \
             str(matrix10.partitioning_prototype(3, [1, 3, 12], 1, 1))
         assert str(c1_bis) == \
             str(matrix10.partitioning_prototype(3, [1, 3, 12], 1, 2))
-        
+
 
 
 if __name__ == "__main__":

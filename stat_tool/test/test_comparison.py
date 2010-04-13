@@ -78,7 +78,7 @@ class TestHisto():
             assert False
         except KeyError:
             assert True
-        
+
     def test_comparisontest_wrong_argument(self):
         meri1 = self.meri1
         meri2 = self.meri2

@@ -28,7 +28,6 @@ class Test(interface):
 
     def test_empty(self):
         """skip test_empty
-        
         because there is an empty constructor in VectorDistance; """
         pass
 

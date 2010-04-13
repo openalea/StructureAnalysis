@@ -13,19 +13,19 @@ def test_simulate_mixture():
     s1 = Simulate(m, 1000)
     assert s1
 
-    
+
 def test_simulate_convolution():
     c = Convolution("data/convolution1.conv")
     s1 = Simulate(c, 1000)
     assert s1
 
-    
+
 def test_simulate_compound():
     c = Compound("data/compound1.cd")
     s1 = Simulate(c, 1000)
     assert s1
 
-    
+
 def test_simulate_distribution():
     c = Distribution("data/distribution1.dist")
     s1 = Simulate(c, 1000)

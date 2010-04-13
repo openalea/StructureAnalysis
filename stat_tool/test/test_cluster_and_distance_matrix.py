@@ -1,4 +1,4 @@
-"""test extracted from stat_tool_test)
+"""test extracted from stat_tool_test
 
 #########################################################################
 #
@@ -6,7 +6,6 @@
 #
 #########################################################################
 
-.. todo:: remove the dependencies over the sequences
 """
 
 

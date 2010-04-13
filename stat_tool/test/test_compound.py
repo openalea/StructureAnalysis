@@ -16,20 +16,20 @@ from tools import runTestClass
 
 class Test(interface):
     """a simple unittest class
-    
+
     See tools to get documentation of the following methods
     """
-    
+
     def __init__(self):
-        interface.__init__(self, 
-            self.build_data(), 
-            "data/compound1.cd", 
+        interface.__init__(self,
+            self.build_data(),
+            "data/compound1.cd",
             Compound)
 
     def build_data(self):
         d1 = Binomial(2, 5, 0.5)
         d2 = NegativeBinomial(0, 2, 0.5)
-        comp = Compound(d1, d2) 
+        comp = Compound(d1, d2)
         return comp
 
     def test_constructor_from_file(self):
@@ -44,7 +44,7 @@ class Test(interface):
         #compound2 = Compound(compound1)
         #assert str(compound1) == str(compound2)
         pass
-        
+
     def test_constructor_from_dists_and_threshold(self):
         compound1 = self.data
         compound2 = Compound(Binomial(2, 5, 0.5),
@@ -54,35 +54,35 @@ class Test(interface):
 
     def test_print(self):
         self.print_data()
-        
+
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
         self.display_versus_str()
-        
+
     def test_len(self):
         """not implemented; irrelevant?"""
         pass
-    
-    def test_plot(self):        
+
+    def test_plot(self):
         self.plot()
 
     def test_save(self):
         self.save()
-                
+
     def test_plot_write(self):
         self.plot_write()
 
     def test_file_ascii_write(self):
         self.file_ascii_write()
-      
+
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
-    
+
     def test_simulate(self):
         sim = self.simulate()
         sim.plot()
-        
+
     def test_extract(self):
         """run and test the extract methods"""
         m = self.data
@@ -94,7 +94,7 @@ class Test(interface):
 
     def test_extract_data(self):
         """todo : check if this test makes sense"""
-        
+
         s = self.simulate()
         #e = Estimate(s, "Compound",  Binomial(2, 5, 0.5), "Sum")
         d = s.extract_sum()
@@ -103,7 +103,7 @@ class Test(interface):
 
     def test_truncate(self):
         s = self.data
-        _res = s.truncate(4) 
+        _res = s.truncate(4)
 
 
 if __name__ == "__main__":

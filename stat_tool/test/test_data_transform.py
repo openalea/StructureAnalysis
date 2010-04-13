@@ -26,7 +26,7 @@ class data():
     """Create some common data sets for the classes
     shift, fit, merge, ...
     """
-    
+
     def __init__(self):
         self.N = 1000
 
@@ -54,16 +54,16 @@ class data():
     def hist_data(self):
         h = Histogram("data/meri2.his")
         return h
-            
+
     def int_vector_data(self):
-        a = [[1, 3, 4], 
+        a = [[1, 3, 4],
              [4, 12, 2],
              [8, 7, 3],]
         v = Vectors(a)
         return v
 
     def float_vector_data(self):
-        v = Vectors([[0.1, 0.3, 4.2], 
+        v = Vectors([[0.1, 0.3, 4.2],
                      [0.5, 2.3, 1.2],
                      [4.5, 6.3, 3.2],
                      ])
@@ -93,19 +93,19 @@ class TestShift(data):
 
     def __init__(self):
         data.__init__(self)
-        
+
     def test_shift_compound_data(self):
         comp_data = self.comp_data()
         assert comp_data.shift(20) == Shift(comp_data, 20)
-       
+
     def test_shift_convolution_data(self):
         conv_data = self.conv_data()
-        assert conv_data.shift(20) == Shift(conv_data, 20) 
-    
+        assert conv_data.shift(20) == Shift(conv_data, 20)
+
     def test_shift_mixture_data(self):
         mixt_data = self.mixt_data()
         assert mixt_data.shift(20) == Shift(mixt_data, 20)
-         
+
     def test_shift_histo(self):
         # equivalent to test Distribution data
         h = data.hist_data(self)
@@ -113,16 +113,16 @@ class TestShift(data):
         assert Shift(h, 2) == h.shift(2)
 
     def test_shift_vector(self):
-        vn = Vectors([[0.2, 1., 2, 3], 
+        vn = Vectors([[0.2, 1., 2, 3],
                       [4.2, 5, 6, 7]])
         v1 = Vectors([[1.]])
         assert Shift(v1, 2)
-        assert Shift(vn, 1, 2)        
+        assert Shift(vn, 1, 2)
         assert str(Shift(vn, 1, 2)) == str(vn.shift(1, 2))
-        
+
 
 class TestFit:
-    
+
     def __init__(self):
         pass
 
@@ -131,10 +131,10 @@ class TestFit:
         dist1 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
         dist2 = meri5.fit(Distribution("B", 0, 10, 0.437879))
         assert str(dist1)==str(dist2)
-        
-        
+
+
 class TestSelectHist:
-    
+
     def __init__(self):
         pass
     def test_value_select_float(self):
@@ -143,30 +143,30 @@ class TestSelectHist:
         assert str(ValueSelect(meri1, 0, 10, Mode="Keep"))==\
             str(meri1.value_select( min=0, max=10, keep=True))
 
-    
+
 class TestValueSelect(data):
-    
+
     def __init__(self):
         data.__init__(self)
-    
+
     def test_value_select_float(self):
-    
+
         v = self.float_vector_data()
-        
+
         v1b = ValueSelect(v, 1, 0.2, 2.0, Mode="Keep")
         v2 =  ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")
         v3 =  ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")
-            
+
         assert v and v1b and v2 and v3
         assert len(v1b) == 1
-        
+
         assert str(ValueSelect(v, 1, 0.2, 2, Mode="Keep")) == \
                 str(v.value_select(1, 0.2, 2, keep=True))
         assert str(ValueSelect(v, 2, 1.0, 6.0, Mode="Keep")) == \
                 str(v.value_select(2, 1.0, 6.0, keep=True))
         assert str(ValueSelect(v, 3, 1.0, 2.0, Mode="Keep")) == \
                 str(v.value_select(3, 1.0, 2., keep=True))
-                         
+
     def test_value_select_int(self):
 
         v = self.int_vector_data()
@@ -179,32 +179,32 @@ class TestValueSelect(data):
         except Exception:
             # Empty sample
             assert True
-            
+
     def test_compound_data(self):
         comp_data = self.comp_data()
         assert comp_data.value_select(1, 20, True)
-    
+
     def test_convolution_data(self):
         conv_data = self.conv_data()
         assert conv_data.value_select(1, 20, True)
-    
+
     def test_mixture_data(self):
         mixt_data = self.mixt_data()
         assert mixt_data.value_select(1, 20, True)
-    
+
     def test_histo_data(self):
         hist_data = self.hist_data()
         assert hist_data.value_select(1, 20, True)
-    
+
 class TestSelectVariable(data):
-    
+
     def __init__(self):
         data.__init__(self)
-    
+
     def test_vector(self):
 
         v = self.int_vector_data()
-        
+
         for i in range(3):
             v1 =  SelectVariable(v, i+1, Mode="Keep")
             assert v1
@@ -214,28 +214,28 @@ class TestSelectVariable(data):
                 str(SelectVariable(v, i+1, Mode="Keep"))
             for j in range(3):
                 assert v1[j][0] == v[j][i]
-                
+
 
 class TestSelectIndividual(data):
-    
+
     def __init__(self):
         data.__init__(self)
-    
+
     def test_vector_integer(self):
-        
+
         v = self.int_vector_data()
-        
+
         selection = SelectIndividual(v, [1, 2], Mode="Keep")
         selection2 = v.select_individual([1, 2], keep=True)
-        
+
         assert str(selection)==str(selection2)
-        
+
         assert len(selection) == 2
-        
+
     def test_top(self):
         """not implemented - top"""
         pass
-    
+
     def test_distance_matrix(self):
         """not implemented - distance matrix """
         pass
@@ -250,17 +250,17 @@ class TestExtract():
     """
     def __init__(self):
         pass
-    
+
 
 
 class TestExtractData():
     """
     See other test file.
     """
-    
+
     def __init__(self):
         pass
-    
+
     def test_histo_extract_data(self):
 
         h = Histogram("data/meri2.his")
@@ -270,10 +270,10 @@ class TestExtractData():
 
 
 class TestExtractDistribution(data):
-    
+
     def __init__(self):
         data.__init__(self)
-        
+
     def test_mixture(self):
         mixt = self.mixt()
 
@@ -302,7 +302,7 @@ class TestExtractDistribution(data):
             convol.extract_elementary(1)
         assert ExtractDistribution(convol, "Elementary", 2) == \
             convol.extract_elementary(2)
- 
+
     def test_compound(self):
         comp = self.comp()
 
@@ -316,21 +316,21 @@ class TestExtractDistribution(data):
     def test_renew(self):
         """not implemented - renew"""
         pass
-    
+
     def test_markov(self):
         """not implemented - markov"""
         pass
-    
+
     def test_top(self):
         """not implemented - top"""
         pass
 
 
 class TestExtractHistogram:
-    
+
     def __init__(self):
         pass
-    
+
     def test_mixture(self):
 
         h = Histogram("data/meri2.his")
@@ -350,46 +350,46 @@ class TestExtractHistogram:
             assert False
         except: # Bas distrubition index
             assert True
-            
-    def test_convolution(self):        
+
+    def test_convolution(self):
         convol = Convolution("data/convolution1.conv")
         convol_histo = Simulate(convol, 200)
         _histo = ExtractHistogram(convol_histo, "Elementary", 1)
         _histo = ExtractHistogram(convol_histo, "Convolution")
-        
+
     def test_compound(self):
         comp  = Compound("data/compound1.cd")
         comp_histo = Simulate(comp, 200)
         _histo = ExtractHistogram(comp_histo, "Sum")
         _histo = ExtractHistogram(comp_histo, "Elementary")
-            
+
     def test_vectors(self):
         v = Vectors([[1, 2, 3, 4, 5, 6, 7]])
         ExtractHistogram(v, 1)
         v = Vectors([[1, 2], [3, 4]])
         ExtractHistogram(v, 1)
-        
+
     def test_renew(self):
         """not implemented - renew"""
         pass
-    
+
     def test_sequence(self):
         """not implemented - sequence"""
         pass
-    
+
     def test_tops(self):
         """not implemented - tops"""
         pass
 
 
 class TestMerge(data):
-    
+
     def __init__(self):
         data.__init__(self)
-        
+
     def test_merge(self):
-        
-        mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 
+
+        mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5),
                         0.4, Distribution("NB", 10, 10, 0.5))
 
         mixt_histo1 = Simulate(mixt1, 200)
@@ -417,54 +417,54 @@ class TestMerge(data):
         Plot(meri)
 
     def test_merge_vectors(self):
-        
+
         v1 = self.int_vector_data()
-        b = [[2, 78, 45], 
+        b = [[2, 78, 45],
              [6, 2, 122],
              [3, 4, 31],]
         v2 = Vectors(b)
 
         v = Merge(v1, v2)
         assert v
-        
+
         a = v1.merge([v2])
         b = v2.merge([v1])
         assert str(a)==str(b)
-        
+
         assert str(a)==str(v)
         Plot(v)
-        
+
     def test_time_events(self):
         """implemented in sequence_analysis/test/test_merge"""
-    
+
     def test_renewal(self):
         """implemented in sequence_analysis/test/test_merge"""
-        
+
     def test_markov(self):
         """not implemented - markov"""
         pass
-    
+
     def test_top(self):
         """implemented in sequence_analysis/test/test_merge"""
         pass
-    
+
     def test_time(self):
         """implemented in sequence_analysis/test/test_merge"""
         pass
-    
+
     def test_correlation(self):
         """implemented in sequence_analysis/test/test_merge"""
         pass
-        
+
 
 class TestMergeVariable(data):
-    
+
     def __init__(self):
         data.__init__(self)
-        
+
     def test_vector(self):
         v = self.int_vector_data()
-        
+
         v1 =  SelectVariable(v, 1, Mode="keep")
         v2 =  SelectVariable(v, 2, Mode="Keep")
         v3 =  SelectVariable(v, 3, Mode="Keep")
@@ -474,7 +474,7 @@ class TestMergeVariable(data):
         for i in range(3):
             for j in range(3):
                 assert merged[i][j] == v[i][j]
-                
+
         assert str(merged) == str(merged2)
 
 
