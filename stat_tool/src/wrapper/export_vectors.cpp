@@ -847,14 +847,15 @@ public:
     return s.str();
   }
 
-  static bool
-  rank_correlation_computation(const Vectors& input, int type, const char* path)
+  static string
+  rank_correlation_computation(const Vectors& input, int type, const string &filename)
   {
     StatError error;
     std::stringstream os;
     bool ret;
-    ret = input.rank_correlation_computation(error, os, type, path);
-    return ret;
+    ret = input.rank_correlation_computation(error, os, type, filename.c_str());
+    //std::cout << os.str()<<endl;
+    return os.str();
   }
 
   static MultiPlotSet*

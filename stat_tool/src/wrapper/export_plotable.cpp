@@ -93,14 +93,20 @@ void class_plotable()
   class_< MultiPlotSet >("MultiPlotSet", init<int>())
     .def_readwrite("title", &MultiPlotSet::title)
     .def_readwrite("border", &MultiPlotSet::border)
+    //.def("variable", (std::vector<int>)&MultiPlotSet::variable)
+    .def_readwrite("variable", &MultiPlotSet::variable)
+    .def_readwrite("variable_nb_viewpoint", &MultiPlotSet::variable_nb_viewpoint)
+    .def_readwrite("viewpoint", &MultiPlotSet::viewpoint)
+
 
     .def("__len__", &MultiPlotSet::size)
-    .def("__getitem__", &MultiPlotSet::operator[],
-	 return_internal_reference<>())
+    .def("__getitem__", &MultiPlotSet::operator[], return_internal_reference<>())
     .def("__iter__", range(&MultiPlotSet::begin, &MultiPlotSet::end))
     ;
 
-
+class_<std::vector<int> > ("std_vector_int")
+  .def(vector_indexing_suite<std::vector<int> >())
+;
 }
 
 
