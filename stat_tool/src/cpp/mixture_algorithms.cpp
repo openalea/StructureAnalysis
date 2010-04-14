@@ -130,7 +130,6 @@ void Mixture::computation(int min_nb_value , double cumul_threshold , bool compo
 
 {
   register int i , j;
-  double *pweight , *pmass;
 
 
   // calcul de la loi des ponderations
@@ -163,15 +162,12 @@ void Mixture::computation(int min_nb_value , double cumul_threshold , bool compo
     }
   }
 
-  pmass = mass - 1;
   for (i = 0;i < nb_value;i++) {
-    pweight = weight->mass;
-    *++pmass = 0.;
+    mass[i] = 0.;
     for (j = 0;j < nb_component;j++) {
       if (i < component[j]->nb_value) {
-        *pmass += *pweight * component[j]->mass[i];
+        mass[i] += weight->mass[j] * component[j]->mass[i];
       }
-      pweight++;
     }
   }
 
@@ -277,8 +273,8 @@ void Mixture::expectation_step(MixtureData *mixt_histo , int nb_element) const
 
 {
   register int i , j , k;
-  int component_index , value_index , *pfrequency , *mfrequency;
-  double scale , sum , max_frequency , *pweight , *mmass , **rfrequency;
+  int component_index , value_index;
+  double scale , sum , max_frequency , **rfrequency;
 
 
   scale = (double)nb_element / (double)mixt_histo->nb_element;
@@ -288,23 +284,18 @@ void Mixture::expectation_step(MixtureData *mixt_histo , int nb_element) const
     rfrequency[i] = new double[mixt_histo->nb_value];
   }
 
-  mfrequency = mixt_histo->frequency + mixt_histo->offset;
-  mmass = mass + mixt_histo->offset;
   sum = 0.;
-
   for (i = mixt_histo->offset;i < mixt_histo->nb_value;i++) {
-    if ((*mfrequency > 0) && (*mmass > 0.)) {
-      pweight = weight->mass;
+    if ((mixt_histo->frequency[i] > 0) && (mass[i] > 0.)) {
 
       // repartition de l'effectif d'une classe entre les composantes empiriques
 
       for (j = 0;j < nb_component;j++) {
-        pfrequency = mixt_histo->component[j]->frequency + i;
-
         if ((i >= component[j]->inf_bound) && (i < component[j]->nb_value)) {
-          rfrequency[j][i] = scale * *mfrequency * *pweight * component[j]->mass[i] / *mmass;
-          *pfrequency = (int)rfrequency[j][i];
-          rfrequency[j][i] -= *pfrequency;
+          rfrequency[j][i] = scale * mixt_histo->frequency[i] * weight->mass[j] *
+                             component[j]->mass[i] / mass[i];
+          mixt_histo->component[j]->frequency[i] = (int)rfrequency[j][i];
+          rfrequency[j][i] -= mixt_histo->component[j]->frequency[i];
           if (rfrequency[j][i] > 0.) {
             sum += rfrequency[j][i];
           }
@@ -312,10 +303,8 @@ void Mixture::expectation_step(MixtureData *mixt_histo , int nb_element) const
 
         else {
           rfrequency[j][i] = 0.;
-          *pfrequency = 0;
+          mixt_histo->component[j]->frequency[i] = 0;
         }
-
-        pweight++;
       }
     }
 
@@ -324,20 +313,15 @@ void Mixture::expectation_step(MixtureData *mixt_histo , int nb_element) const
         mixt_histo->component[j]->frequency[i] = 0;
       }
     }
-
-    mfrequency++;
-    mmass++;
   }
 
   // prise en compte des arrondis
 
   for (i = 0;i < (int)round(sum);i++) {
     max_frequency = 0.;
-    mfrequency = mixt_histo->frequency + mixt_histo->offset;
-    mmass = mass + mixt_histo->offset;
 
     for (j = mixt_histo->offset;j < mixt_histo->nb_value;j++) {
-      if ((*mfrequency > 0) && (*mmass > 0.)) {
+      if ((mixt_histo->frequency[j] > 0) && (mass[j] > 0.)) {
         for (k = 0;k < nb_component;k++) {
           if (rfrequency[k][j] > max_frequency) {
             max_frequency = rfrequency[k][j];
@@ -346,9 +330,6 @@ void Mixture::expectation_step(MixtureData *mixt_histo , int nb_element) const
           }
         }
       }
-
-      mfrequency++;
-      mmass++;
     }
 
     rfrequency[component_index][value_index] = 0.;
@@ -513,9 +494,11 @@ Mixture* FrequencyDistribution::mixture_estimation(StatError &error , const Mixt
 {
   bool status = true;
   register int i , j , k;
-  int nb_component = imixt.nb_component , inf_bound[MIXTURE_NB_COMPONENT] , sup_bound[MIXTURE_NB_COMPONENT];
-  double step , likelihood , previous_likelihood , max_likelihood = D_INF , weight[MIXTURE_NB_COMPONENT] ,
-         parameter[MIXTURE_NB_COMPONENT] , probability[MIXTURE_NB_COMPONENT];
+  int nb_component = imixt.nb_component , inf_bound[MIXTURE_NB_COMPONENT] ,
+      sup_bound[MIXTURE_NB_COMPONENT];
+  double step , likelihood , previous_likelihood , max_likelihood = D_INF ,
+         weight[MIXTURE_NB_COMPONENT] , parameter[MIXTURE_NB_COMPONENT] ,
+         probability[MIXTURE_NB_COMPONENT];
   Mixture *mixt;
   MixtureData *mixt_histo;
 
