@@ -102,8 +102,6 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , const char *ilabel , int *patter
 
 {
   register int i , j;
-  int *plength;
-  double *pdistance;
 
 
   nb_row = nb_pattern;
@@ -139,17 +137,15 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , const char *ilabel , int *patter
     distance[i] = new double[nb_column];
     length[i] = new int[nb_column];
 
-    pdistance = distance[i];
-    plength = length[i];
     for (j = 0;j < nb_column;j++) {
       if (row_identifier[i] != column_identifier[j]) {
-        *pdistance++ = -D_INF;
+        distance[i][j] = -D_INF;
       }
       else {
-        *pdistance++ = 0.;
+        distance[i][j] = 0.;
       }
 
-      *plength++ = 0;
+      length[i][j] = 0;
     }
   }
 
@@ -185,8 +181,6 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
 
 {
   register int i , j;
-  int *plength;
-  double *pdistance;
 
 
   nb_row = (irow_identifier == I_DEFAULT ? nb_pattern : 1);
@@ -234,17 +228,15 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
     distance[i] = new double[nb_column];
     length[i] = new int[nb_column];
 
-    pdistance = distance[i];
-    plength = length[i];
     for (j = 0;j < nb_column;j++) {
       if (row_identifier[i] != column_identifier[j]) {
-        *pdistance++ = -D_INF;
+        distance[i][j] = -D_INF;
       }
       else {
-        *pdistance++ = 0.;
+        distance[i][j] = 0.;
       }
 
-      *plength++ = 0;
+      length[i][j] = 0;
     }
   }
 
@@ -254,11 +246,9 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
     deletion_distance[i] = new double[nb_column];
     nb_deletion[i] = new int[nb_column];
 
-    pdistance = deletion_distance[i];
-    plength = nb_deletion[i];
     for (j = 0;j < nb_column;j++) {
-      *pdistance++ = 0.;
-      *plength++ = 0;
+      deletion_distance[i][j] = 0.;
+      nb_deletion[i][j] = 0;
     }
   }
 
@@ -268,20 +258,18 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
     insertion_distance[i] = new double[nb_column];
     nb_insertion[i] = new int[nb_column];
 
-    pdistance = insertion_distance[i];
-    plength = nb_insertion[i];
     for (j = 0;j < nb_column;j++) {
-      *pdistance++ = 0.;
-      *plength++ = 0;
+      insertion_distance[i][j] = 0.;
+      nb_insertion[i][j] = 0;
     }
   }
 
   nb_match = new int*[nb_row];
   for (i = 0;i < nb_row;i++) {
     nb_match[i] = new int[nb_column];
-    plength = nb_match[i];
+
     for (j = 0;j < nb_column;j++) {
-      *plength++ = 0;
+      nb_match[i][j] = 0;
     }
   }
 
@@ -292,11 +280,9 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
       substitution_distance[i] = new double[nb_column];
       nb_substitution[i] = new int[nb_column];
 
-      pdistance = substitution_distance[i];
-      plength = nb_substitution[i];
       for (j = 0;j < nb_column;j++) {
-        *pdistance++ = 0.;
-        *plength++ = 0;
+        substitution_distance[i][j] = 0.;
+        nb_substitution[i][j] = 0;
       }
     }
   }
@@ -312,11 +298,9 @@ DistanceMatrix::DistanceMatrix(int nb_pattern , int irow_identifier , int icolum
       transposition_distance[i] = new double[nb_column];
       nb_transposition[i] = new int[nb_column];
 
-      pdistance = transposition_distance[i];
-      plength = nb_transposition[i];
       for (j = 0;j < nb_column;j++) {
-        *pdistance++ = 0.;
-        *plength++ = 0;
+        transposition_distance[i][j] = 0.;
+        nb_transposition[i][j] = 0;
       }
     }
   }
@@ -682,8 +666,6 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
 
 {
   register int i , j;
-  int *plength , *clength;
-  double *pdistance , *cdistance;
 
 
   nb_row = dist_matrix.nb_row;
@@ -728,31 +710,23 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
     }
 
     case 'u' : {
-      pdistance = distance[i];
-      cdistance = dist_matrix.distance[i];
-      plength = length[i];
-      clength = dist_matrix.length[i];
       for (j = 0;j < nb_column;j++) {
-        if ((*cdistance != -D_INF) && (*clength > 0)) {
-          *pdistance++ = *cdistance++ / *clength++;
-          *plength++ = 1;
+        if ((dist_matrix.distance[i][j] != -D_INF) && (dist_matrix.length[i][j] > 0)) {
+          distance[i][j] = dist_matrix.distance[i][j] / dist_matrix.length[i][j];
+          length[i][j] = 1;
         }
         else {
-          *pdistance++ = *cdistance++;
-          *plength++ = *clength++;
+          distance[i][j] = dist_matrix.distance[i][j];
+          length[i][j] = dist_matrix.length[i][j];
         }
       }
       break;
     }
 
     default : {
-      pdistance = distance[i];
-      cdistance = dist_matrix.distance[i];
-      plength = length[i];
-      clength = dist_matrix.length[i];
       for (j = 0;j < nb_column;j++) {
-        *pdistance++ = *cdistance++;
-        *plength++ = *clength++;
+        distance[i][j] = dist_matrix.distance[i][j];
+        length[i][j] = dist_matrix.length[i][j];
       }
       break;
     }
@@ -790,13 +764,9 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
         }
 
         default : {
-          pdistance = deletion_distance[i];
-          cdistance = dist_matrix.deletion_distance[i];
-          plength = nb_deletion[i];
-          clength = dist_matrix.nb_deletion[i];
           for (j = 0;j < nb_column;j++) {
-            *pdistance++ = *cdistance++;
-            *plength++ = *clength++;
+            deletion_distance[i][j] = dist_matrix.deletion_distance[i][j];
+            nb_deletion[i][j] = dist_matrix.nb_deletion[i][j];
           }
           break;
         }
@@ -833,19 +803,15 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
               nb_insertion[i][j] = 0;
             }
             insertion_distance[j][i] = insertion_distance[i][j];
-            nb_insertion[j][i]= nb_insertion[i][j];
+            nb_insertion[j][i] = nb_insertion[i][j];
           }
           break;
         }
 
         default : {
-          pdistance = insertion_distance[i];
-          cdistance = dist_matrix.insertion_distance[i];
-          plength = nb_insertion[i];
-          clength = dist_matrix.nb_insertion[i];
           for (j = 0;j < nb_column;j++) {
-            *pdistance++ = *cdistance++;
-            *plength++ = *clength++;
+            insertion_distance[i][j] = dist_matrix.insertion_distance[i][j];
+            nb_insertion[i][j] = dist_matrix.nb_insertion[i][j];
           }
           break;
         }
@@ -882,10 +848,8 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
         }
 
         default : {
-          plength = nb_match[i];
-          clength = dist_matrix.nb_match[i];
           for (j = 0;j < nb_column;j++) {
-            *plength++ = *clength++;
+            nb_match[i][j] = dist_matrix.nb_match[i][j];
           }
           break;
         }
@@ -927,13 +891,9 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
         }
 
         default : {
-          pdistance = substitution_distance[i];
-          cdistance = dist_matrix.substitution_distance[i];
-          plength = nb_substitution[i];
-          clength = dist_matrix.nb_substitution[i];
           for (j = 0;j < nb_column;j++) {
-            *pdistance++ = *cdistance++;
-            *plength++ = *clength++;
+            substitution_distance[i][j] = dist_matrix.substitution_distance[i][j];
+            nb_substitution[i][j] = dist_matrix.nb_substitution[i][j];
           }
           break;
         }
@@ -976,13 +936,9 @@ void DistanceMatrix::copy(const DistanceMatrix &dist_matrix , char transform)
         }
 
         default : {
-          pdistance = transposition_distance[i];
-          cdistance = dist_matrix.transposition_distance[i];
-          plength = nb_transposition[i];
-          clength = dist_matrix.nb_transposition[i];
           for (j = 0;j < nb_column;j++) {
-            *pdistance++ = *cdistance++;
-            *plength++ = *clength++;
+            transposition_distance[i][j] = dist_matrix.transposition_distance[i][j];
+            nb_transposition[i][j] = dist_matrix.nb_transposition[i][j];
           }
           break;
         }
@@ -1471,13 +1427,12 @@ int cumul_computation(int nb_row , int nb_column , int **value)
 
 {
   register int i , j;
-  int cumul = 0 , *pvalue;
+  int cumul = 0;
 
 
   for (i = 0;i < nb_row;i++) {
-    pvalue = value[i];
     for (j = 0;j < nb_column;j++) {
-      cumul += *pvalue++;
+      cumul += value[i][j];
     }
   }
 
@@ -1501,8 +1456,8 @@ double cumul_distance_computation(int dim , double *distance)
 
 
   for (i = 0;i < dim;i++) {
-    if (*distance != -D_INF) {
-      cumul_distance += *distance++;
+    if (distance[i] != -D_INF) {
+      cumul_distance += distance[i];
     }
     else {
       cumul_distance = -D_INF;
@@ -2582,8 +2537,8 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , doubl
  *
  *--------------------------------------------------------------*/
 
-void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , double idistance ,
-                            int ilength)
+void DistanceMatrix::update(int irow_identifier , int icolumn_identifier ,
+                            double idistance , int ilength)
 
 {
   if (idistance != -D_INF) {
@@ -2618,21 +2573,16 @@ void DistanceMatrix::update(int irow_identifier , int icolumn_identifier , doubl
 int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag) const
 
 {
-  bool *pcolumn_flag;
   register int i , j;
-  int cumul_length = 0 , *plength;
+  int cumul_length = 0;
 
 
   for (i = 0;i < nb_row;i++) {
-    if (*row_flag++) {
-      pcolumn_flag = column_flag;
-      plength = length[i];
-
+    if (row_flag[i]) {
       for (j = 0;j < nb_column;j++) {
-        if (*pcolumn_flag++) {
-          cumul_length += *plength;
+        if (column_flag[j]) {
+          cumul_length += length[i][j];
         }
-        plength++;
       }
     }
   }
@@ -2652,21 +2602,17 @@ int DistanceMatrix::cumul_length_computation(bool *row_flag , bool *column_flag)
 double DistanceMatrix::cumul_distance_computation(bool *row_flag , bool *column_flag) const
 
 {
-  bool *pcolumn_flag;
   register int i , j;
-  double cumul_distance = 0. , *pdistance;
+  double cumul_distance = 0.;
 
 
   for (i = 0;i < nb_row;i++) {
-    if (*row_flag++) {
-      pcolumn_flag = column_flag;
-      pdistance = distance[i];
-
+    if (row_flag[i]) {
       for (j = 0;j < nb_column;j++) {
-        if (*pcolumn_flag++) {
-          if (*pdistance != -D_INF) {
-            if (*pdistance > 0.) {
-              cumul_distance += *pdistance;
+        if (column_flag[j]) {
+          if (distance[i][j] != -D_INF) {
+            if (distance[i][j] > 0.) {
+              cumul_distance += distance[i][j];
             }
           }
           else {
@@ -2674,8 +2620,6 @@ double DistanceMatrix::cumul_distance_computation(bool *row_flag , bool *column_
             break;
           }
         }
-
-        pdistance++;
       }
 
       if (cumul_distance == -D_INF) {
