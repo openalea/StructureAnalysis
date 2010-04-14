@@ -71,20 +71,17 @@ void ChainReestimation<Type>::init()
 
 {
   register int i , j;
-  Type *pinitial , *ptransition;
 
 
   if (initial) {
-    pinitial = initial;
     for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
-      *pinitial++ = 0;
+      initial[i] = 0;
     }
   }
 
   for (i = 0;i < nb_row;i++) {
-    ptransition = transition[i];
     for (j = 0;j < nb_state;j++) {
-      *ptransition++ = 0;
+      transition[i][j] = 0;
     }
   }
 }
@@ -145,7 +142,6 @@ void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
 
 {
   register int i , j;
-  Type *pinitial , *cinitial , *ptransition , *ctransition;
 
 
   nb_state = chain_data.nb_state;
@@ -154,10 +150,8 @@ void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
   if (chain_data.initial) {
     initial = new Type[type == 'o' ? nb_state : nb_row];
 
-    pinitial = initial;
-    cinitial = chain_data.initial;
     for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
-      *pinitial++ = *cinitial++;
+      initial[i] = chain_data.initial[i];
     }
   }
 
@@ -169,10 +163,8 @@ void ChainReestimation<Type>::copy(const ChainReestimation<Type> &chain_data)
   for (i = 0;i < nb_row;i++) {
     transition[i] = new Type[nb_state];
 
-    ptransition = transition[i];
-    ctransition = chain_data.transition[i];
     for (j = 0;j < nb_state;j++) {
-      *ptransition++ = *ctransition++;
+      transition[i][j] = chain_data.transition[i][j];
     }
   }
 }
