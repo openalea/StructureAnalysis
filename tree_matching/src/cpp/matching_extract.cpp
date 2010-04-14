@@ -74,6 +74,31 @@ ostream& TreeMatch::saveDistanceMatrix(ostream& out_fich) const
   return(out_fich);
 }
 
+ostream& TreeMatch::saveDistanceMatrix(ostream& out_fich,int& toInt) const
+{
+  int nb_tree ;
+
+  nb_tree = _trees[0]->getNbVertex();
+  for (int i_tree=0;i_tree<nb_tree;i_tree++){
+    int j_tree;
+    for (j_tree=0;j_tree<nb_tree;j_tree++){
+      if (toInt)
+	out_fich<<int(getDistance(i_tree,j_tree))<<" ";
+      else
+	out_fich<<getDistance(i_tree,j_tree)<<" ";	
+    }
+    out_fich<<endl;
+  }
+ 
+  if (_fileName)
+    {
+      fstream outfile(_fileName,ios::out);
+      outfile<<out_fich<<endl;
+      outfile.close();
+    }
+  return(out_fich);
+}
+
 
 //------------------------------------------------------------------------------------------------------
 // DISPLAY THE RESULTS OF THE MATCHING
@@ -224,66 +249,71 @@ ostream& TreeMatch::viewAllMatching(ostream& out_fich) const
 
 DistanceMatrix* TreeMatch::getMatrix()
 {
-  int nb_tree ;
+   cerr<<"Get Distance Matrix"<<endl;
+ int nb_tree ;
 
-  if (_selfSimilarity == 1)
+ if (_selfSimilarity != 1){
+   nb_tree = getNbTree();
+    int nb_del;
+    int nb_ins;
+    double del_cost;
+    double ins_cost;
+    DistanceMatrix* dmatrix = new DistanceMatrix(nb_tree, nb_tree, nb_tree, "ARBORESCENCE");
+    for (int inp_tree=0;inp_tree<nb_tree-1;inp_tree++)
+      {
+	for (int ref_tree=inp_tree+1;ref_tree<nb_tree;ref_tree++)
+	  {
+	    Sequence* s=new Sequence();
+	    s=getSequence(inp_tree,ref_tree);
+	    nb_del = s->getNbDel();
+	    del_cost =s->getDelCost();
+	    nb_ins = s->getNbIns();
+	    ins_cost = s->getInsCost();
+	    
+	    dmatrix->update(inp_tree+1,
+			   ref_tree+1,
+			   getDistance(inp_tree,ref_tree),
+			   s->getSize()*2+s->getNbDel() + s->getNbIns(),
+			   del_cost,nb_del,
+			   ins_cost,nb_ins,
+			   s->getNbMat(),getDistance(inp_tree,ref_tree) -
+			   ins_cost-del_cost, s->getNbSub());
+	    
+	    // On remplit l'autre moitie de la matrice triangulaire
+	    dmatrix->update(ref_tree+1,
+			   inp_tree+1,
+			   getDistance(inp_tree,ref_tree),
+			   s->getSize()*2+s->getNbDel() + s->getNbIns(),
+			   ins_cost , s->getNbIns(),
+			   del_cost, s->getNbDel(),
+			   s->getNbMat(),getDistance(inp_tree,ref_tree) -
+			   ins_cost-del_cost, s->getNbSub());
+	  }
+      }
+    return dmatrix;
+ }
+ else
+   {
     nb_tree = _trees[0]->getNbVertex();
-  else
-    nb_tree = getNbTree();
-
-  int nb_del;
-  int nb_ins;
-  double del_cost;
-  double ins_cost;
-  DistanceMatrix* dmatrix = new DistanceMatrix(nb_tree, -1, -1, "ARBORESCENCE");
-
-  for (int inp_tree=0;inp_tree<nb_tree-1;inp_tree++)
-    {
-      for (int ref_tree=inp_tree+1;ref_tree<nb_tree;ref_tree++)
-        {
-          if (_selfSimilarity!=1)
-           {
-              Sequence* s=new Sequence();
-              s=getSequence(inp_tree,ref_tree);
-              nb_del = s->getNbDel();
-              del_cost =s->getDelCost();
-              nb_ins = s->getNbIns();
-              ins_cost = s->getInsCost();
-
-              dmatrix->update(inp_tree+1,
-                              ref_tree+1,
-                              getDistance(inp_tree,ref_tree),
-                              s->getSize()*2+s->getNbDel() + s->getNbIns(),
-                              del_cost,nb_del,
-                              ins_cost,nb_ins,
-                              s->getNbMat(),getDistance(inp_tree,ref_tree) -
-                              ins_cost-del_cost, s->getNbSub());
-
-              // On remplit l'autre moitie de la matrice triangulaire
-              dmatrix->update(ref_tree+1,
-                              inp_tree+1,
-                              getDistance(inp_tree,ref_tree),
-                              s->getSize()*2+s->getNbDel() + s->getNbIns(),
-                          ins_cost , s->getNbIns(),
-                              del_cost, s->getNbDel(),
-                              s->getNbMat(),getDistance(inp_tree,ref_tree) -
-                              ins_cost-del_cost, s->getNbSub());
-                }
-               else
-            {
-              dmatrix->update(inp_tree+1,
-                              ref_tree+1,
-                              getDistance(inp_tree,ref_tree),0,0,0,0,0,0,0,0);
-
-              // On remplit l'autre moitie de la matrice triangulaire
-              dmatrix->update(ref_tree+1,
-                              inp_tree+1,
-                              getDistance(inp_tree,ref_tree),0,0,0,0,0,0,0,0);
-                              }
-
-        }
-    }
-  return(dmatrix);
+     DistanceMatrix* dmatrix = new DistanceMatrix(nb_tree, "ARBORESCENCE");
+     for (int inp_tree=0;inp_tree<nb_tree-1;inp_tree++)
+       {
+	 for (int ref_tree=inp_tree+1;ref_tree<nb_tree;ref_tree++)
+	   {
+	     dmatrix->update(inp_tree+1,
+			    ref_tree+1,
+			    getDistance(inp_tree,ref_tree),0);
+	     
+	     // On remplit l'autre moitie de la matrice triangulaire
+	     dmatrix->update(ref_tree+1,
+			    inp_tree+1,
+			    getDistance(inp_tree,ref_tree),0);
+	   }
+	 cerr << "\x0d" << "Already computed : "<<int(100. - 100.*inp_tree/nb_tree) <<"% => " <<inp_tree<<"  ...  "<<flush;
+       }
+     cerr<<endl;
+     return(dmatrix);
+   }
 }
 
 

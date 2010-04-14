@@ -40,6 +40,7 @@
 
 #include "definitions.h"
 #include "matching.h"
+#include "Unordered/matching_unordered.h"
 #include "self_similar_matching.h"
 #include "end_space_free_matching.h"
 #include "local_matching.h"
@@ -290,6 +291,7 @@ class TreeMatch
   std::ostream& viewOneMatching(std::ostream& out_info,int imp_tree,int ref_tree) const;
 
   ostream& saveDistanceMatrix(ostream& out_fich) const;
+  ostream& saveDistanceMatrix(ostream& out_fich,int& toInt) const;
 
   DistanceType viewDistanceMatching(std::ostream& out_info,int imp_tree,int ref_tree) const;
   DistanceType viewNormalizedDistance(std::ostream& out_info,int imp_tree,int ref_tree);

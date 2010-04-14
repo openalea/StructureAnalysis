@@ -578,7 +578,8 @@ DistanceType TreeMatch::MatchByAttribute(TreeGraph& Tree1,
   MCF=new WeightedNodeCost(WEIGTH,_vectorDist,_dispersion,_maxValue,_minValue,_InsDelCostCoeff);
 
   // making of the matching
-  Matching* M=new Matching(Tree1,Tree2,*MCF);
+  int spaceOpti= 1;
+  Matching_U* M=new Matching_U(Tree1,Tree2,*MCF,spaceOpti);
   // effective matching : the result is stored in D
   DistanceType D=M->match();
 

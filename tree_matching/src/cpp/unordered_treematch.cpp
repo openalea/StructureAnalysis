@@ -336,30 +336,30 @@ void TreeMatch_U::weightedMatching()
           putDistance(matching_distance,i_tree,r_tree);
           putSequence(matching_sequence,i_tree,r_tree);
 	  cerr<<"put Sequence"<<endl;
-//           int seq_size=matching_sequence->getSize();
-//           int sub_number=0;
-//           int mat_number=0;
-//           matching_sequence->reset();
-//           do
-//             {
-//               if (matching_sequence->getCurrent()->getCost()<=0.01)
-//                 {
-//                   mat_number++;
-//                 }
-//               else
-//                 {
-//                   sub_number++;
-//                 }
-//             } while(matching_sequence->next());
+          int seq_size=matching_sequence->getSize();
+          int sub_number=0;
+          int mat_number=0;
+          matching_sequence->reset();
+          do
+            {
+              if (matching_sequence->getCurrent()->getCost()<=0.01)
+                {
+                  mat_number++;
+                }
+              else
+                {
+                  sub_number++;
+                }
+            } while(matching_sequence->next());
 
-//           matching_sequence->putNbMat(mat_number);
-//           matching_sequence->putNbSub(sub_number);
+          matching_sequence->putNbMat(mat_number);
+          matching_sequence->putNbSub(sub_number);
 
-//           int tree_size2=_trees[r_tree]->getNbVertex();
-//           int tree_size1=_trees[i_tree]->getNbVertex();
+          int tree_size2=_trees[r_tree]->getNbVertex();
+          int tree_size1=_trees[i_tree]->getNbVertex();
 
-//           matching_sequence->putNbDel(tree_size1-seq_size);
-//           matching_sequence->putNbIns(tree_size2-seq_size);
+          matching_sequence->putNbDel(tree_size1-seq_size);
+          matching_sequence->putNbIns(tree_size2-seq_size);
 	  cerr<<getDistance(0,1)<<endl;
         }
     }
@@ -405,7 +405,7 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
 	if (_mapping == GENERAL){
 	  cerr<<"Matching by topology (VPlants)"<<endl;
 	  spaceOpti = 1 ;	  // modification qui ne permet pas de récupérer les listes d'alignements ...
-	  M = new Matching_U(Tree1,Tree2,*MCF,spaceOpti);
+	  M = new Matching_U(Tree1,Tree2,*MCF);
 			
 	}
 	else {
@@ -463,7 +463,6 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
 
   Sequence* s=new Sequence();
   cerr<<M->getI_v()<<" - "<<M->getR_v()<<"  "<<spaceOpti<<endl;
-  if (spaceOpti == 0){
   M->TreeList(M->getI_v(),M->getR_v(),*s);
   cerr<<"Tree List"<<endl;
   int mat_number = 0;
@@ -501,7 +500,7 @@ DistanceType TreeMatch_U::MatchByTopology(TreeGraph& Tree1,
   S->putNbSub(sub_number);
  
   delete (Sequence*) s;
-  }
+ 
   cerr<<"Delete Node cost"<<endl;
   delete (NodeCost*) MCF;
 
