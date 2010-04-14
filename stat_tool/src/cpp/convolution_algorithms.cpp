@@ -101,38 +101,27 @@ void Convolution::expectation_step(const FrequencyDistribution &histo ,
 
 {
   register int i , j , k;
-  int min , max , *pfrequency;
-  double *rfrequency , *pmass1 , *pmass2 , *cmass;
+  int min , max;
 
 
   for (i = 0;i < nb_distribution;i++) {
     if (reestim[i]) {
-      rfrequency = reestim[i]->frequency;
       for (j = 0;j < reestim[i]->alloc_nb_value;j++) {
-        *rfrequency++ = 0.;
+        reestim[i]->frequency[j] = 0.;
       }
 
-      pfrequency = histo.frequency + histo.offset;
-      cmass = mass + histo.offset;
-
       for (j = histo.offset;j < histo.nb_value;j++) {
-        if ((*pfrequency > 0) && (*cmass > 0.)) {
+        if ((histo.frequency[j] > 0) && (mass[j] > 0.)) {
           min = MAX(distribution[i]->offset , j - (partial_convol[i]->nb_value - 1));
           max = MIN(distribution[i]->nb_value - 1 , j - partial_convol[i]->offset);
 
           if (max >= min) {
-            rfrequency = reestim[i]->frequency + min;
-            pmass1 = distribution[i]->mass + min;
-            pmass2 = partial_convol[i]->mass + j - min;
-
             for (k = min;k <= max;k++) {
-              *rfrequency++ += *pfrequency * *pmass1++ * *pmass2-- / *cmass;
+              reestim[i]->frequency[k] += histo.frequency[j] * distribution[i]->mass[k] *
+                                          partial_convol[i]->mass[j - k] / mass[j];
             }
           }
         }
-
-        pfrequency++;
-        cmass++;
       }
 
       reestim[i]->nb_value_computation();
