@@ -490,15 +490,15 @@ protected :
 
     std::ostream& profile_ascii_print(std::ostream &os , int index , int nb_segment ,
                                       double **profiles , const char *label ,
-                                      double **mean = NULL , double **change_point = NULL) const;
+                                      double **mean = NULL , long double **change_point = NULL) const;
     std::ostream& profile_spreadsheet_print(std::ostream &os , int index , int nb_segment ,
                                             double **profiles , const char *label ,
-                                            double **mean = NULL , double **change_point = NULL) const;
+                                            double **mean = NULL , long double **change_point = NULL) const;
     std::ostream& profile_plot_print(std::ostream &os , int index , int nb_segment ,
                                      double **profiles , double **mean = NULL ,
-                                     double **change_point = NULL) const;
+                                     long double **change_point = NULL) const;
     void change_point_profile_plotable_write(MultiPlot &plot , int index , int nb_segment ,
-                                             double **change_point) const;
+                                             long double **change_point) const;
 
     int nb_parameter_computation(int index , int nb_segment , int *model_type) const;
     double one_segment_likelihood(int index , int *model_type , double **rank) const;
@@ -509,10 +509,11 @@ protected :
                         double *segment_penalty = NULL);
     double forward_backward(int index , int nb_segment , int *model_type , double **rank ,
                             std::ostream *os , MultiPlotSet *plot_set , int output , char format ,
-                            double *ilikelihood = NULL , double *isegmentation_entropy = NULL ,
-                            double *iranked_change_point_entropy = NULL ,
-                            double *ichange_point_entropy = NULL , double *uniform_entropy = NULL ,
-                            double *imarginal_entropy = NULL) const;
+                            double *ilikelihood = NULL , long double *isegmentation_entropy = NULL ,
+                            long double *iranked_change_point_entropy = NULL ,
+                            long double *ichange_point_entropy = NULL ,
+                            double *uniform_entropy = NULL ,
+                            long double *imarginal_entropy = NULL) const;
     double forward_backward_sampling(int index , int nb_segment , int *model_type ,
                                      double **rank , std::ostream &os , char format ,
                                      int nb_segmentation) const;
