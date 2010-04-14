@@ -82,8 +82,6 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag , bool init_fla
 
 {
   register int i , j;
-  int *pfrequency;
-  double *ppoint;
 
 
   nb_curve = inb_curve;
@@ -94,9 +92,8 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag , bool init_fla
     frequency = new int[length];
 
     if (init_flag) {
-      pfrequency = frequency;
       for (i = 0;i < length;i++) {
-        *pfrequency++ = 0;
+        frequency[i] = 0;
       }
     }
   }
@@ -110,9 +107,8 @@ Curves::Curves(int inb_curve , int ilength , bool frequency_flag , bool init_fla
     point[i] = new double[length];
 
     if (init_flag) {
-      ppoint = point[i];
       for (j = 0;j < length;j++) {
-        *ppoint++ = 0.;
+        point[i][j] = 0.;
       }
     }
   }
@@ -131,7 +127,7 @@ Curves::Curves(const Distribution &dist)
 
 {
   register int i;
-  double norm , *pmass , *pcumul;
+  double norm , *pcumul;
 
 
   nb_curve = 2;
@@ -151,15 +147,12 @@ Curves::Curves(const Distribution &dist)
     point[i] = new double[length];
   }
 
-  pmass = dist.mass;
-  pcumul = dist.cumul;
   norm = 1. - dist.complement;
-
   for (i = 0;i < length;i++) {
-    if ((*pmass <= norm) && ((1. - dist.complement - *pcumul) <= norm)) {
-      point[0][i] = *pmass++ / norm;
-      point[1][i] = (1. - dist.complement - *pcumul) / norm;
-      norm = 1. - dist.complement - *pcumul++;
+    if ((dist.mass[i] <= norm) && ((1. - dist.complement - dist.cumul[i]) <= norm)) {
+      point[0][i] = dist.mass[i] / norm;
+      point[1][i] = (1. - dist.complement - dist.cumul[i]) / norm;
+      norm = 1. - dist.complement - dist.cumul[i];
     }
 
     else {
@@ -183,7 +176,7 @@ Curves::Curves(const FrequencyDistribution &histo)
 
 {
   register int i;
-  int norm , *hfrequency;
+  int norm;
 
 
   nb_curve = 2;
@@ -196,14 +189,12 @@ Curves::Curves(const FrequencyDistribution &histo)
   }
   frequency = new int[length];
 
-  hfrequency = histo.frequency;
   norm = histo.nb_element;
-
   for (i = 0;i < length;i++) {
-    point[0][i] = (double)*hfrequency / (double)norm;
-    point[1][i] = (double)(norm - *hfrequency) / (double)norm;
+    point[0][i] = (double)histo.frequency[i] / (double)norm;
+    point[1][i] = (double)(norm - histo.frequency[i]) / (double)norm;
     frequency[i] = norm;
-    norm -= *hfrequency++;
+    norm -= histo.frequency[i];
   }
 }
 
@@ -220,8 +211,6 @@ void Curves::copy(const Curves &curves)
 
 {
   register int i , j;
-  int *pfrequency , *cfrequency;
-  double *ppoint , *cpoint;
 
 
   nb_curve = curves.nb_curve;
@@ -231,10 +220,8 @@ void Curves::copy(const Curves &curves)
   if (curves.frequency) {
     frequency = new int[length];
 
-    pfrequency = frequency;
-    cfrequency = curves.frequency;
     for (i = 0;i < length;i++) {
-      *pfrequency++ = *cfrequency++;
+      frequency[i] = curves.frequency[i];
     }
   }
 
@@ -246,10 +233,8 @@ void Curves::copy(const Curves &curves)
   for (i = 0;i < nb_curve;i++) {
     point[i] = new double[length];
 
-    ppoint = point[i];
-    cpoint = curves.point[i];
     for (j = 0;j < length;j++) {
-      *ppoint++ = *cpoint++;
+      point[i][j] = curves.point[i][j];
     }
   }
 }
@@ -268,8 +253,8 @@ void Curves::smooth(const Curves &curves , int max_frequency)
 
 {
   register int i , j , k;
-  int range , buff , min , max , total , *pfrequency;
-  double sum , *ppoint;
+  int range , buff , min , max , total;
+  double sum;
 
 
   nb_curve = curves.nb_curve;
@@ -304,19 +289,16 @@ void Curves::smooth(const Curves &curves , int max_frequency)
       min = i - buff;
       max = i + buff;
 
-      pfrequency = curves.frequency + min;
       total = 0;
       for (j = min;j <= max;j++) {
-        total += *pfrequency++;
+        total += curves.frequency[j];
       }
 
       if (total > 0) {
         for (j = 0;j < nb_curve;j++) {
-          ppoint = curves.point[j] + min;
-          pfrequency = curves.frequency + min;
           sum = 0.;
           for (k = min;k <= max;k++) {
-            sum += *ppoint++ * *pfrequency++;
+            sum += curves.point[j][k] * curves.frequency[k];
           }
           point[j][i] = sum / total;
         }
@@ -735,16 +717,13 @@ int Curves::max_frequency_computation() const
 
   if (frequency) {
     register int i;
-    int *pfrequency;
 
 
-    pfrequency = frequency + offset;
     max_frequency = 0;
     for (i = offset;i < length;i++) {
-      if (*pfrequency > max_frequency) {
-        max_frequency = *pfrequency;
+      if (frequency[i] > max_frequency) {
+        max_frequency = frequency[i];
       }
-      pfrequency++;
     }
   }
 
@@ -766,13 +745,11 @@ int Curves::nb_element_computation() const
 
   if (frequency) {
     register int i;
-    int *pfrequency;
 
 
-    pfrequency = frequency + offset;
     nb_element = 0;
     for (i = offset;i < length;i++) {
-      nb_element += *pfrequency++;
+      nb_element += frequency[i];
     }
   }
 
@@ -792,24 +769,18 @@ double Curves::mean_computation(int index) const
 
 {
   register int i;
-  int nb_element , *pfrequency;
-  double mean , *ppoint;
+  int nb_element;
+  double mean;
 
 
-  pfrequency = frequency + offset;
-  ppoint = point[index] + offset;
   nb_element = 0;
   mean = 0.;
-
   for (i = offset;i < length;i++) {
-    if (*pfrequency > 0) {
-      nb_element += *pfrequency;
-      mean += *pfrequency * *ppoint;
+    if (frequency[i] > 0) {
+      nb_element += frequency[i];
+      mean += frequency[i] * point[index][i];
     }
-    pfrequency++;
-    ppoint++;
   }
-
   mean /= nb_element;
 
   return mean;
@@ -828,21 +799,15 @@ double Curves::total_square_sum_computation(int index , double mean) const
 
 {
   register int i;
-  int *pfrequency;
-  double total_square_sum , diff , *ppoint;
+  double total_square_sum , diff;
 
 
-  pfrequency = frequency + offset;
-  ppoint = point[index] + offset;
   total_square_sum = 0.;
-
   for (i = offset;i < length;i++) {
-    if (*pfrequency > 0) {
-      diff = *ppoint - mean;
-      total_square_sum += *pfrequency * diff * diff;
+    if (frequency[i] > 0) {
+      diff = point[index][i] - mean;
+      total_square_sum += frequency[i] * diff * diff;
     }
-    pfrequency++;
-    ppoint++;
   }
 
   return total_square_sum;
