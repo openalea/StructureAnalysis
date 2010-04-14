@@ -140,8 +140,7 @@ double** Vectors::kendall_rank_correlation_computation() const
 
 {
   register int i , j , k , m , n , p;
-  int diff , *current_frequency , *pfrequency , *cumul_frequency , *pcumul , *index ,
-      **frequency;
+  int diff , *current_frequency , *pfrequency , *cumul_frequency , *index , **frequency;
   double nb_pair , sum , rank_diff_sign , *correction , **correlation = NULL;
 
 
@@ -177,17 +176,13 @@ double** Vectors::kendall_rank_correlation_computation() const
       cumul_frequency = new int[marginal[i]->nb_value];
       current_frequency = new int[marginal[i]->nb_value];
 
-      pcumul = cumul_frequency + marginal[i]->offset;
-      pfrequency = marginal[i]->frequency + marginal[i]->offset;
-      *pcumul = 0;
+      cumul_frequency[marginal[i]->offset] = 0;
       for (j = marginal[i]->offset + 1;j < marginal[i]->nb_value;j++) {
-        pcumul++;
-        *pcumul = *(pcumul - 1) + *pfrequency++;
+        cumul_frequency[j] = cumul_frequency[j - 1] + marginal[i]->frequency[j - 1];
       }
 
-      pfrequency = current_frequency + marginal[i]->offset;
       for (j = marginal[i]->offset;j < marginal[i]->nb_value;j++) {
-        *pfrequency++ = 0;
+        current_frequency[j] = 0;
       }
 
       for (j = 0;j < nb_vector;j++) {
@@ -212,13 +207,11 @@ double** Vectors::kendall_rank_correlation_computation() const
               if (frequency[k][m] > 0) {
                 sum = 0.;
                 for (n = k + 1;n < marginal[i]->nb_value;n++) {
-                  pfrequency = frequency[n] + marginal[j]->offset;
                   for (p = marginal[j]->offset;p < m;p++) {
-                    sum -= *pfrequency++;
+                    sum -= frequency[n][p];
                   }
-                  pfrequency++;
                   for (p = m + 1;p < marginal[j]->nb_value;p++) {
-                    sum += *pfrequency++;
+                    sum += frequency[n][p];
                   }
                 }
               }
@@ -529,7 +522,8 @@ double Vectors::spearman_rank_single_correlation_computation() const
 
   correlation = 0.;
   for (i = 0;i < nb_vector;i++) {
-    correlation += (rank[0][int_vector[i][0]] - rank_mean) * (rank[1][int_vector[i][1]] - rank_mean);
+    correlation += (rank[0][int_vector[i][0]] - rank_mean) *
+                   (rank[1][int_vector[i][1]] - rank_mean);
   }
 
   correlation = 12. * correlation / sqrt((main_term - correction[0]) * (main_term - correction[1]));
@@ -552,7 +546,7 @@ double Vectors::kendall_rank_single_correlation_computation() const
 
 {
   register int i , j , k , m;
-  int diff , *current_frequency , *pfrequency , *cumul_frequency , *pcumul , *index ,
+  int diff , *current_frequency , *pfrequency , *cumul_frequency , *index ,
       **frequency;
   double sum , correlation , nb_pair , correction[2];
 
@@ -588,13 +582,11 @@ double Vectors::kendall_rank_single_correlation_computation() const
         if (frequency[i][j] > 0) {
           sum = 0.;
           for (k = i + 1;k < marginal[0]->nb_value;k++) {
-            pfrequency = frequency[k] + marginal[1]->offset;
             for (m = marginal[1]->offset;m < j;m++) {
-              sum -= *pfrequency++;
+              sum -= frequency[k][m];
             }
-            pfrequency++;
             for (m = j + 1;m < marginal[1]->nb_value;m++) {
-              sum += *pfrequency++;
+              sum += frequency[k][m];
             }
           }
         }
@@ -617,17 +609,13 @@ double Vectors::kendall_rank_single_correlation_computation() const
     current_frequency = new int[marginal[0]->nb_value];
     index = new int[nb_vector];
 
-    pcumul = cumul_frequency + marginal[0]->offset;
-    pfrequency = marginal[0]->frequency + marginal[0]->offset;
-    *pcumul = 0;
+    cumul_frequency[marginal[0]->offset] = 0;
     for (i = marginal[0]->offset + 1;i < marginal[0]->nb_value;i++) {
-      pcumul++;
-      *pcumul = *(pcumul - 1) + *pfrequency++;
+      cumul_frequency[i] = cumul_frequency[i - 1] + marginal[0]->frequency[i - 1];
     }
 
-    pfrequency = current_frequency + marginal[0]->offset;
     for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      *pfrequency++ = 0;
+      current_frequency[i] = 0;
     }
 
     for (i = 0;i < nb_vector;i++) {
@@ -996,16 +984,15 @@ int** Vectors::joint_frequency_computation(int variable1 , int variable2) const
 
 {
   register int i , j;
-  int *pfrequency , **frequency = NULL;
+  int **frequency = NULL;
 
 
   if ((marginal[variable1]) && (marginal[variable2])) {
     frequency = new int*[marginal[variable1]->nb_value];
     for (i = 0;i < marginal[variable1]->nb_value;i++) {
       frequency[i] = new int[marginal[variable2]->nb_value];
-      pfrequency = frequency[i];
       for (j = 0;j < marginal[variable2]->nb_value;j++) {
-        *pfrequency++ = 0;
+        frequency[i][j] = 0;
       }
     }
 
