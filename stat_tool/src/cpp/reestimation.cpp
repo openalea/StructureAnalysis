@@ -74,13 +74,12 @@ void Reestimation<Type>::init(int inb_value)
 
   else {
     register int i;
-    Type *pfrequency;
+
 
     frequency = new Type[nb_value];
 
-    pfrequency = frequency;
     for (i = 0;i < nb_value;i++) {
-      *pfrequency++ = 0;
+      frequency[i] = 0;
     }
   }
 }
@@ -99,7 +98,6 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 
 {
   register int i;
-  Type *pfrequency , *cfrequency;
 
 
   nb_value = histo.nb_value;
@@ -114,10 +112,8 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
 
   frequency = new Type[nb_value];
 
-  pfrequency = frequency;
-  cfrequency = histo.frequency;
   for (i = 0;i < nb_value;i++) {
-    *pfrequency++ = *cfrequency++;
+    frequency[i] = histo.frequency[i];
   }
 }
 
@@ -151,7 +147,6 @@ Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo
 
 {
   register int i , j;
-  Type *pfrequency , *cfrequency;
 
 
   nb_value = 0;
@@ -166,16 +161,12 @@ Reestimation<Type>::Reestimation(int nb_histo , const Reestimation<Type> **histo
 
   frequency = new Type[nb_value];
 
-  pfrequency = frequency;
   for (i = 0;i < nb_value;i++) {
-    *pfrequency++ = 0;
+    frequency[i] = 0;
   }
-
   for (i = 0;i < nb_histo;i++) {
-    pfrequency = frequency + histo[i]->offset;
-    cfrequency = histo[i]->frequency + histo[i]->offset;
     for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
-      *pfrequency++ += *cfrequency++;
+      frequency[j] += histo[i]->frequency[j];
     }
   }
 
@@ -349,14 +340,11 @@ void Reestimation<Type>::nb_element_computation()
 
 {
   register int i;
-  Type *pfrequency;
 
 
-  pfrequency = frequency + offset;
   nb_element = 0;
-
   for (i = offset;i < nb_value;i++) {
-    nb_element += *pfrequency++;
+    nb_element += frequency[i];
   }
 }
 
@@ -372,17 +360,13 @@ void Reestimation<Type>::max_computation()
 
 {
   register int i;
-  Type *pfrequency;
 
 
-  pfrequency = frequency + offset;
   max = 0;
-
   for (i = offset;i < nb_value;i++) {
-    if (*pfrequency > max) {
-      max = *pfrequency;
+    if (frequency[i] > max) {
+      max = frequency[i];
     }
-    pfrequency++;
   }
 }
 
@@ -399,16 +383,12 @@ void Reestimation<Type>::mean_computation()
 {
   if (nb_element > 0) {
     register int i;
-    Type *pfrequency;
 
 
-    pfrequency = frequency + offset;
     mean = 0.;
-
     for (i = offset;i < nb_value;i++) {
-      mean += *pfrequency++ * i;
+      mean += frequency[i] * i;
     }
-
     mean /= nb_element;
   }
 }
@@ -429,16 +409,13 @@ void Reestimation<Type>::variance_computation()
 
     if (nb_element > 1) {
       register int i;
-      Type *pfrequency;
       double diff;
 
 
-      pfrequency = frequency + offset;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        variance += *pfrequency++ * diff * diff;
+        variance += frequency[i] * diff * diff;
       }
-
       variance /= (nb_element - 1);
     }
   }
@@ -456,18 +433,14 @@ double Reestimation<Type>::mean_absolute_deviation_computation() const
 
 {
   register int i;
-  Type *pfrequency;
   double mean_absolute_deviation = D_DEFAULT;
 
 
   if ((mean != D_DEFAULT) && (nb_element > 0)) {
-    pfrequency = frequency + offset;
     mean_absolute_deviation = 0.;
-
     for (i = offset;i < nb_value;i++) {
-      mean_absolute_deviation += *pfrequency++ * fabs(i - mean);
+      mean_absolute_deviation += frequency[i] * fabs(i - mean);
     }
-
     mean_absolute_deviation /= nb_element;
   }
 
@@ -486,7 +459,6 @@ double Reestimation<Type>::skewness_computation() const
 
 {
   register int i;
-  Type *pfrequency;
   double skewness = D_INF , diff;
 
 
@@ -494,13 +466,13 @@ double Reestimation<Type>::skewness_computation() const
     skewness = 0.;
 
     if ((nb_element > 2) && (variance > 0.)) {
-      pfrequency = frequency + offset;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        skewness += *pfrequency++ * diff * diff * diff;
+        skewness += frequency[i] * diff * diff * diff;
       }
 
-      skewness = skewness * nb_element / ((nb_element - 1) * (double)(nb_element - 2) * pow(variance , 1.5));
+      skewness = skewness * nb_element /
+                 ((nb_element - 1) * (double)(nb_element - 2) * pow(variance , 1.5));
     }
   }
 
@@ -520,7 +492,6 @@ double Reestimation<Type>::kurtosis_computation() const
 
 {
   register int i;
-  Type *pfrequency;
   double kurtosis = D_INF , diff;
 
 
@@ -530,14 +501,11 @@ double Reestimation<Type>::kurtosis_computation() const
     }
 
     else {
-      pfrequency = frequency + offset;
       kurtosis = 0.;
-
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        kurtosis += *pfrequency++ * diff * diff * diff * diff;
+        kurtosis += frequency[i] * diff * diff * diff * diff;
       }
-
       kurtosis = kurtosis / ((nb_element - 1) * variance * variance) - 3.;
     }
   }
@@ -557,19 +525,15 @@ double Reestimation<Type>::information_computation() const
 
 {
   register int i;
-  Type *pfrequency;
   double information = D_INF;
 
 
   if (nb_element > 0) {
-    pfrequency = frequency + offset;
     information = 0.;
-
     for (i = offset;i < nb_value;i++) {
-      if (*pfrequency > 0) {
-        information += *pfrequency * log((double)*pfrequency / (double)nb_element);
+      if (frequency[i] > 0) {
+        information += frequency[i] * log((double)frequency[i] / (double)nb_element);
       }
-      pfrequency++;
     }
   }
 
@@ -590,8 +554,7 @@ double Reestimation<Type>::likelihood_computation(const Distribution &dist) cons
 
 {
   register int i;
-  Type *pfrequency;
-  double likelihood = 0. , *pmass;
+  double likelihood = 0.;
 
 
   if (nb_element > 0) {
@@ -600,22 +563,16 @@ double Reestimation<Type>::likelihood_computation(const Distribution &dist) cons
     }
 
     else {
-      pfrequency = frequency + offset;
-      pmass = dist.mass + offset;
-
       for (i = offset;i < nb_value;i++) {
-        if (*pfrequency > 0) {
-          if (*pmass > 0.) {
-            likelihood += *pfrequency * log(*pmass);
+        if (frequency[i] > 0) {
+          if (dist.mass[i] > 0.) {
+            likelihood += frequency[i] * log(dist.mass[i]);
           }
           else {
             likelihood = D_INF;
             break;
           }
         }
-
-        pfrequency++;
-        pmass++;
       }
 
       if ((likelihood != D_INF) && (dist.complement > 0.)) {
@@ -642,21 +599,16 @@ void Reestimation<Type>::distribution_estimation(Distribution *dist) const
 {
   if (nb_element > 0) {
     register int i;
-    Type *pfrequency;
-    double *pmass;
 
 
     dist->offset = offset;
     dist->nb_value = nb_value;
 
-    pmass = dist->mass;
     for (i = 0;i < offset;i++) {
-      *pmass++ = 0.;
+      dist->mass[i] = 0.;
     }
-
-    pfrequency = frequency + offset;
     for (i = offset;i < nb_value;i++) {
-      *pmass++ = (double)*pfrequency++ / (double)nb_element;
+      dist->mass[i] = (double)frequency[i] / (double)nb_element;
     }
 
     dist->cumul_computation();
@@ -688,8 +640,7 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
   if (nb_element > 0) {
     register int i;
     int iter;
-    Type *pfrequency;
-    double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm , *ppenalty , *pmass;
+    double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
 
     dist->penalty_computation(weight , type , penalty , outside);
@@ -724,9 +675,8 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
     do {
       inf_norm += 0.05 * nb_element;
 
-      ppenalty = penalty + offset;
       for (i = offset;i < nb_value;i++) {
-        if (inf_norm + *ppenalty++ <= 0.) {
+        if (inf_norm + penalty[i] <= 0.) {
           break;
         }
       }
@@ -743,34 +693,28 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
     cout << "Initialization : " << inf_norm << " " << sup_norm;
 #   endif
 
-    pfrequency = frequency + offset;
-    ppenalty = penalty + offset;
     inf_ratio = 0.;
     sup_ratio = 0.;
 
     for (i = offset;i < nb_value;i++) {
-      if (sup_norm + *ppenalty > 0.) {
-        inf_ratio += *pfrequency / (sup_norm + *ppenalty);
+      if (sup_norm + penalty[i] > 0.) {
+        inf_ratio += frequency[i] / (sup_norm + penalty[i]);
       }
-      if (inf_norm + *ppenalty > 0.) {
-        sup_ratio += *pfrequency / (inf_norm + *ppenalty);
+      if (inf_norm + penalty[i] > 0.) {
+        sup_ratio += frequency[i] / (inf_norm + penalty[i]);
       }
-      pfrequency++;
-      ppenalty++;
     }
 
     iter = 0;
     do {
       iter++;
 
-      pfrequency = frequency + offset;
-      ppenalty = penalty + offset;
       ratio = 0.;
       norm = (inf_norm + sup_norm) / 2.;
 
       for (i = offset;i < nb_value;i++) {
-        if (norm + *ppenalty > 0.) {
-          ratio += *pfrequency / (norm + *ppenalty);
+        if (norm + penalty[i] > 0.) {
+          ratio += frequency[i] / (norm + penalty[i]);
         }
 
         else {
@@ -783,9 +727,6 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 
           break;
         }
-
-        pfrequency++;
-        ppenalty++;
       }
 
       if (i < nb_value) {
@@ -814,19 +755,14 @@ void Reestimation<Type>::penalized_likelihood_estimation(Distribution *dist , do
 
       // reestimation de la loi
 
-      pmass = dist->mass;
       for (i = 0;i < offset;i++) {
-        *pmass++ = 0.;
+        dist->mass[i] = 0.;
       }
-
-      pfrequency = frequency + offset;
-      ppenalty = penalty + offset;
       for (i = offset;i < nb_value;i++) {
-        *pmass++ = *pfrequency++ / (norm + *ppenalty++);
+        dist->mass[i] = frequency[i] / (norm + penalty[i]);
       }
-
       for (i = nb_value;i < dist->nb_value;i++) {
-        *pmass++ = 0.;
+        dist->mass[i] = 0.;
       }
 
       dist->offset_computation();
@@ -1287,16 +1223,12 @@ void Reestimation<Type>::equilibrium_process_combination(const Reestimation<Type
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
     register int i;
-    Type *pfrequency , *lfrequency;
 
-
-    pfrequency = frequency + offset;
-    lfrequency = length_bias_reestim->frequency + offset;
 
     for (i = offset;i < nb_value;i++) {
-      *pfrequency = (*pfrequency + *lfrequency++) * (nb_element + length_bias_reestim->nb_element) /
-                    (nb_element + length_bias_reestim->nb_element * i / imean);
-      *pfrequency++;
+      frequency[i] = (frequency[i] + length_bias_reestim->frequency[i]) *
+                     (nb_element + length_bias_reestim->nb_element) /
+                     (nb_element + length_bias_reestim->nb_element * i / imean);
     }
 
     nb_element_computation();
@@ -1324,24 +1256,17 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 {
   if (nb_element + length_bias_reestim->nb_element > 0) {
     register int i;
-    Type *pfrequency , *lfrequency;
-    double *pmass;
 
 
-    pmass = dist->mass;
     for (i = 0;i < offset;i++) {
-      *pmass++ = 0.;
+      dist->mass[i] = 0.;
     }
-
-    pfrequency = frequency + offset;
-    lfrequency = length_bias_reestim->frequency + offset;
     for (i = offset;i < nb_value;i++) {
-      *pmass++ = (*pfrequency++ + *lfrequency++) /
-                 (nb_element + length_bias_reestim->nb_element * i / imean);
+      dist->mass[i] = (frequency[i] + length_bias_reestim->frequency[i]) /
+                      (nb_element + length_bias_reestim->nb_element * i / imean);
     }
-
     for (i = nb_value;i < dist->nb_value;i++) {
-      *pmass++ = 0.;
+      dist->mass[i] = 0.;
     }
 
     dist->offset_computation();
@@ -1350,9 +1275,8 @@ void Reestimation<Type>::equilibrium_process_estimation(const Reestimation<Type>
 
     // renormalisation de la loi
 
-    pmass = dist->mass + dist->offset;
     for (i = dist->offset;i < dist->nb_value;i++) {
-      *pmass++ /= dist->cumul[nb_value - 1];
+      dist->mass[i] /= dist->cumul[nb_value - 1];
     }
 
     dist->cumul_computation();
@@ -1387,8 +1311,7 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
   if (nb_element + length_bias_reestim->nb_element > 0) {
     register int i;
     int iter;
-    Type *pfrequency , *lfrequency;
-    double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm , *ppenalty , *pmass;
+    double ratio , inf_ratio , sup_ratio , norm , inf_norm , sup_norm;
 
 
     dist->penalty_computation(weight , type , penalty , outside);
@@ -1400,9 +1323,8 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
     do {
       inf_norm += 0.05 * nb_element;
 
-      ppenalty = penalty + offset;
       for (i = offset;i < nb_value;i++) {
-        if (inf_norm + length_bias_reestim->nb_element * i / imean + *ppenalty++ <= 0.) {
+        if (inf_norm + length_bias_reestim->nb_element * i / imean + penalty[i] <= 0.) {
           break;
         }
       }
@@ -1415,40 +1337,31 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
       sup_norm = nb_element + weight;
     }
 
-    pfrequency = frequency + offset;
-    lfrequency = length_bias_reestim->frequency + offset;
-    ppenalty = penalty + offset;
     inf_ratio = 0.;
     sup_ratio = 0.;
 
     for (i = offset;i < nb_value;i++) {
-      if (sup_norm + length_bias_reestim->nb_element * i / imean + *ppenalty > 0.) {
-        inf_ratio += (*pfrequency + *lfrequency) /
-                     (sup_norm + length_bias_reestim->nb_element * i / imean + *ppenalty);
+      if (sup_norm + length_bias_reestim->nb_element * i / imean + penalty[i] > 0.) {
+        inf_ratio += (frequency[i] + length_bias_reestim->frequency[i]) /
+                     (sup_norm + length_bias_reestim->nb_element * i / imean + penalty[i]);
       }
-      if (inf_norm + length_bias_reestim->nb_element * i / imean + *ppenalty > 0.) {
-        sup_ratio += (*pfrequency + *lfrequency) /
-                     (inf_norm + length_bias_reestim->nb_element * i / imean + *ppenalty);
+      if (inf_norm + length_bias_reestim->nb_element * i / imean + penalty[i] > 0.) {
+        sup_ratio += (frequency[i] + length_bias_reestim->frequency[i]) /
+                     (inf_norm + length_bias_reestim->nb_element * i / imean + penalty[i]);
       }
-      pfrequency++;
-      lfrequency++;
-      ppenalty++;
     }
 
     iter = 0;
     do {
       iter++;
 
-      pfrequency = frequency + offset;
-      lfrequency = length_bias_reestim->frequency + offset;
-      ppenalty = penalty + offset;
       ratio = 0.;
       norm = (inf_norm + sup_norm) / 2.;
 
       for (i = offset;i < nb_value;i++) {
-        if (norm + length_bias_reestim->nb_element * i / imean + *ppenalty > 0.) {
-          ratio += (*pfrequency + *lfrequency) /
-                   (norm + length_bias_reestim->nb_element * i / imean + *ppenalty);
+        if (norm + length_bias_reestim->nb_element * i / imean + penalty[i] > 0.) {
+          ratio += (frequency[i] + length_bias_reestim->frequency[i]) /
+                   (norm + length_bias_reestim->nb_element * i / imean + penalty[i]);
         }
 
         else {
@@ -1461,10 +1374,6 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 
           break;
         }
-
-        pfrequency++;
-        lfrequency++;
-        ppenalty++;
       }
 
       if (i < nb_value) {
@@ -1489,21 +1398,15 @@ void Reestimation<Type>::penalized_likelihood_equilibrium_process_estimation(con
 
       // reestimation de la loi
 
-      pmass = dist->mass;
       for (i = 0;i < offset;i++) {
-        *pmass++ = 0.;
+        dist->mass[i] = 0.;
       }
-
-      pfrequency = frequency + offset;
-      lfrequency = length_bias_reestim->frequency + offset;
-      ppenalty = penalty + offset;
       for (i = offset;i < nb_value;i++) {
-        *pmass++ = (*pfrequency++ + *lfrequency++) /
-                   (norm + length_bias_reestim->nb_element * i / imean + *ppenalty++);
+        dist->mass[i] = (frequency[i] + length_bias_reestim->frequency[i]) /
+                        (norm + length_bias_reestim->nb_element * i / imean + penalty[i]);
       }
-
       for (i = nb_value;i < dist->nb_value;i++) {
-        *pmass++ = 0.;
+        dist->mass[i] = 0.;
       }
 
       dist->offset_computation();
@@ -1538,41 +1441,32 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
 {
   register int i;
   int max_nb_value;
-  double hazard_rate , hazard_product , *preestim;
-  Type *pfrequency , *psurvivor;
+  double hazard_rate , hazard_product;
 
 
   if (nb_value > 0) {
-    psurvivor = occupancy_survivor + nb_value - 1;
-    pfrequency = frequency + nb_value - 1;
-    *psurvivor = *pfrequency;
+    occupancy_survivor[nb_value - 1] = frequency[nb_value - 1];
     for (i = nb_value - 2;i >= 1;i--) {
-      psurvivor--;
-      *psurvivor = *(psurvivor + 1) + *--pfrequency;
+      occupancy_survivor[i] = occupancy_survivor[i + 1] + frequency[i];
     }
   }
 
   max_nb_value = MAX(nb_value + 1 , final_run->nb_value);
-  psurvivor = censored_occupancy_survivor + max_nb_value - 1;
   for (i = max_nb_value - 1;i >= final_run->nb_value;i--) {
-    *psurvivor-- = 0;
+    censored_occupancy_survivor[i] = 0;
   }
-  pfrequency = final_run->frequency + final_run->nb_value - 1;
-  *psurvivor = *pfrequency;
+  censored_occupancy_survivor[final_run->nb_value - 1] = final_run->frequency[final_run->nb_value - 1];
   for (i = final_run->nb_value - 2;i >= 2;i--) {
-    psurvivor--;
-    *psurvivor = *(psurvivor + 1) + *--pfrequency;
+    censored_occupancy_survivor[i] = censored_occupancy_survivor[i + 1] + final_run->frequency[i];
   }
 
-  preestim = occupancy_reestim->frequency + 1;
-  pfrequency = frequency + 1;
   hazard_product = 1.;
   for (i = 1;i < nb_value;i++) {
     if (occupancy_survivor[i] + censored_occupancy_survivor[i + 1] > 0) {
-      hazard_rate = (double)*pfrequency++ / (double)(occupancy_survivor[i] +
+      hazard_rate = (double)frequency[i] / (double)(occupancy_survivor[i] +
                      censored_occupancy_survivor[i + 1]);
-      *preestim++ = hazard_rate * hazard_product * (nb_element +
-                     final_run->nb_element);
+      occupancy_reestim->frequency[i] = hazard_rate * hazard_product * (nb_element +
+                                        final_run->nb_element);
       hazard_product *= (1. - hazard_rate);
     }
 
@@ -1587,11 +1481,13 @@ void Reestimation<Type>::state_occupancy_estimation(const Reestimation<Type> *fi
 
   if (i == nb_value) {
     for (i = nb_value;i < final_run->nb_value - 1;i++) {
-      *preestim++ = 0.;
+      occupancy_reestim->frequency[i] = 0.;
     }
-    *preestim = hazard_product * (nb_element + final_run->nb_element);
+    occupancy_reestim->frequency[final_run->nb_value - 1] = hazard_product *
+                                                            (nb_element + final_run->nb_element);
 
-    if ((characteristic_computation) && (*preestim > 0)) {
+    if ((characteristic_computation) &&
+        (occupancy_reestim->frequency[final_run->nb_value - 1] > 0)) {
       occupancy_reestim->nb_value = final_run->nb_value;
     }
   }
