@@ -87,16 +87,15 @@ Chain::Chain(char itype , int inb_state , bool init_flag)
 
   else {
     register int i , j;
-    double *pinitial , *ptransition;
+
 
     nb_row = nb_state;
 
     initial = new double[type == 'o' ? nb_state : nb_row];
 
     if (init_flag) {
-      pinitial = initial;
       for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
-        *pinitial++ = 0.;
+        initial[i] = 0.;
       }
     }
 
@@ -105,9 +104,8 @@ Chain::Chain(char itype , int inb_state , bool init_flag)
       transition[i] = new double[nb_state];
 
       if (init_flag) {
-        ptransition = transition[i];
         for (j = 0;j < nb_state;j++) {
-          *ptransition++ = 0.;
+          transition[i][j] = 0.;
         }
       }
     }
@@ -131,7 +129,6 @@ Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
 
 {
   register int i , j;
-  double *pinitial , *ptransition;
 
 
   type = itype;
@@ -148,9 +145,8 @@ Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
   initial = new double[type == 'o' ? nb_state : nb_row];
 
   if (init_flag) {
-    pinitial = initial;
     for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
-      *pinitial++ = 0.;
+      initial[i] = 0.;
     }
   }
 
@@ -159,9 +155,8 @@ Chain::Chain(char itype , int inb_state , int inb_row , bool init_flag)
     transition[i] = new double[nb_state];
 
     if (init_flag) {
-      ptransition = transition[i];
       for (j = 0;j < nb_state;j++) {
-        *ptransition++ = 0.;
+        transition[i][j] = 0.;
       }
     }
   }
@@ -183,37 +178,28 @@ void Chain::parameter_copy(const Chain &chain)
 
 {
   register int i , j;
-  double *pinitial , *cinitial , *ptransition , *ctransition;
 
 
-  pinitial = initial;
-  cinitial = chain.initial;
   for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
-    *pinitial++ = *cinitial++;
+    initial[i] = chain.initial[i];
   }
 
   if (chain.cumul_initial) {
-    pinitial = cumul_initial;
-    cinitial = chain.cumul_initial;
     for (i = 0;i < (type == 'o' ? nb_state : nb_row);i++) {
-      *pinitial++ = *cinitial++;
+      cumul_initial[i] = chain.cumul_initial[i];
     }
   }
 
   for (i = 0;i < nb_row;i++) {
-    ptransition = transition[i];
-    ctransition = chain.transition[i];
     for (j = 0;j < nb_state;j++) {
-      *ptransition++ = *ctransition++;
+      transition[i][j] = chain.transition[i][j];
     }
   }
 
   if (chain.cumul_transition) {
     for (i = 0;i < nb_row;i++) {
-      ptransition = cumul_transition[i];
-      ctransition = chain.cumul_transition[i];
       for (j = 0;j < nb_state;j++) {
-        *ptransition++ = *ctransition++;
+        cumul_transition[i][j] = chain.cumul_transition[i][j];
       }
     }
   }
