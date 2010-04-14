@@ -7129,8 +7129,6 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
 
       plot[0].yrange = Range(0. , exp(state_seq_likelihood - seq_likelihood));
 
-      plot[0].resize(nb_state);
-
       for (i = 0;i < nb_state;i++) {
         legend.str("");
         legend << STAT_label[STATL_STATE] << " " << i;
@@ -7169,8 +7167,6 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
 
       plot[1].yrange = Range(0. , 1.);
 
-      plot[1].resize(nb_state);
-
       for (i = 0;i < nb_state;i++) {
         legend.str("");
         legend << STAT_label[STATL_STATE] << " " << i;
@@ -7197,8 +7193,6 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
 
       plot[2].yrange = Range(0. , max_marginal_entropy);
 
-      plot[2].resize(2);
-
       plot[2][0].legend = SEQ_label[SEQL_CONDITIONAL_ENTROPY];
       plot[2][0].style = "linespoints";
 
@@ -7222,8 +7216,6 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
       }
 
       plot[3].yrange = Range(0. ,entropy);
-
-      plot[3].resize(1);
 
       plot[3][0].legend = SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY];
       plot[3][0].style = "linespoints";
