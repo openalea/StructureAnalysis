@@ -637,10 +637,9 @@ Test* FrequencyDistribution::kruskal_wallis_test(int nb_histo , const FrequencyD
 
   value = 0.;
   for (i = 0;i < nb_histo;i++) {
-    pfrequency = histo[i]->frequency + histo[i]->offset;
     sum = 0.;
     for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
-      sum += *pfrequency++ * rank[j];
+      sum += histo[i]->frequency[j] * rank[j];
     }
     value += sum * sum / histo[i]->nb_element;
   }
@@ -711,7 +710,7 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
 
 # ifdef DEBUG
   if (type == ORDINAL) {
-    int buff , *pfrequency , width[2];
+    int buff , width[2];
     double *rank , *rank_mean;
     FrequencyDistribution *merged_histo;
 
@@ -727,10 +726,9 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
     rank_mean = new double[nb_histo];
 
     for (i = 0;i < nb_histo;i++) {
-      pfrequency = histo[i]->frequency + histo[i]->offset;
       rank_mean[i] = 0.;
       for (j = histo[i]->offset;j < histo[i]->nb_value;j++) {
-        rank_mean[i] += *pfrequency++ * rank[j];
+        rank_mean[i] += histo[i]->frequency[j] * rank[j];
       }
       rank_mean[i] /= histo[i]->nb_element;
     }
@@ -944,7 +942,7 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
 {
   bool status;
   register int i;
-  int nb_equal , min , max , *pfrequency0 , *pfrequency1;
+  int nb_equal , min , max , *pfrequency;
   double correction , value , nb_sup , mean , variance , *rank;
   const FrequencyDistribution **histo;
   FrequencyDistribution *merged_histo;
@@ -968,13 +966,13 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
 
     // calcul du terme de correction pour les ex-aequo
 
-    pfrequency0 = merged_histo->frequency + merged_histo->offset;
+    pfrequency = merged_histo->frequency + merged_histo->offset;
     correction = 0.;
     for (i = merged_histo->offset;i < merged_histo->nb_value;i++) {
-      if (*pfrequency0 > 1) {
-        correction += *pfrequency0 * ((double)*pfrequency0 * (double)*pfrequency0 - 1);
+      if (*pfrequency > 1) {
+        correction += *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
       }
-      pfrequency0++;
+      pfrequency++;
     }
 
     // calcul des rangs
@@ -983,10 +981,9 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
 
     // calcul de la statistique de Wilcoxon
 
-    pfrequency0 = histo[0]->frequency + histo[0]->offset;
     value = 0.;
     for (i = histo[0]->offset;i < histo[0]->nb_value;i++) {
-      value += *pfrequency0++ * rank[i];
+      value += histo[0]->frequency[i] * rank[i];
     }
 
     nb_sup = value - histo[0]->nb_element * ((double)histo[0]->nb_element + 1) / 2.;
@@ -1002,8 +999,9 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
       value -= 0.5;
     }
 
-    variance = histo[0]->nb_element * (double)histo[1]->nb_element * ((merged_histo->nb_element *
-                 ((double)merged_histo->nb_element * (double)merged_histo->nb_element - 1)) - correction) /
+    variance = histo[0]->nb_element * (double)histo[1]->nb_element *
+               ((merged_histo->nb_element * ((double)merged_histo->nb_element *
+                  (double)merged_histo->nb_element - 1)) - correction) /
                (merged_histo->nb_element * ((double)merged_histo->nb_element - 1) * 12.);
 
     value = fabs(value - mean) / sqrt(variance);
@@ -1017,11 +1015,8 @@ bool FrequencyDistribution::wilcoxon_mann_whitney_comparison(StatError &error , 
     nb_equal = 0;
 
     if (max >= min) {
-      pfrequency0 = histo[0]->frequency + min;
-      pfrequency1 = histo[1]->frequency + min;
-
       for (i = min;i <= max;i++) {
-        nb_equal += *pfrequency0++ * *pfrequency1++;
+        nb_equal += histo[0]->frequency[i] * histo[1]->frequency[i];
       }
     }
 
