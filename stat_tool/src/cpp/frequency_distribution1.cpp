@@ -68,7 +68,6 @@ FrequencyDistribution::FrequencyDistribution(int inb_element , int *pelement)
 
 {
   register int i;
-  int *pfrequency;
 
 
   nb_element = inb_element;
@@ -86,11 +85,9 @@ FrequencyDistribution::FrequencyDistribution(int inb_element , int *pelement)
   alloc_nb_value = nb_value;
   frequency = new int[nb_value];
 
-  pfrequency = frequency;
   for (i = 0;i < nb_value;i++) {
-    *pfrequency++ = 0;
+    frequency[i] = 0;
   }
-
   for (i = 0;i < nb_element;i++) {
     frequency[*pelement++]++;
   }
@@ -116,7 +113,7 @@ void FrequencyDistribution::shift(const FrequencyDistribution &histo , int shift
 
 {
   register int i;
-  int *pfrequency , *cfrequency;
+  int *cfrequency;
 
 
   // calcul des caracteristiques de la loi empirique
@@ -133,13 +130,12 @@ void FrequencyDistribution::shift(const FrequencyDistribution &histo , int shift
 
   frequency = new int[nb_value];
 
-  pfrequency = frequency;
   for (i = 0;i < offset;i++) {
-    *pfrequency++ = 0;
+    frequency[i] = 0;
   }
   cfrequency = histo.frequency + histo.offset;
   for (i = offset;i < nb_value;i++) {
-    *pfrequency++ = *cfrequency++;
+    frequency[i] = *cfrequency++;
   }
 }
 
@@ -157,7 +153,6 @@ void FrequencyDistribution::cluster(const FrequencyDistribution &histo , int ste
 
 {
   register int i;
-  int *pfrequency , *cfrequency;
 
 
   nb_element = histo.nb_element;
@@ -186,29 +181,28 @@ void FrequencyDistribution::cluster(const FrequencyDistribution &histo , int ste
   for (i = 0;i < nb_value;i++) {
     frequency[i] = 0;
   }
-  cfrequency = histo.frequency + histo.offset;
 
   switch (mode) {
 
   case FLOOR : {
     for (i = histo.offset;i < histo.nb_value;i++) {
-      frequency[i / step] += *cfrequency++;
+      frequency[i / step] += histo.frequency[i];
     }
     break;
   }
 
   case ROUND : {
     for (i = histo.offset;i < histo.nb_value;i++) {
-      frequency[(i + step / 2) / step] += *cfrequency++;
-//      frequency[(int)round((double)i / (double)step)] += *cfrequency++;
+      frequency[(i + step / 2) / step] += histo.frequency[i];
+//      frequency[(int)round((double)i / (double)step)] += histo.frequency[i];
     }
     break;
   }
 
   case CEIL : {
     for (i = histo.offset;i < histo.nb_value;i++) {
-      frequency[(i + step - 1) / step] += *cfrequency++;
-//      frequency[(int)ceil((double)i / (double)step)] += *cfrequency++;
+      frequency[(i + step - 1) / step] += histo.frequency[i];
+//      frequency[(int)ceil((double)i / (double)step)] += histo.frequency[i];
     }
     break;
   }
@@ -264,7 +258,6 @@ bool FrequencyDistribution::operator==(const FrequencyDistribution &histo) const
 {
   bool status = true;
   register int i;
-  int *pfrequency , *cfrequency;
 
 
   if ((offset != histo.offset) || (nb_value != histo.nb_value) ||
@@ -273,10 +266,8 @@ bool FrequencyDistribution::operator==(const FrequencyDistribution &histo) const
   }
 
   else {
-    pfrequency = frequency + offset;
-    cfrequency = histo.frequency + offset;
     for (i = offset;i < nb_value;i++) {
-      if (*pfrequency++ != *cfrequency++) {
+      if (frequency[i] != histo.frequency[i]) {
         status = false;
         break;
       }
@@ -550,7 +541,7 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 {
   bool status = true , *presence;
   register int i;
-  int min_symbol , max_symbol , *psymbol , *pfrequency , *cfrequency;
+  int min_symbol , max_symbol , *cfrequency;
   DiscreteDistributionData *histo;
 
 
@@ -615,15 +606,13 @@ DiscreteDistributionData* FrequencyDistribution::transcode(StatError &error ,
 
     // transcodage des symboles
 
-    pfrequency = histo->frequency;
     for (i = 0;i < histo->nb_value;i++) {
-      *pfrequency++ = 0;
+      histo->frequency[i] = 0;
     }
 
-    psymbol = symbol;
     cfrequency = frequency + offset;
     for (i = 0;i < nb_value - offset;i++) {
-      histo->frequency[*psymbol++] += *cfrequency++;
+      histo->frequency[symbol[i]] += *cfrequency++;
     }
 
     // calcul des caracteristiques de la loi empirique
@@ -654,7 +643,6 @@ DiscreteDistributionData* FrequencyDistribution::value_select(StatError &error ,
 {
   bool status = true;
   register int i;
-  int *pfrequency , *cfrequency;
   DiscreteDistributionData *histo;
 
 
@@ -676,18 +664,15 @@ DiscreteDistributionData* FrequencyDistribution::value_select(StatError &error ,
     case false : {
       histo = new DiscreteDistributionData(nb_value);
 
-      pfrequency = histo->frequency;
-      cfrequency = frequency;
       for (i = 0;i < min_value;i++) {
-        *pfrequency++ = *cfrequency++;
+        histo->frequency[i] = frequency[i];
       }
       for (i = min_value;i <= MIN(max_value , nb_value - 1);i++) {
-        *pfrequency++ = 0;
+        histo->frequency[i] = 0;
       }
       if (max_value + 1 < nb_value) {
-        cfrequency += max_value - min_value + 1;
         for (i = max_value + 1;i < nb_value;i++) {
-          *pfrequency++ = *cfrequency++;
+          histo->frequency[i] = frequency[i];
         }
       }
 
@@ -699,13 +684,11 @@ DiscreteDistributionData* FrequencyDistribution::value_select(StatError &error ,
 
       // copie des valeurs
 
-      pfrequency = histo->frequency;
-      for (i = 0;i < min_value;i++) {
-        *pfrequency++ = 0;
+       for (i = 0;i < min_value;i++) {
+        histo->frequency[i] = 0;
       }
-      cfrequency = frequency + min_value;
       for (i = min_value;i < histo->nb_value;i++) {
-        *pfrequency++ = *cfrequency++;
+        histo->frequency[i] = frequency[i];
       }
       break;
     }
@@ -1657,8 +1640,7 @@ double* FrequencyDistribution::cumul_computation(double scale) const
 
 {
   register int i;
-  int *pfrequency;
-  double *cumul , *pcumul;
+  double *cumul;
 
 
   if (scale == D_DEFAULT) {
@@ -1667,17 +1649,12 @@ double* FrequencyDistribution::cumul_computation(double scale) const
 
   cumul = new double[nb_value];
 
-  pcumul = cumul;
   for (i = 0;i < offset;i++) {
-    *pcumul++ = 0.;
+    cumul[i] = 0.;
   }
-
-  pfrequency = frequency + offset;
-
-  *pcumul++ = *pfrequency++ / scale;
+  cumul[offset] = frequency[offset] / scale;
   for (i = offset + 1;i < nb_value;i++) {
-    *pcumul = *(pcumul - 1) + *pfrequency++ / scale;
-    pcumul++;
+    cumul[i] = cumul[i - 1] + frequency[i] / scale;
   }
 
   return cumul;
@@ -1696,8 +1673,7 @@ double* FrequencyDistribution::survivor_function_computation(double scale) const
 
 {
   register int i;
-  int *pfrequency;
-  double *survivor_function , *psurvivor;
+  double *survivor_function;
 
 
   if (scale == D_DEFAULT) {
@@ -1706,18 +1682,12 @@ double* FrequencyDistribution::survivor_function_computation(double scale) const
 
   survivor_function = new double[nb_value];
 
-  psurvivor = survivor_function + nb_value;
-  pfrequency = frequency + nb_value;
-
-  *--psurvivor = 0.;
+  survivor_function[nb_value - 1] = 0.;
   for (i = nb_value - 2;i >= MAX(offset - 1 , 0);i--) {
-    psurvivor--;
-    *psurvivor = *(psurvivor + 1) + *--pfrequency / scale;
+    survivor_function[i] = survivor_function[i + 1] + frequency[i + 1] / scale;
   }
-
   for (i = offset - 2;i >= 0;i--) {
-    psurvivor--;
-    *psurvivor = *(psurvivor + 1);
+    survivor_function[i] = survivor_function[i + 1];
   }
 
   return survivor_function;
@@ -1736,8 +1706,7 @@ double* FrequencyDistribution::concentration_function_computation(double scale) 
 
 {
   register int i;
-  int *pfrequency;
-  double norm , *concentration_function , *pconcentration;
+  double norm , *concentration_function;
 
 
   if ((variance != D_DEFAULT) && (variance > 0.)) {
@@ -1747,18 +1716,14 @@ double* FrequencyDistribution::concentration_function_computation(double scale) 
 
     concentration_function = new double[nb_value];
 
-    pconcentration = concentration_function;
     for (i = 0;i < offset;i++) {
-      *pconcentration++ = 0.;
+      concentration_function[i] = 0.;
     }
-
-    pfrequency = frequency + offset;
     norm = mean * scale;
 
-    *pconcentration++ = *pfrequency++ * offset / norm;
+    concentration_function[offset] = frequency[offset] * offset / norm;
     for (i = offset + 1;i < nb_value;i++) {
-      *pconcentration = *(pconcentration - 1) + *pfrequency++ * i / norm;
-      pconcentration++;
+      concentration_function[i] = concentration_function[i - 1] + frequency[i] * i / norm;
     }
   }
 
@@ -1780,19 +1745,16 @@ double FrequencyDistribution::concentration_computation() const
 
 {
   register int i;
-  int *pfrequency;
   double concentration = D_DEFAULT , *concentration_function;
 
 
   if ((mean > 0.) && (variance > 0.)) {
     concentration_function = concentration_function_computation();
-    pfrequency = frequency + offset;
 
-    concentration = *pfrequency++ * concentration_function[offset];
+    concentration = frequency[offset] * concentration_function[offset];
     for (i = offset + 1;i < nb_value;i++) {
-      concentration += *pfrequency++ * (concentration_function[i - 1] + concentration_function[i]);
+      concentration += frequency[i] * (concentration_function[i - 1] + concentration_function[i]);
     }
-
     concentration = 1. - concentration / nb_element;
 
     delete [] concentration_function;
@@ -1801,17 +1763,15 @@ double FrequencyDistribution::concentration_computation() const
     int previous_value , cumul;
     double concentration2 = 0.;
 
-    pfrequency = frequency + offset;
-    cumul = *pfrequency++;
+    cumul = frequency[offset];
     previous_value = offset;
 
     for (i = offset + 1;i < nb_value;i++) {
-      if (*pfrequency > 0) {
+      if (frequency[i] > 0) {
         concentration2 += cumul * (double)(nb_element - cumul) * (i - previous_value);
-        cumul += *pfrequency;
+        cumul += frequency[i];
         previous_value = i;
       }
-      pfrequency++;
     }
 
     concentration2 /= (nb_element * (double)nb_element * mean);
@@ -1840,63 +1800,52 @@ void FrequencyDistribution::update(const Reestimation<double> *reestim , int inb
 
 {
   register int i , j;
-  int index , *pfrequency;
-  double scale , sum , max_frequency , *real_frequency , *rfrequency , *cfrequency;
+  int index;
+  double scale , sum , max_frequency , *real_frequency;
 
 
   // copie de la loi empirique reel et mise a l'echelle
 
   real_frequency = new double[reestim->nb_value];
 
-  rfrequency = real_frequency + reestim->offset;
-  cfrequency = reestim->frequency + reestim->offset;
   scale = inb_element / reestim->nb_element;
   for (i = reestim->offset;i < reestim->nb_value;i++) {
-    *rfrequency++ = *cfrequency++ * scale;
+    real_frequency[i] = reestim->frequency[i] * scale;
   }
 
   // calcul des frequences
 
-  pfrequency = frequency;
   for (i = 0;i < reestim->offset;i++) {
-    *pfrequency++ = 0;
+    frequency[i] = 0;
   }
 
-  rfrequency = real_frequency + reestim->offset;
   sum = 0.;
-
   for (i = reestim->offset;i < reestim->nb_value;i++) {
-    *pfrequency = (int)*rfrequency;
-    *rfrequency -= *pfrequency++;
-    if (*rfrequency > 0.) {
-      sum += *rfrequency;
+    frequency[i] = (int)real_frequency[i];
+    real_frequency[i] -= frequency[i];
+    if (real_frequency[i] > 0.) {
+      sum += real_frequency[i];
     }
-    rfrequency++;
   }
 
   for (i = reestim->nb_value;i < alloc_nb_value;i++) {
-    *pfrequency++ = 0;
+    frequency[i] = 0;
   }
 
   // prise en compte des arrondis
 
   for (i = 0;i < (int)round(sum);i++) {
-    rfrequency = real_frequency + reestim->offset;
     max_frequency = 0.;
-
     for (j = reestim->offset;j < reestim->nb_value;j++) {
-      if (*rfrequency > max_frequency) {
-        max_frequency = *rfrequency;
+      if (real_frequency[j] > max_frequency) {
+        max_frequency = real_frequency[j];
         index = j;
       }
-      rfrequency++;
     }
 
     real_frequency[index] = 0.;
     frequency[index]++;
   }
-
-  delete [] real_frequency;
 
   // calcul des caracteristiques de la loi empirique
 
@@ -1922,50 +1871,39 @@ FrequencyDistribution* FrequencyDistribution::frequency_scale(int inb_element) c
 
 {
   register int i , j;
-  int index , *pfrequency , *cfrequency;
-  double sum , real_max , *real_frequency , *rfrequency;
+  int index;
+  double sum , real_max , *real_frequency;
   FrequencyDistribution *histo;
 
 
   real_frequency = new double[nb_value];
   histo = new FrequencyDistribution(nb_value);
 
-  cfrequency = frequency + offset;
-  rfrequency = real_frequency + offset;
-  pfrequency = histo->frequency + offset;
   sum = 0.;
-
   for (i = offset;i < nb_value;i++) {
-    if (*cfrequency > 0) {
-      *rfrequency = *cfrequency * (double)inb_element / (double)nb_element;
-      *pfrequency = (int)*rfrequency;
-      *rfrequency -= *pfrequency;
-      if (*rfrequency > 0.) {
-        sum += *rfrequency;
+    if (frequency[i] > 0) {
+      real_frequency[i] = frequency[i] * (double)inb_element / (double)nb_element;
+      histo->frequency[i] = (int)real_frequency[i];
+      real_frequency[i] -= histo->frequency[i];
+      if (real_frequency[i] > 0.) {
+        sum += real_frequency[i];
       }
     }
 
     else {
-      *rfrequency = 0.;
+      real_frequency[i] = 0.;
     }
-
-    cfrequency++;
-    rfrequency++;
-    pfrequency++;
   }
 
   // prise en compte des arrondis
 
   for (i = 0;i < (int)round(sum);i++) {
-    rfrequency = real_frequency + offset;
     real_max = 0.;
-
     for (j = offset;j < nb_value;j++) {
-      if (*rfrequency > real_max) {
-        real_max = *rfrequency;
+      if (real_frequency[i] > real_max) {
+        real_max = real_frequency[i];
         index = j;
       }
-      rfrequency++;
     }
 
     real_frequency[index] = 0.;
