@@ -42,7 +42,12 @@
 #include "distribution.h"
 #include "stat_label.h"
 
+#include <boost/math/distributions/binomial.hpp>
+#include <boost/math/distributions/poisson.hpp>
+#include <boost/math/distributions/negative_binomial.hpp>
+
 using namespace std;
+using namespace boost::math;
 
 
 
@@ -112,7 +117,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
 {
   register int i;
   int set , subset;
-  double failure = 1. - probability , success = probability , ratio , scale , term , *pmass;
+  double failure = 1. - probability , success = probability , ratio , scale , term;
 
 
   switch (mode) {
@@ -128,9 +133,8 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
 
   // valeurs de probabilite nulle avant la borne inferieure
 
-  pmass = mass;
   for (i = 0;i < MIN(nb_value , inf_bound);i++) {
-    *pmass++ = 0.;
+    mass[i] = 0.;
   }
 
   if (nb_value > inf_bound) {
@@ -149,7 +153,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
         for (i = 0;i < sup_bound - inf_bound;i++) {
           term *= failure;
         }
-        *pmass++ = term;
+        mass[inf_bound] = term;
 
         // calcul des probabilites des valeurs suivantes
 
@@ -159,7 +163,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
           scale = (double)(set - subset) / (double)(subset + 1);
           subset++;
           term *= scale * ratio;
-          *pmass++ = term;
+          mass[i] = term;
         }
       }
 
@@ -170,7 +174,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
         // calcul de la probabilite de la borne inferieure
 
         term = (sup_bound - inf_bound) * log(failure);
-        *pmass++ = exp(term);
+        mass[inf_bound] = exp(term);
 
         // calcul des probabilites des valeurs suivantes
 
@@ -180,13 +184,12 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
           scale = (double)(set - subset) / (double)(subset + 1);
           subset++;
           term += log(scale) + ratio;
-          *pmass++ = exp(term);
+          mass[i] = exp(term);
         }
       }
     }
 
     else {
-      pmass = mass + nb_value;
       subset = set - 1;
 
       // cas calcul direct
@@ -200,7 +203,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
           term *= success;
         }
         if (sup_bound < nb_value) {
-          *--pmass = term;
+          mass[sup_bound] = term;
         }
 
         // calcul des probabilites des valeurs precedentes
@@ -212,7 +215,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
           subset--;
           term *= scale * ratio;
           if (i < nb_value) {
-            *--pmass = term;
+            mass[i] = term;
           }
         }
       }
@@ -225,7 +228,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
 
         term = (sup_bound - inf_bound) * log(success);
         if (sup_bound < nb_value) {
-          *--pmass = exp(term);
+          mass[sup_bound] = exp(term);
         }
 
         // calcul des probabilites des valeurs precedentes
@@ -237,7 +240,7 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
           subset--;
           term += log(scale) + ratio;
           if (i < nb_value) {
-            *--pmass = exp(term);
+            mass[i] = exp(term);
           }
         }
       }
@@ -245,6 +248,18 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
   }
 
   cumul_computation();
+
+# ifdef DEBUG
+  if (mode == 's') {
+    binomial dist(sup_bound , probability);
+
+    cout << "TEST binomial distribution" << endl;
+    for (i = inf_bound;i <= sup_bound;i++) {
+      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i] << endl;
+    }
+  }
+# endif
+
 }
 
 
@@ -405,6 +420,18 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
 
   offset = MIN(inf_bound , i - 1);
   nb_value = i;
+
+# ifdef DEBUG
+  if (mode == 's') {
+    poisson dist(parameter);
+
+    cout << "TEST Poisson distribution" << endl;
+    for (i = inf_bound;i < nb_value;i++) {
+      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i] << endl;
+    }
+  }
+# endif
+
 }
 
 
@@ -571,6 +598,18 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
 
   offset = MIN(inf_bound , i - 1);
   nb_value = i;
+
+# ifdef DEBUG
+  if (mode == 's') {
+    negative_binomial dist(parameter , probability);
+
+    cout << "TEST negative binomial distribution" << endl;
+    for (i = inf_bound;i < nb_value;i++) {
+      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i] << endl;
+    }
+  }
+# endif
+
 }
 
 
@@ -584,20 +623,19 @@ void DiscreteParametric::uniform_computation()
 
 {
   register int i;
-  double proba , *pmass;
+  double proba;
 
 
   offset = inf_bound;
   nb_value = sup_bound + 1;
 
-  pmass = mass;
   for (i = 0;i < inf_bound;i++) {
-    *pmass++ = 0.;
+    mass[i] = 0.;
   }
 
   proba = 1. / (double)(sup_bound - inf_bound + 1);
   for (i = inf_bound;i <= sup_bound;i++) {
-    *pmass++ = proba;
+    mass[i] = proba;
   }
 
   cumul_computation();
@@ -689,15 +727,12 @@ void Forward::computation(const DiscreteParametric &dist)
 
 {
   register int i;
-  double norm , *pmass , *icumul;
+  double norm;
 
-
-  pmass = mass;
-  icumul = dist.cumul;
 
   offset = 1;
   nb_value = dist.nb_value;
-  *pmass++ = 0.;
+  mass[0] = 0.;
 
   // calcul de la quantite de normalisation
 
@@ -711,7 +746,7 @@ void Forward::computation(const DiscreteParametric &dist)
   // calcul des probabilites des valeurs
 
   for (i = 1;i < nb_value;i++) {
-    *pmass++ = (1. - *icumul++) / norm;
+    mass[i] = (1. - dist.cumul[i - 1]) / norm;
   }
 
   cumul_computation();
@@ -734,8 +769,7 @@ double Distribution::survivor_likelihood_computation(const FrequencyDistribution
 
 {
   register int i;
-  int *pfrequency;
-  double likelihood = 0. , *pcumul;
+  double likelihood = 0.;
 
 
   if (histo.nb_element > 0) {
@@ -744,22 +778,16 @@ double Distribution::survivor_likelihood_computation(const FrequencyDistribution
     }
 
     else {
-      pfrequency = histo.frequency + histo.offset;
-      pcumul = cumul + histo.offset - 1;
-
       for (i = histo.offset;i < histo.nb_value;i++) {
-        if (*pfrequency > 0) {
-          if (*pcumul < 1.) {
-            likelihood += *pfrequency * log(1. - *pcumul);
+        if (histo.frequency[i] > 0) {
+          if (cumul[i - 1] < 1.) {
+            likelihood += histo.frequency[i] * log(1. - cumul[i - 1]);
           }
           else {
             likelihood = D_INF;
             break;
           }
         }
-
-        pfrequency++;
-        pcumul++;
       }
     }
   }
@@ -780,8 +808,7 @@ double Distribution::chi2_value_computation(const FrequencyDistribution &histo) 
 
 {
   register int i;
-  int *pfrequency;
-  double value , var1 , var2 , *pmass;
+  double value , var1 , var2;
 
 
   if ((histo.offset < offset) || (histo.nb_value > nb_value)) {
@@ -789,36 +816,31 @@ double Distribution::chi2_value_computation(const FrequencyDistribution &histo) 
   }
 
   else {
-    pfrequency = histo.frequency + offset;
-    pmass = mass + offset;
     value = 0.;
 
     for (i = offset;i < histo.nb_value;i++) {
-      if (*pmass > 0.) {
-        var1 = histo.nb_element * *pmass;
+      if (mass[i] > 0.) {
+        var1 = histo.nb_element * mass[i];
         if (cumul[nb_value - 1] < CUMUL_THRESHOLD) {
           var1 /= cumul[nb_value - 1];
         }
 
-        var2 = *pfrequency - var1;
+        var2 = histo.frequency[i] - var1;
         value += var2 * var2 / var1;
       }
 
       else {
-        if (*pfrequency > 0) {
+        if (histo.frequency[i] > 0) {
           value = -D_INF;
           break;
         }
       }
-
-      pfrequency++;
-      pmass++;
     }
 
     if (value != -D_INF) {
       var1 = 0.;
       for (i = histo.nb_value;i < nb_value;i++) {
-        var1 += histo.nb_element * *pmass++;
+        var1 += histo.nb_element * mass[i];
       }
       if (cumul[nb_value - 1] < CUMUL_THRESHOLD) {
         var1 /= cumul[nb_value - 1];
@@ -844,8 +866,8 @@ void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , T
 
 {
   register int i , j;
-  int *pfrequency , *filter_frequency;
-  double *pmass , *pcumul , *filter_mass;
+  int *filter_frequency;
+  double *filter_mass;
   Distribution *filter_dist;
   FrequencyDistribution *filter_histo;
 
@@ -863,9 +885,6 @@ void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , T
 
     // regroupement des valeurs
 
-    pmass = mass + offset;
-    pcumul = cumul + offset;
-    pfrequency = histo.frequency + offset;
     filter_mass = filter_dist->mass + offset;
     filter_frequency = filter_histo->frequency + offset;
     *filter_mass = 0.;
@@ -873,31 +892,29 @@ void Distribution::chi2_degree_of_freedom(const FrequencyDistribution &histo , T
     j = offset + 1;
 
     for (i = offset;i < histo.nb_value - 1;i++) {
-      *filter_mass += *pmass++;
-      *filter_frequency += *pfrequency++;
+      *filter_mass += mass[i];
+      *filter_frequency += histo.frequency[i];
       if ((*filter_mass * histo.nb_element / cumul[nb_value - 1] > CHI2_FREQUENCY) &&
-          ((1. - *pcumul) * histo.nb_element / cumul[nb_value - 1] > 1)) {
+          ((1. - cumul[i]) * histo.nb_element / cumul[nb_value - 1] > 1)) {
         *++filter_mass = 0.;
         *++filter_frequency = 0;
         j++;
       }
-      pcumul++;
     }
-    *filter_frequency += *pfrequency;
+    *filter_frequency += histo.frequency[histo.nb_value - 1];
 
     filter_histo->offset_computation();
     filter_histo->nb_value = j;
 
     for (i = histo.nb_value - 1;i < nb_value - 1;i++) {
-      *filter_mass += *pmass++;
+      *filter_mass += mass[i];
       if ((*filter_mass * histo.nb_element / cumul[nb_value - 1] > CHI2_FREQUENCY) &&
-          ((1. - *pcumul) * histo.nb_element / cumul[nb_value - 1] > 1)) {
+          ((1. - cumul[i]) * histo.nb_element / cumul[nb_value - 1] > 1)) {
         *++filter_mass = 0.;
         j++;
       }
-      pcumul++;
     }
-    *filter_mass += *pmass;
+    *filter_mass += mass[nb_value - 1];
 
     filter_dist->nb_value = j;
     filter_dist->cumul_computation();
@@ -956,7 +973,6 @@ DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_valu
 
 {
   register int i;
-  double *pmass , *pcumul , *cmass , *ccumul;
   DiscreteParametricModel *dist;
 
 
@@ -973,17 +989,12 @@ DiscreteParametricModel* Distribution::truncate(StatError &error , int imax_valu
 
     dist = new DiscreteParametricModel(MIN(imax_value + 1 , nb_value));
 
-    pmass = dist->mass;
-    cmass = mass;
-    pcumul = dist->cumul;
-    ccumul = cumul;
-
     for (i = 0;i < dist->nb_value - 1;i++) {
-      *pmass++ = *cmass++;
-      *pcumul++ = *ccumul++;
+      dist->mass[i] = mass[i];
+      dist->cumul[i] = cumul[i];
     }
-    *pmass = 1. - *(pcumul - 1);
-    *pcumul = 1.;
+    dist->mass[dist->nb_value - 1] = 1. - dist->cumul[dist->nb_value - 2];
+    dist->cumul[dist->nb_value - 1] = 1.;
 
     dist->offset = offset;
     dist->max_computation();
@@ -1209,33 +1220,30 @@ void Distribution::penalty_computation(double weight , int type , double *penalt
 
 {
   register int i;
-  double *ppenalty;
 
-
-  ppenalty = penalty + offset;
 
   switch (type) {
 
   case FIRST_DIFFERENCE : {
     switch (outside) {
     case ZERO :
-      *ppenalty++ = 2 * weight * (2 * mass[offset] - mass[offset + 1]);
+      penalty[offset] = 2 * weight * (2 * mass[offset] - mass[offset + 1]);
       break;
     case CONTINUATION :
-      *ppenalty++ = 2 * weight * (mass[offset] - mass[offset + 1]);
+      penalty[offset] = 2 * weight * (mass[offset] - mass[offset + 1]);
       break;
     }
 
     for (i = offset + 1;i < nb_value - 1;i++) {
-      *ppenalty++ = 2 * weight * (-mass[i - 1] + 2 * mass[i] - mass[i + 1]);
+      penalty[i] = 2 * weight * (-mass[i - 1] + 2 * mass[i] - mass[i + 1]);
     }
 
     switch (outside) {
     case ZERO :
-      *ppenalty = 2 * weight * (-mass[nb_value - 2] + 2 * mass[nb_value - 1]);
+      penalty[nb_value - 1] = 2 * weight * (-mass[nb_value - 2] + 2 * mass[nb_value - 1]);
       break;
     case CONTINUATION :
-      *ppenalty = 2 * weight * (-mass[nb_value - 2] + mass[nb_value - 1]);
+      penalty[nb_value - 1] = 2 * weight * (-mass[nb_value - 2] + mass[nb_value - 1]);
       break;
     }
     break;
@@ -1247,25 +1255,25 @@ void Distribution::penalty_computation(double weight , int type , double *penalt
     switch (outside) {
 
     case ZERO : {
-      *ppenalty++ = 2 * weight * (6 * mass[i] - 4 * mass[i + 1] + mass[i + 2]);
+      penalty[offset] = 2 * weight * (6 * mass[i] - 4 * mass[i + 1] + mass[i + 2]);
       i++;
-      *ppenalty++ = 2 * weight * (-4 * mass[i - 1] + 6 * mass[i] - 4 * mass[i + 1] +
-                                  mass[i + 2]);
+      penalty[offset + 1] = 2 * weight * (-4 * mass[i - 1] + 6 * mass[i] - 4 * mass[i + 1] +
+                                          mass[i + 2]);
       break;
     }
 
     case CONTINUATION : {
-      *ppenalty++ = 2 * weight * (3 * mass[i] - 4 * mass[i + 1] + mass[i + 2]);
+      penalty[offset] = 2 * weight * (3 * mass[i] - 4 * mass[i + 1] + mass[i + 2]);
       i++;
-      *ppenalty++ = 2 * weight * (-3 * mass[i - 1] + 6 * mass[i] - 4 * mass[i + 1] +
-                                  mass[i + 2]);
+      penalty[offset + 1] = 2 * weight * (-3 * mass[i - 1] + 6 * mass[i] - 4 * mass[i + 1] +
+                                          mass[i + 2]);
       break;
     }
     }
 
     for (i = offset + 2;i < nb_value - 2;i++) {
-      *ppenalty++ = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i] -
-                                  4 * mass[i + 1] + mass[i + 2]);
+      penalty[i] = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i] -
+                                 4 * mass[i + 1] + mass[i + 2]);
     }
 
     i = nb_value - 2;
@@ -1273,18 +1281,18 @@ void Distribution::penalty_computation(double weight , int type , double *penalt
     switch (outside) {
 
     case ZERO : {
-      *ppenalty++ = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i] -
-                                  4 * mass[i + 1]);
+      penalty[nb_value - 2] = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i] -
+                                            4 * mass[i + 1]);
       i++;
-      *ppenalty = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i]);
+      penalty[nb_value - 1] = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i]);
       break;
     }
 
     case CONTINUATION : {
-      *ppenalty++ = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i] -
-                                  3 * mass[i + 1]);
+      penalty[nb_value - 2] = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 6 * mass[i] -
+                                            3 * mass[i + 1]);
       i++;
-      *ppenalty = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 3 * mass[i]);
+      penalty[nb_value - 1] = 2 * weight * (mass[i - 2] - 4 * mass[i - 1] + 3 * mass[i]);
       break;
     }
     }
@@ -1293,7 +1301,7 @@ void Distribution::penalty_computation(double weight , int type , double *penalt
 
   case ENTROPY : {
     for (i = offset;i < nb_value;i++) {
-      *ppenalty++ = weight * (log(mass[i]) + 1);
+      penalty[i] = weight * (log(mass[i]) + 1);
     }
     break;
   }
@@ -1338,16 +1346,15 @@ void DiscreteParametric::reestimation(const Reestimation<double> *reestim , int 
 
     case 2 : {
 /*      register int i;
-      double previous_parameter = parameter , sum1 , sum2 , *rfrequency; */
+      double previous_parameter = parameter , sum1 , sum2; */
 
       parameter = (reestim->mean - inf_bound) * probability / (1. - probability);
 
-/*      rfrequency = reestim->frequency + inf_bound + 1;
-      sum1 = 0.;
+/*     sum1 = 0.;
       sum2 = 0.;
       for (i = inf_bound + 1;i < nb_value;i++) {
         sum2 += 1. / (i - inf_bound + previous_parameter - 1);
-        sum1 += *rfrequency++ * sum2;
+        sum1 += reestim->frequency[i] * sum2;
       }
 
       probability = exp(-sum1 / reestim->nb_element); */
