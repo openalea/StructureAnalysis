@@ -36,7 +36,7 @@
 
 
 
-#include <cmath>
+#include <math.h>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
@@ -63,7 +63,6 @@ void Distribution::mass_copy(const Distribution &dist , int inb_value)
 
 {
   register int i;
-  double *pmass , *dmass;
 
 
   if ((inb_value != I_DEFAULT) && (inb_value < dist.nb_value)) {
@@ -74,10 +73,8 @@ void Distribution::mass_copy(const Distribution &dist , int inb_value)
   }
   offset = MIN(dist.offset , nb_value - 1);
 
-  pmass = mass;
-  dmass = dist.mass;
   for (i = 0;i < nb_value;i++) {
-    *pmass++ = *dmass++;
+    mass[i] = dist.mass[i];
   }
 }
 
@@ -95,7 +92,6 @@ void Distribution::equal_size_copy(const Distribution &dist)
 
 {
   register int i;
-  double *pmass , *pcumul , *dmass , *dcumul;
 
 
   nb_value = dist.nb_value;
@@ -107,14 +103,9 @@ void Distribution::equal_size_copy(const Distribution &dist)
   variance = dist.variance;
   nb_parameter = dist.nb_parameter;
 
-  pmass = mass;
-  dmass = dist.mass;
-  pcumul = cumul;
-  dcumul = dist.cumul;
-
   for (i = 0;i < nb_value;i++) {
-    *pmass++ = *dmass++;
-    *pcumul++ = *dcumul++;
+    mass[i] = dist.mass[i];
+    cumul[i] = dist.cumul[i];
   }
 }
 
@@ -147,17 +138,14 @@ void Distribution::init(int inb_value)
 
   else {
     register int i;
-    double *pmass , *pcumul;
+
 
     mass = new double[nb_value];
     cumul = new double[nb_value];
 
-    pmass = mass;
-    pcumul = cumul;
-
     for (i = 0;i < nb_value;i++) {
-      *pmass++ = 0.;
-      *pcumul++ = 0.;
+      mass[i] = 0.;
+      cumul[i] = 0.;
     }
   }
 }
@@ -192,7 +180,6 @@ Distribution::Distribution(const Distribution &dist , double scaling_coeff)
 {
   register int i , j;
   int min , max;
-  double *pmass;
 
 
   nb_value = (int)floor(dist.nb_value * scaling_coeff) + 1;
@@ -205,9 +192,8 @@ Distribution::Distribution(const Distribution &dist , double scaling_coeff)
   mass = new double[nb_value];
   cumul = new double[nb_value];
 
-  pmass = mass;
   for (i = 0;i < nb_value;i++) {
-    *pmass++ = 0.;
+    mass[i] = 0.;
   }
 
   for (i = dist.offset;i < dist.nb_value;i++) {
@@ -272,7 +258,6 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
 
 {
   register int i;
-  double *pmass , *pcumul , *cmass , *ccumul;
 
 
   nb_value = dist.nb_value;
@@ -293,18 +278,13 @@ void Distribution::copy(const Distribution &dist , int ialloc_nb_value)
   mass = new double[alloc_nb_value];
   cumul = new double[alloc_nb_value];
 
-  pmass = mass;
-  cmass = dist.mass;
-  pcumul = cumul;
-  ccumul = dist.cumul;
-
   for (i = 0;i < nb_value;i++) {
-    *pmass++ = *cmass++;
-    *pcumul++ = *ccumul++;
+    mass[i] = dist.mass[i];
+    cumul[i] = dist.cumul[i];
   }
   for (i = nb_value;i < alloc_nb_value;i++) {
-    *pmass++ = 0.;
-    *pcumul++ = 0.;
+    mass[i] = 0.;
+    cumul[i] = 0.;
   }
 }
 
@@ -326,7 +306,6 @@ void Distribution::normalization_copy(const Distribution &dist)
 
   else {
     register int i;
-    double *pmass , *dmass;
 
 
     nb_value = dist.nb_value;
@@ -339,10 +318,8 @@ void Distribution::normalization_copy(const Distribution &dist)
     mass = new double[nb_value];
     cumul = new double[nb_value];
 
-    pmass = mass;
-    dmass = dist.mass;
     for (i = 0;i < nb_value;i++) {
-      *pmass++ = *dmass++ / (1. - dist.complement);
+      mass[i] = dist.mass[i] / (1. - dist.complement);
     }
 
     cumul_computation();
@@ -430,7 +407,6 @@ bool Distribution::operator==(const Distribution &dist) const
 {
   bool status = true;
   register int i;
-  double *pmass , *dmass;
 
 
   if ((offset != dist.offset) || (nb_value != dist.nb_value)) {
@@ -438,10 +414,8 @@ bool Distribution::operator==(const Distribution &dist) const
   }
 
   else {
-    pmass = mass + offset;
-    dmass = dist.mass + offset;
     for (i = offset;i < nb_value;i++) {
-      if (*pmass++ != *dmass++) {
+      if (mass[i] != dist.mass[i]) {
         status = false;
         break;
       }
@@ -536,9 +510,9 @@ int column_width(int min_value , int max_value)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la largeur d'une colonne de flottants.
+ *  Calcul de la largeur d'une colonne de reels.
  *
- *  arguments : nombre de valeurs, pointeur sur des valeurs flottantes,
+ *  arguments : nombre de valeurs, pointeur sur des valeurs reelles,
  *              facteur d'echelle.
  *
  *--------------------------------------------------------------*/
@@ -2491,17 +2465,13 @@ void Distribution::max_computation()
 
 {
   register int i;
-  double *pmass;
 
 
-  pmass = mass + offset;
   max = 0.;
-
   for (i = offset;i < nb_value;i++) {
-    if (*pmass > max) {
-      max = *pmass;
+    if (mass[i] > max) {
+      max = mass[i];
     }
-    pmass++;
   }
 }
 
@@ -2517,16 +2487,12 @@ void Distribution::mean_computation()
 {
   if (cumul[nb_value - 1] > 0.) {
     register int i;
-    double *pmass;
 
 
-    pmass = mass + offset;
     mean = 0.;
-
     for (i = offset;i < nb_value;i++) {
-      mean += *pmass++ * i;
+      mean += mass[i] * i;
     }
-
     mean /= cumul[nb_value - 1];
   }
 }
@@ -2543,17 +2509,14 @@ void Distribution::variance_computation()
 {
   if (mean != D_DEFAULT) {
     register int i;
-    double diff , *pmass;
+    double diff;
 
 
-    pmass = mass + offset;
     variance = 0.;
-
     for (i = offset;i < nb_value;i++) {
       diff = i - mean;
-      variance += *pmass++ * diff * diff;
+      variance += mass[i] * diff * diff;
     }
-
     variance /= cumul[nb_value - 1];
 
     if (variance < 0.) {
@@ -2573,17 +2536,14 @@ double Distribution::mean_absolute_deviation_computation() const
 
 {
   register int i;
-  double mean_absolute_deviation = D_DEFAULT , *pmass;
+  double mean_absolute_deviation = D_DEFAULT;
 
 
   if (mean != D_DEFAULT) {
-    pmass = mass + offset;
     mean_absolute_deviation = 0.;
-
     for (i = offset;i < nb_value;i++) {
-      mean_absolute_deviation += *pmass++ * fabs(i - mean);
+      mean_absolute_deviation += mass[i] * fabs(i - mean);
     }
-
     mean_absolute_deviation /= cumul[nb_value - 1];
 
     if (mean_absolute_deviation < 0.) {
@@ -2605,19 +2565,17 @@ double Distribution::skewness_computation() const
 
 {
   register int i;
-  double skewness = D_INF , diff , *pmass;
+  double skewness = D_INF , diff;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
     skewness = 0.;
 
     if (variance > 0.) {
-      pmass = mass + offset;
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        skewness += *pmass++ * diff * diff * diff;
+        skewness += mass[i] * diff * diff * diff;
       }
-
       skewness /= (cumul[nb_value - 1] * pow(variance , 1.5));
     }
   }
@@ -2637,7 +2595,7 @@ double Distribution::kurtosis_computation() const
 
 {
   register int i;
-  double kurtosis = D_INF , diff , *pmass;
+  double kurtosis = D_INF , diff;
 
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
@@ -2646,14 +2604,11 @@ double Distribution::kurtosis_computation() const
     }
 
     else {
-      pmass = mass + offset;
       kurtosis = 0.;
-
       for (i = offset;i < nb_value;i++) {
         diff = i - mean;
-        kurtosis += *pmass++ * diff * diff * diff * diff;
+        kurtosis += mass[i] * diff * diff * diff * diff;
       }
-
       kurtosis = kurtosis / (cumul[nb_value - 1] * variance * variance) - 3.;
     }
   }
@@ -2672,18 +2627,15 @@ double Distribution::information_computation() const
 
 {
   register int i;
-  double information = D_INF , *pmass;
+  double information = D_INF;
 
 
   if (cumul[nb_value - 1] > 0.) {
-    pmass = mass + offset;
     information = 0.;
-
     for (i = offset;i < nb_value;i++) {
-      if (*pmass > 0.) {
-        information += *pmass * log(*pmass);
+      if (mass[i] > 0.) {
+        information += mass[i] * log(mass[i]);
       }
-      pmass++;
     }
 
     if (complement > 0.) {
@@ -2787,14 +2739,11 @@ void Distribution::cumul_computation()
 
 {
   register int i;
-  double *pcumul;
 
 
-  pcumul = cumul;
   for (i = 0;i < offset;i++) {
-    *pcumul++ = 0.;
+    cumul[i] = 0.;
   }
-
   ::cumul_computation(nb_value - offset , mass + offset , cumul + offset);
 }
 
@@ -2809,19 +2758,16 @@ double* Distribution::survivor_function_computation() const
 
 {
   register int i;
-  double *survivor_function , *psurvivor , *pcumul;
+  double *survivor_function;
 
 
   survivor_function = new double[nb_value];
 
-  psurvivor = survivor_function;
   for (i = 0;i < offset;i++) {
-    *psurvivor++ = 1. - complement;
+    survivor_function[i] = 1. - complement;
   }
-
-  pcumul = cumul + offset;
   for (i = offset;i < nb_value;i++) {
-    *psurvivor++ = 1. - complement - *pcumul++;
+    survivor_function[i] = 1. - complement - cumul[i];
   }
 
   return survivor_function;
@@ -2838,23 +2784,18 @@ double* Distribution::concentration_function_computation() const
 
 {
   register int i;
-  double *concentration_function , *pconcentration , *pmass;
+  double *concentration_function;
 
 
   if ((mean > 0.) && (variance > 0.)) {
     concentration_function = new double[nb_value];
 
-    pconcentration = concentration_function;
     for (i = 0;i < offset;i++) {
-      *pconcentration++ = 0.;
+      concentration_function[i] = 0.;
     }
-
-    pmass = mass + offset;
-
-    *pconcentration++ = *pmass++ * offset / mean;
+    concentration_function[offset] = mass[offset] * offset / mean;
     for (i = offset + 1;i < nb_value;i++) {
-      *pconcentration = *(pconcentration - 1) + *pmass++ * i / mean;
-      pconcentration++;
+      concentration_function[i] = concentration_function[i - 1] + mass[i] * i / mean;
     }
   }
 
@@ -2876,16 +2817,15 @@ double Distribution::concentration_computation() const
 
 {
   register int i;
-  double concentration = D_DEFAULT , *concentration_function , *pmass;
+  double concentration = D_DEFAULT , *concentration_function;
 
 
   if ((mean > 0.) && (variance > 0.)) {
     concentration_function = concentration_function_computation();
-    pmass = mass + offset;
 
-    concentration = *pmass++ * concentration_function[offset];
+    concentration = mass[offset] * concentration_function[offset];
     for (i = offset + 1;i < nb_value;i++) {
-      concentration += *pmass++ * (concentration_function[i - 1] + concentration_function[i]);
+      concentration += mass[i] * (concentration_function[i - 1] + concentration_function[i]);
     }
 
     concentration = 1. - concentration / (cumul[nb_value - 1] * concentration_function[nb_value - 1]);
@@ -2894,20 +2834,15 @@ double Distribution::concentration_computation() const
 
 #   ifdef DEBUG
     int previous_value;
-    double concentration2 = 0. , *pcumul;
+    double concentration2 = 0.;
 
-    pmass = mass + offset + 1;
-    pcumul = cumul + offset;
     previous_value = offset;
-
     for (i = offset + 1;i < nb_value;i++) {
-      if (*pmass > 0.) {
-        concentration2 += *pcumul * (1. - *pcumul) * (i - previous_value);
-//        concentration2 += *pcumul * (cumul[nb_value - 1] - *pcumul) * (i - previous_value);
+      if (mass[i] > 0.) {
+        concentration2 += cumul[i - 1] * (1. - cumul[i - 1]) * (i - previous_value);
+//        concentration2 += cumul[i - 1] * (cumul[nb_value - 1] - cumul[i - 1]) * (i - previous_value);
         previous_value = i;
       }
-      pmass++;
-      pcumul++;
     }
 
     concentration2 /= mean;
