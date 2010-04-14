@@ -67,6 +67,34 @@ extern char* label(const char *file_name);
 
 
 
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la largeur d'une colonne de reels.
+ *
+ *  arguments : nombre de valeurs, pointeur sur des valeurs reelles.
+ *
+ *--------------------------------------------------------------*/
+
+int column_width(int nb_value , const long double *value)
+
+{
+  register int i;
+  int width , max_width = 0;
+
+
+  for (i = 0;i < nb_value;i++) {
+    ostringstream ostring;
+    ostring << *value++;
+    width = (ostring.str()).size();
+    if (width > max_width) {
+      max_width = width;
+    }
+  }
+
+  return max_width;
+}
+
+
 /*--------------------------------------------------------------*/
 /**
  *  Ecriture des profils de segments/d'etats pour une sequence.
@@ -79,7 +107,7 @@ extern char* label(const char *file_name);
 
 ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment ,
                                         double **profiles , const char *label ,
-                                        double **mean , double **change_point) const
+                                        double **mean , long double **change_point) const
 
 {
   register int i , j;
@@ -231,7 +259,7 @@ ostream& Sequences::profile_ascii_print(ostream &os , int index , int nb_segment
 
 ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_segment ,
                                               double **profiles , const char *label ,
-                                              double **mean , double **change_point) const
+                                              double **mean , long double **change_point) const
 
 {
   register int i , j;
@@ -314,7 +342,7 @@ ostream& Sequences::profile_spreadsheet_print(ostream &os , int index , int nb_s
 
 ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment ,
                                        double **profiles , double **mean ,
-                                       double **change_point) const
+                                       long double **change_point) const
 
 {
   register int i , j;
@@ -362,25 +390,30 @@ ostream& Sequences::profile_plot_print(ostream &os , int index , int nb_segment 
  *--------------------------------------------------------------*/
 
 void Sequences::change_point_profile_plotable_write(MultiPlot &plot , int index , int nb_segment ,
-                                                    double **change_point) const
+                                                    long double **change_point) const
 
 {
-  register int i , j;
+  register int i , j , k;
 
+
+  plot.resize(MAX(nb_segment - 1 , 3));
+  i = 0;
 
   if (index_parameter) {
-    for (i = 1;i < nb_segment;i++) {
-      for (j = 0;j < length[index];j++) {
-        plot[i].add_point(index_parameter[index][j] , change_point[i][j]);
+    for (j = MAX(1 , nb_segment - 3);j < nb_segment;j++) {
+      for (k = 0;k < length[index];k++) {
+        plot[i].add_point(index_parameter[index][k] , change_point[j][k]);
       }
+      i++;
     }
   }
 
   else {
-    for (i = 1;i < nb_segment;i++) {
-      for (j = 0;j < length[index];j++) {
-        plot[i].add_point(j , change_point[i][j]);
+    for (j =  MAX(1 , nb_segment - 3);j < nb_segment;j++) {
+      for (k = 0;k < length[index];k++) {
+        plot[i].add_point(k , change_point[j][k]);
       }
+      i++;
     }
   }
 }
@@ -476,7 +509,8 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
 {
   register int i , j , k;
   int max_nb_value , *frequency , *pisequence , *psegment;
-  double sum , factorial_sum , diff , residual , likelihood , *prsequence;
+  double sum , factorial_sum , diff , likelihood , *prsequence;
+  long double residual;
 
 
   max_nb_value = 0;
@@ -568,7 +602,8 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
 #         ifdef MESSAGE
           if ((model_type[i - 1] != MEAN_CHANGE) &&
               (model_type[i - 1] != MEAN_VARIANCE_CHANGE)) {
-            double mean , diff , residual2;
+            double mean , diff;
+            long double residual2;
 
 
             mean = 0.;
@@ -609,9 +644,9 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
           (model_type[i - 1] != MEAN_VARIANCE_CHANGE)) {
 //        if (residual > 0.) {
         if (residual > sqrt((double)length[index]) * ROUNDOFF_ERROR) {
-          likelihood -= ((double)length[index] / 2.) * (log(residual / length[index]) +
+          likelihood -= ((double)length[index] / 2.) * (logl(residual / length[index]) +
                          log(2 * M_PI) + 1);
-/*          likelihood -= ((double)length[index] / 2.) * (log(residual / (length[index] - 1)) +
+/*          likelihood -= ((double)length[index] / 2.) * (logl(residual / (length[index] - 1)) +
                          log(2 * M_PI)) - (double)(length[index] - 1) / 2.; */
         }
         else {
@@ -626,9 +661,9 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
 //    if (residual > 0.) {
     if (residual > sqrt((double)((nb_variable - 1) * length[index])) * ROUNDOFF_ERROR) {
       likelihood = -((double)((nb_variable - 1) * length[index]) / 2.) *
-                    (log(residual / ((nb_variable - 1) * length[index])) + log(2 * M_PI) + 1);
+                    (logl(residual / ((nb_variable - 1) * length[index])) + log(2 * M_PI) + 1);
 /*      likelihood = -((double)((nb_variable - 1) * length[index]) / 2.) *
-                    (log(residual / ((nb_variable - 1) * (length[index] - 1))) +
+                    (logl(residual / ((nb_variable - 1) * (length[index] - 1))) +
                      log(2 * M_PI)) - (double)((nb_variable - 1) * (length[index] - 1)) / 2.; */
     }
     else {
@@ -1059,8 +1094,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   register int i , j , k , m;
   int index , max_nb_value , nb_parameter , *change_point = NULL , *pindex_param ,
       *frequency , *pisequence , *psegment , inb_segment[1];
-  double sum , factorial_sum , diff , residual , segmentation_likelihood ,
-         segment_penalty , penalized_likelihood , *mean , *prsequence , *segment_variance , **rank;
+  double sum , factorial_sum , diff , segmentation_likelihood , segment_penalty ,
+         penalized_likelihood , *mean , *prsequence , *segment_variance , **rank;
+  long double residual;
   Sequences *iseq , *seq , *oseq;
 
 
@@ -1393,9 +1429,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           if ((model_type[j] != MEAN_CHANGE) && (model_type[j] != MEAN_VARIANCE_CHANGE)) {
 //            if (residual > 0.) {
             if (residual > sqrt((double)(change_point[i + 1] - change_point[i])) * ROUNDOFF_ERROR) {
-              segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (log(residual /
+              segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (logl(residual /
                                            (change_point[i + 1] - change_point[i])) + log(2 * M_PI) + 1);
-/*              segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (log(residual /
+/*              segmentation_likelihood -= ((double)(change_point[i + 1] - change_point[i]) / 2.) * (logl(residual /
                                            (change_point[i + 1] - change_point[i])) + log(2 * M_PI)) + (double)(change_point[i + 1] - change_point[i]) / 2.; */
             }
             else {
@@ -1410,10 +1446,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 //        if (residual > 0.) {
         if (residual > sqrt((double)(nb_variable * (change_point[i + 1] - change_point[i]))) * ROUNDOFF_ERROR) {
           segmentation_likelihood -= ((double)(nb_variable * (change_point[i + 1] - change_point[i])) / 2.) *
-                                     (log(residual / (nb_variable * (change_point[i + 1] - change_point[i]))) +
+                                     (logl(residual / (nb_variable * (change_point[i + 1] - change_point[i]))) +
                                       log(2 * M_PI) + 1);
 /*          segmentation_likelihood -= ((double)(nb_variable * (change_point[i + 1] - change_point[i])) / 2.) *
-                                     (log(residual / (nb_variable * (change_point[i + 1] - change_point[i]))) +
+                                     (logl(residual / (nb_variable * (change_point[i + 1] - change_point[i]))) +
                                       log(2 * M_PI)) + (double)(nb_variable * (change_point[i + 1] - change_point[i])) / 2.; */
           segment_variance[i] = residual / (nb_variable * (change_point[i + 1] - change_point[i]));
         }
@@ -1432,10 +1468,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 //      if (residual > 0.) {
       if (residual > sqrt((double)(nb_variable * length[index])) * ROUNDOFF_ERROR) {
         segmentation_likelihood = -((double)(nb_variable * length[index]) / 2.) *
-                                    (log(residual / (nb_variable * length[index])) + log(2 * M_PI) + 1);
+                                   (logl(residual / (nb_variable * length[index])) + log(2 * M_PI) + 1);
 /*        segmentation_likelihood = -((double)(nb_variable * length[index]) / 2.) *
-                                    (log(residual / (nb_variable * (length[index] - nb_segment))) + log(2 * M_PI)) -
-                                    (double)(nb_variable * (length[index] - nb_segment)) / 2.; */
+                                   (logl(residual / (nb_variable * (length[index] - nb_segment))) + log(2 * M_PI)) -
+                                   (double)(nb_variable * (length[index] - nb_segment)) / 2.; */
       }
     }
 
@@ -1534,8 +1570,9 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
   bool *used_output;
   register int i , j , k , m , n , r;
   int max_nb_segment , max_nb_value , *frequency , *pisequence , *psegment , **optimal_length;
-  double sum , factorial_sum , diff , sum_square , buff , segmentation_likelihood ,
-         *mean , *residual , *prsequence , *contrast , **factorial , **forward;
+  double sum , factorial_sum , diff , buff , segmentation_likelihood , *mean ,
+         *prsequence , **factorial , **forward;
+  long double sum_square , *residual , *contrast;
 
 
   max_nb_segment = nb_segment[0];
@@ -1569,9 +1606,9 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
   }
 
   mean = new double[nb_variable];
-  residual = new double[max_length];
+  residual = new long double[max_length];
 
-  contrast = new double[max_length];
+  contrast = new long double[max_length];
 
   forward = new double*[max_length];
   for (i = 0;i < max_length;i++) {
@@ -1756,9 +1793,9 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
             for (m = j;m >= 0;m--) {
 //              if ((contrast[m] != D_INF) && (residual[m] > 0.)) {
               if ((contrast[m] != D_INF) && (residual[m] > sqrt((double)(j - m + 1)) * ROUNDOFF_ERROR)) {
-                contrast[m] -= ((double)(j - m + 1) / 2.) * (log(residual[m] /
+                contrast[m] -= ((double)(j - m + 1) / 2.) * (logl(residual[m] /
                                  (j - m + 1)) + log(2 * M_PI) + 1);
-/*                contrast[m] -= ((double)(j - m + 1) / 2.) * (log(residual[m] /
+/*                contrast[m] -= ((double)(j - m + 1) / 2.) * (logl(residual[m] /
                                  (j - m)) + log(2 * M_PI)) + (double)(j - m) / 2.; */
               }
               else {
@@ -1774,9 +1811,9 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
         for (k = j - 1;k >= 0;k--) {
 //           if (contrast[k] > 0.) {
           if (contrast[k] > sqrt((double)((nb_variable - 1) * (j - k + 1))) * ROUNDOFF_ERROR) {
-            contrast[k] = -((double)((nb_variable - 1) * (j - k + 1)) / 2.) * (log(contrast[k] /
+            contrast[k] = -((double)((nb_variable - 1) * (j - k + 1)) / 2.) * (logl(contrast[k] /
                              ((nb_variable - 1) * (j - k + 1))) + log(2 * M_PI) + 1);
-/*            contrast[k] = -((double)((nb_variable - 1) * (j - k + 1)) / 2.) * (log(contrast[k] /
+/*            contrast[k] = -((double)((nb_variable - 1) * (j - k + 1)) / 2.) * (logl(contrast[k] /
                              ((nb_variable - 1) * (j - k))) + log(2 * M_PI)) +
                            (double)((nb_variable - 1) * (j - k)) / 2.; */
           }
@@ -2221,9 +2258,10 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
   register int i , j;
   int index , nb_segment , *nb_parameter , inb_segment[1];
   double max_likelihood[2] , *segmentation_likelihood , *segment_penalty , *slope_penalty ,
-         **penalized_likelihood , *likelihood , *segmentation_entropy ,
-         *ranked_change_point_entropy , *change_point_entropy , *uniform_entropy ,
-         *segmentation_divergence , *marginal_entropy , **rank;
+         **penalized_likelihood , *likelihood , *uniform_entropy ,
+         *segmentation_divergence , **rank;
+  long double *segmentation_entropy , *ranked_change_point_entropy ,
+              *change_point_entropy , *marginal_entropy;
   Sequences *iseq , *seq , *oseq;
 
 
@@ -2349,12 +2387,12 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     if (model_type[0] != MEAN_CHANGE) {
       likelihood = new double[max_nb_segment + 1];
-      segmentation_entropy = new double[max_nb_segment + 1];
-      ranked_change_point_entropy = new double[max_nb_segment + 1];
-      change_point_entropy = new double[max_nb_segment + 1];
+      segmentation_entropy = new long double[max_nb_segment + 1];
+      ranked_change_point_entropy = new long double[max_nb_segment + 1];
+      change_point_entropy = new long double[max_nb_segment + 1];
       uniform_entropy = new double[max_nb_segment + 1];
       segmentation_divergence = new double[max_nb_segment + 1];
-      marginal_entropy = new double[max_nb_segment + 1];
+      marginal_entropy = new long double[max_nb_segment + 1];
     }
 
     inb_segment[0] = max_nb_segment + 1;
@@ -2763,23 +2801,24 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 double Sequences::forward_backward(int index , int nb_segment , int *model_type ,
                                    double **rank , ostream *os , MultiPlotSet *plot_set ,
                                    int output , char format , double *ilikelihood ,
-                                   double *isegmentation_entropy ,
-                                   double *iranked_change_point_entropy ,
-                                   double *ichange_point_entropy , double *uniform_entropy ,
-                                   double *imarginal_entropy) const
+                                   long double *isegmentation_entropy ,
+                                   long double *iranked_change_point_entropy ,
+                                   long double *ichange_point_entropy , double *uniform_entropy ,
+                                   long double *imarginal_entropy) const
 
 {
   register int i , j , k , m;
   int max_nb_value , *frequency , *pisequence;
-  double sum , factorial_sum , diff , sum_square , buff , segment_norm , sequence_norm ,
-         rlikelihood , segmentation_entropy , ranked_change_point_entropy , change_point_entropy ,
-         marginal_entropy , *mean , *residual , *prsequence , *contrast , *normalized_contrast ,
-         *likelihood , *norm , *forward_norm , *backward_norm , *entropy_backward , **factorial ,
-         **nb_segmentation_forward , **forward , **nb_segmentation_backward , **backward ,
-         **backward_output , **change_point;
+  double sum , factorial_sum , diff , buff , rlikelihood , *mean , *prsequence ,
+         *likelihood , **factorial , **nb_segmentation_forward , **nb_segmentation_backward ,
+         **backward_output;
+  long double sum_square , segment_norm , sequence_norm , lbuff , segmentation_entropy ,
+              ranked_change_point_entropy , change_point_entropy , marginal_entropy ,
+              *residual , *contrast , *normalized_contrast , *norm , *forward_norm ,
+              *backward_norm , *entropy_backward , **forward , **backward , **change_point;
 
 # ifdef DEBUG
-  double **change_point_entropy_profile , **segment_entropy_profile;
+  long double **change_point_entropy_profile , **segment_entropy_profile;
 # endif
 
 
@@ -2807,23 +2846,23 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   }
 
   mean = new double[nb_variable];
-  residual = new double[length[index]];
+  residual = new long double[length[index]];
 
-  contrast = new double[length[index]];
-  normalized_contrast = new double[length[index]];
+  contrast = new long double[length[index]];
+  normalized_contrast = new long double[length[index]];
 
   nb_segmentation_forward = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
     nb_segmentation_forward[i] = new double[nb_segment];
   }
 
-  forward = new double*[length[index]];
+  forward = new long double*[length[index]];
   for (i = 0;i < length[index];i++) {
-    forward[i] = new double[nb_segment];
+    forward[i] = new long double[nb_segment];
   }
 
-  norm = new double[length[index]];
-  forward_norm = new double[length[index]];
+  norm = new long double[length[index]];
+  forward_norm = new long double[length[index]];
 
   if (ilikelihood) {
     likelihood = ilikelihood;
@@ -2837,34 +2876,34 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     nb_segmentation_backward[i] = new double[nb_segment];
   }
 
-  backward = new double*[length[index]];
+  backward = new long double*[length[index]];
   for (i = 0;i < length[index];i++) {
-    backward[i] = new double[nb_segment];
+    backward[i] = new long double[nb_segment];
   }
 
-  backward_norm = new double[length[index]];
+  backward_norm = new long double[length[index]];
 
   backward_output = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
     backward_output[i] = new double[nb_segment];
   }
 
-  change_point = new double*[nb_segment];
+  change_point = new long double*[nb_segment];
   for (i = 1;i < nb_segment;i++) {
-    change_point[i] = new double[length[index]];
+    change_point[i] = new long double[length[index]];
   }
 
-  entropy_backward = new double[nb_segment];
+  entropy_backward = new long double[nb_segment];
 
 # ifdef DEBUG
-  change_point_entropy_profile = new double*[nb_segment];
+  change_point_entropy_profile = new long double*[nb_segment];
   for (i = 1;i < nb_segment;i++) {
-    change_point_entropy_profile[i] = new double[length[index]];
+    change_point_entropy_profile[i] = new long double[length[index]];
   }
 
-  segment_entropy_profile = new double*[nb_segment];
+  segment_entropy_profile = new long double*[nb_segment];
   for (i = 1;i < nb_segment;i++) {
-    segment_entropy_profile[i] = new double[length[index]];
+    segment_entropy_profile[i] = new long double[length[index]];
   }
 # endif
 
@@ -3029,9 +3068,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
           for (k = i;k >= 0;k--) {
 //            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
             if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                                (i - k + 1)) + log(2 * M_PI) + 1);
-/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                                (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
             }
             else {
@@ -3047,9 +3086,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       for (j = i - 1;j >= 0;j--) {
 //        if (contrast[j] > 0.) {
         if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
-          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
-/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
                          (double)((nb_variable - 1) * (i - j)) / 2.; */
         }
@@ -3083,7 +3122,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     }
 
     if (contrast[i] != D_INF) {
-      contrast[i] = exp(contrast[i]);
+      contrast[i] = expl(contrast[i]);
     }
     else {
       contrast[i] = 0.;
@@ -3100,7 +3139,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 #     endif
 
       if (contrast[j] != D_INF) {
-        contrast[j] = exp(contrast[j] - segment_norm);
+        contrast[j] = expl(contrast[j] - segment_norm);
       }
       else {
         contrast[j] = 0.;
@@ -3150,7 +3189,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         forward[i][j] /= norm[i];
       }
 
-      norm[i] = log(norm[i]);
+      norm[i] = logl(norm[i]);
     }
 
     forward_norm[i] = segment_norm + norm[i];
@@ -3160,7 +3199,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     for (j = 0;j < nb_segment;j++) {
       cout << " " << forward[i][j];
     }
-    cout << " | " << exp(norm[i]) << endl;
+    cout << " | " << expl(norm[i]) << endl;
 #   endif
 
   }
@@ -3186,7 +3225,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
   for (i = 0;i < nb_segment;i++) {
     if (forward[length[index] - 1][i] > 0.) {
-      likelihood[i] = log(forward[length[index] - 1][i]) + forward_norm[length[index] - 1];
+      likelihood[i] = logl(forward[length[index] - 1][i]) + forward_norm[length[index] - 1];
     }
     else {
       likelihood[i] = D_INF;
@@ -3338,9 +3377,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
             for (k = i;k < length[index];k++) {
 //              if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
               if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(k - i + 1)) * ROUNDOFF_ERROR)) {
-                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+                contrast[k] -= ((double)(k - i + 1) / 2.) * (logl(residual[k] /
                                  (k - i + 1)) + log(2 * M_PI) + 1);
-/*                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+/*                contrast[k] -= ((double)(k - i + 1) / 2.) * (logl(residual[k] /
                                  (k - i)) + log(2 * M_PI)) + (double)(k - i) / 2.; */
               }
               else {
@@ -3356,9 +3395,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         for (j = i + 1;j < length[index];j++) {
 //          if (contrast[j] > 0.) {
           if (contrast[j] > sqrt((double)((nb_variable - 1) * (j - i + 1))) * ROUNDOFF_ERROR) {
-            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (logl(contrast[j] /
                              ((nb_variable - 1) * (j - i + 1))) + log(2 * M_PI) + 1);
-/*            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+/*            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (logl(contrast[j] /
                              ((nb_variable - 1) * (j - i))) + log(2 * M_PI)) +
                            (double)((nb_variable - 1) * (j - i)) / 2.; */
           }
@@ -3392,7 +3431,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       }
 
       if (contrast[i] != D_INF) {
-        normalized_contrast[i] = exp(contrast[i]);
+        normalized_contrast[i] = expl(contrast[i]);
       }
       else {
         normalized_contrast[i] = 0.;
@@ -3402,7 +3441,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       for (j = i + 1;j < length[index];j++) {
         segment_norm += norm[j];
         if (contrast[j] != D_INF) {
-          normalized_contrast[j] = exp(contrast[j] - segment_norm);
+          normalized_contrast[j] = expl(contrast[j] - segment_norm);
         }
         else {
           normalized_contrast[j] = 0.;
@@ -3435,7 +3474,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
           backward[i][j] /= norm[i];
         }
 
-        norm[i] = log(norm[i]);
+        norm[i] = logl(norm[i]);
       }
 
       backward_norm[i] = segment_norm + norm[i];
@@ -3468,9 +3507,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       if (i == 0) {
 
 #       ifdef MESSAGE
-        buff = backward[i][0] * exp(backward_norm[i] - rlikelihood);
-        if ((buff < 1. - DOUBLE_ERROR) || (buff > 1. + DOUBLE_ERROR)) {
-          cout << "\nERROR: " << buff << " | " << 1 << endl;
+        lbuff = backward[i][0] * expl(backward_norm[i] - rlikelihood);
+        if ((lbuff < 1. - DOUBLE_ERROR) || (lbuff > 1. + DOUBLE_ERROR)) {
+          cout << "\nERROR: " << lbuff << " | " << 1 << endl;
         }
 #       endif
 
@@ -3488,10 +3527,10 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
           for (k = MAX(1 , j + 1 + i - length[index]);k <= MIN(j , i);k++) {
             change_point[j][i] += forward[i - 1][k - 1] * backward[i][k + nb_segment - j - 1];
           }
-          change_point[j][i] *= exp(forward_norm[i - 1] + backward_norm[i] - likelihood[j]);
+          change_point[j][i] *= expl(forward_norm[i - 1] + backward_norm[i] - likelihood[j]);
         }
 
-        sequence_norm = exp(forward_norm[i - 1] + backward_norm[i] - rlikelihood);
+        sequence_norm = expl(forward_norm[i - 1] + backward_norm[i] - rlikelihood);
 
 #       ifdef DEBUG
         cout << i << ": " << forward_norm[i - 1] << " " << backward_norm[i] << " | "
@@ -3514,7 +3553,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       for (j = i;j < length[index];j++) {
         segment_norm += norm[j];
         if (contrast[j] != D_INF) {
-          normalized_contrast[j] = exp(contrast[j] - segment_norm);
+          normalized_contrast[j] = expl(contrast[j] - segment_norm);
         }
         else {
           normalized_contrast[j] = 0.;
@@ -3522,7 +3561,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       }
 
       if (i == 0) {
-        sequence_norm = exp(backward_norm[i] - rlikelihood);
+        sequence_norm = expl(backward_norm[i] - rlikelihood);
 
         for (j = i;j <= length[index] - nb_segment;j++) {
           if (contrast[j] != D_INF) {
@@ -3533,7 +3572,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       }
 
       else {
-        sequence_norm = exp(forward_norm[i - 1] + backward_norm[i] - rlikelihood);
+        sequence_norm = expl(forward_norm[i - 1] + backward_norm[i] - rlikelihood);
 
         for (j = MAX(1 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
           if (j < nb_segment - 1) {
@@ -3558,12 +3597,12 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         if (i == 0) {
           for (j = i;j < length[index] - 1;j++) {
             if (contrast[j] != D_INF) {
-              buff = normalized_contrast[j] * contrast[j];
+              lbuff = normalized_contrast[j] * contrast[j];
               for (k = 1;k < MIN(nb_segment - 1 , length[index] - j);k++) {
                 isegmentation_entropy[k] -= backward[j + 1][nb_segment - k] *
-                                            exp(backward_norm[i] - likelihood[k]) * buff;
+                                            expl(backward_norm[i] - likelihood[k]) * lbuff;
 //                isegmentation_entropy[k] -= normalized_contrast[j] * backward[j + 1][nb_segment - k] *
-//                                            exp(backward_norm[i] - likelihood[k]) * contrast[j];
+//                                            expl(backward_norm[i] - likelihood[k]) * contrast[j];
               }
             }
           }
@@ -3574,12 +3613,12 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
             if (j < nb_segment - 1) {
               for (k = i;k < length[index] - 1;k++) {
                 if (contrast[k] != D_INF) {
-                  buff = forward[i - 1][j - 1] * normalized_contrast[k] * contrast[k];
+                  lbuff = forward[i - 1][j - 1] * normalized_contrast[k] * contrast[k];
                   for (m = j + 1;m < MIN(nb_segment - 1 , j + length[index] - k);m++) {
                     isegmentation_entropy[m] -= backward[k + 1][j + nb_segment - m] *
-                                                exp(forward_norm[i - 1] + backward_norm[i] - likelihood[m]) * buff;
+                                                expl(forward_norm[i - 1] + backward_norm[i] - likelihood[m]) * lbuff;
 //                    isegmentation_entropy[m] -= forward[i - 1][j - 1] * normalized_contrast[k] * backward[k + 1][j + nb_segment - m] *
-//                                                exp(forward_norm[i - 1] + backward_norm[i] - likelihood[m]) * contrast[k];
+//                                                expl(forward_norm[i - 1] + backward_norm[i] - likelihood[m]) * contrast[k];
                   }
                 }
               }
@@ -3587,12 +3626,12 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
             else {
               if (contrast[length[index] - 1] != D_INF) {
-                buff = normalized_contrast[length[index] - 1] * contrast[length[index] - 1];
+                lbuff = normalized_contrast[length[index] - 1] * contrast[length[index] - 1];
                 for (k = 1;k < MIN(nb_segment - 1 , i + 1);k++) {
                   isegmentation_entropy[k] -= forward[i - 1][k - 1] *
-                                              exp(forward_norm[i - 1] + backward_norm[i] - likelihood[k]) * buff;
+                                              expl(forward_norm[i - 1] + backward_norm[i] - likelihood[k]) * lbuff;
 //                  isegmentation_entropy[k] -= forward[i - 1][k - 1] * normalized_contrast[length[index] - 1] *
-//                                              exp(forward_norm[i - 1] + backward_norm[i] - likelihood[k]) * contrast[length[index] - 1];
+//                                              expl(forward_norm[i - 1] + backward_norm[i] - likelihood[k]) * contrast[length[index] - 1];
                 }
               }
             }
@@ -3643,7 +3682,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     marginal_entropy = 0.;
 
     for (i = length[index] - 2;i >= 0;i--) {
-      sequence_norm = exp(forward_norm[i] + backward_norm[i + 1] - rlikelihood);
+      sequence_norm = expl(forward_norm[i] + backward_norm[i + 1] - rlikelihood);
 
 /*      for (j = 0;j < MAX(0 , nb_segment + i - length[index]);j++) {
         entropy_backward[j] = 0.;
@@ -3656,24 +3695,24 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       for (j = MAX(0 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
         if (j > 0) {
 //          entropy_backward[j] -= forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
-          buff = forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
-          entropy_backward[j] -= buff;
-//          if ((buff > 0.) && (buff < 1.)) {
-          if (buff > 0.) {
-            ranked_change_point_entropy -= buff * log(buff);
+          lbuff = forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
+          entropy_backward[j] -= lbuff;
+//          if ((lbuff > 0.) && (lbuff < 1.)) {
+          if (lbuff > 0.) {
+            ranked_change_point_entropy -= lbuff * logl(lbuff);
           }
         }
 //        if ((entropy_backward[j] > 0.) && (entropy_backward[j] < 1.)) {
         if (entropy_backward[j] > 0.) {
-          ranked_change_point_entropy -= entropy_backward[j] * log(entropy_backward[j]);
+          ranked_change_point_entropy -= entropy_backward[j] * logl(entropy_backward[j]);
         }
 
         if (j < nb_segment - 1) {
           entropy_backward[j] += forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
-/*          buff = forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
-          entropy_backward[j] += buff;
-          if (buff > 0.) {
-            ranked_change_point_entropy -= buff * log(buff);
+/*          lbuff = forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
+          entropy_backward[j] += lbuff;
+          if (lbuff > 0.) {
+            ranked_change_point_entropy -= lbuff * logl(lbuff);
           } */
         }
 
@@ -3685,8 +3724,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         }
 
         if (entropy_backward[j] > 0.) {
-          ranked_change_point_entropy += entropy_backward[j] * log(entropy_backward[j]);
-          marginal_entropy -= entropy_backward[j] * log(entropy_backward[j]);
+          ranked_change_point_entropy += entropy_backward[j] * logl(entropy_backward[j]);
+          marginal_entropy -= entropy_backward[j] * logl(entropy_backward[j]);
         }
       }
 
@@ -3706,8 +3745,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     change_point_entropy = 0.;
     for (i = 1;i < length[index];i++) {
       if ((change_point[nb_segment - 1][i] > 0.) && (change_point[nb_segment - 1][i] < 1.)) {
-        change_point_entropy -= change_point[nb_segment - 1][i] * log(change_point[nb_segment - 1][i]) +
-                                (1 - change_point[nb_segment - 1][i]) * log(1 - change_point[nb_segment - 1][i]);
+        change_point_entropy -= change_point[nb_segment - 1][i] * logl(change_point[nb_segment - 1][i]) +
+                                (1 - change_point[nb_segment - 1][i]) * logl(1 - change_point[nb_segment - 1][i]);
       }
     }
 
@@ -3721,32 +3760,32 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     entropy_backward[nb_segment - 1] = 1.;
 
     for (i = length[index] - 2;i >= 0;i--) {
-      sequence_norm = exp(forward_norm[i] + backward_norm[i + 1] - rlikelihood);
+      sequence_norm = expl(forward_norm[i] + backward_norm[i + 1] - rlikelihood);
       segment_entropy_profile[nb_segment - 1][i + 1] = 0.;
 
       for (j = MAX(0 , nb_segment + i - length[index]);j < MIN(nb_segment , i + 1);j++) {
         if (entropy_backward[j] > 0.) {
-          segment_entropy_profile[nb_segment - 1][i + 1] -= entropy_backward[j] * log(entropy_backward[j]);
+          segment_entropy_profile[nb_segment - 1][i + 1] -= entropy_backward[j] * logl(entropy_backward[j]);
         }
 
         if (j > 0) {
 //          entropy_backward[j] -= forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
-          buff = forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
-          entropy_backward[j] -= buff;
-          if (buff > 0.) {
-            segment_entropy_profile[nb_segment - 1][i + 1] += buff * log(buff);
+          lbuff = forward[i][j - 1] * backward[i + 1][j] * sequence_norm;
+          entropy_backward[j] -= lbuff;
+          if (lbuff > 0.) {
+            segment_entropy_profile[nb_segment - 1][i + 1] += lbuff * logl(lbuff);
           }
         }
         if (entropy_backward[j] > 0.) {
-          segment_entropy_profile[nb_segment - 1][i + 1] += entropy_backward[j] * log(entropy_backward[j]);
+          segment_entropy_profile[nb_segment - 1][i + 1] += entropy_backward[j] * logl(entropy_backward[j]);
         }
 
         if (j < nb_segment - 1) {
           entropy_backward[j] += forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
-/*          buff = forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
-          entropy_backward[j] += buff;
-          if (buff > 0.) {
-            segment_entropy_profile[nb_segment - 1][i + 1] += buff * log(buff);
+/*          lbuff = forward[i][j] * backward[i + 1][j + 1] * sequence_norm;
+          entropy_backward[j] += lbuff;
+          if (lbuff > 0.) {
+            segment_entropy_profile[nb_segment - 1][i + 1] += lbuff * logl(lbuff);
           } */
         }
 
@@ -3758,7 +3797,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         }
 
         if (entropy_backward[j] > 0.) {
-          segment_entropy_profile[nb_segment - 1][i + 1] -= entropy_backward[j] * log(entropy_backward[j]);
+          segment_entropy_profile[nb_segment - 1][i + 1] -= entropy_backward[j] * logl(entropy_backward[j]);
         }
       }
     }
@@ -3770,8 +3809,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     for (i = 1;i < length[index];i++) {
       if ((change_point[nb_segment - 1][i] > 0.) && (change_point[nb_segment - 1][i] < 1.)) {
 
-        change_point_entropy_profile[nb_segment - 1][i] = -change_point[nb_segment - 1][i] * log(change_point[nb_segment - 1][i]) -
-                                                          (1 - change_point[nb_segment - 1][i]) * log(1 - change_point[nb_segment - 1][i]);
+        change_point_entropy_profile[nb_segment - 1][i] = -change_point[nb_segment - 1][i] * logl(change_point[nb_segment - 1][i]) -
+                                                          (1 - change_point[nb_segment - 1][i]) * logl(1 - change_point[nb_segment - 1][i]);
       }
 
       else {
@@ -3795,7 +3834,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         imarginal_entropy[i] = 0.;
 
         for (j = length[index] - 2;j > 0;j--) {
-          sequence_norm = exp(forward_norm[j] + backward_norm[j + 1] - likelihood[i]);
+          sequence_norm = expl(forward_norm[j] + backward_norm[j + 1] - likelihood[i]);
 
 /*          for (k = 0;k < MAX(0 , i + 1 + j - length[index]);k++) {
             entropy_backward[k] = 0.;
@@ -3808,24 +3847,24 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
           for (k = MAX(0 , i + 1 + j - length[index]);k <= MIN(i , j);k++) {
             if (k > 0) {
 //              entropy_backward[k] -= forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
-              buff = forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
-              entropy_backward[k] -= buff;
-//              if (buff > 0.) {
-              if ((buff > 0.) && (buff < 1.)) {
-                iranked_change_point_entropy[i] -= buff * log(buff);
+              lbuff = forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
+              entropy_backward[k] -= lbuff;
+//              if (lbuff > 0.) {
+              if ((lbuff > 0.) && (lbuff < 1.)) {
+                iranked_change_point_entropy[i] -= lbuff * logl(lbuff);
               }
             }
 //            if (entropy_backward[k] > 0.) {
             if ((entropy_backward[k] > 0.) && (entropy_backward[k] < 1.)) {
-              iranked_change_point_entropy[i] -= entropy_backward[k] * log(entropy_backward[k]);
+              iranked_change_point_entropy[i] -= entropy_backward[k] * logl(entropy_backward[k]);
             }
 
             if (k < i) {
               entropy_backward[k] += forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
-/*              buff = forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
-              entropy_backward[k] += buff;
-              if (buff > 0.) {
-                iranked_change_point_entropy[i] -= buff * log(buff);
+/*              lbuff = forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
+              entropy_backward[k] += lbuff;
+              if (lbuff > 0.) {
+                iranked_change_point_entropy[i] -= lbuff * logl(lbuff);
               } */
             }
 
@@ -3837,8 +3876,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
             }
 
             if (entropy_backward[k] > 0.) {
-              iranked_change_point_entropy[i] += entropy_backward[k] * log(entropy_backward[k]);
-              imarginal_entropy[i] -= entropy_backward[k] * log(entropy_backward[k]);
+              iranked_change_point_entropy[i] += entropy_backward[k] * logl(entropy_backward[k]);
+              imarginal_entropy[i] -= entropy_backward[k] * logl(entropy_backward[k]);
             }
           }
 
@@ -3865,8 +3904,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
         ichange_point_entropy[i] = 0.;
         for (j = 1;j < length[index];j++) {
           if ((change_point[i][j] > 0.) && (change_point[i][j] < 1.)) {
-            ichange_point_entropy[i] -= change_point[i][j] * log(change_point[i][j]) +
-                                        (1 - change_point[i][j]) * log(1 - change_point[i][j]);
+            ichange_point_entropy[i] -= change_point[i][j] * logl(change_point[i][j]) +
+                                        (1 - change_point[i][j]) * logl(1 - change_point[i][j]);
           }
         }
       }
@@ -3885,32 +3924,32 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       entropy_backward[i] = 1.;
 
       for (j = length[index] - 2;j > 0;j--) {
-        sequence_norm = exp(forward_norm[j] + backward_norm[j + 1] - likelihood[i]);
+        sequence_norm = expl(forward_norm[j] + backward_norm[j + 1] - likelihood[i]);
         segment_entropy_profile[i][j + 1] = 0.;
 
         for (k = MAX(0 , i + 1 + j - length[index]);k <= MIN(i , j);k++) {
           if (entropy_backward[k] > 0.) {
-            segment_entropy_profile[i][j + 1] -= entropy_backward[k] * log(entropy_backward[k]);
+            segment_entropy_profile[i][j + 1] -= entropy_backward[k] * logl(entropy_backward[k]);
           }
 
           if (k > 0) {
 //            entropy_backward[k] -= forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
-            buff = forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
-            entropy_backward[k] -= buff;
-            if (buff > 0.) {
-              segment_entropy_profile[i][j + 1] += buff * log(buff);
+            lbuff = forward[j][k - 1] * backward[j + 1][k + nb_segment - i - 1] * sequence_norm;
+            entropy_backward[k] -= lbuff;
+            if (lbuff > 0.) {
+              segment_entropy_profile[i][j + 1] += lbuff * logl(lbuff);
             }
           }
           if (entropy_backward[k] > 0.) {
-            segment_entropy_profile[i][j + 1] += entropy_backward[k] * log(entropy_backward[k]);
+            segment_entropy_profile[i][j + 1] += entropy_backward[k] * logl(entropy_backward[k]);
           }
 
           if (k < i) {
             entropy_backward[k] += forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
-/*            buff = forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
-            entropy_backward[k] += buff;
-            if (buff > 0.) {
-              segment_entropy_profile[i][j + 1] += buff * log(buff);
+/*            lbuff = forward[j][k] * backward[j + 1][k + nb_segment - i] * sequence_norm;
+            entropy_backward[k] += lbuff;
+            if (lbuff > 0.) {
+              segment_entropy_profile[i][j + 1] += lbuff * logl(lbuff);
             } */
           }
 
@@ -3922,7 +3961,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
           }
 
           if (entropy_backward[k] > 0.) {
-            segment_entropy_profile[i][j + 1] -= entropy_backward[k] * log(entropy_backward[k]);
+            segment_entropy_profile[i][j + 1] -= entropy_backward[k] * logl(entropy_backward[k]);
           }
         }
       }
@@ -3936,8 +3975,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       change_point_entropy_profile[i][0] = 0.;
       for (j = 1;j < length[index];j++) {
         if ((change_point[i][j] > 0.) && (change_point[i][j] < 1.)) {
-          change_point_entropy_profile[i][j] = -change_point[i][j] * log(change_point[i][j]) -
-                                               (1 - change_point[i][j]) * log(1 - change_point[i][j]);
+          change_point_entropy_profile[i][j] = -change_point[i][j] * logl(change_point[i][j]) -
+                                               (1 - change_point[i][j]) * logl(1 - change_point[i][j]);
         }
 
         else {
@@ -4248,10 +4287,11 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 {
   register int i , j , k , m , n;
   int max_nb_value , segment_length , *frequency , *pisequence , *psegment , **sisequence;
-  double sum , factorial_sum , diff , sum_square , segment_norm , sequence_norm ,
-         likelihood , segmentation_likelihood , *sequence_mean , *residual , *prsequence ,
-         *contrast , *norm , **factorial , **forward , *backward , *cumul_backward ,
-         **srsequence , **mean , **variance;
+  double sum , factorial_sum , diff , likelihood , segmentation_likelihood , *sequence_mean ,
+         *prsequence , *backward , *cumul_backward , **factorial , **srsequence ,
+         **mean , **variance;
+  long double sum_square , segment_norm , sequence_norm , *residual , *contrast ,
+              *norm , **forward;
 
 
   max_nb_value = 0;
@@ -4278,16 +4318,16 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   }
 
   sequence_mean = new double[nb_variable];
-  residual = new double[length[index]];
+  residual = new long double[length[index]];
 
-  contrast = new double[length[index]];
+  contrast = new long double[length[index]];
 
-  forward = new double*[length[index]];
+  forward = new long double*[length[index]];
   for (i = 0;i < length[index];i++) {
-    forward[i] = new double[nb_segment];
+    forward[i] = new long double[nb_segment];
   }
 
-  norm = new double[length[index]];
+  norm = new long double[length[index]];
 
   backward = new double[length[index]];
   cumul_backward = new double[length[index]];
@@ -4482,9 +4522,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
           for (k = i;k >= 0;k--) {
 //            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
             if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                               (i - k + 1)) + log(2 * M_PI) + 1);
-/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                               (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
             }
             else {
@@ -4500,9 +4540,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
       for (j = i - 1;j >= 0;j--) {
 //        if (contrast[j] > 0.) {
         if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
-          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
-/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
                          (double)((nb_variable - 1) * (i - j)) / 2.; */
         }
@@ -4513,7 +4553,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
     }
 
     if (contrast[i] != D_INF) {
-      contrast[i] = exp(contrast[i]);
+      contrast[i] = expl(contrast[i]);
     }
     else {
       contrast[i] = 0.;
@@ -4523,7 +4563,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
     for (j = i - 1;j >= 0;j--) {
       segment_norm += norm[j];
       if (contrast[j] != D_INF) {
-        contrast[j] = exp(contrast[j] - segment_norm);
+        contrast[j] = expl(contrast[j] - segment_norm);
       }
       else {
         contrast[j] = 0.;
@@ -4553,7 +4593,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
         forward[i][j] /= norm[i];
       }
 
-      norm[i] = log(norm[i]);
+      norm[i] = logl(norm[i]);
     }
 
 #   ifdef DEBUG
@@ -4561,7 +4601,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
     for (j = 0;j < nb_segment;j++) {
       cout << " " << forward[i][j];
     }
-    cout << " | " << exp(norm[i]) << endl;
+    cout << " | " << expl(norm[i]) << endl;
 #   endif
 
   }
@@ -4569,7 +4609,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   sequence_norm = segment_norm + norm[length[index] - 1];
 
   if (forward[length[index] - 1][nb_segment - 1] > 0.) {
-    likelihood = log(forward[length[index] - 1][nb_segment - 1]) + sequence_norm;
+    likelihood = logl(forward[length[index] - 1][nb_segment - 1]) + sequence_norm;
   }
   else {
     likelihood = D_INF;
@@ -4728,9 +4768,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
               for (n = j;n >= k;n--) {
 //                if ((contrast[n] != D_INF) && (residual[n] > 0.)) {
                 if ((contrast[n] != D_INF) && (residual[n] > sqrt((double)(j - n + 1)) * ROUNDOFF_ERROR)) {
-                  contrast[n] -= ((double)(j - n + 1) / 2.) * (log(residual[n] /
+                  contrast[n] -= ((double)(j - n + 1) / 2.) * (logl(residual[n] /
                                    (j - n + 1)) + log(2 * M_PI) + 1);
-/*                  contrast[n] -= ((double)(j - n + 1) / 2.) * (log(residual[n] /
+/*                  contrast[n] -= ((double)(j - n + 1) / 2.) * (logl(residual[n] /
                                    (j - n)) + log(2 * M_PI)) + (double)(j - n) / 2.; */
                 }
                 else {
@@ -4746,9 +4786,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
           for (m = j - 1;m >= k;m--) {
 //            if (contrast[m] > 0.)) {
             if (contrast[m] > sqrt((double)((nb_variable - 1) * (j - m + 1))) * ROUNDOFF_ERROR) {
-              contrast[m] = -((double)((nb_variable - 1) * (j - m + 1)) / 2.) * (log(contrast[m] /
+              contrast[m] = -((double)((nb_variable - 1) * (j - m + 1)) / 2.) * (logl(contrast[m] /
                                ((nb_variable - 1) * (j - m + 1))) + log(2 * M_PI) + 1);
-/*              contrast[m] = -((double)((nb_variable - 1) * (j - m + 1)) / 2.) * (log(contrast[m] /
+/*              contrast[m] = -((double)((nb_variable - 1) * (j - m + 1)) / 2.) * (logl(contrast[m] /
                                ((nb_variable - 1) * (j - m))) + log(2 * M_PI)) +
                              (double)((nb_variable - 1) * (j - m)) / 2.; */
             }
@@ -4762,7 +4802,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
         for (m = j;m >= k;m--) {
           segment_norm += norm[m];
           if (contrast[m] != D_INF) {
-            contrast[m] = exp(contrast[m] - segment_norm);
+            contrast[m] = expl(contrast[m] - segment_norm);
           }
           else {
             contrast[m] = 0.;
@@ -4792,7 +4832,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
           segment_length = j + 1;
         }
 
-        segmentation_likelihood += log(contrast[j - segment_length + 1]);
+        segmentation_likelihood += logl(contrast[j - segment_length + 1]);
 
         for (m = j;m > j - segment_length;m--) {
           *psegment-- = k;
@@ -5046,11 +5086,10 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   register int i , j , k , m , n;
   int max_nb_value , brank , previous_rank , nb_cell , *frequency , *pisequence , *rank ,
       *psegment , **sisequence , ***optimal_length , ***optimal_rank;
-  double sum , factorial_sum , diff , sum_square , buff , segmentation_likelihood ,
-         *nb_segmentation , *sequence_mean , *residual , *prsequence , *contrast ,
-         **factorial , **nb_segmentation_forward , **srsequence , **mean , **variance ,
-         ***forward;
-  long double likelihood_cumul;
+  double sum , factorial_sum , diff , buff , segmentation_likelihood , *nb_segmentation ,
+         *sequence_mean , *prsequence , **factorial , **nb_segmentation_forward ,
+         **srsequence , **mean , **variance , ***forward;
+  long double sum_square , *residual , *contrast , likelihood_cumul;
 
 # ifdef MESSAGE
   double sum2;
@@ -5083,9 +5122,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   }
 
   sequence_mean = new double[nb_variable];
-  residual = new double[length[index]];
+  residual = new long double[length[index]];
 
-  contrast = new double[length[index]];
+  contrast = new long double[length[index]];
 
   nb_segmentation_forward = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
@@ -5400,9 +5439,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
           for (k = i;k >= 0;k--) {
 //            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
             if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                                (i - k + 1)) + log(2 * M_PI) + 1);
-/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                                (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
             }
             else {
@@ -5418,9 +5457,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       for (j = i - 1;j >= 0;j--) {
 //        if (contrast[j] > 0.) {
         if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
-          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
-/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
                          (double)((nb_variable - 1) * (i - j)) / 2.; */
         }
@@ -5682,7 +5721,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
     }
 
     if (forward[length[index] - 1][nb_segment - 1][i] != D_INF) {
-      likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][i]);
+      likelihood_cumul += exp(forward[length[index] - 1][nb_segment - 1][i]);
     }
 
 #   ifdef DEBUG
@@ -5737,7 +5776,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       os << "  " << i + 1 << "  " << forward[length[index] - 1][nb_segment - 1][i] << "   (";
       if (likelihood != D_INF) {
         os << exp(forward[length[index] - 1][nb_segment - 1][i] - likelihood)
-           << "  " << likelihood_cumul / expl(likelihood);
+           << "  " << likelihood_cumul / exp(likelihood);
       }
       else {
         os << exp(forward[length[index] - 1][nb_segment - 1][i] - segmentation_likelihood);
@@ -5803,7 +5842,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
       os << "\t" << i + 1 << "\t" << forward[length[index] - 1][nb_segment - 1][i] << "\t";
       if (likelihood != D_INF) {
         os << exp(forward[length[index] - 1][nb_segment - 1][i] - likelihood)
-           << "\t" << likelihood_cumul / expl(likelihood);
+           << "\t" << likelihood_cumul / exp(likelihood);
       }
       else {
         os << exp(forward[length[index] - 1][nb_segment - 1][i] - segmentation_likelihood);
@@ -5842,7 +5881,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   }
 
 # ifdef DEBUG
-  if (((likelihood != D_INF) && (likelihood_cumul / expl(likelihood) > 0.8)) ||
+  if (((likelihood != D_INF) && (likelihood_cumul / exp(likelihood) > 0.8)) ||
       (segmentation_likelihood != D_INF)) {
     if (likelihood != D_INF) {
       for (i = 0;i < length[index];i++) {
@@ -5916,11 +5955,11 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
     if (likelihood != D_INF) {
       for (i = 0;i < inb_segmentation;i++) {
-        segmentation->mass[i] = expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood);
-        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood);
+        segmentation->mass[i] = exp(forward[length[index] - 1][nb_segment - 1][i] - likelihood);
+        likelihood_cumul += exp(forward[length[index] - 1][nb_segment - 1][i] - likelihood);
         segmentation->cumul[i] = likelihood_cumul;
 
-        divergence += expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood) *
+        divergence += exp(forward[length[index] - 1][nb_segment - 1][i] - likelihood) *
                       (forward[length[index] - 1][nb_segment - 1][i] - likelihood +
                        log(nb_segmentation_forward[length[index] - 1][nb_segment - 1]));
       }
@@ -5930,10 +5969,10 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
     else {
       for (i = 0;i < inb_segmentation;i++) {
-        segmentation->mass[i] = expl(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood;
+        segmentation->mass[i] = exp(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood;
 
-        divergence += expl(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood *
-                      (forward[length[index] - 1][nb_segment - 1][i] - logl(approximated_likelihood) +
+        divergence += exp(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood *
+                      (forward[length[index] - 1][nb_segment - 1][i] - log(approximated_likelihood) +
                        log(nb_segmentation_forward[length[index] - 1][nb_segment - 1]));
       }
 
@@ -5961,17 +6000,17 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
     i = 0;
     if (likelihood != D_INF) {
       for (j = 0;j < inb_segmentation;j++) {
-        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][j]);
-        if (likelihood_cumul / expl(likelihood) > cdf[i]) {
-          os << j << " " << likelihood_cumul / expl(likelihood) << " (";
+        likelihood_cumul += exp(forward[length[index] - 1][nb_segment - 1][j]);
+        if (likelihood_cumul / exp(likelihood) > cdf[i]) {
+          os << j << " " << likelihood_cumul / exp(likelihood) << " (";
           if (i == 0) {
             os << j / nb_segmentation_forward[length[index] - 1][nb_segment - 1] << ")" << endl;
           }
           else {
-            os << likelihood_cumul / expl(likelihood) - previous_cumul[0] << " "
+            os << likelihood_cumul / exp(likelihood) - previous_cumul[0] << " "
                << j / nb_segmentation_forward[length[index] - 1][nb_segment - 1] - previous_cumul[1] << ")" << endl;
           }
-          previous_cumul[0] = likelihood_cumul / expl(likelihood);
+          previous_cumul[0] = likelihood_cumul / exp(likelihood);
           previous_cumul[1] = j / nb_segmentation_forward[length[index] - 1][nb_segment - 1];
           i++;
         }
@@ -5980,7 +6019,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
     else {
       for (j = 0;j < inb_segmentation;j++) {
-        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][j]);
+        likelihood_cumul += exp(forward[length[index] - 1][nb_segment - 1][j]);
         if (likelihood_cumul / approximated_likelihood > cdf[i]) {
           os << j << " " << likelihood_cumul / approximated_likelihood << " (";
           if (i == 0) {
@@ -6002,17 +6041,17 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
     likelihood_cumul = 0.;
     if (likelihood != D_INF) {
       for (i = 0;i < inb_segmentation;i++) {
-        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][i]);
-        out_file << i << "\t" << expl(forward[length[index] - 1][nb_segment - 1][i] - likelihood) << "\t"
-                 << likelihood_cumul / expl(likelihood) << "\t"
+        likelihood_cumul += exp(forward[length[index] - 1][nb_segment - 1][i]);
+        out_file << i << "\t" << exp(forward[length[index] - 1][nb_segment - 1][i] - likelihood) << "\t"
+                 << likelihood_cumul / exp(likelihood) << "\t"
                  << 1. / nb_segmentation_forward[length[index] - 1][nb_segment - 1] << endl;
       }
     }
 
     else {
       for (i = 0;i < inb_segmentation;i++) {
-        likelihood_cumul += expl(forward[length[index] - 1][nb_segment - 1][i]);
-        out_file << i << "\t" << expl(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood << "\t"
+        likelihood_cumul += exp(forward[length[index] - 1][nb_segment - 1][i]);
+        out_file << i << "\t" << exp(forward[length[index] - 1][nb_segment - 1][i]) / approximated_likelihood << "\t"
                  << likelihood_cumul / approximated_likelihood << "\t"
                  << 1. / nb_segmentation_forward[length[index] - 1][nb_segment - 1] << endl;
       }
@@ -6126,9 +6165,10 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 {
   register int i , j , k , m;
   int max_nb_value , *frequency , *pisequence , *psegment , **optimal_length;
-  double sum , factorial_sum , diff , sum_square , buff , segmentation_likelihood ,
-         backward_max , *sequence_mean , *residual , *prsequence , *contrast ,
-         **factorial , **forward , **backward , **backward_output , **mean;
+  double sum , factorial_sum , diff , buff , segmentation_likelihood , backward_max ,
+         *sequence_mean , *prsequence , **factorial , **forward , **backward ,
+         **backward_output , **mean;
+  long double sum_square , *residual , *contrast;
 
 
   max_nb_value = 0;
@@ -6155,9 +6195,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   }
 
   sequence_mean = new double[nb_variable];
-  residual = new double[length[index]];
+  residual = new long double[length[index]];
 
-  contrast = new double[length[index]];
+  contrast = new long double[length[index]];
 
   forward = new double*[length[index]];
   for (i = 0;i < length[index];i++) {
@@ -6358,9 +6398,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
           for (k = i;k >= 0;k--) {
 //            if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
             if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(i - k + 1)) * ROUNDOFF_ERROR)) {
-              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                                (i - k + 1)) + log(2 * M_PI) + 1);
-/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (log(residual[k] /
+/*              contrast[k] -= ((double)(i - k + 1) / 2.) * (logl(residual[k] /
                                (i - k)) + log(2 * M_PI)) + (double)(i - k) / 2.; */
             }
             else {
@@ -6376,9 +6416,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
       for (j = i - 1;j >= 0;j--) {
 //        if (contrast[j] > 0.) {
         if (contrast[j] > sqrt((double)((nb_variable - 1) * (i - j + 1))) * ROUNDOFF_ERROR) {
-          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j + 1))) + log(2 * M_PI) + 1);
-/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (log(contrast[j] /
+/*          contrast[j] = -((double)((nb_variable - 1) * (i - j + 1)) / 2.) * (logl(contrast[j] /
                            ((nb_variable - 1) * (i - j))) + log(2 * M_PI)) +
                          (double)((nb_variable - 1) * (i - j)) / 2.; */
         }
@@ -6572,9 +6612,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
             for (k = i;k < length[index];k++) {
 //              if ((contrast[k] != D_INF) && (residual[k] > 0.)) {
               if ((contrast[k] != D_INF) && (residual[k] > sqrt((double)(k - i + 1)) * ROUNDOFF_ERROR)) {
-                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+                contrast[k] -= ((double)(k - i + 1) / 2.) * (logl(residual[k] /
                                  (k - i + 1)) + log(2 * M_PI) + 1);
-/*                contrast[k] -= ((double)(k - i + 1) / 2.) * (log(residual[k] /
+/*                contrast[k] -= ((double)(k - i + 1) / 2.) * (logl(residual[k] /
                                  (k - i)) + log(2 * M_PI)) + (double)(k - i) / 2.; */
               }
               else {
@@ -6590,9 +6630,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         for (j = i + 1;j < length[index];j++) {
 //          if (contrast[j] > 0.) {
           if (contrast[j] > sqrt((double)((nb_variable - 1) * (j - i + 1))) * ROUNDOFF_ERROR) {
-            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (logl(contrast[j] /
                              ((nb_variable - 1) * (j - i + 1))) + log(2 * M_PI) + 1);
-/*            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (log(contrast[j] /
+/*            contrast[j] = -((double)((nb_variable - 1) * (j - i + 1)) / 2.) * (logl(contrast[j] /
                              ((nb_variable - 1) * (j - i))) + log(2 * M_PI)) +
                            (double)((nb_variable - 1) * (j - i)) / 2.; */
           }
@@ -6921,6 +6961,8 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
         if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
             (model_type[j - 1] == MEAN_CHANGE) || (model_type[j - 1] == VARIANCE_CHANGE) ||
             (model_type[j - 1] == MEAN_VARIANCE_CHANGE)) {
+          plot[i].resize(2);
+
           if (index_parameter) {
             if (type[j] != REAL_VALUE) {
               for (k = 0;k < length[index];k++) {
@@ -7780,7 +7822,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
 {
   bool status = true;
-  register int i , j;
+  register int i , j , k;
   int index , nb_plot_set;
   double likelihood = D_INF , segmentation_likelihood , **rank;
   Sequences *seq;
@@ -7967,8 +8009,6 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
           plot[i].yrange = Range(MIN(seq->min_value[j] , 0) , MAX(seq->max_value[j] , seq->min_value[j] + 1));
 
-          plot[i].resize(2);
-
           legend.str("");
           legend << SEQ_label[SEQL_SEQUENCE] << " " << iidentifier;
           plot[i][0].legend = legend.str();
@@ -8023,8 +8063,6 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
         }
       }
 
-      plot[i].resize(nb_segment);
-
       for (j = 0;j < nb_segment;j++) {
         legend.str("");
         legend << (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT])
@@ -8063,8 +8101,6 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
         plot[i].yrange = Range(0. , 1.);
 
-        plot[i].resize(nb_segment);
-
         for (j = 0;j < nb_segment;j++) {
           legend.str("");
           legend << (output == CHANGE_POINT ? SEQ_label[SEQL_CHANGE_POINT] : SEQ_label[SEQL_SEGMENT])
@@ -8095,14 +8131,14 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
         plot[i].yrange = Range(0. , 1.);
 
-        plot[i].resize(MAX(nb_segment - 1 , 3));
-
-        for (j = MAX(1 , nb_segment - 3);j < nb_segment;j++) {
+        j = 0;
+        for (k = MAX(1 , nb_segment - 3);k < nb_segment;k++) {
           legend.str("");
-          legend << j + 1 << " " << SEQ_label[SEQL_SEGMENTS];
+          legend << k + 1 << " " << SEQ_label[SEQL_SEGMENTS];
           plot[i][j].legend = legend.str();
 
           plot[i][j].style = "linespoints";
+          j++;
         }
       }
     }
@@ -8138,10 +8174,11 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
   int index , max_nb_value , nb_segment , segment_index , split_change_point ,
       begin_change_point , end_change_point , merge , *frequency , *pisequence , *psegment ,
       *nb_parameter , **change_point , ***begin_frequency , ***end_frequency;
-  double sum , factorial_sum , diff , sum_square , buff , merge_contrast , max_likelihood ,
-         *mean , *residual , *prsequence , *begin_contrast , *end_contrast , *likelihood ,
-         *penalty , *penalized_likelihood , **rank , **factorial , **begin_sum , **end_sum ,
-         **begin_factorial_sum , **end_factorial_sum , **begin_sum_square , **end_sum_square;
+  double sum , factorial_sum , diff , buff , max_likelihood , *mean , *prsequence ,
+         *likelihood , *penalty , *penalized_likelihood , **rank , **factorial ,
+         **begin_sum , **end_sum , **begin_factorial_sum , **end_factorial_sum;
+  long double sum_square , merge_contrast , *residual , *begin_contrast , *end_contrast ,
+              **begin_sum_square , **end_sum_square;
   Sequences *seq , *iseq;
 
 
@@ -8269,8 +8306,8 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
     end_sum = new double*[seq->nb_variable];
     begin_factorial_sum = new double*[seq->nb_variable];
     end_factorial_sum = new double*[seq->nb_variable];
-    begin_sum_square = new double*[seq->nb_variable];
-    end_sum_square = new double*[seq->nb_variable];
+    begin_sum_square = new long double*[seq->nb_variable];
+    end_sum_square = new long double*[seq->nb_variable];
 
     for (i = 1;i < seq->nb_variable;i++) {
       if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (seq->marginal[i]->nb_value > max_nb_value)) {
@@ -8313,8 +8350,8 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
       if ((model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) || (model_type[i - 1] == GAUSSIAN_CHANGE) ||
           (model_type[i - 1] == VARIANCE_CHANGE)){
-        begin_sum_square[i] = new double[seq->length[0]];
-        end_sum_square[i] = new double[seq->length[0]];
+        begin_sum_square[i] = new long double[seq->length[0]];
+        end_sum_square[i] = new long double[seq->length[0]];
       }
       else {
         begin_sum_square[i] = NULL;
@@ -8330,10 +8367,10 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
     }
 
     mean = new double[seq->nb_variable];
-    residual = new double[seq->length[0]];
+    residual = new long double[seq->length[0]];
 
-    begin_contrast = new double[seq->length[0]];
-    end_contrast = new double[seq->length[0]];
+    begin_contrast = new long double[seq->length[0]];
+    end_contrast = new long double[seq->length[0]];
 
     change_point = new int*[max_nb_segment + 1];
     for (i = 1;i <= max_nb_segment;i++) {
@@ -8551,9 +8588,9 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
         for (j = 0;j < seq->length[0];j++) {
 //          if ((begin_contrast[j] != D_INF) && (residual[j] > 0.)) {
           if ((begin_contrast[j] != D_INF) && (residual[j] > sqrt((double)(j + 1)) * ROUNDOFF_ERROR)) {
-            begin_contrast[j] -= ((double)(j + 1) / 2.) * (log(residual[j] /
+            begin_contrast[j] -= ((double)(j + 1) / 2.) * (logl(residual[j] /
                                    (j + 1)) + log(2 * M_PI) + 1);
-/*            begin_contrast[j] -= ((double)(j + 1) / 2.) * (log(residual[j] /
+/*            begin_contrast[j] -= ((double)(j + 1) / 2.) * (logl(residual[j] /
                                    j) + log(2 * M_PI)) + (double)j / 2.; */
           }
           else {
@@ -8811,9 +8848,9 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
         for (j = seq->length[0] - 1;j >= 0;j--) {
 //          if ((end_contrast[j] != D_INF) && (residual[j] > 0.)) {
           if ((end_contrast[j] != D_INF) && (residual[j] > sqrt((double)(seq->length[0] - j)) * ROUNDOFF_ERROR)) {
-            end_contrast[j] -= ((double)(seq->length[0] - j) / 2.) * (log(residual[j] /
+            end_contrast[j] -= ((double)(seq->length[0] - j) / 2.) * (logl(residual[j] /
                                  (seq->length[0] - j)) + log(2 * M_PI) + 1);
-/*            end_contrast[j] -= ((double)(seq->length[0] - j) / 2.) * (log(residual[j] /
+/*            end_contrast[j] -= ((double)(seq->length[0] - j) / 2.) * (logl(residual[j] /
                                  (seq->length[0] - j - 1)) + log(2 * M_PI)) +
                                (double)(seq->length[0] - j - 1) / 2.; */
           }
@@ -9247,9 +9284,9 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
             for (j = begin_change_point;j < split_change_point;j++) {
 //              if ((begin_contrast[j] != D_INF) && (residual[j] > 0.)) {
               if ((begin_contrast[j] != D_INF) && (residual[j] > sqrt((double)(j - change_point[nb_segment][segment_index - 1] + 1)) * ROUNDOFF_ERROR)) {
-                begin_contrast[j] -= ((double)(j - change_point[nb_segment][segment_index - 1] + 1) / 2.) * (log(residual[j] /
+                begin_contrast[j] -= ((double)(j - change_point[nb_segment][segment_index - 1] + 1) / 2.) * (logl(residual[j] /
                                        (j - change_point[nb_segment][segment_index - 1] + 1)) + log(2 * M_PI) + 1);
-/*                begin_contrast[j] -= ((double)(j - change_point[nb_segment][segment_index - 1] + 1) / 2.) * (log(residual[j] /
+/*                begin_contrast[j] -= ((double)(j - change_point[nb_segment][segment_index - 1] + 1) / 2.) * (logl(residual[j] /
                                        (j - change_point[nb_segment][segment_index - 1])) + log(2 * M_PI)) +
                                      (double)(j - change_point[nb_segment][segment_index - 1]) / 2.; */
               }
@@ -9262,9 +9299,9 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           for (j = split_change_point;j < change_point[nb_segment][segment_index + 1];j++) {
 //            if ((begin_contrast[j] != D_INF) && (residual[j] > 0.)) {
             if ((begin_contrast[j] != D_INF) && (residual[j] > sqrt((double)(j - split_change_point + 1)) * ROUNDOFF_ERROR)) {
-              begin_contrast[j] -= ((double)(j - split_change_point + 1) / 2.) * (log(residual[j] /
+              begin_contrast[j] -= ((double)(j - split_change_point + 1) / 2.) * (logl(residual[j] /
                                      (j - split_change_point + 1)) + log(2 * M_PI) + 1);
-/*              begin_contrast[j] -= ((double)(j - split_change_point + 1) / 2.) * (log(residual[j] /
+/*              begin_contrast[j] -= ((double)(j - split_change_point + 1) / 2.) * (logl(residual[j] /
                                      (j - split_change_point)) + log(2 * M_PI)) +
                                    (double)(j - split_change_point) / 2.; */
             }
@@ -9785,9 +9822,9 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
             for (j = end_change_point - 1;j >= split_change_point;j--) {
 //              if ((end_contrast[j] != D_INF) && (residual[j] > 0.)) {
               if ((end_contrast[j] != D_INF) && (residual[j] > sqrt((double)(change_point[nb_segment][segment_index + 1] - j)) * ROUNDOFF_ERROR)) {
-                end_contrast[j] -= ((double)(change_point[nb_segment][segment_index + 1] - j) / 2.) * (log(residual[j] /
+                end_contrast[j] -= ((double)(change_point[nb_segment][segment_index + 1] - j) / 2.) * (logl(residual[j] /
                                      (change_point[nb_segment][segment_index + 1] - j)) + log(2 * M_PI) + 1);
-/*                end_contrast[j] -= ((double)(change_point[nb_segment][segment_index + 1] - j) / 2.) * (log(residual[j] /
+/*                end_contrast[j] -= ((double)(change_point[nb_segment][segment_index + 1] - j) / 2.) * (logl(residual[j] /
                                      (change_point[nb_segment][segment_index + 1] - j - 1)) + log(2 * M_PI)) +
                                    (double)(change_point[nb_segment][segment_index + 1] - j - 1) / 2.; */
               }
@@ -9800,9 +9837,9 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           for (j = split_change_point - 1;j >= change_point[nb_segment][segment_index - 1];j--) {
 //            if ((end_contrast[j] != D_INF) && (residual[j] > 0.)) {
             if ((end_contrast[j] != D_INF) && (residual[j] > sqrt((double)(split_change_point - j)) * ROUNDOFF_ERROR)) {
-              end_contrast[j] -= ((double)(split_change_point - j) / 2.) * (log(residual[j] /
+              end_contrast[j] -= ((double)(split_change_point - j) / 2.) * (logl(residual[j] /
                                    (split_change_point - j)) + log(2 * M_PI) + 1);
-/*              end_contrast[j] -= ((double)(split_change_point - j) / 2.) * (log(residual[j] /
+/*              end_contrast[j] -= ((double)(split_change_point - j) / 2.) * (logl(residual[j] /
                                    (split_change_point - j - 1)) + log(2 * M_PI)) +
                                  (double)(split_change_point - j - 1) / 2.; */
             }
@@ -10803,7 +10840,7 @@ Sequences* Sequences::segmentation(StatError &error , int iidentifier ,
               backward_output[i][j] = pow(backward_output[i][j] / forward[seq->length[index] - 1][nb_segment - 1] ,
                                           exponent);
               backward_output[i][j] = exp(exponent * log(backward_output[i][j] /
-                                             forward[seq->length[index] - 1][nb_segment - 1]));
+                                            forward[seq->length[index] - 1][nb_segment - 1]));
             }
             else {
               backward_output[i][j] = 0.;
