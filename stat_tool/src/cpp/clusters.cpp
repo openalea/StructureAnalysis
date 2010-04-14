@@ -93,8 +93,6 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster)
 
 {
   register int i , j;
-  int *plength;
-  double *pdistance;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -115,18 +113,16 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster)
   pattern_distance = new double*[nb_pattern];
   for (i = 0;i < nb_pattern;i++) {
     pattern_distance[i] = new double[nb_cluster];
-    pdistance = pattern_distance[i];
     for (j = 0;j < nb_cluster;j++) {
-      *pdistance++ = 0.;
+      pattern_distance[i][j] = 0.;
     }
   }
 
   pattern_length = new int*[nb_pattern];
   for (i = 0;i < nb_pattern;i++) {
     pattern_length[i] = new int[nb_cluster];
-    plength = pattern_length[i];
-    for (j = 0;j < nb_cluster;j++) {
-      *plength++ = 0;
+     for (j = 0;j < nb_cluster;j++) {
+      pattern_length[i][j] = 0;
     }
   }
 }
@@ -147,8 +143,6 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
 
 {
   register int i , j , k;
-  int *plength;
-  double *pdistance;
 
 
   distance_matrix = new DistanceMatrix(dist_matrix);
@@ -179,18 +173,16 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster ,
   pattern_distance = new double*[nb_pattern];
   for (i = 0;i < nb_pattern;i++) {
     pattern_distance[i] = new double[nb_cluster + 1];
-    pdistance = pattern_distance[i];
     for (j = 0;j <= nb_cluster;j++) {
-      *pdistance++ = 0.;
+      pattern_distance[i][j] = 0.;
     }
   }
 
   pattern_length = new int*[nb_pattern];
   for (i = 0;i < nb_pattern;i++) {
     pattern_length[i] = new int[nb_cluster + 1];
-    plength = pattern_length[i];
     for (j = 0;j <= nb_cluster;j++) {
-      *plength++ = 0;
+      pattern_length[i][j] = 0;
     }
   }
 }
@@ -208,8 +200,6 @@ void Clusters::copy(const Clusters &clusters)
 
 {
   register int i , j;
-  int *plength , *clength;
-  double *pdistance , *cdistance;
 
 
   distance_matrix = new DistanceMatrix(*(clusters.distance_matrix));
@@ -230,20 +220,16 @@ void Clusters::copy(const Clusters &clusters)
   pattern_distance = new double*[nb_pattern];
   for (i = 0;i < nb_pattern;i++) {
     pattern_distance[i] = new double[nb_cluster + 1];
-    pdistance = pattern_distance[i];
-    cdistance = clusters.pattern_distance[i];
     for (j = 0;j <= nb_cluster;j++) {
-      *pdistance++ = *cdistance++;
+      pattern_distance[i][j] = clusters.pattern_distance[i][j];
     }
   }
 
   pattern_length = new int*[nb_pattern];
   for (i = 0;i < nb_pattern;i++) {
     pattern_length[i] = new int[nb_cluster + 1];
-    plength = pattern_length[i];
-    clength = clusters.pattern_length[i];
     for (j = 0;j <= nb_cluster;j++) {
-      *plength++ = *clength++;
+      pattern_length[i][j] = clusters.pattern_length[i][j];
     }
   }
 }
