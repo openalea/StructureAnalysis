@@ -508,20 +508,59 @@ class StatInterface(object):
 
         try:
             if (survival):
+                print 'Survival viewpoint'
                 plotable = self.survival_get_plotable(*params)
 
             elif (stateprofile):
+                print 'state profile viewpoint'
                 plotable = self.stateprofile_get_plotable(*params)
 
             elif (segmentprofile):
-                plotable = self.segmentprofile_get_plotable(*params)
+                print 'segment profile viewpoint'
+                print params
+                try:
+                    from openalea.sequence_analysis import enums
+                except:
+                    raise ImportError("sequence analysis not installed !!")
+                identifier =  args[0]
+                nb_segment =  args[1]
+
+                model_type = [enums.model_type[args[2]]]
+                output = 1 #segment (1) or changepoint (0) todo: use enum
+                print identifier, nb_segment, model_type, output
+                plotable = self.segmentprofile_get_plotable(identifier, nb_segment, model_type, output)
+            elif data:
+                print 'data viewpoint'
+                plotable = self.get_plotable_data(*params)
             else:
-                if (args):
-                    if len(args)==1 and type(args[0])==int:
+                print 'normal viewpoint',
+
+                if args:
+                    #sequence case:
+                    #todo: make it looser: observation, intensity INTENSITY?
+                    if args[0] in ["SelfTransition" ,"Observation","Intensity",
+                                    "FirstOccurrence","Recurrence","Sojourn"  ,"Counting"]:
+                        print 'with args "intensity"'
+                        multiplotset = self.get_plotable()
+                        viewpoints = [x for x in multiplotset.viewpoint]
+                        plotable = []
+                        print viewpoints
+                        try:
+                            from openalea.sequence_analysis import enums
+                        except:
+                            raise ImportError("sequence analysis not installed !!")
+                        for index, xx in enumerate(viewpoints):
+                            if xx==enums.markovian_sequence_type[args[0]]:
+                                plotable.append(multiplotset[index])
+                        print plotable
+                    elif len(args)==1 and type(args[0])==int:
+                        print ' of len 1 and arg0 is int',
                         plotable = self.get_plotable_list()
                     else:
+                        print ' of len !=1 orarg0 != int',
                         plotable = self.get_plotable_list(list(args), *params)
                 else:
+                    print 'without args'
                     plotable = self.get_plotable(*params)
 
             plotter = plot.get_plotter()
