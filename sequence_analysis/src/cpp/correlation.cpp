@@ -239,7 +239,6 @@ Correlation* Correlation::merge(StatError &error , int nb_correl ,
   bool status = true;
   register int i , j , k , m;
   int inb_curve , *pfrequency;
-  double *ppoint , *cpoint;
   Correlation *correl;
   const Correlation **pcorrel;
 
@@ -341,11 +340,10 @@ Correlation* Correlation::merge(StatError &error , int nb_correl ,
     i = 0;
     for (j = 0;j < nb_correl;j++) {
       for (k = 0;k < pcorrel[j]->nb_curve;k++) {
-        ppoint = correl->point[i++];
-        cpoint = pcorrel[j]->point[k];
         for (m = 0;m < length;m++) {
-          *ppoint++ = *cpoint++;
+          correl->point[i][m] = pcorrel[j]->point[k][m];
         }
+        i++;
       }
     }
 
