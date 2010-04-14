@@ -60,7 +60,6 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
 
 {
   register int i , j;
-  double *smass , *pmass , *cmass;
   DiscreteParametric *power_dist;
 
 
@@ -79,12 +78,11 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
   power_dist = new DiscreteParametric((sum_distribution->nb_value - 1) * (distribution->nb_value - 1) + 1 ,
                                       distribution->ident);
 
-  pmass = mass;
   for (i = 0;i < MIN(power_dist->nb_value , alloc_nb_value);i++) {
-    *pmass++ = 0.;
+    mass[i] = 0.;
   }
   if (sum_distribution->offset == 0) {
-    *mass += sum_distribution->mass[0];
+    mass[0] += sum_distribution->mass[0];
   }
 
   if (((distribution->ident == NONPARAMETRIC) || (distribution->ident == UNIFORM)) &&
@@ -95,7 +93,6 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
     }
   }
 
-  smass = sum_distribution->mass + MAX(sum_distribution->offset , 1);
   for (i = MAX(sum_distribution->offset , 1);i < sum_distribution->nb_value;i++) {
     if (i == 1) {
       power_dist->mass_copy(*distribution);
@@ -116,12 +113,9 @@ void Compound::computation(int min_nb_value , double cumul_threshold ,
       }
     }
 
-    pmass = mass + power_dist->offset;
-    cmass = power_dist->mass + power_dist->offset;
     for (j = power_dist->offset;j < MIN(power_dist->nb_value , alloc_nb_value);j++) {
-      *pmass++ += *smass * *cmass++;
+      mass[j] += sum_distribution->mass[i] * power_dist->mass[j];
     }
-    smass++;
   }
 
   offset_computation();
@@ -154,7 +148,6 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
 {
   register int i , j;
   int sum_nb_value , min;
-  double *smass , *pmass , *cmass;
 
 
   // calcul de la loi de la somme et de la loi elementaire
@@ -223,22 +216,17 @@ void Compound::computation(DiscreteParametric **power_dist , int min_nb_value ,
   }
   nb_value = MIN(power_dist[sum_distribution->nb_value - 1]->nb_value , alloc_nb_value);
 
-  pmass = mass;
   for (i = 0;i < nb_value;i++) {
-    *pmass++ = 0.;
+    mass[i] = 0.;
   }
   if (sum_distribution->offset == 0) {
-    *mass += sum_distribution->mass[0];
+    mass[0] += sum_distribution->mass[0];
   }
 
-  smass = sum_distribution->mass + MAX(sum_distribution->offset , 1);
   for (i = MAX(sum_distribution->offset , 1);i < sum_distribution->nb_value;i++) {
-    pmass = mass + power_dist[i]->offset;
-    cmass = power_dist[i]->mass + power_dist[i]->offset;
     for (j = power_dist[i]->offset;j < power_dist[i]->nb_value;j++) {
-      *pmass++ += *smass * *cmass++;
+      mass[j] += sum_distribution->mass[i] * power_dist[i]->mass[j];
     }
-    smass++;
   }
 
   cumul_computation();
@@ -266,8 +254,7 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
 
 {
   register int i , j , k;
-  int *pfrequency;
-  double num , denom , *rfrequency , *term , *pterm , *smass , *pmass;
+  double num , denom , *term;
 
 
   term = new double[sum_distribution->nb_value];
@@ -275,49 +262,41 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
   // initialisation
 
   if (sum_reestim) {
-    rfrequency = sum_reestim->frequency;
     for (i = 0;i < sum_reestim->alloc_nb_value;i++) {
-      *rfrequency++ = 0.;
+      sum_reestim->frequency[i] = 0.;
     }
   }
 
   if (reestim) {
-    rfrequency = reestim->frequency;
     for (i = 0;i < reestim->alloc_nb_value;i++) {
-      *rfrequency++ = 0.;
+      reestim->frequency[i] = 0.;
     }
   }
 
-  pfrequency = histo.frequency + histo.offset;
   for (i = histo.offset;i < histo.nb_value;i++) {
-    if (*pfrequency > 0) {
+    if (histo.frequency[i] > 0) {
 
       // calcul du denominateur
 
-      pterm = term + sum_distribution->offset;
-      smass = sum_distribution->mass + sum_distribution->offset;
       denom = 0.;
-
       if (sum_distribution->offset == 0) {
         if (i == 0) {
-          *pterm = *smass;
-          denom += *pterm++;
+          term[0] = sum_distribution->mass[0];
+          denom += term[0];
         }
         else {
-          *pterm++ = 0.;
+          term[0] = 0.;
         }
-        smass++;
       }
 
       for (j = MAX(sum_distribution->offset , 1);j < sum_distribution->nb_value;j++) {
         if ((i >= power_dist[j]->offset) && (i < power_dist[j]->nb_value)) {
-          *pterm = *smass * power_dist[j]->mass[i];
-          denom += *pterm++;
+          term[j] = sum_distribution->mass[j] * power_dist[j]->mass[i];
+          denom += term[j];
         }
         else {
-          *pterm++ = 0.;
+          term[j] = 0.;
         }
-        smass++;
       }
 
       if (denom > 0.) {
@@ -325,36 +304,28 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
         // accumulation des quantites de reestimation de la loi de la somme
 
         if (sum_reestim) {
-          rfrequency = sum_reestim->frequency + sum_distribution->offset;
-          pterm = term + sum_distribution->offset;
           for (j = sum_distribution->offset;j < sum_distribution->nb_value;j++) {
-            *rfrequency++ += *pfrequency * *pterm++ / denom;
+            sum_reestim->frequency[j] += histo.frequency[i] * term[j] / denom;
           }
         }
 
         // accumulation des quantites de reestimation de la loi elementaire
 
         if (reestim) {
-          rfrequency = reestim->frequency + distribution->offset;
-          pmass = distribution->mass + distribution->offset;
-
           for (j = distribution->offset;j <= MIN(i , distribution->nb_value - 1);j++) {
-            smass = sum_distribution->mass + sum_distribution->nb_value;
             num = 0.;
 
             for (k = sum_distribution->nb_value - 1;k >= MAX(sum_distribution->offset , 1);k--) {
-              smass--;
-
               if (k == 1) {
                 if (i == j) {
-                  num += *smass;
+                  num += sum_distribution->mass[k];
                 }
               }
 
               else {
                 if (i - j < power_dist[k - 1]->nb_value) {
                   if (i - j >= power_dist[k - 1]->offset) {
-                    num += *smass * k * power_dist[k - 1]->mass[i - j];
+                    num += sum_distribution->mass[k] * k * power_dist[k - 1]->mass[i - j];
                   }
                 }
                 else {
@@ -363,13 +334,11 @@ void Compound::expectation_step(const FrequencyDistribution &histo ,
               }
             }
 
-            *rfrequency++ += *pfrequency * *pmass++ * num / denom;
+            reestim->frequency[j] += histo.frequency[i] * distribution->mass[j] * num / denom;
           }
         }
-
       }
     }
-    pfrequency++;
   }
 
   delete [] term;
