@@ -1804,6 +1804,8 @@ void Sequences::profile_plotable_write(MultiPlot &plot , int index , int nb_stat
   register int i , j;
 
 
+  plot.resize(nb_state);
+
   if (index_parameter) {
     for (i = 0;i < length[index];i++) {
       for (j = 0;j < nb_state;j++) {
@@ -1837,7 +1839,17 @@ void Sequences::entropy_profile_plotable_write(MultiPlot &plot , int index ,
 
 {
   register int i , j;
+  int nb_plot;
 
+
+  nb_plot = 1;
+  if (end_entropy) {
+    nb_plot++;
+  }
+  if (marginal_entropy) {
+    nb_plot++;
+  }
+  plot.resize(nb_plot);
 
   if (index_parameter) {
     for (i = 0;i < length[index];i++) {
@@ -4801,8 +4813,6 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
 
       plot[0].yrange = Range(0. , exp(state_seq_likelihood - seq_likelihood));
 
-      plot[0].resize(nb_state);
-
       for (i = 0;i < nb_state;i++) {
         legend.str("");
         legend << STAT_label[STATL_STATE] << " " << i;
@@ -4831,8 +4841,6 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
 
       plot[1].yrange = Range(0. , 1.);
 
-      plot[1].resize(nb_state);
-
       for (i = 0;i < nb_state;i++) {
         legend.str("");
         legend << STAT_label[STATL_STATE] << " " << i;
@@ -4858,8 +4866,6 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
       }
 
       plot[2].yrange = Range(0. , max_marginal_entropy);
-
-      plot[2].resize(3);
 
       plot[2][0].legend = SEQ_label[SEQL_CONDITIONAL_ENTROPY];
       plot[2][0].style = "linespoints";
@@ -4887,8 +4893,6 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
       }
 
       plot[3].yrange = Range(0. ,entropy);
-
-      plot[3].resize(2);
 
       plot[3][0].legend = SEQ_label[SEQL_PARTIAL_STATE_SEQUENCE_ENTROPY];
       plot[3][0].style = "linespoints";
