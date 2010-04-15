@@ -7923,6 +7923,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
   }
 
   if (status) {
+    seq = new Sequences(*this , 'a');
 
     // calcul du nombre de vues
 
@@ -7943,8 +7944,6 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
     MultiPlotSet &plot = *plot_set;
 
     plot.border = "15 lw 0";
-
-    seq = new Sequences(*this , 'a');
 
     // calcul des rangs pour les variables ordinales
 
