@@ -503,23 +503,35 @@ public:
     FOOTER_OS;
   }
 
-  static void plot_write(const MarkovianSequences &input, const std::string& prefix,
-    const std::string& title)
+  static void
+  plot_write(const MarkovianSequences &input, const std::string& prefix,
+      const std::string& title)
   {
-      StatError error;
-      input.plot_write(error, prefix.c_str(), title.c_str());
+    StatError error;
+    input.plot_write(error, prefix.c_str(), title.c_str());
   }
 
-/*  static MultiPlotSet*
+  static SequenceCharacteristics *
+  get_characteristics(const MarkovianSequences &input, const int variable)
+  {
+    // todo : shall we return something ? 
+    HEADER(SequenceCharacteristics);
+    ret = input.get_characteristics(variable);
+    FOOTER;
+  }
+
+  static MultiPlotSet*
   get_plotable(const MarkovianSequences &p)
   {
     StatError error;
+    std::cout<<"get_plotble markovian sequences starting"<<std::endl;
     MultiPlotSet* ret = p.get_plotable();
+    std::cout<<"get_plotble markovian sequences end"<<std::endl;
     if (!ret)
       ERROR;
     return ret;
-  }*/
-  
+  }
+
 };
 
 // Boost declaration
@@ -583,7 +595,10 @@ void class_markovian_sequences() {
 
     .def("mtg_write", WRAP::mtg_write, args(""), "")
     .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")
-   //DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "Return a plotable")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable,"get_plotable")
+    DEF_RETURN_VALUE("get_characteristics", WRAP::get_characteristics, args("variable"), "get_plotable")
+
+
 
     ;
 
@@ -615,7 +630,6 @@ void class_markovian_sequences() {
    FrequencyDistribution*** get_observation() const { return observation; }
    FrequencyDistribution** get_observation(int variable) const { return observation[variable]; }
    FrequencyDistribution* get_observation(int variable , int state) const   { return observation[variable][state]; }
-   SequenceCharacteristics* get_characteristics(int variable) const   { return characteristics[variable]; }
    */
 
 }

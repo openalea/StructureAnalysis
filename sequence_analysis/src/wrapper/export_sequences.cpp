@@ -346,7 +346,6 @@ public:
   {
     std::stringstream os;
     std::string res;
-
     d.ascii_data_write(os, exhaustive, true);
     res = os.str();
     return res;
@@ -1025,17 +1024,8 @@ public:
       StatError error;
       input.plot_data_write(error, prefix.c_str(), title.c_str());    
   }
- 
-/*
-  static bool segment_profile_write(const Sequences &input, int iidentifier, int nb_segment, int *model_type, int output, char format, int segmentation, int nb_segmentation)
-  {
-    HEADER_OS(Sequences);
-    ret = input.segment_profile_write(error, iidentifier, nb_segment, model_type, output, format, segmentation, nb_segmentation); 
-    FOOTER_OS;
-  }
-  */
 
-  static bool 
+  /*static bool 
   segment_profile_write(const Sequences &input, const char *prefix, int iidentifier, int nb_segment, 
     boost::python::list model_type, int output, char title)
   {
@@ -1047,15 +1037,12 @@ public:
          models.get(), output, title); 
     FOOTER;
   }
-
+  */
   static MultiPlotSet*
   get_plotable(const Sequences &p)
   {
     StatError error;
-    // todo check this piece of code. IT works since it calls the correct plotable in sequences2.cpp  but it this cast optimal ?
-    Sequences seq;
-    seq = (Sequences )p;
-    MultiPlotSet* ret = seq.get_plotable();
+    MultiPlotSet* ret = p.get_plotable();
     if (!ret)
       ERROR;
     return ret;
@@ -1073,6 +1060,38 @@ public:
     return ret;
   }
 
+  static MultiPlotSet* 
+  get_segment_profile_plotable_write(const Sequences &input, int iidentifier ,
+      int nb_segment, boost::python::list model_type , int output)
+  {
+    StatError error;
+    CREATE_ARRAY(model_type, int, models);
+    std::cout<<"here1"<<std::endl;
+    MultiPlotSet* ret = input.segment_profile_plotable_write(error, iidentifier, nb_segment, models.get(), output);
+    std::cout<<"here2"<<std::endl;
+
+    if (!ret)
+      ERROR;
+    return ret;
+  }
+
+  static bool
+  segment_profile_write(const Sequences &input,int iidentifier,
+                               int nb_segment , boost::python::list& model_type , int output ,
+                               char format, int segmentation ,
+                               int nb_segmentation)
+  {
+    std::stringstream os;
+    StatError error;
+    bool ret;
+    CREATE_ARRAY(model_type, int, models);
+    ret = input.segment_profile_write(error, os, iidentifier,  nb_segment,
+        models.get(), output, format, segmentation, nb_segmentation);
+    if (!ret) 
+      sequence_analysis::wrap_util::throw_error(error);
+    cout << os.str() << endl;
+    //return ret;
+  }
 
 
 
@@ -1166,7 +1185,11 @@ class_sequences()
 
    .def("plot_write", SequencesWrap::plot_write, args("prefix", "title"), "Write GNUPLOT files")
    .def("plot_data_write", SequencesWrap::plot_data_write, args("prefix", "title"), "Write GNUPLOT files")
-   .def("segment_profile_write", SequencesWrap::segment_profile_write, args("todo"), "Write segment_profile")
+   DEF_RETURN_VALUE("segmentprofile_get_plotable", SequencesWrap::get_segment_profile_plotable_write, args("identifier", "nb_segment", "model_type", "output"), "Write segment_profile")
+
+    .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output" ,"format","segmentation","nb_segmentation"), "segment profile write for Display")
+
+
 
 ;
 
@@ -1202,7 +1225,17 @@ class_sequences()
  FrequencyDistribution* value_index_interval_computation(StatError &error , int variable , int value) const;
  Sequences* hierarchical_segmentation(StatError &error , std::ostream &os , int iidentifier , int max_nb_segment , int *model_type) const;
 
- bool segment_profile_write(StatError &error , const char *path , int iidentifier , int nb_segment , int *model_type , int output = SEGMENT , char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING , int nb_segmentation = NB_SEGMENTATION) const;
+
+    bool segment_profile_write(StatError &error , const char *path , int iidentifier ,
+                               int nb_segment , int *model_type , int output = SEGMENT ,
+                               char format = 'a' , int segmentation = FORWARD_DYNAMIC_PROGRAMMING ,
+                               int nb_segmentation = NB_SEGMENTATION) const;
+    bool segment_profile_plot_write(StatError &error , const char *prefix ,
+                                    int iidentifier , int nb_segment , int *model_type ,
+                                    int output = SEGMENT , const char *title = NULL) const;
+
+
+
 
  FrequencyDistribution* get_hlength() const { return hlength; }
  FrequencyDistribution* get_hindex_parameter() const { return hindex_parameter; }
@@ -1228,6 +1261,7 @@ public:
     for (int i = 0; i < input.get_nb_value(); i++)
       {
         //list.append(  boost::python::extract<FrequencyDistribution>(input.get_initial_run(i)));
+        //extract<FrequencyDistribution>(input.get_initial_run(i));
         list.append(i);
 
       }

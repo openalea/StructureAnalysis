@@ -149,13 +149,13 @@ void class_constant_sequence()
   scope().attr("MIN_NB_STATE_SEQUENCE") = MIN_NB_STATE_SEQUENCE;
   scope().attr("MAX_NB_STATE_SEQUENCE") = MAX_NB_STATE_SEQUENCE;
   scope().attr("NB_STATE_SEQUENCE_PARAMETER") = NB_STATE_SEQUENCE_PARAMETER;
+  scope().attr("NB_STATE_SEQUENCE") = NB_STATE_SEQUENCE;
 
 
 /*
   const int POSTERIOR_PROBABILITY_NB_SEQUENCE = 300; // nombre maximum de sequences pour la sortie des probabilites
                                                      // a posteriori des sequences d'etats les plus probables
 
-  const int NB_STATE_SEQUENCE = 10;      // nombre de sequences d'etats calculees
 
   const int COUNT_MAX_LENGTH = 10000;    // longueur maximum des sequences pour l'extraction des comptages
   const int COUNTING_MAX_LENGTH = 500;   // longueur maximum des sequences pour le calcul des lois de comptage
