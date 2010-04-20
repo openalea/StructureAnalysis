@@ -21,30 +21,31 @@ seq25 = Sequences(path + "reinet1.seq")
 seq26 = Sequences(path + "wij1.seq")
 
 Display(seq25, ViewPoint="Data")
-# Plot(seq25, "Intensity")
-# Plot(seq25, "Sojourn")
+Plot(seq25, "Intensity")
+Plot(seq25, "Sojourn")
 
 seq26 = Reverse(seq25)
-# Plot(seq26, "Intensity")
-# Plot(seq26, "FirstOccurrence")
+Plot(seq26, "Intensity")
+Plot(seq26, "FirstOccurrence")
 
 # Sojourn time (run length) distributions
 
 seq30 = Merge(seq20, seq21, seq22, seq23, seq24, seq25)
-# Plot(seq30, "Sojourn")
-# Plot(ExtractHistogram(seq30, "Sojourn", 1), ExtractHistogram(seq30, "Sojourn", 2), ExtractHistogram(seq30, "Sojourn", 3), ExtractHistogram(seq30, "Sojourn", 4))
+Plot(seq30, "Sojourn")
+Plot(ExtractHistogram(seq30, "Sojourn", 1), ExtractHistogram(seq30, "Sojourn", 2), ExtractHistogram(seq30, "Sojourn", 3), ExtractHistogram(seq30, "Sojourn", 4))
 
 mc30 = Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=4, GlobalInitialTransition=False)
-# mc30 = Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=4, Algorithm="BIC", GlobalInitialTransition=False)
-# Plot(mc30, "Sojourn")
-# Display(Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=1))
-# Display(Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=2, GlobalInitialTransition=False))
+mc30 = Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=4, Algorithm="BIC", GlobalInitialTransition=False)
+#todo
+#Plot(mc30, "Sojourn")
+Display(Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=1))
+Display(Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=2, GlobalInitialTransition=False))
 
 seq31 = Cluster(seq30, "Limit", [1, 4])
 mc31 = Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=4, GlobalInitialTransition=False)
 mc31 = Estimate(seq31, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=2, GlobalInitialTransition=False)
 # Plot(mc31, "Sojourn")
-# Display(Estimate(seq31, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=1))
+Display(Estimate(seq31, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=1))
 
 # comparison of sequences by dynamic programming algorithms
 
@@ -70,10 +71,10 @@ Compare(seq25, VectorDistance("S"), TestSequence=9, RefSequence=1, Transposition
 
 # multiple change-point models
 
-# Display(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile")
-# Display(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile", Output="ChangePoint")
-# Plot(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile")
-# Plot(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile", Output="ChangePoint")
+Display(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile")
+Display(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile", Output="ChangePoint")
+Plot(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile")
+Plot(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile", Output="ChangePoint")
 # hidden semi-Markov chains
 
 hsmc0 = HiddenSemiMarkov(path + "belren1.hsc")
@@ -94,8 +95,9 @@ hsmc24 = Estimate(seq24, "HIDDEN_SEMI-MARKOV", hsmc0)
 hsmc0 = HiddenSemiMarkov(path + "reinet1.hsc")
 hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-# Display(hsmc25)
-# Plot(hsmc25, "FirstOccurence", 1)
+Display(hsmc25)
+#todo
+#Plot(hsmc25, "FirstOccurence", 1)
 # Plot(hsmc25, "Intensity", 1)
 # Plot(hsmc25, "Sojourn", 1)
 # Plot(hsmc25, "Counting", 1)
@@ -103,10 +105,12 @@ hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 # Plot(hsmc25, "Intensity")
 # Plot(hsmc25, "Sojourn")
 
-
+#todo
+#Plot(hsmc25, ViewPoint="StateProfile")
+#Plot(hsmc25, ViewPoint="StateProfile", Output=['InState', 'OutState'])
 
 seq25_1 = ExtractData(hsmc25)
-# Display(seq25_1, ViewPoint=Data, Format=Line)
+Display(seq25_1, ViewPoint="Data", Format="Line")
 
 hsmc0 = HiddenSemiMarkov(path + "wij1.hsc")
 hsmc26 = Estimate(seq26, "HIDDEN_SEMI-MARKOV", hsmc0)

@@ -35,10 +35,11 @@ seq70 = Cluster(seq69, "Step", 1, 10)
 # todo:: error here need to remove MaxIndex 
 #seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 27, MaxIndex=92)
 
+seq2 = SelectVariable(seq70, 1)
+Plot(seq2, 2, 5, "Gaussian", ViewPoint="SegmentProfile")
 
-#TODO error seg fault
-#Plot(seq70, ViewPoint="Data")
-#Plot(Cumulate(seq70), ViewPoint="Data")
+Plot(seq70, ViewPoint="Data")
+Plot(Cumulate(seq70), ViewPoint="Data")
 
 vec70 = Vectors(seq70)
 Plot(Regression(vec70, "MovingAverage", 1, 2, [1]))
@@ -58,15 +59,15 @@ Plot(SelectIndividual(seq72, [1, 2, 3]), ViewPoint="Data")
 Plot(SelectIndividual(Cumulate(seq72), [1, 2, 3]), ViewPoint="Data")
 
 vec73 =  Vectors(SelectIndividual(seq70, [4, 5, 6]))
-# Plot(Regression(vec73, "MovingAverage", 1, 2, [1]))
-# Plot(Regression(vec73, "MovingAverage", 1, 3, [1]))
+Plot(Regression(vec73, "MovingAverage", 1, 2, [1]))
+Plot(Regression(vec73, "MovingAverage", 1, 3, [1]))
 
 seq73 = PointwiseAverage(SelectIndividual(seq70, [4, 5, 6]), StandardDeviation=True)
-# Plot(SelectIndividual(seq73, [3, 4, 5, 6]), ViewPoint="Data")
-# Plot(SelectIndividual(seq73, [3, 7]), ViewPoint="Data")
+Plot(SelectIndividual(seq73, [3, 4, 5, 6]), ViewPoint="Data")
+Plot(SelectIndividual(seq73, [3, 7]), ViewPoint="Data")
 
 seq74 = PointwiseAverage(SelectIndividual(seq70, [4, 5, 6]), Output="Residual")
-# seq74 = PointwiseAverage(SelectIndividual(seq70, [4, 5, 6]), Output="StandardizedResidual")
+seq74 = PointwiseAverage(SelectIndividual(seq70, [4, 5, 6]), Output="StandardizedResidual")
 Plot(SelectIndividual(seq74, [4, 5, 6]), ViewPoint="Data")
 Plot(SelectIndividual(Cumulate(seq74), [4, 5, 6]), ViewPoint="Data")
 
@@ -113,23 +114,23 @@ Plot(acf13)
 # "Mean" (multivariate specification), "MeanVariance" (multivariate specification)
 
 seq80 = SelectVariable(seq70, 1)
-# Display(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile", NbSegmentation=5)
-# Plot(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile")
-#Plot(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile", Output="ChangePoint")
+Display(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile", NbSegmentation=5)
+Plot(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile")
+Plot(seq80, 2, 5, "Gaussian", ViewPoint="SegmentProfile", Output="ChangePoint")
 
 seq81 = Segmentation(seq80, 2, 10, "Gaussian")
-# Plot(seq81, ViewPoint="Data")
+Plot(seq81, ViewPoint="Data")
 
 seq82 = Segmentation(seq80, [5, 6, 6, 4, 4, 4], "Gaussian")
 seq83 = SelectVariable(seq82, 1, Mode="Reject")
-# Plot(SelectIndividual(seq83, [1, 2]), ViewPoint="Data")
-# Plot(SelectIndividual(seq83, [4, 5]), ViewPoint="Data")
+Plot(SelectIndividual(seq83, [1, 2]), ViewPoint="Data")
+Plot(SelectIndividual(seq83, [4, 5]), ViewPoint="Data")
 
 # multivariate segmentation
 
-# Display(seq70, 5, 4, "Gaussian", "Gaussian", ViewPoint="SegmentProfile", NbSegmentation=5)
-# Plot(seq70, 5, 4, "Gaussian", "Gaussian", ViewPoint="SegmentProfile")
-# Plot(seq70, 5, 4, "Gaussian", "Gaussian", ViewPoint="SegmentProfile", Output="ChangePoint")
+Display(seq70, 5, 4, "Gaussian", "Gaussian", ViewPoint="SegmentProfile", NbSegmentation=5)
+Plot(seq70, 5, 4, "Gaussian", "Gaussian", ViewPoint="SegmentProfile")
+Plot(seq70, 5, 4, "Gaussian", "Gaussian", ViewPoint="SegmentProfile", Output="ChangePoint")
 
 # estimation of a hidden semi-Markov chain
 
@@ -138,7 +139,8 @@ hmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hmc60)
 
 hsmc60 = HiddenSemiMarkov(path + "pin_laricio_6.hsc")
 hsmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hsmc60)
-# hsmc61 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", "Ordinary", 6, "LeftRight")
+#todo
+#hsmc61 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", "Ordinary", 6, "LeftRight")
 
 # Plot(ExtractDistribution(hsmc6, "Observation", 1, 0), ExtractDistribution(hsmc6, "Observation", 1, 1), ExtractDistribution(hsmc6, "Observation", 1, 2), ExtractDistribution(hsmc6, "Observation", 1, 3), ExtractDistribution(hsmc6, "Observation", 1, 4), ExtractDistribution(hsmc6, "Observation", 1, 5))
 # Plot(ExtractDistribution(hsmc6, "Observation", 2, 0), ExtractDistribution(hsmc6, "Observation", 2, 1), ExtractDistribution(hsmc6, "Observation", 2, 2), ExtractDistribution(hsmc6, "Observation", 2, 3), ExtractDistribution(hsmc6, "Observation", 2, 4), ExtractDistribution(hsmc6, "Observation", 2, 5))
@@ -147,20 +149,22 @@ hsmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hsmc60)
 # Plot(hsmc6, 5, ViewPoint="StateProfile")
 
 seq60 = ExtractData(hsmc6)
-# Display(seq60, ViewPoint=Data, Format=Line)
+Display(seq60, ViewPoint="Data", Format="Line")
 
 seq61 = SojournTimeSequences(seq60, 1)
-# Display(seq61, ViewPoint=Data, Format=Line)
+Display(seq61, ViewPoint="Data", Format="Line")
+
+
 
 
 
 mixt61 = Mixture(21. / 406., ExtractDistribution(hsmc6, "Observation", 1, 0), 29. / 406., ExtractDistribution(hsmc6, "Observation", 1, 1), 140. / 406., ExtractDistribution(hsmc6, "Observation", 1, 2), 87. / 406., ExtractDistribution(hsmc6, "Observation", 1, 3), 71. / 406., ExtractDistribution(hsmc6, "Observation", 1, 4), 58. / 406., ExtractDistribution(hsmc6, "Observation", 1, 5))
 mixt61 = Mixture(0.0497296, ExtractDistribution(hsmc6, "Observation", 1, 0), 0.0750034, ExtractDistribution(hsmc6, "Observation", 1, 1), 0.3416, ExtractDistribution(hsmc6, "Observation", 1, 2), 0.207806, ExtractDistribution(hsmc6, "Observation", 1, 3), 0.159426, ExtractDistribution(hsmc6, "Observation", 1, 4), 0.166434, ExtractDistribution(hsmc6, "Observation", 1, 5))
-# Plot(Fit(ExtractHistogram(seq70, "Value", 1), ExtractDistribution(mixt61, "Mixture")))
+Plot(Fit(ExtractHistogram(seq70, "Value", 1), ExtractDistribution(mixt61, "Mixture")))
 
 mixt62 = Mixture(21. / 406., ExtractDistribution(hsmc6, "Observation", 2, 0), 29. / 406., ExtractDistribution(hsmc6, "Observation", 2, 1), 140. / 406., ExtractDistribution(hsmc6, "Observation", 2, 2), 87. / 406., ExtractDistribution(hsmc6, "Observation", 2, 3), 71. / 406., ExtractDistribution(hsmc6, "Observation", 2, 4), 58. / 406., ExtractDistribution(hsmc6, "Observation", 2, 5))
 mixt62 = Mixture(0.0497296, ExtractDistribution(hsmc6, "Observation", 2, 0), 0.0750034, ExtractDistribution(hsmc6, "Observation", 2, 1), 0.3416, ExtractDistribution(hsmc6, "Observation", 2, 2), 0.207806, ExtractDistribution(hsmc6, "Observation", 2, 3), 0.159426, ExtractDistribution(hsmc6, "Observation", 2, 4), 0.166434, ExtractDistribution(hsmc6, "Observation", 2, 5))
-# Plot(Fit(ExtractHistogram(seq70, "Value", 2), ExtractDistribution(mixt62, "Mixture")))
+Plot(Fit(ExtractHistogram(seq70, "Value", 2), ExtractDistribution(mixt62, "Mixture")))
 
 
 # comparason with the segmentations deduced from the 6-state hidden semi-Markov chain
@@ -174,11 +178,12 @@ Segmentation(seq70, 6, [1931, 1943, 1960, 1976], "Gaussian", "Gaussian"))
 
 seq47 = SelectVariable(seq46, [3, 5])
 # seq47 = SelectVariable(seq46, [3])
-# Plot(seq47, ViewPoint=Data)
+Plot(seq47, ViewPoint="Data")
 
 seq48 = Segmentation(seq80, [5, 5, 6, 5, 5, 4], "Gaussian")
 seq49 = SelectVariable(seq48, [3])
-# Plot(Merge(SelectIndividual(seq47, [1]), SelectIndividual(seq49, [1])), ViewPoint=Data)
+#todo
+#Plot(Merge(SelectIndividual(seq47, [1]), SelectIndividual(seq49, [1])), ViewPoint=Data)
 
 
 # analyse des residus
@@ -189,17 +194,17 @@ Plot(SelectIndividual(seq51, [0, 7]), ViewPoint="Data")
 Plot(Regression(Vectors(seq50), "MovingAverage", 1, 3, [1]))
 
 acf50 = ComputeCorrelation(seq50, 1, MaxLag=10)
-# Plot(acf30)
+Plot(acf30)
 seq51 = Merge(SegmentationExtract(seq50, 1, 0), SegmentationExtract(seq50, 1, 1), SegmentationExtract(seq50, 1, 2), SegmentationExtract(seq50, 1, 3), SegmentationExtract(seq50, 1, 4), SegmentationExtract(seq50, 1, 5))
 acf51 = ComputeCorrelation(seq51, MaxLag=10)
-# Plot(acf51)
+Plot(acf51)
 
-# seq52 = Segmentation(seq80, 2, 6, "Gaussian", NbChangePoint="Fixed", Output="Residual")
+seq52 = Segmentation(seq80, 2, 6, "Gaussian", NbChangePoint="Fixed", Output="Residual")
 
 
 seq55 = Segmentation(seq80, [6, 5, 5, 6, 4, 4], "Mean", Output="Residual")
 seq56 = PointwiseAverage(seq55, StandardDeviation=True)
-# Plot(SelectIndividual(seq56, [0, 7]), ViewPoint=Data)
+Plot(SelectIndividual(seq56, [0, 7]), ViewPoint=Data)
 Plot(Regression(Vectors(seq55), "MovingAverage", 1, 3, [1]))
 
 seq57 = Segmentation(seq80, [5, 5, 5, 4, 4, 4], "Mean")

@@ -55,7 +55,7 @@ Plot(histo202, histo402, histo602, histo802)
 Plot(ExtractHistogram(seq20, "Length"), ExtractHistogram(seq40, "Length"), ExtractHistogram(seq60, "Length"), ExtractHistogram(seq80, "Length"))
 
 seq10 = Merge(seq20, seq40, seq60, seq80)
-# Display(seq10, ViewPoint="Data")
+Display(seq10, ViewPoint="Data")
 Plot(seq10, "Intensity")
 Plot(seq10, "Recurrence")
 Plot(seq10, "Sojourn")
@@ -69,7 +69,7 @@ seq12 = Transcode(seq10, [0, 0, 1])
 acf1 = Merge(ComputeCorrelation(seq11, MaxLag=15, Normalization="Exact"),\
              ComputeCorrelation(seq12, MaxLag=15, Normalization="Exact"))
 Plot(acf1)
-# Display(acf1)
+Display(acf1)
 
 acf2 = Merge(ComputeCorrelation(seq11, Type="Spearman", MaxLag=15, Normalization="Exact"),\
              ComputeCorrelation(seq12, Type="Spearman", MaxLag=15, Normalization="Exact"))

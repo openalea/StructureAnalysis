@@ -20,32 +20,34 @@
 """
 __revision__ = "$Id$"
 from openalea.sequence_analysis import *
-seq20 = Sequences("data/belren1.seq")
-seq21 = Sequences("data/elstar1.seq")
-seq22 = Sequences("data/fuji1.seq")
-seq23 = Sequences("data/gala1.seq")
-seq24 = Sequences("data/granny1.seq")
-seq25 = Sequences("data/reinet1.seq")
+import os
+path = 'data' + os.sep
+seq20 = Sequences(path+"belren1.seq")
+seq21 = Sequences(path+"elstar1.seq")
+seq22 = Sequences(path+"fuji1.seq")
+seq23 = Sequences(path+"gala1.seq")
+seq24 = Sequences(path+"granny1.seq")
+seq25 = Sequences(path+"reinet1.seq")
 
-# Display(seq25, ViewPoint="Data")
-# Plot(seq25, "Intensity")
-# Plot(seq25, "Sojourn")
+Display(seq25, ViewPoint="Data")
+Plot(seq25, "Intensity")
+Plot(seq25, "Sojourn")
 
 seq26 = Reverse(seq25)
-# Plot(seq26, "Intensity")
-# Plot(seq26, "FirstOccurrence")
+Plot(seq26, "Intensity")
+Plot(seq26, "FirstOccurrence")
 
 # Sojourn time (run length) distributions
 
 seq30 = Merge(seq20, seq21, seq22, seq23, seq24, seq25)
-# Plot(seq30, "Sojourn")
-# Plot(ExtractHistogram(seq30, "Sojourn", 1), ExtractHistogram(seq30, "Sojourn", 2), ExtractHistogram(seq30, "Sojourn", 3),  ExtractHistogram(seq30, "Sojourn", 4))
+Plot(seq30, "Sojourn")
+Plot(ExtractHistogram(seq30, "Sojourn", 1), ExtractHistogram(seq30, "Sojourn", 2), ExtractHistogram(seq30, "Sojourn", 3),  ExtractHistogram(seq30, "Sojourn", 4))
 
 #todo
 #mc30 = Estimate(seq30, "MARKOV", MaxOrder=4)
 
 # Plot(mc30, "Sojourn")
-# Display(Estimate(seq30, "MARKOV"))
+#Display(Estimate(seq30, "MARKOV"))
 
 seq31 = Cluster(seq30, "Limit", [1, 4])
 #todo
@@ -63,8 +65,8 @@ matrix32 = Compare(seq32, VectorDistance("S"), Transposition=True)
 matrix33 = Compare(seq32, VectorDistance("data/align1.a"), Transposition=True)
 
 #todo
-#Display(Clustering(matrix33, "Partition", 2))
-#Clustering(matrix33, "Hierarchy")
+Display(Clustering(matrix33, "Partition", 2))
+Clustering(matrix33, "Hierarchy")
 
 Compare(seq25, TestSequence=9, RefSequence=1)
 Compare(seq25, VectorDistance("S"), TestSequence=9, RefSequence=1)

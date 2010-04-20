@@ -1,3 +1,5 @@
+# 
+
 """
 #########################################################################
 #
@@ -14,13 +16,12 @@
 
 from openalea.sequence_analysis import *
 
-PLOTTING = True
 
 seq1 = Sequences("data/abricotier_suivi_11.seq")
 ipe = IndexParameterExtract(seq1, 3, MaxIndex=24)
-if PLOTTING:
-    Plot(seq1, ViewPoint="Data")
-    Plot(ipe, ViewPoint="Data")
+
+Plot(seq1, ViewPoint="Data")
+Plot(ipe, ViewPoint="Data")
     
 Display(seq1, ViewPoint="Data", Format="Line")
 
@@ -28,9 +29,8 @@ timev3_7 = TimeScaling(TimeEvents(seq1, 3, 7),  12)
 hist1 = ExtractHistogram(timev3_7, "NbEvent", 48)
 hist2 = ExtractHistogram(TimeEvents("data/abri13.ren"), "NbEvent", 16)
 
-if PLOTTING:
-    Plot(hist1, hist2)
-    Plot(timev3_7)
+Plot(hist1, hist2)
+Plot(timev3_7)
 
 # "Equilibrium" or "Ordinary"
 mytype = "Equilibrium"
@@ -41,14 +41,13 @@ renew3_7_np = Estimate(timev3_7, mytype, NbIteration=10000)
 renew3_7_p = Estimate(timev3_7, mytype, Estimator="Parametric")
 
 
-if PLOTTING:
-    Plot(renew3_7_p)
-    Plot(ExtractDistribution(renew3_7, "InterEvent"), 
+Plot(renew3_7_p)
+Plot(ExtractDistribution(renew3_7, "InterEvent"), 
         ExtractDistribution(renew3_7_s, "InterEvent"),
         ExtractDistribution(renew3_7_np, "InterEvent"),
         ExtractDistribution(renew3_7_p, "InterEvent"), 
         Distribution("NB", 1, 1, 1. / 11.0191))
-    Plot(ExtractDistribution(renew3_7, "NbEvent", 48),
+Plot(ExtractDistribution(renew3_7, "NbEvent", 48),
         ExtractDistribution(renew3_7_s, "NbEvent", 48),
         ExtractDistribution(renew3_7_np, "NbEvent", 48),
         ExtractDistribution(renew3_7_p, "NbEvent", 48))
@@ -80,29 +79,26 @@ timev121_167 = RenewalData(seq10, 120, 166)
 timev81_167 = RenewalData(seq10, 80, 166)
 timev1_167 = RenewalData(seq10, 0, 166)
 
-if PLOTTING:
-    Plot(timev1_40)
+
+Plot(timev1_40)
 
 renew1_40_i = Estimate(timev1_40, "Equilibrium", InitialInterEvent=Distribution("U", 1, 38), NbIteration=10000)
 renew1_40_is = Estimate(timev1_40, "Equilibrium", InitialInterEvent=Distribution("U", 1, 50), NbIteration=10000, Estimator="PenalizedLikelihood", Weight=0.4)
 
 
-if PLOTTING:
-    Plot(renew1_40_is)
+Plot(renew1_40_is)
 
 Display(renew1_40_is)
 renew1_40_c = Estimate(timev1_40, "Equilibrium", NbIteration=10000)
 
-if PLOTTING:
-    Plot(ExtractDistribution(renew1_40_i, "InterEvent"), ExtractDistribution(renew1_40_is, "InterEvent"), ExtractDistribution(renew1_40_c, "InterEvent"))
-    Plot(Fit(Merge(Shift(ExtractHistogram(timev1_40, "Backward"), 1), ExtractHistogram(timev1_40, "Forward")), ExtractDistribution(renew1_40_is,  "Forward")))
+Plot(ExtractDistribution(renew1_40_i, "InterEvent"), ExtractDistribution(renew1_40_is, "InterEvent"), ExtractDistribution(renew1_40_c, "InterEvent"))
+Plot(Fit(Merge(Shift(ExtractHistogram(timev1_40, "Backward"), 1), ExtractHistogram(timev1_40, "Forward")), ExtractDistribution(renew1_40_is,  "Forward")))
 
 
 timev10 = Simulate(renew1_40_c, "Equilibrium", 200, 40)
 timev11 = Simulate(renew1_40_c, "Equilibrium", Simulate(Mixture(0.5, Distribution("U", 40, 40), 0.5, Distribution("U", 50, 50)), 200))
 
-if PLOTTING:
-    Plot(timev11)
+Plot(timev11)
 
 Display(timev11)
 
