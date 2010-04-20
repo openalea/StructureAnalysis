@@ -12,7 +12,7 @@ from enums import format_type
 
 from _stat_tool import \
     _CompoundData,\
-    _DistributionData,\
+    _DiscreteDistributionData,\
     _MixtureData,\
     _ConvolutionData,\
     _Vectors,\
@@ -58,13 +58,13 @@ def compare_histo(histo, *args, **kargs):
     utype = variable_type[args[-1]]
 
     error.CheckType([histo],
-                        [[_DistributionData, _MixtureData,
+                        [[_DiscreteDistributionData, _MixtureData,
                           _ConvolutionData, _CompoundData]])
 
     histos = args[0:-1]
     for h in histos:
         error.CheckType([h],
-                        [[_DistributionData, _MixtureData,
+                        [[_DiscreteDistributionData, _MixtureData,
                           _ConvolutionData, _CompoundData]])
     filename = kargs.get("Filename", None)
     format = error.ParseKargs(kargs, "Format", "ASCII",
@@ -221,7 +221,7 @@ def ComparisonTest(utype, histo1, histo2):
 
     """
     error.CheckType([histo1, histo2],
-                        [[_DistributionData, _MixtureData,
+                        [[_DiscreteDistributionData, _MixtureData,
                           _ConvolutionData, _CompoundData]]*2)
 
     utype = utype.lower()
