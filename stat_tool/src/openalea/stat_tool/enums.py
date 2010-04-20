@@ -8,8 +8,9 @@ __version__ = "$Id$"
 import _stat_tool
 
 from _stat_tool import _FrequencyDistribution, _MixtureData, \
-    _CompoundData,_ConvolutionData, _DistributionData, _Mixture, _Compound, \
-    _Convolution, _DiscreteParametricModel
+    _CompoundData,_ConvolutionData, _DiscreteDistributionData, _Mixture, \
+    _Compound, _Convolution, _DiscreteParametricModel, _Distribution, \
+    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression
 
 
 # map to enumerate in boost python
@@ -178,9 +179,32 @@ algo_map = {"Averaging": 'a',
             }
 
 
-histogram_types = [_FrequencyDistribution, _MixtureData, _CompoundData, _ConvolutionData,
-                    _DistributionData]
-    
+histogram_types = [ _FrequencyDistribution, 
+                    _MixtureData, 
+                    _CompoundData, 
+                    _ConvolutionData,
+                    _DiscreteDistributionData]
 
-model_distribution_type = [_Mixture, _Compound, _Convolution, _DiscreteParametricModel]
-    
+
+model_distribution_types = [ _Mixture,
+                            _Compound, 
+                            _Convolution, 
+                            _DiscreteParametricModel, 
+                            _Distribution]
+
+all_stat_tool_types  = [_FrequencyDistribution,
+                        _MixtureData,
+                        _CompoundData,
+                        _ConvolutionData, 
+                        _DiscreteDistributionData, 
+                        _Mixture, 
+                        _Compound,
+                        _Convolution, 
+                        _DiscreteParametricModel, 
+                        _Distribution,
+                        _VectorDistance, 
+                        _Vectors, 
+                        _Cluster,
+                        _DistanceMatrix,
+                        _Regression
+                        ]
