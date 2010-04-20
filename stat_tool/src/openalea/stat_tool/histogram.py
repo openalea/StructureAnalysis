@@ -12,12 +12,12 @@ __version__ = "$Id$"
 
 import interface
 
-from _stat_tool import _DistributionData
+from _stat_tool import _DiscreteDistributionData
 
 # Extend _DistributionData class dynamically
-interface.extend_class(_DistributionData, interface.StatInterface)
+interface.extend_class(_DiscreteDistributionData, interface.StatInterface)
 
-__all__ = ["_DistributionData",
+__all__ = ["_DiscreteDistributionData",
            "Histogram",
            ]
 
@@ -36,7 +36,7 @@ def Histogram(*args):
       * `filename` (string) -
 
     :Returns:
-       If the construction succeeds, an object of type `_DistributionData`
+       If the construction succeeds, an object of type `_DiscreteDistributionData`
        is returned.
 
     :Examples:
@@ -62,13 +62,13 @@ def Histogram(*args):
     ret = None
     # Histogram(filename)
     if len(args)==1 and isinstance(args[0], str):
-        ret = _DistributionData(args[0])
+        ret = _DiscreteDistributionData(args[0])
         
     # Histogram([1,2,3])
     elif len(args)==1 and isinstance(args[0], list):
-        ret = _DistributionData(args[0])
+        ret = _DiscreteDistributionData(args[0])
     # Histogram(1,2,3)
     else:
-        ret = _DistributionData(list(args))
+        ret = _DiscreteDistributionData(list(args))
         
     return ret

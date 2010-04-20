@@ -63,16 +63,17 @@ def Compound(*args, **kargs):
 
     # filename
     if len(args)==1:
-        error.CheckType([args[0]], [str], arg_id=[1])
+        error.CheckType([args[0]], [str])
         result =  _Compound(args[0])
 
-    possible_types = [_DiscreteParametricModel, _Mixture, _Compound, _Convolution]
+    possible_types = [_DiscreteParametricModel, _Mixture,
+                      _Compound, _Convolution]
 
     # build from two objects and optional threshold
     if len(args)==2:
         error.CheckType([args[0], args[1]],
                         [possible_types, possible_types],
-                        variable_id=[1,2])
+                        variable_pos=[1,2])
 
         if Threshold:
             result =  _Compound([args[0], args[1]], Threshold)

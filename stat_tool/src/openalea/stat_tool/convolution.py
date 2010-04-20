@@ -64,7 +64,7 @@ def Convolution(*args):
         arguments = []
         #check that all arguments are correct
         for arg, i in zip(args, range(0, len(args))):
-            error.CheckType([arg], [possible_types], variable_id=[i+1])
+            error.CheckType([arg], [possible_types], variable_pos=[i+1])
             arguments.append(arg)
         result = _Convolution(arguments)
 
