@@ -10,7 +10,7 @@ import error
 import _stat_tool
 
 from _stat_tool import _DiscreteParametricModel
-from _stat_tool import _DistributionData
+from _stat_tool import _DiscreteDistributionData
 from _stat_tool import _Distribution
 
 from enums import distribution_identifier_type
@@ -81,7 +81,7 @@ def Distribution(utype, *args):
     # Constructor from Filename or Histogram or parametricmodel
     if(len(args) == 0):
         error.CheckType([utype],
-                        [[str, _DistributionData, _DiscreteParametricModel]],
+                        [[str, _DiscreteDistributionData, _DiscreteParametricModel]],
                         arg_id=[1])
         result =  _DiscreteParametricModel(utype)
     # from parameters
@@ -214,11 +214,11 @@ interface.extend_class( _DiscreteParametricModel, interface.StatInterface)
 
 
 def ToDistribution(histo):
-    """ Cast an object of type `_DistributionData` into an object
+    """ Cast an object of type `_DiscreteDistributionData` into an object
     of type `_Distribution`.
 
     :Parameters:
-      * `histo` (DistributionData)
+      * `histo` (DiscreteDistributionData)
 
     :Returns:
         If the object histo contains a 'model' part, an object
@@ -240,14 +240,14 @@ def ToDistribution(histo):
 
 def ToHistogram(dist):
     """Cast an object of type `_Distribution` into an object of
-    type `_DistributionData`.
+    type `_DiscreteDistributionData`.
 
     :Parameters:
       * dist (distribution).
 
     :Returns:
         If the object dist contains a 'data' part, an object of
-        type `_DistributionData` is returned, otherwise no object
+        type `_DiscreteDistributionData` is returned, otherwise no object
         is returned.
 
     :Examples:
