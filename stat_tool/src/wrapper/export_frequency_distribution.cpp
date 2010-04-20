@@ -563,7 +563,7 @@ void class_distribution_data()
 {
     // _DiscreteDistributionData
   class_<DiscreteDistributionData, bases<FrequencyDistribution, StatInterface> >
-    ("_DistributionData", "_DistributionData", init< optional< int > >())
+    ("_DiscreteDistributionData", "_DiscreteDistributionData", init< optional< int > >())
 
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_list ))
     .def("__init__", make_constructor(DistributionDataWrap::distribution_data_from_file))
