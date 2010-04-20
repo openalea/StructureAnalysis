@@ -5,6 +5,7 @@ __version__ = "$Id$"
 from openalea.stat_tool import _stat_tool
 from openalea.stat_tool.distribution import Distribution, Uniform, Binomial
 from openalea.stat_tool.distribution import NegativeBinomial, Poisson
+from openalea.stat_tool.distribution import Multinomial
 from openalea.stat_tool.distribution import ToHistogram, ToDistribution
 from openalea.stat_tool.histogram import Histogram
 from openalea.stat_tool import Estimate
@@ -197,7 +198,18 @@ class TestDistribution():
         assert isinstance(m, _DiscreteParametricModel)
 
     def test_multimodial(self):
-        pass
+        """multinomial not yet implemented"""
+        try:
+            Distribution("MULTINOMIAL", 10)
+            assert False
+        except:
+            assert True
+        try:
+            d = Multinomial()
+            assert False
+        except:
+            assert True
+
 
     def test_getters(self):
         dist = Distribution(Histogram([1, 1, 1, 2, 2, 2, 3, 3, 3]))

@@ -148,6 +148,7 @@ class interface():
         h.plot_write('test', 'title')
         _remove_file('test.print')
         _remove_file('test.plot')
+        _remove_file('test0.dat')
 
     def file_ascii_write(self):
         h = self.data

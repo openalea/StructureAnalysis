@@ -8,7 +8,7 @@ from openalea.stat_tool.convolution import Convolution
 from openalea.stat_tool.estimate import Estimate
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.data_transform import Shift
-from openalea.stat_tool.output import Plot
+from openalea.stat_tool.output import Plot, Display
 from openalea.stat_tool.plot import DISABLE_PLOT
 
 from tools import runTestClass
@@ -115,6 +115,35 @@ class Test:
             Plot(dist2)
 
 
+def test_output_display_detail():
+    d1 = Distribution("B", 2,19,0.5)
+    print Display(d1)
+    print Display(d1, Detail=1)
+    print Display(d1, Detail=2)
+    try:
+        print Display(d1, Detail=3)
+        assert False
+    except:
+       assert ValueError
+
+def test_output_viewpoint_survival():
+    d1 = Distribution("B", 2,19,0.5)
+    print Display(d1, ViewPoint="Survival")
+    convol1 = Convolution("data/convolution1.conv")
+    print Display(convol1, ViewPoint="Survival")
+
+def test_output_viewpoint_data():
+    from openalea.stat_tool import Vectors
+    v = Vectors('data/vectors.vec')
+    Display(v, ViewPoint='Data') 
+    Display(v) 
+    #ddata viewpoint is dedicated to Vectors or sequences
+    try:
+        d1 = Distribution("B", 2,19,0.5)
+        Display(d1, ViewPoint="Data")
+        assert False
+    except:
+        assert True
 
 if __name__ == "__main__":
     runTestClass(Test())
