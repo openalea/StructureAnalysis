@@ -135,7 +135,7 @@ def Vectors(*args, **kargs):
         # first, get the Identifiers and check its type
         identifiers = error.ParseKargs(kargs, "Identifiers")
         if identifiers:
-            error.CheckType([identifiers], [[list]], variable_id=[2])
+            error.CheckType([identifiers], [[list]], variable_pos=[2])
 
             if len(identifiers) != len(obj):
                 raise ValueError("""Identifiers must be a list,
@@ -148,7 +148,7 @@ def Vectors(*args, **kargs):
         # from a sequence
         index_variable = error.ParseKargs(kargs, "IndexVariable", False,
                                           [True, False])
-        error.CheckType([index_variable], [bool], variable_id=[2])
+        error.CheckType([index_variable], [bool], variable_pos=[2])
         ret = obj.build_vectors(index_variable)
 
 
