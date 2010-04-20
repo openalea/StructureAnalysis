@@ -50,6 +50,12 @@ markovian_sequence_type = {
 #todo: get rid if mode_type, rename the enumerate properly
 mode_type = enumerate_st.round_type
 
+
+#constants: 
+NB_STATE_SEQUENCE = _sequence_analysis.NB_STATE_SEQUENCE
+NB_SEGMENTATION = _sequence_analysis.NB_SEGMENTATION
+
+
 INTER_EVENT = _sequence_analysis.RenewalType.INTER_EVENT
 WITHIN_OBSERVATION_PERIOD =  \
     _sequence_analysis.RenewalType.WITHIN_OBSERVATION_PERIOD
@@ -232,6 +238,15 @@ output_type = {
                "Segment" : _sequence_analysis.ChangePointType.SEGMENT
                }
 
+output_display = {
+               "ChangePoint" : _sequence_analysis.ChangePointType.CHANGE_POINT,
+               "Segment" : _sequence_analysis.ChangePointType.SEGMENT,
+               "State" : _sequence_analysis.SemiMarkovState.SSTATE,
+               "InState" : _sequence_analysis.SemiMarkovState.IN_STATE,
+               "OutState" : _sequence_analysis.SemiMarkovState.OUT_STATE
+            }
+
+
 nb_segment_map = {
                   "Fixed": False,
                   "Estimated":True
@@ -247,7 +262,10 @@ end_aligned_map = begin_aligned_map
 from openalea.sequence_analysis._sequence_analysis import \
     _Sequences, _MarkovianSequences, _VariableOrderMarkovData, \
     _SemiMarkovData, _NonHomogeneousMarkovData, _VariableOrderMarkov,\
-    _HiddenVariableOrderMarkov, _HiddenSemiMarkov, _SemiMarkov
+    _HiddenVariableOrderMarkov, _HiddenSemiMarkov, _SemiMarkov, \
+    _Renewal,_RenewalData,_TimeEvents, _Tops, \
+    _TopParameters, _Correlation, _NonHomogeneousMarkov
+    
 
 sequence_alignment_first_arg = [_Sequences,
                                 _MarkovianSequences,
@@ -287,3 +305,23 @@ output_sequence = {
 
 indel_cost_map = {"Adaptative": _sequence_analysis.IndelCost.ADAPTATIVE,
                      "Fixed": _sequence_analysis.IndelCost.FIXED}
+
+
+all_sequences_types = [ _VariableOrderMarkov,
+                        _VariableOrderMarkovData,
+                        _HiddenVariableOrderMarkov,
+                        _HiddenSemiMarkov,
+                        _SemiMarkov,
+                        _MarkovianSequences,
+                        _SemiMarkovData,
+                        _NonHomogeneousMarkovData,
+                        _NonHomogeneousMarkov,
+                        _Renewal,
+                        _RenewalData,
+                        _TimeEvents,
+                        _Sequences,
+                        _Tops,
+                        _TopParameters,
+                        _Correlation
+                        ]
+
