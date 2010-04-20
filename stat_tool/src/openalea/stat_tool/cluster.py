@@ -178,7 +178,10 @@ def Cluster(obj, utype, *args, **kargs):
                     except:
                         pass
         else:
-            raise ValueError(error.STAT_TOOL_NB_VARIABLE_ERROR)
+            raise ValueError("""Extra arguments provided 
+            (to specify variable value ?). Consider removing it. 
+            Be aware that nb_variable equals 1""")
+
     else:
         if len(args) == 2:
             if utype == "Step":
@@ -192,7 +195,10 @@ def Cluster(obj, utype, *args, **kargs):
             except:
                 ret = func(args[0], args[1], AddVariable)
         else:
-            raise ValueError(error.STAT_TOOL_NB_VARIABLE_ERROR)
+            raise ValueError("""Extra arguments provided 
+            (to specify variable value ?).
+            Consider removing it. Be aware that nb_variable equals 1""")
+
 
 
 
