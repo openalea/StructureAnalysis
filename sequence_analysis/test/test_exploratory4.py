@@ -22,7 +22,8 @@ __revision__ = "$Id$"
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare
 
-seq1 = Sequences("data/dupreziana_a1.seq")
+path = 'data'+os.sep
+seq1 = Sequences(path +"dupreziana_a1.seq")
 Display(seq1, ViewPoint="Data", Format="Line")
 
 vec20 = MergeVariable(ExtractVectors(seq1, "NbOccurrence", 1, 3), ExtractVectors(seq1, "Length"))

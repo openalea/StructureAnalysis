@@ -36,7 +36,7 @@ Plot(ExtractHistogram(seq30, "Sojourn", 1), ExtractHistogram(seq30, "Sojourn", 2
 
 mc30 = Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=4, GlobalInitialTransition=False)
 mc30 = Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=4, Algorithm="BIC", GlobalInitialTransition=False)
-#todo
+#todo empty plot
 #Plot(mc30, "Sojourn")
 Display(Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=1))
 Display(Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=2, GlobalInitialTransition=False))
@@ -44,7 +44,7 @@ Display(Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=2, GlobalInit
 seq31 = Cluster(seq30, "Limit", [1, 4])
 mc31 = Estimate(seq30, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=4, GlobalInitialTransition=False)
 mc31 = Estimate(seq31, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=2, GlobalInitialTransition=False)
-# Plot(mc31, "Sojourn")
+Plot(mc31, "Sojourn")
 Display(Estimate(seq31, "VARIABLE_ORDER_MARKOV", "Ordinary", Order=1))
 
 # comparison of sequences by dynamic programming algorithms
@@ -98,16 +98,17 @@ hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 Display(hsmc25)
 #todo
 #Plot(hsmc25, "FirstOccurence", 1)
-# Plot(hsmc25, "Intensity", 1)
-# Plot(hsmc25, "Sojourn", 1)
-# Plot(hsmc25, "Counting", 1)
+#Plot(hsmc25, "Intensity", 1)
+#Plot(hsmc25, "Sojourn", 1)
+#Plot(hsmc25, "Counting", 1)
 
 # Plot(hsmc25, "Intensity")
 # Plot(hsmc25, "Sojourn")
 
 #todo
-#Plot(hsmc25, ViewPoint="StateProfile")
+Plot(hsmc25, ViewPoint="StateProfile")
 #Plot(hsmc25, ViewPoint="StateProfile", Output=['InState', 'OutState'])
+Plot(hsmc25, ViewPoint="StateProfile", Output='OutState')
 
 seq25_1 = ExtractData(hsmc25)
 Display(seq25_1, ViewPoint="Data", Format="Line")
@@ -120,11 +121,11 @@ hsmc26 = Estimate(seq26, "HIDDEN_SEMI-MARKOV", hsmc0)
 Thresholding(hsmc20, MinProbability=0.001)
 
 matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholding(hsmc21, MinProbability=0.001), seq21, Thresholding(hsmc22, MinProbability=0.001), seq22, Thresholding(hsmc23, MinProbability=0.001), seq23, Thresholding(hsmc24, MinProbability=0.001), seq24, Thresholding(hsmc25, MinProbability=0.001), seq25, Thresholding(hsmc26, MinProbability=0.001), seq26, 10000)
-# matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholding(hsmc21, MinProbability=0.001), seq21, Thresholding(hsmc22, MinProbability=0.001), seq22, Thresholding(hsmc23, MinProbability=0.001), seq23, Thresholding(hsmc24, MinProbability=0.001), seq24, Thresholding(hsmc25, MinProbability=0.001), seq25, Thresholding(hsmc26, MinProbability=0.001), seq26, 10000, FileName="ASCII/cultivar1_models.txt")
+matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholding(hsmc21, MinProbability=0.001), seq21, Thresholding(hsmc22, MinProbability=0.001), seq22, Thresholding(hsmc23, MinProbability=0.001), seq23, Thresholding(hsmc24, MinProbability=0.001), seq24, Thresholding(hsmc25, MinProbability=0.001), seq25, Thresholding(hsmc26, MinProbability=0.001), seq26, 10000, FileName="ASCII/cultivar1_models.txt")
 
-#matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 10000, 90)
-
-# matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 10000, 90, FileName="ASCII/cultivar1_models_90.txt")
+# very slow of buggy ?
+matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 10000, 90)
+matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 10000, 90, FileName="ASCII/cultivar1_models_90.txt")
 
 
 Plot(matrix20)

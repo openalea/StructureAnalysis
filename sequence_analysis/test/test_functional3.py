@@ -146,7 +146,7 @@ hsmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hsmc60)
 # Plot(ExtractDistribution(hsmc6, "Observation", 2, 0), ExtractDistribution(hsmc6, "Observation", 2, 1), ExtractDistribution(hsmc6, "Observation", 2, 2), ExtractDistribution(hsmc6, "Observation", 2, 3), ExtractDistribution(hsmc6, "Observation", 2, 4), ExtractDistribution(hsmc6, "Observation", 2, 5))
 
 # 1, 3, 5
-# Plot(hsmc6, 5, ViewPoint="StateProfile")
+Plot(hsmc6, 5, ViewPoint="StateProfile")
 
 seq60 = ExtractData(hsmc6)
 Display(seq60, ViewPoint="Data", Format="Line")
@@ -182,7 +182,7 @@ Plot(seq47, ViewPoint="Data")
 
 seq48 = Segmentation(seq80, [5, 5, 6, 5, 5, 4], "Gaussian")
 seq49 = SelectVariable(seq48, [3])
-#todo
+#todo fails in aml as well
 #Plot(Merge(SelectIndividual(seq47, [1]), SelectIndividual(seq49, [1])), ViewPoint=Data)
 
 

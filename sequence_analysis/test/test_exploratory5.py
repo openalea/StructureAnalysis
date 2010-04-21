@@ -46,6 +46,7 @@ Plot(ExtractHistogram(seq30, "Sojourn", 1), ExtractHistogram(seq30, "Sojourn", 2
 #todo
 #mc30 = Estimate(seq30, "MARKOV", MaxOrder=4)
 
+#todo does not work in aml either
 # Plot(mc30, "Sojourn")
 #Display(Estimate(seq30, "MARKOV"))
 
