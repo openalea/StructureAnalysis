@@ -8,18 +8,20 @@ __revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkov
+from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkov, _NonHomogeneousMarkovData
 from openalea.stat_tool import error
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 
 
 __all__ = ['NonhomogeneousMarkov',
-           '_NonHomogeneousMarkov']
+           '_NonHomogeneousMarkov',
+           '_NonHomogeneousMarkovData',
+           ]
 
 
 # Extend dynamically class
 interface.extend_class( _NonHomogeneousMarkov, interface.StatInterface)
-
+interface.extend_class( _NonHomogeneousMarkovData, interface.StatInterface)
 # Add methods to _Vectors
 
 

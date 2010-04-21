@@ -584,6 +584,7 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
     if itype == "VARIABLE_ORDER_MARKOV":
         return _estimate_variable_order_markov(obj, *args, **kargs)
     elif itype == "MARKOV":
+        raise NotImplementedError("to be done?")
         return _estimate_variable_order_markov(obj, *args, **kargs)
     elif itype == "HIDDEN_VARIABLE_ORDER_MARKOV":
         return _estimate_hidden_variable_order_markov(obj, *args, **kargs)

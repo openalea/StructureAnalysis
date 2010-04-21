@@ -10,6 +10,7 @@ import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import \
     _Sequences, \
+    _MarkovianSequences, \
     _RenewalData,\
     _MarkovianSequences,\
     _VariableOrderMarkovData,\
@@ -27,6 +28,7 @@ from openalea.stat_tool.enums import bool_type
 
 __all__ = ['Sequences',
            '_Sequences',
+           '_MarkovianSequences',
            'LumpabilityTest',
            'RemoveIndexParameter',
            'TransformPosition', 
@@ -37,6 +39,7 @@ __all__ = ['Sequences',
 
 # Extend dynamically class
 interface.extend_class( _Sequences, interface.StatInterface)
+interface.extend_class( _MarkovianSequences, interface.StatInterface)
 
 # Add methods to _Vectors
 

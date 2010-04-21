@@ -3,18 +3,19 @@ __revision__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import _VariableOrderMarkov
-
+from openalea.sequence_analysis._sequence_analysis import _VariableOrderMarkov, _VariableOrderMarkovData
 from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 
 from openalea.stat_tool import error
 
 __all__ = ['VariableOrderMarkov',
-           '_VariableOrderMarkov']
+           '_VariableOrderMarkov', 
+           '_VariableOrderMarkovData']
 
 
 # Extend dynamically class
 interface.extend_class( _VariableOrderMarkov, interface.StatInterface)
+interface.extend_class( _VariableOrderMarkovData, interface.StatInterface)
 
 # Add methods to _Vectors
 
