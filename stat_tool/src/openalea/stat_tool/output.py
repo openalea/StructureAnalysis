@@ -497,44 +497,223 @@ class StatInterface(object):
     @add_doc
     def plot(self, *args, **kargs):
 
-        title = kargs.get("Title", "")
-        ViewPoint = kargs.get("ViewPoint", "")
+        Title = kargs.get("Title", "")
+        
         params = kargs.get("Params", ())
         groups = kargs.get("Groups", ())
 
-        survival = bool(ViewPoint.lower() == "survival")
-        stateprofile = bool(ViewPoint.lower() == "stateprofile")
-        segmentprofile = bool(ViewPoint.lower() == "segmentprofile")
-        data = bool(ViewPoint.lower() == "data")
+        possible_modes = {'Blocking':False, 'NonBlocking':True}
+        Mode = error.ParseKargs(kargs, 'Mode', 'Blocking', possible=possible_modes)
+        print Mode
 
+        viewpoint_map = {'v':'v', 
+                         "Data":"d",
+                         "Survival":'s',
+                         "SegmentProfile":'q',
+                         "StateProfile":'p'}
+        ViewPoint = error.ParseKargs(kargs, "ViewPoint", "v", possible=viewpoint_map)
+
+
+        #todo: check the compatibilities between options
+        """
+        if ((output_option) && ((view_point != 'q') ||
+       ((args[0].tag() != AMObjType::SEQUENCES) && (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA))) &&
+      ((view_point != 'p') || ((args[0].tag() != AMObjType::HIDDEN_SEMI_MARKOV) &&
+        (args[0].tag() != AMObjType::MARKOVIAN_SEQUENCES) &&
+        (args[0].tag() != AMObjType::VARIABLE_ORDER_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::SEMI_MARKOV_DATA) &&
+        (args[0].tag() != AMObjType::NONHOMOGENEOUS_MARKOV_DATA)))) {
+    status = false;
+    genAMLError(ERRORMSG(INCOMPATIBLE_OPTIONS_s) , "Plot");
+  }
+  
+  
+  if ((config) && (view_point != 'p') && ((args[0].tag() == AMObjType::MARKOVIAN_SEQUENCES) ||
+       (args[0].tag() == AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV) || (args[0].tag() == AMObjType::HIDDEN_SEMI_MARKOV) ||
+       (args[0].tag() == AMObjType::VARIABLE_ORDER_MARKOV_DATA) || (args[0].tag() == AMObjType::SEMI_MARKOV_DATA))) {
+    variable = args[1].val.i;
+
+    switch (args[0].tag()) {
+
+    case AMObjType::MARKOVIAN_SEQUENCES : {
+      seq = (MarkovianSequences*)((STAT_model*)args[0].val.p)->pt;
+      if ((variable <= seq->get_nb_variable()) && (seq->get_characteristics(variable - 1))) {
+        status = false;
+        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
+      }
+      break;
+    }
+
+    case AMObjType::HIDDEN_VARIABLE_ORDER_MARKOV : {
+      hmarkov = (HiddenVariableOrderMarkov*)((STAT_model*)args[0].val.p)->pt;
+      if ((variable <= hmarkov->get_nb_output_process()) &&
+          (hmarkov->get_nonparametric_process(variable))) {
+        status = false;
+        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
+      }
+      break;
+    }
+
+    case AMObjType::HIDDEN_SEMI_MARKOV : {
+      hsmarkov = (HiddenSemiMarkov*)((STAT_model*)args[0].val.p)->pt;
+      if ((variable <= hsmarkov->get_nb_output_process()) &&
+          (hsmarkov->get_nonparametric_process(variable))) {
+        status = false;
+        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
+      }
+      break;
+    }
+
+    case AMObjType::VARIABLE_ORDER_MARKOV_DATA : {
+      seq = (VariableOrderMarkovData*)((STAT_model*)args[0].val.p)->pt;
+      if ((variable < seq->get_nb_variable()) && (seq->get_characteristics(variable))) {
+        status = false;
+        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
+      }
+      break;
+    }
+
+    case AMObjType::SEMI_MARKOV_DATA : {
+      seq = (SemiMarkovData*)((STAT_model*)args[0].val.p)->pt;
+      if ((variable < seq->get_nb_variable()) && (seq->get_characteristics(variable))) {
+        status = false;
+        genAMLError(ERRORMSG(K_NB_ARG_ERR_s) , "Plot");
+      }
+      break;
+    }
+    }
+  }
+
+        """
+        from openalea.sequence_analysis.enums import output_display
+        if kargs.get('Output'):
+            Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
+        else:
+            Output = None
+        if Output is None:
+            if ViewPoint == 'q':
+                Output = output_display['Segment']
+            elif ViewPoint == 'p':
+                Output = output_display['State']
+        elif (ViewPoint == 'q' and Output not in [output_display['ChangePoint'], output_display['Segment']]) \
+            or (ViewPoint == 'p'  and Output not in [output_display['State'], output_display['InState'], output_display['OutState']]):
+            raise ValueError(" INCOMPATIBLE_OPTIONS between ViewPoint and Output")
+
+
+        #calling the plot functions from here
         try:
-            if (survival):
+            if ViewPoint=='s':
                 print 'Survival viewpoint'
-                plotable = self.survival_get_plotable(*params)
+                
+                from openalea.stat_tool.enums import histogram_types
+                from openalea.stat_tool.enums import model_distribution_types
+                #todo is *params needed or not?
+                if type(self) in model_distribution_types:
+                    #equivalent to dist->suvival_plot_write(error, Plot_prefix, title)
+                    plotable = self.survival_get_plotable(*params)
+                elif type(self) in histogram_types:
+                    #equivalent to histo->survival_plot_write(error , Plot_prefix , title)
+                    output = self.survival_get_plotable(*params)
+                else:
+                    raise ValueError("""(%s) has no survival point. Use another
+                        Viewpoint or use a first argument in DISTRIBUTION or MIXTURE or
+                        CONVOLUTION or COMPOUND or FREQUENCY_DISTRIBUTION or 
+                        MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA""" 
+                        % str(type(self)))
+                
 
-            elif (stateprofile):
+            elif ViewPoint=='p':
                 print 'state profile viewpoint'
-                plotable = self.stateprofile_get_plotable(*params)
+                print 'Output=', Output
+                Plot_prefix=''
+                plotable = None
+                from openalea.sequence_analysis import \
+                    _HiddenVariableOrderMarkov, _HiddenSemiMarkov
+                if type(self) == _HiddenVariableOrderMarkov:
+                    print '--hiddenvom'
+                    plotable = self.state_profile_plotable_write(args[0])
+                elif type(self) == _HiddenSemiMarkov:
+                    print '--hiddensemimarkov'
+                    print len(args)
+                    if len(args)==0:
+                        identifier = 1
+                    elif len(args)==1:
+                        identifier = args[0]
+                    else:
+                        raise SyntaxError("expect only one identifier Plot(hsmc25, 1, ViewPoint='StateProfile'")
+                    plotable = self.state_profile_plotable_write(identifier, Output)
+                else:
+                    print '3d state case'
+                    #todo 3 args required
+                    from openalea.sequence_analysis import _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData, _NonhomogeneousMarkovData
+                    assert type(self) in [_MarkovianSequences, _VariableOrderMarkovData,
+                                          _SemiMarkovData, _NonhomogeneousMarkovData]
+                    if type(args[1])==_HiddenVariableOrderMarkov:
+                        plotable = args[1].state_profile_plotable_write2(self , args[0]);
+                    elif type(args[1])==_HiddenSemiMarkov:
+                        plotable = args[1].state_profile_plotable_write2(self , args[0], Output)
+                    else:
+                        raise TypeError("expect HiddenVariableOrderMarkov or HiddenSemiMarkov")
+                
+                if plotable == None:
+                    try:
+                        plotable = self.stateprofile_get_plotable(*params)
+                    except:
+                        pass
 
-            elif (segmentprofile):
+            elif ViewPoint=='q':
                 print 'segment profile viewpoint'
-                print params
-                try:
-                    from openalea.sequence_analysis import enums
-                except:
-                    raise ImportError("sequence analysis not installed !!")
-                identifier =  args[0]
-                nb_segment =  args[1]
+                from openalea.sequence_analysis import _Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData
+                if type(self) not in [_Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData]:
+                    raise TypeError('object must be in SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA')
 
-                model_type = [enums.model_type[args[2]]]
-                output = 1 #segment (1) or changepoint (0) todo: use enum
-                print identifier, nb_segment, model_type, output
-                plotable = self.segmentprofile_get_plotable(identifier, nb_segment, model_type, output)
-            elif data:
+                try:
+                    self.nb_variable
+                except:
+                    raise ValueError("object has no nb_variable. check that it is a sequence")
+                nb_variable = self.nb_variable
+                assert len(args)>=2
+                error.CheckType([args[0], args[1]], [[int],[int]])
+                #construct model_type
+                from openalea.sequence_analysis.enums import model_type
+                types = []
+                for i in range(0, nb_variable):
+                    error.CheckType([args[i+2]], [str])
+                    if i==0:
+                        types.append(model_type[args[i+2]])
+                        #Multinomial or Poisson or Ordinal or Gaussian or 
+                        # Mean or Variance or MeanVariance
+                        if args[i+2] in ["Mean","MeanVariance"]:
+                            for j in range(1, nb_variable):
+                                types.append(types[i])
+                            break
+                    else:  
+                        # Multinomial or Poisson or Ordinal or Gaussian 
+                        # or Variance
+                        model_type[i] = model_type[args[i+2]]
+                print types
+                print nb_variable
+                #seq->segment_profile_plot_write(
+                #         error , Plot_prefix , args[1].val.i ,
+                #           args[2].val.i , model_type , output , title);
+       
+                plotable = self.segment_profile_plotable_write(args[0], args[1], 
+                                       types, Output)
+            
+    
+            elif ViewPoint=='d':
                 print 'data viewpoint'
-                plotable = self.get_plotable_data(*params)
-            else:
+                from openalea.sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _NonHomogeneousMarkovData, _Tops
+                if type(self) in [_SemiMarkovData, _MarkovianSequences, _Sequences,
+                                  _NonHomogeneousMarkovData, _Tops]:
+                    #status = seq->plot_data_write(error , Plot_prefix , title);
+                    plotable = self.get_plotable_data(*params)
+            elif ViewPoint=='v':
                 print 'normal viewpoint',
+                # plot_write(error , Plot_prefix , title);
 
                 if args:
                     #sequence case:
@@ -577,7 +756,7 @@ class StatInterface(object):
             return
 
         if(plotable is not None):
-            plotter.plot(plotable, title, groups, *args, **kargs)
+            plotter.plot(plotable, Title, groups, *args, **kargs)
         else:
             self.old_plot(*args, **kargs)
 
@@ -623,18 +802,18 @@ class StatInterface(object):
         StateSequence = error.ParseKargs(kargs, "StateSequence",
                                           "GeneralizedViterbi", state_seq_map)
         Segmentation = error.ParseKargs(kargs, "Segmentation", 
-                                        "ForwardBackwardSampling",
+                                        "DynamicProgramming",
                                         segmentations_map)
         #todo it seems that by default, segmentation = FORWARD_DYNAMIC_PROGRAMMING , 
        
-
-        from openalea.sequence_analysis.enums import output_display
+        
         # !! in AML, Output is not set y default, i.e. equivalent to None
         # the ParseKargs does not accept None sinc we provide the list of
         # possible keys in output_display (which do not contain None)
         #, so we first need to check the presence of Output in the kargs
         # then, to give a default value!=None. But be aware that tis default 
         # value is a dummy variable that is not used.
+        from openalea.sequence_analysis.enums import output_display
         if kargs.get('Output'):
             Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
         else:
@@ -654,7 +833,7 @@ class StatInterface(object):
             raise ValueError("incompatible options")
         if Format == 'l' and ViewPoint != 'd':
             raise ValueError("incompatible options")
-        """if (segmentations_option or nb_segmentation_option)  and \
+        """if segmentations_option or nb_segmentation_option)  and \
            (view_point!='q' or args[0] not in 
             (
                 (args[0].tag() != AMObjType::SEQUENCES) 
@@ -781,7 +960,7 @@ class StatInterface(object):
                     types.append(model_type[args[i+2]])
                     #Multinomial or Poisson or Ordinal or Gaussian or 
                     # Mean or Variance or MeanVariance
-                    if args[i+2] in ["Variance","MeaVariance"]:
+                    if args[i+2] in ["Mean","MeanVariance"]:
                         for j in range(1, nb_variable):
                              types.append(types[i])
                         break
