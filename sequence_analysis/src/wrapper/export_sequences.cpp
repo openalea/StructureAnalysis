@@ -100,7 +100,7 @@ public:
     int nb_variables_check = 0;
     int *length;
     int *identifiers;
-    
+
     double ***real_sequence;
     int ***int_sequence;
     bool is_float = false;
@@ -312,7 +312,7 @@ public:
           }
       }
 
-    
+
     delete[] length;
     delete[] identifiers;
 
@@ -408,7 +408,7 @@ public:
 
     return l;
   }
-  
+
   static boost::python::list
   get_item_int(const Sequences *seq, int index_seq)
   {
@@ -418,7 +418,7 @@ public:
         PyErr_SetString(PyExc_IndexError, "sequence index out of bound");
         boost::python::throw_error_already_set();
       }
-    
+
     boost::python::list l;
     int nb_length = seq->get_length(index_seq);
     int nb_var = seq->get_nb_variable();
@@ -426,7 +426,7 @@ public:
 
     for (int indexvar = 0; indexvar < nb_var; indexvar++)
     {
-      
+
       boost::python::list subl;
       for (int index = 0; index < nb_length; index++)
       {
@@ -441,7 +441,7 @@ public:
     return l;
   }
 
-  
+
 
 
   static Sequences*
@@ -770,7 +770,7 @@ public:
     // i = n
     values[i] = extract<double> (input_values[i]);
     sum += values[i];
-    
+
     // check that sum is 1 ?
 
     //normalization
@@ -864,7 +864,7 @@ public:
   }
 
   static Sequences*
-  multiple_alignment(const Sequences &input, const VectorDistance &ivector_dist, 
+  multiple_alignment(const Sequences &input, const VectorDistance &ivector_dist,
       bool begin_free, bool end_free, int indel_cost, double indel_factor, int algorithm, const char *path)
   {
     HEADER_OS(Sequences);
@@ -1016,17 +1016,17 @@ public:
     const std::string& title)
   {
       StatError error;
-      input.plot_write(error, prefix.c_str(), title.c_str());    
+      input.plot_write(error, prefix.c_str(), title.c_str());
   }
   static void plot_data_write(const Sequences &input, const std::string& prefix,
   const std::string& title)
   {
       StatError error;
-      input.plot_data_write(error, prefix.c_str(), title.c_str());    
+      input.plot_data_write(error, prefix.c_str(), title.c_str());
   }
 
-  /*static bool 
-  segment_profile_write(const Sequences &input, const char *prefix, int iidentifier, int nb_segment, 
+  /*static bool
+  segment_profile_write(const Sequences &input, const char *prefix, int iidentifier, int nb_segment,
     boost::python::list model_type, int output, char title)
   {
     StatError error;
@@ -1034,7 +1034,7 @@ public:
     CREATE_ARRAY(model_type, int, models);
 
     ret = input.segment_profile_write(error, prefix, iidentifier, nb_segment,
-         models.get(), output, title); 
+         models.get(), output, title);
     FOOTER;
   }
   */
@@ -1060,15 +1060,13 @@ public:
     return ret;
   }
 
-  static MultiPlotSet* 
-  get_segment_profile_plotable_write(const Sequences &input, int iidentifier ,
+  static MultiPlotSet*
+  segment_profile_plotable_write(const Sequences &input, int iidentifier ,
       int nb_segment, boost::python::list model_type , int output)
   {
     StatError error;
     CREATE_ARRAY(model_type, int, models);
-    std::cout<<"here1"<<std::endl;
     MultiPlotSet* ret = input.segment_profile_plotable_write(error, iidentifier, nb_segment, models.get(), output);
-    std::cout<<"here2"<<std::endl;
 
     if (!ret)
       ERROR;
@@ -1087,7 +1085,7 @@ public:
     CREATE_ARRAY(model_type, int, models);
     ret = input.segment_profile_write(error, os, iidentifier,  nb_segment,
         models.get(), output, format, segmentation, nb_segmentation);
-    if (!ret) 
+    if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     cout << os.str() << endl;
     //return ret;
@@ -1185,7 +1183,7 @@ class_sequences()
 
    .def("plot_write", SequencesWrap::plot_write, args("prefix", "title"), "Write GNUPLOT files")
    .def("plot_data_write", SequencesWrap::plot_data_write, args("prefix", "title"), "Write GNUPLOT files")
-   DEF_RETURN_VALUE("segmentprofile_get_plotable", SequencesWrap::get_segment_profile_plotable_write, args("identifier", "nb_segment", "model_type", "output"), "Write segment_profile")
+   DEF_RETURN_VALUE("segment_profile_plotable_write", SequencesWrap::segment_profile_plotable_write, args("identifier", "nb_segment", "model_type", "output"), "Write segment_profile")
 
     .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output" ,"format","segmentation","nb_segmentation"), "segment profile write for Display")
 

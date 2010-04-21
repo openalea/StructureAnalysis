@@ -168,10 +168,23 @@ public:
   }
 
  static MultiPlotSet*
-  stateprofile_get_plotable(const HiddenSemiMarkov &p, int identifier, int output = SSTATE)
+  state_profile_plotable_write(const HiddenSemiMarkov &p,
+      int identifier, int output)
   {
     StatError error;
     MultiPlotSet* ret = p.state_profile_plotable_write(error, identifier, output);
+    if (!ret)
+      ERROR;
+    return ret;
+  }
+
+  static MultiPlotSet*
+  state_profile_plotable_write2(const HiddenSemiMarkov &p,
+      const MarkovianSequences &iseq,int identifier, int output)
+  {
+    StatError error;
+    MultiPlotSet* ret = p.state_profile_plotable_write(error, iseq,
+        identifier, output);
     if (!ret)
       ERROR;
     return ret;
@@ -205,7 +218,9 @@ void class_hidden_semi_markov() {
     DEF_RETURN_VALUE("divergence_computation_histo", WRAP::divergence_computation_histo, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_length", WRAP::divergence_computation_length, args("input", "input_markov", "input_sequence", "filename"), "todo")
     DEF_RETURN_VALUE("divergence_computation_sequences", WRAP::divergence_computation_sequences, args("input", "input_markov", "input_sequence", "filename"), "todo")
-    DEF_RETURN_VALUE("stateprofile_get_plotable", WRAP::stateprofile_get_plotable, args("identifier", "output"), "Return a plotable")
+    DEF_RETURN_VALUE("state_profile_plotable_write", WRAP::state_profile_plotable_write, args("identifier", "output"), "Return a plotable")
+    DEF_RETURN_VALUE("state_profile_plotable_write2", WRAP::state_profile_plotable_write2, args("seqeuences","identifier", "output"), "Return a plotable")
+
 
 ;
 
