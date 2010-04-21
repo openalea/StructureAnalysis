@@ -98,11 +98,11 @@ class Test:
         d1 = Distribution("B", 2, 18, 0.5)
 
         if DISABLE_PLOT == False:
-            d1.plot(ViewPoint="survival")
+            d1.plot(ViewPoint="Survival")
 
         histo1 = Simulate(d1, 200)
         if DISABLE_PLOT == False:
-            histo1.plot(ViewPoint="survival")
+            histo1.plot(ViewPoint="Survival")
 
     def test_plot_parametric_model(self):
 
@@ -115,6 +115,12 @@ class Test:
             Plot(dist2)
 
 
+
+def test_output_plot_viewpoint_survival():
+    d1 = Distribution("B", 2,19,0.5)
+    Plot(d1)
+    Plot(d1, ViewPoint='Survival')
+
 def test_output_display_detail():
     d1 = Distribution("B", 2,19,0.5)
     print Display(d1)
@@ -126,13 +132,13 @@ def test_output_display_detail():
     except:
        assert ValueError
 
-def test_output_viewpoint_survival():
+def test_output_display_viewpoint_survival():
     d1 = Distribution("B", 2,19,0.5)
     print Display(d1, ViewPoint="Survival")
     convol1 = Convolution("data/convolution1.conv")
     print Display(convol1, ViewPoint="Survival")
 
-def test_output_viewpoint_data():
+def test_output_display_viewpoint_data():
     from openalea.stat_tool import Vectors
     v = Vectors('data/vectors.vec')
     Display(v, ViewPoint='Data') 
