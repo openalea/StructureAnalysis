@@ -719,12 +719,12 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
 
     os << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
-    if (vectors->marginal[i]) {
-      vectors->marginal[i]->ascii_characteristic_print(os , exhaustive);
+    if (vectors->marginal_distribution[i]) {
+      vectors->marginal_distribution[i]->ascii_characteristic_print(os , exhaustive);
 
-      if ((vectors->marginal[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
+      if ((vectors->marginal_distribution[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
         os << "\n   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-        vectors->marginal[i]->ascii_print(os);
+        vectors->marginal_distribution[i]->ascii_print(os);
       }
     }
 
@@ -1036,11 +1036,11 @@ bool Regression::spreadsheet_write(StatError &error , const char *path) const
 
       out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
 
-      if (vectors->marginal[i]) {
-        vectors->marginal[i]->spreadsheet_characteristic_print(out_file);
+      if (vectors->marginal_distribution[i]) {
+        vectors->marginal_distribution[i]->spreadsheet_characteristic_print(out_file);
 
         out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-        vectors->marginal[i]->spreadsheet_print(out_file);
+        vectors->marginal_distribution[i]->spreadsheet_print(out_file);
       }
 
       else {
@@ -1306,12 +1306,14 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
         out_file << "set ytics " << MIN(min_response , 0) << ",1" << endl;
       }
 
-      if (((vectors->marginal[0]) && (vectors->marginal[0]->nb_value <= PLOT_NB_VALUE)) &&
-          ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
+      if (((vectors->marginal_distribution[0]) &&
+           (vectors->marginal_distribution[0]->nb_value <= PLOT_NB_VALUE)) &&
+          ((vectors->marginal_distribution[1]) &&
+           (vectors->marginal_distribution[1]->nb_value <= PLOT_NB_VALUE))) {
         frequency = vectors->joint_frequency_computation(0 , 1);
 
-        for (j = vectors->marginal[0]->offset;j < vectors->marginal[0]->nb_value;j++) {
-          for (k = vectors->marginal[1]->offset;k < vectors->marginal[1]->nb_value;k++) {
+        for (j = vectors->marginal_distribution[0]->offset;j < vectors->marginal_distribution[0]->nb_value;j++) {
+          for (k = vectors->marginal_distribution[1]->offset;k < vectors->marginal_distribution[1]->nb_value;k++) {
             if (frequency[j][k] > 0) {
               out_file << "set label \"" << frequency[j][k] << "\" at " << j << ","
                        << k << endl;
@@ -1319,7 +1321,7 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
           }
         }
 
-        for (j = 0;j < vectors->marginal[0]->nb_value;j++) {
+        for (j = 0;j < vectors->marginal_distribution[0]->nb_value;j++) {
           delete [] frequency[j];
         }
         delete [] frequency;
@@ -1464,8 +1466,10 @@ MultiPlotSet* Regression::get_plotable() const
   plot[0].xlabel = STAT_label[STATL_EXPLANATORY_VARIABLE];
   plot[0].ylabel = STAT_label[STATL_RESPONSE_VARIABLE];
 
-  if (((vectors->marginal[0]) && (vectors->marginal[0]->nb_value <= PLOT_NB_VALUE)) &&
-      ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
+  if (((vectors->marginal_distribution[0]) &&
+       (vectors->marginal_distribution[0]->nb_value <= PLOT_NB_VALUE)) &&
+      ((vectors->marginal_distribution[1]) &&
+       (vectors->marginal_distribution[1]->nb_value <= PLOT_NB_VALUE))) {
     plot[0].resize(3);
   }
   else {
@@ -1486,8 +1490,10 @@ MultiPlotSet* Regression::get_plotable() const
 
   plotable_write(plot[0][1]);
 
-  if (((vectors->marginal[0]) && (vectors->marginal[0]->nb_value <= PLOT_NB_VALUE)) &&
-      ((vectors->marginal[1]) && (vectors->marginal[1]->nb_value <= PLOT_NB_VALUE))) {
+  if (((vectors->marginal_distribution[0]) &&
+       (vectors->marginal_distribution[0]->nb_value <= PLOT_NB_VALUE)) &&
+      ((vectors->marginal_distribution[1]) &&
+       (vectors->marginal_distribution[1]->nb_value <= PLOT_NB_VALUE))) {
     plot[0][2].label = "true";
 
     vectors->plotable_frequency_write(plot[0][2] , 0 , 1);
@@ -1834,7 +1840,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
       error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
     }
 
-    if (!marginal[explanatory_variable]) {
+    if (!marginal_distribution[explanatory_variable]) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << explanatory_variable + 1 << " "
@@ -1843,8 +1849,8 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
     }
 
     else {
-      for (i = marginal[explanatory_variable]->offset;i < marginal[explanatory_variable]->nb_value;i++) {
-        if (marginal[explanatory_variable]->frequency[i] == 0) {
+      for (i = marginal_distribution[explanatory_variable]->offset;i < marginal_distribution[explanatory_variable]->nb_value;i++) {
+        if (marginal_distribution[explanatory_variable]->frequency[i] == 0) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << explanatory_variable + 1 << ": "
@@ -1969,7 +1975,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 
         // calcul de la matrice de lissage
 
-        for (j = 0;j < vec->marginal[0]->frequency[i];j++) {
+        for (j = 0;j < vec->marginal_distribution[0]->frequency[i];j++) {
           for (k = min_index;k <= max_index;k++) {
             smoother_matrix[value_index + j][k] = weight[k] / norm;
           }
@@ -2040,7 +2046,7 @@ Regression* Vectors::moving_average(StatError &error , int explanatory_variable 
 
         // calcul de la matrice de lissage
 
-        for (j = 0;j < vec->marginal[0]->frequency[i];j++) {
+        for (j = 0;j < vec->marginal_distribution[0]->frequency[i];j++) {
           for (k = min_index;k <= max_index;k++) {
             smoother_matrix[value_index + j][k] = weight[k] / norm * (1. + (i - local_mean[0]) *
                                                    (vec->int_vector[index[k]][0] - local_mean[0]) / local_variance);
