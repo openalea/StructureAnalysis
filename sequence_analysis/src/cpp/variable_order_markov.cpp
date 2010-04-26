@@ -4717,7 +4717,8 @@ double VariableOrderMarkov::penalty_computation(bool hidden , double min_probabi
           if (nb_parameter > 0) {
             switch (hidden) {
             case false :
-              penalty += nb_parameter * log((double)markov_data->marginal[0]->frequency[j]);
+              penalty += nb_parameter *
+                         log((double)markov_data->marginal_distribution[0]->frequency[j]);
               break;
             case true :
               penalty += nb_parameter * log(state_marginal[j] * markov_data->cumul_length);
@@ -4733,7 +4734,8 @@ double VariableOrderMarkov::penalty_computation(bool hidden , double min_probabi
 
           switch (hidden) {
             case false :
-            penalty += nb_parameter * log((double)markov_data->marginal[0]->frequency[j]);
+            penalty += nb_parameter *
+                       log((double)markov_data->marginal_distribution[0]->frequency[j]);
             break;
           case true :
             penalty += nb_parameter * log(state_marginal[j] * markov_data->cumul_length);
@@ -4967,7 +4969,7 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
     else {
       variable--;
 
-      if ((value < 0) || (value >= marginal[0]->nb_value)) {
+      if ((value < 0) || (value >= marginal_distribution[0]->nb_value)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_STATE] << " " << value << " "
@@ -5003,7 +5005,7 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
         error.update((error_message.str()).c_str());
       }
 
-      else if ((value < 0) || (value >= marginal[variable]->nb_value)) {
+      else if ((value < 0) || (value >= marginal_distribution[variable]->nb_value)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[variable == 0 ? STATL_STATE : STATL_OUTPUT] << " "
