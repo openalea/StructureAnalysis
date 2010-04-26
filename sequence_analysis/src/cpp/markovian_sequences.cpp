@@ -130,8 +130,8 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
 
 
   if ((seq.self_transition) && (param != REVERSE)) {
-    self_transition = new SelfTransition*[marginal[0]->nb_value];
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       if (seq.self_transition[i]) {
         self_transition[i] = new SelfTransition(*(seq.self_transition[i]));
       }
@@ -150,8 +150,8 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
     observation[0] = NULL;
 
     for (i = 1;i < nb_variable;i++) {
-      observation[i] = new FrequencyDistribution*[marginal[0]->nb_value];
-      for (j = 0;j < marginal[0]->nb_value;j++) {
+      observation[i] = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
+      for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
         observation[i][j] = new FrequencyDistribution(*(seq.observation[i][j]));
       }
     }
@@ -308,7 +308,7 @@ void MarkovianSequences::remove()
 
 
   if (self_transition) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       delete self_transition[i];
     }
     delete [] self_transition;
@@ -316,7 +316,7 @@ void MarkovianSequences::remove()
 
   if (observation) {
     for (i = 1;i < nb_variable;i++) {
-      for (j = 0;j < marginal[0]->nb_value;j++) {
+      for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
         delete observation[i][j];
       }
       delete [] observation [i];
@@ -386,7 +386,7 @@ void MarkovianSequences::state_variable_init(int itype)
   if (itype != type[0]) {
     if (type[0] == STATE) {
       if (self_transition) {
-        for (i = 0;i < marginal[0]->nb_value;i++) {
+        for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
           delete self_transition[i];
         }
         delete [] self_transition;
@@ -396,7 +396,7 @@ void MarkovianSequences::state_variable_init(int itype)
 
       if (observation) {
         for (i = 1;i < nb_variable;i++) {
-          for (j = 0;j < marginal[0]->nb_value;j++) {
+          for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
             delete observation[i][j];
           }
           delete [] observation[i];
@@ -450,7 +450,7 @@ DiscreteDistributionData* MarkovianSequences::extract(StatError &error , int typ
       error.update(SEQ_error[SEQR_CHARACTERISTICS_NOT_COMPUTED]);
     }
 
-    else if ((value < 0) || (value >= marginal[variable]->nb_value)) {
+    else if ((value < 0) || (value >= marginal_distribution[variable]->nb_value)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VALUE] << " " << value << " "
@@ -548,9 +548,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 {
   bool status = true;
   register int i , j , k , m , n;
-  int inb_sequence , nb_histo , *ilength , *pindex_param , *cindex_param ,
-      *pisequence , *cisequence;
-  double *prsequence , *crsequence;
+  int inb_sequence , nb_histo , *ilength;
   const FrequencyDistribution **phisto;
   MarkovianSequences *seq;
   const MarkovianSequences **pseq;
@@ -635,10 +633,8 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       i = 0;
       for (j = 0;j < nb_sample;j++) {
         for (k = 0;k < pseq[j]->nb_sequence;k++) {
-          pindex_param = seq->index_parameter[i];
-          cindex_param = pseq[j]->index_parameter[k];
           for (m = 0;m < pseq[j]->length[k];m++) {
-            *pindex_param++ = *cindex_param++;
+            seq->index_parameter[i][m] = pseq[j]->index_parameter[k][m];
           }
           i++;
         }
@@ -660,18 +656,14 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       for (k = 0;k < pseq[j]->nb_sequence;k++) {
         for (m = 0;m < pseq[j]->nb_variable;m++) {
           if (pseq[j]->type[m] != REAL_VALUE) {
-            pisequence = seq->int_sequence[i][m];
-            cisequence = pseq[j]->int_sequence[k][m];
             for (n = 0;n < pseq[j]->length[k];n++) {
-              *pisequence++ = *cisequence++;
+              seq->int_sequence[i][m][n] = pseq[j]->int_sequence[k][m][n];
             }
           }
 
           else {
-            prsequence = seq->real_sequence[i][m];
-            crsequence = pseq[j]->real_sequence[k][m];
             for (n = 0;n < pseq[j]->length[k];n++) {
-              *prsequence++ = *crsequence++;
+              seq->real_sequence[i][m][n] = pseq[j]->real_sequence[k][m][n];
             }
           }
         }
@@ -693,9 +685,13 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
       if (seq->type[i] != REAL_VALUE) {
         for (j = 0;j < nb_sample;j++) {
-          phisto[j] = pseq[j]->marginal[i];
+          phisto[j] = pseq[j]->marginal_distribution[i];
         }
-        seq->marginal[i] = new FrequencyDistribution(nb_sample , phisto);
+        seq->marginal_distribution[i] = new FrequencyDistribution(nb_sample , phisto);
+      }
+
+      else {
+        seq->build_marginal_histogram(i);
       }
 
       for (j = 0;j < nb_sample;j++) {
@@ -707,17 +703,17 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       if (j == nb_sample) {
         seq->characteristics[i] = new SequenceCharacteristics();
 
-        seq->characteristics[i]->nb_value = seq->marginal[i]->nb_value;
+        seq->characteristics[i]->nb_value = seq->marginal_distribution[i]->nb_value;
 
         seq->build_index_value(i);
 
-        seq->characteristics[i]->first_occurrence = new FrequencyDistribution*[seq->marginal[i]->nb_value];
-        seq->characteristics[i]->recurrence_time = new FrequencyDistribution*[seq->marginal[i]->nb_value];
+        seq->characteristics[i]->first_occurrence = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+        seq->characteristics[i]->recurrence_time = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
 
-        for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+        for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
           nb_histo = 0;
           for (k = 0;k < nb_sample;k++) {
-            if (j < pseq[k]->marginal[i]->nb_value) {
+            if (j < pseq[k]->marginal_distribution[i]->nb_value) {
               phisto[nb_histo++] = pseq[k]->characteristics[i]->first_occurrence[j];
             }
           }
@@ -725,7 +721,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
           nb_histo = 0;
           for (k = 0;k < nb_sample;k++) {
-            if (j < pseq[k]->marginal[i]->nb_value) {
+            if (j < pseq[k]->marginal_distribution[i]->nb_value) {
               phisto[nb_histo++] = pseq[k]->characteristics[i]->recurrence_time[j];
             }
           }
@@ -740,16 +736,16 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
         }
 
         if (j == nb_sample) {
-          seq->characteristics[i]->sojourn_time = new FrequencyDistribution*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->sojourn_time = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
           if (pseq[0]->characteristics[i]->initial_run) {
-            seq->characteristics[i]->initial_run = new FrequencyDistribution*[seq->marginal[i]->nb_value];
+            seq->characteristics[i]->initial_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
           }
-          seq->characteristics[i]->final_run = new FrequencyDistribution*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->final_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
 
-          for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+          for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
             nb_histo = 0;
             for (k = 0;k < nb_sample;k++) {
-              if (j < pseq[k]->marginal[i]->nb_value) {
+              if (j < pseq[k]->marginal_distribution[i]->nb_value) {
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->sojourn_time[j];
               }
             }
@@ -758,7 +754,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
             if (pseq[0]->characteristics[i]->initial_run) {
               nb_histo = 0;
               for (k = 0;k < nb_sample;k++) {
-                if (j < pseq[k]->marginal[i]->nb_value) {
+                if (j < pseq[k]->marginal_distribution[i]->nb_value) {
                   phisto[nb_histo++] = pseq[k]->characteristics[i]->initial_run[j];
                 }
               }
@@ -767,7 +763,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
             nb_histo = 0;
             for (k = 0;k < nb_sample;k++) {
-              if (j < pseq[k]->marginal[i]->nb_value) {
+              if (j < pseq[k]->marginal_distribution[i]->nb_value) {
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->final_run[j];
               }
             }
@@ -786,13 +782,13 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
         }
 
         if (j == nb_sample) {
-          seq->characteristics[i]->nb_run = new FrequencyDistribution*[seq->marginal[i]->nb_value];
-          seq->characteristics[i]->nb_occurrence = new FrequencyDistribution*[seq->marginal[i]->nb_value];
+          seq->characteristics[i]->nb_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+          seq->characteristics[i]->nb_occurrence = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
 
-          for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+          for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
             nb_histo = 0;
             for (k = 0;k < nb_sample;k++) {
-              if (j < pseq[k]->marginal[i]->nb_value) {
+              if (j < pseq[k]->marginal_distribution[i]->nb_value) {
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_run[j];
               }
             }
@@ -800,7 +796,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
             nb_histo = 0;
             for (k = 0;k < nb_sample;k++) {
-              if (j < pseq[k]->marginal[i]->nb_value) {
+              if (j < pseq[k]->marginal_distribution[i]->nb_value) {
                 phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_occurrence[j];
               }
             }
@@ -921,11 +917,11 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
     }
 
     else {
-      min_symbol = marginal[ivariable]->nb_value;
+      min_symbol = marginal_distribution[ivariable]->nb_value;
       max_symbol = 0;
 
-      for (i = 0;i < marginal[ivariable]->nb_value - marginal[ivariable]->offset;i++) {
-        if ((symbol[i] < 0) || (symbol[i] >= (add_flag ? marginal[ivariable]->nb_value - 1 : marginal[ivariable]->nb_value))) {
+      for (i = 0;i < marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset;i++) {
+        if ((symbol[i] < 0) || (symbol[i] >= (add_flag ? marginal_distribution[ivariable]->nb_value - 1 : marginal_distribution[ivariable]->nb_value))) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_SYMBOL] << " " << symbol[i] << " "
@@ -955,7 +951,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
         presence[i] = false;
       }
 
-      for (i = 0;i < marginal[ivariable]->nb_value - marginal[ivariable]->offset;i++) {
+      for (i = 0;i < marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset;i++) {
         presence[symbol[i]] = true;
       }
 
@@ -1082,13 +1078,13 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
     }
 
     else {
-      for (i = 0;i < marginal[ivariable]->nb_value;i++) {
-        if (marginal[ivariable]->frequency[i] == 0) {
+      for (i = 0;i < marginal_distribution[ivariable]->nb_value;i++) {
+        if (marginal_distribution[ivariable]->frequency[i] == 0) {
           break;
         }
       }
 
-      if (i == marginal[ivariable]->nb_value) {
+      if (i == marginal_distribution[ivariable]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << ivariable + 1 << ": "
@@ -1102,31 +1098,31 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
 
 #   ifdef MESSAGE
     os << "\n" << SEQ_label[SEQL_MISSING_VALUE] << ":";
-    for (i = 0;i < marginal[ivariable]->nb_value;i++) {
-      if (marginal[ivariable]->frequency[i] == 0) {
+    for (i = 0;i < marginal_distribution[ivariable]->nb_value;i++) {
+      if (marginal_distribution[ivariable]->frequency[i] == 0) {
         os << " " << i;
       }
     }
     os << endl;
 #   endif
 
-    symbol = new int[marginal[ivariable]->nb_value - marginal[ivariable]->offset];
+    symbol = new int[marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset];
 
 //    i = 0;
     i = -1;
-    for (j = marginal[ivariable]->offset;j < marginal[ivariable]->nb_value;j++) {
-//      symbol[j - marginal[ivariable]->offset] = i;
-      if (marginal[ivariable]->frequency[j] > 0) {
+    for (j = marginal_distribution[ivariable]->offset;j < marginal_distribution[ivariable]->nb_value;j++) {
+//      symbol[j - marginal_distribution[ivariable]->offset] = i;
+      if (marginal_distribution[ivariable]->frequency[j] > 0) {
         i++;
       }
-      symbol[j - marginal[ivariable]->offset] = i;
+      symbol[j - marginal_distribution[ivariable]->offset] = i;
     }
 //    max = i - 1;
     max = i;
 
 #   ifdef DEBUG
     cout << "\nTest :";
-    for (i = 0;i < marginal[ivariable]->nb_value - marginal[ivariable]->offset;i++) {
+    for (i = 0;i < marginal_distribution[ivariable]->nb_value - marginal_distribution[ivariable]->offset;i++) {
       cout << " " << symbol[i];
     }
     cout << endl;
@@ -1208,7 +1204,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
     }
 
-    else if ((nb_class < 2) || (nb_class >= marginal[ivariable]->nb_value)) {
+    else if ((nb_class < 2) || (nb_class >= marginal_distribution[ivariable]->nb_value)) {
       status = false;
       error.update(STAT_error[STATR_NB_CLASS]);
     }
@@ -1216,11 +1212,11 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 
   if (status) {
     limit = new int[nb_class + 1];
-    limit[0] = marginal[ivariable]->offset;
+    limit[0] = marginal_distribution[ivariable]->offset;
     for (i = 1;i < nb_class;i++) {
       limit[i] = ilimit[i - 1];
     }
-    limit[nb_class] = marginal[ivariable]->nb_value;
+    limit[nb_class] = marginal_distribution[ivariable]->nb_value;
 
     for (i = 1;i <= nb_class;i++) {
       if (limit[i] <= limit[i - 1]) {
@@ -1230,7 +1226,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
     }
 
     if (status) {
-      symbol = new int[marginal[ivariable]->nb_value];
+      symbol = new int[marginal_distribution[ivariable]->nb_value];
 
       i = 0;
       for (j = 0;j < nb_class;j++) {
@@ -1536,8 +1532,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 {
   bool status = true;
   register int i , j , k , m;
-  int inb_variable , *iidentifier , *itype , *pisequence , *cisequence;
-  double *prsequence , *crsequence;
+  int inb_variable , *iidentifier , *itype;
   MarkovianSequences *seq;
   const MarkovianSequences **pseq;
 
@@ -1678,20 +1673,18 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       for (j = 0;j < nb_sample;j++) {
         for (k = 0;k < pseq[j]->nb_variable;k++) {
           if (seq->type[inb_variable] != REAL_VALUE) {
-            pisequence = seq->int_sequence[i][inb_variable++];
-            cisequence = pseq[j]->int_sequence[i][k];
             for (m = 0;m < length[i];m++) {
-              *pisequence++ = *cisequence++;
+              seq->int_sequence[i][inb_variable][m] = pseq[j]->int_sequence[i][k][m];
             }
           }
 
           else {
-            prsequence = seq->real_sequence[i][inb_variable++];
-            crsequence = pseq[j]->real_sequence[i][k];
             for (m = 0;m < length[i];m++) {
-              *prsequence++ = *crsequence++;
+              seq->real_sequence[i][inb_variable][m] = pseq[j]->real_sequence[i][k][m];
             }
           }
+
+          inb_variable++;
         }
       }
     }
@@ -1701,12 +1694,17 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       for (j = 0;j < pseq[i]->nb_variable;j++) {
         seq->min_value[inb_variable] = pseq[i]->min_value[j];
         seq->max_value[inb_variable] = pseq[i]->max_value[j];
-        if (pseq[i]->marginal[j]) {
-          seq->marginal[inb_variable] = new FrequencyDistribution(*(pseq[i]->marginal[j]));
+
+        if (pseq[i]->marginal_distribution[j]) {
+          seq->marginal_distribution[inb_variable] = new FrequencyDistribution(*(pseq[i]->marginal_distribution[j]));
+        }
+        if (pseq[i]->marginal_histogram[j]) {
+          seq->marginal_histogram[inb_variable] = new Histogram(*(pseq[i]->marginal_histogram[j]));
         }
         if (pseq[i]->characteristics[j]) {
           seq->characteristics[inb_variable] = new SequenceCharacteristics(*(pseq[i]->characteristics[j]));
         }
+
         inb_variable++;
       }
     }
@@ -1770,8 +1768,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
 {
   bool status = true , initial_run_flag;
   register int i , j , k;
-  int end_value , *ilength , *pisequence , *cisequence;
-  double *prsequence , *crsequence;
+  int end_value , *ilength;
   MarkovianSequences *seq;
 
 
@@ -1821,10 +1818,8 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
         if (seq->type[j] != REAL_VALUE) {
-          pisequence = seq->int_sequence[i][j];
-          cisequence = int_sequence[i][j];
           for (k = 0;k < length[i];k++) {
-            *pisequence++ = *cisequence++;
+            seq->int_sequence[i][j][k] = int_sequence[i][j][k];
           }
 
           if ((min_value[j] > 0) || (max_value[j] < 0)) {
@@ -1835,7 +1830,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
           }
 
           for (k = length[i];k < seq->length[i];k++) {
-            *pisequence++ = end_value;
+            seq->int_sequence[i][j][k] = end_value;
           }
 
 #         ifdef DEBUG
@@ -1844,21 +1839,18 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
 
           if (run_length == 1) {
             if ((j == 0) || (j == 1)) {
-              pisequence--;
-              *pisequence = *(pisequence - 1);
+              seq->int_sequence[i][j][seq->length[i] - 1] = seq->int_sequence[i][j][seq->length[i] - 2];
             }
             else if (j > 2) {
-              *--pisequence = 0;
+              seq->int_sequence[i][j][seq->length[i] - 1] = 0;
             }
           }
 #         endif
         }
 
         else {
-          prsequence = seq->real_sequence[i][j];
-          crsequence = real_sequence[i][j];
           for (k = 0;k < length[i];k++) {
-            *prsequence++ = *crsequence++;
+            seq->real_sequence[i][j][k] = real_sequence[i][j][k];
           }
 
           if ((min_value[j] > 0.) || (max_value[j] < 0.)) {
@@ -1874,7 +1866,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
           }
 
           for (k = length[i];k < seq->length[i];k++) {
-            *prsequence++ = end_value;
+            seq->real_sequence[i][j][k] = end_value;
           }
         }
       }
@@ -1883,6 +1875,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
+
       seq->build_marginal_frequency_distribution(i);
     }
 
@@ -1998,8 +1991,12 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
     for (i = 0;i < seq->nb_variable;i++) {
       seq->min_value[i] = min_value[i];
       seq->max_value[i] = max_value[i];
-      if (marginal[i]) {
-        seq->marginal[i] = new FrequencyDistribution(*marginal[i]);
+
+      if (marginal_distribution[i]) {
+        seq->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
+      }
+      if (marginal_histogram[i]) {
+        seq->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
       }
     }
 
@@ -2025,7 +2022,7 @@ double MarkovianSequences::iid_information_computation() const
 
 
   for (i = (((type[0] != STATE) || (nb_variable == 1)) ? 0 : 1);i < nb_variable;i++) {
-    information += marginal[i]->information_computation();
+    information += marginal_distribution[i]->information_computation();
   }
 
   return information;
@@ -2045,12 +2042,8 @@ void MarkovianSequences::self_transition_computation(int state)
 
 {
   register int i , j;
-  int num , denom , *pfrequency;
-  double *ppoint;
+  int num , denom;
 
-
-  pfrequency = self_transition[state]->frequency;
-  ppoint = self_transition[state]->point[0];
 
   for (i = 0;i < max_length - 1;i++) {
     num = 0;
@@ -2067,22 +2060,20 @@ void MarkovianSequences::self_transition_computation(int state)
       }
     }
 
-    *pfrequency++ = denom;
+    self_transition[state]->frequency[i] = denom;
     if (denom > 0) {
-      *ppoint++ = (double)num / (double)denom;
+      self_transition[state]->point[0][i] = (double)num / (double)denom;
     }
     else {
-      *ppoint++ = D_DEFAULT;
+      self_transition[state]->point[0][i] = D_DEFAULT;
     }
   }
 
 # ifdef DEBUG
-  pfrequency = self_transition[state]->frequency;
-  ppoint = self_transition[state]->point[0];
   double sum = 0.;
 
   for (i = 0;i < max_length - 1;i++) {
-    sum += *pfrequency++ * *ppoint++;
+    sum += self_transition[state]->frequency[i] * self_transition[state]->point[0][i];
   }
 
   cout << "\naverage self-transition probability : "
@@ -2107,9 +2098,9 @@ void MarkovianSequences::self_transition_computation()
 
 
     state_variable_init();
-    self_transition = new SelfTransition*[marginal[0]->nb_value];
+    self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
 
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       self_transition[i] = new SelfTransition(max_length - 1);
       self_transition_computation(i);
     }
@@ -2134,9 +2125,9 @@ void MarkovianSequences::self_transition_computation(bool *homogeneity)
 
 
     state_variable_init();
-    self_transition = new SelfTransition*[marginal[0]->nb_value];
+    self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
 
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       switch (homogeneity[i]) {
       case false :
         self_transition[i] = new SelfTransition(max_length - 1);
@@ -2163,15 +2154,14 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 
 {
   register int i , j;
-  int *pfrequency , *pstate , *poutput;
+  int *pstate , *poutput;
 
 
   // initialisation des lois empiriques
 
-  for (i = 0;i < marginal[0]->nb_value;i++) {
-    pfrequency = observation[variable][i]->frequency;
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
-      *pfrequency++ = 0;
+  for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
+      observation[variable][i]->frequency[j] = 0;
     }
   }
 
@@ -2187,7 +2177,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[0]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
     if (!characteristics[variable]) {
       observation[variable][i]->nb_value_computation();
     }
@@ -2242,7 +2232,7 @@ void MarkovianSequences::create_observation_frequency_distribution(int nb_state)
     for (i = 1;i < nb_variable;i++) {
       observation[i] = new FrequencyDistribution*[nb_state];
       for (j = 0;j < nb_state;j++) {
-        observation[i][j] = new FrequencyDistribution(marginal[i]->nb_value);
+        observation[i][j] = new FrequencyDistribution(marginal_distribution[i]->nb_value);
       }
     }
   }
@@ -2258,7 +2248,7 @@ void MarkovianSequences::create_observation_frequency_distribution(int nb_state)
 void MarkovianSequences::build_observation_frequency_distribution()
 
 {
-  create_observation_frequency_distribution(marginal[0]->nb_value);
+  create_observation_frequency_distribution(marginal_distribution[0]->nb_value);
   observation_frequency_distribution_computation();
 }
 
@@ -2284,10 +2274,10 @@ bool MarkovianSequences::test_hidden(int variable) const
 
     hidden = false;
 
-    occurrence = new bool*[marginal[0]->nb_value];
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      occurrence[i] = new bool[marginal[variable]->nb_value];
-      for (j = 0;j < marginal[variable]->nb_value;j++) {
+    occurrence = new bool*[marginal_distribution[0]->nb_value];
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      occurrence[i] = new bool[marginal_distribution[variable]->nb_value];
+      for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
         occurrence[i][j] = false;
       }
     }
@@ -2300,9 +2290,9 @@ bool MarkovianSequences::test_hidden(int variable) const
       }
     }
 
-    for (i = 0;i < marginal[variable]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
       nb_occurrence = 0;
-      for (j = 0;j < marginal[0]->nb_value;j++) {
+      for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
         if (occurrence[j][i]) {
           nb_occurrence++;
         }
@@ -2314,7 +2304,7 @@ bool MarkovianSequences::test_hidden(int variable) const
       }
     }
 
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       delete [] occurrence[i];
     }
     delete [] occurrence;
@@ -2342,14 +2332,14 @@ void MarkovianSequences::build_index_value(int variable)
 
   // creation d'un objet Curves
 
-  characteristics[variable]->index_value = new Curves(marginal[variable]->nb_value ,
+  characteristics[variable]->index_value = new Curves(marginal_distribution[variable]->nb_value ,
                                                       max_length , true , false);
-  frequency = new int[marginal[variable]->nb_value];
+  frequency = new int[marginal_distribution[variable]->nb_value];
 
   // calcul des probabilites de chaque valeur en fonction de l'index
 
   for (i = 0;i < max_length;i++) {
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       frequency[j] = 0;
     }
 
@@ -2360,11 +2350,11 @@ void MarkovianSequences::build_index_value(int variable)
     }
 
     total = 0;
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       total += frequency[j];
     }
     characteristics[variable]->index_value->frequency[i] = total;
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       characteristics[variable]->index_value->point[j][i] = (double)frequency[j] / (double)total;
     }
   }
@@ -2393,23 +2383,23 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
 
   // creation des lois empiriques
 
-  first_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  first_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     first_occurrence[i] = new FrequencyDistribution(max_length);
   }
 
-/*  characteristics[variable]->first_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  characteristics[variable]->first_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->first_occurrence[i] = new FrequencyDistribution(max_length);
   } */
 
   // mise a jour des lois empiriques
 
-  occurrence = new bool[marginal[variable]->nb_value];
+  occurrence = new bool[marginal_distribution[variable]->nb_value];
 
   for (i = 0;i < nb_sequence;i++) {
     nb_value = 0;
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       occurrence[j] = false;
     }
 
@@ -2421,7 +2411,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
 //       (characteristics[variable]->first_occurrence[*pisequence]->frequency[j])++;
 
         nb_value++;
-        if (nb_value == marginal[variable]->nb_value) {
+        if (nb_value == marginal_distribution[variable]->nb_value) {
           break;
         }
       }
@@ -2434,7 +2424,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     first_occurrence[i]->nb_value_computation();
     first_occurrence[i]->offset_computation();
     first_occurrence[i]->nb_element_computation();
@@ -2443,7 +2433,7 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
     first_occurrence[i]->variance_computation();
   }
 
-/*  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->first_occurrence[i]->nb_value_computation();
     characteristics[variable]->first_occurrence[i]->offset_computation();
     characteristics[variable]->first_occurrence[i]->nb_element_computation();
@@ -2452,8 +2442,8 @@ void MarkovianSequences::build_first_occurrence_frequency_distribution(int varia
     characteristics[variable]->first_occurrence[i]->variance_computation();
   } */
 
-  characteristics[variable]->first_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  characteristics[variable]->first_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->first_occurrence[i] = new FrequencyDistribution(*(first_occurrence[i]));
     delete first_occurrence[i];
   }
@@ -2480,22 +2470,22 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
 
   // creation des lois empiriques
 
-  recurrence_time = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  recurrence_time = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     recurrence_time[i] = new FrequencyDistribution(max_length);
   }
 
-/*  characteristics[variable]->recurrence_time = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  characteristics[variable]->recurrence_time = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->recurrence_time[i] = new FrequencyDistribution(max_length);
   } */
 
   // mise a jour des lois empiriques
 
-  index = new int[marginal[variable]->nb_value];
+  index = new int[marginal_distribution[variable]->nb_value];
 
   for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       index[j] = I_DEFAULT;
     }
     pisequence = int_sequence[i][variable];
@@ -2513,7 +2503,7 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     recurrence_time[i]->nb_value_computation();
     recurrence_time[i]->offset_computation();
     recurrence_time[i]->nb_element_computation();
@@ -2522,7 +2512,7 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
     recurrence_time[i]->variance_computation();
   }
 
-/*  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->recurrence_time[i]->nb_value_computation();
     characteristics[variable]->recurrence_time[i]->offset_computation();
     characteristics[variable]->recurrence_time[i]->nb_element_computation();
@@ -2531,8 +2521,8 @@ void MarkovianSequences::build_recurrence_time_frequency_distribution(int variab
     characteristics[variable]->recurrence_time[i]->variance_computation();
   } */
 
-  characteristics[variable]->recurrence_time = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  characteristics[variable]->recurrence_time = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->recurrence_time[i] = new FrequencyDistribution(*(recurrence_time[i]));
     delete recurrence_time[i];
   }
@@ -2565,20 +2555,20 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
 
   // creation des lois empiriques
 
-  sojourn_time = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  sojourn_time = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     sojourn_time[i] = new FrequencyDistribution(max_length + 1);
   }
 
   if (initial_run_flag) {
-    initial_run = new FrequencyDistribution*[marginal[variable]->nb_value];
-    for (i = 0;i < marginal[variable]->nb_value;i++) {
+    initial_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+    for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
       initial_run[i] = new FrequencyDistribution(max_length + 1);
     }
   }
 
-  final_run = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  final_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     final_run[i] = new FrequencyDistribution(max_length + 1);
   }
 
@@ -2610,7 +2600,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     sojourn_time[i]->nb_value_computation();
     sojourn_time[i]->offset_computation();
     sojourn_time[i]->nb_element_computation();
@@ -2620,7 +2610,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
   }
 
   if (initial_run_flag) {
-    for (i = 0;i < marginal[variable]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
       initial_run[i]->nb_value_computation();
       initial_run[i]->offset_computation();
       initial_run[i]->nb_element_computation();
@@ -2630,7 +2620,7 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
     }
   }
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     final_run[i]->nb_value_computation();
     final_run[i]->offset_computation();
     final_run[i]->nb_element_computation();
@@ -2639,24 +2629,24 @@ void MarkovianSequences::build_sojourn_time_frequency_distribution(int variable 
     final_run[i]->variance_computation();
   }
 
-  characteristics[variable]->sojourn_time = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  characteristics[variable]->sojourn_time = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->sojourn_time[i] = new FrequencyDistribution(*(sojourn_time[i]));
     delete sojourn_time[i];
   }
   delete [] sojourn_time;
 
   if (initial_run_flag) {
-    characteristics[variable]->initial_run = new FrequencyDistribution*[marginal[variable]->nb_value];
-    for (i = 0;i < marginal[variable]->nb_value;i++) {
+    characteristics[variable]->initial_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+    for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
       characteristics[variable]->initial_run[i] = new FrequencyDistribution(*(initial_run[i]));
       delete initial_run[i];
     }
     delete [] initial_run;
   }
 
-  characteristics[variable]->final_run = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  characteristics[variable]->final_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->final_run[i] = new FrequencyDistribution(*(final_run[i]));
     delete final_run[i];
   }
@@ -2677,36 +2667,33 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
 
 {
   register int i , j;
-  int run_length , *pfrequency , *pisequence;
+  int run_length , *pisequence;
 
 
   // initialisation des lois empiriques
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->sojourn_time[i]->offset = 1;
     characteristics[variable]->sojourn_time[i]->nb_value = characteristics[variable]->sojourn_time[i]->alloc_nb_value;
 
-    pfrequency = characteristics[variable]->sojourn_time[i]->frequency;
     for (j = 0;j < characteristics[variable]->sojourn_time[i]->nb_value;j++) {
-      *pfrequency++ = 0;
+      characteristics[variable]->sojourn_time[i]->frequency[j] = 0;
     }
 
     if (characteristics[variable]->initial_run) {
       characteristics[variable]->initial_run[i]->offset = 1;
       characteristics[variable]->initial_run[i]->nb_value = characteristics[variable]->initial_run[i]->alloc_nb_value;
 
-      pfrequency = characteristics[variable]->initial_run[i]->frequency;
       for (j = 0;j < characteristics[variable]->initial_run[i]->nb_value;j++) {
-        *pfrequency++ = 0;
+        characteristics[variable]->initial_run[i]->frequency[j] = 0;
       }
     }
 
     characteristics[variable]->final_run[i]->offset = 1;
     characteristics[variable]->final_run[i]->nb_value = characteristics[variable]->final_run[i]->alloc_nb_value;
 
-    pfrequency = characteristics[variable]->final_run[i]->frequency;
     for (j = 0;j < characteristics[variable]->final_run[i]->nb_value;j++) {
-      *pfrequency++ = 0;
+      characteristics[variable]->final_run[i]->frequency[j] = 0;
     }
   }
 
@@ -2738,7 +2725,7 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->sojourn_time[i]->nb_value_computation();
     characteristics[variable]->sojourn_time[i]->offset_computation();
     characteristics[variable]->sojourn_time[i]->nb_element_computation();
@@ -2748,7 +2735,7 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
   }
 
   if (characteristics[variable]->initial_run) {
-    for (i = 0;i < marginal[variable]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
       characteristics[variable]->initial_run[i]->nb_value_computation();
       characteristics[variable]->initial_run[i]->offset_computation();
       characteristics[variable]->initial_run[i]->nb_element_computation();
@@ -2758,7 +2745,7 @@ void MarkovianSequences::sojourn_time_frequency_distribution_computation(int var
     }
   }
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->final_run[i]->nb_value_computation();
     characteristics[variable]->final_run[i]->offset_computation();
     characteristics[variable]->final_run[i]->nb_element_computation();
@@ -2815,7 +2802,7 @@ void MarkovianSequences::censored_sojourn_time_frequency_distribution_computatio
 
   // extraction des caracteristiques des lois empiriques des temps de sejour censures
 
-  for (i = 0;i < marginal[0]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
     initial_run[i]->nb_value_computation();
     initial_run[i]->offset_computation();
     initial_run[i]->nb_element_computation();
@@ -2875,24 +2862,24 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 
   // creation des lois empiriques
 
-  nb_run = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  nb_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     nb_run[i] = new FrequencyDistribution((max_length % 2 == 0 ?
                                max_length / 2 : max_length / 2 + 1) + 1);
   }
 
-/*  characteristics[variable]->nb_run = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  characteristics[variable]->nb_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->nb_run[i] = new FrequencyDistribution((max_length % 2 == 0 ?
                                                                      max_length / 2 : max_length / 2 + 1) + 1);
   } */
 
   // mise a jour des lois empiriques
 
-  count = new int[marginal[variable]->nb_value];
+  count = new int[marginal_distribution[variable]->nb_value];
 
   for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       count[j] = 0;
     }
 
@@ -2905,7 +2892,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
       pisequence++;
     }
 
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       (nb_run[j]->frequency[count[j]])++;
 //      (characteristics[variable]->nb_run[j]->frequency[count[j]])++;
     }
@@ -2915,7 +2902,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     nb_run[i]->nb_value_computation();
     nb_run[i]->offset_computation();
     nb_run[i]->nb_element = nb_sequence;
@@ -2924,7 +2911,7 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
     nb_run[i]->variance_computation();
   }
 
-/*  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->nb_run[i]->nb_value_computation();
     characteristics[variable]->nb_run[i]->offset_computation();
     characteristics[variable]->nb_run[i]->nb_element = nb_sequence;
@@ -2933,8 +2920,8 @@ void MarkovianSequences::build_nb_run_frequency_distribution(int variable)
     characteristics[variable]->nb_run[i]->variance_computation();
   } */
 
-  characteristics[variable]->nb_run = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  characteristics[variable]->nb_run = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->nb_run[i] = new FrequencyDistribution(*(nb_run[i]));
     delete nb_run[i];
   }
@@ -2961,22 +2948,22 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
 
   // creation des lois empiriques
 
-  nb_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  nb_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     nb_occurrence[i] = new FrequencyDistribution(max_length + 1);
   }
 
-/*  characteristics[variable]->nb_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  characteristics[variable]->nb_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->nb_occurrence[i] = new FrequencyDistribution(max_length + 1);
   } */
 
   // mise a jour des lois empiriques
 
-  count = new int[marginal[variable]->nb_value];
+  count = new int[marginal_distribution[variable]->nb_value];
 
   for (i = 0;i < nb_sequence;i++) {
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       count[j] = 0;
     }
 
@@ -2985,7 +2972,7 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
       count[*pisequence++]++;
     }
 
-    for (j = 0;j < marginal[variable]->nb_value;j++) {
+    for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       (nb_occurrence[j]->frequency[count[j]])++;
 //      (characteristics[variable]->nb_occurrence[j]->frequency[count[j]])++;
     }
@@ -2995,7 +2982,7 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     nb_occurrence[i]->nb_value_computation();
     nb_occurrence[i]->offset_computation();
     nb_occurrence[i]->nb_element = nb_sequence;
@@ -3004,7 +2991,7 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
     nb_occurrence[i]->variance_computation();
   }
 
-/*  for (i = 0;i < marginal[variable]->nb_value;i++) {
+/*  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->nb_occurrence[i]->nb_value_computation();
     characteristics[variable]->nb_occurrence[i]->offset_computation();
     characteristics[variable]->nb_occurrence[i]->nb_element = nb_sequence;
@@ -3013,8 +3000,8 @@ void MarkovianSequences::build_nb_occurrence_frequency_distribution(int variable
     characteristics[variable]->nb_occurrence[i]->variance_computation();
   } */
 
-  characteristics[variable]->nb_occurrence = new FrequencyDistribution*[marginal[variable]->nb_value];
-  for (i = 0;i < marginal[variable]->nb_value;i++) {
+  characteristics[variable]->nb_occurrence = new FrequencyDistribution*[marginal_distribution[variable]->nb_value];
+  for (i = 0;i < marginal_distribution[variable]->nb_value;i++) {
     characteristics[variable]->nb_occurrence[i] = new FrequencyDistribution(*(nb_occurrence[i]));
     delete nb_occurrence[i];
   }
@@ -3048,16 +3035,16 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
 
 
   for (i = 0;i < nb_variable;i++) {
-    if (((variable == I_DEFAULT) || (i == variable)) && (marginal[i])) {
+    if (((variable == I_DEFAULT) || (i == variable)) && (marginal_distribution[i])) {
       build = true;
 
-      if (marginal[i]->nb_value > NB_OUTPUT) {
+      if (marginal_distribution[i]->nb_value > NB_OUTPUT) {
         build = false;
       }
 
       else if (type[i] != STATE) {
-        for (j = 0;j < marginal[i]->nb_value;j++) {
-          if (marginal[i]->frequency[j] == 0) {
+        for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+          if (marginal_distribution[i]->frequency[j] == 0) {
             build = false;
             break;
           }
@@ -3066,7 +3053,7 @@ void MarkovianSequences::build_characteristic(int variable , bool sojourn_time_f
 
       if (build) {
         if (sojourn_time_flag) {
-          characteristics[i] = new SequenceCharacteristics(marginal[i]->nb_value);
+          characteristics[i] = new SequenceCharacteristics(marginal_distribution[i]->nb_value);
         }
 
         build_index_value(i);
@@ -3138,7 +3125,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
     }
 
     else {
-      nb_state = marginal[variable]->nb_value - marginal[variable]->offset;
+      nb_state = marginal_distribution[variable]->nb_value - marginal_distribution[variable]->offset;
  
       if ((nb_state < 2) || (nb_state > NB_STATE)) {
         status = false;
@@ -3160,8 +3147,9 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
           error.update(SEQ_error[SEQR_MAX_NB_WORD]);
         }
 
-        if ((begin_state != I_DEFAULT) && ((begin_state < marginal[variable]->offset) ||
-             (begin_state >= marginal[variable]->nb_value) || (marginal[variable]->frequency[begin_state] == 0))) {
+        if ((begin_state != I_DEFAULT) && ((begin_state < marginal_distribution[variable]->offset) ||
+             (begin_state >= marginal_distribution[variable]->nb_value) ||
+             (marginal_distribution[variable]->frequency[begin_state] == 0))) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
@@ -3170,8 +3158,9 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
           error.update((error_message.str()).c_str());
         }
 
-        if ((end_state != I_DEFAULT) && ((end_state < marginal[variable]->offset) ||
-             (end_state >= marginal[variable]->nb_value) || (marginal[variable]->frequency[end_state] == 0))) {
+        if ((end_state != I_DEFAULT) && ((end_state < marginal_distribution[variable]->offset) ||
+             (end_state >= marginal_distribution[variable]->nb_value) ||
+             (marginal_distribution[variable]->frequency[end_state] == 0))) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
@@ -3194,7 +3183,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
     i = 1;
     for (j = 0;j < word_length - 1;j++) {
       power[j] = i;
-      i *= marginal[variable]->nb_value;
+      i *= marginal_distribution[variable]->nb_value;
     }
     power[word_length - 1] = i;
 
@@ -3356,7 +3345,7 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
 
   if ((self_transition) && (exhaustive)) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       if (self_transition[i]) {
         os << "\n";
         if (comment_flag) {
@@ -3378,31 +3367,30 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
     }
 
     if (type[i] == STATE) {
-      os << "(" << marginal[i]->nb_value << " "
-         << STAT_label[marginal[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << ")" << endl;
+      os << "(" << marginal_distribution[i]->nb_value << " "
+         << STAT_label[marginal_distribution[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << ")" << endl;
     }
     else {
       os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << min_value[i] << ", "
          << STAT_label[STATL_MAX_VALUE] << ": " << max_value[i] << ")" << endl;
     }
 
-    if (marginal[i]) {
+    if (marginal_distribution[i]) {
       os << "\n";
       if (comment_flag) {
         os << "# ";
       }
       os << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
          << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-      marginal[i]->ascii_characteristic_print(os , false , comment_flag);
+      marginal_distribution[i]->ascii_characteristic_print(os , false , comment_flag);
 
-      if ((marginal[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
+      if ((marginal_distribution[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
         os << "\n";
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-           << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-        marginal[i]->ascii_print(os , comment_flag);
+        os << "   | " << STAT_label[STATL_FREQUENCY] << endl;
+        marginal_distribution[i]->ascii_print(os , comment_flag);
       }
     }
 
@@ -3423,12 +3411,27 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
          << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
          << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
-      if ((exhaustive) && (variance > 0.)) {
+      if ((variance > 0.) && (exhaustive)) {
         if (comment_flag) {
           os << "# ";
         }
         os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness_computation(i , mean , variance) << "   "
            << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation(i , mean , variance) << endl;
+      }
+
+      if ((marginal_histogram[i]) && (exhaustive)) {
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << " " << STAT_label[STATL_VALUE] << "  | " << STAT_label[STATL_FREQUENCY] << endl;
+        marginal_histogram[i]->ascii_print(os , comment_flag);
       }
     }
 
@@ -3610,7 +3613,7 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
     out_file << nb_variable << "\t" << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
 
     if (self_transition) {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         if (self_transition[i]) {
           out_file << "\n\t" << STAT_label[STATL_STATE] << " " << i << " - "
                    << SEQ_label[SEQL_OBSERVED] << " " << SEQ_label[SEQL_SELF_TRANSITION] << endl;
@@ -3632,22 +3635,21 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
                << STAT_variable_word[type[i]];
 
       if (type[i] == STATE) {
-        out_file << "\t\t" << marginal[i]->nb_value << "\t"
-                 << STAT_label[marginal[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << endl;
+        out_file << "\t\t" << marginal_distribution[i]->nb_value << "\t"
+                 << STAT_label[marginal_distribution[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << endl;
       }
       else {
         out_file << "\t\t" << STAT_label[STATL_MIN_VALUE] << "\t" << min_value[i]
                  << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
       }
 
-      if (marginal[i]) {
+      if (marginal_distribution[i]) {
         out_file << "\n" << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
                  << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-        marginal[i]->spreadsheet_characteristic_print(out_file);
+        marginal_distribution[i]->spreadsheet_characteristic_print(out_file);
 
-        out_file << "\n\t" << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-        marginal[i]->spreadsheet_print(out_file);
+        out_file << "\n\t" << STAT_label[STATL_FREQUENCY] << endl;
+        marginal_distribution[i]->spreadsheet_print(out_file);
       }
 
       else {
@@ -3663,6 +3665,12 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
         if (variance > 0.) {
           out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i , mean , variance) << "\t\t"
                    << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation(i , mean , variance) << endl;
+        }
+
+        if (marginal_histogram[i]) {
+          out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+          out_file << "\n" << STAT_label[STATL_VALUE] << "\t" << STAT_label[STATL_FREQUENCY] << endl;
+          marginal_histogram[i]->spreadsheet_print(out_file);
         }
       }
 
@@ -3701,24 +3709,31 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
   bool status;
   register int i;
   int nb_histo;
-  const FrequencyDistribution *phisto[2];
-  ostringstream data_file_name;
+  const FrequencyDistribution *phisto[1];
+  ostringstream data_file_name[2];
 
 
   // ecriture du fichier de donnees
 
-  data_file_name << prefix << variable + 1 << ".dat";
+  data_file_name[0] << prefix << variable + 1 << 0 << ".dat";
 
   nb_histo = 0;
-
-  phisto[nb_histo++] = hlength;
   if (hindex_parameter) {
     phisto[nb_histo++] = hindex_parameter;
   }
 
-  status = marginal[variable]->plot_print((data_file_name.str()).c_str() , nb_histo , phisto);
+  status = hlength->plot_print((data_file_name[0].str()).c_str() , nb_histo , phisto);
 
   if (status) {
+    if (marginal_distribution[variable]) {
+      data_file_name[1] << prefix << variable + 1 << 1 << ".dat";
+      marginal_distribution[variable]->plot_print((data_file_name[1].str()).c_str());
+    }
+    else if (marginal_histogram[variable]) {
+      data_file_name[1] << prefix << variable + 1 << 1 << ".dat";
+      marginal_histogram[variable]->plot_print((data_file_name[1].str()).c_str());
+    }
+
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
 
@@ -3766,25 +3781,48 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
       }
       out_file << "\n\n";
 
-      if (marginal[variable]) {
-        if (marginal[variable]->nb_value - 1 < TIC_THRESHOLD) {
+      if (marginal_distribution[variable]) {
+        if (marginal_distribution[variable]->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
         }
-        if ((int)(marginal[variable]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(marginal_distribution[variable]->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics 0,1" << endl;
         }
 
-        out_file << "plot [0:" << MAX(marginal[variable]->nb_value - 1 , 1) << "] [0:"
-                 << (int)(marginal[variable]->max * YSCALE) + 1 << "] \""
-                 << label((data_file_name.str()).c_str()) << "\" using 1 title \""
+        out_file << "plot [0:" << MAX(marginal_distribution[variable]->nb_value - 1 , 1) << "] [0:"
+                 << (int)(marginal_distribution[variable]->max * YSCALE) + 1 << "] \""
+                 << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
                  << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " - "
                  << STAT_label[type[variable] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
                  << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
-        if (marginal[variable]->nb_value - 1 < TIC_THRESHOLD) {
+        if (marginal_distribution[variable]->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics autofreq" << endl;
         }
-        if ((int)(marginal[variable]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+        if ((int)(marginal_distribution[variable]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          out_file << "set ytics autofreq" << endl;
+        }
+
+        if (i == 0) {
+          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+        }
+        out_file << endl;
+      }
+
+      else if (marginal_histogram[variable]) {
+        if ((int)(marginal_histogram[variable]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          out_file << "set ytics 0,1" << endl;
+        }
+
+        out_file << "plot [" << marginal_histogram[variable]->min_value << ":"
+                 << marginal_histogram[variable]->max_value << "] [0:"
+                 << (int)(marginal_histogram[variable]->max * YSCALE) + 1 << "] \""
+                 << label((data_file_name[1].str()).c_str()) << "\" using 1:2 title \""
+                 << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " "
+                 << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
+                 << "\" with histeps" << endl;
+
+        if ((int)(marginal_histogram[variable]->max * YSCALE) + 1 < TIC_THRESHOLD) {
           out_file << "set ytics autofreq" << endl;
         }
 
@@ -3803,7 +3841,7 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
 
       out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
                << (int)(hlength->max * YSCALE) + 1 << "] \""
-               << label((data_file_name.str()).c_str()) << "\" using 2 title \""
+               << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
                << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
@@ -3830,7 +3868,7 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
         out_file << "plot [" << hindex_parameter->offset << ":"
                  << hindex_parameter->nb_value - 1 << "] [0:"
                  << (int)(hindex_parameter->max * YSCALE) + 1 << "] \""
-                 << label((data_file_name.str()).c_str()) << "\" using 3 title \""
+                 << label((data_file_name[0].str()).c_str()) << "\" using 2 title \""
                  << SEQ_label[SEQL_TIME] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                  << "\" with impulses" << endl;
 
@@ -3893,7 +3931,7 @@ bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
     }
 
     if (self_transition) {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         if (self_transition[i]) {
           max_frequency[i] = self_transition[i]->max_frequency_computation();
 
@@ -3942,7 +3980,7 @@ bool MarkovianSequences::plot_write(StatError &error , const char *prefix ,
         out_file << "\n\n";
 
         start = true;
-        for (j = 0;j < marginal[0]->nb_value;j++) {
+        for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
           if (self_transition[j]) {
             if (!start) {
               if (i == 0) {
@@ -4029,7 +4067,7 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
 
   /*  nb_plot_set = 1;
-  if (marginal[variable]) {
+  if ((marginal_distribution[variable]) || (marginal_histogram[variable])) {
     nb_plot_set++;
   }
   if (hindex_parameter) {
@@ -4038,19 +4076,19 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
   plot.variable_nb_viewpoint[variable] = 1;
 
-  if (marginal[variable]) {
+  if (marginal_distribution[variable]) {
 
     // vue : loi marginale empirique
 
     plot.variable[index] = variable;
 
-    plot[index].xrange = Range(0 , MAX(marginal[variable]->nb_value - 1 , 1));
-    plot[index].yrange = Range(0 , ceil(marginal[variable]->max * YSCALE));
+    plot[index].xrange = Range(0 , MAX(marginal_distribution[variable]->nb_value - 1 , 1));
+    plot[index].yrange = Range(0 , ceil(marginal_distribution[variable]->max * YSCALE));
 
-    if (marginal[variable]->nb_value - 1 < TIC_THRESHOLD) {
+    if (marginal_distribution[variable]->nb_value - 1 < TIC_THRESHOLD) {
       plot[index].xtics = 1;
     }
-    if (ceil(marginal[variable]->max * YSCALE) < TIC_THRESHOLD) {
+    if (ceil(marginal_distribution[variable]->max * YSCALE) < TIC_THRESHOLD) {
       plot[index].ytics = 1;
     }
 
@@ -4063,9 +4101,34 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
     plot[index][0].style = "impulses";
 
-    marginal[variable]->plotable_frequency_write(plot[index][0]);
-    index++;
+    marginal_distribution[variable]->plotable_frequency_write(plot[index][0]);
   }
+
+  else if (marginal_histogram[variable]) {
+
+    // vue : histogramme marginal
+
+    plot[index].xrange = Range(marginal_histogram[variable]->min_value ,
+                               marginal_histogram[variable]->max_value);
+    plot[index].yrange = Range(0 , ceil(marginal_histogram[variable]->max * YSCALE));
+
+    if (ceil(marginal_histogram[variable]->max * YSCALE) < TIC_THRESHOLD) {
+      plot[index].ytics = 1;
+    }
+
+    plot[index].resize(1);
+
+    legend.str("");
+    legend << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " "
+           << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+    plot[index][0].legend = legend.str();
+
+    plot[index][0].style = "histeps";
+
+    marginal_histogram[variable]->plotable_write(plot[index][0]);
+  }
+
+  index++;
 
   // vue : loi empirique des longueurs des sequences
 
@@ -4191,7 +4254,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
 
     else {
       nb_plot_set++;
-      if (marginal[i]) {
+      if ((marginal_distribution[i]) || (marginal_histogram[i])) {
         nb_plot_set++;
       }
       if (hindex_parameter) {
@@ -4200,9 +4263,11 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
     }
   }
 
-  for (i = 0;i < marginal[0]->nb_value;i++) {
-    if (self_transition[i]) {
-      nb_plot_set += 2;
+  if (self_transition) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      if (self_transition[i]) {
+        nb_plot_set += 2;
+      }
     }
   }
 
@@ -4220,7 +4285,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
   if (self_transition) {
     plot.variable_nb_viewpoint[0]++;
 
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       if (self_transition[i]) {
 
         // vue : probabilites de rester dans l'etat i indexees
@@ -4340,7 +4405,7 @@ bool MarkovianSequences::mtg_write(StatError &error , const char *path , int *it
       switch (itype[i]) {
 
       case SYMBOLIC : {
-        for (j = 1;j < marginal[i]->nb_value;j++) {
+        for (j = 1;j < marginal_distribution[i]->nb_value;j++) {
           out_file << (char)('F' + j) << "\t2\tFREE\tFREE\tIMPLICIT" << endl;
         }
         break;
@@ -4361,9 +4426,9 @@ bool MarkovianSequences::mtg_write(StatError &error , const char *path , int *it
 
       case SYMBOLIC : {
         out_file << "E\t";
-        for (j = 1;j < marginal[i]->nb_value;j++) {
+        for (j = 1;j < marginal_distribution[i]->nb_value;j++) {
           out_file << (char)('F' + j);
-          if (j < marginal[i]->nb_value - 1) {
+          if (j < marginal_distribution[i]->nb_value - 1) {
             out_file << ",";
           }
         }
