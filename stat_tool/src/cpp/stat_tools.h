@@ -75,7 +75,7 @@ const int ERROR_LENGTH = 200;
 
 const int I_DEFAULT = -1;              // int par defaut
 const double D_DEFAULT = -1.;          // double par defaut
-const double D_INF = -1.e37;           // plus petit nombre flottant
+const double D_INF = -1.e37;           // plus petit nombre reel
 const double DOUBLE_ERROR = 1.e-5;     // erreur sur une somme de doubles
 
 enum {
@@ -104,6 +104,12 @@ enum {
   NEGATIVE_BINOMIAL ,
   UNIFORM ,
   MULTINOMIAL                          // ajout par Florence Chaubert
+};
+
+enum {
+//  GAMMA ,
+  GAUSSIAN ,
+  VON_MISES
 };
 
 enum {
@@ -209,10 +215,9 @@ const double SAMPLE_NB_VALUE_COEFF = 5.;  // facteur pour deduire le nombre de v
                                           // par une v.a. du nombre de valeurs d'un echantillon
 const int INF_BOUND_MARGIN = 5;        // plage de recherche pour la borne inferieure
 const int SUP_BOUND_MARGIN = 3;        // plage de recherche pour la borne superieure
-const double POISSON_RATIO = 0.7;      // rapport moyenne/variance minimum pour      
-                                        // estimer une loi de Poisson    
-                                        //       
-const double POISSON_RANGE = 0.1;      // plage de variation pour choisir une loi de   
+const double POISSON_RATIO = 0.7;      // rapport moyenne/variance minimum pour
+                                       // estimer une loi de Poisson
+const double POISSON_RANGE = 0.1;      // plage de variation pour choisir une loi de
                                        // Poisson par dilatation de l'echelle des temps
 const double NB_VALUE_COEFF = 2.;      // facteur pour deduire le nombre de valeurs prises par une v.a.
                                        // du nombre de valeurs prises par une v.a. initiale
@@ -226,7 +231,10 @@ const int CHI2_FREQUENCY = 2;          // effectif theorique minimum pour un
                                        // test d'ajustement du Chi2
 const double MIN_T_VALUE = 2.5;        // seuil sur la variable t
 
-const int MARGINAL_MAX_VALUE = 20000;  // valeur maximum pour la construction de la loi marginale
+const int MARGINAL_DISTRIBUTION_MAX_VALUE = 20000;  // valeur maximum pour la construction
+                                                    // de la loi marginale
+const int HISTOGRAM_FREQUENCY = 10;    // frequence moyenne pour definir le pas de regroupement
+                                       // d'un histogramme
 const double SKEWNESS_ROUNDNESS = 1.e-2;  // arrondi sur le coefficient d'asymetrie
 
 const int NB_ERROR = 10;               // nombre maximum d'erreurs prises en compte
@@ -419,7 +427,7 @@ class Distribution {    // loi de probabilite discrete
     int nb_value;           // nombre de valeurs a partir de 0
     int alloc_nb_value;     // nombre de valeurs allouees
     int offset;             // nombre de valeurs de probabilite nulle a partir de 0
-    double max;             // valeur de probabilite maximum
+    double max;             // probabilite maximum
     double complement;      // probabilite complementaire
                             // (> 0. dans le cas d'une loi impropre)
     double mean;            // moyenne
@@ -554,7 +562,7 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
 
 class Forward;
 
-class DiscreteParametric : public Distribution {  // loi de probabilite parametrique
+class DiscreteParametric : public Distribution {  // loi de probabilite discrete parametrique
 
 /*    template <typename Type> friend class Reestimation;  probleme Windows
     friend class FrequencyDistribution;
@@ -946,6 +954,67 @@ DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , c
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
                 const FrequencyDistribution **histo , int *index_dist);
+
+
+
+/* enum {
+  DEGREE ,
+  RADIAN
+};
+
+class ContinuousParametric {  // loi de probabilite continue parametrique
+
+// private :
+public :
+
+    int ident;              // identificateur
+    double location;        // parametre de moyenne
+    double dispersion;      // parametre de dispersion - variance (GAUSSIAN) / concentration (VON_MISES)
+    double mean;            // moyenne
+    double variance;        // variance
+    int unit;               // unité (degre/radian) pour la loi de von Mises
+    double interval;        // intervalle minimum entre 2 valeurs mesurees pour la discretisation
+
+// public :
+
+    ContinuousParametric(int iident = GAUSSIAN , 
+                         double ilocation = D_DEFAULT , double idispersion = D_DEFAULT);
+
+    double parametric_mean_computation() const;
+    double parametric_variance_computation() const;
+}; */
+
+
+
+class Histogram {       // histogramme
+
+// private :
+public :
+
+    int nb_individual;      // nombre d'individus
+    int nb_category;        // nombre de categories
+    double step;            // pas de regroupement
+    int max;                // frequence maximum
+    int *frequency;         // frequences
+    double min_value;       // valeur minimum
+    double max_value;       // valeur maximum
+
+    void copy(const Histogram &histo);
+
+    std::ostream& ascii_print(std::ostream &os , bool comment_flag = false) const;
+    std::ostream& spreadsheet_print(std::ostream &os) const;
+    bool plot_print(const char *path) const;
+    void plotable_write(SinglePlot &plot) const;
+
+    void max_computation();
+
+// public :
+
+    Histogram(int inb_category = 0 , bool init_flag = true);
+    Histogram(const Histogram &histo);
+    ~Histogram();
+    Histogram& operator=(const Histogram &histo);
+};
 
 
 
