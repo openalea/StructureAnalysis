@@ -690,7 +690,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
           error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
         }
 
-        else if (!marginal[i]) {
+        else if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -811,7 +811,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
       }
 
       if (vector_dist->variable_type[i] == ORDINAL) {
-        rank[i] = marginal[i]->rank_computation();
+        rank[i] = marginal_distribution[i]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -819,8 +819,8 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
 
       // calcul des dispersions pour la standardisation
 
-      if (marginal[i]) {
-        vector_dist->dispersion_computation(i , marginal[i] , rank[i]);
+      if (marginal_distribution[i]) {
+        vector_dist->dispersion_computation(i , marginal_distribution[i] , rank[i]);
       }
 
       else {
@@ -2877,7 +2877,7 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
         }
 
         if (vector_dist->variable_type[i] == ORDINAL) {
-          rank[i] = marginal[i]->rank_computation();
+          rank[i] = marginal_distribution[i]->rank_computation();
         }
         else {
           rank[i] = NULL;
@@ -2885,8 +2885,8 @@ Sequences* Sequences::multiple_alignment(StatError &error , ostream &os ,
 
         // calcul des dispersions pour la standardisation
 
-        if (marginal[i]) {
-          vector_dist->dispersion_computation(i , marginal[i] , rank[i]);
+        if (marginal_distribution[i]) {
+          vector_dist->dispersion_computation(i , marginal_distribution[i] , rank[i]);
         }
 
         else {
