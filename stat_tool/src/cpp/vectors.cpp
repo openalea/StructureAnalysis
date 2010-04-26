@@ -58,6 +58,7 @@ using namespace std;
 
 extern int column_width(int value);
 extern int column_width(int min_value , int max_value);
+extern int column_width(double min_value , double max_value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
 
@@ -80,7 +81,8 @@ Vectors::Vectors()
   type = NULL;
   min_value = NULL;
   max_value = NULL;
-  marginal = NULL;
+  marginal_distribution = NULL;
+  marginal_histogram = NULL;
 
   mean = NULL;
   covariance = NULL;
@@ -125,13 +127,15 @@ void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new FrequencyDistribution*[nb_variable];
+  marginal_distribution = new FrequencyDistribution*[nb_variable];
+  marginal_histogram = new Histogram*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = itype[i];
     min_value[i] = 0.;
     max_value[i] = 0.;
-    marginal[i] = NULL;
+    marginal_distribution[i] = NULL;
+    marginal_histogram[i] = NULL;
   }
 
   mean = new double[nb_variable];
@@ -238,6 +242,8 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
+    build_marginal_histogram(i);
+
     mean_computation(i);
     variance_computation(i);
   }
@@ -274,11 +280,13 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new FrequencyDistribution*[nb_variable];
+  marginal_distribution = new FrequencyDistribution*[nb_variable];
+  marginal_histogram = new Histogram*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = vec.type[i];
-    marginal[i] = NULL;
+    marginal_distribution[i] = NULL;
+    marginal_histogram[i] = NULL;
   }
 
   mean = new double[nb_variable];
@@ -335,18 +343,26 @@ void Vectors::copy(const Vectors &vec)
   type = new int[nb_variable];
   min_value = new double[nb_variable];
   max_value = new double[nb_variable];
-  marginal = new FrequencyDistribution*[nb_variable];
+  marginal_distribution = new FrequencyDistribution*[nb_variable];
+  marginal_histogram = new Histogram*[nb_variable];
 
   for (i = 0;i < nb_variable;i++) {
     type[i] = vec.type[i];
     min_value[i] = vec.min_value[i];
     max_value[i] = vec.max_value[i];
 
-    if (vec.marginal[i]) {
-      marginal[i] = new FrequencyDistribution(*(vec.marginal[i]));
+    if (vec.marginal_distribution[i]) {
+      marginal_distribution[i] = new FrequencyDistribution(*(vec.marginal_distribution[i]));
     }
     else {
-      marginal[i] = NULL;
+      marginal_distribution[i] = NULL;
+    }
+
+    if (vec.marginal_histogram[i]) {
+      marginal_histogram[i] = new Histogram(*(vec.marginal_histogram[i]));
+    }
+    else {
+      marginal_histogram[i] = NULL;
     }
   }
 
@@ -395,11 +411,18 @@ void Vectors::remove()
   delete [] min_value;
   delete [] max_value;
 
-  if (marginal) {
+  if (marginal_distribution) {
     for (i = 0;i < nb_variable;i++) {
-      delete marginal[i];
+      delete marginal_distribution[i];
     }
-    delete [] marginal;
+    delete [] marginal_distribution;
+  }
+
+  if (marginal_histogram) {
+    for (i = 0;i < nb_variable;i++) {
+      delete marginal_histogram[i];
+    }
+    delete [] marginal_histogram;
   }
 
   delete [] mean;
@@ -515,14 +538,14 @@ DiscreteDistributionData* Vectors::extract(StatError &error , int variable) cons
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[INT_VALUE]);
     }
 
-    else if (!marginal[variable]) {
+    else if (!marginal_distribution[variable]) {
       status = false;
       error.update(STAT_error[STATR_MARGINAL_FREQUENCY_DISTRIBUTION]);
     }
   }
 
   if (status) {
-    histo = new DiscreteDistributionData(*(marginal[variable]));
+    histo = new DiscreteDistributionData(*marginal_distribution[variable]);
   }
 
   return histo;
@@ -697,8 +720,8 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
       }
 
       for (j = 0;j < nb_sample;j++) {
-        if (pvec[j]->marginal[i]) {
-          phisto[j] = pvec[j]->marginal[i];
+        if (pvec[j]->marginal_distribution[i]) {
+          phisto[j] = pvec[j]->marginal_distribution[i];
         }
         else {
           break;
@@ -706,12 +729,13 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
       }
 
       if (j == nb_sample) {
-        vec->marginal[i] = new FrequencyDistribution(nb_sample , phisto);
-        vec->mean[i] = vec->marginal[i]->mean;
-        vec->covariance[i][i] = vec->marginal[i]->variance;
+        vec->marginal_distribution[i] = new FrequencyDistribution(nb_sample , phisto);
+        vec->mean[i] = vec->marginal_distribution[i]->mean;
+        vec->covariance[i][i] = vec->marginal_distribution[i]->variance;
       }
 
       else {
+        vec->build_marginal_histogram(i);
         vec->mean_computation(i);
         vec->variance_computation(i);
       }
@@ -817,10 +841,10 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
         vec->max_value[i] = max_value[i] + shift_param;
 
         if ((vec->type[i] == INT_VALUE) && (vec->min_value[i] >= 0) &&
-            (vec->max_value[i] <= MARGINAL_MAX_VALUE)) {
-          if (marginal[i]) {
-            vec->marginal[i] = new FrequencyDistribution(*(marginal[i]) , 's' , shift_param);
-            vec->mean[i] = vec->marginal[i]->mean;
+            (vec->max_value[i] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
+          if (marginal_distribution[i]) {
+            vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i] , 's' , shift_param);
+            vec->mean[i] = vec->marginal_distribution[i]->mean;
           }
           else {
             vec->build_marginal_frequency_distribution(i);
@@ -828,6 +852,8 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
         }
 
         else {
+          vec->build_marginal_histogram(i);
+
           vec->mean[i] = mean[i] + shift_param;
         }
       }
@@ -836,9 +862,13 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
         vec->min_value[i] = min_value[i];
         vec->max_value[i] = max_value[i];
 
-        if (marginal[i]) {
-          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
+        if (marginal_distribution[i]) {
+          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
         }
+        if (marginal_histogram[i]) {
+          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
+        }
+
         vec->mean[i] = mean[i];
       }
 
@@ -920,6 +950,8 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
         vec->min_value[i] = min_value[i] + shift_param;
         vec->max_value[i] = max_value[i] + shift_param;
 
+        vec->build_marginal_histogram(i);
+
         vec->mean[i] = mean[i] + shift_param;
       }
 
@@ -927,9 +959,13 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
         vec->min_value[i] = min_value[i];
         vec->max_value[i] = max_value[i];
 
-        if (marginal[i]) {
-          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
+        if (marginal_distribution[i]) {
+          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
         }
+        if (marginal_histogram[i]) {
+          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
+        }
+
         vec->mean[i] = mean[i];
       }
 
@@ -1047,10 +1083,10 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
             break;
           }
 
-          if (marginal[i]) {
-            vec->marginal[i] = new FrequencyDistribution(*(marginal[i]) , 'c' , step , mode);
-            vec->mean[i] = vec->marginal[i]->mean;
-            vec->covariance[i][i] = vec->marginal[i]->variance;
+          if (marginal_distribution[i]) {
+            vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i] , 'c' , step , mode);
+            vec->mean[i] = vec->marginal_distribution[i]->mean;
+            vec->covariance[i][i] = vec->marginal_distribution[i]->variance;
           }
           else {
             vec->build_marginal_frequency_distribution(i);
@@ -1061,6 +1097,8 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
           vec->min_value[i] = min_value[i] / step;
           vec->max_value[i] = max_value[i] / step;
 
+          vec->build_marginal_histogram(i , marginal_histogram[i]->step / step);
+
           vec->mean[i] = mean[i] / step;
           vec->covariance[i][i] = covariance[i][i] / (step * step);
         }
@@ -1070,9 +1108,13 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
         vec->min_value[i] = min_value[i];
         vec->max_value[i] = max_value[i];
 
-        if (marginal[i]) {
-          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
+        if (marginal_distribution[i]) {
+          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
         }
+        if (marginal_histogram[i]) {
+          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
+        }
+
         vec->mean[i] = mean[i];
         for (j = 0;j < vec->nb_variable;j++) {
           vec->covariance[i][j] = covariance[i][j];
@@ -1110,7 +1152,8 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
         // transcodage des symboles
 
         if (j == variable) {
-          int_vector[i][j] = symbol[vec.int_vector[i][j] - (int)vec.min_value[variable]] + min_symbol;
+          int_vector[i][j] = symbol[vec.int_vector[i][j] -
+                                    (int)vec.min_value[variable]] + min_symbol;
         }
 
         // copie des valeurs entieres
@@ -1140,9 +1183,13 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
       min_value[i] = vec.min_value[i];
       max_value[i] = vec.max_value[i];
 
-      if (vec.marginal[i]) {
-        marginal[i] = new FrequencyDistribution(*(vec.marginal[i]));
+      if (vec.marginal_distribution[i]) {
+        marginal_distribution[i] = new FrequencyDistribution(*(vec.marginal_distribution[i]));
       }
+      if (vec.marginal_histogram[i]) {
+        marginal_histogram[i] = new Histogram(*(vec.marginal_histogram[i]));
+      }
+
       mean[i] = vec.mean[i];
       for (j = 0;j < nb_variable;j++) {
         covariance[i][j] = vec.covariance[i][j];
@@ -1415,9 +1462,13 @@ void Vectors::cluster(const Vectors &vec , int variable , int nb_class ,
       min_value[i] = vec.min_value[i];
       max_value[i] = vec.max_value[i];
 
-      if (vec.marginal[i]) {
-        marginal[i] = new FrequencyDistribution(*(vec.marginal[i]));
+      if (vec.marginal_distribution[i]) {
+        marginal_distribution[i] = new FrequencyDistribution(*(vec.marginal_distribution[i]));
       }
+      if (vec.marginal_histogram[i]) {
+        marginal_histogram[i] = new Histogram(*(vec.marginal_histogram[i]));
+      }
+
       mean[i] = vec.mean[i];
       for (j = 0;j < nb_variable;j++) {
         covariance[i][j] = vec.covariance[i][j];
@@ -1596,9 +1647,13 @@ Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) c
         vec->min_value[i] = min_value[i];
         vec->max_value[i] = max_value[i];
 
-        if (marginal[i]) {
-          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
+        if (marginal_distribution[i]) {
+          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
         }
+        if (marginal_histogram[i]) {
+          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
+        }
+
         vec->mean[i] = mean[i];
         for (j = 0;j < vec->nb_variable;j++) {
           vec->covariance[i][j] = covariance[i][j];
@@ -1753,9 +1808,13 @@ Vectors* Vectors::round(StatError &error , int variable , int mode) const
         vec->min_value[i] = min_value[i];
         vec->max_value[i] = max_value[i];
 
-        if (marginal[i]) {
-          vec->marginal[i] = new FrequencyDistribution(*(marginal[i]));
+        if (marginal_distribution[i]) {
+          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
         }
+        if (marginal_histogram[i]) {
+          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
+        }
+
         vec->mean[i] = mean[i];
         for (j = 0;j < vec->nb_variable;j++) {
           vec->covariance[i][j] = covariance[i][j];
@@ -2164,9 +2223,13 @@ void Vectors::select_variable(const Vectors &vec , int *variable)
     min_value[i] = vec.min_value[variable[i]];
     max_value[i] = vec.max_value[variable[i]];
 
-    if (vec.marginal[variable[i]]) {
-      marginal[i] = new FrequencyDistribution(*(vec.marginal[variable[i]]));
+    if (vec.marginal_distribution[variable[i]]) {
+      marginal_distribution[i] = new FrequencyDistribution(*(vec.marginal_distribution[variable[i]]));
     }
+    if (vec.marginal_histogram[variable[i]]) {
+      marginal_histogram[i] = new Histogram(*(vec.marginal_histogram[variable[i]]));
+    }
+
     mean[i] = vec.mean[variable[i]];
     for (j = 0;j < nb_variable;j++) {
       covariance[i][j] = vec.covariance[variable[i]][variable[j]];
@@ -2442,11 +2505,16 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
         vec->min_value[inb_variable] = pvec[i]->min_value[j];
         vec->max_value[inb_variable] = pvec[i]->max_value[j];
 
-        if (pvec[i]->marginal[j]) {
-          vec->marginal[inb_variable] = new FrequencyDistribution(*(pvec[i]->marginal[j]));
+        if (pvec[i]->marginal_distribution[j]) {
+          vec->marginal_distribution[inb_variable] = new FrequencyDistribution(*(pvec[i]->marginal_distribution[j]));
         }
+        if (pvec[i]->marginal_histogram[j]) {
+          vec->marginal_histogram[inb_variable] = new Histogram(*(pvec[i]->marginal_histogram[j]));
+        }
+
         vec->mean[inb_variable] = pvec[i]->mean[j];
         vec->covariance[inb_variable][inb_variable] = pvec[i]->covariance[j][j];
+
         inb_variable++;
       }
     }
@@ -2777,6 +2845,7 @@ Vectors* vectors_ascii_read(StatError &error , const char *path)
       for (i = 0;i < vec->nb_variable;i++) {
         vec->min_value_computation(i);
         vec->max_value_computation(i);
+
         vec->build_marginal_frequency_distribution(i);
       }
 
@@ -2843,22 +2912,22 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
     os << "("  << STAT_label[STATL_MIN_VALUE] << ": " << min_value[i] << ", "
        << STAT_label[STATL_MAX_VALUE] << ": " << max_value[i] << ")" << endl;
 
-    if (marginal[i]) {
+    if (marginal_distribution[i]) {
       os << "\n";
       if (comment_flag) {
         os << "# ";
       }
       os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
-      marginal[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
+      marginal_distribution[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
 
-      if ((marginal[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
+      if ((marginal_distribution[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
         os << "\n";
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-        marginal[i]->ascii_print(os , comment_flag);
+        os << "   | " << STAT_label[STATL_FREQUENCY] << endl;
+        marginal_distribution[i]->ascii_print(os , comment_flag);
       }
     }
 
@@ -2882,6 +2951,21 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
         }
         os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness_computation(i) << "   "
            << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation(i) << endl;
+      }
+
+      if (exhaustive) {
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << " " << STAT_label[STATL_VALUE] << "  | " << STAT_label[STATL_FREQUENCY] << endl;
+        marginal_histogram[i]->ascii_print(os , comment_flag);
       }
     }
 
@@ -3122,12 +3206,17 @@ ostream& Vectors::ascii_print(ostream &os , bool comment_flag) const
     }
 
     else {
-      for (j = 0;j < nb_vector;j++) {
+      buff = column_width(min_value[i] , max_value[i]);
+      if (buff > width[0]) {
+        width[0] = buff;
+      }
+
+/*      for (j = 0;j < nb_vector;j++) {
         buff = column_width(1 , real_vector[j] + i);
         if (buff > width[0]) {
           width[0] = buff;
         }
-      }
+      } */
     }
   }
   width[1] = width[0] + ASCII_SPACE;
@@ -3254,12 +3343,12 @@ bool Vectors::spreadsheet_write(StatError &error , const char *path) const
       out_file << "\t\t" << STAT_label[STATL_MIN_VALUE] << "\t" << min_value[i]
                << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
 
-      if (marginal[i]) {
+      if (marginal_distribution[i]) {
         out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-        marginal[i]->spreadsheet_characteristic_print(out_file);
+        marginal_distribution[i]->spreadsheet_characteristic_print(out_file);
 
-        out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-        marginal[i]->spreadsheet_print(out_file);
+        out_file << "\n\t" << STAT_label[STATL_FREQUENCY] << endl;
+        marginal_distribution[i]->spreadsheet_print(out_file);
       }
 
       else {
@@ -3273,6 +3362,10 @@ bool Vectors::spreadsheet_write(StatError &error , const char *path) const
           out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i) << "\t\t"
                    << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation(i) << endl;
         }
+
+        out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+        out_file << "\n" << STAT_label[STATL_VALUE] << "\t" << STAT_label[STATL_FREQUENCY] << endl;
+        marginal_histogram[i]->spreadsheet_print(out_file);
       }
     }
 
@@ -3411,14 +3504,15 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
 {
   bool status;
   register int i , j , k , m , n;
-  int nb_histo , histo_index , **frequency;
-  const FrequencyDistribution **phisto;
-  ostringstream data_file_name[2];
+  int **frequency;
+  ostringstream *data_file_name;
 
 
   error.init();
 
   // ecriture des fichiers de donnees
+
+  data_file_name = new ostringstream[nb_variable + 1];
 
   data_file_name[0] << prefix << 0 << ".dat";
   status = plot_print((data_file_name[0].str()).c_str());
@@ -3428,38 +3522,31 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
   }
 
   else {
-    phisto = new const FrequencyDistribution*[nb_variable];
-
-    nb_histo = 0;
     for (i = 0;i < nb_variable;i++) {
-      if (marginal[i]) {
-        phisto[nb_histo++] = marginal[i];
+      data_file_name[i + 1] << prefix << i + 1 << ".dat";
+
+      if (marginal_distribution[i]) {
+        marginal_distribution[i]->plot_print((data_file_name[i + 1].str()).c_str());
+      }
+      else {
+        marginal_histogram[i]->plot_print((data_file_name[i + 1].str()).c_str());
       }
     }
 
-    if (nb_histo > 0) {
-      data_file_name[1] << prefix << 1 << ".dat";
-      phisto[0]->plot_print((data_file_name[1].str()).c_str() , nb_histo - 1 , phisto + 1);
-    }
-
-    delete [] phisto;
-
     // ecriture des fichiers de commandes et des fichier d'impression
 
-    histo_index = 1;
-
-    for (i = 0;i < nb_variable;i++) {
-      for (j = 0;j < 2;j++) {
+    for (i = 0;i < 2;i++) {
+      for (j = 0;j < nb_variable;j++) {
         ostringstream file_name[2];
 
-        switch (j) {
+        switch (i) {
 
         case 0 : {
           if (nb_variable == 1) {
             file_name[0] << prefix << ".plot";
           }
           else {
-            file_name[0] << prefix << i + 1 << ".plot";
+            file_name[0] << prefix << j + 1 << ".plot";
           }
           break;
         }
@@ -3469,7 +3556,7 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
             file_name[0] << prefix << ".print";
           }
           else {
-            file_name[0] << prefix << i + 1 << ".print";
+            file_name[0] << prefix << j + 1 << ".print";
           }
           break;
         }
@@ -3477,14 +3564,14 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
 
         ofstream out_file((file_name[0].str()).c_str());
 
-        if (j == 1) {
+        if (i == 1) {
           out_file << "set terminal postscript" << endl;
 
           if (nb_variable == 1) {
             file_name[1] << label(prefix) << ".ps";
           }
           else {
-            file_name[1] << label(prefix) << i + 1 << ".ps";
+            file_name[1] << label(prefix) << j + 1 << ".ps";
           }
           out_file << "set output \"" << file_name[1].str() << "\"\n\n";
         }
@@ -3496,52 +3583,72 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
         }
         out_file << "\n\n";
 
-        if (marginal[i]) {
-          if (marginal[i]->nb_value - 1 < TIC_THRESHOLD) {
+        if (marginal_distribution[j]) {
+          if (marginal_distribution[j]->nb_value - 1 < TIC_THRESHOLD) {
             out_file << "set xtics 0,1" << endl;
           }
-          if ((int)(marginal[i]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          if ((int)(marginal_distribution[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
             out_file << "set ytics 0,1" << endl;
           }
 
-          out_file << "plot [0:" << MAX(marginal[i]->nb_value - 1 , 1) << "] [0:"
-                   << (int)(marginal[i]->max * YSCALE) + 1 << "] \""
-                   << label((data_file_name[1].str()).c_str()) << "\" using " << histo_index
-                   << " title \"" << STAT_label[STATL_VARIABLE] << " " << i + 1 << " "
+          out_file << "plot [0:" << MAX(marginal_distribution[j]->nb_value - 1 , 1) << "] [0:"
+                   << (int)(marginal_distribution[j]->max * YSCALE) + 1 << "] \""
+                   << label((data_file_name[j + 1].str()).c_str()) << "\" using 1 title \""
+                   << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
                    << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
-          if (marginal[i]->nb_value - 1 < TIC_THRESHOLD) {
+          if (marginal_distribution[j]->nb_value - 1 < TIC_THRESHOLD) {
             out_file << "set xtics autofreq" << endl;
           }
-          if ((int)(marginal[i]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          if ((int)(marginal_distribution[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
             out_file << "set ytics autofreq" << endl;
           }
-
-          if ((j == 0) && (nb_variable > 1)) {
-            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
-          }
-          out_file << endl;
         }
 
+        else {
+          if ((int)(marginal_histogram[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+            out_file << "set ytics 0,1" << endl;
+          }
+
+          out_file << "plot [" << marginal_histogram[j]->min_value << ":"
+                   << marginal_histogram[j]->max_value << "] [0:"
+                   << (int)(marginal_histogram[j]->max * YSCALE) + 1 << "] \""
+                   << label((data_file_name[j + 1].str()).c_str()) << "\" using 1:2 title \""
+                   << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
+                   << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
+                   << "\" with histeps" << endl;
+
+          if ((int)(marginal_histogram[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+            out_file << "set ytics autofreq" << endl;
+          }
+        }
+
+        if ((i == 0) && (nb_variable > 1)) {
+          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+        }
+        out_file << endl;
+
         for (k = 0;k < nb_variable;k++) {
-          if (k != i) {
-            out_file << "set xlabel \"" << STAT_label[STATL_VARIABLE] << " " << i + 1 << "\"" << endl;
+          if (k != j) {
+            out_file << "set xlabel \"" << STAT_label[STATL_VARIABLE] << " " << j + 1 << "\"" << endl;
             out_file << "set ylabel \"" << STAT_label[STATL_VARIABLE] << " " << k + 1 << "\"" << endl;
 
-            if (max_value[i] - min_value[i] < TIC_THRESHOLD) {
-              out_file << "set xtics " << MIN(min_value[i] , 0) << ",1" << endl;
+            if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
+              out_file << "set xtics " << MIN(min_value[j] , 0) << ",1" << endl;
             }
             if (max_value[k] - min_value[k] < TIC_THRESHOLD) {
               out_file << "set ytics " << MIN(min_value[k] , 0) << ",1" << endl;
             }
 
-            if (((marginal[i]) && (marginal[i]->nb_value <= PLOT_NB_VALUE)) &&
-                ((marginal[k]) && (marginal[k]->nb_value <= PLOT_NB_VALUE))) {
-              frequency = joint_frequency_computation(i , k);
+            if (((marginal_distribution[j]) &&
+                 (marginal_distribution[j]->nb_value <= PLOT_NB_VALUE)) &&
+                ((marginal_distribution[k]) &&
+                 (marginal_distribution[k]->nb_value <= PLOT_NB_VALUE))) {
+              frequency = joint_frequency_computation(j , k);
 
-              for (m = marginal[i]->offset;m < marginal[i]->nb_value;m++) {
-                for (n = marginal[k]->offset;n < marginal[k]->nb_value;n++) {
+              for (m = marginal_distribution[j]->offset;m < marginal_distribution[j]->nb_value;m++) {
+                for (n = marginal_distribution[k]->offset;n < marginal_distribution[k]->nb_value;n++) {
                   if (frequency[m][n] > 0) {
                     out_file << "set label \"" << frequency[m][n] << "\" at " << m << ","
                              << n << endl;
@@ -3549,19 +3656,19 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
                 }
               }
 
-              for (m = 0;m < marginal[i]->nb_value;m++) {
+              for (m = 0;m < marginal_distribution[j]->nb_value;m++) {
                 delete [] frequency[m];
               }
               delete [] frequency;
             }
 
-            if ((min_value[i] >= 0.) && (max_value[i] - min_value[i] > min_value[i] * PLOT_RANGE_RATIO)) {
+            if ((min_value[j] >= 0.) && (max_value[j] - min_value[j] > min_value[j] * PLOT_RANGE_RATIO)) {
               out_file << "plot [" << 0;
             }
             else {
-              out_file << "plot [" << min_value[i];
+              out_file << "plot [" << min_value[j];
             }
-            out_file << ":" << MAX(max_value[i] , min_value[i] + 1) << "] [";
+            out_file << ":" << MAX(max_value[j] , min_value[j] + 1) << "] [";
             if ((min_value[k] >= 0.) && (max_value[k] - min_value[k] > min_value[k] * PLOT_RANGE_RATIO)) {
               out_file << 0;
             }
@@ -3570,40 +3677,38 @@ bool Vectors::plot_write(StatError &error , const char *prefix ,
             }
             out_file << ":" << MAX(max_value[k] , min_value[k] + 1) << "] \""
                      << label((data_file_name[0].str()).c_str()) << "\" using "
-                     << i + 1 << ":" << k + 1 << " notitle with points" << endl;
+                     << j + 1 << ":" << k + 1 << " notitle with points" << endl;
 
             out_file << "unset label" << endl;
 
             out_file << "set xlabel" << endl;
             out_file << "set ylabel" << endl;
 
-            if (max_value[i] - min_value[i] < TIC_THRESHOLD) {
+            if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
               out_file << "set xtics autofreq" << endl;
             }
             if (max_value[k] - min_value[k] < TIC_THRESHOLD) {
               out_file << "set ytics autofreq" << endl;
             }
 
-            if ((j == 0) && (((i < nb_variable - 1) && (k < nb_variable - 1)) ||
-                 ((i == nb_variable - 1) && (k < nb_variable - 2)))) {
+            if ((i == 0) && (((j < nb_variable - 1) && (k < nb_variable - 1)) ||
+                 ((j == nb_variable - 1) && (k < nb_variable - 2)))) {
               out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
             }
             out_file << endl;
           }
         }
 
-        if (j == 1) {
+        if (i == 1) {
           out_file << "\nset terminal x11" << endl;
         }
 
         out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
       }
-
-      if (marginal[i]) {
-        histo_index++;
-      }
     }
   }
+
+  delete [] data_file_name;
 
   return status;
 }
@@ -3669,8 +3774,8 @@ void Vectors::plotable_frequency_write(SinglePlot &plot , int variable1 , int va
 
   frequency = joint_frequency_computation(variable1 , variable2);
 
-  for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
-    for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+  for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
+    for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
       if (frequency[i][j] > 0) {
         label.str("");
         label << frequency[i][j];
@@ -3680,7 +3785,7 @@ void Vectors::plotable_frequency_write(SinglePlot &plot , int variable1 , int va
     }
   }
 
-  for (i = 0;i < marginal[variable1]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[variable1]->nb_value;i++) {
     delete [] frequency[i];
   }
   delete [] frequency;
@@ -3703,12 +3808,7 @@ MultiPlotSet* Vectors::get_plotable() const
   MultiPlotSet *plot_set;
 
 
-  nb_plot_set = nb_variable * (nb_variable - 1);
-  for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]) {
-      nb_plot_set++;
-    }
-  }
+  nb_plot_set = nb_variable * nb_variable;
 
   plot_set = new MultiPlotSet(nb_plot_set , nb_variable);
   MultiPlotSet &plot = *plot_set;
@@ -3718,19 +3818,19 @@ MultiPlotSet* Vectors::get_plotable() const
   i = 0;
   for (j = 0;j < nb_variable;j++) {
     plot.variable_nb_viewpoint[j] = 1;
+    plot.variable[i] = j;
 
-    if (marginal[j]) {
-      plot.variable[i] = j;
+    if (marginal_distribution[j]) {
 
       // vue : loi marginale empirique
 
-      plot[i].xrange = Range(0 , MAX(marginal[j]->nb_value - 1 , 1));
-      plot[i].yrange = Range(0 , ceil(marginal[j]->max * YSCALE));
+      plot[i].xrange = Range(0 , MAX(marginal_distribution[j]->nb_value - 1 , 1));
+      plot[i].yrange = Range(0 , ceil(marginal_distribution[j]->max * YSCALE));
 
-      if (marginal[j]->nb_value - 1 < TIC_THRESHOLD) {
+      if (marginal_distribution[j]->nb_value - 1 < TIC_THRESHOLD) {
         plot[i].xtics = 1;
       }
-      if (ceil(marginal[j]->max * YSCALE) < TIC_THRESHOLD) {
+      if (ceil(marginal_distribution[j]->max * YSCALE) < TIC_THRESHOLD) {
         plot[i].ytics = 1;
       }
 
@@ -3743,9 +3843,32 @@ MultiPlotSet* Vectors::get_plotable() const
 
       plot[i][0].style = "impulses";
 
-      marginal[j]->plotable_frequency_write(plot[i][0]);
-      i++;
+      marginal_distribution[j]->plotable_frequency_write(plot[i][0]);
     }
+
+    else {
+
+      // vue : histogramme marginal
+
+      plot[i].xrange = Range(marginal_histogram[j]->min_value , marginal_histogram[j]->max_value);
+      plot[i].yrange = Range(0 , ceil(marginal_histogram[j]->max * YSCALE));
+
+      if (ceil(marginal_histogram[j]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(1);
+
+      legend.str("");
+      legend << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
+             << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][0].legend = legend.str();
+
+      plot[i][0].style = "histeps";
+
+      marginal_histogram[j]->plotable_write(plot[i][0]);
+    }
+    i++;
 
     for (k = 0;k < nb_variable;k++) {
       if (k != j) {
@@ -3784,8 +3907,10 @@ MultiPlotSet* Vectors::get_plotable() const
         label << STAT_label[STATL_VARIABLE] << " " << k + 1;
         plot[i].ylabel = label.str();
 
-        if (((marginal[j]) && (marginal[j]->nb_value <= PLOT_NB_VALUE)) &&
-            ((marginal[k]) && (marginal[k]->nb_value <= PLOT_NB_VALUE))) {
+        if (((marginal_distribution[j]) &&
+             (marginal_distribution[j]->nb_value <= PLOT_NB_VALUE)) &&
+            ((marginal_distribution[k]) &&
+             (marginal_distribution[k]->nb_value <= PLOT_NB_VALUE))) {
           plot[i].resize(2);
         }
         else {
@@ -3796,8 +3921,10 @@ MultiPlotSet* Vectors::get_plotable() const
 
         plotable_write(plot[i][0] , j , k);
 
-        if (((marginal[j]) && (marginal[j]->nb_value <= PLOT_NB_VALUE)) &&
-            ((marginal[k]) && (marginal[k]->nb_value <= PLOT_NB_VALUE))) {
+        if (((marginal_distribution[j]) &&
+             (marginal_distribution[j]->nb_value <= PLOT_NB_VALUE)) &&
+            ((marginal_distribution[k]) &&
+             (marginal_distribution[k]->nb_value <= PLOT_NB_VALUE))) {
           plot[i][1].label = "true";
 
           plotable_frequency_write(plot[i][1] , j , k);
@@ -3896,30 +4023,138 @@ void Vectors::build_marginal_frequency_distribution(int variable)
 
 {
   if ((type[variable] == INT_VALUE) && (min_value[variable] >= 0) &&
-      (max_value[variable] <= MARGINAL_MAX_VALUE)) {
+      (max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
     register int i;
 
 
-    marginal[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
+    marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
 
     for (i = 0;i < nb_vector;i++) {
-      (marginal[variable]->frequency[int_vector[i][variable]])++;
+      (marginal_distribution[variable]->frequency[int_vector[i][variable]])++;
     }
 
-    marginal[variable]->offset = (int)min_value[variable];
-    marginal[variable]->nb_element = nb_vector;
-    marginal[variable]->max_computation();
-    marginal[variable]->mean_computation();
-    marginal[variable]->variance_computation();
+    marginal_distribution[variable]->offset = (int)min_value[variable];
+    marginal_distribution[variable]->nb_element = nb_vector;
+    marginal_distribution[variable]->max_computation();
+    marginal_distribution[variable]->mean_computation();
+    marginal_distribution[variable]->variance_computation();
 
-    mean[variable] = marginal[variable]->mean;
-    covariance[variable][variable] = marginal[variable]->variance;
+    mean[variable] = marginal_distribution[variable]->mean;
+    covariance[variable][variable] = marginal_distribution[variable]->variance;
   }
 
   else {
+    build_marginal_histogram(variable);
+
     mean_computation(variable);
     variance_computation(variable);
   }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction de l'histogramme marginal pour une variable.
+ *
+ *  arguments : indice de la variable, pas de regroupement.
+ *
+ *--------------------------------------------------------------*/
+
+void Vectors::build_marginal_histogram(int variable , double step)
+
+{
+  if ((!marginal_histogram[variable]) || (step != marginal_histogram[variable]->step)) {
+    register int i;
+
+
+    // construction de l'histogramme
+
+    if (step == D_DEFAULT) {
+      step = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / nb_vector) , 1);
+
+#     ifdef MESSAGE
+      cout << "\nSTEP: " << step << endl;
+#     endif
+
+    }
+
+    if (marginal_histogram[variable]) {
+      marginal_histogram[variable]->nb_category = (int)::round((max_value[variable] - min_value[variable]) / step) + 1;
+
+      delete [] marginal_histogram[variable]->frequency;
+      marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_category];
+    }
+
+    else {
+      marginal_histogram[variable] = new Histogram((int)::round((max_value[variable] - min_value[variable]) / step) + 1 , false);
+
+      marginal_histogram[variable]->nb_individual = nb_vector;
+      marginal_histogram[variable]->min_value = min_value[variable];
+      marginal_histogram[variable]->max_value = max_value[variable];
+    }
+    marginal_histogram[variable]->step = step;
+
+    // calcul des frequences
+
+    for (i = 0;i < marginal_histogram[variable]->nb_category;i++) {
+      marginal_histogram[variable]->frequency[i] = 0;
+    }
+
+    if (type[variable] == INT_VALUE) {
+      for (i = 0;i < nb_vector;i++) {
+//        marginal_histogram[variable]->frequency[(int)((int_vector[i][variable] - min_value[variable] + step / 2.) / step)]++;
+        marginal_histogram[variable]->frequency[(int)::round((int_vector[i][variable] - min_value[variable]) / step)]++;
+      }
+    }
+
+    else {
+      for (i = 0;i < nb_vector;i++) {
+//        marginal_histogram[variable]->frequency[(int)((real_vector[i][variable] - min_value[variable] + step / 2.) / step)]++;
+        marginal_histogram[variable]->frequency[(int)::round((real_vector[i][variable] - min_value[variable]) / step)]++;
+      }
+    }
+
+    marginal_histogram[variable]->max_computation();
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Changement du pas de regroupement d'un l'histogramme marginal.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              pas de regroupement.
+ *
+ *--------------------------------------------------------------*/
+
+bool Vectors::select_step(StatError &error , int variable , double step)
+
+{
+  bool status = true;
+
+
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if (!marginal_histogram[variable]) {
+      status = false;
+      error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+    }
+  }
+
+  if (status) {
+    build_marginal_histogram(variable , step);
+  }
+
+  return status;
 }
 
 
