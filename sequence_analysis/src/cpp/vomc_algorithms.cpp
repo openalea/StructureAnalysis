@@ -288,7 +288,8 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
         nb_value = parametric_process[i]->nb_value;
       }
 
-      if ((seq.marginal[i]) && (nb_value < seq.marginal[i]->nb_value)) {
+      if ((seq.marginal_distribution[i]) &&
+          (nb_value < seq.marginal_distribution[i]->nb_value)) {
         likelihood = D_INF;
         break;
       }
@@ -531,7 +532,7 @@ void VariableOrderMarkovData::observation_frequency_distribution_correction(Freq
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal[0]->nb_value;i++) {
+  for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
     corrected_observation[i]->nb_value_computation();
     corrected_observation[i]->offset_computation();
     corrected_observation[i]->nb_element_computation();
@@ -573,7 +574,7 @@ double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData
         nb_value = parametric_process[i]->nb_value;
       }
 
-      if (nb_value < seq.marginal[i]->nb_value) {
+      if (nb_value < seq.marginal_distribution[i]->nb_value) {
         likelihood = D_INF;
         break;
       }
@@ -967,8 +968,10 @@ void VariableOrderMarkovData::order0_estimation(VariableOrderMarkov &markov) con
   } */
 
   for (i = 0;i < chain_data->nb_state;i++) {
-    markov.initial[i] = (double)marginal[0]->frequency[i] / (double)marginal[0]->nb_element;
-//    markov.initial[i] = (double)(chain_data->initial[i] + chain_data->transition[0][i]) / (double)sum;
+    markov.initial[i] = (double)marginal_distribution[0]->frequency[i] /
+                        (double)marginal_distribution[0]->nb_element;
+//    markov.initial[i] = (double)(chain_data->initial[i] + chain_data->transition[0][i]) /
+//                        (double)sum;
     for (j = 0;j <= chain_data->nb_state;j++) {
       markov.transition[j][i] = markov.initial[i];
     }
@@ -1031,14 +1034,15 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
   }
 
   else {
-    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+    if ((marginal_distribution[0]->nb_value < 2) ||
+        (marginal_distribution[0]->nb_value > NB_STATE)) {
       status = false;
       error.update(SEQ_error[SEQR_NB_STATE]);
     }
 
     else if (!characteristics[0]) {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] == 0) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] == 0) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
@@ -1056,7 +1060,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       error.update(SEQ_error[SEQR_MAX_ORDER]);
     }
     else {
-      if ((int)pow((double)marginal[0]->nb_value , max_order + 1) > NB_PARAMETER) {
+      if ((int)pow((double)marginal_distribution[0]->nb_value , max_order + 1) > NB_PARAMETER) {
         status = false;
         error.update(SEQ_error[SEQR_NB_PARAMETER]);
       }
@@ -1089,8 +1093,8 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       }
 
       if (!characteristics[1]) {
-        for (i = 0;i < marginal[1]->nb_value;i++) {
-          if (marginal[1]->frequency[i] == 0) {
+        for (i = 0;i < marginal_distribution[1]->nb_value;i++) {
+          if (marginal_distribution[1]->frequency[i] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
@@ -1109,7 +1113,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 
     sample_size = cumul_length;
     os << "\n" << STAT_label[STATL_SAMPLE_SIZE] << ":";
-    for (i = 0;i <= (int)::round(log((double)cumul_length) / log((double)marginal[0]->nb_value));i++) {
+    for (i = 0;i <= (int)::round(log((double)cumul_length) / log((double)marginal_distribution[0]->nb_value));i++) {
       os << " " << sample_size;
       sample_size -= length_nb_sequence;
       length_nb_sequence -= hlength->frequency[i + 1];
@@ -1117,12 +1121,12 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     os << endl;
 
     os << SEQ_label[SEQL_RECOMMENDED_MAX_ORDER] << ": "
-       << (int)::round(log((double)cumul_length) / log((double)marginal[0]->nb_value)) << endl;
+       << (int)::round(log((double)cumul_length) / log((double)marginal_distribution[0]->nb_value)) << endl;
 #   endif
 
 /*    if ((algorithm == CONTEXT) && (threshold == CONTEXT_THRESHOLD)) {
       Test test(CHI2);
-      test.df1 = marginal[0]->nb_value - 1;
+      test.df1 = marginal_distribution[0]->nb_value - 1;
       test.critical_probability = 0.05;
       test.chi2_value_computation();
 
@@ -1131,7 +1135,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       os << "\n" << SEQ_label[SEQL_PRUNING_THRESHOLD] << ": " << threshold << endl;
     } */
 
-    markov = new VariableOrderMarkov(model_type , marginal[0]->nb_value , max_order , true);
+    markov = new VariableOrderMarkov(model_type , marginal_distribution[0]->nb_value , max_order , true);
 
     // comptage des transitions et calcul du nombre des parametres independants correspondant
 
@@ -1548,7 +1552,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     }
 
     completed_markov = new VariableOrderMarkov(*markov , nb_variable - 1 ,
-                                                 (nb_variable == 2 ? marginal[1]->nb_value : 0));
+                                               (nb_variable == 2 ? marginal_distribution[1]->nb_value : 0));
     delete markov;
 
     completed_markov->markov_data = new VariableOrderMarkovData(*this , 'c' , (completed_markov->type == 'e' ? true : false));
@@ -1691,14 +1695,15 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
   }
 
   else {
-    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+    if ((marginal_distribution[0]->nb_value < 2) ||
+        (marginal_distribution[0]->nb_value > NB_STATE)) {
       status = false;
       error.update(SEQ_error[SEQR_NB_STATE]);
     }
 
     else if (!characteristics[0]) {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] == 0) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] == 0) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
@@ -1733,14 +1738,14 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
         error.update((error_message.str()).c_str());
       }
 
-      if (marginal[1]->nb_value > NB_STATE) {
+      if (marginal_distribution[1]->nb_value > NB_STATE) {
         status = false;
         error.update(SEQ_error[SEQR_NB_OUTPUT]);
       }
 
 /*      if (!characteristics[1]) {
-        for (i = 0;i < marginal[1]->nb_value;i++) {
-          if (marginal[1]->frequency[i] == 0) {
+        for (i = 0;i < marginal_distribution[1]->nb_value;i++) {
+          if (marginal_distribution[1]->frequency[i] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
@@ -1861,15 +1866,15 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     error.update(SEQ_error[SEQR_ORDER]);
   }
   else {
-    if ((int)pow((double)marginal[0]->nb_value , order + 1) > NB_PARAMETER) {
+    if ((int)pow((double)marginal_distribution[0]->nb_value , order + 1) > NB_PARAMETER) {
       status = false;
       error.update(SEQ_error[SEQR_NB_PARAMETER]);
     }
   }
 
   if (status) {
-    imarkov = new VariableOrderMarkov(type , marginal[0]->nb_value , order , true ,
-                                        nb_variable - 1 , (nb_variable == 2 ? marginal[1]->nb_value : 0));
+    imarkov = new VariableOrderMarkov(type , marginal_distribution[0]->nb_value , order , true ,
+                                      nb_variable - 1 , (nb_variable == 2 ? marginal_distribution[1]->nb_value : 0));
     imarkov->build_previous_memory();
 
     markov = variable_order_markov_estimation(error , *imarkov , global_initial_transition ,
@@ -2530,14 +2535,15 @@ bool MarkovianSequences::transition_count(StatError &error , ostream &os ,
   }
 
   else {
-    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+    if ((marginal_distribution[0]->nb_value < 2) ||
+        (marginal_distribution[0]->nb_value > NB_STATE)) {
       status = false;
       error.update(SEQ_error[SEQR_NB_STATE]);
     }
 
     else if (!characteristics[0]) {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] == 0) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] == 0) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
@@ -2553,7 +2559,7 @@ bool MarkovianSequences::transition_count(StatError &error , ostream &os ,
   }
 
   if (status) {
-    markov = new VariableOrderMarkov('o' , marginal[0]->nb_value , max_order , true);
+    markov = new VariableOrderMarkov('o' , marginal_distribution[0]->nb_value , max_order , true);
     markov->build_previous_memory();
 
     markov->markov_data = new VariableOrderMarkovData(*this , 'c' , false);
@@ -2858,8 +2864,8 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
   }
 
   else if (!characteristics[0]) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] == 0) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] == 0) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
@@ -2894,8 +2900,8 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       }
 
       if (!characteristics[1]) {
-        for (i = 0;i < marginal[1]->nb_value;i++) {
-          if (marginal[1]->frequency[i] == 0) {
+        for (i = 0;i < marginal_distribution[1]->nb_value;i++) {
+          if (marginal_distribution[1]->frequency[i] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
@@ -2917,7 +2923,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
     }
 
     else {
-      if (imarkov[i]->nonparametric_process[0]->nb_value < marginal[0]->nb_value) {
+      if (imarkov[i]->nonparametric_process[0]->nb_value < marginal_distribution[0]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_MARKOV_CHAIN] << " " << i + 1 << ": "
@@ -2926,7 +2932,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       }
 
       if (nb_variable == 2) {
-        if (imarkov[i]->nonparametric_process[1]->nb_value < marginal[1]->nb_value) {
+        if (imarkov[i]->nonparametric_process[1]->nb_value < marginal_distribution[1]->nb_value) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_MARKOV_CHAIN] << " " << i + 1 << ": "
@@ -3836,8 +3842,8 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
   else {
     max_symbol = 0;
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if ((symbol[i] < 0) || (symbol[i] >= marginal[0]->nb_value - 1)) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      if ((symbol[i] < 0) || (symbol[i] >= marginal_distribution[0]->nb_value - 1)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_SYMBOL] << " " << symbol[i] << " "
@@ -3860,7 +3866,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
         presence[i] = false;
       }
 
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         presence[symbol[i]] = true;
       }
 
@@ -3937,15 +3943,15 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
           // 2eme propriete d'aggregation (probabilites d'observation attachees aux transitions)
 
-          observation_data = new int**[seq->marginal[0]->nb_value];
-          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-            observation_data[i] = new int*[seq->marginal[1]->nb_value];
-            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
-              observation_data[i][j] = new int[seq->marginal[1]->nb_value];
+          observation_data = new int**[seq->marginal_distribution[0]->nb_value];
+          for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+            observation_data[i] = new int*[seq->marginal_distribution[1]->nb_value];
+            for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
+              observation_data[i][j] = new int[seq->marginal_distribution[1]->nb_value];
             }
-            for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+            for (j = 0;j < seq->marginal_distribution[0]->nb_value;j++) {
               pfrequency = observation_data[i][j];
-              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
                 *pfrequency++ = 0;
               }
             }
@@ -3993,12 +3999,12 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
           os << "\n" << STAT_word[STATW_OBSERVATION_PROBABILITIES] << endl;
 
-          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-            for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+          for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal_distribution[0]->nb_value;j++) {
               nb_output = 0;
               sum = 0;
               pfrequency = observation_data[i][j];
-              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
                 if (*pfrequency > 0) {
                   nb_output++;
                   sum += *pfrequency;
@@ -4012,7 +4018,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
                 lumped_nb_parameter += (nb_output - 1);
 
                 pfrequency = observation_data[i][j];
-                for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
                   if (*pfrequency > 0) {
                     os << k << " (" << (double)*pfrequency / (double)sum << ") | ";
 
@@ -4048,10 +4054,10 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
           // 3eme propriete d'aggregation (classique)
 
-          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+          for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
               pfrequency = observation_data[i][j];
-              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
                 *pfrequency++ = 0;
               }
             }
@@ -4078,12 +4084,12 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
 
           os << "\n" << STAT_word[STATW_OBSERVATION_PROBABILITIES] << endl;
 
-          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+          for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
               nb_output = 0;
               sum = 0;
               pfrequency = observation_data[i][j];
-              for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
                 if (*pfrequency > 0) {
                   nb_output++;
                   sum += *pfrequency;
@@ -4097,7 +4103,7 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
                 lumped_nb_parameter += (nb_output - 1);
 
                 pfrequency = observation_data[i][j];
-                for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+                for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
                   if (*pfrequency > 0) {
                     os << k << " (" << (double)*pfrequency / (double)sum << ") | ";
 
@@ -4131,8 +4137,8 @@ VariableOrderMarkov* MarkovianSequences::lumpability_estimation(StatError &error
              << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("
              << STAT_criterion_word[penalty_type] << "): " << 2 * lumped_penalized_likelihood << endl;
 
-          for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-            for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+          for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+            for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
               delete [] observation_data[i][j];
             }
             delete [] observation_data[i];
@@ -4254,14 +4260,15 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
   }
 
   else {
-    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+    if ((marginal_distribution[0]->nb_value < 2) ||
+        (marginal_distribution[0]->nb_value > NB_STATE)) {
       status = false;
       error.update(SEQ_error[SEQR_NB_STATE]);
     }
 
     else if (!characteristics[0]) {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] == 0) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] == 0) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
@@ -4271,8 +4278,8 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
     }
 
     max_symbol = 0;
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if ((symbol[i] < 0) || (symbol[i] >= marginal[0]->nb_value - 1)) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      if ((symbol[i] < 0) || (symbol[i] >= marginal_distribution[0]->nb_value - 1)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_SYMBOL] << " " << symbol[i] << " "
@@ -4295,7 +4302,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
         presence[i] = false;
       }
 
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         presence[symbol[i]] = true;
       }
 
@@ -4400,18 +4407,18 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
 
       // 2eme propriete d'aggregation (probabilites d'observation attachees aux transitions)
 
-      observation_data = new int**[seq->marginal[0]->nb_value];
-      observation_proba = new double**[seq->marginal[0]->nb_value];
-      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-        observation_data[i] = new int*[seq->marginal[1]->nb_value];
-        observation_proba[i] = new double*[seq->marginal[1]->nb_value];
-        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
-          observation_data[i][j] = new int[seq->marginal[1]->nb_value];
-          observation_proba[i][j] = new double[seq->marginal[1]->nb_value];
+      observation_data = new int**[seq->marginal_distribution[0]->nb_value];
+      observation_proba = new double**[seq->marginal_distribution[0]->nb_value];
+      for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+        observation_data[i] = new int*[seq->marginal_distribution[1]->nb_value];
+        observation_proba[i] = new double*[seq->marginal_distribution[1]->nb_value];
+        for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
+          observation_data[i][j] = new int[seq->marginal_distribution[1]->nb_value];
+          observation_proba[i][j] = new double[seq->marginal_distribution[1]->nb_value];
         }
-        for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+        for (j = 0;j < seq->marginal_distribution[0]->nb_value;j++) {
           pfrequency = observation_data[i][j];
-          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
             *pfrequency++ = 0;
           }
         }
@@ -4436,12 +4443,12 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
                             lumped_markov->nonparametric_process[1]->nb_parameter_computation(0.);
       lumped_likelihood = lumped_markov->likelihood_computation(*(lumped_markov->markov_data->chain_data));
 
-      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-        for (j = 0;j < seq->marginal[0]->nb_value;j++) {
+      for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal_distribution[0]->nb_value;j++) {
           nb_output = 0;
           sum = 0;
           pfrequency = observation_data[i][j];
-          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
             if (*pfrequency > 0) {
               nb_output++;
               sum += *pfrequency;
@@ -4453,7 +4460,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
             lumped_nb_parameter += (nb_output - 1);
 
             pfrequency = observation_data[i][j];
-            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
               if (*pfrequency > 0) {
                 lumped_likelihood += *pfrequency * log((double)*pfrequency / (double)sum);
               }
@@ -4464,7 +4471,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
           if (sum > 0) {
             pproba = observation_proba[i][j];
             pfrequency = observation_data[i][j];
-            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
               *pproba++ = (double)*pfrequency++ / (double)sum;
             }
           }
@@ -4532,10 +4539,10 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
 
       // 3eme propriete d'aggregation (classique)
 
-      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+      for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
           pfrequency = observation_data[i][j];
-          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
             *pfrequency++ = 0;
           }
         }
@@ -4560,12 +4567,12 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
                             lumped_markov->nonparametric_process[1]->nb_parameter_computation(0.);
       lumped_likelihood = lumped_markov->likelihood_computation(*(lumped_markov->markov_data->chain_data));
 
-      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+      for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
           nb_output = 0;
           sum = 0;
           pfrequency = observation_data[i][j];
-          for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
             if (*pfrequency > 0) {
               nb_output++;
               sum += *pfrequency;
@@ -4577,7 +4584,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
             lumped_nb_parameter += (nb_output - 1);
 
             pfrequency = observation_data[i][j];
-            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
               if (*pfrequency > 0) {
                 lumped_likelihood += *pfrequency * log((double)*pfrequency / (double)sum);
               }
@@ -4588,7 +4595,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
           if (sum > 0) {
             pproba = observation_proba[i][j];
             pfrequency = observation_data[i][j];
-            for (k = 0;k < seq->marginal[1]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[1]->nb_value;k++) {
               *pproba++ = (double)*pfrequency++ / (double)sum;
             }
           }
@@ -4654,8 +4661,8 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
 
       delete test;
 
-      for (i = 0;i < seq->marginal[0]->nb_value;i++) {
-        for (j = 0;j < seq->marginal[1]->nb_value;j++) {
+      for (i = 0;i < seq->marginal_distribution[0]->nb_value;i++) {
+        for (j = 0;j < seq->marginal_distribution[1]->nb_value;j++) {
           delete [] observation_data[i][j];
           delete [] observation_proba[i][j];
         }
