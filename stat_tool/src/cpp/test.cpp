@@ -40,7 +40,13 @@
 #include "stat_tools.h"
 #include "stat_label.h"
 
+#include <boost/math/distributions/normal.hpp>
+#include <boost/math/distributions/chi_squared.hpp>
+#include <boost/math/distributions/fisher_f.hpp>
+#include <boost/math/distributions/students_t.hpp>
+
 using namespace std;
+using namespace boost::math;
 
 
 static const double  CRITICAL_PROBABILITY_FACTOR = 1.2;
@@ -529,6 +535,13 @@ void Test::standard_normal_critical_probability_computation()
 {
   critical_probability = ::standard_normal_critical_probability_computation(value);
 
+# ifdef DEBUG
+  normal dist;
+
+  cout << "\nTEST Gaussian distribution: " << cdf(complement(dist , value))
+       << " | " <<  critical_probability << endl;
+# endif
+
   if (!one_side) {
     critical_probability *= 2.;
   }
@@ -584,6 +597,14 @@ void Test::standard_normal_value_computation()
 
 {
   value = ::standard_normal_value_computation(one_side ? critical_probability : critical_probability / 2.);
+
+# ifdef DEBUG
+  normal dist;
+
+  cout << "\nTEST Gaussian distribution: " << quantile(complement(dist , (one_side ? critical_probability : critical_probability / 2.)))
+       << " | " << value << endl;
+# endif
+
 }
 
 
@@ -629,6 +650,14 @@ void Test::chi2_critical_probability_computation()
     correct *= 60. / (double)df1;
  
     critical_probability = ::standard_normal_critical_probability_computation(normal_var + correct);
+
+#   ifdef DEBUG
+    chi_squared dist(df1);
+
+    cout << "\nTEST Chi2 distribution: " << cdf(complement(dist , value))
+         << " | " <<  critical_probability << endl;
+#   endif
+
   }
 
   else {
@@ -675,6 +704,14 @@ void Test::chi2_value_computation()
     var = 1. - 2. / (9. * df1) +
           (normal_var - correct) * sqrt(2. / (9. * df1));
     value = df1 * var * var * var;
+
+#   ifdef DEBUG
+    chi_squared dist(df1);
+
+    cout << "\nTEST Chi2 distribution: " << quantile(complement(dist , critical_probability))
+         << " | " << value << endl;
+#   endif
+
   }
 
   else {
@@ -712,6 +749,14 @@ void Test::F_critical_probability_computation()
                  sqrt(2. / (9. * df1) + cbrt_value * cbrt_value * 2. / (9. * df2));
 
     critical_probability = ::standard_normal_critical_probability_computation(normal_var);
+
+#   ifdef DEBUG
+    fisher_f dist(df1 , df2);
+
+    cout << "\nTEST F-distribution: " << cdf(complement(dist , value))
+         << " | " <<  critical_probability << endl;
+#   endif
+
   }
 
   else {
@@ -748,6 +793,14 @@ void Test::F_value_computation()
     // approximation finale (formule 26.6.16)
 
     value = exp(2. * w);
+
+#   ifdef DEBUG
+    fisher_f dist(df1 , df2);
+
+    cout << "\nTEST F-distribution: " << quantile(complement(dist , critical_probability))
+         << " | " << value << endl;
+#   endif
+
   }
 
   else {
@@ -796,6 +849,13 @@ void Test::t_critical_probability_computation()
 
       critical_probability = ::standard_normal_critical_probability_computation(normal_var);
     }
+
+#   ifdef DEBUG
+    students_t dist(df1);
+
+    cout << "\nTEST t-distribution: " << cdf(complement(dist , value))
+         << " | " <<  critical_probability << endl;
+#   endif
 
     switch (one_side) {
 
@@ -873,4 +933,12 @@ void Test::t_value_computation()
 
 {
   value = ::t_value_computation(one_side , df1 , critical_probability);
+
+# ifdef DEBUG
+  students_t dist(df1);
+
+  cout << "\nTEST t-distribution: " << quantile(complement(dist , critical_probability))
+       << " | " << value << endl;
+# endif
+
 }
