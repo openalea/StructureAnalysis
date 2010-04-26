@@ -1475,9 +1475,9 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
     main_term = cumul_length * ((double)cumul_length * (double)cumul_length - 1);
 
-    pfrequency = marginal[variable1]->frequency + marginal[variable1]->offset;
+    pfrequency = marginal_distribution[variable1]->frequency + marginal_distribution[variable1]->offset;
     correction = 0.;
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
       if (*pfrequency > 1) {
         correction += *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
       }
@@ -1491,9 +1491,9 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
     else {
       norm = sqrt(main_term - correction) / 12.;
 
-      pfrequency = marginal[variable2]->frequency + marginal[variable2]->offset;
+      pfrequency = marginal_distribution[variable2]->frequency + marginal_distribution[variable2]->offset;
       correction = 0.;
-      for (i = marginal[variable2]->offset;i < marginal[variable2]->nb_value;i++) {
+      for (i = marginal_distribution[variable2]->offset;i < marginal_distribution[variable2]->nb_value;i++) {
         if (*pfrequency > 1) {
           correction += *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
         }
@@ -1507,18 +1507,18 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
 
     rank_mean = (double)(cumul_length + 1) / 2.;
 
-    rank[0] = marginal[variable1]->rank_computation();
+    rank[0] = marginal_distribution[variable1]->rank_computation();
 
     if (variable1 == variable2) {
-      rank[1] = new double[marginal[variable1]->nb_value];
+      rank[1] = new double[marginal_distribution[variable1]->nb_value];
 
-      for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+      for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
         rank[1][i] = rank[0][i];
       }
     }
 
     else {
-      rank[1] = marginal[variable2]->rank_computation();
+      rank[1] = marginal_distribution[variable2]->rank_computation();
     }
 
     // calcul des coefficients de correlation
@@ -1610,7 +1610,7 @@ void Sequences::correlation_computation(Correlation &correl , int variable1 , in
         vec->min_value_computation(j);
         vec->max_value_computation(j);
 
-        delete vec->marginal[j];
+        delete vec->marginal_distribution[j];
         vec->build_marginal_frequency_distribution(j);
       }
 
@@ -1682,9 +1682,9 @@ Correlation* Sequences::correlation_computation(StatError &error , int variable1
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-//    if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal[variable1])) {
+//    if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal_distribution[variable1])) {
     if (((itype == SPEARMAN) || (itype == SPEARMAN2) || (itype == KENDALL)) &&
-        (!marginal[variable1])) {
+        (!marginal_distribution[variable1])) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
@@ -1717,9 +1717,9 @@ Correlation* Sequences::correlation_computation(StatError &error , int variable1
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-//    if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal[variable2])) {
+//    if (((itype == SPEARMAN) || (itype == KENDALL)) && (!marginal_distribution[variable2])) {
     if (((itype == SPEARMAN) || (itype == SPEARMAN2) || (itype == KENDALL)) &&
-        (!marginal[variable2])) {
+        (!marginal_distribution[variable2])) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
@@ -1954,7 +1954,7 @@ Correlation* Sequences::partial_autocorrelation_computation(StatError &error , i
       error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
     }
 
-    if ((itype == KENDALL) && (!marginal[variable])) {
+    if ((itype == KENDALL) && (!marginal_distribution[variable])) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
