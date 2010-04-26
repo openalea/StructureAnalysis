@@ -1312,12 +1312,12 @@ Tops::Tops(int nb_sample , const Tops **ptops)
     }
   }
 
-  marginal = new FrequencyDistribution*[nb_variable];
+  marginal_distribution = new FrequencyDistribution*[nb_variable];
 
   for (i = 0;i < nb_sample;i++) {
-    phisto[i] = ptops[i]->marginal[0];
+    phisto[i] = ptops[i]->marginal_distribution[0];
   }
-  marginal[0] = new FrequencyDistribution(nb_sample , phisto);
+  marginal_distribution[0] = new FrequencyDistribution(nb_sample , phisto);
 
   // copie des sequences
 
@@ -1545,7 +1545,7 @@ Tops* Tops::shift(StatError &error , int inb_internode) const
 
     tops->min_value[0] = min_value[0];
     tops->max_value[0] = max_value[0];
-    tops->marginal[0] = new FrequencyDistribution(*marginal[0]);
+    tops->marginal_distribution[0] = new FrequencyDistribution(*marginal_distribution[0]);
 
     tops->build_nb_internode_frequency_distribution();
   }
