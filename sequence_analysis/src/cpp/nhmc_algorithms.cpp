@@ -1132,7 +1132,8 @@ double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &se
   // verification de la compatibilite entre le modele et les donnees
 
   if (seq.nb_variable == 1) {
-    if ((seq.marginal[0]) && (nb_state < seq.marginal[0]->nb_value)) {
+    if ((seq.marginal_distribution[0]) &&
+        (nb_state < seq.marginal_distribution[0]->nb_value)) {
       likelihood = D_INF;
     }
   }
@@ -1208,7 +1209,8 @@ double NonhomogeneousMarkov::likelihood_computation(const MarkovianSequences &se
 void NonhomogeneousMarkovData::build_transition_count()
 
 {
-  chain_data = new ChainData('o' , marginal[0]->nb_value , marginal[0]->nb_value);
+  chain_data = new ChainData('o' , marginal_distribution[0]->nb_value ,
+                             marginal_distribution[0]->nb_value);
   transition_count_computation(*chain_data);
 }
 
@@ -1241,13 +1243,14 @@ NonhomogeneousMarkov* MarkovianSequences::nonhomogeneous_markov_estimation(StatE
     status = false;
     error.correction_update(STAT_error[STATR_NB_VARIABLE] , 1);
   }
-  if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+  if ((marginal_distribution[0]->nb_value < 2) ||
+      (marginal_distribution[0]->nb_value > NB_STATE)) {
     status = false;
     error.update(SEQ_error[SEQR_NB_STATE]);
   }
 
   if (status) {
-    markov = new NonhomogeneousMarkov(marginal[0]->nb_value , ident);
+    markov = new NonhomogeneousMarkov(marginal_distribution[0]->nb_value , ident);
     markov->markov_data = new NonhomogeneousMarkovData(*this);
 
     seq = markov->markov_data;
