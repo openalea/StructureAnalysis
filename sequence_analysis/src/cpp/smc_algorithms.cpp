@@ -226,7 +226,8 @@ double SemiMarkov::likelihood_computation(const MarkovianSequences &seq , int in
         nb_value = parametric_process[i]->nb_value;
       }
 
-      if ((seq.marginal[i]) && (nb_value < seq.marginal[i]->nb_value)) {
+      if ((seq.marginal_distribution[i]) &&
+          (nb_value < seq.marginal_distribution[i]->nb_value)) {
         likelihood = D_INF;
         break;
       }
@@ -399,7 +400,7 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
         nb_value = parametric_process[i]->nb_value;
       }
 
-      if (nb_value < seq.marginal[i]->nb_value) {
+      if (nb_value < seq.marginal_distribution[i]->nb_value) {
         likelihood = D_INF;
         break;
       }
@@ -418,18 +419,18 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
 
         // creation des lois empiriques des temps de sejour censures
 
-        initial_run = new FrequencyDistribution*[seq.marginal[0]->nb_value];
-        for (i = 0;i < seq.marginal[0]->nb_value;i++) {
+        initial_run = new FrequencyDistribution*[seq.marginal_distribution[0]->nb_value];
+        for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           initial_run[i] = new FrequencyDistribution(seq.max_length);
         }
 
-        final_run = new FrequencyDistribution*[seq.marginal[0]->nb_value];
-        for (i = 0;i < seq.marginal[0]->nb_value;i++) {
+        final_run = new FrequencyDistribution*[seq.marginal_distribution[0]->nb_value];
+        for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           final_run[i] = new FrequencyDistribution(seq.max_length);
         }
 
-        single_run = new FrequencyDistribution*[seq.marginal[0]->nb_value];
-        for (i = 0;i < seq.marginal[0]->nb_value;i++) {
+        single_run = new FrequencyDistribution*[seq.marginal_distribution[0]->nb_value];
+        for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           single_run[i] = new FrequencyDistribution(seq.max_length + 1);
         }
 
@@ -502,17 +503,17 @@ double SemiMarkov::likelihood_computation(const SemiMarkovData &seq) const
       }
 
       if (type == 'e') {
-        for (i = 0;i < seq.marginal[0]->nb_value;i++) {
+        for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           delete initial_run[i];
         }
         delete [] initial_run;
 
-        for (i = 0;i < seq.marginal[0]->nb_value;i++) {
+        for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           delete final_run[i];
         }
         delete [] final_run;
 
-        for (i = 0;i < seq.marginal[0]->nb_value;i++) {
+        for (i = 0;i < seq.marginal_distribution[0]->nb_value;i++) {
           delete single_run[i];
         }
         delete [] single_run;
@@ -620,7 +621,8 @@ void MarkovianSequences::transition_count_computation(const ChainData &chain_dat
 void SemiMarkovData::build_transition_count(const SemiMarkov *smarkov)
 
 {
-  chain_data = new ChainData('o' , marginal[0]->nb_value , marginal[0]->nb_value);
+  chain_data = new ChainData('o' , marginal_distribution[0]->nb_value ,
+                             marginal_distribution[0]->nb_value);
   transition_count_computation(*chain_data , smarkov);
 }
 
@@ -999,14 +1001,15 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
   }
 
   else {
-    if ((marginal[0]->nb_value < 2) || (marginal[0]->nb_value > NB_STATE)) {
+    if ((marginal_distribution[0]->nb_value < 2) ||
+        (marginal_distribution[0]->nb_value > NB_STATE)) {
       status = false;
       error.update(SEQ_error[SEQR_NB_STATE]);
     }
 
     else if (!characteristics[0]) {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] == 0) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] == 0) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
@@ -1041,14 +1044,14 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
         error.update((error_message.str()).c_str());
       }
 
-      if (marginal[1]->nb_value > NB_STATE) {
+      if (marginal_distribution[1]->nb_value > NB_STATE) {
         status = false;
         error.update(SEQ_error[SEQR_NB_OUTPUT]);
       }
 
 /*      if (!characteristics[1]) {
-        for (i = 0;i < marginal[1]->nb_value;i++) {
-          if (marginal[1]->frequency[i] == 0) {
+        for (i = 0;i < marginal_distribution[1]->nb_value;i++) {
+          if (marginal_distribution[1]->frequency[i] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
@@ -1069,18 +1072,18 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
 
       // creation des lois empiriques des temps de sejour censures
 
-      initial_run = new FrequencyDistribution*[marginal[0]->nb_value];
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      initial_run = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         initial_run[i] = new FrequencyDistribution(max_length);
       }
 
-      final_run = new FrequencyDistribution*[marginal[0]->nb_value];
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      final_run = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         final_run[i] = new FrequencyDistribution(max_length);
       }
 
-      single_run = new FrequencyDistribution*[marginal[0]->nb_value];
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      single_run = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         single_run[i] = new FrequencyDistribution(max_length + 1);
       }
 
@@ -1090,11 +1093,13 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
     }
 
     if (nb_variable == 2) {
-      nb_value[0] = marginal[1]->nb_value;
+      nb_value[0] = marginal_distribution[1]->nb_value;
     }
 
-    smarkov = new SemiMarkov(model_type , marginal[0]->nb_value , nb_variable - 1 , nb_value);
-    smarkov->semi_markov_data = new SemiMarkovData(*this , 'c' , (model_type == 'e' ? true : false));
+    smarkov = new SemiMarkov(model_type , marginal_distribution[0]->nb_value ,
+                             nb_variable - 1 , nb_value);
+    smarkov->semi_markov_data = new SemiMarkovData(*this , 'c' ,
+                                                   (model_type == 'e' ? true : false));
 
     seq = smarkov->semi_markov_data;
     seq->state_variable_init();
@@ -1519,17 +1524,17 @@ SemiMarkov* MarkovianSequences::semi_markov_estimation(StatError &error , ostrea
     }
 
     if (model_type == 'e') {
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         delete initial_run[i];
       }
       delete [] initial_run;
 
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         delete final_run[i];
       }
       delete [] final_run;
 
-      for (i = 0;i < marginal[0]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
         delete single_run[i];
       }
       delete [] single_run;
@@ -1607,8 +1612,8 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
   }
 
   else if (!characteristics[0]) {
-    for (i = 0;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] == 0) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] == 0) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_error[SEQR_MISSING_STATE] << " " << i;
@@ -1643,8 +1648,8 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       }
 
       if (!characteristics[1]) {
-        for (i = 0;i < marginal[1]->nb_value;i++) {
-          if (marginal[1]->frequency[i] == 0) {
+        for (i = 0;i < marginal_distribution[1]->nb_value;i++) {
+          if (marginal_distribution[1]->frequency[i] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << 2 << ": "
@@ -1666,7 +1671,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
     }
 
     else {
-      if (ismarkov[i]->nonparametric_process[0]->nb_value < marginal[0]->nb_value) {
+      if (ismarkov[i]->nonparametric_process[0]->nb_value < marginal_distribution[0]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
@@ -1675,7 +1680,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
       }
 
       if (nb_variable == 2) {
-        if (ismarkov[i]->nonparametric_process[1]->nb_value < marginal[1]->nb_value) {
+        if (ismarkov[i]->nonparametric_process[1]->nb_value < marginal_distribution[1]->nb_value) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
