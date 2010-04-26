@@ -121,7 +121,7 @@ Clusters::Clusters(const DistanceMatrix &dist_matrix , int inb_cluster)
   pattern_length = new int*[nb_pattern];
   for (i = 0;i < nb_pattern;i++) {
     pattern_length[i] = new int[nb_cluster];
-     for (j = 0;j < nb_cluster;j++) {
+    for (j = 0;j < nb_cluster;j++) {
       pattern_length[i][j] = 0;
     }
   }
