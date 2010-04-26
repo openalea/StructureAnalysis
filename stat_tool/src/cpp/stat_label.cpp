@@ -238,6 +238,7 @@ const char *STAT_label[] = {
 
   "frequency distribution" ,
   "frequency distributions" ,
+  "histogram" ,
   "sample" ,
   "sample size" ,
   "dissimilarities" ,
@@ -457,6 +458,7 @@ const char *STAT_error[] = {
   "not present" ,
 
   "marginal frequency distribution not built" ,
+  "marginal histogram not built" ,
   "bad" ,
   "bad number of vectors" ,
   "bad number of variables" ,
