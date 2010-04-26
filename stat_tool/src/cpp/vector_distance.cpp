@@ -1054,7 +1054,7 @@ double* VectorDistance::max_symbol_distance_computation(int variable) const
  *
  *--------------------------------------------------------------*/
 
-void VectorDistance::dispersion_computation(int variable , const FrequencyDistribution *marginal ,
+void VectorDistance::dispersion_computation(int variable , const FrequencyDistribution *marginal_distribution ,
                                             double *rank) const
 
 {
@@ -1065,11 +1065,11 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
 
   dispersion[variable] = 0.;
 
-  for (i = marginal->offset;i < marginal->nb_value;i++) {
-    if (marginal->frequency[i] > 0) {
-      pfrequency = marginal->frequency + i + 1;
+  for (i = marginal_distribution->offset;i < marginal_distribution->nb_value;i++) {
+    if (marginal_distribution->frequency[i] > 0) {
+      pfrequency = marginal_distribution->frequency + i + 1;
       sum = 0.;
-      for (j = i + 1;j < marginal->nb_value;j++) {
+      for (j = i + 1;j < marginal_distribution->nb_value;j++) {
         if (*pfrequency > 0) {
           switch (variable_type[variable]) {
 
@@ -1109,11 +1109,12 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
         pfrequency++;
       }
 
-      dispersion[variable] += marginal->frequency[i] * sum;
+      dispersion[variable] += marginal_distribution->frequency[i] * sum;
     }
   }
 
-  dispersion[variable] = 2 * dispersion[variable] / (marginal->nb_element * (double)(marginal->nb_element - 1));
+  dispersion[variable] = 2 * dispersion[variable] / (marginal_distribution->nb_element *
+                          (double)(marginal_distribution->nb_element - 1));
   if (dispersion[variable] == 0.) {
     dispersion[variable] = 1.;
   }
@@ -1125,10 +1126,12 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
   switch (variable_type[variable]) {
 
   case ORDINAL : {
-    double dispersion2 = marginal->nb_element * ((double)marginal->nb_element * (double)marginal->nb_element - 1);
+    double dispersion2 = marginal_distribution->nb_element *
+                         ((double)marginal_distribution->nb_element *
+                          (double)marginal_distribution->nb_element - 1);
 
-    pfrequency = marginal->frequency + marginal->offset;
-    for (i = marginal->offset;i < marginal->nb_value;i++) {
+    pfrequency = marginal_distribution->frequency + marginal_distribution->offset;
+    for (i = marginal_distribution->offset;i < marginal_distribution->nb_value;i++) {
       if (*pfrequency > 1) {
         dispersion2 -= *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
       }
@@ -1137,10 +1140,11 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
 
     switch (distance_type) {
     case ABSOLUTE_VALUE :
-      dispersion2 /= (3 * marginal->nb_element * (double)(marginal->nb_element - 1));
+      dispersion2 /= (3 * marginal_distribution->nb_element *
+                      (double)(marginal_distribution->nb_element - 1));
       break;
     case QUADRATIC :
-      dispersion2 /= (6 * (marginal->nb_element - 1));
+      dispersion2 /= (6 * (marginal_distribution->nb_element - 1));
       break;
     }
 
@@ -1150,21 +1154,23 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
       int cumul;
       double previous_rank;
 
-      pfrequency = marginal->frequency + marginal->offset;
+      pfrequency = marginal_distribution->frequency + marginal_distribution->offset;
       cumul = *pfrequency++;
-      previous_rank = rank[marginal->offset];
+      previous_rank = rank[marginal_distribution->offset];
       dispersion2 = 0.;
 
-      for (i = marginal->offset + 1;i < marginal->nb_value;i++) {
+      for (i = marginal_distribution->offset + 1;i < marginal_distribution->nb_value;i++) {
         if (*pfrequency > 0) {
-          dispersion2 += cumul * (double)(marginal->nb_element - cumul) * (rank[i] - previous_rank);
+          dispersion2 += cumul * (double)(marginal_distribution->nb_element - cumul) *
+                         (rank[i] - previous_rank);
           cumul += *pfrequency;
           previous_rank = rank[i];
         }
         pfrequency++;
       }
 
-      dispersion2 = 2 * dispersion2 / (marginal->nb_element * (double)(marginal->nb_element - 1));
+      dispersion2 = 2 * dispersion2 / (marginal_distribution->nb_element *
+                     (double)(marginal_distribution->nb_element - 1));
 
       cout << " | " << dispersion2;
     }
@@ -1176,20 +1182,22 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
       int previous_value , cumul;
       double dispersion2 = 0.;
 
-      pfrequency = marginal->frequency + marginal->offset;
+      pfrequency = marginal_distribution->frequency + marginal_distribution->offset;
       cumul = *pfrequency++;
-      previous_value = marginal->offset;
+      previous_value = marginal_distribution->offset;
 
-      for (i = marginal->offset + 1;i < marginal->nb_value;i++) {
+      for (i = marginal_distribution->offset + 1;i < marginal_distribution->nb_value;i++) {
         if (*pfrequency > 0) {
-          dispersion2 += cumul * (double)(marginal->nb_element - cumul) * (i - previous_value);
+          dispersion2 += cumul * (double)(marginal_distribution->nb_element - cumul) *
+                         (i - previous_value);
           cumul += *pfrequency;
           previous_value = i;
         }
         pfrequency++;
       }
 
-      dispersion2 = 2 * dispersion2 / (marginal->nb_element * (double)(marginal->nb_element - 1));
+      dispersion2 = 2 * dispersion2 / (marginal_distribution->nb_element *
+                     (double)(marginal_distribution->nb_element - 1));
 
       cout << " | " << dispersion2;
     }
@@ -1198,10 +1206,10 @@ void VectorDistance::dispersion_computation(int variable , const FrequencyDistri
     switch (distance_type) {
     case ABSOLUTE_VALUE :
       cout << "sqrt(2) * " << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << ": "
-           << sqrt(2.) * marginal->mean_absolute_deviation_computation();
+           << sqrt(2.) * marginal_distribution->mean_absolute_deviation_computation();
       break;
     case QUADRATIC :
-      cout << 2 * marginal->variance;
+      cout << 2 * marginal_distribution->variance;
       break;
     }
     break;
