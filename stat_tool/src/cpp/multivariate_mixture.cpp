@@ -2403,7 +2403,7 @@ DiscreteDistributionData* MultivariateMixtureData::extract_marginal(StatError &e
   if (status) {
 
     var = ivariable-1;
-    pFrequencyDistribution = get_marginal(var);
+    pFrequencyDistribution = get_marginal_distribution(var);
     if (mixture != NULL)
       pDistribution = mixture->extract_distribution(error, ivariable);
 
