@@ -102,12 +102,11 @@ protected :
     int *type;              // type de chaque variable (INT_VALUE/REAL_VALUE)
     double *min_value;      // valeurs minimums
     double *max_value;      // valeurs maximums
-    FrequencyDistribution **marginal;  // lois marginales empiriques
+    FrequencyDistribution **marginal_distribution;  // lois marginales empiriques
+    Histogram **marginal_histogram;  // histogrammes marginaux
     double *mean;           // vecteur moyenne
     double **covariance;    // matrice de variance-covariance
-    /// int_vector[vector_id][variable]
     int **int_vector;       // vecteurs, variables entieres
-    /// real_vector[vector_id][variable]
     double **real_vector;   // vecteurs, variables reelles
 
     void init(int inb_vector , int *iidentifier , int inb_variable , int *itype , bool init_flag);
@@ -130,8 +129,9 @@ protected :
 
     void min_value_computation(int variable);
     void max_value_computation(int variable);
-    int* order_computation(int variable) const;
     void build_marginal_frequency_distribution(int variable);
+    void build_marginal_histogram(int variable , double step = D_DEFAULT);
+    int* order_computation(int variable) const;
 
     void mean_computation(int variable);
     void variance_computation(int variable);
@@ -228,6 +228,8 @@ public :
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
+    bool select_step(StatError &error , int variable , double step);
+
     double mean_absolute_deviation_computation(int variable) const;
     double mean_absolute_difference_computation(int variable) const;
     double skewness_computation(int variable) const;
@@ -274,7 +276,10 @@ public :
     int get_type(int variable) const { return type[variable]; }
     double get_min_value(int variable) const { return min_value[variable]; }
     double get_max_value(int variable) const { return max_value[variable]; }
-    FrequencyDistribution* get_marginal(int variable) const { return marginal[variable]; }
+    FrequencyDistribution* get_marginal_distribution(int variable) const
+    { return marginal_distribution[variable]; }
+    Histogram* get_marginal_histogram(int variable) const
+    { return marginal_histogram[variable]; }
     double get_mean(int variable) const { return mean[variable]; }
     double get_covariance(int variable1, int variable2) const
     { return covariance[variable1][variable2]; }
@@ -342,7 +347,7 @@ public :
 
     double* max_symbol_distance_computation(int variable) const;
 
-    void dispersion_computation(int variable , const FrequencyDistribution *marginal ,
+    void dispersion_computation(int variable , const FrequencyDistribution *marginal_distribution ,
                                 double *rank = NULL) const;
 
     // acces membres de la classe
