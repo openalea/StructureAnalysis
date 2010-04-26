@@ -724,6 +724,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       for (i = 0;i < nb_variable;i++) {
         seq->min_value_computation(i);
         seq->max_value_computation(i);
+
         seq->build_marginal_frequency_distribution(i);
       }
     }
@@ -843,22 +844,22 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
       os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << min_value[i] << ", "
          << STAT_label[STATL_MAX_VALUE] << ": " << max_value[i] << ")" << endl;
 
-      if (marginal[i]) {
+      if (marginal_distribution[i]) {
         os << "\n";
         if (comment_flag) {
           os << "# ";
         }
         os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
-        marginal[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
+        marginal_distribution[i]->ascii_characteristic_print(os , exhaustive , comment_flag);
 
-        if ((marginal[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
+        if ((marginal_distribution[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
           os << "\n";
           if (comment_flag) {
             os << "# ";
           }
-          os << "   | " << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-          marginal[i]->ascii_print(os , comment_flag);
+          os << "   | " << STAT_label[STATL_FREQUENCY] << endl;
+          marginal_distribution[i]->ascii_print(os , comment_flag);
         }
       }
 
@@ -879,12 +880,27 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
            << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
            << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
 
-        if ((exhaustive) && (variance > 0.)) {
+        if ((variance > 0.) && (exhaustive)) {
           if (comment_flag) {
             os << "# ";
           }
           os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness_computation(i , mean , variance) << "   "
              << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation(i , mean , variance) << endl;
+        }
+
+        if ((marginal_histogram[i]) && (exhaustive)) {
+          os << "\n";
+          if (comment_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+
+          os << "\n";
+          if (comment_flag) {
+            os << "# ";
+          }
+          os << " " << STAT_label[STATL_VALUE] << "  | " << STAT_label[STATL_FREQUENCY] << endl;
+          marginal_histogram[i]->ascii_print(os , comment_flag);
         }
       }
     }
@@ -1436,12 +1452,12 @@ bool Sequences::spreadsheet_write(StatError &error , const char *path) const
         out_file << "\t\t" << STAT_label[STATL_MIN_VALUE] << "\t" << min_value[i]
                  << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
 
-        if (marginal[i]) {
+        if (marginal_distribution[i]) {
           out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-          marginal[i]->spreadsheet_characteristic_print(out_file);
+          marginal_distribution[i]->spreadsheet_characteristic_print(out_file);
 
-          out_file << "\n\t" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-          marginal[i]->spreadsheet_print(out_file);
+          out_file << "\n\t" << STAT_label[STATL_FREQUENCY] << endl;
+          marginal_distribution[i]->spreadsheet_print(out_file);
         }
 
         else {
@@ -1457,6 +1473,12 @@ bool Sequences::spreadsheet_write(StatError &error , const char *path) const
           if (variance > 0.) {
             out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i , mean , variance) << "\t\t"
                      << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation(i , mean , variance) << endl;
+          }
+
+          if (marginal_histogram[i]) {
+            out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+            out_file << "\n" << STAT_label[STATL_VALUE] << "\t" << STAT_label[STATL_FREQUENCY] << endl;
+            marginal_histogram[i]->spreadsheet_print(out_file);
           }
         }
       }
@@ -1493,19 +1515,19 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 
 {
   bool status;
-  register int i , j , k;
+  register int i , j;
   int nb_histo;
-  const FrequencyDistribution **phisto;
-  ostringstream data_file_name;
+  const FrequencyDistribution *phisto[2];
+  ostringstream *data_file_name;
 
 
   error.init();
 
-  // ecriture du fichier de donnees
+  // ecriture des fichier de donnees
 
-  data_file_name << prefix << ".dat";
+  data_file_name = new ostringstream[nb_variable + 1];
 
-  phisto = new const FrequencyDistribution*[nb_variable + 2];
+  data_file_name[0] << prefix << 0 << ".dat";
 
   nb_histo = 0;
 
@@ -1516,15 +1538,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
     phisto[nb_histo++] = index_interval;
   }
 
-  for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]) {
-      phisto[nb_histo++] = marginal[i];
-    }
-  }
-
-  status = hlength->plot_print((data_file_name.str()).c_str() , nb_histo , phisto);
-
-  delete [] phisto;
+  status = hlength->plot_print((data_file_name[0].str()).c_str() , nb_histo , phisto);
 
   if (!status) {
     error.update(STAT_error[STATR_FILE_PREFIX]);
@@ -1533,9 +1547,18 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
   // ecriture du fichier de commandes et du fichier d'impression
 
   else {
-    for (i = 0;i < 2;i++) {
-      j = 2;
+    for (i = 0;i < nb_variable;i++) {
+      if (marginal_distribution[i]) {
+        data_file_name[i + 1] << prefix << i + 1 << ".dat";
+        marginal_distribution[i]->plot_print((data_file_name[i + 1].str()).c_str());
+      }
+      else if (marginal_histogram[i]) {
+        data_file_name[i + 1] << prefix << i + 1 << ".dat";
+        marginal_histogram[i]->plot_print((data_file_name[i + 1].str()).c_str());
+      }
+    }
 
+    for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
 
       switch (i) {
@@ -1562,6 +1585,8 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
       }
       out_file << "\n\n";
 
+      j = 2;
+
       if (hindex_parameter) {
         if (hindex_parameter->nb_value - 1 < TIC_THRESHOLD) {
           out_file << "set xtics 0,1" << endl;
@@ -1573,7 +1598,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
         out_file << "plot [" << hindex_parameter->offset << ":"
                  << hindex_parameter->nb_value - 1 << "] [0:"
                  << (int)(hindex_parameter->max * YSCALE) + 1 << "] \""
-                 << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
+                 << label((data_file_name[0].str()).c_str()) << "\" using " << j++ << " title \""
                  << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME] : SEQ_label[SEQL_POSITION])
                  << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
@@ -1600,7 +1625,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 
         out_file << "plot [0:" << index_interval->nb_value - 1 << "] [0:"
                  << (int)(index_interval->max * YSCALE) + 1 << "] \""
-                 << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \""
+                 << label((data_file_name[0].str()).c_str()) << "\" using " << j++ << " title \""
                  << (index_parameter_type == TIME ? SEQ_label[SEQL_TIME_INTERVAL] : SEQ_label[SEQL_POSITION_INTERVAL])
                  << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
@@ -1617,28 +1642,51 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
         out_file << endl;
       }
 
-      for (k = 0;k < nb_variable;k++) {
-        if (marginal[k]) {
-          if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
+      for (j = 0;j < nb_variable;j++) {
+        if (marginal_distribution[j]) {
+          if (marginal_distribution[j]->nb_value - 1 < TIC_THRESHOLD) {
             out_file << "set xtics 0,1" << endl;
           }
-          if ((int)(marginal[k]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          if ((int)(marginal_distribution[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
             out_file << "set ytics 0,1" << endl;
           }
 
-          out_file << "plot [0:" << MAX(marginal[k]->nb_value - 1 , 1) << "] [0:"
-                   << (int)(marginal[k]->max * YSCALE) + 1 << "] \""
-                   << label((data_file_name.str()).c_str()) << "\" using " << j++ << " title \"";
+          out_file << "plot [0:" << MAX(marginal_distribution[j]->nb_value - 1 , 1) << "] [0:"
+                   << (int)(marginal_distribution[j]->max * YSCALE) + 1 << "] \""
+                   << label((data_file_name[j + 1].str()).c_str()) << "\" using 1 title \"";
           if (nb_variable > 1) {
-            out_file << STAT_label[STATL_VARIABLE] << " " << k + 1 << " - ";
+            out_file << STAT_label[STATL_VARIABLE] << " " << j + 1 << " - ";
           }
           out_file << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                    << "\" with impulses" << endl;
 
-          if (marginal[k]->nb_value - 1 < TIC_THRESHOLD) {
+          if (marginal_distribution[j]->nb_value - 1 < TIC_THRESHOLD) {
             out_file << "set xtics autofreq" << endl;
           }
-          if ((int)(marginal[k]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+          if ((int)(marginal_distribution[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+            out_file << "set ytics autofreq" << endl;
+          }
+
+          if (i == 0) {
+            out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+          }
+          out_file << endl;
+        }
+
+        else if (marginal_histogram[j]) {
+          if ((int)(marginal_histogram[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
+            out_file << "set ytics 0,1" << endl;
+          }
+
+          out_file << "plot [" << marginal_histogram[j]->min_value << ":"
+                   << marginal_histogram[j]->max_value << "] [0:"
+                   << (int)(marginal_histogram[j]->max * YSCALE) + 1 << "] \""
+                   << label((data_file_name[j + 1].str()).c_str()) << "\" using 1:2 title \""
+                   << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
+                   << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
+                   << "\" with histeps" << endl;
+
+          if ((int)(marginal_histogram[j]->max * YSCALE) + 1 < TIC_THRESHOLD) {
             out_file << "set ytics autofreq" << endl;
           }
 
@@ -1658,7 +1706,7 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
 
       out_file << "plot [0:" << hlength->nb_value - 1 << "] [0:"
                << (int)(hlength->max * YSCALE) + 1 << "] \""
-               << label((data_file_name.str()).c_str()) << "\" using 1 title \""
+               << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
                << SEQ_label[SEQL_SEQUENCE_LENGTH] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                << "\" with impulses" << endl;
 
@@ -1676,6 +1724,8 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
       out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
     }
   }
+
+  delete [] data_file_name;
 
   return status;
 }
@@ -1703,9 +1753,8 @@ MultiPlotSet* Sequences::get_plotable() const
   if (index_interval) {
     nb_plot_set++;
   }
-
   for (i = 0;i < nb_variable;i++) {
-    if (marginal[i]) {
+    if ((marginal_distribution[i]) || (marginal_histogram[i])) {
       nb_plot_set++;
     }
   }
@@ -1773,17 +1822,17 @@ MultiPlotSet* Sequences::get_plotable() const
   }
 
   for (j = 0;j < nb_variable;j++) {
-    if (marginal[j]) {
+    if (marginal_distribution[j]) {
 
       // vue : loi marginale empirique
 
-      plot[i].xrange = Range(0 , MAX(marginal[j]->nb_value - 1 , 1));
-      plot[i].yrange = Range(0 , ceil(marginal[j]->max * YSCALE));
+      plot[i].xrange = Range(0 , MAX(marginal_distribution[j]->nb_value - 1 , 1));
+      plot[i].yrange = Range(0 , ceil(marginal_distribution[j]->max * YSCALE));
 
-      if (marginal[j]->nb_value - 1 < TIC_THRESHOLD) {
+      if (marginal_distribution[j]->nb_value - 1 < TIC_THRESHOLD) {
         plot[i].xtics = 1;
       }
-      if (ceil(marginal[j]->max * YSCALE) < TIC_THRESHOLD) {
+      if (ceil(marginal_distribution[j]->max * YSCALE) < TIC_THRESHOLD) {
         plot[i].ytics = 1;
       }
 
@@ -1798,7 +1847,31 @@ MultiPlotSet* Sequences::get_plotable() const
 
       plot[i][0].style = "impulses";
 
-      marginal[j]->plotable_frequency_write(plot[i][0]);
+      marginal_distribution[j]->plotable_frequency_write(plot[i][0]);
+      i++;
+    }
+
+    else if (marginal_histogram[j]) {
+
+      // vue : histogramme marginal
+
+      plot[i].xrange = Range(marginal_histogram[j]->min_value , marginal_histogram[j]->max_value);
+      plot[i].yrange = Range(0 , ceil(marginal_histogram[j]->max * YSCALE));
+
+      if (ceil(marginal_histogram[j]->max * YSCALE) < TIC_THRESHOLD) {
+        plot[i].ytics = 1;
+      }
+
+      plot[i].resize(1);
+
+      legend.str("");
+      legend << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
+             << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM];
+      plot[i][0].legend = legend.str();
+
+      plot[i][0].style = "histeps";
+
+      marginal_histogram[j]->plotable_write(plot[i][0]);
       i++;
     }
   }
