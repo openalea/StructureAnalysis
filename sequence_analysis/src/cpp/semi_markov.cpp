@@ -1584,6 +1584,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
   SequenceCharacteristics *characteristics;
   MultiPlotSet *plot_set;
 
+
   if ((seq) && (seq->type[0] == STATE)) {
     characteristics = seq->characteristics[0];
   }
@@ -1811,8 +1812,6 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
     characteristics = NULL;
   }
 
-  return plot_set;
-
   index = 0;
   plot_set->variable_nb_viewpoint[0] = 0;
   nonparametric_process[0]->plotable_write(*plot_set , index , 0 , 0 , characteristics ,
@@ -2017,7 +2016,8 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
 
         switch (hidden) {
         case false :
-          penalty += nb_parameter * log((double)semi_markov_data->marginal[0]->frequency[i]);
+          penalty += nb_parameter *
+                     log((double)semi_markov_data->marginal_distribution[0]->frequency[i]);
           break;
         case true :
           penalty += nb_parameter * log(state_marginal[i] * semi_markov_data->cumul_length);
@@ -2041,7 +2041,8 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
           if (nb_parameter > 0) {
             switch (hidden) {
               case false :
-              penalty += nb_parameter * log((double)semi_markov_data->marginal[0]->frequency[j]);
+              penalty += nb_parameter *
+                         log((double)semi_markov_data->marginal_distribution[0]->frequency[j]);
               break;
             case true :
               penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
@@ -2057,7 +2058,8 @@ double SemiMarkov::penalty_computation(bool hidden , double min_probability) con
 
           switch (hidden) {
             case false :
-            penalty += nb_parameter * log((double)semi_markov_data->marginal[0]->frequency[j]);
+            penalty += nb_parameter *
+                       log((double)semi_markov_data->marginal_distribution[0]->frequency[j]);
             break;
           case true :
             penalty += nb_parameter * log(state_marginal[j] * semi_markov_data->cumul_length);
@@ -2291,7 +2293,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
     else {
       variable--;
 
-      if ((value < 0) || (value >= marginal[0]->nb_value)) {
+      if ((value < 0) || (value >= marginal_distribution[0]->nb_value)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_STATE] << " " << value << " "
@@ -2327,7 +2329,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
         error.update((error_message.str()).c_str());
       }
 
-      else if ((value < 0) || (value >= marginal[variable]->nb_value)) {
+      else if ((value < 0) || (value >= marginal_distribution[variable]->nb_value)) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[variable == 0 ? STATL_STATE : STATL_OUTPUT] << " "
