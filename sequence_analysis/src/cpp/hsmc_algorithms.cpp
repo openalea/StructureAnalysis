@@ -100,7 +100,7 @@ double HiddenSemiMarkov::likelihood_computation(const MarkovianSequences &seq ,
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < seq.marginal[i]->nb_value) {
+      if (nb_value < seq.marginal_distribution[i]->nb_value) {
         likelihood = D_INF;
         break;
       }
@@ -397,9 +397,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
   else {
     for (i = 0;i < nb_variable;i++) {
       if (((ihsmarkov.nonparametric_process[i + 1]) &&
-           (ihsmarkov.nonparametric_process[i + 1]->nb_value != marginal[i]->nb_value)) ||
+           (ihsmarkov.nonparametric_process[i + 1]->nb_value != marginal_distribution[i]->nb_value)) ||
           ((ihsmarkov.parametric_process[i + 1]) &&
-           (ihsmarkov.parametric_process[i + 1]->nb_value < marginal[i]->nb_value))) {
+           (ihsmarkov.parametric_process[i + 1]->nb_value < marginal_distribution[i]->nb_value))) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -408,8 +408,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       }
 
       else if ((ihsmarkov.nonparametric_process[i + 1]) && (!characteristics[i])) {
-        for (j = 0;j < marginal[i]->nb_value;j++) {
-          if (marginal[i]->frequency[j] == 0) {
+        for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+          if (marginal_distribution[i]->frequency[j] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -545,14 +545,14 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
       observation_reestim[i] = new Reestimation<double>*[hsmarkov->nb_state];
       for (j = 0;j < hsmarkov->nb_state;j++) {
-        observation_reestim[i][j] = new Reestimation<double>(marginal[i]->nb_value);
+        observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
       }
     }
 
     max_nb_value = 0;
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
-      if ((hsmarkov->parametric_process[i + 1]) && (max_nb_value < marginal[i]->nb_value)) {
-        max_nb_value = marginal[i]->nb_value;
+      if ((hsmarkov->parametric_process[i + 1]) && (max_nb_value < marginal_distribution[i]->nb_value)) {
+        max_nb_value = marginal_distribution[i]->nb_value;
       }
     }
 
@@ -603,7 +603,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
         for (j = 0;j < hsmarkov->nb_state;j++) {
           reestim = observation_reestim[i][j]->frequency;
-          for (k = 0;k < marginal[i]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
             *reestim++ = 0.;
           }
         }
@@ -1221,7 +1221,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
           if (hsmarkov->nonparametric_process[i + 1]) {
             for (j = 0;j < hsmarkov->nb_state;j++) {
-              reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+              reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                            hsmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                            MIN_PROBABILITY , false);
             }
@@ -1246,11 +1246,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
                 min_likelihood = D_INF;
               }
               else {
-                hsmarkov->parametric_process[i + 1]->observation[j]->computation(marginal[i]->nb_value ,
+                hsmarkov->parametric_process[i + 1]->observation[j]->computation(marginal_distribution[i]->nb_value ,
                                                                                  OBSERVATION_THRESHOLD);
 
                 if (hsmarkov->parametric_process[i + 1]->observation[j]->ident == BINOMIAL) {
-                  for (k = hsmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal[i]->nb_value;k++) {
+                  for (k = hsmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal_distribution[i]->nb_value;k++) {
                     hsmarkov->parametric_process[i + 1]->observation[j]->mass[k] = 0.;
                   }
                 }
@@ -1317,7 +1317,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
         if (hsmarkov->nonparametric_process[i + 1]) {
           for (j = 0;j < hsmarkov->nb_state;j++) {
-            reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+            reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                          hsmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                          MIN_PROBABILITY , true);
           }
@@ -1609,7 +1609,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
 
   if (status) {
     for (i = 0;i < nb_variable;i++) {
-      nb_value[i] = marginal[i]->nb_value;
+      nb_value[i] = marginal_distribution[i]->nb_value;
     }
 
     ihsmarkov = new HiddenSemiMarkov(model_type , nb_state , nb_variable , nb_value);
@@ -1755,9 +1755,9 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
   else {
     for (i = 0;i < nb_variable;i++) {
       if (((ihsmarkov.nonparametric_process[i + 1]) &&
-           (ihsmarkov.nonparametric_process[i + 1]->nb_value != marginal[i]->nb_value)) ||
+           (ihsmarkov.nonparametric_process[i + 1]->nb_value != marginal_distribution[i]->nb_value)) ||
           ((ihsmarkov.parametric_process[i + 1]) &&
-           (ihsmarkov.parametric_process[i + 1]->nb_value < marginal[i]->nb_value))) {
+           (ihsmarkov.parametric_process[i + 1]->nb_value < marginal_distribution[i]->nb_value))) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -1766,8 +1766,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       }
 
       else if ((ihsmarkov.nonparametric_process[i + 1]) && (!characteristics[i])) {
-        for (j = 0;j < marginal[i]->nb_value;j++) {
-          if (marginal[i]->frequency[j] == 0) {
+        for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+          if (marginal_distribution[i]->frequency[j] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -1888,7 +1888,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
     for (i = 0;i < hsmarkov->nb_output_process;i++) {
       observation_reestim[i] = new Reestimation<double>*[hsmarkov->nb_state];
       for (j = 0;j < hsmarkov->nb_state;j++) {
-        observation_reestim[i][j] = new Reestimation<double>(marginal[i]->nb_value);
+        observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
       }
     }
 
@@ -1948,7 +1948,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
         for (j = 0;j < hsmarkov->nb_state;j++) {
           reestim = observation_reestim[i][j]->frequency;
-          for (k = 0;k < marginal[i]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
             *reestim++ = 0.;
           }
         }
@@ -2458,7 +2458,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         for (i = 0;i < hsmarkov->nb_output_process;i++) {
           if (hsmarkov->nonparametric_process[i + 1]) {
             for (j = 0;j < hsmarkov->nb_state;j++) {
-              reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+              reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                            hsmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                            MIN_PROBABILITY , false);
             }
@@ -2480,11 +2480,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
                 min_likelihood = D_INF;
               }
               else {
-                hsmarkov->parametric_process[i + 1]->observation[j]->computation(marginal[i]->nb_value ,
+                hsmarkov->parametric_process[i + 1]->observation[j]->computation(marginal_distribution[i]->nb_value ,
                                                                                  OBSERVATION_THRESHOLD);
 
                 if (hsmarkov->parametric_process[i + 1]->observation[j]->ident == BINOMIAL) {
-                  for (k = hsmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal[i]->nb_value;k++) {
+                  for (k = hsmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal_distribution[i]->nb_value;k++) {
                     hsmarkov->parametric_process[i + 1]->observation[j]->mass[k] = 0.;
                   }
                 }
@@ -2562,7 +2562,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
       for (i = 0;i < hsmarkov->nb_output_process;i++) {
         if (hsmarkov->nonparametric_process[i + 1]) {
           for (j = 0;j < hsmarkov->nb_state;j++) {
-            reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+            reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                          hsmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                          MIN_PROBABILITY , true);
           }
@@ -2849,7 +2849,7 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
 
   if (status) {
     for (i = 0;i < nb_variable;i++) {
-      nb_value[i] = marginal[i]->nb_value;
+      nb_value[i] = marginal_distribution[i]->nb_value;
     }
 
     ihsmarkov = new HiddenSemiMarkov(model_type , nb_state , nb_variable , nb_value);
@@ -6375,7 +6375,7 @@ bool HiddenSemiMarkov::state_profile_write(StatError &error , ostream &os ,
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i + offset]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -6648,7 +6648,7 @@ bool HiddenSemiMarkov::state_profile_plot_write(StatError &error , const char *p
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i + offset]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -7046,7 +7046,7 @@ MultiPlotSet* HiddenSemiMarkov::state_profile_plotable_write(StatError &error ,
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i + offset]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -7310,7 +7310,7 @@ SemiMarkovData* HiddenSemiMarkov::state_sequence_computation(StatError &error , 
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -7469,7 +7469,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
           nb_value = ihsmarkov[i]->parametric_process[j + 1]->nb_value;
         }
 
-        if (nb_value < marginal[j]->nb_value) {
+        if (nb_value < marginal_distribution[j]->nb_value) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_HIDDEN_SEMI_MARKOV_CHAIN] << " " << i + 1 << ": "
