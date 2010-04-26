@@ -445,14 +445,14 @@ int Sequences::nb_parameter_computation(int index , int nb_segment , int *model_
       psegment = int_sequence[index][0] + 1;
       pisequence = int_sequence[index][i];
 
-      for (j = 0;j < marginal[i]->nb_value;j++) {
+      for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
         used_output[j] = false;
       }
       used_output[*pisequence++] = true;
 
       for (j = 1;j < length[index];j++) {
         if (*psegment != *(psegment - 1)) {
-          for (k = 0;k < marginal[i]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
             used_output[k] = false;
           }
           used_output[*pisequence] = true;
@@ -516,8 +516,8 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
   max_nb_value = 0;
   for (i = 1;i < nb_variable;i++) {
     if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
-      if (marginal[i]->nb_value > max_nb_value) {
-        max_nb_value = marginal[i]->nb_value;
+      if (marginal_distribution[i]->nb_value > max_nb_value) {
+        max_nb_value = marginal_distribution[i]->nb_value;
       }
     }
   }
@@ -538,7 +538,7 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
 
   for (i = 1;i < nb_variable;i++) {
     if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
-      for (j = 0;j < marginal[i]->nb_value;j++) {
+      for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
         frequency[j] = 0;
       }
 
@@ -547,7 +547,7 @@ double Sequences::one_segment_likelihood(int index , int *model_type , double **
         frequency[*pisequence++]++;
       }
 
-      for (j = 0;j < marginal[i]->nb_value;j++) {
+      for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
         if (frequency[j] > 0) {
           likelihood += frequency[j] * log((double)frequency[j] / (double)(length[index]));
         }
@@ -1064,10 +1064,12 @@ Sequences* Sequences::segmentation_output(int *nb_segment , int *model_type , os
       seq->min_value_computation(i);
       seq->max_value_computation(i);
 
-      if (seq->marginal[i]) {
-        delete seq->marginal[i];
-        seq->marginal[i] = NULL;
+      if (seq->marginal_distribution[i]) {
+        delete seq->marginal_distribution[i];
+        seq->marginal_distribution[i] = NULL;
       }
+
+      seq->build_marginal_histogram(i);
     }
   }
 
@@ -1131,7 +1133,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           error.update((error_message.str()).c_str());
         }
 
-        if (!marginal[i]) {
+        if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -1140,7 +1142,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         }
 
         else if (model_type[i] == MULTINOMIAL_CHANGE) {
-          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -1149,8 +1152,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           }
 
           else {
-            for (j = 0;j < marginal[i]->nb_value;j++) {
-              if (marginal[i]->frequency[j] == 0) {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -1252,7 +1255,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     for (i = 0;i < nb_variable;i++) {
       if (model_type[i] == ORDINAL_GAUSSIAN_CHANGE) {
-        rank[i] = marginal[i]->rank_computation();
+        rank[i] = marginal_distribution[i]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -1262,8 +1265,9 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     max_nb_value = 0;
 
     for (i = 0;i < nb_variable;i++) {
-      if ((model_type[i] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
-        max_nb_value = marginal[i]->nb_value;
+      if ((model_type[i] == MULTINOMIAL_CHANGE) &&
+          (marginal_distribution[i]->nb_value > max_nb_value)) {
+        max_nb_value = marginal_distribution[i]->nb_value;
       }
     }
 
@@ -1323,7 +1327,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
         if (model_type[j] == MULTINOMIAL_CHANGE) {
 
-          for (k = 0;k < marginal[j]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
             frequency[k] = 0;
           }
 
@@ -1332,7 +1336,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
             frequency[*pisequence++]++;
           }
 
-          for (k = 0;k < marginal[j]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
             if (frequency[k] > 0) {
               segmentation_likelihood += frequency[k] * log((double)frequency[k] /
                                           (double)(change_point[i + 1] - change_point[i]));
@@ -1488,6 +1492,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     seq->min_value[0] = 0;
     seq->max_value[0] = nb_segment - 1;
+
     seq->build_marginal_frequency_distribution(0);
 
 #   ifdef MESSAGE
@@ -1586,8 +1591,9 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
-      max_nb_value = marginal[i]->nb_value;
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
+        (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
     }
 
     if (model_type[i - 1] == POISSON_CHANGE) {
@@ -1661,7 +1667,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
 
       for (k = 1;k < nb_variable;k++) {
         if (model_type[k - 1] == MULTINOMIAL_CHANGE) {
-          for (m = 0;m < marginal[k]->nb_value;m++) {
+          for (m = 0;m < marginal_distribution[k]->nb_value;m++) {
             frequency[m] = 0;
           }
           sum = 0.;
@@ -1683,7 +1689,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
 
 /*            frequency[*pisequence--]++;
             if (contrast[m] != D_INF) {
-              for (n = 0;n < marginal[k]->nb_value;n++) {
+              for (n = 0;n < marginal_distribution[k]->nb_value;n++) {
                 if (frequency[n] > 0) {
                   contrast[m] += frequency[n] * log((double)frequency[n] / (double)(j - m + 1));
                 }
@@ -1946,7 +1952,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
             pisequence = int_sequence[i][k] + m;
 
             for (n = j;n >= 0;n--) {
-              for (r = 0;r < marginal[k]->nb_value;r++) {
+              for (r = 0;r < marginal_distribution[k]->nb_value;r++) {
                 used_output[r] = false;
               }
 
@@ -2003,7 +2009,7 @@ double Sequences::segmentation(int *nb_segment , int *model_type , double **rank
 
   min_value[0] = 0;
   max_value[0] = max_nb_segment - 1;
-  delete marginal[0];
+  delete marginal_distribution[0];
   build_marginal_frequency_distribution(0);
 
   delete [] frequency;
@@ -2088,7 +2094,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
           error.update((error_message.str()).c_str());
         }
 
-        if (!marginal[i]) {
+        if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -2097,7 +2103,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
         }
 
         else if (model_type[i] == MULTINOMIAL_CHANGE) {
-          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -2106,8 +2113,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
           }
 
           else {
-            for (j = 0;j < marginal[i]->nb_value;j++) {
-              if (marginal[i]->frequency[j] == 0) {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -2173,7 +2180,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int *nb_segm
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-        rank[i] = seq->marginal[i]->rank_computation();
+        rank[i] = seq->marginal_distribution[i]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -2296,7 +2303,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           error.update((error_message.str()).c_str());
         }
 
-        if (!marginal[i]) {
+        if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -2305,7 +2312,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
         }
 
         else if (model_type[i] == MULTINOMIAL_CHANGE) {
-          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -2314,8 +2322,8 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
           }
 
           else {
-            for (j = 0;j < marginal[i]->nb_value;j++) {
-              if (marginal[i]->frequency[j] == 0) {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -2368,7 +2376,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-        rank[i] = marginal[i - 1]->rank_computation();
+        rank[i] = marginal_distribution[i - 1]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -2826,8 +2834,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
-      max_nb_value = marginal[i]->nb_value;
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
+        (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
     }
 
     if (model_type[i - 1] == POISSON_CHANGE) {
@@ -2941,7 +2950,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
     for (j = 1;j < nb_variable;j++) {
       if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
-        for (k = 0;k < marginal[j]->nb_value;k++) {
+        for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
           frequency[k] = 0;
         }
         sum = 0.;
@@ -2963,7 +2972,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
 /*          frequency[*pisequence--]++;
           if (contrast[k] != D_INF) {
-            for (m = 0;m < marginal[j]->nb_value;m++) {
+            for (m = 0;m < marginal_distribution[j]->nb_value;m++) {
               if (frequency[m] > 0) {
                 contrast[k] += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
               }
@@ -3255,7 +3264,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
       for (j = 1;j < nb_variable;j++) {
         if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
-          for (k = 0;k < marginal[j]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
             frequency[k] = 0;
           }
           sum = 0.;
@@ -3277,7 +3286,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
 
 /*            frequency[*pisequence++]++;
             if (contrast[k] != D_INF) {
-              for (m = 0;m < marginal[j]->nb_value;m++) {
+              for (m = 0;m < marginal_distribution[j]->nb_value;m++) {
                 if (frequency[m] > 0) {
                   contrast[k] += frequency[m] * log((double)frequency[m] / (double)(k - i + 1));
                 }
@@ -4298,8 +4307,9 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
-      max_nb_value = marginal[i]->nb_value;
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
+        (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
     }
 
     if (model_type[i - 1] == POISSON_CHANGE) {
@@ -4395,7 +4405,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
     for (j = 1;j < nb_variable;j++) {
       if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
-        for (k = 0;k < marginal[j]->nb_value;k++) {
+        for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
           frequency[k] = 0;
         }
         sum = 0.;
@@ -4417,7 +4427,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
 /*          frequency[*pisequence--]++;
           if (contrast[k] != D_INF) {
-            for (m = 0;m < marginal[j]->nb_value;m++) {
+            for (m = 0;m < marginal_distribution[j]->nb_value;m++) {
               if (frequency[m] > 0) {
                 contrast[k] += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
               }
@@ -4646,7 +4656,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
         for (m = 1;m < nb_variable;m++) {
           if (model_type[m - 1] == MULTINOMIAL_CHANGE) {
-            for (n = 0;n < marginal[m]->nb_value;n++) {
+            for (n = 0;n < marginal_distribution[m]->nb_value;n++) {
               frequency[n] = 0;
             }
             sum = 0.;
@@ -4668,7 +4678,7 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
 
 /*              frequency[*pisequence--]++;
               if (contrast[n] != D_INF) {
-                for (r = 0;r < marginal[m]->nb_value;r++) {
+                for (r = 0;r < marginal_distribution[m]->nb_value;r++) {
                   if (frequency[r] > 0) {
                     contrast[n] += frequency[r] * log((double)frequency[r] / (double)(j - n + 1));
                   }
@@ -5102,8 +5112,9 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
-      max_nb_value = marginal[i]->nb_value;
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
+        (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
     }
 
     if (model_type[i - 1] == POISSON_CHANGE) {
@@ -5266,7 +5277,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
     for (j = 1;j < nb_variable;j++) {
       if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
-        for (k = 0;k < marginal[j]->nb_value;k++) {
+        for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
           frequency[k] = 0;
         }
         sum = 0.;
@@ -5288,7 +5299,7 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
 
 #         ifdef MESSAGE
           sum2 = 0.;
-          for (m = 0;m < marginal[j]->nb_value;m++) {
+          for (m = 0;m < marginal_distribution[j]->nb_value;m++) {
             if (frequency[m] > 0) {
               sum2 += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
             }
@@ -6175,8 +6186,9 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
   factorial = new double*[nb_variable];
 
   for (i = 1;i < nb_variable;i++) {
-    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (marginal[i]->nb_value > max_nb_value)) {
-      max_nb_value = marginal[i]->nb_value;
+    if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
+        (marginal_distribution[i]->nb_value > max_nb_value)) {
+      max_nb_value = marginal_distribution[i]->nb_value;
     }
 
     if (model_type[i - 1] == POISSON_CHANGE) {
@@ -6265,7 +6277,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
     for (j = 1;j < nb_variable;j++) {
       if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
-        for (k = 0;k < marginal[j]->nb_value;k++) {
+        for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
           frequency[k] = 0;
         }
         sum = 0.;
@@ -6287,7 +6299,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
 /*          frequency[*pisequence--]++;
           if (contrast[k] != D_INF) {
-            for (m = 0;m < marginal[j]->nb_value;m++) {
+            for (m = 0;m < marginal_distribution[j]->nb_value;m++) {
               if (frequency[m] > 0) {
                 contrast[k] += frequency[m] * log((double)frequency[m] / (double)(i - k + 1));
               }
@@ -6484,7 +6496,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
       for (j = 1;j < nb_variable;j++) {
         if (model_type[j - 1] == MULTINOMIAL_CHANGE) {
-          for (k = 0;k < marginal[j]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[j]->nb_value;k++) {
             frequency[k] = 0;
           }
           sum = 0.;
@@ -6506,7 +6518,7 @@ double Sequences::forward_backward_dynamic_programming(int index , int nb_segmen
 
 /*            frequency[*pisequence++]++;
             if (contrast[k] != D_INF) {
-              for (m = 0;m < marginal[j]->nb_value;m++) {
+              for (m = 0;m < marginal_distribution[j]->nb_value;m++) {
                 if (frequency[m] > 0) {
                   contrast[k] += frequency[m] * log((double)frequency[m] / (double)(k - i + 1));
                 }
@@ -7135,7 +7147,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
           error.update((error_message.str()).c_str());
         }
 
-        if (!marginal[i]) {
+        if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7144,7 +7156,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
         }
 
         else if (model_type[i] == MULTINOMIAL_CHANGE) {
-          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7153,8 +7166,8 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
           }
 
           else {
-            for (j = 0;j < marginal[i]->nb_value;j++) {
-              if (marginal[i]->frequency[j] == 0) {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7212,7 +7225,7 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-        rank[i] = seq->marginal[i]->rank_computation();
+        rank[i] = seq->marginal_distribution[i]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -7354,7 +7367,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
           error.update((error_message.str()).c_str());
         }
 
-        if (!marginal[i]) {
+        if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7363,7 +7376,8 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
         }
 
         else if (model_type[i] == MULTINOMIAL_CHANGE) {
-          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7372,8 +7386,8 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
           }
 
           else {
-            for (j = 0;j < marginal[i]->nb_value;j++) {
-              if (marginal[i]->frequency[j] == 0) {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7437,7 +7451,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
       for (i = 1;i < seq->nb_variable;i++) {
         if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-          rank[i] = seq->marginal[i]->rank_computation();
+          rank[i] = seq->marginal_distribution[i]->rank_computation();
         }
         else {
           rank[i] = NULL;
@@ -7861,7 +7875,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
           error.update((error_message.str()).c_str());
         }
 
-        if (!marginal[i]) {
+        if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7870,7 +7884,8 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
         }
 
         else if (model_type[i] == MULTINOMIAL_CHANGE) {
-          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7879,8 +7894,8 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
           }
 
           else {
-            for (j = 0;j < marginal[i]->nb_value;j++) {
-              if (marginal[i]->frequency[j] == 0) {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -7951,7 +7966,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-        rank[i] = seq->marginal[i]->rank_computation();
+        rank[i] = seq->marginal_distribution[i]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -8217,7 +8232,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           error.update((error_message.str()).c_str());
         }
 
-        if (!marginal[i]) {
+        if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -8226,7 +8241,8 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
         }
 
         else if (model_type[i] == MULTINOMIAL_CHANGE) {
-          if ((marginal[i]->nb_value < 2) || (marginal[i]->nb_value > NB_OUTPUT)) {
+          if ((marginal_distribution[i]->nb_value < 2) ||
+              (marginal_distribution[i]->nb_value > NB_OUTPUT)) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -8235,8 +8251,8 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           }
 
           else {
-            for (j = 0;j < marginal[i]->nb_value;j++) {
-              if (marginal[i]->frequency[j] == 0) {
+            for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+              if (marginal_distribution[i]->frequency[j] == 0) {
                 status = false;
                 ostringstream error_message;
                 error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -8289,7 +8305,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (model_type[i - 1] == ORDINAL_GAUSSIAN_CHANGE) {
-        rank[i] = marginal[i - 1]->rank_computation();
+        rank[i] = marginal_distribution[i - 1]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -8309,16 +8325,17 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
     end_sum_square = new long double*[seq->nb_variable];
 
     for (i = 1;i < seq->nb_variable;i++) {
-      if ((model_type[i - 1] == MULTINOMIAL_CHANGE) && (seq->marginal[i]->nb_value > max_nb_value)) {
-        max_nb_value = seq->marginal[i]->nb_value;
+      if ((model_type[i - 1] == MULTINOMIAL_CHANGE) &&
+          (seq->marginal_distribution[i]->nb_value > max_nb_value)) {
+        max_nb_value = seq->marginal_distribution[i]->nb_value;
       }
 
       if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
         begin_frequency[i] = new int*[seq->length[0]];
         end_frequency[i] = new int*[seq->length[0]];
         for (j = 0;j < seq->length[0];j++) {
-          begin_frequency[i][j] = new int[seq->marginal[i]->nb_value];
-          end_frequency[i][j] = new int[seq->marginal[i]->nb_value];
+          begin_frequency[i][j] = new int[seq->marginal_distribution[i]->nb_value];
+          end_frequency[i][j] = new int[seq->marginal_distribution[i]->nb_value];
         }
 
         begin_sum[i] = NULL;
@@ -8413,7 +8430,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
-        for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+        for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
           frequency[j] = 0;
         }
         sum = 0.;
@@ -8421,7 +8438,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
         pisequence = seq->int_sequence[0][i];
         frequency[*pisequence++]++;
 
-        for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+        for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
           begin_frequency[i][0][j] = frequency[j];
         }
 
@@ -8434,7 +8451,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           }
           frequency[*pisequence++]++;
 
-          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
             begin_frequency[i][j][k] = frequency[k];
           }
 
@@ -8444,12 +8461,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
 /*          frequency[*pisequence++]++;
 
-          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
             begin_frequency[i][j][k] = frequency[k];
           }
 
           if (begin_contrast[j] != D_INF) {
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               if (frequency[k] > 0) {
                 begin_contrast[j] += frequency[k] * log((double)frequency[k] / (double)(j + 1));
               }
@@ -8605,7 +8622,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
-/*        for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+/*        for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
           frequency[j] = 0;
         }
         sum = 0.;
@@ -8613,7 +8630,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
         pisequence = seq->int_sequence[0][i] + seq->length[0] - 1;
         frequency[*pisequence--]++;
 
-        for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+        for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
           end_frequency[i][seq->length[0] - 1][j] = frequency[j];
         }
 
@@ -8627,7 +8644,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           }
           frequency[*pisequence--]++;
 
-          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
             end_frequency[i][j][k] = frequency[k];
           }
 
@@ -8637,12 +8654,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
           frequency[*pisequence--]++;
 
-          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
             end_frequency[i][j][k] = frequency[k];
           }
 
           if (end_contrast[j] != D_INF) {
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               if (frequency[k] > 0) {
                 end_contrast[j] += frequency[k] * log((double)frequency[k] / (double)(seq->length[0] - j));
               }
@@ -8651,12 +8668,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
         } */
 
         for (j = seq->length[0] - 1;j > 0;j--) {
-          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
             end_frequency[i][j][k] = begin_frequency[i][seq->length[0] - 1][k] - begin_frequency[i][j - 1][k];
           }
 
           if (end_contrast[j] != D_INF) {
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               if (end_frequency[i][j][k] > 0) {
                 end_contrast[j] += end_frequency[i][j][k] * log((double)end_frequency[i][j][k] /
                                    (double)(seq->length[0] - j));
@@ -8665,12 +8682,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           }
         }
 
-        for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+        for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
           end_frequency[i][0][k] = begin_frequency[i][seq->length[0] - 1][k];
         }
 
         if (end_contrast[0] != D_INF) {
-          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
             if (end_frequency[i][0][k] > 0) {
               end_contrast[0] += end_frequency[i][0][k] * log((double)end_frequency[i][0][k] /
                                  (double)seq->length[0]);
@@ -8941,7 +8958,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
       for (i = 1;i < seq->nb_variable;i++) {
         if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
           if (begin_change_point < split_change_point) {
-            for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+            for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
               frequency[j] = begin_frequency[i][begin_change_point - 1][j];
             }
             sum = 0.;
@@ -8959,7 +8976,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
               }
               frequency[*pisequence++]++;
 
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 begin_frequency[i][j][k] = frequency[k];
               }
 
@@ -8969,12 +8986,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
 /*              frequency[*pisequence++]++;
 
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 begin_frequency[i][j][k] = frequency[k];
               }
 
               if (begin_contrast[j] != D_INF) {
-                for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+                for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                   if (frequency[k] > 0) {
                     begin_contrast[j] += frequency[k] * log((double)frequency[k] /
                                                             (double)(j - change_point[nb_segment][segment_index - 1] + 1));
@@ -8988,14 +9005,14 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
             pisequence = seq->int_sequence[0][i] + split_change_point;
           }
 
-          for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+          for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
             frequency[j] = 0;
           }
           sum = 0.;
 
           frequency[*pisequence++]++;
 
-          for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+          for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
             begin_frequency[i][split_change_point][j] = frequency[j];
           }
 
@@ -9009,7 +9026,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
             }
             frequency[*pisequence++]++;
 
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               begin_frequency[i][j][k] = frequency[k];
             }
 
@@ -9019,12 +9036,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
 /*            frequency[*pisequence++]++;
 
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               begin_frequency[i][j][k] = frequency[k];
             }
 
             if (begin_contrast[j] != D_INF) {
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 if (frequency[k] > 0) {
                   begin_contrast[j] += frequency[k] * log((double)frequency[k] /
                                                           (double)(j - split_change_point + 1));
@@ -9318,7 +9335,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
       for (i = 1;i < seq->nb_variable;i++) {
         if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
 /*          if (end_change_point > split_change_point) {
-            for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+            for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
               frequency[j] = end_frequency[i][end_change_point][j];
             }
             sum = 0.;
@@ -9336,7 +9353,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
               }
               frequency[*pisequence--]++;
 
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 end_frequency[i][j][k] = frequency[k];
               }
 
@@ -9346,12 +9363,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
               frequency[*pisequence--]++;
 
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 end_frequency[i][j][k] = frequency[k];
               }
 
               if (end_contrast[j] != D_INF) {
-                for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+                for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                   if (frequency[k] > 0) {
                     end_contrast[j] += frequency[k] * log((double)frequency[k] /
                                                           (double)(change_point[nb_segment][segment_index + 1] - j));
@@ -9365,14 +9382,14 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
             pisequence = seq->int_sequence[0][i] + split_change_point - 1;
           }
 
-          for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+          for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
             frequency[j] = 0;
           }
           sum = 0.;
 
           frequency[*pisequence--]++;
 
-          for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+          for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
             end_frequency[i][split_change_point - 1][j] = frequency[j];
           }
 
@@ -9386,7 +9403,7 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
             }
             frequency[*pisequence--]++;
 
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               end_frequency[i][j][k] = frequency[k];
             }
 
@@ -9396,12 +9413,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
             frequency[*pisequence--]++;
 
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               end_frequency[i][j][k] = frequency[k];
             }
 
             if (end_contrast[j] != D_INF) {
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 if (frequency[k] > 0) {
                   end_contrast[j] += frequency[k] * log((double)frequency[k] /
                                                         (double)(split_change_point - j));
@@ -9412,13 +9429,13 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
           if (end_change_point > split_change_point) {
             for (j = end_change_point - 1;j > split_change_point;j--) {
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 end_frequency[i][j][k] = begin_frequency[i][change_point[nb_segment][segment_index + 1] - 1][k] -
                                          begin_frequency[i][j - 1][k];
               }
 
               if (end_contrast[j] != D_INF) {
-                for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+                for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                   if (end_frequency[i][j][k] > 0) {
                     end_contrast[j] += end_frequency[i][j][k] * log((double)end_frequency[i][j][k] /
                                                                     (double)(change_point[nb_segment][segment_index + 1] - j));
@@ -9427,12 +9444,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
               }
             }
 
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               end_frequency[i][j][k] = begin_frequency[i][change_point[nb_segment][segment_index + 1] - 1][k];
             }
 
             if (end_contrast[j] != D_INF) {
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 if (end_frequency[i][j][k] > 0) {
                   end_contrast[j] += end_frequency[i][j][k] * log((double)end_frequency[i][j][k] /
                                                                   (double)(change_point[nb_segment][segment_index + 1] - j));
@@ -9442,12 +9459,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
           }
 
           for (j = split_change_point - 1;j > change_point[nb_segment][segment_index - 1];j--) {
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               end_frequency[i][j][k] = begin_frequency[i][split_change_point - 1][k] - begin_frequency[i][j - 1][k];
             }
 
             if (end_contrast[j] != D_INF) {
-              for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+              for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
                 if (end_frequency[i][j][k] > 0) {
                   end_contrast[j] += end_frequency[i][j][k] * log((double)end_frequency[i][j][k] /
                                                                   (double)(split_change_point - j));
@@ -9456,12 +9473,12 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
             }
           }
 
-          for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+          for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
             end_frequency[i][j][k] = begin_frequency[i][split_change_point - 1][k];
           }
 
           if (end_contrast[j] != D_INF) {
-            for (k = 0;k < seq->marginal[i]->nb_value;k++) {
+            for (k = 0;k < seq->marginal_distribution[i]->nb_value;k++) {
               if (end_frequency[i][j][k] > 0) {
                 end_contrast[j] += end_frequency[i][j][k] * log((double)end_frequency[i][j][k] /
                                                                 (double)(split_change_point - j));
@@ -9888,13 +9905,13 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
           for (i = 1;i < seq->nb_variable;i++) {
             if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
-              for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+              for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
                 frequency[j] = begin_frequency[i][change_point[nb_segment][segment_index - 1] - 1][j] +
                                begin_frequency[i][split_change_point - 1][j];
               }
 
               if (merge_contrast != D_INF) {
-                for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+                for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
                   if (frequency[j] > 0) {
                     merge_contrast += frequency[j] * log((double)frequency[j] /
                                                          (double)(split_change_point - change_point[nb_segment][segment_index - 2]));
@@ -9959,13 +9976,13 @@ Sequences* Sequences::hierarchical_segmentation(StatError &error , ostream &os ,
 
           for (i = 1;i < seq->nb_variable;i++) {
             if (model_type[i - 1] == MULTINOMIAL_CHANGE) {
-              for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+              for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
                 frequency[j] = end_frequency[i][split_change_point][j] +
                                end_frequency[i][change_point[nb_segment][segment_index]][j];
               }
 
               if (merge_contrast != D_INF) {
-                for (j = 0;j < seq->marginal[i]->nb_value;j++) {
+                for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
                   if (frequency[j] > 0) {
                     merge_contrast += frequency[j] * log((double)frequency[j] /
                                                          (double)(change_point[nb_segment][segment_index + 1] - split_change_point));
@@ -10286,7 +10303,7 @@ Sequences* Sequences::segmentation(StatError &error , int iidentifier ,
             error.update((error_message.str()).c_str());
           }
 
-          if (!marginal[i]) {
+          if (!marginal_distribution[i]) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -10355,7 +10372,7 @@ Sequences* Sequences::segmentation(StatError &error , int iidentifier ,
 
     for (i = 1;i < seq->nb_variable;i++) {
       if (vector_dist->variable_type[i - 1] == ORDINAL) {
-        rank[i] = seq->marginal[i]->rank_computation();
+        rank[i] = seq->marginal_distribution[i]->rank_computation();
       }
       else {
         rank[i] = NULL;
@@ -10363,8 +10380,8 @@ Sequences* Sequences::segmentation(StatError &error , int iidentifier ,
 
       // calcul des dispersions pour la standardisation
 
-      if (seq->marginal[i]) {
-        vector_dist->dispersion_computation(i - 1 , seq->marginal[i] , rank[i]);
+      if (seq->marginal_distribution[i]) {
+        vector_dist->dispersion_computation(i - 1 , seq->marginal_distribution[i] , rank[i]);
       }
 
       else {
