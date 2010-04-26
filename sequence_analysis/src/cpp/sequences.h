@@ -415,7 +415,8 @@ protected :
     int *type;              // type de chaque variable (INT_VALUE/REAL_VALUE/STATE/NB_INTERNODE)
     double *min_value;      // valeurs minimums
     double *max_value;      // valeurs maximums
-    FrequencyDistribution **marginal;  // lois marginales empiriques
+    FrequencyDistribution **marginal_distribution;  // lois marginales empiriques
+    Histogram **marginal_histogram;  // histogrammes marginaux
     int ***int_sequence;    // sequences, variables entieres
     double ***real_sequence;  // sequences, variables reelles
 
@@ -461,6 +462,7 @@ protected :
     void min_value_computation(int variable);
     void max_value_computation(int variable);
     void build_marginal_frequency_distribution(int variable);
+    void build_marginal_histogram(int variable , double step = D_DEFAULT);
 
     std::ostream& alignment_ascii_print(std::ostream &os , int width , int ref_index , int test_index ,
                                         const Sequences &alignment , int alignment_index) const;
@@ -671,6 +673,7 @@ public :
     int max_index_parameter_computation(bool last_position = false) const;
 
     void marginal_frequency_distribution_computation(int variable);
+    bool select_step(StatError &error , int variable , double step);
     double mean_computation(int variable) const;
     double variance_computation(int variable , double mean) const;
     double mean_absolute_deviation_computation(int variable , double mean) const;
@@ -754,7 +757,10 @@ public :
     int get_type(int variable) const { return type[variable]; }
     double get_min_value(int variable) const { return min_value[variable]; }
     double get_max_value(int variable) const { return max_value[variable]; }
-    FrequencyDistribution* get_marginal(int variable) const { return marginal[variable]; }
+    FrequencyDistribution* get_marginal_distribution(int variable) const
+    { return marginal_distribution[variable]; }
+    Histogram* get_marginal_histogram(int variable) const
+    { return marginal_histogram[variable]; }
     int get_int_sequence(int iseq , int variable , int index) const
     { return int_sequence[iseq][variable][index]; }
     double get_real_sequence(int iseq , int variable , int index) const
