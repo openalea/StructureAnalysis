@@ -576,7 +576,7 @@ public:
     mixt_data = mixt.get_mixture_data();
 
     if (mixt_data != NULL)
-      marginal_hist = mixt_data->get_marginal(ivariable);
+      marginal_hist = mixt_data->get_marginal_distribution(ivariable);
 
     ret = new DiscreteParametricModel(*marginal, marginal_hist);
 
