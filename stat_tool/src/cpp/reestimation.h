@@ -92,7 +92,7 @@ public :
     int alloc_nb_value;     // nombre de valeurs alloues
     int offset;             // nombre de valeurs de frequence nulle a partir de 0
     Type nb_element;        // effectif total
-    Type max;               // valeur de frequence maximum
+    Type max;               // frequence maximum
     double mean;            // moyenne
     double variance;        // variance
     Type *frequency;        // frequence de chacune des valeurs
