@@ -2363,7 +2363,7 @@ DiscreteDistributionData* NonhomogeneousMarkovData::extract(StatError &error , i
   histo = NULL;
   error.init();
 
-  if ((state < 0) || (state >= marginal[0]->nb_value)) {
+  if ((state < 0) || (state >= marginal_distribution[0]->nb_value)) {
     status = false;
     ostringstream error_message;
     error_message << STAT_label[STATL_STATE] << " " << state << " "
