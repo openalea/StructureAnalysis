@@ -75,7 +75,6 @@ void Reestimation<Type>::init(int inb_value)
   else {
     register int i;
 
-
     frequency = new Type[nb_value];
 
     for (i = 0;i < nb_value;i++) {
@@ -107,8 +106,6 @@ void Reestimation<Type>::copy(const Reestimation<Type> &histo)
   max = histo.max;
   mean = histo.mean;
   variance = histo.variance;
-
-  // copie des frequences
 
   frequency = new Type[nb_value];
 
@@ -351,7 +348,7 @@ void Reestimation<Type>::nb_element_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Recherche de la valeur de frequence maximum d'une loi empirique.
+ *  Recherche de la frequence maximum d'une loi empirique.
  *
  *--------------------------------------------------------------*/
 
