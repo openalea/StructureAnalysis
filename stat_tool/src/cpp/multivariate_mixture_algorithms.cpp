@@ -420,9 +420,9 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, ostream& os,
       error.update((error_message.str()).c_str());
     }
     else
-      if ((imixture.npcomponent[var] != NULL) && (marginal != NULL))
+      if ((imixture.npcomponent[var] != NULL) && (marginal_distribution != NULL))
         for(j = 0; j < (int)get_max_value(var); j++)
-          if (marginal[var]->frequency[j] == 0) {
+          if (marginal_distribution[var]->frequency[j] == 0) {
         status= false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << var << ": "
@@ -971,7 +971,7 @@ MultivariateMixture* Vectors::mixture_estimation(StatError &error, std::ostream&
 
   if (status) {
     for(var = 0; var < nb_variable; var++) {
-      nb_value[var] = marginal[var]->nb_value;
+      nb_value[var] = marginal_distribution[var]->nb_value;
     }
 
     // initial Mixture
