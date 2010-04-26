@@ -512,7 +512,7 @@ int column_width(int min_value , int max_value)
  *
  *  Calcul de la largeur d'une colonne de reels.
  *
- *  arguments : nombre de valeurs, pointeur sur des valeurs reelles,
+ *  arguments : nombre de valeurs, pointeur sur les valeurs reelles,
  *              facteur d'echelle.
  *
  *--------------------------------------------------------------*/
