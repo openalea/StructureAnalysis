@@ -97,7 +97,7 @@ double HiddenVariableOrderMarkov::likelihood_computation(const MarkovianSequence
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < seq.marginal[i]->nb_value) {
+      if (nb_value < seq.marginal_distribution[i]->nb_value) {
         likelihood = D_INF;
         break;
       }
@@ -318,9 +318,9 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
   else {
     for (i = 0;i < nb_variable;i++) {
       if (((ihmarkov.nonparametric_process[i + 1]) &&
-           (ihmarkov.nonparametric_process[i + 1]->nb_value != marginal[i]->nb_value)) ||
+           (ihmarkov.nonparametric_process[i + 1]->nb_value != marginal_distribution[i]->nb_value)) ||
           ((ihmarkov.parametric_process[i + 1]) &&
-           (ihmarkov.parametric_process[i + 1]->nb_value < marginal[i]->nb_value))) {
+           (ihmarkov.parametric_process[i + 1]->nb_value < marginal_distribution[i]->nb_value))) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -329,8 +329,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
       }
 
       else if ((ihmarkov.nonparametric_process[i + 1]) && (!characteristics[i])) {
-        for (j = 0;j < marginal[i]->nb_value;j++) {
-          if (marginal[i]->frequency[j] == 0) {
+        for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+          if (marginal_distribution[i]->frequency[j] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -392,14 +392,14 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
     for (i = 0;i < hmarkov->nb_output_process;i++) {
       observation_reestim[i] = new Reestimation<double>*[hmarkov->nb_state];
       for (j = 0;j < hmarkov->nb_state;j++) {
-        observation_reestim[i][j] = new Reestimation<double>(marginal[i]->nb_value);
+        observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
       }
     }
 
     max_nb_value = 0;
     for (i = 0;i < hmarkov->nb_output_process;i++) {
-      if ((hmarkov->parametric_process[i + 1]) && (max_nb_value < marginal[i]->nb_value)) {
-        max_nb_value = marginal[i]->nb_value;
+      if ((hmarkov->parametric_process[i + 1]) && (max_nb_value < marginal_distribution[i]->nb_value)) {
+        max_nb_value = marginal_distribution[i]->nb_value;
       }
     }
 
@@ -425,7 +425,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
       for (i = 0;i < hmarkov->nb_output_process;i++) {
         for (j = 0;j < hmarkov->nb_state;j++) {
           reestim = observation_reestim[i][j]->frequency;
-          for (k = 0;k < marginal[i]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
             *reestim++ = 0.;
           }
         }
@@ -661,7 +661,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
         for (i = 0;i < hmarkov->nb_output_process;i++) {
           if (hmarkov->nonparametric_process[i + 1]) {
             for (j = 0;j < hmarkov->nb_state;j++) {
-              reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+              reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                            hmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                            MIN_PROBABILITY , false);
             }
@@ -686,11 +686,11 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
                 min_likelihood = D_INF;
               }
               else {
-                hmarkov->parametric_process[i + 1]->observation[j]->computation(marginal[i]->nb_value ,
+                hmarkov->parametric_process[i + 1]->observation[j]->computation(marginal_distribution[i]->nb_value ,
                                                                                 OBSERVATION_THRESHOLD);
 
                 if (hmarkov->parametric_process[i + 1]->observation[j]->ident == BINOMIAL) {
-                  for (k = hmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal[i]->nb_value;k++) {
+                  for (k = hmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal_distribution[i]->nb_value;k++) {
                     hmarkov->parametric_process[i + 1]->observation[j]->mass[k] = 0.;
                   }
                 }
@@ -763,7 +763,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
       for (i = 0;i < hmarkov->nb_output_process;i++) {
         if (hmarkov->nonparametric_process[i + 1]) {
           for (j = 0;j < hmarkov->nb_state;j++) {
-            reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+            reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                          hmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                          MIN_PROBABILITY , true);
           }
@@ -984,9 +984,9 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
   else {
     for (i = 0;i < nb_variable;i++) {
       if (((ihmarkov.nonparametric_process[i + 1]) &&
-           (ihmarkov.nonparametric_process[i + 1]->nb_value != marginal[i]->nb_value)) ||
+           (ihmarkov.nonparametric_process[i + 1]->nb_value != marginal_distribution[i]->nb_value)) ||
           ((ihmarkov.parametric_process[i + 1]) &&
-           (ihmarkov.parametric_process[i + 1]->nb_value < marginal[i]->nb_value))) {
+           (ihmarkov.parametric_process[i + 1]->nb_value < marginal_distribution[i]->nb_value))) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -995,8 +995,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
       }
 
       else if ((ihmarkov.nonparametric_process[i + 1]) && (!characteristics[i])) {
-        for (j = 0;j < marginal[i]->nb_value;j++) {
-          if (marginal[i]->frequency[j] == 0) {
+        for (j = 0;j < marginal_distribution[i]->nb_value;j++) {
+          if (marginal_distribution[i]->frequency[j] == 0) {
             status = false;
             ostringstream error_message;
             error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -1065,7 +1065,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
     for (i = 0;i < hmarkov->nb_output_process;i++) {
       observation_reestim[i] = new Reestimation<double>*[hmarkov->nb_state];
       for (j = 0;j < hmarkov->nb_state;j++) {
-        observation_reestim[i][j] = new Reestimation<double>(marginal[i]->nb_value);
+        observation_reestim[i][j] = new Reestimation<double>(marginal_distribution[i]->nb_value);
       }
     }
 
@@ -1097,7 +1097,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
       for (i = 0;i < hmarkov->nb_output_process;i++) {
         for (j = 0;j < hmarkov->nb_state;j++) {
           reestim = observation_reestim[i][j]->frequency;
-          for (k = 0;k < marginal[i]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
             *reestim++ = 0.;
           }
         }
@@ -1318,7 +1318,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
         for (i = 0;i < hmarkov->nb_output_process;i++) {
           if (hmarkov->nonparametric_process[i + 1]) {
             for (j = 0;j < hmarkov->nb_state;j++) {
-              reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+              reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                            hmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                            MIN_PROBABILITY , false);
             }
@@ -1340,11 +1340,11 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
                 min_likelihood = D_INF;
               }
               else {
-                hmarkov->parametric_process[i + 1]->observation[j]->computation(marginal[i]->nb_value ,
+                hmarkov->parametric_process[i + 1]->observation[j]->computation(marginal_distribution[i]->nb_value ,
                                                                                 OBSERVATION_THRESHOLD);
 
                 if (hmarkov->parametric_process[i + 1]->observation[j]->ident == BINOMIAL) {
-                  for (k = hmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal[i]->nb_value;k++) {
+                  for (k = hmarkov->parametric_process[i + 1]->observation[j]->nb_value;k < marginal_distribution[i]->nb_value;k++) {
                     hmarkov->parametric_process[i + 1]->observation[j]->mass[k] = 0.;
                   }
                 }
@@ -1418,7 +1418,7 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
       for (i = 0;i < hmarkov->nb_output_process;i++) {
         if (hmarkov->nonparametric_process[i + 1]) {
           for (j = 0;j < hmarkov->nb_state;j++) {
-            reestimation(marginal[i]->nb_value , observation_reestim[i][j]->frequency ,
+            reestimation(marginal_distribution[i]->nb_value , observation_reestim[i][j]->frequency ,
                          hmarkov->nonparametric_process[i + 1]->observation[j]->mass ,
                          MIN_PROBABILITY , true);
           }
@@ -4093,7 +4093,7 @@ bool HiddenVariableOrderMarkov::state_profile_write(StatError &error , ostream &
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i + offset]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -4359,7 +4359,7 @@ bool HiddenVariableOrderMarkov::state_profile_plot_write(StatError &error , cons
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i + offset]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -4740,7 +4740,7 @@ MultiPlotSet* HiddenVariableOrderMarkov::state_profile_plotable_write(StatError 
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i + offset]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i + offset]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -4990,7 +4990,7 @@ VariableOrderMarkovData* HiddenVariableOrderMarkov::state_sequence_computation(S
         nb_value = parametric_process[i + 1]->nb_value;
       }
 
-      if (nb_value < iseq.marginal[i]->nb_value) {
+      if (nb_value < iseq.marginal_distribution[i]->nb_value) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_OUTPUT_PROCESS] << " " << i + 1 << ": "
@@ -5111,7 +5111,7 @@ bool MarkovianSequences::comparison(StatError &error , ostream &os , int nb_mode
           nb_value = ihmarkov[i]->parametric_process[j + 1]->nb_value;
         }
 
-        if (nb_value < marginal[j]->nb_value) {
+        if (nb_value < marginal_distribution[j]->nb_value) {
           status = false;
           ostringstream error_message;
           error_message << SEQ_label[SEQL_HIDDEN_MARKOV_CHAIN] << " " << i + 1 << ": "
