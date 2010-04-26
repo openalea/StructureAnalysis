@@ -80,9 +80,9 @@ double** Vectors::spearman_rank_correlation_computation() const
 
     correction = new double[nb_variable];
     for (i = 0;i < nb_variable;i++) {
-      pfrequency = marginal[i]->frequency + marginal[i]->offset;
+      pfrequency = marginal_distribution[i]->frequency + marginal_distribution[i]->offset;
       correction[i] = 0.;
-      for (j = marginal[i]->offset;j < marginal[i]->nb_value;j++) {
+      for (j = marginal_distribution[i]->offset;j < marginal_distribution[i]->nb_value;j++) {
         if (*pfrequency > 1) {
           correction[i] += *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
         }
@@ -97,7 +97,7 @@ double** Vectors::spearman_rank_correlation_computation() const
     rank = new double*[nb_variable];
 
     for (i = 0;i < nb_variable;i++) {
-      rank[i] = marginal[i]->rank_computation();
+      rank[i] = marginal_distribution[i]->rank_computation();
     }
 
     for (i = 0;i < nb_variable;i++) {
@@ -156,9 +156,9 @@ double** Vectors::kendall_rank_correlation_computation() const
 
     correction = new double[nb_variable];
     for (i = 0;i < nb_variable;i++) {
-      pfrequency = marginal[i]->frequency + marginal[i]->offset;
+      pfrequency = marginal_distribution[i]->frequency + marginal_distribution[i]->offset;
       correction[i] = 0.;
-      for (j = marginal[i]->offset;j < marginal[i]->nb_value;j++) {
+      for (j = marginal_distribution[i]->offset;j < marginal_distribution[i]->nb_value;j++) {
         if (*pfrequency > 1) {
           correction[i] += *pfrequency * ((double)*pfrequency - 1);
         }
@@ -173,15 +173,15 @@ double** Vectors::kendall_rank_correlation_computation() const
 
       // calcul d'un ordre sur les vecteurs a partir des valeurs de la 1ere variable
 
-      cumul_frequency = new int[marginal[i]->nb_value];
-      current_frequency = new int[marginal[i]->nb_value];
+      cumul_frequency = new int[marginal_distribution[i]->nb_value];
+      current_frequency = new int[marginal_distribution[i]->nb_value];
 
-      cumul_frequency[marginal[i]->offset] = 0;
-      for (j = marginal[i]->offset + 1;j < marginal[i]->nb_value;j++) {
-        cumul_frequency[j] = cumul_frequency[j - 1] + marginal[i]->frequency[j - 1];
+      cumul_frequency[marginal_distribution[i]->offset] = 0;
+      for (j = marginal_distribution[i]->offset + 1;j < marginal_distribution[i]->nb_value;j++) {
+        cumul_frequency[j] = cumul_frequency[j - 1] + marginal_distribution[i]->frequency[j - 1];
       }
 
-      for (j = marginal[i]->offset;j < marginal[i]->nb_value;j++) {
+      for (j = marginal_distribution[i]->offset;j < marginal_distribution[i]->nb_value;j++) {
         current_frequency[j] = 0;
       }
 
@@ -193,8 +193,8 @@ double** Vectors::kendall_rank_correlation_computation() const
       for (j = i + 1;j < nb_variable;j++) {
         rank_diff_sign = 0.;
 
-        if ((marginal[i]->nb_value - marginal[i]->offset) *
-            (marginal[j]->nb_value - marginal[j]->offset) < nb_vector) {
+        if ((marginal_distribution[i]->nb_value - marginal_distribution[i]->offset) *
+            (marginal_distribution[j]->nb_value - marginal_distribution[j]->offset) < nb_vector) {
 
           // calcul des frequences correspondant a la loi jointe des 2 variables
 
@@ -202,15 +202,15 @@ double** Vectors::kendall_rank_correlation_computation() const
 
           // calcul des paires concordantes et discordantes
 
-          for (k = marginal[i]->offset;k < marginal[i]->nb_value;k++) {
-            for (m = marginal[j]->offset;m < marginal[j]->nb_value;m++) {
+          for (k = marginal_distribution[i]->offset;k < marginal_distribution[i]->nb_value;k++) {
+            for (m = marginal_distribution[j]->offset;m < marginal_distribution[j]->nb_value;m++) {
               if (frequency[k][m] > 0) {
                 sum = 0.;
-                for (n = k + 1;n < marginal[i]->nb_value;n++) {
-                  for (p = marginal[j]->offset;p < m;p++) {
+                for (n = k + 1;n < marginal_distribution[i]->nb_value;n++) {
+                  for (p = marginal_distribution[j]->offset;p < m;p++) {
                     sum -= frequency[n][p];
                   }
-                  for (p = m + 1;p < marginal[j]->nb_value;p++) {
+                  for (p = m + 1;p < marginal_distribution[j]->nb_value;p++) {
                     sum += frequency[n][p];
                   }
                 }
@@ -220,7 +220,7 @@ double** Vectors::kendall_rank_correlation_computation() const
             }
           }
 
-          for (k = 0;k < marginal[i]->nb_value;k++) {
+          for (k = 0;k < marginal_distribution[i]->nb_value;k++) {
             delete [] frequency[k];
           }
           delete [] frequency;
@@ -443,7 +443,7 @@ bool Vectors::rank_correlation_computation(StatError &error , ostream &os ,
       error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
     }
 
-    else if (!marginal[i]) {
+    else if (!marginal_distribution[i]) {
       status = false;
       ostringstream error_message;
       error_message << STAT_error[STATR_RANK_CORRELATION_COMPUTATION] << ": "
@@ -500,9 +500,9 @@ double Vectors::spearman_rank_single_correlation_computation() const
   main_term = nb_vector * ((double)nb_vector * (double)nb_vector - 1);
 
   for (i = 0;i < 2;i++) {
-    pfrequency = marginal[i]->frequency + marginal[i]->offset;
+    pfrequency = marginal_distribution[i]->frequency + marginal_distribution[i]->offset;
     correction[i] = 0.;
-    for (j = marginal[i]->offset;j < marginal[i]->nb_value;j++) {
+    for (j = marginal_distribution[i]->offset;j < marginal_distribution[i]->nb_value;j++) {
       if (*pfrequency > 1) {
         correction[i] += *pfrequency * ((double)*pfrequency * (double)*pfrequency - 1);
       }
@@ -515,7 +515,7 @@ double Vectors::spearman_rank_single_correlation_computation() const
   rank_mean = (double)(nb_vector + 1) / 2.;
 
   for (i = 0;i < 2;i++) {
-    rank[i] = marginal[i]->rank_computation();
+    rank[i] = marginal_distribution[i]->rank_computation();
   }
 
   // calcul des differences de rangs centrees
@@ -556,9 +556,9 @@ double Vectors::kendall_rank_single_correlation_computation() const
   nb_pair = nb_vector * ((double)nb_vector - 1);
 
   for (i = 0;i < 2;i++) {
-    pfrequency = marginal[i]->frequency + marginal[i]->offset;
+    pfrequency = marginal_distribution[i]->frequency + marginal_distribution[i]->offset;
     correction[i] = 0.;
-    for (j = marginal[i]->offset;j < marginal[i]->nb_value;j++) {
+    for (j = marginal_distribution[i]->offset;j < marginal_distribution[i]->nb_value;j++) {
       if (*pfrequency > 1) {
         correction[i] += *pfrequency * ((double)*pfrequency - 1);
       }
@@ -568,8 +568,8 @@ double Vectors::kendall_rank_single_correlation_computation() const
 
   correlation = 0.;
 
-  if ((marginal[0]->nb_value - marginal[0]->offset) *
-      (marginal[1]->nb_value - marginal[1]->offset) < nb_vector) {
+  if ((marginal_distribution[0]->nb_value - marginal_distribution[0]->offset) *
+      (marginal_distribution[1]->nb_value - marginal_distribution[1]->offset) < nb_vector) {
 
     // calcul des frequences correspondant a la loi jointe des 2 variables
 
@@ -577,15 +577,15 @@ double Vectors::kendall_rank_single_correlation_computation() const
 
     // calcul des paires concordantes et discordantes
 
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      for (j = marginal[1]->offset;j < marginal[1]->nb_value;j++) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      for (j = marginal_distribution[1]->offset;j < marginal_distribution[1]->nb_value;j++) {
         if (frequency[i][j] > 0) {
           sum = 0.;
-          for (k = i + 1;k < marginal[0]->nb_value;k++) {
-            for (m = marginal[1]->offset;m < j;m++) {
+          for (k = i + 1;k < marginal_distribution[0]->nb_value;k++) {
+            for (m = marginal_distribution[1]->offset;m < j;m++) {
               sum -= frequency[k][m];
             }
-            for (m = j + 1;m < marginal[1]->nb_value;m++) {
+            for (m = j + 1;m < marginal_distribution[1]->nb_value;m++) {
               sum += frequency[k][m];
             }
           }
@@ -595,7 +595,7 @@ double Vectors::kendall_rank_single_correlation_computation() const
       }
     }
 
-    for (i = 0;i < marginal[0]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       delete [] frequency[i];
     }
     delete [] frequency;
@@ -605,16 +605,16 @@ double Vectors::kendall_rank_single_correlation_computation() const
 
     // calcul d'un ordre sur les vecteurs a partir des valeurs de la 1ere variable
 
-    cumul_frequency = new int[marginal[0]->nb_value];
-    current_frequency = new int[marginal[0]->nb_value];
+    cumul_frequency = new int[marginal_distribution[0]->nb_value];
+    current_frequency = new int[marginal_distribution[0]->nb_value];
     index = new int[nb_vector];
 
-    cumul_frequency[marginal[0]->offset] = 0;
-    for (i = marginal[0]->offset + 1;i < marginal[0]->nb_value;i++) {
-      cumul_frequency[i] = cumul_frequency[i - 1] + marginal[0]->frequency[i - 1];
+    cumul_frequency[marginal_distribution[0]->offset] = 0;
+    for (i = marginal_distribution[0]->offset + 1;i < marginal_distribution[0]->nb_value;i++) {
+      cumul_frequency[i] = cumul_frequency[i - 1] + marginal_distribution[0]->frequency[i - 1];
     }
 
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
       current_frequency[i] = 0;
     }
 
@@ -692,7 +692,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
           error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
         }
 
-        else if (!marginal[i]) {
+        else if (!marginal_distribution[i]) {
           status = false;
           ostringstream error_message;
           error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -745,7 +745,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
 
     case false : {
       if (vector_dist->variable_type[0] == ORDINAL) {
-        merged_marginal = new FrequencyDistribution(nb_variable , (const FrequencyDistribution**)marginal);
+        merged_marginal = new FrequencyDistribution(nb_variable , (const FrequencyDistribution**)marginal_distribution);
         rank[0] = merged_marginal->rank_computation();
 
 #       ifdef MESSAGE
@@ -784,7 +784,7 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
     case true : {
       for (i = 0;i < nb_variable;i++) {
         if (vector_dist->variable_type[i] == ORDINAL) {
-          rank[i] = marginal[i]->rank_computation();
+          rank[i] = marginal_distribution[i]->rank_computation();
         }
         else {
           rank[i] = NULL;
@@ -798,8 +798,8 @@ DistanceMatrix* Vectors::comparison(StatError &error , const VectorDistance &ive
 
     if (standardization) {
       for (i = 0;i < nb_variable;i++) {
-        if (marginal[i]) {
-          vector_dist->dispersion_computation(i , marginal[i] , rank[i]);
+        if (marginal_distribution[i]) {
+          vector_dist->dispersion_computation(i , marginal_distribution[i] , rank[i]);
         }
 
         else {
@@ -987,11 +987,11 @@ int** Vectors::joint_frequency_computation(int variable1 , int variable2) const
   int **frequency = NULL;
 
 
-  if ((marginal[variable1]) && (marginal[variable2])) {
-    frequency = new int*[marginal[variable1]->nb_value];
-    for (i = 0;i < marginal[variable1]->nb_value;i++) {
-      frequency[i] = new int[marginal[variable2]->nb_value];
-      for (j = 0;j < marginal[variable2]->nb_value;j++) {
+  if ((marginal_distribution[variable1]) && (marginal_distribution[variable2])) {
+    frequency = new int*[marginal_distribution[variable1]->nb_value];
+    for (i = 0;i < marginal_distribution[variable1]->nb_value;i++) {
+      frequency[i] = new int[marginal_distribution[variable2]->nb_value];
+      for (j = 0;j < marginal_distribution[variable2]->nb_value;j++) {
         frequency[i][j] = 0;
       }
     }
@@ -1026,42 +1026,42 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
   long old_adjust;
 
 
-  if ((file_flag) || ((marginal[variable1]->nb_value - marginal[variable1]->offset <= DISPLAY_CONTINGENCY_NB_VALUE) &&
-       (marginal[variable2]->nb_value - marginal[variable2]->offset <= DISPLAY_CONTINGENCY_NB_VALUE))) {
+  if ((file_flag) || ((marginal_distribution[variable1]->nb_value - marginal_distribution[variable1]->offset <= DISPLAY_CONTINGENCY_NB_VALUE) &&
+       (marginal_distribution[variable2]->nb_value - marginal_distribution[variable2]->offset <= DISPLAY_CONTINGENCY_NB_VALUE))) {
     old_adjust = os.setf(ios::right , ios::adjustfield);
 
     // calcul des largeurs des colonnes
 
-    width[0] = column_width(MAX(marginal[variable1]->nb_value , marginal[variable2]->nb_value) - 1);
+    width[0] = column_width(MAX(marginal_distribution[variable1]->nb_value , marginal_distribution[variable2]->nb_value) - 1);
     width[1] = column_width(nb_vector) + ASCII_SPACE;
 
     // ecriture du tableau de contingence
 
     os << STAT_label[STATL_CONTINGENCY_TABLE] << endl;
 
-    os << "\n" << setw(width[0] + width[1]) << marginal[variable2]->offset;
-    for (i = marginal[variable2]->offset + 1;i < marginal[variable2]->nb_value;i++) {
+    os << "\n" << setw(width[0] + width[1]) << marginal_distribution[variable2]->offset;
+    for (i = marginal_distribution[variable2]->offset + 1;i < marginal_distribution[variable2]->nb_value;i++) {
       os << setw(width[1]) << i;
     }
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
       os << "\n" << setw(width[0]) << i;
-      for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+      for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
         os << setw(width[1]) << frequency[i][j];
       }
-      os << setw(width[1]) << marginal[variable1]->frequency[i];
+      os << setw(width[1]) << marginal_distribution[variable1]->frequency[i];
     }
-    os << "\n" << setw(width[0] + width[1]) << marginal[variable2]->frequency[marginal[variable2]->offset];
-    for (i = marginal[variable2]->offset + 1;i < marginal[variable2]->nb_value;i++) {
-      os << setw(width[1]) << marginal[variable2]->frequency[i];
+    os << "\n" << setw(width[0] + width[1]) << marginal_distribution[variable2]->frequency[marginal_distribution[variable2]->offset];
+    for (i = marginal_distribution[variable2]->offset + 1;i < marginal_distribution[variable2]->nb_value;i++) {
+      os << setw(width[1]) << marginal_distribution[variable2]->frequency[i];
     }
     os << setw(width[1]) << nb_vector << endl;
 
     // calcul des largeurs des colonnes
 
     width[1] = 0;
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
-      buff = column_width(marginal[variable2]->nb_value - marginal[variable2]->offset ,
-                          deviation[i] + marginal[variable2]->offset);
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
+      buff = column_width(marginal_distribution[variable2]->nb_value - marginal_distribution[variable2]->offset ,
+                          deviation[i] + marginal_distribution[variable2]->offset);
       if (buff > width[1]) {
         width[1] = buff;
       }
@@ -1072,13 +1072,13 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
 
     os << "\n" << STAT_label[STATL_DEVIATION_TABLE] << endl;
 
-    os << "\n" << setw(width[0] + width[1]) << marginal[variable2]->offset;
-    for (i = marginal[variable2]->offset + 1;i < marginal[variable2]->nb_value;i++) {
+    os << "\n" << setw(width[0] + width[1]) << marginal_distribution[variable2]->offset;
+    for (i = marginal_distribution[variable2]->offset + 1;i < marginal_distribution[variable2]->nb_value;i++) {
       os << setw(width[1]) << i;
     }
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
       os << "\n" << setw(width[0]) << i;
-      for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+      for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
         os << setw(width[1]) << deviation[i][j];
       }
     }
@@ -1087,9 +1087,9 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
     // calcul des largeurs des colonnes
 
     width[1] = 0;
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
-      buff = column_width(marginal[variable2]->nb_value - marginal[variable2]->offset ,
-                          chi2_contribution[i] + marginal[variable2]->offset);
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
+      buff = column_width(marginal_distribution[variable2]->nb_value - marginal_distribution[variable2]->offset ,
+                          chi2_contribution[i] + marginal_distribution[variable2]->offset);
       if (buff > width[1]) {
         width[1] = buff;
       }
@@ -1101,13 +1101,13 @@ ostream& Vectors::contingency_table_ascii_write(ostream &os , int variable1 , in
     if (test.value > 0.) {
       os << "\n" << STAT_label[STATL_CHI2_CONTRBUTION_TABLE] << endl;
 
-      os << "\n" << setw(width[0] + width[1]) << marginal[variable2]->offset;
-      for (i = marginal[variable2]->offset + 1;i < marginal[variable2]->nb_value;i++) {
+      os << "\n" << setw(width[0] + width[1]) << marginal_distribution[variable2]->offset;
+      for (i = marginal_distribution[variable2]->offset + 1;i < marginal_distribution[variable2]->nb_value;i++) {
         os << setw(width[1]) << i;
       }
-      for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+      for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
         os << "\n" << setw(width[0]) << i;
-        for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+        for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
           os << setw(width[1]) << chi2_contribution[i][j];
         }
       }
@@ -1197,19 +1197,19 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const char 
     out_file << STAT_label[STATL_CONTINGENCY_TABLE] << endl;
 
     out_file << "\n";
-    for (i = marginal[variable2]->offset;i < marginal[variable2]->nb_value;i++) {
+    for (i = marginal_distribution[variable2]->offset;i < marginal_distribution[variable2]->nb_value;i++) {
       out_file << "\t" << i;
     }
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
       out_file << "\n" << i;
-      for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+      for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
         out_file << "\t" << frequency[i][j];
       }
-      out_file << "\t" << marginal[variable1]->frequency[i];
+      out_file << "\t" << marginal_distribution[variable1]->frequency[i];
     }
     out_file << "\n";
-    for (i = marginal[variable2]->offset;i < marginal[variable2]->nb_value;i++) {
-      out_file << "\t" << marginal[variable2]->frequency[i];
+    for (i = marginal_distribution[variable2]->offset;i < marginal_distribution[variable2]->nb_value;i++) {
+      out_file << "\t" << marginal_distribution[variable2]->frequency[i];
     }
     out_file << "\t" << nb_vector << endl;
 
@@ -1218,12 +1218,12 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const char 
     out_file << "\n" << STAT_label[STATL_DEVIATION_TABLE] << endl;
 
     out_file << "\n";
-    for (i = marginal[variable2]->offset;i < marginal[variable2]->nb_value;i++) {
+    for (i = marginal_distribution[variable2]->offset;i < marginal_distribution[variable2]->nb_value;i++) {
       out_file << "\t" << i;
     }
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
       out_file << "\n" << i;
-      for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+      for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
         out_file << "\t" << deviation[i][j];
       }
     }
@@ -1235,12 +1235,12 @@ bool Vectors::contingency_table_spreadsheet_write(StatError &error , const char 
       out_file << "\n" << STAT_label[STATL_CHI2_CONTRBUTION_TABLE] << endl;
 
       out_file << "\n";
-      for (i = marginal[variable2]->offset;i < marginal[variable2]->nb_value;i++) {
+      for (i = marginal_distribution[variable2]->offset;i < marginal_distribution[variable2]->nb_value;i++) {
         out_file << "\t" << i;
       }
-      for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
+      for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
         out_file << "\n" << i;
-        for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
+        for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
           out_file << "\t" << chi2_contribution[i][j];
         }
       }
@@ -1301,8 +1301,8 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
       error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
     }
 
-    else if ((!marginal[variable1]) ||
-             (marginal[variable1]->nb_value - marginal[variable1]->offset > CONTINGENCY_NB_VALUE)) {
+    else if ((!marginal_distribution[variable1]) ||
+             (marginal_distribution[variable1]->nb_value - marginal_distribution[variable1]->offset > CONTINGENCY_NB_VALUE)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable1 + 1 << ": "
@@ -1330,8 +1330,8 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
       error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
     }
 
-    else if ((!marginal[variable2]) ||
-             (marginal[variable2]->nb_value - marginal[variable2]->offset > CONTINGENCY_NB_VALUE)) {
+    else if ((!marginal_distribution[variable2]) ||
+             (marginal_distribution[variable2]->nb_value - marginal_distribution[variable2]->offset > CONTINGENCY_NB_VALUE)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable2 + 1 << ": "
@@ -1346,18 +1346,18 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
 
     frequency = joint_frequency_computation(variable1 , variable2);
 
-    deviation = new double*[marginal[variable1]->nb_value];
-    for (i = 0;i < marginal[variable1]->nb_value;i++) {
-      deviation[i] = new double[marginal[variable2]->nb_value];
-      for (j = 0;j < marginal[variable2]->nb_value;j++) {
+    deviation = new double*[marginal_distribution[variable1]->nb_value];
+    for (i = 0;i < marginal_distribution[variable1]->nb_value;i++) {
+      deviation[i] = new double[marginal_distribution[variable2]->nb_value];
+      for (j = 0;j < marginal_distribution[variable2]->nb_value;j++) {
         deviation[i][j] = 0.;
       }
     }
 
-    chi2_contribution = new double*[marginal[variable1]->nb_value];
-    for (i = 0;i < marginal[variable1]->nb_value;i++) {
-      chi2_contribution[i] = new double[marginal[variable2]->nb_value];
-      for (j = 0;j < marginal[variable2]->nb_value;j++) {
+    chi2_contribution = new double*[marginal_distribution[variable1]->nb_value];
+    for (i = 0;i < marginal_distribution[variable1]->nb_value;i++) {
+      chi2_contribution[i] = new double[marginal_distribution[variable2]->nb_value];
+      for (j = 0;j < marginal_distribution[variable2]->nb_value;j++) {
         chi2_contribution[i][j] = 0.;
       }
     }
@@ -1367,11 +1367,11 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
     df = 1;
     value = 0.;
 
-    for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
-      if (marginal[variable1]->frequency[i] > 0) {
-        for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
-          if (marginal[variable2]->frequency[j] > 0) {
-            var = (double)(marginal[variable1]->frequency[i] * marginal[variable2]->frequency[j]) /
+    for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
+      if (marginal_distribution[variable1]->frequency[i] > 0) {
+        for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
+          if (marginal_distribution[variable2]->frequency[j] > 0) {
+            var = (double)(marginal_distribution[variable1]->frequency[i] * marginal_distribution[variable2]->frequency[j]) /
                   (double)nb_vector;
 
             df++;
@@ -1385,17 +1385,17 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
       }
     }
 
-    for (i = marginal[variable2]->offset;i < marginal[variable2]->nb_value;i++) {
-      if (marginal[variable2]->frequency[i] > 0) {
+    for (i = marginal_distribution[variable2]->offset;i < marginal_distribution[variable2]->nb_value;i++) {
+      if (marginal_distribution[variable2]->frequency[i] > 0) {
         df--;
       }
     }
 
     if (value > 0.) {
-      for (i = marginal[variable1]->offset;i < marginal[variable1]->nb_value;i++) {
-        if (marginal[variable1]->frequency[i] > 0) {
-          for (j = marginal[variable2]->offset;j < marginal[variable2]->nb_value;j++) {
-            if (marginal[variable2]->frequency[j] > 0) {
+      for (i = marginal_distribution[variable1]->offset;i < marginal_distribution[variable1]->nb_value;i++) {
+        if (marginal_distribution[variable1]->frequency[i] > 0) {
+          for (j = marginal_distribution[variable2]->offset;j < marginal_distribution[variable2]->nb_value;j++) {
+            if (marginal_distribution[variable2]->frequency[j] > 0) {
               chi2_contribution[i][j] /= value;
             }
           }
@@ -1424,7 +1424,7 @@ bool Vectors::contingency_table(StatError &error , ostream &os , int variable1 ,
       }
     }
 
-    for (i = 0;i < marginal[variable1]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[variable1]->nb_value;i++) {
       delete [] frequency[i];
       delete [] deviation[i];
       delete [] chi2_contribution[i];
@@ -1466,16 +1466,16 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
 
   // lois conditionnelles
 
-  value_mean = new double[marginal[0]->nb_value];
-  variance = new double[marginal[0]->nb_value];
-  standard_deviation = new double[marginal[0]->nb_value];
-  mean_absolute_deviation = new double[marginal[0]->nb_value];
-  concentration_coeff = new double[marginal[0]->nb_value];
-  skewness_coeff = new double[marginal[0]->nb_value];
-  kurtosis_coeff = new double[marginal[0]->nb_value];
+  value_mean = new double[marginal_distribution[0]->nb_value];
+  variance = new double[marginal_distribution[0]->nb_value];
+  standard_deviation = new double[marginal_distribution[0]->nb_value];
+  mean_absolute_deviation = new double[marginal_distribution[0]->nb_value];
+  concentration_coeff = new double[marginal_distribution[0]->nb_value];
+  skewness_coeff = new double[marginal_distribution[0]->nb_value];
+  kurtosis_coeff = new double[marginal_distribution[0]->nb_value];
 
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       value_mean[i] = value_vec[i]->mean[1];
       variance[i] = value_vec[i]->covariance[1][1];
       standard_deviation[i] = sqrt(value_vec[i]->covariance[1][1]);
@@ -1502,108 +1502,108 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
     }
   }
 
-  width[0] = column_width(marginal[0]->nb_value - 1);
-  buff = column_width(marginal[0]->max);
+  width[0] = column_width(marginal_distribution[0]->nb_value - 1);
+  buff = column_width(marginal_distribution[0]->max);
   if (buff > width[0]) {
     width[0] = buff;
   }
-  buff = column_width(marginal[0]->nb_value - marginal[0]->offset , value_mean + marginal[0]->offset);
+  buff = column_width(marginal_distribution[0]->nb_value - marginal_distribution[0]->offset , value_mean + marginal_distribution[0]->offset);
   if (buff > width[0]) {
     width[0] = buff;
   }
-  buff = column_width(marginal[0]->nb_value - marginal[0]->offset , variance + marginal[0]->offset);
+  buff = column_width(marginal_distribution[0]->nb_value - marginal_distribution[0]->offset , variance + marginal_distribution[0]->offset);
   if (buff > width[0]) {
     width[0] = buff;
   }
-  buff = column_width(marginal[0]->nb_value - marginal[0]->offset , standard_deviation + marginal[0]->offset);
+  buff = column_width(marginal_distribution[0]->nb_value - marginal_distribution[0]->offset , standard_deviation + marginal_distribution[0]->offset);
   if (buff > width[0]) {
     width[0] = buff;
   }
-  buff = column_width(marginal[0]->nb_value - marginal[0]->offset , mean_absolute_deviation + marginal[0]->offset);
+  buff = column_width(marginal_distribution[0]->nb_value - marginal_distribution[0]->offset , mean_absolute_deviation + marginal_distribution[0]->offset);
   if (buff > width[0]) {
     width[0] = buff;
   }
-  buff = column_width(marginal[0]->nb_value - marginal[0]->offset , concentration_coeff + marginal[0]->offset);
+  buff = column_width(marginal_distribution[0]->nb_value - marginal_distribution[0]->offset , concentration_coeff + marginal_distribution[0]->offset);
   if (buff > width[0]) {
     width[0] = buff;
   }
-  buff = column_width(marginal[0]->nb_value - marginal[0]->offset , skewness_coeff + marginal[0]->offset);
+  buff = column_width(marginal_distribution[0]->nb_value - marginal_distribution[0]->offset , skewness_coeff + marginal_distribution[0]->offset);
   if (buff > width[0]) {
     width[0] = buff;
   }
-  buff = column_width(marginal[0]->nb_value - marginal[0]->offset , kurtosis_coeff + marginal[0]->offset);
+  buff = column_width(marginal_distribution[0]->nb_value - marginal_distribution[0]->offset , kurtosis_coeff + marginal_distribution[0]->offset);
   if (buff > width[0]) {
     width[0] = buff;
   }
   width[0] += ASCII_SPACE;
 
   os << STAT_label[STATL_VALUE] << "                       ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << i;
     }
   }
   os << endl;
 
   os << STAT_label[STATL_SAMPLE_SIZE] << "                 ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
-      os << setw(width[0]) << marginal[0]->frequency[i];
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
+      os << setw(width[0]) << marginal_distribution[0]->frequency[i];
     }
   }
   os << endl;
 
   os << STAT_label[STATL_MEAN] << "                        ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << value_mean[i];
     }
   }
   os << endl;
 
   os << STAT_label[STATL_VARIANCE] << "                    ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << variance[i];
     }
   }
   os << endl;
 
   os << STAT_label[STATL_STANDARD_DEVIATION] << "          ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << standard_deviation[i];
     }
   }
   os << endl;
 
   os << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION] << "     ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << mean_absolute_deviation[i];
     }
   }
   os << endl;
 
   os << STAT_label[STATL_CONCENTRATION_COEFF];
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << concentration_coeff[i];
     }
   }
   os << endl;
 
   os << STAT_label[STATL_SKEWNESS_COEFF] << "     ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << skewness_coeff[i];
     }
   }
   os << endl;
 
   os << STAT_label[STATL_KURTOSIS_COEFF] << "     ";
-  for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-    if (marginal[0]->frequency[i] > 0) {
+  for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+    if (marginal_distribution[0]->frequency[i] > 0) {
       os << setw(width[0]) << kurtosis_coeff[i];
     }
   }
@@ -1617,20 +1617,20 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
   delete [] skewness_coeff;
   delete [] kurtosis_coeff;
 
-  if ((marginal[1]) && ((exhaustive) || (marginal[1]->nb_value <= DISPLAY_CONDITIONAL_NB_VALUE))) {
-    cumul = new double*[marginal[0]->nb_value];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
-        cumul[i] = value_vec[i]->marginal[1]->cumul_computation();
+  if ((marginal_distribution[1]) && ((exhaustive) || (marginal_distribution[1]->nb_value <= DISPLAY_CONDITIONAL_NB_VALUE))) {
+    cumul = new double*[marginal_distribution[0]->nb_value];
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
+        cumul[i] = value_vec[i]->marginal_distribution[1]->cumul_computation();
       }
     }
 
-    width[0] = column_width(marginal[1]->nb_value - 1);
+    width[0] = column_width(marginal_distribution[1]->nb_value - 1);
 
     width[1] = 0;
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
-        buff = column_width(value_vec[i]->marginal[1]->max);
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
+        buff = column_width(value_vec[i]->marginal_distribution[1]->max);
         if (buff > width[1]) {
           width[1] = buff;
         }
@@ -1639,10 +1639,10 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
     width[1] += ASCII_SPACE;
 
     width[2] = 0;
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
-        buff = column_width(value_vec[i]->marginal[1]->nb_value - value_vec[i]->marginal[1]->offset ,
-                            cumul[i] + value_vec[i]->marginal[1]->offset);
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
+        buff = column_width(value_vec[i]->marginal_distribution[1]->nb_value - value_vec[i]->marginal_distribution[1]->offset ,
+                            cumul[i] + value_vec[i]->marginal_distribution[1]->offset);
         if (buff > width[2]) {
           width[2] = buff;
         }
@@ -1653,34 +1653,34 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
     // ecriture des lois empiriques et des fonctions de repartition
 
     os << "\n  ";
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i;
       }
     }
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
            << i << " " << STAT_label[STATL_FUNCTION];
       }
     }
     os << endl;
 
-    for (i = 0;i < marginal[1]->nb_value;i++) {
+    for (i = 0;i < marginal_distribution[1]->nb_value;i++) {
       os << setw(width[0]) << i;
-      for (j = marginal[0]->offset;j < marginal[0]->nb_value;j++) {
-        if (marginal[0]->frequency[j] > 0) {
-          if (i < value_vec[j]->marginal[1]->nb_value) {
-            os << setw(width[1]) << value_vec[j]->marginal[1]->frequency[i];
+      for (j = marginal_distribution[0]->offset;j < marginal_distribution[0]->nb_value;j++) {
+        if (marginal_distribution[0]->frequency[j] > 0) {
+          if (i < value_vec[j]->marginal_distribution[1]->nb_value) {
+            os << setw(width[1]) << value_vec[j]->marginal_distribution[1]->frequency[i];
           }
           else {
             os << setw(width[1]) << " ";
           }
         }
       }
-      for (j = marginal[0]->offset;j < marginal[0]->nb_value;j++) {
-        if (marginal[0]->frequency[j] > 0) {
-          if (i < value_vec[j]->marginal[1]->nb_value) {
+      for (j = marginal_distribution[0]->offset;j < marginal_distribution[0]->nb_value;j++) {
+        if (marginal_distribution[0]->frequency[j] > 0) {
+          if (i < value_vec[j]->marginal_distribution[1]->nb_value) {
             os << setw(width[2]) << cumul[j][i];
           }
           else {
@@ -1691,8 +1691,8 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
       os << endl;
     }
 
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         delete [] cumul[i];
       }
     }
@@ -1706,11 +1706,11 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
     const FrequencyDistribution **value_marginal;
 
 
-    value_marginal = new const FrequencyDistribution*[marginal[0]->nb_value];
+    value_marginal = new const FrequencyDistribution*[marginal_distribution[0]->nb_value];
     nb_histo = 0;
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
-        value_marginal[nb_histo++] = value_vec[i]->marginal[1];
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
+        value_marginal[nb_histo++] = value_vec[i]->marginal_distribution[1];
       }
     }
 
@@ -1731,11 +1731,11 @@ ostream& Vectors::variance_analysis_ascii_write(ostream &os , int type , const V
     square_sum[1] = 0.;
     df[0] = -1;
 
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         diff = value_vec[i]->mean[1] - mean[1];
-        square_sum[0] += diff * diff * marginal[0]->frequency[i];
-        square_sum[1] += value_vec[i]->covariance[1][1] * (marginal[0]->frequency[i] - 1);
+        square_sum[0] += diff * diff * marginal_distribution[0]->frequency[i];
+        square_sum[1] += value_vec[i]->covariance[1][1] * (marginal_distribution[0]->frequency[i] - 1);
         df[0]++;
       }
     }
@@ -1863,56 +1863,56 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char 
     // lois conditionnelles
 
     out_file << STAT_label[STATL_VALUE];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t"  << i;
       }
     }
     out_file << endl;
 
     out_file << STAT_label[STATL_SAMPLE_SIZE];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
-        out_file << "\t" << marginal[0]->frequency[i];
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
+        out_file << "\t" << marginal_distribution[0]->frequency[i];
       }
     }
     out_file << endl;
 
     out_file << STAT_label[STATL_MEAN];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t" << value_vec[i]->mean[1];
       }
     }
     out_file << endl;
 
     out_file << STAT_label[STATL_VARIANCE];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t" << value_vec[i]->covariance[1][1];
       }
     }
     out_file << endl;
 
     out_file << STAT_label[STATL_STANDARD_DEVIATION];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t" << sqrt(value_vec[i]->covariance[1][1]);
       }
     }
     out_file << endl;
 
     out_file << STAT_label[STATL_MEAN_ABSOLUTE_DEVIATION];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t" << value_vec[i]->mean_absolute_deviation_computation(1);
       }
     }
     out_file << endl;
 
     out_file << STAT_label[STATL_CONCENTRATION_COEFF];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t" << (value_vec[i]->nb_vector > 1 ? (value_vec[i]->mean_absolute_difference_computation(1) /
                               (2 * value_vec[i]->mean[1])) * ((double)(value_vec[i]->nb_vector - 1) / (double)value_vec[i]->nb_vector) : 1.);
       }
@@ -1920,57 +1920,57 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char 
     out_file << endl;
 
     out_file << STAT_label[STATL_SKEWNESS_COEFF];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t" << value_vec[i]->skewness_computation(1);
       }
     }
     out_file << endl;
 
     out_file << STAT_label[STATL_KURTOSIS_COEFF];
-    for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-      if (marginal[0]->frequency[i] > 0) {
+    for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+      if (marginal_distribution[0]->frequency[i] > 0) {
         out_file << "\t" << value_vec[i]->kurtosis_computation(1);
       }
     }
     out_file << endl;
 
-    if (marginal[1]) {
-      cumul = new double*[marginal[0]->nb_value];
-      for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] > 0) {
-          cumul[i] = value_vec[i]->marginal[1]->cumul_computation();
+    if (marginal_distribution[1]) {
+      cumul = new double*[marginal_distribution[0]->nb_value];
+      for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] > 0) {
+          cumul[i] = value_vec[i]->marginal_distribution[1]->cumul_computation();
         }
       }
 
       out_file << "\n";
-      for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] > 0) {
+      for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] > 0) {
           out_file << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " " << i;
         }
       }
-      for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] > 0) {
+      for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] > 0) {
           out_file << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
                    << i << " " << STAT_label[STATL_FUNCTION];
         }
       }
       out_file << endl;
 
-      for (i = 0;i < marginal[1]->nb_value;i++) {
+      for (i = 0;i < marginal_distribution[1]->nb_value;i++) {
         out_file << i;
-        for (j = marginal[0]->offset;j < marginal[0]->nb_value;j++) {
-          if (marginal[0]->frequency[j] > 0) {
+        for (j = marginal_distribution[0]->offset;j < marginal_distribution[0]->nb_value;j++) {
+          if (marginal_distribution[0]->frequency[j] > 0) {
             out_file << "\t";
-            if (i < value_vec[j]->marginal[1]->nb_value) {
-              out_file << value_vec[j]->marginal[1]->frequency[i];
+            if (i < value_vec[j]->marginal_distribution[1]->nb_value) {
+              out_file << value_vec[j]->marginal_distribution[1]->frequency[i];
             }
           }
         }
-        for (j = marginal[0]->offset;j < marginal[0]->nb_value;j++) {
-          if (marginal[0]->frequency[j] > 0) {
+        for (j = marginal_distribution[0]->offset;j < marginal_distribution[0]->nb_value;j++) {
+          if (marginal_distribution[0]->frequency[j] > 0) {
             out_file << "\t";
-            if (i < value_vec[j]->marginal[1]->nb_value) {
+            if (i < value_vec[j]->marginal_distribution[1]->nb_value) {
               out_file << cumul[j][i];
             }
           }
@@ -1978,8 +1978,8 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char 
         out_file << endl;
       }
 
-      for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] > 0) {
+      for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] > 0) {
           delete [] cumul[i];
         }
       }
@@ -1993,11 +1993,11 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char 
       const FrequencyDistribution **value_marginal;
 
 
-      value_marginal = new const FrequencyDistribution*[marginal[0]->nb_value];
+      value_marginal = new const FrequencyDistribution*[marginal_distribution[0]->nb_value];
       nb_histo = 0;
-      for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] > 0) {
-          value_marginal[nb_histo++] = value_vec[i]->marginal[1];
+      for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] > 0) {
+          value_marginal[nb_histo++] = value_vec[i]->marginal_distribution[1];
         }
       }
 
@@ -2018,11 +2018,11 @@ bool Vectors::variance_analysis_spreadsheet_write(StatError &error , const char 
       square_sum[1] = 0.;
       df[0] = -1;
 
-      for (i = marginal[0]->offset;i < marginal[0]->nb_value;i++) {
-        if (marginal[0]->frequency[i] > 0) {
+      for (i = marginal_distribution[0]->offset;i < marginal_distribution[0]->nb_value;i++) {
+        if (marginal_distribution[0]->frequency[i] > 0) {
           diff = value_vec[i]->mean[1] - mean[1];
-          square_sum[0] += diff * diff * marginal[0]->frequency[i];
-          square_sum[1] += value_vec[i]->covariance[1][1] * (marginal[0]->frequency[i] - 1);
+          square_sum[0] += diff * diff * marginal_distribution[0]->frequency[i];
+          square_sum[1] += value_vec[i]->covariance[1][1] * (marginal_distribution[0]->frequency[i] - 1);
           df[0]++;
         }
       }
@@ -2118,8 +2118,8 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
       error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
     }
 
-    else if ((!marginal[class_variable]) ||
-             (marginal[class_variable]->nb_value - marginal[class_variable]->offset > VARIANCE_ANALYSIS_NB_VALUE)) {
+    else if ((!marginal_distribution[class_variable]) ||
+             (marginal_distribution[class_variable]->nb_value - marginal_distribution[class_variable]->offset > VARIANCE_ANALYSIS_NB_VALUE)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << class_variable + 1 << ": "
@@ -2148,7 +2148,7 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
         error.correction_update((error_message.str()).c_str() , STAT_variable_word[INT_VALUE]);
       }
 
-      else if (!marginal[response_variable]) {
+      else if (!marginal_distribution[response_variable]) {
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << response_variable + 1 << " "
                       << STAT_error[STATR_SHIFTED_SCALED];
@@ -2163,12 +2163,12 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
 
     vec = select_variable(class_variable , response_variable);
 
-    value_nb_vector = new int[vec->marginal[0]->nb_value];
-    index = new int*[vec->marginal[0]->nb_value];
-    for (i = vec->marginal[0]->offset;i < vec->marginal[0]->nb_value;i++) {
-      if (vec->marginal[0]->frequency[i] > 0) {
+    value_nb_vector = new int[vec->marginal_distribution[0]->nb_value];
+    index = new int*[vec->marginal_distribution[0]->nb_value];
+    for (i = vec->marginal_distribution[0]->offset;i < vec->marginal_distribution[0]->nb_value;i++) {
+      if (vec->marginal_distribution[0]->frequency[i] > 0) {
         value_nb_vector[i] = 0;
-        index[i] = new int[vec->marginal[0]->frequency[i]];
+        index[i] = new int[vec->marginal_distribution[0]->frequency[i]];
       }
     }
 
@@ -2176,9 +2176,9 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
       index[vec->int_vector[i][0]][(value_nb_vector[vec->int_vector[i][0]])++] = i;
     }
 
-    value_vec = new const Vectors*[vec->marginal[0]->nb_value];
-    for (i = vec->marginal[0]->offset;i < vec->marginal[0]->nb_value;i++) {
-      if (vec->marginal[0]->frequency[i] > 0) {
+    value_vec = new const Vectors*[vec->marginal_distribution[0]->nb_value];
+    for (i = vec->marginal_distribution[0]->offset;i < vec->marginal_distribution[0]->nb_value;i++) {
+      if (vec->marginal_distribution[0]->frequency[i] > 0) {
         value_vec[i] = new Vectors(*vec , value_nb_vector[i] , index[i]);
       }
     }
@@ -2201,8 +2201,8 @@ bool Vectors::variance_analysis(StatError &error , ostream &os , int class_varia
       }
     }
 
-    for (i = vec->marginal[0]->offset;i < vec->marginal[0]->nb_value;i++) {
-      if (vec->marginal[0]->frequency[i] > 0) {
+    for (i = vec->marginal_distribution[0]->offset;i < vec->marginal_distribution[0]->nb_value;i++) {
+      if (vec->marginal_distribution[0]->frequency[i] > 0) {
         delete [] index[i];
         delete value_vec[i];
       }
