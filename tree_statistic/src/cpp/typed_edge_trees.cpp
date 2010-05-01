@@ -1731,7 +1731,7 @@ void TreeCharacteristics::build_marginal_frequency_distribution(Typed_edge_one_i
    int t, v;
    vertex_iterator it, end;
 
-   if ((otrees1 != NULL) &&(_min_value >= 0) && (_max_value <= MARGINAL_MAX_VALUE))
+   if ((otrees1 != NULL) &&(_min_value >= 0) && (_max_value <= MARGINAL_DISTRIBUTION_MAX_VALUE))
    {
       if (marginal == NULL)
          marginal = new FrequencyDistribution(_max_value+1);
