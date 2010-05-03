@@ -365,7 +365,7 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
 
         if args[0] == "Ordinary":
             error.CheckArgumentsLength(args, 3, 3)
-            error.CheckType(args[2], [str])
+            error.CheckType([args[2]], [str])
             Type = 'o'
             if args[2] not in ["LeftRight", "Irreducible"]:
                 raise ValueError(
@@ -583,9 +583,6 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
 
     if itype == "VARIABLE_ORDER_MARKOV":
         return _estimate_variable_order_markov(obj, *args, **kargs)
-    elif itype == "MARKOV":
-        raise NotImplementedError("to be done?")
-        return _estimate_variable_order_markov(obj, *args, **kargs)
     elif itype == "HIDDEN_VARIABLE_ORDER_MARKOV":
         return _estimate_hidden_variable_order_markov(obj, *args, **kargs)
     elif itype == "HIDDEN_SEMI-MARKOV":
@@ -639,9 +636,6 @@ def Estimate(obj, *args, **kargs):
     >>> Estimate(timev, type, NbIteration=10,Parametric=True)
     >>> Estimate(timev, type, InitialInterEvent=initial_dist,    NbIteration=10, Parametric=True)
 
-    >>> Estimate(seq, "MARKOV", Order=2, Counting=False)
-    >>> Estimate(seq, "MARKOV", MaxOrder=3, Penalty="AIC", Counting=False)
-    >>> Estimate(seq, "MARKOV", states, Penalty="AIC", Order=2, Counting=False)
     >>> Estimate(seq, "NON-HOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting=False)
     >>> Estimate(seq, "SEMI-MARKOV", Counting=False)
     >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, SelfTransition=0.9, NbIteration=10,
