@@ -866,6 +866,28 @@ public:
     return ret;
   }
 
+  static bool
+  select_step(Vectors &input, int variable, double step)
+  {
+    StatError error;
+    bool ret;
+
+    ret = input.select_step(error, variable, step);
+    if (!ret)
+      stat_tool::wrap_util::throw_error(error);
+    return ret;
+  }
+
+  static Histogram*
+  get_marginal_histogram(Vectors &input, int variable)
+  {
+    Histogram *ret;
+    ret = input.get_marginal_histogram(variable);
+    return ret;
+  }
+
+
+
 };
 
 void
@@ -977,6 +999,10 @@ class_vectors()
       "Save vector data into a file")
   .def("spreadsheet_write", WRAP::spreadsheet_write,
       "Save data into CSV file")
+  .def("select_step", WRAP::select_step, 
+    args("variable", "step"), "select_step on sequences")
+  DEF_RETURN_VALUE("get_marginal_histogram", WRAP::get_marginal_histogram, 
+    args("variable"), "get_marginal_histogram wrapper")
 
   ;
 
