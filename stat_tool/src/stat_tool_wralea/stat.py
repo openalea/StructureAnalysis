@@ -211,7 +211,7 @@ def py_histogram( seq = [] ):
 #//////////////////////////////////////////////////////////////////////////////
 
 #@add_doc('Plot')
-def py_plot( obj, fig_id=1, title='', viewpoint=""):
+def py_plot( obj, fig_id=1, title='', viewpoint="v"):
     if DISABLE_PLOT:
         return
     if obj:
