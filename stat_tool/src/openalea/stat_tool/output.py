@@ -504,7 +504,6 @@ class StatInterface(object):
 
         possible_modes = {'Blocking':False, 'NonBlocking':True}
         Mode = error.ParseKargs(kargs, 'Mode', 'Blocking', possible=possible_modes)
-        print Mode
 
         viewpoint_map = {'v':'v', 
                          "Data":"d",
@@ -606,8 +605,6 @@ class StatInterface(object):
         #calling the plot functions from here
         try:
             if ViewPoint=='s':
-                print 'Survival viewpoint'
-                
                 from openalea.stat_tool.enums import histogram_types
                 from openalea.stat_tool.enums import model_distribution_types
                 #todo is *params needed or not?
@@ -623,30 +620,23 @@ class StatInterface(object):
                         CONVOLUTION or COMPOUND or FREQUENCY_DISTRIBUTION or 
                         MIXTURE_DATA or CONVOLUTION_DATA or COMPOUND_DATA""" 
                         % str(type(self)))
-                
 
             elif ViewPoint=='p':
-                print 'state profile viewpoint'
-                print 'Output=', Output
                 Plot_prefix=''
                 plotable = None
                 from openalea.sequence_analysis import \
                     _HiddenVariableOrderMarkov, _HiddenSemiMarkov
                 if type(self) == _HiddenVariableOrderMarkov:
-                    print '--hiddenvom'
                     plotable = self.state_profile_plotable_write(args[0])
                 elif type(self) == _HiddenSemiMarkov:
-                    print '--hiddensemimarkov'
-                    print len(args)
                     if len(args)==0:
-                        identifier = 1
+                        raise SyntaxError("expect an identifier")
                     elif len(args)==1:
                         identifier = args[0]
                     else:
                         raise SyntaxError("expect only one identifier Plot(hsmc25, 1, ViewPoint='StateProfile'")
                     plotable = self.state_profile_plotable_write(identifier, Output)
                 else:
-                    print '3d state case'
                     #todo 3 args required
                     from openalea.sequence_analysis import _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData, _NonhomogeneousMarkovData
                     assert type(self) in [_MarkovianSequences, _VariableOrderMarkovData,
@@ -665,7 +655,6 @@ class StatInterface(object):
                         pass
 
             elif ViewPoint=='q':
-                print 'segment profile viewpoint'
                 from openalea.sequence_analysis import _Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData
                 if type(self) not in [_Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData]:
                     raise TypeError('object must be in SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA')
@@ -693,9 +682,7 @@ class StatInterface(object):
                     else:  
                         # Multinomial or Poisson or Ordinal or Gaussian 
                         # or Variance
-                        model_type[i] = model_type[args[i+2]]
-                print types
-                print nb_variable
+                        types.append(model_type[args[i+2]])
                 #seq->segment_profile_plot_write(
                 #         error , Plot_prefix , args[1].val.i ,
                 #           args[2].val.i , model_type , output , title);
@@ -703,16 +690,13 @@ class StatInterface(object):
                 plotable = self.segment_profile_plotable_write(args[0], args[1], 
                                        types, Output)
             
-    
             elif ViewPoint=='d':
-                print 'data viewpoint'
                 from openalea.sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _NonHomogeneousMarkovData, _Tops
                 if type(self) in [_SemiMarkovData, _MarkovianSequences, _Sequences,
                                   _NonHomogeneousMarkovData, _Tops]:
                     #status = seq->plot_data_write(error , Plot_prefix , title);
                     plotable = self.get_plotable_data(*params)
             elif ViewPoint=='v':
-                print 'normal viewpoint',
                 # plot_write(error , Plot_prefix , title);
 
                 if args:
@@ -720,12 +704,9 @@ class StatInterface(object):
                     #todo: make it looser: observation, intensity INTENSITY?
                     if args[0] in ["SelfTransition" ,"Observation","Intensity",
                                     "FirstOccurrence","Recurrence","Sojourn"  ,"Counting"]:
-                        print 'with args %s' % args[0]
                         multiplotset = self.get_plotable()
-                        print 'get viewpoints'
                         viewpoints = [x for x in multiplotset.viewpoint]
                         plotable = []
-                        print viewpoints
                         try:
                             from openalea.sequence_analysis import enums
                         except:
@@ -733,19 +714,14 @@ class StatInterface(object):
                         for index, xx in enumerate(viewpoints):
                             if xx==enums.markovian_sequence_type[args[0]]:
                                 plotable.append(multiplotset[index])
-                        print plotable
                     elif len(args)==1 and type(args[0])==int:
-                        print ' of len 1 and arg0 is int',
                         plotable = self.get_plotable_list()
                     elif len(args)==1:
-                        print ' of len !=1 or arg0 != int (args0 is %s)' % args[0]
                         plotable = self.get_plotable_list(list(args), *params)
                     else:
                         plotable = self.get_plotable_list(list(args), *params)
                 else:
-                    print 'without args'
                     plotable = self.get_plotable(*params)
-                print "plotabl is set"
             plotter = plot.get_plotter()
         except:
             import warnings
@@ -967,12 +943,9 @@ class StatInterface(object):
                 else:  
                     # Multinomial or Poisson or Ordinal or Gaussian 
                     # or Variance
-                    model_type[i] = model_type[args[i+2]]
-            print types
-            print nb_variable
+                    types.append(model_type[args[i+2]])
             output = self.segment_profile_write(args[0], args[1], types, Output, 
                                        'a', Segmentation, NbSegmentation)
-            
         elif ViewPoint == 'v':
             from openalea.stat_tool.enums import all_stat_tool_types
             from openalea.sequence_analysis.enums import all_sequences_types
@@ -982,8 +955,6 @@ class StatInterface(object):
                 output = self.ascii_write(exhaustive)
             else:
                 raise TypeError("wrong input type.")
-                
-                
 
         return output
 
