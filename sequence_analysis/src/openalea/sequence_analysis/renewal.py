@@ -90,7 +90,7 @@ def Renewal(*args, **kargs):
     Scale = kargs.get("Scale", None)  #todo check default values !
 
     a = [str]
-    a.extend(model_distribution_type)
+    a.extend(model_distribution_types)
     error.CheckType([args[0]], [a])
 
     # a filename constructor. check that only one argument, which is a string
@@ -152,7 +152,7 @@ def Renewal(*args, **kargs):
 
     #    renewal = _Renewal(args[0], range(0,len(args[0])),
     # index_parameter_type) or may be provided by the user.
-    elif type(args[0]) in model_distribution_type:
+    elif type(args[0]) in model_distribution_types:
         renewal = _Renewal(_DiscreteParametric(args[0]), Type, ObservationTime)
 
     return renewal
