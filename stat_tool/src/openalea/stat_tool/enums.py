@@ -10,7 +10,8 @@ import _stat_tool
 from _stat_tool import _FrequencyDistribution, _MixtureData, \
     _CompoundData,_ConvolutionData, _DiscreteDistributionData, _Mixture, \
     _Compound, _Convolution, _DiscreteParametricModel, _Distribution, \
-    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression
+    _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression, \
+    _MultivariateMixture, _MultivariateMixtureData
 
 
 # map to enumerate in boost python
@@ -195,15 +196,17 @@ model_distribution_types = [ _Mixture,
 all_stat_tool_types  = [_FrequencyDistribution,
                         _MixtureData,
                         _CompoundData,
-                        _ConvolutionData, 
-                        _DiscreteDistributionData, 
-                        _Mixture, 
+                        _ConvolutionData,
+                        _DiscreteDistributionData,
+                        _Mixture,
+                        _MultivariateMixture,
+                        _MultivariateMixtureData,
                         _Compound,
-                        _Convolution, 
-                        _DiscreteParametricModel, 
+                        _Convolution,
+                        _DiscreteParametricModel,
                         _Distribution,
-                        _VectorDistance, 
-                        _Vectors, 
+                        _VectorDistance,
+                        _Vectors,
                         _Cluster,
                         _DistanceMatrix,
                         _Regression
