@@ -31,9 +31,7 @@ path = 'data' + os.sep
 
 seq69 = Sequences(path + "pin_laricio_7x.seq")
 seq70 = Cluster(seq69, "Step", 1, 10)
-
-# todo:: error here need to remove MaxIndex 
-#seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 27, MaxIndex=92)
+#seq70 = IndexParameterExtract(Cluster(seq69, "Step", 2, 10), 1927, MaxIndex=1992)
 
 seq2 = SelectVariable(seq70, 1)
 Plot(seq2, 2, 5, "Gaussian", ViewPoint="SegmentProfile")
@@ -139,11 +137,10 @@ hmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hmc60)
 
 hsmc60 = HiddenSemiMarkov(path + "pin_laricio_6.hsc")
 hsmc6 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", hsmc60)
-#todo
-#hsmc61 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", "Ordinary", 6, "LeftRight")
+hsmc61 = Estimate(seq70, "HIDDEN_SEMI-MARKOV", "Ordinary", 6, "LeftRight")
 
-# Plot(ExtractDistribution(hsmc6, "Observation", 1, 0), ExtractDistribution(hsmc6, "Observation", 1, 1), ExtractDistribution(hsmc6, "Observation", 1, 2), ExtractDistribution(hsmc6, "Observation", 1, 3), ExtractDistribution(hsmc6, "Observation", 1, 4), ExtractDistribution(hsmc6, "Observation", 1, 5))
-# Plot(ExtractDistribution(hsmc6, "Observation", 2, 0), ExtractDistribution(hsmc6, "Observation", 2, 1), ExtractDistribution(hsmc6, "Observation", 2, 2), ExtractDistribution(hsmc6, "Observation", 2, 3), ExtractDistribution(hsmc6, "Observation", 2, 4), ExtractDistribution(hsmc6, "Observation", 2, 5))
+Plot(ExtractDistribution(hsmc6, "Observation", 1, 0), ExtractDistribution(hsmc6, "Observation", 1, 1), ExtractDistribution(hsmc6, "Observation", 1, 2), ExtractDistribution(hsmc6, "Observation", 1, 3), ExtractDistribution(hsmc6, "Observation", 1, 4), ExtractDistribution(hsmc6, "Observation", 1, 5))
+Plot(ExtractDistribution(hsmc6, "Observation", 2, 0), ExtractDistribution(hsmc6, "Observation", 2, 1), ExtractDistribution(hsmc6, "Observation", 2, 2), ExtractDistribution(hsmc6, "Observation", 2, 3), ExtractDistribution(hsmc6, "Observation", 2, 4), ExtractDistribution(hsmc6, "Observation", 2, 5))
 
 # 1, 3, 5
 Plot(hsmc6, 5, ViewPoint="StateProfile")
@@ -177,12 +174,12 @@ Segmentation(seq70, 5, [1931, 1963, 1975, 1991], "Gaussian", "Gaussian"),
 Segmentation(seq70, 6, [1931, 1943, 1960, 1976], "Gaussian", "Gaussian"))
 
 seq47 = SelectVariable(seq46, [3, 5])
-# seq47 = SelectVariable(seq46, [3])
 Plot(seq47, ViewPoint="Data")
 
 seq48 = Segmentation(seq80, [5, 5, 6, 5, 5, 4], "Gaussian")
 seq49 = SelectVariable(seq48, [3])
-#todo fails in aml as well
+# these two lines works together
+# seq47 = SelectVariable(seq46, [3])
 #Plot(Merge(SelectIndividual(seq47, [1]), SelectIndividual(seq49, [1])), ViewPoint=Data)
 
 
@@ -194,7 +191,7 @@ Plot(SelectIndividual(seq51, [0, 7]), ViewPoint="Data")
 Plot(Regression(Vectors(seq50), "MovingAverage", 1, 3, [1]))
 
 acf50 = ComputeCorrelation(seq50, 1, MaxLag=10)
-Plot(acf30)
+Plot(acf50)
 seq51 = Merge(SegmentationExtract(seq50, 1, 0), SegmentationExtract(seq50, 1, 1), SegmentationExtract(seq50, 1, 2), SegmentationExtract(seq50, 1, 3), SegmentationExtract(seq50, 1, 4), SegmentationExtract(seq50, 1, 5))
 acf51 = ComputeCorrelation(seq51, MaxLag=10)
 Plot(acf51)
@@ -204,7 +201,7 @@ seq52 = Segmentation(seq80, 2, 6, "Gaussian", NbChangePoint="Fixed", Output="Res
 
 seq55 = Segmentation(seq80, [6, 5, 5, 6, 4, 4], "Mean", Output="Residual")
 seq56 = PointwiseAverage(seq55, StandardDeviation=True)
-Plot(SelectIndividual(seq56, [0, 7]), ViewPoint=Data)
+Plot(SelectIndividual(seq56, [0, 7]), ViewPoint="Data")
 Plot(Regression(Vectors(seq55), "MovingAverage", 1, 3, [1]))
 
 seq57 = Segmentation(seq80, [5, 5, 5, 4, 4, 4], "Mean")

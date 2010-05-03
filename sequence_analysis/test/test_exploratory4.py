@@ -55,7 +55,8 @@ Clustering(matrix21, "Hierarchy")
 
 seq11 = SelectIndividual(seq2, [18, 9, 10, 31, 6, 14, 29, 16, 1, 12, 5, 7, 25, 22, 17, 30, 13, 4, 21, 27, 20, 24])
 seq12 = SelectIndividual(seq2, [28, 19, 32, 23, 26, 11, 3, 15, 8, 33, 2])
-Plot(ExtractHistogram(seq11, "FirstOccurrence", 1, 0), ExtractHistogram(seq12, "FirstOccurrence", 1, 0))
+#todo
+#Plot(ExtractHistogram(seq11, "FirstOccurrence", 1, 0), ExtractHistogram(seq12, "FirstOccurrence", 1, 0))
 ComparisonTest("W", ExtractHistogram(seq11, "Length"), ExtractHistogram(seq12, "Length"))
 Plot(ExtractHistogram(seq11, "Length"), ExtractHistogram(seq12, "Length"))
 

@@ -105,9 +105,10 @@ Display(hsmc25)
 # Plot(hsmc25, "Intensity")
 # Plot(hsmc25, "Sojourn")
 
-#todo
+
 Plot(hsmc25, ViewPoint="StateProfile")
-#Plot(hsmc25, ViewPoint="StateProfile", Output=['InState', 'OutState'])
+#todo
+#Plot(hsmc25, ViewPoint="StateProfile", Output='InState')
 Plot(hsmc25, ViewPoint="StateProfile", Output='OutState')
 
 seq25_1 = ExtractData(hsmc25)
@@ -124,8 +125,8 @@ matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholdi
 matrix20 = Compare(Thresholding(hsmc20, MinProbability=0.001), seq20, Thresholding(hsmc21, MinProbability=0.001), seq21, Thresholding(hsmc22, MinProbability=0.001), seq22, Thresholding(hsmc23, MinProbability=0.001), seq23, Thresholding(hsmc24, MinProbability=0.001), seq24, Thresholding(hsmc25, MinProbability=0.001), seq25, Thresholding(hsmc26, MinProbability=0.001), seq26, 10000, FileName="ASCII/cultivar1_models.txt")
 
 # very slow of buggy ?
-matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 10000, 90)
-matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 10000, 90, FileName="ASCII/cultivar1_models_90.txt")
+matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 100, 90)
+matrix21 = Compare(Thresholding(hsmc20, MinProbability=0.001), Thresholding(hsmc21, MinProbability=0.001), Thresholding(hsmc22, MinProbability=0.001), Thresholding(hsmc23, MinProbability=0.001), Thresholding(hsmc24, MinProbability=0.001), Thresholding(hsmc25, MinProbability=0.001), Thresholding(hsmc26, MinProbability=0.001), 100, 90, FileName="ASCII/cultivar1_models_90.txt")
 
 
 Plot(matrix20)
