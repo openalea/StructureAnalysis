@@ -136,10 +136,14 @@ class mplotlib(plotter):
         Plot a plotable with title
         groups : list of group (int) to plot
         show=True by default will pop up the figure
+        y_maxrange_ratio=1 multiply max y range by this value
         """
 
         show = kargs.get("Show", True)
         nbcol = kargs.get("nbcol", 1)
+        options_y_maxrange_ratio = kargs.get("y_maxrange_ratio",1.1)
+        line2d = {}
+        line2d['linewidth'] = kargs.get("linewidth",1)
         legend_size = kargs.get("legend_size", 10)
         legend_ncol = kargs.get("legend_ncol", 1)
         legend_on = kargs.get("legend", True)
@@ -242,16 +246,16 @@ class mplotlib(plotter):
                     pointstyle = self.pointstyles[j % len(self.pointstyles)]
 
                     if "impulses" in style:
-                        l = pylab.vlines(x, 0, y)
+                        l = pylab.vlines(x, 0, y, **line2d)
                     elif "linespoints" in style:
                         #l = pylab.plot(x, y, '-', x, y, pointstyle)
-                        l = pylab.plot(x, y, pointstyle + '-')
+                        l = pylab.plot(x, y, pointstyle + '-',**line2d)
                     elif "points" in style:
-                        l = pylab.plot(x, y, pointstyle)
+                        l = pylab.plot(x, y, pointstyle,**line2d)
                     elif "lines" in style:
-                        l = pylab.plot(x, y, '-')
+                        l = pylab.plot(x, y, '-', **line2d)
                     else:
-                        l = pylab.plot(x, y, style)
+                        l = pylab.plot(x, y, style,**line2d)
 
                     if(color):
                         pylab.setp(l, color=color)
@@ -282,7 +286,8 @@ class mplotlib(plotter):
                 a.set_xlim([round(xrange.min, 5), round(xrange.max, 5)])
 
             if(yrange.min != yrange.max):
-                a.set_ylim([round(yrange.min, 5), round(yrange.max, 5)])
+                a.set_ylim([round(yrange.min, 5), 
+                            round(yrange.max*options_y_maxrange_ratio, 5)])
 
             # Tics
             xt = round(multiplot.xtics, 5)
@@ -298,7 +303,7 @@ class mplotlib(plotter):
         if show == True:
             pylab.show()
 
-
+        return f1
 
 PLOTTER = None
 
