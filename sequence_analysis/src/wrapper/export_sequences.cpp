@@ -346,7 +346,7 @@ public:
   {
     std::stringstream os;
     std::string res;
-    d.ascii_data_write(os, exhaustive, true);
+    d.ascii_data_write(os, exhaustive, exhaustive);
     res = os.str();
     return res;
   }
@@ -926,8 +926,7 @@ public:
   }
 
   static Vectors*
-  build_vectors(const Sequences &input,
-  bool index_variable)
+  build_vectors(const Sequences &input,  bool index_variable)
   {
     Vectors* ret;
 
@@ -1041,7 +1040,6 @@ public:
   static MultiPlotSet*
   get_plotable(const Sequences &p)
   {
-    StatError error;
     MultiPlotSet* ret = p.get_plotable();
     if (!ret)
       ERROR;
@@ -1088,9 +1086,30 @@ public:
     if (!ret)
       sequence_analysis::wrap_util::throw_error(error);
     cout << os.str() << endl;
-    //return ret;
+    return ret;
   }
 
+  static bool
+  select_step(Sequences &input, int variable, double step)
+  {
+    StatError error;
+    bool ret;
+
+
+
+    ret = input.select_step(error, variable, step);
+    if (!ret)
+      sequence_analysis::wrap_util::throw_error(error);
+    return ret;
+  }
+
+  static Histogram*
+  get_marginal_histogram(Sequences &input, int variable)
+  {
+    Histogram *ret;
+    ret = input.get_marginal_histogram(variable);
+    return ret;
+  }
 
 
 };
@@ -1186,6 +1205,8 @@ class_sequences()
    DEF_RETURN_VALUE("segment_profile_plotable_write", SequencesWrap::segment_profile_plotable_write, args("identifier", "nb_segment", "model_type", "output"), "Write segment_profile")
 
     .def("segment_profile_write", SequencesWrap::segment_profile_write, args("sequences", "iidentifier","nb_segment", "model_type" , "output" ,"format","segmentation","nb_segmentation"), "segment profile write for Display")
+    .def("select_step", SequencesWrap::select_step, args("variable", "step"), "select_step on sequences")
+   DEF_RETURN_VALUE("get_marginal_histogram", SequencesWrap::get_marginal_histogram, args("variable"), "get_marginal_histogram wrapper")
 
 
 
