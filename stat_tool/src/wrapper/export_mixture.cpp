@@ -273,8 +273,7 @@ void class_mixture()
       "Save Compound into a file")
   .def("spreadsheet_write", WRAP::spreadsheet_write,
       "save data in spreadsheet format")
-  DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable,
-      "return plotable")
+  DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "return plotable")
   DEF_RETURN_VALUE_NO_ARGS("survival_get_plotable", WRAP::survival_get_plotable,
       "Return a survival plotable")
 
@@ -674,6 +673,17 @@ public:
         iperm = NULL;
       }
   }
+  
+
+  static MultiPlotSet*
+  get_plotable(const MultivariateMixture &mixt)
+  {
+    StatError error;
+    MultiPlotSet *ret = mixt.get_plotable();
+    if (!ret)
+      stat_tool::wrap_util::throw_error(error);
+    return ret;
+  }
 
     WRAP_METHOD0(MultivariateMixture, extract_data, MultivariateMixtureData);
     WRAP_METHOD_FILE_ASCII_WRITE( MultivariateMixture);
@@ -736,36 +746,34 @@ void class_multivariate_mixture()
         args("prefix", "title"),"plot_write(self, prefix, title) -> None. \n\n" "Write GNUPLOT files")
 
     // no object returned, no arguments required
-    .def("state_permutation", WRAP::state_permutation,
-        "permutation of the model states")
-    .def("spreadsheet_write", WRAP::spreadsheet_write,
-        "save data in spreadsheet format")
+    .def("state_permutation", WRAP::state_permutation, "permutation of the model states")
+    .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
+    DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "return plotable")
 
      ;
 
     /*
 
-      MultivariateMixture(int inb_component , double *pweight , int inb_variable, DiscreteParametricProcess **ppcomponent, NonparametricProcess **pnpcomponent);
-      MultivariateMixture(int inb_component , int inb_variable, const DiscreteParametricProcess **ppcomponent,  const NonparametricProcess **pnpcomponent);
-      MultivariateMixture(const MultivariateMixture &mixt , bool *variable_flag , int inb_variable);
-      MultivariateMixture(int inb_component, int inb_variable, int *nb_value, bool *force_param=NULL);
+    DiscreteParametricModel* extract_parametric_model(StatError &error , int ivariable,    int index) const;
+    Distribution* extract_nonparametric_model(StatError &error , int ivariable, int index) const;
+    Distribution* extract_distribution(StatError &error , int ivariable) const;
+    std::ostream& line_write(std::ostream &os) const;
+    std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const;
+    bool ascii_write(StatError &error , const char *path ,  bool exhaustive = false) const;
+    plotable::MultiPlotSet* get_plotable() const;
+    double likelihood_computation(const Vectors &mixt_data, bool log_computation=false) const;
+    MultivariateMixtureData* cluster(StatError &error,  const Vectors &vec, int algorithm=VITERBI) const;
+    bool is_parametric(int ivariable) const;
+  MultivariateMixtureData* get_mixture_data() const { return mixture_data; }
+  DiscreteParametric* get_weight() const { return weight; }
+  DiscreteParametricProcess* get_parametric_process(int variable) const;
+  NonparametricProcess* get_nonparametric_process(int variable) const;
+  DiscreteParametric* get_parametric_component(int variable, int index) const;
+  Distribution* get_nonparametric_component(int variable, int index) const;
+  
+ 
+*/
 
-      DiscreteParametricModel* extract_parametric_model(StatError &error , int ivariable,
-                             int index) const;
-      Distribution* extract_nonparametric_model(StatError &error , int ivariable,
-                            int index) const;
-
-      plotable::MultiPlotSet* get_plotable() const;
-
-      double likelihood_computation(const Vectors &mixt_data, bool log_computation=false) const;
-
-      MultivariateMixtureData* cluster(StatError &error,  const Vectors &vec,int algorithm=VITERBI) const;
-
-      MultivariateMixtureData* get_mixture_data() const { return mixture_data; }
-      DiscreteParametricProcess* get_parametric_process(int variable) const;
-      NonparametricProcess* get_nonparametric_process(int variable) const;
-      DiscreteParametric* get_parametric_component(int variable, int index) const;
-      Distribution* get_nonparametric_component(int variable, int index) const;*/
 }
 
 #undef WRAP
