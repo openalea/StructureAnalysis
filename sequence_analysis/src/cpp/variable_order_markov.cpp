@@ -1931,9 +1931,9 @@ VariableOrderMarkov* VariableOrderMarkov::thresholding(double min_probability) c
   markov = new VariableOrderMarkov(*this , false);
   markov->threshold_application(min_probability);
 
-  for (i = 1;i <= nb_output_process;i++) {
-    if (nonparametric_process[i]) {
-      nonparametric_process[i]->thresholding(min_probability);
+  for (i = 1;i <= markov->nb_output_process;i++) {
+    if (markov->nonparametric_process[i]) {
+      markov->nonparametric_process[i]->thresholding(min_probability);
     }
   }
 
@@ -4407,7 +4407,7 @@ MultiPlotSet* VariableOrderMarkov::get_plotable(const VariableOrderMarkovData *s
     nb_plot_set += nb_state;
   }
 
-  plot_set = new MultiPlotSet(nb_plot_set);
+  plot_set = new MultiPlotSet(nb_plot_set , nb_output_process + 1);
   plot_set->border = "15 lw 0";
 
   if ((seq) && (seq->type[0] == STATE)) {
