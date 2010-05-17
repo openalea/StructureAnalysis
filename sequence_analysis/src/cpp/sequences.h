@@ -408,7 +408,7 @@ protected :
     FrequencyDistribution *hlength;  // loi empirique des longueurs des sequences
     int **vertex_identifier;  // identificateurs des vertex d'un MTG associe
     int index_parameter_type;  // type du parametre d'index (TIME/POSITION)
-    FrequencyDistribution *hindex_parameter;   // loi empirique des parametres d'index explicites
+    FrequencyDistribution *hindex_parameter;  // loi empirique des parametres d'index explicites
     FrequencyDistribution *index_interval;  // intervalles entre parametres d'index explicites
     int **index_parameter;  // parametres d'index explicites
     int nb_variable;        // nombre de variables
