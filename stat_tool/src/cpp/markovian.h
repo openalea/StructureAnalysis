@@ -142,7 +142,7 @@ public :
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = NULL);
 
-    void thresholding(double min_probability);
+    void thresholding(double min_probability , bool semi_markov = false);
 
     int nb_parameter_computation(double min_probability = 0.) const;
     double chi2_value_computation(const ChainData &chain_data) const;
