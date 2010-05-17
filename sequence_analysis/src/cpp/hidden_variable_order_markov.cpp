@@ -147,9 +147,9 @@ HiddenVariableOrderMarkov* HiddenVariableOrderMarkov::thresholding(double min_pr
   hmarkov = new HiddenVariableOrderMarkov(*this , false);
   hmarkov->threshold_application(min_probability);
 
-  for (i = 1;i <= nb_output_process;i++) {
-    if (nonparametric_process[i]) {
-      nonparametric_process[i]->thresholding(min_probability);
+  for (i = 1;i <= hmarkov->nb_output_process;i++) {
+    if (hmarkov->nonparametric_process[i]) {
+      hmarkov->nonparametric_process[i]->thresholding(min_probability);
     }
   }
 
