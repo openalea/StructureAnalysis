@@ -622,6 +622,7 @@ class StatInterface(object):
                         % str(type(self)))
 
             elif ViewPoint=='p':
+                #print 'viewpoint = state-profile'
                 Plot_prefix=''
                 plotable = None
                 from openalea.sequence_analysis import \
@@ -630,10 +631,11 @@ class StatInterface(object):
                     plotable = self.state_profile_plotable_write(args[0])
                 elif type(self) == _HiddenSemiMarkov:
                     if len(args)==0:
-                        raise SyntaxError("expect an identifier")
+                        raise SyntaxError("expect an identifier (Plot(hsmc25, 1, ViewPoint='StateProfile')")
                     elif len(args)==1:
                         identifier = args[0]
                     else:
+                        #print 'iiiiiiiiiiiiiii'
                         raise SyntaxError("expect only one identifier Plot(hsmc25, 1, ViewPoint='StateProfile'")
                     plotable = self.state_profile_plotable_write(identifier, Output)
                 else:
@@ -698,12 +700,12 @@ class StatInterface(object):
                     plotable = self.get_plotable_data(*params)
             elif ViewPoint=='v':
                 # plot_write(error , Plot_prefix , title);
-
                 if args:
                     #sequence case:
                     #todo: make it looser: observation, intensity INTENSITY?
-                    if args[0] in ["SelfTransition" ,"Observation","Intensity",
-                                    "FirstOccurrence","Recurrence","Sojourn"  ,"Counting"]:
+                    choices = ["SelfTransition" ,"Observation","Intensity",
+                         "FirstOccurrence","Recurrence","Sojourn"  ,"Counting"]
+                    if args[0] in choices:
                         multiplotset = self.get_plotable()
                         viewpoints = [x for x in multiplotset.viewpoint]
                         plotable = []
@@ -711,9 +713,17 @@ class StatInterface(object):
                             from openalea.sequence_analysis import enums
                         except:
                             raise ImportError("sequence analysis not installed !!")
+
+                        if len(args)==1:
+                            variable = 0
+                        elif len(args)==2:
+                            variable = args[1]
                         for index, xx in enumerate(viewpoints):
                             if xx==enums.markovian_sequence_type[args[0]]:
-                                plotable.append(multiplotset[index])
+                                if multiplotset.variable[index]==variable:
+                                    plotable.append(multiplotset[index])
+                    elif len(args)==1 and type(args[0])==str:
+                        raise SyntaxError("first argument must be in %s and second arg (int) may be provided." % choices)
                     elif len(args)==1 and type(args[0])==int:
                         plotable = self.get_plotable_list()
                     elif len(args)==1:
