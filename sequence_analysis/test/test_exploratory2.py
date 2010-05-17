@@ -83,8 +83,6 @@ acf3 = Merge(ComputeCorrelation(seq11, Type="Kendall", MaxLag=15),\
 
 #todo
 #mc10 = Estimate(seq10, "MARKOV", MaxOrder=4)
-
-
-# Plot(mc10, "Intensity")
-# Plot(mc10, "Recurrence")
+#Plot(mc10, "Intensity")
+#Plot(mc10, "Recurrence")
 

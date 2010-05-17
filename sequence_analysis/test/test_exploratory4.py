@@ -65,5 +65,5 @@ Plot(ExtractHistogram(seq11, "Length"), ExtractHistogram(seq12, "Length"))
 
 #Plot(seq2, "Intensity", 2)
 seq5 = RemoveRun(seq2, 2, 0, "End")
-Plot(seq5, "Intensity", 2)
+Plot(seq5, "Intensity", 1)
 
