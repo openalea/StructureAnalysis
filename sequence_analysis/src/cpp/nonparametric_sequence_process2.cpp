@@ -2685,6 +2685,8 @@ void NonparametricSequenceProcess::plotable_write(MultiPlotSet &plot , int &inde
   }
 
   if (characteristics) {
+    index_length = characteristics->index_value->plot_length_computation();
+
     if (characteristics->index_value->frequency[index_length - 1] < MAX_FREQUENCY) {
 
       // vue : ajustement intensite lissee
