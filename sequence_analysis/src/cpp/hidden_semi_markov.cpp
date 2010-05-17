@@ -228,11 +228,11 @@ HiddenSemiMarkov* HiddenSemiMarkov::thresholding(double min_probability) const
 
 
   hsmarkov = new HiddenSemiMarkov(*this , false , false);
-  hsmarkov->Chain::thresholding(min_probability);
+  hsmarkov->Chain::thresholding(min_probability , true);
 
-  for (i = 1;i <= nb_output_process;i++) {
-    if (nonparametric_process[i]) {
-      nonparametric_process[i]->thresholding(min_probability);
+  for (i = 1;i <= hsmarkov->nb_output_process;i++) {
+    if (hsmarkov->nonparametric_process[i]) {
+      hsmarkov->nonparametric_process[i]->thresholding(min_probability);
     }
   }
 
