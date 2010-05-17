@@ -673,7 +673,7 @@ SemiMarkov* SemiMarkov::thresholding(double min_probability) const
 
 
   smarkov = new SemiMarkov(*this , false , 0);
-  smarkov->Chain::thresholding(min_probability);
+  smarkov->Chain::thresholding(min_probability , true);
 
   for (i = 1;i <= smarkov->nb_output_process;i++) {
     if (smarkov->nonparametric_process[i]) {
@@ -1801,7 +1801,7 @@ MultiPlotSet* SemiMarkov::get_plotable(const SemiMarkovData *seq) const
     nb_plot_set += nb_state;
   }
 
-  plot_set = new MultiPlotSet(nb_plot_set);
+  plot_set = new MultiPlotSet(nb_plot_set , nb_output_process + 1);
   plot_set->border = "15 lw 0";
 
   if ((seq) && (seq->type[0] == STATE)) {
