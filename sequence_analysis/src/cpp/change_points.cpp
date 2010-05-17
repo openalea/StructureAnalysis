@@ -2408,7 +2408,7 @@ Sequences* Sequences::segmentation(StatError &error , ostream &os , int iidentif
     seq->segmentation(inb_segment , model_type , rank , segmentation_likelihood + 1 ,
                       nb_parameter + 1 , segment_penalty + 1);
     if (model_type[0] != MEAN_CHANGE) {
-      seq->forward_backward(0 , max_nb_segment , model_type , rank , 0 , 0 , SEGMENT , 'a' ,
+      seq->forward_backward(0 , max_nb_segment , model_type , rank , NULL , NULL , SEGMENT , 'a' ,
                             likelihood + 1 , segmentation_entropy + 1 ,
                             ranked_change_point_entropy + 1 , change_point_entropy + 1 ,
                             uniform_entropy + 1 , marginal_entropy + 1);
@@ -4040,7 +4040,7 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
     cout.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 #   endif
 
-    if (os) {
+    if ((os) || (plot_set)) {
       switch (format) {
 
       case 'a' : {
@@ -4095,6 +4095,8 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
       }
 
       case 'p' : {
+        MultiPlotSet &plot = *plot_set;
+
         i = 1;
         for (j = 1;j < nb_variable;j++) {
           if ((model_type[j - 1] == POISSON_CHANGE) || (model_type[j - 1] == GAUSSIAN_CHANGE) ||
@@ -4104,9 +4106,9 @@ double Sequences::forward_backward(int index , int nb_segment , int *model_type 
           }
         }
 
-        profile_plotable_write((*plot_set)[i] , index , nb_segment , backward_output);
+        profile_plotable_write(plot[i] , index , nb_segment , backward_output);
         i++;
-        change_point_profile_plotable_write((*plot_set)[i] , index , nb_segment , change_point);
+        change_point_profile_plotable_write(plot[i] , index , nb_segment , change_point);
         break;
       }
       }
@@ -7235,11 +7237,11 @@ bool Sequences::segment_profile_write(StatError &error , ostream &os , int iiden
     for (i = 0;i < seq->nb_sequence;i++) {
       if ((index == I_DEFAULT) || (index == i)) {
         if (model_type[0] != MEAN_CHANGE) {
-          likelihood = seq->forward_backward(i , nb_segment , model_type , rank , &os , 0 ,
+          likelihood = seq->forward_backward(i , nb_segment , model_type , rank , &os , NULL ,
                                              output , format);
         }
         segmentation_likelihood = seq->forward_backward_dynamic_programming(i , nb_segment , model_type ,
-                                                                            rank , &os , 0 , output , format ,
+                                                                            rank , &os , NULL , output , format ,
                                                                             likelihood);
         if (segmentation_likelihood == D_INF) {
           status = false;
@@ -7460,7 +7462,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 
       if (model_type[0] != MEAN_CHANGE) {
         likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
-                                           out_data_file , 0 , output , 'g');
+                                           out_data_file , NULL , output , 'g');
         out_data_file->close();
         delete out_data_file;
 
@@ -7473,7 +7475,7 @@ bool Sequences::segment_profile_plot_write(StatError &error , const char *prefix
 #     endif
 
       segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
-                                                                          rank , out_data_file , 0 ,
+                                                                          rank , out_data_file , NULL ,
                                                                           output , 'g' , likelihood);
       out_data_file->close();
       delete out_data_file;
@@ -7975,7 +7977,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 
     if (model_type[0] != MEAN_CHANGE) {
       likelihood = seq->forward_backward(index , nb_segment , model_type , rank ,
-                                         0 , plot_set , output , 'p');
+                                         NULL , plot_set , output , 'p');
     }
 
 #   ifdef DEBUG
@@ -7983,7 +7985,7 @@ MultiPlotSet* Sequences::segment_profile_plotable_write(StatError &error , int i
 #   endif
 
     segmentation_likelihood = seq->forward_backward_dynamic_programming(index , nb_segment , model_type ,
-                                                                        rank , 0 , plot_set ,
+                                                                        rank , NULL , plot_set ,
                                                                         output , 'p' , likelihood);
 
     if (segmentation_likelihood == D_INF) {
