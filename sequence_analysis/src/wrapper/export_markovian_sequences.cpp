@@ -524,9 +524,7 @@ public:
   get_plotable(const MarkovianSequences &p)
   {
     StatError error;
-    std::cout<<"get_plotble markovian sequences starting"<<std::endl;
     MultiPlotSet* ret = p.get_plotable();
-    std::cout<<"get_plotble markovian sequences end"<<std::endl;
     if (!ret)
       ERROR;
     return ret;
