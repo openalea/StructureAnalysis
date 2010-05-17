@@ -720,11 +720,11 @@ void Chain::component_computation(bool **ilogic_transition)
  *
  *  Application d'un seuil sur les parametres d'une chaine de Markov.
  *
- *  argument : probabilite minimum.
+ *  arguments : probabilite minimum, flag semi-Markov.
  *
  *--------------------------------------------------------------*/
 
-void Chain::thresholding(double min_probability)
+void Chain::thresholding(double min_probability , bool semi_markov)
 
 {
   bool stop;
@@ -774,7 +774,7 @@ void Chain::thresholding(double min_probability)
       norm = 0.;
 
       for (j = 0;j < nb_state;j++) {
-        if (transition[i][j] <= min_probability) {
+        if (((!semi_markov) || (j != i)) && (transition[i][j] <= min_probability)) {
           nb_correction++;
           transition[i][j] = min_probability;
         }
