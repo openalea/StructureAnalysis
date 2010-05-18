@@ -510,7 +510,7 @@ Tops* TopParameters::simulation(StatError &error , int nb_top ,
       nb_position[i] = (nb_trial.nb_value - 1) * (nb_axillary.nb_value - 1);
     }
 
-    tops = new Tops(nb_top , 0 , nb_position);
+    tops = new Tops(nb_top , NULL , nb_position);
     tops->top_parameters = new TopParameters(*this , false);
     parameters = tops->top_parameters;
 
