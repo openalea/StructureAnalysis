@@ -621,7 +621,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       }
     }
 
-    seq = new MarkovianSequences(inb_sequence , 0 , ilength , index_parameter_type , 
+    seq = new MarkovianSequences(inb_sequence , NULL , ilength , index_parameter_type , 
                                  nb_variable , type);
     delete [] ilength;
 
@@ -1938,7 +1938,7 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
     cout << "\nTEST: " << inb_sequence << " | " << cumul_length / step + nb_sequence << endl;
 #   endif
 
-    seq = new MarkovianSequences(inb_sequence , 0 , ilength , index_parameter_type ,
+    seq = new MarkovianSequences(inb_sequence , NULL , ilength , index_parameter_type ,
                                  nb_variable , type);
     delete [] ilength;
 
