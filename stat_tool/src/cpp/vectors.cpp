@@ -111,11 +111,13 @@ void Vectors::init(int inb_vector , int *iidentifier , int inb_variable ,
   nb_vector = inb_vector;
 
   identifier = new int[nb_vector];
+
   if (iidentifier) {
     for (i = 0;i < nb_vector;i++) {
       identifier[i] = iidentifier[i];
     }
   }
+
   else {
     for (i = 0;i < nb_vector;i++) {
       identifier[i] = i + 1;
@@ -246,6 +248,66 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
 
     mean_computation(i);
     variance_computation(i);
+  }
+
+  covariance_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur de la classe Vectors.
+ *
+ *  arguments : nombre de vecteurs, identificateurs des vecteurs,
+ *              nombre de variables, type de chaque variable,
+ *              variables entieres, variables reelles.
+ *
+ *--------------------------------------------------------------*/
+
+Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
+                 int *itype , int **iint_vector , double **ireal_vector)
+
+{
+  register int i , j , k , m;
+
+
+  init(inb_vector , iidentifier , inb_variable , itype , false);
+
+  i = 0;
+  j = 0;
+  for (k = 0;k < nb_variable;k++) {
+    switch (type[k]) {
+
+    case INT_VALUE : {
+      for (m = 0;m < nb_vector;m++) {
+        int_vector[m][k] = iint_vector[m][i];
+      }
+      i++;
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (m = 0;m < nb_vector;m++) {
+        real_vector[m][k] = ireal_vector[m][j];
+      }
+      j++;
+      break;
+    }
+    }
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    min_value_computation(i);
+    max_value_computation(i);
+
+    switch (type[i]) {
+    case INT_VALUE :
+      build_marginal_frequency_distribution(i);
+      break;
+    case REAL_VALUE :
+      build_marginal_histogram(i);
+      break;
+    }
   }
 
   covariance_computation();
@@ -690,7 +752,7 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
       inb_vector += pvec[i]->nb_vector;
     }
 
-    vec = new Vectors(inb_vector , 0 , nb_variable , type);
+    vec = new Vectors(inb_vector , NULL , nb_variable , type);
 
     // copie des vecteurs
 
