@@ -560,6 +560,9 @@ public :
               int inb_variable , int itype , int ***iint_sequence);
     Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
               double ***ireal_sequence);
+    Sequences(int inb_sequence , int *iidentifier , int *ilength , int **ivertex_identifier ,
+              int iindex_parameter_type , int **iindex_parameter , int inb_variable ,
+              int *itype , int ***iint_sequence , double ***ireal_sequence);
     Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
               bool init_flag = false)
     { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
