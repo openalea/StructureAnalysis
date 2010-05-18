@@ -634,7 +634,7 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       in_file.clear();
       in_file.seekg(0 , ios::beg);
 
-      seq = new Sequences(nb_sequence , 0 , length , index_parameter_type ,
+      seq = new Sequences(nb_sequence , NULL , length , index_parameter_type ,
                           nb_variable , type);
 
       line = 0;
