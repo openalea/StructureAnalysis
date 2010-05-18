@@ -196,11 +196,13 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
   nb_sequence = inb_sequence;
 
   identifier = new int[nb_sequence];
+
   if (iidentifier) {
     for (i = 0;i < nb_sequence;i++) {
       identifier[i] = iidentifier[i];
     }
   }
+
   else {
     for (i = 0;i < nb_sequence;i++) {
       identifier[i] = i + 1;
@@ -293,7 +295,7 @@ void Sequences::init(int inb_sequence , int *iidentifier , int *ilength ,
  *  Constructeur de la classe Sequences.
  *
  *  arguments : nombre de sequences, identificateurs des sequences,
- *              longueurs des sequences, type de parametre d'index (INT_VALUE/NB_INTERNODE),
+ *              longueurs des sequences, type de parametre d'index (TIME/POSITION),
  *              nombre de variables, type des variables,
  *              (parametres d'index et) sequences entieres.
  *
@@ -313,8 +315,8 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
     btype[i] = itype;
   }
 
-  init(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,
-       btype , false);
+  init(inb_sequence , iidentifier , ilength , iindex_parameter_type ,
+       inb_variable , btype , false);
   delete [] btype;
 
   vertex_identifier = NULL;
@@ -354,6 +356,7 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
+
     build_marginal_frequency_distribution(i);
   }
 }
@@ -381,8 +384,8 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
     itype[i] = REAL_VALUE;
   }
 
-  init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE , inb_variable ,
-       itype , false);
+  init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE ,
+       inb_variable , itype , false);
   delete [] itype;
 
   vertex_identifier = NULL;
@@ -398,6 +401,98 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
+
+    build_marginal_histogram(i);
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur de la classe Sequences.
+ *
+ *  arguments : nombre de sequences, identificateurs des sequences,
+ *              longueurs des sequences, identificateurs des vertex d'un MTG associe, 
+ *              type du parametre d'index (TIME/POSITION),
+ *              parametres d'index, nombre de variables, type des variables,
+ *              sequences entieres, sequences reelles.
+ *
+ *--------------------------------------------------------------*/
+
+Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
+                     int **ivertex_identifier , int iindex_parameter_type ,
+                     int **iindex_parameter , int inb_variable , int *itype ,
+                     int ***iint_sequence , double ***ireal_sequence)
+
+{
+  register int i , j , k , m , n;
+
+
+  init(inb_sequence , iidentifier , ilength , iindex_parameter_type ,
+       inb_variable , itype , false);
+
+  if (ivertex_identifier) {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        vertex_identifier[i][j] = ivertex_identifier[i][j];
+      }
+    }
+  }
+
+//  if (index_parameter_type != IMPLICIT_TYPE) {
+  if (index_parameter) {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < (index_parameter_type == POSITION ? length[i] + 1 : length[i]);j++) {
+        index_parameter[i][j] = iindex_parameter[i][j];
+      }
+    }
+
+    build_index_parameter_frequency_distribution();
+
+    if ((index_parameter_type == TIME) || (index_parameter_type == POSITION)) {
+      index_interval_computation();
+    }
+  }
+
+  i = 0;
+  j = 0;
+  for (k = 0;k < nb_variable;k++) {
+    switch (type[k]) {
+
+    case INT_VALUE : {
+      for (m = 0;m < nb_sequence;m++) {
+        for (n = 0;n < length[m];n++) {
+          int_sequence[m][k][n] = iint_sequence[m][i][n];
+        }
+      }
+      i++;
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (m = 0;m < nb_sequence;m++) {
+        for (n = 0;n < length[m];n++) {
+          real_sequence[m][k][n] = ireal_sequence[m][j][n];
+        }
+      }
+      j++;
+      break;
+    }
+    }
+  }
+
+  for (i = 0;i < nb_variable;i++) {
+    min_value_computation(i);
+    max_value_computation(i);
+
+    switch (type[i]) {
+    case INT_VALUE :
+      build_marginal_frequency_distribution(i);
+      break;
+    case REAL_VALUE :
+      build_marginal_histogram(i);
+      break;
+    }
   }
 }
 
@@ -2465,7 +2560,7 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
       }
     }
 
-    seq = new Sequences(inb_sequence , 0 , ilength , index_parameter_type ,
+    seq = new Sequences(inb_sequence , NULL , ilength , index_parameter_type ,
                         nb_variable , type);
     delete [] ilength;
 
@@ -5367,7 +5462,7 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 
     // creation de l'objet Sequences
 
-    seq = new Sequences(i + 1 , 0 , zone_length , index_parameter_type ,
+    seq = new Sequences(i + 1 , NULL , zone_length , index_parameter_type ,
                         nb_variable - 1 , itype);
 
     // copie des sequences
@@ -7420,7 +7515,7 @@ Sequences* Sequences::cross(StatError &error) const
       ilength[i] = nb_sequence;
     }
 
-    seq = new Sequences(max_length , 0 , ilength , index_parameter_type ,
+    seq = new Sequences(max_length , NULL , ilength , index_parameter_type ,
                         nb_variable , type);
     delete [] ilength;
 
