@@ -907,7 +907,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
     }
     else {
       ilength = max_length + max_length;
-      alignment = new Sequences(1 , 0 , &ilength , 1);
+      alignment = new Sequences(1 , NULL , &ilength , 1);
     }
 
     // creation des structures de donnees de l'algorithme - calcul des couts d'elision/insertion
@@ -1736,7 +1736,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
     }
     else {
       ilength = max_length + max_length;
-      alignment = new Sequences(1 , 0 , &ilength , 1);
+      alignment = new Sequences(1 , NULL , &ilength , 1);
     }
 
     // creation des structures de donnees de l'algorithme
@@ -2661,7 +2661,7 @@ Sequences* Sequences::multiple_alignment(const Sequences &test_seq , const Vecto
   for (i = 0;i < nb_sequence + test_seq.nb_sequence;i++) {
     ilength[i] = path_length[max_length][test_seq.max_length];
   }
-  seq = new Sequences(nb_sequence + test_seq.nb_sequence , 0 , ilength ,
+  seq = new Sequences(nb_sequence + test_seq.nb_sequence , NULL , ilength ,
                       nb_variable , type);
   delete [] ilength;
 
