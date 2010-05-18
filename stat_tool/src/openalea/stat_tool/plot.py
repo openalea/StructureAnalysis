@@ -254,6 +254,8 @@ class mplotlib(plotter):
                         l = pylab.plot(x, y, pointstyle,**line2d)
                     elif "lines" in style:
                         l = pylab.plot(x, y, '-', **line2d)
+                    elif "histeps" in style:
+                        l = pylab.plot(x, y,  linestyle='steps-mid', **line2d)
                     else:
                         l = pylab.plot(x, y, style,**line2d)
 
