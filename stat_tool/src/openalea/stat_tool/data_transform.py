@@ -826,17 +826,14 @@ def TruncateDistribution(obj, variable):
 
 
 
-def SelectStep(obj, **args):
+def SelectStep(obj, *args):
     """to be done"""
-
     error.CheckArgumentsLength(args, 1, 2)
 
-    print 'a'
     try:
         nb_variable = obj.nb_variable
     except AttributeError:
         nb_variable = 0
-    print 'a'
 
 
     if len(args)==2 and nb_variable!=1:
@@ -844,12 +841,12 @@ def SelectStep(obj, **args):
         error.CheckType([step], [[int, float]])
     elif len(args)==1 and nb_variable==1:
         variable = 1
-        step = args
+        step = args[0]
         error.CheckType([step], [[int, float]])
     else:
         print 'error'
         raise ValueError("expect only the step argument if nb_variable==1")
 
-    obj.get_marginal_histogram(variable)
+    #obj.get_marginal_histogram(variable)
     ret = obj.select_step(variable, step)
     return ret
