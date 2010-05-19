@@ -17,7 +17,7 @@ from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.output import Plot
 from openalea.stat_tool.data_transform import Shift, Merge, Fit, ValueSelect, \
     SelectVariable, SelectIndividual, MergeVariable, ExtractDistribution, \
-    ExtractHistogram, ExtractData
+    ExtractHistogram, ExtractData, SelectStep
 
 from tools import runTestClass
 
@@ -87,6 +87,19 @@ class data():
         d2 = NegativeBinomial(0, 1, 0.1)
         m = Convolution(d1, d2)
         return m
+
+class TestSelectStep(data):
+
+    def __init__(self):
+        data.__init__(self)
+
+    def test_select_step_vectors(self):
+        data = self.int_vector_data
+        try:
+            SelectStep(data,1, 100)
+            assert False
+        except:
+            assert True
 
 
 class TestShift(data):
@@ -232,10 +245,6 @@ class TestSelectIndividual(data):
 
         assert len(selection) == 2
 
-    def test_top(self):
-        """not implemented - top"""
-        pass
-
     def test_distance_matrix(self):
         """not implemented - distance matrix """
         pass
@@ -313,17 +322,6 @@ class TestExtractDistribution(data):
         assert ExtractDistribution(comp, "Sum") == \
             comp.extract_sum()
 
-    def test_renew(self):
-        """not implemented - renew"""
-        pass
-
-    def test_markov(self):
-        """not implemented - markov"""
-        pass
-
-    def test_top(self):
-        """not implemented - top"""
-        pass
 
 
 class TestExtractHistogram:
@@ -368,18 +366,6 @@ class TestExtractHistogram:
         ExtractHistogram(v, 1)
         v = Vectors([[1, 2], [3, 4]])
         ExtractHistogram(v, 1)
-
-    def test_renew(self):
-        """not implemented - renew"""
-        pass
-
-    def test_sequence(self):
-        """not implemented - sequence"""
-        pass
-
-    def test_tops(self):
-        """not implemented - tops"""
-        pass
 
 
 class TestMerge(data):
@@ -433,28 +419,6 @@ class TestMerge(data):
 
         assert str(a)==str(v)
         Plot(v)
-
-    def test_time_events(self):
-        """implemented in sequence_analysis/test/test_merge"""
-
-    def test_renewal(self):
-        """implemented in sequence_analysis/test/test_merge"""
-
-    def test_markov(self):
-        """not implemented - markov"""
-        pass
-
-    def test_top(self):
-        """implemented in sequence_analysis/test/test_merge"""
-        pass
-
-    def test_time(self):
-        """implemented in sequence_analysis/test/test_merge"""
-        pass
-
-    def test_correlation(self):
-        """implemented in sequence_analysis/test/test_merge"""
-        pass
 
 
 class TestMergeVariable(data):
