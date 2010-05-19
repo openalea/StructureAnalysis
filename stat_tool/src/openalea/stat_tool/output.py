@@ -700,6 +700,7 @@ class StatInterface(object):
                     plotable = self.get_plotable_data(*params)
             elif ViewPoint=='v':
                 # plot_write(error , Plot_prefix , title);
+
                 if args:
                     #sequence case:
                     #todo: make it looser: observation, intensity INTENSITY?
@@ -725,8 +726,22 @@ class StatInterface(object):
                     elif len(args)==1 and type(args[0])==str:
                         raise SyntaxError("first argument must be in %s and second arg (int) may be provided." % choices)
                     elif len(args)==1 and type(args[0])==int:
-                        plotable = self.get_plotable_list()
+                        from openalea.stat_tool._stat_tool import _Vectors
+                        if type(self)==_Vectors:
+                            #Plot(vector, 1)
+                            multiplotset = self.get_plotable()
+                            viewpoints = [x for x in multiplotset.viewpoint]
+                            plotable = []
+                            try:
+                                from openalea.sequence_analysis import enums
+                            except:
+                                raise ImportError("sequence analysis not installed !!")
+                            plotable = [multiplotset[args[0]]]
+                        else:
+                            #Plot(hist1, hist2, hist3)
+                            plotable = self.get_plotable_list()
                     elif len(args)==1:
+                        #e.g., list of histograms
                         plotable = self.get_plotable_list(list(args), *params)
                     else:
                         plotable = self.get_plotable_list(list(args), *params)

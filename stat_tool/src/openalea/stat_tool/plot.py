@@ -140,12 +140,13 @@ class mplotlib(plotter):
         """
 
         show = kargs.get("Show", True)
-        nbcol = kargs.get("nbcol", 1)
+        nbcol = kargs.get("nbcol", 2)
         options_y_maxrange_ratio = kargs.get("y_maxrange_ratio",1.1)
         line2d = {}
         line2d['linewidth'] = kargs.get("linewidth",1)
         legend_size = kargs.get("legend_size", 10)
-        legend_ncol = kargs.get("legend_ncol", 1)
+        legend_nbcol = kargs.get("legend_nbcol", 1)
+        legend_loc = kargs.get("legend_loc", "best")
         legend_on = kargs.get("legend", True)
         #legend_size = kargs.get("legend_kwds", {})
         #Plot(seq1, ViewPoint="Data", nbcol=2, legend_kwds={'prop':{'size':9}})
@@ -156,6 +157,8 @@ class mplotlib(plotter):
         multiset = plotable
 
 
+        if len(multiset)==1:
+            nbcol = 1
         # Title & border
         #if title: pylab.suptitle(title)
         #multiset.border
@@ -269,8 +272,9 @@ class mplotlib(plotter):
                 #Plot(seq1, ViewPoint="Data", nbcol=2, legend_kwds={'prop':{'size':9}})
                 kwds = {}
                 kwds['prop'] = {'size':legend_size}
-                kwds['ncol'] = legend_ncol
-                if legend_on is True:
+                kwds['ncol'] = legend_nbcol
+                kwds['loc'] = legend_loc
+                if legend_on is True and len(legends)<15:
                     lg = pylab.legend(lines, legends, **kwds)
                     lg.legendPatch.set_alpha(0.1) # transparency
             except:
