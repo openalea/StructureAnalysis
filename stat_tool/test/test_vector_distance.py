@@ -50,7 +50,7 @@ class Test(interface):
         assert len(v) == 3
         assert len(v) == v.nb_variable
 
-    def _test_plot(self):
+    def test_plot(self):
         pass
 
     def test_save(self):
@@ -96,6 +96,12 @@ class Test(interface):
 
         assert str(VectorDistance('N', 'O', 'S'))
 
+    def test_constructor_failure(self):
+        try:
+            v = VectorDistance('N', 'DUMMY')
+            assert False
+        except:
+            assert True
 
 if __name__ == "__main__":
     runTestClass(Test())
