@@ -13,15 +13,19 @@ from openalea.stat_tool import Mixture
 from openalea.stat_tool import Distribution
 from openalea.stat_tool import Simulate
 from openalea.stat_tool import Merge
+from openalea.stat_tool import SelectStep
+from openalea.stat_tool import Plot
+from openalea.stat_tool import Display
+from openalea.stat_tool import Vectors
 from tools import runTestClass
 
 class TestRemoveRun():
 
     def __init__(self):
         self.data = Sequences("data/sequences1.seq")
-        
+
     def _test_sequences_1(self):
-        
+
         seq1 = self.data
         seq2 = seq1.remove_run(1, 0,"e",2)
         seq3 = RemoveRun(seq1,1, 0,"e", MaxLength=2)
@@ -39,7 +43,7 @@ class TestRemoveRun():
             assert False
         except:
             assert True
-    
+
     def test_incorrect_variable(self):
         seq1 = self.data
         try:
@@ -58,11 +62,11 @@ class TestRemoveRun():
 def test_markov_data():
     """not implemented"""
     pass
-    
+
 def test_semi_markov_data():
     """not implemented"""
     pass
-    
+
 def test_discrete_sequences():
     """not implemented"""
     pass
@@ -72,34 +76,64 @@ def test_compute_state_sequence():
     seq = Sequences("data/wij1.seq")
     hsmc0 = HiddenSemiMarkov("data/" + "wij1.hsc")
     ComputeStateSequences(seq, hsmc0, Algorithm="ForwardBackward", Characteristics=True)
- 
+
 
 def test_transition_count():
     seq = Sequences("data/wij1.seq")
     TransitionCount(seq, 5, Begin=True, Estimator="MaximumLikelihood",
                     Filename = "ASCII")
-    
-    
-class TestMerge():
-    
-    def __init__(self):
-        pass
-        #data.__init__(self)
-        
-    def test_merge(self):
-        
-        mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5), 
-                        0.4, Distribution("NB", 10, 10, 0.5))
 
-        mixt_histo1 = Simulate(mixt1, 200)
 
-        histo10 = mixt_histo1.extract_component(1)
-        histo11 = mixt_histo1.extract_component(2)
+def test_merge():
 
-        histo12 = Merge(histo10, histo11)
+    mixt1 = Mixture(0.6, Distribution("B", 2, 18, 0.5),
+                    0.4, Distribution("NB", 10, 10, 0.5))
 
-        assert histo12
+    mixt_histo1 = Simulate(mixt1, 200)
 
+    histo10 = mixt_histo1.extract_component(1)
+    histo11 = mixt_histo1.extract_component(2)
+
+    histo12 = Merge(histo10, histo11)
+
+    assert histo12
+
+
+def test_select_step():
+    """
+    #########################################################################
+    #
+    #  Well-log data; used in Fearnhead and Clifford "On-line Inference for 
+    #  Hidden Markov Models via Particle Filters". Measurements of Nuclear-response
+    #  of a well-bore over time. Data from O Ruanaidh, J. J. K. and 
+    #  Fitzgerald, W. J. (1996). "Numerical Bayesion Methods Applied to Signal 
+    #  Processing". New York: Springer.
+    #
+    #########################################################################
+    """
+    seq1 = Sequences("data/well_log_filtered.seq")
+    Plot(seq1, ViewPoint="Data")
+    Plot(seq1)
+
+    SelectStep(seq1, 1000)
+    Plot(seq1)
+
+    #Display(seq1, 1, 17, "Gaussian", ViewPoint="SegmentProfile", NbSegmentation=5)
+    Plot(seq1, 1, 17, "Gaussian", ViewPoint="SegmentProfile")
+
+    # seq20 = Segmentation(seq1, 1, 20, "Gaussian")
+    # seq40 = Segmentation(seq1, 1, 40, "Gaussian")
+
+    # seq20 = Segmentation(seq1, 1, 20, "Mean")
+    # seq40 = Segmentation(seq1, 1, 40, "Mean")
+
+    # seq16 = Segmentation(seq1, 1, 16, "Gaussian", NbSegment->"Fixed")
+
+    vec1 = Vectors(seq1)
+    Plot(vec1)
+
+    SelectStep(vec1, 1000)
+    Plot(vec1)
 
 if __name__ == "__main__":
     runTestClass(TestMerge())
