@@ -827,25 +827,39 @@ def TruncateDistribution(obj, variable):
 
 
 def SelectStep(obj, *args):
-    """to be done"""
+    """Change the internal step of a vector or a sequence
+
+    :param obj: the vector or sequence objet
+    :param argument 1: the new step
+
+    :Example:
+
+        >>> seq = Sequences('data')
+        >>> SelectStep(seq, 100)
+        >>> Plot(seq)
+
+    """
     error.CheckArgumentsLength(args, 1, 2)
 
     try:
         nb_variable = obj.nb_variable
     except AttributeError:
-        nb_variable = 0
+        raise TypeError("object has no nb_variable. Check that it is a Vector or Sequence")
 
 
-    if len(args)==2 and nb_variable!=1:
+    if len(args)==2:
         variable, step = args
         error.CheckType([step], [[int, float]])
+        error.CheckType([variable], [[int]])
     elif len(args)==1 and nb_variable==1:
         variable = 1
         step = args[0]
         error.CheckType([step], [[int, float]])
     else:
-        print 'error'
-        raise ValueError("expect only the step argument if nb_variable==1")
+        if nb_variable!=1:
+            raise SyntaxError("Wrong number of arguments. The number of variable is greater than 1 (%s) therefore you must provide a variable and a step like in SelectStep(object, 1, 100)" % nb_variable)
+        else:
+            raise ValueError("UnknownError")
 
     #obj.get_marginal_histogram(variable)
     ret = obj.select_step(variable, step)

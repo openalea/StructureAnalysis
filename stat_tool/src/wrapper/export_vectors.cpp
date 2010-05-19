@@ -881,12 +881,21 @@ public:
   static Histogram*
   get_marginal_histogram(Vectors &input, int variable)
   {
+    StatError error;
     Histogram *ret;
-    ret = input.get_marginal_histogram(variable);
-    return ret;
+    if (variable<input.get_nb_variable() and variable>=0)
+        {
+            ret = input.get_marginal_histogram(variable);
+            return ret;
+        }
+    else
+        {
+            cerr << "variable must be positive or zero and stricly below nb_variable"<< endl;
+        }
+    if (!ret)
+      stat_tool::wrap_util::throw_error(error);
+
   }
-
-
 
 };
 
@@ -1000,9 +1009,9 @@ class_vectors()
   .def("spreadsheet_write", WRAP::spreadsheet_write,
       "Save data into CSV file")
   .def("select_step", WRAP::select_step, 
-    args("variable", "step"), "select_step on sequences")
+    args("variable", "step"), "select_step(step) refedine the step of the histogram. Step must be >0")
   DEF_RETURN_VALUE("get_marginal_histogram", WRAP::get_marginal_histogram, 
-    args("variable"), "get_marginal_histogram wrapper")
+    args("variable"), "get_marginal_histogram(nb_variable) construct marginal histogram of the vector given for the variable provided. The variable must be >=0 and less than nb_variable.")
 
   ;
 
