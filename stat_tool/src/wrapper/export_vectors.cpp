@@ -897,6 +897,14 @@ public:
 
   }
 
+  static void plot_write(const Vectors &input, const std::string& prefix,
+  const std::string& title)
+  {
+      StatError error;
+      input.plot_write(error, prefix.c_str(), title.c_str());
+  }
+
+
 };
 
 void
@@ -921,15 +929,17 @@ class_vectors()
 
   // getter
   .def("get_identifiers", WRAP::get_identifiers, args("index"),
-      "Return the list of identifiers")
+      "function that returns the list of identifiers")
   .def("get_min_value", &Vectors::get_min_value, args("index"),
-      "Return the min value of a variable")
+      "Return the min value of a variable.  Example: v.get_min_value(4)")
   .def("get_max_value", &Vectors::get_max_value, args("index"),
-      "Return the max value of a variable")
+      "Return the max value of a variable.  Example: v.get_max_value(4)")
   .def("get_mean", &Vectors::get_mean, args("index"),
-      "Return the mean value of a variable")
+      "Return the mean value of a vector. examepl v.get_mean(4)")
   .def("get_type", &Vectors::get_type, args("index"),
-      "Return the type of a variable")
+      "Return the type of a variable. example v.get_type(4)")
+   //.def ("skewness", &Vectors::skewness_computation, args("variable"),
+   //     "Returns skewness coefficient given variable")
 
 
   // python modules
@@ -998,6 +1008,8 @@ class_vectors()
   //others
   DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable,
       "Return a plotable")
+  .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")
+
   .def("check", WRAP::check, args("todo"),
       "todo check vectors")
   .def("ascii_data_write", WRAP::ascii_data_write,
@@ -1016,6 +1028,15 @@ class_vectors()
   ;
 
   /*
+
+    Vectors (int inb_vector , int *iidentifier , int inb_variable , int *itype ,  bool init_flag = false)
+    Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,  int **iint_vector , double **ireal_vector);
+    Vectors(const Vectors &vec , int inb_vector , int *index);
+    
+
+
+
+
 
    Vectors();
    Vectors(const Vectors &vec , int inb_vector , int *index);
