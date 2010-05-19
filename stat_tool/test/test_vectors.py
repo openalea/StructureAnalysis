@@ -145,6 +145,12 @@ class Test(interface):
         va = VarianceAnalysis(vec10, 1, 4, "O")
         assert vec10.variance_analysis(1, 4, 1, "whatever", "whatever") == \
             str(va)
+    
+        try:
+            va = VarianceAnalysis(vec10, 1, 4, "DUMMY")
+            assert False
+        except:
+            assert True
 
     def test_contingency_table(self):
         """test contingency table"""
