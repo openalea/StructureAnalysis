@@ -541,7 +541,7 @@ def _estimate_top(obj, **kargs):
 
 
 
-def _estimate_dispatch(obj, itype, *args, **kargs):
+def _estimate_dispatch(obj, *args, **kargs):
     """
 
 
@@ -576,37 +576,40 @@ def _estimate_dispatch(obj, itype, *args, **kargs):
                "NON-HOMOGENEOUS_MARKOV",
                "MARKOV"
                ]
-    if (itype not in fct_map_distribution) and (itype not in fct_map):
+
+    if len(args)==0:
+        itype=None
+    else:
+        itype = args[0]
+
+    if (itype not in fct_map_distribution) and (itype not in fct_map) and (type(obj) not in [_TimeEvents, _RenewalData, _FrequencyDistribution]):
         raise KeyError("Valid type are %s or %s"
                        % (str(fct_map),
                           str(fct_map_distribution)))
-
     if itype == "VARIABLE_ORDER_MARKOV":
-        return _estimate_variable_order_markov(obj, *args, **kargs)
+        return _estimate_variable_order_markov(obj, *args[1:], **kargs)
     elif itype == "HIDDEN_VARIABLE_ORDER_MARKOV":
-        return _estimate_hidden_variable_order_markov(obj, *args, **kargs)
+        return _estimate_hidden_variable_order_markov(obj, *args[1:], **kargs)
     elif itype == "HIDDEN_SEMI-MARKOV":
-        return _estimate_hidden_semi_markov(obj, *args, **kargs)
+        return _estimate_hidden_semi_markov(obj, *args[1:], **kargs)
     elif itype == "SEMI-MARKOV":
-        return _estimate_semi_markov(obj, *args, **kargs)
+        return _estimate_semi_markov(obj, *args[1:], **kargs)
     elif itype == "NON-HOMOGENEOUS_MARKOV":
-        return _estimate_non_homogeneous_markov(obj, *args, **kargs)
-    # the two following elif are together and should be kept in this order
-    # the first one expect the obj to be Time_events or Renewal_data only
-    #elif itype in ["Equilibrium", "Ordinary"]:
-    #    return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
-    elif (type(obj) in [_TimeEvents, _RenewalData]) or \
-        (len(args)>=1 \
-            and isinstance(obj, _FrequencyDistribution) \
-            and isinstance(itype, _FrequencyDistribution) \
-            and isinstance(args[0], _FrequencyDistribution)):
-        if len(args)>=0 and isinstance(obj, _FrequencyDistribution)==False and type(itype)==str:
-            return  _estimate_renewal_count_data(obj, itype, *args, **kargs)
+        return _estimate_non_homogeneous_markov(obj, *args[1:], **kargs)
+    elif (type(obj)==_TimeEvents) or (type(obj)==_RenewalData) \
+            or (len(args)>=2 and isinstance(obj, _FrequencyDistribution) \
+            and isinstance(args[0], _FrequencyDistribution)   \
+            and isinstance(args[1], _FrequencyDistribution)):
+        if len(args)>=1 and isinstance(obj, _FrequencyDistribution)==False and type(args[0])==str:
+            print 'count data'
+            return  _estimate_renewal_count_data(obj, args[0], *args[1:], **kargs)
         else:
-            return  _estimate_renewal_interval_data(obj, itype, *args, **kargs)
+            print 'interval data'
+            #always 'equilibrium' as second argument
+            return  _estimate_renewal_interval_data(obj, **kargs)
     else:
         from openalea.stat_tool.estimate import Estimate as HistoEstimate
-        return HistoEstimate(obj, itype, *args, **kargs)
+        return HistoEstimate(obj, itype, *args[1:], **kargs)
 
 
 
@@ -814,12 +817,9 @@ def Estimate(obj, *args, **kargs):
 
     """
 
-    # top case (no type specified and args  may be empty)
+    # top case (no type specified and args may be empty)
     if isinstance(obj, _Tops):
         return _estimate_top(obj, *args, **kargs)
-    # generic case
-    elif isinstance(args[0], str):
-        return _estimate_dispatch(obj, args[0], *args[1:], **kargs)
     else:
-        raise NotImplemented
+        return _estimate_dispatch(obj, *args, **kargs)
 
