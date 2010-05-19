@@ -96,6 +96,7 @@ hsmc0 = HiddenSemiMarkov(path + "reinet1.hsc")
 hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 
 Display(hsmc25)
+Plot(hsmc25, "Intensity", 1)
 Plot(hsmc25, "FirstOccurrence", 1)
 Plot(hsmc25, "Counting", 1)
 

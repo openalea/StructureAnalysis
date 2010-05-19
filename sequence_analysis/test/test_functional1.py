@@ -64,6 +64,7 @@ mc10 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=5, GlobalIn
 
 mc11 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", MaxOrder=5, GlobalInitialTransition=False)
 
+Plot(mc11, "Intensity")
 
 mc12 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", Algorithm="LocalBIC", Threshold=10., MaxOrder=5, GlobalInitialTransition=False, GlobalSample=False)
 mc13 = Estimate(seq10, "VARIABLE_ORDER_MARKOV", "Ordinary", Algorithm="Context", Threshold=1., MaxOrder=5, GlobalInitialTransition=False, GlobalSample=False)

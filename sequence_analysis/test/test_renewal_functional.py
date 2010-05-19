@@ -82,8 +82,8 @@ timev1_167 = RenewalData(seq10, 0, 166)
 
 Plot(timev1_40)
 
-renew1_40_i = Estimate(timev1_40, "Equilibrium", InitialInterEvent=Distribution("U", 1, 38), NbIteration=10000)
-renew1_40_is = Estimate(timev1_40, "Equilibrium", InitialInterEvent=Distribution("U", 1, 50), NbIteration=10000, Estimator="PenalizedLikelihood", Weight=0.4)
+renew1_40_i = Estimate(timev1_40, InitialInterEvent=Distribution("U", 1, 38), NbIteration=10000)
+renew1_40_is = Estimate(timev1_40, InitialInterEvent=Distribution("U", 1, 50), NbIteration=10000, Estimator="PenalizedLikelihood", Weight=0.4)
 
 
 Plot(renew1_40_is)
