@@ -420,8 +420,9 @@ protected :
     int ***int_sequence;    // sequences, variables entieres
     double ***real_sequence;  // sequences, variables reelles
 
-    void init(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,
-              int inb_variable , int *itype , bool init_flag);
+    void init(int inb_sequence , int *iidentifier , int *ilength , int **ivertex_identifier ,
+              int iindex_parameter_type , int inb_variable , int *itype ,
+              bool vertex_identifier_copy , bool init_flag);
     void init(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
               bool init_flag);
     void copy(const Sequences &seq , bool reverse_flag = false);
@@ -548,17 +549,15 @@ public :
 
     Sequences();
     Sequences(int inb_sequence , int inb_variable);
-    Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,
-              int inb_variable , int *itype , bool init_flag = false)
-    { init(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,
-           itype , init_flag); }
-    Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
-              int *itype , bool init_flag = false)
-    { init(inb_sequence , iidentifier , ilength , IMPLICIT_TYPE , inb_variable ,
-           itype , init_flag); }
-    Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,
+    Sequences(int inb_sequence , int *iidentifier , int *ilength ,
+              int **ivertex_identifier , int iindex_parameter_type , int inb_variable ,
+              int *itype , bool vertex_identifier_copy = true , bool init_flag = false)
+    { init(inb_sequence , iidentifier , ilength , ivertex_identifier ,
+           iindex_parameter_type , inb_variable , itype ,
+           vertex_identifier_copy , init_flag); }
+    Sequences(int inb_sequence , int *iidentifier , int *ilength , int iindex_parameter_type ,  // interface AML
               int inb_variable , int itype , int ***iint_sequence);
-    Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,
+    Sequences(int inb_sequence , int *iidentifier , int *ilength , int inb_variable ,  // interface AML
               double ***ireal_sequence);
     Sequences(int inb_sequence , int *iidentifier , int *ilength , int **ivertex_identifier ,
               int iindex_parameter_type , int **iindex_parameter , int inb_variable ,
@@ -569,6 +568,7 @@ public :
     Sequences(const FrequencyDistribution &ihlength , int inb_variable ,
               bool init_flag = false);
     Sequences(const RenewalData &timev);
+    Sequences(const Sequences &seq , int variable , int itype);
     Sequences(const Sequences &seq , int inb_sequence , int *index);
     Sequences(const Sequences &seq , bool *segment_mean);
     Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
@@ -929,16 +929,16 @@ public :
 
     MarkovianSequences();
     MarkovianSequences(int inb_sequence , int *iidentifier , int *ilength ,
-                       int iindex_parameter_type , int inb_variable ,
-                       int *itype , bool init_flag = false)
-    :Sequences(inb_sequence , iidentifier , ilength , iindex_parameter_type , inb_variable ,
-               itype , init_flag) { init(); }
-    MarkovianSequences(int inb_sequence , int *iidentifier , int *ilength ,
-                       int inb_variable , bool init_flag = false)
-    :Sequences(inb_sequence , iidentifier , ilength , inb_variable , init_flag) { init(); }
+                       int **ivertex_identifier , int iindex_parameter_type , int inb_variable ,
+                       int *itype , bool vertex_identifier_copy = true , bool init_flag = false)
+    :Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
+               iindex_parameter_type , inb_variable , itype ,
+               vertex_identifier_copy , init_flag) { init(); }
     MarkovianSequences(const FrequencyDistribution &ihlength ,
                        int inb_variable , bool init_flag = false)
     :Sequences(ihlength , inb_variable , init_flag) { init(); }
+    MarkovianSequences(const MarkovianSequences &seq , int variable , int itype)
+    :Sequences(seq , variable , itype) { init(); }
     MarkovianSequences(const Sequences &seq);
     MarkovianSequences(const MarkovianSequences &seq , char transform = 'c' ,
                        int param = DEFAULT);
