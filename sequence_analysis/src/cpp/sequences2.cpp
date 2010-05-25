@@ -634,8 +634,8 @@ Sequences* sequences_ascii_read(StatError &error , const char *path , bool old_f
       in_file.clear();
       in_file.seekg(0 , ios::beg);
 
-      seq = new Sequences(nb_sequence , NULL , length , index_parameter_type ,
-                          nb_variable , type);
+      seq = new Sequences(nb_sequence , NULL , length , NULL ,
+                          index_parameter_type , nb_variable , type);
 
       line = 0;
 
@@ -899,7 +899,7 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
           if (comment_flag) {
             os << "# ";
           }
-          os << " " << STAT_label[STATL_VALUE] << "  | " << STAT_label[STATL_FREQUENCY] << endl;
+          os << STAT_label[STATL_VALUE] << " | " << STAT_label[STATL_FREQUENCY] << endl;
           marginal_histogram[i]->ascii_print(os , comment_flag);
         }
       }
