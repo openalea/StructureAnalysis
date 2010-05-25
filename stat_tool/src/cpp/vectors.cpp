@@ -96,8 +96,8 @@ Vectors::Vectors()
  *
  *  Initialisation d'un objet Vectors.
  *
- *  arguments : nombre de vecteurs, identificateurs des vecteurs, nombre de variables,
- *              type de chaque variable, flag initialisation.
+ *  arguments : nombre de vecteurs, identificateurs des vecteurs,
+ *              nombre de variables, type de chaque variable, flag initialisation.
  *
  *--------------------------------------------------------------*/
 
@@ -203,6 +203,7 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
+
     build_marginal_frequency_distribution(i);
   }
 
@@ -244,6 +245,7 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
+
     build_marginal_histogram(i);
 
     mean_computation(i);
@@ -301,16 +303,121 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
     max_value_computation(i);
 
     switch (type[i]) {
-    case INT_VALUE :
+
+    case INT_VALUE : {
       build_marginal_frequency_distribution(i);
       break;
-    case REAL_VALUE :
+    }
+
+    case REAL_VALUE : {
       build_marginal_histogram(i);
+
+      mean_computation(i);
+      variance_computation(i);
       break;
+    }
     }
   }
 
   covariance_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Constructeur de la classe Vectors.
+ *
+ *  arguments : reference sur un objet Vectors, indice de la variable,
+ *              type de la variable selectionnee.
+ *
+ *--------------------------------------------------------------*/
+
+Vectors::Vectors(const Vectors &vec , int variable , int itype)
+
+{
+  register int i , j;
+
+
+  nb_vector = vec.nb_vector;
+
+  identifier = new int[nb_vector];
+  for (i = 0;i < nb_vector;i++) {
+    identifier[i] = vec.identifier[i];
+  }
+
+  nb_variable = vec.nb_variable;
+
+  type = new int[nb_variable];
+  min_value = new double[nb_variable];
+  max_value = new double[nb_variable];
+  marginal_distribution = new FrequencyDistribution*[nb_variable];
+  marginal_histogram = new Histogram*[nb_variable];
+
+  for (i = 0;i < nb_variable;i++) {
+    if (i != variable) {
+      type[i] = vec.type[i];
+      min_value[i] = vec.min_value[i];
+      max_value[i] = vec.max_value[i];
+
+      if (vec.marginal_distribution[i]) {
+        marginal_distribution[i] = new FrequencyDistribution(*(vec.marginal_distribution[i]));
+      }
+      else {
+        marginal_distribution[i] = NULL;
+      }
+
+      if (vec.marginal_histogram[i]) {
+        marginal_histogram[i] = new Histogram(*(vec.marginal_histogram[i]));
+      }
+      else {
+        marginal_histogram[i] = NULL;
+      }
+    }
+
+    else {
+      type[i] = itype;
+      min_value[i] = 0.;
+      max_value[i] = 0.;
+      marginal_distribution[i] = NULL;
+      marginal_histogram[i] = NULL;
+    }
+  }
+
+  mean = new double[nb_variable];
+  for (i = 0;i < nb_variable;i++) {
+    if (i != variable) {
+      mean[i] = vec.mean[i];
+    }
+    else {
+      mean[i] = D_INF;
+    }
+  }
+
+  covariance = new double*[nb_variable];
+  for (i = 0;i < nb_variable;i++) {
+    covariance[i] = new double[nb_variable];
+    for (j = 0;j < nb_variable;j++) {
+      if ((i != variable) && (j != variable)) {
+        covariance[i][j] = vec.covariance[i][j];
+      }
+      else {
+        covariance[i][j] = D_DEFAULT;
+      }
+    }
+  }
+
+  int_vector = new int*[nb_vector];
+  real_vector = new double*[nb_vector];
+  for (i = 0;i < nb_vector;i++) {
+    int_vector[i] = new int[nb_variable];
+    real_vector[i] = new double[nb_variable];
+    for (j = 0;j < nb_variable;j++) {
+      if (j != variable) {
+        int_vector[i][j] = vec.int_vector[i][j];
+        real_vector[i][j] = vec.real_vector[i][j];
+      }
+    }
+  }
 }
 
 
@@ -372,7 +479,22 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
   for (i = 0;i < nb_variable;i++) {
     min_value_computation(i);
     max_value_computation(i);
-    build_marginal_frequency_distribution(i);
+
+    switch (type[i]) {
+
+    case INT_VALUE : {
+      build_marginal_frequency_distribution(i);
+      break;
+    }
+
+    case REAL_VALUE : {
+      build_marginal_histogram(i);
+
+      mean_computation(i);
+      variance_computation(i);
+      break;
+    }
+    }
   }
 
   covariance_computation();
@@ -706,7 +828,7 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
 {
   bool status = true;
   register int i , j , k , m;
-  int inb_vector;
+  int inb_vector , cumul_nb_vector , *iidentifier;
   const FrequencyDistribution **phisto;
   Vectors *vec;
   const Vectors **pvec;
@@ -747,12 +869,45 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
       pvec[i] = ivec[i - 1];
     }
 
+    // calcul du nombre de vecteurs
+
     inb_vector = 0;
     for (i = 0;i < nb_sample;i++) {
       inb_vector += pvec[i]->nb_vector;
     }
 
-    vec = new Vectors(inb_vector , NULL , nb_variable , type);
+    // comparaison des identificateurs des vecteurs
+
+    iidentifier = new int[inb_vector];
+
+    cumul_nb_vector = 0;
+    i = 0;
+    for (j = 0;j < nb_sample;j++) {
+      for (k = 0;k < pvec[j]->nb_vector;k++) {
+        iidentifier[i] = pvec[j]->identifier[k];
+
+        for (m = 0;m < cumul_nb_vector;m++) {
+          if (iidentifier[i] == iidentifier[m]) {
+            delete [] iidentifier;
+            iidentifier = NULL;
+            break;
+          }
+        }
+
+        if (!iidentifier) {
+          break;
+        }
+        i++;
+      }
+
+      if (!iidentifier) {
+        break;
+      }
+      cumul_nb_vector += pvec[j]->nb_vector;
+    }
+
+    vec = new Vectors(inb_vector , iidentifier , nb_variable , type);
+    delete [] iidentifier;
 
     // copie des vecteurs
 
@@ -792,12 +947,14 @@ Vectors* Vectors::merge(StatError &error , int nb_sample , const Vectors **ivec)
 
       if (j == nb_sample) {
         vec->marginal_distribution[i] = new FrequencyDistribution(nb_sample , phisto);
+
         vec->mean[i] = vec->marginal_distribution[i]->mean;
         vec->covariance[i][i] = vec->marginal_distribution[i]->variance;
       }
 
       else {
         vec->build_marginal_histogram(i);
+
         vec->mean_computation(i);
         vec->variance_computation(i);
       }
@@ -826,7 +983,7 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
 
 {
   bool status = true;
-  register int i , j;
+  register int i;
   Vectors *vec;
 
 
@@ -861,82 +1018,54 @@ Vectors* Vectors::shift(StatError &error , int variable , int shift_param) const
   }
 
   if (status) {
-    vec = new Vectors(nb_vector , identifier , nb_variable , type);
+    vec = new Vectors(*this , variable , type[variable]);
 
-    for (i = 0;i < vec->nb_vector;i++) {
-      for (j = 0;j < vec->nb_variable;j++) {
-        if (vec->type[j] == INT_VALUE) {
+    switch (vec->type[variable]) {
 
-          // translation des valeurs entieres
+    // translation des valeurs entieres
 
-          if (j == variable) {
-            vec->int_vector[i][j] = int_vector[i][j] + shift_param;
-          }
-
-          // copie des valeurs entieres
-
-          else {
-            vec->int_vector[i][j] = int_vector[i][j];
-          }
-        }
-
-        else {
-
-          // translation des valeurs reelles
-
-          if (j == variable) {
-            vec->real_vector[i][j] = real_vector[i][j] + shift_param;
-          }
-
-          // copie des valeurs reelles
-
-          else {
-            vec->real_vector[i][j] = real_vector[i][j];
-          }
-        }
+    case INT_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->int_vector[i][variable] = int_vector[i][variable] + shift_param;
       }
+      break;
     }
 
-    for (i = 0;i < vec->nb_variable;i++) {
-      if (i == variable) {
-        vec->min_value[i] = min_value[i] + shift_param;
-        vec->max_value[i] = max_value[i] + shift_param;
+    // translation des valeurs reelles
 
-        if ((vec->type[i] == INT_VALUE) && (vec->min_value[i] >= 0) &&
-            (vec->max_value[i] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
-          if (marginal_distribution[i]) {
-            vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i] , 's' , shift_param);
-            vec->mean[i] = vec->marginal_distribution[i]->mean;
-          }
-          else {
-            vec->build_marginal_frequency_distribution(i);
-          }
-        }
+    case REAL_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->real_vector[i][variable] = real_vector[i][variable] + shift_param;
+      }
+      break;
+    }
+    }
 
-        else {
-          vec->build_marginal_histogram(i);
+    vec->min_value[variable] = min_value[variable] + shift_param;
+    vec->max_value[variable] = max_value[variable] + shift_param;
 
-          vec->mean[i] = mean[i] + shift_param;
-        }
+    if ((vec->type[variable] == INT_VALUE) && (vec->min_value[variable] >= 0) &&
+        (vec->max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
+      if (marginal_distribution[variable]) {
+        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] , 's' , shift_param);
+
+        vec->mean[variable] = vec->marginal_distribution[variable]->mean;
       }
 
       else {
-        vec->min_value[i] = min_value[i];
-        vec->max_value[i] = max_value[i];
-
-        if (marginal_distribution[i]) {
-          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
-        }
-        if (marginal_histogram[i]) {
-          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
-        }
-
-        vec->mean[i] = mean[i];
+        vec->build_marginal_frequency_distribution(variable);
       }
+    }
 
-      for (j = 0;j < vec->nb_variable;j++) {
-        vec->covariance[i][j] = covariance[i][j];
-      }
+    else {
+      vec->build_marginal_histogram(variable);
+
+      vec->mean[variable] = mean[variable] + shift_param;
+    }
+
+    for (i = 0;i < vec->nb_variable;i++) {
+      vec->covariance[i][variable] = covariance[i][variable];
+      vec->covariance[variable][i] = covariance[variable][i];
     }
   }
 
@@ -957,7 +1086,7 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
 
 {
   bool status = true;
-  register int i , j;
+  register int i;
   Vectors *vec;
 
 
@@ -979,61 +1108,24 @@ Vectors* Vectors::shift(StatError &error , int variable , double shift_param) co
   }
 
   if (status) {
-    vec = new Vectors(nb_vector , identifier , nb_variable , type);
+    vec = new Vectors(*this , variable , type[variable]);
+
+    // translation des valeurs reelles
 
     for (i = 0;i < vec->nb_vector;i++) {
-      for (j = 0;j < vec->nb_variable;j++) {
-
-        // copie des valeurs entieres
-
-        if (vec->type[j] == INT_VALUE) {
-          vec->int_vector[i][j] = int_vector[i][j];
-        }
-
-        else {
-
-          // translation des valeurs reelles
-
-          if (j == variable) {
-            vec->real_vector[i][j] = real_vector[i][j] + shift_param;
-          }
-
-          // copie des valeurs reelles
-
-          else {
-            vec->real_vector[i][j] = real_vector[i][j];
-          }
-        }
-      }
+      vec->real_vector[i][variable] = real_vector[i][variable] + shift_param;
     }
 
+    vec->min_value[variable] = min_value[variable] + shift_param;
+    vec->max_value[variable] = max_value[variable] + shift_param;
+
+    vec->build_marginal_histogram(variable);
+
+    vec->mean[variable] = mean[variable] + shift_param;
+
     for (i = 0;i < vec->nb_variable;i++) {
-      if (i == variable) {
-        vec->min_value[i] = min_value[i] + shift_param;
-        vec->max_value[i] = max_value[i] + shift_param;
-
-        vec->build_marginal_histogram(i);
-
-        vec->mean[i] = mean[i] + shift_param;
-      }
-
-      else {
-        vec->min_value[i] = min_value[i];
-        vec->max_value[i] = max_value[i];
-
-        if (marginal_distribution[i]) {
-          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
-        }
-        if (marginal_histogram[i]) {
-          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
-        }
-
-        vec->mean[i] = mean[i];
-      }
-
-      for (j = 0;j < vec->nb_variable;j++) {
-        vec->covariance[i][j] = covariance[i][j];
-      }
+      vec->covariance[i][variable] = covariance[i][variable];
+      vec->covariance[variable][i] = covariance[variable][i];
     }
   }
 
@@ -1054,7 +1146,7 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
 
 {
   bool status = true;
-  register int i , j;
+  register int i;
   Vectors *vec;
 
 
@@ -1073,115 +1165,88 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
   if (status) {
     variable--;
 
-    vec = new Vectors(nb_vector , identifier , nb_variable , type);
+    vec = new Vectors(*this , variable , type[variable]);
 
-    for (i = 0;i < vec->nb_vector;i++) {
-      for (j = 0;j < vec->nb_variable;j++) {
-        if (vec->type[j] == INT_VALUE) {
+    switch (vec->type[variable]) {
 
-          // regroupement des valeurs entieres
+    // regroupement des valeurs entieres
 
-          if (j == variable) {
-            switch (mode) {
-            case FLOOR :
-              vec->int_vector[i][j] = int_vector[i][j] / step;
-              break;
-            case ROUND :
-              vec->int_vector[i][j] = (int_vector[i][j] + step / 2) / step;
-//              vec->int_vector[i][j] = (int)::round((double)int_vector[i][j] / (double)step);
-              break;
-            case CEIL :
-              vec->int_vector[i][j] = (int_vector[i][j] + step - 1) / step;
-//              vec->int_vector[i][j] = (int)ceil((double)int_vector[i][j] / (double)step);
-              break;
-            }
-          }
-
-          // copie des valeurs entieres
-
-          else {
-            vec->int_vector[i][j] = int_vector[i][j];
-          }
-        }
-
-        else {
-
-          // regroupement des valeurs reelles
-
-          if (j == variable) {
-            vec->real_vector[i][j] = real_vector[i][j] / step;
-          }
-
-          // copie des valeurs reelles
-
-          else {
-            vec->real_vector[i][j] = real_vector[i][j];
-          }
+    case INT_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        switch (mode) {
+        case FLOOR :
+          vec->int_vector[i][variable] = int_vector[i][variable] / step;
+          break;
+        case ROUND :
+          vec->int_vector[i][variable] = (int_vector[i][variable] + step / 2) / step;
+//          vec->int_vector[i][variable] = (int)::round((double)int_vector[i][variable] / (double)step);
+          break;
+        case CEIL :
+          vec->int_vector[i][variable] = (int_vector[i][variable] + step - 1) / step;
+//          vec->int_vector[i][variable] = (int)ceil((double)int_vector[i][variable] / (double)step);
+          break;
         }
       }
+      break;
     }
 
-    for (i = 0;i < vec->nb_variable;i++) {
-      if (i == variable) {
-        if (vec->type[i] == INT_VALUE) {
-          switch (mode) {
-          case FLOOR :
-            vec->min_value[i] = (int)min_value[i] / step;
-            vec->max_value[i] = (int)max_value[i] / step;
-//            vec->min_value[i] = floor(min_value[i] / step);
-//            vec->max_value[i] = floor(max_value[i] / step);
-            break;
-          case ROUND :
-            vec->min_value[i] = ((int)min_value[i] + step / 2) / step;
-            vec->max_value[i] = ((int)max_value[i] + step / 2) / step;
-//            vec->min_value[i] = ::round(min_value[i] / step);
-//            vec->max_value[i] = ::round(max_value[i] / step);
-            break;
-          case CEIL :
-            vec->min_value[i] = ((int)min_value[i] + step - 1) / step;
-            vec->max_value[i] = ((int)max_value[i] + step - 1) / step;
-//            vec->min_value[i] = ceil(min_value[i] / step);
-//            vec->max_value[i] = ceil(max_value[i] / step);
-            break;
-          }
+    // regroupement des valeurs reelles
 
-          if (marginal_distribution[i]) {
-            vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i] , 'c' , step , mode);
-            vec->mean[i] = vec->marginal_distribution[i]->mean;
-            vec->covariance[i][i] = vec->marginal_distribution[i]->variance;
-          }
-          else {
-            vec->build_marginal_frequency_distribution(i);
-          }
-        }
+    case REAL_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->real_vector[i][variable] = real_vector[i][variable] / step;
+      }
+      break;
+    }
+    }
 
-        else {
-          vec->min_value[i] = min_value[i] / step;
-          vec->max_value[i] = max_value[i] / step;
+    switch (vec->type[variable]) {
 
-          vec->build_marginal_histogram(i , marginal_histogram[i]->step / step);
+    case INT_VALUE : {
+      switch (mode) {
+      case FLOOR :
+        vec->min_value[variable] = (int)min_value[variable] / step;
+        vec->max_value[variable] = (int)max_value[variable] / step;
+//        vec->min_value[variable] = floor(min_value[variable] / step);
+//        vec->max_value[variable] = floor(max_value[variable] / step);
+        break;
+      case ROUND :
+        vec->min_value[variable] = ((int)min_value[variable] + step / 2) / step;
+        vec->max_value[variable] = ((int)max_value[variable] + step / 2) / step;
+//        vec->min_value[variable] = ::round(min_value[variable] / step);
+//        vec->max_value[variable] = ::round(max_value[variable] / step);
+        break;
+      case CEIL :
+        vec->min_value[variable] = ((int)min_value[variable] + step - 1) / step;
+        vec->max_value[variable] = ((int)max_value[variable] + step - 1) / step;
+//        vec->min_value[variable] = ceil(min_value[variable] / step);
+//        vec->max_value[variable] = ceil(max_value[variable] / step);
+        break;
+      }
 
-          vec->mean[i] = mean[i] / step;
-          vec->covariance[i][i] = covariance[i][i] / (step * step);
-        }
+      if (marginal_distribution[variable]) {
+        vec->marginal_distribution[variable] = new FrequencyDistribution(*marginal_distribution[variable] , 'c' , step , mode);
+
+        vec->mean[variable] = vec->marginal_distribution[variable]->mean;
+        vec->covariance[variable][variable] = vec->marginal_distribution[variable]->variance;
       }
 
       else {
-        vec->min_value[i] = min_value[i];
-        vec->max_value[i] = max_value[i];
-
-        if (marginal_distribution[i]) {
-          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
-        }
-        if (marginal_histogram[i]) {
-          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
-        }
-
-        vec->mean[i] = mean[i];
-        for (j = 0;j < vec->nb_variable;j++) {
-          vec->covariance[i][j] = covariance[i][j];
-        }
+        vec->build_marginal_frequency_distribution(variable);
       }
+      break;
+    }
+
+    case REAL_VALUE : {
+      vec->min_value[variable] = min_value[variable] / step;
+      vec->max_value[variable] = max_value[variable] / step;
+
+      vec->build_marginal_histogram(i , marginal_histogram[variable]->step / step);
+
+      vec->mean[variable] = mean[variable] / step;
+      vec->covariance[variable][variable] = covariance[variable][variable] / (step * step);
+      break;
+    }
     }
 
     vec->covariance_computation(variable);
@@ -1204,60 +1269,18 @@ void Vectors::transcode(const Vectors &vec , int variable , int min_symbol ,
                         int max_symbol , int *symbol)
 
 {
-  register int i , j;
+  register int i;
 
 
   for (i = 0;i < nb_vector;i++) {
-    for (j = 0;j < nb_variable;j++) {
-      if (type[j] == INT_VALUE) {
-
-        // transcodage des symboles
-
-        if (j == variable) {
-          int_vector[i][j] = symbol[vec.int_vector[i][j] -
-                                    (int)vec.min_value[variable]] + min_symbol;
-        }
-
-        // copie des valeurs entieres
-
-        else {
-          int_vector[i][j] = vec.int_vector[i][j];
-        }
-      }
-
-      // copie des valeurs reelles
-
-      else {
-        real_vector[i][j] = vec.real_vector[i][j];
-      }
-    }
+    int_vector[i][variable] = symbol[vec.int_vector[i][variable] -
+                                     (int)vec.min_value[variable]] + min_symbol;
   }
 
-  for (i = 0;i < nb_variable;i++) {
-    if (i == variable) {
-      min_value[i] = min_symbol;
-      max_value[i] = max_symbol;
+  min_value[variable] = min_symbol;
+  max_value[variable] = max_symbol;
 
-      build_marginal_frequency_distribution(i);
-    }
-
-    else {
-      min_value[i] = vec.min_value[i];
-      max_value[i] = vec.max_value[i];
-
-      if (vec.marginal_distribution[i]) {
-        marginal_distribution[i] = new FrequencyDistribution(*(vec.marginal_distribution[i]));
-      }
-      if (vec.marginal_histogram[i]) {
-        marginal_histogram[i] = new Histogram(*(vec.marginal_histogram[i]));
-      }
-
-      mean[i] = vec.mean[i];
-      for (j = 0;j < nb_variable;j++) {
-        covariance[i][j] = vec.covariance[i][j];
-      }
-    }
-  }
+  build_marginal_frequency_distribution(variable);
 
   covariance_computation(variable);
 }
@@ -1348,7 +1371,7 @@ Vectors* Vectors::transcode(StatError &error , int variable , int *symbol) const
         symbol[i] -= min_symbol;
       }
 
-      vec = new Vectors(nb_vector , identifier , nb_variable , type);
+      vec = new Vectors(*this , variable , type[variable]);
       vec->transcode(*this , variable , min_symbol , max_symbol , symbol);
     }
   }
@@ -1372,7 +1395,7 @@ Vectors* Vectors::cluster(StatError &error , int variable , int nb_class ,
 {
   bool status = true;
   register int i , j , k;
-  int *int_limit , *symbol , *itype;
+  int *int_limit , *symbol;
   double *real_limit;
   Vectors *vec;
 
@@ -1420,7 +1443,7 @@ Vectors* Vectors::cluster(StatError &error , int variable , int nb_class ,
           }
         }
 
-        vec = new Vectors(nb_vector, identifier , nb_variable , type );
+        vec = new Vectors(*this , variable , type[variable]);
         vec->transcode(*this , variable , 0 , nb_class - 1 , symbol);
 
         delete [] symbol;
@@ -1443,17 +1466,9 @@ Vectors* Vectors::cluster(StatError &error , int variable , int nb_class ,
           error.update(STAT_error[STATR_CLUSTER_LIMIT]);
         }
       }
+
       if (status) {
-        itype = new int[nb_variable];
-
-        for (i = 0;i < nb_variable;i++) {
-          itype[i] = type[i];
-        }
-        itype[variable] = INT_VALUE;
-
-        vec = new Vectors(nb_vector , identifier , nb_variable , itype);
-        delete [] itype;
-
+        vec = new Vectors(*this , variable , INT_VALUE);
         vec->cluster(*this , variable , nb_class , real_limit);
       }
 
@@ -1478,65 +1493,22 @@ void Vectors::cluster(const Vectors &vec , int variable , int nb_class ,
                       double *limit)
 
 {
-  register int i , j , k;
+  register int i , j;
 
 
   for (i = 0;i < nb_vector;i++) {
-    for (j = 0;j < nb_variable;j++) {
-
-      // copie des valeurs entieres
-
-      if (vec.type[j] == INT_VALUE) {
-        int_vector[i][j] = vec.int_vector[i][j];
-      }
-
-      else {
-
-        // regroupement des valeurs reelles
-
-        if (j == variable) {
-          for (k = 0;k < nb_class;k++) {
-            if (vec.real_vector[i][j] < limit[k + 1]) {
-              int_vector[i][j] = k;
-              break;
-            }
-          }
-        }
-
-        // copie des valeurs reelles
-
-        else {
-          real_vector[i][j] = vec.real_vector[i][j];
-        }
+    for (j = 0;j < nb_class;j++) {
+      if (vec.real_vector[i][variable] < limit[j + 1]) {
+        int_vector[i][variable] = j;
+        break;
       }
     }
   }
 
-  for (i = 0;i < nb_variable;i++) {
-    if (i == variable) {
-      min_value_computation(i);
-      max_value_computation(i);
+  min_value_computation(variable);
+  max_value_computation(variable);
 
-      build_marginal_frequency_distribution(i);
-    }
-
-    else {
-      min_value[i] = vec.min_value[i];
-      max_value[i] = vec.max_value[i];
-
-      if (vec.marginal_distribution[i]) {
-        marginal_distribution[i] = new FrequencyDistribution(*(vec.marginal_distribution[i]));
-      }
-      if (vec.marginal_histogram[i]) {
-        marginal_histogram[i] = new Histogram(*(vec.marginal_histogram[i]));
-      }
-
-      mean[i] = vec.mean[i];
-      for (j = 0;j < nb_variable;j++) {
-        covariance[i][j] = vec.covariance[i][j];
-      }
-    }
-  }
+  build_marginal_frequency_distribution(variable);
 
   covariance_computation(variable);
 }
@@ -1557,7 +1529,6 @@ Vectors* Vectors::cluster(StatError &error , int variable , int nb_class ,
 {
   bool status = true;
   register int i;
-  int *itype;
   double *limit;
   Vectors *vec;
 
@@ -1598,17 +1569,9 @@ Vectors* Vectors::cluster(StatError &error , int variable , int nb_class ,
         error.update(STAT_error[STATR_CLUSTER_LIMIT]);
       }
     }
+
     if (status) {
-      itype = new int[nb_variable];
-
-      for (i = 0;i < nb_variable;i++) {
-        itype[i] = type[i];
-      }
-      itype[variable] = INT_VALUE;
-
-      vec = new Vectors(nb_vector , identifier , nb_variable , itype);
-      delete [] itype;
-
+      vec = new Vectors(*this , variable , INT_VALUE);
       vec->cluster(*this , variable , nb_class , limit);
     }
 
@@ -1631,7 +1594,7 @@ Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) c
 
 {
   bool status = true;
-  register int i , j;
+  register int i;
   Vectors *vec;
 
 
@@ -1661,67 +1624,33 @@ Vectors* Vectors::scaling(StatError &error , int variable , int scaling_coeff) c
   }
 
   if (status) {
-    vec = new Vectors(nb_vector , identifier , nb_variable , type);
+    vec = new Vectors(*this , variable , type[variable]);
 
-    for (i = 0;i < vec->nb_vector;i++) {
-      for (j = 0;j < vec->nb_variable;j++) {
-        if (vec->type[j] == INT_VALUE) {
+    switch (vec->type[variable]) {
 
-          // mise a l'echelle des valeurs entieres
+    // mise a l'echelle des valeurs entieres
 
-          if (j == variable) {
-            vec->int_vector[i][j] = int_vector[i][j] * scaling_coeff;
-          }
-
-          // copie des valeurs entieres
-
-          else {
-            vec->int_vector[i][j] = int_vector[i][j];
-          }
-        }
-
-        else {
-
-          // mise a l'echelle des valeurs reelles
-
-          if (j == variable) {
-            vec->real_vector[i][j] = real_vector[i][j] * scaling_coeff;
-          }
-
-          // copie des valeurs reelles
-
-          else {
-            vec->real_vector[i][j] = real_vector[i][j];
-          }
-        }
+    case INT_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->int_vector[i][variable] = int_vector[i][variable] * scaling_coeff;
       }
+      break;
     }
 
-    for (i = 0;i < vec->nb_variable;i++) {
-      if (i == variable) {
-        vec->min_value[i] = min_value[i] * scaling_coeff;
-        vec->max_value[i] = max_value[i] * scaling_coeff;
+    // mise a l'echelle des valeurs reelles
 
-        vec->build_marginal_frequency_distribution(i);
+    case REAL_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->real_vector[i][variable] = real_vector[i][variable] * scaling_coeff;
       }
-
-      else {
-        vec->min_value[i] = min_value[i];
-        vec->max_value[i] = max_value[i];
-
-        if (marginal_distribution[i]) {
-          vec->marginal_distribution[i] = new FrequencyDistribution(*marginal_distribution[i]);
-        }
-        if (marginal_histogram[i]) {
-          vec->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
-        }
-
-        vec->mean[i] = mean[i];
-        for (j = 0;j < vec->nb_variable;j++) {
-          vec->covariance[i][j] = covariance[i][j];
-        }
-      }
+      break;
     }
+    }
+
+    vec->min_value[variable] = min_value[variable] * scaling_coeff;
+    vec->max_value[variable] = max_value[variable] * scaling_coeff;
+
+    vec->build_marginal_frequency_distribution(variable);
 
     vec->covariance_computation(variable);
   }
@@ -2478,7 +2407,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
 {
   bool status = true;
   register int i , j , k;
-  int inb_variable , *itype , *iidentifier;
+  int inb_variable , *iidentifier , *itype;
   Vectors *vec;
   const Vectors **pvec;
 
@@ -2512,7 +2441,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
       inb_variable += ivec[i - 1]->nb_variable;
     }
 
-    // calcul des identificateurs des vecteurs
+    // comparaison des identificateurs des vecteurs
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_vector;i++) {
@@ -2527,7 +2456,7 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
       }
 
       if (i < nb_vector) {
-        iidentifier = 0;
+        iidentifier = NULL;
       }
       else {
         iidentifier = pvec[0]->identifier;
@@ -2535,7 +2464,8 @@ Vectors* Vectors::merge_variable(StatError &error , int nb_sample ,
     }
 
     else {
-      iidentifier = pvec[--ref_sample]->identifier;
+      ref_sample--;
+      iidentifier = pvec[ref_sample]->identifier;
     }
 
     itype = new int[inb_variable];
@@ -3026,7 +2956,7 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
         if (comment_flag) {
           os << "# ";
         }
-        os << " " << STAT_label[STATL_VALUE] << "  | " << STAT_label[STATL_FREQUENCY] << endl;
+        os << STAT_label[STATL_VALUE] << " | " << STAT_label[STATL_FREQUENCY] << endl;
         marginal_histogram[i]->ascii_print(os , comment_flag);
       }
     }
@@ -4015,7 +3945,9 @@ void Vectors::min_value_computation(int variable)
   register int i;
 
 
-  if (type[variable] == INT_VALUE) {
+  switch (type[variable]) {
+
+  case INT_VALUE : {
     min_value[variable] = int_vector[0][variable];
 
     for (i = 1;i < nb_vector;i++) {
@@ -4023,9 +3955,10 @@ void Vectors::min_value_computation(int variable)
         min_value[variable] = int_vector[i][variable];
       }
     }
+    break;
   }
 
-  else {
+  case REAL_VALUE : {
     min_value[variable] = real_vector[0][variable];
 
     for (i = 1;i < nb_vector;i++) {
@@ -4033,6 +3966,8 @@ void Vectors::min_value_computation(int variable)
         min_value[variable] = real_vector[i][variable];
       }
     }
+    break;
+  }
   }
 }
 
@@ -4051,7 +3986,9 @@ void Vectors::max_value_computation(int variable)
   register int i;
 
 
-  if (type[variable] == INT_VALUE) {
+  switch (type[variable]) {
+
+  case INT_VALUE : {
     max_value[variable] = int_vector[0][variable];
 
     for (i = 1;i < nb_vector;i++) {
@@ -4059,9 +3996,10 @@ void Vectors::max_value_computation(int variable)
         max_value[variable] = int_vector[i][variable];
       }
     }
+    break;
   }
 
-  else {
+  case REAL_VALUE : {
     max_value[variable] = real_vector[0][variable];
 
     for (i = 1;i < nb_vector;i++) {
@@ -4069,6 +4007,8 @@ void Vectors::max_value_computation(int variable)
         max_value[variable] = real_vector[i][variable];
       }
     }
+    break;
+  }
   }
 }
 
@@ -4135,7 +4075,9 @@ void Vectors::build_marginal_histogram(int variable , double step)
       step = MAX(::round((max_value[variable] - min_value[variable]) * HISTOGRAM_FREQUENCY / nb_vector) , 1);
 
 #     ifdef MESSAGE
-      cout << "\nSTEP: " << step << endl;
+      cout << "\n" << STAT_label[STATL_VARIABLE] << " " << variable << " - "
+           << STAT_label[STATL_STEP] << ": " << step << endl;
+//           << " (" << min_value[variable] << ", " << max_value[variable] << ")"
 #     endif
 
     }
@@ -4162,18 +4104,23 @@ void Vectors::build_marginal_histogram(int variable , double step)
       marginal_histogram[variable]->frequency[i] = 0;
     }
 
-    if (type[variable] == INT_VALUE) {
+    switch (type[variable]) {
+
+    case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
 //        marginal_histogram[variable]->frequency[(int)((int_vector[i][variable] - min_value[variable] + step / 2.) / step)]++;
         marginal_histogram[variable]->frequency[(int)::round((int_vector[i][variable] - min_value[variable]) / step)]++;
       }
+      break;
     }
 
-    else {
+    case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
 //        marginal_histogram[variable]->frequency[(int)((real_vector[i][variable] - min_value[variable] + step / 2.) / step)]++;
         marginal_histogram[variable]->frequency[(int)::round((real_vector[i][variable] - min_value[variable]) / step)]++;
       }
+      break;
+    }
     }
 
     marginal_histogram[variable]->max_computation();
@@ -4241,7 +4188,9 @@ int* Vectors::order_computation(int variable) const
 
   i = 0;
 
-  if (type[variable] == INT_VALUE) {
+  switch (type[variable]) {
+
+  case INT_VALUE : {
     do {
 
       // recherche de la valeur minimum courante
@@ -4270,9 +4219,10 @@ int* Vectors::order_computation(int variable) const
       }
     }
     while (i < nb_vector);
+    break;
   }
 
-  else {
+  case REAL_VALUE : {
     do {
 
       // recherche de la valeur minimum courante
@@ -4301,6 +4251,8 @@ int* Vectors::order_computation(int variable) const
       }
     }
     while (i < nb_vector);
+    break;
+  }
   }
 
   return index;
@@ -4323,16 +4275,21 @@ void Vectors::mean_computation(int variable)
 
   mean[variable] = 0.;
 
-  if (type[variable] == INT_VALUE) {
+  switch (type[variable]) {
+
+  case INT_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       mean[variable] += int_vector[i][variable];
     }
+    break;
   }
 
-  else {
+  case REAL_VALUE : {
     for (i = 0;i < nb_vector;i++) {
       mean[variable] += real_vector[i][variable];
     }
+    break;
+  }
   }
 
   mean[variable] /= nb_vector;
@@ -4358,18 +4315,23 @@ void Vectors::variance_computation(int variable)
       double diff;
 
 
-      if (type[variable] == INT_VALUE) {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
           covariance[variable][variable] += diff * diff;
         }
+        break;
       }
 
-      else {
+      case REAL_VALUE : {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
           covariance[variable][variable] += diff * diff;
         }
+        break;
+      }
       }
 
       covariance[variable][variable] /= (nb_vector - 1);
@@ -4392,8 +4354,6 @@ void Vectors::covariance_computation(int variable)
   if (mean[0] != D_INF) {
     register int i , j , k;
 
-
-//    build_real_vector(variable);
 
     for (i = 0;i < nb_variable;i++) {
       if ((variable == I_DEFAULT) || (i == variable)) {
@@ -4452,16 +4412,21 @@ double Vectors::mean_absolute_deviation_computation(int variable) const
   if (mean[variable] != D_INF) {
     mean_absolute_deviation = 0.;
 
-    if (type[variable] == INT_VALUE) {
+    switch (type[variable]) {
+
+    case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         mean_absolute_deviation += fabs(int_vector[i][variable] - mean[variable]);
       }
+      break;
     }
 
-    else {
+    case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         mean_absolute_deviation += fabs(real_vector[i][variable] - mean[variable]);
       }
+      break;
+    }
     }
 
     mean_absolute_deviation /= nb_vector;
@@ -4489,20 +4454,25 @@ double Vectors::mean_absolute_difference_computation(int variable) const
   mean_absolute_difference = 0.;
 
   if (nb_vector > 1) {
-    if (type[variable] == INT_VALUE) {
+    switch (type[variable]) {
+
+    case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = i + 1;j < nb_vector;j++) {
           mean_absolute_difference += abs(int_vector[i][variable] - int_vector[j][variable]);
         }
       }
+      break;
     }
 
-    else {
+    case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
         for (j = i + 1;j < nb_vector;j++) {
           mean_absolute_difference += fabs(real_vector[i][variable] - real_vector[j][variable]);
         }
       }
+      break;
+    }
     }
 
     mean_absolute_difference = 2 * mean_absolute_difference / (nb_vector * (nb_vector - 1));
@@ -4531,18 +4501,23 @@ double Vectors::skewness_computation(int variable) const
     skewness = 0.;
 
     if ((nb_vector > 2) && (covariance[variable][variable] > 0.)) {
-      if (type[variable] == INT_VALUE) {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
           skewness += diff * diff * diff;
         }
+        break;
       }
 
-      else {
+      case REAL_VALUE : {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
           skewness += diff * diff * diff;
         }
+        break;
+      }
       }
 
       skewness = skewness * nb_vector / ((nb_vector - 1) * (nb_vector - 2) *
@@ -4578,18 +4553,23 @@ double Vectors::kurtosis_computation(int variable) const
     else {
       kurtosis = 0.;
 
-      if (type[variable] == INT_VALUE) {
+      switch (type[variable]) {
+
+      case INT_VALUE : {
         for (i = 0;i < nb_vector;i++) {
           diff = int_vector[i][variable] - mean[variable];
           kurtosis += diff * diff * diff * diff;
         }
+        break;
       }
 
-      else {
+      case REAL_VALUE : {
         for (i = 0;i < nb_vector;i++) {
           diff = real_vector[i][variable] - mean[variable];
           kurtosis += diff * diff * diff * diff;
         }
+        break;
+      }
       }
 
       kurtosis = kurtosis / ((nb_vector - 1) * covariance[variable][variable] *
