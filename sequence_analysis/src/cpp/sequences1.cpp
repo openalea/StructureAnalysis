@@ -4424,16 +4424,6 @@ void Sequences::select_variable(const Sequences &seq , int *variable)
   register int i , j , k;
 
 
-  // copie des identificateurs de vertex
-
-  if (seq.vertex_identifier) {
-    for (i = 0;i < nb_sequence;i++) {
-      for (j = 0;j < length[i];j++) {
-        vertex_identifier[i][j] = seq.vertex_identifier[i][j];
-      }
-    }
-  }
-
   // copie des parametres d'index
 
   if (seq.hindex_parameter) {
