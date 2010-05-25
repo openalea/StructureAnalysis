@@ -3096,6 +3096,7 @@ void NonparametricSequenceProcess::plotable_write(MultiPlotSet &plot , int &inde
         legend.str("");
         legend << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << i << " "
                << SEQ_label[SEQL_SOJOURN_TIME] << " " << STAT_label[STATL_DISTRIBUTION];
+        sojourn_time[i]->plot_title_print(legend);
         plot[index][j].legend = legend.str();
 
         plot[index][j].style = "linespoints";
