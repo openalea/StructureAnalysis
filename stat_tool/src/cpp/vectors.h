@@ -176,10 +176,11 @@ public :
     Vectors (int inb_vector , int *iidentifier , int inb_variable , int *itype ,
              bool init_flag = false)
     { init(inb_vector , iidentifier , inb_variable , itype , init_flag); }
-    Vectors(int inb_vector , int *iidentifier , int inb_variable , int **iint_vector);
-    Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);
+    Vectors(int inb_vector , int *iidentifier , int inb_variable , int **iint_vector);  // interface AML
+    Vectors(int inb_vector , int *iidentifier , int inb_variable , double **ireal_vector);  // interface AML
     Vectors(int inb_vector , int *iidentifier , int inb_variable , int *itype ,
             int **iint_vector , double **ireal_vector);
+    Vectors(const Vectors &vec , int variable , int itype);
     Vectors(const Vectors &vec , int inb_vector , int *index);
     Vectors(const Vectors &vec)
     { copy(vec); }
