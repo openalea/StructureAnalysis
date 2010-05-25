@@ -1114,7 +1114,8 @@ Tops::Tops(int nb_top , int *iidentifier , int *nb_position , bool init_flag)
   int itype[1] = {NB_INTERNODE};
 
 
-  init(nb_top , iidentifier , nb_position , POSITION , 1 , itype , init_flag);
+  init(nb_top , iidentifier , nb_position , NULL , POSITION ,
+       1 , itype , false , init_flag);
 
   top_parameters = NULL;
 
