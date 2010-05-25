@@ -199,6 +199,7 @@ const char *SEQ_label[] = {
   "simulated" ,
   "sequence" ,
   "sequences" ,
+  "vertex identifier" ,
   "index parameter" ,
   "minimum index parameter" ,
   "maximum index parameter" ,
@@ -331,6 +332,8 @@ const char *SEQ_error[] = {
   "states not represented" ,
   "failure in the computation of the optimal state sequences" ,
 
+  "vertex identifier not allowed: change the sample order" ,
+  "bad vertex identifier" ,
   "bad index parameter type" ,
   "bad index parameter" ,
   "bad minimum value: should be positive" ,
