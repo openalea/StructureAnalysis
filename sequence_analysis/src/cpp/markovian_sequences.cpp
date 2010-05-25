@@ -547,8 +547,9 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
 
 {
   bool status = true;
-  register int i , j , k , m , n;
-  int inb_sequence , nb_histo , *ilength;
+  register int i , j , k , m , n , p , q;
+  int inb_sequence , cumul_nb_sequence , nb_histo , *ilength , *iidentifier ,
+      **ivertex_identifier;
   const FrequencyDistribution **phisto;
   MarkovianSequences *seq;
   const MarkovianSequences **pseq;
@@ -605,12 +606,44 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       pseq[i] = iseq[i - 1];
     }
 
-    // calcul du nombre et de la longueur des sequences
+    // calcul du nombre de sequences
 
     inb_sequence = 0;
     for (i = 0;i < nb_sample;i++) {
       inb_sequence += pseq[i]->nb_sequence;
     }
+
+    // comparaison des identificateurs des sequences
+
+    iidentifier = new int[inb_sequence];
+
+    cumul_nb_sequence = 0;
+    i = 0;
+    for (j = 0;j < nb_sample;j++) {
+      for (k = 0;k < pseq[j]->nb_sequence;k++) {
+        iidentifier[i] = pseq[j]->identifier[k];
+
+        for (m = 0;m < cumul_nb_sequence;m++) {
+          if (iidentifier[i] == iidentifier[m]) {
+            delete [] iidentifier;
+            iidentifier = NULL;
+            break;
+          }
+        }
+
+        if (!iidentifier) {
+          break;
+        }
+        i++;
+      }
+
+      if (!iidentifier) {
+        break;
+      }
+      cumul_nb_sequence += pseq[j]->nb_sequence;
+    }
+
+    // copie des longueurs des sequences
 
     ilength = new int[inb_sequence];
 
@@ -621,13 +654,79 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       }
     }
 
-    seq = new MarkovianSequences(inb_sequence , NULL , ilength , index_parameter_type , 
-                                 nb_variable , type);
+    // comparaison des identificateurs des vertex
+
+    for (i = 0;i < nb_sample;i++) {
+      if (!(pseq[i]->vertex_identifier)) {
+        break;
+      }
+    }
+
+    if (i == nb_sample) {
+      ivertex_identifier = new int*[inb_sequence];
+
+      cumul_nb_sequence = 0;
+      i = 0;
+      for (j = 0;j < nb_sample;j++) {
+        for (k = 0;k < pseq[j]->nb_sequence;k++) {
+          ivertex_identifier[i] = new int[pseq[j]->length[k]];
+          for (m = 0;m < pseq[j]->length[k];m++) {
+            ivertex_identifier[i][m] = pseq[j]->vertex_identifier[k][m];
+
+            for (n = 0;n < cumul_nb_sequence;n++) {
+              for (p = 0;p < ilength[n];p++) {
+                if (ivertex_identifier[i][m] == ivertex_identifier[n][p]) {
+                  for (q = 0;q <= i;q++) {
+                    delete [] ivertex_identifier[q];
+                  }
+                  delete [] ivertex_identifier;
+                  ivertex_identifier = NULL;
+                  break;
+                }
+              }
+
+              if (!ivertex_identifier) {
+                break;
+              }
+            }
+
+            if (!ivertex_identifier) {
+              break;
+            }
+          }
+
+          if (!ivertex_identifier) {
+            break;
+          }
+          i++;
+        }
+
+        if (!ivertex_identifier) {
+          break;
+        }
+        cumul_nb_sequence += pseq[j]->nb_sequence;
+      }
+    }
+
+    else {
+      ivertex_identifier = NULL;
+    }
+
+    seq = new MarkovianSequences(inb_sequence , iidentifier , ilength , ivertex_identifier , 
+                                 index_parameter_type , nb_variable , type);
+    delete [] iidentifier;
     delete [] ilength;
+
+    if (ivertex_identifier) {
+      for (i = 0;i < inb_sequence;i++) {
+        delete [] ivertex_identifier[i];
+      }
+      delete [] ivertex_identifier;
+    }
 
     phisto = new const FrequencyDistribution*[nb_sample];
 
-    // copie des sequences
+    // copie des parametres d'index
 
     if (index_parameter_type == TIME) {
       i = 0;
@@ -650,6 +749,8 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       }
       seq->index_interval = new FrequencyDistribution(nb_sample , phisto);
     }
+
+    // copie des valeurs
 
     i = 0;
     for (j = 0;j < nb_sample;j++) {
@@ -861,8 +962,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
   }
 
   if (status) {
-    seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
-                                 nb_variable , type);
+    seq = new MarkovianSequences(*this , variable , type[variable]);
     seq->Sequences::cluster(*this , variable , step , mode);
 
     for (i = 0;i < seq->nb_variable;i++) {
@@ -985,8 +1085,8 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
       }
       itype[variable] = INT_VALUE;
 
-      seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
-                                   nb_variable + offset , itype);
+      seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
+                                   index_parameter_type , nb_variable + offset , itype);
       delete [] itype;
 
       seq->Sequences::transcode(*this , ivariable , 0 , max_symbol , symbol , add_flag);
@@ -1145,8 +1245,8 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
     }
     itype[variable] = INT_VALUE;
 
-    seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
-                                 nb_variable + offset , itype);
+    seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
+                                 index_parameter_type , nb_variable + offset , itype);
     delete [] itype;
 
     seq->Sequences::transcode(*this , ivariable , 0 , max , symbol , add_flag);
@@ -1252,8 +1352,8 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
       }
       itype[variable] = INT_VALUE;
 
-      seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
-                                   nb_variable + offset , itype);
+      seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
+                                   index_parameter_type , nb_variable + offset , itype);
       delete [] itype;
 
       seq->Sequences::transcode(*this , ivariable , 0 , nb_class - 1 , symbol , add_flag);
@@ -1291,7 +1391,6 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 {
   bool status = true;
   register int i;
-  int *itype;
   double *limit;
   MarkovianSequences *seq;
 
@@ -1334,17 +1433,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
     }
 
     if (status) {
-      itype = new int[nb_variable];
-
-      for (i = 0;i < nb_variable;i++) {
-        itype[i] = type[i];
-      }
-      itype[variable] = INT_VALUE;
-
-      seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
-                                   nb_variable , itype);
-      delete [] itype;
-
+      seq = new MarkovianSequences(*this , variable , type[variable]);
       seq->Sequences::cluster(*this , variable , nb_class , limit);
 
       for (i = 0;i < seq->nb_variable;i++) {
@@ -1459,8 +1548,8 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
       itype[i] = type[variable[i]];
     }
 
-    seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
-                                 bnb_variable , itype);
+    seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
+                                 index_parameter_type , bnb_variable , itype);
 
     seq->Sequences::select_variable(*this , variable);
 
@@ -1499,8 +1588,8 @@ MarkovianSequences* MarkovianSequences::remove_variable_1() const
     itype[i] = type[i + 1];
   }
 
-  seq = new MarkovianSequences(nb_sequence , identifier , length , index_parameter_type ,
-                               nb_variable - 1 , itype);
+  seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
+                               index_parameter_type , nb_variable - 1 , itype);
 
   seq->Sequences::select_variable(*this , variable);
 
@@ -1532,7 +1621,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
 {
   bool status = true;
   register int i , j , k , m;
-  int inb_variable , *iidentifier , *itype;
+  int inb_variable , *iidentifier , *itype , **ivertex_identifier;
   MarkovianSequences *seq;
   const MarkovianSequences **pseq;
 
@@ -1609,7 +1698,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       inb_variable += iseq[i - 1]->nb_variable;
     }
 
-    // calcul des identificateurs des sequences
+    // comparaison des identificateurs des sequences
 
     if (ref_sample == I_DEFAULT) {
       for (i = 0;i < nb_sequence;i++) {
@@ -1624,7 +1713,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       }
 
       if (i < nb_sequence) {
-        iidentifier = 0;
+        iidentifier = NULL;
       }
       else {
         iidentifier = pseq[0]->identifier;
@@ -1632,7 +1721,53 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
     }
 
     else {
-      iidentifier = pseq[--ref_sample]->identifier;
+      ref_sample--;
+      iidentifier = pseq[ref_sample]->identifier;
+    }
+
+    // comparaison des identificateurs des vertex
+
+    if (ref_sample == I_DEFAULT) {
+      for (i = 0;i < nb_sample;i++) {
+        if (!(pseq[i]->vertex_identifier)) {
+          break;
+        }
+      }
+
+      if (i == nb_sample) {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 1;j < nb_sample;j++) {
+            for (k = 0;k < pseq[j]->length[i];k++) {
+              if (pseq[j]->vertex_identifier[i][k] != pseq[0]->vertex_identifier[i][k]) {
+                break;
+              }
+            }
+
+            if (k < pseq[j]->length[i]) {
+              break;
+            }
+          }
+
+          if (j < nb_sample) {
+            break;
+          }
+        }
+
+        if (i < nb_sequence) {
+          ivertex_identifier = NULL;
+        }
+        else {
+          ivertex_identifier = pseq[0]->vertex_identifier;
+        }
+      }
+
+      else {
+        ivertex_identifier = NULL;
+      }
+    }
+
+    else {
+      ivertex_identifier = pseq[ref_sample]->vertex_identifier;
     }
 
     itype = new int[inb_variable];
@@ -1647,11 +1782,11 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       }
     }
 
-    seq = new MarkovianSequences(nb_sequence , iidentifier , length , index_parameter_type ,
-                                 inb_variable , itype);
+    seq = new MarkovianSequences(nb_sequence , iidentifier , length , ivertex_identifier ,
+                                 index_parameter_type , inb_variable , itype);
     delete [] itype;
 
-    // copie des sequences
+    // copie des parametres d'index
 
     if (hindex_parameter) {
       seq->hindex_parameter = new FrequencyDistribution(*hindex_parameter);
@@ -1667,6 +1802,8 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
         }
       }
     }
+
+    // copie des valeurs
 
     for (i = 0;i < nb_sequence;i++) {
       inb_variable = 0;
@@ -1775,10 +1912,10 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
   seq = NULL;
   error.init();
 
-  if (index_parameter_type == TIME) {
+/*  if (index_parameter_type == TIME) {
     status = false;
     error.update(SEQ_error[SEQR_INDEX_PARAMETER_TYPE]);
-  }
+  } */
 
   if ((sequence_length != I_DEFAULT) && ((sequence_length <= max_length) ||
        (sequence_length > max_length + MAX_ABSORBING_RUN_LENGTH))) {
@@ -1811,9 +1948,42 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
       }
     }
 
-    seq = new MarkovianSequences(nb_sequence , identifier , ilength , index_parameter_type ,
-                                 nb_variable , type);
+    seq = new MarkovianSequences(nb_sequence , identifier , ilength , vertex_identifier ,
+                                 index_parameter_type , nb_variable , type , false);
     delete [] ilength;
+
+    // copie des identificateurs de vertex
+
+    if (vertex_identifier) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          seq->vertex_identifier[i][j] = vertex_identifier[i][j];
+        }
+        for (j = length[i];j < seq->length[i];j++) {
+          seq->vertex_identifier[i][j] = I_DEFAULT;
+        }
+      }
+    }
+
+    // copie des parametres d'index
+
+    if (index_parameter) {
+      for (i = 0;i < seq->nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          seq->index_parameter[i][j] = index_parameter[i][j];
+        }
+        for (j = length[i];j < seq->length[i];j++) {
+          seq->index_parameter[i][j] = seq->index_parameter[i][j - 1] + 1;
+	}
+      }
+
+      seq->build_index_parameter_frequency_distribution();
+      if (index_interval) {
+        seq->index_interval_computation();
+      }
+    }
+
+    // copie des sequences avec ajout series finales absorbantes
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
@@ -1938,8 +2108,8 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
     cout << "\nTEST: " << inb_sequence << " | " << cumul_length / step + nb_sequence << endl;
 #   endif
 
-    seq = new MarkovianSequences(inb_sequence , NULL , ilength , index_parameter_type ,
-                                 nb_variable , type);
+    seq = new MarkovianSequences(inb_sequence , NULL , ilength , vertex_identifier ,
+                                 index_parameter_type , nb_variable , type);
     delete [] ilength;
 
     // copie des sequences
