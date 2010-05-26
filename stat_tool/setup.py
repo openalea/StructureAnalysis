@@ -59,6 +59,8 @@ if __name__ == '__main__':
                     ],
 
           package_dir={ "" : "src"  },
+          share_dirs = { 'share' : 'share' },
+
 
           # Add package platform libraries if any
           include_package_data=True,
