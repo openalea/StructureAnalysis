@@ -530,6 +530,15 @@ public:
     return ret;
   }
 
+  static MarkovianSequences* 
+  initial_run_computation(const MarkovianSequences &input)
+  {
+    HEADER(MarkovianSequences);
+    ret = input.initial_run_computation(error);
+    FOOTER;
+  }
+
+
 };
 
 // Boost declaration
@@ -595,6 +604,7 @@ void class_markovian_sequences() {
     .def("plot_write", WRAP::plot_write, args("prefix", "title"), "Write GNUPLOT files")
     DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable,"get_plotable")
     DEF_RETURN_VALUE("get_characteristics", WRAP::get_characteristics, args("variable"), "get_plotable")
+    DEF_RETURN_VALUE("initial_run_computation", WRAP::initial_run_computation, args(""), "initial run computation")
 
 
 

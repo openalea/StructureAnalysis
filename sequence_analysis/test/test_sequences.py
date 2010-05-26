@@ -8,7 +8,7 @@ __revision__ = "$Id$"
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
-from openalea.sequence_analysis.sequences import Sequences
+from openalea.sequence_analysis.sequences import Sequences, Split, SaveMTG
 from openalea.sequence_analysis.data_transform import Cumulate, Difference, \
     ExtractVectors, IndexParameterExtract, IndexParameterSelect, RecurrenceTimeSequences
 
@@ -60,6 +60,13 @@ class Test(interface):
     def build_seq1(self):
         s = Sequences([[1,1,1],[2,2,2]])
         return s
+
+    def build_seq_wrong_identifiers(self):
+        try:
+            s = Sequences([[1,1,1],[2,2,2]], Identifiers=[-1,1])
+            assert False
+        except:
+            assert True
 
     def _test_empty(self):
         self.empty()
@@ -366,6 +373,20 @@ class Test(interface):
         import os
         self.data.mtg_write('test.mtg', [1,2])
         os.remove('test.mtg')
+
+    def test_SaveMTG(self):
+        SaveMTG(self.data,Filename='test.mtg', Type=['N'])
+
+    def test_split(self):
+        #markovian sequences
+        data = Sequences('data/vanille_m.seq')
+        Split(data, 2)
+
+    def test_initial_run(self):
+        from openalea.sequence_analysis import ComputeInitialRun
+        #markovian sequences
+        data = Sequences('data/vanille_m.seq')
+        ComputeInitialRun(data)
 
 """
 

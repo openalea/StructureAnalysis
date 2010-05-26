@@ -168,7 +168,6 @@ def Sequences(obj, **kargs):
             sequence = _Sequences(obj, range(0, len(obj)),
                               index_parameter)
         else:
-
             sequence = _Sequences(obj, Identifiers, index_parameter)
 
     if hasattr(sequence, 'markovian_sequences'):
@@ -252,13 +251,13 @@ def SaveMTG(obj, Filename=None, Type=None):
     Save sequence in MTG format.
     :param Type : list of "S" or "N" characters for Symbolic or Numeric
     """
-    from openalea.stat_tool.enumerate import sub_variable_type
+    from openalea.stat_tool.enums import sub_variable_type
 
     error.CheckType([obj], [ms_vomd_smd_nhmd])
     error.CheckType([Filename, Type], [str, list])
 
-    Type = []
+    type = []
     for pstr in Type:
-        Type.append(sub_variable_type[pstr])
+        type.append(sub_variable_type[pstr])
 
-    obj.mtg_write(Filename, Type)
+    obj.mtg_write(Filename, type)
