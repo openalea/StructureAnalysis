@@ -927,7 +927,7 @@ void NonhomogeneousMarkov::remove()
 
   delete [] homogeneity;
 
-  delete [] process;
+  delete process;
 }
 
 
