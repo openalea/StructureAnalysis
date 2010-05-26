@@ -28,18 +28,17 @@
 #include "sequence_analysis/sequences.h"
 #include "sequence_analysis/nonhomogeneous_markov.h"
 #include "sequence_analysis/sequence_label.h"
+#include "tool/config.h"
 
 #include <boost/python.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/python/make_constructor.hpp>
-
 #include "boost_python_aliases.h"
 
 using namespace boost::python;
 using namespace boost;
-
 
 #define WRAP NonHomogeneousMarkovWrap
 class NonHomogeneousMarkovWrap
@@ -54,10 +53,11 @@ public:
     StatError error;
     NonhomogeneousMarkov *nonhomo = NULL;
     nonhomo = nonhomogeneous_markov_ascii_read(error, filename, length);
-    if (!nonhomo)
+    /*if (!nonhomo)
       {
         sequence_analysis::wrap_util::throw_error(error);
       }
+    */
     return boost::shared_ptr<NonhomogeneousMarkov>(nonhomo);
   }
 
@@ -111,7 +111,9 @@ void class_nonhomogeneous_markov() {
   class_<NonhomogeneousMarkov, bases<StatInterface> > ("_NonHomogeneousMarkov", "NonHomogeneousMarkov")
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_nb_state_and_ident_list))
     //.def("__init__", make_constructor(NonHomogeneousMarkovWrap::constructor_from_chain_and_self_transition))
-    .def("__init__", make_constructor(WRAP::nonhomogeneous_markov_from_file))
+    .def("__init__", make_constructor(NonHomogeneousMarkovWrap::nonhomogeneous_markov_from_file))
+
+    .def(self_ns::str(self)) //__str__
 
     .def("extract", WRAP::extract, return_value_policy<manage_new_object> (),  python::args("type", "state"), "Extract distribution data")
     .def("get_homogeneity", &NonhomogeneousMarkov::get_homogeneity, python::args("index"),"return homogeneity")

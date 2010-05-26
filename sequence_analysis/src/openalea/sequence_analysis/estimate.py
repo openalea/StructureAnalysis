@@ -573,7 +573,7 @@ def _estimate_dispatch(obj, *args, **kargs):
                "HIDDEN_VARIABLE_ORDER_MARKOV",
                "HIDDEN_SEMI-MARKOV",
                "SEMI-MARKOV",
-               "NON-HOMOGENEOUS_MARKOV",
+               "NONHOMOGENEOUS_MARKOV",
                "MARKOV"
                ]
 
@@ -594,7 +594,7 @@ def _estimate_dispatch(obj, *args, **kargs):
         return _estimate_hidden_semi_markov(obj, *args[1:], **kargs)
     elif itype == "SEMI-MARKOV":
         return _estimate_semi_markov(obj, *args[1:], **kargs)
-    elif itype == "NON-HOMOGENEOUS_MARKOV":
+    elif itype == "NONHOMOGENEOUS_MARKOV":
         return _estimate_non_homogeneous_markov(obj, *args[1:], **kargs)
     elif (type(obj)==_TimeEvents) or (type(obj)==_RenewalData) \
             or (len(args)>=2 and isinstance(obj, _FrequencyDistribution) \
@@ -639,7 +639,7 @@ def Estimate(obj, *args, **kargs):
     >>> Estimate(timev, type, NbIteration=10,Parametric=True)
     >>> Estimate(timev, type, InitialInterEvent=initial_dist,    NbIteration=10, Parametric=True)
 
-    >>> Estimate(seq, "NON-HOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting=False)
+    >>> Estimate(seq, "NONHOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting=False)
     >>> Estimate(seq, "SEMI-MARKOV", Counting=False)
     >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, SelfTransition=0.9, NbIteration=10,
         StateSequences="Viterbi", Counting=False)
@@ -729,7 +729,7 @@ def Estimate(obj, *args, **kargs):
     **markovian case**
 
     * Counting (bool): computation of counting distributions (default value: True).
-    * Order (int): Markov chain order (default value: 1). This optional argument can only be used if the second mandatory argument giving the model type is "MARKOV", "NON-HOMOGENEOUS_MARKOV" or "HIDDEN_MARKOV".
+    * Order (int): Markov chain order (default value: 1). This optional argument can only be used if the second mandatory argument giving the model type is "MARKOV", "NONHOMOGENEOUS_MARKOV" or "HIDDEN_MARKOV".
     * MaxOrder (int): maximum order of the Markov chain (default value: 4). This optional argument can only be used if the second mandatory argument giving the model type is "MARKOV".
     * Penalty (string): type of penalty function for model selection: "AIC" (Akaike Information Criterion), "AICc" (corrected Akaike Information Criterion) or "BIC" (Bayesian Information Criterion). This optional argument can only be used if the second mandatory argument giving the model type is "MARKOV" (default value: "BIC") and if the optional argument MaxOrder is set or else, if a new set of states is given (defining a partition of the original state space) or else, if the second mandatory argument giving the model type is "HIDDEN_MARKOV" and the third "NbState" (default value: "AICc").
     * Algorithm (string): type of algorithm: "ForwardBackward" (the default) or "Viterbi". This optional argument can only be used if the second mandatory argument giving the model type is "HIDDEN_MARKOV" or "HIDDEN_SEMI-MARKOV".
@@ -771,9 +771,9 @@ def Estimate(obj, *args, **kargs):
     In case of success of the estimation procedure, the type of the returned object
     (chosen among markov, semi-markov, hidden_markov, hidden_semi-markov) is given
     by the second mandatory argument. Otherwise no object is returned. If the
-    second mandatory argument is "NON-HOMOGENEOUS_MARKOV", in case of success
+    second mandatory argument is "NONHOMOGENEOUS_MARKOV", in case of success
     of the estimation procedure, the returned object is of type markov. If the
-    second mandatory argument is "NON-HOMOGENEOUS_MARKOV", the subsequent
+    second mandatory argument is "NONHOMOGENEOUS_MARKOV", the subsequent
     arguments chosen among "VOID" (homogeneous state), "MONOMOLECULAR" or
     "LOGISTIC", specify the evolution of the self-transition probabilities
     as a function of the index parameter. The returned object of type markov,
