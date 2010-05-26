@@ -1441,6 +1441,13 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMar
     }
   }
 
+# ifdef DEBUG
+  MultiPlotSet *plot_set;
+
+  plot_set = get_plotable(seq);
+  delete plot_set;
+# endif
+
   return os;
 }
 
@@ -1913,8 +1920,7 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData 
 
   if ((process->first_occurrence) || (characteristics)) {
     for (i = 0;i < nb_state;i++) {
-      if ((process->first_occurrence) &&
-          (process->first_occurrence[i])) {
+      if ((process->first_occurrence) && (process->first_occurrence[i])) {
         nb_plot_set++;
       }
       else if ((characteristics) && (i < characteristics->nb_value) &&
@@ -1926,8 +1932,7 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData 
 
   if ((process->recurrence_time) || (characteristics)) {
     for (i = 0;i < nb_state;i++) {
-      if ((process->recurrence_time) &&
-          (process->recurrence_time[i])) {
+      if ((process->recurrence_time) && (process->recurrence_time[i])) {
         nb_plot_set++;
       }
       else if ((characteristics) && (i < characteristics->nb_value) &&
@@ -1939,8 +1944,7 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData 
 
   if ((process->sojourn_time) || (characteristics)) {
     for (i = 0;i < nb_state;i++) {
-      if ((process->sojourn_time) &&
-          (process->sojourn_time[i])) {
+      if ((process->sojourn_time) && (process->sojourn_time[i])) {
         nb_plot_set++;
       }
       else if ((characteristics) && (i < characteristics->nb_value) &&
@@ -1996,7 +2000,7 @@ MultiPlotSet* NonhomogeneousMarkov::get_plotable(const NonhomogeneousMarkovData 
     }
   }
 
-  plot_set = new MultiPlotSet(nb_plot_set);
+  plot_set = new MultiPlotSet(nb_plot_set , 1);
 
   MultiPlotSet &plot = *plot_set;
 
