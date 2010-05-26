@@ -69,3 +69,5 @@ in order to access to the data (array of arrays)::
     >>> data = s1[0][0]
 
 
+
+.. plot:: pyplots/test.py

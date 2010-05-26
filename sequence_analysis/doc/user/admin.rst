@@ -20,22 +20,17 @@ docstrings need to be written.
 Wrapper
 =======
 
-See the wrapping section
+Remaing wrapping to be done: one Sequences constructor and one Vectors constructor.
 
 Test
 ====
 
-
-Most of the functions have a test. The data structure such as Semi_markov, Sequences as  well.
-
-Remains to be done : clean the test and use a common data.py file to create common data sets.
-
+Most of the functions have a test. 
 
 Questions
 =========
 
 * do we want a specific extension for all different type of data: top for tops, seq for sequences and so on ? or just .dat ?
-* Discrete and sequences difference ? 
 
 
 

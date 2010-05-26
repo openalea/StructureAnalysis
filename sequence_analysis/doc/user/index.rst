@@ -24,7 +24,6 @@ how to use VPlants.Sequence_analysis see :ref:`sequence_analysis_reference`.
 
 .. toctree::
     :maxdepth: 1
-            
+
     tutorial.rst
     admin.rst
-    wrapping.rst
