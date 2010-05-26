@@ -1,5 +1,8 @@
-Sequences
-#########
+.. warning:: draft version not to be used yet
+
+
+Sequences tutorial
+##################
 
 Let us start from the following file that follows the sequences syntax (see stat_tool user guide documentation for the syntax).
 

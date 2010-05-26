@@ -22,6 +22,14 @@ how to use VPlants.Sequence_analysis see :ref:`sequence_analysis_reference`.
    More documentation can be found on the
    `openalea <http://openalea.gforge.inria.fr>`__ wiki.
 
+
+The wrapping of the CPP code is over and therefore all AML functionalities are now available in Python.
+
+The test cover 80% of the code. 
+
+The main point remaining is the writting of documentation as tutorials. 
+
+
 .. toctree::
     :maxdepth: 1
 
