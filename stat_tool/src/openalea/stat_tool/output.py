@@ -587,9 +587,13 @@ class StatInterface(object):
   }
 
         """
-        from openalea.sequence_analysis.enums import output_display
         if kargs.get('Output'):
-            Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
+            try:
+                from openalea.sequence_analysis.enums import output_display
+                Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
+            except:
+                print 'warning could not import output_display from sequence_analysis'
+                Output = None
         else:
             Output = None
         if Output is None:
