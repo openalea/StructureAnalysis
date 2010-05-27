@@ -1,6 +1,6 @@
 """Output functions
 
-:Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+:Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>, Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 """
 __version__ = "$Id$"
 

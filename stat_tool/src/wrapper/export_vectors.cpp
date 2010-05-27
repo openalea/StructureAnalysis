@@ -76,6 +76,171 @@ public:
 
   }
 
+
+  static Vectors*
+  build_from_lists_and_types(boost::python::list& array, boost::python::list &ident, boost::python::list &user_types)
+  {
+    int nb_vector = boost::python::len(array);
+    int nb_ident = boost::python::len(ident);
+    int nb_types = boost::python::len(user_types);
+
+    int dummy;
+
+    int *types = 0; // 0 for int and 1 for float/double
+    int *identifier = 0;
+    int nb_variable = -1, this_nb_variable=-1;
+    int **int_vector = 0;
+    double **float_vector = 0;
+    bool is_float = false;
+    bool error = false;
+    Vectors* vec = 0;
+
+    // check that length are correct
+    if (nb_types == 0 || nb_vector==0){
+        return vec;
+    }
+
+    // get nb_variable
+    boost::python::list vectemp = boost::python::extract<boost::python::list>(array[0]);
+    nb_variable = boost::python::len(vectemp);
+
+    // check hat nb_types == nb_vectors
+    if (nb_types != nb_variable){
+        error=true;
+        ostringstream error_message;
+        error_message << "Types size must be equal to number of variables."  << endl;
+        PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+        throw_error_already_set();
+//        return vec;
+    }
+
+    // extract the identifiers if needed
+    if (nb_ident > 0)
+    {
+      identifier = new int[nb_ident];
+      for (int ii = 0; ii < nb_ident; ii++)
+        {
+          identifier[ii] = boost::python::extract<int>(ident[ii]);
+        }
+    }
+
+    // check that nb_identifiers == nb_vector
+    if (nb_ident != nb_vector){
+        error=true;
+        ostringstream error_message;
+        error_message << "Idnetifiers length must be equal to number of vectors."  << endl;
+        PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+        throw_error_already_set();
+    //    return vec;
+    }
+
+    // extract the types
+    types = new int[nb_types];
+    int nb_variable_int = 0;
+    int nb_variable_float = 0;
+    for (int ii = 0; ii < nb_types; ii++){
+        dummy = boost::python::extract<int>(user_types[ii]);
+        if (dummy==0){
+            types[ii] = INT_VALUE;
+            nb_variable_int++;
+        }
+        else {
+            types[ii] = REAL_VALUE;
+            nb_variable_float++;
+        }
+    }
+
+    // count nb integer and float in types
+    //
+    int i,  index_int, index_float;
+
+    // allocate only required memory according to types
+    int_vector = new int*[nb_vector];
+    float_vector = new double*[nb_vector];
+    for (int e = 0; e < nb_vector; e++)
+    {
+       int_vector[e] = new int[nb_variable_int];
+       float_vector[e] = new double[nb_variable_float];
+    }
+
+    // scan all vectors
+    try {
+
+    for (int vi = 0; vi < nb_vector; vi++)
+    {
+      // look at each vector
+      boost::python::list vectemp = boost::python::extract<boost::python::list>(array[vi]);
+      this_nb_variable = boost::python::len(vectemp);
+      if (this_nb_variable!=nb_variable){
+        ostringstream error_message;
+        error_message << "vectors sizes must be equal"  << endl;
+        PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
+        throw_error_already_set();
+        return vec;
+      }
+      index_int = 0;
+      index_float= 0;
+      for (int i = 0; i < nb_variable; i++)
+        {
+          if (types[i]==INT_VALUE){
+            int v = boost::python::extract<int>(vectemp[i]);
+            int_vector[vi][index_int] = v;
+            index_int++;
+          }
+          else{
+              double v = boost::python::extract<double>(vectemp[i]);
+              float_vector[vi][index_float] = v;
+              index_float++;
+          }
+        }
+    }
+    }
+    catch (...)
+      {
+        error = true;
+      }
+    if (!error){
+        vec = new Vectors(nb_vector, identifier, nb_variable, types, int_vector, float_vector);
+    }
+
+
+    // Delete memory
+    if (int_vector)
+    {
+      for (int i = 0; i < nb_vector; i++)
+        {
+          delete[] int_vector[i];
+        }
+      delete[] int_vector;
+    }
+
+    if (float_vector)
+    {
+      for (int i = 0; i < nb_vector; i++)
+      {
+        delete[] float_vector[i];
+      }
+      delete[] float_vector;
+    }
+    // delete identifier
+    if (identifier)
+    {
+      delete[] identifier;
+    }
+    // delete type
+    if (types)
+    {
+      delete[] types;
+    }
+
+    if (error)
+      {
+        throw_error_already_set();
+      }
+
+    return vec;
+  }
+
   static Vectors*
   build_from_lists(boost::python::list& array, boost::python::list &ident)
   {
@@ -915,6 +1080,7 @@ class_vectors()
   ("_Vectors", "Vectors (2 dimensions list)", init<>())
   // constructors
   .def("__init__", make_constructor(VectorsWrap::build_from_lists))
+  .def("__init__", make_constructor(VectorsWrap::build_from_lists_and_types))
   .def("__init__", make_constructor(VectorsWrap::read_from_file))
 
   // Python Operators

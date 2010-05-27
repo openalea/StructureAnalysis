@@ -114,7 +114,7 @@ def Vectors(*args, **kargs):
         :func:`~openalea.stat_tool.comparison.VarianceAnalysis`
     """
     error.CheckArgumentsLength(args, 1, 1)
-    error.CheckKargs(kargs, possible_kargs = ["Identifiers", "IndexVariable"])
+    error.CheckKargs(kargs, possible_kargs = ["Identifiers", "IndexVariable", "Types"])
 
     obj = args[0]
     ret = None
@@ -134,16 +134,22 @@ def Vectors(*args, **kargs):
 
         # first, get the Identifiers and check its type
         identifiers = error.ParseKargs(kargs, "Identifiers")
+        types = error.ParseKargs(kargs, "Types")
         if identifiers:
             error.CheckType([identifiers], [[list]], variable_pos=[2])
 
             if len(identifiers) != len(obj):
                 raise ValueError("""Identifiers must be a list,
                 which size equals vectors's length""")
-
-            ret = _Vectors(obj, identifiers)
+            if types: 
+                ret = _Vectors(obj, identifiers, types)
+            else:
+                ret = _Vectors(obj, identifiers)
         else:
-            ret = _Vectors(obj, [])
+            if types:
+                ret = _Vectors(obj, [], types)
+            else:
+                ret = _Vectors(obj, [])
     else:
         # from a sequence
         index_variable = error.ParseKargs(kargs, "IndexVariable", False,
@@ -153,6 +159,7 @@ def Vectors(*args, **kargs):
 
 
     return ret
+
 
 interface.extend_class( _Vectors, interface.StatInterface)
 
@@ -392,3 +399,56 @@ def ComputeRankCorrelation(*args, **kargs):
 
     a = vec.rank_correlation_computation(utype, filename)
     return a
+
+
+
+def VectorsType(*args, **kargs):
+    error.CheckArgumentsLength(args, 1, 1)
+    error.CheckKargs(kargs, possible_kargs = ["Identifiers", "IndexVariable", "Types"])
+
+    obj = args[0]
+    ret = None
+
+    if isinstance(obj, str):
+        # constructor from a filename
+        ret = _Vectors(args[0])
+    elif isinstance(obj, list):
+        # Normal usage is Vectors([ [1,2,3],  [1,2,3], [4,5,6]])
+        # If only one variable is requited, then Normal usage is
+        # Vectors([ [1,2,3] ]). Yet, to simplify usage, if there is only
+        # one variable, the followin if allows us to use Vectors([1,2,3])
+        if type(obj[0])!=list:
+            obj = [obj]
+
+        # from a list and an optional argument
+
+        # first, get the Identifiers and check its type
+        identifiers = error.ParseKargs(kargs, "Identifiers")
+        types = error.ParseKargs(kargs, "Types")
+        if identifiers:
+            error.CheckType([identifiers], [[list]], variable_pos=[2])
+
+            if len(identifiers) != len(obj):
+                raise ValueError("""Identifiers must be a list,
+                which size equals vectors's length""")
+            if types: 
+                ret = _Vectors(obj, identifiers, types)
+            else:
+                ret = _Vectors(obj, identifiers)
+        else:
+            if types:
+                ret = _Vectors(obj, [], types)
+            else:
+                ret = _Vectors(obj, [])
+    else:
+        # from a sequence
+        index_variable = error.ParseKargs(kargs, "IndexVariable", False,
+                                          [True, False])
+        error.CheckType([index_variable], [bool], variable_pos=[2])
+        ret = obj.build_vectors(index_variable)
+
+
+    return ret
+
+interface.extend_class( _Vectors, interface.StatInterface)
+

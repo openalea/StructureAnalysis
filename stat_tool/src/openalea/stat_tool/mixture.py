@@ -89,4 +89,4 @@ interface.extend_class(_Mixture, interface.StatInterface)
 # Extend _MixtureData
 interface.extend_class(_MixtureData, interface.StatInterface)
 
-
+_Mixture.__doc__ = Mixture.__doc__

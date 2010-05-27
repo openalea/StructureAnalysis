@@ -42,6 +42,11 @@ class Test(interface):
         v = Vectors([[1, 2, 3], [4, 5, 6], [7, 8, 9]], Identifiers=[1, 2, 4])
         assert v.get_identifiers() == [1, 2, 4]
 
+    def test_types(self):
+
+        v2 = Vectors([[1,2.,3.],[1,5.,1.]], Identifiers=[1,2], Types=[0,1,1])
+
+
     def test_constructor_from_file(self):
         self.constructor_from_file()
 
@@ -91,6 +96,8 @@ class Test(interface):
             assert False
         except:
             assert True
+
+
 
     def test_len(self):
         v = self.data
