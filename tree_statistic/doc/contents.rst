@@ -29,7 +29,7 @@ Documentation
 .. toctree::
     :maxdepth: 1
 
-    User Guide<user/index.rst>   
+    Tutorial<user/tutorial.rst>   
     Reference Guide<user/autosum.rst>
 
 - A `PDF <../latex/main.pdf>`_ version of |tree_statistic| documentation is 
