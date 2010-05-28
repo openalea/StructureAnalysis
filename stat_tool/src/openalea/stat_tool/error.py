@@ -27,8 +27,9 @@ arguments_labels = {1:'first',
 __all__ = ['CheckArgumentsLength',
            'CheckType',
            'CheckDictKeys',
-           'ParseKargs', 
-           'CheckKargs']
+           'ParseKargs',
+           'CheckKargs',
+           'FormatError']
 
 
 
@@ -215,3 +216,19 @@ def CheckKargs(kargs, possible_kargs):
             raise KeyError('Argument %s not allowed (%s).',
                                 karg, possible_kargs)
 
+
+class FormatError(Exception):
+         """Exceptions related to the statistical modules."""
+
+         def __init__(self, error=None):
+             """Initialize a FormatError exception."""
+             if error is None:
+                 self.__error=""
+             else:
+                 self.__error=error
+
+         def _error(self):
+             return str(self.__error)
+
+         def __str__(self):
+             return str(self.__error)
