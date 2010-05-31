@@ -68,6 +68,274 @@ public:
   }
 */
 
+/*Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
+                     int **ivertex_identifier , int iindex_parameter_type ,
+                     int **iindex_parameter , int inb_variable , int *itype ,
+                     int ***iint_sequence , double ***ireal_sequence)
+
+*/
+
+//types is for sequences where all vectors have the same length
+  static Sequences*
+  build_from_lists_new(
+        boost::python::list& input_sequences,
+        boost::python::list& input_identifiers,
+        boost::python::list& input_vertex_identifiers,
+        boost::python::list& input_index_parameters,
+        boost::python::list& input_types,
+        int input_index_parameter_type
+        )
+  {
+    int nb_sequences = boost::python::len(input_sequences);
+    int nb_identifiers = boost::python::len(input_identifiers);
+    int nb_types = boost::python::len(input_types);
+    int nb_variables = boost::python::len(input_types);
+    int nb_vectors = 0;
+
+    Sequences *ret = NULL;
+
+    int *lengths = NULL;
+    int *identifiers = NULL;
+    int *types = NULL;
+
+    double ***real_sequences = NULL;
+    int ***int_sequences = NULL;
+    int **index_parameters = NULL;
+    int **vertex_identifiers = NULL;
+    int index_parameter_type = input_index_parameter_type;
+
+    int nb_variable_float = 0;
+    int nb_variable_int = 0;
+    int index_int=0, index_float=0;
+    boost::python::list sequences = extract<boost::python::list> (input_sequences);
+    
+
+    lengths = new int[nb_sequences];
+    identifiers = new int[nb_identifiers];
+    types = new int[nb_types];
+    index_parameters = new int*[nb_sequences];
+
+
+
+    //cout << "allocate memory and set values of index_parameters"<<endl;
+    // allocate memory for index_parameters 
+    for (int iseq; iseq<nb_sequences; iseq++)
+    {
+        boost::python::list sequence = extract<boost::python::list> (input_sequences[iseq]);
+        boost::python::list index_parameter = extract<boost::python::list> (input_index_parameters[iseq]);
+        if (index_parameter_type == POSITION)
+        {
+            index_parameters[iseq] = new int[len(sequence)+1];
+            for (int ilength=0; ilength<len(sequence)+1 ; ilength++)
+            {
+                index_parameters[iseq][ilength] = extract<int>(index_parameter[ilength]);
+            }
+        }
+        else
+        {
+            index_parameters[iseq] = new int[len(sequence)];
+            for (int ilength=0; ilength<len(sequence) ; ilength++)
+            {
+                index_parameters[iseq][ilength] = extract<int>(index_parameter[ilength]);
+            }
+        }
+    }
+
+
+    //cout << " nb identifiers="<< nb_identifiers<<endl;
+    if (nb_identifiers > 0)
+    {
+      identifiers = new int[nb_identifiers];
+      for (int ii = 0; ii < nb_identifiers; ii++)
+        {
+          identifiers[ii] = boost::python::extract<int>(input_identifiers[ii]);
+        }
+    }
+    //cout << "identifier ok"<<endl;
+    //types is for sequences where all vectors have the same lengths only and are homogeneous (same signature)
+    // e.g., [ [ [1,1.],[2,2.] ] [ [3,3.],[4,4.] ] ] Type = [int, float]
+    // but not [ [ [1.,1.],[2,2.] ] [ [3,3],[4,4.] ] ] Type = [int, float] sometimes is [float, int]
+    // and not [ [ [1,1.],[2,2.] ] [ [3,3.,5],[4,4.,5] ] ] Type = [int, float] sometimes is [int, float, int]
+    //cout << "nb_types="<<nb_types<<endl;
+    if (nb_types!=0)
+    {
+      for (int ii = 0; ii < nb_types; ii++)
+      {
+        int dummy = boost::python::extract<int>(input_types[ii]);
+        if (dummy==0){
+            types[ii] = INT_VALUE;
+            nb_variable_int++;
+        }
+        else {
+            types[ii] = REAL_VALUE;
+            nb_variable_float++;
+        }
+      }
+    }
+    //cout << "nb var int and float="<<nb_variable_int << " "<<nb_variable_float <<endl;
+    // todo check that nb_sequences == nb_identifiers
+
+
+    // get the list of sequences, assuming that input format is [ [ [1,1], [2,4] ], [ [1,4] ,[4,7] , [8,9]] ]
+    // the most inner level being vectors of same length (2 variables here), the middle level being 
+    // the sequences of vectors, which may have different lengths (first sequence of length 2 and second of 
+    // length 3).
+
+    // allocate memory
+    if (nb_variable_int>0)
+    {
+        int_sequences = new int**[nb_sequences];
+        for (int i=0; i<nb_sequences; i++)
+        {
+            int_sequences[i] = new int*[nb_variable_int];
+        }
+    }
+    if (nb_variable_float>0)
+    {
+        real_sequences = new double**[nb_sequences];
+        for (int i=0; i<nb_sequences; i++)
+        {
+            real_sequences[i] = new double*[nb_variable_float];
+        }
+    }
+
+
+    vertex_identifiers = new int*[nb_sequences];
+
+    //cout << "nb_sequences"<<len(input_sequences)<<endl;
+    for (int iseq = 0; iseq < nb_sequences; iseq++)
+    {
+        boost::python::list sequence = extract<boost::python::list> (input_sequences[iseq]);
+        boost::python::list vertex = extract<boost::python::list> (input_vertex_identifiers[iseq]);
+
+        nb_vectors = len(sequence);
+        //cout << "seq" << iseq << " and its length is " << len(sequence)<< endl;
+        for (int kk=0; kk<nb_variable_int; kk++)
+            int_sequences[iseq][kk] = new int[nb_vectors];
+        for (int kk=0; kk<nb_variable_float; kk++)
+            real_sequences[iseq][kk] = new double[nb_vectors];
+        // fill the sequences lengths
+        lengths[iseq] = len(sequence); 
+        //look at the first vector to get the length and therefore number of variables
+        boost::python::list vector = extract<boost::python::list> (sequence[0]);
+        nb_variables = len(vector);
+        vertex_identifiers[iseq] = new int[nb_vectors];
+        for (int ivec = 0; ivec < nb_vectors; ivec++)
+        {
+  
+            boost::python::list vector = extract<boost::python::list> (sequence[ivec]);
+            //cout << "length vector" << ivec << "="<< len(vector)<< " and expected is "<<  nb_variables <<endl;
+            vertex_identifiers[iseq][ivec] = extract<int>(vertex[ivec]);
+
+
+            index_int = 0;
+            index_float= 0;
+
+            for (int ivar=0; ivar < nb_variables; ivar++)
+            {
+                //cout << "------" << ivar<<endl;
+                //TODO switch between int or real sequences
+                if (types[ivar]==INT_VALUE)
+                {
+                    //cout <<"before affect int"<< extract<int>(vector[ivar])<<endl;
+                    int_sequences[iseq][index_int][ivec] =  extract<int> (vector[ivar]);
+                    //cout <<"aftere affect int"<<endl;
+                    index_int++;
+                }
+                else
+                {
+                    //cout <<"before affect float"<<extract<double>(vector[ivar])<<endl;
+                    real_sequences[iseq][index_float][ivec] =  extract<double> (vector[ivar]);
+                    //cout <<"after affect float"<<endl;
+                    index_float++;
+
+                }
+            }
+        }
+    }
+
+/*
+    for (int iseq = 0; iseq < nb_sequences; iseq++){
+        boost::python::list sequence = extract<boost::python::list> (input_sequences[iseq]);
+        nb_vectors = len(sequence);
+        boost::python::list vector = extract<boost::python::list> (sequence[0]);
+        for (int ivec = 0; ivec < nb_vectors; ivec++)
+            cout << iseq <<","<<ivec<<"="<<vertex_identifiers[iseq][ivec] <<endl;
+    }
+*/
+
+    //cout << "calling Sequences "<<endl;
+    ret = new Sequences(nb_sequences, identifiers, lengths,
+        vertex_identifiers, index_parameter_type, index_parameters,
+        nb_variables, types, int_sequences, real_sequences);
+    //cout << "calling Sequences done "<<endl;
+
+
+    //cout << "freeing memory rela sequences "<<endl;
+    if (real_sequences)
+    {
+
+      
+      for (int i = 0; i < nb_sequences; i++)
+      {
+        if (nb_variable_float>0)
+        {
+          for (int j = 0; j < nb_variable_float; j++)
+          {
+            delete[] real_sequences[i][j];
+          }
+          delete[] real_sequences[i];
+        }
+      }
+      delete[] real_sequences;
+    }
+    //cout << "freeing memory rela sequences done"<<endl;
+    //cout << "freeing memory int sequences "<<endl;
+    if (int_sequences)
+    {
+      for (int i = 0; i < nb_sequences; i++)
+      {
+        if (nb_variable_int>0)
+        {
+          for (int j = 0; j < nb_variable_int; j++)
+          {
+            delete[] int_sequences[i][j];
+          }
+          delete[] int_sequences[i];
+        }
+      }
+      delete[] int_sequences;
+    }
+
+    if (vertex_identifiers)
+    {
+        for (int iseq = 0; iseq < nb_sequences; iseq++)
+            delete [] vertex_identifiers[iseq];
+      delete [] vertex_identifiers;
+    }
+
+    if (index_parameters)
+    {
+        for (int iseq = 0; iseq < nb_sequences; iseq++)
+            delete [] index_parameters[iseq];
+      delete [] index_parameters;
+    }
+
+
+
+    if (identifiers){
+        delete[] identifiers;
+    }
+    if (lengths){
+        delete[] lengths;
+    }
+    if (types){
+        delete[] types;
+    }
+
+    return ret;
+  }
+
 
   // very complicated implementation of Sequence, but seems to work for now
   static Sequences*
@@ -375,10 +643,14 @@ public:
 
   }
 
+
+  // used to return a vector
+  //   seq = [[[1,2],[2,3]]]
+  //  seq[0,1] -> [2,3] vector 1 of sequence 0
   static boost::python::list
   get_item_tuple(const Sequences *seq, boost::python::tuple indexes)
   {
-    int index_var = extract<int> (indexes[1]);
+    int index_vec = extract<int> (indexes[1]);
     int index_seq = extract<int> (indexes[0]);
 
     // Test index
@@ -387,7 +659,7 @@ public:
         PyErr_SetString(PyExc_IndexError, "sequence index out of bound");
         boost::python::throw_error_already_set();
       }
-    if (index_var < 0 || index_var >= seq->get_nb_variable())
+    if (index_vec < 0 || index_vec >= seq->get_length(index_seq))
       {
         PyErr_SetString(PyExc_IndexError, "variable index out of bound");
         boost::python::throw_error_already_set();
@@ -396,14 +668,14 @@ public:
     boost::python::list l;
 
     int nb_length = seq->get_length(index_seq);
-
-    for (int index = 0; index < nb_length; index++)
+    int nb_variables = seq->get_nb_variable();
+    for (int index = 0; index < nb_variables; index++)
       {
-        if ((seq->get_type(index_var) == INT_VALUE)
-            || (seq->get_type(index_var) == STATE))
-          l.append(seq->get_int_sequence(index_seq, index_var, index));
+        if ((seq->get_type(index) == INT_VALUE)
+            || (seq->get_type(index) == STATE))
+          l.append(seq->get_int_sequence(index_seq, index, index_vec));
         else
-          l.append(seq->get_real_sequence(index_seq, index_var, index));
+          l.append(seq->get_real_sequence(index_seq, index, index_vec));
       }
 
     return l;
@@ -423,18 +695,22 @@ public:
     int nb_length = seq->get_length(index_seq);
     int nb_var = seq->get_nb_variable();
 
-
-    for (int indexvar = 0; indexvar < nb_var; indexvar++)
+    for (int indexvec = 0; indexvec<nb_length; indexvec++)
     {
-
       boost::python::list subl;
-      for (int index = 0; index < nb_length; index++)
+
+
+      for (int indexvar = 0; indexvar < nb_var; indexvar++)
       {
+
+      //boost::python::list subl;
+      //for (int index = 0; index < nb_length; index++)
+      //{
         if ((seq->get_type(indexvar) == INT_VALUE)
             || (seq->get_type(indexvar) == STATE))
-          subl.append(seq->get_int_sequence(index_seq, indexvar, index));
+          subl.append(seq->get_int_sequence(index_seq, indexvar, indexvec));
         else
-          subl.append(seq->get_real_sequence(index_seq, indexvar, index));
+          subl.append(seq->get_real_sequence(index_seq, indexvar, indexvec));
       }
       l.append(subl);
     }
@@ -584,20 +860,25 @@ public:
   }
 
   static Sequences*
-  transcode(const Sequences &seq, int variable, boost::python::list& symbol)
+  transcode(const Sequences &seq, int variable, boost::python::list& input_symbols)
   {
 
-    int nb_symbol = len(symbol);
+    int nb_symbol =  boost::python::len(input_symbols);
+    //seq.get_nb_sequence();
     sequence_analysis::wrap_util::auto_ptr_array<int> l(new int[nb_symbol]);
 
     int expected_nb_symbol = (int) (seq.get_max_value(variable - 1)
         - seq.get_min_value(variable - 1)) + 1;
 
     if (nb_symbol != expected_nb_symbol)
-      sequence_analysis::wrap_util::throw_error("Bad number of Symbol");
+    {
+        cout << "expected_nb_symbol="<<expected_nb_symbol <<endl;
+        sequence_analysis::wrap_util::throw_error("Bad number of Symbol");
+    }
+
 
     for (int i = 0; i < nb_symbol; i++)
-      l[i] = extract<int> (symbol[i]);
+      l[i] = extract<int> (input_symbols[i]);
 
     SIMPLE_METHOD_TEMPLATE_1(seq, transcode, Sequences, variable, l.get());
 
@@ -1124,7 +1405,8 @@ class_sequences()
   class_<Sequences, bases<StatInterface> > ("_Sequences", "Sequences")
     .def("__init__", make_constructor(SequencesWrap::sequences_from_file))
    // .def("__init__", make_constructor(SequencesWrap::sequences_from_file_old))
-    .def("__init__", make_constructor(SequencesWrap::build_from_lists))
+    //.def("__init__", make_constructor(SequencesWrap::build_from_lists))
+    .def("__init__", make_constructor(SequencesWrap::build_from_lists_new))
     .def(init <const RenewalData&>())
 
     // Python Operators
