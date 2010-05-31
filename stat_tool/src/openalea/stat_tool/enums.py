@@ -211,3 +211,13 @@ all_stat_tool_types  = [_FrequencyDistribution,
                         _DistanceMatrix,
                         _Regression
                         ]
+
+
+output_display = {
+               "ChangePoint" : None,
+               "Segment" : None,
+               "State" : None,
+               "InState" : None,
+               "OutState" : None
+            }
+

@@ -587,15 +587,27 @@ class StatInterface(object):
   }
 
         """
+        try:
+            from openalea.sequence_analysis.enums import output_display
+        except:
+            from openalea.stat_tool.enums import output_display
+
+
+
         if kargs.get('Output'):
             try:
-                from openalea.sequence_analysis.enums import output_display
+                Output = None
                 Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
             except:
                 print 'warning could not import output_display from sequence_analysis'
-                Output = None
         else:
+            try:
+                from openalea.sequence_analysis.enums import output_display
+            except:
+                from openalea.stat_tool.enums import output_display
             Output = None
+
+
         if Output is None:
             if ViewPoint == 'q':
                 Output = output_display['Segment']
@@ -820,7 +832,11 @@ class StatInterface(object):
         # value is a dummy variable that is not used.
         from openalea.sequence_analysis.enums import output_display
         if kargs.get('Output'):
-            Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
+            try:
+                from openalea.sequence_analysis.enums import output_display
+                Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
+            except:
+                Output = None
         else:
             Output = None
         if Output is None:
@@ -957,7 +973,10 @@ class StatInterface(object):
             assert len(args)>=2
             error.CheckType([args[0], args[1]], [[int],[int]])
             #construct model_type
-            from openalea.sequence_analysis.enums import model_type
+            try:
+                from openalea.sequence_analysis.enums import model_type
+            except:
+                pass
             types = []
             for i in range(0, nb_variable):
                 error.CheckType([args[i+2]], [str])
@@ -977,7 +996,10 @@ class StatInterface(object):
                                        'a', Segmentation, NbSegmentation)
         elif ViewPoint == 'v':
             from openalea.stat_tool.enums import all_stat_tool_types
-            from openalea.sequence_analysis.enums import all_sequences_types
+            try:
+                from openalea.sequence_analysis.enums import all_sequences_types
+            except:
+                pass
             if type(self) in all_stat_tool_types:
                 output = self.ascii_write(exhaustive)
             elif type(self) in all_sequences_types:

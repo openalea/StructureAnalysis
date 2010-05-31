@@ -6,33 +6,30 @@ Reference guide
 
 Class Inheritance diagram
 =========================
-.. .. inheritance-diagram:: vplants.stat_tool.cluster
-.. .. inheritance-diagram:: vplants.stat_tool.comparison
-.. .. inheritance-diagram:: vplants.stat_tool.compound
-.. .. inheritance-diagram:: vplants.stat_tool.convolution
-.. .. inheritance-diagram:: vplants.stat_tool.data_transform
-.. .. inheritance-diagram:: vplants.stat_tool.distribution
-.. .. inheritance-diagram:: vplants.stat_tool.error
-.. inheritance-diagram:: vplants.stat_tool.estimate
-.. .. inheritance-diagram:: vplants.stat_tool.histogram
-.. .. inheritance-diagram:: vplants.stat_tool.interface
-.. .. inheritance-diagram:: vplants.stat_tool.mixture
-.. .. inheritance-diagram:: vplants.stat_tool.mvmixture
-.. inheritance-diagram:: vplants.stat_tool.output
-.. .. inheritance-diagram:: vplants.stat_tool.plot
-.. .. inheritance-diagram:: vplants.stat_tool.regression
-.. .. inheritance-diagram:: vplants.stat_tool.simulate
-.. .. inheritance-diagram:: vplants.stat_tool.vectors
+.. .. inheritance-diagram:: openalea.stat_tool.cluster
+.. .. inheritance-diagram:: openalea.stat_tool.comparison
+.. .. inheritance-diagram:: openalea.stat_tool.compound
+.. .. inheritance-diagram:: openalea.stat_tool.convolution
+.. .. inheritance-diagram:: openalea.stat_tool.data_transform
+.. .. inheritance-diagram:: openalea.stat_tool.distribution
+.. inheritance-diagram:: openalea.stat_tool.estimate
+.. .. inheritance-diagram:: openalea.stat_tool.histogram
+.. .. inheritance-diagram:: openalea.stat_tool.interface
+.. .. inheritance-diagram:: openalea.stat_tool.mixture
+.. .. inheritance-diagram:: openalea.stat_tool.mvmixture
+.. inheritance-diagram:: openalea.stat_tool.output
+.. .. inheritance-diagram:: openalea.stat_tool.plot
+.. .. inheritance-diagram:: openalea.stat_tool.regression
+.. .. inheritance-diagram:: openalea.stat_tool.simulate
+.. .. inheritance-diagram:: openalea.stat_tool.vectors
 
-.. currentmodule:: vplants.stat_tool.cluster
+.. currentmodule:: openalea.stat_tool.cluster
 
-:mod:`vplants.stat_tool.cluster` module
-=======================================
-
-Download the source file :download:`../../src/openalea/stat_tool/cluster.py`.
+:mod:`openalea.stat_tool.cluster` module
+==========================================
 
 
-.. automodule:: vplants.stat_tool.cluster
+.. automodule:: openalea.stat_tool.cluster
     :members:
     :undoc-members:
     :inherited-members:
@@ -40,15 +37,13 @@ Download the source file :download:`../../src/openalea/stat_tool/cluster.py`.
     :synopsis: Cluster functions and classes
 
 
-.. currentmodule:: vplants.stat_tool.comparison
+.. currentmodule:: openalea.stat_tool.comparison
 
-:mod:`vplants.stat_tool.comparison` module
-==========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/comparison.py`.
+:mod:`openalea.stat_tool.comparison` module
+=============================================
 
 
-.. automodule:: vplants.stat_tool.comparison
+.. automodule:: openalea.stat_tool.comparison
     :members:
     :undoc-members:
     :inherited-members:
@@ -56,15 +51,13 @@ Download the source file :download:`../../src/openalea/stat_tool/comparison.py`.
     :synopsis: Comparison functions
 
 
-.. currentmodule:: vplants.stat_tool.compound
+.. currentmodule:: openalea.stat_tool.compound
 
-:mod:`vplants.stat_tool.compound` module
-========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/compound.py`.
+:mod:`openalea.stat_tool.compound` module
+===========================================
 
 
-.. automodule:: vplants.stat_tool.compound
+.. automodule:: openalea.stat_tool.compound
     :members:
     :undoc-members:
     :inherited-members:
@@ -72,15 +65,13 @@ Download the source file :download:`../../src/openalea/stat_tool/compound.py`.
     :synopsis: Compound module
 
 
-.. currentmodule:: vplants.stat_tool.convolution
+.. currentmodule:: openalea.stat_tool.convolution
 
-:mod:`vplants.stat_tool.convolution` module
-===========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/convolution.py`.
+:mod:`openalea.stat_tool.convolution` module
+==============================================
 
 
-.. automodule:: vplants.stat_tool.convolution
+.. automodule:: openalea.stat_tool.convolution
     :members:
     :undoc-members:
     :inherited-members:
@@ -88,15 +79,13 @@ Download the source file :download:`../../src/openalea/stat_tool/convolution.py`
     :synopsis:  Convolution module 
 
 
-.. currentmodule:: vplants.stat_tool.data_transform
+.. currentmodule:: openalea.stat_tool.data_transform
 
-:mod:`vplants.stat_tool.data_transform` module
-==============================================
-
-Download the source file :download:`../../src/openalea/stat_tool/data_transform.py`.
+:mod:`openalea.stat_tool.data_transform` module
+=================================================
 
 
-.. automodule:: vplants.stat_tool.data_transform
+.. automodule:: openalea.stat_tool.data_transform
     :members:
     :undoc-members:
     :inherited-members:
@@ -104,15 +93,13 @@ Download the source file :download:`../../src/openalea/stat_tool/data_transform.
     :synopsis: Data transformation functions
 
 
-.. currentmodule:: vplants.stat_tool.distribution
+.. currentmodule:: openalea.stat_tool.distribution
 
-:mod:`vplants.stat_tool.distribution` module
-============================================
-
-Download the source file :download:`../../src/openalea/stat_tool/distribution.py`.
+:mod:`openalea.stat_tool.distribution` module
+===============================================
 
 
-.. automodule:: vplants.stat_tool.distribution
+.. automodule:: openalea.stat_tool.distribution
     :members:
     :undoc-members:
     :inherited-members:
@@ -120,15 +107,13 @@ Download the source file :download:`../../src/openalea/stat_tool/distribution.py
     :synopsis:  Distributions module
 
 
-.. currentmodule:: vplants.stat_tool.error
+.. currentmodule:: openalea.stat_tool.error
 
-:mod:`vplants.stat_tool.error` module
-=====================================
-
-Download the source file :download:`../../src/openalea/stat_tool/error.py`.
+:mod:`openalea.stat_tool.error` module
+========================================
 
 
-.. automodule:: vplants.stat_tool.error
+.. automodule:: openalea.stat_tool.error
     :members:
     :undoc-members:
     :inherited-members:
@@ -136,15 +121,13 @@ Download the source file :download:`../../src/openalea/stat_tool/error.py`.
     :synopsis:  Error class to manage standard errors in stat_tool 
 
 
-.. currentmodule:: vplants.stat_tool.estimate
+.. currentmodule:: openalea.stat_tool.estimate
 
-:mod:`vplants.stat_tool.estimate` module
-========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/estimate.py`.
+:mod:`openalea.stat_tool.estimate` module
+===========================================
 
 
-.. automodule:: vplants.stat_tool.estimate
+.. automodule:: openalea.stat_tool.estimate
     :members:
     :undoc-members:
     :inherited-members:
@@ -152,15 +135,13 @@ Download the source file :download:`../../src/openalea/stat_tool/estimate.py`.
     :synopsis:  Estimation functions 
 
 
-.. currentmodule:: vplants.stat_tool.histogram
+.. currentmodule:: openalea.stat_tool.histogram
 
-:mod:`vplants.stat_tool.histogram` module
-=========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/histogram.py`.
+:mod:`openalea.stat_tool.histogram` module
+============================================
 
 
-.. automodule:: vplants.stat_tool.histogram
+.. automodule:: openalea.stat_tool.histogram
     :members:
     :undoc-members:
     :inherited-members:
@@ -168,15 +149,13 @@ Download the source file :download:`../../src/openalea/stat_tool/histogram.py`.
     :synopsis: Histogram functions and classes
 
 
-.. currentmodule:: vplants.stat_tool.interface
+.. currentmodule:: openalea.stat_tool.interface
 
-:mod:`vplants.stat_tool.interface` module
-=========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/interface.py`.
+:mod:`openalea.stat_tool.interface` module
+============================================
 
 
-.. automodule:: vplants.stat_tool.interface
+.. automodule:: openalea.stat_tool.interface
     :members:
     :undoc-members:
     :inherited-members:
@@ -184,15 +163,13 @@ Download the source file :download:`../../src/openalea/stat_tool/interface.py`.
     :synopsis:  Interfaces for stat_tool objects 
 
 
-.. currentmodule:: vplants.stat_tool.mixture
+.. currentmodule:: openalea.stat_tool.mixture
 
-:mod:`vplants.stat_tool.mixture` module
-=======================================
-
-Download the source file :download:`../../src/openalea/stat_tool/mixture.py`.
+:mod:`openalea.stat_tool.mixture` module
+==========================================
 
 
-.. automodule:: vplants.stat_tool.mixture
+.. automodule:: openalea.stat_tool.mixture
     :members:
     :undoc-members:
     :inherited-members:
@@ -200,15 +177,13 @@ Download the source file :download:`../../src/openalea/stat_tool/mixture.py`.
     :synopsis:  Mixture class
 
 
-.. currentmodule:: vplants.stat_tool.mvmixture
+.. currentmodule:: openalea.stat_tool.mvmixture
 
-:mod:`vplants.stat_tool.mvmixture` module
-=========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/mvmixture.py`.
+:mod:`openalea.stat_tool.mvmixture` module
+============================================
 
 
-.. automodule:: vplants.stat_tool.mvmixture
+.. automodule:: openalea.stat_tool.mvmixture
     :members:
     :undoc-members:
     :inherited-members:
@@ -216,12 +191,10 @@ Download the source file :download:`../../src/openalea/stat_tool/mvmixture.py`.
     :synopsis: Mv Mixture class
 
 
-.. currentmodule:: vplants.stat_tool.output
+.. currentmodule:: openalea.stat_tool.output
 
-:mod:`vplants.stat_tool.output` module
-======================================
-
-Download the source file :download:`../../src/openalea/stat_tool/output.py`.
+:mod:`openalea.stat_tool.output` module
+=========================================
 
 
 .. automodule:: openalea.stat_tool.output
@@ -232,15 +205,13 @@ Download the source file :download:`../../src/openalea/stat_tool/output.py`.
     :synopsis: Output functions
 
 
-.. currentmodule:: vplants.stat_tool.plot
+.. currentmodule:: openalea.stat_tool.plot
 
-:mod:`vplants.stat_tool.plot` module
-====================================
-
-Download the source file :download:`../../src/openalea/stat_tool/plot.py`.
+:mod:`openalea.stat_tool.plot` module
+=======================================
 
 
-.. automodule:: vplants.stat_tool.plot
+.. automodule:: openalea.stat_tool.plot
     :members:
     :undoc-members:
     :inherited-members:
@@ -248,15 +219,13 @@ Download the source file :download:`../../src/openalea/stat_tool/plot.py`.
     :synopsis:  Plot functions 
 
 
-.. currentmodule:: vplants.stat_tool.regression
+.. currentmodule:: openalea.stat_tool.regression
 
-:mod:`vplants.stat_tool.regression` module
-==========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/regression.py`.
+:mod:`openalea.stat_tool.regression` module
+=============================================
 
 
-.. automodule:: vplants.stat_tool.regression
+.. automodule:: openalea.stat_tool.regression
     :members:
     :undoc-members:
     :inherited-members:
@@ -264,15 +233,13 @@ Download the source file :download:`../../src/openalea/stat_tool/regression.py`.
     :synopsis: Regression
 
 
-.. currentmodule:: vplants.stat_tool.simulate
+.. currentmodule:: openalea.stat_tool.simulate
 
-:mod:`vplants.stat_tool.simulate` module
-========================================
-
-Download the source file :download:`../../src/openalea/stat_tool/simulate.py`.
+:mod:`openalea.stat_tool.simulate` module
+===========================================
 
 
-.. automodule:: vplants.stat_tool.simulate
+.. automodule:: openalea.stat_tool.simulate
     :members:
     :undoc-members:
     :inherited-members:
@@ -280,15 +247,13 @@ Download the source file :download:`../../src/openalea/stat_tool/simulate.py`.
     :synopsis:  Simulation functions 
 
 
-.. currentmodule:: vplants.stat_tool.vectors
+.. currentmodule:: openalea.stat_tool.vectors
 
-:mod:`vplants.stat_tool.vectors` module
-=======================================
-
-Download the source file :download:`../../src/openalea/stat_tool/vectors.py`.
+:mod:`openalea.stat_tool.vectors` module
+==========================================
 
 
-.. automodule:: vplants.stat_tool.vectors
+.. automodule:: openalea.stat_tool.vectors
     :members:
     :undoc-members:
     :inherited-members:
