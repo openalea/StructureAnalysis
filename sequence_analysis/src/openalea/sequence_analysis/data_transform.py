@@ -1,17 +1,19 @@
-"""Data transform methods
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-.. todo:: move _check_nbvariable_ to stat_ttol and use it wherever possible
-.. todo:: decide on using __get_mode__ everywhere or ParseKargs
-
-.. todo:: move markovian_sequencse call inside the wrapper ?
-
-    For instance, Cumulate does not return the same as .cumulate
-    but     the same as  .cumulate(...).markovian_sequences()
-
-    OR test if _Sequence, then use markovian_sequence conversion
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: data_transform.py summary
+
+    A module dedicated to Variable Order Markov objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+"""
+__version__ = "$Id$"
 
 from openalea.stat_tool.error import *
 
@@ -100,8 +102,11 @@ def RemoveRun(obj, *args, **kargs):
 
     :Usage:
 
-    >>> RemoveRun(seq1, value, position, MaxLength=4)
-    >>> RemoveRun(seqn, variable, value, position, MaxLength=4)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> RemoveRun(seq1, value, position, MaxLength=4)
+        >>> RemoveRun(seqn, variable, value, position, MaxLength=4)
 
     :Arguments:
 
@@ -126,8 +131,11 @@ def RemoveRun(obj, *args, **kargs):
 
     :Examples:
 
-    >>> RemoveRun(seq1, 0, "End")
-    >>> RemoveRun(seq5, 2, 0, "End")
+    .. doctest::
+        :options: +SKIP
+    
+        >>> RemoveRun(seq1, 0, "End")
+        >>> RemoveRun(seq5, 2, 0, "End")
 
     .. seealso::
 
@@ -192,11 +200,14 @@ def ExtractVectors(obj, key, *args):
 
     :Usage:
 
-    >>> ExtractVectors(seq, "Length")
-    >>> ExtractVectors(seq1, "NbRun", value)
-    >>> ExtractVectors(seq1, "NbOccurrence", value)
-    >>> ExtractVectors(seqn, "NbRun", variable, value)
-    >>> ExtractVectors(seqn, "NbOccurrence", variable, value)
+    .. doctest::
+        :options: +SKIP
+    
+        >>> ExtractVectors(seq, "Length")
+        >>> ExtractVectors(seq1, "NbRun", value)
+        >>> ExtractVectors(seq1, "NbOccurrence", value)
+        >>> ExtractVectors(seqn, "NbRun", variable, value)
+        >>> ExtractVectors(seqn, "NbOccurrence", variable, value)
 
     :Arguments:
 
@@ -265,8 +276,11 @@ def SegmentationExtract(obj, variable, values , **kargs):
 
     :Usage:
 
-    >>> SegmentationExtract(seqn, variable, value, Mode="Reject")
-    >>> SegmentationExtract(seqn, variable, values, Mode="Reject")
+    .. doctest::
+        :options: +SKIP
+    
+        >>> SegmentationExtract(seqn, variable, value, Mode="Reject")
+        >>> SegmentationExtract(seqn, variable, values, Mode="Reject")
 
     :Arguments:
 
@@ -346,8 +360,11 @@ def LengthSelect(obj, minLength, *args, **kargs):
 
     :Usage:
 
-    >>> LengthSelect(seq, length, Mode="Reject")
-    >>> LengthSelect(seq, min_length, max_length, Mode="Reject")
+    .. doctest::
+        :options: +SKIP
+    
+        >>> LengthSelect(seq, length, Mode="Reject")
+        >>> LengthSelect(seq, min_length, max_length, Mode="Reject")
 
     :Arguments:
 
@@ -422,8 +439,11 @@ def RecurrenceTimeSequences(obj, *args):
 
     :Usage:
 
-    >>> RecurrenceTimeSequences(seq1, value)
-    >>> RecurrenceTimeSequences(seqn, variable, value)
+    .. doctest::
+        :options: +SKIP
+    
+        >>> RecurrenceTimeSequences(seq1, value)
+        >>> RecurrenceTimeSequences(seqn, variable, value)
 
     :Arguments:
 
@@ -518,8 +538,12 @@ def AddAbsorbingRun(obj, **kargs):
 
     :Usage:
 
-    >>> AddAbsorbingRun(seq, RunLength=20)
-    >>> AddAbsorbingRun(seq, SequenceLength=30, RunLength=20)
+    .. doctest::
+        :options: +SKIP
+    
+        >>> seq = Sequences([1,2,3,5])
+        >>> AddAbsorbingRun(seq, RunLength=20)
+        >>> AddAbsorbingRun(seq, SequenceLength=22, RunLength=20)
 
     :Arguments:
 
@@ -556,7 +580,6 @@ def AddAbsorbingRun(obj, **kargs):
         :func:`~openalea.stat_tool.data_transform.ValueSelect`,
         :func:`~openalea.sequence_analysis.data_transform.VariableScaling`.
 
-    .. todo:: wrap the constant values
     """
     error.CheckType([obj], [[_MarkovianSequences, _VariableOrderMarkovData,
                             _SemiMarkovData, _NonHomogeneousMarkovData,
@@ -589,9 +612,12 @@ def Reverse(obj):
 
     :Usage:
 
-    >>> Reverse(seq)
-    >>> Reverse(discrete_seq)
-    >>> Reverse(top)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> Reverse(seq)
+        >>> Reverse(discrete_seq)
+        >>> Reverse(top)
 
     :Arguments:
 
@@ -657,7 +683,10 @@ def Cumulate(obj, Variable=I_DEFAULT):
 
     :Usage:
 
-    Cumulate(seq, Variable=1)
+    .. doctest::
+        :options: +SKIP
+    
+        >>> Cumulate(seq, Variable=1)
 
     :Arguments:
 
@@ -718,8 +747,11 @@ def Difference(obj, Variable=I_DEFAULT, FirstElement=False):
     First-order differencing of sequences.
 
     :Usage:
-
-    Difference(seq, Variable=1, FirstElement=True)
+    
+    .. doctest::
+        :options: +SKIP
+        
+        Difference(seq, Variable=1, FirstElement=True)
 
     :Arguments:
 
@@ -780,9 +812,13 @@ def IndexParameterExtract(obj, minIndex, MaxIndex=I_DEFAULT):
     Extraction of sub-sequences corresponding to a range of index parameters.
 
     :Usage:
+    
+    .. doctest::
+        :options: +SKIP
 
-    >>> IndexParameterExtract(seq, min_index, MaxIndex=40)
-    >>> IndexParameterExtract(seq, min_index, MaxIndex)
+        >>> IndexParameterExtract(seq, min_index, MaxIndex=40)
+        >>> IndexParameterExtract(seq, min_index, MaxIndex)
+        
     :Arguments:
 
     * seq (sequences, discrete_sequences, markov_data, semi-markov_data),
@@ -836,10 +872,13 @@ def IndexParameterSelect(obj, minIndex, *args, **kargs):
     Extraction of sub-sequences corresponding to a range of index parameters.
 
     :Usage:
+    
+    .. doctest::
+        :options: +SKIP
 
-    >>> IndexParameterSelect(seq, min_index)
-    >>> IndexParameterSelect(seq, min_index, max_index)
-    >>> IndexParameterSelect(seq, min_index, max_index, Mode="Keep")
+        >>> IndexParameterSelect(seq, min_index)
+        >>> IndexParameterSelect(seq, min_index, max_index)
+        >>> IndexParameterSelect(seq, min_index, max_index, Mode="Keep")
 
     :Arguments:
 
@@ -848,11 +887,18 @@ def IndexParameterSelect(obj, minIndex, *args, **kargs):
 
     :Optional Arguments:
 
-    * max_index (int): maximum index parameter (default behaviour: the end of sequences is kept).
+    * max_index (int): maximum index parameter (default behaviour: the end of 
+      sequences is kept).
     * Mode: Keep or Reject
+    
     :Returned Object:
 
-    If 0 < min_index < (maximum index parameter if the optional argument MaxIndex is set) < (maximum length of sequences), the returned object is of type sequences or discrete_sequences, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is < 15.
+    If 0 < min_index < (maximum index parameter if the optional argument 
+    MaxIndex is set) < (maximum length of sequences), the returned object is of
+    type sequences or discrete_sequences, otherwise no object is returned. The
+    returned object is of type discrete_sequences if all the variables are of 
+    type STATE, if the possible values for each variable are consecutive from 0 
+    and if the number of possible values for each variable is < 15.
 
     .. seealso::
 
@@ -905,9 +951,12 @@ def ComputeStateSequences(obj, data, **kargs):
     Computation of the optimal state sequences corresponding to the observed sequences using a hidden Markov chain or a hidden semi-Markov chain.
 
     :Usage:
+    
+    .. doctest::
+        :options: +SKIP
 
-    >>> ComputeStateSequences(seq, hmc, Algorithm="ForwardBackward", Characteristics=True)
-    >>> ComputeStateSequences(seq, hsmc, Algorithm="ForwardBackward", Characteristics=True)
+        >>> ComputeStateSequences(seq, hmc, Algorithm="ForwardBackward", Characteristics=True)
+        >>> ComputeStateSequences(seq, hsmc, Algorithm="ForwardBackward", Characteristics=True)
 
     :Arguments:
 
@@ -954,10 +1003,13 @@ def MovingAverage(obj, itype, *args, **kargs):
     Extraction of trends or residuals using a symmetric smoothing filter.
 
     :Usage:
+    
+    .. doctest::
+        :options: +SKIP
 
-    >>> MovingAverage(seq, filter, Variable=1, BeginEnd=True, Output="Residual", FileName="filtered_sequences")
-    >>> MovingAverage(seq, frequencies, Variable=1, BeginEnd=True,  Output="Residual", FileName="filtered_sequences")
-    >>> MovingAverage(seq, dist, Variable=1, BeginEnd=True,  Output="Residual", FileName="filtered_sequences")
+        >>> MovingAverage(seq, filter, Variable=1, BeginEnd=True, Output="Residual", FileName="filtered_sequences")
+        >>> MovingAverage(seq, frequencies, Variable=1, BeginEnd=True,  Output="Residual", FileName="filtered_sequences")
+        >>> MovingAverage(seq, dist, Variable=1, BeginEnd=True,  Output="Residual", FileName="filtered_sequences")
 
     :Arguments:
 
@@ -1031,11 +1083,15 @@ def MovingAverage(obj, itype, *args, **kargs):
 def ComputeSelfTransition(obj, Order=1):
     """ComputeSelfTransition
 
-    Computation of the self-transition probabilities as a function of the index parameter from discrete sequences.
+    Computation of the self-transition probabilities as a function of the 
+    index parameter from discrete sequences.
 
     :Usage:
+    
+    .. doctest::
+        :options: +SKIP
 
-    >>> ComputeSelfTransition(seq, Order=2)
+        >>> ComputeSelfTransition(seq, Order=2)
 
     :Arguments:
 
@@ -1143,8 +1199,10 @@ def TimeScaling(obj, scaling_factor=0):
     Change of the time unit of data of type {time interval between two observation dates, number of events occurring between these two observation dates}.
 
     :Usage:
+    .. doctest::
+        :options: +SKIP
 
-    >>> TimeScaling(timev, scaling_factor)
+        >>> TimeScaling(timev, scaling_factor)
 
     :Arguments:
 
@@ -1171,9 +1229,12 @@ def TimeSelect(obj, *args):
     Selection of data item of type {time interval between two observation dates, number of events occurring between these two observation dates} according to a length of the observation period criterion.
 
     :Usage:
+    
+    .. doctest::
+        :options: +SKIP
 
-    >>> TimeSelect(timev, time)
-    >>> TimeSelect(timev, min_time, max_time)
+        >>> TimeSelect(timev, time)
+        >>> TimeSelect(timev, min_time, max_time)
 
     :Arguments:
 
@@ -1212,8 +1273,11 @@ def Segmentation(obj, *args, **kargs):
 
     :Usage:
 
-    >>> Segmentation(seq, 1,2, VectorDistance("N"), Output="Segment")
-    >>> S
+    .. doctest::
+        :options: +SKIP
+
+        >>> Segmentation(seq, 1,2, VectorDistance("N"), Output="Segment")
+    
     """
     error.CheckArgumentsLength(args, 2)
     error.CheckType([obj], [[_Sequences, _MarkovianSequences,
@@ -1312,9 +1376,11 @@ def VariableScaling(obj, *args):
     Change of the unit of a variable.
 
     :Usage:
+    .. doctest::
+        :options: +SKIP
 
-    * VariableScaling(seq1, scaling_factor)
-    * VariableScaling(seqn, variable, scaling_factor)
+        >>> VariableScaling(seq1, scaling_factor)
+        >>> VariableScaling(seqn, variable, scaling_factor)
 
     :Arguments:
 
@@ -1396,12 +1462,8 @@ def vec2list(vector):
 
 def Extract(obj, *args, **kargs):
     """
-    .. todo:: check the case
-    elif type(obj) in [_Sequences,
-                       _MarkovianSequences,
-                       _VariableOrderMarkovData,
-                       _SemiMarkovData,
-                       _NonHomogeneousMarkovData]
+    .. todo:: check the case elif type(obj) in [_Sequences, _MarkovianSequences,
+        _VariableOrderMarkovData, _SemiMarkovData, _NonHomogeneousMarkovData]
     """
 
     if isinstance(obj, _Tops):
@@ -1485,7 +1547,7 @@ def Extract(obj, *args, **kargs):
             else:
                 variable = args[1]
                 value = args[2]
-                error.CheckType([args[1], args[2]], [[int],[int]])
+                error.CheckType([args[1], args[2]], [[int], [int]])
                 ret = obj.extract(markovian_sequence_type[ident], variable, value)
 
 

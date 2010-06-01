@@ -1,10 +1,18 @@
-"""HiddenVariableOrderMarkov
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: hidden_variable_order_markov.py summary
+
+    A module dedicated to HiddenVariableOrderMarkov objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+"""
+__version__ = "$Id$"
 
 import os
 

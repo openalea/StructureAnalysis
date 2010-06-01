@@ -1,10 +1,22 @@
-"""hidden Semi Markov
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: hidden_semi_markov.py summary
+
+    A module dedicated to HiddenSemiMarkov objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+.. testsetup::
+
+    from openalea.sequence_analysis import *
+"""
+__version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -31,7 +43,10 @@ def HiddenSemiMarkov(*args, **kargs):
 
     :Usage:
 
-    >>> HiddenSemiMarkov(file_name, Length=40, Counting=False)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> HiddenSemiMarkov(file_name, Length=40, Counting=False)
 
     :Arguments:
 

@@ -1,11 +1,16 @@
-"""common enumerate
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: enums.py summary
 
-this is a mess, need to be simplified very carefully though according to stat_tool/
-sequence original code.
+    A module to setup enums related to sequence analysis
 
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
+    :Revision: $Id$
 """
 __version__ = "$Id$"
 

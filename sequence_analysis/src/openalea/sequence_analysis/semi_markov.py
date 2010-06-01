@@ -1,9 +1,19 @@
-"""Semi markov
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: semi_markov.py summary
+
+    A module dedicated to SemiMarkov objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+"""
+__version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -32,7 +42,10 @@ def SemiMarkov(filename=None, length=DEFAULT_LENGTH, counting=True,
 
     :Usage:
 
-    >>> SemiMarkov(file_name, Length=40, Counting=True)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> SemiMarkov(file_name, Length=40, Counting=True)
 
     :Arguments:
 

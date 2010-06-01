@@ -20,20 +20,20 @@ from tools import runTestClass
 
 class _Compare():
     """
-    a main class to test the Compare function on different type of 
+    a main class to test the Compare function on different type of
     data structure.
     """
     def __init__(self):
         self.data = None
-        
+
     def create_data(self):
-        raise NotImplemented 
-        
+        raise NotImplemented
+
     def test_compare(self):
         raise NotImplemented
-    
-    
-        
+
+
+
 class Test_Compare_Histograms(_Compare):
     def __init__(self):
         _Compare.__init__(self)
@@ -54,7 +54,7 @@ class Test_Compare_Histograms(_Compare):
                       ExtractHistogram(seq[2], 2), "N")
         assert res
 
-        
+
 class Test_Compare_Sequences(_Compare):
 
     def __init__(self):
@@ -69,7 +69,7 @@ class Test_Compare_Sequences(_Compare):
         seq = self.data
         matrix20 = Compare(seq)
         assert matrix20
-    
+
 
 class Test_Compare_Sequences_VectorDistance(_Compare):
 
@@ -88,7 +88,7 @@ class Test_Compare_Sequences_VectorDistance(_Compare):
 
 
 class Test_Compare_Vectors_VectorDistance(_Compare):
-    
+
     def __init__(self):
         _Compare.__init__(self)
         self.data = self.create_data()
@@ -103,9 +103,11 @@ class Test_Compare_Vectors_VectorDistance(_Compare):
 
         assert a.nb_row == 3
         assert a.nb_column == 3
+        
+
 
 class Test_Compare_hsmc_with_sequences(_Compare):
-    
+
     def __init__(self):
         _Compare.__init__(self)
         self.data = self.create_data()
@@ -118,7 +120,7 @@ class Test_Compare_hsmc_with_sequences(_Compare):
         data0 = Estimate(seq0, "HIDDEN_SEMI-MARKOV", hsmc0)
         data1 = Estimate(seq1, "HIDDEN_SEMI-MARKOV", hsmc1)
         return [seq0, seq1, data0, data1]
-    
+
     def test_compare(self):
         data = self.data
         matrix20 = Compare(Thresholding(data[2], MinProbability=0.001), data[0],

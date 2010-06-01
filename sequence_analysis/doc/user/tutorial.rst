@@ -1,10 +1,23 @@
-.. warning:: draft version not to be used yet
+.. testsetup:: *
+
+    from openalea.stat_tool import *
+    from openalea.sequence_analysis import *
+    from openalea.sequence_analysis.data import path
 
 
 Sequences tutorial
 ##################
 
-Let us start from the following file that follows the sequences syntax (see stat_tool user guide documentation for the syntax).
+.. note:: preliminary code::
+
+    >>> from openalea.stat_tool import *
+    >>> from openalea.sequence_analysis import *
+    >>> from openalea.sequence_analysis.data import path
+
+
+
+Let us start from the following file data, which is fulfills the sequences syntax (see 
+the stat_tool user guide documentation for the syntax).
 
 ::
 
@@ -21,16 +34,17 @@ Let us start from the following file that follows the sequences syntax (see stat
     0 0 3 0 0 0
     0 0 0 0
 
-you read the file as follows
+This file can be read using :func:`~openalea.sequence_analysis.sequences.Sequences` as follows
 
-.. code-block:: python
+.. doctest::
 
-    >>> from openalea.stat_tool import *
-    >>> from openalea.sequence_analysis import *
-    >>> seq = Sequences('sequences.dat')
-    
+    >>> seq = Sequences(path +  'sequences_tutorial.dat')
 
-Then, you can introspect the object `seq`. For instance, you can obtain the number of variables, the maximum length among the sequences os the number of elements over all sequences::
+
+Now, you can start to introspect the object `seq`. 
+For instance, you can obtain the number of variables, the maximum length among the sequences or the number of elements over all sequences:
+
+.. doctest::
 
     >>> seq.nb_variable
     1
@@ -42,34 +56,51 @@ Then, you can introspect the object `seq`. For instance, you can obtain the numb
     62
 
 
-Then, you may not be interested in all the sequences, but only the two first one. Use `SelectIndividual` ::
+Then, you may not be interested in all the sequences, but only the two first one. This can be done 
+using :func:`~openalea.stat_tool.data_transform.SelectIndividual` from the **stat_tool package**:
+
+
+
+.. doctest::
 
     >>> s1 = SelectIndividual(seq, [1])
 
-which is equivalent to the object syntax (which is more complicated since you have to provide a second argument)::
-    
+.. note:: All Functions have an object equivalent but there are usually more difficult to use
+   (not type or bound checks)
+
+The object equivalent works as follows.
+
+.. doctest::
+
     >>> s1 = seq.select_individual([1], True)
 
-so, in the following we only use the AML syntax with functions except if the function does not exist.
+The extracted sequences can now be plotted:
 
-The extracted sequences can now be plot::
+.. doctest::
 
-    >>> s1.plot()
+    >>> Plot(s1)
 
 or displayed::
 
-    >>> print s1.display()
-    
+    >>> print Display(s1)
 
-or introspect::
 
-    >>> s1.get_length()
+or introspect:
+
+.. doctest::
+
+    >>> s1.get_length(0)
     47
 
 
-in order to access to the data (array of arrays)::
+in order to access to the data (array of arrays):
 
-    >>> data = s1[0][0]
+.. doctest::
+
+    >>> s1[0][0]
+    [0]
+
+
 
 
 

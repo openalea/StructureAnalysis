@@ -1,10 +1,19 @@
-"""TimeEvents
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: time_events.py summary
+
+    A module dedicated to TimeEvents objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+"""
+__version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -41,13 +50,16 @@ def TimeEvents(*args, **kargs):
 
     :Usage:
 
-    >>> TimeEvents(seq1, begin_date, end_date, PreviousDate=3, NextDate=8)
-    >>> TimeEvents(seqn, variable, begin_date, end_date, PreviousDate=3,
-    ... NextDate=8)
-    >>> TimeEvents(histo, time)
-    >>> TimeEvents(file_name)
-    >>> h = Histogram([1,1,1,2,2,2])
-    >>> t = TimeEvents(h, 2)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> TimeEvents(seq1, begin_date, end_date, PreviousDate=3, NextDate=8)
+        >>> TimeEvents(seqn, variable, begin_date, end_date, PreviousDate=3,\
+                NextDate=8)
+        >>> TimeEvents(histo, time)
+        >>> TimeEvents(file_name)
+        >>> h = Histogram([1,1,1,2,2,2])
+        >>> t = TimeEvents(h, 2)
 
     :Arguments:
 
@@ -83,7 +95,7 @@ def TimeEvents(*args, **kargs):
         :func:`Save`,
         :func:`~openalea.stat_tool.data_transform.ExtractHistogram`,
         :func:`~openalea.stat_tool.data_transform.Merge`,
-        :func:`~openalea.sequence_analysis.data_transform.NbEventSelect`,
+        :func:`~openalea.sequence_analysis.time_events.NbEventSelect`,
         :func:`~openalea.sequence_analysis.data_transform.TimeScaling`,
         :func:`~openalea.sequence_analysis.data_transform.TimeSelect`.
 
@@ -118,11 +130,11 @@ def TimeEvents(*args, **kargs):
                                      PreviousDate, NextDate)
 
     else:
-        # todo: finish this code with examples ?
         # should work with Histogram, Mixture_data, Conv_data, comp_data
         error.CheckArgumentsLength(args, 2, 2)
-        error.CheckType([args[0], args[1]], [[_DiscreteDistributionData, _MixtureData,
-                                     _ConvolutionData, _CompoundData], int])
+        error.CheckType([args[0], args[1]], \
+                        [[_DiscreteDistributionData, _MixtureData,\
+                          _ConvolutionData, _CompoundData], int])
         distribution = args[0]
         time = args[1]
         time_events = _TimeEvents(distribution, time)
@@ -138,7 +150,10 @@ def NbEventSelect(obj, imin, imax):
 
     :Usage:
 
-    * NbEventSelect(timev, min_nb_event, max_nb_event)
+    .. doctest:: 
+        :options: +SKIP
+        
+        >>> NbEventSelect(timev, min_nb_event, max_nb_event)
 
     :Arguments:
 

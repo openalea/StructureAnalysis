@@ -1,8 +1,16 @@
-"""NonhomogeneousMarkov
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""
 
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+.. topic:: nonhomogeneous_markov.py summary
 
+    A module dedicated to NonhomogeneousMarkov objects
 
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
 """
 __revision__ = "$Id$"
 
@@ -31,8 +39,13 @@ def NonhomogeneousMarkov(filename, length=DEFAULT_LENGTH):
     :param filename:
     :param length: optional argument (default is 20)
 
-    >>> nm = NonhomogeneousMarkov("filename.dat")
-    >>> nm = NonhomogeneousMarkov("filename.dat", 10)
+    :Usage:
+    
+    .. doctest:: 
+        :options: +SKIP
+        
+        >>> nm = NonhomogeneousMarkov("filename.dat")
+        >>> nm = NonhomogeneousMarkov("filename.dat", 10)
     """
     error.CheckType([filename, length], [str, int])
 

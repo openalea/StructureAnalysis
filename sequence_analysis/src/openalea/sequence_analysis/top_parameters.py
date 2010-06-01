@@ -1,9 +1,19 @@
-"""Top parameters
-
-author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: top_parameters.py summary
+
+    A module dedicated to TopParameters objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+"""
+__version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -33,8 +43,11 @@ def TopParameters(*args, **kargs):
 
     :Usage:
 
-    >>> TopParameters(proba, axillary_proba, rhythm_ratio, MaxPosition=40)
-    >>> TopParameters(file_name, MaxPosition=40)    
+    .. doctest::
+        :options: +SKIP
+        
+        >>> TopParameters(proba, axillary_proba, rhythm_ratio, MaxPosition=40)
+        >>> TopParameters(file_name, MaxPosition=40)    
 
 
     :Arguments:

@@ -1,6 +1,19 @@
-"""Tops"""
-__revision__ = "$Id$"
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""
 
+.. topic:: tops.py summary
+
+    A module dedicated to Tops objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+"""
+__version__ = "$Id$"
 import os
 import openalea.stat_tool.interface as interface
 from openalea.sequence_analysis._sequence_analysis import _Tops
@@ -64,10 +77,13 @@ def Tops(*args, **kargs):
 
     :Examples:
 
-    >>> Tops(array1, Identifiers=[1, 8, 12])
-    >>> Tops(arrayn, Identifiers=[1, 8, 12], IndexParameter="Position")
-    >>> Tops(timev)
-    >>> Tops(file_name)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> Tops(array1, Identifiers=[1, 8, 12])
+        >>> Tops(arrayn, Identifiers=[1, 8, 12], IndexParameter="Position")
+        >>> Tops(timev)
+        >>> Tops(file_name)
 
     .. seealso::
 
@@ -121,16 +137,12 @@ def Tops(*args, **kargs):
             return _Tops(filename, OldFormat)
         else:
             raise IOError("bad file name")
-    #sequences case #todo: to be tested/implemented
     elif isinstance(args[0], _Sequences):
         raise NotImplemented
         #return _Tops(args[0])
     elif isinstance(args[0], list):
         error.CheckType([Identifiers], [list])
         if kargs.get("IndexParameter"):
-            # todo:: list of list for the arrayn not yet implemented
-            # in the wrapper
-            #list case, no identifier See export_sequences.cpp
             if Identifiers:
                 return _Tops(args[0], Identifiers, index_parameter)
             else:
@@ -150,7 +162,10 @@ def RemoveApicalInternodes(obj, internode):
 
     :Usage:
 
-    >>> RemoveApicalInternodes(top, nb_internode)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> RemoveApicalInternodes(top, nb_internode)
 
     :Arguments:
 

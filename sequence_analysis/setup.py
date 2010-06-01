@@ -62,6 +62,7 @@ if __name__ == '__main__':
 
 #          package_dir={ "" : "src", vplants':'src/vplants/sequence_analysis' },
           package_dir={ "" : "src",  },
+          share_dirs = { 'share' : 'share' },
 
 
           # Add package platform libraries if any

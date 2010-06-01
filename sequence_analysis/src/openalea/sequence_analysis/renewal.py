@@ -1,9 +1,17 @@
-"""Renewal
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""
 
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+.. topic:: renewal.py summary
 
-.. todo:: print (str in the wrapper file) for the renewal class
+    A module dedicated to Renewal objects
 
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
 """
 __revision__ = "$Id$"
 
@@ -38,11 +46,14 @@ def Renewal(*args, **kargs):
 
     :Usage:
 
-    >>> Renewal("BINOMIAL", inf_bound, sup_bound, proba,  Type="Equilibrium", ObservationTime=40)
-    >>> Renewal("POISSON", inf_bound, param, Type="Equilibrium", ObservationTime=40)
-    >>> Renewal("NEGATIVE_BINOMIAL", inf_bound, param, proba, Type="Equilibrium", ObservationTime=40)
-    >>> Renewal(inter_event, Type="Equilibrium", ObservationTime=40)
-    >>> Renewal(file_name, Type="Equilibrium", ObservationTime=40)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> Renewal("BINOMIAL", inf_bound, sup_bound, proba,  Type="Equilibrium", ObservationTime=40)
+        >>> Renewal("POISSON", inf_bound, param, Type="Equilibrium", ObservationTime=40)
+        >>> Renewal("NEGATIVE_BINOMIAL", inf_bound, param, proba, Type="Equilibrium", ObservationTime=40)
+        >>> Renewal(inter_event, Type="Equilibrium", ObservationTime=40)
+        >>> Renewal(file_name, Type="Equilibrium", ObservationTime=40)
 
     :Arguments:
 

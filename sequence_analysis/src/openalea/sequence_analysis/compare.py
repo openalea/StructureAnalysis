@@ -1,10 +1,18 @@
-"""Compare module on vectors, sequences, renewal, distributions...
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
 
-__revision__ = "$Id$"
+.. topic:: compare.py summary
+
+    A module dedicated to Compare functions
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+"""
+__version__ = "$Id$"
 
 
 from openalea.stat_tool.comparison import compare_histo, compare_vectors
@@ -30,18 +38,21 @@ def _compare_markovian_sequences(obj, *args, **kargs):
     """
     :Example:
 
-    >>> Compare(mc1, length_histo1, mc2, length_histo2,...,  FileName="result")
-    >>> Compare(mc1, mc2,..., nb_seq, length, FileName="result")
-    >>> Compare(mc1, seqm1, mc2, seqm2,..., nb_seq, FileName="result")
-    >>> Compare(smc1, length_histo1, smc2, length_histo2,...,   FileName="result")
-    >>> Compare(smc1, smc2,..., nb_seq, length, FileName="result")
-    >>> Compare(smc1, seqm1, smc2, seqm2,..., nb_seq, FileName="result")
-    >>> Compare(hmc1, length_histo1, hmc2, length_histo2,...,    FileName="result")
-    >>> Compare(hmc1, hmc2,..., nb_seq, length, FileName="result")
-    >>> Compare(hmc1, seqm1, hmc2, seqm2,..., nb_seq, FileName="result")
-    >>> Compare(hsmc1, length_histo1, hsmc2, length_histo2,...,    FileName="result")
-    >>> Compare(hsmc1, hsmc2,..., nb_seq, length, FileName="result")
-    >>> Compare(hsmc1, seqm1, hsmc2, seqm2,..., nb_seq,  FileName="result")
+    .. doctest::
+        :options: +SKIP
+        
+        >>> Compare(mc1, length_histo1, mc2, length_histo2,...,  FileName="result")
+        >>> Compare(mc1, mc2,..., nb_seq, length, FileName="result")
+        >>> Compare(mc1, seqm1, mc2, seqm2,..., nb_seq, FileName="result")
+        >>> Compare(smc1, length_histo1, smc2, length_histo2,...,   FileName="result")
+        >>> Compare(smc1, smc2,..., nb_seq, length, FileName="result")
+        >>> Compare(smc1, seqm1, smc2, seqm2,..., nb_seq, FileName="result")
+        >>> Compare(hmc1, length_histo1, hmc2, length_histo2,...,    FileName="result")
+        >>> Compare(hmc1, hmc2,..., nb_seq, length, FileName="result")
+        >>> Compare(hmc1, seqm1, hmc2, seqm2,..., nb_seq, FileName="result")
+        >>> Compare(hsmc1, length_histo1, hsmc2, length_histo2,...,    FileName="result")
+        >>> Compare(hsmc1, hsmc2,..., nb_seq, length, FileName="result")
+        >>> Compare(hsmc1, seqm1, hsmc2, seqm2,..., nb_seq,  FileName="result")
     """
 
     error.CheckType([obj], [markov_model_comparison_first_arg])
@@ -234,37 +245,40 @@ def Compare(arg1, *args, **kargs):
 
     :Usage:
 
-    >>> Compare(histo1, histo2,..., type, FileName="result", Format="ASCII")
+    .. doctest::
+        :options: +SKIP
+    
+        >>> Compare(histo1, histo2,..., type, FileName="result", Format="ASCII")
 
-    >>> Compare(vec, vector_distance)
+        >>> Compare(vec, vector_distance)
 
-    >>> Compare(seq, vector_distance, RefSequence=3, TestSequence=8,
-        Begin="Free", End="Free", Transposition=True,
-        FileName="result", Format="SpreadSheet",
-        AlignmentFileName="alignment",
-        AlignmentFormat="ASCII")
-    >>> Compare(seq, RefSequence=3, TestSequence=8,
-        Begin="Free", End="Free",  FileName="result",
-        Format="SpreadSheet", AlignmentFileName="alignment",
-        AlignmentFormat="ASCII")
+        >>> Compare(seq, vector_distance, RefSequence=3, TestSequence=8,
+                Begin="Free", End="Free", Transposition=True,
+                FileName="result", Format="SpreadSheet",
+                AlignmentFileName="alignment",
+                AlignmentFormat="ASCII")
+        >>> Compare(seq, RefSequence=3, TestSequence=8,
+                Begin="Free", End="Free",  FileName="result",
+                Format="SpreadSheet", AlignmentFileName="alignment",
+                AlignmentFormat="ASCII")
 
-    >>> Compare(discrete_seq, mc1, mc2,..., FileName="result")
-    >>> Compare(discrete_seq, smc1, smc2,..., FileName="result")
-    >>> Compare(discrete_seq, hmc1, hmc2,..., Algorithm="Viterbi",  FileName="result")
-    >>> Compare(discrete_seq, hsmc1, hsmc2,..., Algorithm="Viterbi", FileName="result")
+        >>> Compare(discrete_seq, mc1, mc2,..., FileName="result")
+        >>> Compare(discrete_seq, smc1, smc2,..., FileName="result")
+        >>> Compare(discrete_seq, hmc1, hmc2,..., Algorithm="Viterbi",  FileName="result")
+        >>> Compare(discrete_seq, hsmc1, hsmc2,..., Algorithm="Viterbi", FileName="result")
 
-    >>> Compare(mc1, length_histo1, mc2, length_histo2,...,  FileName="result")
-    >>> Compare(mc1, mc2,..., nb_seq, length, FileName="result")
-    >>> Compare(mc1, seqm1, mc2, seqm2,..., nb_seq, FileName="result")
-    >>> Compare(smc1, length_histo1, smc2, length_histo2,...,   FileName="result")
-    >>> Compare(smc1, smc2,..., nb_seq, length, FileName="result")
-    >>> Compare(smc1, seqm1, smc2, seqm2,..., nb_seq, FileName="result")
-    >>> Compare(hmc1, length_histo1, hmc2, length_histo2,...,    FileName="result")
-    >>> Compare(hmc1, hmc2,..., nb_seq, length, FileName="result")
-    >>> Compare(hmc1, seqm1, hmc2, seqm2,..., nb_seq, FileName="result")
-    >>> Compare(hsmc1, length_histo1, hsmc2, length_histo2,...,    FileName="result")
-    >>> Compare(hsmc1, hsmc2,..., nb_seq, length, FileName="result")
-    >>> Compare(hsmc1, seqm1, hsmc2, seqm2,..., nb_seq,  FileName="result")
+        >>> Compare(mc1, length_histo1, mc2, length_histo2,...,  FileName="result")
+        >>> Compare(mc1, mc2,..., nb_seq, length, FileName="result")
+        >>> Compare(mc1, seqm1, mc2, seqm2,..., nb_seq, FileName="result")
+        >>> Compare(smc1, length_histo1, smc2, length_histo2,...,   FileName="result")
+        >>> Compare(smc1, smc2,..., nb_seq, length, FileName="result")
+        >>> Compare(smc1, seqm1, smc2, seqm2,..., nb_seq, FileName="result")
+        >>> Compare(hmc1, length_histo1, hmc2, length_histo2,...,    FileName="result")
+        >>> Compare(hmc1, hmc2,..., nb_seq, length, FileName="result")
+        >>> Compare(hmc1, seqm1, hmc2, seqm2,..., nb_seq, FileName="result")
+        >>> Compare(hsmc1, length_histo1, hsmc2, length_histo2,...,    FileName="result")
+        >>> Compare(hsmc1, hsmc2,..., nb_seq, length, FileName="result")
+        >>> Compare(hsmc1, seqm1, hsmc2, seqm2,..., nb_seq,  FileName="result")
 
     :Arguments:
 

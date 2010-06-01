@@ -1,8 +1,16 @@
-""" Estimation functions
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""
 
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+.. topic:: estimate.py summary
 
+    A module dedicated to Estimate functions
 
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
 """
 __revision__ = "$Id$"
 
@@ -307,7 +315,10 @@ def _estimate_semi_markov(obj, *args, **kargs):
 
 def _estimate_hidden_semi_markov(obj, *args, **kargs):
     """
-    >>> hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
 
     """
 
@@ -577,12 +588,13 @@ def _estimate_dispatch(obj, *args, **kargs):
                "MARKOV"
                ]
 
-    if len(args)==0:
-        itype=None
+    if len(args) == 0:
+        itype = None
     else:
         itype = args[0]
 
-    if (itype not in fct_map_distribution) and (itype not in fct_map) and (type(obj) not in [_TimeEvents, _RenewalData, _FrequencyDistribution]):
+    if (itype not in fct_map_distribution) and (itype not in fct_map) and \
+        (type(obj) not in [_TimeEvents, _RenewalData, _FrequencyDistribution]):
         raise KeyError("Valid type are %s or %s"
                        % (str(fct_map),
                           str(fct_map_distribution)))
@@ -600,11 +612,12 @@ def _estimate_dispatch(obj, *args, **kargs):
             or (len(args)>=2 and isinstance(obj, _FrequencyDistribution) \
             and isinstance(args[0], _FrequencyDistribution)   \
             and isinstance(args[1], _FrequencyDistribution)):
-        if len(args)>=1 and isinstance(obj, _FrequencyDistribution)==False and type(args[0])==str:
-            print 'count data'
+        if len(args)>=1 and isinstance(obj, _FrequencyDistribution)==False and\
+            type(args[0])==str:
+            
             return  _estimate_renewal_count_data(obj, args[0], *args[1:], **kargs)
         else:
-            print 'interval data'
+            
             #always 'equilibrium' as second argument
             return  _estimate_renewal_interval_data(obj, **kargs)
     else:
@@ -622,37 +635,48 @@ def Estimate(obj, *args, **kargs):
     * Estimation of (hidden) Markovian models.
 
     :Usage:
+    .. doctest::
+        :options: +SKIP
 
-    >>> Estimate(histo, "NON-PARAMETRIC")
-    >>> Estimate(histo, "NB", MinInfBound=1, InfBoundStatus="Fixed")
-    >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound=1, InfBoundStatus="Fixed",
-        DistInfBoundStatus="Fixed")
-    >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound=1, InfBoundStatus="Fixed",
-        DistInfBoundStatus="Fixed", NbComponent="Estimated", Penalty="AIC")
-    >>> Estimate(histo, "CONVOLUTION", dist,MinInfBound=1, Parametric=False)
-    >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution=initial_dist, Parametric=False)
-    >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric=False, MinInfBound=0)
-    >>> Estimate(histo, "COMPOUND", dist, unknown, InitialDistribution=initial_dist, Parametric=False)
+        >>> Estimate(histo, "NON-PARAMETRIC")
+        >>> Estimate(histo, "NB", MinInfBound=1, InfBoundStatus="Fixed")
+        >>> Estimate(histo, "MIXTURE", "B", dist,..., MinInfBound=1, 
+            InfBoundStatus="Fixed", DistInfBoundStatus="Fixed")
+        >>> Estimate(histo, "MIXTURE", "B", "NB",..., MinInfBound=1, 
+                InfBoundStatus="Fixed", DistInfBoundStatus="Fixed", 
+                NbComponent="Estimated", Penalty="AIC")
+        >>> Estimate(histo, "CONVOLUTION", dist,MinInfBound=1, Parametric=False)
+        >>> Estimate(histo, "CONVOLUTION", dist,InitialDistribution=initial_dist, 
+                Parametric=False)
+        >>> Estimate(histo, "COMPOUND", dist, unknown, Parametric=False, 
+                MinInfBound=0)
+        >>> Estimate(histo, "COMPOUND", dist, unknown, 
+                InitialDistribution=initial_dist, Parametric=False)
 
-    >>> Estimate(top, MinPosition=1, MaxPosition=5, Neighbourhood=2,    EqualProba=True)
+        >>> Estimate(top, MinPosition=1, MaxPosition=5, Neighbourhood=2,    
+                EqualProba=True)
 
-    >>> Estimate(timev, type, NbIteration=10,Parametric=True)
-    >>> Estimate(timev, type, InitialInterEvent=initial_dist,    NbIteration=10, Parametric=True)
+        >>> Estimate(timev, type, NbIteration=10,Parametric=True)
+        >>> Estimate(timev, type, InitialInterEvent=initial_dist,    
+                NbIteration=10, Parametric=True)
 
-    >>> Estimate(seq, "NONHOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, Counting=False)
-    >>> Estimate(seq, "SEMI-MARKOV", Counting=False)
-    >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, SelfTransition=0.9, NbIteration=10,
-        StateSequences="Viterbi", Counting=False)
-    >>> Estimate(seq, "HIDDEN_MARKOV", hmc, Algorithm="Viterbi",
-        NbIteration=10, Order=2, Counting=False)
-    >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", min_nb_state,
-        max_nb_state, Penalty="AIC", Order=2, Counting=False)
-    >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", hmc, state,
-        max_nb_state, Penalty="AIC", SelfTransition=0.9, Counting=False)
-    >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", nb_state, structure,
-        OccupancyMean=20, NbIteration=10, Estimator="PartialLikelihood",
-        StateSequences="Viterbi", Counting=False)
-    >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm="Viterbi", NbIteration=10, Counting=False)
+        >>> Estimate(seq, "NONHOMOGENEOUS_MARKOV", MONOMOLECULAR, VOID, 
+                Counting=False)
+        >>> Estimate(seq, "SEMI-MARKOV", Counting=False)
+        >>> Estimate(seq, "HIDDEN_MARKOV", nb_state, structure, 
+                SelfTransition=0.9, NbIteration=10,
+                StateSequences="Viterbi", Counting=False)
+        >>> Estimate(seq, "HIDDEN_MARKOV", hmc, Algorithm="Viterbi",
+                NbIteration=10, Order=2, Counting=False)
+        >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", min_nb_state,
+                max_nb_state, Penalty="AIC", Order=2, Counting=False)
+        >>> Estimate(seq, "HIDDEN_MARKOV", "NbState", hmc, state,
+                max_nb_state, Penalty="AIC", SelfTransition=0.9, Counting=False)
+        >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", nb_state, structure,
+                OccupancyMean=20, NbIteration=10, Estimator="PartialLikelihood",
+                StateSequences="Viterbi", Counting=False)
+        >>> Estimate(seq, "HIDDEN_SEMI-MARKOV", hsmc, Algorithm="Viterbi", 
+            NbIteration=10, Counting=False)
 
     :Arguments:
 

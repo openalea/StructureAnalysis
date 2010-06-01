@@ -27,10 +27,11 @@ Documentation
 =============
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     User Guide<user/index.rst>
     Reference Guide<user/autosum.rst>
+    Administration <user/admin.rst>
 
 - A `PDF <../latex/main.pdf>`_ version of |sequence_analysis| documentation is 
   available.

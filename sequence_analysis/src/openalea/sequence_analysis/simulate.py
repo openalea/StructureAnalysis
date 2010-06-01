@@ -1,9 +1,19 @@
-"""Simulate
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: simulate.py summary
+
+    A module dedicated to Simulate functionalities
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+"""
+__version__ = "$Id$"
 
 
 from openalea.stat_tool.simulate import Simulate as SimulateDistribution
@@ -44,23 +54,23 @@ def Simulate(obj, *args, **kargs):
 
     :Usage:
 
-    >>> Simulate(dist, size)
-    >>> Simulate(mixt, size)
-    >>> Simulate(convol, size)
-    >>> Simulate(compound, size)
-
-    >>> Simulate(renew, type, time_histo)
-    >>> Simulate(renew, type, size, time)
-    >>> Simulate(renew, type, size, timev)
-
-    >>> Simulate(markov, length_histo)
-    >>> Simulate(markov, size, length)
-    >>> Simulate(markov, size, seq)
-    >>> Simulate(semi_markov, length_histo, Counting=False)
-    >>> Simulate(semi_markov, size, length, Counting=False)
-    >>> Simulate(semi_markov, size, seq, Counting=False)
-
-    >>> Simulate(top_param, size, nb_trial, NbAxillary=2)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> Simulate(dist, size)
+        >>> Simulate(mixt, size)
+        >>> Simulate(convol, size)
+        >>> Simulate(compound, size)
+        >>> Simulate(renew, type, time_histo)
+        >>> Simulate(renew, type, size, time)
+        >>> Simulate(renew, type, size, timev)
+        >>> Simulate(markov, length_histo)
+        >>> Simulate(markov, size, length)
+        >>> Simulate(markov, size, seq)
+        >>> Simulate(semi_markov, length_histo, Counting=False)
+        >>> Simulate(semi_markov, size, length, Counting=False)
+        >>> Simulate(semi_markov, size, seq, Counting=False)
+        >>> Simulate(top_param, size, nb_trial, NbAxillary=2)
 
     :Arguments (distribution case):
 
@@ -74,7 +84,8 @@ def Simulate(obj, *args, **kargs):
 
     * renew (renewal),
     * type (string): type of renewal process: "Ordinary" or "Equilibriun",
-    * time_histo (histogram, mixture_data, convolution_data, compound_data): frequency distribution of the length of the observation period,
+    * time_histo (histogram, mixture_data, convolution_data, compound_data): 
+      frequency distribution of the length of the observation period,
     * size (int): sample size,
     * time (int): length of the observation period,
     * timev (time_events, renewal_data),
@@ -83,12 +94,13 @@ def Simulate(obj, *args, **kargs):
 
     * markov (markov, hidden_markov),
     * semi_markov (semi-markov, hidden_semi-markov),
-    * length_histo (histogram, mixture_data, convolution_data, compound_data): frequency distribution of sequence lengths,
+    * length_histo (histogram, mixture_data, convolution_data, compound_data):
+      frequency distribution of sequence lengths,
     * size (int): sample size,
     * length (int): sequence length,
     * seq (discrete_sequences, markov_data, semi-markov_data),
 
-    :Arguments (top case)
+    :Arguments (top case):
 
     * top_param (top_parameters),
     * size (int): sample size,
@@ -97,16 +109,27 @@ def Simulate(obj, *args, **kargs):
     :Optional Arguments:
 
     * Counting (bool): computation of counting distributions (default value: True).
-    * NbAxillary (int): number of offspring shoots per node (default value: 1, should be < 4).
+    * NbAxillary (int): number of offspring shoots per node (default value: 1,
+      should be < 4).
 
     :Returned Object:
 
-    * If the first argument is of type distribution and if 0 < size < 1000000, an object of type HISTOGRAM is returned, otherwise no object is returned.
-    * If the first argument is of type mixture and if 0 < size < 1000000, an object of type mixture_data is returned, otherwise no object is returned.
-    * If the first argument is of type convolution and if 0 < size < 1000000, an object of type convolution_data is returned, otherwise no object is returned.
-    * If the first argument is of type compound and if 0 < size < 1000000, an object of type compound_data is returned, otherwise no object is returned.
-    * The returned object of type HISTOGRAM, mixture_data, convolution_data or compound_data contains both the simulated sample and the model used for simulation.
-    * If 0 < (sample size) < 1000000, if (minimum length of the observation period) > 2 and if (maximum length of the observation period) XX 1000, an object of type renewal_data is returned, otherwise no object is returned. The returned object contains both the simulated sample (not only count data but also time sequences) and the model used for simulation.
+    * If the first argument is of type distribution and if 0 < size < 1000000, 
+      an object of type HISTOGRAM is returned, otherwise no object is returned.
+    * If the first argument is of type mixture and if 0 < size < 1000000, an 
+      object of type mixture_data is returned, otherwise no object is returned.
+    * If the first argument is of type convolution and if 0 < size < 1000000,
+      an object of type convolution_data is returned, otherwise no object is returned.
+    * If the first argument is of type compound and if 0 < size < 1000000, an 
+      object of type compound_data is returned, otherwise no object is returned.
+    * The returned object of type HISTOGRAM, mixture_data, convolution_data or
+      compound_data contains both the simulated sample and the model used for 
+      simulation.
+    * If 0 < (sample size) < 1000000, if (minimum length of the observation
+      period) > 2 and if (maximum length of the observation period) XX 1000,
+      an object of type renewal_data is returned, otherwise no object is
+      returned. The returned object contains both the simulated sample (not
+      only count data but also time sequences) and the model used for simulation.
     * If the first argument is of type markov or hidden_markov, if 0 < (sample size)
       < 100000, if (minimum sequence length) < 2, if (maximum sequence length) <
       1000 and if (cumulative sequence length) < 1000000, an object of type
@@ -124,20 +147,24 @@ def Simulate(obj, *args, **kargs):
 
     :Description:
 
-    If the fourth argument is of type time_events or renewal_data, the simulated sample has the same distribution of length of the observation period than the original sample given by this fourth argument. This simulation mode is particularly useful to study the effects of length biasing.
+    If the fourth argument is of type time_events or renewal_data, the simulated
+    sample has the same distribution of length of the observation period than 
+    the original sample given by this fourth argument. This simulation mode is
+    particularly useful to study the effects of length biasing.
 
-   If the third argument is of type discrete_sequences, markov_data or semi-markov_data, the simulated sequences has the same length distribution than the original sample given by this third argument. This simulation mode is particularly useful to study the effects of length biasing.
+    If the third argument is of type discrete_sequences, markov_data or 
+    semi-markov_data, the simulated sequences has the same length distribution
+    than the original sample given by this third argument. This simulation 
+    mode is particularly useful to study the effects of length biasing.
 
     .. seealso::
 
         :func:`~openalea.stat_tool.distribution.Distribution`,
-        :func:`openalea.stat_tool.mixture.Mixture`,
-        :func:`openalea.stat_tool.convolution.Convolution`,
-        :func:`openalea.stat_tool.compound.Compound`,
-        :func:`openalea.stat_tool.data_transform.ExtractHistogram`.
-        :func:`~openalea.sequence_analysis.Markov`,
+        :func:`~openalea.stat_tool.mixture.Mixture`,
+        :func:`~openalea.stat_tool.convolution.Convolution`,
+        :func:`~openalea.stat_tool.compound.Compound`,
+        :func:`~openalea.stat_tool.data_transform.ExtractHistogram`.
         :func:`~openalea.sequence_analysis.semi_markov.SemiMarkov`,
-        :func:`~openalea.sequence_analysis.hidden_markov.HiddenMarkov`,
         :func:`~openalea.sequence_analysis.hidden_semi_markov.HiddenSemiMarkov`,
         :func:`~openalea.sequence_analysis.renewal.Renewal`,
         :func:`~openalea.sequence_analysis.top_parameters.TopParameters`,
@@ -207,14 +234,3 @@ def Simulate(obj, *args, **kargs):
             ret =  obj.simulation_histogram(args[0], Counting, False)
 
         return ret
-
-
-
-
-
-
-
-
-
-
-

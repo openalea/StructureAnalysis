@@ -1,10 +1,19 @@
-"""Sequences
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-uthor:/
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: sequences.py summary
+
+    A module dedicated to Sequences
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+"""
+__version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
@@ -171,10 +180,13 @@ def Sequences(obj, **kargs):
 
     :Examples:
 
-    >>> Sequences(array1, Identifiers=[1, 8, 12])
-    >>> Sequences(arrayn, Identifiers=[1, 8, 12], IndexParameter="Position")
-    >>> Sequences(timev)
-    >>> Sequences(file_name)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> Sequences(array1, Identifiers=[1, 8, 12])
+        >>> Sequences(arrayn, Identifiers=[1, 8, 12], IndexParameter="Position")
+        >>> Sequences(timev)
+        >>> Sequences(file_name)
 
     .. seealso::
 
@@ -399,11 +411,13 @@ def IndexParameterType(obj):
     input can be sequence, markovian_sequences,
     nonhomogeneous_markov, variable_order_markov
 
-
-    >>> obj.index_parameter_type
-    3
-    >>> IndexParameterType(obj)
-    openalea.sequence_analysis._sequence_analysis.IndexParameterType.POSITON
+    .. doctest::
+        :options: +SKIP
+        
+        >>> obj.index_parameter_type
+        3
+        >>> IndexParameterType(obj)
+        openalea.sequence_analysis._sequence_analysis.IndexParameterType.POSITON
     """
 
     error.CheckType([obj], [[_Sequences, _MarkovianSequences,

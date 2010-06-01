@@ -1,10 +1,18 @@
-"""Correlation methods
-
-:Author: Thomas Cokelaer, Thomas.Cokelaer@inria.fr
-
-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """
-__revision__ = "$Id$"
+
+.. topic:: correlation.py summary
+
+    A module dedicated to Correlation functions
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+"""
+__version__ = "$Id$"
 
 
 import openalea.stat_tool.interface as interface
@@ -45,9 +53,12 @@ def ComputeCorrelation(obj, *args, **kargs):
 
     :Examples:
 
-    >>> ComputeCorrelation(seq1, MaxLag=10, Type="Spearman", Normalization="Exact")
-    >>> ComputeCorrelation(seqn, variable, MaxLag=10, Type="Spearman", Normalization="Exact")
-    >>> ComputeCorrelation(seqn, variable1, variable2, MaxLag=10, Type="Spearman", Normalization="Exact")
+    .. doctest::
+        :options: +SKIP
+        
+        >>> ComputeCorrelation(seq1, MaxLag=10, Type="Spearman", Normalization="Exact")
+        >>> ComputeCorrelation(seqn, variable, MaxLag=10, Type="Spearman", Normalization="Exact")
+        >>> ComputeCorrelation(seqn, variable1, variable2, MaxLag=10, Type="Spearman", Normalization="Exact")
 
     :Arguments:
 
@@ -158,8 +169,6 @@ def ComputeAutoCorrelation(obj, *args, **kargs):
         return obj.state_autocorrelation_computation(value, max_lag)
     elif len(args)==2:
         return obj.output_autocorrelation_computation(variable, value, max_lag)
-    else:
-        raise Exception("Should not enter here")
 
 
 
@@ -170,10 +179,13 @@ def ComputeWhiteNoiseCorrelation(obj, itype):
 
     :Usage:
 
-    >>> ComputeWhiteNoiseAutoCorrelation(cf, order)
-    >>> ComputeWhiteNoiseAutoCorrelation(cf, filter)
-    >>> ComputeWhiteNoiseAutoCorrelation(cf, frequencies)
-    >>> ComputeWhiteNoiseAutoCorrelation(cf, dist)
+    .. doctest::
+        :options: +SKIP
+        
+        >>> ComputeWhiteNoiseAutoCorrelation(cf, order)
+        >>> ComputeWhiteNoiseAutoCorrelation(cf, filter)
+        >>> ComputeWhiteNoiseAutoCorrelation(cf, frequencies)
+        >>> ComputeWhiteNoiseAutoCorrelation(cf, dist)
 
     :Arguments:
 
@@ -215,8 +227,11 @@ def ComputePartialAutoCorrelation(obj, *args, **kargs):
 
     :Usage:
 
-    >>> ComputePartialAutoCorrelation(seq1, MaxLag=10, Type="Kendall")
-    >>> ComputePartialAutoCorrelation(seqn, variable, MaxLag=10, Type="Kendall")
+    .. doctest::
+        :options: +SKIP
+        
+        >>> ComputePartialAutoCorrelation(seq1, MaxLag=10, Type="Kendall")
+        >>> ComputePartialAutoCorrelation(seqn, variable, MaxLag=10, Type="Kendall")
 
     :Arguments:
 

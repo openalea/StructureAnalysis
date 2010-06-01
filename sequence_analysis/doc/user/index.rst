@@ -10,28 +10,11 @@ Sequence_analysis User Guide
 :Release: |release|
 :Date: |today|
 
-This manual details functions, modules, and objects included in 
-VPlants.Sequence_analysis, describing what they are and what they do. For learning
-how to use VPlants.Sequence_analysis see :ref:`sequence_analysis_reference`.
-
-.. warning::
-
-   This Guide is still very much in progress.
-   Many aspects of VPlants.Sequence_analysis are not covered.
-
-   More documentation can be found on the
-   `openalea <http://openalea.gforge.inria.fr>`__ wiki.
-
-
-The wrapping of the CPP code is over and therefore all AML functionalities are now available in Python.
-
-The test cover 80% of the code. 
-
-The main point remaining is the writting of documentation as tutorials. 
-
+.. seealso:: :ref:`sequence_analysis_reference`.
 
 .. toctree::
     :maxdepth: 1
 
     tutorial.rst
-    admin.rst
+    example_oak.rst
+
