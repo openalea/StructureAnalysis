@@ -21,6 +21,7 @@ From original AML documentation
 
     description.rst
     syntax.rst
+    syntax2.rst
     list.rst
 
 tutorials and examples

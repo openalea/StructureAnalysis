@@ -54,6 +54,7 @@ class EstimateFunctions(object):
           * histo (histogram, mixture_data, convolution_data, compound_data)
 
         :Usage:
+
         .. doctest::
             :options: +SKIP
 
@@ -251,6 +252,7 @@ class EstimateFunctions(object):
 
 
         :Usage:
+
         .. doctest::
             :options: +SKIP
 

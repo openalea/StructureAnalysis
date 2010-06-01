@@ -20,4 +20,4 @@ mixt2 = Estimate(meri, "MIXTURE", "B", "B", "B", "B",  NbComponent="Estimated")
 
 import matplotlib as mpl
 mpl.rc('figure', figsize=(8,8))
-Plot(mixt2) 
+Plot(mixt2, fontsize=8) 

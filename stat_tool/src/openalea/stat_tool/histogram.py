@@ -1,8 +1,16 @@
-"""Histogram functions and classes
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Histogram object
 
-:Author: 
+.. topic:: histogram.py summary
 
-Thomas Cokelaer, Thomas.Cokelaer@inria.fr
+    A module dedicated to Histogram and DiscreteDistribution
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
 """
 __version__ = "$Id$"
 

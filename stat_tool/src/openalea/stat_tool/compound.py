@@ -11,7 +11,7 @@
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
     :Revision: $Id$
-    
+
 """
 __version__ = "$Id$"
 

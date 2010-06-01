@@ -109,7 +109,7 @@ def CheckArgumentsLength(args, min_nargs=0, max_nargs=32):
     arguments is in the given range.
 
     Used by functions to check the validity of the list of arguments
-    (usually denoted *args) provided by the user.
+    (usually denoted `*args`) provided by the user.
 
     :param args: a tuple containing user arguments
     :param min: minimum number of arguments expected.
@@ -119,7 +119,6 @@ def CheckArgumentsLength(args, min_nargs=0, max_nargs=32):
 
         >>> args = ('a','b')
         >>> CheckArgumentsLength(args, 1, 2)
-
     """
     CheckType([min_nargs], [[int, float]])
     l = len(args)
@@ -198,16 +197,13 @@ def ParseKargs(kargs, keyword, default=None, possible=None):
 def CheckKargs(kargs, possible_kargs):
     """Check that a list of keywords are present in kargs
 
-    :param kargs: a dictionary such as **kargs
+    :param kargs: a dictionary such as `**kargs`
     :param possible_kargs: a list of possible keywords
-
-
 
     :Example:
 
         >>> d = {'a':[1,1], 'b':[1,2]}
         >>> CheckKargs(d, ['a', 'b'])
-
     """
     # check that number of arguments is correct
 

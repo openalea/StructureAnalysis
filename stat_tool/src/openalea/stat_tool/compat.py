@@ -1,5 +1,5 @@
 """to be done"""
-__revision__ = "$Id$"
+__version__ = "$Id$"
 
 #import _stat_tool 
 #import openalea.stat_tool as stat_tool

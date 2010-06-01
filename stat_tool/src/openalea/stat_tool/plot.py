@@ -13,6 +13,9 @@
         Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
 
     :Revision: $Id$
+
+.. inheritance-diagram:: openalea.stat_tool.plot
+
 """
 __version__ = "$Id$"
 
@@ -34,7 +37,7 @@ class plotter(object):
     """ Abstract base class for all plotter """
     def _init__(self):
         pass
-    
+ 
     def plot(self, obj, title, groups=None, *args, **kargs):
         """ Plot obj with title """
 
@@ -45,7 +48,7 @@ class fakeplot(plotter):
 
     def __init__(self):
         plotter.__init__(self)
-        
+
     def plot(self, obj, title, groups=None, *args, **kargs):
         """ Plot obj with title """
         return
@@ -324,7 +327,7 @@ class mplotlib(plotter):
             _xrange = multiplot.xrange
             _yrange = multiplot.yrange
             a = pylab.gca()
-            if(xrange.min != _xrange.max):
+            if(_xrange.min != _xrange.max):
                 a.set_xlim([round(_xrange.min, 5), round(_xrange.max, 5)])
 
             if(_yrange.min != _yrange.max):
