@@ -27,14 +27,14 @@ AML doc
 
 .. toctree::
     :maxdepth: 1
-            
+
     description.rst
     syntax.rst
     list.rst
 
 To finalise
 ===========
-    
+
 .. toctree::
     :maxdepth: 1
 

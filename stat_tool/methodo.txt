@@ -27,8 +27,8 @@ Methodologie Ecriture wrapper Python
     - specification de l'interface
 
        * interface AML vs interface Object/Python::
-            >>> Estimate("Mixture", m, Param=2,...))
-            >>> m.estimate_mixture(param=2)
+            >>> Estimate("Mixture", m, Param=2,...))    #doctest:+SKIP
+            >>> m.estimate_mixture(param=2)             #doctest:+SKIP
        * integration Python : len, str, getitem
        * pour chaque objet
 

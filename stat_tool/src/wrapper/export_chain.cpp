@@ -90,7 +90,7 @@ void class_chain()
     void probability_accessibility_computation();
     void component_computation(bool **ilogic_transition = 0);
 
-    void thresholding(double min_probability);
+    void thresholding(double min_probability, bool semi_markov);
 
     int nb_parameter_computation(double min_probability = 0.) const;
     double chi2_value_computation(const Chain_data &chain_data) const;

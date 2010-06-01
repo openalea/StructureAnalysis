@@ -128,7 +128,7 @@ def Cluster(obj, utype, *args, **kargs):
         :func:`~openalea.stat_tool.data_transform.Difference`,
         :func:`~openalea.stat_tool.data_transform.IndexExtract`,
         :func:`~openalea.stat_tool.data_transform.LengthSelect`,
-        :func:`~openalea.stat_tool.data_transform.MovingAverage`,
+        :func:`~vplants.sequence_analysis.data_transform.MovingAverage`,
         :func:`~openalea.stat_tool.data_transform.RecurrenceTimeSequences`,
         :func:`~openalea.stat_tool.data_transform.Removerun`,
         :func:`~openalea.stat_tool.data_transform.Reverse`,

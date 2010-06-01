@@ -28,8 +28,7 @@ loading an ASCII or directly using python lists as follows:
 .. filename with respect to the directory where sphinx is launch
 .. doctest::
 
-    >>> v1 = Vectors('./test/chene_sessile.vec')
-
+    >>> v1 = Vectors('./test/data/chene_sessile.vec') #doctest: +SKIP
     >>> v2 = Vectors([[1,2], [3,4]])
 
 .. note:: Note the syntax, which is a list of lists
@@ -38,9 +37,9 @@ Then, you can access to various information using:
 
 .. doctest::
 
-    >>> v2.get_nb_variable()
+    >>> v2.nb_variable
     2
-    >>> v2.get_nb_vector()
+    >>> v2.nb_vector
     2
     >>> v2.get_identifiers()
     [1, 2]
@@ -77,7 +76,7 @@ Here is the usage of One-way variance analysis.
     coefficient of skewness        0   0
     coefficient of kurtosis       -2  -2
     <BLANKLINE>
-       | histogram 1 | histogram 3 | cumulative histogram 1 function | cumulative histogram 3 function
+       | frequency distribution 1 | frequency distribution 3 | cumulative distribution 1 function | cumulative distribution 3 function
     0  0  0  0  0
     1  0  0  0  0
     2  1  0  1  0
@@ -97,40 +96,40 @@ Compare
 
 .. doctest::
 
+
+
     >>> print Compare(ExtractHistogram(v2, 1), ExtractHistogram(v2,2), "O")
-    histogram 1 - sample size: 2
+    frequency distribution 1 - sample size: 2
     mean: 2   variance: 2   standard deviation: 1.41421
     coefficient of skewness: 0   coefficient of kurtosis: -2.5
     mean absolute deviation: 1   coefficient of concentration: 0.25
     information: -1.38629 (-0.693147)
     <BLANKLINE>
-    histogram 2 - sample size: 2
+    frequency distribution 2 - sample size: 2
     mean: 3   variance: 2   standard deviation: 1.41421
     coefficient of skewness: 0   coefficient of kurtosis: -2.5
     mean absolute deviation: 1   coefficient of concentration: 0.166667
     information: -1.38629 (-0.693147)
     <BLANKLINE>
-       | histogram 1 | histogram 2 | cumulative histogram 1 function | cumulative histogram 2 function
+       | frequency distribution 1 | frequency distribution 2 | cumulative distribution 1 function | cumulative distribution 2 function
     0  0  0    0    0
     1  1  0  0.5    0
     2  0  1  0.5  0.5
     3  1  0    1  0.5
     4     1         1
     <BLANKLINE>
-    dissimilarities between histograms
+    dissimilarities between frequency distributions
     <BLANKLINE>
-                | histogram 1 | histogram 2
-    histogram 1      0   0.5
-    histogram 2   -0.5     0
+                | frequency distribution 1 | frequency distribution 2
+    frequency distribution 1      0   0.5
+    frequency distribution 2   -0.5     0
     <BLANKLINE>
     Kruskal-Wallis test
     chi-square test (1 degree of freedom)
     chi-square value: 0.6   critical probability: 0.448429
     reference chi-square value: 3.74866   reference critical probability: 0.05
     <BLANKLINE>
-    
-    
-    
+
 ContingencyTable
 ----------------
 

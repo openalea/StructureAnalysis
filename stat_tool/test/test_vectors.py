@@ -171,7 +171,7 @@ class Test(interface):
     def test_rank_computation(self):
         vec10 = self.vec10
         ComputeRankCorrelation(vec10, Type="Kendall", FileName="test")
-        #todo  ComputeRankCorrelation(vec10, Type="Spearman", FileName="test")
+        #ComputeRankCorrelation(vec10, Type="Spearman", FileName="test")
 
 if __name__ == "__main__":
     test = Test()

@@ -1,7 +1,16 @@
-""" Plot functions
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Plot functions
 
-Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+.. topic:: estimate.py summary
 
+    A module dedicated to estimation functionalities
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Authors: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>, Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+
+    :Revision: $Id$
 """
 __version__ = "$Id$"
 
@@ -116,7 +125,15 @@ class gnuplot(plotter):
 
 
 class mplotlib(plotter):
-    """matplotlib implementation"""
+    """matplotlib implementation of AML Plot
+
+
+    This class defines an interface to matplolib plotting functions
+    and options.
+
+
+
+    """
 
     linestyles = ('-', '--', ':', '.')
     pointstyles = ('o', '^', 'x', '+', 's', 'v', '>', '<')
@@ -132,15 +149,24 @@ class mplotlib(plotter):
         self.matplotlib = matplotlib
 
     def plot(self, plotable, title, groups=[], *args, **kargs):
-        """
-        Plot a plotable with title
-        groups : list of group (int) to plot
+        """Plot a plotable with title
+
+        :param plotable: a plotable instance from standard stat_tool objects such as :func:`Distribution`
+        :param groups: list of group (int) to plot
+        :param Show:
+        :param nbcol:
+        :param legend_size: 10
+        :param legend_nbcol: 2
+        :param legend_loc: best
+        :param legend: True/False
+
         show=True by default will pop up the figure
         y_maxrange_ratio=1 multiply max y range by this value
         """
 
         show = kargs.get("Show", True)
         nbcol = kargs.get("nbcol", 2)
+        fontsize = kargs.get("fontsize", 10)
         options_y_maxrange_ratio = kargs.get("y_maxrange_ratio",1.1)
         line2d = {}
         line2d['linewidth'] = kargs.get("linewidth",1)
@@ -164,7 +190,7 @@ class mplotlib(plotter):
         #multiset.border
 
         # Configure figure
-        f1 = pylab.figure(fig_id)
+        f1 = pylab.figure(fig_id, figsize=(10,10))
         f1.clf()
 
         f1.set_facecolor("w")
@@ -206,8 +232,8 @@ class mplotlib(plotter):
             pylab.title(multiplot.title)
 
             # Labels
-            pylab.xlabel(multiplot.xlabel)
-            pylab.ylabel(multiplot.ylabel)
+            pylab.xlabel(multiplot.xlabel, fontsize=fontsize)
+            pylab.ylabel(multiplot.ylabel,fontsize=fontsize)
 
             lines = []
             legends = []

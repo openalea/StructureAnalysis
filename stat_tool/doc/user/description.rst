@@ -26,7 +26,7 @@ Les types «données» et les types «modèle» se regroupent en applications fi
 
 .. _fig7_1:
 
-.. figure:: ../.static/fig7_1.png
+.. figure:: ../_static/fig7_1.png
     :align: center
     :width: 60%
 
@@ -107,7 +107,7 @@ Nous distinguons trois catégories de fonctions :
 
 .. _fig7_2:
 
-.. figure:: ../.static/fig7_2.png
+.. figure:: ../_static/fig7_2.png
     :align: center
     :width: 80%
 

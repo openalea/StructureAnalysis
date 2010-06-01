@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""Functions dedicated to check function and class arguments 
+"""Functions dedicated to check function and class arguments
 
 .. topic:: error module summary
 
@@ -7,6 +8,10 @@
     :Documentation status: mature
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
     :Revision: $Id$
+
+.. testsetup:: *
+
+    from openalea.stat_tool.error import *
 """
 __version__ = "$Id$"
 
@@ -36,19 +41,19 @@ __all__ = ['CheckArgumentsLength',
 def CheckType(variables, types, **kargs):
     """Check types of input list of variables
 
-    .. warning:: only list are supported. 
-    
+    .. warning:: only list are supported.
+
     :param variables: a list of variables to be checked
     :param types: list of types
-    :param variable_pos: optional argument that provides the position of 
+    :param variable_pos: optional argument that provides the position of
         each variable. Used to enhance output message. For instance, if only
-        a specific arguments (let us say the third one) has to be checked, 
+        a specific arguments (let us say the third one) has to be checked,
         use variable_pos=[3] and in case of errorm, the error message will be
         'the third argument is incorrect'
 
     .. todo:: consider removing the optional argument that is hardly used.
-     
-    :example:
+
+    :Examples:
 
         >>> #CheckType(1, int, variable_index=0) NOT IMPLEMENTED
         >>> CheckType([1, 'a'], [int, str], variable_pos=[0,1])
@@ -99,31 +104,31 @@ def CheckType(variables, types, **kargs):
 
 def CheckArgumentsLength(args, min_nargs=0, max_nargs=32):
     """Check that the number of arguments is valid
-    
-    This function check that the number of arguments of the list/tuple of 
+
+    This function check that the number of arguments of the list/tuple of
     arguments is in the given range.
-    
-    Used by functions to check the validity of the list of arguments 
-    (usually denoted *args) provided by the user.  
+
+    Used by functions to check the validity of the list of arguments
+    (usually denoted *args) provided by the user.
 
     :param args: a tuple containing user arguments
     :param min: minimum number of arguments expected.
     :param max: maximum number of arguments expected (strict) (default is 32).
-    
+
     :Example:
-    
-        >>> args = ('a','b') 
+
+        >>> args = ('a','b')
         >>> CheckArgumentsLength(args, 1, 2)
-        
+
     """
     CheckType([min_nargs], [[int, float]])
     l = len(args)
     assert max_nargs >= min_nargs, \
         "max_nargs must be greater or equal to min_args"
     assert max_nargs >= 0 and min_nargs >= 0, \
-        "max_nargs and min_margs must be striclty positive" 
+        "max_nargs and min_margs must be striclty positive"
     if (l < min_nargs) or (l > max_nargs):
-        msg = """Expected at least %s arguments and at most %s arguments but 
+        msg = """Expected at least %s arguments and at most %s arguments but
             %s were provided' """ % (min_nargs, max_nargs, l)
         raise Exception(msg)
 
@@ -134,12 +139,12 @@ def CheckDictKeys(key, udict):
     :param key:
     :param udict: a valid dictionary
     :returns: the value corresponding to the key
-    
+
     :Example:
-    
-        >>> d = {'a', [1,2], 'b':[1,2]}
-        >>> res = CheckDictKeys('a', udict)
-        
+
+        >>> d = {'a': [1,2], 'b':[1,2]}
+        >>> res = CheckDictKeys('a', d)
+
     """
     CheckType([key], [str])
     if key not in udict.keys():
@@ -150,7 +155,7 @@ def CheckDictKeys(key, udict):
 
 
 def ParseKargs(kargs, keyword, default=None, possible=None):
-    """Utility to parse and check `**kargs` optional arguments 
+    """Utility to parse and check `**kargs` optional arguments
 
     This is an improved version of kargs.get() to be used after the function
     definition.
@@ -158,21 +163,19 @@ def ParseKargs(kargs, keyword, default=None, possible=None):
     :param kargs: a dictionary
     :param keyword: a key to look for
     :param default: value to assigned to keyword if not found in kargs
-    :param possible: possible values that kargs[keyword] can take 
+    :param possible: possible values that kargs[keyword] can take
         (either a list or dict)
-    
+
     :Example:
 
         >>> kargs = {'a':[1,2], 'verbose':True}
-        >>> a = error.ParseKargs(kargs, "a", [1,1])
-        >>> verbose = error.ParseKargs(kargs, "verbose", False, 
-                possible=[False, True] 
+        >>> a = ParseKargs(kargs, "a", [1,1])
+        >>> verbose = ParseKargs(kargs, "verbose", False, possible=[False, True])
 
-    The fourth argument may be a dictionary. 
-            
-        >>> mykeys = {'verbose':None}
-        >>> distance = error.ParseKargs(kargs, "verbose", False
-                                possible=mykeys)
+    The fourth argument may be a dictionary (values are irrelevant)
+
+        >>> mykeys = {False:None, True:None}
+        >>> distance = ParseKargs(kargs, "verbose", False, possible=mykeys)
     """
     CheckType([kargs], [dict])
     ret = kargs.get(keyword, default)
@@ -195,25 +198,25 @@ def ParseKargs(kargs, keyword, default=None, possible=None):
 def CheckKargs(kargs, possible_kargs):
     """Check that a list of keywords are present in kargs
 
-    :param kargs: a dictionary such as **kargs 
+    :param kargs: a dictionary such as **kargs
     :param possible_kargs: a list of possible keywords
-    
+
 
 
     :Example:
 
         >>> d = {'a':[1,1], 'b':[1,2]}
-        >>> CheckKargs(d, ['a', 'b']
+        >>> CheckKargs(d, ['a', 'b'])
 
     """
     # check that number of arguments is correct
-   
+
     CheckArgumentsLength(kargs, 0, len(possible_kargs))
 
     # check that argument names are correct
     for karg in kargs:
         if karg not in possible_kargs:
-            raise KeyError('Argument %s not allowed (%s).',
+            raise KeyError('Argument %s not allowed (possible args are %s).',
                                 karg, possible_kargs)
 
 

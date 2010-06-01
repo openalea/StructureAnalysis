@@ -34,8 +34,8 @@ follows:
 and
 
 .. doctest:: 
-   
-    >>> conv2 = Convolution('./test/convolution1.conv')
+
+    >>> conv2 = Convolution('./test/convolution1.conv') #doctest: +SKIP
 
 In the first example, which we'll use later on, one create the convolution of 
 two :func:`~openalea.stat_tool.distribution.Distribution` that are a 

@@ -1,5 +1,6 @@
 .. _stat_tool_reference:
 
+
 Reference guide
 ###############
 .. contents::
@@ -177,13 +178,13 @@ Class Inheritance diagram
     :synopsis:  Mixture class
 
 
-.. currentmodule:: openalea.stat_tool.mvmixture
+.. currentmodule:: openalea.stat_tool.multivariate_vmixture
 
-:mod:`openalea.stat_tool.mvmixture` module
-============================================
+:mod:`openalea.stat_tool.multivariate_mixture` module
+==========================================================
 
 
-.. automodule:: openalea.stat_tool.mvmixture
+.. automodule:: openalea.stat_tool.multivariate_mixture
     :members:
     :undoc-members:
     :inherited-members:

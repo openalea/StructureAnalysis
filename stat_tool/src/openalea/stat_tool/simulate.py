@@ -37,6 +37,9 @@ def Simulate(obj, *args):
 
     :Example:
 
+    .. doctest::
+        :options: +SKIP
+
         >>> Simulate(dist, size)
         >>> Simulate(mixt, size)
         >>> Simulate(convol, size)

@@ -31,6 +31,14 @@ def test_simulate_distribution():
     s1 = Simulate(c, 1000)
     assert s1
 
+def test_simulation_sequences():
+    #TODO The Simulate call does not work. Requires a proper input.
+    try:
+        from openalea.sequence_analysis import Sequences
+        seq = Sequences([1,2,3,4])
+        Simulate(seq, 100)
+    except:
+        assert True
 
 if __name__ == "__main__":
     test_simulate_mixture()

@@ -1,4 +1,18 @@
-"""Data transformation functions"""
+"""Data transformation functions
+
+
+
+
+
+
+
+.. testsetup:: *
+
+    from openalea.stat_tool import *
+
+
+
+"""
 
 __revision__ = "$Id$"
 
@@ -793,6 +807,9 @@ def Unnormalize(obj):
 
     :Examples:
 
+    .. doctest::
+        :options: +SKIP
+
         >>>  Unnormalize(dist_matrix)
 
     """
@@ -834,9 +851,14 @@ def SelectStep(obj, *args):
 
     :Example:
 
-        >>> seq = Sequences('data')
+    .. doctest::
+        :options: +SKIP
+
+        >>> seq = Sequences([])
         >>> SelectStep(seq, 100)
         >>> Plot(seq)
+
+    .. todo:: shall we move this function to sequence_analysis package?
 
     """
     error.CheckArgumentsLength(args, 1, 2)

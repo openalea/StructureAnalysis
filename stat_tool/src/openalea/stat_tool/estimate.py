@@ -1,9 +1,18 @@
-""" Estimation functions
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Estimate functions
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: estimate.py summary
 
-.. todo:: refactoring : pylint score is negative !
+    A module dedicated to estimation functionalities
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
 """
+
 __version__ = "$Id$"
 
 import error
@@ -26,7 +35,7 @@ from _stat_tool import _Mixture
 from _stat_tool import _FrequencyDistribution
 
 
-__all__ = ["Estimate"]
+__all__ = ["Estimate", "EstimateFunctions"]
 
 class EstimateFunctions(object):
     """
@@ -42,16 +51,12 @@ class EstimateFunctions(object):
         :Parameters:
           * histo (histogram, mixture_data, convolution_data, compound_data)
 
-        :Examples:
-
+        :Usage:
         .. doctest::
             :options: +SKIP
 
-            >>> estimate_nonparametric(histo)
-
-        :Usage:
-
             >>> Estimate(histo, "NON-PARAMETRIC")
+            >>> estimate_nonparametric(histo)
 
         """
         return  _DiscreteParametricModel(histo)
@@ -71,7 +76,7 @@ class EstimateFunctions(object):
           * InfBoundStatus (string): shifting or not of the distribution:
                                       "Free" (default value) or "Fixed". T
 
-        :Examples:
+        :Usage:
 
         .. doctest::
             :options: +SKIP
@@ -145,13 +150,12 @@ class EstimateFunctions(object):
                                MinInfBound=1, InfBoundStatus="Fixed",
                                DistInfBoundStatus="Fixed",
                                NbComponent="Estimated", Penalty="AIC")
-            Estimate(histo, "MIXTURE", "B", dist, MinInfBound->1, InfBoundStatus->"Fixed",
-                DistInfBoundStatus->"Fixed")
-
-            Estimate(histo, "MIXTURE", "B", "NB",
-                MinInfBound=1, InfBoundStatus="Fixed",
-                DistInfBoundStatus="Fixed",
-                NbComponent="Estimated", Penalty="AIC")
+            >>> Estimate(histo, "MIXTURE", "B", dist, MinInfBound=1, InfBoundStatus="Fixed",
+                    DistInfBoundStatus="Fixed")
+            >>> Estimate(histo, "MIXTURE", "B", "NB",
+                    MinInfBound=1, InfBoundStatus="Fixed",
+                    DistInfBoundStatus="Fixed",
+                    NbComponent="Estimated", Penalty="AIC")
 
 
         """
@@ -244,11 +248,14 @@ class EstimateFunctions(object):
         """estimate a compound
 
 
+        :Usage:
+        .. doctest::
+            :options: +SKIP
 
-        Estimate(histo, "COMPOUND", dist, unknown,
-            Parametric->False, MinInfBound->0)
-            Estimate(histo, "COMPOUND", dist, unknown,
-            InitialDistribution->initial_dist, Parametric->False)
+            >>> Estimate(histo, "COMPOUND", dist, unknown,
+                    Parametric=False, MinInfBound=0)
+                    Estimate(histo, "COMPOUND", dist, unknown,
+                    InitialDistribution=initial_dist, Parametric=False)
         """
 
         if len(args)<2:
@@ -331,10 +338,15 @@ class EstimateFunctions(object):
     def estimate_convolution(histo, *args, **kargs):
         """ Estimate a convolution
 
-        Estimate(histo, "CONVOLUTION", dist,
-            MinInfBound->1, Parametric->False)
-            Estimate(histo, "CONVOLUTION", dist,
-            InitialDistribution->initial_dist, Parametric->False)
+        :Usage:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> Estimate(histo, "CONVOLUTION", dist,
+                    MinInfBound=1, Parametric=False)
+                    Estimate(histo, "CONVOLUTION", dist,
+                    InitialDistribution=initial_dist, Parametric=False)
 
         """
 
@@ -381,15 +393,20 @@ _FrequencyDistribution = interface.extend_class( _FrequencyDistribution, Estimat
 
 
 def Estimate(histo, itype, *args, **kargs):
-    """
-    Estimation function for AML compatibility
+    """Estimate function
+
+    This function is a dispatcher to several estimate functions depending on
+    the first argument and the type.
+
+    :param obj: the input object (may be histogram, sequence, compound, ...)
+    :param itype: string.
 
     .. seealso::
-        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimation_nonparametric`,
-        :func:`~openalea.stat_tool.estimate.estimation_parametric`,
-        :func:`~openalea.stat_tool.estimate.estimation_mixture`,
-        :func:`~openalea.stat_tool.estimate.estimation_convolution`,
-        :func:`~openalea.stat_tool.estimate.estimation_compound`,
+        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_nonparametric`,
+        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_parametric`,
+        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_mixture`,
+        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_convolution`,
+        :func:`~openalea.stat_tool.estimate.EstimateFunctions.estimate_compound`,
     """
 
     fct_map = {

@@ -1,7 +1,17 @@
-""" Distributions module
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Distributions
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
- """
+.. topic:: distribution.py summary
+
+    Provides standard distributions
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+"""
 __version__ = "$Id$"
 
 import interface
@@ -114,6 +124,10 @@ def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT, \
         (shift parameter)
       * `sup_bound` (int) : upper bound to the range of possilbe values
       * `proba` (int, float) : probability of 'success'
+
+    .. plot:: pyplots/binomial.py
+
+
     """
     # todo: seg fault when passing -1 as first arguments if there
     # is no assert here below
@@ -141,6 +155,8 @@ def Poisson(inf_bound, param=_stat_tool.D_DEFAULT):
       * `inf_bound` (int) : lower bound to the range of possible values
         (shift parameter)
       * `param` (int, float) : parameter of the Poisson distribution
+    
+    .. plot:: pyplots/poisson.py
     """
 
     assert inf_bound >= 0
@@ -164,6 +180,8 @@ def NegativeBinomial(inf_bound, param=_stat_tool.D_DEFAULT, \
         (shift parameter)
       * param (int, float) : parameter of the Poisson distribution
       * proba (int, float) : probability of 'success'
+
+    .. plot:: pyplots/negative_binomial.py
     """
 
     # Check parameters
@@ -186,6 +204,8 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
       * inf_bound (int) : lower bound to the range of possible values
         (shift parameter)
       * sup_bound (int) : upper bound to the range of possilbe values
+
+    .. plot:: pyplots/uniform.py
     """
 
     # Check parameters

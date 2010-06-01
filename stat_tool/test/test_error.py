@@ -150,7 +150,16 @@ def test_CheckKargs():
     except:
         assert True
     try:
-        CheckKargs(d, ['d'])
+        CheckKargs(d, ['a','d'])
         assert False
     except:
         assert True
+
+
+def test_class_error():
+
+    fe = FormatError()
+    fe._error()
+    fe = FormatError(error="test")
+    fe._error()
+    print fe

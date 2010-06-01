@@ -63,7 +63,6 @@ def Histogram(*args):
     # Histogram(filename)
     if len(args)==1 and isinstance(args[0], str):
         ret = _DiscreteDistributionData(args[0])
-        
     # Histogram([1,2,3])
     elif len(args)==1 and isinstance(args[0], list):
         ret = _DiscreteDistributionData(args[0])

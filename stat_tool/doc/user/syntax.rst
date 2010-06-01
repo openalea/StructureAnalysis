@@ -1,10 +1,10 @@
 .. _stat_tool_syntax:
 
-.. |leq|   unicode:: U+02264 
-.. |geq|   unicode:: U+02265 
+.. |leq|   unicode:: U+02264
+.. |geq|   unicode:: U+02265
 
 .. testsetup:: *
-      
+
     from openalea.stat_tool import *
 
 
@@ -30,7 +30,7 @@ you can load this data by using
 
 
 .. doctest::
-    
+
     >>> compound = Compound('doc/user/syntax_compound.dat')
 
 The first line gives the distribution type. The parametric sum distribution and the parametric elementary distribution are then defined in subsequent lines according to the syntactic form defined for the type DISTRIBUTION.
@@ -46,7 +46,7 @@ you can load this data by using
 
 
 .. doctest::
-    
+
     >>> convolution = Convolution('doc/user/syntax_convolution.dat')
 
 
@@ -64,7 +64,7 @@ you can load this data by using
 
 
 .. doctest::
-       
+
     >>> binomial = Distribution('doc/user/syntax_distribution.dat')
 
 INF_BOUND and SUP_BOUND are integer-valued parameters while PARAMETER and PROBABILITY are real-valued parameters.
@@ -126,7 +126,7 @@ A hidden Markov chain is constructed from an underlying Markov chain and nonpara
     OBSERVATION 0 : 0.2
     OBSERVATION 1 : 0.4
     OBSERVATION 2 : 0.4
-    
+
     STATE 1
     OBSERVATION 0 : 0.8
     OBSERVATION 1 : 0.1
@@ -162,7 +162,7 @@ A hidden semi-Markov chain is constructed from an underlying semi-Markov chain (
     POISSON  INF_BOUND : 1  PARAMETER : 5.4
 
     OBSERVATION_PROBABILITIES
-    
+
     1 SPACE
 
     SPACE 1
@@ -225,9 +225,9 @@ It is also possible to define observation (or state-dependent) probabilities if 
     OBSERVATION_PROBABILITIES
 
     2 SPACES
-    
+
     SPACE 1
-    
+
     STATE 0
     OBSERVATION 0 : 1.0
 
@@ -240,7 +240,7 @@ It is also possible to define observation (or state-dependent) probabilities if 
     STATE 0
     OBSERVATION 0 : 0.7
     OBSERVATION 1 : 0.3
-    
+
     STATE 1
     OBSERVATION 2 : 0.6
     OBSERVATION 3 : 0.4
@@ -248,23 +248,23 @@ It is also possible to define observation (or state-dependent) probabilities if 
 Consider the following example of a non-homogeneous Markov chain::
 
     NON-HOMOGENEOUS_MARKOV_CHAIN
-    
+
     3 STATES
     ORDER 1
-    
+
     INITIAL_PROBABILITIES
     0.5  0.3  0.2
-    
+
     TRANSITION_PROBABILITIES
     0.6  0.2  0.2
     0.1  0.8  0.1
     0.2  0.1  0.7
-    
+
     STATE 0 HOMOGENEOUS
-    
+
     STATE 1 NON-HOMOGENEOUS
     MONOMOLECULAR FUNCTION  PARAMETER 1 : 0.99  PARAMETER 2 : -0.34  PARAMETER 3 : 0.3
-    
+
     STATE 2 NON-HOMOGENEOUS
     LOGISTIC FUNCTION  PARAMETER 1 : 0. 99  PARAMETER 2 : 2.8  PARAMETER 3 : 0.2
 
@@ -275,7 +275,7 @@ For a MONOMOLECULAR function :math:`\left(p_{ii}(t)=a+b \exp{(-ct)}\right)`, the
 * 0 |leq| PARAMETER 1 |leq| 1
 * 0 |leq| PARAMETER 1 + PARAMETER 2 |leq| 1
 * PARAMETER 3 > 0
-    
+
 For a MONOMOLECULAR function :math:`\left(p_{ii}(t)=a/ \{ 1+b \exp{(-ct)}\}\right)`, the following constraints apply:
 
 * 0 |leq| PARAMETER 1 |leq| 1
@@ -348,10 +348,10 @@ Consider the following example of multivariate sequences::
 
     VARIABLE 1 : STATE
     VARIABLE 2 : STATE
-    
+
     1 0 | 0 0 | 1 0 | 2 0 | 2 1 | 2 1 | 1 0 | 1 0 | 1 0 | 0 1 | 0 1 | 1 1 \
     0 1 | 2 0 | 2 1
-    
+
     0 0 | 0 0 | 1 0 | 2 0 | 2 1 | 1 1 | 1 0 | 1 0 | 0 0 | 0 0
 
 The character '|' enables to separate successive vectors.
@@ -388,24 +388,24 @@ Consider the following example of sequences with an explicit index parameter of 
 
     VARIABLE 1 : TIME
     VARIABLE 2 : STATE
-    
+
     3 1 | 7 4 | 10 8 | 14 10 | 18 15 | 21 16 | 25 18 | 28 19 | 31 20 | 35 22 | 39 23 | 42 24 \
     45 25 | 49 25
-    
+
     3 1 | 7 2 | 10 6 | 14 9 | 18 13 | 21 14 | 25 15 | 28 16 | 31 17 | 35 17
-    
+
 The only difference with the explicit index parameter of type POSITION is that the index values should be strictly increasing along sequences and that no final index value is required.
 
 The explicit index parameter of type TIME can be replaced by time intervals::
 
     2 VARIABLES
-    
+
     VARIABLE 1 : TIME_INTERVAL
     VARIABLE 2 : STATE
-    
+
     3 1 | 4 4 | 3 8 | 4 10 | 4 15 | 3 16 | 4 18 | 3 19 | 3 20 | 4 22 | 4 23 | 3 24 \
     3 25 | 4 25
-    
+
     3 1 | 4 2 | 3 6 | 4 9 | 4 13 | 3 14 | 4 15 | 3 16 | 3 17 | 4 17
 
 4.7.11 type TIME_EVENTS
@@ -444,10 +444,10 @@ Consider the following example::
 
     VARIABLE 1 : POSITION
     VARIABLE 2 : NB_INTERNODE
-    
+
     10 5 | 12 5 | 13 6 | 13 8 | 15 7 | 20 10 | 22 11 | 23 11 | 27 15 | 30 16 | 31 15 | 32 17 \
     35 16 | 37 18 | 40 19 | 45
-    
+
     5 2 | 7 4 | 10 5 | 11 6 | 15 7 | 18 8 | 20 9 | 21 11 | 22 11 | 25 12 | 25
 
 The syntactic form of the type TOPS is a variant of the syntactic form of the type SEQUENCES. 'Tops' can be seen as sequences with an explicit index parameter of type POSITION. This index parameter represents the position of successive offspring shoots along the parent shoot and a final index value gives the number of internodes of the parent shoot. The second variable of type NB_INTERNODE gives the number of internodes of the offspring shoots.
@@ -455,13 +455,13 @@ The syntactic form of the type TOPS is a variant of the syntactic form of the ty
 The explicit index parameter of type POSITION can be replaced by inter-position intervals::
 
     2 VARIABLES
-    
+
     VARIABLE 1 : POSITION_INTERVAL
     VARIABLE 2 : NB_INTERNODE
-    
+
     10 5 | 2 5 | 1 6 | 0 8 | 2 7 | 5 10 | 2 11 | 1 11 | 4 15 | 3 16 | 1 15 | 1 17 \
     3 16 | 2 18 | 3 19 | 5
-    
+
     5 2 | 2 4 | 3 5 | 1 6 | 4 7 | 3 8 | 2 9 | 1 11 | 1 11 | 3 12 | 0
 
 4.7.13 type TOP_PARAMETERS
@@ -469,13 +469,13 @@ The explicit index parameter of type POSITION can be replaced by inter-position 
 A model of 'tops' is defined by three parameters, namely the growth probability of the parent shoot, the growth probability of the offspring shoots (both in the sense of Bernoulli processes) and the growth rhythm ratio offspring shoots / parent shoot. Consider the following example::
 
     TOP_PARAMETERS
-    
+
     PROBABILITY : 0.7
     AXILLARY_PROBABILITY : 0.6
     RHYTHM_RATIO : 0.8
-    
+
 The following constraints apply to the parameters:
-    
+
 * 0.05 |leq| PROBABILITY |leq| 1
 * 0.05 |leq| AXILLARY_PROBABILITY |leq| 1
 * 1/3 |leq| RHYTHM_RATIO |leq| 3
