@@ -1,6 +1,17 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """Cluster functions and classes
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: cluster.py summary
+
+    A module dedicated to Clustering
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+        Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
 
 """
 __version__ = "$Id$"

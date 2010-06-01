@@ -1,5 +1,19 @@
-# -*- coding: utf-8 -*-
-"""Mv Mixture class"""
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Multivariate mixture
+
+.. topic:: compound.py summary
+
+    A module dedicated to Multivariate Mixture
+
+    :Code status: ?
+    :Documentation status: ?
+    :Author: JB Durand
+
+    :Revision: $Id$
+
+"""
+
 __version__ = "$Id$"
 
 

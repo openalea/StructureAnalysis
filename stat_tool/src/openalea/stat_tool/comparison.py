@@ -1,6 +1,17 @@
-"""Comparison functions
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Comparison
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: comparison.py summary
+
+    A module dedicated to Comparison tests
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
 """
 __version__ = "$Id$"
 

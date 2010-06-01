@@ -10,20 +10,11 @@ Stat_tool User Guide
 :Release: |release|
 :Date: |today|
 
-This manual details functions, modules, and objects included in 
-VPlants.Stat_tool, describing what they are and what they do. For learning
-how to use VPlants.Stat_tool see :ref:`stat_tool_reference`.
+.. seealso:: :ref:`stat_tool_reference`.
 
-.. warning::
 
-   This Guide is still very much in progress.
-   Many aspects of VPlants.Stat_tool are not covered.
-
-   More documentation can be found on the
-   `openalea <http://openalea.gforge.inria.fr>`__ wiki.
-
-AML doc
-=======
+From original AML documentation
+====================================
 
 .. toctree::
     :maxdepth: 1
@@ -32,8 +23,8 @@ AML doc
     syntax.rst
     list.rst
 
-To finalise
-===========
+tutorials and examples
+=======================
 
 .. toctree::
     :maxdepth: 1

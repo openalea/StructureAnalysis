@@ -1,6 +1,16 @@
-"""Regression
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Regression functions
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: regression.py summary
+
+    A module dedicated to regression functionalities
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
 """
 __version__ = "$Id$"
 
@@ -24,7 +34,6 @@ __all__ = ['_Regression',
            'Regression']
 
 
-#todo: use args and kargs as arguments
 def Regression(vec, utype, explanatory, response, 
                *args, **kargs):
     """
@@ -131,7 +140,6 @@ def Regression(vec, utype, explanatory, response,
         
         assert span >= STAT_MINIMUM_SPAN 
         #todo: check this assert
-        #assert span <= 1. - STAT_MINIMUM_SPAN 
 
         return vec.nearest_neighbours_regression(explanatory, response, 
                                                  float(span), Weighting)

@@ -1,6 +1,21 @@
-""" Convolution module
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Convolution
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: convolution.py summary
+
+    A module dedicated to Convolution
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+        Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+
+.. testsetup:: *
+
+    from openalea.stat_tool import *
 """
 __version__ = "$Id$"
 

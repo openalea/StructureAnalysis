@@ -1,8 +1,17 @@
-"""Compound module
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Compound object
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: compound.py summary
 
+    A module dedicated to Compound objects
 
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
 """
 __version__ = "$Id$"
 

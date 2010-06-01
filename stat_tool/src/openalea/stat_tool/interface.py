@@ -1,4 +1,7 @@
-""" Interfaces for stat_tool objects """
+""" Interfaces for stat_tool objects 
+
+.. note:: this is for developers usage only, not part of the user library
+"""
 __version__ = "$Id$"
 
 from output import StatInterface

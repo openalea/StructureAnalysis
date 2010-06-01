@@ -1,8 +1,17 @@
-""" Simulation functions 
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Simulate functions
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: simulate.py summary
+
+    A module dedicated to simulate functionalities
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
 """
-
 __version__ = "$Id$"
 
 __all__ = ["Simulate"]
@@ -56,6 +65,6 @@ def Simulate(obj, *args):
     error.CheckArgumentsLength(args, 1, 1)
     try:
         return obj.simulate(args[0])
-    except:
+    except ImportError:
         from openalea.sequence_analysis.simulate import Simulate as newSimulate
         return newSimulate(args[0])

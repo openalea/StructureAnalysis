@@ -1,7 +1,9 @@
-"""common enumerate
+"""common enumerates
 
 :Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
-
+:Code status: mature
+:Documentation status: to be completed
+:Revision: $Id$
 """
 __version__ = "$Id$"
 

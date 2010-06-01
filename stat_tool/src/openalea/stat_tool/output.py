@@ -1,6 +1,18 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """Output functions
 
-:Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>, Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+.. topic:: output.py summary
+
+    A module dedicated to Output functions (plot, displya, save)
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+        Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
 """
 __version__ = "$Id$"
 

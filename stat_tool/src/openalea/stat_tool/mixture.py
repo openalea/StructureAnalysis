@@ -1,8 +1,20 @@
-""" Mixture class
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
+"""Mixture object
 
-:Authors: Thomas Cokelaer <Thomas.Cokelaer@inria.fr> 
- 
-todo: MixtureData ?
+.. topic:: mixture.py summary
+
+    A module dedicated to Mixture objects
+
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
+.. testsetup:: *
+
+    from openalea.stat_tool.vectors import *
 """
 __version__ = "$Id$"
 

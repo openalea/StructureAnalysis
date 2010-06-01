@@ -1,19 +1,24 @@
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """Data transformation functions
 
+.. topic:: data_transform.py summary
 
+    A module dedicated to Output functions (plot, displya, save)
 
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+        Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
-
-
+    :Revision: $Id$
 
 .. testsetup:: *
 
     from openalea.stat_tool import *
-
-
-
+    
+.. warning:: sequence analysis package also contain a data transform module
 """
-
 __revision__ = "$Id$"
 
 import error

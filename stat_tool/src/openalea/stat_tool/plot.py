@@ -2,13 +2,15 @@
 #-*- coding: utf-8 -*-
 """Plot functions
 
-.. topic:: estimate.py summary
+.. topic:: plot.py summary
 
-    A module dedicated to estimation functionalities
+    A module that provides plotting functions for Gnuplot
+    of Matplorlib.
 
     :Code status: mature
     :Documentation status: to be completed
-    :Authors: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>, Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
+    :Authors: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>, 
+        Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
 
     :Revision: $Id$
 """
@@ -24,104 +26,110 @@ DISABLE_PLOT = False
 # So, we test if the command "python setup.py nosetests" has been used.
 # Still, using nosetests executable, windows should pop up.
 if("nosetests" in sys.argv):
- DISABLE_PLOT = True
+    DISABLE_PLOT = True
 
 
 
 class plotter(object):
- """ Abstract base class for all plotter """
+    """ Abstract base class for all plotter """
+    def _init__(self):
+        pass
+    
+    def plot(self, obj, title, groups=None, *args, **kargs):
+        """ Plot obj with title """
 
- def plot(self, obj, title, groups=[], *args, **kargs):
-     """ Plot obj with title """
-
-     raise NotImplementedError()
+        raise NotImplementedError()
 
 
 class fakeplot(plotter):
 
- def plot(self, obj, title, groups=[], *args, **kargs):
-     """ Plot obj with title """
-     return
+    def __init__(self):
+        plotter.__init__(self)
+        
+    def plot(self, obj, title, groups=None, *args, **kargs):
+        """ Plot obj with title """
+        return
 
 
 class gnuplot(plotter):
- """ GNUPlot implementation """
+    """ GNUPlot implementation """
 
- def __init__(self):
-     """ Initialize GnuPlot """
-     import Gnuplot
-     self.session = Gnuplot.Gnuplot()
+    def __init__(self):
+        """ Initialize GnuPlot """
+        plotter.__init__(self)
+        import Gnuplot
+        self.session = Gnuplot.Gnuplot()
 
- def plot(self, plotable, title, groups=[], *args, **kargs):
-     """
-     Plot a plotable with title
-     groups : list of group (int) to plot
-     """
-     import Gnuplot
+    def plot(self, plotable, title, groups=None, *args, **kargs):
+        """
+         Plot a plotable with title
+         groups : list of group (int) to plot
+        """
+        import Gnuplot
 
-     multiset = plotable
-     g = self.session
+        multiset = plotable
+        g = self.session
 
-     # Title & border
-     #multiset.border
-     # nb subplot
-     _nbx = len(multiset)
+        # Title & border
+        #multiset.border
+        # nb subplot
+        _nbx = len(multiset)
 
-     # For each subplot
-     for _i, multiplot in enumerate(multiset):
-         # Group filter
-         if(groups and multiplot.group not in groups):
-             continue
-         g.title(multiplot.title)
-         #yoffset = i * plotsize
+        # For each subplot
+        for _i, multiplot in enumerate(multiset):
+            # Group filter
+            if(groups and multiplot.group not in groups):
+                continue
+            g.title(multiplot.title)
+            #yoffset = i * plotsize
 
-         #g('set origin 0.0, %f'%(yoffset))
-         #g('set size 1.0, %f'%(plotsize))
+            #g('set origin 0.0, %f'%(yoffset))
+            #g('set size 1.0, %f'%(plotsize))
 
-         # Labels
-         g.xlabel(multiplot.xlabel)
-         g.ylabel(multiplot.ylabel)
+            # Labels
+            g.xlabel(multiplot.xlabel)
+            g.ylabel(multiplot.ylabel)
 
-         # List of argument for the plot function
-         plot_list = []
-         for singleplot in multiplot:
+            # List of argument for the plot function
+            plot_list = []
+            for singleplot in multiplot:
 
-             style = singleplot.style
-             legend = singleplot.legend
-             _color = singleplot.color
+                style = singleplot.style
+                legend = singleplot.legend
+                _color = singleplot.color
 
-             x = []
-             y = []
-             for pt in singleplot:
-                 x.append(pt.x)
-                 y.append(pt.y)
+                x = []
+                y = []
+                for pt in singleplot:
+                    x.append(pt.x)
+                    y.append(pt.y)
 
-             p = Gnuplot.Data(x, y)
-             if style:
-                 "todo: check that this option works."
-                 p.set_option(with_=style)
+                p = Gnuplot.Data(x, y)
+                if style:
+                    #todo: check that this option works.
+                    p.set_option(with_=style)
+ 
+                if legend:
+                    p.set_option(title=legend)
+                plot_list.append(p)
 
-             if legend:
-                 p.set_option(title=legend)
-             plot_list.append(p)
+            # Range
+            _xrange = multiplot.xrange
+            _yrange = multiplot.yrange
+            if(_xrange.min != _xrange.max):
+                g('set xrange[%f:%f]'%(_xrange.min, _xrange.max))
+            if(_yrange.min != _yrange.max):
+                g('set yrange[%f:%f]'%(_yrange.min, _yrange.max))
 
-         # Range
-         xrange = multiplot.xrange
-         yrange = multiplot.yrange
-         if(xrange.min != xrange.max):
-             g('set xrange[%f:%f]'%(xrange.min, xrange.max))
-         if(yrange.min != yrange.max):
-             g('set yrange[%f:%f]'%(yrange.min, yrange.max))
-
-         # Tics
-         if(multiplot.xtics > 0):
-             g('set xtics 0, %f'%(multiplot.xtics))
-         if(multiplot.ytics > 0):
-             g('set ytics 0, %f'%(multiplot.ytics))
+            # Tics
+            if(multiplot.xtics > 0):
+                g('set xtics 0, %f'%(multiplot.xtics))
+            if(multiplot.ytics > 0):
+                g('set ytics 0, %f'%(multiplot.ytics))
 
 
-         g.plot(*plot_list)
-         raw_input("Press Enter to continue")
+            g.plot(*plot_list)
+            raw_input("Press Enter to continue")
 
 
 class mplotlib(plotter):
@@ -141,14 +149,14 @@ class mplotlib(plotter):
 
     def __init__(self):
         """ Initialize matplotlib """
-
+        plotter.__init__(self)
         import matplotlib
         #matplotlib.use('Qt4Agg')
         import pylab
         self.pylab = pylab
         self.matplotlib = matplotlib
 
-    def plot(self, plotable, title, groups=[], *args, **kargs):
+    def plot(self, plotable, title, groups=None, *args, **kargs):
         """Plot a plotable with title
 
         :param plotable: a plotable instance from standard stat_tool objects such as :func:`Distribution`
@@ -167,9 +175,9 @@ class mplotlib(plotter):
         show = kargs.get("Show", True)
         nbcol = kargs.get("nbcol", 2)
         fontsize = kargs.get("fontsize", 10)
-        options_y_maxrange_ratio = kargs.get("y_maxrange_ratio",1.1)
+        options_y_maxrange_ratio = kargs.get("y_maxrange_ratio", 1.1)
         line2d = {}
-        line2d['linewidth'] = kargs.get("linewidth",1)
+        line2d['linewidth'] = kargs.get("linewidth", 1)
         legend_size = kargs.get("legend_size", 10)
         legend_nbcol = kargs.get("legend_nbcol", 1)
         legend_loc = kargs.get("legend_loc", "best")
@@ -190,7 +198,7 @@ class mplotlib(plotter):
         #multiset.border
 
         # Configure figure
-        f1 = pylab.figure(fig_id, figsize=(10,10))
+        f1 = pylab.figure(fig_id, figsize=(10, 10))
         f1.clf()
 
         f1.set_facecolor("w")
@@ -227,13 +235,14 @@ class mplotlib(plotter):
             pylab.figure(fig_id + g )
 
             # Select Subplot
-            pylab.subplot(group_size[g]%nbcol+group_size[g]/nbcol, nbcol , group_index[g] + 1)
+            pylab.subplot(group_size[g]%nbcol+group_size[g]/nbcol,
+                          nbcol , group_index[g] + 1)
             group_index[g] += 1
             pylab.title(multiplot.title)
 
             # Labels
             pylab.xlabel(multiplot.xlabel, fontsize=fontsize)
-            pylab.ylabel(multiplot.ylabel,fontsize=fontsize)
+            pylab.ylabel(multiplot.ylabel, fontsize=fontsize)
 
             lines = []
             legends = []
@@ -256,7 +265,7 @@ class mplotlib(plotter):
                 # no data available. check if label is on.
                 if len(x) == 0:
                     if label == True:
-                        for i in range(0,singleplot.get_label_size()):
+                        for i in range(0, singleplot.get_label_size()):
                             x = singleplot.get_label_x(i)
                             y = singleplot.get_label_y(i)
                             labels = singleplot.get_label_text(i)
@@ -295,7 +304,8 @@ class mplotlib(plotter):
                     legends.append(legend)
             # Legend
             try:
-                #Plot(seq1, ViewPoint="Data", nbcol=2, legend_kwds={'prop':{'size':9}})
+                #Plot(seq1, ViewPoint="Data", nbcol=2, 
+                #    legend_kwds={'prop':{'size':9}})
                 kwds = {}
                 kwds['prop'] = {'size':legend_size}
                 kwds['ncol'] = legend_nbcol
@@ -311,15 +321,15 @@ class mplotlib(plotter):
             pylab.grid(bool(multiplot.grid))
 
             # Range
-            xrange = multiplot.xrange
-            yrange = multiplot.yrange
+            _xrange = multiplot.xrange
+            _yrange = multiplot.yrange
             a = pylab.gca()
-            if(xrange.min != xrange.max):
-                a.set_xlim([round(xrange.min, 5), round(xrange.max, 5)])
+            if(xrange.min != _xrange.max):
+                a.set_xlim([round(_xrange.min, 5), round(_xrange.max, 5)])
 
-            if(yrange.min != yrange.max):
-                a.set_ylim([round(yrange.min, 5), 
-                            round(yrange.max*options_y_maxrange_ratio, 5)])
+            if(_yrange.min != _yrange.max):
+                a.set_ylim([round(_yrange.min, 5), 
+                            round(_yrange.max*options_y_maxrange_ratio, 5)])
 
             # Tics
             xt = round(multiplot.xtics, 5)
@@ -341,32 +351,32 @@ PLOTTER = None
 
 
 def set_plotter(plot):
- global PLOTTER
- PLOTTER = plot
+    global PLOTTER
+    PLOTTER = plot
 
 
 def get_plotter():
- """
- Plotter factory
- Return a plotter object (matplotlib or gnuplot)
- If none is available, raise an ImportError exception
- """
- global DISABLE_PLOT
- if DISABLE_PLOT:
-     return fakeplot()
+    """
+    Plotter factory
+    Return a plotter object (matplotlib or gnuplot)
+    If none is available, raise an ImportError exception
+    """
+    global DISABLE_PLOT
+    if DISABLE_PLOT:
+        return fakeplot()
 
- # Try user define PLOTTER
- global PLOTTER
- if(PLOTTER):
-     return PLOTTER
+    # Try user define PLOTTER
+    global PLOTTER
+    if PLOTTER:
+        return PLOTTER
 
- # Try to import a plotter
- else:
-     try:
-         plotter = mplotlib()
+    # Try to import a plotter
+    else:
+        try:
+            _plotter = mplotlib()
 
-     except ImportError:
-         plotter = gnuplot()
+        except ImportError:
+            _plotter = gnuplot()
 
-     set_plotter(plotter)
-     return plotter
+        set_plotter(_plotter)
+        return _plotter

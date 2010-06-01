@@ -11,6 +11,9 @@
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
     :Revision: $Id$
+    
+.. warning:: sequence analysis package also contains an estimate module and
+    function
 """
 
 __version__ = "$Id$"
@@ -42,7 +45,6 @@ class EstimateFunctions(object):
     Class containing histogram estimation functions
     This class must not be used alone, but through an histogram object
     """
-
 
     def estimate_nonparametric(histo):
         """

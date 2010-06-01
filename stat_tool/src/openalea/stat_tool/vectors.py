@@ -1,16 +1,20 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+#-*- coding: utf-8 -*-
 """Vectors function and class
 
-:Author: Thomas Cokelaer <Thomas.Cokelaer@inria.fr>
+.. topic:: vectors.py summary
 
-.. testsetup:: *
+    A module dedicated to Vectors
 
-    from openalea.stat_tool.vectors import Vectors, ComputeRankCorrelation 
+    :Code status: mature
+    :Documentation status: to be completed
+    :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
+
+    :Revision: $Id$
+    
 """
 __version__ = "$Id$"
 
-# .. todo:: check vectors from sequences, markovian_sequences, ....
-#import _stat_tool
 import interface
 import error
 
@@ -50,7 +54,7 @@ def _Vectors_mixture_estimation(self, model,
     if force_param is None:
         force_param = []
 
-    error.CheckType([nb_iteration, force_param],[int, list])
+    error.CheckType([nb_iteration, force_param], [int, list])
 
     # model is a MultivariateMixture class
     error.CheckType([model], [[int, _MultivariateMixture]])
@@ -117,7 +121,8 @@ def Vectors(*args, **kargs):
         :func:`~openalea.stat_tool.comparison.VarianceAnalysis`
     """
     error.CheckArgumentsLength(args, 1, 1)
-    error.CheckKargs(kargs, possible_kargs = ["Identifiers", "IndexVariable", "Types"])
+    error.CheckKargs(kargs, possible_kargs = ["Identifiers", 
+                                              "IndexVariable", "Types"])
 
     obj = args[0]
     ret = None
@@ -401,7 +406,7 @@ def ComputeRankCorrelation(*args, **kargs):
 
     error.CheckType([vec], [_Vectors])
 
-    a = vec.rank_correlation_computation(utype, filename)
+    _a = vec.rank_correlation_computation(utype, filename)
 
 
 
