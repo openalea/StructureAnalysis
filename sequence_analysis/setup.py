@@ -53,7 +53,11 @@ if __name__ == '__main__':
           # Packages
           packages=[ 
                     'openalea.sequence_analysis',
-                    'vplants'],
+                    'sequence_analysis_wralea.demo.change_point', 
+                    'sequence_analysis_wralea.demo.stat_tool_tutorial', 
+                    'sequence_analysis_wralea', 
+                    'vplants',
+                    ],
           
 
            #package_dir={'openalea.sequence_analysis' : 'src/openalea/sequence_analysis',
@@ -74,6 +78,11 @@ if __name__ == '__main__':
           lib_dirs = {'lib' : pj(build_prefix, 'lib'),},
           inc_dirs = { 'include' : pj(build_prefix, 'include') },
 
+          entry_points = {
+            "wralea": ["vplants.stats = sequence_analysis_wralea",
+                       "vplants.demo = sequence_analysis_wralea.demo.change_point",
+            ]
+            },
 
           # Dependencies
           setup_requires = setup_requires,
