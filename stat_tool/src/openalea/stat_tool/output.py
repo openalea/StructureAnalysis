@@ -630,7 +630,6 @@ class StatInterface(object):
                 from openalea.stat_tool.enums import output_display
             Output = None
 
-
         if Output is None:
             if ViewPoint == 'q':
                 Output = output_display['Segment']
@@ -853,15 +852,24 @@ class StatInterface(object):
         #, so we first need to check the presence of Output in the kargs
         # then, to give a default value!=None. But be aware that tis default
         # value is a dummy variable that is not used.
-        from openalea.stat_tool.enums import output_display
+        try:
+            from openalea.sequence_analysis.enums import output_display
+        except:
+            from openalea.stat_tool.enums import output_display
+
         if kargs.get('Output'):
             try:
-                from openalea.sequence_analysis.enums import output_display
+                Output = None
                 Output = error.ParseKargs(kargs, "Output", 'Segment', output_display)
             except:
-                Output = None
+                print 'warning could not import output_display from sequence_analysis'
         else:
+            try:
+                from openalea.sequence_analysis.enums import output_display
+            except:
+                from openalea.stat_tool.enums import output_display
             Output = None
+
         if Output is None:
             if ViewPoint == 'q':
                 Output = output_display['Segment']
@@ -870,6 +878,9 @@ class StatInterface(object):
         elif (ViewPoint == 'q' and Output not in [output_display['ChangePoint'], output_display['Segment']]) \
             or (ViewPoint == 'p'  and Output not in [output_display['State'], output_display['InState'], output_display['OutState']]):
             raise ValueError(" INCOMPATIBLE_OPTIONS between ViewPoint and Output")
+
+
+
 
         #check arguments compatibilities
 
