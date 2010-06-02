@@ -241,6 +241,10 @@ def Sequences(obj, **kargs):
                 sequence = sequence.markovian_sequences()
             except Exception:
                 pass
+        try:
+            sequence.nb_sequence
+        except ValueError:
+            raise ValueError("File read but issue while parsing. Returned sequence is not valid")
         return sequence
     elif isinstance(obj, _RenewalData):
         sequence = _Sequences(obj)
