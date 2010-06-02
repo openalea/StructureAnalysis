@@ -171,23 +171,54 @@ def Sequences(obj, **kargs):
 
     :Optional Parameters:
 
-    * Identifiers (array(int)): explicit identifiers of sequences. This optional argument can only be used if the first argument is of type array(array(int / array(int))).
-    * IndexParameter (string): type of the explicit index parameter: "Position" or "Time" (the default: implicit discrete index parameter starting at 0). This optional argument can only be used if the first argument is of type array(array(int / array(int))).
+    * Identifiers (array(int)): explicit identifiers of sequences. This 
+      optional argument can only be used if the first argument is of 
+      type array(array(int / array(int))).
+    * VertexIdentifiers (array(array(int))): explicit identifiers of vectors. 
+
+    * IndexParameter (string): type of the explicit index parameter: "Position"
+      or "Time" (the default: implicit discrete index parameter starting at 0). 
+      This optional argument can only be used if the first argument is of type 
+      array(array(int / array(int))).
+    
+    .. todo:: IndexParameterType
 
     :Returns:
 
-    If the construction succeeds, an object of type sequences or discrete_sequences is returned, otherwise no object is returned. The returned object is of type discrete_sequences if all the variables are of type STATE, if the possible values for each variable are consecutive from 0 and if the number of possible values for each variable is <= 15.
+    If the construction succeeds, an object of type sequences or 
+    discrete_sequences is returned, otherwise no object is returned. The 
+    returned object is of type discrete_sequences if all the variables are of 
+    type STATE, if the possible values for each variable are consecutive from 0 
+    and if the number of possible values for each variable is <= 15.
 
     :Examples:
 
     .. doctest::
+        
+        >>> # Single univariate sequence case (array1). 
+        >>> seq1 = Sequences([1, 2, 3], Identifiers=[8])
+        >>> seq1.nb_sequence
+        1
+        >>> seq1.nb_variable
+        1
+        >>> # General case arrayn
+        >>> seq = Sequences([ 
+        ...    [[1,2],[3,4]], 
+        ...    [[21,22],[23,24]], 
+        ...    [[31,32],[33,34], [35,36] ]], 
+        ...    Identifiers = [1,8,12],
+        ...    VertexIdentifiers = [[1,2],[3,4],[5,6,7]])
+        >>> seq.nb_sequence
+        3
+        >>> seq.nb_variable
+        2
+        
+    .. doctest::
         :options: +SKIP
         
-        >>> Sequences(array1, Identifiers=[1, 8, 12])
-        >>> Sequences(arrayn, Identifiers=[1, 8, 12], IndexParameter="Position")
-        >>> Sequences(timev)
-        >>> Sequences(file_name)
-
+            >>> Sequences(timev)
+            >>> Sequences(file_name)
+    
     .. seealso::
 
        :class:`~openalea.stat_tool.output.Save`,
