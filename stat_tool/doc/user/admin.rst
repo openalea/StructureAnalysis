@@ -26,7 +26,7 @@ TODO
   len(h) returns 76 but this seem to be the length of the original data set,
   not the histogram itself. Is this what we want ? 
 * plotable inside MvMixture(Data) ? 
-
+* consistency of property names: nb_vector or nb_vectors, nb_variable, nb_sequence, ...
 
 Test
 ====

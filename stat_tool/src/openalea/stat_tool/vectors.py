@@ -122,7 +122,7 @@ def Vectors(*args, **kargs):
     """
     error.CheckArgumentsLength(args, 1, 1)
     error.CheckKargs(kargs, possible_kargs = ["Identifiers", 
-                                              "IndexVariable", "Types"])
+                                              "IndexVariable"])
 
     obj = args[0]
     ret = None
@@ -138,26 +138,47 @@ def Vectors(*args, **kargs):
         if type(obj[0])!=list:
             obj = [obj]
 
+
+
+        # 0 for int, 1 for float. By default all variables are int
+        #now, we loop over all sequences and sequences and if a variable 
+        # is found to be float, then the type is float.
+        # once a float is found, there is no need to carry on the current variable
+        InputTypes = [0] * len(obj[0])
+        nb_variables = len(obj[0])
+        for vec in obj:
+            for index, var in enumerate(vec):
+                assert type(var) in [int, float], "wrong types var=%s and its type is %s" % (var, type(var))
+                if type(var)==float:
+                    InputTypes[index]=1
+
+
         # from a list and an optional argument
 
         # first, get the Identifiers and check its type
         identifiers = error.ParseKargs(kargs, "Identifiers")
-        types = error.ParseKargs(kargs, "Types")
         if identifiers:
             error.CheckType([identifiers], [[list]], variable_pos=[2])
 
             if len(identifiers) != len(obj):
                 raise ValueError("""Identifiers must be a list,
                 which size equals vectors's length""")
-            if types: 
-                ret = _Vectors(obj, identifiers, types)
-            else:
-                ret = _Vectors(obj, identifiers)
+            #iif InputTypes: 
+            ret = _Vectors(obj, identifiers, InputTypes)
+            #else:
+            #    ret = _Vectors(obj, identifiers)
         else:
-            if types:
-                ret = _Vectors(obj, [], types)
-            else:
-                ret = _Vectors(obj, [])
+
+            #create a standard identifiers list [0,1,2,....] for each sequences ?
+            identifiers = []
+            for i, vec in enumerate(obj):
+                identifiers.append(i+1)
+    
+            print identifiers
+            #if InputTypes:
+            ret = _Vectors(obj, identifiers, InputTypes)
+            #else:
+            #    ret = _Vectors(obj, [])
     else:
         # from a sequence
         index_variable = error.ParseKargs(kargs, "IndexVariable", False,

@@ -44,7 +44,7 @@ class Test(interface):
 
     def test_types(self):
 
-        v2 = Vectors([[1,2.,3.],[1,5.,1.]], Identifiers=[1,2], Types=[0,1,1])
+        v2 = Vectors([[1,2.,3.],[1,5.,1.]], Identifiers=[1,2])
 
 
     def test_constructor_from_file(self):
