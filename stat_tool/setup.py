@@ -52,9 +52,6 @@ if __name__ == '__main__':
 
           # Packages
           packages=['openalea.stat_tool', 
-                    'stat_tool_wralea.demo.change_point', 
-                    'stat_tool_wralea.demo.stat_tool_tutorial', 
-                    'stat_tool_wralea', 
                     'vplants',
                     ],
 
@@ -78,15 +75,6 @@ if __name__ == '__main__':
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
 
-           # entry_points
-           entry_points = {
-            "wralea": ["vplants.stats = stat_tool_wralea",
-                       "vplants.demo = stat_tool_wralea.demo.change_point",
-            ]
-            },
-
-#            pylint_packages = ['src/openalea/stat_tool'],
-#            pylint_options = ['--disable-msg=C0103']
 
        )
 

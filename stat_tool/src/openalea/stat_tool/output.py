@@ -853,7 +853,7 @@ class StatInterface(object):
         #, so we first need to check the presence of Output in the kargs
         # then, to give a default value!=None. But be aware that tis default
         # value is a dummy variable that is not used.
-        from openalea.sequence_analysis.enums import output_display
+        from openalea.stat_tool.enums import output_display
         if kargs.get('Output'):
             try:
                 from openalea.sequence_analysis.enums import output_display
