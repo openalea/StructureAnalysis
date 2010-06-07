@@ -40,6 +40,8 @@
 #include "export_chain.h"
 #include "export_chain_reestimation.h"
 
+#include "wrapper_util.h"
+
 #include <boost/python.hpp>
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 103400
@@ -47,6 +49,8 @@
 #endif
 
 using namespace boost::python;
+using namespace stat_tool::wrap_util;
+
 
 
 // Define python module "_stat_tool"
@@ -58,6 +62,13 @@ BOOST_PYTHON_MODULE(_stat_tool)
   docstring_options doc_options(true, false);
 #endif
 
+/*
+register_exception_translator<
+  MyStatError>(translation);
+*/
+
+  StatErrorClass = object(handle<>(PyErr_NewException("_stat_tool.StatError",NULL,NULL)));
+  scope().attr("StatError") = StatErrorClass;
 
   class_constant();
   class_stat_error();

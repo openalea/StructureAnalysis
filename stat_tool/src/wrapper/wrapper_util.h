@@ -9,23 +9,48 @@
 
 #include "stat_tool/stat_tools.h"
 
+using namespace boost::python;
 
 namespace stat_tool
 {
   namespace wrap_util
   {
+    static object StatErrorClass;
 
+    //char error_name[] = "StatError";
+    //PyObject *StatErrorClass = PyErr_NewException(error_name, NULL, NULL); 
+    /*
+    struct MyStatError{};
+    void translation( MyStatError const& x )
+    {
+    PyErr_SetString(PyExc_Exception, "StatError");
+    }
+    */
     template<int num, int id> 
       struct UniqueInt
       {
-    	int v;
-	    enum { value=num };
-	
+        int v;
+        enum { value=num };
+
         UniqueInt(int _v) : v(_v) { }
-	    operator int() const { return v; }
+        operator int() const { return v; }
       };
     
     
+
+    inline void throw_stat_error(StatError &error)
+    {
+      ostringstream error_message;
+      error_message << error;
+      PyErr_SetString(StatErrorClass.ptr(), (error_message.str()).c_str());
+      boost::python::throw_error_already_set();
+    };
+    inline void throw_stat_error(const char* error_message)
+    {
+      PyErr_SetString(StatErrorClass.ptr(), error_message);
+      boost::python::throw_error_already_set();
+    };
+
 
     inline void throw_error(StatError &error)
     {
