@@ -62,11 +62,6 @@ BOOST_PYTHON_MODULE(_stat_tool)
   docstring_options doc_options(true, false);
 #endif
 
-/*
-register_exception_translator<
-  MyStatError>(translation);
-*/
-
   StatErrorClass = object(handle<>(PyErr_NewException("_stat_tool.StatError",NULL,NULL)));
   scope().attr("StatError") = StatErrorClass;
 
