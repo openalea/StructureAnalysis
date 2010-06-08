@@ -59,6 +59,16 @@ template<int num, int id> struct UniqueInt
  *  Wrappers for Python class Trees:
  */
 
+void throw_stat_tree_error(const char* error_message)
+{
+  PyErr_SetString(StatTreeErrorClass.ptr(), error_message);
+  boost::python::throw_error_already_set();
+};
+void throw_stat_tree_error(ostringstream& error_message)
+{
+  PyErr_SetString(StatTreeErrorClass.ptr(), (error_message.str()).c_str());
+  boost::python::throw_error_already_set();
+};
 
 Trees* Trees_wrapper_init1(boost::python::list tree_list)
 {
@@ -162,8 +172,7 @@ Trees* Trees_wrapper_init1(boost::python::list tree_list)
          {
             status= false;
             error_message << "could not initialize a Trees object from argument"; // << endl;
-            PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-            throw_error_already_set();
+            throw_stat_tree_error(error_message);
          }
       }
    }
@@ -1129,7 +1138,7 @@ BOOST_PYTHON_MODULE(ctrees)
     object stat_tool = import("vplants.stat_tool");
     object StatError = stat_tool.attr("StatError");
 
-    StatTreeErrorClass == object(handle<>(PyErr_NewException("StatTreeError",StatError.ptr(),NULL))); 
+    StatTreeErrorClass = object(handle<>(PyErr_NewException("ctrees.StatTreeError",StatError.ptr(),NULL))); 
     scope().attr("StatTreeError") = StatTreeErrorClass;
 
     class_< Trees >("CTrees", init< const Trees& >())
