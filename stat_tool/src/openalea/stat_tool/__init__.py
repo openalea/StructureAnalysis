@@ -45,4 +45,5 @@ from _stat_tool import VariableType
 from _stat_tool import VariableTypeBis
 from _stat_tool import RestorationAlgorithm
 
-
+# Error
+from _stat_tool import StatError
