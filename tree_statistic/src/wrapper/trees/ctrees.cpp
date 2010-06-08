@@ -29,6 +29,10 @@ using namespace Stat_trees;
 using boost::python::list;
 
 // Declarations ================================================================
+
+// New error Type
+static object StatTreeErrorClass;
+
 namespace  {
 //
 // BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Trees_extract_sequences_overloads_2_3, Trees_wrapper_extract_sequences, 2, 3)
@@ -1119,6 +1123,15 @@ std::string Trees_wrapper_line_write(const Trees& reftree)
 // Module ======================================================================
 BOOST_PYTHON_MODULE(ctrees)
 {
+
+    // Error initialisation
+    // Import the stat_tool module
+    object stat_tool = import("vplants.stat_tool");
+    object StatError = stat_tool.attr("StatError");
+
+    StatTreeErrorClass == object(handle<>(PyErr_NewException("StatTreeError",StatError.ptr(),NULL))); 
+    scope().attr("StatTreeError") = StatTreeErrorClass;
+
     class_< Trees >("CTrees", init< const Trees& >())
         .def(init< optional< int, int, int > > ())
         .def(init< int, int, const FrequencyDistribution&, const FrequencyDistribution&,
