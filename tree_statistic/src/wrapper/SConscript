@@ -24,7 +24,8 @@ lenv.AppendUnique(LIBS=['vptree_statistic'])
 #sources = Split("""""")
 
 
-lenv.ALEAWrapper(py_dir+'/trees', "ctree", ["trees/ctree.cpp"]) 
+lenv.ALEAWrapper(py_dir, "_errors", ["errors.cpp"])
+lenv.ALEAWrapper(py_dir+'/trees', "ctree", ["trees/ctree.cpp"])
 lenv.ALEAWrapper(py_dir+'/trees', "ctrees", ["trees/ctrees.cpp"])
 lenv.ALEAWrapper(py_dir+'/int_fl_containers', "int_fl_containers", ["int_fl_containers/int_fl_containers.cpp"])
 lenv.ALEAWrapper(py_dir+'/hmt', "chmt", ["hmt/chmt.cpp"])

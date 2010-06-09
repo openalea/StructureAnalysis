@@ -15,6 +15,7 @@
 #include "tree_statistic/typed_edge_trees.h"
 #include "tree_statistic/hidden_markov_tree.h"
 #include "tree_statistic/hidden_markov_out_tree.h"
+#include "../wrapper_util.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -25,6 +26,7 @@
 // Using =======================================================================
 using namespace boost::python;
 using namespace Stat_trees;
+using namespace tree_statistic::wrap_util;
 
 // Declarations ================================================================
 namespace  {
@@ -796,6 +798,11 @@ DiscreteDistributionData* Chmt_data_wrapper_extract_value(const HiddenMarkovTree
 // Module ======================================================================
 BOOST_PYTHON_MODULE(chmt)
 {
+    // Error initialisation
+    object stat_tree_errors = import("openalea.tree_statistic._errors");
+    // Import StatError
+    object StatTreeError = stat_tree_errors.attr("StatTreeError");
+
     class_< HiddenMarkovTree >
     ("CHmt", init< const HiddenMarkovTree&, optional< bool, bool> >())
         .def("ExtractData", &CHmt_wrapper_extract_data,

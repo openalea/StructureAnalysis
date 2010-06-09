@@ -5,6 +5,7 @@ __revision__ = "$Id$"
 import string
 import openalea.stat_tool as stat_tool
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
+import openalea.tree_statistic._errors as _errors
 import ctree, ctrees
 
 from openalea.stat_tool import interface
@@ -15,8 +16,7 @@ I_DEFAULT_TREE_SIZE = ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_SIZE = ctree.I_DEFAULT_TREE_SIZE()
 I_DEFAULT_TREE_DEPTH = ctree.I_DEFAULT_TREE_DEPTH()
 VariableType = stat_tool.VariableTypeBis
-#FormatError = stat_tool.FormatError
-FormatError = ctrees.StatTreeError
+StatTreeError = _errors.StatTreeError
 CharacteristicType = ctree.Characteristic
 
 VariableTypeDict = VariableType.values
@@ -1397,9 +1397,9 @@ class Trees(object):
                 prefix+=str(random.randint(1,9))                
         try:
             self.__ctrees.BuildSequences(file_name, maximal_sequences)
-        except RuntimeError, error:
+        except _errors.StatTreeError, error:
             os.remove(file_name)
-            raise FormatError(error)
+            raise _errors.StatTreeError(error)
         else:
             import openalea.aml as amlPy
             res= amlPy.Sequences(file_name)
@@ -1410,12 +1410,8 @@ class Trees(object):
         """Extract sequence_analysis.Sequences from the Trees,
         cutting or not sequences after branching"""
         import os
-        try:
-            res = self.__ctrees.BuildPySequences(maximal_sequences)
-        except RuntimeError, error:
-            raise FormatError(error)
-        else:
-            return res.markovian_sequences()
+        res = self.__ctrees.BuildPySequences(maximal_sequences)
+        return res.markovian_sequences()
 
     def BuildVectors(self):
         """Extract Vectors from the Trees."""
@@ -1432,27 +1428,26 @@ class Trees(object):
         Argument limit can be either:
         - the clustering step if mode is "Step"
         - the list of bounds defining the clusters if mode is "Limit". """
-        cvariable=self._valid_cvariable(variable)+1
+        cvariable = self._valid_cvariable(variable)+1
         # correspondence of variables between self and self.__ctrees
         try:
             if not (mode.upper()=="STEP" or mode.upper()=="LIMIT"):
-                msg="unknown clustering mode: "+str(mode)\
+                msg = "unknown clustering mode: "+str(mode)\
                     +" - expecting 'Step' or 'Limit'"
                 raise ValueError, msg
             elif (mode.upper()=="STEP" and type(limit)!=int):
                 msg="incorrect type for clustering step: "+str(type(limit))
                 raise TypeError, msg
-            elif (mode.upper()=="LIMIT" and 
+            elif (mode.upper()=="LIMIT" and
                   not (hasattr(limit, "__getitem__"))):
-                msg="incorrect type for clustering limits: "+str(type(limit))
-                raise TypeError, msg                                
+                msg = "incorrect type for clustering limits: "+str(type(limit))
+                raise TypeError, msg
             else:
-                cclustered=self.__ctrees.Cluster(cvariable, limit)
-        except RuntimeError, error:
-            # raise stat_tool.Format_error, str(cerror)
-            replaced=str(error) # self.__replacestr(str(cerror), "variable")
-            raise FormatError, replaced
-        clustered=Trees(cclustered, self.__types, self.__attributes)
+                cclustered = self.__ctrees.Cluster(cvariable, limit)
+        except _errors.StatTreeError, error:
+            replaced = str(error) # self.__replacestr(str(cerror), "variable")
+            raise _errors.StatTreeError, replaced
+        clustered = Trees(cclustered, self.__types, self.__attributes)
         self._copy_vid_conversion(clustered)
         self._copy_tid_conversion(clustered)
         return clustered
@@ -1504,11 +1499,11 @@ class Trees(object):
         else:
             cvariable=self._valid_cvariable(variable)+1
         try:
-            cdiff=self.__ctrees.Difference(cvariable)
-        except RuntimeError, error:
-            replaced=self.__replacestr(str(error), "variable")
-            raise FormatError, replaced
-        diff=Trees(cdiff, self.__types, self.__attributes)
+            cdiff = self.__ctrees.Difference(cvariable)
+        except _errors.StatTreeError, error:
+            replaced = self.__replacestr(str(error), "variable")
+            raise _errors.StatTreeError(replaced)
+        diff = Trees(cdiff, self.__types, self.__attributes)
         self._copy_vid_conversion(diff)
         self._copy_tid_conversion(diff)
         return diff
@@ -1687,13 +1682,10 @@ class Trees(object):
                         'Algorithm, Saem, ForceParametric): '
                         +"boolean type expected"
                         raise TypeError, msg
-                    try:
-                        chmt=chmt_data.EstimationCiHmot(arg1, structure, arg6, 
-                                                        StateTrees, EMAlgo, 
-                                                        Saem, arg3, arg4, 
-                                                        ForceParametric)
-                    except RuntimeError, error:
-                        raise FormatError(error)
+                    chmt = chmt_data.EstimationCiHmot(arg1, structure, arg6,
+                                                      StateTrees, EMAlgo,
+                                                      Saem, arg3, arg4,
+                                                      ForceParametric)
                 elif issubclass(arg1.__class__, hmt.HiddenMarkovTree):
                     # Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, Counting,
                     #          Algorithm, Saem, ForceParametric)
@@ -1721,13 +1713,10 @@ class Trees(object):
                         ForceParametric=False
                     elif type(ForceParametric)!=bool:
                         ForceParametric=False
-                    try:
-                        chmt=chmt_data.EstimationCiHmot(arg1._chmt(), arg3, 
-                                                        RestorationAlgorithm.VITERBI,
-                                                        EMAlgo, Saem, arg2, 
-                                                        ForceParametric)
-                    except RuntimeError, error:
-                        raise FormatError(error)
+                    chmt = chmt_data.EstimationCiHmot(arg1._chmt(), arg3,
+                                                      RestorationAlgorithm.VITERBI,
+                                                      EMAlgo, Saem, arg2,
+                                                      ForceParametric)
                 else:
                     msg="bad type for argument 1: "+type(arg1)
                     raise TypeError, msg
@@ -1766,13 +1755,9 @@ class Trees(object):
                     else:
                         raise TypeError, 'argument 2 is mandatory in ' \
                                          'ExtractHistogram("Value", variable)'
-                try:
-                    chisto=self.__ctrees.ExtractValueFrequencyDistribution(
-                        self._valid_cvariable(variable)+1)
-                except RuntimeError, error:
-                    raise FormatError(error)
-                else:
-                    return chisto
+                chisto = self.__ctrees.ExtractValueFrequencyDistribution(
+                            self._valid_cvariable(variable)+1)
+                return chisto
             elif ((nature.upper()=="FIRSTOCCURRENCEROOT") or
                   (nature.upper()=="FIRSTOCCURRENCELEAVES") or
                   (nature.upper()=="SOJOURNSIZE") or
@@ -1805,13 +1790,9 @@ class Trees(object):
                 elif nature.upper()=="NBOCCURRENCES":
                     chartype=CharacteristicType.NB_OCCURRENCES
                 chartype+=0
-                try:
-                    chisto=self.__ctrees.ExtractFeatureFrequencyDistribution(
-                        chartype, self._valid_cvariable(variable)+1, value)
-                except RuntimeError, error:
-                    raise FormatError(error)
-                else:
-                    return chisto
+                chisto = self.__ctrees.ExtractFeatureFrequencyDistribution(
+                              chartype, self._valid_cvariable(variable)+1, value)
+                return chisto
             else:
                 try:
                     v=self.__name_to_variable(nature)
@@ -1828,7 +1809,6 @@ class Trees(object):
 
         If the argument is a list of Trees objects and if the variables of
         each Trees object are compatible, return a Trees object."""
-        #cerror=stat_tool.Format_error()
         ctree_list=[]
         for t in range(len(tree_list)):
             if issubclass(tree_list[t].__class__, Trees):
@@ -1836,15 +1816,11 @@ class Trees(object):
             else:
                 ctree_list.append(tree_list[t])
         try:
-            # cmerged=self.__ctrees.Merge(cerror, ctree_list)
-            cmerged=self.__ctrees.Merge(ctree_list)
-        except RuntimeError, error:
-            # raise stat_tool.Format_error, str(cerror)
-            replaced=self.__replacestr(str(error), "variable")
-            # replaced=self.__replacestr(str(cerror), "variable")
-            raise FormatError, replaced
-            # raise FormatError(replaced)
-        merged=Trees(cmerged, self.__types, self.__attributes)
+            cmerged = self.__ctrees.Merge(ctree_list)
+        except _errors.StatTreeError, error:
+            replaced = self.__replacestr(str(error), "variable")
+            raise _errors.StatTreeError(replaced)
+        merged = Trees(cmerged, self.__types, self.__attributes)
         # self._copy_vid_conversion(merged)
         # self._copy_tid_conversion(merged)
         return merged
@@ -2022,13 +1998,10 @@ class Trees(object):
             if (not self.__ctrees.IsCharacteristic(cvariable, ftype)):
                 msg = "Characteristic " + ViewPoint + " not computed " + \
                     "for variable ", variable
-                raise FormatError(msg)
+                raise _errors.StatTreeError(msg)
             file_id = str(self._valid_cvariable(variable)+1)+str(ftype+1)
-            try:
-                self.__ctrees.plot(Title=Title, Suffix=file_id,
-                                   Params=(ftype, variable))
-            except RuntimeError, f:
-                raise FormatError(f)
+            self.__ctrees.plot(Title=Title, Suffix=file_id,
+                               Params=(ftype, variable))
 
     def MergeVariable(self, tree_list):
         """Merge the variables of Trees objects (contained in a list) with self.
@@ -2045,10 +2018,7 @@ class Trees(object):
                 attributes+=list(tree_list[t].__attributes)
             else:
                 ctree_list.append(tree_list[t])
-        try:
-            cmerged=self.__ctrees.MergeVariable(ctree_list)
-        except RuntimeError, error:
-            raise FormatError(error)
+        cmerged=self.__ctrees.MergeVariable(ctree_list)
         merged=Trees(cmerged, types, attributes)
         self._copy_vid_conversion(merged)
         self._copy_tid_conversion(merged)
@@ -2271,57 +2241,10 @@ class Trees(object):
             if (not self.__ctrees.IsCharacteristic(cvariable, ftype)):
                 msg = "Characteristic " + ViewPoint + " not computed " + \
                     "for variable ", variable
-                raise FormatError(msg)
-##            ref_file_id=str(self._valid_cvariable(variable)+1)
-##            # part of the filename which identifies the graph to be displayed
+                raise _errors.StatTreeError(msg)
+            # part of the filename which identifies the graph to be displayed
             file_id = str(self._valid_cvariable(variable)+1)+str(ftype+1)
-##            prefix="ftmp"
-##            file_created=False
-##            file_list=[]
-##            # find a non existing file name
-##            while not file_created:
-##                try:
-##                    cfile=open(prefix+'11.plot','r')
-##                except IOError:
-##                    file_created=True
-##                else:
-##                    import random
-##                    prefix+=str(random.randint(1,9))
-            try:
-                self.__ctrees.plot(Title=Title, Suffix=file_id)
-                # build the list of the created files: 
-##                for var in range(self.NbInt()):
-##                    for char in [str(c) for c in range(5)]+[""]:
-##                        filename=prefix+str(self._valid_cvariable(var)+1)+char
-##                        try:
-##                            tmpfile=open(filename+'.plot', 'r')
-##                        except IOError:
-##                            pass
-##                        else:
-##                            tmpfile.close()
-##                            # add the .plot and .print files
-##                            file_list+=[filename+extension
-##                                for extension in [".plot", ".print"]]
-##                            if (char=='1') or (char==''):
-##                                # add the .dat file
-##                                file_list+=[filename+".dat"]
-            except RuntimeError, f:
-##                for tmpfile in file_list:
-##                   os.remove(tmpfile)
-                raise FormatError, f
-##            try:
-##                # check if the desired file exists
-##                cfile=open(prefix+file_id+'.plot','r')
-##            except IOError:
-##                for tmpfile in file_list:
-##                   os.remove(tmpfile)
-##                msg='Characteristic not computed: '+str(ViewPoint)
-##                raise ValueError, msg                
-            # else:
-            #     nb_windows= \
-            #       self.__ctrees.NbValues(self._valid_cvariable(variable))
-            #     self.__plot= _PlotManager(file_list, prefix+file_id, 
-            #                                          nb_windows)
+            self.__ctrees.plot(Title=Title, Suffix=file_id)
 
     def Save(self, file_name, overwrite=False, variable_names=None):
         """Save trees into a file as a MTG."""
@@ -2402,10 +2325,9 @@ class Trees(object):
                         types.append(self.__types[variable])
                         attributes.append(self.__attributes[variable])
                 cselected=self.__ctrees.SelectVariable(cvariables, keep)
-        except RuntimeError, error:
-            # raise stat_tool.Format_error, str(cerror)
-            replaced=str(error) # self.__replacestr(str(cerror), "variable")
-            raise FormatError, replaced
+        except _errors.StatTreeError, error:
+            replaced = str(error) # self.__replacestr(str(cerror), "variable")
+            raise _errors.StatTreeError, replaced
         selected=Trees(cselected, types, attributes)
         self._copy_vid_conversion(selected)
         self._copy_tid_conversion(selected)
@@ -2424,23 +2346,20 @@ class Trees(object):
         else:
             # a list of identifiers is given
             id_list=list(identifiers)
-        try:
-            if not (mode.upper()=="KEEP" or mode.upper()=="REJECT"):
-                msg="unknown selection mode: "+str(mode) \
-                    + " - expecting 'Keep' or 'Reject'"
-                raise ValueError, msg
+        if not (mode.upper()=="KEEP" or mode.upper()=="REJECT"):
+            msg="unknown selection mode: "+str(mode) \
+                + " - expecting 'Keep' or 'Reject'"
+            raise ValueError, msg
+        else:
+            if mode.upper()=="KEEP":
+                keep=True
             else:
-                if mode.upper()=="KEEP":
-                    keep=True
-                else:
-                    keep=False
-                # build the list of types and attributes
-                attributes=self.__attributes
-                types=self.__types
-                cselected=self.__ctrees.SelectIndividual(id_list, keep)
-        except RuntimeError, error:
-            raise FormatError, str(error)
-        selected=Trees(cselected, types, attributes)
+                keep=False
+            # build the list of types and attributes
+            attributes=self.__attributes
+            types=self.__types
+            cselected=self.__ctrees.SelectIndividual(id_list, keep)
+        selected = Trees(cselected, types, attributes)
         self._copy_vid_conversion(selected)
         self._copy_tid_conversion(selected)
         return selected
@@ -2474,11 +2393,10 @@ class Trees(object):
                     attributes.append(self.__attributes[v])
             csegmentation=self.__ctrees.SegmentationExtract(cvariable, 
                                                             values, keep)
-        except RuntimeError, error:
-            # raise stat_tool.Format_error, str(cerror)
-            replaced=self.__replacestr(str(error), "variable") # str(error)
-            raise FormatError, replaced
-        segmentation=Trees(csegmentation, types, attributes)
+        except _errors.StatTreeError, error:
+            replaced = self.__replacestr(str(error), "variable")
+            raise _errors.StatTreeError(replaced)
+        segmentation = Trees(csegmentation, types, attributes)
         # self._copy_vid_conversion(selected)
         # self._copy_tid_conversion(selected)
         return segmentation
@@ -2499,10 +2417,10 @@ class Trees(object):
         else:
             eparam=param
         try:
-            cshifted=self.__ctrees.Shift(cvariable, eparam)
-        except RuntimeError, error:
-            replaced=self.__replacestr(str(error), "variable")
-            raise FormatError, replaced
+            cshifted = self.__ctrees.Shift(cvariable, eparam)
+        except _errors.StatTreeError, error:
+            replaced = self.__replacestr(str(error), "variable")
+            raise _errors.StatTreeError(replaced)
         shifted=Trees(cshifted, self.__types, self.__attributes)
         self._copy_vid_conversion(shifted)
         self._copy_tid_conversion(shifted)
@@ -2521,12 +2439,8 @@ class Trees(object):
             raise IndexError, msg
         cvariable=self._valid_cvariable(variable)+1
         # correspondence of variables between self and self.__ctrees
-        try:
-            ctranscoded=self.__ctrees.Transcode(cvariable, new_values)
-        except RuntimeError, error:
-            msg=str(error)
-            raise FormatError, msg
-        transcoded=Trees(ctranscoded, self.__types, self.__attributes)
+        ctranscoded = self.__ctrees.Transcode(cvariable, new_values)
+        transcoded = Trees(ctranscoded, self.__types, self.__attributes)
         self._copy_vid_conversion(transcoded)
         self._copy_tid_conversion(transcoded)
         return transcoded

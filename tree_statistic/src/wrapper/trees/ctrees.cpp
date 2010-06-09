@@ -15,6 +15,7 @@
 #include "tree_statistic/tree_labels.h"
 #include "tree_statistic/generic_typed_edge_tree.h"
 #include "tree_statistic/typed_edge_trees.h"
+#include "../wrapper_util.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -25,13 +26,11 @@
 // Using =======================================================================
 using namespace boost::python;
 using namespace Stat_trees;
+using namespace tree_statistic::wrap_util;
 
 using boost::python::list;
 
 // Declarations ================================================================
-
-// New error Type
-static object StatTreeErrorClass;
 
 namespace  {
 //
@@ -58,17 +57,6 @@ template<int num, int id> struct UniqueInt
  *
  *  Wrappers for Python class Trees:
  */
-
-void throw_stat_tree_error(const char* error_message)
-{
-  PyErr_SetString(StatTreeErrorClass.ptr(), error_message);
-  boost::python::throw_error_already_set();
-};
-void throw_stat_tree_error(ostringstream& error_message)
-{
-  PyErr_SetString(StatTreeErrorClass.ptr(), (error_message.str()).c_str());
-  boost::python::throw_error_already_set();
-};
 
 Trees* Trees_wrapper_init1(boost::python::list tree_list)
 {
@@ -122,8 +110,10 @@ Trees* Trees_wrapper_init1(boost::python::list tree_list)
             }
          delete [] otrees;
          otrees= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+
+         throw_python_error(PyExc_TypeError, error_message);
+         // PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
+         // throw_error_already_set();
       }
       else
       {
@@ -172,7 +162,7 @@ Trees* Trees_wrapper_init1(boost::python::list tree_list)
          {
             status= false;
             error_message << "could not initialize a Trees object from argument"; // << endl;
-            throw_stat_tree_error(error_message);
+            throw_stat_tree_error(StatTreeError, error_message);
          }
       }
    }
@@ -180,8 +170,7 @@ Trees* Trees_wrapper_init1(boost::python::list tree_list)
    {
       status= false;
       error_message << "at least one tree required to initialize a Trees object"; // << endl;
-      PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_IndexError, error_message);
    }
    return trees;
 }
@@ -207,8 +196,7 @@ Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
       status= false;
       error_message << "bad number of classes: " << nb_classes
                     << "; must be positive"; // << endl;
-      PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_ValueError, error_message);
    }
    nb_values= reftree.get_max_int_value(variable-1)
       - reftree.get_min_int_value(variable-1) + 1;
@@ -219,8 +207,7 @@ Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
       error_message << "bad number of classes: " << nb_classes
                     << "; must be at least the number of values ("
                     << nb_values << ")"; // << endl;
-      PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_ValueError, error_message);
    }
    if (status)
       for (c= 0; c < nb_classes; c++)
@@ -248,8 +235,7 @@ Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
          delete [] isymbols;
          isymbols= NULL;
       }
-      PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_TypeError, error_message);
    }
    else
    {
@@ -260,8 +246,7 @@ Trees* Trees_wrapper_transcode(const Trees& reftree, int variable,
       {
          status= false;
          error_message << error; // << endl;
-         PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_stat_tree_error(StatTreeError, error_message);
       }
    }
    return trees;
@@ -278,8 +263,9 @@ Trees* Trees_wrapper_cluster_step(const Trees& reftree, int variable,
    if (trees == NULL)
    {
       error_message << error; // << endl;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
+      // PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+      // throw_error_already_set();
    }
    return trees;
 }
@@ -321,8 +307,7 @@ Trees* Trees_wrapper_cluster_limit(const Trees& reftree, int variable,
    {
       delete [] ilimits;
       ilimits= NULL;
-      PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_TypeError, error_message);
    }
    else
    {
@@ -333,8 +318,7 @@ Trees* Trees_wrapper_cluster_limit(const Trees& reftree, int variable,
       {
          status= false;
          error_message << error; // << endl;
-         PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_stat_tree_error(StatTreeError, error_message);
       }
    }
    return trees;
@@ -352,8 +336,7 @@ Trees* Trees_wrapper_difference(const Trees& reftree, int variable)
    {
       status= false;
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return trees;
 }
@@ -392,8 +375,7 @@ void Trees_wrapper_build_sequences(const Trees& reftree, const char* prefix,
    if (!status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
 }
 
@@ -412,8 +394,7 @@ Sequences* Trees_wrapper_build_py_sequences(const Trees& reftree,
    if (!status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    else
        return seq;
@@ -440,8 +421,7 @@ void Trees_wrapper_build_vectors_path(const Trees& reftree, const char* prefix)
    if (!status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
 }
 
@@ -460,8 +440,7 @@ Vectors* Trees_wrapper_build_vectors_object(const Trees& reftree)
    if (!status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return vec;
 }
@@ -478,8 +457,7 @@ DiscreteDistributionData* Trees_wrapper_extract_value(const Trees& reftree, int 
    if (histo == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return histo;
 }
@@ -497,8 +475,7 @@ DiscreteDistributionData* Trees_wrapper_extract_feature(const Trees& reftree,
    if (histo == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return histo;
 }
@@ -572,8 +549,7 @@ Trees* Trees_wrapper_select_variable(const Trees& reftree,
       {
          delete [] variable_list;
          variable_list= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_TypeError, error_message);
       }
       else
       {
@@ -585,8 +561,7 @@ Trees* Trees_wrapper_select_variable(const Trees& reftree,
          {
             status= false;
             error_message << error;
-            PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-            throw_error_already_set();
+            throw_stat_tree_error(StatTreeError, error_message);
          }
       }
    }
@@ -595,8 +570,7 @@ Trees* Trees_wrapper_select_variable(const Trees& reftree,
       status= false;
       trees= new Trees(reftree);
       error_message << "at least one variable required to select variables";
-      PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_UserWarning, error_message);
    }
    return trees;
 }
@@ -641,8 +615,7 @@ Trees* Trees_wrapper_select_individual(const Trees& reftree,
       {
          delete [] id_list;
          id_list= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_TypeError, error_message);
       }
       else
       {
@@ -653,8 +626,7 @@ Trees* Trees_wrapper_select_individual(const Trees& reftree,
          {
             status= false;
             error_message << error;
-            PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-            throw_error_already_set();
+            throw_stat_tree_error(StatTreeError, error_message);
          }
       }
    }
@@ -663,8 +635,7 @@ Trees* Trees_wrapper_select_individual(const Trees& reftree,
       status= false;
       trees= new Trees(reftree);
       error_message << "at least one identifier required to select individuals";
-      PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_UserWarning, error_message);
    }
    return trees;
 }
@@ -690,8 +661,7 @@ Trees* Trees_wrapper_segmentation_extract_value(const Trees& reftree,
    {
       status= false;
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return trees;
 }
@@ -738,8 +708,7 @@ Trees* Trees_wrapper_segmentation_extract_values(const Trees& reftree,
       {
          delete [] ivalue;
          ivalue= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_TypeError, error_message);
       }
       else
       {
@@ -751,8 +720,7 @@ Trees* Trees_wrapper_segmentation_extract_values(const Trees& reftree,
          {
             status= false;
             error_message << error;
-            PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-            throw_error_already_set();
+            throw_stat_tree_error(StatTreeError, error_message);
          }
       }
    }
@@ -760,8 +728,7 @@ Trees* Trees_wrapper_segmentation_extract_values(const Trees& reftree,
    {
       status= false;
       error_message << "at least one value required to extract segmentation";
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return trees;
 }
@@ -776,8 +743,7 @@ Trees* Trees_wrapper_shift_int(const Trees& reftree, int variable, int shift)
    if (trees == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return trees;
 }
@@ -792,8 +758,7 @@ Trees* Trees_wrapper_shift_float(const Trees& reftree, int variable, double shif
    if (trees == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
    return trees;
 }
@@ -842,8 +807,7 @@ Trees* Trees_wrapper_merge(const Trees& reftree, StatError& error,
             }
          delete [] otrees;
          otrees= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_TypeError, error_message);
       }
       else
       {
@@ -860,8 +824,7 @@ Trees* Trees_wrapper_merge(const Trees& reftree, StatError& error,
          {
             status= false;
             error_message << "could not merge Trees object from arguments"; // << endl;
-            PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-            throw_error_already_set();
+            throw_stat_tree_error(StatTreeError, error_message);
          }
       }
    }
@@ -870,8 +833,7 @@ Trees* Trees_wrapper_merge(const Trees& reftree, StatError& error,
       status= false;
       trees= new Trees(reftree);
       error_message << "at least one tree required to merge Trees objects"; // << endl;
-      PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_UserWarning, error_message);
       return trees;
    }
    return trees;
@@ -947,8 +909,7 @@ Trees* Trees_wrapper_merge2(const Trees& reftree, boost::python::list tree_list)
             }
          delete [] otrees;
          otrees= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_TypeError, error_message);
       }
       else
       {
@@ -972,12 +933,11 @@ Trees* Trees_wrapper_merge2(const Trees& reftree, boost::python::list tree_list)
          {
             status= false;
             error_message << error; // << endl;
-            PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
+            throw_stat_tree_error(StatTreeError, error_message);
 #ifdef      DEBUG
             cerr << "Sending exception." << endl;
 #endif
-            throw_error_already_set();
-#ifdef      DEBUG
+            #ifdef      DEBUG
             cerr << "Exception sent." << endl;
 #endif
          }
@@ -988,8 +948,7 @@ Trees* Trees_wrapper_merge2(const Trees& reftree, boost::python::list tree_list)
       status= false;
       trees= new Trees(reftree);
       error_message << "at least one tree required to merge Trees objects"; // << endl;
-      PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_UserWarning, error_message);
       return trees;
    }
    return trees;
@@ -1043,8 +1002,7 @@ Trees* Trees_wrapper_merge_variable(const Trees& reftree, boost::python::list tr
             }
          delete [] otrees;
          otrees= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_TypeError, error_message);
       }
       else
       {
@@ -1061,8 +1019,7 @@ Trees* Trees_wrapper_merge_variable(const Trees& reftree, boost::python::list tr
          {
             status= false;
             error_message << error; // << endl;
-            PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-            throw_error_already_set();
+            throw_stat_tree_error(StatTreeError, error_message);
          }
       }
    }
@@ -1071,8 +1028,7 @@ Trees* Trees_wrapper_merge_variable(const Trees& reftree, boost::python::list tr
       status= false;
       trees= new Trees(reftree);
       error_message << "at least one tree required to merge variables"; // << endl;
-      PyErr_SetString(PyExc_UserWarning, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_python_error(PyExc_UserWarning, error_message);
       return trees;
    }
    return trees;
@@ -1091,8 +1047,7 @@ MultiPlotSet* Trees_wrapper_get_plotable(const Trees& reftree,
    if (plotset == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
 
    return plotset;
@@ -1110,8 +1065,7 @@ void Trees_wrapper_plot_write(const Trees& reftree,
    if (not status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(StatTreeError, error_message);
    }
 }
 
@@ -1134,12 +1088,9 @@ BOOST_PYTHON_MODULE(ctrees)
 {
 
     // Error initialisation
-    // Import the stat_tool module
-    object stat_tool = import("vplants.stat_tool");
-    object StatError = stat_tool.attr("StatError");
-
-    StatTreeErrorClass = object(handle<>(PyErr_NewException("ctrees.StatTreeError",StatError.ptr(),NULL))); 
-    scope().attr("StatTreeError") = StatTreeErrorClass;
+    object stat_tree_errors = import("openalea.tree_statistic._errors");
+    // Import StatTreeError
+    object StatTreeError = stat_tree_errors.attr("StatTreeError");
 
     class_< Trees >("CTrees", init< const Trees& >())
         .def(init< optional< int, int, int > > ())
@@ -1174,7 +1125,7 @@ BOOST_PYTHON_MODULE(ctrees)
                              "Build vectors from trees and print them"
                              "into a file.")
         .def("BuildVectors", &Trees_wrapper_build_vectors_object,
-	                      return_value_policy< manage_new_object >(),
+                          return_value_policy< manage_new_object >(),
                              "BuildVectors(self, path) -> void \n\n"
                              "Build vectors object from trees.")
         .def("ExtractSizeFrequencyDistribution", &Trees::extract_size,

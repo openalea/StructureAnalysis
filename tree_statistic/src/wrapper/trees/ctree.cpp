@@ -56,7 +56,7 @@ template <class Tree>
 typename tree_traits<Tree>::vertex_descriptor
 Tree_wrapper_Parent(Tree& tree, typename tree_traits<Tree>::vertex_descriptor v)
 {
-#ifdef __GNUC__  
+#ifdef __GNUC__
 #warning: in each method, access to vertices needs to be checked more carefully, as in Parent
 #endif
    // int parent;
