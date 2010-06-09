@@ -338,7 +338,6 @@ class HiddenMarkovTree:
             elif not(self.__chmt.IsParametric(variable)):
                 file_id+=str(0)
             self.__chmt.plot(Title=Title, Suffix=file_id)
-            raise FormatError, f
         else: # ViewPoint.upper()=="STATEPROFILE"
             if (type(TreeId)!=int):
                 raise TypeError, "bad tree index type: "+str(type(TreeId))
@@ -669,7 +668,6 @@ class HiddenMarkovTreeData(trees.Trees):
                 file_id = ref_file_id
             # part of the filename that identifies the graph to be displayed
             self.__ctrees.plot(Title=Title, Suffix=file_id)
-            raise FormatError, f
 
     def _ctrees(self):
         return self.__ctrees

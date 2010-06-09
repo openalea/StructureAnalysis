@@ -1130,15 +1130,15 @@ BOOST_PYTHON_MODULE(ctrees)
                           return_value_policy< manage_new_object >(),
                              "BuildVectors(self, path) -> void \n\n"
                              "Build vectors object from trees.")
-        .def("ExtractSizeFrequencyDistribution", &Trees::extract_size,
+        .def("ExtractSizeHistogram", &Trees::extract_size,
                                                  return_value_policy< manage_new_object >(),
-                                                "ExtractSizeFrequencyDistribution(self) -> FrequencyDistribution \n\n"
+                                                "ExtractSizeHistogram(self) -> FrequencyDistribution \n\n"
                                                 "Extract the frequency distribution of tree size.")
-        .def("ExtractNbChildrenFrequencyDistribution", &Trees::extract_nb_children,
-                                                       return_value_policy< manage_new_object >())
-        .def("ExtractValueFrequencyDistribution", &Trees_wrapper_extract_value,
-                                                  return_value_policy< manage_new_object >())
-        .def("ExtractFeatureFrequencyDistribution", &Trees_wrapper_extract_feature,
+        .def("ExtractNbChildrenHistogram", &Trees::extract_nb_children,
+                                            return_value_policy< manage_new_object >())
+        .def("ExtractValueHistogram", &Trees_wrapper_extract_value,
+                                      return_value_policy< manage_new_object >())
+        .def("ExtractFeatureHistogram", &Trees_wrapper_extract_feature,
                                         return_value_policy< manage_new_object >())
         .def("IsCharacteristic", &Trees::is_characteristic,
                              "IsCharacteristic(self, variable, charac) -> bool \n\n",

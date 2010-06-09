@@ -5,6 +5,7 @@
 
 import trees, ctree
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
+import openalea.tree_statistic._errors as _errors
 import openalea.stat_tool as stat_tool
 
 VariableType = stat_tool.VariableTypeBis
@@ -12,7 +13,7 @@ VariableType = stat_tool.VariableTypeBis
 I_DEFAULT_TREE_SIZE = trees.I_DEFAULT_TREE_SIZE
 I_DEFAULT_TREE_DEPTH = trees.I_DEFAULT_TREE_DEPTH
 
-FormatError = stat_tool.FormatError
+StatTreeError = _errors.StatTreeError
 VariableTypeDict = VariableType.values
 
 TreeValue = trees.TreeValue

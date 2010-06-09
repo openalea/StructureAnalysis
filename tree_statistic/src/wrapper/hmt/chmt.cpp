@@ -873,7 +873,7 @@ BOOST_PYTHON_MODULE(chmt)
         .def("EstimationCiHmot",
              &Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition,
              return_value_policy< manage_new_object >())
-        .def("ExtractValueFrequencyDistribution", &Chmt_data_wrapper_extract_value,
+        .def("ExtractValueHistogram", &Chmt_data_wrapper_extract_value,
              return_value_policy< manage_new_object>())
         .def("plot_write", &CHmt_data_wrapper_plot_write)
         .def("__str__", &CHmt_data_wrapper_ascii_write0)

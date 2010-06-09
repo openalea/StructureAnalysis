@@ -1495,7 +1495,7 @@ class Trees(object):
     def Difference(self, variable=None):
         """First-order differentiation of trees."""
         if (variable is None):
-            cvariable=stat_tool.I_DEFAULT()
+            cvariable=stat_tool.I_DEFAULT
         else:
             cvariable=self._valid_cvariable(variable)+1
         try:
@@ -1741,10 +1741,10 @@ class Trees(object):
                 ExtractHistogram("NbZones", variable, value)"""
         if type(nature)==str:
             if (nature.upper()=="SIZE"):
-                chisto=self.__ctrees.ExtractSizeFrequencyDistribution()
+                chisto=self.__ctrees.ExtractSizeHistogram()
                 return chisto
             elif (nature.upper()=="NBCHILDREN"):
-                chisto=self.__ctrees.ExtractNbChildrenFrequencyDistribution()
+                chisto=self.__ctrees.ExtractNbChildrenHistogram()
                 return chisto
             elif (nature.upper()=="VALUE"):
                 if variable is None:
@@ -1755,7 +1755,7 @@ class Trees(object):
                     else:
                         raise TypeError, 'argument 2 is mandatory in ' \
                                          'ExtractHistogram("Value", variable)'
-                chisto = self.__ctrees.ExtractValueFrequencyDistribution(
+                chisto = self.__ctrees.ExtractValueHistogram(
                             self._valid_cvariable(variable)+1)
                 return chisto
             elif ((nature.upper()=="FIRSTOCCURRENCEROOT") or
@@ -1790,7 +1790,7 @@ class Trees(object):
                 elif nature.upper()=="NBOCCURRENCES":
                     chartype=CharacteristicType.NB_OCCURRENCES
                 chartype+=0
-                chisto = self.__ctrees.ExtractFeatureFrequencyDistribution(
+                chisto = self.__ctrees.ExtractFeatureHistogram(
                               chartype, self._valid_cvariable(variable)+1, value)
                 return chisto
             else:
@@ -1799,7 +1799,7 @@ class Trees(object):
                 except ValueError:
                     msg="unknown feature histogram: "+nature
                     raise ValueError, msg
-                chisto=self.__ctrees.ExtractValueFrequencyDistribution(v+1)
+                chisto=self.__ctrees.ExtractValueHistogram(v+1)
                 return chisto
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"
