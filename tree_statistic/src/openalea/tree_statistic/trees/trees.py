@@ -1446,7 +1446,7 @@ class Trees(object):
                 cclustered = self.__ctrees.Cluster(cvariable, limit)
         except _errors.StatTreeError, error:
             replaced = str(error) # self.__replacestr(str(cerror), "variable")
-            raise _errors.StatTreeError, replaced
+            raise _errors.StatTreeError(replaced)
         clustered = Trees(cclustered, self.__types, self.__attributes)
         self._copy_vid_conversion(clustered)
         self._copy_tid_conversion(clustered)

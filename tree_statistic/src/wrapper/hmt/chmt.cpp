@@ -15,7 +15,6 @@
 #include "tree_statistic/typed_edge_trees.h"
 #include "tree_statistic/hidden_markov_tree.h"
 #include "tree_statistic/hidden_markov_out_tree.h"
-#include "../wrapper_util.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
@@ -23,10 +22,12 @@
 #include <boost/python/make_constructor.hpp>
 // definition of boost::python::make_constructor
 
+#include "../errors.h"
+
 // Using =======================================================================
 using namespace boost::python;
 using namespace Stat_trees;
-using namespace tree_statistic::wrap_util;
+using namespace tree_statistic;
 
 // Declarations ================================================================
 namespace  {
@@ -801,7 +802,7 @@ BOOST_PYTHON_MODULE(chmt)
     // Error initialisation
     object stat_tree_errors = import("openalea.tree_statistic._errors");
     // Import StatError
-    object StatTreeError = stat_tree_errors.attr("StatTreeError");
+    StatTreeError = stat_tree_errors.attr("StatTreeError");
 
     class_< HiddenMarkovTree >
     ("CHmt", init< const HiddenMarkovTree&, optional< bool, bool> >())

@@ -13,25 +13,23 @@ using namespace boost::python;
 
 namespace tree_statistic
 {
-  namespace wrap_util
-  {
      // New error Type
-     // static object StatTreeErrorClass;
-     object StatTreeError;
-/*
-     void throw_stat_tree_error(const char* error_message)
+     static object StatTreeError;
+
+     inline void throw_stat_tree_error(const char* error_message)
      {
-       PyErr_SetString(StatTreeErrorClass.ptr(), error_message);
-       boost::python::throw_error_already_set();
+       PyErr_SetString(StatTreeError.ptr(), error_message);
+       throw_error_already_set();
      };
 
      // Throw exception StatTreeError with a message
-     void throw_stat_tree_error(ostringstream& error_message)
+     inline void throw_stat_tree_error(ostringstream& error_message)
      {
-       PyErr_SetString(StatTreeErrorClass.ptr(), (error_message.str()).c_str());
-       boost::python::throw_error_already_set();
-     }; */
+       PyErr_SetString(StatTreeError.ptr(), (error_message.str()).c_str());
+       throw_error_already_set();
+     };
 
+    /*
      void throw_stat_tree_error(object StatTreeError, const char* error_message)
      {
        PyErr_SetString(StatTreeError.ptr(), error_message);
@@ -44,15 +42,14 @@ namespace tree_statistic
        PyErr_SetString(StatTreeError.ptr(), (error_message.str()).c_str());
        boost::python::throw_error_already_set();
      };
-
+    */
      // Throw python predefined exception with a message
      void throw_python_error(PyObject* exception_class,
                              ostringstream& error_message)
      {
        PyErr_SetString(exception_class, (error_message.str()).c_str());
-       boost::python::throw_error_already_set();
+       throw_error_already_set();
      };
-  }
 }
 
 
