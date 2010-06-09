@@ -60,8 +60,7 @@ int CHmt_wrapper_nb_values(const HiddenMarkovTree& hmt, int variable)
    else
    {
       error_message << "Bad variable: " << variable << endl;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return res;
 }
@@ -77,8 +76,7 @@ CHmt_wrapper_extract_data(const HiddenMarkovTree& hmt)
    if (res == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return res;
 }
@@ -95,8 +93,7 @@ CHmt_wrapper_extract(const HiddenMarkovTree& hmt, int itype,
    if (res == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return res;
 }
@@ -111,8 +108,7 @@ double CHmt_wrapper_likelihood(const HiddenMarkovTree& hmt,
    if (res <= D_INF)
    {
       error_message << "Cannot compute the likelihood";
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return res;
 }
@@ -143,8 +139,7 @@ CiHmot_wrapper_extract_data(const HiddenMarkovOutTree& hmt)
    if (res == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return res;
 }
@@ -171,8 +166,7 @@ bool CiHmot_wrapper_file_ascii_write2(const HiddenMarkovOutTree& hmt,
    if (!res)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return res;
 }
@@ -224,16 +218,14 @@ void CiHmot_wrapper_state_permutation(const HiddenMarkovOutTree& hmt,
       {
          delete [] iperm;
          iperm= NULL;
-         PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_TypeError, error_message);
       }
    }
    else
    {
       status= false;
       error_message << "incorrect permutation" << endl;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    if (status)
    {
@@ -241,8 +233,7 @@ void CiHmot_wrapper_state_permutation(const HiddenMarkovOutTree& hmt,
       if (error.get_nb_error() > 0)
       {
          error_message << error;
-         PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_stat_tree_error(error_message);
       }
       delete [] iperm;
       iperm= NULL;
@@ -260,8 +251,7 @@ bool CiHmot_wrapper_spreadsheet_write1(const HiddenMarkovOutTree& hmt,
    if (!res)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return res;
 }
@@ -282,8 +272,7 @@ CiHmot_wrapper_simulate_histo(const HiddenMarkovOutTree& hmt,
    if (markov_data == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return markov_data;
 }
@@ -303,8 +292,7 @@ CiHmot_wrapper_simulate_size(const HiddenMarkovOutTree& hmt,
    if (markov_data == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return markov_data;
 }
@@ -323,8 +311,7 @@ CiHmot_wrapper_simulate_trees(const HiddenMarkovOutTree& hmt,
    if (markov_data == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return markov_data;
 }
@@ -354,8 +341,7 @@ boost::python::list CiHmot_wrapper_state_profile5(const HiddenMarkovOutTree& hmt
    if (markov_data == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    else
    {
@@ -390,8 +376,7 @@ boost::python::list CiHmot_wrapper_state_profile5(const HiddenMarkovOutTree& hmt
       }
       if (!status)
       {
-         PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_ValueError, error_message);
       }
       else
       {
@@ -406,8 +391,7 @@ boost::python::list CiHmot_wrapper_state_profile5(const HiddenMarkovOutTree& hmt
       //     || (generalized_restoration == NULL)) // || (nstate_trees == NULL)
       {
          error_message << error;
-         PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_stat_tree_error(error_message);
          if (smoothed != NULL)
          {
             delete smoothed;
@@ -513,8 +497,7 @@ Hmt_wrapper_ascii_read(const char * path, int size= I_DEFAULT_TREE_SIZE,
    if (hmt == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    else
       hmot= new HiddenMarkovOutTree(*hmt);
@@ -539,8 +522,7 @@ CiHmot_wrapper_compute_state_trees(const HiddenMarkovOutTree& hmt,
    if (markov_data == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return markov_data;
 }
@@ -557,8 +539,7 @@ void CiHmot_wrapper_plot_write(const HiddenMarkovOutTree& hmt,
    if (not status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
 }
 
@@ -577,8 +558,7 @@ void CiHmot_wrapper_state_profile_plot_write(const HiddenMarkovOutTree& hmt,
    if (not status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
 }
 
@@ -602,8 +582,7 @@ bool Chmt_data_wrapper_is_parametric(const HiddenMarkovTreeData& reftree,
    if (hmarkovt == NULL)
    {
       error_message << "No model associated with data";
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    else
    {
@@ -611,8 +590,7 @@ bool Chmt_data_wrapper_is_parametric(const HiddenMarkovTreeData& reftree,
           (variable > reftree.get_nb_int() + reftree.get_nb_float()))
       {
          error_message << STAT_TREES_error[STATR_OUTPUT_PROCESS_INDEX];
-         PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_IndexError, error_message);
       }
       else
       {
@@ -645,8 +623,7 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_markov(const HiddenMarkovTre
    if (hmt == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return hmt;
 }
@@ -682,8 +659,7 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition(const Hidden
          error_message << "bad size of argument list: " << nb_fparam
                        << ": should be the number of variables ("
                        << nb_variables << ")";
-         PyErr_SetString(PyExc_ValueError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_python_error(PyExc_ValueError, error_message);
       }
       else
       {
@@ -717,8 +693,7 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition(const Hidden
          {
             delete [] fparam;
             fparam= NULL;
-            PyErr_SetString(PyExc_TypeError, (error_message.str()).c_str());
-            throw_error_already_set();
+            throw_python_error(PyExc_TypeError, error_message);
          }
       }
    }
@@ -733,8 +708,7 @@ Chmt_data_wrapper_hidden_markov_out_tree_estimation_self_transition(const Hidden
       if (hmt == NULL)
       {
          error_message << error;
-         PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-         throw_error_already_set();
+         throw_stat_tree_error(error_message);
       }
       if (fparam != NULL)
       {
@@ -768,8 +742,7 @@ void CHmt_data_wrapper_plot_write(const HiddenMarkovTreeData& reftree,
    if (not status)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
 }
 
@@ -787,8 +760,7 @@ DiscreteDistributionData* Chmt_data_wrapper_extract_value(const HiddenMarkovTree
    if (histo == NULL)
    {
       error_message << error;
-      PyErr_SetString(PyExc_RuntimeError, (error_message.str()).c_str());
-      throw_error_already_set();
+      throw_stat_tree_error(error_message);
    }
    return histo;
 }

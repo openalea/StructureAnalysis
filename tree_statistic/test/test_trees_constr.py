@@ -107,34 +107,6 @@ def test_mtg_build():
     assert mtg_t
     return mtg_t
 
-def test_cluster():
-    """cluster values of variable 0"""
-    mtg_t = test_mtg_build()
-    try:
-        T = mtg_t.Cluster("Step", 0, 10)
-    except trees.StatTreeError, msg:
-        assert False, str(msg) + "\n" + str(mtg_t)
-    clust = T
-
-def test_cluster_step_failure():
-    """use invalid step in clustering values"""
-    mtg_t = test_mtg_build()
-    try:
-        T = mtg_t.Cluster("Step", 0, -10)
-    except trees.StatTreeError, msg:
-        print msg
-    else:
-        msg = "Failed to raise exception for step in clustering"
-        assert False, msg
-
-def test_difference():
-    """1st order differenciation for variable 0"""
-    mtg_t = test_mtg_build()
-    try:
-        T = mtg_t.Difference(0)
-    except trees.StatTreeError, msg:
-        assert False, str(msg) + "\n" + str(mtg_t)
-
 def test_exception_inheritance():
     """Test whether StatTreeError are also seen as StatError"""
     mtg_t = test_mtg_build()
@@ -145,45 +117,6 @@ def test_exception_inheritance():
     else:
         msg = "Failed to catch StatTreeError as StatError exception"
         assert False, msg
-
-def test_merge():
-    """merge a tree with itself"""
-    mtg_t = test_mtg_build()
-    try:
-        T = mtg_t.Merge([mtg_t])
-    except trees.StatTreeError, msg:
-        assert False, str(msg) + "\n" + str(mtg_t)
-    msg = "Bad number of merged trees"
-    assert T.NbTrees() == mtg_t.NbTrees()*2, msg
-
-def test_select_variable():
-    """select variable 0"""
-    mtg_t = test_mtg_build()
-    try:
-        T = mtg_t.SelectVariable(0)
-    except trees.StatTreeError, msg:
-        assert False, str(msg) + "\n" + str(mtg_t)
-    msg = "Bad number of trees after variable selection"
-    assert T.NbTrees() == mtg_t.NbTrees(), msg
-
-def test_merge_failure():
-    """use invalid tree in merge"""
-    mtg_t = test_mtg_build()
-    try:
-        TS = mtg_t.SelectVariable(0)
-        T = mtg_t.Merge([TS])
-    except trees.StatTreeError, msg:
-        print msg
-    else:
-        msg = "Failed to raise exception for bad number "+\
-            "of variables in merge"
-        assert False, msg
-
-def test_build_vectors():
-    vec = T.BuildVectors()
-    assert vec
-    import openalea
-    assert type(vec) == openalea.stat_tool._stat_tool._Vectors
 
 def test_build_mtg_filter():
     """Read a Tree from a MTG with filter and custom attributes"""
@@ -333,13 +266,7 @@ if __name__ == "__main__":
     test_nb_trees()
     test_copy()
     test_mtg_build()
-    test_cluster()
-    test_cluster_step_failure()
-    # test_exception_inheritance()
-    test_difference()
-    test_merge()
-    test_select_variable()
-    # test_merge_failure()
+    test_exception_inheritance()
     test_mtg_build_failure()
     test_list_build_failure()
     #test_attribute_name_failure()
