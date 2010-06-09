@@ -53,6 +53,12 @@ class Test(interface):
         hmc = HiddenSemiMarkov("data/hidden_markov.hmc")
         assert hmc
 
+    def test_constructor_from_file_nonparametric1(self):
+	"""Read HSM model from a file with 1st nonparametric variable
+	with observation distribution ending by 1e-05 """
+        hmc = HiddenSemiMarkov("data/hidden_markov_non-parametric1.hmc")
+        assert hmc
+
     def test_constructor_from_file_failure(self):
         self.constructor_from_file_failure()
 
