@@ -42,14 +42,12 @@
 #include "distribution.h"
 #include "stat_label.h"
 
-#ifdef DEBUG
 #include <boost/math/distributions/binomial.hpp>
 #include <boost/math/distributions/poisson.hpp>
 #include <boost/math/distributions/negative_binomial.hpp>
-using namespace boost::math;
-#endif
 
 using namespace std;
+using namespace boost::math;
 
 
 

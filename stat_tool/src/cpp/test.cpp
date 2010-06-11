@@ -40,15 +40,13 @@
 #include "stat_tools.h"
 #include "stat_label.h"
 
-#ifdef DEBUG
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/distributions/chi_squared.hpp>
 #include <boost/math/distributions/fisher_f.hpp>
 #include <boost/math/distributions/students_t.hpp>
-using namespace boost::math;
-#endif
 
 using namespace std;
+using namespace boost::math;
 
 
 static const double  CRITICAL_PROBABILITY_FACTOR = 1.2;
@@ -118,7 +116,6 @@ Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
            double icritical_probability)
 
 {
-/*
   ident = iident;
   one_side = ione_side;
   df1 = idf1;
@@ -183,7 +180,6 @@ Test::Test(int iident , bool ione_side , int idf1 , int idf2 , double ivalue ,
   cout << ": " << value << "   " << STAT_label[STATL_REFERENCE] << " "
        << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << critical_probability << endl;
 # endif
-*/
 }
 
 
