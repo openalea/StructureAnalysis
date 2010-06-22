@@ -316,6 +316,18 @@ CiHmot_wrapper_simulate_trees(const HiddenMarkovOutTree& hmt,
    return markov_data;
 }
 
+HiddenMarkovTreeData*
+CiHmot_wrapper_simulate_forest(const HiddenMarkovOutTree& hmt,
+                               const Trees& otrees,
+                               bool counting_flag= true)
+{
+   HiddenMarkovTreeData* markov_data= NULL;
+
+   markov_data= hmt.simulation(otrees, counting_flag);
+
+   return markov_data;
+}
+
 boost::python::list CiHmot_wrapper_state_profile5(const HiddenMarkovOutTree& hmt,
                                                  int viterbi_algorithm,
                                                  int nb_state_trees,
@@ -365,7 +377,7 @@ boost::python::list CiHmot_wrapper_state_profile5(const HiddenMarkovOutTree& hmt
       {
          t= markov_data->get_tree(index);
 
-         if (t->get_nb_children(root) < 2)
+         if (!(t->is_root(root)) && (t->get_nb_children(root) < 2))
          {
             error_message << "Bad number of children for subtree rooted at: "
             << root << endl;
@@ -824,6 +836,8 @@ BOOST_PYTHON_MODULE(chmt)
         .def("Simulate", &CiHmot_wrapper_simulate_size,
                          return_value_policy< manage_new_object >())
         .def("Simulate", &CiHmot_wrapper_simulate_trees,
+                         return_value_policy< manage_new_object >())
+        .def("Simulate", &CiHmot_wrapper_simulate_forest,
                          return_value_policy< manage_new_object >())
         .def("SpreadsheetWrite", &CiHmot_wrapper_spreadsheet_write1)
         .def("StatePermutation", &CiHmot_wrapper_state_permutation,

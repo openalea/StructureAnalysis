@@ -440,12 +440,13 @@ class HiddenMarkovTree:
             self.__chmt.SpreadsheetWrite(file_name)
 
 
-    def Simulate(self, arg1, arg2, arg3=None):
+    def Simulate(self, arg1, arg2=None, arg3=None):
         """Generate a sample of trees from self.
 
         Usage:  Simulate(sample_size, tree_size, nb_children)
                 Simulate(sample_size, Trees)
-                Simulate(size_histo, nb_children_histo)"""
+                Simulate(size_histo, nb_children_histo)
+                Simulate(Trees)"""
         if (type(arg1)==int) and (type(arg2)==int):
             # Simulate(sample_size, tree_size, nb_children)
             if arg3 is None:
@@ -459,18 +460,21 @@ class HiddenMarkovTree:
             else:
                 raise TypeError, "bad type for argument 2: trees.Trees " \
                                     "expected"
-        else:
+        elif issubclass(arg1.__class__, stat_tool._DiscreteDistributionData):
             # Simulate(size_histo, nb_children_histo)
-            if issubclass(arg1.__class__, stat_tool._DistributionData):
-                if issubclass(arg2.__class__, stat_tool._DistributionData):
-                    chmt_data= \
-                        self.__chmt.Simulate(arg1, arg2, True, False)
-                else:
-                    raise TypeError, "bad type for argument 2:  " \
-                                        "stat_tool._DistributionData expected"
+            if issubclass(arg2.__class__, stat_tool._DiscreteDistributionData):
+                chmt_data= \
+                    self.__chmt.Simulate(arg1, arg2, True, False)
             else:
-                raise TypeError, "bad type for argument 1:  " \
-                                    "stat_tool._DistributionData expected"
+                raise TypeError, "bad type for argument 2:  " \
+                                    "stat_tool._DiscreteDistributionData expected"
+        else:
+            # Simulate(Trees)
+            if issubclass(arg1.__class__, trees.Trees):
+                chmt_data = self.__chmt.Simulate(arg1._ctrees(), True)
+            else:
+                raise TypeError, "bad type for argument 1: trees.Trees " \
+                                    "expected"
         chmt_data = chmt_data.StateTrees()
         return HiddenMarkovTreeData(chmt_data, self, True)
 

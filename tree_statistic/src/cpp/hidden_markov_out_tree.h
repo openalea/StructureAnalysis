@@ -357,6 +357,10 @@ public :
                                     const Trees& otrees,
                                     bool counting_flag= true) const;
 
+   /** Simulation using a given forest structure*/
+   HiddenMarkovTreeData* simulation(const Trees& otrees,
+                                    bool counting_flag=true) const;
+
    // methods below should be used for testing purposes only...
    void get_state_marginal_distribution(const HiddenMarkovTreeData& trees,
                                         double_array_3d& state_marginal) const;

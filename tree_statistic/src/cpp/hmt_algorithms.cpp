@@ -1022,6 +1022,192 @@ HiddenMarkovTreeData* HiddenMarkovOutTree::simulation(StatError& error,
    return res;
 }
 
+/*****************************************************************
+ *
+ *  Simulation of a Hidden_markov_out_tree
+ *  on a actual forest given as argument,
+ *  using a flag on the counting distribution computation
+ *
+ **/
+
+HiddenMarkovTreeData* HiddenMarkovOutTree::simulation(const Trees& otrees,
+                                                      bool counting_flag) const
+{
+   typedef Trees::tree_type tree_type;
+   typedef generic_visitor<tree_type>::vertex_array vertex_array;
+   typedef Typed_edge_one_int_tree::value ivalue;
+   typedef tree_type::value value;
+
+   HiddenMarkovTreeData *res =NULL;
+   HiddenMarkovTree *markov = NULL; //shouldn't it be hmot??
+
+   Typed_edge_one_int_tree *state_tree;
+   tree_type *tree;
+   Typed_edge_one_int_tree::value state_v;
+   value obs_v;
+   int var, t, node;
+   bool status = true;
+   tree_type::key parent_key;
+   generic_visitor<tree_type> *visitor;
+   vertex_array va;
+   int parent_state;
+   register int *itype = NULL;
+
+   int numTrees = otrees.get_nb_trees();
+
+   tree_type **t_otrees = NULL; // trees copied from otrees
+   tree_type **t_trees = NULL; // t_otrees with changed number of variables
+   Unlabelled_typed_edge_tree *tmp_utree = NULL;
+   Trees *new_otrees = NULL;
+   tree_type *default_base_tree = NULL;
+   ivalue v;
+
+   // number of variables of the HMT
+   int itypeLen = _nb_ioutput_process + _nb_doutput_process;
+   itype = new int[itypeLen];
+
+   for(var= 0; var < _nb_ioutput_process; var++)
+      itype[var]= INT_VALUE;
+
+   for(int var= 0; var < _nb_doutput_process; var++)
+      itype[var+_nb_ioutput_process]= REAL_VALUE;
+
+
+   //create a new Trees object with itype and the same structure
+   default_base_tree= new tree_type(_nb_ioutput_process, _nb_doutput_process, 0, 1);
+   v.reset(_nb_ioutput_process, _nb_doutput_process);
+   default_base_tree->add_vertex(v);
+
+   tmp_utree = new Unlabelled_typed_edge_tree;
+   t_otrees = new tree_type*[numTrees];
+   t_trees = new tree_type*[numTrees];
+
+   // copy the tree structures in otrees, changing their
+   // number and type of variables if necessary
+   for(int i=0; i < numTrees; i++)
+   {
+       t_otrees[i] = otrees.get_tree(i);
+       tmp_utree = t_otrees[i]->get_structure();
+       t_trees[i] = new tree_type(*default_base_tree);
+       t_trees[i]->set_structure(*tmp_utree, v);
+       delete tmp_utree;
+       tmp_utree = NULL;
+   }
+
+   new_otrees = new Trees(numTrees,itype,t_trees);
+   //end
+
+   for(int i=0; i < numTrees; i++)
+   {
+       delete t_otrees[i];
+       t_otrees[i] = NULL;
+       delete [] t_otrees;
+       t_otrees = NULL;
+       delete t_trees[i];
+       t_trees[i] = NULL;
+       delete [] t_trees;
+       t_trees = NULL;
+   }
+
+   res = new HiddenMarkovTreeData(numTrees, itype, new_otrees->trees);
+
+   //initialize states
+   ivalue default_value;
+   Unlabelled_typed_edge_tree *utree;
+
+   assert(res->get_nb_int()+res->get_nb_float()> 0);
+
+   // create state_trees
+   res->state_trees = new Typed_edge_one_int_tree*[res->get_nb_trees()];
+   default_value.Int() = I_DEFAULT;
+   // with appropriate namespace
+
+   for(int i= 0; i < res->get_nb_trees(); i++)
+   {
+      res->state_trees[i] = new Typed_edge_one_int_tree;
+      utree = res->get_tree(i)->get_structure();
+      res->state_trees[i]->set_structure(*utree, default_value);
+      delete utree;
+   }//end init states
+
+   //simulation of states
+   res->markov = new HiddenMarkovOutTree(*this, false, false);
+
+   markov = res->markov;
+   markov->create_cumul();
+   markov->cumul_computation();
+
+   obs_v.reset(_nb_ioutput_process, _nb_doutput_process);
+
+   for(t= 0; t < res->get_nb_trees(); t++)
+   {
+       state_tree = res->state_trees[t];
+       tree = res->trees[t];
+       // simulation of the root state
+       state_v.Int() = cumul_method(markov->nb_state, markov->cumul_initial);
+       state_tree->put(state_tree->root(), state_v); //save the value of simulated state
+
+       // simulation of the root observation
+       for(var = 0; var < markov->_nb_ioutput_process; var++)
+         if (markov->npprocess[var+1] != NULL)
+            obs_v.Int(var)= markov->npprocess[var+1]->observation[state_v.Int()]->simulation();
+         else
+            obs_v.Int(var)= markov->piprocess[var+1]->observation[state_v.Int()]->simulation();
+
+       for(var = 0; var < markov->_nb_doutput_process; var++)
+            obs_v.Double(var) = markov->pdprocess[var]->observation[state_v.Int()]->simulation();
+
+       tree->put(tree->root(), obs_v);
+
+       visitor = new generic_visitor<tree_type>;
+       traverse_tree(tree->root(), *tree, *visitor);
+
+       va = visitor->get_preorder(*tree);
+       delete visitor;
+
+       // simulation of the chain
+       for(node = 1; node < va.size(); node++)
+       { // starting from node = 1 skips the root node
+
+            // va(node) is a key
+            parent_key = state_tree->parent(va[node]);
+            parent_state = (state_tree->get(parent_key)).Int();
+
+            // simulation of current state
+            state_v.Int()= cumul_method(markov->nb_state, markov->cumul_transition[parent_state]);
+            state_tree->put(va[node], state_v);
+
+            for(var = 0; var < markov->_nb_ioutput_process; var++)
+               if (markov->npprocess[var+1] != NULL)
+                  obs_v.Int(var) = markov->npprocess[var+1]->observation[state_v.Int()]->simulation();
+               else
+                  obs_v.Int(var) = markov->piprocess[var+1]->observation[state_v.Int()]->simulation();
+
+            for(var = 0; var < markov->_nb_doutput_process; var++)
+               obs_v.Double(var) = markov->pdprocess[var]->observation[state_v.Int()]->simulation();
+
+            tree->put(va[node], obs_v);
+         }
+   }//end simulation of states
+
+   markov->remove_cumul();
+
+   // extraction of the characteristics for the simulated trees
+   res->min_max_value_computation();
+
+   // res->chain_data= new Chain_data(*res, 0, 1); // 1 == markov->order
+   res->chain_data= new ChainData(type, 0, 1);
+   res->build_characteristics();
+   res->build_size_frequency_distribution();
+   res->build_nb_children_frequency_distribution();
+   res->_nb_states = nb_state;
+   res->build_observation_frequency_distribution();
+   // res->build_state_characteristics(); // called by build_observation_histogram();
+
+   return res;
+}
+
+
 void HiddenMarkovOutTree::state_no_occurrence_probability(int state, double increment)
 {}
 

@@ -121,9 +121,10 @@ def test_extract_observation_histogram():
 
 def test_plot_first_occurrencer_histogram():
     H = test_hmt_read()
-    H.Plot(ViewPoint="FirstOccurrenceRoot", variable=1)
+    if not(stat_tool.plot.DISABLE_PLOT):
+        H.Plot(ViewPoint="FirstOccurrenceRoot", variable=1)
 
-def test_plot_data():
+def test_plot_observation():
     H = test_hmt_read()
     if not(stat_tool.plot.DISABLE_PLOT):
         H.Plot()
@@ -131,7 +132,8 @@ def test_plot_data():
 if __name__ == "__main__":
     hmt_name1, hmt_name2 = init()
     test_hmt_read()
-    test_hmt_ascii_readtest_hmt_read_failure()
+    test_hmt_ascii_read
+    test_hmt_read_failure()
     test_hmt_save()
     test_hmt_spreadsheet_save()
     test_compare_display()

@@ -522,9 +522,10 @@ public :
    FrequencyDistribution* get_nb_zones(int variable, int value) const;
    FrequencyDistribution* get_nb_occurrence(int variable, int value) const;
 
+   /** Return the set of trees (a new object is allocated)*/
    pt_tree_type_array get_trees() const;
+   /** Return a given tree (a new object is allocated)*/
    tree_type* get_tree(int itree) const;
-   // access to the observed trees
 
 //     // model identification and selection
 
