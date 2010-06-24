@@ -98,20 +98,21 @@ private :
     int nb_parameter_computation(double min_probability) const;
     double penalty_computation() const;
 
-    /** Conditional density of observations */
+    /** Conditional density of observations 
+     output_cond[vec_index, state] */
     void get_output_conditional_distribution(const Vectors &mixt_data,
                          double** &output_cond,
                          bool log_computation=false) const;
 
     /** Conditional distribution of states */
     void get_posterior_distribution(const Vectors &mixt_data,
-                    double** output_cond,
-                    double** &posterior_dist) const;
+				    double** output_cond,
+				    double** &posterior_dist) const;
 
     /** MAP algorithm */
-    std::vector<int>* state_computation(StatError &error, const Vectors &vec,
-                                        int algorithm=VITERBI, int index=I_DEFAULT,
-                                        double** posterior_dist=NULL) const;
+    std::vector<int>* state_computation(StatError &error, const Vectors &vec, 
+					double** &posterior_dist,
+                                        int algorithm=VITERBI, int index=I_DEFAULT) const;
 
     /** Initialization of EM algorithm */
     void init();
@@ -144,8 +145,8 @@ public :
     Distribution* extract_distribution(StatError &error , int ivariable) const;
     MultivariateMixtureData* extract_data(StatError &error) const;
 
-   /** Permutation of the states of \e self */
-   void state_permutation(StatError& error, int* perm) const;
+    /** Permutation of the states of \e self */
+    void state_permutation(StatError& error, int* perm) const;
 
     std::ostream& line_write(std::ostream &os) const;
 
@@ -162,9 +163,9 @@ public :
 
     MultivariateMixtureData* simulation(StatError &error , int nb_element) const;
 
-    /** add restored states to Vectors */
-    MultivariateMixtureData* cluster(StatError &error,  const Vectors &vec,
-                                     int algorithm=VITERBI) const;
+    /** add restored states and state entropy to Vectors */
+    MultivariateMixtureData* cluster(StatError &error, const Vectors &vec,
+                                     int algorithm=VITERBI, bool add_state_entropy=false) const;
 
     /** return "true" if process ivariable is parametric */
     bool is_parametric(int ivariable) const;

@@ -280,6 +280,7 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
   for (k = 0;k < nb_variable;k++) {
     switch (type[k]) {
 
+    case STATE:
     case INT_VALUE : {
       for (m = 0;m < nb_vector;m++) {
         int_vector[m][k] = iint_vector[m][i];
@@ -304,6 +305,7 @@ Vectors::Vectors(int inb_vector , int *iidentifier , int inb_variable ,
 
     switch (type[i]) {
 
+    case STATE:
     case INT_VALUE : {
       build_marginal_frequency_distribution(i);
       break;
@@ -482,6 +484,7 @@ Vectors::Vectors(const Vectors &vec , int inb_vector , int *index)
 
     switch (type[i]) {
 
+    case STATE:
     case INT_VALUE : {
       build_marginal_frequency_distribution(i);
       break;

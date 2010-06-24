@@ -560,7 +560,7 @@ public:
     return ret;
   }
 
-  static DiscreteParametricModel*
+  static DiscreteParametricModel* 
   extract_mixture(const MultivariateMixture& mixt, int ivariable)
   {
     StatError error;
@@ -588,6 +588,20 @@ public:
         delete marginal;
         marginal = NULL;
       }
+
+    return ret;
+  }
+
+  static MultivariateMixtureData* 
+  cluster_data(const MultivariateMixture& mixt, Vectors& vec, bool state_entropy=false)
+  {
+    StatError error;
+    MultivariateMixtureData* ret = NULL;
+
+    ret = mixt.cluster(error, vec, VITERBI, state_entropy);
+
+    if (ret == NULL)
+      stat_tool::wrap_util::throw_error(error);
 
     return ret;
   }
@@ -736,7 +750,6 @@ void class_multivariate_mixture()
     DEF_RETURN_VALUE("extract_mixture", WRAP::extract_mixture,
         args("variable"), "extract_mixture(self, variable) -> _Distribution. \n\n" "Return the _MultivariateMixture distribution")
 
-
     // no object returned, args required
     .def("_is_parametric", WRAP::_is_parametric,
         args("variable"),"_is_parametric(self, variable) -> bool. \n\n" "Return True if the variable is parametric")
@@ -749,6 +762,9 @@ void class_multivariate_mixture()
     .def("state_permutation", WRAP::state_permutation, "permutation of the model states")
     .def("spreadsheet_write", WRAP::spreadsheet_write, "save data in spreadsheet format")
     DEF_RETURN_VALUE_NO_ARGS("get_plotable", WRAP::get_plotable, "return plotable")
+
+    .def("cluster_data", WRAP::cluster_data, "cluster_data(self, Vectors, entropy) -> _MultivariateMixtureData. \n\n" "Cluster data using the _MultivariateMixture model", return_value_policy< manage_new_object >())
+
 
      ;
 
@@ -824,6 +840,7 @@ public:
           "No mixture model available for Mixture Data");
     return ret;
   }
+
   WRAP_METHOD2(MultivariateMixtureData, extract, DiscreteDistributionData, int, int);
   WRAP_METHOD1(MultivariateMixtureData, extract_marginal, DiscreteDistributionData, int);
   WRAP_METHOD_FILE_ASCII_WRITE( MultivariateMixtureData);

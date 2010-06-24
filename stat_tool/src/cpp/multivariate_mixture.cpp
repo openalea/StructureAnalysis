@@ -2107,22 +2107,28 @@ MultivariateMixtureData::MultivariateMixtureData(const Vectors &vec , int inb_co
 
 {
   register int i, var;
-  int nb_val;
+  int nb_val, nb_int_variable = 0;
 
   mixture = NULL;
   nb_component = inb_component;
+
+  for (i = 0; i < nb_variable; i++)
+    if ((vec.get_type(i) == STATE) || (vec.get_type(i) == INT_VALUE))
+      nb_int_variable++;
 
   weight = new FrequencyDistribution(nb_component);
 
   if (nb_variable > 0) {
     component = new FrequencyDistribution**[nb_variable];
-    for (var = 0;var < nb_variable;var++) {
+    for (var = 0; var < nb_int_variable; var++) {
       component[var] = new FrequencyDistribution*[nb_component];
-      for (i = 0;i < nb_component;i++) {
-    nb_val = (int)ceil(get_max_value(var))+1;
-    component[var][i] = new FrequencyDistribution(nb_val);
+      nb_val = (int)ceil(get_max_value(var))+1;
+      for (i = 0; i < nb_component; i++) {
+	component[var][i] = new FrequencyDistribution(nb_val);
       }
     }
+    for (var = nb_int_variable; var < nb_variable; var++)
+      component[var] = NULL;
   }
   else
     component = NULL;
@@ -2154,7 +2160,8 @@ MultivariateMixtureData::MultivariateMixtureData(const MultivariateMixture &mixt
     component[var][i] = new FrequencyDistribution(*mixt.pcomponent[var]->observation[i]);
       else
     component[var][i] = new FrequencyDistribution(*mixt.npcomponent[var]->get_observation(i));
-    }}
+    }
+  }
 }
 
 
@@ -2217,10 +2224,10 @@ void MultivariateMixtureData::remove()
 
     for (var = 0; var < nb_variable; var++) {
       for (i = 0;i < nb_component;i++)
-    if (component[var] != NULL) {
-      delete component[var][i];
-      component[var][i] = NULL;
-    }
+	if (component[var] != NULL) {
+	  delete component[var][i];
+	  component[var][i] = NULL;
+	}
       delete [] component[var];
       component[var] = NULL;
     }

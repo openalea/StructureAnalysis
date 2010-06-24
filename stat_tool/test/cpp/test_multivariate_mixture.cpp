@@ -295,6 +295,21 @@ int main(void) {
     for (i = 0; i < 10; i++)
        cout << cluster->get_int_vector(i, 0) << "\t";
     cout << "..." << endl;
+    delete cluster;
+    cluster = NULL;
+  }
+
+  cout << "State entropy: " << endl;
+  cluster = mv_estim->cluster(error, *mv_data, VITERBI, true);
+
+  if (cluster == NULL) {
+    cout << error;
+  }
+  else {
+    cout << "State entropies: " << endl;
+    for (i = 0; i < 10; i++)
+       cout << cluster->get_real_vector(i, 3) << "\t";
+    cout << "..." << endl;
     delete mv_estim;
     mv_estim = NULL;
     delete cluster;

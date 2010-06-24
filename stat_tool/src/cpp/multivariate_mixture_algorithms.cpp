@@ -121,34 +121,34 @@ void MultivariateMixture::get_output_conditional_distribution(const Vectors &mix
   for (n = 0; n < nb_vector; n++) {
     for (i = 0; i < nb_component; i++) {
       if (log_computation)
-    output_cond[n][i] = 0.;
+	output_cond[n][i] = 0.;
       else
-    output_cond[n][i] = 1.;
+	output_cond[n][i] = 1.;
       for (var = 0; var < nb_variable; var++) {
-    if (pcomponent[var] != NULL) {
-      if (log_computation) {
-        if (pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]] > 0)
-          output_cond[n][i] += log(pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]]);
-        else {
-          output_cond[n][i] = D_INF;
-          break;
-        }
-      }
-      else
-        output_cond[n][i]*= pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]];
-    }
-    else {
-      if (log_computation) {
-        if (npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]] > 0)
-          output_cond[n][i] += log(npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]]);
-        else {
-          output_cond[n][i] = D_INF;
-          break;
-        }
-      }
-      else
-        output_cond[n][i]*= npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]];
-    }
+	if (pcomponent[var] != NULL) {
+	  if (log_computation) {
+	    if (pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]] > 0)
+	      output_cond[n][i] += log(pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]]);
+	    else {
+	      output_cond[n][i] = D_INF;
+	      break;
+	    }
+	  }
+	  else
+	    output_cond[n][i]*= pcomponent[var]->observation[i]->mass[mixt_data.int_vector[n][var]];
+	}
+	else {
+	  if (log_computation) {
+	    if (npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]] > 0)
+	      output_cond[n][i] += log(npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]]);
+	    else {
+	      output_cond[n][i] = D_INF;
+	      break;
+	    }
+	  }
+	  else
+	    output_cond[n][i]*= npcomponent[var]->get_observation(i)->mass[mixt_data.int_vector[n][var]];
+	}
       }
     }
   }
@@ -201,17 +201,19 @@ void MultivariateMixture::get_posterior_distribution(const Vectors &mixt_data,
  *
  *  arguments : reference sur un objet StatError, sur un object Vectors,
  *  l' algorithme de restauration, l'index (a partir de 0)
- *  et la loi a posteriori des etats
+ *  et la loi a posteriori des etats (mise a jour au besoin)
  *
  *--------------------------------------------------------------*/
 
 std::vector<int>* MultivariateMixture::state_computation(StatError &error, const Vectors &vec,
-                                                         int algorithm, int index,
-                                                         double** posterior_dist) const {
+                                                         double** &posterior_dist,
+                                                         int algorithm, int index) const {
 
   bool status = true, delete_cond = false;
   int n, i, s;
   double pmax;
+  // output_cond n'est pas utile (pas alloue) si posterior_dist est donne en argument
+  // Dans le cas contraire, posterior_dist est mis a jour
   double **output_cond = NULL, **cp_posterior_dist = NULL;
   int nb_vector = vec.get_nb_vector(),
     nb_variable = vec.get_nb_variable();
@@ -254,8 +256,8 @@ std::vector<int>* MultivariateMixture::state_computation(StatError &error, const
     }
     if (delete_cond) {
       for (n = 0; n < nb_vector; n++) {
-    delete [] output_cond[n];
-    output_cond[n] = NULL;
+	delete [] output_cond[n];
+	output_cond[n] = NULL;
       }
       delete [] output_cond;
       output_cond = NULL;
@@ -1096,34 +1098,86 @@ MultivariateMixtureData* MultivariateMixture::simulation(StatError &error ,
  *  Ajout des etats restaures en tant que variable
  *
  *  arguments : reference sur un objet StatError, sur un objet Vectors,
- *  et algorithme de restauration
+ *  algorithme de restauration, et flag pour ajouter ou non l'entropie
  *
  *--------------------------------------------------------------*/
 
 MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const Vectors &vec,
-                                                      int algorithm) const {
+                                                      int algorithm, bool add_state_entropy) const {
 
   int n, var, s, k;
   int nb_vector = vec.get_nb_vector(),
-    nb_variable = vec.get_nb_variable();
+    nb_variable = vec.get_nb_variable(),
+    nb_res_variable = nb_variable + 1, // nombre de variables du resultat
+    // nombre de variables entieres et reelles du resultat
+    nb_int_variable = 0, nb_real_variable = 0; 
   int **iint_vector = NULL;
+  double **ireal_vector = NULL;  
+  double **posterior_dist = NULL; // probabilites a posteriori des etats
+  int *itypes = NULL; // type des variables
   std::vector<int> *states = NULL;
   MultivariateMixtureData* clusters_vec = NULL;
   Vectors* state_vec = NULL;
   FrequencyDistribution *hweight = NULL, ***hcomponent = NULL;
 
-  states = state_computation(error, vec, algorithm);
+  if (add_state_entropy) {
+    nb_res_variable++;
+    nb_real_variable++;
+  }
+
+  itypes = new int[nb_res_variable];
+  itypes[0] = STATE; // states
+  for (var = 0; var < nb_variable; var++) {
+    itypes[var+1] = vec.get_type(var);
+    if ((itypes[var+1] == INT_VALUE) || (itypes[var+1] == STATE))
+      nb_int_variable++;
+    else
+      nb_real_variable++;
+  }
+
+  nb_int_variable++; // state variable
+
+  if (add_state_entropy)  
+    itypes[nb_res_variable-1] = REAL_VALUE;
+  
+  // calcul des etats et leur loi a posteriori
+  states = state_computation(error, vec, posterior_dist, algorithm, I_DEFAULT);
+
   if (states != NULL) {
     iint_vector = new int*[nb_vector];
     for (n = 0; n < nb_vector; n++) {
-      iint_vector[n] = new int[nb_variable+1];
+      iint_vector[n] = new int[nb_res_variable];
       iint_vector[n][0] = (*states)[n];
-      for (var = 1; var < nb_variable+1; var++) {
-          iint_vector[n][var] = vec.int_vector[n][var-1];
+    }
+    if (nb_real_variable > 0) {
+      ireal_vector = new double*[nb_vector];
+      for (n = 0; n < nb_vector; n++) {
+	ireal_vector[n] = new double[nb_res_variable];
       }
     }
 
-    state_vec = new Vectors(nb_vector, vec.identifier, nb_variable+1, iint_vector);
+    for (var = 1; var < nb_res_variable; var++) {
+      for (n = 0; n < nb_vector; n++) {
+	if ((itypes[var] == INT_VALUE) || (itypes[var] == STATE))
+	  iint_vector[n][var] = vec.int_vector[n][var-1];
+	else {
+	  if (add_state_entropy && (var == nb_res_variable-1)) {
+	    // compute entropy
+	    ireal_vector[n][nb_real_variable-1] = 0;
+	    for (s = 0; s < nb_component; s++) {
+	      if (log(posterior_dist[n][s]) > D_INF) 
+		ireal_vector[n][nb_real_variable-1] -= 
+		  posterior_dist[n][s] * log(posterior_dist[n][s]); 
+	      }
+	  }
+	  else
+	    ireal_vector[n][var] = vec.real_vector[n][var-1];
+	}
+      }
+    }
+    
+    state_vec = new Vectors(nb_vector, vec.identifier, nb_res_variable, itypes, 
+			    iint_vector, ireal_vector);
 
     for (n = 0; n < nb_vector; n++) {
       delete [] iint_vector[n];
@@ -1131,6 +1185,23 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
     }
     delete [] iint_vector;
     iint_vector = NULL;
+    delete [] itypes;
+    itypes = NULL;
+    if (ireal_vector != NULL) {
+      for (n = 0; n < nb_vector; n++) {
+	delete [] ireal_vector[n];
+	ireal_vector[n] = NULL;
+      }
+      delete [] ireal_vector;
+      ireal_vector = NULL; 
+    }
+    if (add_state_entropy) {
+      for (n = 0; n < nb_vector; n++) {
+	delete [] posterior_dist[n]; 
+	posterior_dist[n] = NULL; }
+      delete [] posterior_dist;
+      posterior_dist = NULL;
+    }
 
     state_vec->type[0] = STATE;
     clusters_vec = new MultivariateMixtureData(*state_vec, nb_component);
@@ -1147,7 +1218,7 @@ MultivariateMixtureData* MultivariateMixture::cluster(StatError &error,  const V
       s = (*states)[n];
       (hweight->frequency[s])++;
       for (var = 1; var < nb_var+1; var++) {
-    (hcomponent[var][s]->frequency[vec.int_vector[n][var-1]])++;
+	(hcomponent[var][s]->frequency[vec.int_vector[n][var-1]])++;
       }
     } // end for (n)
 

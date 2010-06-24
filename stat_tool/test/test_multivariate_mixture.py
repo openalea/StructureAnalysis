@@ -107,6 +107,7 @@ class Test(interface):
         assert m_estim_model
         m_estim_nbcomp = v.mixture_estimation(2)
         assert m_estim_nbcomp
+        return m, v
 
     def _test_permutation(self):
         data1 = self.data
@@ -116,6 +117,13 @@ class Test(interface):
 
         assert str(data1)==str(data2)
 
+    def _cluster_data(self):
+        """Clustering using the mixture model"""
+        m, v = self.test_simulate2()
+        clust_entropy = m.cluster_data(v , True)
+        clust_plain = m.cluster_data(v , False)
+        assert (clust_entropy.nb_variable == m.nb_variable+2)
+        assert (clust_plain.nb_variable == m.nb_variable+1)
 
 if __name__ == "__main__":
     test = Test()

@@ -55,6 +55,9 @@ def test1():
     
     m_estim_nbcomp.plot(variable = 1, Title="Estimated mixture")
 
+    clust_entropy = m_estim_nbcomp.cluster_data(v , True)
+    clust_plain = m_estim_nbcomp.cluster_data(v , False)
+
 
 if __name__ == "__main__":
     test1()
