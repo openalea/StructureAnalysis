@@ -137,6 +137,8 @@ void class_distribution()
     .def_readonly("get_nb_parameter", &Distribution::nb_parameter,
         "number of unknown parameters")
 
+    .def("simulation", &Distribution::simulation, "simulate one realization")
+
     // no tested. is it useful ?
     DEF_RETURN_VALUE_NO_ARGS("get_plotable_list", WRAP::get_plotable_dists,
         "Return a plotable for a list of distribution")
@@ -221,7 +223,6 @@ void class_distribution()
    double likelihood_computation(const Reestimation<double> &histo) const   { return histo.likelihood_computation(*this); }
    void chi2_fit(const FrequencyDistribution &histo , Test &test) const;
 
-   int simulation() const;
 
    DiscreteParametricModel* truncate(StatError &error , int imax_value) const;
 */

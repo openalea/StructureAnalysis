@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Distribution tests"""
 __version__ = "$Id$"
 
@@ -210,6 +211,15 @@ class TestDistribution():
         except:
             assert True
 
+
+    def test_simulation(self):
+        """simulate a vector of realizations"""
+        d = Uniform(0, 1)
+        import numpy
+        l = numpy.zeros(100000)
+        for i in range(len(l)):
+            l[i] = d.simulation()
+        assert((0 < sum(l)) & (sum(l) < len(l)))
 
     def test_getters(self):
         dist = Distribution(Histogram([1, 1, 1, 2, 2, 2, 3, 3, 3]))
