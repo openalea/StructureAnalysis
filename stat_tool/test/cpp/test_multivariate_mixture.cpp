@@ -22,14 +22,18 @@ int main(void) {
   const char * gnupath = "./tmp_mix", * gnu_datapath = "./tmp_mix_data";
   const char * margpath= "./marg_mix", * gnu_tmppath = "./tmp_mix_d";
   const char * np_modelpath= "./np_model.mix", * gnu_tmpnppath = "./tmp_mix_d";
+  const char * entropy_data= "cluster_vectors.vec";
+  const char * output_path = "tmp_entropy_output.vec";
   Distribution *marginal = NULL;
   DiscreteDistributionData *marginal_histo = NULL;
+  Vectors *vec = NULL;
   MultivariateMixture *mv1 = NULL, *mv_cp = NULL;
   MultivariateMixture *mv_np1 = NULL, *mv_np_estim = NULL;
   MultivariateMixture *mv_estim = NULL;
   MultivariateMixtureData *mv_data = NULL, *cluster = NULL;
   DiscreteParametric **dt1 = NULL, **dt2 = NULL;
   DiscreteParametricProcess **ppcomponent = NULL;
+
 
   // constructors of Mv_Mixture
   mv1 = new MultivariateMixture();
@@ -100,7 +104,7 @@ int main(void) {
 
   cout << "MultivariateMixture_building (print into file " << mixpath << "): " << endl;
 
-  mv1 = multivariate_mixture_building(error , nb_component , 
+  mv1 = multivariate_mixture_building(error , nb_component ,
                                       nb_variable, pweight, ppcomponent, NULL);
 
   if (mv1 == NULL)
@@ -316,6 +320,37 @@ int main(void) {
     cluster = NULL;
   }
 
+  // compute state entropies on data
+  cout << "Compute state entropies on data" << endl;
+
+  vec = vectors_ascii_read(error, entropy_data);
+  if (vec == NULL) {
+    cout << error;
+    return 1;
+  }
+
+  mv_estim = vec->mixture_estimation(error, cout, 3, 300);
+
+  if (mv_estim == NULL) {
+    cout << error;
+    return 1;
+  }
+  else
+    mv_estim->ascii_write(cout, true);
+
+  cluster = mv_estim->cluster(error, *vec, VITERBI, true);
+
+  if (cluster == NULL) {
+    cout << error;
+  }
+  else {
+    cluster->ascii_write(error, output_path);
+  }
+
+  delete mv_estim;
+  delete cluster;
+
+  delete vec;
   delete mv_data;
   delete mv_np1;
 

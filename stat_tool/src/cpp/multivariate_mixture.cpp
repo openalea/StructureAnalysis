@@ -1321,79 +1321,94 @@ ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtur
 
     if (mixt_data != NULL) {
       double likelihood , information;
-
+      const register unsigned int dif_var = mixt_data->nb_variable - nb_var;
+      MultivariateMixtureData * mixt_vec_data = NULL;
+      
       bnb_parameter = nb_parameter_computation(MIN_PROBABILITY);
-      if (mixt_data->type[0] == STATE) {
-    var_array = new int[1];
-    var_array[0] = 1;
-    vect_data = mixt_data->select_variable(error, 1, var_array, false);
-    if (vect_data == NULL) {
-      cerr << error;
-      likelihood = D_INF;
-    }
-    else
-      likelihood = likelihood_computation(*vect_data, true);
-      }
-      else
-    likelihood = likelihood_computation(*mixt_data, true);
+      if ((mixt_data->type[0] == STATE) 
+          && (dif_var > 0)) {
+	// 1ere variable = etat restaure
+	// eventuellement, derniere variable = entropie
+	var_array = new int[dif_var];
+	var_array[0] = 1;
+	if (dif_var > 1)
+	  var_array[1] = mixt_data->nb_variable;
 
-      information = mixt_data->information_computation();
+	vect_data = mixt_data->select_variable(error, dif_var, var_array, false);
+	if (vect_data == NULL) {
+	  cerr << error;
+	  likelihood = D_INF;
+	}
+	else {
+	  likelihood = likelihood_computation(*vect_data, true);
+	  mixt_vec_data = new MultivariateMixtureData(*vect_data, this->nb_component);
+	  mixt_vec_data->mixture = new MultivariateMixture(*this, false);
+	  information = mixt_vec_data->information_computation(); 
+	  delete mixt_vec_data->mixture;
+	  mixt_vec_data->mixture = NULL;	  
+	  delete mixt_vec_data;
+	  mixt_vec_data = NULL;
+	}
+      }
+      else {
+	likelihood = likelihood_computation(*mixt_data, true);
+	information = mixt_data->information_computation();
+      }
       os << "\n";
       if (file_flag)
-    os << "# ";
+	os << "# ";
 
       os << STAT_label[STATL_INFORMATION] << ": " << information << " ("
          << information / mixt_data->nb_vector << ")" << endl;
 
       // print the likelihood
 
-      if (likelihood != D_INF)
-    {
-      os << "\n";
-      if (file_flag)
-        os << "# ";
-      os << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   ("
-         << STAT_label[STATL_NORMALIZED] << ": " << likelihood / mixt_data->nb_vector << ")" << endl;
-    }
+      if (likelihood != D_INF) {
+	os << "\n";
+	if (file_flag)
+	  os << "# ";
+	os << STAT_label[STATL_LIKELIHOOD] << ": " << likelihood << "   ("
+	   << STAT_label[STATL_NORMALIZED] << ": " << likelihood / mixt_data->nb_vector 
+	   << ")" << endl;
+      }
 
       // print AIC, AICc and BIC
-      if (likelihood != D_INF)
-    {
-      if (file_flag) {
+      if (likelihood != D_INF) {
+	if (file_flag)
+	  os << "# ";
+
+	os << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << endl;
+	
+	bnb_parameter = nb_parameter_computation(MIN_PROBABILITY);
+	
+	os << "\n";
+	if (file_flag)
+	  os << "# ";
+
+	os << bnb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS] << "   2 * "
+	   << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AIC] << "): "
+	   << 2 * (likelihood - bnb_parameter) << endl;
+	
+	if (0 < bnb_parameter < mixt_data->nb_vector - 1) {
+	  if (file_flag) 
+	    os << "# ";
+
+	  os << bnb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS] << "   2 * "
+	     << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AICc] << "): "
+	     << 2 * (likelihood - (double)(bnb_parameter * mixt_data->nb_vector) /
+		     (double)(mixt_data->nb_vector - bnb_parameter - 1)) << endl;
+	}
+
+	if (file_flag)
+	  os << "# ";
+
+	os << bnb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS] << "   2 * "
+	   << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BIC] << "): "
+	   << 2 * likelihood - bnb_parameter * log((double)mixt_data->nb_vector) << endl;
+
+      if (file_flag)
         os << "# ";
-      }
-      os << STAT_label[STATL_DEVIANCE] << ": " << 2 * (information - likelihood) << endl;
 
-      bnb_parameter = nb_parameter_computation(MIN_PROBABILITY);
-
-      os << "\n";
-      if (file_flag) {
-        os << "# ";
-      }
-      os << bnb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS] << "   2 * "
-         << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AIC] << "): "
-         << 2 * (likelihood - bnb_parameter) << endl;
-
-      if (0 < bnb_parameter < mixt_data->nb_vector - 1) {
-        if (file_flag) {
-          os << "# ";
-        }
-        os << bnb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS] << "   2 * "
-           << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[AICc] << "): "
-           << 2 * (likelihood - (double)(bnb_parameter * mixt_data->nb_vector) /
-               (double)(mixt_data->nb_vector - bnb_parameter - 1)) << endl;
-      }
-
-      if (file_flag) {
-        os << "# ";
-      }
-      os << bnb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS] << "   2 * "
-         << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BIC] << "): "
-         << 2 * likelihood - bnb_parameter * log((double)mixt_data->nb_vector) << endl;
-
-      if (file_flag) {
-        os << "# ";
-      }
       os << bnb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS] << "   2 * "
          << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " (" << STAT_criterion_word[BICc] << "): "
          << 2 * likelihood - penalty_computation() << endl;
@@ -1416,26 +1431,27 @@ ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtur
          << STAT_label[STATL_INFORMATION] << ": " << information / mixt_data->nb_vector << ")" << endl;
       */
 
-    } // end if (likelihood > 0)
+      } // end if (likelihood > 0)
     } // end if (mixt_data != NULL)
 
     if (mixt_data != NULL) {
       if (exhaustive) {
-    os << "\n";
-    if (file_flag) {
-      os << "# ";
-    }
-    os << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-    mixt_data->weight->ascii_characteristic_print(os , false , file_flag);
+	os << "\n";
+	if (file_flag) 	  
+	  os << "# ";
 
-    os << "\n";
-    if (file_flag) {
-      os << "# ";
-    }
-    os << "   | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
-       << " | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
+	os << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+	mixt_data->weight->ascii_characteristic_print(os , false , file_flag);
+	
+	os << "\n";
+	if (file_flag)
+	  os << "# ";
+    
+	os << "   | " << STAT_label[STATL_WEIGHT] 
+	   << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
+	   << " | " << STAT_label[STATL_WEIGHT] << " " << STAT_label[STATL_DISTRIBUTION] << endl;
 
-    weight->Distribution::ascii_print(os , file_flag , false , false , mixt_data->weight);
+	weight->Distribution::ascii_print(os , file_flag , false , false , mixt_data->weight);
       }
     }
   }

@@ -10,6 +10,7 @@ __version__ = "$Id$"
 from openalea.stat_tool.plot import DISABLE_PLOT
 
 from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
+from openalea.stat_tool.vectors import _Vectors
 from openalea.stat_tool.distribution import Binomial
 from openalea.stat_tool.distribution import Poisson
 
@@ -109,21 +110,39 @@ class Test(interface):
         assert m_estim_nbcomp
         return m, v
 
-    def _test_permutation(self):
+    def test_permutation(self):
         data1 = self.data
 
-        data2 = data1.state_permutation([0, 2, 1])
-        _data3 = data2.state_permutation([0, 1, 2])
+        data2 = _MultivariateMixture(data1)
+        data2.state_permutation([0, 2, 1])
+        data2.state_permutation([0, 2, 1])
 
         assert str(data1)==str(data2)
 
-    def _cluster_data(self):
+    def test_cluster_data(self):
         """Clustering using the mixture model"""
         m, v = self.test_simulate2()
         clust_entropy = m.cluster_data(v , True)
+        import tempfile, os
+        tmp_file_name = tempfile.mktemp()
+        clust_entropy.file_ascii_write(tmp_file_name, False)
+        os.remove(tmp_file_name)
         clust_plain = m.cluster_data(v , False)
         assert (clust_entropy.nb_variable == m.nb_variable+2)
         assert (clust_plain.nb_variable == m.nb_variable+1)
+
+
+    def test_cluster_data_file(self):
+        """Clustering using the mixture model, reading data from a file"""
+        data_file = "data/cluster_vectors.vec"
+        v = _Vectors(data_file)
+        m = v.mixture_estimation(3, 300, [])
+        clust_entropy = m.cluster_data(v , True)
+        import tempfile, os
+        tmp_file_name = tempfile.mktemp()
+        clust_entropy.file_ascii_write(tmp_file_name, False)
+        os.remove(tmp_file_name)
+        assert (clust_entropy.nb_variable == m.nb_variable+2)
 
 if __name__ == "__main__":
     test = Test()
