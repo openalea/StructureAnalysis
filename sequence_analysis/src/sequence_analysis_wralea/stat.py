@@ -25,7 +25,6 @@ __revision__=" $Id$ "
 #//////////////////////////////////////////////////////////////////////////////
 
 from openalea.core import *
-    
 from openalea.stat_tool import *
 from openalea.sequence_analysis import *
 
@@ -40,22 +39,13 @@ if("nosetests" in sys.argv[0]):
 
 
 
-def add_doc(function, arg):
-    """a simple decorator to replace f's docstring by a new one
-    
-    The new one is the docstring of the function's name capitalized. 
-    E.g: if function's name is display, then 
-        display.__doc__ = Display.__doc__
-    """
-    try:
-        cmd = 'from openalea.stat_tool import %s' % arg
-        exec(cmd)
-    except ImportError:
-        print "The command '%s' failed" % cmd 
-    
-     
-    function.__doc__ = arg.__doc__
-    return function
+def add_doc(doc):
+    def wrap(f):
+        f.__doc__ = doc.__doc__
+        return f
+    return wrap
+
+
 
 #//////////////////////////////////////////////////////////////////////////////
 # Adapters
@@ -71,15 +61,22 @@ def adapt2list(arg):
 # Input/output functions
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Compound)
 def py_compound_ascii( filename ):
     if filename and filename != '':
         return (Compound(filename),)
+
+@add_doc(Convolution)
 def py_convolution_ascii( filename ):
     if filename and filename != '':
         return (Convolution(filename),)
+
+@add_doc(Distribution)
 def py_distribution_ascii( filename ):
     if filename and filename != '':
         return (Distribution(filename),)
+
+@add_doc(Histogram)
 def py_histogram_ascii(filename):
     if filename and filename != '':
         return (Histogram(filename),)
@@ -87,17 +84,20 @@ def py_histogram_ascii(filename):
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Compound)
 def py_compound( sum_dist, dist ):
     if sum_dist and dist:
         return (Compound(sum_dist, dist),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Convolution)
 def py_convolution( list_of_dist ):
     l=adapt2list(list_of_dist)
     if l:
         return Convolution(*l)
 
+@add_doc(Mixture)
 def py_mixture( list_of_dist ):
     l=adapt2list(list_of_dist)
     if l:
@@ -105,21 +105,24 @@ def py_mixture( list_of_dist ):
         for w,d in l:
             arg.append(w)
             arg.append(d)
-
     return Mixture(*arg)
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Binomial)
 def py_dist_binomial( inf_bound= 0, sup_bound = 10, proba = 0.5 ):
     return (Distribution("BINOMIAL",inf_bound, sup_bound, proba),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Poisson)
 def py_dist_poisson( inf_bound= 0, param = 10 ):
+    """test"""
     return (Distribution("P",inf_bound, param),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Distribution)
 def py_dist_negativebinomial( inf_bound= 0, param = 10., proba = 0.5 ):
     return (Distribution("NB",inf_bound, param, proba),)
 
@@ -277,6 +280,7 @@ class PyObjectFromFile(Node):
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Sequences)
 def py_sequences(seq=[], identifiers=[], indexParameter='Position'):
     if seq:
         if identifiers:
@@ -287,6 +291,7 @@ def py_sequences(seq=[], identifiers=[], indexParameter='Position'):
 #//////////////////////////////////////////////////////////////////////////////
 # Compare family : TODO
 
+@add_doc(Compare)
 def py_compare_frequency( histos, Type ):
     _types = {"Numeric" : "N","Ordinal" : "O", "Symbolic" : "S"}
     _type=_types[Type]
@@ -298,6 +303,8 @@ def py_compare_frequency( histos, Type ):
     return Compare(*args),
         
 
+
+@add_doc(Compare)
 def py_compare_vectors( vectors, vector_distance ):
     if vectors is None or vector_distance is None:
         return None,
@@ -305,12 +312,14 @@ def py_compare_vectors( vectors, vector_distance ):
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(ComparisonTest)
 def py_comparisontest(Type, histo1, histo2):
     if Type in ['F', 'T', 'W'] and histo1 and histo2:
         return ComparisonTest(Type, histo1, histo2)
 
 #//////////////////////////////////////////////////////////////////////////////
 
+@add_doc(Estimate)
 def py_estimate_dist( histo,
                       distribution,
                       MinInfBound,
@@ -326,6 +335,7 @@ def py_estimate_dist( histo,
                         InfBoundStatus=InfBoundStatus)
 
 
+@add_doc(Estimate)
 def py_estimate_mixture( histo,
                          components,
                          MinInfBound,
@@ -353,6 +363,7 @@ def py_estimate_mixture( histo,
 
     return Estimate(*args, **kwds)
 
+@add_doc(Estimate)
 def py_estimate_conv( histo,
                       dist,
                       Estimator,
@@ -380,6 +391,7 @@ def py_estimate_conv( histo,
     
     return Estimate(histo,"CONVOLUTION", dist,*kwds)
 
+@add_doc(Estimate)
 def py_estimate_compound( histo,
                           dist,
                           type,
@@ -459,6 +471,7 @@ def py_estimate_distrib( histo,
     return Estimate(*args, **kwds)
 """
 
+@add_doc(Merge)
 def py_merge( data ):
     
     if data:
@@ -467,28 +480,34 @@ def py_merge( data ):
         else:
             return Merge(data)
 
+@add_doc(ExtractData)
 def py_extractdata( model ):
     if model is not None:
         return ExtractData(model)
 
+@add_doc(ExtractHistogram)
 def py_extract_histogram( model, choice):
     if model is not None:
         return ExtractHistogram(model, choice)
 
 
+@add_doc(ExtractDistribution)
 def py_extract_distribution( model, key, index):
     if model is not None:
         try:
             return ExtractDistribution(model, key, index)
         except:
             return ExtractDistribution(model, key)
-    
+
+@add_doc(Shift)
 def py_shift(obj, param=0):
     if obj: return Shift(obj,param)
 
+@add_doc(Shift)
 def py_shiftn(obj, variable=0, param=0):
     if obj: return Shift(obj,variable, param)
 
+@add_doc(Cluster)
 def py_cluster(obj, mode, variable_rank, step, information_ratio, limits):
     if obj is None: return
 
@@ -506,23 +525,27 @@ def py_cluster(obj, mode, variable_rank, step, information_ratio, limits):
         else:
             return Cluster(obj, mode, _limits)
 
+@add_doc(Simulate)
 def py_simulate_dist(obj, size=100):
     if obj is None:
         return
     return Simulate(obj,size)
 
+@add_doc(SelectVariable)
 def py_select_variable(obj, variables, mode):
     if not obj:
         return
     vars = adapt2list(variables)
     return SelectVariable(obj, vars, Mode=mode),
 
+@add_doc(SelectIndividual)
 def py_select_individual(obj, individuals, mode):
     if not obj:
         return
     vars = adapt2list(individuals)
     return SelectIndividual(obj, vars, Mode=mode),
 
+@add_doc(Segmentation)
 def py_segmentation(seq, ind, nb_segment, change_points,  model_list, model, NbSegment, Output):
     if not seq:
         return
@@ -539,13 +562,15 @@ def py_segmentation(seq, ind, nb_segment, change_points,  model_list, model, NbS
 
     if change_points:
         kwds['Output']=Output
-        return Segmentation(*args, **kwds)
+        return Segmentation(*args, **kwds),
     else:
         kwds['NbSegment']=NbSegment
         if NbSegment != 'Estimated':
             kwds['Output']=Output
-        return Segmentation(*args, **kwds)
+        return Segmentation(*args, **kwds),
 
+
+@add_doc(Segmentation)
 def py_segmentation_sample(seq, nb_segment, model_list, model, Output):
     if not seq:
         return
@@ -559,12 +584,13 @@ def py_segmentation_sample(seq, nb_segment, model_list, model, Output):
     kwds['Output']=Output
     return Segmentation(*args, **kwds)
 
+@add_doc(ComputeCorrelation)
 def py_compute_correlation(seq,  MaxLag,  Type,  Normalization):
     if not seq:
         return 
-
     return ComputeCorrelation(seq,  MaxLag=MaxLag,  Type=Type,  Normalization=Normalization)
-    
+
+@add_doc(ComputeCorrelation)
 def py_compute_correlation_mult(seq,  auto,  var1,  var2,  MaxLag,  Type,  Normalization):
     if not seq:
         return 
@@ -573,6 +599,7 @@ def py_compute_correlation_mult(seq,  auto,  var1,  var2,  MaxLag,  Type,  Norma
     else:
         return ComputeCorrelation(seq,  var1, var2,  MaxLag=MaxLag,  Type=Type,  Normalization=Normalization)
 
+@add_doc(PointwiseAverage)
 def py_pointwise_average(seq,  StandardDeviation,  Output,  dirname,  FileName,  Format):
     if not seq:
         return
@@ -587,11 +614,14 @@ def py_pointwise_average(seq,  StandardDeviation,  Output,  dirname,  FileName, 
         
     return PointwiseAverage(seq,  **kwds), 
 
+@add_doc(Vectors)
 def py_vectors(seq, IndexVariable = False):
     if not seq:
         return
     return Vectors(seq, IndexVariable=IndexVariable),
 
+
+@add_doc(Regression)
 def py_regression(vec, regressionModel, explanatoryVariable, responseVariable, filter, frequencies, distribution, span, Algorithm, Weighting ):
     if vec is None or explanatoryVariable is None or responseVariable is None:
         return
@@ -610,19 +640,23 @@ def py_regression(vec, regressionModel, explanatoryVariable, responseVariable, f
     else:
         reg = Regression(vec, regressionModel, explanatoryVariable, responseVariable, span, Weighting=Weighting)
     return reg,
-        
+
+@add_doc(Cumulate)
 def py_cumulate(seq):
     if seq is not None:
         return Cumulate(seq),
 
+@add_doc(ToHistogram)
 def py_to_histogram(obj):
     if obj is not None:
         return ToHistogram(obj),
 
+@add_doc(ToDistribution)
 def py_to_distribution(obj):
     if obj is not None:
         return ToDistribution(obj),
 
+@add_doc(ExtractData)
 def py_extract_data(obj):
     if obj is not None:
         return ExtractData(obj),
