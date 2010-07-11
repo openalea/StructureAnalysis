@@ -88,13 +88,6 @@ class TestRegression(interface):
 
     def test_moving_average(self):
 
-        # Test algorithm
-        try:
-            r = self.vector.moving_average_regression_values(1, 2, [1, ], 'n')
-            assert False
-        except:
-            assert True
-
         r1 = Regression(self.vector, "MovingAverage" , 1, 2, [1, ])
         r = self.vector.moving_average_regression_values(1, 2, [1, ], 'a')
         assert r
