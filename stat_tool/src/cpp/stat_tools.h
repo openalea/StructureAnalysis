@@ -76,7 +76,7 @@ const int ERROR_LENGTH = 200;
 const int I_DEFAULT = -1;              // int par defaut
 const double D_DEFAULT = -1.;          // double par defaut
 const double D_INF = -1.e37;           // plus petit nombre reel
-const double DOUBLE_ERROR = 1.e-5;     // erreur sur une somme de doubles
+const double DOUBLE_ERROR = 5.e-6;     // erreur sur une somme de doubles
 
 enum {
   STANDARD_NORMAL ,
