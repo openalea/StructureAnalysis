@@ -266,7 +266,7 @@ def Sequences(obj, **kargs):
             OldFormat = error.ParseKargs(kargs, "OldFormat", False, bool_type)
             sequence = _Sequences(filename, OldFormat)
         else:
-            raise IOError("bad file name")
+            raise IOError("bad file name %s" % filename)
         if hasattr(sequence, 'markovian_sequences'):
             try:
                 sequence = sequence.markovian_sequences()

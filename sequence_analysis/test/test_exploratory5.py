@@ -20,8 +20,8 @@
 """
 __revision__ = "$Id$"
 from openalea.sequence_analysis import *
-import os
-path = 'data' + os.sep
+from openalea.sequence_analysis.data import path
+
 seq20 = Sequences(path+"belren1.seq")
 seq21 = Sequences(path+"elstar1.seq")
 seq22 = Sequences(path+"fuji1.seq")

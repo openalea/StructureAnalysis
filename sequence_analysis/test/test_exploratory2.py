@@ -26,7 +26,7 @@ __revision__ = "$Id$"
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import Estimate as Estimate
 
-path = 'data' +os.sep
+from openalea.sequence_analysis.data import path
 
 def test_exploratory():
     seq19 = Sequences(path +"dupreziana_20a2.seq")

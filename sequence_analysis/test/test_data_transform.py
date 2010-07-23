@@ -6,7 +6,7 @@
 __revision__ = "$Id$"
 
 
-
+from openalea.sequence_analysis.data import path
 from openalea.sequence_analysis.data_transform import *
 from openalea.sequence_analysis.sequences import Sequences
 from openalea.stat_tool import Mixture
@@ -73,13 +73,13 @@ def test_discrete_sequences():
 
 def test_compute_state_sequence():
     from openalea.sequence_analysis import HiddenSemiMarkov
-    seq = Sequences("data/wij1.seq")
-    hsmc0 = HiddenSemiMarkov("data/" + "wij1.hsc")
+    seq = Sequences(path + "wij1.seq")
+    hsmc0 = HiddenSemiMarkov(path +  "wij1.hsc")
     ComputeStateSequences(seq, hsmc0, Algorithm="ForwardBackward", Characteristics=True)
 
 
 def test_transition_count():
-    seq = Sequences("data/wij1.seq")
+    seq = Sequences(path + "wij1.seq")
     TransitionCount(seq, 5, Begin=True, Estimator="MaximumLikelihood",
                     Filename = "ASCII")
 
@@ -111,7 +111,7 @@ def test_select_step():
     #
     #########################################################################
     """
-    seq1 = Sequences("data/well_log_filtered.seq")
+    seq1 = Sequences(path + "well_log_filtered.seq")
     Plot(seq1, ViewPoint="Data")
     Plot(seq1)
 

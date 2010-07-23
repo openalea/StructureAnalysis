@@ -24,10 +24,10 @@ __revision__ = "$Id$"
 
 import os
 from openalea.sequence_analysis import *
+from openalea.sequence_analysis.data import path
 from openalea.sequence_analysis.estimate import  Estimate
 from openalea.sequence_analysis.compare import  Compare
 
-path = 'data' + os.sep
 
 seq69 = Sequences(path + "pin_laricio_7x.seq")
 seq70 = Cluster(seq69, "Step", 1, 10)

@@ -5,18 +5,17 @@
 """
 __revision__ = "$Id$"
 
-from os import sep
 from openalea.sequence_analysis import _sequence_analysis as sa
 from openalea.sequence_analysis.hidden_variable_order_markov import *
 from openalea.sequence_analysis.hidden_semi_markov import *
 from openalea.sequence_analysis.renewal import *
-
+from openalea.sequence_analysis.data import path
 
 N = 10
-
+import os
 # SEMI MARKOV case
 def test_semi_markov_iterator():
-    hsm = HiddenSemiMarkov('data'+sep+'hidden_semi_markov.dat')
+    hsm = HiddenSemiMarkov('data' + os.sep + 'hidden_semi_markov.dat')
     smi = sa._SemiMarkovIterator(hsm)
     sim = smi.simulation(N, True)
 
@@ -26,7 +25,7 @@ def hsm_iterator(fn):
     return it
 
 def test_semi_markov_iterator2():
-    fn = 'data'+sep+'hidden_semi_markov.dat'
+    fn = 'data' + os.sep + 'hidden_semi_markov.dat'
     smi = hsm_iterator(fn)
     sim = smi.simulation(N, True)
 
@@ -38,12 +37,12 @@ def vom_iterator(fn):
     return it
 
 def test_variable_order_markov_iterator():
-    vom = HiddenVariableOrderMarkov('data'+sep+'dupreziana21.hc')
+    vom = HiddenVariableOrderMarkov(path + 'dupreziana21.hc')
     smi = sa._VariableOrderMarkovIterator(vom)
     sim = smi.simulation(N, True)
 
 def test_variable_order_markov_iterator2():
-    fn = 'data'+sep+'dupreziana21.hc'
+    fn = path + 'dupreziana21.hc'
     smi = vom_iterator(fn)
     sim = smi.simulation(N, True)
 
@@ -55,13 +54,13 @@ def renewal_iterator(fn):
 
 def _test_renewal_iterator2():
     """to be fixed"""
-    fn = "data" + sep + "abri13.ren"
+    fn = path + "abri13.ren"
     smi = renewal_iterator(fn)
     sim = smi.simulation(N, True)
 
 def _test_renewal_iterator():
     """to be fixed"""
-    ren = Renewal("data" + sep + "abri13.ren")
+    ren = Renewal(path + "abri13.ren")
     print type(ren)
     smi = sa._RenewalIterator(ren)
     sim = smi.simulation(N, True)

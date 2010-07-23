@@ -15,9 +15,10 @@
 """
 
 from openalea.sequence_analysis import *
+from openalea.sequence_analysis.data import path
 
 
-seq1 = Sequences("data/abricotier_suivi_11.seq")
+seq1 = Sequences(path + "abricotier_suivi_11.seq")
 ipe = IndexParameterExtract(seq1, 3, MaxIndex=24)
 
 Plot(seq1, ViewPoint="Data")
@@ -27,7 +28,7 @@ Display(seq1, ViewPoint="Data", Format="Line")
 
 timev3_7 = TimeScaling(TimeEvents(seq1, 3, 7),  12)
 hist1 = ExtractHistogram(timev3_7, "NbEvent", 48)
-hist2 = ExtractHistogram(TimeEvents("data/abri13.ren"), "NbEvent", 16)
+hist2 = ExtractHistogram(TimeEvents(path + "abri13.ren"), "NbEvent", 16)
 
 Plot(hist1, hist2)
 Plot(timev3_7)
@@ -61,12 +62,12 @@ Plot(ExtractDistribution(renew3_7, "NbEvent", 48),
 #
 #########################################################################
 """
-seq11 = Sequences("data/cafe_ortho1.seq")
-seq12 = Sequences("data/cafe_ortho2.seq")
-seq13 = Sequences("data/cafe_ortho3.seq")
-seq14 = Sequences("data/cafe_ortho4.seq")
-seq15 = Sequences("data/cafe_ortho5.seq")
-seq16 = Sequences("data/cafe_ortho6.seq")
+seq11 = Sequences(path + "cafe_ortho1.seq")
+seq12 = Sequences(path + "cafe_ortho2.seq")
+seq13 = Sequences(path + "cafe_ortho3.seq")
+seq14 = Sequences(path + "cafe_ortho4.seq")
+seq15 = Sequences(path + "cafe_ortho5.seq")
+seq16 = Sequences(path + "cafe_ortho6.seq")
 
 seq10 = Merge(seq11, seq12, seq13, seq14, seq15, seq16)
 

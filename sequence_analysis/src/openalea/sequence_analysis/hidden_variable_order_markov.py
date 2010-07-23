@@ -38,17 +38,17 @@ interface.extend_class( _HiddenVariableOrderMarkov, interface.StatInterface)
 def HiddenVariableOrderMarkov(filename=None, Length=DEFAULT_LENGTH,
                               CumulThreshold=OCCUPANCY_THRESHOLD):
     """HiddenVariableOrderMarkov
-   
+
     .. todo:: documentation
-    """ 
-        
+    """
+
     error.CheckType([filename, Length, CumulThreshold], [str, int, float])
 
     if not os.path.isfile(filename):
-        raise IOError("Invalid filename")
-    else: 
+        raise IOError("Invalid filename %s" % filename)
+    else:
         return _HiddenVariableOrderMarkov(filename, Length,  CumulThreshold)
-        
+
 
 
 

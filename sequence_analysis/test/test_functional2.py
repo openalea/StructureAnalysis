@@ -5,12 +5,10 @@ __revision__ = "$Id$"
 
 
 
-import os
 from openalea.sequence_analysis import *
+from openalea.sequence_analysis.data import path
 from openalea.sequence_analysis.estimate import  Estimate
 from openalea.sequence_analysis.compare import  Compare
-
-path = 'data' + os.sep
 
 seq20 = Sequences(path + "belren1.seq")
 seq21 = Sequences(path + "elstar1.seq")
@@ -53,7 +51,7 @@ seq32 = Merge(seq20, seq25)
 matrix30 = Compare(seq32)
 matrix31 = Compare(seq32, VectorDistance("S"))
 matrix32 = Compare(seq32, VectorDistance("S"), Transposition=True)
-matrix33 = Compare(seq32, VectorDistance(path + "align1.a"), Transposition=True)
+matrix33 = Compare(seq32, VectorDistance("data/align1.a"), Transposition=True)
 
 Display(Clustering(matrix33, "Partition", 2))
 Clustering(matrix33, "Hierarchy", Algorithm="Agglomerative")

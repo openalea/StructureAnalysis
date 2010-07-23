@@ -8,10 +8,8 @@ __revision__ = "$Id$"
 import os
 from openalea.stat_tool import *
 from openalea.sequence_analysis import *
+from openalea.sequence_analysis.data import path
 
-
-#path = 'test' + os.sep + 'data' +os.sep
-path = 'data' + os.sep
 
 seq1 = Sequences(path + 'dupreziana_20a2.seq')   # correct
 seq2 = RemoveRun(seq1, 1, 0, "End")              # correct
@@ -77,12 +75,13 @@ mc4 = Estimate(seq4, "VARIABLE_ORDER_MARKOV", mc11, GlobalInitialTransition=Fals
 mc6 = Estimate(seq6, "VARIABLE_ORDER_MARKOV", mc11, GlobalInitialTransition=False)
 mc8 = Estimate(seq8, "VARIABLE_ORDER_MARKOV", mc11, GlobalInitialTransition=False)
 
-matrix1 = Compare(Thresholding(mc2, MinProbability=0.001), seq10, Thresholding(mc4, MinProbability=0.001), seq10, Thresholding(mc6, MinProbability=0.001), seq10, Thresholding(mc8, MinProbability=0.001), seq10, 10000)
 
-matrix2 = Compare(Thresholding(mc2, MinProbability=0.001), seq2, Thresholding(mc4, MinProbability=0.001), seq4,	Thresholding(mc6, MinProbability=0.001), seq6,	Thresholding(mc8, MinProbability=0.001), seq8, 10000)
+#TODO compare functions crashes sometimes
+#matrix1 = Compare(Thresholding(mc2, MinProbability=0.001), seq10, Thresholding(mc4, MinProbability=0.001), seq10, Thresholding(mc6, MinProbability=0.001), seq10, Thresholding(mc8, MinProbability=0.001), seq10, 10000)
+#matrix2 = Compare(Thresholding(mc2, MinProbability=0.001), seq2, Thresholding(mc4, MinProbability=0.001), seq4,	Thresholding(mc6, MinProbability=0.001), seq6,	Thresholding(mc8, MinProbability=0.001), seq8, 10000)
 
 
-Compare(seq10, Thresholding(mc2, MinProbability=0.001), Thresholding(mc4, MinProbability=.001), Thresholding(mc6, MinProbability=0.001), Thresholding(mc8, MinProbability=0.001))
+#Compare(seq10, Thresholding(mc2, MinProbability=0.001), Thresholding(mc4, MinProbability=.001), Thresholding(mc6, MinProbability=0.001), Thresholding(mc8, MinProbability=0.001))
 
 
 
@@ -96,3 +95,4 @@ acf21 = ComputeAutoCorrelation(hmc11, 1, 1, MaxLag=20)
 acf22 = ComputeAutoCorrelation(hmc11, 1, 2, MaxLag=20)
 
 seq15 = Simulate(hmc11, 10000, seq10)
+

@@ -62,7 +62,7 @@ class TestComputeCorrelation(Data):
         cf = ComputeCorrelation(seq, self.variable)
 
     def test_spearman(self):
-        seq = Sequences("data/laricio_date66.seq")
+        seq = Sequences(path + "laricio_date66.seq")
         ComputeCorrelation(seq, 1, Type="Spearman")
         ComputeCorrelation(seq, 1, 2,Type="Spearman")
         try:

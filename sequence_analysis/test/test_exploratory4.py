@@ -21,8 +21,8 @@ __revision__ = "$Id$"
 
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare
+from openalea.sequence_analysis.data import path
 
-path = 'data'+os.sep
 seq1 = Sequences(path +"dupreziana_a1.seq")
 Display(seq1, ViewPoint="Data", Format="Line")
 
