@@ -20,8 +20,10 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 from tools import interface
 from tools import runTestClass
 
+from openalea.sequence_analysis.data import path
+
 def HiddenSemiMarkovData():
-     hsm = HiddenSemiMarkov("data/wij1.hsc")
+     hsm = HiddenSemiMarkov(path + "wij1.hsc")
      return hsm
 
 
@@ -32,14 +34,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/hidden_semi_markov.dat",
+                           path + "hidden_semi_markov.dat",
                            HiddenSemiMarkov)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        hsm = HiddenSemiMarkov('data/hidden_semi_markov.dat')
+        hsm = HiddenSemiMarkov(path + 'hidden_semi_markov.dat')
         return hsm
 
     def test_empty(self):
@@ -50,12 +52,12 @@ class Test(interface):
         self.constructor_from_file()
 
     def _test_constructor_from_file2(self):
-        hmc = HiddenSemiMarkov("data/hidden_markov.hmc")
+        hmc = HiddenSemiMarkov(the + "hidden_markov.hmc")
         assert hmc
 
     def test_constructor_from_file_nonparametric1(self):
-	"""Read HSM model from a file with 1st nonparametric variable
-	with observation distribution ending by 1e-05 """
+        """Read HSM model from a file with 1st nonparametric variable
+        with observation distribution ending by 1e-05 """
         hmc = HiddenSemiMarkov("data/hidden_markov_non-parametric1.hmc")
         assert hmc
 

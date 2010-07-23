@@ -10,18 +10,13 @@ from openalea.stat_tool import *
 from openalea.sequence_analysis import *
 
 
-
-
-
-
-path = 'data' + os.sep
-
+from openalea.sequence_analysis.data import path
 
 vecn = Vectors([[1,2,3],[4,5,6], [7,8,9]])
 vec1 = Vectors([[1],[4], [7]])
-seq1 = Sequences(path + 'sequences1.seq')
-seqn = Sequences(path + 'sequences2.seq')
-hmc = HiddenSemiMarkov(path + 'hidden_semi_markov.dat')
+seq1 = Sequences('data' + os.sep + 'sequences1.seq')
+seqn = Sequences('data' + os.sep + 'sequences2.seq')
+hmc = HiddenSemiMarkov('data' + os.sep  + 'hidden_semi_markov.dat')
 
 hvom_sample = HiddenVariableOrderMarkov(path + "dupreziana21.hc")
 
@@ -50,12 +45,12 @@ print seq10.nb_variable
 seq11 = Transcode(seq10, [0, 1, 0])
 
 
-seq0 = Sequences("data/chene_sessile_15pa.seq")
+seq0 = Sequences(path + "chene_sessile_15pa.seq")
 vec10 = Vectors(seq0)
 vec95 = ValueSelect(vec10, 1, 95)
 
 
-seq20 = Sequences("data//belren1.seq")
+seq20 = Sequences(path + "belren1.seq")
  
 
 
