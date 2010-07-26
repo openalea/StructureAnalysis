@@ -203,6 +203,13 @@ def Plot(obj, *args, **kargs):
           * "StateProfile" only if the first mandatory argument is of type
             hidden_markov or hidden_semi-markov.
       * Title (string): graphic title (the default: no title).
+      * nbcol (int): number of columns in the output figure
+      * Show:
+      * legend_size: 10
+      * legend_nbcol: 2
+      * legend_loc: best
+      * legend: True/False
+
 
     :Returns:
         Nothing.
