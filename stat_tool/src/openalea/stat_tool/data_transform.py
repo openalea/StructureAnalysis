@@ -575,8 +575,7 @@ def SelectIndividual(obj, identifiers, Mode="Keep"):
 
 
 def ValueSelect(obj, *args, **kargs):
-    """
-    Selection of individuals according to the values taken by a variable
+    """Selection of individuals according to the values taken by a variable
 
     :Parameters:
 
