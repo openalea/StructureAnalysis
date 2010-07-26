@@ -43,7 +43,7 @@ vec97 = ValueSelect(vec10, 1, 97)
 VarianceAnalysis(vec10, 1, 2, "N")
 
 
-print type(ExtractHistogram(vec95, 2))
+#print type(ExtractHistogram(vec95, 2))
 
 Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2), "N")
 Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2))

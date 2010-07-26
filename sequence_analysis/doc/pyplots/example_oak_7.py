@@ -67,7 +67,7 @@ vec13 = ValueSelect(vec10, 4, 3, 4)
 #Plot(ExtractHistogram(vec11, 5), ExtractHistogram(vec12, 5), ExtractHistogram(vec13, 5))
 
 mixt20 = Estimate(ExtractHistogram(vec10, 2), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent="Estimated")
-Display(mixt20)
+#Display(mixt20)
 #Plot(mixt20)
 #Plot(ExtractDistribution(mixt20, "Mixture"))
 

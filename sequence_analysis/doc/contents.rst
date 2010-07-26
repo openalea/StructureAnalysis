@@ -28,6 +28,7 @@ Documentation
 
 .. toctree::
     :maxdepth: 2
+    :numbered:
 
     User Guide<user/index.rst>
     Reference Guide<user/autosum.rst>

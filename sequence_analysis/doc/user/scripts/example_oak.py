@@ -28,8 +28,8 @@ Plot(seq0, ViewPoint="Data")
 
 marginal3 = ExtractHistogram(seq0, "Value", 3)
 Plot(Cluster(marginal3, "Information", 0.75))
-Plot(Cluster(marginal3, "Information", 0.61))
-Plot(Cluster(marginal3, "Step", 10))
+#Plot(Cluster(marginal3, "Information", 0.61))
+#Plot(Cluster(marginal3, "Step", 10))
 
 vec10 = Vectors(seq0)
 
@@ -43,7 +43,7 @@ vec97 = ValueSelect(vec10, 1, 97)
 VarianceAnalysis(vec10, 1, 2, "N")
 
 
-print type(ExtractHistogram(vec95, 2))
+#print type(ExtractHistogram(vec95, 2))
 
 Compare(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2), "N")
 Plot(ExtractHistogram(vec95, 2), ExtractHistogram(vec96, 2), ExtractHistogram(vec97, 2))
@@ -56,8 +56,8 @@ VarianceAnalysis(vec10, 1, 4, "O")
 Compare(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), ExtractHistogram(vec97, 4), "O")
 Plot(ExtractHistogram(vec95, 4), ExtractHistogram(vec96, 4), ExtractHistogram(vec97, 4))
 
-Plot(ExtractHistogram(vec95, 5), ExtractHistogram(vec96, 5), ExtractHistogram(vec97, 5))
-Plot(ExtractHistogram(vec95, 6), ExtractHistogram(vec96, 6), ExtractHistogram(vec97, 6))
+#Plot(ExtractHistogram(vec95, 5), ExtractHistogram(vec96, 5), ExtractHistogram(vec97, 5))
+#Plot(ExtractHistogram(vec95, 6), ExtractHistogram(vec96, 6), ExtractHistogram(vec97, 6))
 
 vec11 = ValueSelect(vec10, 4, 1)
 vec12 = ValueSelect(vec10, 4, 2)
@@ -70,7 +70,7 @@ mixt20 = Estimate(ExtractHistogram(vec10, 2), "MIXTURE", "NB", "NB", "NB", "NB",
 Display(mixt20)
 Plot(mixt20)
 Plot(ExtractDistribution(mixt20, "Mixture"))
-
+#Plot(ExtractDistribution(mixt20, "Component", 2))
 mixt21 = Estimate(ExtractHistogram(vec10, 5), "MIXTURE", "NB", "NB", "NB", "NB", NbComponent="Estimated")
 
 vec9596 = ValueSelect(vec10, 1, 95, 96)

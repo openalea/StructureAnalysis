@@ -27,8 +27,8 @@ seq0 = Sequences(path +"chene_sessile_15pa.seq")
 
 marginal3 = ExtractHistogram(seq0, "Value", 3)
 Plot(Cluster(marginal3, "Information", 0.75))
-Plot(Cluster(marginal3, "Information", 0.61))
-Plot(Cluster(marginal3, "Step", 10))
+#Plot(Cluster(marginal3, "Information", 0.61))
+#Plot(Cluster(marginal3, "Step", 10))
 
 
 

@@ -16,5 +16,5 @@ Sequence_analysis User Guide
     :maxdepth: 1
 
     tutorial.rst
-    example_oak.rst
+    scripts/example_oak.rst
 
