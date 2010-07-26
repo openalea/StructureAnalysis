@@ -226,7 +226,7 @@ class mplotlib(plotter):
         _nbx = len(multiset)
 
         if title:
-            pylab.suptitle(title)
+            pylab.suptitle(title, fontsize=fontsize)
         # For each subplot
         for i, multiplot in enumerate(multiset):
             g = multiplot.group
