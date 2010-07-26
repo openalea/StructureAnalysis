@@ -92,7 +92,7 @@ class TestCompound(_HistoCase):
         self.data = self.create_data()
 
     def create_data(self):
-        comp = Compound('data/compound1.cd')
+        comp = Compound('data'+ os.sep +'compound1.cd')
         return comp.simulate(1000)
 
 
@@ -148,7 +148,7 @@ class TestSequences1(_Cluster):
         self.data = self.create_data()
 
     def create_data(self):
-        data = Sequences('data/sequences1.seq')
+        data = Sequences('data' + os.sep + 'sequences1.seq')
         return data
 
     def test_cluster_step(self):
@@ -173,7 +173,7 @@ class TestSequencesn(_Cluster):
         self.data = self.create_data()
 
     def create_data(self):
-        data = Sequences('data/sequences2.seq')
+        data = Sequences('data'+os.sep+'sequences2.seq')
         return data
 
     def test_cluster_step(self):
