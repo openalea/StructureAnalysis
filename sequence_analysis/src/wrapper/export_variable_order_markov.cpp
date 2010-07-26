@@ -186,7 +186,6 @@ public:
   get_plotable(const VariableOrderMarkov &p)
   {
     StatError error;
-    cout << "here vom"<<endl;
     MultiPlotSet* ret = p.get_plotable();
     if (!ret)
       ERROR;
