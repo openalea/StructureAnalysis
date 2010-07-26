@@ -41,7 +41,6 @@ seq8_0 = RemoveRun(seq7, 2, 0, "End")
 seq8 = SegmentationExtract(seq8_0, 1, 2)
 
 seq10 = Merge(seq2, seq4, seq6, seq8)
-print seq10.nb_variable
 seq11 = Transcode(seq10, [0, 1, 0])
 
 
@@ -51,7 +50,7 @@ vec95 = ValueSelect(vec10, 1, 95)
 
 
 seq20 = Sequences(path + "belren1.seq")
- 
+
 
 
 _seq69 = Sequences(path + "pin_laricio_7x.seq")
