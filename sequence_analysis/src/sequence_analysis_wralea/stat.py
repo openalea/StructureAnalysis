@@ -218,12 +218,12 @@ def py_plot( obj, fig_id=1, title='', viewpoint="v"):
     if DISABLE_PLOT:
         return
     if obj:
-#        print types.ListType
+        print types.ListType
         if type(obj) == types.ListType:
-            status = Plot(*obj)
+            status = Plot(*obj, FigureId=fig_id, ViewPoint=viewpoint)
         else:
             Plot(obj, FigureId=fig_id, ViewPoint=viewpoint)
-    
+
 
 def py_plot_segprofile(seq, ind, nb_seg, model, output):
     if DISABLE_PLOT:
@@ -490,6 +490,18 @@ def py_extract_histogram( model, choice):
     if model is not None:
         return ExtractHistogram(model, choice)
 
+@add_doc(ExtractHistogram)
+def py_extract_histogram_sequences( model, input_data, choice, variable):
+    if model is not None:
+        if input_data=='Sequences':
+            try:
+                return ExtractHistogram(model, choice, variable)
+            except:
+                return ExtractHistogram(model, choice)
+        elif input_data=='Vectors':
+            return ExtractHistogram(model, variable)
+
+
 
 @add_doc(ExtractDistribution)
 def py_extract_distribution( model, key, index):
@@ -537,6 +549,12 @@ def py_select_variable(obj, variables, mode):
         return
     vars = adapt2list(variables)
     return SelectVariable(obj, vars, Mode=mode),
+
+@add_doc(ValueSelect)
+def py_value_select(obj, variables, value):
+    if not obj:
+        return
+    return ValueSelect(obj, variables, value),
 
 @add_doc(SelectIndividual)
 def py_select_individual(obj, individuals, mode):
