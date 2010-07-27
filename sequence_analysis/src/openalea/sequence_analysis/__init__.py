@@ -1,3 +1,6 @@
+"""Sequence Analysis init file"""
+__revision__ = "$Id$"
+
 from openalea.stat_tool import *
 from openalea.stat_tool._stat_tool import *
 
@@ -25,4 +28,7 @@ from nonhomogeneous_markov import *
 from renewal import *
 from variable_order_markov import *
 
-
+# must be after from openaeal.stat_tool import *
+from openalea.deploy.metainfo import read_metainfo
+metadata = read_metainfo(__path__[0] + '/../../../metainfo.ini', verbose=False)
+__version__ = metadata['version']
