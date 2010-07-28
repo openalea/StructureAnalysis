@@ -11,6 +11,8 @@ from openalea.stat_tool.estimate import Estimate
 from tools import interface
 from tools import runTestClass
 
+from openalea.stat_tool import shared_data_path as data
+from  os.path import join as pj
 
 class Test(interface):
     """a simple unittest class"""
@@ -102,7 +104,7 @@ class Test(interface):
     def test_extract_data(self):
         """run and test the extract_data methods"""
 
-        h = Histogram("data/meri2.his")
+        h = Histogram(pj(data, "meri2.his"))
         m = h.estimate_mixture("B", "NB")
 
         d = m.extract_data()

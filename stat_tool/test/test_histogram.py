@@ -9,6 +9,8 @@ from openalea.stat_tool.distribution import Distribution
 from tools import interface
 from tools import runTestClass
 
+from openalea.stat_tool import shared_data_path as data
+from  os.path import join as pj
 
 class Test(interface):
     """a simple unittest class
@@ -17,7 +19,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/peup1.his",
+                           pj(data ,"peup1.his"),
                            Histogram)
 
     def build_data(self):
@@ -80,7 +82,8 @@ class Test(interface):
 
     def test_extract_data(self):
         """todo : check if this test makes sense"""
-        h = Histogram("data/meri1.his")
+        h = Histogram(pj(data,"meri1.his"))
+
         e = h.estimate_nonparametric()
 
         assert e
@@ -92,7 +95,7 @@ class Test(interface):
 
     def test_container(self):
         """ container / iterator"""
-        h = Histogram("data/meri1.his")
+        h = Histogram(pj(data,"meri1.his"))
 
         assert h[0] == 0
         assert h[10] == 1

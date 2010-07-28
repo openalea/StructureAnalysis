@@ -19,15 +19,16 @@ from openalea.stat_tool.comparison import Compare, ComparisonTest
 
 from tools import runTestClass
 
+from openalea.stat_tool import shared_data_path as data
+from  os.path import join as pj
 
 class TestHisto():
     """a simple unittest class"""
 
     def __init__(self):
-        self.meri1 = Histogram("data/meri1.his")
-        self.meri2 = Histogram("data/meri2.his")
-        self.meri3 = Histogram("data/meri3.his")
-
+        self.meri1 = Histogram(pj(data, "meri1.his"))
+        self.meri2 = Histogram(pj(data, "meri1.his"))
+        self.meri3 = Histogram(pj(data, "meri1.his"))
     def test_comparisontest(self):
         meri1 = self.meri1
         meri2 = self.meri2
