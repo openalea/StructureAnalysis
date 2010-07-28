@@ -22,8 +22,11 @@ __revision__ = "$Id$"
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare
 from openalea.sequence_analysis.data import path
+from os.path import join as pj
 
-seq1 = Sequences(path +"dupreziana_a1.seq")
+
+seq1 = Sequences(pj(path, "dupreziana_a1.seq"))
+
 Display(seq1, ViewPoint="Data", Format="Line")
 
 vec20 = MergeVariable(ExtractVectors(seq1, "NbOccurrence", 1, 3), ExtractVectors(seq1, "Length"))

@@ -24,12 +24,14 @@ from test_semi_markov import SemiMarkovData
 from openalea.sequence_analysis.data import path
 from data import seq10, seq2
 
+from os.path import join as pj
+
 class Test_Estimate_Histogram():
     def __init__(self):
         self.data = self.create_data()
 
     def create_data(self):
-        seq0 = Sequences(path + "chene_sessile_15pa.seq")
+        seq0 = Sequences(pj(path, "chene_sessile_15pa.seq"))
         vec10 = Vectors(seq0)
         return vec10
 
@@ -106,7 +108,7 @@ class Test_Estimate_HIDDEN_SEMI_MARKOV():
 
     def __init__(self):
         self.data = HiddenSemiMarkovData()
-        self.sequence = Sequences(path + "wij1.seq")
+        self.sequence = Sequences(pj(path, "wij1.seq"))
 
 
     def test_estimate(self):
@@ -119,7 +121,7 @@ class Test_Estimate_SEMI_MARKOV():
 
     def __init__(self):
         #self.data = SemiMarkovData()
-        self.sequence = Sequences(path + "wij1.seq")
+        self.sequence = Sequences(pj(path, "wij1.seq"))
 
     def _test_estimate(self):
         seq = self.sequence

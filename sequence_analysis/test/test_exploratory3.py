@@ -24,25 +24,27 @@
 __revision__ = "$Id$"
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.data import path
+from os.path import join as pj
+from data import files
 
-seq19 = Sequences(path + "dupreziana_20a2.seq")
+seq19 = Sequences(files["dupreziana_20a2.seq"])
 seq20 = RemoveRun(seq19, 0, "End")
 histo201 = ExtractHistogram(seq20, "Recurrence", 1)
 histo202 = ExtractHistogram(seq20, "Recurrence", 2)
 
-seq38 = Sequences(path + "dupreziana_40a2.seq")
+seq38 = Sequences(files["dupreziana_40a2.seq"])
 seq39 = RemoveRun(seq38, 2, 0, "End")
 seq40 = SegmentationExtract(seq39, 1, 2)
 histo401 = ExtractHistogram(seq40, "Recurrence", 1)
 histo402 = ExtractHistogram(seq40, "Recurrence", 2)
 
-seq58 = Sequences(path + "dupreziana_60a2.seq")
+seq58 = Sequences(files["dupreziana_60a2.seq"])
 seq59 = RemoveRun(seq58, 2, 0, "End")
 seq60 =  LengthSelect(SegmentationExtract(seq59, 1, 2), 1, Mode="Reject")
 histo601 = ExtractHistogram(seq60, "Recurrence", 1)
 histo602 = ExtractHistogram(seq60, "Recurrence", 2)
 
-seq78 = Sequences(path + "dupreziana_80a2.seq")
+seq78 = Sequences(files["dupreziana_80a2.seq"])
 seq79 = RemoveRun(seq78, 2, 0, "End")
 seq80 = SegmentationExtract(seq79, 1, 2)
 histo801 = ExtractHistogram(seq80, "Recurrence", 1)

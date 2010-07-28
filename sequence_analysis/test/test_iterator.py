@@ -10,6 +10,7 @@ from openalea.sequence_analysis.hidden_variable_order_markov import *
 from openalea.sequence_analysis.hidden_semi_markov import *
 from openalea.sequence_analysis.renewal import *
 from openalea.sequence_analysis.data import path
+from data import files
 
 N = 10
 import os
@@ -37,12 +38,12 @@ def vom_iterator(fn):
     return it
 
 def test_variable_order_markov_iterator():
-    vom = HiddenVariableOrderMarkov(path + 'dupreziana21.hc')
+    vom = HiddenVariableOrderMarkov(files['dupreziana21.hc'])
     smi = sa._VariableOrderMarkovIterator(vom)
     sim = smi.simulation(N, True)
 
 def test_variable_order_markov_iterator2():
-    fn = path + 'dupreziana21.hc'
+    fn = files['dupreziana21.hc']
     smi = vom_iterator(fn)
     sim = smi.simulation(N, True)
 

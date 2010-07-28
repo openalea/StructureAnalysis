@@ -22,9 +22,10 @@ from tools import runTestClass
 
 from openalea.sequence_analysis.data import path
 import os
+from os.path import join as pj
 
 def HiddenSemiMarkovData():
-     hsm = HiddenSemiMarkov(path + "wij1.hsc")
+     hsm = HiddenSemiMarkov(pj(path, "wij1.hsc"))
      return hsm
 
 

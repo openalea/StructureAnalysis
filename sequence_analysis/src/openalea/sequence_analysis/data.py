@@ -6,9 +6,7 @@ import os
 import openalea.sequence_analysis as sa
 
 
-path = sa.__path__[0] + (os.sep + '..') * 3 \
-    + os.sep + 'share' + os.sep + 'data' +os.sep
-path = os.path.realpath(path) + os.sep
+path = sa.shared_data_path
 
 class _data_tutorial():
     def __init__(self):

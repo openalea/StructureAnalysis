@@ -21,6 +21,8 @@ from tools import runTestClass
 
 from openalea.sequence_analysis.data import path
 
+from data import files
+
 def VariableOrderMarkovData():
     sm =  VariableOrderMarkov('data/variable_order_markov.dat')
     ret = Simulate(sm, 1, 1000, True)
@@ -38,7 +40,7 @@ class Test(interface):
                            VariableOrderMarkov)
 
     def build_data(self):
-        seq = Sequences(path + "belren1.seq")
+        seq = Sequences(files["belren1.seq"])
         vom = Estimate(seq, "VARIABLE_ORDER_MARKOV", "Ordinary",
                         MaxOrder=4, GlobalInitialTransition=False)
 

@@ -6,14 +6,14 @@
 __revision__ = "$Id$"
 
 
-from data import seq20 as data
+from data import seq20 
 from openalea.sequence_analysis.data_transform import ExtractVectors
 from tools import runTestClass
 
 
 class Test():
     def __init__(self):
-        self.data = data
+        self.data = seq20
         
     def test_extract_vectors_length(self):
         data = self.data

@@ -3,6 +3,9 @@ __revision__ = "$Id$"
 
 from openalea.stat_tool import *
 from openalea.stat_tool._stat_tool import *
+#must be after from openalea_stat_tool import *
+from openalea.deploy.shared_data import get_shared_data_path
+shared_data_path = get_shared_data_path(__path__)
 
 import _sequence_analysis
 

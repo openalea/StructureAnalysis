@@ -16,7 +16,7 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 
 from tools import interface
 from tools import runTestClass
-from openalea.sequence_analysis.data import path
+from data import files
 
 class Test(interface):
     """a simple unittest class
@@ -25,14 +25,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           path + "dupreziana21.hc",
+                           files["dupreziana21.hc"],
                            HiddenVariableOrderMarkov)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        hvom =  HiddenVariableOrderMarkov(path + 'dupreziana21.hc')
+        hvom =  HiddenVariableOrderMarkov(files['dupreziana21.hc'])
 
         return hvom
 
