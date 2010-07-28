@@ -17,10 +17,9 @@
 """Stat_Tool init file"""
 __revision__ = "$Id$"
 
-from openalea.deploy.metainfo import read_metainfo
-metadata = read_metainfo(__path__[0] + '/../../../metainfo.ini', verbose=False)
-__version__ = metadata['version']
 
+from openalea.deploy.shared_data import get_shared_data_path
+shared_data_path = get_shared_data_path(__path__)
 
 
 import _stat_tool
