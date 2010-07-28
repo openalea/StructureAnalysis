@@ -191,7 +191,7 @@ public :
     int get_nb_insertion(int row , int column) const
     { return nb_insertion[row][column]; }
     int get_nb_match(int row , int column) const
-    { return nb_match[row][column]; }
+    { if (nb_match) return nb_match[row][column];}
     double get_substitution_distance(int row , int column) const
     { return substitution_distance[row][column]; }
     int get_nb_substitution(int row , int column) const
@@ -202,6 +202,18 @@ public :
     { return nb_transposition[row][column]; }
     int get_label_size() const { return label_size; }
     char* get_label() const { return label; }
+
+
+    bool is_match()
+    { if (nb_match!=NULL) return true; else return false;}
+    bool is_deletion()
+    { if (nb_deletion!=NULL) return true; else return false;}
+    bool is_transposition()
+    { if (nb_transposition!=NULL) return true; else return false;}
+    bool is_substitution()
+    { if (nb_substitution!=NULL) return true; else return false;}
+    bool is_insertion()
+    { if (nb_insertion!=NULL) return true; else return false;}
 };
 
 

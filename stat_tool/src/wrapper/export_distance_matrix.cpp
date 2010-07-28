@@ -53,7 +53,6 @@ public:
   {
     Clusters *ret;
     StatError error;
-    bool berror = false;
 
     std::stringstream output;
     int nb_proto = len(prototype);
@@ -221,6 +220,128 @@ public:
   }
 
   static double
+  get_deletion_distance(DistanceMatrix &input, int i, int j)
+  {
+    double ret;
+    bool bret=false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_deletion();
+    if (bret == false)
+      {
+        error_message << "! no deletion data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+    }
+
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+      ret = input.get_deletion_distance(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+        << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+
+  static double
+  get_substitution_distance(DistanceMatrix &input, int i, int j)
+  {
+    double ret;
+    bool bret=false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_substitution();
+    if (bret == false)
+      {
+        error_message << "! no substitution data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+      }
+    
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+      ret = input.get_substitution_distance(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+        << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+  
+  
+  
+  static double
+  get_transposition_distance(DistanceMatrix &input, int i, int j)
+  {
+    double ret;
+    bool bret=false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_transposition();
+    if (bret == false)
+      {
+        error_message << "! no transposition data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+    }
+
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+      ret = input.get_transposition_distance(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+        << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+  
+  
+  static double
+  get_insertion_distance(DistanceMatrix &input, int i, int j)
+  {
+    double ret;
+    bool bret=false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_insertion();
+    if (bret == false)
+      {
+        error_message << "! no insertion data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+    }
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+      ret = input.get_insertion_distance(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+            << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+  
+  static double
   get_distance(DistanceMatrix &input, int i, int j)
   {
     double ret;
@@ -240,6 +361,154 @@ public:
       }
     return ret;
   }
+
+  static int
+  get_nb_deletion(DistanceMatrix &input, int i, int j)
+  {
+    int ret;
+    bool bret = false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_deletion();
+    if (bret == false)
+      {
+        error_message << "! no deletion data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+      }
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+          ret = input.get_nb_deletion(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+            << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+  static int
+  get_nb_insertion(DistanceMatrix &input, int i, int j)
+  {
+    int ret;
+    bool bret = false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_insertion();
+    if (bret == false)
+      {
+        error_message << "! no insertion data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+      }
+
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+          ret = input.get_nb_insertion(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+            << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+  static int
+  get_nb_transposition(DistanceMatrix &input, int i, int j)
+  {
+    int ret;
+    bool bret = false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_transposition();
+    if (bret == false)
+      {
+        error_message << "! no transposition data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+      }
+
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+          ret = input.get_nb_transposition(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+            << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+  static int
+  get_nb_substitution(DistanceMatrix &input, int i, int j)
+  {
+    int ret;
+    bool bret = false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_substitution();
+    if (bret == false)
+      {
+        error_message << "! no substitution data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+      }
+
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+          ret = input.get_nb_substitution(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+            << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+
+  static int
+  get_nb_match(DistanceMatrix &input, int i, int j)
+  {
+    int ret;
+    bool bret = false;
+    int row_max = input.get_nb_row();
+    int column_max = input.get_nb_column();
+
+    ostringstream error_message;
+
+    bret = input.is_match();
+    if (bret == false)
+      {
+        error_message << "! no match data computed in this object.";
+        cout << error_message.str() << endl;
+        return -1;
+      }
+
+    if (i < row_max && j < column_max && i >= 0 && j >= 0)
+          ret = input.get_nb_match(i, j);
+    else
+      {
+        error_message << "index not in valid range" << "i must be less than "
+            << row_max << " and j less than " << column_max << endl;
+        cout << error_message.str() << endl;
+        ret = -1;
+      }
+    return ret;
+  }
+
+
 
 };
 
@@ -264,13 +533,33 @@ class_distance_matrix()
   .def("test_symmetry", &CLASS::test_symmetry, "returns True if symmetric")
   // test the validity of the arguments by using a wrapped function
   .def("get_distance", &WRAP::get_distance,
-      args("irow", "icolumn"), "todo")
+      args("irow", "icolumn"), "returns distance between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
   .def("get_length", WRAP::get_length,
-      args("irow", "icolumn"), "todo")
+      args("irow", "icolumn"), "returns length between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_transposition_distance", WRAP::get_transposition_distance,
+      args("irow", "icolumn"), "returns transposition between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_insertion_distance", WRAP::get_insertion_distance,
+      args("irow", "icolumn"), "returns insertion between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_deletion_distance", WRAP::get_deletion_distance,
+      args("irow", "icolumn"), "returns deletion between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_substitution_distance", WRAP::get_substitution_distance,
+      args("irow", "icolumn"), "returns substitution between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+
   .def("get_row_identifier", &CLASS::get_row_identifier,
       args("index"), "todo")
   .def("get_column_identifier", &CLASS::get_column_identifier,
       args("index"), "todo")
+  
+  .def("get_nb_substitution", WRAP::get_nb_substitution,
+      args("irow", "icolumn"), "returns nb of substitution between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_nb_deletion", WRAP::get_nb_deletion,
+      args("irow", "icolumn"), "returns nb of deletion between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_nb_transposition", WRAP::get_nb_transposition,
+      args("irow", "icolumn"), "returns nb of transposition between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_nb_match", WRAP::get_nb_match,
+      args("irow", "icolumn"), "returns nb of match between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
+  .def("get_nb_insertion", WRAP::get_nb_insertion,
+      args("irow", "icolumn"), "returns nb of insertion between element i,j where i in [0, nbrow] and j in [0,nbcolum]")
 
   // Clustering
   DEF_RETURN_VALUE_NO_ARGS("partitioning_prototype", WRAP::partitioning_prototype,
@@ -291,28 +580,8 @@ class_distance_matrix()
 ;
 
 /*
- DistanceMatrix();
- DistanceMatrix(int nb_pattern , const char *ilabel , int *pattern_identifier = 0);
- DistanceMatrix(int nb_pattern , int irow_identifier , int icolumn_identifier , const char *ilabel , int *pattern_identifier = 0 ,                     bool substitution_flag = true , bool transposition_flag = false);
- DistanceMatrix(const DistanceMatrix &dist_matrix , int inb_pattern , int *iidentifier , bool keep = true);
- DistanceMatrix(const DistanceMatrix &dist_matrix , int nb_cluster , const char *ilabel);
- DistanceMatrix(const DistanceMatrix &dist_matrix , char transform = 'c')     { copy(dist_matrix , transform); }
-
  void update(...
  void update(int irow_identifier , int icolumn_identifier , double idistance , int ilength);
-
- double get_deletion_distance(int row , int column) const     { return deletion_distance[row][column]; }
- int get_nb_deletion(int row , int column) const     { return nb_deletion[row][column]; }
- double get_insertion_distance(int row , int column) const     { return insertion_distance[row][column]; }
- int get_nb_insertion(int row , int column) const     { return nb_insertion[row][column]; }
-
- int get_nb_match(int row , int column) const     { return nb_match[row][column]; }
-
- double get_substitution_distance(int row , int column) const     { return substitution_distance[row][column]; }
- int get_nb_substitution(int row , int clumn) const     { return nb_substitution[row][column]; }
-
- double get_transposition_distance(int row , int column) const     { return transposition_distance[row][column]; }
- int get_nb_transposition(int row , int column) const     { return nb_transposition[row][column]; }
 
  int get_label_size() const { return label_size; }     char* get_label() const { return label; }
 
