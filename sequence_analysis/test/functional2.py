@@ -9,14 +9,15 @@ from openalea.sequence_analysis import *
 from openalea.sequence_analysis.data import path
 from openalea.sequence_analysis.estimate import  Estimate
 from openalea.sequence_analysis.compare import  Compare
+from os.path import join as pj
 
-seq20 = Sequences(path + "belren1.seq")
-seq21 = Sequences(path + "elstar1.seq")
-seq22 = Sequences(path + "fuji1.seq")
-seq23 = Sequences(path + "gala1.seq")
-seq24 = Sequences(path + "granny1.seq")
-seq25 = Sequences(path + "reinet1.seq")
-seq26 = Sequences(path + "wij1.seq")
+seq20 = Sequences(pj(path, "belren1.seq"))
+seq21 = Sequences(pj(path, "elstar1.seq"))
+seq22 = Sequences(pj(path, "fuji1.seq"))
+seq23 = Sequences(pj(path, "gala1.seq"))
+seq24 = Sequences(pj(path, "granny1.seq"))
+seq25 = Sequences(pj(path, "reinet1.seq"))
+seq26 = Sequences(pj(path, "wij1.seq"))
 
 Display(seq25, ViewPoint="Data")
 Plot(seq25, "Intensity")
@@ -75,22 +76,22 @@ Plot(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile")
 Plot(seq25, 14, 6, "Multinomial", ViewPoint="SegmentProfile", Output="ChangePoint")
 # hidden semi-Markov chains
 
-hsmc0 = HiddenSemiMarkov(path + "belren1.hsc")
+hsmc0 = HiddenSemiMarkov(pj(path, "belren1.hsc"))
 hsmc20 = Estimate(seq20, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov(path + "elstar1.hsc")
+hsmc0 = HiddenSemiMarkov(pj(path, "elstar1.hsc"))
 hsmc21 = Estimate(seq21, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov(path  + "fuji1.hsc")
+hsmc0 = HiddenSemiMarkov(pj(path, "fuji1.hsc"))
 hsmc22 = Estimate(seq22, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov(path + "gala1.hsc")
+hsmc0 = HiddenSemiMarkov(pj(path, "gala1.hsc"))
 hsmc23 = Estimate(seq23, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov(path + "granny1.hsc")
+hsmc0 = HiddenSemiMarkov(pj(path, "granny1.hsc"))
 hsmc24 = Estimate(seq24, "HIDDEN_SEMI-MARKOV", hsmc0)
 
-hsmc0 = HiddenSemiMarkov(path + "reinet1.hsc")
+hsmc0 = HiddenSemiMarkov(pj(path, "reinet1.hsc"))
 hsmc25 = Estimate(seq25, "HIDDEN_SEMI-MARKOV", hsmc0)
 
 Display(hsmc25)
@@ -111,7 +112,7 @@ Plot(hsmc25, 1, ViewPoint="StateProfile", Output='OutState')
 seq25_1 = ExtractData(hsmc25)
 Display(seq25_1, ViewPoint="Data", Format="Line")
 
-hsmc0 = HiddenSemiMarkov(path + "wij1.hsc")
+hsmc0 = HiddenSemiMarkov(pj(path, "wij1.hsc"))
 hsmc26 = Estimate(seq26, "HIDDEN_SEMI-MARKOV", hsmc0)
 
 # model comparison
