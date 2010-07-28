@@ -8,6 +8,7 @@ __revision__ = "$Id$"
 import os, sys
 from setuptools import setup, find_packages
 from openalea.deploy.binary_deps import binary_deps
+from openalea.deploy.setup import *
 from os.path import join as pj
 
 from openalea.deploy.metainfo import read_metainfo
@@ -40,7 +41,7 @@ if __name__ == '__main__':
           author_email=authors_email,
           url=url,
           license=license,
-
+          platforms = platforms,
 
           # Define where to execute scons
           scons_scripts=['SConstruct'],
