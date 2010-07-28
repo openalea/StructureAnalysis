@@ -11,7 +11,8 @@ from openalea.stat_tool import Compound, Histogram, Distribution
 from openalea.stat_tool import Simulate, ExtractHistogram, ToHistogram
 from openalea.stat_tool import Estimate, ExtractData, ExtractDistribution
 from openalea.stat_tool import Plot, Shift
-
+from openalea.stat_tool import shared_data_path
+import os
 
 # read data file
 def test():
@@ -36,7 +37,7 @@ def test():
     histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
     Plot(histo31, histo32)
 
-    peup1 = Histogram("data/peup1.his")
+    peup1 = Histogram(os.path.join(shared_data_path, "peup1.his"))
     mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
     histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
     histo34 = Shift(histo33, -11)

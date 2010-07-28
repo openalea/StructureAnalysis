@@ -87,10 +87,6 @@ class Test(interface):
         assert keep_true.nb_row == 1
         assert keep_true.nb_column == 1
 
-    def test_test_symmetry(self):
-        data = self.data
-        assert data.test_symmetry() == False
-
     def test_get_distance(self):
         data = self.data
         assert data.get_distance(0, 0)
@@ -98,6 +94,29 @@ class Test(interface):
     def test_get_length(self):
         data = self.data
         assert data.get_length(0, 0)
+
+    def test_get_substitution(self):
+        data = self.data
+        # no substituion computed for vectors 
+        assert data.get_substitution_distance(0, 0) == -1
+
+    def test_get_insertion(self):
+        data = self.data
+        # no insertion computed for vectors 
+        assert data.get_insertion_distance(0, 0) == -1
+
+    def test_get_transposition(self):
+        data = self.data
+        # no transposition computed for vectors 
+        assert data.get_transposition_distance(0, 0) == -1
+
+    def test_get_deletion(self):
+        data = self.data
+        # no deletion computed for vectors 
+        assert data.get_deletion_distance(0, 0) == -1
+
+
+
 
     def test_get_length_outside_range(self):
         data = self.data
