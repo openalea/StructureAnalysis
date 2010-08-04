@@ -18,9 +18,10 @@ __revision__ = "$Id: test_exploratory.py 8676 2010-04-20 15:28:46Z cokelaer $"
 
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.estimate import  Estimate
-from openalea.sequence_analysis.data import path
+from openalea.sequence_analysis import shared_data_path as path
+from os.path import join as pj
+seq0 = Sequences(pj(path ,"chene_sessile_15pa.seq"))
 
-seq0 = Sequences(path +"chene_sessile_15pa.seq")
 
 
 # change of unit for the variable diameter of the annual shoot
