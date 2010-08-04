@@ -49,7 +49,8 @@ openalea.sequence_analysis.variable_order_markov             18     18     100%
 TOTAL                                                       1444    1206    83%
 =========================================================== ====== ======= ========
 
-In addition more than 10 tests are available using doctest. Use the following command to run those tests::
+In addition tests are also available using doctest on the sphinx documentaiton. Use the following command to 
+run those tests::
 
     python setup.py build_sphinx -b doctest
 

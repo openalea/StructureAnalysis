@@ -1,6 +1,6 @@
 
-Example: Oak trunk annual shoots
-=====================================
+Sequences advanced tutorial: Oak trunk annual shoots
+=====================================================
 
 .. topic:: Illustrative example of stat_tool and sequence_analysis packages
 
@@ -75,7 +75,7 @@ Read sequences in a file and plot a data viewpoint
 Let us come back to the example. The first step consists in reading the data. We need to use use the :func:`~openalea.sequence_analysis.sequences.Sequences` function that will check the header and return a sequence object. Then, we can plot the results using a Data viewpoint (see :func:`openalea.stat_tool.output.Plot`).
 
 .. literalinclude:: example_oak.py
-    :lines: 1-25
+    :lines: 1-26
     :linenos:
 
 .. plot:: pyplots/example_oak_1.py
@@ -89,7 +89,7 @@ On the first line of the following code, we first extract a given variable (the 
 
 
 .. literalinclude:: example_oak.py
-    :lines: 25-30
+    :lines: 27-32
     :linenos:
 
 .. plot:: pyplots/example_oak_2.py
@@ -110,7 +110,7 @@ The variable marginal3 could have been obtained as follows::
 Now, coming back to the first (year) and second variable (growth length), we plot the average of the second variable versus the year as follows
 
 .. literalinclude:: example_oak.py
-    :lines: 34-37
+    :lines: 35-39
     :linenos:
 
 .. plot:: pyplots/example_oak_3.py
@@ -124,7 +124,7 @@ Then, we want to look those data in more details by selecting the length year by
 
 
 .. literalinclude:: example_oak.py
-    :lines: 38-49
+    :lines: 40-52
     :linenos:
 
 .. plot:: pyplots/example_oak_4.py
@@ -196,7 +196,7 @@ We first look at the contingency table ::
 and then plot some histograms.
 
 .. literalinclude:: example_oak.py
-    :lines: 50-61
+    :lines: 52-63
     :linenos:
 
 .. plot:: pyplots/example_oak_5.py
@@ -212,7 +212,7 @@ Now, we extract an historam from the second variable and estimated a model that 
 distribution and plot the results either the mixture model or component by component
 
 .. literalinclude:: example_oak.py
-    :lines: 68-74
+    :lines: 71-75
     :linenos:
 
 .. plot:: pyplots/example_oak_6.py
@@ -224,7 +224,7 @@ Regression
 -------------
 
 .. literalinclude:: example_oak.py
-    :lines: 78-81
+    :lines: 80-83
     :linenos:
 
 .. plot:: pyplots/example_oak_7.py
