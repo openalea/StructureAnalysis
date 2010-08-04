@@ -174,6 +174,19 @@ Functionalities
     :show-inheritance:
     :synopsis: Data transform methods
 
+.. currentmodule:: openalea.sequence_analysis.distance_matrix
+
+:mod:`openalea.sequence_analysis.distance_matrix` module
+---------------------------------------------------------
+.. automodule:: openalea.sequence_analysis.distance_matrix
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
+    :synopsis:  todo
+
+
+
 
 .. currentmodule:: openalea.sequence_analysis.enums
 

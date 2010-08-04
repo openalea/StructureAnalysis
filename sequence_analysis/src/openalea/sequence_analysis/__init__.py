@@ -30,4 +30,4 @@ from estimate import *
 from nonhomogeneous_markov import *
 from renewal import *
 from variable_order_markov import *
-
+from distance_matrix import *
