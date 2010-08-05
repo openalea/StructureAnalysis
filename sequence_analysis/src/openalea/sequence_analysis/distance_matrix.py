@@ -136,7 +136,7 @@ class ImprovedDistanceMatrix(object):
         pylab.show()
 
 
-    def cumulated_distance(self):
+    def cumulated_distance(self, verbose=False):
         c = numpy.zeros(self.distance_matrix.nb_row)
 
         for i in range(0,self.distance_matrix.nb_row):
@@ -144,7 +144,8 @@ class ImprovedDistanceMatrix(object):
             c[i] = numpy.mean(self.distance[i,index]/self.length[i,index])
 
         i = numpy.argsort(c)
-        for x in i:
-            print x+1, c[x]
+        if verbose==True:
+            for x in i:
+                print x+1, c[x]
         return c
 

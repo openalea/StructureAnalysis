@@ -60,6 +60,10 @@ def adapt2list(arg):
 #//////////////////////////////////////////////////////////////////////////////
 # Input/output functions
 #//////////////////////////////////////////////////////////////////////////////
+@add_doc(Fit)
+def py_fit(histo, dist):
+    return (Fit(histo, dist),)
+
 
 @add_doc(Compound)
 def py_compound_ascii( filename ):
@@ -199,30 +203,22 @@ def py_semimarkov( filename, length=20, counting=True ):
 
 #//////////////////////////////////////////////////////////////////////////////
 
-def py_histogram( seq = [] ):
-    """\
-    Histogram([int]) -> Histogram
-    Input:
-        list of int
-    Output:
-        Histogram model
-    """
-    
-    if hasattr(seq,'__iter__') and (len(seq)>0):
-        return (Histogram(seq),)
+@add_doc(Histogram)
+def py_histogram(seq):
+    return (Histogram(seq),)
 
 #//////////////////////////////////////////////////////////////////////////////
 
-#@add_doc('Plot')
-def py_plot( obj, fig_id=1, title='', viewpoint="v"):
+@add_doc('Plot')
+def py_plot( obj, fig_id=1, title='', viewpoint="v", **kargs):
     if DISABLE_PLOT:
         return
     if obj:
         print types.ListType
         if type(obj) == types.ListType:
-            status = Plot(*obj, FigureId=fig_id, ViewPoint=viewpoint)
+            status = Plot(*obj, FigureId=fig_id, ViewPoint=viewpoint, **kargs)
         else:
-            Plot(obj, FigureId=fig_id, ViewPoint=viewpoint)
+            Plot(obj, FigureId=fig_id, ViewPoint=viewpoint, **kargs)
 
 
 def py_plot_segprofile(seq, ind, nb_seg, model, output):

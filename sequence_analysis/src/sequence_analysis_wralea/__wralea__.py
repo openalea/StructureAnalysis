@@ -1,5 +1,5 @@
 
-# This file has been generated at Mon Jul 26 21:26:09 2010
+# This file has been generated at Thu Aug  5 11:30:32 2010
 
 from openalea.core import *
 
@@ -17,7 +17,21 @@ __institutes__ = 'INRIA/CIRAD'
 __icon__ = 'icon.png'
 
 
-__all__ = ['stat_py_convolution', 'stat_py_simulate_dist', 'stat_py_dist_poisson', 'stat_py_semimarkov', 'stat_py_segmentation_sample', 'stat_py_shiftn', 'stat_py_pointwise_average', 'stat_py_regression', 'stat_py_estimate_mixture', 'stat_PyObjectFromFile', 'stat_py_compute_correlation', 'stat_py_vectors', 'stat_py_cluster', 'stat_py_select_variable', 'stat_py_dist_binomial', 'data_SharedData', 'stat_py_sequences', 'stat_py_compute_correlation_mult', 'stat_py_to_distribution', 'stat_py_hiddensemimarkov', 'stat_py_to_histogram', 'stat_py_compound', 'stat_py_plot', 'stat_py_plot_segprofile', 'stat_PyRenewal', 'stat_py_merge', 'stat_PyRenewalAscii', 'data_Selector', 'stat_py_comparisontest', 'stat_py_estimate_compound', 'stat_py_cumulate', 'stat_py_estimate_dist', 'stat_py_shift', 'stat_py_dist_negativebinomial', 'stat_py_markov', 'stat_py_dist_uniform', 'stat_py_segmentation', 'stat_py_select_individual', 'stat_py_hiddenmarkov', 'stat_py_extract_histogram', 'stat_py_compare_vectors', 'stat_py_histogram', 'stat_py_extract_data', 'stat_py_compare_frequency', 'stat_py_estimate_conv', 'stat_py_extract_distribution', 'stat_py_extract_histogram_sequences', 'stat_py_value_select']
+__all__ = ['stat_py_value_select', 'stat_py_convolution', 'stat_py_simulate_dist', 'stat_py_dist_poisson', 'stat_py_semimarkov', 'stat_py_segmentation_sample', 'stat_py_shiftn', 'stat_py_pointwise_average', 'stat_py_estimate_mixture', 'stat_PyObjectFromFile', 'stat_py_compute_correlation', 'stat_py_vectors', 'stat_py_cluster', 'stat_py_select_variable', 'stat_py_dist_binomial', 'data_SharedData', 'stat_py_sequences', 'stat_py_compute_correlation_mult', 'stat_py_to_distribution', 'stat_py_hiddensemimarkov', 'stat_py_to_histogram', 'stat_py_compound', 'stat_py_plot', 'stat_py_plot_segprofile', 'stat_PyRenewal', 'stat_py_merge', 'stat_py_regression', 'data_Selector', 'stat_py_comparisontest', 'stat_py_estimate_compound', 'stat_py_cumulate', 'stat_py_estimate_dist', 'stat_py_extract_distribution', 'stat_py_shift', 'stat_py_dist_negativebinomial', 'stat_py_markov', 'stat_py_dist_uniform', 'stat_py_segmentation', 'stat_py_select_individual', 'stat_py_hiddenmarkov', 'stat_py_extract_histogram', 'stat_py_compare_vectors', 'stat_py_histogram', 'stat_PyRenewalAscii', 'stat_py_extract_data', 'stat_py_compare_frequency', 'stat_py_estimate_conv', 'stat_py_extract_histogram_sequences', 'stat_py_fit']
+
+
+
+stat_py_value_select = Factory(name='ValueSelect',
+                description='Extraction of vectors according to a a criteria upon a given variable',
+                category='STAT',
+                nodemodule='stat',
+                nodeclass='py_value_select',
+                inputs=[{'name': 'obj'}, {'interface': IInt, 'name': 'variable', 'value': 1}, {'interface': IInt, 'name': 'value', 'value': None}],
+                outputs=None,
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
 
 
 
@@ -111,20 +125,6 @@ stat_py_pointwise_average = Factory(name='PointwiseAverage',
                 nodemodule='stat',
                 nodeclass='py_pointwise_average',
                 inputs=[{'name': 'seq'}, {'interface': IBool, 'name': 'StandardDeviation', 'value': False}, {'interface': IEnumStr(enum=['Sequence', 'Residual', 'StandardizedResidual']), 'name': 'Output', 'value': 'Sequence'}, {'interface': IDirStr, 'name': 'DirName'}, {'interface': IStr, 'name': 'FileName'}, {'interface': IEnumStr(enum=['ASCII', 'SpreadSheet']), 'name': 'Format', 'value': 'ASCII'}],
-                outputs=None,
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-stat_py_regression = Factory(name='Regression',
-                description='Simple Regression with a single explanatory variable.',
-                category='STAT',
-                nodemodule='stat',
-                nodeclass='py_regression',
-                inputs=[{'name': 'vec'}, {'interface': IEnumStr(enum=['Linear', 'MovingAverage', 'NearestNeighbors']), 'name': 'RegressionModel', 'value': 'Linear'}, {'interface': IInt, 'name': 'explanatoryVariable'}, {'interface': IInt, 'name': 'responseVariable'}, {'interface': ISequence, 'name': 'filter'}, {'interface': ISequence, 'name': 'frequencies'}, {'name': 'distribution'}, {'interface': IFloat, 'name': 'span'}, {'interface': IEnumStr(enum=['Averaging', 'LeastSquares']), 'name': 'Algorithm', 'value': 'Averaging'}, {'interface': IBool, 'name': 'Weighting', 'value': True}],
                 outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
@@ -331,15 +331,10 @@ stat_py_compound = Factory(name='Compound',
 
 stat_py_plot = Factory(name='Plot (stat_tool)',
                 description='Graphical output of an object of the STAT module using either GNUPLOT or matplotlib software.',
-                category='STAT',
+                category='Unclassified',
                 nodemodule='stat',
                 nodeclass='py_plot',
-                inputs=(
-                    {'name': 'obj'}, 
-                    {'interface': IInt, 'name': 'fig_id'}, 
-                    {'interface': IStr, 'name': 'title', 'value': ''},
-                    {'interface': IEnumStr(enum=['Data', 'Survival', 'v']), 'name': 'viewpoint', 'value': 'Data'}
-                    ),
+                inputs=({'name': 'obj'}, {'interface': IInt, 'name': 'fig_id'}, {'interface': IStr, 'name': 'title', 'value': ''}, {'interface': IEnumStr(enum=['Data', 'Survival', 'v']), 'name': 'viewpoint', 'value': 'v'}),
                 outputs=(),
                 widgetmodule=None,
                 widgetclass=None,
@@ -390,12 +385,12 @@ stat_py_merge = Factory(name='Merge',
 
 
 
-stat_PyRenewalAscii = Factory(name='Renewal_from_file',
-                description='Construction of a (either ordinary or equilibrium) renewal process from an inter-event distribution.',
-                category='STAT.Renewal',
+stat_py_regression = Factory(name='Regression',
+                description='Simple Regression with a single explanatory variable.',
+                category='STAT',
                 nodemodule='stat',
-                nodeclass='PyRenewalAscii',
-                inputs=None,
+                nodeclass='py_regression',
+                inputs=[{'name': 'vec'}, {'interface': IEnumStr(enum=['Linear', 'MovingAverage', 'NearestNeighbors']), 'name': 'RegressionModel', 'value': 'Linear'}, {'interface': IInt, 'name': 'explanatoryVariable'}, {'interface': IInt, 'name': 'responseVariable'}, {'interface': ISequence, 'name': 'filter'}, {'interface': ISequence, 'name': 'frequencies'}, {'name': 'distribution'}, {'interface': IFloat, 'name': 'span'}, {'interface': IEnumStr(enum=['Averaging', 'LeastSquares']), 'name': 'Algorithm', 'value': 'Averaging'}, {'interface': IBool, 'name': 'Weighting', 'value': True}],
                 outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
@@ -466,6 +461,20 @@ stat_py_estimate_dist = Factory(name='EstimateDistribution',
                 nodemodule='stat',
                 nodeclass='py_estimate_dist',
                 inputs=({'name': 'histo'}, {'interface': IEnumStr(enum=['NONPARAMETRIC', 'BINOMIAL', 'POISSON', 'NEGATIVE_BINOMIAL']), 'name': 'distribution', 'value': 'NONPARAMETRIC'}, {'interface': IInt(min=0, max=1, step=1), 'name': 'MinInfBound', 'value': 0}, {'interface': IEnumStr(enum=['Free', 'Fixed']), 'name': 'InfBoundStatus', 'value': 'Free'}),
+                outputs=None,
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+stat_py_extract_distribution = Factory(name='ExtractDistribution',
+                description='Extraction of the distribution part of an object of type model.',
+                category='STAT',
+                nodemodule='stat',
+                nodeclass='py_extract_distribution',
+                inputs=[{'name': 'obj'}, {'interface': IEnumStr(enum=['Sum', 'Elementary', 'Component', 'Weight', 'Mixture', 'Convolution', 'Compound']), 'name': 'key', 'value': 'Sum'}, {'interface': IFloat, 'name': 'index', 'value': None}],
                 outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
@@ -582,22 +591,6 @@ stat_py_extract_histogram = Factory(name='ExtractHistogram',
                 widgetmodule=None,
                 widgetclass=None,
                )
-stat_py_extract_histogram_sequences = Factory(name='ExtractHistogram(Sequences)',
-                description='Extraction of the histogram part of an object of type model.',
-                category='STAT',
-                nodemodule='stat',
-                nodeclass='py_extract_histogram_sequences',
-                inputs=[{'name': 'obj'}, 
-                    {'interface': IEnumStr(['Sequences','Vectors']), 'name':'input data', 'value': None },
-                    {'interface': IEnumStr(enum=['Value', 'Length']), 'name': 'choice', 'value': 'Value'},
-                    {'interface': IInt, 'name': 'variable', 'value': 1}],
-                outputs=None,
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
 
 
 
@@ -621,7 +614,21 @@ stat_py_histogram = Factory(name='Histogram',
                 category='STAT.FrequencyDistribution',
                 nodemodule='stat',
                 nodeclass='py_histogram',
-                inputs=({'interface': ISequence, 'name': 'sequence', 'value': []},),
+                inputs=[{'interface': None, 'name': 'seq', 'value': None}],
+                outputs=({'interface': None, 'name': 'out'},),
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+stat_PyRenewalAscii = Factory(name='Renewal_from_file',
+                description='Construction of a (either ordinary or equilibrium) renewal process from an inter-event distribution.',
+                category='STAT.Renewal',
+                nodemodule='stat',
+                nodeclass='PyRenewalAscii',
+                inputs=None,
                 outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
@@ -672,12 +679,12 @@ stat_py_estimate_conv = Factory(name='EstimateConvolution',
 
 
 
-stat_py_extract_distribution = Factory(name='ExtractDistribution',
-                description='Extraction of the distribution part of an object of type model.',
+stat_py_extract_histogram_sequences = Factory(name='ExtractHistogram(Sequences)',
+                description='Extraction of the histogram part of an object of type model.',
                 category='STAT',
                 nodemodule='stat',
-                nodeclass='py_extract_distribution',
-                inputs=[{'name': 'obj'}, {'interface': IEnumStr(enum=['Sum', 'Elementary', 'Component', 'Weight', 'Mixture', 'Convolution', 'Compound']), 'name': 'key', 'value': 'Sum'}, {'interface': IFloat, 'name': 'index', 'value': None}],
+                nodeclass='py_extract_histogram_sequences',
+                inputs=[{'name': 'obj'}, {'interface': IEnumStr(enum=['Sequences', 'Vectors']), 'name': 'input data', 'value': None}, {'interface': IEnumStr(enum=['Value', 'Length']), 'name': 'choice', 'value': 'Value'}, {'interface': IInt, 'name': 'variable', 'value': 1}],
                 outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
@@ -685,12 +692,12 @@ stat_py_extract_distribution = Factory(name='ExtractDistribution',
 
 
 
-stat_py_value_select = Factory(name='ValueSelect',
-                description='Extraction of vectors according to a a criteria upon a given variable',
+stat_py_fit = Factory(name='Fit',
+                description='Fit distribution to histogram.',
                 category='STAT',
                 nodemodule='stat',
-                nodeclass='py_value_select',
-                inputs=[{'name': 'obj'}, {'interface': IInt, 'name': 'variable', 'value': 1}, {'interface': IInt, 'name': 'value', 'value': None}],
+                nodeclass='py_fit',
+                inputs=None,
                 outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
