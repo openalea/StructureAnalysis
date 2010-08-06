@@ -19,16 +19,14 @@ from openalea.stat_tool.comparison import Compare, ComparisonTest
 
 from tools import runTestClass
 
-from openalea.stat_tool import shared_data_path as data
-from  os.path import join as pj
-
+from openalea.stat_tool import get_shared_data
 class TestHisto():
     """a simple unittest class"""
 
     def __init__(self):
-        self.meri1 = Histogram(pj(data, "meri1.his"))
-        self.meri2 = Histogram(pj(data, "meri1.his"))
-        self.meri3 = Histogram(pj(data, "meri1.his"))
+        self.meri1 = Histogram(get_shared_data("meri1.his"))
+        self.meri2 = Histogram(get_shared_data("meri1.his"))
+        self.meri3 = Histogram(get_shared_data("meri1.his"))
     def test_comparisontest(self):
         meri1 = self.meri1
         meri2 = self.meri2
@@ -117,7 +115,7 @@ class TestVectors():
 
     def test_compare_vectors(self):
 
-        vec10 = Vectors("data/chene_sessile.vec")
+        vec10 = Vectors(get_shared_data("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         assert vec15
 

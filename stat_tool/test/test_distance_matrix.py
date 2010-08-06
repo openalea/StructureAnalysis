@@ -14,7 +14,7 @@ from openalea.stat_tool.cluster import Clustering, ToDistanceMatrix
 
 from tools import interface
 from tools import runTestClass
-
+from openalea.stat_tool import get_shared_data
 
 class Test(interface):
 
@@ -25,7 +25,7 @@ class Test(interface):
                            ToDistanceMatrix)
 
     def build_data(self):
-        vec10 = Vectors("data/chene_sessile.vec")
+        vec10 = Vectors(get_shared_data("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         c1 = Clustering(matrix10, "Partition", 3, Prototypes=[1, 3, 12],

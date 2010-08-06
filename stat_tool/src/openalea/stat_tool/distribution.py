@@ -181,7 +181,14 @@ def NegativeBinomial(inf_bound, param=_stat_tool.D_DEFAULT, \
       * param (int, float) : parameter of the Poisson distribution
       * proba (int, float) : probability of 'success'
 
-    .. plot:: pyplots/negative_binomial.py
+    .. plot::
+        :width: 50%
+        :include-source:
+
+        from openalea.stat_tool.distribution import NegativeBinomial
+        b = NegativeBinomial(1,2 ,.5)
+        b.plot(legend_size=12)
+
     """
 
     # Check parameters

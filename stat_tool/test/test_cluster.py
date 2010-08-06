@@ -13,6 +13,7 @@ from openalea.stat_tool.cluster import Transcode, Clustering, \
     ToDistanceMatrix, Cluster
 
 from tools import runTestClass
+from openalea.stat_tool import get_shared_data
 
 
 class Test:
@@ -105,7 +106,7 @@ class Test:
             assert True
 
     def test_clustering(self):
-        vec10 = Vectors("data/chene_sessile.vec")
+        vec10 = Vectors(get_shared_data("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
 
         assert vec15

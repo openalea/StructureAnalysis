@@ -20,8 +20,10 @@ from openalea.stat_tool import SelectIndividual
 from openalea.stat_tool import ExtractHistogram
 from openalea.stat_tool import Display
 
+from openalea.stat_tool import get_shared_data
+
 def test():
-    vec10 = Vectors('data/chene_sessile.vec')
+    vec10 = Vectors(get_shared_data('chene_sessile.vec'))
     vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
     vec9596 = ValueSelect(vec10, 1, 1995, 1996)
 

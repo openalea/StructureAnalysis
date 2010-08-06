@@ -1,3 +1,21 @@
+Stat_tool 0.9.0
+----------------
+version **9270**
+
+* move some data from test/data to /share/data
+* correct the tests accordingly
+
+
+Stat_tool 0.8.5
+----------------
+
+* Finalisation of Boost python wrapping; fix some bugs
+* Completion of the tests in ./test
+* all pylab/matplotlib plots are now available
+* add demos in VisuAlea (put in sequence_analysis package)
+
+
+
 Stat_tool 0.7.0
 ---------------
 

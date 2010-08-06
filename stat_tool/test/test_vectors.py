@@ -9,6 +9,8 @@ from openalea.stat_tool.vectors import ComputeRankCorrelation
 from tools import interface
 from tools import runTestClass
 
+from openalea.stat_tool import get_shared_data
+
 class Test(interface):
     """a simple unittest class
 
@@ -36,7 +38,7 @@ class Test(interface):
         return v
 
     def build_data_2(self):
-        return Vectors("data/chene_sessile.vec")
+        return Vectors(get_shared_data("chene_sessile.vec"))
 
     def test_identifiers(self):
         v = Vectors([[1, 2, 3], [4, 5, 6], [7, 8, 9]], Identifiers=[1, 2, 4])

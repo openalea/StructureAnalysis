@@ -7,7 +7,7 @@ from openalea.stat_tool.comparison import Compare
 
 from tools import interface
 from tools import runTestClass
-
+from openalea.stat_tool import get_shared_data
 
 class Test(interface):
     """a simple unittest class for distance matrix"""
@@ -19,7 +19,7 @@ class Test(interface):
         # init expect the 4th argument to be provided.
         # vectors is therefore passed as dummy structure
     def build_data(self):
-        vec10 = Vectors("data/chene_sessile.vec")
+        vec10 = Vectors(get_shared_data("chene_sessile.vec"))
         vec15 = SelectVariable(vec10, [1, 3, 6], Mode="Reject")
         matrix10 = Compare(vec15, VectorDistance("N", "N", "N"))
         assert 138 == matrix10.nb_row
