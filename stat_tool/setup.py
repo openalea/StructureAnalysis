@@ -57,7 +57,7 @@ if __name__ == '__main__':
                     'openalea',
                     ],
 
-          package_dir={ "vplants.plantik" : "src/plantik", '':'src'  },
+          package_dir={ "vplants.stat_tool" : "src/stat_tool", '':'src'  },
           share_dirs = { 'share' : 'share' },
 
 
