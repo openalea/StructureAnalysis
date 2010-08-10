@@ -21,8 +21,7 @@ from openalea.stat_tool.data_transform import Shift, Merge, Fit, ValueSelect, \
 
 from tools import runTestClass
 
-from openalea.stat_tool import shared_data_path as datapath
-from  os.path import join as pj
+from openalea.stat_tool import get_shared_data
 
 class data():
     """Create some common data sets for the classes
@@ -54,7 +53,7 @@ class data():
         return mixt_data
 
     def hist_data(self):
-        h = Histogram(pj(datapath, "meri2.his"))
+        h = Histogram(get_shared_data( "meri2.his"))
         return h
 
     def int_vector_data(self):
@@ -142,7 +141,7 @@ class TestFit:
         pass
 
     def test_fit_histogram(self):
-        meri5 = Histogram(pj(datapath, "meri5.his"))
+        meri5 = Histogram(get_shared_data( "meri5.his"))
         dist1 = Fit(meri5, Distribution("B", 0, 10, 0.437879))
         dist2 = meri5.fit(Distribution("B", 0, 10, 0.437879))
         assert str(dist1)==str(dist2)
@@ -153,7 +152,7 @@ class TestSelectHist:
     def __init__(self):
         pass
     def test_value_select_float(self):
-        meri1 = Histogram(pj(datapath,"meri1.his"))
+        meri1 = Histogram(get_shared_data("meri1.his"))
         # note keep=False is equivalent to Mode=keep,is this correct ?
         assert str(ValueSelect(meri1, 0, 10, Mode="Keep"))==\
             str(meri1.value_select( min=0, max=10, keep=True))
@@ -274,7 +273,7 @@ class TestExtractData():
 
     def test_histo_extract_data(self):
 
-        h = Histogram(pj(datapath,"meri2.his"))
+        h = Histogram(get_shared_data("meri2.his"))
         mixt = h.estimate_mixture(["B", "NB"])
         assert ExtractData(mixt)
         assert mixt.extract_data() == ExtractData(mixt)
@@ -333,7 +332,7 @@ class TestExtractHistogram:
 
     def test_mixture(self):
 
-        h = Histogram(pj(datapath,"meri2.his"))
+        h = Histogram(get_shared_data("meri2.his"))
         mixt = h.estimate_mixture(["B", "NB"])
 
         assert ExtractHistogram(mixt, "Weight") == \
@@ -391,11 +390,11 @@ class TestMerge(data):
         Plot(histo12)
 
     def test_merge_histo(self):
-        meri1 = Histogram(pj(datapath, "meri1.his"))
-        meri2 = Histogram(pj(datapath, "meri2.his"))
-        meri3 = Histogram(pj(datapath, "meri3.his"))
-        meri4 = Histogram(pj(datapath, "meri4.his"))
-        meri5 = Histogram(pj(datapath, "meri5.his"))
+        meri1 = Histogram(get_shared_data( "meri1.his"))
+        meri2 = Histogram(get_shared_data( "meri2.his"))
+        meri3 = Histogram(get_shared_data( "meri3.his"))
+        meri4 = Histogram(get_shared_data( "meri4.his"))
+        meri5 = Histogram(get_shared_data( "meri5.his"))
        
 
         meri = Merge(meri1, meri2, meri3, meri4, meri5)

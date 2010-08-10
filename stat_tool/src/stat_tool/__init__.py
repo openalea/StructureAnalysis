@@ -19,10 +19,11 @@ __revision__ = "$Id$"
 
 
 from openalea.deploy.shared_data import get_shared_data_path
-shared_data_path = get_shared_data_path(__path__)
 from os.path import join as pj
 
 def get_shared_data(file):
+    import openalea.stat_tool
+    shared_data_path = get_shared_data_path(openalea.stat_tool.__path__)
     return pj(shared_data_path, file)
 
 import _stat_tool

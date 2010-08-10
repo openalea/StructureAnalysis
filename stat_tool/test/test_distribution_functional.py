@@ -49,18 +49,17 @@ from openalea.stat_tool.data_transform import Merge, Shift, ExtractData
 from openalea.stat_tool.simulate import Simulate
 from openalea.stat_tool.cluster import Cluster
 
-from openalea.stat_tool import shared_data_path as data
-from  os.path import join as pj
+from openalea.stat_tool import get_shared_data
 
 plot.DISABLE_PLOT = DISABLE_PLOT
 
 
 def test():
-    meri1 = Histogram(pj(data, "meri1.his"))
-    meri2 = Histogram(pj(data, "meri2.his"))
-    meri3 = Histogram(pj(data, "meri3.his"))
-    meri4 = Histogram(pj(data, "meri4.his"))
-    meri5 = Histogram(pj(data, "meri5.his"))
+    meri1 = Histogram(get_shared_data("meri1.his"))
+    meri2 = Histogram(get_shared_data("meri2.his"))
+    meri3 = Histogram(get_shared_data("meri3.his"))
+    meri4 = Histogram(get_shared_data("meri4.his"))
+    meri5 = Histogram(get_shared_data("meri5.his"))
 
 
     Plot(meri1, meri2, meri3, meri4, meri5)
@@ -111,12 +110,12 @@ def test():
     Plot(histo5)
 
 
-    peup1 = Histogram(pj(data, "peup1.his"))
-    peup2 = Histogram(pj(data, "peup2.his"))
-    peup3 = Histogram(pj(data, "peup3.his"))
-    peup4 = Histogram(pj(data, "peup4.his"))
-    peup5 = Histogram(pj(data, "peup5.his"))
-    peup6 = Histogram(pj(data, "peup6.his"))
+    peup1 = Histogram(get_shared_data( "peup1.his"))
+    peup2 = Histogram(get_shared_data( "peup2.his"))
+    peup3 = Histogram(get_shared_data( "peup3.his"))
+    peup4 = Histogram(get_shared_data( "peup4.his"))
+    peup5 = Histogram(get_shared_data( "peup5.his"))
+    peup6 = Histogram(get_shared_data( "peup6.his"))
 
     _mixt10 = Estimate(peup2, "MIXTURE", "B", "NB", "NB", "NB",
                        NbComponent="Estimated")

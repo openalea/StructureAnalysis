@@ -13,8 +13,7 @@ from openalea.stat_tool.plot import DISABLE_PLOT
 
 from tools import runTestClass
 
-from openalea.stat_tool import shared_data_path as data
-from  os.path import join as pj
+from openalea.stat_tool import get_shared_data
 
 class Test:
     """a simple unittest class"""
@@ -32,7 +31,7 @@ class Test:
 
     def get_mixture_2(self):
         """create another mixture data"""
-        h = Histogram(pj(data,"meri2.his"))
+        h = Histogram(get_shared_data("meri2.his"))
         m = h.estimate_mixture("B", "NB")
         return m
 

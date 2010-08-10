@@ -21,8 +21,7 @@ from openalea.stat_tool.estimate import Estimate, likelihood_penalty_type
 from tools import runTestClass
 
 
-from openalea.stat_tool import shared_data_path as data
-from  os.path import join as pj
+from openalea.stat_tool import get_shared_data
 
 class Test():
 
@@ -30,19 +29,19 @@ class Test():
         pass
 
     def test_nonparametric(self):
-        h = Histogram(pj(data,"meri1.his"))
+        h = Histogram(get_shared_data("meri1.his"))
         e =  h.estimate_nonparametric()
         assert e
         # assert abs(e.likelihood() - VAL) < epsilon
 
     def test_nb(self):
         """NegativeBinomial"""
-        h = Histogram(pj(data,"peup2.his"))
+        h = Histogram(get_shared_data("peup2.his"))
         assert h.estimate_parametric('NB')
 
     def test_binomial(self):
         """BINOMIAL Distribution"""
-        h = Histogram(pj(data,"meri5.his"))
+        h = Histogram(get_shared_data("meri5.his"))
         assert h.estimate_parametric('B')
 
     def test_poisson(self):
@@ -57,7 +56,7 @@ class Test():
 
     def test_mixture_1(self):
         distributions = ["B", "NB", "NB", "NB"]
-        h = Histogram(pj(data, "peup2.his"))
+        h = Histogram(get_shared_data( "peup2.his"))
         m1 =  h.estimate_mixture(distributions, NbComponent="Estimated")
         assert m1
 
@@ -72,7 +71,7 @@ class Test():
         assert str(c)==str(m1)
 
     def test_mixture_2(self):
-        h = Histogram(pj(data, "peup2.his"))
+        h = Histogram(get_shared_data( "peup2.his"))
         m2 = h.estimate_mixture([Binomial(0, 10, 0.5), "NB"])
         assert m2
 

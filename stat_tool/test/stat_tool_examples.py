@@ -28,11 +28,8 @@ from openalea.stat_tool import ContingencyTable
 
 from openalea.sequence_analysis import Sequences
 
-from openalea.stat_tool import shared_data_path as data
-from  os.path import join as pj
+from openalea.stat_tool import get_shared_data
 
-#def Plot(*args, **kargs):
-#    return None
 
 dist0 = Distribution("NEGATIVE_BINOMIAL", 0, 1, 0.3)
 dist0 = Distribution("data//distribution1.dist")
@@ -76,11 +73,11 @@ histo8 = ValueSelect(fagus, 2, 8)
 dist3 = Estimate(fagus, "B")
 
 # comparison of histograms
-meri1 = Histogram(pj(data, "meri1.his"))
-meri2 = Histogram(pj(data, "meri2.his"))
-meri3 = Histogram(pj(data, "meri3.his"))
-meri4 = Histogram(pj(data, "meri4.his"))
-meri5 = Histogram(pj(data, "meri5.his"))
+meri1 = Histogram(get_shared_data( "meri1.his"))
+meri2 = Histogram(get_shared_data( "meri2.his"))
+meri3 = Histogram(get_shared_data( "meri3.his"))
+meri4 = Histogram(get_shared_data( "meri4.his"))
+meri5 = Histogram(get_shared_data( "meri5.his"))
 
 
 # Compare(meri1, meri2, meri3, meri4, meri5, "N", FileName="ASCII/meri.cmp")
@@ -206,7 +203,7 @@ cdist2 = Estimate(chisto1, "COMPOUND",
 histo31 = ExtractHistogram(ExtractData(cdist2), "Sum")
 histo32 = ToHistogram(ExtractDistribution(cdist2, "Sum"))
     
-peup1 = Histogram(pj(data, "peup1.his"))
+peup1 = Histogram(get_shared_data( "peup1.his"))
 mixt4 = Estimate(peup1, "MIXTURE", "B", "NB")
 histo33 = ToHistogram(ExtractDistribution(mixt4, "Component", 2))
 histo34 = Shift(histo33, -11)

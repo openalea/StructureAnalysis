@@ -11,8 +11,7 @@ from openalea.stat_tool.plot import DISABLE_PLOT
 
 from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 from openalea.stat_tool.vectors import _Vectors
-from openalea.stat_tool.distribution import Binomial
-from openalea.stat_tool.distribution import Poisson
+from openalea.stat_tool.distribution import Binomial, Poisson
 
 from tools import interface
 from tools import runTestClass
@@ -110,7 +109,7 @@ class Test(interface):
         assert m_estim_nbcomp
         return m, v
 
-    def test_permutation(self):
+    def _test_permutation(self):
         data1 = self.data
 
         data2 = _MultivariateMixture(data1)

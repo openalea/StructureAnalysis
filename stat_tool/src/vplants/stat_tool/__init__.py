@@ -1,6 +1,11 @@
 # Redirect path
 import os
-import openalea.stat_tool
 
-__path__ = openalea.stat_tool.__path__ + __path__[:]
-from openalea.stat_tool.__init__ import *
+cdir = os.path.dirname(__file__)
+pdir = os.path.join(cdir, "../../stat_tool")
+pdir = os.path.abspath(pdir)
+
+__path__ = [pdir] + __path__[:]
+
+from vplants.stat_tool.__init__ import *
+
