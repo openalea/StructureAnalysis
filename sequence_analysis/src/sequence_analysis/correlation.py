@@ -21,18 +21,18 @@ from openalea.stat_tool._stat_tool import I_DEFAULT
 from openalea.stat_tool._stat_tool import _DiscreteParametricModel, _Mixture, \
     _Convolution, _Compound
 
-from _sequence_analysis import _Correlation
-from _sequence_analysis import _NonHomogeneousMarkovData
-from _sequence_analysis import _HiddenVariableOrderMarkov
-from _sequence_analysis import _VariableOrderMarkovData
-from _sequence_analysis import _SemiMarkovData
-from _sequence_analysis import _Sequences
-from _sequence_analysis import _MarkovianSequences
-from _sequence_analysis import _VariableOrderMarkov
+from openalea.sequence_analysis._sequence_analysis import _Correlation
+from openalea.sequence_analysis._sequence_analysis import _NonHomogeneousMarkovData
+from openalea.sequence_analysis._sequence_analysis import _HiddenVariableOrderMarkov
+from openalea.sequence_analysis._sequence_analysis import _VariableOrderMarkovData
+from openalea.sequence_analysis._sequence_analysis import _SemiMarkovData
+from openalea.sequence_analysis._sequence_analysis import _Sequences
+from openalea.sequence_analysis._sequence_analysis import _MarkovianSequences
+from openalea.sequence_analysis._sequence_analysis import _VariableOrderMarkov
 
 
-from enums import type_dict, norm_type
-from data_transform import _check_nb_variable
+from openalea.sequence_analysis.enums import type_dict, norm_type
+from openalea.sequence_analysis.data_transform import _check_nb_variable
 from openalea.stat_tool import error
 
 from openalea.sequence_analysis._sequence_analysis import MAX_LAG

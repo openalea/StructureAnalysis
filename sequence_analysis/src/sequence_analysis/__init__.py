@@ -2,7 +2,7 @@
 __revision__ = "$Id$"
 
 from openalea.stat_tool import *
-from openalea.stat_tool._stat_tool import *
+#import openalea.stat_tool._stat_tool
 
 from openalea.deploy.shared_data import get_shared_data_path
 from os.path import join as pj
@@ -15,7 +15,6 @@ def get_shared_data(file):
 
 
 
-import _sequence_analysis
 
 import openalea.stat_tool.interface as interface
 

@@ -14,10 +14,11 @@
 """
 __version__ = "$Id$"
 
-from openalea.stat_tool._stat_tool import GraphicalType
+#from openalea.stat_tool._stat_tool import GraphicalType
+from openalea.sequence_analysis._sequence_analysis import *
 
-import openalea.stat_tool._stat_tool as _stat_tool
-from openalea.sequence_analysis import _sequence_analysis
+from openalea.stat_tool import  _stat_tool
+#import openalea.sequence_analysis._sequence_analysis as _sequence_analysis
 
 import openalea.stat_tool.enums as enumerate_st
 
@@ -29,26 +30,26 @@ type_dict = enumerate_st.pearson_type
 
 
 
-norm_type = {"Approximated": _sequence_analysis.NormType.APPROXIMATED,
-             "Exact": _sequence_analysis.NormType.EXACT }
+norm_type = {"Approximated": NormType.APPROXIMATED,
+             "Exact": NormType.EXACT }
 
 # not complete !! see MarkovianSequnece
 markovian_sequence_type = {
-    "SelfTransition": _sequence_analysis.MarkovianSequenceType.SELF_TRANSITION,
-    "Observation": _sequence_analysis.MarkovianSequenceType.OBSERVATION,
-    "Counting": _sequence_analysis.MarkovianSequenceType.COUNTING,
-    "Intensity": _sequence_analysis.MarkovianSequenceType.INTENSITY,
-    "Recurrence": _sequence_analysis.MarkovianSequenceType.RECURRENCE_TIME,
-    "Sojourn": _sequence_analysis.MarkovianSequenceType.SOJOURN_TIME,
-    "InitialRun": _sequence_analysis.MarkovianSequenceType.INITIAL_RUN,
-    "FinalRun": _sequence_analysis.MarkovianSequenceType.FINAL_RUN,
-    "Length": _sequence_analysis.MarkovianSequenceType.LENGTH,
-    "NbRun": _sequence_analysis.MarkovianSequenceType.NB_RUN,
-    "NbOccurrence": _sequence_analysis.MarkovianSequenceType.NB_OCCURRENCE,
+    "SelfTransition": MarkovianSequenceType.SELF_TRANSITION,
+    "Observation": MarkovianSequenceType.OBSERVATION,
+    "Counting": MarkovianSequenceType.COUNTING,
+    "Intensity": MarkovianSequenceType.INTENSITY,
+    "Recurrence": MarkovianSequenceType.RECURRENCE_TIME,
+    "Sojourn": MarkovianSequenceType.SOJOURN_TIME,
+    "InitialRun": MarkovianSequenceType.INITIAL_RUN,
+    "FinalRun": MarkovianSequenceType.FINAL_RUN,
+    "Length": MarkovianSequenceType.LENGTH,
+    "NbRun": MarkovianSequenceType.NB_RUN,
+    "NbOccurrence": MarkovianSequenceType.NB_OCCURRENCE,
     "FirstOccurrence": \
-        _sequence_analysis.MarkovianSequenceType.FIRST_OCCURRENCE,
-    "Mean": _sequence_analysis.MarkovianSequenceType.SEQUENCE_MEAN,
-    "Cumul": _sequence_analysis.MarkovianSequenceType.SEQUENCE_CUMUL
+        MarkovianSequenceType.FIRST_OCCURRENCE,
+    "Mean": MarkovianSequenceType.SEQUENCE_MEAN,
+    "Cumul": MarkovianSequenceType.SEQUENCE_CUMUL
         }
 
 
@@ -57,55 +58,55 @@ mode_type = enumerate_st.round_type
 
 
 #constants: 
-NB_STATE_SEQUENCE = _sequence_analysis.NB_STATE_SEQUENCE
-NB_SEGMENTATION = _sequence_analysis.NB_SEGMENTATION
+NB_STATE_SEQUENCE = NB_STATE_SEQUENCE
+NB_SEGMENTATION = NB_SEGMENTATION
 
 
-INTER_EVENT = _sequence_analysis.RenewalType.INTER_EVENT
+INTER_EVENT = RenewalType.INTER_EVENT
 WITHIN_OBSERVATION_PERIOD =  \
-    _sequence_analysis.RenewalType.WITHIN_OBSERVATION_PERIOD
-LENGTH_BIAS =  _sequence_analysis.RenewalType.LENGTH_BIAS
+    RenewalType.WITHIN_OBSERVATION_PERIOD
+LENGTH_BIAS =  RenewalType.LENGTH_BIAS
 BACKWARD_RECURRENCE_TIME = \
-    _sequence_analysis.RenewalType.BACKWARD_RECURRENCE_TIME
-FORWARD_RECURRENCE_TIME = _sequence_analysis.RenewalType.FORWARD_RECURRENCE_TIME
-NB_EVENT = _sequence_analysis.RenewalType.NB_EVENT
-MIXTURE = _sequence_analysis.RenewalType.MIXTURE
+    RenewalType.BACKWARD_RECURRENCE_TIME
+FORWARD_RECURRENCE_TIME = RenewalType.FORWARD_RECURRENCE_TIME
+NB_EVENT = RenewalType.NB_EVENT
+MIXTURE = RenewalType.MIXTURE
 
 renewal_nb_event_map = {
-    "InterEvent":   _sequence_analysis.RenewalType.INTER_EVENT,
-    "LengthBias":   _sequence_analysis.RenewalType.LENGTH_BIAS,
-    "Backward":     _sequence_analysis.RenewalType.BACKWARD_RECURRENCE_TIME,
-    "Forward":      _sequence_analysis.RenewalType.FORWARD_RECURRENCE_TIME,
-    "Mixture":      _sequence_analysis.RenewalType.MIXTURE,
-    "Within":       _sequence_analysis.RenewalType.WITHIN_OBSERVATION_PERIOD,
-    "NbEvent":      _sequence_analysis.RenewalType.NB_EVENT,
+    "InterEvent":   RenewalType.INTER_EVENT,
+    "LengthBias":   RenewalType.LENGTH_BIAS,
+    "Backward":     RenewalType.BACKWARD_RECURRENCE_TIME,
+    "Forward":      RenewalType.FORWARD_RECURRENCE_TIME,
+    "Mixture":      RenewalType.MIXTURE,
+    "Within":       RenewalType.WITHIN_OBSERVATION_PERIOD,
+    "NbEvent":      RenewalType.NB_EVENT,
                         }
 
 sub_func_map = {
-    "Sequence": _sequence_analysis.OutputType.SEQUENCE,
-    "SubtractionResidual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL ,
-    "DivisionResidual":_sequence_analysis.OutputType.DIVISION_RESIDUAL,
-    "Residual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL,
+    "Sequence": OutputType.SEQUENCE,
+    "SubtractionResidual": OutputType.SUBTRACTION_RESIDUAL ,
+    "DivisionResidual":OutputType.DIVISION_RESIDUAL,
+    "Residual": OutputType.SUBTRACTION_RESIDUAL,
 
     }
 func_map = {
-    "Sequence": _sequence_analysis.OutputType.SEQUENCE,
-    "Trend": _sequence_analysis.OutputType.TREND,
-    "SubtractionResidual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL ,
-    "Residual": _sequence_analysis.OutputType.SUBTRACTION_RESIDUAL,
-    "DivisionResidual":_sequence_analysis.OutputType.DIVISION_RESIDUAL,
-    "StandardizedResidual": _sequence_analysis.OutputType.STANDARDIZED_RESIDUAL
+    "Sequence": OutputType.SEQUENCE,
+    "Trend": OutputType.TREND,
+    "SubtractionResidual": OutputType.SUBTRACTION_RESIDUAL ,
+    "Residual": OutputType.SUBTRACTION_RESIDUAL,
+    "DivisionResidual":OutputType.DIVISION_RESIDUAL,
+    "StandardizedResidual": OutputType.STANDARDIZED_RESIDUAL
     }
 #todo: simplify
 output_sequence_map = func_map
 output_map = func_map
 
 estimator_map = {
-    "MaximumLikelihood": _sequence_analysis.Estimator.MAXIMUM_LIKELIHOOD,
-    "Laplace": _sequence_analysis.Estimator.LAPLACE,
-    "AdaptativeLaplace": _sequence_analysis.Estimator.ADAPTATIVE_LAPLACE,
-    "UniformSubset": _sequence_analysis.Estimator.UNIFORM_SUBSET,
-    "UniformCardinality": _sequence_analysis.Estimator.UNIFORM_CARDINALITY
+    "MaximumLikelihood": Estimator.MAXIMUM_LIKELIHOOD,
+    "Laplace": Estimator.LAPLACE,
+    "AdaptativeLaplace": Estimator.ADAPTATIVE_LAPLACE,
+    "UniformSubset": Estimator.UNIFORM_SUBSET,
+    "UniformCardinality": Estimator.UNIFORM_CARDINALITY
     }
 estimator = estimator_map
 
@@ -118,12 +119,12 @@ STANDARDIZED_RESIDUAL = 2
 
 
 seq_map = {
-            "Observation":      GraphicalType.OBSERVATION,
-            "FirstOccurrence":  GraphicalType.FIRST_OCCURRENCE,
-            "Recurrence":       GraphicalType.RECURRENCE_TIME,
-            "Sojourn":          GraphicalType.SOJOURN_TIME,
-            "NbRun":            GraphicalType.NB_RUN,
-            "NbOccurrence":     GraphicalType.NB_OCCURRENCE,
+            "Observation":      _stat_tool.GraphicalType.OBSERVATION,
+            "FirstOccurrence":  _stat_tool.GraphicalType.FIRST_OCCURRENCE,
+            "Recurrence":       _stat_tool.GraphicalType.RECURRENCE_TIME,
+            "Sojourn":          _stat_tool.GraphicalType.SOJOURN_TIME,
+            "NbRun":            _stat_tool.GraphicalType.NB_RUN,
+            "NbOccurrence":     _stat_tool.GraphicalType.NB_OCCURRENCE,
             "Forward": -1}
 
 _INITIAL_RUN = 4
@@ -138,30 +139,30 @@ histogram_type = {
                   }
 
 model_type = {
-              "Multinomial": _sequence_analysis.ChangeType.MULTINOMIAL_CHANGE,
-              "Poisson": _sequence_analysis.ChangeType.POISSON_CHANGE,
-              "Ordinal": _sequence_analysis.ChangeType.ORDINAL_GAUSSIAN_CHANGE,
-              "Gaussian": _sequence_analysis.ChangeType.GAUSSIAN_CHANGE,
-              "Mean": _sequence_analysis.ChangeType.MEAN_CHANGE,
-              "Variance": _sequence_analysis.ChangeType.VARIANCE_CHANGE,
-              "MeanVariance": _sequence_analysis.ChangeType.MEAN_VARIANCE_CHANGE
+              "Multinomial": ChangeType.MULTINOMIAL_CHANGE,
+              "Poisson": ChangeType.POISSON_CHANGE,
+              "Ordinal": ChangeType.ORDINAL_GAUSSIAN_CHANGE,
+              "Gaussian": ChangeType.GAUSSIAN_CHANGE,
+              "Mean": ChangeType.MEAN_CHANGE,
+              "Variance": ChangeType.VARIANCE_CHANGE,
+              "MeanVariance": ChangeType.MEAN_VARIANCE_CHANGE
               }
 
 # todo:: ckean the 2 next enums ?
 type_map = {
-            "INT": _sequence_analysis.INT_VALUE,
-            "REAL" : _sequence_analysis.REAL_VALUE,
-            "STATE": _sequence_analysis.STATE,
-            "NB_INTERNODE":  _sequence_analysis.NB_INTERNODE,
-            "AUXILIARY":  _sequence_analysis.AUXILIARY,
+            "INT": INT_VALUE,
+            "REAL" : REAL_VALUE,
+            "STATE": STATE,
+            "NB_INTERNODE":  NB_INTERNODE,
+            "AUXILIARY":  AUXILIARY,
             }
 
 index_parameter_type_map = {
-        "IMPLICIT_TYPE": _sequence_analysis.IMPLICIT_TYPE,
-        "TIME": _sequence_analysis.TIME,
-        "TIME_INTERVAL": _sequence_analysis.TIME_INTERVAL,
-        "POSITION": _sequence_analysis.POSITION,
-        "POSITION_INTERVAL": _sequence_analysis.POSITION_INTERVAL
+        "IMPLICIT_TYPE": IMPLICIT_TYPE,
+        "TIME": TIME,
+        "TIME_INTERVAL": TIME_INTERVAL,
+        "POSITION": POSITION,
+        "POSITION_INTERVAL": POSITION_INTERVAL
         }
 
 
@@ -196,12 +197,12 @@ sub_markovian_algorithms_2 = {
 
 
 algorithm = {
-    'CTM_BIC': _sequence_analysis.Algorithm.CTM_BIC ,
-    'BIC': _sequence_analysis.Algorithm.CTM_BIC ,
-    'CTM_KT': _sequence_analysis.Algorithm.CTM_KT,
-    'KT': _sequence_analysis.Algorithm.CTM_KT,
-    'LocalBIC': _sequence_analysis.Algorithm.LOCAL_BIC,
-    'Context': _sequence_analysis.Algorithm.CONTEXT
+    'CTM_BIC': Algorithm.CTM_BIC ,
+    'BIC': Algorithm.CTM_BIC ,
+    'CTM_KT': Algorithm.CTM_KT,
+    'KT': Algorithm.CTM_KT,
+    'LocalBIC': Algorithm.LOCAL_BIC,
+    'Context': Algorithm.CONTEXT
 }
 
 
@@ -239,16 +240,16 @@ ident_map = {
              }
 
 output_type = {
-               "ChangePoint" : _sequence_analysis.ChangePointType.CHANGE_POINT,
-               "Segment" : _sequence_analysis.ChangePointType.SEGMENT
+               "ChangePoint" : ChangePointType.CHANGE_POINT,
+               "Segment" : ChangePointType.SEGMENT
                }
 
 output_display = {
-               "ChangePoint" : _sequence_analysis.ChangePointType.CHANGE_POINT,
-               "Segment" : _sequence_analysis.ChangePointType.SEGMENT,
-               "State" : _sequence_analysis.SemiMarkovState.SSTATE,
-               "InState" : _sequence_analysis.SemiMarkovState.IN_STATE,
-               "OutState" : _sequence_analysis.SemiMarkovState.OUT_STATE
+               "ChangePoint" : ChangePointType.CHANGE_POINT,
+               "Segment" : ChangePointType.SEGMENT,
+               "State" : SemiMarkovState.SSTATE,
+               "InState" : SemiMarkovState.IN_STATE,
+               "OutState" : SemiMarkovState.OUT_STATE
             }
 
 
@@ -308,8 +309,8 @@ output_sequence = {
                    "Sequences": 's'
                    }
 
-indel_cost_map = {"Adaptative": _sequence_analysis.IndelCost.ADAPTATIVE,
-                     "Fixed": _sequence_analysis.IndelCost.FIXED}
+indel_cost_map = {"Adaptative": IndelCost.ADAPTATIVE,
+                     "Fixed": IndelCost.FIXED}
 
 
 all_sequences_types = [ _VariableOrderMarkov,
