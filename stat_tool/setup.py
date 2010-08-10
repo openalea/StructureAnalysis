@@ -53,10 +53,11 @@ if __name__ == '__main__':
 
           # Packages
           packages=['openalea.stat_tool', 
-                    'vplants',
+                    'vplants.stat_tool', 
+                    'openalea',
                     ],
 
-          package_dir={ "" : "src"  },
+          package_dir={ "vplants.plantik" : "src/plantik", '':'src'  },
           share_dirs = { 'share' : 'share' },
 
 
