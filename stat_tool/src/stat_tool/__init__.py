@@ -1,3 +1,4 @@
+from distribution import *
 from histogram import *
 from mixture import *
 from multivariate_mixture import *
@@ -8,13 +9,13 @@ from estimate import *
 from simulate import *
 from comparison import *
 from regression import *
-
-
 from output import  *
 from data_transform import *
 from cluster import *
-
-
+from enums import *
+from plot import *
+from plot import *
+from error import *
 
 from openalea.deploy.shared_data import get_shared_data_path
 from os.path import join as pj
