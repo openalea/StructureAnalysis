@@ -26,5 +26,5 @@ env.AppendUnique(LIBS=LIBS)
 env.AppendUnique(CPPDEFINES=['MESSAGE'])
 env.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence'])
 
-env.ALEAWrapper("../openalea/sequence_analysis", "_sequence_analysis", sources)
+env.ALEAWrapper("../sequence_analysis", "_sequence_analysis", sources)
 

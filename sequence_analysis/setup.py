@@ -53,19 +53,14 @@ if __name__ == '__main__':
           # Packages
           packages=[ 
                     'openalea.sequence_analysis',
+                    'vplants.sequence_analysis',
                     'sequence_analysis_wralea.demo.change_point', 
                     'sequence_analysis_wralea.demo.stat_tool_tutorial', 
                     'sequence_analysis_wralea', 
                     'vplants',
                     ],
-          
 
-           #package_dir={'openalea.sequence_analysis' : 'src/openalea/sequence_analysis',
-                       #'' : 'build/lib', # hack to use develop command
-#                       },
-
-#          package_dir={ "" : "src", vplants':'src/vplants/sequence_analysis' },
-          package_dir={ "" : "src",  },
+          package_dir={ "vplants.sequence_analysis" : "src/sequence_analysis",  '':'src'},
           share_dirs = { 'share' : 'share' },
 
 

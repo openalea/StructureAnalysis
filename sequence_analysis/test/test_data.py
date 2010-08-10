@@ -1,7 +1,6 @@
-from openalea.sequence_analysis.data import path
-from os.path import join as pj
+from openalea.sequence_analysis import get_shared_data
 
 
-def test_read_data():
+def test_get_shared_data():
     from openalea.sequence_analysis.sequences import Sequences
-    seq = Sequences(pj(path , 'sequences_tutorial.dat'))
+    seq = Sequences(get_shared_data('wij1.seq'))

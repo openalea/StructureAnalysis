@@ -15,9 +15,9 @@ from openalea.stat_tool.data_transform import ValueSelect, ExtractHistogram
 from openalea.sequence_analysis.estimate import Estimate
 from openalea.sequence_analysis.data_transform import Thresholding
 
-from openalea.sequence_analysis.data import path
+from openalea.sequence_analysis import get_shared_data
 from tools import runTestClass
-from os.path import join as pj
+
 
 class _Compare():
     """
@@ -41,7 +41,7 @@ class Test_Compare_Histograms(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        seq0 = Sequences(pj(path, "chene_sessile_15pa.seq"))
+        seq0 = Sequences(get_shared_data( "chene_sessile_15pa.seq"))
         vec10 = Vectors(seq0)
         vec95 = ValueSelect(vec10, 1, 95)
         vec96 = ValueSelect(vec10, 1, 96)
@@ -63,7 +63,7 @@ class Test_Compare_Sequences(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        seq = Sequences(pj(path, 'dupreziana_a1.seq'))
+        seq = Sequences(get_shared_data( 'dupreziana_a1.seq'))
         return seq
 
     def test_compare(self):
@@ -79,7 +79,7 @@ class Test_Compare_Sequences_VectorDistance(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        seq = Sequences(pj(path, 'dupreziana_a1.seq'))
+        seq = Sequences(get_shared_data( 'dupreziana_a1.seq'))
         return seq
 
     def test_compare(self):
@@ -114,10 +114,10 @@ class Test_Compare_hsmc_with_sequences(_Compare):
         self.data = self.create_data()
 
     def create_data(self):
-        hsmc0 = HiddenSemiMarkov(pj(path , "belren1.hsc"))
-        hsmc1 = HiddenSemiMarkov(pj(path ,"elstar1.hsc"))
-        seq0 = Sequences(pj(path , "belren1.seq"))
-        seq1 = Sequences(pj(path , "elstar1.seq"))
+        hsmc0 = HiddenSemiMarkov(get_shared_data( "belren1.hsc"))
+        hsmc1 = HiddenSemiMarkov(get_shared_data("elstar1.hsc"))
+        seq0 = Sequences(get_shared_data( "belren1.seq"))
+        seq1 = Sequences(get_shared_data( "elstar1.seq"))
         data0 = Estimate(seq0, "HIDDEN_SEMI-MARKOV", hsmc0)
         data1 = Estimate(seq1, "HIDDEN_SEMI-MARKOV", hsmc1)
         return [seq0, seq1, data0, data1]

@@ -1,6 +1,11 @@
 # Redirect path
 import os
-import openalea.sequence_analysis
 
-__path__ = openalea.sequence_analysis.__path__ + __path__[:]
-from openalea.sequence_analysis.__init__ import *
+cdir = os.path.dirname(__file__)
+pdir = os.path.join(cdir, "../../sequence_analysis")
+pdir = os.path.abspath(pdir)
+
+__path__ = [pdir] + __path__[:]
+
+from vplants.sequence_analysis.__init__ import *
+

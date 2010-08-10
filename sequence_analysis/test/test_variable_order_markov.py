@@ -19,9 +19,7 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 from tools import interface
 from tools import runTestClass
 
-from openalea.sequence_analysis.data import path
-
-from data import files
+from openalea.sequence_analysis import get_shared_data
 
 def VariableOrderMarkovData():
     sm =  VariableOrderMarkov('data/variable_order_markov.dat')
@@ -40,7 +38,7 @@ class Test(interface):
                            VariableOrderMarkov)
 
     def build_data(self):
-        seq = Sequences(files["belren1.seq"])
+        seq = Sequences(get_shared_data("belren1.seq"))
         vom = Estimate(seq, "VARIABLE_ORDER_MARKOV", "Ordinary",
                         MaxOrder=4, GlobalInitialTransition=False)
 

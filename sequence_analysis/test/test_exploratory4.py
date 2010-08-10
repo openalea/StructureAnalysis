@@ -21,11 +21,10 @@ __revision__ = "$Id$"
 
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare
-from openalea.sequence_analysis.data import path
-from os.path import join as pj
+from openalea.sequence_analysis import get_shared_data
 
 
-seq1 = Sequences(pj(path, "dupreziana_a1.seq"))
+seq1 = Sequences(get_shared_data( "dupreziana_a1.seq"))
 
 Display(seq1, ViewPoint="Data", Format="Line")
 

@@ -16,9 +16,7 @@ from openalea.stat_tool.compound import Compound
 from openalea.stat_tool.vectors import Vectors
 
 from tools import runTestClass
-from openalea.sequence_analysis.data import path
-from os.path import join as pj
-
+from openalea.sequence_analysis import get_shared_data
 
 class _Cluster():
     """Test class to test cluster function and classes
@@ -73,7 +71,7 @@ class TestHistogram(_HistoCase):
         self.data = self.create_data()
 
     def create_data(self):
-        return Histogram(pj(path , 'fagus1.his'))
+        return Histogram(get_shared_data( 'fagus1.his'))
 
 
 class TestConvolution( _HistoCase):

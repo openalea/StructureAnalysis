@@ -20,16 +20,14 @@
 """
 __revision__ = "$Id$"
 from openalea.sequence_analysis import *
-from openalea.sequence_analysis.data import path
-from data import files
+from openalea.sequence_analysis import get_shared_data
 
-
-seq20 = Sequences(files["belren1.seq"])
-seq21 = Sequences(files["elstar1.seq"])
-seq22 = Sequences(files["fuji1.seq"])
-seq23 = Sequences(files["gala1.seq"])
-seq24 = Sequences(files["granny1.seq"])
-seq25 = Sequences(files["reinet1.seq"])
+seq20 = Sequences(get_shared_data("belren1.seq"))
+seq21 = Sequences(get_shared_data("elstar1.seq"))
+seq22 = Sequences(get_shared_data("fuji1.seq"))
+seq23 = Sequences(get_shared_data("gala1.seq"))
+seq24 = Sequences(get_shared_data("granny1.seq"))
+seq25 = Sequences(get_shared_data("reinet1.seq"))
 
 Display(seq25, ViewPoint="Data")
 Plot(seq25, "Intensity")

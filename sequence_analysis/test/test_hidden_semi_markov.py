@@ -20,12 +20,11 @@ from openalea.stat_tool.cluster import Transcode, Cluster
 from tools import interface
 from tools import runTestClass
 
-from openalea.sequence_analysis.data import path
+from openalea.sequence_analysis import get_shared_data
 import os
-from os.path import join as pj
 
 def HiddenSemiMarkovData():
-     hsm = HiddenSemiMarkov(pj(path, "wij1.hsc"))
+     hsm = HiddenSemiMarkov(get_shared_data( "wij1.hsc"))
      return hsm
 
 

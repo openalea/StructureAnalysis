@@ -3,9 +3,17 @@ __revision__ = "$Id$"
 
 from openalea.stat_tool import *
 from openalea.stat_tool._stat_tool import *
-#must be after from openalea_stat_tool import *
+
 from openalea.deploy.shared_data import get_shared_data_path
-shared_data_path = get_shared_data_path(__path__)
+from os.path import join as pj
+
+def get_shared_data(file):
+    import openalea.sequence_analysis
+    shared_data_path = get_shared_data_path(openalea.sequence_analysis.__path__)
+    return pj(shared_data_path, file)
+
+
+
 
 import _sequence_analysis
 

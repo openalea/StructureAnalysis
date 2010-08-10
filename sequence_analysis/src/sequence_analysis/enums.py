@@ -17,7 +17,7 @@ __version__ = "$Id$"
 from openalea.stat_tool._stat_tool import GraphicalType
 
 import openalea.stat_tool._stat_tool as _stat_tool
-from openalea.sequence_analysis import _sequence_analysis as _sequence_analysis
+from openalea.sequence_analysis import _sequence_analysis
 
 import openalea.stat_tool.enums as enumerate_st
 

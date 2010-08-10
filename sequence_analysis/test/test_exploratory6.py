@@ -22,10 +22,9 @@ __revision__ = "$Id$"
 
 from openalea.sequence_analysis import *
 from openalea.sequence_analysis.compare import Compare as Compare
-from openalea.sequence_analysis.data import path
-from os.path import join as pj
+from openalea.sequence_analysis import get_shared_data
 
-seq66 = Sequences(pj(path,"laricio_date66.seq"))
+seq66 = Sequences(get_shared_data("laricio_date66.seq"))
 Plot(seq66, ViewPoint="Data")
 #Plot(Cumulate(seq66), ViewPoint="Data")
 
@@ -90,6 +89,6 @@ acf13 = Merge(ComputeCorrelation(seq71, 2, MaxLag=10, Normalization="Exact"),\
 ComputeWhiteNoiseCorrelation(acf13, [1, 1, 1])
 Plot(acf13)
 
-seq80 = Sequences(pj(path, "laricio_position66.seq"), OldFormat=True)
+seq80 = Sequences(get_shared_data( "laricio_position66.seq"), OldFormat=True)
 
 #Plot(Cumulate(seq80), ViewPoint="Data")
