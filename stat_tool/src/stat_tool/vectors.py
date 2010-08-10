@@ -20,13 +20,13 @@ import error
 
 from openalea.stat_tool.multivariate_mixture import _MultivariateMixture
 
-from _stat_tool import _Vectors
-from _stat_tool import _VectorDistance
-from _stat_tool import I_DEFAULT
-from enums import format_type
-from enums import variable_type
-from enums import variance_type
-from enums import distance_type
+from openalea.stat_tool._stat_tool import _Vectors
+from openalea.stat_tool._stat_tool import _VectorDistance
+from openalea.stat_tool._stat_tool import I_DEFAULT
+from openalea.stat_tool.enums import format_type
+from openalea.stat_tool.enums import variable_type
+from openalea.stat_tool.enums import variance_type
+from openalea.stat_tool.enums import distance_type
 
 __all__ = ['Vectors',
            '_Vectors',

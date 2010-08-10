@@ -22,7 +22,7 @@
 __revision__ = "$Id$"
 
 import error
-from _stat_tool import \
+from openalea.stat_tool._stat_tool import \
      _Mixture, \
      _MixtureData, \
      _Compound, \

@@ -21,8 +21,8 @@ import interface
 import error
 
 
-from _stat_tool import _MultivariateMixture
-from _stat_tool import _MultivariateMixtureData
+from openalea.stat_tool._stat_tool import _MultivariateMixture
+from openalea.stat_tool._stat_tool import _MultivariateMixtureData
 
 __all__ = ['_MultivariateMixture',
            '_MultivariateMixtureData']

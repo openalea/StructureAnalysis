@@ -52,9 +52,9 @@ if __name__ == '__main__':
           create_namespaces=True,
 
           # Packages
-          packages=['openalea.stat_tool', 
+          packages=['openalea', 
+                    'openalea.stat_tool', 
                     'vplants.stat_tool', 
-                    'openalea',
                     ],
 
           package_dir={ "vplants.stat_tool" : "src/stat_tool", '':'src'  },

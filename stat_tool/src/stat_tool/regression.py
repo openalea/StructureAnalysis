@@ -18,12 +18,12 @@ import error
 import interface
 
 
-from _stat_tool import _Regression
-from _stat_tool import _Vectors
-from _stat_tool import _DiscreteParametricModel
-from _stat_tool import _Compound
-from _stat_tool import _Convolution
-from _stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _Regression
+from openalea.stat_tool._stat_tool import _Vectors
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel
+from openalea.stat_tool._stat_tool import _Compound
+from openalea.stat_tool._stat_tool import _Convolution
+from openalea.stat_tool._stat_tool import _Mixture
 
 
 from enums import algo_map

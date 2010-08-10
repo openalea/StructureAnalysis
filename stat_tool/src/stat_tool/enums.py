@@ -7,9 +7,9 @@
 """
 __version__ = "$Id$"
 
-import _stat_tool
+from openalea.stat_tool._stat_tool import *
 
-from _stat_tool import _FrequencyDistribution, _MixtureData, \
+from openalea.stat_tool._stat_tool import _FrequencyDistribution, _MixtureData, \
     _CompoundData,_ConvolutionData, _DiscreteDistributionData, _Mixture, \
     _Compound, _Convolution, _DiscreteParametricModel, _Distribution, \
     _Vectors, _Cluster, _DistanceMatrix, _VectorDistance, _Regression, \
@@ -18,88 +18,88 @@ from _stat_tool import _FrequencyDistribution, _MixtureData, \
 
 # map to enumerate in boost python
 criterion_type = {
-    "NearestNeighbor":  _stat_tool.CriterionType.NEAREST_NEIGHBOR,
-    "FarthestNeighbor": _stat_tool.CriterionType.FARTHEST_NEIGHBOR,
-    "Averaging":        _stat_tool.CriterionType.AVERAGING,
+    "NearestNeighbor":  CriterionType.NEAREST_NEIGHBOR,
+    "FarthestNeighbor": CriterionType.FARTHEST_NEIGHBOR,
+    "Averaging":        CriterionType.AVERAGING,
     }
 
 distance_type = {
-    "ABSOLUTE_VALUE":   _stat_tool.DistanceType.ABSOLUTE_VALUE,
-    "QUADRATIC":        _stat_tool.DistanceType.QUADRATIC
+    "ABSOLUTE_VALUE":   DistanceType.ABSOLUTE_VALUE,
+    "QUADRATIC":        DistanceType.QUADRATIC
     }
 
 fitting_type = {
-    "STANDARD_NORMAL": _stat_tool.FittingType.STANDARD_NORMAL,
-    "CHI2": _stat_tool.FittingType.CHI2,
-    "FISHER": _stat_tool.FittingType.FISHER,
-    "STUDENT": _stat_tool.FittingType.STUDENT
+    "STANDARD_NORMAL": FittingType.STANDARD_NORMAL,
+    "CHI2": FittingType.CHI2,
+    "FISHER": FittingType.FISHER,
+    "STUDENT": FittingType.STUDENT
     }
 
 round_type = {
-    "FLOOR":_stat_tool.RoundType.FLOOR,
-    "ROUND":_stat_tool.RoundType.ROUND,
-    "CEIL":_stat_tool.RoundType.CEIL
+    "FLOOR": RoundType.FLOOR,
+    "ROUND": RoundType.ROUND,
+    "CEIL": RoundType.CEIL
     }
 
 distribution_identifier_type = {
-    "B":                _stat_tool.DistributionIdentifierType.BINOMIAL,
-    "BINOMIAL":         _stat_tool.DistributionIdentifierType.BINOMIAL,
-    "P":                _stat_tool.DistributionIdentifierType.POISSON,
-    "POISSON":          _stat_tool.DistributionIdentifierType.POISSON,
-    "NB":               _stat_tool.DistributionIdentifierType.NEGATIVE_BINOMIAL,
-    "NEGATIVE_BINOMIAL":_stat_tool.DistributionIdentifierType.NEGATIVE_BINOMIAL,
-    "U": _stat_tool.DistributionIdentifierType.UNIFORM,
-    "UNIFORM": _stat_tool.DistributionIdentifierType.UNIFORM,
-    "M": _stat_tool.DistributionIdentifierType.MULTINOMIAL,
-    "MULTINOMIAL": _stat_tool.DistributionIdentifierType.MULTINOMIAL,
+    "B":                DistributionIdentifierType.BINOMIAL,
+    "BINOMIAL":         DistributionIdentifierType.BINOMIAL,
+    "P":                DistributionIdentifierType.POISSON,
+    "POISSON":          DistributionIdentifierType.POISSON,
+    "NB":               DistributionIdentifierType.NEGATIVE_BINOMIAL,
+    "NEGATIVE_BINOMIAL": DistributionIdentifierType.NEGATIVE_BINOMIAL,
+    "U": DistributionIdentifierType.UNIFORM,
+    "UNIFORM": DistributionIdentifierType.UNIFORM,
+    "M": DistributionIdentifierType.MULTINOMIAL,
+    "MULTINOMIAL": DistributionIdentifierType.MULTINOMIAL,
     }
 
 variable_type = {
-    "O" : _stat_tool.VariableType.ORDINAL,
-    "ORDINAL" : _stat_tool.VariableType.ORDINAL,
-    "N" : _stat_tool.VariableType.NUMERIC,
-    "NUMERIC" : _stat_tool.VariableType.NUMERIC,
-    "S" : _stat_tool.VariableType.SYMBOLIC,
-    "SYMBOLIC" : _stat_tool.VariableType.SYMBOLIC,
-    "C" : _stat_tool.VariableType.CIRCULAR,
-    "CIRCULAR" : _stat_tool.VariableType.CIRCULAR,
+    "O" : VariableType.ORDINAL,
+    "ORDINAL" : VariableType.ORDINAL,
+    "N" : VariableType.NUMERIC,
+    "NUMERIC" : VariableType.NUMERIC,
+    "S" : VariableType.SYMBOLIC,
+    "SYMBOLIC" : VariableType.SYMBOLIC,
+    "C" : VariableType.CIRCULAR,
+    "CIRCULAR" : VariableType.CIRCULAR,
     }
 sub_variable_type = {
-    "N" : _stat_tool.VariableType.NUMERIC,
-    "NUMERIC" : _stat_tool.VariableType.NUMERIC,
-    "S" : _stat_tool.VariableType.SYMBOLIC,
-    "SYMBOLIC" : _stat_tool.VariableType.SYMBOLIC,
+    "N" : VariableType.NUMERIC,
+    "NUMERIC" : VariableType.NUMERIC,
+    "S" : VariableType.SYMBOLIC,
+    "SYMBOLIC" : VariableType.SYMBOLIC,
     }
 
 pearson_type = {
-    "PEARSON": _stat_tool.PearsonType.PEARSON,
-    "SPEARMAN": _stat_tool.PearsonType.SPEARMAN,
-    "KENDALL": _stat_tool.PearsonType.KENDALL,
-    "SPEARMAN2": _stat_tool.PearsonType.SPEARMAN2,
-    "Pearson": _stat_tool.PearsonType.PEARSON,
-    "Spearman": _stat_tool.PearsonType.SPEARMAN,
-    "Kendall": _stat_tool.PearsonType.KENDALL,
-    "Spearman2": _stat_tool.PearsonType.SPEARMAN2
+    "PEARSON": PearsonType.PEARSON,
+    "SPEARMAN": PearsonType.SPEARMAN,
+    "KENDALL": PearsonType.KENDALL,
+    "SPEARMAN2": PearsonType.SPEARMAN2,
+    "Pearson": PearsonType.PEARSON,
+    "Spearman": PearsonType.SPEARMAN,
+    "Kendall": PearsonType.KENDALL,
+    "Spearman2": PearsonType.SPEARMAN2
     }
 
 smoothing_penalty_type = {
-    'FirstDifference': _stat_tool.FIRST_DIFFERENCE,
-    'SecondDifference': _stat_tool.SECOND_DIFFERENCE,
-    'Entropy': _stat_tool.ENTROPY,
+    'FirstDifference': FIRST_DIFFERENCE,
+    'SecondDifference': SECOND_DIFFERENCE,
+    'Entropy': ENTROPY,
     }
 
 estimator_type = {
-    "Zero":                 _stat_tool.EstimatorType.ZERO,
-    "Likelihood":           _stat_tool.EstimatorType.LIKELIHOOD,
-    "PenalizedLikelihood":  _stat_tool.EstimatorType.PENALIZED_LIKELIHOOD,
-    "Parametric": _stat_tool.EstimatorType.PARAMETRIC_REGULARIZATION,
+    "Zero":                 EstimatorType.ZERO,
+    "Likelihood":           EstimatorType.LIKELIHOOD,
+    "PenalizedLikelihood":  EstimatorType.PENALIZED_LIKELIHOOD,
+    "Parametric": EstimatorType.PARAMETRIC_REGULARIZATION,
     "ParametricRegularization": 
-        _stat_tool.EstimatorType.PARAMETRIC_REGULARIZATION
+        EstimatorType.PARAMETRIC_REGULARIZATION
     }
 
 outside_type = {
-    "Zero": _stat_tool.ZERO,
-    "Continuation": _stat_tool.CONTINUATION,
+    "Zero": ZERO,
+    "Continuation": CONTINUATION,
     }
 
 #  enum_<stat_tool::wrap_util::UniqueInt<3, 11> >("TOBEDONEType")
@@ -118,18 +118,18 @@ outside_type = {
 #  ;
 
 likelihood_penalty_type = {
-    'AIC': _stat_tool.AIC,
-    'AICc': _stat_tool.AICc,
-    'BIC': _stat_tool.BIC,
-    'BICc': _stat_tool.BICc,
-    'ICL' : _stat_tool.ICL,
-    'ICLc': _stat_tool.ICLc,
+    'AIC': AIC,
+    'AICc': AICc,
+    'BIC': BIC,
+    'BICc': BICc,
+    'ICL' : ICL,
+    'ICLc': ICLc,
     }
 
 algorithm_type = {
-     "Agglomerative":   _stat_tool.AlgoType.AGGLOMERATIVE,
-     "Divisive":        _stat_tool.AlgoType.DIVISIVE,
-     "Ordering":        _stat_tool.AlgoType.ORDERING,
+     "Agglomerative":   AlgoType.AGGLOMERATIVE,
+     "Divisive":        AlgoType.DIVISIVE,
+     "Ordering":        AlgoType.ORDERING,
      }
 
 
@@ -155,10 +155,10 @@ compound_type = {
     }
 
 variance_type = {
-    "N": _stat_tool.NUMERIC,
-    "NUMERIC" : _stat_tool.NUMERIC,
-    "O": _stat_tool.ORDINAL,
-    "ORDINAL":  _stat_tool.ORDINAL,
+    "N": NUMERIC,
+    "NUMERIC" : NUMERIC,
+    "O": ORDINAL,
+    "ORDINAL":  ORDINAL,
     }
 
 keep_type = {

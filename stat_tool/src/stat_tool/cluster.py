@@ -19,9 +19,9 @@ __version__ = "$Id$"
 import error
 import interface
 
-from _stat_tool import _DistanceMatrix
-from _stat_tool import _Cluster
-from _stat_tool import _Dendrogram
+from openalea.stat_tool._stat_tool import _DistanceMatrix
+from openalea.stat_tool._stat_tool import _Cluster
+from openalea.stat_tool._stat_tool import _Dendrogram
 
 from enums import format_type
 from enums import criterion_type

@@ -22,11 +22,11 @@ __version__ = "$Id$"
 import interface
 import error
 
-from _stat_tool import _Mixture
-from _stat_tool import _MixtureData
-from _stat_tool import _DiscreteParametricModel
-from _stat_tool import _Compound
-from _stat_tool import _Convolution
+from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _MixtureData
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel
+from openalea.stat_tool._stat_tool import _Compound
+from openalea.stat_tool._stat_tool import _Convolution
 
 __all__ = ['_Mixture',
            '_MixtureData',

@@ -20,7 +20,7 @@ __version__ = "$Id$"
 
 import interface
 
-from _stat_tool import _DiscreteDistributionData
+from openalea.stat_tool._stat_tool import _DiscreteDistributionData
 
 # Extend _DistributionData class dynamically
 interface.extend_class(_DiscreteDistributionData, interface.StatInterface)

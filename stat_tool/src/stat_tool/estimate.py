@@ -19,7 +19,6 @@
 __version__ = "$Id$"
 
 import error
-import _stat_tool
 import interface
 
 from enums import likelihood_penalty_type
@@ -29,14 +28,14 @@ from enums import compound_type
 from enums import estimator_type
 from enums import distribution_identifier_type as dist_type
 
-from _stat_tool import _DiscreteParametricModel
-from _stat_tool import _DiscreteParametric
-from _stat_tool import _Compound
-from _stat_tool import _Convolution
-from _stat_tool import _Distribution
-from _stat_tool import _Mixture
-from _stat_tool import _FrequencyDistribution
-
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel
+from openalea.stat_tool._stat_tool import _DiscreteParametric
+from openalea.stat_tool._stat_tool import _Compound
+from openalea.stat_tool._stat_tool import _Convolution
+from openalea.stat_tool._stat_tool import _Distribution
+from openalea.stat_tool._stat_tool import _Mixture
+from openalea.stat_tool._stat_tool import _FrequencyDistribution
+from openalea.stat_tool._stat_tool import LikelihoodPenaltyType
 
 __all__ = ["Estimate", "EstimateFunctions"]
 
@@ -186,7 +185,7 @@ class EstimateFunctions(object):
         #should be before the conversion to booleans
         error.CheckType([MinInfBound, InfBoundStatus, DistInfBoundStatus,
                          NbComponent, Penalty],
-                        [int, str, str, str, _stat_tool.LikelihoodPenaltyType])
+                        [int, str, str, str, LikelihoodPenaltyType])
 
 
         # transform into boolean when needed

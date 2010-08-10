@@ -23,7 +23,7 @@ import glob
 import sys
 import error
 # Output functions
-from _stat_tool import FORWARD_DYNAMIC_PROGRAMMING, \
+from openalea.stat_tool._stat_tool import FORWARD_DYNAMIC_PROGRAMMING, \
     FORWARD_BACKWARD_SAMPLING, GENERALIZED_VITERBI, \
     FORWARD_BACKWARD_SAMPLING
 

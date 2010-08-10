@@ -17,11 +17,20 @@ __version__ = "$Id$"
 import interface
 import error
 
-import _stat_tool
+from openalea.stat_tool._stat_tool import *
 
-from _stat_tool import _DiscreteParametricModel
-from _stat_tool import _DiscreteDistributionData
-from _stat_tool import _Distribution
+from openalea.stat_tool._stat_tool import _DiscreteParametricModel
+from openalea.stat_tool._stat_tool import _DiscreteDistributionData
+from openalea.stat_tool._stat_tool import _Distribution
+from openalea.stat_tool._stat_tool import I_DEFAULT
+from openalea.stat_tool._stat_tool import D_DEFAULT
+from openalea.stat_tool._stat_tool import D_INF
+from openalea.stat_tool._stat_tool import MAX_DIFF_BOUND
+from openalea.stat_tool._stat_tool import MAX_MEAN
+from openalea.stat_tool._stat_tool import VariableType
+from openalea.stat_tool._stat_tool import VariableTypeBis
+from openalea.stat_tool._stat_tool import RestorationAlgorithm
+
 
 from enums import distribution_identifier_type
 
@@ -114,8 +123,8 @@ def Distribution(utype, *args):
     return result
 
 
-def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT, \
-             proba=_stat_tool.D_DEFAULT):
+def Binomial(inf_bound, sup_bound=I_DEFAULT, \
+             proba=D_DEFAULT):
     """
     Construction of a binomial distribution
 
@@ -138,16 +147,16 @@ def Binomial(inf_bound, sup_bound=_stat_tool.I_DEFAULT, \
     error.CheckType([inf_bound, sup_bound, proba], [int, int, [int, float]])
     assert inf_bound >= 0
     assert inf_bound < sup_bound
-    assert (sup_bound - inf_bound) <= _stat_tool.MAX_DIFF_BOUND
+    assert (sup_bound - inf_bound) <= MAX_DIFF_BOUND
     assert proba <= 1. and proba > 0
 
-    param = _stat_tool.D_DEFAULT
+    param = D_DEFAULT
 
-    return _DiscreteParametricModel(_stat_tool.BINOMIAL, \
+    return _DiscreteParametricModel(BINOMIAL, \
         inf_bound, sup_bound, param, proba)
 
 
-def Poisson(inf_bound, param=_stat_tool.D_DEFAULT):
+def Poisson(inf_bound, param=D_DEFAULT):
     """
     Construction of a poisson distribution
 
@@ -161,17 +170,17 @@ def Poisson(inf_bound, param=_stat_tool.D_DEFAULT):
 
     assert inf_bound >= 0
     assert param > inf_bound
-    assert param > 0. and param < _stat_tool.MAX_MEAN
+    assert param > 0. and param < MAX_MEAN
 
-    sup_bound = _stat_tool.I_DEFAULT
-    proba = _stat_tool.D_DEFAULT
+    sup_bound = I_DEFAULT
+    proba = D_DEFAULT
 
-    return _DiscreteParametricModel(_stat_tool.POISSON, \
+    return _DiscreteParametricModel(POISSON, \
         inf_bound, sup_bound, param, proba)
 
 
-def NegativeBinomial(inf_bound, param=_stat_tool.D_DEFAULT, \
-                     proba=_stat_tool.D_DEFAULT):
+def NegativeBinomial(inf_bound, param=D_DEFAULT, \
+                     proba=D_DEFAULT):
     """
     Construction of a negative binomial distribution
 
@@ -195,15 +204,15 @@ def NegativeBinomial(inf_bound, param=_stat_tool.D_DEFAULT, \
     assert inf_bound >= 0
     assert param > 0
     assert proba <= 1. and proba > 0
-    assert (param * (1. - proba) / proba) <= _stat_tool.MAX_MEAN
+    assert (param * (1. - proba) / proba) <= MAX_MEAN
 
-    sup_bound = _stat_tool.I_DEFAULT
+    sup_bound = I_DEFAULT
 
-    return _DiscreteParametricModel(_stat_tool.NEGATIVE_BINOMIAL, \
+    return _DiscreteParametricModel(NEGATIVE_BINOMIAL, \
         inf_bound, sup_bound, param, proba)
 
 
-def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
+def Uniform(inf_bound, sup_bound=I_DEFAULT):
     """
     Construction of a uniform distribution
 
@@ -221,12 +230,12 @@ def Uniform(inf_bound, sup_bound=_stat_tool.I_DEFAULT):
     assert inf_bound >= 0
     assert sup_bound >= 0
     assert inf_bound <= sup_bound
-    assert (sup_bound - inf_bound) < _stat_tool.MAX_DIFF_BOUND
+    assert (sup_bound - inf_bound) < MAX_DIFF_BOUND
 
-    param = _stat_tool.D_DEFAULT
-    proba = _stat_tool.D_DEFAULT
-    cumul_threshold = _stat_tool.CUMUL_THRESHOLD
-    return _DiscreteParametricModel(_stat_tool.UNIFORM, \
+    param = D_DEFAULT
+    proba = D_DEFAULT
+    cumul_threshold = CUMUL_THRESHOLD
+    return _DiscreteParametricModel(UNIFORM, \
         inf_bound, sup_bound, param, proba, cumul_threshold)
 
 

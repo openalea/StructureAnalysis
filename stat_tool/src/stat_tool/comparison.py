@@ -21,7 +21,7 @@ from enums import variable_type
 from enums import format_type
 
 
-from _stat_tool import \
+from openalea.stat_tool._stat_tool import \
     _CompoundData,\
     _DiscreteDistributionData,\
     _MixtureData,\
