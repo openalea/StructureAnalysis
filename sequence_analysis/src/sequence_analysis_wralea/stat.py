@@ -207,7 +207,6 @@ def py_plot( obj, fig_id=1, title='', viewpoint="v", **kargs):
     if DISABLE_PLOT:
         return
     if obj:
-        print types.ListType
         if type(obj) == types.ListType:
             status = Plot(*obj, FigureId=fig_id, ViewPoint=viewpoint, **kargs)
         else:

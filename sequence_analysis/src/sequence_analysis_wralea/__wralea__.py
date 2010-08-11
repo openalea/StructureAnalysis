@@ -1,5 +1,5 @@
 
-# This file has been generated at Thu Aug  5 11:30:32 2010
+# This file has been generated at Wed Aug 11 17:21:31 2010
 
 from openalea.core import *
 
@@ -17,7 +17,7 @@ __institutes__ = 'INRIA/CIRAD'
 __icon__ = 'icon.png'
 
 
-__all__ = ['stat_py_value_select', 'stat_py_convolution', 'stat_py_simulate_dist', 'stat_py_dist_poisson', 'stat_py_semimarkov', 'stat_py_segmentation_sample', 'stat_py_shiftn', 'stat_py_pointwise_average', 'stat_py_estimate_mixture', 'stat_PyObjectFromFile', 'stat_py_compute_correlation', 'stat_py_vectors', 'stat_py_cluster', 'stat_py_select_variable', 'stat_py_dist_binomial', 'data_SharedData', 'stat_py_sequences', 'stat_py_compute_correlation_mult', 'stat_py_to_distribution', 'stat_py_hiddensemimarkov', 'stat_py_to_histogram', 'stat_py_compound', 'stat_py_plot', 'stat_py_plot_segprofile', 'stat_PyRenewal', 'stat_py_merge', 'stat_py_regression', 'data_Selector', 'stat_py_comparisontest', 'stat_py_estimate_compound', 'stat_py_cumulate', 'stat_py_estimate_dist', 'stat_py_extract_distribution', 'stat_py_shift', 'stat_py_dist_negativebinomial', 'stat_py_markov', 'stat_py_dist_uniform', 'stat_py_segmentation', 'stat_py_select_individual', 'stat_py_hiddenmarkov', 'stat_py_extract_histogram', 'stat_py_compare_vectors', 'stat_py_histogram', 'stat_PyRenewalAscii', 'stat_py_extract_data', 'stat_py_compare_frequency', 'stat_py_estimate_conv', 'stat_py_extract_histogram_sequences', 'stat_py_fit']
+__all__ = ['stat_py_value_select', 'stat_py_convolution', 'stat_py_simulate_dist', 'stat_py_dist_poisson', 'stat_py_semimarkov', 'stat_py_segmentation_sample', 'stat_py_shiftn', 'stat_py_pointwise_average', 'stat_py_estimate_mixture', 'stat_PyObjectFromFile', 'stat_py_compute_correlation', 'stat_py_vectors', 'stat_py_cluster', 'stat_py_select_variable', 'stat_py_dist_binomial', 'stat_py_sequences', 'stat_py_compute_correlation_mult', 'stat_py_to_distribution', 'stat_py_hiddensemimarkov', 'stat_py_to_histogram', 'stat_py_compound', 'stat_py_regression', 'stat_py_plot_segprofile', 'stat_PyRenewal', 'stat_py_merge', 'stat_py_plot', 'data_Selector', 'stat_py_comparisontest', 'stat_py_estimate_compound', 'stat_py_cumulate', 'stat_py_estimate_dist', 'stat_py_extract_distribution', 'stat_py_shift', 'stat_py_dist_negativebinomial', 'stat_py_markov', 'stat_py_dist_uniform', 'stat_py_fit', 'stat_py_segmentation', 'stat_py_select_individual', 'stat_py_hiddenmarkov', 'stat_py_extract_histogram', 'stat_py_compare_vectors', 'stat_py_histogram', 'stat_PyRenewalAscii', 'stat_py_extract_data', 'stat_py_compare_frequency', 'stat_py_estimate_conv', 'stat_py_extract_histogram_sequences']
 
 
 
@@ -231,20 +231,6 @@ stat_py_dist_binomial = Factory(name='Binomial',
 
 
 
-data_SharedData = Factory(name='SharedData',
-                description='',
-                category='Unclassified',
-                nodemodule='data',
-                nodeclass='SharedData',
-                inputs=[{'interface': IEnumStr(enum=['stat_tool', 'sequence_analysis']), 'name': 'package', 'value': 'sequence_analysis', 'desc': ''}],
-                outputs=None,
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
 stat_py_sequences = Factory(name='Sequences',
                 description='',
                 category='STAT.Sequence',
@@ -329,13 +315,13 @@ stat_py_compound = Factory(name='Compound',
 
 
 
-stat_py_plot = Factory(name='Plot (stat_tool)',
-                description='Graphical output of an object of the STAT module using either GNUPLOT or matplotlib software.',
-                category='Unclassified',
+stat_py_regression = Factory(name='Regression',
+                description='Simple Regression with a single explanatory variable.',
+                category='STAT',
                 nodemodule='stat',
-                nodeclass='py_plot',
-                inputs=({'name': 'obj'}, {'interface': IInt, 'name': 'fig_id'}, {'interface': IStr, 'name': 'title', 'value': ''}, {'interface': IEnumStr(enum=['Data', 'Survival', 'v']), 'name': 'viewpoint', 'value': 'v'}),
-                outputs=(),
+                nodeclass='py_regression',
+                inputs=[{'name': 'vec'}, {'interface': IEnumStr(enum=['Linear', 'MovingAverage', 'NearestNeighbors']), 'name': 'RegressionModel', 'value': 'Linear'}, {'interface': IInt, 'name': 'explanatoryVariable'}, {'interface': IInt, 'name': 'responseVariable'}, {'interface': ISequence, 'name': 'filter'}, {'interface': ISequence, 'name': 'frequencies'}, {'name': 'distribution'}, {'interface': IFloat, 'name': 'span'}, {'interface': IEnumStr(enum=['Averaging', 'LeastSquares']), 'name': 'Algorithm', 'value': 'Averaging'}, {'interface': IBool, 'name': 'Weighting', 'value': True}],
+                outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -385,13 +371,13 @@ stat_py_merge = Factory(name='Merge',
 
 
 
-stat_py_regression = Factory(name='Regression',
-                description='Simple Regression with a single explanatory variable.',
-                category='STAT',
+stat_py_plot = Factory(name='Plot (stat_tool)',
+                description='Graphical output of an object of the STAT module using either GNUPLOT or matplotlib software.',
+                category='Unclassified',
                 nodemodule='stat',
-                nodeclass='py_regression',
-                inputs=[{'name': 'vec'}, {'interface': IEnumStr(enum=['Linear', 'MovingAverage', 'NearestNeighbors']), 'name': 'RegressionModel', 'value': 'Linear'}, {'interface': IInt, 'name': 'explanatoryVariable'}, {'interface': IInt, 'name': 'responseVariable'}, {'interface': ISequence, 'name': 'filter'}, {'interface': ISequence, 'name': 'frequencies'}, {'name': 'distribution'}, {'interface': IFloat, 'name': 'span'}, {'interface': IEnumStr(enum=['Averaging', 'LeastSquares']), 'name': 'Algorithm', 'value': 'Averaging'}, {'interface': IBool, 'name': 'Weighting', 'value': True}],
-                outputs=None,
+                nodeclass='py_plot',
+                inputs=({'name': 'obj'}, {'interface': IInt, 'name': 'fig_id'}, {'interface': IStr, 'name': 'title', 'value': ''}, {'interface': IEnumStr(enum=['Data', 'Survival', 'v']), 'name': 'viewpoint', 'value': 'v'}),
+                outputs=(),
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -530,6 +516,20 @@ stat_py_dist_uniform = Factory(name='Uniform',
                 category='STAT.FrequencyDistribution',
                 nodemodule='stat',
                 nodeclass='py_dist_uniform',
+                inputs=None,
+                outputs=None,
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+stat_py_fit = Factory(name='Fit',
+                description='Fit distribution to histogram.',
+                category='STAT',
+                nodemodule='stat',
+                nodeclass='py_fit',
                 inputs=None,
                 outputs=None,
                 widgetmodule=None,
@@ -692,14 +692,4 @@ stat_py_extract_histogram_sequences = Factory(name='ExtractHistogram(Sequences)'
 
 
 
-stat_py_fit = Factory(name='Fit',
-                description='Fit distribution to histogram.',
-                category='STAT',
-                nodemodule='stat',
-                nodeclass='py_fit',
-                inputs=None,
-                outputs=None,
-                widgetmodule=None,
-                widgetclass=None,
-               )
 
