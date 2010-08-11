@@ -670,7 +670,7 @@ class StatInterface(object):
                 #print 'viewpoint = state-profile'
                 Plot_prefix=''
                 plotable = None
-                from openalea.sequence_analysis import \
+                from openalea.sequence_analysis._sequence_analysis import \
                     _HiddenVariableOrderMarkov, _HiddenSemiMarkov
                 if type(self) == _HiddenVariableOrderMarkov:
                     plotable = self.state_profile_plotable_write(args[0])
@@ -685,7 +685,7 @@ class StatInterface(object):
                     plotable = self.state_profile_plotable_write(identifier, Output)
                 else:
                     #todo 3 args required
-                    from openalea.sequence_analysis import _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData, _NonhomogeneousMarkovData
+                    from openalea.sequence_analysis._sequence_analysis import _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData, _NonhomogeneousMarkovData
                     assert type(self) in [_MarkovianSequences, _VariableOrderMarkovData,
                                           _SemiMarkovData, _NonhomogeneousMarkovData]
                     if type(args[1])==_HiddenVariableOrderMarkov:
@@ -702,7 +702,7 @@ class StatInterface(object):
                         pass
 
             elif ViewPoint=='q':
-                from openalea.sequence_analysis import _Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData
+                from openalea.sequence_analysis._sequence_analysis import _Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData
                 if type(self) not in [_Sequences, _MarkovianSequences, _VariableOrderMarkovData, _SemiMarkovData]:
                     raise TypeError('object must be in SEQUENCES or MARKOVIAN_SEQUENCES or VARIABLE_ORDER_MARKOV_DATA or SEMI-MARKOV_DATA')
 
@@ -737,8 +737,9 @@ class StatInterface(object):
                 plotable = self.segment_profile_plotable_write(args[0], args[1],
                                        types, Output)
 
+            #data viewPoint
             elif ViewPoint == 'd':
-                from openalea.sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _NonHomogeneousMarkovData, _Tops
+                from openalea.sequence_analysis._sequence_analysis import _SemiMarkovData, _MarkovianSequences, _Sequences, _NonHomogeneousMarkovData, _Tops
                 if type(self) in [_SemiMarkovData, _MarkovianSequences, _Sequences,
                                   _NonHomogeneousMarkovData, _Tops]:
                     #status = seq->plot_data_write(error , Plot_prefix , title);
@@ -970,7 +971,7 @@ class StatInterface(object):
         # StatProfile
         elif ViewPoint == 'p':
             try:
-                from openalea.sequence_analysis import \
+                from openalea.sequence_analysis._sequence_analysis import \
                     _HiddenVariableOrderMarkov, _HiddenSemiMarkov, \
                     _MarkovianSequences, VariableOrderMarkovData, \
                     _SemiMarkovData, _NonhomogenousMarkovData
