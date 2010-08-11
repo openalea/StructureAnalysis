@@ -22,13 +22,31 @@ def test_demo_dycorinia():
     res = run(('demo.changepoint_stat_tool','Dycorinia change point'),{},pm=pm)
     assert res == []
 
-def test_stat_tool_tutorial():
+def test_oak_demo():
     """ Test dataflow demo compound tutorial"""
+    res = run(('demo.changepoint_stat_tool', 'oak_demo'),{},pm=pm)
+    assert res == []
+
+def test_beech1_demo():
+    """ Test dataflow demo compound tutorial"""
+    res = run(('demo.changepoint_stat_tool', 'beech1'),{},pm=pm)
+    assert res == []
+
+def test_stat_tool_demos_and_tutorial_convolution():
+    """ Test dataflow demo compound tutorial"""
+    res = run(('demo.stat_tool demos and tutorials', 'convolution tutorial'),{},pm=pm)
+    assert res == []
+    
+
+def test_stat_tool_demos_and_tutorial_compound():
     res = run(('demo.stat_tool demos and tutorials', 'compound tutorial'),{},pm=pm)
     assert res == []
+
+
 
 if __name__ == "__main__":
     test_demo_corsican()
     test_demo_dycorinia()
-    test_stat_tool_tutorial()
+    test_stat_tool_tutorial_compound()
+    test_stat_tool_tutorial_convolution()
 
