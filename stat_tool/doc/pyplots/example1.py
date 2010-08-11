@@ -6,11 +6,11 @@ from openalea.stat_tool import *
 from openalea.stat_tool.plot  import *
 
 # Download histograms
-meri1 = Histogram("../../test/data/meri1.his")
-meri2 = Histogram("../../test/data/meri2.his")
-meri3 = Histogram("../../test/data/meri3.his")
-meri4 = Histogram("../../test/data/meri4.his")
-meri5 = Histogram("../../test/data/meri5.his")
+meri1 = Histogram(get_shared_data("meri1.his"))
+meri2 = Histogram(get_shared_data("meri2.his"))
+meri3 = Histogram(get_shared_data("meri3.his"))
+meri4 = Histogram(get_shared_data("meri4.his"))
+meri5 = Histogram(get_shared_data("meri5.his"))
 
 #Merge the histograms
 meri = Merge(meri1, meri2, meri3, meri4, meri5)
