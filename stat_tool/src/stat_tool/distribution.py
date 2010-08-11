@@ -134,8 +134,13 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
       * `sup_bound` (int) : upper bound to the range of possilbe values
       * `proba` (int, float) : probability of 'success'
 
-    .. plot:: pyplots/binomial.py
+    .. plot::
+        :width: 50%
+        :include-source:
 
+        from openalea.stat_tool.distribution import Binomial
+        b = Binomial(0,10,0.5)
+        b.plot(legend_size=8)
 
     """
     # todo: seg fault when passing -1 as first arguments if there
@@ -165,7 +170,13 @@ def Poisson(inf_bound, param=D_DEFAULT):
         (shift parameter)
       * `param` (int, float) : parameter of the Poisson distribution
     
-    .. plot:: pyplots/poisson.py
+    .. plot::
+        :width: 50%
+        :include-source:
+
+        from openalea.stat_tool.distribution import Poisson
+        b = Poisson(1,1.5)
+        b.plot(legend_size=8)
     """
 
     assert inf_bound >= 0
@@ -221,7 +232,14 @@ def Uniform(inf_bound, sup_bound=I_DEFAULT):
         (shift parameter)
       * sup_bound (int) : upper bound to the range of possilbe values
 
-    .. plot:: pyplots/uniform.py
+    .. plot::
+        :width: 50%
+        :include-source:
+
+        from openalea.stat_tool.distribution import Uniform
+        b = Uniform(1,10)
+        b.plot(legend_size=8)
+
     """
 
     # Check parameters

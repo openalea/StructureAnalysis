@@ -56,7 +56,7 @@ if __name__ == '__main__':
                     'openalea.stat_tool', 
                     ],
 
-          package_dir={ "openalea.stat_tool" : "src/stat_tool", '':'src'  },
+          package_dir={ "openalea.stat_tool" : pj("src","stat_tool"), '':'src'  },
           share_dirs = { 'share' : 'share' },
 
 
