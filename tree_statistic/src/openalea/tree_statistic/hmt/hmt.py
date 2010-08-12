@@ -460,9 +460,9 @@ class HiddenMarkovTree:
             else:
                 raise TypeError, "bad type for argument 2: trees.Trees " \
                                     "expected"
-        elif issubclass(arg1.__class__, stat_tool._DiscreteDistributionData):
+        elif issubclass(arg1.__class__, stat_tool._stat_tool._DiscreteDistributionData):
             # Simulate(size_histo, nb_children_histo)
-            if issubclass(arg2.__class__, stat_tool._DiscreteDistributionData):
+            if issubclass(arg2.__class__, stat_tool._stat_tool._DiscreteDistributionData):
                 chmt_data= \
                     self.__chmt.Simulate(arg1, arg2, True, False)
             else:
