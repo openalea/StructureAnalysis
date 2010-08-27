@@ -22,6 +22,7 @@ __all__ = ['_178926732', '_178925868']
 
 
 _178926732 = CompositeNodeFactory(name='convolution tutorial',
+                             authors='Thomas Cokelaer',
                              description='tutorial to illustrate convolution usage',
                              category='data processing',
                              doc='',
@@ -217,6 +218,7 @@ _178926732 = CompositeNodeFactory(name='convolution tutorial',
 
 
 _178925868 = CompositeNodeFactory(name='compound tutorial',
+                             authors='Thomas Cokelaer',
                              description='',
                              category='Unclassified',
                              doc='',

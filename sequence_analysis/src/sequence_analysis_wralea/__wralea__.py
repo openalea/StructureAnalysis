@@ -526,6 +526,7 @@ stat_py_dist_uniform = Factory(name='Uniform',
 
 
 stat_py_fit = Factory(name='Fit',
+                authors='Thomas Cokelaer',
                 description='Fit distribution to histogram.',
                 category='STAT',
                 nodemodule='stat',
