@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""Convolution
+"""Convolution module
 
-.. topic:: convolution.py summary
+.. topic:: Summary
 
     A module dedicated to Convolution
 
     :Code status: mature
-    :Documentation status: to be completed
+    :Documentation status: mature
     :Author: Samuel Dufour-Kowalski <samuel.dufour@sophia.inria.fr>
         Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
@@ -58,6 +58,17 @@ def Convolution(*args):
 
         >>> Convolution(dist1, dist2, ...)
         >>> Convolution(file_name)
+
+    .. plot::
+        :width: 50%
+        :include-source:
+
+        from openalea.stat_tool import *
+        sum_dist = Binomial(0,10,0.5)
+        dist = Binomial(0,15,0.2)
+        c = Convolution(sum_dist, dist)
+        c.plot()
+
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Save`,

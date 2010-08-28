@@ -5,13 +5,13 @@ Reference guide
 ###############
 .. contents::
 
-.. currentmodule:: openalea.stat_tool.cluster
 
 
 Data structures
 ===================
 
-.. currentmodule:: openalea.stat_tool.compound
+.. module:: openalea.stat_tool.compound
+.. module:: compound
 
 :mod:`openalea.stat_tool.compound` module
 ---------------------------------------------------
@@ -25,6 +25,7 @@ Data structures
 
 
 .. currentmodule:: openalea.stat_tool.convolution
+.. module:: convolution
 
 :mod:`openalea.stat_tool.convolution` module
 ---------------------------------------------------
@@ -36,6 +37,7 @@ Data structures
     :synopsis:  Convolution module 
 
 .. currentmodule:: openalea.stat_tool.distribution
+.. module:: distribution
 
 :mod:`openalea.stat_tool.distribution` module
 ---------------------------------------------------
@@ -46,7 +48,7 @@ Data structures
     :show-inheritance:
     :synopsis:  Distributions module
 
-.. currentmodule:: openalea.stat_tool.histogram
+.. module:: histogram
 
 :mod:`openalea.stat_tool.histogram` module
 ---------------------------------------------------
@@ -58,7 +60,7 @@ Data structures
     :synopsis: Histogram functions and classes
 
 
-.. currentmodule:: openalea.stat_tool.mixture
+.. module:: mixture
 
 :mod:`openalea.stat_tool.mixture` module
 ---------------------------------------------------
@@ -70,7 +72,7 @@ Data structures
     :synopsis:  Mixture class
 
 
-.. currentmodule:: openalea.stat_tool.vectors
+.. module:: vectors
 
 :mod:`openalea.stat_tool.vectors` module
 ------------------------------------------------------
@@ -82,7 +84,7 @@ Data structures
     :synopsis: Vectors function and class
 
 
-.. currentmodule:: openalea.stat_tool.multivariate_vmixture
+.. module:: multivariate_vmixture
 
 :mod:`openalea.stat_tool.multivariate_mixture` module
 ------------------------------------------------------
@@ -94,13 +96,10 @@ Data structures
     :synopsis: Mv Mixture class
 
 
-
-
-
 Functionalities
 ================
 
-.. currentmodule:: openalea.stat_tool.regression
+.. module:: regression
 
 :mod:`openalea.stat_tool.regression` module
 --------------------------------------------
@@ -112,7 +111,7 @@ Functionalities
     :synopsis: Regression
 
 
-.. currentmodule:: openalea.stat_tool.simulate
+.. module:: simulate
 
 :mod:`openalea.stat_tool.simulate` module
 --------------------------------------------
@@ -124,7 +123,7 @@ Functionalities
     :synopsis:  Simulation functions 
 
 
-.. currentmodule:: openalea.stat_tool.cluster
+.. module:: cluster
 
 :mod:`openalea.stat_tool.cluster` module
 ------------------------------------------
@@ -136,7 +135,7 @@ Functionalities
     :synopsis: Cluster functions and classes
 
 
-.. currentmodule:: openalea.stat_tool.comparison
+.. module:: comparison
 
 :mod:`openalea.stat_tool.comparison` module
 ----------------------------------------------
@@ -148,7 +147,7 @@ Functionalities
     :synopsis: Comparison functions
 
 
-.. currentmodule:: openalea.stat_tool.data_transform
+.. module:: data_transform
 
 :mod:`openalea.stat_tool.data_transform` module
 -------------------------------------------------
@@ -159,7 +158,7 @@ Functionalities
     :show-inheritance:
     :synopsis: Data transformation functions
 
-.. currentmodule:: openalea.stat_tool.estimate
+.. module:: estimate
 
 :mod:`openalea.stat_tool.estimate` module
 ---------------------------------------------------
@@ -175,7 +174,7 @@ Functionalities
 Display and Plot functionalities
 =================================
 
-.. currentmodule:: openalea.stat_tool.output
+.. module:: output
 
 :mod:`openalea.stat_tool.output` module
 ----------------------------------------------------
@@ -187,7 +186,7 @@ Display and Plot functionalities
     :synopsis: Output functions
 
 
-.. currentmodule:: openalea.stat_tool.plot
+.. module:: plot
 
 :mod:`openalea.stat_tool.plot` module
 -----------------------------------------------
@@ -201,7 +200,7 @@ Display and Plot functionalities
 Others
 ======
 
-.. currentmodule:: openalea.stat_tool.error
+.. module:: error
 
 :mod:`openalea.stat_tool.error` module
 ----------------------------------------------
@@ -214,7 +213,7 @@ Others
     :show-inheritance:
     :synopsis:  Error class to manage standard errors in stat_tool 
 
-.. currentmodule:: openalea.stat_tool.interface
+.. module:: interface
 
 :mod:`openalea.stat_tool.interface` module
 ---------------------------------------------

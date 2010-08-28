@@ -128,11 +128,9 @@ def Binomial(inf_bound, sup_bound=I_DEFAULT, \
     """
     Construction of a binomial distribution
 
-    :Parameters:
-      * `inf_bound` (int) : lower bound to the range of possible values
-        (shift parameter)
-      * `sup_bound` (int) : upper bound to the range of possilbe values
-      * `proba` (int, float) : probability of 'success'
+    :param float inf_bound: lower bound to the range of possible values    (shift parameter)
+    :param float sup_bound: upper bound to the range of possilbe values
+    :param float proba: probability of `success`
 
     .. plot::
         :width: 50%

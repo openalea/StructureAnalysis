@@ -3,7 +3,6 @@
 
 .. _stat_tool:
 
-.. module:: stat_tool
 
 VPlants Stat_tool documentation
 ###############################

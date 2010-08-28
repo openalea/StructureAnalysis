@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""Compound object
+"""Compound module
 
-.. topic:: compound.py summary
+.. topic:: Summary
 
     A module dedicated to Compound objects
 
@@ -41,10 +41,12 @@ def Compound(*args, **kargs):
     to as the sum distribution while the distribution of the :math:`X_i` is referred to as
     the elementary distribution.
 
-    :Parameters:
-      * `sum_dist` (DISTRIBUTION, MIXTURE, CONVOLUTION, COMPOUND) - sum distribution
-      * `dist` (DISTRIBUTION, MIXTURE, CONVOLUTION, COMPOUND) - elementary distribution
-      * `filename` (STRING) -
+    :param sum_dist: sum distribution
+    :param dist: elementary distribution
+    :param string filename:
+
+    :type sum_dist: :class:`distribution`, :class:`mixture`, :class:`convolution`, :class:`compound`
+    :type dist: :class:`distribution`, :class:`mixture`, :class:`convolution`, :class:`compound`
 
     :Returns:
 
@@ -59,6 +61,17 @@ def Compound(*args, **kargs):
         >>> Compound(sum_dist, dist)
         >>> Compound(sum_dist, dist, Threshold=0.999)
         >>> Compound(filename)
+
+    .. plot::
+        :width: 50%
+        :include-source:
+
+        from openalea.stat_tool import *
+        sum_dist = Binomial(0,10,0.5)
+        dist = Binomial(0,15,0.2)
+        c = Compound(sum_dist, dist)
+        c.plot()
+
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Save`,

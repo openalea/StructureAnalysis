@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""Histogram object
+"""Histogram module
 
 .. topic:: histogram.py summary
 
@@ -37,23 +37,35 @@ def Histogram(*args):
     In the file syntax, the frequencies *fi* for each possible value
     *i* are given in two columns. In the case of an argument of type
     (list(int)), it is simply assumed that each array element represents
-     one data item.
+    one data item.
 
-    :Parameters:
-      * `list` (list(int)) -
-      * `filename` (string) -
+    :param integer list: a list of integer values
+    :param string filename: a valid filename in the proper format (see syntax part)
 
     :Returns:
        If the construction succeeds, an object of type `_DiscreteDistributionData`
        is returned.
 
-    :Examples:
+    :Usage:
 
     .. doctest::
         :options: +SKIP
 
         >>> Histogram(list)
         >>> Histogram(filename)
+
+    :Examples:
+
+    .. plot::
+        :width: 50%
+        :include-source:
+
+        from openalea.stat_tool import *
+        from numpy.random import randint
+        h = Histogram(randint(10, size=10000).tolist())
+        h.plot()
+
+    .. note:: works for integer values only. 
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Save`,
