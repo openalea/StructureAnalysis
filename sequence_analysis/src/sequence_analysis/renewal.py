@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""
+"""Renewal module
+
+.. module:: renewal
+    :synopsis: A module dedicated to Renewal objects
+
 
 .. topic:: renewal.py summary
 
@@ -9,9 +13,9 @@
     :Code status: mature
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-
     :Revision: $Id$
-    
+    :Usage: >>> from openalea.sequence_analysis.renewal import *
+ 
 """
 __revision__ = "$Id$"
 
@@ -78,10 +82,18 @@ def Renewal(*args, **kargs):
 
     :Background:
 
-    A renewal process is built from a discrete distribution termed the inter-event distribution which represents the time interval between consecutive events. Two types of renewal processes are available:
-    * ordinary renewal process where the start of the observation period coincides with the occurrence time of an event (synchronism assumption),
-    * equilibrium or stationary renewal process where the start of the observation period is independent of the process which generates the data (asynchronism assumption).
-    In the case where the arguments are the name and the parameters of the inter-event distribution, the constraints on parameters described in the definition of the syntactic form of the type distribution apply (cf. File Syntax).
+    A renewal process is built from a discrete distribution termed the inter-event 
+    distribution which represents the time interval between consecutive events. Two types 
+    of renewal processes are available:
+        * ordinary renewal process where the start of the observation period coincides 
+          with the occurrence time of an event (synchronism assumption),
+        * equilibrium or stationary renewal process where the start of the observation
+          period is independent of the process which generates the data (asynchronism 
+          assumption).
+
+    In the case where the arguments are the name and the parameters of the inter-event \
+    distribution, the constraints on parameters described in the definition of the syntactic 
+    form of the type distribution apply (cf. File Syntax).
 
     .. seealso::
         :func:`~openalea.stat_tool.output.Save`,

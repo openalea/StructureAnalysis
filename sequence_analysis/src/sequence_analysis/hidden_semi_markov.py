@@ -6,11 +6,11 @@
 
     A module dedicated to HiddenSemiMarkov objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: mature
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-
     :Revision: $Id$
+    :Usage: >>> from openalea.sequence_analysis import *
 
 .. testsetup::
 

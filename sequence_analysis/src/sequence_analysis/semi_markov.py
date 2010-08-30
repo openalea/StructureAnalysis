@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""
+"""Semi markov module
 
-.. topic:: semi_markov.py summary
+.. module:: semi_markov
+    :synopsis: a module dedicated to SemiMarkov objects
+
+.. topic:: Summary
 
     A module dedicated to SemiMarkov objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: mature
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-
     :Revision: $Id$
-    
+    :Usage: >>> from openalea.sequence_analysis.semi_markov import * 
 """
 __version__ = "$Id$"
 
@@ -45,11 +47,15 @@ def SemiMarkov(filename=None, length=DEFAULT_LENGTH, counting=True,
     .. doctest::
         :options: +SKIP
         
-        >>> SemiMarkov(file_name, Length=40, Counting=True)
+        >>> SemiMarkov(filename, length=40, counting=True, cumul_threshold=40)
+
+     .. todo:: make the parameter input names consistent over all modules e.g, length and Length
+        should be only denoted either length or Length exclusively. For backward 
+        compatibility, Length should be used ?
 
     :Arguments:
 
-    * file_name (string).
+    * filename (string).
 
     :Optional Arguments:
 

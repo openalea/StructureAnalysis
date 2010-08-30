@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""
+"""Sequences modules
 
-.. topic:: sequences.py summary
+.. module:: sequences
+    :synopsis: a odule dedicated to Sequences
+
+.. topic:: summary
 
     A module dedicated to Sequences
 
     :Code status: mature
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-
     :Revision: $Id$
+    :Usage: >>> from openalea.sequence_analysis.sequences import *
 
 """
 __version__ = "$Id$"
@@ -252,7 +255,6 @@ def Sequences(obj, **kargs):
        :func:`~openalea.sequence_analysis.simulate.Simulate`.
 
 
-    .. todo:: refactoring using AML original code
     """
     import numpy
 

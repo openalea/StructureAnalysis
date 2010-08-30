@@ -6,8 +6,8 @@
 
     A module dedicated to HiddenVariableOrderMarkov objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: mature
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
     :Revision: $Id$
@@ -38,6 +38,11 @@ interface.extend_class( _HiddenVariableOrderMarkov, interface.StatInterface)
 def HiddenVariableOrderMarkov(filename=None, Length=DEFAULT_LENGTH,
                               CumulThreshold=OCCUPANCY_THRESHOLD):
     """HiddenVariableOrderMarkov
+
+    :param str filename:
+    :param int Length: 
+    :param float CumulThreshold: 
+
 
     .. todo:: documentation
     """

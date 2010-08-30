@@ -1,16 +1,20 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""
+"""nonhomogeneous_markov module
+
+.. module:: nonhomogeneous_markov
+    :synopsis: A module dedicated to NonhomogeneousMarkov objects
 
 .. topic:: nonhomogeneous_markov.py summary
 
     A module dedicated to NonhomogeneousMarkov objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: mature
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-
     :Revision: $Id$
+    :Usage: from openalea.sequence_analysis.nonhomogeneous_markov import *
+
 """
 __revision__ = "$Id$"
 
@@ -36,8 +40,8 @@ interface.extend_class( _NonHomogeneousMarkovData, interface.StatInterface)
 def NonhomogeneousMarkov(filename, length=DEFAULT_LENGTH):
     """NonhomogeneousMarkov constructor
 
-    :param filename:
-    :param length: optional argument (default is 20)
+    :param str filename:
+    :param int length: 
 
     :Usage:
     
