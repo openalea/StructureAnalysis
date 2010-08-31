@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""
+"""time_events module
 
-.. topic:: time_events.py summary
+.. module:: time_events
+
+.. topic::  summary
 
     A module dedicated to TimeEvents objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: mature
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
     :Revision: $Id$
@@ -78,12 +80,12 @@ def TimeEvents(*args, **kargs):
 
     :Optional Arguments:
 
-    PreviousDate (int): date preceding the initial observation date to check
-    the increasing character of the number of events. This optional argument
-    can only be used if the first mandatory argument is of type sequences.
-    NextDate (int): date following the final observation date to check the
-    increasing character of the number of events. This optional argument can
-    only be used if the first mandatory argument is of type sequences.
+    * PreviousDate (int): date preceding the initial observation date to check
+      the increasing character of the number of events. This optional argument
+      can only be used if the first mandatory argument is of type sequences.
+    * NextDate (int): date following the final observation date to check the
+      increasing character of the number of events. This optional argument can
+      only be used if the first mandatory argument is of type sequences.
 
     :Returned Object:
 
@@ -146,7 +148,9 @@ def TimeEvents(*args, **kargs):
 def NbEventSelect(obj, imin, imax):
     """NbEventSelect
 
-    Selection of data item of type {time interval between two observation dates, number of events occurring bet    ween these two observation dates} according to a number of events criterion.
+    Selection of data item of type {time interval between two observation dates, 
+    number of events occurring between these two observation dates} according to
+    a number of events criterion.
 
     :Usage:
 
@@ -155,11 +159,10 @@ def NbEventSelect(obj, imin, imax):
         
         >>> NbEventSelect(timev, min_nb_event, max_nb_event)
 
-    :Arguments:
 
-    * timev (time_events, renewal_data),
-    * min_nb_event (int): minimum number of events,
-    * max_nb_event (int): maximum number of events.
+    :param TimeEvents,RenewalData time_v:
+    :param int min_nb_event: minimum number of events,
+    :param int max_nb_event: maximum number of events.
 
     :Returned Object:
 

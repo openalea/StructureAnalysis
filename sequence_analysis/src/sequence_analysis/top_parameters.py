@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""
+"""top parameters
+
+.. module:: top_parameters
+    :synopsis: module dedicated to TopParameters objects
 
 .. topic:: top_parameters.py summary
 
     A module dedicated to TopParameters objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: mature
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
 
     :Revision: $Id$
@@ -43,11 +46,8 @@ def TopParameters(*args, **kargs):
 
     :Usage:
 
-    .. doctest::
-        :options: +SKIP
-        
-        >>> TopParameters(proba, axillary_proba, rhythm_ratio, MaxPosition=40)
-        >>> TopParameters(file_name, MaxPosition=40)    
+        TopParameters(proba, axillary_proba, rhythm_ratio, MaxPosition=40)
+        TopParameters(file_name, MaxPosition=40)    
 
 
     :Arguments:
@@ -68,7 +68,17 @@ def TopParameters(*args, **kargs):
     :Background:
 
     The aim of the model of 'tops' is to related the growth of offspring shoots to the growth of their parent shoot in the case of immediate branching. In the case where the arguments are the three 'top' parameters, the constraints over these parameters are described in the definition of the syntactic form of the type top_parameters (cf. File Syntax).
-    
+
+    :Example:
+
+    .. plot::
+        :include-source:
+        :width: 50%
+
+        from openalea.sequence_analysis import TopParameters
+        top = TopParameters(0.4, 0.5,0.6)
+        top.plot()
+
     .. seealso::
 
         :func:`~openalea.stat_tool.output.Save`, 

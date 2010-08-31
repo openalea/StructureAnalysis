@@ -2,8 +2,7 @@
 
     from openalea.stat_tool import *
     from openalea.sequence_analysis import *
-    from openalea.sequence_analysis import shared_data_path as path
-    from os.path import join as pj
+    from openalea.sequence_analysis import get_shared_data
 
 Sequences tutorial (beginners)
 ##############################
@@ -37,8 +36,7 @@ In order to go through this tutorial, you will first need to import the stat_too
 
 Then, we will need some data to play with. We will use some shared data available within the sequence_analysis package by typing::
 
-    >>> from openalea.sequence_analysis import shared_data_path as path
-    >>> from os.path import join as pj
+    >>> from openalea.sequence_analysis import get_shared_data
 
 Read some data
 ================
@@ -64,7 +62,7 @@ This file can be read using :func:`~openalea.sequence_analysis.sequences.Sequenc
 
 .. doctest::
 
-    >>> seq = Sequences(pj(path ,  'sequences_tutorial.dat'))
+    >>> seq = Sequences(get_shared_data('sequences_tutorial.dat'))
 
 
 Now, you can start to introspect the object `seq`. For instance, you can obtain the number of variables, the maximum length among the sequences or the number of elements over all sequences as follows
@@ -167,9 +165,8 @@ for each sequence and each variable. So, we should use a specific viewpoint. The
     :height: 480px
 
     from openalea.sequence_analysis import *
-    from openalea.sequence_analysis import shared_data_path
-    from os.path import join as pj
-    seq = Sequences(pj(shared_data_path, 'sequences_tutorial.dat'))
+    from openalea.sequence_analysis import get_shared_data
+    seq = Sequences(get_shared_data('sequences_tutorial.dat'))
     Plot(seq, ViewPoint="Data")
 
 As you can see, all sequences are plotted. You may select only a subsets and plot them as follows::
@@ -181,9 +178,8 @@ As you can see, all sequences are plotted. You may select only a subsets and plo
     :height: 480px
 
     from openalea.sequence_analysis import *
-    from openalea.sequence_analysis import shared_data_path
-    from os.path import join as pj
-    seq = Sequences(pj(shared_data_path, 'sequences_tutorial.dat'))
+    from openalea.sequence_analysis import get_shared_data
+    seq = Sequences(get_shared_data( 'sequences_tutorial.dat'))
     Plot(SelectIndividual(seq, [1,2]), ViewPoint="Data")
 
 Normal Viewpoint
@@ -201,22 +197,6 @@ Now, if you do::
 
 You won't get at all the same kind of output. The reason being that SelectIndividual does not return a Markovian Sequence. 
 
-Sojourn and Markovian sequences specific viewpoints
-----------------------------------------------------
-    
-    >>>    Plot(seq, "Sojourn")
-
-.. plot::
-    :width: 480px
-    :height: 480px
-
-    from openalea.sequence_analysis import *
-    from openalea.sequence_analysis import shared_data_path
-    from os.path import join as pj
-    seq = Sequences(pj(shared_data_path, 'sequences_tutorial.dat'))
-    Plot(seq,  "Sojourn")
-
-
 
 Others
 ------
@@ -230,9 +210,8 @@ Then, we can look at an histogram of the values::
     :height: 480px
 
     from openalea.sequence_analysis import *
-    from openalea.sequence_analysis import shared_data_path
-    from os.path import join as pj
-    seq = Sequences(pj(shared_data_path,  'sequences_tutorial.dat'))
+    from openalea.sequence_analysis import get_shared_data
+    seq = Sequences(get_shared_data(  'sequences_tutorial.dat'))
     Plot(ExtractHistogram(seq, "Value"))
 
 and finally an histogram of the sequences length::
@@ -244,9 +223,8 @@ and finally an histogram of the sequences length::
     :height: 480px
 
     from openalea.sequence_analysis import *
-    from openalea.sequence_analysis import shared_data_path
-    from os.path import join as pj
-    seq = Sequences(pj(shared_data_path,  'sequences_tutorial.dat'))
+    from openalea.sequence_analysis import get_shared_data
+    seq = Sequences(get_shared_data(  'sequences_tutorial.dat'))
     Plot(ExtractHistogram(seq, "Length"))
 
 

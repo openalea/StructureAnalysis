@@ -14,6 +14,11 @@
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
     :Revision: $Id$
     :Usage: >>> from openalea.sequence_analysis.semi_markov import * 
+
+
+.. testsetup::
+    
+    from openalea.sequence_analysis.semi_markov import * 
 """
 __version__ = "$Id$"
 
@@ -44,10 +49,9 @@ def SemiMarkov(filename=None, length=DEFAULT_LENGTH, counting=True,
 
     :Usage:
 
-    .. doctest::
-        :options: +SKIP
-        
-        >>> SemiMarkov(filename, length=40, counting=True, cumul_threshold=40)
+    ::
+    
+        SemiMarkov(filename, length=40, counting=True, cumul_threshold=40) 
 
      .. todo:: make the parameter input names consistent over all modules e.g, length and Length
         should be only denoted either length or Length exclusively. For backward 

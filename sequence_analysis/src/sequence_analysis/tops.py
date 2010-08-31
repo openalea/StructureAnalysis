@@ -2,6 +2,9 @@
 #-*- coding: utf-8 -*-
 """
 
+
+.. module:: tops
+
 .. topic:: tops.py summary
 
     A module dedicated to Tops objects
@@ -9,9 +12,10 @@
     :Code status: mature
     :Documentation status: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-
     :Revision: $Id$
-    
+    :Usage: >>> from openalea.sequence_analysis import tops
+
+
 """
 __version__ = "$Id$"
 import os
@@ -59,13 +63,13 @@ def Tops(*args, **kargs):
 
     :Optional Parameters:
 
-    Identifiers (array(int)): explicit identifiers of sequences. This optional
-    argument can only be used if the first argument is of type
-    array(array(int/array(int))).
-    IndexParameter (string): type of the explicit index parameter: "Position"
-    or "Time" (the default: implicit discrete index parameter starting at 0).
-    This optional argument can only be used if the first argument is of type
-    array(array(int/array(int))).
+    * Identifiers (array(int)): explicit identifiers of sequences. This optional
+      argument can only be used if the first argument is of type
+      array(array(int/array(int))).
+    * IndexParameter (string): type of the explicit index parameter: "Position"
+      or "Time" (the default: implicit discrete index parameter starting at 0).
+      This optional argument can only be used if the first argument is of type
+      array(array(int/array(int))).
 
     :Returns:
 
