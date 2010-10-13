@@ -53,6 +53,10 @@ enum {
   STATW_PARAMETER ,
   STATW_PROBABILITY ,
 
+  STATW_MEAN ,
+  STATW_STANDARD_DEVIATION ,
+  STATW_CONCENTRATION ,
+
   STATW_MIXTURE ,
   STATW_CONVOLUTION ,
   STATW_DISTRIBUTIONS ,
@@ -81,7 +85,9 @@ enum {
   STATW_OUTPUT_PROCESS ,
   STATW_OUTPUT_PROCESSES ,
   STATW_NONPARAMETRIC ,
-  STATW_PARAMETRIC ,
+  STATW_PARAMETRIC ,   // pour compatibilite ascendante
+  STATW_DISCRETE_PARAMETRIC ,
+  STATW_CONTINUOUS_PARAMETRIC ,
   STATW_OBSERVATION_DISTRIBUTION ,
 
   STATW_OBSERVATION_PROBABILITIES ,
@@ -91,8 +97,10 @@ enum {
 
 
 extern const char *STAT_word[];
-extern const char *STAT_distribution_word[];
-extern const char *STAT_distribution_letter[];
+extern const char *STAT_discrete_distribution_word[];
+extern const char *STAT_discrete_distribution_letter[];
+extern const char *STAT_continuous_distribution_word[];
+extern const char *STAT_continuous_distribution_letter[];
 extern const char *STAT_variable_type_word[];
 extern const char *STAT_variable_type_letter[];
 extern const char *STAT_distance_word[];
@@ -289,7 +297,11 @@ enum {
   STATL_OUTPUT ,
   STATL_OUTPUT_PROCESS ,
   STATL_OBSERVATION ,
-  STATL_OBSERVATION_PROBABILITIY_MATRIX 
+  STATL_OBSERVATION_PROBABILITIY_MATRIX ,
+  STATL_THEORETICAL ,
+  STATL_RESTORATION ,
+  STATL_WEIGHTS ,
+  STATL_Q_Q_PLOT
 };
 
 
@@ -348,6 +360,7 @@ enum {
   STATP_NON_CONSECUTIVE_OUTPUTS ,
   STATP_OBSERVATION_DISTRIBUTION_OVERLAP ,
   STATP_OBSERVATION_DISTRIBUTION_NON_OVERLAP ,
+  STATP_OBSERVATION_DISTRIBUTION_TYPE ,
   STATP_NB_OUTPUT_PROCESS ,
   STATP_OUTPUT_PROCESS_INDEX
 };
@@ -413,6 +426,7 @@ enum {
 
   STATR_MARGINAL_FREQUENCY_DISTRIBUTION ,
   STATR_MARGINAL_HISTOGRAM ,
+  STATR_HISTOGRAM_STEP ,
   STATR_BAD ,
   STATR_NB_VECTOR ,
   STATR_NB_VARIABLE ,
