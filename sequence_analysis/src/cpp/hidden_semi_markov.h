@@ -113,9 +113,12 @@ public :
                 counting_flag) {}
     HiddenSemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
                      int inb_output_process , NonparametricProcess **nonparametric_observation ,
-                     DiscreteParametricProcess **parametric_observation , int length , bool counting_flag)
+                     DiscreteParametricProcess **discrete_parametric_observation ,
+                     ContinuousParametricProcess **continuous_parametric_observation ,
+                     int length , bool counting_flag)
     :SemiMarkov(pchain , poccupancy , inb_output_process , nonparametric_observation ,
-                parametric_observation , length , counting_flag) {}
+                discrete_parametric_observation ,
+                continuous_parametric_observation , length , counting_flag) {}
     HiddenSemiMarkov(const HiddenSemiMarkov &hsmarkov , bool data_flag = true ,
                      int param = I_DEFAULT)
     :SemiMarkov(hsmarkov , data_flag , param) {}
