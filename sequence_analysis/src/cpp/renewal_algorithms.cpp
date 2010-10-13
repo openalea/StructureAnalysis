@@ -38,13 +38,16 @@
 
 #include <math.h>
 #include <iomanip>
+
+#include "tool/config.h"
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/stat_label.h"
+
 #include "renewal.h"
 #include "sequence_label.h"
-#include "tool/config.h"
 
 using namespace std;
 
@@ -339,7 +342,7 @@ double interval_bisection(Reestimation<double> *distribution_reestim ,
 void Renewal::expectation_step(const TimeEvents &timev ,
                                Reestimation<double> *inter_event_reestim ,
                                Reestimation<double> *length_bias_reestim , int estimator ,
-                               bool combination , int mean_computation) const
+                               bool combination , int mean_computation_method) const
 
 {
   register int i , j;
@@ -535,7 +538,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
   }
 
   if ((estimator == COMPLETE_LIKELIHOOD) && (combination)) {
-    switch (mean_computation) {
+    switch (mean_computation_method) {
     case ESTIMATED :
       inter_event_mean = timev.htime->mean / timev.mixture->mean;
       break;
@@ -548,7 +551,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
     }
 
 #   ifdef DEBUG
-    if (mean_computation != ESTIMATED) {
+    if (mean_computation_method != ESTIMATED) {
       cout << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_MEAN] << ": "
            << inter_event_mean << " (" << timev.htime->mean / timev.mixture->mean << ") | ";
     }
@@ -590,7 +593,7 @@ void Renewal::expectation_step(const TimeEvents &timev ,
 
 Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
                                 const DiscreteParametric &iinter_event , int estimator ,
-                                int nb_iter , int equilibrium_estimator , int mean_computation ,
+                                int nb_iter , int equilibrium_estimator , int mean_computation_method ,
                                 double weight , int penalty_type , int outside) const
 
 {
@@ -696,7 +699,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
         }
 
         else {
-          switch (mean_computation) {
+          switch (mean_computation_method) {
           case ESTIMATED :
             inter_event_mean = htime->mean / mixture->mean;
             break;
@@ -721,7 +724,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
         }
 
         else {
-          switch (mean_computation) {
+          switch (mean_computation_method) {
           case ESTIMATED :
             inter_event_mean = htime->mean / mixture->mean;
             break;
@@ -795,7 +798,7 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
           case 'e' :
             renew->expectation_step(*this , inter_event_reestim ,
                                     length_bias_reestim , equilibrium_estimator ,
-                                    true , mean_computation);
+                                    true , mean_computation_method);
             break;
           }
 
@@ -908,8 +911,8 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 
 Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
                                 int estimator , int nb_iter , int equilibrium_estimator ,
-                                int mean_computation , double weight , int penalty_type ,
-                                int outside) const
+                                int mean_computation_method , double weight ,
+                                int penalty_type , int outside) const
 
 {
   double proba;
@@ -933,7 +936,8 @@ Renewal* TimeEvents::estimation(StatError &error , ostream &os , char type ,
 # endif
 
   renew = estimation(error , os , type , *iinter_event , estimator , nb_iter ,
-                     equilibrium_estimator , mean_computation , weight , penalty_type , outside);
+                     equilibrium_estimator , mean_computation_method , weight ,
+                     penalty_type , outside);
   delete iinter_event;
 
   return renew;
@@ -1170,9 +1174,10 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
                                                            const DiscreteParametric &iinter_event ,
-                                                           int estimator , int nb_iter , int mean_computation ,
-                                                           double weight , int penalty_type ,
-                                                           int outside , double iinter_event_mean) const
+                                                           int estimator , int nb_iter ,
+                                                           int mean_computation_method , double weight ,
+                                                           int penalty_type , int outside ,
+                                                           double iinter_event_mean) const
 
 {
   bool status = true;
@@ -1217,7 +1222,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
     error.update(STAT_error[STATR_PENALTY_WEIGHT]);
   }
 
-  if ((mean_computation == ESTIMATED) && (iinter_event_mean == D_DEFAULT)) {
+  if ((mean_computation_method == ESTIMATED) && (iinter_event_mean == D_DEFAULT)) {
     status = false;
     error.update(SEQ_error[SEQR_MEAN_COMPUTATION_METHOD]);
   }
@@ -1374,7 +1379,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
       switch (estimator) {
 
       case LIKELIHOOD : {
-        switch (mean_computation) {
+        switch (mean_computation_method) {
         case ESTIMATED :
           inter_event_mean = iinter_event_mean;
           break;
@@ -1392,7 +1397,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
       }
 
       case PENALIZED_LIKELIHOOD : {
-        switch (mean_computation) {
+        switch (mean_computation_method) {
         case ESTIMATED :
           inter_event_mean = iinter_event_mean;
           break;
@@ -1425,7 +1430,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
         if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
             ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
-          if (mean_computation == ESTIMATED) {
+          if (mean_computation_method == ESTIMATED) {
             inter_event_mean = iinter_event_mean;
           }
           else {
@@ -1472,7 +1477,7 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
       if ((no_event) && (no_event->offset + 1 == no_event->nb_value) && (backward_forward->nb_value > nb_value) &&
           ((forward.nb_element + no_event->nb_element) * (1. - inter_event->cumul[inb_value - 2]) > 0.)) {
-        if (mean_computation == ESTIMATED) {
+        if (mean_computation_method == ESTIMATED) {
           inter_event_mean = iinter_event_mean;
         }
         else {
@@ -1529,8 +1534,9 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
                                                            const FrequencyDistribution &backward ,
                                                            const FrequencyDistribution &forward ,
                                                            const FrequencyDistribution *no_event ,
-                                                           int estimator , int nb_iter , int mean_computation ,
-                                                           double weight , int penalty_type , int outside) const
+                                                           int estimator , int nb_iter ,
+                                                           int mean_computation_method , double weight ,
+                                                           int penalty_type , int outside) const
 
 {
   register int i;
@@ -1588,8 +1594,9 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
   iinter_event->ascii_print(cout);
 # endif
 
-  inter_event = estimation(error , os , backward , forward , no_event , *iinter_event , estimator ,
-                           nb_iter , mean_computation , weight , penalty_type , outside);
+  inter_event = estimation(error , os , backward , forward , no_event ,
+                           *iinter_event , estimator , nb_iter , mean_computation_method ,
+                           weight , penalty_type , outside);
   delete iinter_event;
 
   return inter_event;
@@ -1613,8 +1620,9 @@ DiscreteParametricModel* FrequencyDistribution::estimation(StatError &error , os
 
 Renewal* RenewalData::estimation(StatError &error , ostream &os ,
                                  const DiscreteParametric &iinter_event ,
-                                 int estimator , int nb_iter , int mean_computation ,
-                                 double weight , int penalty_type , int outside) const
+                                 int estimator , int nb_iter ,
+                                 int mean_computation_method , double weight ,
+                                 int penalty_type , int outside) const
 
 {
   register int i , j;
@@ -1694,7 +1702,7 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os ,
   }
 
   inter_event = within->estimation(error , os , *within_backward , *within_forward , no_event ,
-                                   iinter_event , estimator , nb_iter , mean_computation ,
+                                   iinter_event , estimator , nb_iter , mean_computation_method ,
                                    weight , penalty_type , outside , htime->mean / mixture->mean);
 
   delete within_backward;
@@ -1727,7 +1735,7 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os ,
  *--------------------------------------------------------------*/
 
 Renewal* RenewalData::estimation(StatError &error , ostream &os , int estimator ,
-                                 int nb_iter , int mean_computation , double weight ,
+                                 int nb_iter , int mean_computation_method , double weight ,
                                  int penalty_type , int outside) const
 
 {
@@ -1752,7 +1760,7 @@ Renewal* RenewalData::estimation(StatError &error , ostream &os , int estimator 
 # endif
 
   renew = estimation(error , os , *iinter_event , estimator , nb_iter ,
-                     mean_computation , weight , penalty_type , outside);
+                     mean_computation_method , weight , penalty_type , outside);
   delete iinter_event;
 
   return renew;
@@ -2092,24 +2100,24 @@ RenewalIterator::RenewalIterator(Renewal *irenewal , int ilength)
  *
  *--------------------------------------------------------------*/
 
-void RenewalIterator::copy(const RenewalIterator &_it)
+void RenewalIterator::copy(const RenewalIterator &iter)
 
 {
   register int i;
   int *psequence , *isequence;
 
 
-  renewal = _it.renewal;
+  renewal = iter.renewal;
   (renewal->nb_iterator)++;
 
-  interval = _it.interval;
-  counter = _it.counter;
-  length = _it.length;
+  interval = iter.interval;
+  counter = iter.counter;
+  length = iter.length;
 
   sequence = new int[length];
 
   psequence = sequence;
-  isequence = _it.sequence;
+  isequence = iter.sequence;
   for (i = 0;i < length;i++) {
     *psequence++ = *isequence++;
   }
@@ -2138,14 +2146,14 @@ RenewalIterator::~RenewalIterator()
  *
  *--------------------------------------------------------------*/
 
-RenewalIterator& RenewalIterator::operator=(const RenewalIterator &_it)
+RenewalIterator& RenewalIterator::operator=(const RenewalIterator &iter)
 
 {
-  if (&_it != this) {
+  if (&iter != this) {
     (renewal->nb_iterator)--;
     delete [] sequence;
 
-    copy(_it);
+    copy(iter);
   }
 
   return *this;
