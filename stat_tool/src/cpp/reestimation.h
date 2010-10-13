@@ -109,7 +109,9 @@ public :
     void nb_element_computation();
     void max_computation();
     void mean_computation();
-    void variance_computation();
+    void variance_computation(bool bias = false);
+
+    void mean_direction_computation(double *mean_direction) const;
 
     void distribution_estimation(Distribution *pdist) const;
     void penalized_likelihood_estimation(Distribution *dist , double weight , int type ,
