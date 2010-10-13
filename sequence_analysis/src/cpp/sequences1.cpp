@@ -40,19 +40,27 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+
+#include <boost/math/distributions/normal.hpp>
+#include <boost/math/distributions/students_t.hpp>
+
 #include "tool/rw_locale.h"
+#include "tool/config.h"
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "renewal.h"
 #include "sequences.h"
 #include "tops.h"
 #include "sequence_label.h"
 
 using namespace std;
+using namespace boost::math;
 
 
 extern bool identifier_checking(StatError &error , int nb_individual , int *individual_identifier);
@@ -67,8 +75,6 @@ extern int* select_variable(int nb_variable , int nb_selected_variable ,
 extern int column_width(int value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 
-extern double standard_normal_value_computation(double critical_probability);
-extern double t_value_computation(bool one_side , int df , double critical_probability);
 
 
 /*--------------------------------------------------------------*
@@ -588,11 +594,12 @@ Sequences::Sequences(int inb_sequence , int *iidentifier , int *ilength ,
  *  Constructeur de la classe Sequences.
  *
  *  arguments : loi empirique des longueurs des sequences, nombre de variables,
- *              flag initialisation.
+ *              type de chaque variable, flag initialisation.
  *
  *--------------------------------------------------------------*/
 
-Sequences::Sequences(const FrequencyDistribution &ihlength , int inb_variable , bool init_flag)
+Sequences::Sequences(const FrequencyDistribution &ihlength , int inb_variable ,
+                     int *itype , bool init_flag)
 
 {
   register int i , j , k;
@@ -633,8 +640,20 @@ Sequences::Sequences(const FrequencyDistribution &ihlength , int inb_variable , 
   marginal_distribution = new FrequencyDistribution*[nb_variable];
   marginal_histogram = new Histogram*[nb_variable];
 
+  if (itype) {
+    for (i = 0;i < nb_variable;i++) {
+      type[i] = itype[i];
+    }
+  }
+
+  else {
+    type[0] = STATE;
+    for (i = 1;i < nb_variable;i++) {
+      type[i] = INT_VALUE;
+    }
+  }
+
   for (i = 0;i < nb_variable;i++) {
-    type[i] = INT_VALUE;
     min_value[i] = 0.;
     max_value[i] = 0.;
     marginal_distribution[i] = NULL;
@@ -647,12 +666,25 @@ Sequences::Sequences(const FrequencyDistribution &ihlength , int inb_variable , 
     int_sequence[i] = new int*[nb_variable];
     real_sequence[i] = new double*[nb_variable];
     for (j = 0;j < nb_variable;j++) {
-      int_sequence[i][j] = new int[length[i]];
-      real_sequence[i][j] = NULL;
+      if (type[j] != REAL_VALUE) {
+        int_sequence[i][j] = new int[length[i]];
+        real_sequence[i][j] = NULL;
 
-      if (init_flag) {
-        for (k = 0;k < length[i];k++) {
-          int_sequence[i][j][k] = 0;
+        if (init_flag) {
+          for (k = 0;k < length[i];k++) {
+            int_sequence[i][j][k] = 0;
+          }
+        }
+      }
+
+      else {
+        int_sequence[i][j] = NULL;
+        real_sequence[i][j] = new double[length[i]];
+
+        if (init_flag) {
+          for (k = 0;k < length[i];k++) {
+            real_sequence[i][j][k] = 0.;
+          }
         }
       }
     }
@@ -987,10 +1019,10 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
   }
 
   for (i = 0;i < nb_variable;i++) {
-    if (type[i] != AUXILIARY) {
-      min_value_computation(i);
-      max_value_computation(i);
+    min_value_computation(i);
+    max_value_computation(i);
 
+    if (type[i] != AUXILIARY) {
       build_marginal_frequency_distribution(i);
     }
   }
@@ -999,14 +1031,14 @@ Sequences::Sequences(const Sequences &seq , int inb_sequence , int *index)
 
 /*--------------------------------------------------------------*
  *
- *  Constructeur de la classe Sequences.
+ *  Construction d'un objet Sequences avec ajout de variables auxilliaires.
  *
- *  arguments : reference sur un objet Sequences, flags sur l'ajout de variables
- *              de moyennes de segments.
+ *  arguments : reference sur un objet Sequences, flags sur l'ajout
+ *              des variables auxilliaires.
  *
  *--------------------------------------------------------------*/
 
-Sequences::Sequences(const Sequences &seq , bool *segment_mean)
+Sequences::Sequences(const Sequences &seq , bool *auxiliary)
 
 {
   register int i , j , k , m;
@@ -1075,7 +1107,7 @@ Sequences::Sequences(const Sequences &seq , bool *segment_mean)
 
   nb_variable = seq.nb_variable;
   for (i = 0;i < seq.nb_variable;i++) {
-    if (segment_mean[i]) {
+    if (auxiliary[i]) {
       nb_variable++;
     }
   }
@@ -1107,7 +1139,7 @@ Sequences::Sequences(const Sequences &seq , bool *segment_mean)
     }
     i++;
 
-    if (segment_mean[j]) {
+    if (auxiliary[j]) {
       type[i] = AUXILIARY;
       min_value[i] = 0.;
       max_value[i] = 0.;
@@ -1145,7 +1177,7 @@ Sequences::Sequences(const Sequences &seq , bool *segment_mean)
 
       j++;
 
-      if (segment_mean[k]) {
+      if (auxiliary[k]) {
         int_sequence[i][j] = NULL;
         real_sequence[i][j] = new double[length[i]];
         j++;
@@ -1487,6 +1519,10 @@ void Sequences::add_state_variable(const Sequences &seq)
 
     int_sequence[i][0] = new int[length[i]];
     real_sequence[i][0] = NULL;
+
+    for (j = 0;j < length[i];j++) {
+      int_sequence[i][0][j] = 0;
+    }
 
     for (j = 0;j < seq.nb_variable;j++) {
       if (seq.type[j] != REAL_VALUE) {
@@ -2161,7 +2197,7 @@ MarkovianSequences* Sequences::markovian_sequences(StatError &error) const
     }
 
     if ((type[i] == INT_VALUE) || (type[i] == STATE)) {
-      if (min_value[i] < 0.) {
+      if (min_value[i] < 0) {
         status = false;
         ostringstream error_message;
         error_message << STAT_label[STATL_VARIABLE] << " " << i + 1 << ": "
@@ -2904,21 +2940,23 @@ Sequences* Sequences::merge(StatError &error , int nb_sample , const Sequences *
         }
       }
 
-      for (j = 0;j < nb_sample;j++) {
-        if (pseq[j]->marginal_distribution[i]) {
-          phisto[j] = pseq[j]->marginal_distribution[i];
+      if (seq->type[i] != AUXILIARY) {
+        for (j = 0;j < nb_sample;j++) {
+          if (pseq[j]->marginal_distribution[i]) {
+            phisto[j] = pseq[j]->marginal_distribution[i];
+          }
+          else {
+            break;
+          }
         }
+
+        if (j == nb_sample) {
+          seq->marginal_distribution[i] = new FrequencyDistribution(nb_sample , phisto);
+        }
+
         else {
-          break;
+          seq->build_marginal_histogram(i);
         }
-      }
-
-      if (j == nb_sample) {
-        seq->marginal_distribution[i] = new FrequencyDistribution(nb_sample , phisto);
-      }
-
-      else {
-        seq->build_marginal_histogram(i);
       }
     }
 
@@ -3012,16 +3050,19 @@ Sequences* Sequences::shift(StatError &error , int variable , int shift_param) c
     }
     }
 
+    seq->min_value[variable] = min_value[variable] + shift_param;
+    seq->max_value[variable] = max_value[variable] + shift_param;
+
     if ((variable + 1 < seq->nb_variable) && (seq->type[variable + 1] == AUXILIARY)) {
       for (i = 0;i < seq->nb_sequence;i++) {
         for (j = 0;j < seq->length[i];j++) {
           seq->real_sequence[i][variable + 1][j] = real_sequence[i][variable + 1][j] + shift_param;
         }
       }
-    }
 
-    seq->min_value[variable] = min_value[variable] + shift_param;
-    seq->max_value[variable] = max_value[variable] + shift_param;
+      seq->min_value[variable + 1] = min_value[variable + 1] + shift_param;
+      seq->max_value[variable + 1] = max_value[variable + 1] + shift_param;
+    }
 
     if ((seq->type[variable] == INT_VALUE) && (seq->min_value[variable] >= 0) &&
         (seq->max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
@@ -3087,16 +3128,19 @@ Sequences* Sequences::shift(StatError &error , int variable , double shift_param
       }
     }
 
+    seq->min_value[variable] = min_value[variable] + shift_param;
+    seq->max_value[variable] = max_value[variable] + shift_param;
+
     if ((variable + 1 < seq->nb_variable) && (seq->type[variable + 1] == AUXILIARY)) {
       for (i = 0;i < seq->nb_sequence;i++) {
         for (j = 0;j < seq->length[i];j++) {
           seq->real_sequence[i][variable + 1][j] = real_sequence[i][variable + 1][j] + shift_param;
         }
       }
-    }
 
-    seq->min_value[variable] = min_value[variable] + shift_param;
-    seq->max_value[variable] = max_value[variable] + shift_param;
+      seq->min_value[variable + 1] = min_value[variable + 1] + shift_param;
+      seq->max_value[variable + 1] = max_value[variable + 1] + shift_param;
+    }
 
     seq->build_marginal_histogram(variable);
   }
@@ -3125,32 +3169,58 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , int mod
   // regroupement des valeurs entieres
 
   case INT_VALUE : {
-    for (i = 0;i < nb_sequence;i++) {
-      switch (mode) {
+    switch (mode) {
 
-      case FLOOR : {
+    case FLOOR : {
+      for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           int_sequence[i][variable][j] = seq.int_sequence[i][variable][j] / step;
         }
-        break;
       }
 
-      case ROUND : {
+      min_value[variable] = (int)seq.min_value[variable] / step;
+      max_value[variable] = (int)seq.max_value[variable] / step;
+//      min_value[variable] = floor(seq.min_value[variable] / step);
+//      max_value[variable] = floor(seq.max_value[variable] / step);
+      break;
+    }
+
+    case ROUND : {
+      for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           int_sequence[i][variable][j] = (seq.int_sequence[i][variable][j] + step / 2) / step;
 //          int_sequence[i][variable][j] = (int)::round((double)seq.int_sequence[i][variable][j] / (double)step);
         }
-        break;
       }
 
-      case CEIL : {
+      min_value[variable] = ((int)seq.min_value[variable] + step / 2) / step;
+      max_value[variable] = ((int)seq.max_value[variable] + step / 2) / step;
+//      min_value[variable] = ::round(seq.min_value[variable] / step);
+//      max_value[variable] = ::round(seq.max_value[variable] / step);
+      break;
+    }
+
+    case CEIL : {
+      for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           int_sequence[i][variable][j] = (seq.int_sequence[i][variable][j] + step - 1) / step;
 //          int_sequence[i][variable][j] = (int)ceil((double)seq.int_sequence[i][variable][j] / (double)step);
         }
-        break;
       }
-      }
+
+      min_value[variable] = ((int)seq.min_value[variable] + step - 1) / step;
+      max_value[variable] = ((int)seq.max_value[variable] + step - 1) / step;
+//      min_value[variable] = ceil(seq.min_value[variable] / step);
+//      max_value[variable] = ceil(seq.max_value[variable] / step);
+      break;
+    }
+    }
+
+    if (seq.marginal_distribution[variable]) {
+      marginal_distribution[variable] = new FrequencyDistribution(*(seq.marginal_distribution[variable]) , 'c' , step , mode);
+    }
+    else {
+      build_marginal_frequency_distribution(variable);
     }
     break;
   }
@@ -3164,55 +3234,23 @@ void Sequences::cluster(const Sequences &seq , int variable , int step , int mod
       }
     }
 
+    min_value[variable] = seq.min_value[variable] / step;
+    max_value[variable] = seq.max_value[variable] / step;
+
+    build_marginal_histogram(variable , seq.marginal_histogram[variable]->step / step);
+
     if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           real_sequence[i][variable + 1][j] = seq.real_sequence[i][variable + 1][j] / step;
         }
       }
+
+      min_value[variable + 1] = seq.min_value[variable + 1] / step;
+      max_value[variable + 1] = seq.max_value[variable + 1] / step;
     }
     break;
   }
-  }
-
-  switch (type[variable]) {
-
-  case INT_VALUE : {
-    switch (mode) {
-    case FLOOR :
-      min_value[variable] = (int)seq.min_value[variable] / step;
-      max_value[variable] = (int)seq.max_value[variable] / step;
-//      min_value[variable] = floor(seq.min_value[variable] / step);
-//      max_value[variable] = floor(seq.max_value[variable] / step);
-      break;
-    case ROUND :
-      min_value[variable] = ((int)seq.min_value[variable] + step / 2) / step;
-      max_value[variable] = ((int)seq.max_value[variable] + step / 2) / step;
-//      min_value[variable] = ::round(seq.min_value[variable] / step);
-//      max_value[variable] = ::round(seq.max_value[variable] / step);
-      break;
-    case CEIL :
-      min_value[variable] = ((int)seq.min_value[variable] + step - 1) / step;
-      max_value[variable] = ((int)seq.max_value[variable] + step - 1) / step;
-//      min_value[variable] = ceil(seq.min_value[variable] / step);
-//      max_value[variable] = ceil(seq.max_value[variable] / step);
-      break;
-    }
-    break;
-  }
-
-  case REAL_VALUE : {
-    min_value[variable] = seq.min_value[variable] / step;
-    max_value[variable] = seq.max_value[variable] / step;
-    break;
-  }
-  }
-
-  if (seq.marginal_distribution[variable]) {
-    marginal_distribution[variable] = new FrequencyDistribution(*(seq.marginal_distribution[variable]) , 'c' , step , mode);
-  }
-  else {
-    build_marginal_frequency_distribution(variable);
   }
 }
 
@@ -3252,16 +3290,12 @@ Sequences* Sequences::cluster(StatError &error , int variable , int step , int m
     }
 
     if ((type[variable] == INT_VALUE) && (variable + 1 < nb_variable) &&
-        ((type[variable + 1] != INT_VALUE) && (type[variable + 1] != STATE) &&
-         (type[variable + 1] != REAL_VALUE))) {
+        (type[variable + 1] == AUXILIARY)) {
       status = false;
-      ostringstream error_message , correction_message;
+      ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
-      correction_message << STAT_variable_word[INT_VALUE] << " or "
-                         << STAT_variable_word[STATE] << " or "
-                         << STAT_variable_word[REAL_VALUE];
-      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      error.update((error_message.str()).c_str());
     }
   }
 
@@ -3416,16 +3450,12 @@ Sequences* Sequences::transcode(StatError &error , int variable , int *symbol) c
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
     }
 
-    if ((variable + 1 < nb_variable) && ((type[variable + 1] != INT_VALUE) &&
-         (type[variable + 1] != STATE) && (type[variable + 1] != REAL_VALUE))) {
+    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
       status = false;
-      ostringstream error_message , correction_message;
+      ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
-      correction_message << STAT_variable_word[INT_VALUE] << " or "
-                         << STAT_variable_word[STATE] << " or "
-                         << STAT_variable_word[REAL_VALUE];
-      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      error.update((error_message.str()).c_str());
     }
 
     if (status) {
@@ -3535,16 +3565,12 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
       error.update(STAT_error[STATR_NB_CLASS]);
     }
 
-    if ((variable + 1 < nb_variable) && ((type[variable + 1] != INT_VALUE) &&
-         (type[variable + 1] != STATE) && (type[variable + 1] != REAL_VALUE))) {
+    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
       status = false;
-      ostringstream error_message , correction_message;
+      ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
-      correction_message << STAT_variable_word[INT_VALUE] << " or "
-                         << STAT_variable_word[STATE] << " or "
-                         << STAT_variable_word[REAL_VALUE];
-      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      error.update((error_message.str()).c_str());
     }
   }
 
@@ -3682,16 +3708,12 @@ Sequences* Sequences::cluster(StatError &error , int variable ,
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[REAL_VALUE]);
     }
 
-    if ((variable + 1 < nb_variable) && ((type[variable + 1] != INT_VALUE) &&
-         (type[variable + 1] != STATE) && (type[variable + 1] != REAL_VALUE))) {
+    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
       status = false;
-      ostringstream error_message , correction_message;
+      ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
-      correction_message << STAT_variable_word[INT_VALUE] << " or "
-                         << STAT_variable_word[STATE] << " or "
-                         << STAT_variable_word[REAL_VALUE];
-      error.correction_update((error_message.str()).c_str() , (correction_message.str()).c_str());
+      error.update((error_message.str()).c_str());
     }
   }
 
@@ -3778,7 +3800,7 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
   if (status) {
     seq = new Sequences(*this , variable , type[variable]);
 
-    switch (seq->type[j]) {
+    switch (seq->type[variable]) {
 
     // mise a l'echelle des valeurs entieres
 
@@ -3803,18 +3825,21 @@ Sequences* Sequences::scaling(StatError &error , int variable , int scaling_coef
     }
     }
 
+    seq->min_value[variable] = min_value[variable] * scaling_coeff;
+    seq->max_value[variable] = max_value[variable] * scaling_coeff;
+
+    seq->build_marginal_frequency_distribution(variable);
+
     if ((variable + 1 < seq->nb_variable) && (seq->type[variable + 1] == AUXILIARY)) {
       for (i = 0;i < seq->nb_sequence;i++) {
         for (j = 0;j < seq->length[i];j++) {
           seq->real_sequence[i][variable + 1][j] = real_sequence[i][variable + 1][j] * scaling_coeff;
         }
       }
+
+      seq->min_value[variable + 1] = min_value[variable + 1] * scaling_coeff;
+      seq->max_value[variable + 1] = max_value[variable + 1] * scaling_coeff;
     }
-
-    seq->min_value[variable] = min_value[variable] * scaling_coeff;
-    seq->max_value[variable] = max_value[variable] * scaling_coeff;
-
-    seq->build_marginal_frequency_distribution(variable);
   }
 
   return seq;
@@ -4535,20 +4560,28 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
 
     bnb_variable = (keep ? inb_variable : nb_variable - inb_variable);
 
-    itype = new int[bnb_variable];
     for (i = 0;i < bnb_variable;i++) {
-      itype[i] = type[variable[i]];
-      if ((type[variable[i]] == AUXILIARY) && (variable[i - 1] != variable[i] - 1)) {
-        itype[i] = REAL_VALUE;
+      if ((type[variable[i]] == AUXILIARY) &&
+          ((i == 0) || (variable[i - 1] != variable[i] - 1))) {
+        status = false;
+        error.update(SEQ_error[SEQR_VARIABLE_INDICES]);
       }
     }
 
-    seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
-                        index_parameter_type , bnb_variable , itype);
-    seq->select_variable(*this , variable);
+    if (status) {
+      itype = new int[bnb_variable];
+      for (i = 0;i < bnb_variable;i++) {
+        itype[i] = type[variable[i]];
+      }
+
+      seq = new Sequences(nb_sequence , identifier , length , vertex_identifier ,
+                          index_parameter_type , bnb_variable , itype);
+      seq->select_variable(*this , variable);
+
+      delete [] itype;
+    }
 
     delete [] variable;
-    delete [] itype;
   }
 
   return seq;
@@ -4560,7 +4593,8 @@ Sequences* Sequences::select_variable(StatError &error , int inb_variable ,
  *  Concatenation des variables d'objets Sequences.
  *
  *  arguments : reference sur un objet StatError, nombre d'objets Sequences,
- *              pointeurs sur les objets Sequences, echantillon de reference pour les identificateurs.
+ *              pointeurs sur les objets Sequences, echantillon de reference pour
+ *              les identificateurs.
  *
  *--------------------------------------------------------------*/
 
@@ -6403,10 +6437,8 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
             }
             i++;
 
-/*            seq->min_value_computation(i);
+            seq->min_value_computation(i);
             seq->max_value_computation(i);
-
-            seq->build_marginal_histogram(i); */
             i++;
           }
         }
@@ -6421,10 +6453,8 @@ Sequences* Sequences::moving_average(StatError &error , int nb_point , double *f
             seq->build_marginal_frequency_distribution(i);
             i++;
 
-/*            seq->min_value_computation(i);
+            seq->min_value_computation(i);
             seq->max_value_computation(i);
-
-            seq->build_marginal_histogram(i); */
             i++;
           }
         }
@@ -6526,14 +6556,17 @@ bool Sequences::pointwise_average_ascii_print(StatError &error , const char *pat
     if (standard_deviation) {
 
 #     ifdef MESSAGE
-      standard_normal_value = standard_normal_value_computation(0.025);
+      normal normal_dist;
+      standard_normal_value = quantile(complement(normal_dist , 0.025));
       cout << "\nTEST: " << standard_normal_value;
 #     endif
 
       t_value = new double[length[0]];
       for (i = 0;i < length[0];i++) {
         if (size[i] > 1) {
-          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
+//          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
+          students_t students_dist(size[i] - 1);
+          t_value[i] = quantile(complement(students_dist , 0.025));
         }
       }
 
@@ -6726,12 +6759,15 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const cha
     status = true;
 
     if (standard_deviation) {
-//      standard_normal_value = standard_normal_value_computation(0.025);
+//      normal normal_dist;
+//      standard_normal_value = quantile(complement(normal_dist , 0.025));
 
       t_value = new double[length[0]];
       for (i = 0;i < length[0];i++) {
         if (size[i] > 1) {
-          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
+//          t_value[i] = t_value_computation(false , size[i] - 1 , 0.05);
+          students_t students_dist(size[i] - 1);
+          t_value[i] = quantile(complement(students_dist , 0.025));
         }
       }
     }
@@ -8225,14 +8261,16 @@ void Sequences::marginal_frequency_distribution_computation(int variable)
 void Sequences::build_marginal_frequency_distribution(int variable)
 
 {
-  if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY) &&
-      (min_value[variable] >= 0) && (max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
-    marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
-    marginal_frequency_distribution_computation(variable);
-  }
+  if (type[variable] != AUXILIARY) {
+    if ((type[variable] != REAL_VALUE) && (min_value[variable] >= 0) &&
+        (max_value[variable] <= MARGINAL_DISTRIBUTION_MAX_VALUE)) {
+      marginal_distribution[variable] = new FrequencyDistribution((int)max_value[variable] + 1);
+      marginal_frequency_distribution_computation(variable);
+    }
 
-  else {
-    build_marginal_histogram(variable);
+    else {
+      build_marginal_histogram(variable);
+    }
   }
 }
 
@@ -8250,6 +8288,8 @@ void Sequences::build_marginal_histogram(int variable , double step)
 {
   if ((!marginal_histogram[variable]) || (step != marginal_histogram[variable]->step)) {
     register int i , j;
+    int *pisequence;
+    double *prsequence;
 
 
     // construction de l'histogramme
@@ -8266,16 +8306,17 @@ void Sequences::build_marginal_histogram(int variable , double step)
     }
 
     if (marginal_histogram[variable]) {
-      marginal_histogram[variable]->nb_category = (int)::round((max_value[variable] - min_value[variable]) / step) + 1;
+      marginal_histogram[variable]->nb_category = (int)floor((max_value[variable] - min_value[variable]) / step) + 1;
 
       delete [] marginal_histogram[variable]->frequency;
       marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_category];
     }
 
     else {
-      marginal_histogram[variable] = new Histogram((int)::round((max_value[variable] - min_value[variable]) / step) + 1 , false);
+      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - min_value[variable]) / step) + 1 , false);
 
-      marginal_histogram[variable]->nb_individual = cumul_length;
+      marginal_histogram[variable]->nb_element = cumul_length;
+      marginal_histogram[variable]->type = type[variable];
       marginal_histogram[variable]->min_value = min_value[variable];
       marginal_histogram[variable]->max_value = max_value[variable];
     }
@@ -8289,18 +8330,20 @@ void Sequences::build_marginal_histogram(int variable , double step)
 
     if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
+        pisequence = int_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          marginal_histogram[variable]->frequency[(int)((int_sequence[i][variable][j] - min_value[variable] + step / 2.) / step)]++;
-          marginal_histogram[variable]->frequency[(int)::round((int_sequence[i][variable][j] - min_value[variable]) / step)]++;
+//          (marginal_histogram[variable]->frequency[(int)((*pisequence++ - min_value[variable]) / step)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*pisequence++ - min_value[variable]) / step)])++;
         }
       }
     }
 
     else {
       for (i = 0;i < nb_sequence;i++) {
+        prsequence = real_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          marginal_histogram[variable]->frequency[(int)((real_sequence[i][variable][j] - min_value[variable] + step / 2.) / step)]++;
-          marginal_histogram[variable]->frequency[(int)::round((real_sequence[i][variable][j] - min_value[variable]) / step)]++;
+//          (marginal_histogram[variable]->frequency[(int)((*prsequence++ - min_value[variable]) / step)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*prsequence++ - min_value[variable]) / step)])++;
         }
       }
     }
@@ -8312,7 +8355,7 @@ void Sequences::build_marginal_histogram(int variable , double step)
 
 /*--------------------------------------------------------------*
  *
- *  Changement du pas de regroupement d'un l'histogramme marginal.
+ *  Changement du pas de regroupement de l'histogramme marginal.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
  *              pas de regroupement.
@@ -8338,6 +8381,10 @@ bool Sequences::select_step(StatError &error , int variable , double step)
     if (!marginal_histogram[variable]) {
       status = false;
       error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+    }
+    if ((step <= 0.) || ((type[variable] != REAL_VALUE) && ((int)step != step))) {
+      status = false;
+      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
     }
   }
 
@@ -8371,7 +8418,7 @@ double Sequences::mean_computation(int variable) const
   else {
     mean = 0.;
 
-    if (type[variable] != REAL_VALUE) {
+    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           mean += int_sequence[i][variable][j];
@@ -8417,7 +8464,7 @@ double Sequences::variance_computation(int variable , double mean) const
     variance = 0.;
 
     if (cumul_length > 1) {
-      if (type[variable] != REAL_VALUE) {
+      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
@@ -8465,7 +8512,7 @@ double Sequences::mean_absolute_deviation_computation(int variable , double mean
   else {
     mean_absolute_deviation = 0.;
 
-    if (type[variable] != REAL_VALUE) {
+    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           mean_absolute_deviation += fabs(int_sequence[i][variable][j] - mean);
@@ -8506,7 +8553,7 @@ double Sequences::mean_absolute_difference_computation(int variable) const
   mean_absolute_difference = 0.;
 
   if (cumul_length > 1) {
-    if (type[variable] != REAL_VALUE) {
+    if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
       for (i = 0;i < nb_sequence;i++) {
         for (j = 0;j < length[i];j++) {
           for (k = j + 1;k < length[i];k++) {
@@ -8577,7 +8624,7 @@ double Sequences::skewness_computation(int variable , double mean , double varia
     skewness = 0.;
 
     if ((cumul_length > 2) && (variance > 0.)) {
-      if (type[variable] != REAL_VALUE) {
+      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
@@ -8632,7 +8679,7 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
     else {
       kurtosis = 0.;
 
-      if (type[variable] != REAL_VALUE) {
+      if ((type[variable] != REAL_VALUE) && (type[variable] != AUXILIARY)) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < length[i];j++) {
             diff = int_sequence[i][variable][j] - mean;
@@ -8655,4 +8702,89 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
   }
 
   return kurtosis;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la direction moyenne d'une variable circulaire.
+ *
+ *  arguments : indice de la variable, unite (DEGREE/GRADIAN).
+ *
+ *--------------------------------------------------------------*/
+
+double* Sequences::mean_direction_computation(int variable , int unit) const
+
+{
+  register int i , j;
+  double *mean_direction;
+
+
+  mean_direction = new double[4];
+//  mean_direction = new double[2];
+
+  mean_direction[0] = 0.;
+  mean_direction[1] = 0.;
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    for (i = 0;i < nb_sequence;i++) {
+      for (j = 0;j < length[i];j++) {
+        mean_direction[0] += cos(int_sequence[i][variable][j] * M_PI / 180);
+        mean_direction[1] += sin(int_sequence[i][variable][j] * M_PI / 180);
+      }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    switch (unit) {
+
+    case DEGREE : {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean_direction[0] += cos(real_sequence[i][variable][j] * M_PI / 180);
+          mean_direction[1] += sin(real_sequence[i][variable][j] * M_PI / 180);
+        }
+      }
+      break;
+    }
+
+    case RADIAN : {
+      for (i = 0;i < nb_sequence;i++) {
+        for (j = 0;j < length[i];j++) {
+          mean_direction[0] += cos(real_sequence[i][variable][j]);
+          mean_direction[1] += sin(real_sequence[i][variable][j]);
+        }
+      }
+      break;
+    }
+    }
+    break;
+  }
+  }
+
+  mean_direction[0] /= cumul_length;
+  mean_direction[1] /= cumul_length;
+
+  mean_direction[2] = sqrt(mean_direction[0] * mean_direction[0] +
+                           mean_direction[1] * mean_direction[1]);
+
+  if (mean_direction[2] > 0.) {
+    mean_direction[3] = atan(mean_direction[1] / mean_direction[0]);
+
+    if (mean_direction[0] < 0.) {
+      mean_direction[3] += M_PI;
+    }
+    if (unit == DEGREE) {
+      mean_direction[3] *= (180 / M_PI);
+    }
+  }
+
+  else {
+    mean_direction[3] = D_DEFAULT;
+  }
+
+  return mean_direction;
 }
