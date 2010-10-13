@@ -40,21 +40,22 @@
 #include <sstream>
 #include <iomanip>
 
+#include <boost/math/distributions/normal.hpp>
+
+#include "tool/config.h"
 #include "stat_tools.h"
 #include "vectors.h"
 #include "regression.h"
 #include "stat_label.h"
 
-#include "tool/config.h"
-
 using namespace std;
+using namespace boost::math;
 
 
 extern int column_width(int value);
 extern int column_width(int min_value , int max_value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
-extern double standard_normal_value_computation(double critical_probability);
 
 
 
@@ -1269,6 +1270,9 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
     min_response = MIN(min_computation() , vectors->min_value[1]);
     max_response = MAX(max_computation() , vectors->max_value[1]);
 
+    normal dist;
+    threshold = quantile(complement(dist , 0.025));
+
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
 
@@ -1374,8 +1378,6 @@ bool Regression::plot_write(StatError &error , const char *prefix ,
       if (max_value - min_value < TIC_THRESHOLD) {
         out_file << "set xtics 0,1" << endl;
       }
-
-      threshold = standard_normal_value_computation(0.025);
 
       out_file << "plot [" << vectors->min_value[0] << ":" << MAX(vectors->max_value[0] , vectors->min_value[0] + 1)
                << "] [" << MIN(min_standard_residual , -threshold) << ":" << MAX(max_standard_residual , threshold)
@@ -1521,7 +1523,8 @@ MultiPlotSet* Regression::get_plotable() const
     pstandard_residual++;
   }
 
-  threshold = standard_normal_value_computation(0.025);
+  normal dist;
+  threshold = quantile(complement(dist , 0.025));
 
   plot[1].xrange = Range(vectors->min_value[0] ,
                          MAX(vectors->max_value[0] , vectors->min_value[0] + 1));
