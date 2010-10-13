@@ -148,7 +148,7 @@ public :
     Regression();
     Regression(int iident , int explanatory_variable , int response_variable , const Vectors &vec);
     Regression(const Regression &regression);
-    virtual ~Regression();
+    ~Regression();
     Regression& operator=(const Regression &regression);
 
     std::ostream& line_write(std::ostream &os) const;
