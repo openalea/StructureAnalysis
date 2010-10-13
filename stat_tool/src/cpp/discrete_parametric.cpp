@@ -38,6 +38,7 @@
 
 #include <math.h>
 #include <sstream>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
@@ -57,7 +58,7 @@ extern bool cumul_matching_plot_print(const char *path , int nb_cumul , int *off
 
 /*--------------------------------------------------------------*
  *
- *  Initialisation des parametres d'une loi.
+ *  Initialisation des parametres d'une loi discrete.
  *
  *  arguments : bornes inferieure et superieure, parametre, probabilite.
  *
@@ -76,7 +77,7 @@ void DiscreteParametric::init(int iinf_bound , int isup_bound ,
 
 /*--------------------------------------------------------------*
  *
- *  Initialisation de l'identificateur et des parametres d'une loi.
+ *  Initialisation de l'identificateur et des parametres d'une loi discrete.
  *
  *  arguments : identificateur, bornes inferieure et superieure,
  *              parametre, probabilite.
@@ -348,6 +349,7 @@ DiscreteParametric& DiscreteParametric::operator=(const DiscreteParametric &dist
   return *this;
 }
 
+
 /*--------------------------------------------------------------*
  *
  *  Analyse du format d'un objet DiscreteParametric.
@@ -398,7 +400,7 @@ DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_
 
       if (i == 0) {
         for (j = BINOMIAL;j <= last_ident;j++) {
-          if (token == STAT_distribution_word[j]) {
+          if (token == STAT_discrete_distribution_word[j]) {
             ident = j;
             break;
           }
@@ -594,7 +596,7 @@ DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des parametres d'une loi.
+ *  Ecriture des parametres d'une loi discrete.
  *
  *  argument : stream.
  *
@@ -603,7 +605,7 @@ DiscreteParametric* discrete_parametric_parsing(StatError &error , ifstream &in_
 ostream& DiscreteParametric::ascii_print(ostream &os) const
 
 {
-  os << STAT_distribution_word[ident] << "   ";
+  os << STAT_discrete_distribution_word[ident] << "   ";
 
   if (inf_bound != I_DEFAULT) {
     os << STAT_word[STATW_INF_BOUND] << " : " << inf_bound << "   ";
@@ -625,7 +627,7 @@ ostream& DiscreteParametric::ascii_print(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des parametres d'une loi au format tableur.
+ *  Ecriture des parametres d'une loi discrete au format tableur.
  *
  *  argument : stream.
  *
@@ -634,7 +636,7 @@ ostream& DiscreteParametric::ascii_print(ostream &os) const
 ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 
 {
-  os << STAT_distribution_word[ident] << "\t";
+  os << STAT_discrete_distribution_word[ident] << "\t";
 
   if (inf_bound != I_DEFAULT) {
     os << STAT_word[STATW_INF_BOUND] << "\t" << inf_bound << "\t";
@@ -656,7 +658,7 @@ ostream& DiscreteParametric::spreadsheet_print(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture des parametres d'une loi au format Gnuplot (titre d'une courbe).
+ *  Ecriture des parametres d'une loi discrete au format Gnuplot.
  *
  *  argument : stream.
  *
@@ -666,17 +668,17 @@ ostream& DiscreteParametric::plot_title_print(ostream &os) const
 
 {
   if (ident != NONPARAMETRIC) {
-    os << " " << STAT_distribution_letter[ident] << "(";
+    os << " " << STAT_discrete_distribution_letter[ident] << "(";
 
     os << inf_bound;
     if (sup_bound != I_DEFAULT) {
-      os << "," << sup_bound;
+      os << ", " << sup_bound;
     }
     if (parameter != D_DEFAULT) {
-      os << "," << parameter;
+      os << ", " << parameter;
     }
     if (probability != D_DEFAULT) {
-      os << "," << probability;
+      os << ", " << probability;
     }
     os << ")";
   }
@@ -687,7 +689,7 @@ ostream& DiscreteParametric::plot_title_print(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Visualisation d'une loi parametrique.
+ *  Visualisation d'une loi discrete parametrique.
  *
  *  arguments : stream, reference sur un objet DiscreteParametric.
  *
@@ -710,7 +712,7 @@ ostream& operator<<(ostream &os , const DiscreteParametric &dist)
 
 /*--------------------------------------------------------------*
  *
- *  Calcul du nombre de parametres d'une loi.
+ *  Calcul du nombre de parametres d'une loi discrete.
  *
  *--------------------------------------------------------------*/
 
@@ -744,7 +746,7 @@ int DiscreteParametric::nb_parameter_computation()
 
 /*--------------------------------------------------------------*
  *
- *  Mise a jour du nombre de parametres d'une loi.
+ *  Mise a jour du nombre de parametres d'une loi discrete.
  *
  *--------------------------------------------------------------*/
 
@@ -757,7 +759,7 @@ void DiscreteParametric::nb_parameter_update()
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la moyenne d'une loi parametrique.
+ *  Calcul de la moyenne d'une loi discrete parametrique.
  *
  *--------------------------------------------------------------*/
 
@@ -791,7 +793,7 @@ double DiscreteParametric::parametric_mean_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la variance d'une loi parametrique.
+ *  Calcul de la variance d'une loi discrete parametrique.
  *
  *--------------------------------------------------------------*/
 
@@ -826,7 +828,7 @@ double DiscreteParametric::parametric_variance_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul du coefficient d'asymetrie d'une loi parametrique.
+ *  Calcul du coefficient d'asymetrie d'une loi discrete parametrique.
  *
  *--------------------------------------------------------------*/
 
@@ -876,7 +878,7 @@ double DiscreteParametric::parametric_skewness_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de l'exces d'applatissement d'une loi parametrique:
+ *  Calcul de l'exces d'applatissement d'une loi discrete parametrique:
  *  exces d'applatissement = coefficient d'applatissement - 3..
  *
  *--------------------------------------------------------------*/
@@ -1170,7 +1172,7 @@ DiscreteParametricModel* discrete_parametric_ascii_read(StatError &error , const
 ostream& DiscreteParametricModel::line_write(ostream &os) const
 
 {
-  os << STAT_distribution_word[ident];
+  os << STAT_discrete_distribution_word[ident];
 
   if ((mean != D_DEFAULT) && (variance != D_DEFAULT)) {
     os << "   " << STAT_label[STATL_MEAN] << ": " << mean
@@ -1183,9 +1185,9 @@ ostream& DiscreteParametricModel::line_write(ostream &os) const
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une loi parametrique et d'une loi empirique.
+ *  Ecriture d'une loi discrete parametrique et d'une loi discrete empirique.
  *
- *  arguments : stream, pointeur sur une loi empirique,
+ *  arguments : stream, pointeur sur une loi discrete empirique,
  *              flag niveau de detail, flag fichier.
  *
  *--------------------------------------------------------------*/
@@ -1343,10 +1345,10 @@ bool DiscreteParametricModel::ascii_write(StatError &error , const char *path ,
 
 /*--------------------------------------------------------------*
  *
- *  Ecriture d'une loi parametrique et d'une loi empirique dans un fichier
- *  au format tableur.
+ *  Ecriture d'une loi discrete parametrique et d'une loi discrete empirique
+ *  dans un fichier au format tableur.
  *
- *  arguments : stream, pointeur sur une loi empirique.
+ *  arguments : stream, pointeur sur une loi discrete empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -1464,10 +1466,10 @@ bool DiscreteParametricModel::spreadsheet_write(StatError &error , const char *p
 
 /*--------------------------------------------------------------*
  *
- *  Sortie Gnuplot d'une loi parametrique et d'une loi empirique.
+ *  Sortie Gnuplot d'une loi discrete parametrique et d'une loi discrete empirique.
  *
  *  arguments : reference sur un objet StatError, prefixe des fichiers,
- *              titre des figures, pointeur sur une loi empirique.
+ *              titre des figures, pointeur sur une loi discrete empirique.
  *
  *--------------------------------------------------------------*/
 
@@ -1503,7 +1505,7 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
     poffset[0] = histo->offset;
     pnb_value[0] = histo->nb_value;
 
-    // calcul des fonctions de repartition et de concentration de la loi empirique
+    // calcul des fonctions de repartition et de concentration de la loi discrete empirique
 
     scale = histo->nb_element / (1. - complement);
     pcumul[0] = histo->cumul_computation(scale);
@@ -1726,9 +1728,9 @@ bool DiscreteParametricModel::plot_write(StatError &error , const char *prefix ,
 
 /*--------------------------------------------------------------*
  *
- *  Sortie graphique d'une loi parametrique et d'une loi empirique.
+ *  Sortie graphique d'une loi discrete parametrique et d'une loi discrete empirique.
  *
- *  argument : pointeur sur une loi empirique.
+ *  argument : pointeur sur une loi discrete empirique.
  *
  *--------------------------------------------------------------*/
 
