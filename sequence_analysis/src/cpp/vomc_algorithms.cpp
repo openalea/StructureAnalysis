@@ -39,23 +39,28 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+
+#include <boost/math/distributions/normal.hpp>
+
+#include "tool/config.h"
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distance_matrix.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "variable_order_markov.h"
 #include "sequence_label.h"
-#include "tool/config.h"
 
 using namespace std;
+using namespace boost::math;
 
 
 extern int column_width(int value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 
-extern double standard_normal_value_computation(double critical_probability);
 extern int cumul_method(int nb_value , const double *cumul , double scale = 1.);
 
 
@@ -273,25 +278,26 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
 
 {
   register int i , j , k;
-  int nb_value , memory , start , length , *pstate , **poutput;
-  double likelihood = 0. , proba;
+  int nb_value , memory , start , length , *pstate , **pioutput;
+  double likelihood = 0. , proba , **proutput;
 
 
   // verification de la compatibilite entre le modele et les donnees
 
   if (nb_output_process + 1 == seq.nb_variable) {
     for (i = 0;i <= nb_output_process;i++) {
-      if (nonparametric_process[i]) {
-        nb_value = nonparametric_process[i]->nb_value;
-      }
-      else {
-        nb_value = parametric_process[i]->nb_value;
-      }
+      if ((nonparametric_process[i]) || (discrete_parametric_process[i])) {
+        if (nonparametric_process[i]) {
+          nb_value = nonparametric_process[i]->nb_value;
+        }
+        else {
+          nb_value = discrete_parametric_process[i]->nb_value;
+        }
 
-      if ((seq.marginal_distribution[i]) &&
-          (nb_value < seq.marginal_distribution[i]->nb_value)) {
-        likelihood = D_INF;
-        break;
+        if (nb_value < seq.marginal_distribution[i]->nb_value) {
+          likelihood = D_INF;
+          break;
+        }
       }
     }
   }
@@ -302,7 +308,8 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
 
   if (likelihood != D_INF) {
     if (nb_output_process > 0) {
-      poutput = new int*[nb_output_process];
+      pioutput = new int*[nb_output_process];
+      proutput = new double*[nb_output_process];
     }
 
     for (i = 0;i < seq.nb_sequence;i++) {
@@ -360,13 +367,32 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
         }
 
         for (j = 0;j < nb_output_process;j++) {
-          poutput[j] = seq.int_sequence[i][j + 1] + start - 1;
+          switch (seq.type[j + 1]) {
+          case INT_VALUE :
+            pioutput[j] = seq.int_sequence[i][j + 1] + start - 1;
+            break;
+          case REAL_VALUE :
+            proutput[j] = seq.real_sequence[i][j + 1] + start - 1;
+            break;
+          }
 
           if (nonparametric_process[j + 1]) {
-            proba = nonparametric_process[j + 1]->observation[*pstate]->mass[*poutput[j]];
+            proba = nonparametric_process[j + 1]->observation[*pstate]->mass[*pioutput[j]];
           }
+
+          else if (discrete_parametric_process[j + 1]) {
+            proba = discrete_parametric_process[j + 1]->observation[*pstate]->mass[*pioutput[j]];
+          }
+
           else {
-            proba = parametric_process[j + 1]->observation[*pstate]->mass[*poutput[j]];
+            switch (seq.type[j + 1]) {
+            case INT_VALUE :
+              proba = continuous_parametric_process[j + 1]->observation[*pstate]->mass_computation(*pioutput[j] - seq.min_interval[j + 1] / 2 , *pioutput[j] + seq.min_interval[j + 1] / 2);
+              break;
+            case REAL_VALUE :
+              proba = continuous_parametric_process[j + 1]->observation[*pstate]->mass_computation(*proutput[j] - seq.min_interval[j + 1] / 2 , *proutput[j] + seq.min_interval[j + 1] / 2);
+               break;
+            }
           }
 
           if (proba > 0.) {
@@ -390,10 +416,24 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
 
           for (k = 0;k < nb_output_process;k++) {
             if (nonparametric_process[k + 1]) {
-              proba = nonparametric_process[k + 1]->observation[*pstate]->mass[*++poutput[k]];
+              proba = nonparametric_process[k + 1]->observation[*pstate]->mass[*++pioutput[k]];
             }
+
+            else if (discrete_parametric_process[k + 1]) {
+              proba = discrete_parametric_process[k + 1]->observation[*pstate]->mass[*++pioutput[k]];
+            }
+
             else {
-              proba = parametric_process[k + 1]->observation[*pstate]->mass[*++poutput[k]];
+              switch (seq.type[k + 1]) {
+              case INT_VALUE :
+                pioutput[k]++;
+                proba = continuous_parametric_process[k + 1]->observation[*pstate]->mass_computation(*pioutput[k] - seq.min_interval[k + 1] / 2 , *pioutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              case REAL_VALUE :
+                proutput[k]++;
+                proba = continuous_parametric_process[k + 1]->observation[*pstate]->mass_computation(*proutput[k] - seq.min_interval[k + 1] / 2 , *proutput[k] + seq.min_interval[k + 1] / 2);
+                break;
+              }
             }
 
             if (proba > 0.) {
@@ -435,7 +475,8 @@ double VariableOrderMarkov::likelihood_computation(const MarkovianSequences &seq
     }
 
     if (nb_output_process > 0) {
-      delete [] poutput;
+      delete [] pioutput;
+      delete [] proutput;
     }
   }
 
@@ -567,14 +608,21 @@ double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData
 
   if (nb_output_process + 1 == seq.nb_variable) {
     for (i = 0;i <= nb_output_process;i++) {
-      if (nonparametric_process[i]) {
-        nb_value = nonparametric_process[i]->nb_value;
-      }
-      else {
-        nb_value = parametric_process[i]->nb_value;
+      if ((nonparametric_process[i]) || (discrete_parametric_process[i])) {
+        if (nonparametric_process[i]) {
+          nb_value = nonparametric_process[i]->nb_value;
+        }
+        else {
+          nb_value = discrete_parametric_process[i]->nb_value;
+        }
+
+        if (nb_value < seq.marginal_distribution[i]->nb_value) {
+          likelihood = D_INF;
+          break;
+        }
       }
 
-      if (nb_value < seq.marginal_distribution[i]->nb_value) {
+      else if (!(seq.marginal_distribution[i])) {
         likelihood = D_INF;
         break;
       }
@@ -596,14 +644,14 @@ double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData
 
         case 'o' : {
           for (j = 0;j < nb_state;j++) {
-            observation[j] = seq.observation[i][j];
+            observation[j] = seq.observation_distribution[i][j];
           }
           break;
         }
 
         case 'e' : {
           for (j = 0;j < nb_state;j++) {
-            observation[j] = new FrequencyDistribution(*(seq.observation[i][j]));
+            observation[j] = new FrequencyDistribution(*(seq.observation_distribution[i][j]));
           }
           break;
         }
@@ -627,9 +675,23 @@ double VariableOrderMarkov::likelihood_computation(const VariableOrderMarkovData
           }
         }
 
+        else if (discrete_parametric_process[i]) {
+          for (j = 0;j < nb_state;j++) {
+            buff = discrete_parametric_process[i]->observation[j]->likelihood_computation(*observation[j]);
+
+            if (buff != D_INF) {
+              likelihood += buff;
+            }
+            else {
+              likelihood = D_INF;
+              break;
+            }
+          }
+        }
+
         else {
           for (j = 0;j < nb_state;j++) {
-            buff = parametric_process[i]->observation[j]->likelihood_computation(*observation[j]);
+            buff = continuous_parametric_process[i]->observation[j]->likelihood_computation(*observation[j] , (int)seq.min_interval[i]);
 
             if (buff != D_INF) {
               likelihood += buff;
@@ -1610,7 +1672,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       seq->build_observation_frequency_distribution();
 
       for (i = 0;i < completed_markov->nb_state;i++) {
-        seq->observation[1][i]->distribution_estimation(completed_markov->nonparametric_process[1]->observation[i]);
+        seq->observation_distribution[1][i]->distribution_estimation(completed_markov->nonparametric_process[1]->observation[i]);
       }
     }
 
@@ -1806,7 +1868,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
       seq->build_observation_frequency_distribution();
 
       for (i = 0;i < markov->nb_state;i++) {
-        seq->observation[1][i]->distribution_estimation(markov->nonparametric_process[1]->observation[i]);
+        seq->observation_distribution[1][i]->distribution_estimation(markov->nonparametric_process[1]->observation[i]);
       }
     }
 
@@ -2121,7 +2183,8 @@ ostream& VariableOrderMarkov::transition_count_ascii_write(ostream &os , bool be
     }
   }
 
-  standard_normal_value = standard_normal_value_computation(0.025);
+  normal dist;
+  standard_normal_value = quantile(complement(dist , 0.025));
 
   for (i = (begin ? 1 : 0);i < nb_row;i++) {
     if (memory_count[i] > 0) {
@@ -2994,7 +3057,9 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 {
   bool status = true;
   register int i , j , k;
-  int memory , cumul_length , *pstate , **poutput;
+  int memory , cumul_length , *itype , *decimal_scale , *pstate , **pioutput;
+  double buff , min_location , **proutput;
+  Distribution *weight , *restoration_weight;
   VariableOrderMarkov *markov;
   VariableOrderMarkovData *seq;
 
@@ -3031,8 +3096,20 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 
     // initialisations
 
-    seq = new VariableOrderMarkovData(hlength , nb_output_process + 1);
-    seq->type[0] = STATE;
+    itype = new int[nb_output_process + 1];
+
+    itype[0] = STATE;
+    for (i = 1;i <= nb_output_process;i++) {
+      if (!continuous_parametric_process[i]) {
+        itype[i] = INT_VALUE;
+      }
+      else {
+        itype[i] = REAL_VALUE;
+      }
+    }
+
+    seq = new VariableOrderMarkovData(hlength , nb_output_process + 1 , itype);
+    delete [] itype;
 
     seq->markov = new VariableOrderMarkov(*this , false);
 
@@ -3041,13 +3118,71 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
     markov->cumul_computation();
 
     if (markov->nb_output_process > 0) {
-      poutput = new int*[markov->nb_output_process];
+      pioutput = new int*[markov->nb_output_process];
+      proutput = new double*[markov->nb_output_process];
+
+      decimal_scale = new int[markov->nb_output_process];
+
+      for (i = 0;i < markov->nb_output_process;i++) {
+        if (markov->continuous_parametric_process[i + 1]) {
+          switch (markov->continuous_parametric_process[i + 1]->ident) {
+
+          case GAUSSIAN : {
+            min_location = fabs(markov->continuous_parametric_process[i + 1]->observation[0]->location);
+            for (j = 1;j < markov->nb_state;j++) {
+              buff = fabs(markov->continuous_parametric_process[i + 1]->observation[j]->location);
+              if (buff < min_location) {
+                min_location = buff;
+              }
+            }
+
+            buff = (int)ceil(log(min_location) / log(10));
+            if (buff < GAUSSIAN_MAX_NB_DECIMAL) {
+              decimal_scale[i] = pow(10 , (GAUSSIAN_MAX_NB_DECIMAL - buff));
+            }
+            else {
+              decimal_scale[i] = 1;
+            }
+ 
+#           ifdef MESSAGE
+            cout << "\nScale: " << i + 1 << " " << decimal_scale[i] << endl;
+#           endif
+
+            break;
+          }
+
+          case VON_MISES : {
+            switch (markov->continuous_parametric_process[i + 1]->unit) {
+            case DEGREE :
+              decimal_scale[i] = DEGREE_DECIMAL_SCALE;
+              break;
+            case RADIAN :
+              decimal_scale[i] = RADIAN_DECIMAL_SCALE;
+              break;
+            }
+
+            for (j = 0;j < markov->nb_state;j++) {
+              markov->continuous_parametric_process[i + 1]->observation[j]->von_mises_cumul_computation();
+            }
+            break;
+          }
+          }
+        }
+      }
     }
 
     for (i = 0;i < seq->nb_sequence;i++) {
       pstate = seq->int_sequence[i][0];
+
       for (j = 0;j < markov->nb_output_process;j++) {
-        poutput[j] = seq->int_sequence[i][j + 1];
+        switch (seq->type[j + 1]) {
+        case INT_VALUE :
+          pioutput[j] = seq->int_sequence[i][j + 1];
+          break;
+        case REAL_VALUE :
+          proutput[j] = seq->real_sequence[i][j + 1];
+          break;
+        }
       }
 
       switch (markov->type) {
@@ -3063,10 +3198,13 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 
       for (j = 0;j < markov->nb_output_process;j++) {
         if (markov->nonparametric_process[j + 1]) {
-          *poutput[j] = markov->nonparametric_process[j + 1]->observation[*pstate]->simulation();
+          *pioutput[j] = markov->nonparametric_process[j + 1]->observation[*pstate]->simulation();
+        }
+        else if (markov->discrete_parametric_process[j + 1]) {
+          *pioutput[j] = markov->discrete_parametric_process[j + 1]->observation[*pstate]->simulation();
         }
         else {
-          *poutput[j] = markov->parametric_process[j + 1]->observation[*pstate]->simulation();
+          *proutput[j] = round(markov->continuous_parametric_process[j + 1]->observation[*pstate]->simulation() * decimal_scale[j]) / decimal_scale[j];
         }
       }
 
@@ -3075,10 +3213,13 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 
         for (k = 0;k < markov->nb_output_process;k++) {
           if (markov->nonparametric_process[k + 1]) {
-            *++poutput[k] = markov->nonparametric_process[k + 1]->observation[*pstate]->simulation();
+            *++pioutput[k] = markov->nonparametric_process[k + 1]->observation[*pstate]->simulation();
+          }
+          else if (markov->discrete_parametric_process[k + 1]) {
+            *++pioutput[k] = markov->discrete_parametric_process[k + 1]->observation[*pstate]->simulation();
           }
           else {
-            *++poutput[k] = markov->parametric_process[k + 1]->observation[*pstate]->simulation();
+            *++proutput[k] = round(markov->continuous_parametric_process[k + 1]->observation[*pstate]->simulation() * decimal_scale[k]) / decimal_scale[k];
           }
         }
 
@@ -3089,7 +3230,19 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
     markov->remove_cumul();
 
     if (markov->nb_output_process > 0) {
-      delete [] poutput;
+      delete [] pioutput;
+      delete [] proutput;
+
+      delete [] decimal_scale;
+
+      for (i = 0;i < markov->nb_output_process;i++) {
+        if ((markov->continuous_parametric_process[i + 1]) &&
+            (markov->continuous_parametric_process[i + 1]->ident == VON_MISES)) {
+          for (j = 0;j < markov->nb_state;j++) {
+            delete [] markov->continuous_parametric_process[i + 1]->observation[j]->cumul;
+          }
+        }
+      }
     }
 
     // extraction des caracteristiques des sequences simulees
@@ -3101,11 +3254,17 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
     for (i = 1;i < seq->nb_variable;i++) {
       seq->min_value_computation(i);
       seq->max_value_computation(i);
+
       seq->build_marginal_frequency_distribution(i);
+
+      if (seq->type[i] == REAL_VALUE) {
+        seq->min_interval_computation(i);
+      }
     }
 
     seq->build_transition_count(*markov);
     seq->build_observation_frequency_distribution();
+    seq->build_observation_histogram();
     seq->build_characteristic();
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
@@ -3122,12 +3281,46 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
 
       seq->likelihood = markov->likelihood_computation(*seq);
 
+      if (seq->likelihood == D_INF) {
+        seq->likelihood = markov->likelihood_computation(*seq , I_DEFAULT);
+      }
+
 #     ifdef MESSAGE
-      cout << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << seq->likelihood
-           << " | " << markov->likelihood_computation(*seq , I_DEFAULT) << endl;
+      else {
+        cout << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << seq->likelihood
+             << " | " << markov->likelihood_computation(*seq , I_DEFAULT) << endl;
+      }
 #     endif
 
     }
+
+    weight = NULL;
+    restoration_weight = NULL;
+
+    for (i = 1;i <= markov->nb_output_process;i++) {
+      if ((markov->discrete_parametric_process[i]) || (markov->continuous_parametric_process[i])) {
+        weight = markov->nonparametric_process[0]->weight_computation();
+        restoration_weight = seq->weight_computation();
+        break;
+      }
+    }
+
+    for (i = 1;i <= markov->nb_output_process;i++) {
+      if (markov->discrete_parametric_process[i]) {
+        markov->discrete_parametric_process[i]->weight = new Distribution(*weight);
+        markov->discrete_parametric_process[i]->mixture = markov->discrete_parametric_process[i]->mixture_computation(markov->discrete_parametric_process[i]->weight);
+        markov->discrete_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+        markov->discrete_parametric_process[i]->restoration_mixture = markov->discrete_parametric_process[i]->mixture_computation(markov->discrete_parametric_process[i]->restoration_weight);
+      }
+
+      else if (markov->continuous_parametric_process[i]) {
+        markov->continuous_parametric_process[i]->weight = new Distribution(*weight);
+        markov->continuous_parametric_process[i]->restoration_weight = new Distribution(*restoration_weight);
+      }
+    }
+
+    delete weight;
+    delete restoration_weight;
   }
 
   return seq;
@@ -3610,13 +3803,13 @@ VariableOrderMarkovIterator::VariableOrderMarkovIterator(VariableOrderMarkov *im
  *
  *--------------------------------------------------------------*/
 
-void VariableOrderMarkovIterator::copy(const VariableOrderMarkovIterator &it)
+void VariableOrderMarkovIterator::copy(const VariableOrderMarkovIterator &iter)
 
 {
-  markov = it.markov;
+  markov = iter.markov;
   (markov->nb_iterator)++;
 
-  memory = it.memory;
+  memory = iter.memory;
 }
 
 
@@ -3641,12 +3834,12 @@ VariableOrderMarkovIterator::~VariableOrderMarkovIterator()
  *
  *--------------------------------------------------------------*/
 
-VariableOrderMarkovIterator& VariableOrderMarkovIterator::operator=(const VariableOrderMarkovIterator &it)
+VariableOrderMarkovIterator& VariableOrderMarkovIterator::operator=(const VariableOrderMarkovIterator &iter)
 
 {
-  if (&it != this) {
+  if (&iter != this) {
     (markov->nb_iterator)--;
-    copy(it);
+    copy(iter);
   }
 
   return *this;
@@ -3673,18 +3866,27 @@ bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool i
 
   else {
     register int i , j;
-    int offset = 0 , *pstate , **poutput;
+    int offset = 0 , *pstate , **pioutput;
+//    double **proutput;
 
 
     status = true;
 
     if (markov->nb_output_process > 0) {
-      poutput = new int*[markov->nb_output_process];
+      pioutput = new int*[markov->nb_output_process];
+//      proutput = new double*[markov->nb_output_process];
     }
 
     pstate = int_seq[0];
     for (i = 0;i < markov->nb_output_process;i++) {
-      poutput[i] = int_seq[i + 1];
+/*      switch (type[i + 1]) {
+      case INT_VALUE : */
+        pioutput[i] = int_seq[i + 1];
+/*        break;
+      case REAL_VALUE :
+        proutput[i] = real_seq[i + 1];
+        break;
+      } */
     }
 
     if (initialization) {
@@ -3701,10 +3903,13 @@ bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool i
 
       for (i = 0;i < markov->nb_output_process;i++) {
         if (markov->nonparametric_process[i + 1]) {
-          *poutput[i]++ = markov->nonparametric_process[i + 1]->observation[*pstate]->simulation();
+          *pioutput[i]++ = markov->nonparametric_process[i + 1]->observation[*pstate]->simulation();
+        }
+        else if (markov->discrete_parametric_process[i + 1]) {
+          *pioutput[i]++ = markov->discrete_parametric_process[i + 1]->observation[*pstate]->simulation();
         }
         else {
-          *poutput[i]++ = markov->parametric_process[i + 1]->observation[*pstate]->simulation();
+//          *proutput[i]++ = markov->continuous_parametric_process[i + 1]->observation[*pstate]->simulation();
         }
       }
 
@@ -3717,10 +3922,13 @@ bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool i
 
       for (j = 0;j < markov->nb_output_process;j++) {
         if (markov->nonparametric_process[j + 1]) {
-          *poutput[j]++ = markov->nonparametric_process[j + 1]->observation[*pstate]->simulation();
+          *pioutput[j]++ = markov->nonparametric_process[j + 1]->observation[*pstate]->simulation();
+        }
+        else if (markov->nonparametric_process[j + 1]) {
+          *pioutput[j]++ = markov->discrete_parametric_process[j + 1]->observation[*pstate]->simulation();
         }
         else {
-          *poutput[j]++ = markov->parametric_process[j + 1]->observation[*pstate]->simulation();
+//          *proutput[j]++ = markov->continuous_parametric_process[j + 1]->observation[*pstate]->simulation();
         }
       }
 
@@ -3728,7 +3936,8 @@ bool VariableOrderMarkovIterator::simulation(int **int_seq , int length , bool i
     }
 
     if (markov->nb_output_process > 0) {
-      delete [] poutput;
+      delete [] pioutput;
+//      delete [] proutput;
     }
   }
 
