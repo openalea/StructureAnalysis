@@ -88,15 +88,18 @@ protected :
     int *state_subtype;     //  MARKOVIAN/SEMI_MARKOVIAN
     Forward **forward;      // lois de l'intervalle de temps residuel
     int nb_output_process;  // nombre de processus d'observation
-    NonparametricSequenceProcess **nonparametric_process;  // processus d'observation non-parametriques
-    DiscreteParametricProcess **parametric_process;  // processus d'observation parametriques
+    NonparametricSequenceProcess **nonparametric_process;  // processus d'observation discrets non-parametriques
+    DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
+    ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
 
     SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
                int inb_output_process , NonparametricProcess **pobservation ,
                int length , bool counting_flag);
     SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
                int inb_output_process , NonparametricProcess **nonparametric_observation ,
-               DiscreteParametricProcess **parametric_observation , int length , bool counting_flag);
+               DiscreteParametricProcess **discrete_parametric_observation ,
+               ContinuousParametricProcess **continuous_parametric_observation ,
+               int length , bool counting_flag);
 
     void copy(const SemiMarkov &smarkov , bool data_flag = true ,
               int param = I_DEFAULT);
@@ -155,7 +158,7 @@ public :
                int param = I_DEFAULT)
     :Chain(smarkov) { copy(smarkov , data_flag , param); }
     void conditional_delete();
-    virtual ~SemiMarkov();
+    ~SemiMarkov();
     SemiMarkov& operator=(const SemiMarkov &smarkov);
 
     DiscreteParametricModel* extract(StatError &error , int type ,
@@ -211,9 +214,14 @@ public :
     int get_nb_output_process() const { return nb_output_process; }
     NonparametricSequenceProcess* get_nonparametric_process(int variable)
     const { return nonparametric_process[variable]; }
-    DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
-    DiscreteParametricProcess* get_parametric_process(int variable)
-    const { return parametric_process[variable]; }
+    DiscreteParametricProcess** get_discrete_parametric_process() const
+    { return discrete_parametric_process; }
+    DiscreteParametricProcess* get_discrete_parametric_process(int variable) const
+    { return discrete_parametric_process[variable]; }
+    ContinuousParametricProcess** get_continuous_parametric_process() const
+    { return continuous_parametric_process; }
+    ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
+    { return continuous_parametric_process[variable]; }
 };
 
 
@@ -237,10 +245,10 @@ private :
 public :
 
     SemiMarkovIterator(SemiMarkov *ismarkov);
-    SemiMarkovIterator(const SemiMarkovIterator &it)
-    { copy(it); }
+    SemiMarkovIterator(const SemiMarkovIterator &iter)
+    { copy(iter); }
     ~SemiMarkovIterator();
-    SemiMarkovIterator& operator=(const SemiMarkovIterator &it);
+    SemiMarkovIterator& operator=(const SemiMarkovIterator &iter);
 
     bool simulation(int **int_seq , int length = 1 , bool initialization = false);
     int** simulation(int length = 1 , bool initialization = false);
@@ -279,8 +287,8 @@ private :
 public :
 
     SemiMarkovData();
-    SemiMarkovData(const FrequencyDistribution &ihlength ,
-                   int inb_variable , bool init_flag = false);
+    SemiMarkovData(const FrequencyDistribution &ihlength , int inb_variable ,
+                   int *itype , bool init_flag = false);
     SemiMarkovData(const MarkovianSequences &seq);
     SemiMarkovData(const MarkovianSequences &seq , char transform , bool initial_run_flag);
     SemiMarkovData(const SemiMarkovData &seq , bool model_flag = true , char transform = 'c')
@@ -291,6 +299,7 @@ public :
     DiscreteDistributionData* extract(StatError &error , int type ,
                                       int variable , int value) const;
     SemiMarkovData* remove_index_parameter(StatError &error) const;
+    MarkovianSequences* build_auxiliary_variable(StatError &error) const;
 
     std::ostream& ascii_data_write(std::ostream &os , char format = 'c' ,
                                    bool exhaustive = false) const;
