@@ -58,8 +58,8 @@ const double THRESHOLDING_FACTOR = 0.8;  // facteur pour le seuillage des probab
 const int NB_PARAMETER = 100000;       // nombre maximum de parametres d'une chaine de Markov
 const int NB_OUTPUT_PROCESS = 10;      // nombre maximum de processus d'observation
 const int NB_OUTPUT = 12;              // nombre maximum d'observations par etat (cas non-parametrique)
-const double OBSERVATION_THRESHOLD = 0.999;  // seuil sur la fonction de repartition
-                                             // pour borner une loi d'observation parametrique
+const double OBSERVATION_THRESHOLD = 0.999;  // seuil sur la fonction de repartition pour borner
+                                             // une loi d'observation discrete parametrique
 
 const double ACCESSIBILITY_THRESHOLD = 1.e-6;  // seuil pour stopper l'algorithme
                                                // de calcul de l'accessibilite des etats
@@ -67,12 +67,27 @@ const int ACCESSIBILITY_LENGTH = 100;  // longueur maximum de sequence pour l'al
                                        // de calcul de l'accessibilite des etats
 
 const double NOISE_PROBABILITY = 0.05;  // perturbation des probabilites d'observation
+const double MEAN_SHIFT_COEFF = 0.1;   // coefficient pour decaler les lois d'observations
+                                       // continus parametriques
 
 const int MIN_NB_ELEMENT = 10;         // taille minimum de l'echantillon construit par arrondi
 const int OBSERVATION_COEFF = 10;      // coefficient arrondi estimateur pour les lois
                                        // d'observation parametriques
 
+const int GAUSSIAN_MAX_NB_DECIMAL = 6;  // nombre maximum de decimales pour la simulation
+                                        // d'une loi gaussienne
+const int DEGREE_DECIMAL_SCALE = 10;   // facteur pour determiner le nombre de decimales
+                                       // pour la simulation d'une loi de Von Mises en degrees
+const int RADIAN_DECIMAL_SCALE = 1000;  // facteur pour determiner le nombre de decimales
+                                        // pour la simulation d'une loi de Von Mises en radians
+
 // const double SELF_TRANSITION = 0.9;    probabilite de rester dans un etat initiale
+
+enum {
+  NON_PARAMETRIC ,
+  DISCRETE_PARAMETRIC ,
+  CONTINUOUS_PARAMETRIC
+};
 
 enum {
   FORWARD ,
@@ -238,7 +253,6 @@ protected :
     Distribution **observation;  // lois d'observation
 
     void copy(const NonparametricProcess &process);
-    void add_state(const NonparametricProcess &process , int state);
     void remove();
 
     bool test_hidden() const;
@@ -251,8 +265,8 @@ public :
     NonparametricProcess(int inb_state = 0 , int inb_value = 0 , int observation_flag = false);
     NonparametricProcess(int inb_state , int inb_value , double **observation_probability);
     NonparametricProcess(int inb_state , Distribution **pobservation);
-    NonparametricProcess(const NonparametricProcess &process , char manip = 'c' ,
-                         int state = I_DEFAULT);
+    NonparametricProcess(const NonparametricProcess &process)
+    { copy(process); }
     ~NonparametricProcess();
     NonparametricProcess& operator=(const NonparametricProcess &process);
 
@@ -297,43 +311,50 @@ class DiscreteParametricProcess {  // processus d'observation discret parametriq
     friend class VariableOrderMarkovIterator;
     friend class HiddenVariableOrderMarkov; */
 
-    friend DiscreteParametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
-                                                          int &line , int nb_state ,
-                                                          double cumul_threshold);
+    friend DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
+                                                                   int &line , int nb_state ,
+                                                                   double cumul_threshold);
 
-// protected :
+// private :
 public :
 
     int nb_state;           // nombre d'etats
     int nb_value;           // nombre de valeurs
     DiscreteParametric **observation;  // lois d'observation
+    Distribution *weight;   // poids theoriques des lois d'observation
+    Distribution *mixture;  // melange de lois d'observation
+    Distribution *restoration_weight;  // poids des lois d'observation
+                                       // deduits de la restoration
+    Distribution *restoration_mixture;  // melange de lois d'observation
 
     void copy(const DiscreteParametricProcess &process);
-
-    void state_permutation(int *perm) const; // permutation des etats
-
-    void add_state(const DiscreteParametricProcess &process , int state);
+    void state_permutation(int *perm) const;  // permutation des etats
     void remove();
 
     void nb_value_computation();
+    Distribution* mixture_computation(Distribution *pweight);
 
 // public :
 
     DiscreteParametricProcess(int inb_state = 0 , int inb_value = 0);
     DiscreteParametricProcess(int inb_state , DiscreteParametric **pobservation);
-    DiscreteParametricProcess(const DiscreteParametricProcess &process , char manip = 'c' ,
-                              int state = I_DEFAULT);
+    DiscreteParametricProcess(const DiscreteParametricProcess &process)
+    { copy(process); }
     ~DiscreteParametricProcess();
     DiscreteParametricProcess& operator=(const DiscreteParametricProcess &process);
 
     std::ostream& ascii_print(std::ostream &os , FrequencyDistribution **empirical_observation ,
+                              FrequencyDistribution *marginal_distribution ,
                               bool exhaustive , bool file_flag) const;
     std::ostream& spreadsheet_print(std::ostream &os ,
-                                    FrequencyDistribution **empirical_observation = NULL) const;
+                                    FrequencyDistribution **empirical_observation = NULL ,
+                                    FrequencyDistribution *marginal_distribution = NULL) const;
     bool plot_print(const char *prefix , const char *title , int process ,
-                    FrequencyDistribution **empirical_observation = NULL) const;
+                    FrequencyDistribution **empirical_observation = NULL ,
+                    FrequencyDistribution *marginal_distribution = NULL) const;
     void plotable_write(MultiPlotSet &plot , int &index , int process ,
-                        FrequencyDistribution **empirical_observation = NULL) const;
+                        FrequencyDistribution **empirical_observation = NULL ,
+                        FrequencyDistribution *marginal_distribution = NULL) const;
 
     int nb_parameter_computation() const;
     void init();
@@ -347,9 +368,73 @@ public :
 };
 
 
-DiscreteParametricProcess* observation_parsing(StatError &error , ifstream &in_file ,
-                                               int &line , int nb_state ,
-                                               double cumul_threshold = OBSERVATION_THRESHOLD);
+DiscreteParametricProcess* discrete_observation_parsing(StatError &error , ifstream &in_file ,
+                                                        int &line , int nb_state ,
+                                                        double cumul_threshold = OBSERVATION_THRESHOLD);
+
+
+
+class ContinuousParametricProcess {  // processus d'observation continu parametrique
+
+    friend ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
+                                                                       int &line , int nb_state);
+
+// private :
+public :
+
+    int nb_state;           // nombre d'etats
+    int ident;              // identificateur des lois d'observation
+    int unit;               // unite (degre/radian) pour les lois de von Mises
+    ContinuousParametric **observation;  // lois d'observation
+    Distribution *weight;   // poids theorique des lois d'observation
+    Distribution *restoration_weight;  // poids des lois d'observation
+                                       // deduits de la restoration
+
+    void copy(const ContinuousParametricProcess &process);
+    void remove();
+
+// public :
+
+    ContinuousParametricProcess(int inb_state = 0);
+    ContinuousParametricProcess(int inb_state , ContinuousParametric **pobservation);
+    ContinuousParametricProcess(const ContinuousParametricProcess &process)
+    { copy(process); }
+    ~ContinuousParametricProcess();
+    ContinuousParametricProcess& operator=(const ContinuousParametricProcess &process);
+
+    std::ostream& ascii_print(std::ostream &os , Histogram **observation_histogram ,
+                              FrequencyDistribution **observation_distribution ,
+                              Histogram *marginal_histogram ,
+                              FrequencyDistribution *marginal_distribution ,
+                              bool exhaustive , bool file_flag) const;
+    std::ostream& spreadsheet_print(std::ostream &os ,
+                                    Histogram **observation_histogram = NULL ,
+                                    FrequencyDistribution **observation_distribution = NULL ,
+                                    Histogram *marginal_histogram = NULL ,
+                                    FrequencyDistribution *marginal_distribution = NULL) const;
+    bool plot_print(const char *prefix , const char *title ,
+                    int process , Histogram **observation_histogram = NULL ,
+                    FrequencyDistribution **observation_distribution = NULL ,
+                    Histogram *marginal_histogram = NULL ,
+                    FrequencyDistribution *marginal_distribution = NULL ,
+                    int nb_value = I_DEFAULT , double **empirical_cdf = NULL) const;
+    void plotable_write(MultiPlotSet &plot , int &index , int process ,
+                        Histogram **observation_histogram = NULL ,
+                        FrequencyDistribution **observation_distribution = NULL ,
+                        Histogram *marginal_histogram = NULL ,
+                        FrequencyDistribution *marginal_distribution = NULL ,
+                        int nb_value = I_DEFAULT , double **empirical_cdf = NULL) const;
+
+    int nb_parameter_computation() const;
+    void select_unit(int iunit);
+    void init(int iident , double min_value , double max_value ,
+              double mean , double variance);
+};
+
+
+ContinuousParametricProcess* continuous_observation_parsing(StatError &error , ifstream &in_file ,
+                                                            int &line , int nb_state);
+
 
 
 
