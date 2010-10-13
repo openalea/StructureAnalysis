@@ -37,6 +37,7 @@
 
 
 #include <sstream>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
@@ -46,6 +47,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "tops.h"
 #include "sequence_label.h"
@@ -184,7 +186,7 @@ DiscreteParametricModel* TopParameters::extract(StatError &error , int position)
 
   else {
     dist = new DiscreteParametricModel(*axillary_nb_internode[position] ,
-                                       (tops ? tops->axillary_nb_internode[position] : 0));
+                                       (tops ? tops->axillary_nb_internode[position] : NULL));
   }
 
   return dist;
@@ -741,7 +743,7 @@ bool TopParameters::plot_write(const char *prefix , const char *title ,
 {
   bool status;
   register int i , j , k;
-  int nb_dist , nb_histo , *index_dist;
+  int nb_dist , nb_histo;
   double *scale;
   const Distribution **pdist;
   const FrequencyDistribution **phisto;
@@ -773,25 +775,22 @@ bool TopParameters::plot_write(const char *prefix , const char *title ,
       }
 
       phisto = new const FrequencyDistribution*[nb_histo];
-      index_dist = new int[nb_histo];
       pdist = new const Distribution*[nb_histo - 1];
       scale = new double[nb_histo - 1];
 
       nb_histo = 0;
-      phisto[nb_histo] = itops->nb_internode;
-      index_dist[nb_histo++] = I_DEFAULT;
+      phisto[nb_histo++] = itops->nb_internode;
 
       for (i = 1;i <= max_position;i++) {
         if (itops->axillary_nb_internode[i]) {
           phisto[nb_histo] = itops->axillary_nb_internode[i];
-          index_dist[nb_histo] = nb_histo - 1;
           pdist[nb_histo - 1] = axillary_nb_internode[i];
           scale[nb_histo++ - 1] = itops->axillary_nb_internode[i]->nb_element;
         }
       }
 
       plot_print((data_file_name[nb_dist].str()).c_str() , nb_histo - 1 , pdist ,
-                 scale , 0 , nb_histo , phisto , index_dist);
+                 scale , 0 , nb_histo , phisto);
     }
 
     // ecriture du fichier de commandes et du fichier d'impression
@@ -907,7 +906,6 @@ bool TopParameters::plot_write(const char *prefix , const char *title ,
 
     if (itops) {
       delete [] phisto;
-      delete [] index_dist;
       delete [] pdist;
       delete [] scale;
     }
@@ -1481,7 +1479,7 @@ DiscreteDistributionData* Tops::extract(StatError &error , int position) const
 
   if (status) {
     histo = new DiscreteDistributionData(*axillary_nb_internode[position] ,
-                                         (top_parameters ? top_parameters->axillary_nb_internode[position] : 0));
+                                         (top_parameters ? top_parameters->axillary_nb_internode[position] : NULL));
   }
 
   return histo;
