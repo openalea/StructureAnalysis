@@ -158,12 +158,12 @@ public:
 
   static Renewal*
   estimation_type(const TimeEvents &input, char type, int estimator, int nb_iter,
-                 int equilibrium_estimator, int mean_computation, double weight,
+                 int equilibrium_estimator, int mean_computation_method, double weight,
                  int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
     ret = input.estimation(error, os, type, estimator, nb_iter, equilibrium_estimator,
-                           mean_computation, weight, penalty_type, outside);
+                           mean_computation_method, weight, penalty_type, outside);
 
     FOOTER_OS;
   }
@@ -172,14 +172,14 @@ public:
   static Renewal*
   estimation_inter_event_type(const TimeEvents &input, char type,
       const DiscreteParametric& input_dist, int estimator, int nb_iter,
-      int equilibrium_estimator, int mean_computation, double weight,
+      int equilibrium_estimator, int mean_computation_method, double weight,
       int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
 
 
     ret = input.estimation(error, os, type, input_dist, estimator, nb_iter,
-        equilibrium_estimator, mean_computation, weight, penalty_type, outside);
+        equilibrium_estimator, mean_computation_method, weight, penalty_type, outside);
 
     FOOTER_OS;
   }
