@@ -40,6 +40,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
@@ -48,6 +49,7 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/stat_label.h"
+
 #include "renewal.h"
 #include "sequence_label.h"
 #include "tool/config.h"
@@ -2571,7 +2573,7 @@ DiscreteDistributionData* RenewalData::extract(StatError &error , int histo_type
     }
     else {
       histo = new DiscreteDistributionData(*hnb_event[itime] ,
-                                           (renewal ? renewal->nb_event[itime] : 0));
+                                           (renewal ? renewal->nb_event[itime] : NULL));
     }
   }
 
