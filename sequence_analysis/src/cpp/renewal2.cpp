@@ -42,6 +42,7 @@
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/stat_label.h"
+
 #include "renewal.h"
 #include "sequence_label.h"
 
@@ -73,7 +74,7 @@ ostream& Renewal::line_write(ostream &os) const
   }
 
   os << SEQ_label[SEQL_INTER_EVENT] << " " << STAT_label[STATL_DISTRIBUTION] << "   "
-     << STAT_distribution_word[inter_event->ident] << "   "
+     << STAT_discrete_distribution_word[inter_event->ident] << "   "
      << STAT_label[STATL_MEAN] << ": " << inter_event->mean << "   "
      << STAT_label[STATL_VARIANCE] << ": " << inter_event->variance;
 
@@ -571,7 +572,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
         os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
            << STAT_label[STATL_FUNCTION] << endl;
 
-        nb_event[i]->Distribution::ascii_print(os , file_flag , true , false , (timev ? timev->hnb_event[i] : 0));
+        nb_event[i]->Distribution::ascii_print(os , file_flag , true , false , (timev ? timev->hnb_event[i] : NULL));
       }
     }
   }
@@ -748,7 +749,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
          << STAT_label[STATL_FUNCTION] << endl;
 
       mixture->ascii_print(os , nb_dist , pdist , scale , file_flag , true ,
-                           (timev ? timev->mixture : 0));
+                           (timev ? timev->mixture : NULL));
 
       delete [] pdist;
       delete [] scale;
@@ -798,7 +799,7 @@ ostream& Renewal::ascii_write(ostream &os , const RenewalData *timev ,
     }
     os << endl;
 
-    index_event->ascii_print(os , file_flag , (((timev) && (timev->index_event)) ? timev->index_event : 0));
+    index_event->ascii_print(os , file_flag , (((timev) && (timev->index_event)) ? timev->index_event : NULL));
 
     // ecriture des sequences d'evenements
 
@@ -1217,7 +1218,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
            << STAT_label[STATL_FUNCTION] << endl;
 
         nb_event[i]->Distribution::spreadsheet_print(os , true , false , false ,
-                                                     (timev ? timev->hnb_event[i] : 0));
+                                                     (timev ? timev->hnb_event[i] : NULL));
       }
     }
   }
@@ -1335,7 +1336,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
        << STAT_label[STATL_FUNCTION] << endl;
 
     mixture->spreadsheet_print(os , nb_dist , pdist , scale , true ,
-                               (timev ? timev->mixture : 0));
+                               (timev ? timev->mixture : NULL));
 
     delete [] pdist;
     delete [] scale;
@@ -1367,7 +1368,7 @@ ostream& Renewal::spreadsheet_write(ostream &os , const RenewalData *timev) cons
   }
   os << endl;
 
-  index_event->spreadsheet_print(os , (((timev) && (timev->index_event)) ? timev->index_event : 0));
+  index_event->spreadsheet_print(os , (((timev) && (timev->index_event)) ? timev->index_event : NULL));
 
   return os;
 }
@@ -1419,7 +1420,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
 {
   bool status;
   register int i , j , k , m , n;
-  int nb_file , nb_dist , nb_histo , nb_time , inf , sup , *index_dist;
+  int nb_file , nb_dist , nb_histo , nb_time , inf , sup;
   double max , *scale;
   const FrequencyDistribution **phisto;
   const Distribution **pdist;
@@ -1490,7 +1491,6 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
   scale = new double[nb_dist];
   if (timev) {
     phisto = new const FrequencyDistribution*[nb_histo];
-    index_dist = new int[nb_histo];
   }
 
   nb_histo = 0;
@@ -1498,37 +1498,32 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
 
   if ((timev) && (timev->within) && (timev->backward) && (timev->forward)) {
     if (timev->inter_event) {
-      phisto[nb_histo] = timev->inter_event;
-      index_dist[nb_histo++] = nb_dist;
+      phisto[nb_histo++] = timev->inter_event;
       pdist[nb_dist] = inter_event;
       scale[nb_dist++] = timev->inter_event->nb_element;
     }
 
     if (timev->within->nb_element > 0) {
-      phisto[nb_histo] = timev->within;
-      index_dist[nb_histo++] = nb_dist;
+      phisto[nb_histo++] = timev->within;
       pdist[nb_dist] = inter_event;
       scale[nb_dist++] = timev->within->nb_element;
     }
 
     if (timev->length_bias) {
-      phisto[nb_histo] = timev->length_bias;
-      index_dist[nb_histo++] = nb_dist;
+      phisto[nb_histo++] = timev->length_bias;
       pdist[nb_dist] = length_bias;
       scale[nb_dist++] = timev->length_bias->nb_element;
       pdist[nb_dist] = inter_event;
       scale[nb_dist++] = timev->length_bias->nb_element;
     }
 
-    phisto[nb_histo] = timev->backward;
-    index_dist[nb_histo++] = nb_dist;
+    phisto[nb_histo++] = timev->backward;
     pdist[nb_dist] = backward;
     scale[nb_dist++] = timev->backward->nb_element;
     pdist[nb_dist] = inter_event;
     scale[nb_dist++] = timev->backward->nb_element;
 
-    phisto[nb_histo] = timev->forward;
-    index_dist[nb_histo++] = nb_dist;
+    phisto[nb_histo++] = timev->forward;
     pdist[nb_dist] = forward;
     scale[nb_dist++] = timev->forward->nb_element;
     pdist[nb_dist] = inter_event;
@@ -1560,8 +1555,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
   }
 
   if ((time->variance > 0.) && (timev)) {
-    phisto[nb_histo] = timev->htime;
-    index_dist[nb_histo++] = I_DEFAULT;
+    phisto[nb_histo++] = timev->htime;
   }
 
   if (((time->variance == 0.) || (timev)) && (nb_time <= PLOT_NB_TIME)) {
@@ -1570,8 +1564,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
         pdist[nb_dist] = nb_event[i];
 
         if (timev) {
-          phisto[nb_histo] = timev->hnb_event[i];
-          index_dist[nb_histo++] = nb_dist;
+          phisto[nb_histo++] = timev->hnb_event[i];
           scale[nb_dist++] = timev->hnb_event[i]->nb_element;
         }
         else {
@@ -1585,8 +1578,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
     pdist[nb_dist] = mixture;
 
     if (timev) {
-      phisto[nb_histo] = timev->mixture;
-      index_dist[nb_histo++] = nb_dist;
+      phisto[nb_histo++] = timev->mixture;
       scale[nb_dist++] = timev->mixture->nb_element;
     }
     else {
@@ -1595,7 +1587,7 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
   }
 
   status = plot_print((data_file_name[0].str()).c_str() , nb_dist , pdist ,
-                      scale , 0 , nb_histo , phisto , index_dist);
+                      scale , NULL , nb_histo , phisto);
 
   if (status) {
     i = 1;
@@ -1618,14 +1610,15 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
             scale[0] = time->mass[j];
           }
 
-          plot_print((data_file_name[i++].str()).c_str() , 1 , pdist , scale , 0 , 0 , 0 , 0);
+          plot_print((data_file_name[i++].str()).c_str() , 1 , pdist ,
+                     scale , NULL , 0 , NULL);
         }
       }
     }
 
     data_file_name[nb_file - 1] << prefix << nb_file - 1 << ".dat";
     index_event->plot_print((data_file_name[nb_file - 1].str()).c_str() , index_event->length ,
-                            (((timev) && (timev->index_event)) ? timev->index_event : 0));
+                            (((timev) && (timev->index_event)) ? timev->index_event : NULL));
 
     // ecriture du fichier de commandes et du fichier d'impression
 
@@ -1978,7 +1971,6 @@ bool Renewal::plot_write(const char *prefix , const char *title ,
   delete [] scale;
   if (timev) {
     delete [] phisto;
-    delete [] index_dist;
   }
 
   delete [] data_file_name;
