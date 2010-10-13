@@ -76,7 +76,9 @@ const int ERROR_LENGTH = 200;
 const int I_DEFAULT = -1;              // int par defaut
 const double D_DEFAULT = -1.;          // double par defaut
 const double D_INF = -1.e37;           // plus petit nombre reel
-const double DOUBLE_ERROR = 5.e-6;     // erreur sur une somme de doubles
+const double DOUBLE_ERROR = 1.e-6;     // erreur sur une somme de doubles
+// const double DOUBLE_ERROR = 5.e-6;     erreur sur une somme de doubles
+
 
 enum {
   STANDARD_NORMAL ,
@@ -110,6 +112,11 @@ enum {
 //  GAMMA ,
   GAUSSIAN ,
   VON_MISES
+};
+
+enum {
+  DEGREE ,
+  RADIAN
 };
 
 enum {
@@ -224,12 +231,20 @@ const double NB_VALUE_COEFF = 2.;      // facteur pour deduire le nombre de vale
 
 const int MIN_RANGE = 10;              // intervalle de definition minimum
                                        // pour appliquer la methode du rejet
-const double MAX_SURFACE = 3.0;        // surface maximum pour appliquer la methode du rejet
+const double MAX_SURFACE = 3.;         // surface maximum pour appliquer la methode du rejet
 const int DIST_NB_ELEMENT = 1000000;   // taille maximum de l'echantillon pour la simulation
+
+const double GAUSSIAN_TAIL = 5.e-4;    // traine de la loi de Gauss
+const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de von Mises
+const int GAUSSIAN_NB_SUB_STEP = 10;   // nombre de pas pour le calcul de la loi de von Mises
+const int VON_MISES_NB_STEP = 3600;    // nombre de pas pour le calcul de la loi de von Mises
+const int VON_MISES_NB_SUB_STEP = 10;  // nombre de pas pour le calcul de la loi de von Mises
+// const double CONCENTRATION_THRESHOLD = 10.;  seuil sur le parametre de concentration
+                                             // pour appliquer l'approximation gaussienne
+                                             // pour le calcul de la loi de von Mises
 
 const int CHI2_FREQUENCY = 2;          // effectif theorique minimum pour un
                                        // test d'ajustement du Chi2
-const double MIN_T_VALUE = 2.5;        // seuil sur la variable t
 
 const int MARGINAL_DISTRIBUTION_MAX_VALUE = 20000;  // valeur maximum pour la construction
                                                     // de la loi marginale
@@ -371,15 +386,13 @@ public :
     virtual std::ostream& line_write(std::ostream &os) const = 0;
 
     virtual std::ostream& ascii_write(std::ostream &os , bool exhaustive = false) const = 0;
-//    virtual std::ostream& spreadsheet_write(std::ostream &os) const = 0;
-
     virtual bool ascii_write(StatError &error , const char *path ,
                              bool exhaustive = false) const = 0;
     virtual bool spreadsheet_write(StatError &error , const char *path) const = 0;
     virtual bool plot_write(StatError &error , const char *prefix ,
                             const char *title = NULL) const = 0;
 
-    virtual MultiPlotSet* get_plotable() const { return 0; };
+    virtual MultiPlotSet* get_plotable() const { return NULL; };
 
 //    bool binary_write(StatError &error , const char *path) const;
 };
@@ -419,7 +432,7 @@ class Distribution {    // loi de probabilite discrete
     friend std::ostream& operator<<(std::ostream& , const Distribution&);
     friend bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                            double *scale , int *dist_nb_value , int nb_histo ,
-                           const FrequencyDistribution **histo , int *index_dist);
+                           const FrequencyDistribution **histo);
 
 // protected :
   public :
@@ -536,6 +549,7 @@ class Distribution {    // loi de probabilite discrete
     double likelihood_computation(const Reestimation<double> &histo) const
     { return histo.likelihood_computation(*this); }
     void chi2_fit(const FrequencyDistribution &histo , Test &test) const;
+
     int simulation() const;
 
     DiscreteParametricModel* truncate(StatError &error , int imax_value) const;
@@ -556,7 +570,7 @@ class Distribution {    // loi de probabilite discrete
 
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
-                const FrequencyDistribution **histo , int *index_dist);
+                const FrequencyDistribution **histo);
 
 
 
@@ -651,7 +665,7 @@ public :
                           const FrequencyDistribution &single_run ,
                           Reestimation<double> *occupancy_reestim ,
                           Reestimation<double> *length_bias_reestim , int iter ,
-                          bool combination = false , int mean_computation = COMPUTED) const;
+                          bool combination = false , int mean_computation_method = COMPUTED) const;
 
 // public :
 
@@ -723,6 +737,7 @@ public :
 
 
 class DiscreteDistributionData;
+class ContinuousParametric;
 class TimeEvents;
 class Mixture;
 class Convolution;
@@ -771,7 +786,7 @@ class FrequencyDistribution : public Reestimation<int> {  // loi discrete empiri
 
     friend bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                            double *scale , int *dist_nb_value , int nb_histo ,
-                           const FrequencyDistribution **histo , int *index_dist);
+                           const FrequencyDistribution **histo);
 
 // protected :
 public :
@@ -824,9 +839,14 @@ public :
     void update(const Reestimation<double> *reestim , int inb_element);
     FrequencyDistribution* frequency_scale(int inb_element) const;
     double* rank_computation() const;
+    int cumulative_distribution_function_computation(double **cdf) const;
+    int min_interval_computation() const;
 
     DiscreteParametric* parametric_estimation(int ident , int min_inf_bound = 0 , bool flag = true ,
                                               double cumul_threshold = CUMUL_THRESHOLD) const;
+
+    double likelihood_computation(const ContinuousParametric &dist ,
+                                  int min_interval = I_DEFAULT) const;
 
 // public :
 
@@ -923,16 +943,17 @@ public :
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
-                                        const DiscreteParametric &iinter_event , int estimator = LIKELIHOOD ,
-                                        int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
-                                        double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
-                                        int outside = ZERO , double iinter_event_mean = D_DEFAULT) const;
+                                        const DiscreteParametric &iinter_event ,
+                                        int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
+                                        int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
+                                        int penalty_type = SECOND_DIFFERENCE , int outside = ZERO ,
+                                        double iinter_event_mean = D_DEFAULT) const;
     DiscreteParametricModel* estimation(StatError &error , std::ostream &os ,
                                         const FrequencyDistribution &backward ,
                                         const FrequencyDistribution &forward ,
                                         const FrequencyDistribution *no_event ,
                                         int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-                                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                                        int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
                                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
     // acces membres de la classe
@@ -951,38 +972,81 @@ public :
 
 DiscreteDistributionData* frequency_distribution_ascii_read(StatError &error , const char *path);
 
-bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
-                double *scale , int *dist_nb_value , int nb_histo ,
-                const FrequencyDistribution **histo , int *index_dist);
 
 
-
-/* enum {
-  DEGREE ,
-  RADIAN
-};
+class Histogram;
 
 class ContinuousParametric {  // loi de probabilite continue parametrique
+
+    friend ContinuousParametric* continuous_parametric_parsing(StatError &error ,
+                                                               std::ifstream &in_file ,
+                                                               int &line);
+//    friend std::ostream& operator<<(std::ostream &os , const ContinuousParametric &dist)
+//    { return dist.ascii_print(os); }
 
 // private :
 public :
 
     int ident;              // identificateur
     double location;        // parametre de moyenne
-    double dispersion;      // parametre de dispersion - variance (GAUSSIAN) / concentration (VON_MISES)
-    double mean;            // moyenne
-    double variance;        // variance
-    int unit;               // unité (degre/radian) pour la loi de von Mises
-    double interval;        // intervalle minimum entre 2 valeurs mesurees pour la discretisation
+    double dispersion;      // parametre de dispersion - ecart-type (GAUSSIAN),
+                            // concentration (VON_MISES)
+    double min_value;       // valeur minimum
+    double max_value;       // valeur maximum
+    int unit;               // unite (degre/radian) pour la loi de von Mises
+    double *cumul;          // fonction de repartition (loi de von Mises)
+
+    void copy(const ContinuousParametric &dist);
+
+    std::ostream& ascii_parameter_print(std::ostream &os) const;
+    std::ostream& ascii_characteristic_print(std::ostream &os ,
+                                             bool file_flag = false) const;
+    std::ostream& ascii_print(std::ostream &os , bool file_flag = false ,
+                              bool cumul_flag = false , const Histogram *histo1 = NULL ,
+                              const FrequencyDistribution *histo2 = NULL);
+    std::ostream& spreadsheet_parameter_print(std::ostream &os) const;
+    std::ostream& spreadsheet_print(std::ostream &os , bool cumul_flag = false ,
+                                    const Histogram *histo1 = NULL ,
+                                    const FrequencyDistribution *histo2 = NULL);
+    std::ostream& spreadsheet_characteristic_print(std::ostream &os) const;
+    std::ostream& plot_title_print(std::ostream &os) const;
+    bool plot_print(const char *path , const Histogram *histo1 = NULL ,
+                    const FrequencyDistribution *histo2 = NULL);
+    bool q_q_plot_print(const char *path , int nb_value ,
+                        double **empirical_cdf) const;
+    void plotable_write(SinglePlot &plot , const Histogram *histo1 = NULL ,
+                        const FrequencyDistribution *histo2 = NULL);
+    void q_q_plotable_write(SinglePlot &plot , int nb_value ,
+                            double **empirical_cdf) const;
+
+    double** q_q_plot_computation(int nb_value , double **cdf) const;
 
 // public :
 
-    ContinuousParametric(int iident = GAUSSIAN , 
-                         double ilocation = D_DEFAULT , double idispersion = D_DEFAULT);
+    ContinuousParametric(int iident = GAUSSIAN , double ilocation = D_INF ,
+                         double idispersion = D_DEFAULT , int iunit = I_DEFAULT);
+    ContinuousParametric(const ContinuousParametric &dist)
+    { copy(dist); }
+    ~ContinuousParametric();
+    ContinuousParametric& operator=(const ContinuousParametric&);
 
-    double parametric_mean_computation() const;
-    double parametric_variance_computation() const;
-}; */
+    int nb_parameter_computation() const;
+    double variance_computation() const;
+
+    double von_mises_mass_computation(double inf , double sup) const;
+    void von_mises_cumul_computation();
+    double mass_computation(double inf , double sup) const;
+
+    double likelihood_computation(const FrequencyDistribution &histo , int min_interval) const
+    { return histo.likelihood_computation(*this , min_interval); }
+
+    double simulation() const;
+};
+
+
+ContinuousParametric* continuous_parametric_parsing(StatError &error ,
+                                                    std::ifstream &in_file ,
+                                                    int &line);
 
 
 
@@ -991,11 +1055,12 @@ class Histogram {       // histogramme
 // private :
 public :
 
-    int nb_individual;      // nombre d'individus
+    int nb_element;         // effectif total
     int nb_category;        // nombre de categories
     double step;            // pas de regroupement
     int max;                // frequence maximum
     int *frequency;         // frequences
+    int type;               // type de la variable (INT_VALUE/REAL_VALUE)
     double min_value;       // valeur minimum
     double max_value;       // valeur maximum
 
@@ -1011,9 +1076,13 @@ public :
 // public :
 
     Histogram(int inb_category = 0 , bool init_flag = true);
-    Histogram(const Histogram &histo);
+    Histogram(const FrequencyDistribution &histo);
+    Histogram(const Histogram &histo)
+    { copy(histo); }
     ~Histogram();
     Histogram& operator=(const Histogram &histo);
+
+    double* cumul_computation() const;
 };
 
 
