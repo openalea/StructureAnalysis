@@ -40,6 +40,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "semi_markov.h"
 
