@@ -40,6 +40,7 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+
 #include "tool/config.h"
 
 #include "stat_tools.h"
@@ -149,7 +150,8 @@ void FrequencyDistribution::shift(const FrequencyDistribution &histo , int shift
  *
  *--------------------------------------------------------------*/
 
-void FrequencyDistribution::cluster(const FrequencyDistribution &histo , int step , int mode)
+void FrequencyDistribution::cluster(const FrequencyDistribution &histo ,
+                                    int step , int mode)
 
 {
   register int i;
@@ -1952,4 +1954,108 @@ double* FrequencyDistribution::rank_computation() const
   }
 
   return rank;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de repartition empirique.
+ *
+ *  argument : (valeurs, fonction de repartition).
+ *
+ *--------------------------------------------------------------*/
+
+int FrequencyDistribution::cumulative_distribution_function_computation(double **cdf) const
+
+{
+  register int i , j;
+  int buff , cumul;
+
+
+  buff = MIN(nb_value - offset , nb_element);
+  cdf[0] = new double[buff];
+  cdf[1] = new double[buff];
+
+  cumul = 0;
+  i = 0;
+  for (j = offset;j < nb_value;j++) {
+    if (frequency[j] > 0) {
+      cdf[0][i] = j;
+      cdf[1][i] = (cumul + (double)(frequency[j] + 1) / 2.) /  (double)nb_element;
+      cumul += frequency[j];
+      i++;
+    }
+  }
+
+  return i;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de l'intervalle minimum entre 2 valeurs.
+ *
+ *--------------------------------------------------------------*/
+
+int FrequencyDistribution::min_interval_computation() const
+
+{
+  register int i;
+  int min_interval , previous_value;
+
+
+  min_interval = nb_value;
+  previous_value = offset;
+
+  for (i = offset + 1;i < nb_value;i++) {
+    if (frequency[i] > 0) {
+      if (i - previous_value < min_interval) {
+        min_interval = i - previous_value;
+      }
+      previous_value = i;
+    }
+  }
+
+  return min_interval;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la vraisemblance d'une loi continue pour un echantillon.
+ *
+ *  arguments : reference sur un objet ContinuousParametric,
+ *              intervalle minimum entre 2 valeurs.
+ *
+ *--------------------------------------------------------------*/
+
+double FrequencyDistribution::likelihood_computation(const ContinuousParametric &dist ,
+                                                     int min_interval) const
+
+{
+  register int i;
+  double mass , likelihood = 0.;
+
+
+  if (nb_element > 0) {
+    if (min_interval == I_DEFAULT) {
+      min_interval = min_interval_computation();
+    }
+
+    for (i = offset;i < nb_value;i++) {
+      if (frequency[i] > 0) {
+        mass = dist.mass_computation(i - (double)min_interval / 2. , i + (double)min_interval / 2.);
+
+        if (mass > 0.) {
+          likelihood += frequency[i] * log(mass);
+        }
+        else {
+          likelihood = D_INF;
+          break;
+        }
+      }
+    }
+  }
+
+  return likelihood;
 }
