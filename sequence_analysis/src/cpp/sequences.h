@@ -141,7 +141,9 @@ enum {
   TREND ,
   SUBTRACTION_RESIDUAL ,
   DIVISION_RESIDUAL ,
-  STANDARDIZED_RESIDUAL
+  STANDARDIZED_RESIDUAL ,
+  SEGMENTATION_ENTROPY ,
+  SEGMENTATION_DIVERGENCE
 };
 
 enum {
@@ -270,6 +272,8 @@ private :
     void init_occupancy(const NonparametricSequenceProcess &process , int occupancy_nb_value);
     void remove();
 
+    Distribution* weight_computation() const;
+
     std::ostream& ascii_print(std::ostream &os , int process ,
                               FrequencyDistribution **empirical_observation ,
                               const SequenceCharacteristics *characteristics ,
@@ -353,7 +357,7 @@ public :
     Correlation(int inb_curve , int ilength , bool frequency_flag , int itype);
     Correlation(const Correlation &correl)
     :Curves(correl) { copy(correl); }
-    virtual ~Correlation();
+    ~Correlation();
     Correlation& operator=(const Correlation &correl);
 
     Correlation* merge(StatError &error , int nb_correl , const Correlation **icorrel) const;
@@ -566,13 +570,13 @@ public :
               bool init_flag = false)
     { init(inb_sequence , iidentifier , ilength , inb_variable , init_flag); }
     Sequences(const FrequencyDistribution &ihlength , int inb_variable ,
-              bool init_flag = false);
+              int *itype , bool init_flag = false);
     Sequences(const RenewalData &timev);
     Sequences(const Sequences &seq , int variable , int itype);
     Sequences(const Sequences &seq , int inb_sequence , int *index);
-    Sequences(const Sequences &seq , bool *segment_mean);
+    Sequences(const Sequences &seq , bool *auxiliary);
     Sequences(const Sequences &seq , char transform = 'c' , int param = DEFAULT);
-    virtual ~Sequences();
+    ~Sequences();
     Sequences& operator=(const Sequences &seq);
 
     DiscreteDistributionData* extract(StatError &error , int variable) const;
@@ -677,12 +681,14 @@ public :
 
     void marginal_frequency_distribution_computation(int variable);
     bool select_step(StatError &error , int variable , double step);
+
     double mean_computation(int variable) const;
     double variance_computation(int variable , double mean) const;
     double mean_absolute_deviation_computation(int variable , double mean) const;
     double mean_absolute_difference_computation(int variable) const;
     double skewness_computation(int variable , double mean , double variance) const;
     double kurtosis_computation(int variable , double mean , double variance) const;
+    double* mean_direction_computation(int variable , int unit) const;
 
     FrequencyDistribution* value_index_interval_computation(StatError &error ,
                                                             int variable , int value) const;
@@ -717,14 +723,11 @@ public :
                             int *model_type , int iidentifier = I_DEFAULT ,
                             int output = SEQUENCE) const;
     Sequences* segmentation(StatError &error , std::ostream &os , int iidentifier ,
-                            int max_nb_segment , int *model_type) const;
+                            int max_nb_segment , int *model_type ,
+                            int output = SEQUENCE) const;
 
     Sequences* hierarchical_segmentation(StatError &error , std::ostream &os , int iidentifier ,
                                          int max_nb_segment , int *model_type) const;
-
-    Sequences* segmentation(StatError &error , int iidentifier , int nb_segment ,
-                            const VectorDistance &ivector_dist , std::ostream &os ,
-                            int output = SEGMENT) const;
 
     bool segment_profile_write(StatError &error , std::ostream &os , int iidentifier ,
                                int nb_segment , int *model_type , int output = SEGMENT ,
@@ -879,9 +882,11 @@ class MarkovianSequences : public Sequences {  // trajectoires correspondant a
 
 protected :
 
+    double *min_interval;   // intervalles minimums entre 2 valeurs
     SelfTransition **self_transition;  // probabilites de rester dans un etat
                                        // en fonction de l'index
-    FrequencyDistribution ***observation;  // lois empiriques d'observation
+    FrequencyDistribution ***observation_distribution;  // lois empiriques d'observation
+    Histogram ***observation_histogram;  // histogrammes d'observation
     SequenceCharacteristics **characteristics;  // caracteristiques pour une variable donnee
 
     void init();
@@ -891,6 +896,8 @@ protected :
 
     MarkovianSequences* transcode(StatError &error ,
                                   const NonparametricSequenceProcess *process) const;
+    MarkovianSequences* build_auxiliary_variable(DiscreteParametricProcess **discrete_process ,
+                                                 ContinuousParametricProcess **continuous_process) const;
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     bool plot_print(const char *prefix , const char *title , int variable ,
@@ -899,6 +906,8 @@ protected :
 
     void state_variable_init(int itype = STATE);
 
+    void min_interval_computation(int variable) const;
+
     void transition_count_computation(const VariableOrderChainData &chain_data ,
                                       const VariableOrderMarkov &markov ,
                                       bool begin = true , bool non_terminal = false) const;
@@ -906,8 +915,10 @@ protected :
                                       const SemiMarkov *smarkov = NULL) const;
 
     void self_transition_computation(int state);
+    Distribution* weight_computation() const;
     void observation_frequency_distribution_computation(int variable);
     bool test_hidden(int variable) const;
+
     void build_index_value(int variable);
     void build_first_occurrence_frequency_distribution(int variable);
     void build_recurrence_time_frequency_distribution(int variable);
@@ -934,12 +945,13 @@ public :
     :Sequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
                iindex_parameter_type , inb_variable , itype ,
                vertex_identifier_copy , init_flag) { init(); }
-    MarkovianSequences(const FrequencyDistribution &ihlength ,
-                       int inb_variable , bool init_flag = false)
-    :Sequences(ihlength , inb_variable , init_flag) { init(); }
+    MarkovianSequences(const FrequencyDistribution &ihlength , int inb_variable ,
+                       int *itype , bool init_flag = false)
+    :Sequences(ihlength , inb_variable , itype , init_flag) { init(); }
     MarkovianSequences(const MarkovianSequences &seq , int variable , int itype)
     :Sequences(seq , variable , itype) { init(); }
     MarkovianSequences(const Sequences &seq);
+    MarkovianSequences(const MarkovianSequences &seq , bool *auxiliary);
     MarkovianSequences(const MarkovianSequences &seq , char transform = 'c' ,
                        int param = DEFAULT);
     ~MarkovianSequences();
@@ -997,14 +1009,23 @@ public :
                     int min_frequency = 1) const;
     bool mtg_write(StatError &error , const char *path , int *itype) const;
 
+    int cumulative_distribution_function_computation(int variable , double **cdf) const;
+    int cumulative_distribution_function_computation(int variable , int state ,
+                                                     double **cdf) const;
+
     double iid_information_computation() const;
 
     void self_transition_computation();
     void self_transition_computation(bool *homogeneity);
     void sojourn_time_frequency_distribution_computation(int variable);
+
     void create_observation_frequency_distribution(int nb_state);
     void observation_frequency_distribution_computation();
     void build_observation_frequency_distribution();
+    void build_observation_histogram(int variable , double step = D_DEFAULT);
+    void build_observation_histogram();
+    bool select_step(StatError &error , int variable , double step);
+
     void build_characteristic(int variable = I_DEFAULT , bool sojourn_time_flag = true ,
                               bool initial_run_flag = false);
 
@@ -1034,18 +1055,21 @@ public :
                                                 bool counting_flag = true) const;
 
     SemiMarkov* semi_markov_estimation(StatError &error , std::ostream &os , char model_type ,
-                                       int estimator = COMPLETE_LIKELIHOOD , bool counting_flag = true ,
-                                       int nb_iter = I_DEFAULT , int mean_computation = COMPUTED) const;
+                                       int estimator = COMPLETE_LIKELIHOOD ,
+                                       bool counting_flag = true , int nb_iter = I_DEFAULT ,
+                                       int mean_computation_method = COMPUTED) const;
 
     HiddenVariableOrderMarkov* hidden_variable_order_markov_estimation(StatError &error , std::ostream &os ,
                                                                        const HiddenVariableOrderMarkov &ihmarkov ,
                                                                        bool global_initial_transition = true ,
+                                                                       bool common_dispersion = false ,
                                                                        bool counting_flag = true ,
                                                                        bool state_sequence = true ,
                                                                        int nb_iter = I_DEFAULT) const;
     HiddenVariableOrderMarkov* hidden_variable_order_markov_stochastic_estimation(StatError &error , std::ostream &os ,
                                                                                   const HiddenVariableOrderMarkov &ihmarkov ,
                                                                                   bool global_initial_transition = true ,
+                                                                                  bool common_dispersion = false ,
                                                                                   int min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
                                                                                   int max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
                                                                                   double parameter = NB_STATE_SEQUENCE_PARAMETER ,
@@ -1055,21 +1079,24 @@ public :
 
     HiddenSemiMarkov* hidden_semi_markov_estimation(StatError &error , std::ostream &os ,
                                                     const HiddenSemiMarkov &ihsmarkov ,
+                                                    bool common_dispersion = false ,
                                                     int estimator = COMPLETE_LIKELIHOOD ,
                                                     bool counting_flag = true ,
                                                     bool state_sequence = true ,
                                                     int nb_iter = I_DEFAULT ,
-                                                    int mean_computation = COMPUTED) const;
+                                                    int mean_computation_method = COMPUTED) const;
     HiddenSemiMarkov* hidden_semi_markov_estimation(StatError &error , std::ostream &os ,
                                                     char model_type , int nb_state , bool left_right ,
+                                                    double occupancy_mean = D_DEFAULT ,
+                                                    bool common_dispersion = false ,
                                                     int estimator = COMPLETE_LIKELIHOOD ,
                                                     bool counting_flag = true ,
                                                     bool state_sequence = true ,
-                                                    double occupancy_mean = D_DEFAULT ,
                                                     int nb_iter = I_DEFAULT ,
-                                                    int mean_computation = COMPUTED) const;
+                                                    int mean_computation_method = COMPUTED) const;
     HiddenSemiMarkov* hidden_semi_markov_stochastic_estimation(StatError &error , std::ostream &os ,
                                                                const HiddenSemiMarkov &ihsmarkov ,
+                                                               bool common_dispersion = false ,
                                                                int min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
                                                                int max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
                                                                double parameter = NB_STATE_SEQUENCE_PARAMETER ,
@@ -1079,13 +1106,14 @@ public :
                                                                int nb_iter = I_DEFAULT) const;
     HiddenSemiMarkov* hidden_semi_markov_stochastic_estimation(StatError &error , std::ostream &os ,
                                                                char model_type , int nb_state , bool left_right ,
+                                                               double occupancy_mean = D_DEFAULT ,
+                                                               bool common_dispersion = false ,
                                                                int min_nb_state_sequence = MIN_NB_STATE_SEQUENCE ,
                                                                int max_nb_state_sequence = MAX_NB_STATE_SEQUENCE ,
                                                                double parameter = NB_STATE_SEQUENCE_PARAMETER ,
                                                                int estimator = COMPLETE_LIKELIHOOD ,
                                                                bool counting_flag = true ,
                                                                bool state_sequence = true ,
-                                                               double occupancy_mean = D_DEFAULT ,
                                                                int nb_iter = I_DEFAULT) const;
 
     bool lumpability_test(StatError &error , std::ostream &os , int *symbol , int order = 1) const;
@@ -1107,10 +1135,17 @@ public :
     // acces membres de la classe
 
     Curves* get_self_transition(int state) const { return self_transition[state]; }
-    FrequencyDistribution*** get_observation() const { return observation; }
-    FrequencyDistribution** get_observation(int variable) const { return observation[variable]; }
-    FrequencyDistribution* get_observation(int variable , int state) const
-    { return observation[variable][state]; }
+    FrequencyDistribution*** get_observation_distribution() const
+    { return observation_distribution; }
+    FrequencyDistribution** get_observation_distribution(int variable) const
+    { return observation_distribution[variable]; }
+    FrequencyDistribution* get_observation_distribution(int variable , int state) const
+    { return observation_distribution[variable][state]; }
+    Histogram*** get_observation_histogram() const { return observation_histogram; }
+    Histogram** get_observation_histogram(int variable) const
+    { return observation_histogram[variable]; }
+    Histogram* get_observation_histogram(int variable , int state) const
+    { return observation_histogram[variable][state]; }
     SequenceCharacteristics* get_characteristics(int variable) const
     { return characteristics[variable]; }
 };
