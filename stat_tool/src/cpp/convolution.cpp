@@ -38,6 +38,7 @@
 
 #include <math.h>
 #include <sstream>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
@@ -241,7 +242,7 @@ DiscreteParametricModel* Convolution::extract(StatError &error , int index) cons
   else {
     index--;
     pdist = new DiscreteParametricModel(*distribution[index] ,
-                                        (convolution_data ? convolution_data->frequency_distribution[index] : 0));
+                                        (convolution_data ? convolution_data->frequency_distribution[index] : NULL));
   }
 
   return pdist;
@@ -645,7 +646,8 @@ ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_hi
            << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << " | " << STAT_label[STATL_CUMULATIVE]
            << " " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
 
-        distribution[i]->Distribution::ascii_print(os , file_flag , true , false , convol_histo->frequency_distribution[i]);
+        distribution[i]->Distribution::ascii_print(os , file_flag , true , false ,
+                                                   convol_histo->frequency_distribution[i]);
       }
     }
   }
@@ -668,12 +670,12 @@ ostream& Convolution::ascii_write(ostream &os , const ConvolutionData *convol_hi
     if (file_flag) {
       os << "# ";
     }
-    os << "   | " << STAT_label[STATL_CONVOLUTION];
+    os << "  ";
     for (i = 0;i < nb_distribution;i++) {
       os << " | " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
     }
-    os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION]
-       << " " << STAT_label[STATL_FUNCTION] << endl;
+    os << " | " << STAT_label[STATL_CONVOLUTION] << " | " << STAT_label[STATL_CUMULATIVE]
+       << " " << STAT_label[STATL_CONVOLUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
     ascii_print(os , nb_distribution , pdist , scale , file_flag , true);
   }
@@ -796,7 +798,8 @@ ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *con
          << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << "\t" << STAT_label[STATL_CUMULATIVE]
          << " " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
 
-      distribution[i]->Distribution::spreadsheet_print(os , true , false , false , convol_histo->frequency_distribution[i]);
+      distribution[i]->Distribution::spreadsheet_print(os , true , false , false ,
+                                                       convol_histo->frequency_distribution[i]);
     }
   }
 
@@ -813,12 +816,12 @@ ostream& Convolution::spreadsheet_write(ostream &os , const ConvolutionData *con
     scale[i] = 1.;
   }
 
-  os << "\n\t" << STAT_label[STATL_CONVOLUTION];
+  os << "\n";
   for (i = 0;i < nb_distribution;i++) {
     os << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
   }
-  os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_CONVOLUTION]
-     << " " << STAT_label[STATL_FUNCTION] << endl;
+  os << "\t" << STAT_label[STATL_CONVOLUTION] << "\t" << STAT_label[STATL_CUMULATIVE]
+     << " " << STAT_label[STATL_CONVOLUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
   spreadsheet_print(os , nb_distribution , pdist , scale , true);
 
@@ -873,7 +876,6 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
 {
   bool status;
   register int i , j;
-  int index_dist[CONVOLUTION_NB_DISTRIBUTION + 1];
   double plot_max , scale[CONVOLUTION_NB_DISTRIBUTION + 2];
   const Distribution *pdist[CONVOLUTION_NB_DISTRIBUTION + 2];
   const FrequencyDistribution *phisto[CONVOLUTION_NB_DISTRIBUTION + 1];
@@ -890,18 +892,16 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
 
     pdist[1] = this;
     phisto[0] = convol_histo;
-    index_dist[0] = 1;
     scale[1] = convol_histo->nb_element;
 
     for (i = 0;i < nb_distribution;i++) {
       pdist[i + 2] = distribution[i];
       phisto[i + 1] = convol_histo->frequency_distribution[i];
-      index_dist[i + 1] = i + 2;
       scale[i + 2] = convol_histo->frequency_distribution[i]->nb_element;
     }
 
     status = ::plot_print((data_file_name[0].str()).c_str() , nb_distribution + 2 , pdist ,
-                          scale , 0 , nb_distribution + 1 , phisto , index_dist);
+                          scale , NULL , nb_distribution + 1 , phisto);
   }
 
   else {
@@ -955,21 +955,19 @@ bool Convolution::plot_write(const char *prefix , const char *title ,
       }
 
       out_file << "plot [0:" << nb_value - 1 << "] [0:"
-               << MIN(plot_max * YSCALE , 1.) << "] \""
-               << label((data_file_name[0].str()).c_str()) << "\"";
-      if (convol_histo) {
-        out_file << " using " << nb_distribution + 2;
-      }
-      out_file << " title \"" << STAT_label[STATL_CONVOLUTION] << "\" with linespoints";
-
+               << MIN(plot_max * YSCALE , 1.) << "] ";
       for (j = 0;j < nb_distribution;j++) {
-        out_file << ",\\" << endl;
         out_file << "\"" << label((data_file_name[j + 1].str()).c_str()) << "\" title \""
                  << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
         distribution[j]->plot_title_print(out_file);
-        out_file << "\" with linespoints";
+        out_file << "\" with linespoints,\\" << endl;
       }
-      out_file << endl;
+
+      out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\"";
+      if (convol_histo) {
+        out_file << " using " << nb_distribution + 2;
+      }
+      out_file << " title \"" << STAT_label[STATL_CONVOLUTION] << "\" with linespoints" << endl;
 
       if (convol_histo) {
         if (i == 0) {
@@ -1072,8 +1070,6 @@ MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) con
   ostringstream title , legend;
 
 
-  // nombre de graphiques : nb_distribution + 3 si ajustement
-
   MultiPlotSet *plot_set = new MultiPlotSet(convol_histo ? nb_distribution + 3 : 1);
   MultiPlotSet &plot = *plot_set;
 
@@ -1109,22 +1105,22 @@ MultiPlotSet* Convolution::get_plotable(const ConvolutionData *convol_histo) con
 
   plot[0].resize(nb_distribution + 1);
 
-  plot[0][0].legend = STAT_label[STATL_CONVOLUTION];
-
-  plot[0][0].style = "linespoints";
-
-  plotable_mass_write(plot[0][0]);
-
   for (i = 0;i < nb_distribution;i++) {
     legend.str("");
     legend << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
     distribution[i]->plot_title_print(legend);
-    plot[0][i + 1].legend = legend.str();
+    plot[0][i].legend = legend.str();
 
-    plot[0][i + 1].style = "linespoints";
+    plot[0][i].style = "linespoints";
 
-    distribution[i]->plotable_mass_write(plot[0][i + 1]);
+    distribution[i]->plotable_mass_write(plot[0][i]);
   }
+
+  plot[0][nb_distribution].legend = STAT_label[STATL_CONVOLUTION];
+
+  plot[0][nb_distribution].style = "linespoints";
+
+  plotable_mass_write(plot[0][nb_distribution]);
 
   if (convol_histo) {
 
@@ -1417,7 +1413,7 @@ DiscreteDistributionData* ConvolutionData::extract(StatError &error , int index)
   else {
     index--;
     phisto = new DiscreteDistributionData(*frequency_distribution[index] ,
-                                          (convolution ? convolution->distribution[index] : 0));
+                                          (convolution ? convolution->distribution[index] : NULL));
   }
 
   return phisto;
