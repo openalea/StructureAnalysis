@@ -164,7 +164,7 @@ public :
     NonhomogeneousMarkov(const NonhomogeneousMarkov &markov , bool data_flag = true ,
                          bool characteristic_flag = true)
     :Chain(markov) { copy(markov , data_flag , characteristic_flag); }
-    virtual ~NonhomogeneousMarkov();
+    ~NonhomogeneousMarkov();
     NonhomogeneousMarkov& operator=(const NonhomogeneousMarkov &markov);
 
     DiscreteParametricModel* extract(StatError &error , int type , int state) const;
