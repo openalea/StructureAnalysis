@@ -38,6 +38,7 @@
 
 #include <math.h>
 #include <sstream>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
@@ -46,6 +47,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "semi_markov.h"
 #include "hidden_semi_markov.h"
@@ -86,7 +88,8 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
     nonparametric_process[i] = new NonparametricSequenceProcess(*pobservation[i - 1]);
   }
 
-  parametric_process = NULL;
+  discrete_parametric_process = NULL;
+  continuous_parametric_process = NULL;
 
   for (i = 0;i < nb_state;i++) {
     if (transition[i][i] < 1.) {
@@ -131,14 +134,17 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
  *
  *  arguments : pointeur sur un objet Chain et sur un objet NonparametricSequenceProcess,
  *              nombre de processus d'observation, pointeurs sur des objets
- *              NonparametricProcess et DiscreteParametricProcess, longueur des sequences,
+ *              NonparametricProcess, DiscreteParametricProcess et
+ *              ContinuousParametricProcess, longueur des sequences,
  *              flag sur le calcul des lois de comptage.
  *
  *--------------------------------------------------------------*/
 
 SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess *poccupancy ,
                        int inb_output_process , NonparametricProcess **nonparametric_observation ,
-                       DiscreteParametricProcess **parametric_observation , int length , bool counting_flag)
+                       DiscreteParametricProcess **discrete_parametric_observation ,
+                       ContinuousParametricProcess **continuous_parametric_observation ,
+                       int length , bool counting_flag)
 :Chain(*pchain)
 
 {
@@ -151,18 +157,28 @@ SemiMarkov::SemiMarkov(const Chain *pchain , const NonparametricSequenceProcess 
   nb_output_process = inb_output_process;
 
   nonparametric_process = new NonparametricSequenceProcess*[nb_output_process + 1];
+  discrete_parametric_process = new DiscreteParametricProcess*[nb_output_process + 1];
+  continuous_parametric_process = new ContinuousParametricProcess*[nb_output_process + 1];
+
   nonparametric_process[0] = new NonparametricSequenceProcess(*poccupancy);
-  parametric_process = new DiscreteParametricProcess*[nb_output_process + 1];
-  parametric_process[0] = NULL;
+  discrete_parametric_process[0] = NULL;
+  continuous_parametric_process[0] = NULL;
 
   for (i = 1;i <= nb_output_process;i++) {
     if (nonparametric_observation[i - 1]) {
       nonparametric_process[i] = new NonparametricSequenceProcess(*nonparametric_observation[i - 1]);
-      parametric_process[i] = NULL;
+      discrete_parametric_process[i] = NULL;
+      continuous_parametric_process[i] = NULL;
+    }
+    else if (discrete_parametric_observation[i - 1]) {
+      nonparametric_process[i] = NULL;
+      discrete_parametric_process[i] = new DiscreteParametricProcess(*discrete_parametric_observation[i - 1]);
+      continuous_parametric_process[i] = NULL;
     }
     else {
       nonparametric_process[i] = NULL;
-      parametric_process[i] = new DiscreteParametricProcess(*parametric_observation[i - 1]);
+      discrete_parametric_process[i] = NULL;
+      continuous_parametric_process[i] = new ContinuousParametricProcess(*continuous_parametric_observation[i - 1]);
     }
   }
 
@@ -259,14 +275,15 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
   RWCString buffer , token;
   size_t position;
   char type = 'v';
-  bool status , lstatus , nonparametric;
+  bool status , lstatus;
   register int i;
-  int line , nb_output_process , index;
+  int line , nb_output_process , output_process_type , index;
   long value;
   const Chain *chain;
   const NonparametricSequenceProcess *occupancy;
   NonparametricProcess **nonparametric_observation;
-  DiscreteParametricProcess **parametric_observation;
+  DiscreteParametricProcess **discrete_parametric_observation;
+  ContinuousParametricProcess **continuous_parametric_observation;
   HiddenSemiMarkov *hsmarkov;
   ifstream in_file(path);
 
@@ -361,7 +378,8 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
           nb_output_process = I_DEFAULT;
 
           nonparametric_observation = NULL;
-          parametric_observation = NULL;
+          discrete_parametric_observation = NULL;
+          continuous_parametric_observation = NULL;
 
           while (buffer.readLine(in_file , false)) {
             line++;
@@ -432,10 +450,13 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
 
           else {
             nonparametric_observation = new NonparametricProcess*[nb_output_process];
-            parametric_observation = new DiscreteParametricProcess*[nb_output_process];
+            discrete_parametric_observation = new DiscreteParametricProcess*[nb_output_process];
+            continuous_parametric_observation = new ContinuousParametricProcess*[nb_output_process];
+
             for (i = 0;i < nb_output_process;i++) {
               nonparametric_observation[i] = NULL;
-              parametric_observation[i] = NULL;
+              discrete_parametric_observation[i] = NULL;
+              continuous_parametric_observation[i] = NULL;
             }
 
             index = 0;
@@ -461,7 +482,7 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                 // test mot cle OUTPUT_PROCESS
 
                 case 0 : {
-                  nonparametric = true;
+                  output_process_type = NON_PARAMETRIC;
 
                   if (token == STAT_word[STATW_OUTPUT_PROCESS]) {
                     index++;
@@ -498,20 +519,25 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                   break;
                 }
 
-                // test mot cle NONPARAMETRIC / PARAMETRIC
+                // test mot cle NONPARAMETRIC / DISCRETE_PARAMETRIC / CONTINUOUS_PARAMETRIC
 
                 case 3 : {
                   if (token == STAT_word[STATW_NONPARAMETRIC]) {
-                    nonparametric = true;
+                    output_process_type = NON_PARAMETRIC;
                   }
-                  else if (token == STAT_word[STATW_PARAMETRIC]) {
-                    nonparametric = false;
+                  else if ((token == STAT_word[STATW_DISCRETE_PARAMETRIC]) ||
+                           (token == STAT_word[STATW_PARAMETRIC])) {
+                    output_process_type = DISCRETE_PARAMETRIC;
+                  }
+                  else if (token == STAT_word[STATW_CONTINUOUS_PARAMETRIC]) {
+                    output_process_type = CONTINUOUS_PARAMETRIC;
                   }
                   else {
                     status = false;
                     ostringstream correction_message;
                     correction_message << STAT_word[STATW_NONPARAMETRIC] << " or "
-                                       << STAT_word[STATW_PARAMETRIC];
+                                       << STAT_word[STATW_DISCRETE_PARAMETRIC] << " or "
+                                       << STAT_word[STATW_CONTINUOUS_PARAMETRIC];
                     error.correction_update(STAT_parsing[STATP_KEY_WORD] , (correction_message.str()).c_str() , line , i + 1);
                   }
                   break;
@@ -527,9 +553,9 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                   error.update(STAT_parsing[STATP_FORMAT] , line);
                 }
 
-                switch (nonparametric) {
+                switch (output_process_type) {
 
-                case true : {
+                case NON_PARAMETRIC : {
                   nonparametric_observation[index - 1] = observation_parsing(error , in_file , line ,
                                                                              chain->nb_state , true);
                   if (!nonparametric_observation[index - 1]) {
@@ -538,11 +564,20 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
                   break;
                 }
 
-                case false : {
-                  parametric_observation[index - 1] = observation_parsing(error , in_file , line ,
-                                                                          chain->nb_state ,
-                                                                          cumul_threshold);
-                  if (!parametric_observation[index - 1]) {
+                case DISCRETE_PARAMETRIC : {
+                  discrete_parametric_observation[index - 1] = discrete_observation_parsing(error , in_file , line ,
+                                                                                            chain->nb_state ,
+                                                                                            cumul_threshold);
+                  if (!discrete_parametric_observation[index - 1]) {
+                    status = false;
+                  }
+                  break;
+                }
+
+                case CONTINUOUS_PARAMETRIC : {
+                  continuous_parametric_observation[index - 1] = continuous_observation_parsing(error , in_file , line ,
+                                                                                                chain->nb_state);
+                  if (!continuous_parametric_observation[index - 1]) {
                     status = false;
                   }
                   break;
@@ -558,16 +593,20 @@ HiddenSemiMarkov* hidden_semi_markov_ascii_read(StatError &error , const char *p
 
             if (status) {
               hsmarkov = new HiddenSemiMarkov(chain , occupancy , nb_output_process ,
-                                              nonparametric_observation , parametric_observation ,
+                                              nonparametric_observation ,
+                                              discrete_parametric_observation ,
+                                              continuous_parametric_observation ,
                                               length , counting_flag);
             }
 
             for (i = 0;i < nb_output_process;i++) {
               delete nonparametric_observation[i];
-              delete parametric_observation[i];
+              delete discrete_parametric_observation[i];
+              delete continuous_parametric_observation[i];
             }
             delete [] nonparametric_observation;
-            delete [] parametric_observation;
+            delete [] discrete_parametric_observation;
+            delete [] continuous_parametric_observation;
           }
           break;
         }
@@ -744,18 +783,18 @@ int HiddenSemiMarkov::end_state() const
         }
 
         else {
-          for (k = parametric_process[j]->observation[i]->offset;k < parametric_process[j]->observation[i]->nb_value;k++) {
-            if (parametric_process[j]->observation[i]->mass[k] == 1.) {
+          for (k = discrete_parametric_process[j]->observation[i]->offset;k < discrete_parametric_process[j]->observation[i]->nb_value;k++) {
+            if (discrete_parametric_process[j]->observation[i]->mass[k] == 1.) {
               output = k;
               break;
             }
           }
 
-          if (k < parametric_process[j]->observation[i]->nb_value) {
+          if (k < discrete_parametric_process[j]->observation[i]->nb_value) {
             for (k = 0;k < nb_state;k++) {
-              if ((k != i) && (output >= parametric_process[j]->observation[k]->offset) &&
-                  (output < parametric_process[j]->observation[k]->nb_value) &&
-                  (parametric_process[j]->observation[k]->mass[output] > 0.)) {
+              if ((k != i) && (output >= discrete_parametric_process[j]->observation[k]->offset) &&
+                  (output < discrete_parametric_process[j]->observation[k]->nb_value) &&
+                  (discrete_parametric_process[j]->observation[k]->mass[output] > 0.)) {
                 end_state = I_DEFAULT;
                 break;
               }
