@@ -37,11 +37,13 @@
 
 
 #include <math.h>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/regression.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "nonhomogeneous_markov.h"
 #include "sequence_label.h"
