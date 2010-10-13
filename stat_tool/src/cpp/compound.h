@@ -166,7 +166,7 @@ public :
     CompoundData(const Compound &icompound);
     CompoundData(const CompoundData &compound_histo , bool model_flag = true)
     :FrequencyDistribution(compound_histo) { copy(compound_histo , model_flag); }
-    virtual ~CompoundData();
+    ~CompoundData();
     CompoundData& operator=(const CompoundData &compound_histo);
 
     DiscreteDistributionData* extract(StatError &error , char type) const;
