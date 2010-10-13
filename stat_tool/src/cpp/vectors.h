@@ -184,7 +184,7 @@ public :
     Vectors(const Vectors &vec , int inb_vector , int *index);
     Vectors(const Vectors &vec)
     { copy(vec); }
-    virtual ~Vectors();
+    ~Vectors();
     Vectors& operator=(const Vectors &vec);
 
     DiscreteDistributionData* extract(StatError &error , int variable) const;
@@ -232,11 +232,15 @@ public :
     MultiPlotSet* get_plotable() const;
 
     bool select_step(StatError &error , int variable , double step);
+    int cumulative_distribution_function_computation(int variable , double **cdf) const;
+    double min_interval_computation(int variable) const;
 
     double mean_absolute_deviation_computation(int variable) const;
     double mean_absolute_difference_computation(int variable) const;
     double skewness_computation(int variable) const;
     double kurtosis_computation(int variable) const;
+
+    double* mean_direction_computation(int variable , int unit) const;
 
     bool rank_correlation_computation(StatError &error , std::ostream &os ,
                                       int correlation_type , const char *path = NULL) const;
@@ -333,7 +337,7 @@ public :
                    int *iperiod);
     VectorDistance(const VectorDistance &vector_dist)
     { copy(vector_dist); }
-    virtual ~VectorDistance();
+    ~VectorDistance();
     VectorDistance& operator=(const VectorDistance &vector_dist);
 
     std::ostream& line_write(std::ostream &os) const;
