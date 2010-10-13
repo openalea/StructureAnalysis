@@ -39,9 +39,11 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
+#include "tool/config.h"
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/distribution.h"
@@ -49,10 +51,10 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "nonhomogeneous_markov.h"
 #include "sequence_label.h"
-#include "tool/config.h"
 
 using namespace std;
 
@@ -1353,12 +1355,13 @@ ostream& NonhomogeneousMarkov::ascii_write(ostream &os , const NonhomogeneousMar
     case false :
       os << SEQ_word[SEQW_NONHOMOGENEOUS] << endl;
       self_transition[i]->ascii_print(os , exhaustive , file_flag ,
-                                      (seq ? seq->self_transition[i] : 0));
+                                      (seq ? seq->self_transition[i] : NULL));
       break;
     }
   }
 
-  process->ascii_print(os , 0 , 0 , (seq ? seq->characteristics[0] : 0) , exhaustive , file_flag);
+  process->ascii_print(os , 0 , NULL , (seq ? seq->characteristics[0] : NULL) ,
+                       exhaustive , file_flag);
 
   if (seq) {
     int nb_parameter = nb_parameter_computation();
@@ -1533,12 +1536,12 @@ ostream& NonhomogeneousMarkov::spreadsheet_write(ostream &os , const Nonhomogene
       break;
     case false :
       os << SEQ_word[SEQW_NONHOMOGENEOUS] << endl;
-      self_transition[i]->spreadsheet_print(os , (seq ? seq->self_transition[i] : 0));
+      self_transition[i]->spreadsheet_print(os , (seq ? seq->self_transition[i] : NULL));
       break;
     }
   }
 
-  process->spreadsheet_print(os , 0 , 0 , (seq ? seq->characteristics[0] : 0));
+  process->spreadsheet_print(os , 0 , NULL , (seq ? seq->characteristics[0] : NULL));
 
   if (seq) {
     int nb_parameter = nb_parameter_computation();
@@ -1644,7 +1647,8 @@ bool NonhomogeneousMarkov::plot_write(const char *prefix , const char *title ,
 
 
   if (seq) {
-    status = process->plot_print(prefix , title , 0 , 0 , seq->characteristics[0] , seq->hlength);
+    status = process->plot_print(prefix , title , 0 , NULL ,
+                                 seq->characteristics[0] , seq->hlength);
   }
   else {
     status = process->plot_print(prefix , title , 0);
@@ -2246,7 +2250,7 @@ NonhomogeneousMarkovData::NonhomogeneousMarkovData()
  *--------------------------------------------------------------*/
 
 NonhomogeneousMarkovData::NonhomogeneousMarkovData(const FrequencyDistribution &ihlength)
-:MarkovianSequences(ihlength , 1 , false)
+:MarkovianSequences(ihlength , 1 , NULL , false)
 
 {
   markov = NULL;
