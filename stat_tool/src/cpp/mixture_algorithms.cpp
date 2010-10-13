@@ -37,6 +37,7 @@
 
 
 #include <math.h>
+
 #include "stat_tools.h"
 #include "distribution.h"
 #include "mixture.h"
@@ -148,24 +149,27 @@ void Mixture::computation(int min_nb_value , double cumul_threshold , bool compo
 
   // calcul de la loi resultante
 
-  nb_value = 0;
-  for (i = 0;i < nb_component;i++) {
+  nb_value = component[0]->nb_value;
+  for (i = 1;i < nb_component;i++) {
     if (component[i]->nb_value > nb_value) {
       nb_value = component[i]->nb_value;
     }
   }
 
-  offset = nb_value;
-  for (i = 0;i < nb_component;i++) {
+  offset = component[0]->offset;
+  for (i = 1;i < nb_component;i++) {
     if (component[i]->offset < offset) {
       offset = component[i]->offset;
     }
   }
 
-  for (i = 0;i < nb_value;i++) {
+  for (i = 0;i < offset;i++) {
+    mass[i] = 0.;
+  }
+  for (i = offset;i < nb_value;i++) {
     mass[i] = 0.;
     for (j = 0;j < nb_component;j++) {
-      if (i < component[j]->nb_value) {
+      if ((i >= component[j]->offset) && (i < component[j]->nb_value)) {
         mass[i] += weight->mass[j] * component[j]->mass[i];
       }
     }
