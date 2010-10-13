@@ -40,22 +40,25 @@
 #include <sstream>
 #include <iomanip>
 
+#include <boost/math/distributions/normal.hpp>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/vectors.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "sequence_label.h"
 #include "tool/config.h"
 
 using namespace std;
+using namespace boost::math;
 
 
 extern int column_width(int value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
-extern double standard_normal_value_computation(double critical_probability);
 
 
 
@@ -439,7 +442,8 @@ ostream& Correlation::ascii_write(ostream &os , bool exhaustive) const
   // calcul des limites de confiance
 
   if (frequency) {
-    standard_normal_value = standard_normal_value_computation(0.025);
+    normal dist;
+    standard_normal_value = quantile(complement(dist , 0.025));
 
     confidence_limit = new double[length];
 
@@ -727,7 +731,8 @@ bool Correlation::spreadsheet_write(StatError &error , const char *path) const
     out_file << endl;
 
     if (frequency) {
-      standard_normal_value = standard_normal_value_computation(0.025);
+      normal dist;
+      standard_normal_value = quantile(complement(dist , 0.025));
     }
 
     for (i = offset;i < length;i++) {
@@ -828,7 +833,8 @@ bool Correlation::plot_write(StatError &error , const char *prefix ,
   // calcul des limites de confiance
 
   if (frequency) {
-    standard_normal_value = standard_normal_value_computation(0.025);
+    normal dist;
+    standard_normal_value = quantile(complement(dist , 0.025));
 
     confidence_limit = new double[length];
 
@@ -1124,7 +1130,8 @@ MultiPlotSet* Correlation::get_plotable() const
   // calcul des limites de confiance
 
   if (frequency) {
-    standard_normal_value = standard_normal_value_computation(0.025);
+    normal dist;
+    standard_normal_value = quantile(complement(dist , 0.025));
 
     confidence_limit = new double[length];
 
