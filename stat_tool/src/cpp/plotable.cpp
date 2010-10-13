@@ -1,8 +1,11 @@
-#include "plotable.h"
-using namespace plotable;
-using namespace std;
 #include <iostream>
 #include <stdlib.h>
+
+#include "plotable.h"
+
+using namespace plotable;
+using namespace std;
+
 
 
 //////////////////////// SinglePlot /////////////////////////////////////////////
