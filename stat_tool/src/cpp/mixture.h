@@ -179,7 +179,7 @@ public :
     MixtureData(const Mixture &mixt);
     MixtureData(const MixtureData &mixt_histo , bool model_flag = true)
     :FrequencyDistribution(mixt_histo) { copy(mixt_histo , model_flag); }
-    virtual ~MixtureData();
+    ~MixtureData();
     MixtureData& operator=(const MixtureData &mixt_histo);
 
     DiscreteDistributionData* extract(StatError &error , int index) const;
