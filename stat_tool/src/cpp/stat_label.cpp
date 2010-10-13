@@ -48,6 +48,10 @@ const char *STAT_word[] = {
   "PARAMETER" ,
   "PROBABILITY" ,
 
+  "MEAN" ,
+  "STANDARD_DEVIATION" ,
+  "CONCENTRATION" ,
+
   "MIXTURE" ,
   "CONVOLUTION" ,
   "DISTRIBUTIONS" ,
@@ -76,7 +80,9 @@ const char *STAT_word[] = {
   "OUTPUT_PROCESS" ,
   "OUTPUT_PROCESSES" ,
   "NONPARAMETRIC" ,
-  "PARAMETRIC" ,
+  "PARAMETRIC" ,   // pour compatibilite ascendante
+  "DISCRETE_PARAMETRIC" ,
+  "CONTINUOUS_PARAMETRIC" ,
   "OBSERVATION_DISTRIBUTION" ,
 
   "OBSERVATION_PROBABILITIES" ,
@@ -85,7 +91,7 @@ const char *STAT_word[] = {
 };
 
 
-const char *STAT_distribution_word[] = {
+const char *STAT_discrete_distribution_word[] = {
   "NONPARAMETRIC" ,
   "BINOMIAL" ,
   "POISSON" ,
@@ -94,12 +100,24 @@ const char *STAT_distribution_word[] = {
 };
 
 
-const char *STAT_distribution_letter[] = {
+const char *STAT_discrete_distribution_letter[] = {
   "NP" ,
   "B" ,
   "P" ,
   "NB" ,
   "U"
+};
+
+
+const char *STAT_continuous_distribution_word[] = {
+  "GAUSSIAN" ,
+  "VON_MISES"
+};
+
+
+const char *STAT_continuous_distribution_letter[] = {
+  "G" ,
+  "VM"
 };
 
 
@@ -340,7 +358,11 @@ const char *STAT_label[] = {
   "output" ,
   "output process" ,
   "observation" ,
-  "observation probability matrix"
+  "observation probability matrix" ,
+  "theoretical" ,
+  "restoration" ,
+  "weights" ,
+  "q-q plot"
 };
 
 
@@ -396,6 +418,7 @@ const char *STAT_parsing[] = {
   "non-consecutive outputs" ,
   "overlap of observation distributions" ,
   "non-overlap of observation distributions" ,
+  "bad observation distribution type" ,
   "bad number of output processes" ,
   "bad output process index" ,
   "vector does not define a permutation"  // STATR_NO_PERMUTATION
@@ -459,6 +482,7 @@ const char *STAT_error[] = {
 
   "marginal frequency distribution not built" ,
   "marginal histogram not built" ,
+  "bad histogram step" ,
   "bad" ,
   "bad number of vectors" ,
   "bad number of variables" ,
