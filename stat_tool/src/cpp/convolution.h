@@ -170,7 +170,7 @@ public :
     ConvolutionData(const Convolution &convol);
     ConvolutionData(const ConvolutionData &convol_histo , bool model_flag = true)
     :FrequencyDistribution(convol_histo) { copy(convol_histo , model_flag); }
-    virtual ~ConvolutionData();
+    ~ConvolutionData();
     ConvolutionData& operator=(const ConvolutionData &convol_histo);
 
     DiscreteDistributionData* extract(StatError &error , int index) const;
