@@ -39,12 +39,13 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+
+#include "tool/config.h"
+
 #include "stat_tools.h"
 #include "vectors.h"
 #include "distance_matrix.h"
 #include "stat_label.h"
-
-#include "tool/config.h"
 
 using namespace std;
 
