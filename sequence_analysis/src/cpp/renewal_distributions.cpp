@@ -38,6 +38,7 @@
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
+
 #include "renewal.h"
 
 using namespace std;
