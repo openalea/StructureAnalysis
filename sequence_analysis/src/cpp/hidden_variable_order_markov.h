@@ -93,9 +93,12 @@ public :
     HiddenVariableOrderMarkov() {}
     HiddenVariableOrderMarkov(const VariableOrderMarkov *pmarkov , int inb_output_process ,
                               NonparametricProcess **nonparametric_observation ,
-                              DiscreteParametricProcess **parametric_observation , int length)
+                              DiscreteParametricProcess **discrete_parametric_observation ,
+                              ContinuousParametricProcess **continuous_parametric_observation ,
+                              int length)
     :VariableOrderMarkov(pmarkov , inb_output_process , nonparametric_observation ,
-                           parametric_observation , length) {}
+                         discrete_parametric_observation ,
+                         continuous_parametric_observation , length) {}
     HiddenVariableOrderMarkov(const HiddenVariableOrderMarkov &hmarkov , bool data_flag = true)
     :VariableOrderMarkov(hmarkov , data_flag) {}
     ~HiddenVariableOrderMarkov();
