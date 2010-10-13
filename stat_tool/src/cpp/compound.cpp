@@ -37,6 +37,7 @@
 
 
 #include <sstream>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 
@@ -511,7 +512,7 @@ ostream& Compound::ascii_write(ostream &os , const CompoundData *compound_histo 
        << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
     sum_distribution->Distribution::ascii_print(os , file_flag , true , false ,
-                                                (compound_histo ? compound_histo->sum_frequency_distribution : 0));
+                                                (compound_histo ? compound_histo->sum_frequency_distribution : NULL));
   }
 
   os << "\n" << STAT_word[STATW_ELEMENTARY] << endl;
@@ -546,7 +547,7 @@ ostream& Compound::ascii_write(ostream &os , const CompoundData *compound_histo 
 
     distribution->Distribution::ascii_print(os , file_flag , true , false ,
                                             (((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) ?
-                                             compound_histo->frequency_distribution : 0));
+                                             compound_histo->frequency_distribution : NULL));
   }
 
   return os;
@@ -674,7 +675,7 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
      << " " << STAT_label[STATL_DISTRIBUTION] << " " << STAT_label[STATL_FUNCTION] << endl;
 
   sum_distribution->Distribution::spreadsheet_print(os , true , false , false ,
-                                                    (compound_histo ? compound_histo->sum_frequency_distribution : 0));
+                                                    (compound_histo ? compound_histo->sum_frequency_distribution : NULL));
 
   os << "\n" << STAT_word[STATW_ELEMENTARY] << endl;
   distribution->spreadsheet_print(os);
@@ -699,7 +700,7 @@ ostream& Compound::spreadsheet_write(ostream &os , const CompoundData *compound_
 
   distribution->Distribution::spreadsheet_print(os , true , false , false ,
                                                 (((compound_histo) && (compound_histo->frequency_distribution->nb_element > 0)) ?
-                                                 compound_histo->frequency_distribution : 0));
+                                                 compound_histo->frequency_distribution : NULL));
 
   return os;
 }
@@ -751,7 +752,7 @@ bool Compound::plot_write(const char *prefix , const char *title ,
 {
   bool status;
   register int i;
-  int nb_histo = 0 , index_dist[3];
+  int nb_histo = 0;
   double scale[3];
   const Distribution *pdist[3];
   const FrequencyDistribution *phisto[3];
@@ -767,25 +768,22 @@ bool Compound::plot_write(const char *prefix , const char *title ,
   pdist[2] = distribution;
 
   if (compound_histo) {
-    phisto[nb_histo] = compound_histo;
-    index_dist[nb_histo++] = 0;
+    phisto[nb_histo++] = compound_histo;
     scale[0] = compound_histo->nb_element;
 
-    phisto[nb_histo] = compound_histo->sum_frequency_distribution;
-    index_dist[nb_histo++] = 1;
+    phisto[nb_histo++] = compound_histo->sum_frequency_distribution;
     scale[1] = compound_histo->sum_frequency_distribution->nb_element;
 
     if (compound_histo->frequency_distribution->nb_element > 0) {
-      phisto[nb_histo] = compound_histo->frequency_distribution;
-      index_dist[nb_histo++] = 2;
+      phisto[nb_histo++] = compound_histo->frequency_distribution;
       scale[2] = compound_histo->frequency_distribution->nb_element;
     }
     else {
       scale[2] = 1.;
     }
 
-    status = ::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale , 0 ,
-                          nb_histo , phisto , index_dist);
+    status = ::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale ,
+                          NULL , nb_histo , phisto);
   }
 
   else {
@@ -793,7 +791,8 @@ bool Compound::plot_write(const char *prefix , const char *title ,
     scale[1] = 1.;
     scale[2] = 1.;
 
-    status = ::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale , 0 , 0 , 0 , 0);
+    status = ::plot_print((data_file_name.str()).c_str() , 3 , pdist , scale ,
+                          NULL , 0 , NULL);
   }
 
   // ecriture du fichier de commandes et du fichier d'impression
@@ -1326,7 +1325,7 @@ DiscreteDistributionData* CompoundData::extract(StatError &error , char type) co
 
   case 's' : {
     phisto = new DiscreteDistributionData(*sum_frequency_distribution ,
-                                          (compound ? compound->sum_distribution : 0));
+                                          (compound ? compound->sum_distribution : NULL));
     break;
   }
 
@@ -1338,7 +1337,7 @@ DiscreteDistributionData* CompoundData::extract(StatError &error , char type) co
 
     else {
       phisto = new DiscreteDistributionData(*frequency_distribution ,
-                                            (compound ? compound->distribution : 0));
+                                            (compound ? compound->distribution : NULL));
     }
     break;
   }
