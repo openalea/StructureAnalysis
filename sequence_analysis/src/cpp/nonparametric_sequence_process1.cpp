@@ -39,10 +39,12 @@
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "sequence_label.h"
 
@@ -590,10 +592,9 @@ void NonparametricSequenceProcess::init_occupancy(const NonparametricSequencePro
  *  Constructeur par copie de la classe NonparametricSequenceProcess.
  *
  *  arguments : reference sur un objet NonparametricSequenceProcess,
- *              type de manipulation ('c' : copy, 's' : state, 'o' :occupancy),
+ *              type de manipulation ('c' : copy, 'o' :occupancy),
  *              parametre (flag sur le calcul des lois caracteristiques /
- *              nombre de valeurs allouees pour les lois d'occupation des etats /
- *              etat de reference).
+ *              nombre de valeurs allouees pour les lois d'occupation des etats).
  *
  *--------------------------------------------------------------*/
 
@@ -602,33 +603,13 @@ NonparametricSequenceProcess::NonparametricSequenceProcess(const NonparametricSe
 
 {
   switch (manip) {
-
-  case 'c' : {
+  case 'c' :
     NonparametricProcess::copy(process);
     copy(process , param);
     break;
-  }
-
-  case 'o' : {
+  case 'o' :
     init_occupancy(process , param);
     break;
-  }
-
-  case 's' : {
-    add_state(process , param);
-
-    length = NULL;
-    index_value = NULL;
-    no_occurrence = NULL;
-    first_occurrence = NULL;
-    leave = NULL;
-    recurrence_time = NULL;
-    absorption = NULL;
-    sojourn_time = NULL;
-    nb_run = NULL;
-    nb_occurrence = NULL;
-    break;
-  }
   }
 }
 
@@ -914,4 +895,45 @@ NonparametricSequenceProcess* occupancy_parsing(StatError &error , ifstream &in_
   delete [] dist;
 
   return process;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la distribution marginale des etats.
+ *
+ *--------------------------------------------------------------*/
+
+Distribution* NonparametricSequenceProcess::weight_computation() const
+
+{
+  register int i , j;
+  double sum;
+  Distribution *weight;
+
+
+  weight = new Distribution(nb_state);
+
+  for (i = 0;i < nb_state;i++) {
+    weight->mass[i] = 0.;
+  }
+
+  for (i = 0;i < length->nb_value - 1;i++) {
+    for (j = 0;j < nb_state;j++) {
+      weight->mass[j] += index_value->point[j][i] * (1. - length->cumul[i]);
+    }
+  }
+
+  sum = 0.;
+  for (i = 0;i < nb_state;i++) {
+    sum += weight->mass[i];
+  }
+  for (i = 0;i < nb_state;i++) {
+    weight->mass[i] /= sum;
+  }
+
+  weight->cumul_computation();
+  weight->max_computation();
+
+  return weight;
 }
