@@ -45,9 +45,9 @@
 
 #include "stat_tools.h"
 #include "distribution.h"
+#include "markovian.h"
 #include "mixture.h"
 #include "multivariate_mixture.h"
-#include "markovian.h"
 #include "stat_label.h"
 
 using namespace std;
@@ -1068,7 +1068,7 @@ MultivariateMixture* multivariate_mixture_ascii_read(StatError &error , const ch
 
              case false :
                {
-                 p_observation[index-1]= observation_parsing(error, in_file, line,
+                 p_observation[index-1]= discrete_observation_parsing(error, in_file, line,
                                      nb_component,
                                      cumul_threshold);
                  if (p_observation[index-1] == NULL)
@@ -1277,7 +1277,7 @@ ostream& MultivariateMixture::ascii_write(ostream &os , const MultivariateMixtur
         observation= NULL;
     }
     if (npcomponent[var-1] == NULL)
-      pcomponent[var-1]->ascii_print(os, observation, exhaustive, file_flag);
+      pcomponent[var-1]->ascii_print(os, observation, NULL, exhaustive, file_flag);
     else
       npcomponent[var-1]->ascii_print(os, observation, exhaustive, file_flag);
 
