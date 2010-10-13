@@ -291,7 +291,7 @@ DiscreteParametricModel* Mixture::extract(StatError &error , int index) const
   else {
     index--;
     pcomponent = new DiscreteParametricModel(*component[index] ,
-                                             (mixture_data ? mixture_data->component[index] : 0));
+                                             (mixture_data ? mixture_data->component[index] : NULL));
   }
 
   return pcomponent;
@@ -782,7 +782,7 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
       pcomponent[i] = component[i];
 
       if (mixt_histo) {
-        scale[i] = mixt_histo->nb_element * weight->mass[i];
+        scale[i] = weight->mass[i] * mixt_histo->nb_element;
       }
       else {
         scale[i] = weight->mass[i];
@@ -797,10 +797,10 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
     if (mixt_histo) {
       os << " | " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
     }
-    os << " | " << STAT_label[STATL_MIXTURE];
     for (i = 0;i < nb_component;i++) {
       os << " | " << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
     }
+    os << " | " << STAT_label[STATL_MIXTURE];
     if (mixt_histo) {
       os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
          << " " << STAT_label[STATL_FUNCTION];
@@ -855,7 +855,8 @@ ostream& Mixture::ascii_write(ostream &os , const MixtureData *mixt_histo ,
            << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
            << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
 
-        component[i]->Distribution::ascii_print(os , file_flag , true , false , mixt_histo->component[i]);
+        component[i]->Distribution::ascii_print(os , file_flag , true , false ,
+                                                mixt_histo->component[i]);
       }
     }
   }
@@ -997,7 +998,7 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo)
     pcomponent[i] = component[i];
 
     if (mixt_histo) {
-      scale[i] = mixt_histo->nb_element * weight->mass[i];
+      scale[i] = weight->mass[i] * mixt_histo->nb_element;
     }
     else {
       scale[i] = weight->mass[i];
@@ -1008,10 +1009,10 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo)
   if (mixt_histo) {
     os << "\t" << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
   }
-  os << "\t" << STAT_label[STATL_MIXTURE];
   for (i = 0;i < nb_component;i++) {
     os << "\t" << STAT_label[STATL_DISTRIBUTION] << " " << i + 1;
   }
+  os << "\t" << STAT_label[STATL_MIXTURE];
   if (mixt_histo) {
     os << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
        << " " << STAT_label[STATL_FUNCTION];
@@ -1047,7 +1048,8 @@ ostream& Mixture::spreadsheet_write(ostream &os , const MixtureData *mixt_histo)
            << "\t" << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION]
            << " " << i + 1 << " " << STAT_label[STATL_FUNCTION] << endl;
 
-        component[i]->Distribution::spreadsheet_print(os , true , false , false , mixt_histo->component[i]);
+        component[i]->Distribution::spreadsheet_print(os , true , false , false ,
+                                                      mixt_histo->component[i]);
       }
     }
   }
@@ -1102,7 +1104,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
 {
   bool status;
   register int i , j , k;
-  int nb_histo = 0 , index_dist[MIXTURE_NB_COMPONENT + 2];
+  int nb_histo = 0;
   double scale[MIXTURE_NB_COMPONENT + 2];
   const Distribution *pdist[MIXTURE_NB_COMPONENT + 2];
   const FrequencyDistribution *phisto[MIXTURE_NB_COMPONENT + 2];
@@ -1115,20 +1117,17 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
 
   if (mixt_histo) {
     pdist[0] = this;
-    phisto[nb_histo] = mixt_histo;
-    index_dist[nb_histo++] = 0;
+    phisto[nb_histo++] = mixt_histo;
     scale[0] = mixt_histo->nb_element;
 
     pdist[1] = weight;
-    phisto[nb_histo] = mixt_histo->weight;
-    index_dist[nb_histo++] = 1;
+    phisto[nb_histo++] = mixt_histo->weight;
     scale[1] = mixt_histo->weight->nb_element;
 
     for (i = 0;i < nb_component;i++) {
       pdist[i + 2] = component[i];
       if (mixt_histo->component[i]->nb_element > 0) {
-        phisto[nb_histo] = mixt_histo->component[i];
-        index_dist[nb_histo++] = i + 2;
+        phisto[nb_histo++] = mixt_histo->component[i];
         scale[i + 2] = mixt_histo->component[i]->nb_element;
       }
       else {
@@ -1137,7 +1136,7 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
     }
 
     status = ::plot_print((data_file_name[0].str()).c_str() , nb_component + 2 , pdist ,
-                          scale , 0 , nb_histo , phisto , index_dist);
+                          scale , NULL , nb_histo , phisto);
   }
 
   else {
@@ -1157,7 +1156,8 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
         scale[0] = weight->mass[i];
       }
 
-      ::plot_print((data_file_name[i + 1].str()).c_str() , 1 , pdist , scale , 0 , 0 , 0 , 0);
+      ::plot_print((data_file_name[i + 1].str()).c_str() , 1 , pdist ,
+                   scale , NULL , 0 , NULL);
     }
 
     // ecriture du fichier de commandes et du fichier d'impression
@@ -1198,25 +1198,25 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
                  << (int)(MAX(mixt_histo->max , max * mixt_histo->nb_element) * YSCALE) + 1
                  << "] \"" << label((data_file_name[0].str()).c_str()) << "\" using 1 title \""
                  << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses,\\" << endl;
-        out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\" using " << nb_histo + 1
-                 << " title \"" << STAT_label[STATL_MIXTURE] << "\" with linespoints";
       }
 
       else {
         out_file << "plot [0:" << nb_value - 1 << "] [0:"
-                 << MIN(max * YSCALE , 1.) << "] \""
-                 << label((data_file_name[0].str()).c_str()) << "\" title \""
-                 << STAT_label[STATL_MIXTURE] << "\" with linespoints";
+                 << MIN(max * YSCALE , 1.) << "] ";
       }
 
       for (j = 0;j < nb_component;j++) {
-        out_file << ",\\" << endl;
         out_file << "\"" << label((data_file_name[j + 1].str()).c_str()) << "\" title \""
                  << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
         component[j]->plot_title_print(out_file);
-        out_file << "\" with linespoints";
+        out_file << "\" with linespoints,\\" << endl;
       }
-      out_file << endl;
+
+      out_file << "\"" << label((data_file_name[0].str()).c_str());
+      if (mixt_histo) {
+        out_file << "\" using " << nb_histo + 1;
+      }
+      out_file << " title \"" << STAT_label[STATL_MIXTURE] << "\" with linespoints" << endl;
 
       if (nb_value - 1 < TIC_THRESHOLD) {
         out_file << "set xtics autofreq" << endl;
@@ -1392,12 +1392,6 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *mixt_histo) const
     i = 0;
   }
 
-  plot[0][i].legend = STAT_label[STATL_MIXTURE];
-
-  plot[0][i].style = "linespoints";
-
-  plotable_mass_write(plot[0][i++] , scale);
-  
   for (j = 0;j < nb_component;j++) {
     legend.str("");
     legend << STAT_label[STATL_DISTRIBUTION] << " " << j + 1;
@@ -1413,6 +1407,12 @@ MultiPlotSet* Mixture::get_plotable(const MixtureData *mixt_histo) const
       component[j]->plotable_mass_write(plot[0][i + j] , weight->mass[j]);
     }
   }
+
+  plot[0][i + nb_component].legend = STAT_label[STATL_MIXTURE];
+
+  plot[0][i + nb_component].style = "linespoints";
+
+  plotable_mass_write(plot[0][i + nb_component] , scale);
 
   if (mixt_histo) {
 
@@ -1777,7 +1777,7 @@ DiscreteDistributionData* MixtureData::extract(StatError &error , int index) con
 
   if (status) {
     pcomponent = new DiscreteDistributionData(*component[index] ,
-                                              (mixture ? mixture->component[index] : 0));
+                                              (mixture ? mixture->component[index] : NULL));
   }
 
   return pcomponent;
