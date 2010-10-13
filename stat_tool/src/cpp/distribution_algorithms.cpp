@@ -38,13 +38,14 @@
 
 #include <math.h>
 #include <cstdlib>
-#include "stat_tools.h"
-#include "distribution.h"
-#include "stat_label.h"
 
 #include <boost/math/distributions/binomial.hpp>
 #include <boost/math/distributions/poisson.hpp>
 #include <boost/math/distributions/negative_binomial.hpp>
+
+#include "stat_tools.h"
+#include "distribution.h"
+#include "stat_label.h"
 
 using namespace std;
 using namespace boost::math;
@@ -251,11 +252,13 @@ void DiscreteParametric::binomial_computation(int inb_value , char mode)
 
 # ifdef DEBUG
   if (mode == 's') {
-    binomial dist(sup_bound , probability);
+    binomial dist(sup_bound - inf_bound , probability);
 
-    cout << "TEST binomial distribution" << endl;
+
+    cout << "\nTEST binomial distribution" << endl;
     for (i = inf_bound;i <= sup_bound;i++) {
-      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i] << endl;
+      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i]
+           << "   " << cdf(dist , i - inf_bound) << " | " << cumul[i] << endl;
     }
   }
 # endif
@@ -425,9 +428,11 @@ void DiscreteParametric::poisson_computation(int inb_value , double cumul_thresh
   if (mode == 's') {
     poisson dist(parameter);
 
-    cout << "TEST Poisson distribution" << endl;
+
+    cout << "\nTEST Poisson distribution" << endl;
     for (i = inf_bound;i < nb_value;i++) {
-      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i] << endl;
+      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i]
+           << "   " << cdf(dist , i - inf_bound) << " | " << cumul[i] << endl;
     }
   }
 # endif
@@ -603,9 +608,11 @@ void DiscreteParametric::negative_binomial_computation(int inb_value , double cu
   if (mode == 's') {
     negative_binomial dist(parameter , probability);
 
+
     cout << "TEST negative binomial distribution" << endl;
     for (i = inf_bound;i < nb_value;i++) {
-      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i] << endl;
+      cout << i << "  " << pdf(dist , i - inf_bound) << " | " << mass[i]
+           << "   " << cdf(dist , i - inf_bound) << " | " << cumul[i] << endl;
     }
   }
 # endif
