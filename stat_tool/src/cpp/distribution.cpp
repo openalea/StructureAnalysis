@@ -694,10 +694,10 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
   if (histo) {
     width[1] = column_width(histo->max) + ASCII_SPACE;
   }
-  width[2] = column_width(nb_value , mass , scale) + ASCII_SPACE;
   for (i = 0;i < nb_dist;i++) {
-    width[i + 3] = column_width(dist[i]->nb_value , dist[i]->mass , dist_scale[i]) + ASCII_SPACE;
+    width[i + 2] = column_width(dist[i]->nb_value , dist[i]->mass , dist_scale[i]) + ASCII_SPACE;
   }
+  width[nb_dist + 2] = column_width(nb_value , mass , scale) + ASCII_SPACE;
   if (cumul_flag) {
     if (histo) {
       width[nb_dist + 3] = column_width(histo->nb_value , histo_cumul , 1.) + ASCII_SPACE;
@@ -722,20 +722,20 @@ ostream& Distribution::ascii_print(ostream &os , int nb_dist , const Distributio
       }
     }
 
-    if (i < nb_value) {
-      os << setw(width[2]) << mass[i] * scale;
-    }
-    else {
-      os << setw(width[2]) << " ";
-    }
-
     for (j = 0;j < nb_dist;j++) {
       if (i < dist[j]->nb_value) {
-        os << setw(width[j + 3]) << dist[j]->mass[i] * dist_scale[j];
+        os << setw(width[j + 2]) << dist[j]->mass[i] * dist_scale[j];
       }
       else {
-        os << setw(width[j + 3]) << " ";
+        os << setw(width[j + 2]) << " ";
       }
+    }
+
+    if (i < nb_value) {
+      os << setw(width[nb_dist + 2]) << mass[i] * scale;
+    }
+    else {
+      os << setw(width[nb_dist + 2]) << " ";
     }
 
     if (cumul_flag) {
@@ -955,16 +955,16 @@ ostream& Distribution::spreadsheet_print(ostream &os , int nb_dist , const Distr
       }
     }
 
-    os << "\t";
-    if (i < nb_value) {
-      os << mass[i] * scale;
-    }
-
     for (j = 0;j < nb_dist;j++) {
       os << "\t";
       if (i < dist[j]->nb_value) {
         os << dist[j]->mass[i] * dist_scale[j];
       }
+    }
+
+    os << "\t";
+    if (i < nb_value) {
+      os << mass[i] * scale;
     }
 
     if (cumul_flag) {
@@ -1118,19 +1118,18 @@ bool Distribution::plot_print(const char *path , const FrequencyDistribution *hi
  *
  *  arguments : path, nombre de lois, pointeurs sur les lois,
  *              facteurs d'echelle, nombre de valeurs des lois,
- *              nombre de lois empiriques, pointeurs sur les lois empiriques
- *              indice des lois correspondantes.
+ *              nombre de lois empiriques, pointeurs sur les lois empiriques.
  *
  *--------------------------------------------------------------*/
 
 bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
                 double *scale , int *dist_nb_value , int nb_histo ,
-                const FrequencyDistribution **histo , int *index_dist)
+                const FrequencyDistribution **histo)
 
 {
   bool status = false;
   register int i , j;
-  int plot_nb_value = 0 , *histo_nb_value;
+  int plot_nb_value = 0;
   ofstream out_file(path);
 
 
@@ -1140,23 +1139,9 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
     // calcul du nombre de valeurs
 
     if (histo) {
-      histo_nb_value = new int[nb_histo];
-
       for (i = 0;i < nb_histo;i++) {
-        if (index_dist[i] == I_DEFAULT) {
-          histo_nb_value[i] = histo[i]->nb_value;
-          if (histo_nb_value[i] > plot_nb_value) {
-            plot_nb_value = histo_nb_value[i];
-          }
-        }
-
-        else {
-          if (!dist_nb_value) {
-            histo_nb_value[i] = dist[index_dist[i]]->nb_value;
-          }
-          else {
-            histo_nb_value[i] = dist_nb_value[index_dist[i]];
-          }
+        if (histo[i]->nb_value > plot_nb_value) {
+          plot_nb_value = histo[i]->nb_value;
         }
       }
     }
@@ -1214,10 +1199,6 @@ bool plot_print(const char *path , int nb_dist , const Distribution **dist ,
       }
 
       out_file << endl;
-    }
-
-    if (histo) {
-      delete [] histo_nb_value;
     }
   }
 
