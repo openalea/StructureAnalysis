@@ -1282,7 +1282,9 @@ public:
     FOOTER_OS;
   }
 
-  static Sequences*
+  // fonction supprimee
+
+/*  static Sequences*
   segmentation_vector_distance(const Sequences &input,  int iidentifier,
     int nb_segment ,  const VectorDistance &ivector_dist, int output)
   {
@@ -1290,7 +1292,7 @@ public:
     ret = input.segmentation(error,iidentifier,  nb_segment,
       ivector_dist, os, output);
     FOOTER_OS;
-  }
+  } */
 
   static void plot_write(const Sequences &input, const std::string& prefix,
     const std::string& title)
@@ -1462,7 +1464,7 @@ class_sequences()
    DEF_RETURN_VALUE("segmentation_model", SequencesWrap::segmentation_model, args("todo"), "todo")
    DEF_RETURN_VALUE("segmentation_change_point", SequencesWrap::segmentation_change_point, args("todo"), "todo")
    DEF_RETURN_VALUE("segmentation_array", SequencesWrap::segmentation_array, args("todo"), "todo")
-   DEF_RETURN_VALUE("segmentation_vector_distance", SequencesWrap::segmentation_vector_distance, args("todo"), "todo")
+//   DEF_RETURN_VALUE("segmentation_vector_distance", SequencesWrap::segmentation_vector_distance, args("todo"), "todo")
    DEF_RETURN_VALUE("shift", SequencesWrap::shift, args("variable","param"),"Shift")
    DEF_RETURN_VALUE("sojourn_time_sequences", SequencesWrap::sojourn_time_sequences, args("variable"), "Sojourn time sequences")
    DEF_RETURN_VALUE("transcode", SequencesWrap::transcode, args("variable", "symbols"),"Transcode")
