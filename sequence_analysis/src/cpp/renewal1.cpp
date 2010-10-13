@@ -44,6 +44,7 @@
 #include "stat_tool/distribution.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/stat_label.h"
+
 #include "renewal.h"
 #include "sequence_label.h"
 
