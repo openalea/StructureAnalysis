@@ -99,12 +99,15 @@ protected :
     int *nb_memory;         // nombre de memoires precedentes
     int **previous;         // memoires precedentes
     int nb_output_process;  // nombre de processus d'observation
-    NonparametricSequenceProcess **nonparametric_process;  // processus d'observation non-parametriques
-    DiscreteParametricProcess **parametric_process;  // processus d'observation parametriques
+    NonparametricSequenceProcess **nonparametric_process;  // processus d'observation discrets non-parametriques
+    DiscreteParametricProcess **discrete_parametric_process;  // processus d'observation discrets parametriques
+    ContinuousParametricProcess **continuous_parametric_process;  // processus d'observation continus parametriques
 
     VariableOrderMarkov(const VariableOrderMarkov *pmarkov , int inb_output_process ,
                         NonparametricProcess **nonparametric_observation ,
-                        DiscreteParametricProcess **parametric_observation , int length);
+                        DiscreteParametricProcess **discrete_parametric_observation ,
+                        ContinuousParametricProcess **continuous_parametric_observation ,
+                        int length);
 
     void memory_tree_completion(const VariableOrderMarkov &markov);
     void copy(const VariableOrderMarkov &markov , bool data_flag = true);
@@ -205,7 +208,7 @@ public :
                         const NonparametricProcess *pobservation , int length);
     VariableOrderMarkov(const VariableOrderMarkov &markov , bool data_flag = true)
     :Chain(markov) { copy(markov , data_flag); }
-    virtual ~VariableOrderMarkov();
+    ~VariableOrderMarkov();
     VariableOrderMarkov& operator=(const VariableOrderMarkov &markov);
 
     DiscreteParametricModel* extract(StatError &error , int type ,
@@ -273,9 +276,14 @@ public :
     int get_nb_output_process() const { return nb_output_process; }
     NonparametricSequenceProcess* get_nonparametric_process(int variable) const
     { return nonparametric_process[variable]; }
-    DiscreteParametricProcess** get_parametric_process() const { return parametric_process; }
-    DiscreteParametricProcess* get_parametric_process(int variable)
-    const { return parametric_process[variable]; }
+    DiscreteParametricProcess** get_discrete_parametric_process() const
+    { return discrete_parametric_process; }
+    DiscreteParametricProcess* get_discrete_parametric_process(int variable) const
+    { return discrete_parametric_process[variable]; }
+    ContinuousParametricProcess** get_continuous_parametric_process() const
+    { return continuous_parametric_process; }
+    ContinuousParametricProcess* get_continuous_parametric_process(int variable) const
+    { return continuous_parametric_process[variable]; }
 };
 
 
@@ -300,10 +308,10 @@ private :
 public :
 
     VariableOrderMarkovIterator(VariableOrderMarkov *imarkov);
-    VariableOrderMarkovIterator(const VariableOrderMarkovIterator &it)
-    { copy(it); }
+    VariableOrderMarkovIterator(const VariableOrderMarkovIterator &iter)
+    { copy(iter); }
     ~VariableOrderMarkovIterator();
-    VariableOrderMarkovIterator& operator=(const VariableOrderMarkovIterator &it);
+    VariableOrderMarkovIterator& operator=(const VariableOrderMarkovIterator &iter);
 
     bool simulation(int **int_seq , int ilength = 1 , bool initialization = false);
     int** simulation(int ilength = 1 , bool initialization = false);
@@ -357,8 +365,8 @@ private :
 public :
 
     VariableOrderMarkovData();
-    VariableOrderMarkovData(const FrequencyDistribution &ihlength ,
-                            int inb_variable , bool init_flag = false);
+    VariableOrderMarkovData(const FrequencyDistribution &ihlength , int inb_variable ,
+                            int *itype , bool init_flag = false);
     VariableOrderMarkovData(const MarkovianSequences &seq);
     VariableOrderMarkovData(const MarkovianSequences &seq , char transform ,
                             bool initial_run_flag);
@@ -371,6 +379,7 @@ public :
     DiscreteDistributionData* extract(StatError &error , int type ,
                                       int variable , int value) const;
     VariableOrderMarkovData* remove_index_parameter(StatError &error) const;
+    MarkovianSequences* build_auxiliary_variable(StatError &error) const;
 
     Correlation* state_autocorrelation_computation(StatError &error , int istate ,
                                                    int max_lag = MAX_LAG) const;
