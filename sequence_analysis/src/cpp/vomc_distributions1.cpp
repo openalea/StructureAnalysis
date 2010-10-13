@@ -37,9 +37,11 @@
 
 
 #include <sstream>
+
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
+
 #include "sequences.h"
 #include "variable_order_markov.h"
 #include "sequence_label.h"
