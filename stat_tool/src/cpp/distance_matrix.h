@@ -132,7 +132,7 @@ public :
                    const char *ilabel);
     DistanceMatrix(const DistanceMatrix &dist_matrix , char transform = 'c')
     { copy(dist_matrix , transform); }
-    virtual ~DistanceMatrix();
+    ~DistanceMatrix();
     DistanceMatrix& operator=(const DistanceMatrix &dist_matrix);
 
     DistanceMatrix* select_individual(StatError &error , int inb_pattern ,
