@@ -39,19 +39,22 @@
 #include <math.h>
 #include <sstream>
 #include <iomanip>
+
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
 #include "tool/rw_locale.h"
+#include "tool/config.h"
 
 #include "stat_tool/stat_tools.h"
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "sequence_label.h"
-#include "tool/config.h"
 
 using namespace std;
+
 
 extern int column_width(int value);
 extern int column_width(int min_value , int max_value);
@@ -906,7 +909,21 @@ ostream& Sequences::ascii_write(ostream &os , bool exhaustive , bool comment_fla
     }
 
     else {
-      os << endl;
+
+#     ifdef MESSAGE
+      mean = mean_computation(i);
+      variance = variance_computation(i , mean);
+
+      os << "\n";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_MEAN] << ": " << mean << "   "
+         << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+         << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+#     endif
+
+//      os << endl;
     }
   }
 
@@ -1526,7 +1543,6 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
   // ecriture des fichier de donnees
 
   data_file_name = new ostringstream[nb_variable + 1];
-
   data_file_name[0] << prefix << 0 << ".dat";
 
   nb_histo = 0;
@@ -1544,8 +1560,6 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
     error.update(STAT_error[STATR_FILE_PREFIX]);
   }
 
-  // ecriture du fichier de commandes et du fichier d'impression
-
   else {
     for (i = 0;i < nb_variable;i++) {
       if (marginal_distribution[i]) {
@@ -1557,6 +1571,8 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
         marginal_histogram[i]->plot_print((data_file_name[i + 1].str()).c_str());
       }
     }
+
+    // ecriture du fichier de commandes et du fichier d'impression
 
     for (i = 0;i < 2;i++) {
       ostringstream file_name[2];
@@ -1678,11 +1694,11 @@ bool Sequences::plot_write(StatError &error , const char *prefix ,
             out_file << "set ytics 0,1" << endl;
           }
 
-          out_file << "plot [" << marginal_histogram[j]->min_value << ":"
-                   << marginal_histogram[j]->max_value << "] [0:"
+          out_file << "plot [" << marginal_histogram[j]->min_value - marginal_histogram[j]->step << ":"
+                   << marginal_histogram[j]->max_value + marginal_histogram[j]->step << "] [0:"
                    << (int)(marginal_histogram[j]->max * YSCALE) + 1 << "] \""
                    << label((data_file_name[j + 1].str()).c_str()) << "\" using 1:2 title \""
-                   << STAT_label[STATL_VARIABLE] << " " << j + 1 << " "
+                   << STAT_label[STATL_VARIABLE] << " " << j + 1 << " - "
                    << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM]
                    << "\" with histeps" << endl;
 
@@ -1855,7 +1871,8 @@ MultiPlotSet* Sequences::get_plotable() const
 
       // vue : histogramme marginal
 
-      plot[i].xrange = Range(marginal_histogram[j]->min_value , marginal_histogram[j]->max_value);
+      plot[i].xrange = Range(marginal_histogram[j]->min_value - marginal_histogram[j]->step ,
+                             marginal_histogram[j]->max_value + marginal_histogram[j]->step);
       plot[i].yrange = Range(0 , ceil(marginal_histogram[j]->max * YSCALE));
 
       if (ceil(marginal_histogram[j]->max * YSCALE) < TIC_THRESHOLD) {
