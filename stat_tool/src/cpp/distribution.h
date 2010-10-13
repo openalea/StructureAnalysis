@@ -143,7 +143,7 @@ public :
     DiscreteDistributionData(const FrequencyDistribution &histo , const Distribution *dist);
     DiscreteDistributionData(const FrequencyDistribution &histo , const DiscreteParametric *dist);
     DiscreteDistributionData(const DiscreteDistributionData &histo , bool model_flag = true);
-    virtual ~DiscreteDistributionData();
+    ~DiscreteDistributionData();
     DiscreteDistributionData& operator=(const DiscreteDistributionData &histo);
 
     DiscreteParametricModel* extract_model(StatError &error) const;
