@@ -224,7 +224,7 @@ public :
     MultivariateMixtureData(const MultivariateMixture &mixt);
     MultivariateMixtureData(const MultivariateMixtureData &mixt_data , bool model_flag = true)
       :Vectors(mixt_data) { copy(mixt_data , model_flag); }
-    virtual ~MultivariateMixtureData();
+    ~MultivariateMixtureData();
     MultivariateMixtureData& operator=(const MultivariateMixtureData &mixt_data);
 
     DiscreteDistributionData* extract(StatError &error , int variable, int index) const;
