@@ -38,6 +38,7 @@
 
 #include <string.h>
 #include <sstream>
+
 #include "stat_tools.h"
 #include "stat_label.h"
 
