@@ -108,7 +108,7 @@ public :
                   double irhythm_ratio = D_DEFAULT , int imax_position = 0);
     TopParameters(const TopParameters &parameters , bool data_flag = true)
     { copy(parameters , data_flag); }
-    virtual ~TopParameters();
+    ~TopParameters();
     TopParameters& operator=(const TopParameters&);
 
     DiscreteParametricModel* extract(StatError &error , int position) const;
