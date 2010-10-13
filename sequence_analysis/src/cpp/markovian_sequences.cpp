@@ -44,6 +44,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "sequence_label.h"
 #include "tool/config.h"
@@ -68,8 +69,11 @@ extern char* label(const char *file_name);
 MarkovianSequences::MarkovianSequences()
 
 {
+  min_interval = NULL;
+
   self_transition = NULL;
-  observation = NULL;
+  observation_distribution = NULL;
+  observation_histogram = NULL;
   characteristics = NULL;
 }
 
@@ -86,8 +90,14 @@ void MarkovianSequences::init()
   register int i;
 
 
+  min_interval = new double[nb_variable];
+  for (i = 0;i < nb_variable;i++) {
+    min_interval[i] = 0.;
+  }
+
   self_transition = NULL;
-  observation = NULL;
+  observation_distribution = NULL;
+  observation_histogram = NULL;
 
   characteristics = new SequenceCharacteristics*[nb_variable];
   for (i = 0;i < nb_variable;i++) {
@@ -108,8 +118,62 @@ MarkovianSequences::MarkovianSequences(const Sequences &seq)
 :Sequences(seq)
 
 {
+  register int i;
+
+
   init();
+
+  min_interval = new double[nb_variable];
+  for (i = 0;i < nb_variable;i++) {
+    min_interval_computation(i);
+  }
+
   build_characteristic();
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un objet MarkovianSequences avec ajout de variables auxilliaires.
+ *
+ *  argument : reference sur un objet MarkovianSequences,
+ *             flags sur l'ajout des variables auxilliaires.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences::MarkovianSequences(const MarkovianSequences &seq , bool *auxiliary)
+:Sequences(seq , auxiliary)
+
+{
+  register int i , j;
+
+
+  min_interval = new double[nb_variable];
+
+  self_transition = NULL;
+  observation_distribution = NULL;
+  observation_histogram = NULL;
+
+  characteristics = new SequenceCharacteristics*[nb_variable];
+
+  i = 0;
+  for (j = 0;j < seq.nb_variable;j++) {
+    min_interval[i] = seq.min_interval[j];
+
+    if (seq.characteristics[j]) {
+       characteristics[i] = new SequenceCharacteristics(*(seq.characteristics[j]));
+    }
+    else {
+      characteristics[i] = NULL;
+    }
+    i++;
+
+    if (auxiliary[j]) {
+      min_interval[i] = 0.;
+      characteristics[i] = NULL;
+      i++;
+    }
+  }
 }
 
 
@@ -129,6 +193,11 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
   register int i , j;
 
 
+  min_interval = new double[nb_variable];
+  for (i = 0;i < nb_variable;i++) {
+    min_interval[i] = seq.min_interval[i];
+  }
+
   if ((seq.self_transition) && (param != REVERSE)) {
     self_transition = new SelfTransition*[marginal_distribution[0]->nb_value];
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
@@ -145,20 +214,48 @@ void MarkovianSequences::copy(const MarkovianSequences &seq , int param)
     self_transition = NULL;
   }
 
-  if (seq.observation) {
-    observation = new FrequencyDistribution**[nb_variable];
-    observation[0] = NULL;
+  if (seq.observation_distribution) {
+    observation_distribution = new FrequencyDistribution**[nb_variable];
+    observation_distribution[0] = NULL;
 
     for (i = 1;i < nb_variable;i++) {
-      observation[i] = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
-      for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
-        observation[i][j] = new FrequencyDistribution(*(seq.observation[i][j]));
+      if (seq.observation_distribution[i]) {
+        observation_distribution[i] = new FrequencyDistribution*[marginal_distribution[0]->nb_value];
+        for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+          observation_distribution[i][j] = new FrequencyDistribution(*(seq.observation_distribution[i][j]));
+        }
+      }
+
+      else {
+        observation_distribution[i] = NULL;
       }
     }
   }
 
   else {
-    observation = NULL;
+    observation_distribution = NULL;
+  }
+
+  if (seq.observation_histogram) {
+    observation_histogram = new Histogram**[nb_variable];
+    observation_histogram[0] = NULL;
+
+    for (i = 1;i < nb_variable;i++) {
+      if (seq.observation_histogram[i]) {
+        observation_histogram[i] = new Histogram*[marginal_distribution[0]->nb_value];
+        for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+          observation_histogram[i][j] = new Histogram(*(seq.observation_histogram[i][j]));
+        }
+      }
+
+      else {
+        observation_histogram[i] = NULL;
+      }
+    }
+  }
+
+  else {
+    observation_histogram = NULL;
   }
 
   characteristics = new SequenceCharacteristics*[nb_variable];
@@ -222,8 +319,15 @@ void MarkovianSequences::add_state_variable(const MarkovianSequences &seq , int 
   register int i;
 
 
+  min_interval = new double[nb_variable];
+  min_interval[0] = 0.;
+  for (i = 0;i < seq.nb_variable;i++) {
+    min_interval[i + 1] = seq.min_interval[i];
+  }
+
   self_transition = NULL;
-  observation = NULL;
+  observation_distribution = NULL;
+  observation_histogram = NULL;
 
   characteristics = new SequenceCharacteristics*[nb_variable];
   characteristics[0] = NULL;
@@ -307,6 +411,8 @@ void MarkovianSequences::remove()
   register int i , j;
 
 
+  delete [] min_interval;
+
   if (self_transition) {
     for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
       delete self_transition[i];
@@ -314,14 +420,28 @@ void MarkovianSequences::remove()
     delete [] self_transition;
   }
 
-  if (observation) {
+  if (observation_distribution) {
     for (i = 1;i < nb_variable;i++) {
-      for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
-        delete observation[i][j];
+      if (observation_distribution[i]) {
+        for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+          delete observation_distribution[i][j];
+        }
+        delete [] observation_distribution[i];
       }
-      delete [] observation [i];
     }
-    delete [] observation;
+    delete [] observation_distribution;
+  }
+
+  if (observation_histogram) {
+    for (i = 1;i < nb_variable;i++) {
+      if (observation_histogram[i]) {
+        for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+          delete observation_histogram[i][j];
+        }
+        delete [] observation_histogram[i];
+      }
+    }
+    delete [] observation_histogram;
   }
 
   if (characteristics) {
@@ -329,7 +449,7 @@ void MarkovianSequences::remove()
       delete characteristics[i];
     }
     delete [] characteristics;
-  }  
+  }
 }
 
 
@@ -394,24 +514,36 @@ void MarkovianSequences::state_variable_init(int itype)
         self_transition = NULL;
       }
 
-      if (observation) {
+      if (observation_distribution) {
         for (i = 1;i < nb_variable;i++) {
-          for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
-            delete observation[i][j];
+          if (observation_distribution[i]) {
+            for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+              delete observation_distribution[i][j];
+            }
+            delete [] observation_distribution[i];
           }
-          delete [] observation[i];
         }
-        delete [] observation;
+        delete [] observation_distribution;
 
-        observation = NULL;
+        observation_distribution = NULL;
+      }
+
+      if (observation_histogram) {
+        for (i = 1;i < nb_variable;i++) {
+          if (observation_histogram[i]) {
+            for (j = 0;j < marginal_distribution[0]->nb_value;j++) {
+              delete observation_histogram[i][j];
+            }
+            delete [] observation_histogram[i];
+          }
+        }
+        delete [] observation_histogram;
+
+        observation_histogram = NULL;
       }
     }
 
     type[0] = itype;
-  }
-
-  for (i = 1;i < nb_variable;i++) {
-    type[i] = INT_VALUE;
   }
 }
 
@@ -756,7 +888,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
     for (j = 0;j < nb_sample;j++) {
       for (k = 0;k < pseq[j]->nb_sequence;k++) {
         for (m = 0;m < pseq[j]->nb_variable;m++) {
-          if (pseq[j]->type[m] != REAL_VALUE) {
+          if ((pseq[j]->type[m] != REAL_VALUE) && (pseq[j]->type[m] != AUXILIARY)) {
             for (n = 0;n < pseq[j]->length[k];n++) {
               seq->int_sequence[i][m][n] = pseq[j]->int_sequence[k][m][n];
             }
@@ -784,130 +916,139 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
         }
       }
 
-      if (seq->type[i] != REAL_VALUE) {
-        for (j = 0;j < nb_sample;j++) {
-          phisto[j] = pseq[j]->marginal_distribution[i];
-        }
-        seq->marginal_distribution[i] = new FrequencyDistribution(nb_sample , phisto);
-      }
-
-      else {
-        seq->build_marginal_histogram(i);
-      }
-
-      for (j = 0;j < nb_sample;j++) {
-        if (!(pseq[j]->characteristics[i])) {
-          break;
-        }
-      }
-
-      if (j == nb_sample) {
-        seq->characteristics[i] = new SequenceCharacteristics();
-
-        seq->characteristics[i]->nb_value = seq->marginal_distribution[i]->nb_value;
-
-        seq->build_index_value(i);
-
-        seq->characteristics[i]->first_occurrence = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
-        seq->characteristics[i]->recurrence_time = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
-
-        for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
-          nb_histo = 0;
-          for (k = 0;k < nb_sample;k++) {
-            if (j < pseq[k]->marginal_distribution[i]->nb_value) {
-              phisto[nb_histo++] = pseq[k]->characteristics[i]->first_occurrence[j];
-            }
+      if (seq->type[i] != AUXILIARY) {
+        if (seq->type[i] != REAL_VALUE) {
+          for (j = 0;j < nb_sample;j++) {
+            phisto[j] = pseq[j]->marginal_distribution[i];
           }
-          seq->characteristics[i]->first_occurrence[j] = new FrequencyDistribution(nb_histo , phisto);
-
-          nb_histo = 0;
-          for (k = 0;k < nb_sample;k++) {
-            if (j < pseq[k]->marginal_distribution[i]->nb_value) {
-              phisto[nb_histo++] = pseq[k]->characteristics[i]->recurrence_time[j];
-            }
-          }
-          seq->characteristics[i]->recurrence_time[j] = new FrequencyDistribution(nb_histo , phisto);
+          seq->marginal_distribution[i] = new FrequencyDistribution(nb_sample , phisto);
         }
 
+        else {
+          seq->build_marginal_histogram(i);
+        }
+
+        seq->min_interval[i] = pseq[0]->min_interval[i];
         for (j = 1;j < nb_sample;j++) {
-          if (((pseq[0]->characteristics[i]->initial_run) && (!(pseq[j]->characteristics[i]->initial_run))) ||
-              ((!(pseq[0]->characteristics[i]->initial_run)) && (pseq[j]->characteristics[i]->initial_run))) {
+          if (pseq[j]->min_interval[i] < seq->min_interval[i]) {
+            seq->min_interval[i] = pseq[j]->min_interval[i];
+          }
+        }
+
+        for (j = 0;j < nb_sample;j++) {
+          if (!(pseq[j]->characteristics[i])) {
             break;
           }
         }
 
         if (j == nb_sample) {
-          seq->characteristics[i]->sojourn_time = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
-          if (pseq[0]->characteristics[i]->initial_run) {
-            seq->characteristics[i]->initial_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
-          }
-          seq->characteristics[i]->final_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+          seq->characteristics[i] = new SequenceCharacteristics();
+
+          seq->characteristics[i]->nb_value = seq->marginal_distribution[i]->nb_value;
+
+          seq->build_index_value(i);
+
+          seq->characteristics[i]->first_occurrence = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+          seq->characteristics[i]->recurrence_time = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
 
           for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
             nb_histo = 0;
             for (k = 0;k < nb_sample;k++) {
               if (j < pseq[k]->marginal_distribution[i]->nb_value) {
-                phisto[nb_histo++] = pseq[k]->characteristics[i]->sojourn_time[j];
+                phisto[nb_histo++] = pseq[k]->characteristics[i]->first_occurrence[j];
               }
             }
-            seq->characteristics[i]->sojourn_time[j] = new FrequencyDistribution(nb_histo , phisto);
-
-            if (pseq[0]->characteristics[i]->initial_run) {
-              nb_histo = 0;
-              for (k = 0;k < nb_sample;k++) {
-                if (j < pseq[k]->marginal_distribution[i]->nb_value) {
-                  phisto[nb_histo++] = pseq[k]->characteristics[i]->initial_run[j];
-                }
-              }
-              seq->characteristics[i]->initial_run[j] = new FrequencyDistribution(nb_histo , phisto);
-            }
+            seq->characteristics[i]->first_occurrence[j] = new FrequencyDistribution(nb_histo , phisto);
 
             nb_histo = 0;
             for (k = 0;k < nb_sample;k++) {
               if (j < pseq[k]->marginal_distribution[i]->nb_value) {
-                phisto[nb_histo++] = pseq[k]->characteristics[i]->final_run[j];
+                phisto[nb_histo++] = pseq[k]->characteristics[i]->recurrence_time[j];
               }
             }
-            seq->characteristics[i]->final_run[j] = new FrequencyDistribution(nb_histo , phisto);
+            seq->characteristics[i]->recurrence_time[j] = new FrequencyDistribution(nb_histo , phisto);
+          }
+
+          for (j = 1;j < nb_sample;j++) {
+            if (((pseq[0]->characteristics[i]->initial_run) && (!(pseq[j]->characteristics[i]->initial_run))) ||
+                ((!(pseq[0]->characteristics[i]->initial_run)) && (pseq[j]->characteristics[i]->initial_run))) {
+              break;
+            }
+          }
+
+          if (j == nb_sample) {
+            seq->characteristics[i]->sojourn_time = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+            if (pseq[0]->characteristics[i]->initial_run) {
+              seq->characteristics[i]->initial_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+            }
+            seq->characteristics[i]->final_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+
+            for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
+              nb_histo = 0;
+              for (k = 0;k < nb_sample;k++) {
+                if (j < pseq[k]->marginal_distribution[i]->nb_value) {
+                  phisto[nb_histo++] = pseq[k]->characteristics[i]->sojourn_time[j];
+                }
+              }
+              seq->characteristics[i]->sojourn_time[j] = new FrequencyDistribution(nb_histo , phisto);
+
+              if (pseq[0]->characteristics[i]->initial_run) {
+                nb_histo = 0;
+                for (k = 0;k < nb_sample;k++) {
+                  if (j < pseq[k]->marginal_distribution[i]->nb_value) {
+                    phisto[nb_histo++] = pseq[k]->characteristics[i]->initial_run[j];
+                  }
+                }
+                seq->characteristics[i]->initial_run[j] = new FrequencyDistribution(nb_histo , phisto);
+              }
+
+              nb_histo = 0;
+              for (k = 0;k < nb_sample;k++) {
+                if (j < pseq[k]->marginal_distribution[i]->nb_value) {
+                  phisto[nb_histo++] = pseq[k]->characteristics[i]->final_run[j];
+                }
+              }
+              seq->characteristics[i]->final_run[j] = new FrequencyDistribution(nb_histo , phisto);
+            }
+          }
+
+          else {
+            seq->build_sojourn_time_frequency_distribution(i , (characteristics[i]->initial_run ? true : false));
+          }
+
+          for (j = 0;j < nb_sample;j++) {
+            if ((!(pseq[j]->characteristics[i]->nb_run)) && (!(pseq[j]->characteristics[i]->nb_occurrence))) {
+              break;
+            }
+          }
+
+          if (j == nb_sample) {
+            seq->characteristics[i]->nb_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+            seq->characteristics[i]->nb_occurrence = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
+
+            for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
+              nb_histo = 0;
+              for (k = 0;k < nb_sample;k++) {
+                if (j < pseq[k]->marginal_distribution[i]->nb_value) {
+                  phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_run[j];
+                }
+              }
+              seq->characteristics[i]->nb_run[j] = new FrequencyDistribution(nb_histo , phisto);
+
+              nb_histo = 0;
+              for (k = 0;k < nb_sample;k++) {
+                if (j < pseq[k]->marginal_distribution[i]->nb_value) {
+                  phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_occurrence[j];
+                }
+              }
+              seq->characteristics[i]->nb_occurrence[j] = new FrequencyDistribution(nb_histo , phisto);
+            }
           }
         }
 
         else {
-          seq->build_sojourn_time_frequency_distribution(i , (characteristics[i]->initial_run ? true : false));
+          seq->build_characteristic(i , true , (((characteristics[i]) && (characteristics[i]->initial_run)) ? true : false));
         }
-
-        for (j = 0;j < nb_sample;j++) {
-          if ((!(pseq[j]->characteristics[i]->nb_run)) && (!(pseq[j]->characteristics[i]->nb_occurrence))) {
-            break;
-          }
-        }
-
-        if (j == nb_sample) {
-          seq->characteristics[i]->nb_run = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
-          seq->characteristics[i]->nb_occurrence = new FrequencyDistribution*[seq->marginal_distribution[i]->nb_value];
-
-          for (j = 0;j < seq->marginal_distribution[i]->nb_value;j++) {
-            nb_histo = 0;
-            for (k = 0;k < nb_sample;k++) {
-              if (j < pseq[k]->marginal_distribution[i]->nb_value) {
-                phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_run[j];
-              }
-            }
-            seq->characteristics[i]->nb_run[j] = new FrequencyDistribution(nb_histo , phisto);
-
-            nb_histo = 0;
-            for (k = 0;k < nb_sample;k++) {
-              if (j < pseq[k]->marginal_distribution[i]->nb_value) {
-                phisto[nb_histo++] = pseq[k]->characteristics[i]->nb_occurrence[j];
-              }
-            }
-            seq->characteristics[i]->nb_occurrence[j] = new FrequencyDistribution(nb_histo , phisto);
-          }
-        }
-      }
-
-      else {
-        seq->build_characteristic(i , true , (((characteristics[i]) && (characteristics[i]->initial_run)) ? true : false));
       }
     }
 
@@ -954,6 +1095,15 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
       correction_message << STAT_variable_word[INT_VALUE] << " or " << STAT_variable_word[REAL_VALUE];
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
     }
+
+    if ((type[variable] == INT_VALUE) && (variable + 1 < nb_variable) &&
+        (type[variable + 1] == AUXILIARY)) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.update((error_message.str()).c_str());
+    }
   }
 
   if (step < 1) {
@@ -967,10 +1117,15 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (i == variable) {
+        seq->min_interval_computation(i);
         seq->build_characteristic(i , true , (((characteristics[i]) && (characteristics[i]->initial_run)) ? true : false));
       }
-      else if (characteristics[i]) {
-        seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i]));
+
+      else {
+        seq->min_interval[i] = min_interval[i];
+        if (characteristics[i]) {
+          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i]));
+        }
       }
     }
   }
@@ -1016,7 +1171,15 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
     }
 
-    else {
+    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.update((error_message.str()).c_str());
+    }
+
+    if (status) {
       min_symbol = marginal_distribution[ivariable]->nb_value;
       max_symbol = 0;
 
@@ -1093,10 +1256,15 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
 
       for (i = 0;i < seq->nb_variable;i++) {
         if (i == variable) {
+          seq->min_interval_computation(i);
           seq->build_characteristic(i , true , (((characteristics[ivariable]) && (characteristics[ivariable]->initial_run)) ? true : false));
         }
-        else if (characteristics[i - offset]) {
-          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
+
+        else {
+          seq->min_interval[i] = min_interval[i - offset];
+          if (characteristics[i - offset]) {
+            seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
+          }
         }
       }
     }
@@ -1254,9 +1422,12 @@ MarkovianSequences* MarkovianSequences::consecutive_values(StatError &error , os
 
     for (i = 0;i < seq->nb_variable;i++) {
       if (i == variable) {
+        seq->min_interval_computation(i);
         seq->build_characteristic(i , true , (((characteristics[ivariable]) && (characteristics[ivariable]->initial_run)) ? true : false));
       }
+
       else if (characteristics[i - offset]) {
+        seq->min_interval[i] = min_interval[i - offset];
         seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
       }
     }
@@ -1307,6 +1478,14 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
     else if ((nb_class < 2) || (nb_class >= marginal_distribution[ivariable]->nb_value)) {
       status = false;
       error.update(STAT_error[STATR_NB_CLASS]);
+    }
+
+    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.update((error_message.str()).c_str());
     }
   }
 
@@ -1361,10 +1540,14 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 
       for (i = 0;i < seq->nb_variable;i++) {
         if (i == variable) {
+          seq->min_interval_computation(i);
           seq->build_characteristic(i , true , (((characteristics[ivariable]) && (characteristics[ivariable]->initial_run)) ? true : false));
         }
-        else if (characteristics[i - offset]) {
-          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
+        else {
+          seq->min_interval[i] = min_interval[i - offset];
+          if (characteristics[i - offset]) {
+            seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i - offset]));
+          }
         }
       }
     }
@@ -1410,6 +1593,14 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
       status = false;
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , STAT_variable_word[REAL_VALUE]);
     }
+
+    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
+      status = false;
+      ostringstream error_message;
+      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+                    << STAT_error[STATR_VARIABLE_TYPE];
+      error.update((error_message.str()).c_str());
+    }
   }
 
   if (nb_class < 2) {
@@ -1438,10 +1629,15 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int variable 
 
       for (i = 0;i < seq->nb_variable;i++) {
         if (i == variable) {
+          seq->min_interval_computation(i);
           seq->build_characteristic(i);
         }
-        else if (characteristics[i]) {
-          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i]));
+
+        else {
+          seq->min_interval[i] = min_interval[i];
+          if (characteristics[i]) {
+            seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i]));
+          }
         }
       }
     }
@@ -1543,24 +1739,36 @@ MarkovianSequences* MarkovianSequences::select_variable(StatError &error , int i
 
     bnb_variable = (keep ? inb_variable : nb_variable - inb_variable);
 
-    itype = new int[bnb_variable];
     for (i = 0;i < bnb_variable;i++) {
-      itype[i] = type[variable[i]];
-    }
-
-    seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
-                                 index_parameter_type , bnb_variable , itype);
-
-    seq->Sequences::select_variable(*this , variable);
-
-    for (i = 0;i < seq->nb_variable;i++) {
-      if (characteristics[variable[i]]) {
-        seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[variable[i]]));
+      if ((type[variable[i]] == AUXILIARY) &&
+          ((i == 0) || (variable[i - 1] != variable[i] - 1))) {
+        status = false;
+        error.update(SEQ_error[SEQR_VARIABLE_INDICES]);
       }
     }
 
+    if (status) {
+      itype = new int[bnb_variable];
+      for (i = 0;i < bnb_variable;i++) {
+        itype[i] = type[variable[i]];
+      }
+
+      seq = new MarkovianSequences(nb_sequence , identifier , length , vertex_identifier ,
+                                   index_parameter_type , bnb_variable , itype);
+
+      seq->Sequences::select_variable(*this , variable);
+
+      for (i = 0;i < seq->nb_variable;i++) {
+        seq->min_interval[i] = min_interval[variable[i]];
+        if (characteristics[variable[i]]) {
+          seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[variable[i]]));
+        }
+      }
+
+      delete [] itype;
+    }
+
     delete [] variable;
-    delete [] itype;
   }
 
   return seq;
@@ -1594,6 +1802,7 @@ MarkovianSequences* MarkovianSequences::remove_variable_1() const
   seq->Sequences::select_variable(*this , variable);
 
   for (i = 0;i < seq->nb_variable;i++) {
+    seq->min_interval[i] = min_interval[i + 1];
     if (characteristics[i + 1]) {
       seq->characteristics[i] = new SequenceCharacteristics(*(characteristics[i + 1]));
     }
@@ -1611,7 +1820,8 @@ MarkovianSequences* MarkovianSequences::remove_variable_1() const
  *  Concatenation des variables d'objets MarkovianSequences.
  *
  *  arguments : reference sur un objet StatError, nombre d'objets MarkovianSequences,
- *              pointeurs sur les objets MarkovianSequences, echantillon de reference pour les identificateurs.
+ *              pointeurs sur les objets MarkovianSequences,
+ *              echantillon de reference pour les identificateurs.
  *
  *--------------------------------------------------------------*/
 
@@ -1809,7 +2019,7 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
       inb_variable = 0;
       for (j = 0;j < nb_sample;j++) {
         for (k = 0;k < pseq[j]->nb_variable;k++) {
-          if (seq->type[inb_variable] != REAL_VALUE) {
+          if ((seq->type[inb_variable] != REAL_VALUE) && (seq->type[inb_variable] != AUXILIARY)) {
             for (m = 0;m < length[i];m++) {
               seq->int_sequence[i][inb_variable][m] = pseq[j]->int_sequence[i][k][m];
             }
@@ -1838,6 +2048,9 @@ MarkovianSequences* MarkovianSequences::merge_variable(StatError &error , int nb
         if (pseq[i]->marginal_histogram[j]) {
           seq->marginal_histogram[inb_variable] = new Histogram(*(pseq[i]->marginal_histogram[j]));
         }
+
+        seq->min_interval[inb_variable] = pseq[i]->min_interval[j];
+
         if (pseq[i]->characteristics[j]) {
           seq->characteristics[inb_variable] = new SequenceCharacteristics(*(pseq[i]->characteristics[j]));
         }
@@ -1974,7 +2187,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
         }
         for (j = length[i];j < seq->length[i];j++) {
           seq->index_parameter[i][j] = seq->index_parameter[i][j - 1] + 1;
-	}
+        }
       }
 
       seq->build_index_parameter_frequency_distribution();
@@ -1987,12 +2200,12 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
 
     for (i = 0;i < seq->nb_sequence;i++) {
       for (j = 0;j < seq->nb_variable;j++) {
-        if (seq->type[j] != REAL_VALUE) {
+        if ((seq->type[j] != REAL_VALUE) || (seq->type[j] != AUXILIARY)) {
           for (k = 0;k < length[i];k++) {
             seq->int_sequence[i][j][k] = int_sequence[i][j][k];
           }
 
-          if ((min_value[j] > 0) || (max_value[j] < 0)) {
+          if (min_value[j] > 0) {
             end_value = 0;
           }
           else {
@@ -2047,6 +2260,8 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
       seq->max_value_computation(i);
 
       seq->build_marginal_frequency_distribution(i);
+
+      seq->min_interval_computation(i);
     }
 
     initial_run_flag = false;
@@ -2059,6 +2274,82 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
 
     seq->build_characteristic(I_DEFAULT , true , initial_run_flag);
   }
+
+  return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction des variables auxilliaires correspondant a
+ *  la restauration des sequences.
+ *
+ *  arguments : pointeurs sur des objets DiscreteParametricProcess et
+ *              sur des objets ContinuousParametricProcess.
+ *
+ *--------------------------------------------------------------*/
+
+MarkovianSequences* MarkovianSequences::build_auxiliary_variable(DiscreteParametricProcess **discrete_process ,
+                                                                 ContinuousParametricProcess **continuous_process) const
+
+{
+  bool *auxiliary;
+  register int i , j , k , m;
+  int *pstate;
+  double *pauxiliary;
+  MarkovianSequences *seq;
+
+
+  auxiliary = new bool[nb_variable];
+
+  auxiliary[0] = false;
+  for (i = 1;i < nb_variable;i++) {
+    if (((discrete_process) && (discrete_process[i])) ||
+        ((continuous_process) && (continuous_process[i]))) {
+      auxiliary[i] = true;
+    }
+    else {
+      auxiliary[i] = false;
+    }
+  }
+
+  seq = new MarkovianSequences(*this , auxiliary);
+
+  for (i = 0;i < nb_sequence;i++) {
+    j = 0;
+    for (k = 1;k < nb_variable;k++) {
+      j++;
+
+      if ((discrete_process) && (discrete_process[k])) {
+        j++;
+        pstate = seq->int_sequence[i][0];
+        pauxiliary = seq->real_sequence[i][j];
+
+        for (m = 0;m < length[i];m++) {
+          *pauxiliary++ = discrete_process[k]->observation[*pstate++]->mean;
+        }
+      }
+
+      else if ((continuous_process) && (continuous_process[k])) {
+        j++;
+        pstate = seq->int_sequence[i][0];
+        pauxiliary = seq->real_sequence[i][j];
+
+        for (m = 0;m < length[i];m++) {
+          *pauxiliary++ = continuous_process[k]->observation[*pstate++]->location;
+        }
+      }
+    }
+  }
+
+  for (i = 1;i < seq->nb_variable;i++) {
+    if (seq->type[i] == AUXILIARY) {
+      seq->min_value_computation(i);
+      seq->max_value_computation(i);
+    }
+  }
+
+  delete [] auxiliary;
 
   return seq;
 }
@@ -2168,12 +2459,383 @@ MarkovianSequences* MarkovianSequences::split(StatError &error , int step) const
       if (marginal_histogram[i]) {
         seq->marginal_histogram[i] = new Histogram(*marginal_histogram[i]);
       }
+
+      seq->min_interval_computation(i);
     }
 
     seq->build_characteristic();
   }
 
   return seq;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de repartition empirique pour une variable.
+ *
+ *  arguments : indice de la variable, (valeurs, fonction de repartition).
+ *
+ *--------------------------------------------------------------*/
+
+int MarkovianSequences::cumulative_distribution_function_computation(int variable , double **cdf) const
+
+{
+  register int i , j , k;
+  int cumul , int_min , int_value , frequency;
+  double real_min , real_value;
+
+
+  if (marginal_distribution[variable]) {
+    i = marginal_distribution[variable]->cumulative_distribution_function_computation(cdf);
+  }
+
+  else {
+    cdf[0] = new double[cumul_length];
+    cdf[1] = new double[cumul_length];
+
+    cumul = 0;
+    i = 0;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (cumul == 0) {
+          int_value = (int)min_value[variable];
+        }
+
+        else {
+          int_min = (int)max_value[variable] + 1;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = 0;k < length[j];k++) {
+              if ((int_sequence[j][variable][k] > int_value) &&
+                  (int_sequence[j][variable][k] < int_min)) {
+                int_min = int_sequence[j][variable][k];
+              }
+            }
+          }
+          int_value = int_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        frequency = 0;
+        for (j = 0;j < nb_sequence;j++) {
+          for (k = 0;k < length[j];k++) {
+            if (int_sequence[j][variable][k] == int_value) {
+              frequency++;
+            }
+          }
+        }
+
+        cdf[0][i] = int_value;
+        cdf[1][i] = (cumul + (double)(frequency + 1) / 2.) / (double)cumul_length;
+        cumul += frequency;
+        i++;
+      }
+      while (cumul < cumul_length);
+      break;
+    }
+
+    case REAL_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (cumul == 0) {
+          real_value = min_value[variable];
+        }
+
+        else {
+          real_min = max_value[variable] + 1;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = 0;k < length[j];k++) {
+              if ((real_sequence[j][variable][k] > real_value) &&
+                  (real_sequence[j][variable][k] < real_min)) {
+                real_min = real_sequence[j][variable][k];
+              }
+            }
+          }
+          real_value = real_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        frequency = 0;
+        for (j = 0;j < nb_sequence;j++) {
+          for (k = 0;k < length[j];k++) {
+            if (real_sequence[j][variable][k] == real_value) {
+              frequency++;
+            }
+          }
+        }
+
+        cdf[0][i] = real_value;
+        cdf[1][i] = (cumul + (double)(frequency + 1) / 2.) / (double)cumul_length;
+        cumul += frequency;
+        i++;
+      }
+      while (cumul < cumul_length);
+      break;
+    }
+    }
+  }
+
+# ifdef DEBUG
+  cout << "\nCumul: ";
+  for (j = 0;j < i;j++) {
+    cout << cdf[0][j] << " " << cdf[1][j] << " | ";
+  }
+  cout << endl;
+# endif
+
+  return i;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de repartition empirique pour un etat et une variable.
+ *
+ *  arguments : indice de la variable, etat, (valeurs, fonction de repartition).
+ *
+ *--------------------------------------------------------------*/
+
+int MarkovianSequences::cumulative_distribution_function_computation(int variable , int state ,
+                                                                     double **cdf) const
+
+{
+  register int i , j , k;
+  int cumul , int_min , int_value , frequency;
+  double real_min , real_value;
+
+
+  if (observation_distribution[variable]) {
+    i = observation_distribution[variable][state]->cumulative_distribution_function_computation(cdf);
+  }
+
+  else {
+    cdf[0] = new double[marginal_distribution[0]->frequency[state]];
+    cdf[1] = new double[marginal_distribution[0]->frequency[state]];
+
+    cumul = 0;
+    i = 0;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (cumul == 0) {
+          int_value = (int)min_value[variable];
+        }
+
+        else {
+          int_min = (int)max_value[variable] + 1;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = 0;k < length[j];k++) {
+              if ((int_sequence[j][0][k] == state) &&
+                  (int_sequence[j][variable][k] > int_value) &&
+                  (int_sequence[j][variable][k] < int_min)) {
+                int_min = int_sequence[j][variable][k];
+              }
+            }
+          }
+          int_value = int_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        frequency = 0;
+        for (j = 0;j < nb_sequence;j++) {
+          for (k = 0;k < length[j];k++) {
+            if ((int_sequence[j][0][k] == state) &&
+                (int_sequence[j][variable][k] == int_value)) {
+              frequency++;
+            }
+          }
+        }
+
+        cdf[0][i] = int_value;
+        cdf[1][i] = (cumul + (double)(frequency + 1) / 2.) /
+                    (double)marginal_distribution[0]->frequency[state];
+        cumul += frequency;
+        i++;
+      }
+      while (cumul < marginal_distribution[0]->frequency[state]);
+      break;
+    }
+
+    case REAL_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (cumul == 0) {
+          real_value = min_value[variable];
+        }
+
+        else {
+          real_min = max_value[variable] + 1;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = 0;k < length[j];k++) {
+              if ((int_sequence[j][0][k] == state) &&
+                  (real_sequence[j][variable][k] > real_value) &&
+                  (real_sequence[j][variable][k] < real_min)) {
+                real_min = real_sequence[j][variable][k];
+              }
+            }
+          }
+          real_value = real_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        frequency = 0;
+        for (j = 0;j < nb_sequence;j++) {
+          for (k = 0;k < length[j];k++) {
+            if ((int_sequence[j][0][k] == state) &&
+                (real_sequence[j][variable][k] == real_value)) {
+              frequency++;
+            }
+          }
+        }
+
+        cdf[0][i] = real_value;
+        cdf[1][i] = (cumul + (double)(frequency + 1) / 2.) /
+                    (double)marginal_distribution[0]->frequency[state];
+        cumul += frequency;
+        i++;
+      }
+      while (cumul < marginal_distribution[0]->frequency[state]);
+      break;
+    }
+    }
+  }
+
+  return i;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de repartition empirique pour une variable.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+void MarkovianSequences::min_interval_computation(int variable) const
+
+{
+  if (marginal_distribution[variable]) {
+    min_interval[variable] = marginal_distribution[variable]->min_interval_computation();
+  }
+
+  else if (type[variable] != AUXILIARY) {
+    register int i , j , k;
+    int int_min , int_value;
+    double real_min , real_value;
+
+
+    min_interval[variable] = max_value[variable] - min_value[variable];
+    i = 0;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (i == 0) {
+          int_value = (int)min_value[variable];
+        }
+
+        else {
+          int_min = (int)max_value[variable] + 1;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = 0;k < length[j];k++) {
+              if ((int_sequence[j][variable][k] > int_value) &&
+                  (int_sequence[j][variable][k] < int_min)) {
+                int_min = int_sequence[j][variable][k];
+              }
+            }
+          }
+
+          if (int_min - int_value < min_interval[variable]) {
+            min_interval[variable] = int_min - int_value;
+          }
+          int_value = int_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        for (j = 0;j < nb_sequence;j++) {
+          for (k = 0;k < length[j];k++) {
+            if (int_sequence[j][variable][k] == int_value) {
+              i++;
+            }
+          }
+        }
+      }
+      while (i < cumul_length);
+      break;
+    }
+
+    case REAL_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (i == 0) {
+          real_value = min_value[variable];
+        }
+
+        else {
+          real_min = max_value[variable] + 1;
+          for (j = 0;j < nb_sequence;j++) {
+            for (k = 0;k < length[j];k++) {
+              if ((real_sequence[j][variable][k] > real_value) &&
+                  (real_sequence[j][variable][k] < real_min)) {
+                real_min = real_sequence[j][variable][k];
+              }
+            }
+          }
+
+          if (real_min - real_value < min_interval[variable]) {
+            min_interval[variable] = real_min - real_value;
+          }
+          real_value = real_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        for (j = 0;j < nb_sequence;j++) {
+          for (k = 0;k < length[j];k++) {
+            if (real_sequence[j][variable][k] == real_value) {
+              i++;
+            }
+          }
+        }
+      }
+      while (i < cumul_length);
+      break;
+    }
+    }
+  }
 }
 
 
@@ -2192,7 +2854,13 @@ double MarkovianSequences::iid_information_computation() const
 
 
   for (i = (((type[0] != STATE) || (nb_variable == 1)) ? 0 : 1);i < nb_variable;i++) {
-    information += marginal_distribution[i]->information_computation();
+    if (marginal_distribution[i]) {
+      information += marginal_distribution[i]->information_computation();
+    }
+    else {
+      information = D_INF;
+      break;
+    }
   }
 
   return information;
@@ -2314,6 +2982,40 @@ void MarkovianSequences::self_transition_computation(bool *homogeneity)
 
 /*--------------------------------------------------------------*
  *
+ *  Calcul de la distribution marginale des etats a partir de la restauration.
+ *
+ *--------------------------------------------------------------*/
+
+Distribution* MarkovianSequences::weight_computation() const
+
+{
+  register int i;
+  Distribution *weight;
+
+
+  if (type[0] == STATE) {
+    weight = new Distribution(marginal_distribution[0]->nb_value);
+
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      weight->mass[i] = (double)marginal_distribution[0]->frequency[i] /
+                        (double)marginal_distribution[0]->nb_element;
+    }
+
+    weight->cumul_computation();
+    weight->max = (double)marginal_distribution[0]->max /
+                  (double)marginal_distribution[0]->nb_element;
+  }
+
+  else {
+    weight = NULL;
+  }
+
+  return weight;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Accumulation des observations (pour une variable donnee).
  *
  *  argument : indice de la variable.
@@ -2331,7 +3033,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 
   for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
     for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
-      observation[variable][i]->frequency[j] = 0;
+      observation_distribution[variable][i]->frequency[j] = 0;
     }
   }
 
@@ -2341,7 +3043,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
     pstate = int_sequence[i][0];
     poutput = int_sequence[i][variable];
     for (j = 0;j < length[i];j++) {
-      (observation[variable][*pstate++]->frequency[*poutput++])++;
+      (observation_distribution[variable][*pstate++]->frequency[*poutput++])++;
     }
   }
 
@@ -2349,15 +3051,15 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 
   for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
     if (!characteristics[variable]) {
-      observation[variable][i]->nb_value_computation();
+      observation_distribution[variable][i]->nb_value_computation();
     }
-    observation[variable][i]->offset_computation();
-    observation[variable][i]->nb_element_computation();
-    observation[variable][i]->max_computation();
+    observation_distribution[variable][i]->offset_computation();
+    observation_distribution[variable][i]->nb_element_computation();
+    observation_distribution[variable][i]->max_computation();
 
     if (!characteristics[variable]) {
-      observation[variable][i]->mean_computation();
-      observation[variable][i]->variance_computation();
+      observation_distribution[variable][i]->mean_computation();
+      observation_distribution[variable][i]->variance_computation();
     }
   }
 }
@@ -2376,7 +3078,9 @@ void MarkovianSequences::observation_frequency_distribution_computation()
 
 
   for (i = 1;i < nb_variable;i++) {
-    observation_frequency_distribution_computation(i);
+    if (observation_distribution[i]) {
+      observation_frequency_distribution_computation(i);
+    }
   }
 }
 
@@ -2392,17 +3096,23 @@ void MarkovianSequences::observation_frequency_distribution_computation()
 void MarkovianSequences::create_observation_frequency_distribution(int nb_state)
 
 {
-  if ((nb_variable > 1) && (!observation)) {
+  if ((nb_variable > 1) && (!observation_distribution)) {
     register int i , j;
 
 
-    observation = new FrequencyDistribution**[nb_variable];
-    observation[0] = NULL;
+    observation_distribution = new FrequencyDistribution**[nb_variable];
+    observation_distribution[0] = NULL;
 
     for (i = 1;i < nb_variable;i++) {
-      observation[i] = new FrequencyDistribution*[nb_state];
-      for (j = 0;j < nb_state;j++) {
-        observation[i][j] = new FrequencyDistribution(marginal_distribution[i]->nb_value);
+      if (marginal_distribution[i]) {
+        observation_distribution[i] = new FrequencyDistribution*[nb_state];
+        for (j = 0;j < nb_state;j++) {
+          observation_distribution[i][j] = new FrequencyDistribution(marginal_distribution[i]->nb_value);
+        }
+      }
+
+      else {
+        observation_distribution[i] = NULL;
       }
     }
   }
@@ -2420,6 +3130,220 @@ void MarkovianSequences::build_observation_frequency_distribution()
 {
   create_observation_frequency_distribution(marginal_distribution[0]->nb_value);
   observation_frequency_distribution_computation();
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction des histogrammes d'observation pour une variable.
+ *
+ *  arguments : indice de la variable, pas de regroupement.
+ *
+ *--------------------------------------------------------------*/
+
+void MarkovianSequences::build_observation_histogram(int variable , double step)
+
+{
+  if ((!observation_histogram[variable]) || (step != observation_histogram[variable][0]->step)) {
+    register int i , j;
+    int *pstate , *pioutput;
+    double *proutput;
+
+
+    // construction de l'histogramme
+
+    if (step == D_DEFAULT) {
+      step = marginal_histogram[variable]->step;
+    }
+
+    if (observation_histogram[variable]) {
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        observation_histogram[variable][i]->nb_category = (int)floor((observation_histogram[variable][i]->max_value - observation_histogram[variable][i]->min_value) / step) + 1;
+
+        delete [] observation_histogram[variable][i]->frequency;
+        observation_histogram[variable][i]->frequency = new int[observation_histogram[variable][i]->nb_category];
+      }
+    }
+
+    else {
+      observation_histogram[variable] = new Histogram*[marginal_distribution[0]->nb_value];
+
+      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - min_value[variable]) / step) + 1 , false);
+
+        observation_histogram[variable][i]->nb_element = marginal_distribution[0]->frequency[i];
+        observation_histogram[variable][i]->type = type[variable];
+        observation_histogram[variable][i]->min_value = min_value[variable];
+        observation_histogram[variable][i]->max_value = max_value[variable];
+      }
+
+      // calcul des valeurs minimums et maximums par etat
+
+/*      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+        observation_histogram[variable][i]->min_value = max_value[variable];
+        observation_histogram[variable][i]->max_value = min_value[variable];
+      }
+
+      switch (type[variable]) {
+
+      case INT_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          pstate = int_sequence[i][0];
+          pioutput = int_sequence[i][variable];
+
+          for (j = 0;j < length[i];j++) {
+            if (*pioutput < observation_histogram[variable][*pstate]->min_value) {
+              observation_histogram[variable][*pstate]->min_value = *pioutput;
+            }
+            if (*pioutput > observation_histogram[variable][*pstate]->max_value) {
+              observation_histogram[variable][*pstate]->max_value = *pioutput;
+            }
+            pstate++;
+            pioutput++;
+          }
+        }
+        break;
+      }
+
+      case REAL_VALUE : {
+        for (i = 0;i < nb_sequence;i++) {
+          pstate = int_sequence[i][0];
+          proutput = real_sequence[i][variable];
+
+          for (j = 0;j < length[i];j++) {
+            if (*proutput < observation_histogram[variable][*pstate]->min_value) {
+              observation_histogram[variable][*pstate]->min_value = *proutput;
+            }
+            if (*proutput > observation_histogram[variable][*pstate]->max_value) {
+              observation_histogram[variable][*pstate]->max_value = *proutput;
+            }
+            pstate++;
+            proutput++;
+          }
+        }
+        break;
+      }
+      } */
+    }
+
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      observation_histogram[variable][i]->step = step;
+    }
+
+    // calcul des frequences
+
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      for (j = 0;j < observation_histogram[variable][i]->nb_category;j++) {
+        observation_histogram[variable][i]->frequency[j] = 0;
+      }
+    }
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = int_sequence[i][0];
+        pioutput = int_sequence[i][variable];
+        for (j = 0;j < length[i];j++) {
+//          (observation_histogram[variable][*pstate++]->frequency[(int)((*pioutput++ - min_value[variable]) / step)])++;
+          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*pioutput++ - min_value[variable]) / step)])++;
+        }
+      }
+      break;
+    }
+
+    case REAL_VALUE : {
+      for (i = 0;i < nb_sequence;i++) {
+        pstate = int_sequence[i][0];
+        proutput = real_sequence[i][variable];
+        for (j = 0;j < length[i];j++) {
+//          (observation_histogram[variable][*pstate++]->frequency[(int)((*proutput++ - min_value[variable]) / step)]++;
+          (observation_histogram[variable][*pstate++]->frequency[(int)floor((*proutput++ - min_value[variable]) / step)])++;
+        }
+      }
+      break;
+    }
+    }
+
+    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      observation_histogram[variable][i]->max_computation();
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction des histogrammes d'observation.
+ *
+ *--------------------------------------------------------------*/
+
+void MarkovianSequences::build_observation_histogram()
+
+{
+  if ((nb_variable > 1) && (!observation_histogram)) {
+    register int i;
+
+
+    observation_histogram = new Histogram**[nb_variable];
+    observation_histogram[0] = NULL;
+
+    for (i = 1;i < nb_variable;i++) {
+      observation_histogram[i] = NULL;
+      if (marginal_histogram[i]) {
+        build_observation_histogram(i);
+      }
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Changement du pas de regroupement de l'histogramme marginal et
+ *  des histogrammes d'observation pour une variable donnee.
+ *
+ *  arguments : reference sur un objet StatError, indice de la variable,
+ *              pas de regroupement.
+ *
+ *--------------------------------------------------------------*/
+
+bool MarkovianSequences::select_step(StatError &error , int variable , double step)
+
+{
+  bool status = true;
+
+
+  error.init();
+
+  if ((variable < 1) || (variable > nb_variable)) {
+    status = false;
+    error.update(STAT_error[STATR_VARIABLE_INDEX]);
+  }
+
+  else {
+    variable--;
+
+    if (!marginal_histogram[variable]) {
+      status = false;
+      error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+    }
+    if ((step <= 0.) || ((type[variable] != REAL_VALUE) &&
+         (type[variable] != AUXILIARY) && ((int)step != step))) {
+      status = false;
+      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
+    }
+  }
+
+  if (status) {
+    build_marginal_histogram(variable , step);
+
+    if ((observation_histogram) && (observation_histogram[variable])) {
+      build_observation_histogram(variable , step);
+    }
+  }
+
+  return status;
 }
 
 
@@ -3531,82 +4455,130 @@ ostream& MarkovianSequences::ascii_write(ostream &os , bool exhaustive , bool co
 
   for (i = 0;i < nb_variable;i++) {
     os << "\n" << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
-       << STAT_variable_word[type[i]] << "   ";
-    if (comment_flag) {
-      os << "# ";
-    }
+       << STAT_variable_word[type[i]];
 
-    if (type[i] == STATE) {
-      os << "(" << marginal_distribution[i]->nb_value << " "
-         << STAT_label[marginal_distribution[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << ")" << endl;
-    }
-    else {
-      os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << min_value[i] << ", "
-         << STAT_label[STATL_MAX_VALUE] << ": " << max_value[i] << ")" << endl;
-    }
-
-    if (marginal_distribution[i]) {
-      os << "\n";
+    if (type[i] != AUXILIARY) {
+      os  << "   ";
       if (comment_flag) {
         os << "# ";
       }
-      os << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-         << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-      marginal_distribution[i]->ascii_characteristic_print(os , false , comment_flag);
 
-      if ((marginal_distribution[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
+      if (type[i] == STATE) {
+        os << "(" << marginal_distribution[i]->nb_value << " "
+           << STAT_label[marginal_distribution[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << ")" << endl;
+      }
+      else {
+        os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << min_value[i] << ", "
+           << STAT_label[STATL_MAX_VALUE] << ": " << max_value[i] << ")" << endl;
+      }
+
+      if (marginal_distribution[i]) {
         os << "\n";
         if (comment_flag) {
           os << "# ";
         }
-        os << "   | " << STAT_label[STATL_FREQUENCY] << endl;
-        marginal_distribution[i]->ascii_print(os , comment_flag);
+        os << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
+           << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
+        marginal_distribution[i]->ascii_characteristic_print(os , false , comment_flag);
+
+        if ((marginal_distribution[i]->nb_value <= ASCII_NB_VALUE) || (exhaustive)) {
+          os << "\n";
+          if (comment_flag) {
+            os << "# ";
+          }
+          os << "   | " << STAT_label[STATL_FREQUENCY] << endl;
+          marginal_distribution[i]->ascii_print(os , comment_flag);
+        }
+
+#       ifdef DEBUG
+        ContinuousParametric *dist;
+;
+        marginal_histogram[i] = new Histogram(*marginal_distribution[i]);
+
+        dist = new ContinuousParametric(VON_MISES , 137.5 , 180 * 180 / (50. * 50. * M_PI * M_PI) , DEGREE);
+        os << "\n";
+        dist->ascii_parameter_print(os);
+        dist->ascii_print(os , comment_flag , true , NULL , marginal_distribution[i]);
+        os << "\n";
+        dist->ascii_print(os , comment_flag , true , marginal_histogram[i]);
+        delete dist;
+
+        dist = new ContinuousParametric(GAUSSIAN , 137.5 , 50.);
+        os << "\n";
+        dist->ascii_parameter_print(os);
+        dist->ascii_print(os , comment_flag , true , NULL , marginal_distribution[i]);
+//        os << "\n";
+//        dist->ascii_print(os , comment_flag , true , marginal_histogram[i]);
+        delete dist;
+
+        delete marginal_histogram[i];
+        marginal_histogram[i] = NULL;
+#       endif
+
+      }
+
+      else {
+        os << "\n";
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_SAMPLE_SIZE] << ": " << cumul_length << endl;
+
+        mean = mean_computation(i);
+        variance = variance_computation(i , mean);
+
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << STAT_label[STATL_MEAN] << ": " << mean << "   "
+           << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
+           << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+
+        if ((variance > 0.) && (exhaustive)) {
+          if (comment_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness_computation(i , mean , variance) << "   "
+             << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation(i , mean , variance) << endl;
+        }
+
+        if ((marginal_histogram[i]) && (exhaustive)) {
+          os << "\n";
+          if (comment_flag) {
+            os << "# ";
+          }
+          os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+
+          os << "\n";
+          if (comment_flag) {
+            os << "# ";
+          }
+          os << " " << STAT_label[STATL_VALUE] << "  | " << STAT_label[STATL_FREQUENCY] << endl;
+          marginal_histogram[i]->ascii_print(os , comment_flag);
+        }
+      }
+
+      if (characteristics[i]) {
+        characteristics[i]->ascii_print(os , type[i] , *hlength , exhaustive , comment_flag);
       }
     }
 
     else {
-      os << "\n";
-      if (comment_flag) {
-        os << "# ";
-      }
-      os << STAT_label[STATL_SAMPLE_SIZE] << ": " << cumul_length << endl;
 
+#     ifdef MESSAGE
       mean = mean_computation(i);
       variance = variance_computation(i , mean);
 
+      os << "\n";
       if (comment_flag) {
         os << "# ";
       }
       os << STAT_label[STATL_MEAN] << ": " << mean << "   "
          << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
          << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
+#     endif
 
-      if ((variance > 0.) && (exhaustive)) {
-        if (comment_flag) {
-          os << "# ";
-        }
-        os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness_computation(i , mean , variance) << "   "
-           << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation(i , mean , variance) << endl;
-      }
-
-      if ((marginal_histogram[i]) && (exhaustive)) {
-        os << "\n";
-        if (comment_flag) {
-          os << "# ";
-        }
-        os << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
-
-        os << "\n";
-        if (comment_flag) {
-          os << "# ";
-        }
-        os << " " << STAT_label[STATL_VALUE] << "  | " << STAT_label[STATL_FREQUENCY] << endl;
-        marginal_histogram[i]->ascii_print(os , comment_flag);
-      }
-    }
-
-    if (characteristics[i]) {
-      characteristics[i]->ascii_print(os , type[i] , *hlength , exhaustive , comment_flag);
+//      os << endl;
     }
   }
 
@@ -3804,48 +4776,54 @@ bool MarkovianSequences::spreadsheet_write(StatError &error , const char *path) 
       out_file << "\n" << STAT_word[STATW_VARIABLE] << "\t" << i + 1 << "\t"
                << STAT_variable_word[type[i]];
 
-      if (type[i] == STATE) {
-        out_file << "\t\t" << marginal_distribution[i]->nb_value << "\t"
-                 << STAT_label[marginal_distribution[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << endl;
-      }
-      else {
-        out_file << "\t\t" << STAT_label[STATL_MIN_VALUE] << "\t" << min_value[i]
-                 << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
-      }
-
-      if (marginal_distribution[i]) {
-        out_file << "\n" << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
-                 << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-        marginal_distribution[i]->spreadsheet_characteristic_print(out_file);
-
-        out_file << "\n\t" << STAT_label[STATL_FREQUENCY] << endl;
-        marginal_distribution[i]->spreadsheet_print(out_file);
-      }
-
-      else {
-        out_file << "\n" << STAT_label[STATL_SAMPLE_SIZE] << "\t" << cumul_length << endl;
-
-        mean = mean_computation(i);
-        variance = variance_computation(i , mean);
-
-        out_file << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
-                 << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
-                 << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
-
-        if (variance > 0.) {
-          out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i , mean , variance) << "\t\t"
-                   << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation(i , mean , variance) << endl;
+      if (type[i] != AUXILIARY) {
+        if (type[i] == STATE) {
+          out_file << "\t\t" << marginal_distribution[i]->nb_value << "\t"
+                   << STAT_label[marginal_distribution[i]->nb_value == 1 ? STATL_STATE : STATL_STATES] << endl;
+        }
+        else {
+          out_file << "\t\t" << STAT_label[STATL_MIN_VALUE] << "\t" << min_value[i]
+                   << "\t\t" << STAT_label[STATL_MAX_VALUE] << "\t" << max_value[i] << endl;
         }
 
-        if (marginal_histogram[i]) {
-          out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
-          out_file << "\n" << STAT_label[STATL_VALUE] << "\t" << STAT_label[STATL_FREQUENCY] << endl;
-          marginal_histogram[i]->spreadsheet_print(out_file);
+        if (marginal_distribution[i]) {
+          out_file << "\n" << STAT_label[type[i] == STATE ? STATL_STATE : STATL_MARGINAL] << " "
+                   << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
+          marginal_distribution[i]->spreadsheet_characteristic_print(out_file);
+
+          out_file << "\n\t" << STAT_label[STATL_FREQUENCY] << endl;
+          marginal_distribution[i]->spreadsheet_print(out_file);
+        }
+
+        else {
+          out_file << "\n" << STAT_label[STATL_SAMPLE_SIZE] << "\t" << cumul_length << endl;
+
+          mean = mean_computation(i);
+          variance = variance_computation(i , mean);
+
+          out_file << STAT_label[STATL_MEAN] << "\t" << mean << "\t\t"
+                   << STAT_label[STATL_VARIANCE] << "\t" << variance << "\t\t"
+                   << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance) << endl;
+
+          if (variance > 0.) {
+            out_file << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation(i , mean , variance) << "\t\t"
+                     << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation(i , mean , variance) << endl;
+          }
+
+          if (marginal_histogram[i]) {
+            out_file << "\n" << STAT_label[STATL_MARGINAL] << " " << STAT_label[STATL_HISTOGRAM] << endl;
+            out_file << "\n" << STAT_label[STATL_VALUE] << "\t" << STAT_label[STATL_FREQUENCY] << endl;
+            marginal_histogram[i]->spreadsheet_print(out_file);
+          }
+        }
+
+        if (characteristics[i]) {
+          characteristics[i]->spreadsheet_print(out_file , type[i] , *hlength);
         }
       }
 
-      if (characteristics[i]) {
-        characteristics[i]->spreadsheet_print(out_file , type[i] , *hlength);
+      else {
+        out_file << endl;
       }
     }
 
@@ -3984,8 +4962,8 @@ bool MarkovianSequences::plot_print(const char *prefix , const char *title , int
           out_file << "set ytics 0,1" << endl;
         }
 
-        out_file << "plot [" << marginal_histogram[variable]->min_value << ":"
-                 << marginal_histogram[variable]->max_value << "] [0:"
+        out_file << "plot [" << marginal_histogram[variable]->min_value - marginal_histogram[variable]->step << ":"
+                 << marginal_histogram[variable]->max_value + marginal_histogram[variable]->step << "] [0:"
                  << (int)(marginal_histogram[variable]->max * YSCALE) + 1 << "] \""
                  << label((data_file_name[1].str()).c_str()) << "\" using 1:2 title \""
                  << STAT_label[STATL_VARIABLE] << " " << variable + 1 << " "
@@ -4278,8 +5256,8 @@ void MarkovianSequences::plotable_write(MultiPlotSet &plot , int &index , int va
 
     // vue : histogramme marginal
 
-    plot[index].xrange = Range(marginal_histogram[variable]->min_value ,
-                               marginal_histogram[variable]->max_value);
+    plot[index].xrange = Range(marginal_histogram[variable]->min_value - marginal_histogram[variable]->step ,
+                               marginal_histogram[variable]->max_value + marginal_histogram[variable]->step);
     plot[index].yrange = Range(0 , ceil(marginal_histogram[variable]->max * YSCALE));
 
     if (ceil(marginal_histogram[variable]->max * YSCALE) < TIC_THRESHOLD) {
@@ -4422,7 +5400,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
       }
     }
 
-    else {
+    else if (type[i] != AUXILIARY) {
       nb_plot_set++;
       if ((marginal_distribution[i]) || (marginal_histogram[i])) {
         nb_plot_set++;
@@ -4526,7 +5504,7 @@ MultiPlotSet* MarkovianSequences::get_plotable() const
     if (characteristics[i]) {
       characteristics[i]->plotable_write(plot , index , i , type[i] , *hlength);
     }
-    else {
+    else if (type[i] != AUXILIARY) {
       plotable_write(plot , index , i);
     }
   }
