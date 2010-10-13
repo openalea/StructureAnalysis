@@ -237,10 +237,10 @@ public:
 
   static Renewal*
   estimation(const RenewalData &input, int estimator, int nb_iter,
-      int mean_computation, double weight, int penalty_type, int outside)
+      int mean_computation_method, double weight, int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
-    ret = input.estimation(error, os, estimator, nb_iter, mean_computation,
+    ret = input.estimation(error, os, estimator, nb_iter, mean_computation_method,
         weight, penalty_type, outside);
 
     FOOTER_OS;
@@ -250,12 +250,12 @@ public:
    static Renewal*
   estimation_inter_event(const RenewalData &input,
       const DiscreteParametric &input_dist, int estimator, int nb_iter,
-      int mean_computation, double weight, int penalty_type, int outside)
+      int mean_computation_method, double weight, int penalty_type, int outside)
   {
     HEADER_OS(Renewal);
 
     ret = input.estimation(error, os, input_dist, estimator, nb_iter,
-        mean_computation, weight, penalty_type, outside);
+        mean_computation_method, weight, penalty_type, outside);
 
     FOOTER_OS;
   }
