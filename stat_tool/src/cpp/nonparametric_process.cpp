@@ -178,59 +178,18 @@ void NonparametricProcess::copy(const NonparametricProcess &process)
 
 /*--------------------------------------------------------------*
  *
- *  Copie d'un objet NonparametricProcess avec ajout d'un etat.
- *
- *  arguments : reference sur un objet NonparametricProcess, etat de reference.
- *
- *--------------------------------------------------------------*/
-
-void NonparametricProcess::add_state(const NonparametricProcess &process , int state)
-
-{
-  nb_state = process.nb_state + 1;
-  nb_value = process.nb_value;
-
-  if (process.observation) {
-    register int i;
-
-
-    observation = new Distribution*[nb_state];
-    for (i = 0;i <= state;i++) {
-      observation[i] = new Distribution(*(process.observation[i]));
-    }
-    for (i = state + 1;i < nb_state;i++) {
-      observation[i] = new Distribution(*(process.observation[i - 1]));
-    }
-  }
-
-  else {
-    observation = NULL;
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Constructeur par copie de la classe NonparametricProcess.
  *
- *  arguments : reference sur un objet NonparametricProcess,
- *              type de manipulation ('c' : copy, 's' : state), etat de reference.
+ *  arguments : reference sur un objet NonparametricProcess.
  *
  *--------------------------------------------------------------*/
 
-NonparametricProcess::NonparametricProcess(const NonparametricProcess &process ,
+/* NonparametricProcess::NonparametricProcess(const NonparametricProcess &process ,
                                            char manip , int state)
 
 {
-  switch (manip) {
-  case 'c' :
-    copy(process);
-    break;
-  case 's' :
-    add_state(process , state);
-    break;
-  }
-}
+  copy(process);
+} */
 
 
 /*--------------------------------------------------------------*
@@ -1428,7 +1387,7 @@ bool NonparametricProcess::plot_print(const char *prefix , const char *title , i
    bool status= false, start;
    register int val, i, j= 0, k= 0;
    int nb_histo, nb_dist, histo_index,
-       dist_index, plot_index, *dist_nb_value, *index_dist; 
+       dist_index, plot_index, *dist_nb_value; 
    double *scale;
    const Distribution **pdist;
    const FrequencyDistribution **phisto;
@@ -1449,8 +1408,6 @@ bool NonparametricProcess::plot_print(const char *prefix , const char *title , i
    scale= new double[1 * nb_value + nb_state];
    // list of the successive histograms to be printed
    phisto= new const FrequencyDistribution*[1 + 2 * nb_value + nb_state];
-   // correspondance between the histograms and the distributions ?
-   index_dist= new int[1 + 2 * nb_value + nb_state];
 
    nb_histo= 0;
    nb_dist= 0;
@@ -1465,7 +1422,6 @@ bool NonparametricProcess::plot_print(const char *prefix , const char *title , i
          if (empirical_observation != NULL)
          {
            phisto[nb_histo]= empirical_observation[val];
-           index_dist[nb_histo]= nb_dist;
            scale[nb_dist++]= phisto[nb_histo++]->nb_element;
          }
          else
@@ -1477,7 +1433,7 @@ bool NonparametricProcess::plot_print(const char *prefix , const char *title , i
    // the values for all the gnuplot graphs
 
    status= ::plot_print((data_file_name[1].str()).c_str(), nb_dist, pdist,
-                        scale, dist_nb_value, nb_histo, phisto, index_dist);
+                        scale, dist_nb_value, nb_histo, phisto);
 
    // write the command and printing files
    if (status) {
@@ -1573,7 +1529,6 @@ bool NonparametricProcess::plot_print(const char *prefix , const char *title , i
       delete [] dist_nb_value;
       delete [] scale;
       delete [] phisto;
-      delete [] index_dist;
    }
 
    return status;
