@@ -63,7 +63,7 @@ extern int column_width(int value);
 Histogram::Histogram(int inb_category , bool init_flag)
 
 {
-  nb_individual = I_DEFAULT;
+  nb_element = I_DEFAULT;
   nb_category = inb_category;
   step = D_DEFAULT;
   max = 0;
@@ -84,8 +84,44 @@ Histogram::Histogram(int inb_category , bool init_flag)
     }
   }
 
+  type = I_DEFAULT;
   min_value = D_DEFAULT;
   max_value = D_DEFAULT;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Construction d'un objet Histogram a partir d'un objet FrequencyDistribution.
+ *
+ *  argument : reference sur un objet FrequencyDistribution.
+ *
+ *--------------------------------------------------------------*/
+
+Histogram::Histogram(const FrequencyDistribution &histo)
+
+{
+  register int i , j;
+
+
+  nb_element = histo.nb_element;
+  max = histo.max;
+
+  step = histo.min_interval_computation();
+
+  nb_category = (histo.nb_value - 1 - histo.offset) / step + 1;
+  frequency = new int[nb_category];
+
+  i = histo.offset;
+  for (j = 0;j < nb_category;j++) {
+    frequency[j] = histo.frequency[i];
+    i += step;
+  }
+
+  type = INT_VALUE;
+
+  min_value = histo.offset;
+  max_value = histo.nb_value - 1;
 }
 
 
@@ -103,7 +139,7 @@ void Histogram::copy(const Histogram &histo)
   register int i;
 
 
-  nb_individual = histo.nb_individual;
+  nb_element = histo.nb_element;
   nb_category = histo.nb_category;
   step = histo.step;
   max = histo.max;
@@ -114,23 +150,9 @@ void Histogram::copy(const Histogram &histo)
     frequency[i] = histo.frequency[i];
   }
 
+  type = histo.type;
   min_value = histo.min_value;
   max_value = histo.max_value;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Constructeur par copie de la classe Histogram.
- *
- *  argument : reference sur un objet Histogram.
- *
- *--------------------------------------------------------------*/
-
-Histogram::Histogram(const Histogram &histo)
-
-{
-  copy(histo);
 }
 
 
@@ -215,17 +237,26 @@ ostream& Histogram::ascii_print(ostream &os , bool comment_flag) const
   register int i;
   int width[2];
   long old_adjust;
-  double value;
+  double first_value , value;
 
 
   old_adjust = os.setf(ios::right , ios::adjustfield);
 
   // calcul des largeurs des colonnes
 
-  width[0] = column_width(min_value + step / 2 , min_value + (nb_category - 0.5) * step);
+  switch (type) {
+  case INT_VALUE :
+    first_value = min_value;
+    break;
+  case REAL_VALUE :
+    first_value = min_value + step / 2;
+    break;
+  }
+
+  width[0] = column_width(first_value , first_value + (nb_category - 1) * step);
   width[1] = column_width(max) + ASCII_SPACE;
 
-  value = min_value + step / 2;
+  value = first_value;
   for (i = 0;i < nb_category;i++) {
 //    if (frequency[i] > 0) {
       if (comment_flag) {
@@ -259,7 +290,15 @@ ostream& Histogram::spreadsheet_print(ostream &os) const
   double value;
 
 
-  value = min_value + step / 2;
+  switch (type) {
+  case INT_VALUE :
+    value = min_value;
+    break;
+  case REAL_VALUE :
+    value = min_value + step / 2;
+    break;
+  }
+
   for (i = 0;i < nb_category;i++) {
 //    if (frequency[i] > 0) {
       os << value << "\t" << frequency[i] << endl;
@@ -291,11 +330,21 @@ bool Histogram::plot_print(const char *path) const
   if (out_file) {
     status = true;
 
-    value = min_value + step / 2;
+    switch (type) {
+    case INT_VALUE :
+      value = min_value;
+      break;
+    case REAL_VALUE :
+      value = min_value + step / 2;
+      break;
+    }
+
+    out_file << value - step << " " << 0 << endl;
     for (i = 0;i < nb_category;i++) {
       out_file << value << " " << frequency[i] << endl;
       value += step;
     }
+    out_file << value << " " << 0 << endl;
   }
 
   return status;
@@ -317,11 +366,21 @@ void Histogram::plotable_write(SinglePlot &plot) const
   double value;
 
 
-  value = min_value + step / 2;
+  switch (type) {
+  case INT_VALUE :
+    value = min_value;
+    break;
+  case REAL_VALUE :
+    value = min_value + step / 2;
+    break;
+  }
+
+  plot.add_point(value - step , 0);
   for (i = 0;i < nb_category;i++) {
     plot.add_point(value , frequency[i]);
     value += step;
   }
+  plot.add_point(value , 0);
 }
 
 
@@ -343,4 +402,28 @@ void Histogram::max_computation()
       max = frequency[i];
     }
   }
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de repartition deduite d'un histogramme.
+ *
+ *--------------------------------------------------------------*/
+
+double* Histogram::cumul_computation() const
+
+{
+  register int i;
+  double *cumul;
+
+
+  cumul = new double[nb_category];
+
+  cumul[0] = (double)frequency[0] / (double)nb_element;
+  for (i = 1;i < nb_category;i++) {
+    cumul[i] = cumul[i - 1] + (double)frequency[i] / (double)nb_element;
+  }
+
+  return cumul;
 }
