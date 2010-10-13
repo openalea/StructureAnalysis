@@ -51,7 +51,7 @@
 #include "vectors.h"
 #include "stat_label.h"
 
-// #include "stat_tool/quantile_computation.h"   probleme compilateur C++ Windows
+// #include "quantile_computation.h"   probleme compilateur C++ Windows
 
 using namespace std;
 
@@ -1175,56 +1175,45 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
     // regroupement des valeurs entieres
 
     case INT_VALUE : {
-      for (i = 0;i < vec->nb_vector;i++) {
-        switch (mode) {
-        case FLOOR :
-          vec->int_vector[i][variable] = int_vector[i][variable] / step;
-          break;
-        case ROUND :
-          vec->int_vector[i][variable] = (int_vector[i][variable] + step / 2) / step;
-//          vec->int_vector[i][variable] = (int)::round((double)int_vector[i][variable] / (double)step);
-          break;
-        case CEIL :
-          vec->int_vector[i][variable] = (int_vector[i][variable] + step - 1) / step;
-//          vec->int_vector[i][variable] = (int)ceil((double)int_vector[i][variable] / (double)step);
-          break;
-        }
-      }
-      break;
-    }
-
-    // regroupement des valeurs reelles
-
-    case REAL_VALUE : {
-      for (i = 0;i < vec->nb_vector;i++) {
-        vec->real_vector[i][variable] = real_vector[i][variable] / step;
-      }
-      break;
-    }
-    }
-
-    switch (vec->type[variable]) {
-
-    case INT_VALUE : {
       switch (mode) {
-      case FLOOR :
+
+      case FLOOR : {
+        for (i = 0;i < vec->nb_vector;i++) {
+          vec->int_vector[i][variable] = int_vector[i][variable] / step;
+        }
+
         vec->min_value[variable] = (int)min_value[variable] / step;
         vec->max_value[variable] = (int)max_value[variable] / step;
 //        vec->min_value[variable] = floor(min_value[variable] / step);
 //        vec->max_value[variable] = floor(max_value[variable] / step);
         break;
-      case ROUND :
+      }
+
+      case ROUND : {
+        for (i = 0;i < vec->nb_vector;i++) {
+          vec->int_vector[i][variable] = (int_vector[i][variable] + step / 2) / step;
+//          vec->int_vector[i][variable] = (int)::round((double)int_vector[i][variable] / (double)step);
+        }
+
         vec->min_value[variable] = ((int)min_value[variable] + step / 2) / step;
         vec->max_value[variable] = ((int)max_value[variable] + step / 2) / step;
 //        vec->min_value[variable] = ::round(min_value[variable] / step);
 //        vec->max_value[variable] = ::round(max_value[variable] / step);
         break;
-      case CEIL :
+      }
+
+      case CEIL : {
+        for (i = 0;i < vec->nb_vector;i++) {
+          vec->int_vector[i][variable] = (int_vector[i][variable] + step - 1) / step;
+//          vec->int_vector[i][variable] = (int)ceil((double)int_vector[i][variable] / (double)step);
+        }
+
         vec->min_value[variable] = ((int)min_value[variable] + step - 1) / step;
         vec->max_value[variable] = ((int)max_value[variable] + step - 1) / step;
 //        vec->min_value[variable] = ceil(min_value[variable] / step);
 //        vec->max_value[variable] = ceil(max_value[variable] / step);
         break;
+      }
       }
 
       if (marginal_distribution[variable]) {
@@ -1240,11 +1229,17 @@ Vectors* Vectors::cluster(StatError &error , int variable , int step , int mode)
       break;
     }
 
+    // regroupement des valeurs reelles
+
     case REAL_VALUE : {
+      for (i = 0;i < vec->nb_vector;i++) {
+        vec->real_vector[i][variable] = real_vector[i][variable] / step;
+      }
+
       vec->min_value[variable] = min_value[variable] / step;
       vec->max_value[variable] = max_value[variable] / step;
 
-      vec->build_marginal_histogram(i , marginal_histogram[variable]->step / step);
+      vec->build_marginal_histogram(variable , marginal_histogram[variable]->step / step);
 
       vec->mean[variable] = mean[variable] / step;
       vec->covariance[variable][variable] = covariance[variable][variable] / (step * step);
@@ -4086,16 +4081,17 @@ void Vectors::build_marginal_histogram(int variable , double step)
     }
 
     if (marginal_histogram[variable]) {
-      marginal_histogram[variable]->nb_category = (int)::round((max_value[variable] - min_value[variable]) / step) + 1;
+      marginal_histogram[variable]->nb_category = (int)floor((max_value[variable] - min_value[variable]) / step) + 1;
 
       delete [] marginal_histogram[variable]->frequency;
       marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_category];
     }
 
     else {
-      marginal_histogram[variable] = new Histogram((int)::round((max_value[variable] - min_value[variable]) / step) + 1 , false);
+      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - min_value[variable]) / step) + 1 , false);
 
-      marginal_histogram[variable]->nb_individual = nb_vector;
+      marginal_histogram[variable]->nb_element = nb_vector;
+      marginal_histogram[variable]->type = type[variable];
       marginal_histogram[variable]->min_value = min_value[variable];
       marginal_histogram[variable]->max_value = max_value[variable];
     }
@@ -4111,16 +4107,16 @@ void Vectors::build_marginal_histogram(int variable , double step)
 
     case INT_VALUE : {
       for (i = 0;i < nb_vector;i++) {
-//        marginal_histogram[variable]->frequency[(int)((int_vector[i][variable] - min_value[variable] + step / 2.) / step)]++;
-        marginal_histogram[variable]->frequency[(int)::round((int_vector[i][variable] - min_value[variable]) / step)]++;
+//        (marginal_histogram[variable]->frequency[(int)((int_vector[i][variable] - min_value[variable]) / step)])++;
+        (marginal_histogram[variable]->frequency[(int)floor((int_vector[i][variable] - min_value[variable]) / step)])++;
       }
       break;
     }
 
     case REAL_VALUE : {
       for (i = 0;i < nb_vector;i++) {
-//        marginal_histogram[variable]->frequency[(int)((real_vector[i][variable] - min_value[variable] + step / 2.) / step)]++;
-        marginal_histogram[variable]->frequency[(int)::round((real_vector[i][variable] - min_value[variable]) / step)]++;
+//        (marginal_histogram[variable]->frequency[(int)((real_vector[i][variable] - min_value[variable]) / step)])++;
+        (marginal_histogram[variable]->frequency[(int)floor((real_vector[i][variable] - min_value[variable]) / step)])++;
       }
       break;
     }
@@ -4133,7 +4129,7 @@ void Vectors::build_marginal_histogram(int variable , double step)
 
 /*--------------------------------------------------------------*
  *
- *  Changement du pas de regroupement d'un l'histogramme marginal.
+ *  Changement du pas de regroupement de l'histogramme marginal.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
  *              pas de regroupement.
@@ -4159,6 +4155,10 @@ bool Vectors::select_step(StatError &error , int variable , double step)
     if (!marginal_histogram[variable]) {
       status = false;
       error.update(STAT_error[STATR_MARGINAL_HISTOGRAM]);
+    }
+    if ((step <= 0.) || ((type[variable] == INT_VALUE) && ((int)step != step))) {
+      status = false;
+      error.update(STAT_error[STATR_HISTOGRAM_STEP]);
     }
   }
 
@@ -4259,6 +4259,228 @@ int* Vectors::order_computation(int variable) const
   }
 
   return index;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la fonction de repartition empirique pour une variable.
+ *
+ *  arguments : indice de la variable, (valeurs, fonction de repartition).
+ *
+ *--------------------------------------------------------------*/
+
+int Vectors::cumulative_distribution_function_computation(int variable , double **cdf) const
+
+{
+  register int i , j;
+  int cumul , int_min , int_value , frequency;
+  double real_min , real_value;
+
+
+  if (marginal_distribution[variable]) {
+    i = marginal_distribution[variable]->cumulative_distribution_function_computation(cdf);
+  }
+
+  else {
+    cdf[0] = new double[nb_vector];
+    cdf[1] = new double[nb_vector];
+
+    cumul = 0;
+    i = 0;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (cumul == 0) {
+          int_value = (int)min_value[variable];
+        }
+
+        else {
+          int_min = (int)max_value[variable] + 1;
+          for (j = 0;j < nb_vector;j++) {
+            if ((int_vector[j][variable] > int_value) &&
+                (int_vector[j][variable] < int_min)) {
+              int_min = int_vector[j][variable];
+            }
+          }
+          int_value = int_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        frequency = 0;
+        for (j = 0;j < nb_vector;j++) {
+          if (int_vector[j][variable] == int_value) {
+            frequency++;
+          }
+        }
+
+        cdf[0][i] = int_value;
+        cdf[1][i] = (cumul + (double)(frequency + 1) / 2.) / (double)nb_vector;
+        cumul += frequency;
+        i++;
+      }
+      while (cumul < nb_vector);
+      break;
+    }
+
+    case REAL_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (cumul == 0) {
+          real_value = min_value[variable];
+        }
+
+        else {
+          real_min = max_value[variable] + 1;
+          for (j = 0;j < nb_vector;j++) {
+            if ((real_vector[j][variable] > real_value) &&
+                (real_vector[j][variable] < real_min)) {
+              real_min = real_vector[j][variable];
+            }
+          }
+          real_value = real_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        frequency = 0;
+        for (j = 0;j < nb_vector;j++) {
+          if (real_vector[j][variable] == real_value) {
+            frequency++;
+          }
+        }
+
+        cdf[0][i] = real_value;
+        cdf[1][i] = (cumul + (double)(frequency + 1) / 2.) / (double)nb_vector;
+        cumul += frequency;
+        i++;
+      }
+      while (cumul < nb_vector);
+      break;
+    }
+    }
+  }
+
+  return i;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de l'intervalle minimum entre 2 valeurs.
+ *
+ *  argument : indice de la variable.
+ *
+ *--------------------------------------------------------------*/
+
+double Vectors::min_interval_computation(int variable) const
+
+{
+  double min_interval;
+
+
+  if (marginal_distribution[variable]) {
+    min_interval = marginal_distribution[variable]->min_interval_computation();
+  }
+
+  else {
+    register int i , j;
+    int int_min , int_value;
+    double real_min , real_value;
+
+
+    min_interval = max_value[variable] - min_value[variable];
+    i = 0;
+
+    switch (type[variable]) {
+
+    case INT_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (i == 0) {
+          int_value = (int)min_value[variable];
+        }
+
+        else {
+          int_min = (int)max_value[variable] + 1;
+          for (j = 0;j < nb_vector;j++) {
+            if ((int_vector[j][variable] > int_value) &&
+                (int_vector[j][variable] < int_min)) {
+              int_min = int_vector[j][variable];
+            }
+          }
+
+          if (int_min - int_value < min_interval) {
+            min_interval = int_min - int_value;
+          }
+          int_value = int_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        for (j = 0;j < nb_vector;j++) {
+          if (int_vector[j][variable] == int_value) {
+            i++;
+          }
+        }
+      }
+      while (i < nb_vector);
+      break;
+    }
+
+    case REAL_VALUE : {
+      do {
+
+        // recherche de la valeur minimum courante
+
+        if (i == 0) {
+          real_value = min_value[variable];
+        }
+
+        else {
+          real_min = max_value[variable] + 1;
+          for (j = 0;j < nb_vector;j++) {
+            if ((real_vector[j][variable] > real_value) &&
+                (real_vector[j][variable] < real_min)) {
+              real_min = real_vector[j][variable];
+            }
+          }
+
+          if (real_min - real_value < min_interval) {
+            min_interval = real_min - real_value;
+          }
+          real_value = real_min;
+        }
+
+        // recherche du nombre de vecteurs prenant pour la variable selectionnee
+        // la valeur minimum courante
+
+        for (j = 0;j < nb_vector;j++) {
+          if (real_vector[j][variable] == real_value) {
+            i++;
+          }
+        }
+      }
+      while (i < nb_vector);
+      break;
+    }
+    }
+  }
+
+  return min_interval;
 }
 
 
@@ -4618,4 +4840,97 @@ double** Vectors::correlation_computation() const
   }
 
   return correlation;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul de la direction moyenne d'une variable circulaire.
+ *
+ *  arguments : indice de la variable, unite (DEGREE/GRADIAN).
+ *
+ *--------------------------------------------------------------*/
+
+double* Vectors::mean_direction_computation(int variable , int unit) const
+
+{
+  register int i;
+  double *mean_direction;
+
+
+  mean_direction = new double[4];
+//  mean_direction = new double[2];
+
+  mean_direction[0] = 0.;
+  mean_direction[1] = 0.;
+
+  switch (type[variable]) {
+
+  case INT_VALUE : {
+    switch (unit) {
+
+    case DEGREE : {
+      for (i = 0;i < nb_vector;i++) {
+        mean_direction[0] += cos(int_vector[i][variable] * M_PI / 180);
+        mean_direction[1] += sin(int_vector[i][variable] * M_PI / 180);
+      }
+      break;
+    }
+
+    case RADIAN : {
+      for (i = 0;i < nb_vector;i++) {
+        mean_direction[0] += cos(int_vector[i][variable]);
+        mean_direction[1] += sin(int_vector[i][variable]);
+      }
+      break;
+    }
+    }
+    break;
+  }
+
+  case REAL_VALUE : {
+    switch (unit) {
+
+    case DEGREE : {
+      for (i = 0;i < nb_vector;i++) {
+        mean_direction[0] += cos(real_vector[i][variable] * M_PI / 180);
+        mean_direction[1] += sin(real_vector[i][variable] * M_PI / 180);
+      }
+      break;
+    }
+
+    case RADIAN : {
+      for (i = 0;i < nb_vector;i++) {
+        mean_direction[0] += cos(real_vector[i][variable]);
+        mean_direction[1] += sin(real_vector[i][variable]);
+      }
+      break;
+    }
+    }
+    break;
+  }
+  }
+
+  mean_direction[0] /= nb_vector;
+  mean_direction[1] /= nb_vector;
+
+  mean_direction[2] = sqrt(mean_direction[0] * mean_direction[0] +
+                           mean_direction[1] * mean_direction[1]);
+
+  if (mean_direction[2] > 0.) {
+    mean_direction[3] = atan(mean_direction[1] / mean_direction[0]);
+
+    if (mean_direction[0] < 0.) {
+      mean_direction[3] += M_PI;
+    }
+    if (unit == DEGREE) {
+      mean_direction[3] *= (180 / M_PI);
+    }
+  }
+
+  else {
+    mean_direction[3] = D_DEFAULT;
+  }
+
+  return mean_direction;
 }
