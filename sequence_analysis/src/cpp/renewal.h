@@ -220,7 +220,7 @@ private :
     void expectation_step(const TimeEvents &timev , Reestimation<double> *reestim) const;
     void expectation_step(const TimeEvents &timev , Reestimation<double> *inter_event_reestim ,
                           Reestimation<double> *length_bias_reestim , int estimator ,
-                          bool combination = false , int mean_computation = COMPUTED) const;
+                          bool combination = false , int mean_computation_method = COMPUTED) const;
 
 public :
 
@@ -233,7 +233,7 @@ public :
             const DiscreteParametric &iinter_event);
     Renewal(const Renewal &renew , bool data_flag = true)
     { copy(renew , data_flag); }
-    virtual ~Renewal();
+    ~Renewal();
     void conditional_delete();
     Renewal& operator=(const Renewal &renew);
 
@@ -297,15 +297,15 @@ private :
     int length;             // longueur de la sequence
     int *sequence;          // sequence
 
-    void copy(const RenewalIterator &iterator);
+    void copy(const RenewalIterator &iter);
 
 public :
 
     RenewalIterator(Renewal *irenewal , int ilength = 1);
-    RenewalIterator(const RenewalIterator &iterator)
-    { copy(iterator); }
+    RenewalIterator(const RenewalIterator &iter)
+    { copy(iter); }
     ~RenewalIterator();
-    RenewalIterator& operator=(const RenewalIterator &iterator);
+    RenewalIterator& operator=(const RenewalIterator &iter);
 
     void simulation(int ilength = 1 , char type = 'v');
 
@@ -364,7 +364,7 @@ public :
     { build(inb_element , itime , inb_event); }
     TimeEvents(int nb_sample , const TimeEvents **ptimev) { merge(nb_sample , ptimev); }
     TimeEvents(const TimeEvents &timev) { copy(timev); }
-    virtual ~TimeEvents();
+    ~TimeEvents();
     TimeEvents& operator=(const TimeEvents &timev);
 
     DiscreteDistributionData* extract(StatError &error , int histo_type ,
@@ -391,11 +391,11 @@ public :
     Renewal* estimation(StatError &error , std::ostream &os , char type ,
                         const DiscreteParametric &iinter_event , int estimator = LIKELIHOOD ,
                         int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                        int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
     Renewal* estimation(StatError &error , std::ostream &os , char type , int estimator = LIKELIHOOD ,
                         int nb_iter = I_DEFAULT , int equilibrium_estimator = COMPLETE_LIKELIHOOD ,
-                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                        int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
 
     // acces membres de la classe
@@ -470,10 +470,10 @@ public :
 
     Renewal* estimation(StatError &error , std::ostream &os , const DiscreteParametric &iinter_event ,
                         int estimator = LIKELIHOOD , int nb_iter = I_DEFAULT ,
-                        int mean_computation = COMPUTED , double weight = D_DEFAULT ,
+                        int mean_computation_method = COMPUTED , double weight = D_DEFAULT ,
                         int penalty_type = SECOND_DIFFERENCE , int outside = ZERO) const;
     Renewal* estimation(StatError &error , std::ostream &os , int estimator = LIKELIHOOD ,
-                        int nb_iter = I_DEFAULT , int mean_computation = COMPUTED ,
+                        int nb_iter = I_DEFAULT , int mean_computation_method = COMPUTED ,
                         double weight = D_DEFAULT , int penalty_type = SECOND_DIFFERENCE ,
                         int outside = ZERO) const;
 
