@@ -38,11 +38,11 @@
 
 #include <iomanip>
 
+#include "tool/config.h"
+
 #include "stat_tools.h"
 #include "curves.h"
 #include "stat_label.h"
-
-#include "tool/config.h"
 
 using namespace std;
 
