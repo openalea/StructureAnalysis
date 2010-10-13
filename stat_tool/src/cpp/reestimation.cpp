@@ -41,8 +41,9 @@
 
 
 
-#include "stat_label.h"
 #include "tool/util_math.h"
+
+#include "stat_label.h"
 
 using namespace std;
 
@@ -395,10 +396,12 @@ void Reestimation<Type>::mean_computation()
  *
  *  Calcul de la variance d'une loi empirique.
  *
+ *  argument : flag biais.
+ *
  *--------------------------------------------------------------*/
 
 template <typename Type>
-void Reestimation<Type>::variance_computation()
+void Reestimation<Type>::variance_computation(bool bias)
 
 {
   if (mean != D_DEFAULT) {
@@ -413,7 +416,15 @@ void Reestimation<Type>::variance_computation()
         diff = i - mean;
         variance += frequency[i] * diff * diff;
       }
-      variance /= (nb_element - 1);
+
+      switch (bias) {
+      case false :
+        variance /= (nb_element - 1);
+        break;
+      case true :
+        variance /= nb_element;
+        break;
+      }
     }
   }
 }
@@ -513,6 +524,54 @@ double Reestimation<Type>::kurtosis_computation() const
 
 /*--------------------------------------------------------------*
  *
+ *  Calcul de la direction moyenne d'une variable circulaire.
+ *
+ *  argument : pointeur sur la direction moyenne.
+ *
+ *--------------------------------------------------------------*/
+
+template <typename Type>
+void Reestimation<Type>::mean_direction_computation(double *mean_direction) const
+
+{
+  register int i , j;
+
+
+  mean_direction[0] = 0.;
+  mean_direction[1] = 0.;
+
+  for (i = offset;i < nb_value;i++) {
+    mean_direction[0] += frequency[i] * cos(i * M_PI / 180);
+    mean_direction[1] += frequency[i] * sin(i * M_PI / 180);
+  }
+
+  mean_direction[0] /= nb_element;
+  mean_direction[1] /= nb_element;
+
+  mean_direction[2] = sqrt(mean_direction[0] * mean_direction[0] +
+                           mean_direction[1] * mean_direction[1]);
+
+  if (mean_direction[2] > 0.) {
+    mean_direction[3] = atan(mean_direction[1] / mean_direction[0]);
+
+    if (mean_direction[0] < 0.) {
+      mean_direction[3] += M_PI;
+    }
+    else if (mean_direction[1] < 0.) {
+      mean_direction[3] += 2 * M_PI;
+    }
+
+    mean_direction[3] *= (180 / M_PI);
+  }
+
+  else {
+    mean_direction[3] = D_DEFAULT;
+  }
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Calcul de la quantite d'information d'une loi empirique.
  *
  *--------------------------------------------------------------*/
@@ -540,7 +599,7 @@ double Reestimation<Type>::information_computation() const
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la vraisemblance d'une loi donnee pour un echantillon.
+ *  Calcul de la vraisemblance d'une loi discrete pour un echantillon.
  *
  *  argument : reference sur un objet Distribution.
  *
