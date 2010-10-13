@@ -43,6 +43,7 @@
 #include "stat_tool/curves.h"
 #include "stat_tool/markovian.h"
 #include "stat_tool/stat_label.h"
+
 #include "sequences.h"
 #include "sequence_label.h"
 #include "tool/config.h"
@@ -176,7 +177,7 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
 
     if (index_value) {
       index_value->ascii_print(os , file_flag ,
-                               (characteristics ? characteristics->index_value : 0));
+                               (characteristics ? characteristics->index_value : NULL));
     }
     else {
       characteristics->index_value->ascii_print(os , file_flag);
@@ -242,7 +243,7 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
              << STAT_label[STATL_FUNCTION] << endl;
 
           first_occurrence[i]->ascii_print(os , file_flag , true , true ,
-                                           (((characteristics) && (i < characteristics->nb_value) && (characteristics->first_occurrence[i]->nb_element > 0)) ? characteristics->first_occurrence[i] : 0));
+                                           (((characteristics) && (i < characteristics->nb_value) && (characteristics->first_occurrence[i]->nb_element > 0)) ? characteristics->first_occurrence[i] : NULL));
         }
 
         else {
@@ -313,7 +314,7 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
 
           recurrence_time[i]->ascii_print(os , file_flag , true , true ,
                                           (((characteristics) && (i < characteristics->nb_value) && (characteristics->recurrence_time[i]->nb_element > 0)) ?
-                                           characteristics->recurrence_time[i] : 0));
+                                           characteristics->recurrence_time[i] : NULL));
         }
 
         else {
@@ -392,7 +393,7 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
 
           sojourn_time[i]->Distribution::ascii_print(os , file_flag , true , false ,
                                                      (((characteristics) && (i < characteristics->nb_value) && (characteristics->sojourn_time[i]->nb_element > 0)) ?
-                                                      characteristics->sojourn_time[i] : 0));
+                                                      characteristics->sojourn_time[i] : NULL));
         }
 
         else {
@@ -488,7 +489,7 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
 
           forward[i]->Distribution::ascii_print(os , file_flag , true , false ,
                                                 (((characteristics) && (i < characteristics->nb_value) && (characteristics->final_run[i]->nb_element > 0)) ?
-                                                 characteristics->final_run[i] : 0));
+                                                 characteristics->final_run[i] : NULL));
         }
 
         else {
@@ -568,7 +569,7 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
           }
 
           nb_run[i]->ascii_print(os , file_flag , true , false ,
-                                 (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) ? characteristics->nb_run[i] : 0));
+                                 (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) ? characteristics->nb_run[i] : NULL));
         }
 
         else {
@@ -650,7 +651,7 @@ ostream& NonparametricSequenceProcess::ascii_print(ostream &os , int process ,
           }
 
           nb_occurrence[i]->ascii_print(os , file_flag , true , false ,
-                                        (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_occurrence) && (characteristics->nb_occurrence[i]->nb_element > 0)) ? characteristics->nb_occurrence[i] : 0));
+                                        (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_occurrence) && (characteristics->nb_occurrence[i]->nb_element > 0)) ? characteristics->nb_occurrence[i] : NULL));
         }
 
         else {
@@ -730,7 +731,7 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
     os << endl;
 
     if (index_value) {
-      index_value->spreadsheet_print(os , (characteristics ? characteristics->index_value : 0));
+      index_value->spreadsheet_print(os , (characteristics ? characteristics->index_value : NULL));
     }
     else {
       characteristics->index_value->spreadsheet_print(os);
@@ -806,7 +807,7 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
              << STAT_label[STATL_FUNCTION] << endl;
 
           first_occurrence[i]->spreadsheet_print(os , true , false , true ,
-                                                 (((characteristics) && (i < characteristics->nb_value) && (characteristics->first_occurrence[i]->nb_element > 0)) ? characteristics->first_occurrence[i] : 0));
+                                                 (((characteristics) && (i < characteristics->nb_value) && (characteristics->first_occurrence[i]->nb_element > 0)) ? characteristics->first_occurrence[i] : NULL));
         }
 
         else {
@@ -861,7 +862,7 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
 
           recurrence_time[i]->spreadsheet_print(os , true , false , true ,
                                                 (((characteristics) && (i < characteristics->nb_value) && (characteristics->recurrence_time[i]->nb_element > 0)) ?
-                                                 characteristics->recurrence_time[i] : 0));
+                                                 characteristics->recurrence_time[i] : NULL));
         }
 
         else {
@@ -923,7 +924,7 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
 
           sojourn_time[i]->Distribution::spreadsheet_print(os , true , false , false ,
                                                            (((characteristics) && (i < characteristics->nb_value) && (characteristics->sojourn_time[i]->nb_element > 0)) ?
-                                                            characteristics->sojourn_time[i] : 0));
+                                                            characteristics->sojourn_time[i] : NULL));
         }
 
         else {
@@ -998,7 +999,7 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
 
           forward[i]->Distribution::spreadsheet_print(os , true , false , false ,
                                                       (((characteristics) && (i < characteristics->nb_value) && (characteristics->final_run[i]->nb_element > 0)) ?
-                                                       characteristics->final_run[i] : 0));
+                                                       characteristics->final_run[i] : NULL));
 
         }
 
@@ -1065,7 +1066,7 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
         }
 
         nb_run[i]->spreadsheet_print(os , true , false , false ,
-                                     (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) ? characteristics->nb_run[i] : 0));
+                                     (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) ? characteristics->nb_run[i] : NULL));
       }
 
       else {
@@ -1133,7 +1134,7 @@ ostream& NonparametricSequenceProcess::spreadsheet_print(ostream &os , int proce
         }
 
         nb_occurrence[i]->spreadsheet_print(os , true , false , false ,
-                                            (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_occurrence) && (characteristics->nb_occurrence[i]->nb_element > 0)) ? characteristics->nb_occurrence[i] : 0));
+                                            (((characteristics) && (i < characteristics->nb_value) && (characteristics->nb_occurrence) && (characteristics->nb_occurrence[i]->nb_element > 0)) ? characteristics->nb_occurrence[i] : NULL));
       }
 
       else {
@@ -1168,8 +1169,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
 {
   bool status = false , start;
   register int i , j , k , m;
-  int index_length , nb_histo , nb_dist , histo_index , dist_index , *dist_nb_value ,
-      *index_dist;
+  int index_length , nb_histo , nb_dist , histo_index , dist_index , *dist_nb_value;
   double *scale;
   Curves *smoothed_curves;
   const Distribution **pdist;
@@ -1219,14 +1219,12 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
     dist_nb_value = new int[6 * nb_value + nb_state];
     scale = new double[6 * nb_value + nb_state];
     phisto = new const FrequencyDistribution*[1 + 7 * nb_value + nb_state];
-    index_dist = new int[1 + 7 * nb_value + nb_state];
 
     nb_histo = 0;
     nb_dist = 0;
 
     if (hlength) {
-      phisto[nb_histo] = hlength;
-      index_dist[nb_histo++] = I_DEFAULT;
+      phisto[nb_histo++] = hlength;
     }
 
     if ((first_occurrence) || (characteristics)) {
@@ -1237,7 +1235,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->first_occurrence[i]->nb_element > 0)) {
             phisto[nb_histo] = characteristics->first_occurrence[i];
-            index_dist[nb_histo] = nb_dist;
             dist_nb_value[nb_dist] = MIN(first_occurrence[i]->nb_value , phisto[nb_histo]->nb_value * 3);
             scale[nb_dist++] = phisto[nb_histo++]->nb_element /
                                (1. - first_occurrence[i]->complement);
@@ -1251,8 +1248,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
 
         else if ((characteristics) && (i < characteristics->nb_value) &&
                  (characteristics->first_occurrence[i]->nb_element > 0)) {
-          phisto[nb_histo] = characteristics->first_occurrence[i];
-          index_dist[nb_histo++] = I_DEFAULT;
+          phisto[nb_histo++] = characteristics->first_occurrence[i];
         }
       }
     }
@@ -1265,7 +1261,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->recurrence_time[i]->nb_element > 0)) {
             phisto[nb_histo] = characteristics->recurrence_time[i];
-            index_dist[nb_histo] = nb_dist;
             dist_nb_value[nb_dist] = MIN(recurrence_time[i]->nb_value , phisto[nb_histo]->nb_value * 3);
             scale[nb_dist++] = phisto[nb_histo++]->nb_element /
                                (1. - recurrence_time[i]->complement);
@@ -1278,8 +1273,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
 
         else if ((characteristics) && (i < characteristics->nb_value) &&
                  (characteristics->recurrence_time[i]->nb_element > 0)) {
-          phisto[nb_histo] = characteristics->recurrence_time[i];
-          index_dist[nb_histo++] = I_DEFAULT;
+          phisto[nb_histo++] = characteristics->recurrence_time[i];
         }
       }
     }
@@ -1293,7 +1287,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->sojourn_time[i]->nb_element > 0)) {
             phisto[nb_histo] = characteristics->sojourn_time[i];
-            index_dist[nb_histo] = nb_dist;
             if (sojourn_time[i]->cumul[sojourn_time[i]->nb_value - 1] < CUMUL_THRESHOLD) {
               scale[nb_dist++] = phisto[nb_histo++]->nb_element /
                                  (1. - sojourn_time[i]->complement);
@@ -1310,8 +1303,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
 
         else if ((characteristics) && (i < characteristics->nb_value) &&
                  (characteristics->sojourn_time[i]->nb_element > 0)) {
-          phisto[nb_histo] = characteristics->sojourn_time[i];
-          index_dist[nb_histo++] = I_DEFAULT;
+          phisto[nb_histo++] = characteristics->sojourn_time[i];
         }
 
         if ((characteristics) && (i < characteristics->nb_value) &&
@@ -1321,13 +1313,11 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
             pdist[nb_dist] = forward[i];
             dist_nb_value[nb_dist] = forward[i]->nb_value;
             phisto[nb_histo] = characteristics->initial_run[i];
-            index_dist[nb_histo] = nb_dist;
             scale[nb_dist++] = phisto[nb_histo++]->nb_element;
           }
 
           else {
-            phisto[nb_histo] = characteristics->initial_run[i];
-            index_dist[nb_histo++] = I_DEFAULT;
+            phisto[nb_histo++] = characteristics->initial_run[i];
           }
         }
 
@@ -1338,7 +1328,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->final_run[i]->nb_element > 0)) {
             phisto[nb_histo] = characteristics->final_run[i];
-            index_dist[nb_histo] = nb_dist;
             scale[nb_dist++] = phisto[nb_histo++]->nb_element;
           }
           else {
@@ -1348,8 +1337,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
 
         else if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->final_run[i]->nb_element > 0)) {
-          phisto[nb_histo] = characteristics->final_run[i];
-          index_dist[nb_histo++] = I_DEFAULT;
+          phisto[nb_histo++] = characteristics->final_run[i];
         }
       }
     }
@@ -1363,7 +1351,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
           if ((characteristics) && (i < characteristics->nb_value) &&
               (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
             phisto[nb_histo] = characteristics->nb_run[i];
-            index_dist[nb_histo] = nb_dist;
             dist_nb_value[nb_dist] = nb_run[i]->plot_nb_value_computation(phisto[nb_histo]);
             scale[nb_dist++] = phisto[nb_histo++]->nb_element;
           }
@@ -1375,8 +1362,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
 
         else if ((characteristics) && (i < characteristics->nb_value) &&
                  (characteristics->nb_run) && (characteristics->nb_run[i]->nb_element > 0)) {
-          phisto[nb_histo] = characteristics->nb_run[i];
-          index_dist[nb_histo++] = I_DEFAULT;
+          phisto[nb_histo++] = characteristics->nb_run[i];
         }
 
         if (nb_occurrence) {
@@ -1386,7 +1372,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
               (characteristics->nb_occurrence) &&
               (characteristics->nb_occurrence[i]->nb_element > 0)) {
             phisto[nb_histo] = characteristics->nb_occurrence[i];
-            index_dist[nb_histo] = nb_dist;
             dist_nb_value[nb_dist] = nb_occurrence[i]->plot_nb_value_computation(phisto[nb_histo]);
             scale[nb_dist++] = phisto[nb_histo++]->nb_element;
           }
@@ -1399,8 +1384,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
         else if ((characteristics) && (i < characteristics->nb_value) &&
                  (characteristics->nb_occurrence) &&
                  (characteristics->nb_occurrence[i]->nb_element > 0)) {
-          phisto[nb_histo] = characteristics->nb_occurrence[i];
-          index_dist[nb_histo++] = I_DEFAULT;
+          phisto[nb_histo++] = characteristics->nb_occurrence[i];
         }
       }
     }
@@ -1412,7 +1396,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
 
         if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
           phisto[nb_histo] = empirical_observation[i];
-          index_dist[nb_histo] = nb_dist;
           scale[nb_dist++] = phisto[nb_histo++]->nb_element;
         }
         else {
@@ -1422,7 +1405,7 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
     }
 
     status = ::plot_print((data_file_name[1].str()).c_str() , nb_dist , pdist , scale ,
-                          dist_nb_value , nb_histo , phisto , index_dist);
+                          dist_nb_value , nb_histo , phisto);
 
     if (status) {
 
@@ -1514,17 +1497,21 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
             out_file << endl;
           }
 
-          out_file << "set title \"";
-          if (title) {
-            out_file << title;
-            if (process > 0) {
-              out_file << " - ";
+          out_file << "set title";
+          if ((title) || (process > 0)) {
+            out_file << " \"";
+            if (title) {
+              out_file << title;
+              if (process > 0) {
+                out_file << " - ";
+              }
             }
+            if (process > 0) {
+              out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+            }
+            out_file << "\"";
           }
-          if (process > 0) {
-            out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
-          }
-          out_file << "\"\n\n";
+          out_file << "\n\n";
 
           if (index_length - 1 < TIC_THRESHOLD) {
             out_file << "set xtics 0,1" << endl;
@@ -2536,7 +2523,6 @@ bool NonparametricSequenceProcess::plot_print(const char *prefix , const char *t
       delete [] dist_nb_value;
       delete [] scale;
       delete [] phisto;
-      delete [] index_dist;
     }
   }
 
@@ -2565,7 +2551,7 @@ void NonparametricSequenceProcess::plotable_write(MultiPlotSet &plot , int &inde
 {
   register int i , j;
   int index_length , dist_nb_value;
-  double scale;
+  double scale , max;
   Curves *smoothed_curves;
   ostringstream title , legend;
 
@@ -2664,7 +2650,12 @@ void NonparametricSequenceProcess::plotable_write(MultiPlotSet &plot , int &inde
   }
 
   if (observation) {
-    nb_plot_set += nb_state;
+    if (empirical_observation) {
+      nb_plot_set += nb_state;
+    }
+    else {
+      nb_plot_set++;
+    }
   } */
 
   if ((index_value) || (characteristics)) {
@@ -3574,9 +3565,64 @@ void NonparametricSequenceProcess::plotable_write(MultiPlotSet &plot , int &inde
   }
 
   if (observation) {
-    for (i = 0;i < nb_state;i++) {
+    if (empirical_observation) {
+      for (i = 0;i < nb_state;i++) {
 
-      // vue : ajustement loi d'observation
+        // vue : ajustement loi d'observation
+
+        plot.variable[index] = process;
+        plot.viewpoint[index] = OBSERVATION;
+
+        title.str("");
+        title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+        plot[index].title = title.str();
+
+        plot[index].xrange = Range(0 , observation[i]->nb_value - 1);
+        if (observation[i]->nb_value - 1 < TIC_THRESHOLD) {
+          plot[index].xtics = 1;
+        }
+
+        if (empirical_observation[i]->nb_element > 0) {
+          scale = empirical_observation[i]->nb_element;
+          plot[index].yrange = Range(0 , ceil(MAX(empirical_observation[i]->max ,
+                                                  observation[i]->max * scale) * YSCALE));
+
+          plot[index].resize(2);
+
+          legend.str("");
+          legend << STAT_label[STATL_STATE] << " " << i << " "
+                 << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+          plot[index][0].legend = legend.str();
+
+          plot[index][0].style = "impulses";
+
+          empirical_observation[i]->plotable_frequency_write(plot[index][0]);
+          j = 1;
+        }
+
+        else {
+          scale = 1;
+          plot[index].yrange = Range(0 , MIN(observation[i]->max * YSCALE , 1.));
+
+          plot[index].resize(1);
+          j = 0;
+        }
+
+        legend.str("");
+        legend << STAT_label[STATL_STATE] << " " << i << " "
+               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        plot[index][j].legend = legend.str();
+
+        plot[index][j].style = "linespoints";
+
+        observation[i]->plotable_mass_write(plot[index][j] , scale);
+        index++;
+      }
+    }
+
+    else {
+
+      // vue : lois d'observation
 
       plot.variable[index] = process;
       plot.viewpoint[index] = OBSERVATION;
@@ -3585,45 +3631,32 @@ void NonparametricSequenceProcess::plotable_write(MultiPlotSet &plot , int &inde
       title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
       plot[index].title = title.str();
 
-      plot[index].xrange = Range(0 , observation[i]->nb_value - 1);
-      if (observation[i]->nb_value - 1 < TIC_THRESHOLD) {
+      plot[index].xrange = Range(0 , nb_value - 1);
+      if (nb_value - 1 < TIC_THRESHOLD) {
         plot[index].xtics = 1;
       }
 
-      if ((empirical_observation) && (empirical_observation[i]->nb_element > 0)) {
-        scale = empirical_observation[i]->nb_element;
-        plot[index].yrange = Range(0 , ceil(MAX(empirical_observation[i]->max ,
-                                                observation[i]->max * scale) * YSCALE));
+      max = observation[0]->max;
+      for (i = 1;i < nb_state;i++) {
+        if (observation[i]->max > max) {
+          max = observation[i]->max;
+        }
+      }
+      plot[index].yrange = Range(0 , MIN(max * YSCALE , 1.));
 
-        plot[index].resize(2);
+      plot[index].resize(nb_state);
 
+      for (i = 0;i < nb_state;i++) {
         legend.str("");
         legend << STAT_label[STATL_STATE] << " " << i << " "
-               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
-        plot[index][0].legend = legend.str();
+               << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+        plot[index][i].legend = legend.str();
 
-        plot[index][0].style = "impulses";
+        plot[index][i].style = "linespoints";
 
-        empirical_observation[i]->plotable_frequency_write(plot[index][0]);
-        j = 1;
+        observation[i]->plotable_mass_write(plot[index][i]);
       }
 
-      else {
-        scale = 1;
-        plot[index].yrange = Range(0 , MIN(observation[i]->max * YSCALE , 1.));
-
-        plot[index].resize(1);
-        j = 0;
-      }
-
-      legend.str("");
-      legend << STAT_label[STATL_STATE] << " " << i << " "
-             << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
-      plot[index][j].legend = legend.str();
-
-      plot[index][j].style = "linespoints";
-
-      observation[i]->plotable_mass_write(plot[index][j] , scale);
       index++;
     }
   }
