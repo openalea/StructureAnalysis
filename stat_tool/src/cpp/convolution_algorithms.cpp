@@ -37,6 +37,7 @@
 
 
 #include <math.h>
+
 #include "stat_tools.h"
 #include "convolution.h"
 #include "stat_label.h"
