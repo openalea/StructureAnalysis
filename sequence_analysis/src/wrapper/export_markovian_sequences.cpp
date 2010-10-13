@@ -314,11 +314,12 @@ public:
   static HiddenVariableOrderMarkov*
   hidden_variable_order_markov_estimation(const MarkovianSequences &input,
       const HiddenVariableOrderMarkov &hvom, bool global_initial_transition,
-      bool counting_flag, bool state_sequence, int nb_iter)
+      bool common_dispersion, bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenVariableOrderMarkov);
     ret = input.hidden_variable_order_markov_estimation(error, os, hvom,
-        global_initial_transition, counting_flag, state_sequence, nb_iter);
+        global_initial_transition, common_dispersion, counting_flag,
+        state_sequence, nb_iter);
     FOOTER_OS;
   }
 
@@ -327,12 +328,12 @@ public:
   hidden_variable_order_markov_stochastic_estimation(
       const MarkovianSequences &input,
       const HiddenVariableOrderMarkov &hvom, bool global_initial_transition,
-      int min_nb_state_sequence, int max_nb_state_sequence, double parameter,
-      bool counting_flag, bool state_sequence, int nb_iter)
+      bool common_dispersion, int min_nb_state_sequence, int max_nb_state_sequence,
+      double parameter, bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenVariableOrderMarkov);
     ret = input.hidden_variable_order_markov_stochastic_estimation(error, os,
-        hvom, global_initial_transition, min_nb_state_sequence,
+        hvom, global_initial_transition, common_dispersion, min_nb_state_sequence,
         max_nb_state_sequence, parameter, counting_flag, state_sequence,
         nb_iter);
     FOOTER_OS;
@@ -403,40 +404,40 @@ public:
 
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation(const MarkovianSequences &input,
-      const HiddenSemiMarkov &ihsmarkov, int estimator, bool counting_flag,
-      bool state_sequence, int nb_iter, int mean_computation)
+      const HiddenSemiMarkov &ihsmarkov, bool common_dispersion, int estimator,
+      bool counting_flag, bool state_sequence, int nb_iter, int mean_computation_method)
   {
     HEADER_OS(HiddenSemiMarkov);
-    ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov, estimator,
-        counting_flag, state_sequence, nb_iter, mean_computation);
+    ret = input.hidden_semi_markov_estimation(error, os, ihsmarkov, common_dispersion,
+        estimator, counting_flag, state_sequence, nb_iter, mean_computation_method);
     FOOTER_OS;
   }
 
   static HiddenSemiMarkov*
   hidden_semi_markov_estimation_model(const MarkovianSequences &input,
-      char model_type, int nb_state, bool left_right, int estimator,
-      bool counting_flag, bool state_sequence, double occupancy_mean,
-      int nb_iter, int mean_computation)
+      char model_type, int nb_state, bool left_right, double occupancy_mean,
+      bool common_dispersion, int estimator, bool counting_flag,
+      bool state_sequence, int nb_iter, int mean_computation_method)
   {
     HEADER_OS(HiddenSemiMarkov);
     ret = input.hidden_semi_markov_estimation(error, os, model_type, nb_state,
-        left_right, estimator, counting_flag, state_sequence, occupancy_mean,
-        nb_iter, mean_computation);
+        left_right, occupancy_mean, common_dispersion, estimator, counting_flag,
+        state_sequence, nb_iter, mean_computation_method);
     FOOTER_OS;
   }
 
 
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation(const MarkovianSequences &input,
-      const HiddenSemiMarkov &ihsmarkov, int min_nb_state_sequence,
+      const HiddenSemiMarkov &ihsmarkov, bool common_dispersion, int min_nb_state_sequence,
       int max_nb_state_sequence, double parameter, int estimator,
       bool counting_flag, bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
 
     ret = input.hidden_semi_markov_stochastic_estimation(error, os, ihsmarkov,
-        min_nb_state_sequence, max_nb_state_sequence, parameter, estimator,
-        counting_flag, state_sequence, nb_iter);
+        common_dispersion, min_nb_state_sequence, max_nb_state_sequence, parameter,
+        estimator, counting_flag, state_sequence, nb_iter);
 
     FOOTER_OS;
   }
@@ -444,14 +445,14 @@ public:
   static HiddenSemiMarkov*
   hidden_semi_markov_stochastic_estimation_model(
       const MarkovianSequences &input, char model_type, int nb_state,
-      bool left_right, int min_nb_state_sequence, int max_nb_state_sequence,
-      double parameter, int estimator, bool counting_flag, bool state_sequence,
-      double occupancy_mean, int nb_iter)
+      bool left_right, double occupancy_mean, bool common_dispersion, int min_nb_state_sequence,
+      int max_nb_state_sequence, double parameter, int estimator, bool counting_flag,
+      bool state_sequence, int nb_iter)
   {
     HEADER_OS(HiddenSemiMarkov);
     ret = input.hidden_semi_markov_stochastic_estimation(error, os, model_type,
-        nb_state, left_right, min_nb_state_sequence, max_nb_state_sequence,
-        parameter, estimator, counting_flag, state_sequence, occupancy_mean,
+        nb_state, left_right, occupancy_mean, common_dispersion, min_nb_state_sequence,
+        max_nb_state_sequence, parameter, estimator, counting_flag, state_sequence,
         nb_iter);
     FOOTER_OS;
 
@@ -459,11 +460,11 @@ public:
 
   static SemiMarkov*
   semi_markov_estimation(const MarkovianSequences &input, char model_type,
-      int estimator, bool counting_flag, int nb_iter, int mean_computation)
+      int estimator, bool counting_flag, int nb_iter, int mean_computation_method)
   {
     HEADER_OS(SemiMarkov);
     ret = input.semi_markov_estimation(error, os, model_type, estimator,
-        counting_flag, nb_iter, mean_computation);
+        counting_flag, nb_iter, mean_computation_method);
     FOOTER_OS;
   }
 
