@@ -106,7 +106,7 @@ TreeMatch_U::TreeMatch_U(MTG& mtg,
   _mtg=&mtg;
   // making of the vertex list
  _InsDelCostCoeff =coeff;
-
+ //cerr<<"treematching topologique "<<endl;
   _roots=new VIdList();
 
   assert(roots);
@@ -126,11 +126,12 @@ TreeMatch_U::TreeMatch_U(MTG& mtg,
     }
 
   _nbTree=_roots->entries();
-
+  //cerr<<"Nb Tree = "<<_nbTree<<endl;
 
   // making of the local functions list
   if (local_functions)
     {
+      cerr<<"Local functions"<<endl;
       _vectorDist=*(new VectorDistance(ivect));
       _localFun=new NodeFunctionList();
       assert(local_functions->surfaceType()==AMObjType::FNODE);
@@ -161,8 +162,8 @@ TreeMatch_U::TreeMatch_U(MTG& mtg,
     {
       _localFun = (NodeFunctionList*) NULL;
     }
-  cerr<<"Func size -> "<<_localFun->size()<<endl;
-
+  //cerr<<"Func size -> "<<_localFun->size()<<endl;
+  //cerr<<"Initialisation Distance"<<endl;
   _distances.resize(_roots->entries());
   _time.resize(_roots->entries());
   
