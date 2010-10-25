@@ -1171,7 +1171,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
       error.correction_update(STAT_error[STATR_VARIABLE_TYPE] , (correction_message.str()).c_str());
     }
 
-    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
+    if ((ivariable + 1 < nb_variable) && (type[ivariable + 1] == AUXILIARY)) {
       status = false;
       ostringstream error_message;
       error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
