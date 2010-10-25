@@ -1989,6 +1989,7 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
   bool status;
   register int i , j , k;
   int min_index_parameter , max_index_parameter , *pfrequency , *length_nb_sequence;
+  double min , max;
   ostringstream *data_file_name;
 
 
@@ -2070,16 +2071,27 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
           }
           out_file << "\"\n\n";
 
+          min = min_value[j];
+          max = max_value[j];
+          if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
+            if (min_value[j + 1] < min) {
+              min = min_value[j + 1];
+            }
+            if (max_value[j + 1] > max) {
+              max = max_value[j + 1];
+            }
+          }
+
           if (index_parameter) {
             if (max_index_parameter - min_index_parameter < TIC_THRESHOLD) {
               out_file << "set xtics 0,1" << endl;
             }
-            if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
-              out_file << "set ytics " << MIN(min_value[j] , 0) << ",1" << endl;
+            if (max - min < TIC_THRESHOLD) {
+              out_file << "set ytics " << MIN(min , 0) << ",1" << endl;
             }
 
             out_file << "plot [" << min_index_parameter << ":" << max_index_parameter << "] ["
-                     << MIN(min_value[j] , 0) << ":" << MAX(max_value[j] , min_value[j] + 1) << "] ";
+                     << MIN(min , 0) << ":" << MAX(max , min + 1) << "] ";
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * (nb_variable + 1) + 1 << " : "
@@ -2127,8 +2139,8 @@ bool Sequences::plot_data_write(StatError &error , const char *prefix ,
               out_file << "set ytics " << MIN(min_value[j] , 0) << ",1" << endl;
             }
 
-            out_file << "plot [0:" << max_length - 1 << "] [" << MIN(min_value[j] , 0)
-                     << ":" << MAX(max_value[j] , min_value[j] + 1) << "] ";
+            out_file << "plot [0:" << max_length - 1 << "] [" << MIN(min , 0)
+                     << ":" << MAX(max , min + 1) << "] ";
             for (k = 0;k < nb_sequence;k++) {
               out_file << "\"" << label((data_file_name[length[k]].str()).c_str()) << "\" using "
                        << length_nb_sequence[length[k]] * nb_variable + j + 1;
@@ -2207,6 +2219,7 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
 {
   register int i , j , k , m , n;
   int nb_plot_set , min_index_parameter , max_index_parameter;
+  double min , max;
   ostringstream title , legend;
   MultiPlotSet *plot_set;
 
@@ -2246,8 +2259,19 @@ MultiPlotSet* Sequences::get_plotable_data(StatError &error) const
           plot[i].title = title.str();
         }
 
-        plot[i].yrange = Range(MIN(min_value[j] , 0) , MAX(max_value[j] , min_value[j] + 1));
-        if (max_value[j] - min_value[j] < TIC_THRESHOLD) {
+        min = min_value[j];
+        max = max_value[j];
+        if ((j + 1 < nb_variable) && (type[j + 1] == AUXILIARY)) {
+          if (min_value[j + 1] < min) {
+            min = min_value[j + 1];
+          }
+          if (max_value[j + 1] > max) {
+            max = max_value[j + 1];
+          }
+        }
+
+        plot[i].yrange = Range(MIN(min , 0) , MAX(max , min + 1));
+        if (max - min < TIC_THRESHOLD) {
           plot[i].ytics = 1;
         }
 
