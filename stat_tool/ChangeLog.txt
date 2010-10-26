@@ -1,9 +1,29 @@
+
 Stat_tool 0.9.0
 ----------------
-version **9270**
+version **9815**
 
+* function renaming:
+    - ParametricModel to DiscreteParametricModel
+    - MultivariateMixture replaces Mv_Mixture
+    - DisctributionData into Discretedistriburtiondata
+    - new class histogram
+* new classes
+    - marginal histograms
+    - MVMixture objects
+    - New Vectors constructor for MTG interface
+    - Clustering and entropy withMultivariateMixture models.
+    - Continuous parametric distributions (Gaussian, von Mises)
+    - Observation process built from continuous parametric distributions
+    - Introduction of ContinuousParametricProcess
+* plotting in pylab is now fully available (stat_tool and sequence_analysis)
+* Display is fully implemented as in old AML version.
+* remove dependencies to sequence_analysis package
 * move some data from test/data to /share/data
-* correct the tests accordingly
+* move demos into sequence_analysis since there are dependencies on this package
+* doc online:
+  http://openalea.gforge.inria.fr/doc/vplants/stat_tool/doc/_build/html/contents.html
+
 
 
 Stat_tool 0.8.5
@@ -23,10 +43,10 @@ Stat_tool 0.7.0
 - finalise wrapping of the stat_tool cpp code with boost_python
 - finalise Python interface a la AML (same syntax as AML code)
 - sphinx documentation:
-	+ user guide
-	+ reference guide
-	+ administration guide
-	+ tutorials.
+    + user guide
+    + reference guide
+    + administration guide
+    + tutorials.
 
 - add exhaustive unitary tests in ./test (coverage>80%)
 - add functional tests
