@@ -3,7 +3,7 @@
  *
  *       AMAPmod: Exploring and Modeling Plant Architecture
  *
- *       Copyright 1995-2000 UMR Cirad/Inra Modelisation des Plantes
+ *       Copyright 1995-2010 UMR Cirad/Inra Modelisation des Plantes
  *
  *       File author(s): C. Nouguier & F. Boudon (frederic.boudon@cirad.fr) boudon
  *

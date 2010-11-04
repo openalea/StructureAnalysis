@@ -1,0 +1,11 @@
+vplants-treestatistic (0.9.0-1~ppa2) lucid; urgency=low
+
+  * Add build dependencies to fix build error 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Tue, 28 Sep 2010 08:19:22 +0200
+
+vplants-treestatistic (0.9.0-1~ppa1) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:18:14 +0200

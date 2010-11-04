@@ -1,0 +1,11 @@
+vplants-sequenceanalysis (0.9.0-1~ppa2) lucid; urgency=low
+
+  * update binary dependencies 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 27 Sep 2010 15:00:56 +0200
+
+vplants-sequenceanalysis (0.9.0-1~ppa1) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:17:32 +0200

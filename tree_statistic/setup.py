@@ -44,8 +44,8 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
         
           # Packages
-          #namespace_packages = [namespace],
-          #create_namespaces = False,
+          namespace_packages = [namespace],
+          create_namespaces = False,
 
           packages=packages,
 

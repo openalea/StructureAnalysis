@@ -1,0 +1,17 @@
+libvplants-treematching (0.9.0-1~ppa3) lucid; urgency=low
+
+  * update binary deps 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 27 Sep 2010 15:12:28 +0200
+
+libvplants-treematching (0.9.0-1~ppa2) lucid; urgency=low
+
+  * update deps with libglut3-dev 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 27 Sep 2010 12:05:25 +0200
+
+libvplants-treematching (0.9.0-1~ppa1) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:18:28 +0200

@@ -1,0 +1,15 @@
+Source: libvplants-tool
+Maintainer: Christophe Pradal <christophe.pradal@cirad.fr>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-all-dev, debhelper (>= 7), python-support (>= 0.8.4), python-openalea.deploy, python-openalea.sconsx, libqt4-dev, libqt4-opengl-dev, libreadline-dev, pkg-config, libglut3-dev
+Standards-Version: 3.8.4
+
+Package: libvplants-tool
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
+XB-Python-Version: ${python:Versions}
+Provides: ${python:Provides}
+Description: VPlants Tool library providing utilities
+ VPlants Tool is a set of C++ utilities used by other VPlants libraries.
+

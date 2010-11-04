@@ -18,13 +18,11 @@ scons_parameters=["build_prefix="+build_prefix]
 
 
 # dependencies
-setup_requires = ['openalea.deploy']
-install_requires = setup_requires
+setup_requires   = ['openalea.deploy']
+install_requires = setup_requires[:] #copy the content not the reference.
 if sys.platform.startswith('win'):
     setup_requires += [] 
-    install_requires += ['qt4']
-
-
+    #install_requires += ['qt4']
 
 if __name__ == '__main__':
     
@@ -42,8 +40,8 @@ if __name__ == '__main__':
           scons_parameters=scons_parameters,
         
           # Packages
-          #packages=
-          #package_dir=
+          # packages=
+          # package_dir=
       
           # Add package platform libraries if any
           include_package_data=True,
@@ -55,7 +53,7 @@ if __name__ == '__main__':
           
 
           # Dependencies
-          setup_requires = setup_requires ,
+          setup_requires   = setup_requires ,
           install_requires = install_requires,
           dependency_links = ['http://openalea.gforge.inria.fr/pi'],
           )

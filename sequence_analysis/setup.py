@@ -26,8 +26,8 @@ install_requires = [binary_deps('vplants.stat_tool')]
 setup_requires = install_requires + ['openalea.deploy']
 
 if sys.platform.startswith('win'):
-    install_requires += [binary_deps("boostpython")]
-    setup_requires += [binary_deps("boostpython")]
+    install_requires += [binary_deps("boost")]
+    setup_requires += [binary_deps("boost")]
 
 
 if __name__ == '__main__':

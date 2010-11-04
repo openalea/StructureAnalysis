@@ -1,0 +1,11 @@
+vplants-stattool (0.9.0-1~ppa2) lucid; urgency=low
+
+  * add a binary dependency on libvplants-tool 
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Mon, 27 Sep 2010 14:55:44 +0200
+
+vplants-stattool (0.9.0-1~ppa1) lucid; urgency=low
+
+  * source package automatically created by stdeb 0.6.0
+
+ -- Christophe Pradal <christophe.pradal@cirad.fr>  Thu, 23 Sep 2010 17:17:39 +0200
