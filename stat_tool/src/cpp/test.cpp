@@ -615,12 +615,12 @@ void Test::F_value_computation()
 void Test::t_critical_probability_computation()
 
 {
-  students_t dist(df1);
-
-
-  critical_probability = cdf(complement(dist , value));
-
   if (df1 > 0) {
+    students_t dist(df1);
+
+
+    critical_probability = cdf(complement(dist , value));
+
     switch (one_side) {
 
     case true : {
@@ -653,8 +653,14 @@ void Test::t_critical_probability_computation()
 void Test::t_value_computation()
 
 {
-  students_t dist(df1);
+  if (df1 > 0) {
+    students_t dist(df1);
 
 
-  value = quantile(complement(dist , critical_probability));
+    value = quantile(complement(dist , critical_probability));
+  }
+
+  else {
+    value = -D_INF;
+  }
 }
