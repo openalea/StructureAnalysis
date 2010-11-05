@@ -207,7 +207,6 @@ const char *STAT_label[] = {
   "t-test" ,
   "Wilcoxon-Mann-Whitney test" ,
   "Kruskal-Wallis test" ,
-  "likelihood ratio test" ,
   "degree of freedom" ,
   "degrees of freedom" ,
   "standard normal value" ,
