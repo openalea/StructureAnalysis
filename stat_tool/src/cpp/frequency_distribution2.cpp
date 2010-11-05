@@ -294,12 +294,14 @@ ostream& FrequencyDistribution::dissimilarity_ascii_write(ostream &os , int nb_h
     }
     os << endl;
 
-    test = new Test(FISHER , true , df[0] , df[1] , mean_square[0] / mean_square[1]);
-    test->F_critical_probability_computation();
+    if ((df[0] > 0) && (df[1] > 0)) {
+      test = new Test(FISHER , true , df[0] , df[1] , mean_square[0] / mean_square[1]);
+      test->F_critical_probability_computation();
 
-    test->ascii_print(os , false , (df[0] == 1 ? false : true));
+      test->ascii_print(os , false , (df[0] == 1 ? false : true));
 
-    delete test;
+      delete test;
+    }
     break;
   }
   }
@@ -573,12 +575,14 @@ bool FrequencyDistribution::dissimilarity_spreadsheet_write(StatError &error , c
       }
       out_file << endl;
 
-      test = new Test(FISHER , true , df[0] , df[1] , mean_square[0] / mean_square[1]);
-      test->F_critical_probability_computation();
+      if ((df[0] > 0) && (df[1] > 0)) {
+        test = new Test(FISHER , true , df[0] , df[1] , mean_square[0] / mean_square[1]);
+        test->F_critical_probability_computation();
 
-      test->spreadsheet_print(out_file , (df[0] == 1 ? false : true));
+        test->spreadsheet_print(out_file , (df[0] == 1 ? false : true));
 
-      delete test;
+        delete test;
+      }
       break;
     }
     }
@@ -855,25 +859,27 @@ bool FrequencyDistribution::comparison(StatError &error , ostream &os , int nb_h
 void FrequencyDistribution::F_comparison(ostream &os , const FrequencyDistribution &histo) const
 
 {
-  Test *test;
+  if ((nb_element > 1) && (histo.nb_element > 1)) {
+    Test *test;
 
 
-  if (variance > histo.variance) {
-    test = new Test(FISHER , true , nb_element - 1 , histo.nb_element - 1 ,
-                    variance / histo.variance);
+    if (variance > histo.variance) {
+      test = new Test(FISHER , true , nb_element - 1 , histo.nb_element - 1 ,
+                      variance / histo.variance);
+    }
+    else {
+      test = new Test(FISHER , true , histo.nb_element - 1 , nb_element - 1 ,
+                      histo.variance / variance);
+    }
+
+    test->F_critical_probability_computation();
+
+#   ifdef MESSAGE
+    os << *test;
+#   endif
+
+    delete test;
   }
-  else {
-    test = new Test(FISHER , true , histo.nb_element - 1 , nb_element - 1 ,
-                    histo.variance / variance);
-  }
-
-  test->F_critical_probability_computation();
-
-# ifdef MESSAGE
-  os << *test;
-# endif
-
-  delete test;
 }
 
 
@@ -900,15 +906,17 @@ void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistributi
   df = (int)round((buff1 + buff2) * (buff1 + buff2) /
                   (buff1 * buff1 / (nb_element - 1) + buff2 * buff2 / (histo.nb_element - 1)));
 
-  test = new Test(STUDENT , false , df , I_DEFAULT , value);
+  if (df > 0) {
+    test = new Test(STUDENT , false , df , I_DEFAULT , value);
 
-  test->t_critical_probability_computation();
+    test->t_critical_probability_computation();
 
-# ifdef MESSAGE
-  os << *test;
-# endif
+#   ifdef MESSAGE
+    os << *test;
+#   endif
 
-  delete test;
+    delete test;
+  }
 
 # ifdef DEBUG
   value = fabs(mean - histo.mean) /
@@ -916,13 +924,15 @@ void FrequencyDistribution::t_comparison(ostream &os , const FrequencyDistributi
                (nb_element + histo.nb_element - 2) *
                (1. / (double)nb_element + 1. / (double)histo.nb_element));
 
-  test = new Test(STUDENT , false , nb_element + histo.nb_element - 2 , I_DEFAULT , value);
+  if (nb_element + histo.nb_element > 2) {
+    test = new Test(STUDENT , false , nb_element + histo.nb_element - 2 , I_DEFAULT , value);
 
-  test->t_critical_probability_computation();
+    test->t_critical_probability_computation();
 
-  os << "\n" << *test;
+    os << "\n" << *test;
 
-  delete test;
+    delete test;
+  }
 # endif
 
 }
