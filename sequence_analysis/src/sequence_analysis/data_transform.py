@@ -1302,11 +1302,11 @@ def Segmentation(obj, *args, **kargs):
 
 
     # Segmentation(seq, 1,2, VectorDistance("N"), Output="Segment")
-    elif type(args[2]) == _VectorDistance:
-        error.CheckType([args[0], args[1]], [int, int])
-        Output = error.ParseKargs(kargs, "Output", "Sequence", output_type)
-        seq = obj.segmentation_vector_distance(args[0], args[1], args[2],
-                                               Output)
+    # elif type(args[2]) == _VectorDistance:
+    #     error.CheckType([args[0], args[1]], [int, int])
+    #     Output = error.ParseKargs(kargs, "Output", "Sequence", output_type)
+    #     seq = obj.segmentation_vector_distance(args[0], args[1], args[2],
+    #                                            Output)
 
     # Segmenation when args[0] is int
     # >>> Segmentation(seq80, 2, 6, "Gaussian", NbChangePoint="Fixed",
