@@ -93,6 +93,7 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
         FORWARD_BACKWARD_SAMPLING
 
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
+    CommonDispersion = kargs.get("CommonDispersion", False)
     NbIteration = kargs.get("NbIteration", 80)
     Counting = kargs.get("Counting", True)
     StateSequence = kargs.get("StateSequence", True)
@@ -102,16 +103,16 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
     Algorithm = error.ParseKargs(kargs, "Algorithm", 'EM', \
                                  sub_markovian_algorithms)
 
-    error.CheckType([Counting, GlobalInitialTransition, NbIteration,
+    error.CheckType([CommonDispersion, Counting, GlobalInitialTransition, NbIteration,
                      MinNbSequence, MaxNbSequence, Parameter, StateSequence],
-                     [bool, bool, int, int, int, [int, float], bool])
+                     [bool, bool, bool, int, int, int, [int, float], bool])
 
     error.CheckType([args[0]], [_HiddenVariableOrderMarkov])
 
-    #sanity check on arguments
-    # this one can be check only whne Chain will be public and exported in
+    # sanity check on arguments
+    # this one can be check only when Chain will be public and exported in
     # export_variable_order_markov
-    #if type == 'e' and kargs.get("GlobalInitialTransition")" raise Error
+    # if type == 'e' and kargs.get("GlobalInitialTransition")" raise Error
     if Algorithm != sub_markovian_algorithms["MCEM"]:
         options = ["Parameter", "MaxNbStateSequence", "MinNbStateSequence"]
         for option in options:
@@ -121,13 +122,13 @@ def _estimate_hidden_variable_order_markov(obj, *args, **kargs):
 
     if Algorithm == FORWARD_BACKWARD:
         hmarkov = obj.hidden_variable_order_markov_estimation(
-                args[0], GlobalInitialTransition,
+                args[0], GlobalInitialTransition, CommonDispersion,
                 Counting, StateSequence, NbIteration)
 
     elif Algorithm == FORWARD_BACKWARD_SAMPLING:
         hmarkov = obj.hidden_variable_order_markov_stochastic_estimation(
-                        args[0], GlobalInitialTransition, MinNbSequence,
-                        MaxNbSequence, Parameter, Counting,
+                        args[0], GlobalInitialTransition, CommonDispersion,
+                        MinNbSequence, MaxNbSequence, Parameter, Counting,
                         StateSequence, NbIteration)
 
     return hmarkov
@@ -334,7 +335,8 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         FORWARD_BACKWARD_SAMPLING, \
         KAPLAN_MEIER
 
-    GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
+#    GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
+    CommonDispersion = kargs.get("CommonDispersion", False)
     NbIteration = kargs.get("NbIteration", I_DEFAULT)
     Counting = kargs.get("Counting", True)
     StateSequence = kargs.get("StateSequence", True)
@@ -345,11 +347,11 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
                                  sub_markovian_algorithms)
     Estimator = error.ParseKargs(kargs, "Estimator", 'CompleteLikelihood',
                                 estimator_semi_markov_type)
+    InitialOccupancyMean = kargs.get("InitialOccupancyMean", D_DEFAULT)
     MeanComputation = error.ParseKargs(kargs, "OccupancyMean", 'Computed',
                                       mean_computation_map)
-    InitialOccupancyMean = kargs.get("InitialOccupancyMean", D_DEFAULT)
 
-    error.CheckType([Counting, GlobalInitialTransition, NbIteration,
+    error.CheckType([CommonDispersion, Counting, NbIteration,
                      MinNbSequence, MaxNbSequence, Parameter, StateSequence,
                      InitialOccupancyMean],
                      [bool, bool, int, int, int, [int, float], bool,
@@ -396,16 +398,16 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
             raise ValueError("Incompatible user arguments")
 
         if Algorithm == FORWARD_BACKWARD:
-            hsmarkov = obj.hidden_semi_markov_estimation_model( Type , NbState ,
-                         LeftRight , Estimator , Counting , StateSequence ,
-                         InitialOccupancyMean ,NbIteration , MeanComputation)
+            hsmarkov = obj.hidden_semi_markov_estimation_model( Type, NbState,
+                         LeftRight, InitialOccupancyMean, CommonDispersion, Estimator,
+                         Counting, StateSequence, NbIteration, MeanComputation)
             return hsmarkov
 
         elif Algorithm == FORWARD_BACKWARD_SAMPLING:
             hsmarkov = obj.hidden_semi_markov_stochastic_estimation_model(
-                Type, NbState, LeftRight, MinNbSequence, MaxNbSequence,
-                Parameter, Estimator, Counting, StateSequence,
-                InitialOccupancyMean, NbIteration)
+                Type, NbState, LeftRight, InitialOccupancyMean, CommonDispersion,
+                MinNbSequence, MaxNbSequence, Parameter, Estimator, Counting,
+                StateSequence, NbIteration)
             return hsmarkov
 
     elif isinstance(args[0], _HiddenSemiMarkov):
@@ -420,12 +422,12 @@ def _estimate_hidden_semi_markov(obj, *args, **kargs):
         hsmarkov = args[0]
         if Algorithm == FORWARD_BACKWARD:
             output = obj.hidden_semi_markov_estimation(hsmarkov,
-                                Estimator, Counting, StateSequence,
-                                NbIteration, MeanComputation)
+                                CommonDispersion, Estimator, Counting,
+                                StateSequence, NbIteration, MeanComputation)
             return output
         elif Algorithm == FORWARD_BACKWARD_SAMPLING:
             return obj.hidden_semi_markov_stochastic_estimation(hsmarkov,
-                            MinNbSequence, MaxNbSequence,
+                            CommonDispersion, MinNbSequence, MaxNbSequence,
                             Parameter, Estimator, Counting,
                             StateSequence, NbIteration)
 
