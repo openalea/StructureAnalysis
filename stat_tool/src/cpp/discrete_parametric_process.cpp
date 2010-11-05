@@ -547,7 +547,14 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << endl;
+      os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+
+      if (exhaustive) {
+        for (i = 0;i < nb_state;i++) {
+          os << "  " << weight->mass[i];
+        }
+      }
+      os << endl;
 
       likelihood = mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
@@ -604,7 +611,14 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << endl;
+      os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+
+      if (exhaustive) {
+        for (i = 0;i < nb_state;i++) {
+          os << "  " << restoration_weight->mass[i];
+        }
+      }
+      os << endl;
 
       likelihood = restoration_mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
@@ -748,7 +762,11 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
 
 
     if ((weight) && (mixture)) {
-      os << "\n" << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << endl;
+      os << "\n" << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+      for (i = 0;i < nb_state;i++) {
+        os << "\t" << weight->mass[i];
+      }
+      os << endl;
 
       likelihood = mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
@@ -783,7 +801,11 @@ ostream& DiscreteParametricProcess::spreadsheet_print(ostream &os , FrequencyDis
     }
 
     if ((restoration_weight) && (restoration_mixture)) {
-      os << "\n" << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << endl;
+      os << "\n" << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+      for (i = 0;i < nb_state;i++) {
+        os << "\t" << restoration_weight->mass[i];
+      }
+      os << endl;
 
       likelihood = restoration_mixture->likelihood_computation(*marginal_distribution);
       information = marginal_distribution->information_computation();
