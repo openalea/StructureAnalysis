@@ -139,6 +139,7 @@ const char *SEQ_label[] = {
   "count" ,
   "delta" ,
   "Krichevsky-Trofimov" ,
+  "likelihood ratio test" ,
 
   "self-transition" ,
   "asymptote" ,
@@ -179,6 +180,7 @@ const char *SEQ_label[] = {
   "maximum posterior state probabilities" ,
   "maximum posterior in state probabilities" ,
   "maximum posterior out state probabilities" ,
+  "likelihood ratio" ,
 
   "correlation function" ,
   "partial" ,
