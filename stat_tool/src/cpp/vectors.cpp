@@ -3086,28 +3086,30 @@ ostream& Vectors::ascii_write(ostream &os , bool exhaustive , bool comment_flag)
 
   // test du caractere significatif des coefficients de correlation
 
-  test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
+  if (nb_vector > 2) {
+    test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
 
-  for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
-    test->critical_probability = ref_critical_probability[i];
-    test->t_value_computation();
+    for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
+      test->critical_probability = ref_critical_probability[i];
+      test->t_value_computation();
 
-    os << "\n";
-    if (comment_flag) {
-      os << "# ";
+      os << "\n";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_REFERENCE] << " " << STAT_label[STATL_T_VALUE] << ": "
+         << test->value << "   " << STAT_label[STATL_REFERENCE] << " "
+         << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << test->critical_probability << endl;
+
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << ": "
+         << test->value / sqrt(test->value * test->value + nb_vector - 2) << endl;
     }
-    os << STAT_label[STATL_REFERENCE] << " " << STAT_label[STATL_T_VALUE] << ": "
-       << test->value << "   " << STAT_label[STATL_REFERENCE] << " "
-       << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << test->critical_probability << endl;
 
-    if (comment_flag) {
-      os << "# ";
-    }
-    os << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << ": "
-       << test->value / sqrt(test->value * test->value + nb_vector - 2) << endl;
+    delete test;
   }
-
-  delete test;
 
   for (i = 0;i < nb_variable;i++) {
     delete [] correlation[i];
@@ -3395,21 +3397,23 @@ bool Vectors::spreadsheet_write(StatError &error , const char *path) const
 
     // test du caractere significatif des coefficients de correlation
 
-    test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
+    if (nb_vector > 2) {
+      test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
 
-    for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
-      test->critical_probability = ref_critical_probability[i];
-      test->t_value_computation();
+      for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
+        test->critical_probability = ref_critical_probability[i];
+        test->t_value_computation();
 
-      out_file << "\n" << STAT_label[STATL_REFERENCE] << " " << STAT_label[STATL_T_VALUE] << "\t"
-               << test->value << "\t" << STAT_label[STATL_REFERENCE] << " "
-               << STAT_label[STATL_CRITICAL_PROBABILITY] << "\t" << test->critical_probability << endl;
+        out_file << "\n" << STAT_label[STATL_REFERENCE] << " " << STAT_label[STATL_T_VALUE] << "\t"
+                 << test->value << "\t" << STAT_label[STATL_REFERENCE] << " "
+                 << STAT_label[STATL_CRITICAL_PROBABILITY] << "\t" << test->critical_probability << endl;
 
-      out_file << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "\t"
-               << test->value / sqrt(test->value * test->value + nb_vector - 2) << endl;
+        out_file << STAT_label[STATL_LIMIT_CORRELATION_COEFF] << "\t"
+                 << test->value / sqrt(test->value * test->value + nb_vector - 2) << endl;
+      }
+
+      delete test;
     }
-
-    delete test;
 
     for (i = 0;i < nb_variable;i++) {
       delete [] correlation[i];
