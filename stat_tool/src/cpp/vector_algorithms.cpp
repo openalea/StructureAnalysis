@@ -321,52 +321,54 @@ ostream& Vectors::rank_correlation_ascii_write(ostream &os , int correlation_typ
 
   // test du caractere significatif des coefficients de correlation
 
-  switch (correlation_type) {
-  case SPEARMAN :
-    test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
-    break;
-  case KENDALL :
-    test = new Test(STANDARD_NORMAL , false , I_DEFAULT , I_DEFAULT , D_DEFAULT);
-    break;
-  }
-
-  for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
-    test->critical_probability = ref_critical_probability[i];
-
-    switch (test->ident) {
-    case STANDARD_NORMAL :
-      test->standard_normal_value_computation();
-      break;
-    case STUDENT :
-      test->t_value_computation();
-      break;
-    }
-
-    os << "\n" << STAT_label[STATL_REFERENCE] << " ";
-    switch (test->ident) {
-      case STANDARD_NORMAL :
-      os << STAT_label[STATL_STANDARD_NORMAL_VALUE];
-      break;
-    case STUDENT :
-      os << STAT_label[STATL_T_VALUE];
-      break;
-    }
-    os << ": " << test->value << "   " << STAT_label[STATL_REFERENCE] << " "
-       << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << test->critical_probability << endl;
-
+  if (nb_vector > 2) {
     switch (correlation_type) {
     case SPEARMAN :
-      os << STAT_label[STATL_SPEARMAN_LIMIT_RANK_CORRELATION_COEFF] << ": "
-         << test->value / sqrt(test->value * test->value + nb_vector - 2) << endl;
+      test = new Test(STUDENT , false , nb_vector - 2 , I_DEFAULT , D_DEFAULT);
       break;
     case KENDALL :
-      os << STAT_label[STATL_KENDALL_LIMIT_RANK_CORRELATION_COEFF] << ": "
-         << test->value * sqrt((2 * (2 * (double)nb_vector + 5)) / (9 * (double)nb_vector * (double)(nb_vector - 1))) << endl;
+      test = new Test(STANDARD_NORMAL , false , I_DEFAULT , I_DEFAULT , D_DEFAULT);
       break;
     }
-  }
 
-  delete test;
+    for (i = 0;i < NB_CRITICAL_PROBABILITY;i++) {
+      test->critical_probability = ref_critical_probability[i];
+
+      switch (test->ident) {
+      case STANDARD_NORMAL :
+        test->standard_normal_value_computation();
+        break;
+      case STUDENT :
+        test->t_value_computation();
+        break;
+      }
+
+      os << "\n" << STAT_label[STATL_REFERENCE] << " ";
+      switch (test->ident) {
+        case STANDARD_NORMAL :
+        os << STAT_label[STATL_STANDARD_NORMAL_VALUE];
+        break;
+      case STUDENT :
+        os << STAT_label[STATL_T_VALUE];
+        break;
+      }
+      os << ": " << test->value << "   " << STAT_label[STATL_REFERENCE] << " "
+         << STAT_label[STATL_CRITICAL_PROBABILITY] << ": " << test->critical_probability << endl;
+
+      switch (correlation_type) {
+      case SPEARMAN :
+        os << STAT_label[STATL_SPEARMAN_LIMIT_RANK_CORRELATION_COEFF] << ": "
+           << test->value / sqrt(test->value * test->value + nb_vector - 2) << endl;
+        break;
+      case KENDALL :
+        os << STAT_label[STATL_KENDALL_LIMIT_RANK_CORRELATION_COEFF] << ": "
+           << test->value * sqrt((2 * (2 * (double)nb_vector + 5)) / (9 * (double)nb_vector * (double)(nb_vector - 1))) << endl;
+        break;
+      }
+    }
+
+    delete test;
+  }
 
   os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
