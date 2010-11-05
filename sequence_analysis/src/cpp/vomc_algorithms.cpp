@@ -2709,6 +2709,10 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model ,
     for (i = 0;i < nb_model;i++) {
       os << " | " << label << " " << i + 1;
     }
+
+    if (nb_model == 2) {
+      os << " | " << SEQ_label[SEQL_LIKELIHOOD_RATIO];
+    }
     os << endl;
 
     for (i = 0;i < nb_sequence;i++) {
@@ -2717,6 +2721,15 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model ,
       for (j = 0;j < nb_model;j++) {
 //        os << setw(width[1]) << (likelihood[i][j] == D_INF ? likelihood[i][j] : likelihood[i][j] / length[i]);
         os << setw(width[1]) << likelihood[i][j];
+      }
+
+      if (nb_model == 2) {
+        if (likelihood[i][0] > likelihood[i][1]) {
+          os << "   " << exp(likelihood[i][1] - likelihood[i][0]);
+        }
+        else {
+          os << "   " << exp(likelihood[i][0] - likelihood[i][1]);
+        }
       }
       os << endl;
     }
@@ -4601,7 +4614,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
     test->chi2_critical_probability_computation();
 
 #   ifdef MESSAGE
-    os << "\n" << STAT_label[STATL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
+    os << "\n" << SEQ_label[SEQL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
 #   endif
 
     delete test;
@@ -4742,7 +4755,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
 
       test->chi2_critical_probability_computation();
 
-      os << "\n" << STAT_label[STATL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
+      os << "\n" << SEQ_label[SEQL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
 
       delete test;
 
@@ -4866,7 +4879,7 @@ bool MarkovianSequences::lumpability_test(StatError &error , ostream &os ,
 
       test->chi2_critical_probability_computation();
 
-      os << "\n" << STAT_label[STATL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
+      os << "\n" << SEQ_label[SEQL_LIKELIHOOD_RATIO_TEST] << "\n" << *test;
 
       delete test;
 
