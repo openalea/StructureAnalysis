@@ -8,6 +8,7 @@ __revision__ = "$Id: test_semi_markov.py 8204 2010-02-19 10:27:45Z cokelaer $"
 #from openalea.stat_tool import _stat_tool
 #from openalea.sequence_analysis import _sequence_analysis
 from openalea.sequence_analysis.nonhomogeneous_markov import NonhomogeneousMarkov
+from openalea.sequence_analysis import get_shared_data
 #from openalea.sequence_analysis.simulate import Simulate
 #from openalea.sequence_analysis.sequences import Sequences
 #from openalea.stat_tool.data_transform import *
@@ -19,7 +20,7 @@ from tools import runTestClass
 
 
 def NonhomogeneousMarkovData():
-    seq =  Sequences('data/vanille_m.seq')
+    seq =  Sequences(get_shared_data('vanille_m.seq'))
     mc_m = Estimate(seq_m, "NONHOMOGENEOUS_MARKOV", "MONOMOLECULAR", "VOID")
     return mc_m
 
@@ -30,11 +31,11 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/nonhomogeneous.dat",
+                           get_shared_data("test_nonhomogeneous.dat"),
                            NonhomogeneousMarkov)
 
     def build_data(self):
-        sm =  NonhomogeneousMarkov('data/nonhomogeneous.dat')
+        sm =  NonhomogeneousMarkov(get_shared_data('test_nonhomogeneous.dat'))
         return sm
 
     def test_empty(self):

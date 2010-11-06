@@ -14,6 +14,7 @@ from openalea.sequence_analysis.time_events import TimeEvents, NbEventSelect
 
 from openalea.stat_tool.data_transform import *
 from openalea.sequence_analysis.data_transform import TimeScaling
+from openalea.sequence_analysis import get_shared_data
 from openalea.stat_tool.cluster import Cluster
 from openalea.stat_tool.cluster import Transcode, Cluster
 
@@ -31,14 +32,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/time_events.dat",
+                           get_shared_data("test_time_events.dat"),
                            Renewal)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        return TimeEvents('data/time_events.dat')
+        return TimeEvents(get_shared_data('test_time_events.dat'))
 
     def test_constructor_negative_binomial(self):
         proba = 0.5

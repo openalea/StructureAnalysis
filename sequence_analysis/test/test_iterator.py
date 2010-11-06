@@ -15,7 +15,7 @@ N = 10
 import os
 # SEMI MARKOV case
 def test_semi_markov_iterator():
-    hsm = HiddenSemiMarkov('data' + os.sep + 'hidden_semi_markov.dat')
+    hsm = HiddenSemiMarkov(get_shared_data('test_hidden_semi_markov.dat'))
     smi = sa._SemiMarkovIterator(hsm)
     sim = smi.simulation(N, True)
 
@@ -25,7 +25,7 @@ def hsm_iterator(fn):
     return it
 
 def test_semi_markov_iterator2():
-    fn = 'data' + os.sep + 'hidden_semi_markov.dat'
+    fn = get_shared_data('test_hidden_semi_markov.dat')
     smi = hsm_iterator(fn)
     sim = smi.simulation(N, True)
 

@@ -1,7 +1,7 @@
 from openalea.sequence_analysis import *
 
 param1 = TopParameters(0.6, 0.6, 1.2)
-param1 = TopParameters("data/param1.p", MaxPosition=20)
+param1 = TopParameters(get_shared_data("test_param1.p"), MaxPosition=20)
 Plot(param1)
 Display(param1)
 

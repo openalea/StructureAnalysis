@@ -20,6 +20,9 @@ from tools import interface
 from tools import runTestClass
 
 from openalea.sequence_analysis.sequences import Sequences, IndexParameterType
+from openalea.sequence_analysis import get_shared_data
+
+
 class Test(interface):
     """a simple unittest class
 
@@ -28,7 +31,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/sequences1.seq",
+                           get_shared_data("sequences1.seq"),
                            Sequences)
         self.seqn = self.build_seqn()
         self.seq1 = self.build_seq1()
@@ -433,13 +436,13 @@ class Test(interface):
 
     def test_split(self):
         #markovian sequences
-        data = Sequences('data/vanille_m.seq')
+        data = Sequences(get_shared_data('vanille_m.seq'))
         Split(data, 2)
 
     def test_initial_run(self):
         from openalea.sequence_analysis import ComputeInitialRun
         #markovian sequences
-        data = Sequences('data/vanille_m.seq')
+        data = Sequences(get_shared_data('vanille_m.seq'))
         ComputeInitialRun(data)
 
 """

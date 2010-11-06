@@ -59,9 +59,9 @@ def test_exploratory():
     
     seq10 = Merge(seq20, seq40, seq60, seq80)
     Display(seq10, ViewPoint="Data")
-    Plot(seq10, "Intensity")
-    Plot(seq10, "Recurrence")
-    Plot(seq10, "Sojourn")
+    #Plot(seq10, "Intensity")
+    #Plot(seq10, "Recurrence")
+    #Plot(seq10, "Sojourn")
 
     # plot of a sample Spearman (rank based) autocorrelation function
 

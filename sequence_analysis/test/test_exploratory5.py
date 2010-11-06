@@ -63,7 +63,7 @@ seq32 = Merge(seq20, seq25)
 matrix30 = Compare(seq32)
 matrix31 = Compare(seq32, VectorDistance("S"))
 matrix32 = Compare(seq32, VectorDistance("S"), Transposition=True)
-matrix33 = Compare(seq32, VectorDistance("data/align1.a"), Transposition=True)
+matrix33 = Compare(seq32, VectorDistance(get_shared_data("test_align1.a")), Transposition=True)
 
 #todo
 Display(Clustering(matrix33, "Partition", 2))

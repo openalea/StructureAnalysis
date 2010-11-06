@@ -62,7 +62,7 @@ class ImprovedDistanceMatrix(object):
             for j in range(0,dm.nb_column):
                 self.length[i,j] = dm.get_length(i,j)
 
-    def show_distance(self, norm=True):
+    def show_distance(self, fig=1, norm=True, **kargs):
         """Plot the distance values between two sequences for all
         the sequences. Normalizes distance by the length.
         
@@ -80,10 +80,15 @@ class ImprovedDistanceMatrix(object):
             imp_dm.show_distance()
         """
         import pylab
+        pylab.figure(fig)
+        pylab.clf()
         if norm==True:
             pylab.imshow(self.distance/self.length)
         else:
             pylab.imshow(self.distance)
+        pylab.xlabel("Sequence #")
+        pylab.ylabel("Sequence #")
+        pylab.title("Distance Between Sequences #")
         pylab.colorbar()
         pylab.show()
 

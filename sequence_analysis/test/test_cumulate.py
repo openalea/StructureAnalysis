@@ -11,8 +11,12 @@ __revision__ = "$Id$"
 
 
 from openalea.sequence_analysis.data_transform import Cumulate
-from data import seqn
-from data import seq1
+from openalea.sequence_analysis import get_shared_data
+from openalea.sequence_analysis import Sequences
+
+seqn = Sequences(get_shared_data("sequences2.seq"))
+seq1 = Sequences(get_shared_data("sequences1.seq"))
+
 
 
 

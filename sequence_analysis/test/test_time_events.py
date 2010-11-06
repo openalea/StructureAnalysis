@@ -7,7 +7,7 @@ __revision__ = "$Id$"
 
 
 from openalea.stat_tool import _stat_tool
-from openalea.sequence_analysis import _sequence_analysis
+from openalea.sequence_analysis import _sequence_analysis, get_shared_data
 from openalea.sequence_analysis.time_events import TimeEvents, NbEventSelect
 from openalea.sequence_analysis.data_transform import TimeScaling, TimeSelect
 
@@ -21,7 +21,7 @@ from tools import runTestClass
 
 def TimeEventsData():
     """Returns simulated top"""
-    time_events = TimeEvents("data/time_events.dat")
+    time_events = TimeEvents(get_shared_data("test_time_events.dat"))
     return time_events
 
 class Test(interface):
@@ -31,14 +31,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/time_events.dat",
+                           get_shared_data("test_time_events.dat"),
                            TimeEvents)
         
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        return TimeEvents('data/time_events.dat')
+        return TimeEvents(get_shared_data("test_time_events.dat"))
    
     def _test_empty(self):
         self.empty()

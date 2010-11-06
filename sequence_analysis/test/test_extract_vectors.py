@@ -6,9 +6,14 @@
 __revision__ = "$Id$"
 
 
-from data import seq20 
-from openalea.sequence_analysis.data_transform import ExtractVectors
+from openalea.sequence_analysis import *
 from tools import runTestClass
+
+
+seq0 = Sequences(get_shared_data("chene_sessile_15pa.seq"))
+vec10 = Vectors(seq0)
+vec95 = ValueSelect(vec10, 1, 95)
+seq20 = Sequences(get_shared_data("belren1.seq"))
 
 
 class Test():

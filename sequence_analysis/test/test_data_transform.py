@@ -22,7 +22,7 @@ from tools import runTestClass
 class TestRemoveRun():
 
     def __init__(self):
-        self.data = Sequences("data/sequences1.seq")
+        self.data = Sequences(get_shared_data("sequences1.seq"))
 
     def _test_sequences_1(self):
 
@@ -53,7 +53,7 @@ class TestRemoveRun():
             assert True
 
     def _test_sequences_2(self):
-        seq1 = Sequences("data/sequences2.seq")
+        seq1 = Sequences(get_shared_data("sequences2.seq"))
         seq2 = seq1.remove_run(1, 0,"e",2)
         seq3 = RemoveRun(seq1,1, 0,"e",2)
         assert str(seq3)==str(seq2)

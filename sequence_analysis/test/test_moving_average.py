@@ -6,10 +6,12 @@
 """
 __revision__ = "$Id$"
 
-from openalea.sequence_analysis.data_transform import MovingAverage
+from openalea.sequence_analysis import *
 from openalea.stat_tool.distribution import Distribution
-from data import seq70
 from tools import runTestClass
+
+seq = Sequences(get_shared_data("pin_laricio_7x.seq"))
+seq70 = Cluster(seq, "Step", 1, 10)
 
 
 class Test():

@@ -8,18 +8,15 @@ __revision__ = "$Id$"
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
-from openalea.sequence_analysis.tops import Tops
-from openalea.sequence_analysis.simulate import Simulate
-from openalea.sequence_analysis.top_parameters import TopParameters
-from openalea.sequence_analysis.data_transform import *
-  
+from openalea.sequence_analysis import *
+
 from tools import interface
 from tools import runTestClass
 
 
 def TopsData():
     """Returns simulated top"""
-    param1 = TopParameters("data/param1.p", MaxPosition=20)
+    param1 = TopParameters(get_shared_data("test_param1.p"), MaxPosition=20)
     tops = Simulate(param1, 100, 30)
     return tops
 
@@ -27,17 +24,17 @@ def TopsData():
 class Test(interface):
     """a simple unittest class
 
- 
+
     """
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/tops1.dat",
+                           get_shared_data("test_tops1.dat"),
                            Tops)
-        
+
     def build_data(self):
-                
-        return Tops('data/tops1.dat')      
+
+        return Tops(get_shared_data('test_tops1.dat'))
 
     def _test_empty(self):
         self.empty()
@@ -53,57 +50,57 @@ class Test(interface):
 
     def _test_constructor_arrayn(self):
         pass
-    
+
     def _test_constructor_array1(self):
         #print '--------------'
         #top = Tops([1,2,3,4,5], Identifiers=[1])
         print '------------'
         #print type(top)
         print '---------'
-        print top 
+        print top
         #print self.data
-        #top = Tops('data/tops1.dat')   
+        #top = Tops('data/tops1.dat')
         #print top
-        
+
     def test_print(self):
         self.print_data()
-        
+
     def test_display(self):
         self.display()
         self.display_versus_ascii_write()
         self.display_versus_str()
-        
+
     def test_len(self):
         seq = self.data
         assert len(seq) == 2
         assert len(seq) == seq.nb_sequence
 
-    def test_plot(self):        
+    def test_plot(self):
         self.plot()
-    
+
     def test_save(self):
         self.save(skip_reading=True)
-                    
+
     def test_plot_write(self):
         self.plot_write()
-        
+
     def test_file_ascii_write(self):
         self.file_ascii_write()
-        
+
     def test_spreadsheet_write(self):
         self.spreadsheet_write()
-           
+
     def test_extract(self):
         """test to be done"""
         pass
-        
+
     def test_extract_data(self):
         """test to be done"""
-        pass 
-    
+        pass
+
     def test_reverse(self):
         """test to be done"""
-        pass 
+        pass
 
     def test_remove_apical_internodes(self):
         """test to be done"""
@@ -140,8 +137,8 @@ t.cluster_step                         t.markovian_sequences                  t.
 t.correlation_computation              t.max_length                           t.transcode
 t.cross                                t.max_position                         t.transform_position
 t.cumul_length                         t.merge                                t.value_select
-t.cumulate                             t.merge_variable                       
-t.difference                           t.moving_average                       
+t.cumulate                             t.merge_variable
+t.difference                           t.moving_average
 """
 
 

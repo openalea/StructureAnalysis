@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
-"""
+"""variable order markov
+
+.. module:: variable_order_markov
+    :synopsis: a module dedicated to Variable Order Markov objects
 
 .. topic:: variable_order_markov.py summary
 
     A module dedicated to Variable Order Markov objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: mature
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
-
     :Revision: $Id$
-    
+    :Usage: >>> from openalea.sequence_analysis import *
+
 """
 __version__ = "$Id$"
 
@@ -24,7 +27,7 @@ from openalea.sequence_analysis._sequence_analysis import DEFAULT_LENGTH
 from openalea.stat_tool import error
 
 __all__ = ['VariableOrderMarkov',
-           '_VariableOrderMarkov', 
+           '_VariableOrderMarkov',
            '_VariableOrderMarkovData']
 
 
@@ -37,25 +40,25 @@ interface.extend_class( _VariableOrderMarkovData, interface.StatInterface)
 
 def VariableOrderMarkov(*args, **kargs):
     """VariableOrderMarkov
-        
+
     :Usage:
-    
+
     .. doctest::
         :options: +SKIP
-        
+
         >>> VariableOrderMarkov(filename)
-    """ 
+    """
     error.CheckArgumentsLength(args, 1, 1)
     error.CheckType([args[0]], [str])
     filename = args[0]
-    Length = kargs.get("Length", DEFAULT_LENGTH) 
-    
+    Length = kargs.get("Length", DEFAULT_LENGTH)
+
     if os.path.isfile(filename):
         vom =  _VariableOrderMarkov(filename, Length)
     else:
         raise IOError("bad file name %s" % filename)
-        
-        
+
+
     return vom
 
 

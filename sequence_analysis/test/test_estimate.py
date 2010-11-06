@@ -6,14 +6,7 @@
 """
 __revision__ = "$Id$"
 
-from openalea.sequence_analysis.sequences import Sequences
 from openalea.stat_tool.vectors import Vectors
-from openalea.sequence_analysis.hidden_variable_order_markov import \
-    HiddenVariableOrderMarkov
-from openalea.sequence_analysis.hidden_semi_markov import \
-    HiddenSemiMarkov
-
-from openalea.sequence_analysis.estimate import Estimate
 from openalea.stat_tool.data_transform import ExtractHistogram
 
 from tools import runTestClass
@@ -21,8 +14,22 @@ from test_tops import TopsData
 from test_hidden_semi_markov import HiddenSemiMarkovData
 from test_semi_markov import SemiMarkovData
 
-from openalea.sequence_analysis import get_shared_data
-from data import seq10, seq2
+from openalea.sequence_analysis import *
+
+_seq1 = Sequences(get_shared_data('dupreziana_20a2.seq'))
+
+seq2 = RemoveRun(_seq1, 1, 0, "End")
+seq3 = Sequences(get_shared_data('dupreziana_40a2.seq'))
+seq4_0 = RemoveRun(seq3, 2, 0, "End")
+seq4 = SegmentationExtract(seq4_0, 1, 2)
+seq5 = Sequences(get_shared_data('dupreziana_60a2.seq'))
+seq6_0 = RemoveRun(seq5, 2, 0, "End")
+seq6 = LengthSelect(SegmentationExtract(seq6_0, 1, 2), 1, Mode="Reject")
+seq7 = Sequences(get_shared_data('dupreziana_80a2.seq'))
+seq8_0 = RemoveRun(seq7, 2, 0, "End")
+seq8 = SegmentationExtract(seq8_0, 1, 2)
+seq10 = Merge(seq2, seq4, seq6, seq8)
+
 
 
 
@@ -99,7 +106,8 @@ class Test_Estimate_VARIABLE_ORDER_MARKOV_from_markovian():
 
 class Test_Estimate_HIDDEN_VARIABLE_ORDER_MARKOV():
     def test_estimate(self):
-        from data import hvom_sample, seq1
+        seq1 = Sequences(get_shared_data('sequences1.seq'))
+        hvom_sample = HiddenVariableOrderMarkov(get_shared_data("dupreziana21.hc"))
         hmc_estimated = Estimate(seq1, "HIDDEN_VARIABLE_ORDER_MARKOV", hvom_sample,
                          GlobalInitialTransition=True, NbIteration=80)
         assert hmc_estimated

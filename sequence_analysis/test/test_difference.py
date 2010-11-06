@@ -8,8 +8,10 @@ __revision__ = "$Id$"
 
 
 from openalea.sequence_analysis.data_transform import Difference
-from data import seqn
-from data import seq1
+from openalea.sequence_analysis import Sequences, get_shared_data
+
+seq1 = Sequences(get_shared_data("sequences1.seq"))
+seqn = Sequences(get_shared_data("sequences2.seq"))
 
 
 def test_difference1():

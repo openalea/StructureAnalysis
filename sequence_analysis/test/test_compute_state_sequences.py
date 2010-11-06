@@ -5,13 +5,12 @@
 
 __revision__ = "$Id$"
 
-from data import seq1, hmc
 from openalea.sequence_analysis.data_transform import ComputeStateSequences
 
 
+#hmc = HiddenSemiMarkov(get_shared_data("test_hidden_markov.hmc"))
 
 def test_ComputeStateSequences():
     """to be fixed"""
     pass
-    # this test does not work although it works in ipython...
     # ComputeStateSequences(seq1, hmc)

@@ -9,8 +9,8 @@
 
     A module dedicated to Tops objects
 
-    :Code status: mature
-    :Documentation status: to be completed
+    :Code: buggy
+    :Documentation: to be completed
     :Author: Thomas Cokelaer <Thomas.Cokelaer@sophia.inria.fr>
     :Revision: $Id$
     :Usage: >>> from openalea.sequence_analysis import tops

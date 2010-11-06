@@ -13,6 +13,7 @@ from openalea.sequence_analysis.tops import Tops
 from openalea.sequence_analysis.simulate import Simulate
 from openalea.sequence_analysis.top_parameters import TopParameters
 from openalea.sequence_analysis.data_transform import *
+from openalea.sequence_analysis import get_shared_data
 
 
 
@@ -22,7 +23,7 @@ from tools import runTestClass
 
 def TopParametersData():
     """Returns simulated top"""
-    param1 = TopParameters("data/param1.p", MaxPosition=20)
+    param1 = TopParameters(get_shared_data("test_param1.p"), MaxPosition=20)
     return param1
 
 class Test(interface):
@@ -33,7 +34,7 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.test_build_data(),
-                           "data/param1.p",
+                           get_shared_data("test_param1.p"),
                            TopParameters)
 
 

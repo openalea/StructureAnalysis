@@ -7,8 +7,7 @@ __revision__ = "$Id$"
 
 from openalea.stat_tool import _stat_tool
 from openalea.sequence_analysis import _sequence_analysis
-from openalea.sequence_analysis.semi_markov import SemiMarkov
-from openalea.sequence_analysis.simulate import Simulate
+from openalea.sequence_analysis import *
 
 from openalea.stat_tool.data_transform import *
 from openalea.stat_tool.cluster import Cluster
@@ -19,7 +18,7 @@ from tools import runTestClass
 
 
 def SemiMarkovData():
-    sm =  SemiMarkov('data/semi_markov.dat')
+    sm =  SemiMarkov(get_shared_data('test_semi_markov.dat'))
     ret = Simulate(sm, 1, 1000, True)
     return sm
 
@@ -31,14 +30,14 @@ class Test(interface):
     def __init__(self):
         interface.__init__(self,
                            self.build_data(),
-                           "data/semi_markov.dat",
+                           get_shared_data("test_semi_markov.dat"),
                            SemiMarkov)
 
     def build_data(self):
         """todo: check identifier output. should be a list """
         # build a list of 2 sequences with a variable that should be identical
         # to sequences1.seq
-        sm =  SemiMarkov('data/semi_markov.dat')
+        sm =  SemiMarkov(get_shared_data('test_semi_markov.dat'))
 
 
         return sm

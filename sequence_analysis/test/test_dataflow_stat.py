@@ -34,12 +34,12 @@ def test_beech1_demo():
 
 def test_stat_tool_demos_and_tutorial_convolution():
     """ Test dataflow demo compound tutorial"""
-    res = run(('demo.stat_tool demos and tutorials', 'convolution tutorial'),{},pm=pm)
+    res = run(('demo.stat_tool demos and tutorials', 'convolution_tutorial'),{},pm=pm)
     assert res == []
     
 
 def test_stat_tool_demos_and_tutorial_compound():
-    res = run(('demo.stat_tool demos and tutorials', 'compound tutorial'),{},pm=pm)
+    res = run(('demo.stat_tool demos and tutorials', 'compound_tutorial'),{},pm=pm)
     assert res == []
 
 
