@@ -1114,7 +1114,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
           state_no_occurrence_probability(i);
         }
         if (seq.type[0] == STATE) {
-          state_first_occurrence_distribution(i , ((seq.characteristics[0]) && (seq.characteristics[0]->first_occurrence[i]->nb_element > 0) ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
+          state_first_occurrence_distribution(i , ((seq.characteristics[0]) && (seq.characteristics[0]->first_occurrence[i]) && (seq.characteristics[0]->first_occurrence[i]->nb_element > 0) ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
         }
         else {
           state_first_occurrence_distribution(i);
