@@ -1175,7 +1175,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
 
     sample_size = cumul_length;
     os << "\n" << STAT_label[STATL_SAMPLE_SIZE] << ":";
-    for (i = 0;i <= (int)::round(log((double)cumul_length) / log((double)marginal_distribution[0]->nb_value));i++) {
+    for (i = 0;i <= MIN((int)::round(log((double)cumul_length) / log((double)marginal_distribution[0]->nb_value)) , max_length - 2);i++) {
       os << " " << sample_size;
       sample_size -= length_nb_sequence;
       length_nb_sequence -= hlength->frequency[i + 1];
@@ -1183,7 +1183,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     os << endl;
 
     os << SEQ_label[SEQL_RECOMMENDED_MAX_ORDER] << ": "
-       << (int)::round(log((double)cumul_length) / log((double)marginal_distribution[0]->nb_value)) << endl;
+       << MIN((int)::round(log((double)cumul_length) / log((double)marginal_distribution[0]->nb_value)) , max_length - 2) << endl;
 #   endif
 
 /*    if ((algorithm == CONTEXT) && (threshold == CONTEXT_THRESHOLD)) {
@@ -2675,7 +2675,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model ,
 {
   bool *status;
   register int i , j , k , m;
-  int buff , model , min , width[2] , *rank_cumul , **rank;
+  int buff , model , min , width[3] , *rank_cumul , **rank;
   long old_adjust;
   double max_likelihood , likelihood_cumul;
 
@@ -2686,6 +2686,7 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model ,
 
   if (exhaustive) {
     width[0] = column_width(nb_sequence);
+
     width[1] = 0;
     for (i = 0;i < nb_sequence;i++) {
       buff = column_width(nb_model , likelihood[i]);
@@ -2702,6 +2703,8 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model ,
       } */
     }
     width[1] += ASCII_SPACE;
+
+    width[2] = column_width(nb_model) + ASCII_SPACE;
 
     // ecriture de la matrice des vraisemblances des sequences pour chacun des modeles
 
@@ -2722,6 +2725,16 @@ ostream& MarkovianSequences::likelihood_write(ostream &os , int nb_model ,
 //        os << setw(width[1]) << (likelihood[i][j] == D_INF ? likelihood[i][j] : likelihood[i][j] / length[i]);
         os << setw(width[1]) << likelihood[i][j];
       }
+
+      max_likelihood = likelihood[i][0];
+      model = 0;
+      for (j = 1;j < nb_model;j++) {
+        if (likelihood[i][j] > max_likelihood) {
+          model = j;
+          max_likelihood = likelihood[i][j];
+        }
+      }
+      os << setw(width[2]) << model + 1;
 
       if (nb_model == 2) {
         if (likelihood[i][0] > likelihood[i][1]) {
