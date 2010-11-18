@@ -297,6 +297,18 @@ public:
      SIMPLE_METHOD_TEMPLATE_1(input, extract, DiscreteDistributionData, type, variable, value);
    }
 
+ static MarkovianSequences*
+ build_auxiliary_variable(const SemiMarkovData &input)
+  {
+    StatError error;
+    MarkovianSequences* ret;
+    ret = input.build_auxiliary_variable(error);
+    if (!ret) 
+      sequence_analysis::wrap_util::throw_error(error);
+    return ret;
+  }
+
+
 };
 
 void
@@ -316,6 +328,8 @@ class_semi_markov_data()
     DEF_RETURN_VALUE_NO_ARGS("get_semi_markov", &SemiMarkovData::get_semi_markov, "returns semi_markov")
     DEF_RETURN_VALUE_NO_ARGS("get_chain_data", &SemiMarkovData::get_chain_data, "returns chain data")
     DEF_RETURN_VALUE_NO_ARGS("remove_index_parameter", &SemiMarkovDataWrap::remove_index_parameter, "remove index parameter")
+    DEF_RETURN_VALUE_NO_ARGS("build_auxiliary_variable", &SemiMarkovDataWrap::build_auxiliary_variable, "calls build_auxialiary_varibles methods and returns markovian sequences object")
+    
 
  ;
 

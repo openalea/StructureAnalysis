@@ -1599,3 +1599,15 @@ def Extract(obj, *args, **kargs):
         raise Exception("return object cannot not be None")
     else:
         return ret
+
+
+def BuildAuxiliaryVariable(obj):
+    #error.CheckType([obj], [[_Sequences, _MarkovianSequences,
+    #                         _VariableOrderMarkovData, _SemiMarkovData,
+    #                         _NonHomogeneousMarkovData]])
+
+    try:
+        ret =  obj.build_auxiliary_variable()
+    except:
+        ValueError("build_axiliary_variable failed with the given object.Check the types")
+    return ret
