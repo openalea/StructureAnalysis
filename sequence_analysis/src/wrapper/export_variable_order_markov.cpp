@@ -283,12 +283,35 @@ void class_variable_order_markov() {
 #undef WRAP
 
 
+#define WRAP VariableOrderMarkovDataWrap
+class VariableOrderMarkovDataWrap {
+
+public:
+
+ static MarkovianSequences*
+ build_auxiliary_variable(const VariableOrderMarkovData &input)
+  {
+    StatError error;
+    MarkovianSequences* ret;
+    ret = input.build_auxiliary_variable(error);
+    if (!ret) 
+      sequence_analysis::wrap_util::throw_error(error);
+    return ret;
+  }
+
+
+};
+
 void class_variable_order_markov_data() {
 
-        class_<VariableOrderMarkovData, bases<MarkovianSequences > >
-        ("_VariableOrderMarkovData", "VariableOrderMarkovData")
+    class_<VariableOrderMarkovData, bases<MarkovianSequences > >
+    ("_VariableOrderMarkovData", "VariableOrderMarkovData")
 
-;
+    DEF_RETURN_VALUE_NO_ARGS("build_auxiliary_variable", WRAP::build_auxiliary_variable, 
+       "calls build_auxialiary_varibles methods and returns markovian sequences object")
+    ;
+
+
         /*
    VariableOrderMarkovData();
    VariableOrderMarkovData(const FrequencyDistribution &ihlength , int inb_variable , bool init_flag = false);
@@ -328,13 +351,15 @@ void class_variable_order_markov_data() {
 
    // acces membres de la classe
 
-   VariableOrderMarkov* get_markov() const { return markov; }
+  VariableOrderMarkov* get_markov() const { return markov; }
    VariableOrderChainData* get_chain_data() const { return chain_data; }
    double get_likelihood() const { return likelihood; }
    double get_hidden_likelihood() const { return hidden_likelihood; }
    double get_posterior_probability(int index) const { return posterior_probability[index]; }
    */
 }
+
+#undef WRAP
 
 
 class VariableOrderMarkovIteratorWrap
