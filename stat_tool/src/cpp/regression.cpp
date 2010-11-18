@@ -781,28 +781,44 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     delete test;
 
     os << "\n" << STAT_label[STATL_INTERCEPT] << ": " << parameter[0] << " ("
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << standard_deviation[0] << ")   "
-       << parameter[0] - t_value * standard_deviation[0] << " <= " << STAT_label[STATL_INTERCEPT]
-       << " <= " << parameter[0] + t_value * standard_deviation[0] << endl;
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << standard_deviation[0] << ")";
 
-    test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[0] / standard_deviation[0]);
-    test->t_critical_probability_computation();
+    if (standard_deviation[0] > 0) {
+      os << "   " << parameter[0] - t_value * standard_deviation[0]
+         << " <= " << STAT_label[STATL_INTERCEPT] << " <= "
+         << parameter[0] + t_value * standard_deviation[0] << endl;
 
-    test->ascii_print(os , false , true);
+      test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[0] / standard_deviation[0]);
+      test->t_critical_probability_computation();
 
-    delete test;
+      test->ascii_print(os , false , true);
+
+      delete test;
+    }
+
+    else {
+      os << endl;
+    }
 
     os << "\n" << STAT_label[STATL_SLOPE] << ": " << parameter[1] << " ("
-       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << standard_deviation[1] << ")   "
-       << parameter[1] - t_value * standard_deviation[1] << " <= " << STAT_label[STATL_SLOPE]
-       << " <= " << parameter[1] + t_value * standard_deviation[1] << endl;
+       << STAT_label[STATL_STANDARD_DEVIATION] << ": " << standard_deviation[1] << ")";
 
-    test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[1] / standard_deviation[1]);
-    test->t_critical_probability_computation();
+    if (standard_deviation[1] > 0) {
+      os << "   " << parameter[1] - t_value * standard_deviation[1]
+         << " <= " << STAT_label[STATL_SLOPE] << " <= "
+         << parameter[1] + t_value * standard_deviation[1] << endl;
 
-    test->ascii_print(os , false , true);
+      test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[1] / standard_deviation[1]);
+      test->t_critical_probability_computation();
 
-    delete test;
+      test->ascii_print(os , false , true);
+
+      delete test;
+    }
+
+    else {
+      os << endl;
+    }
   }
 
   if (exhaustive) {
@@ -866,12 +882,14 @@ ostream& Regression::ascii_write(ostream &os , bool exhaustive) const
     }
     os << endl;
 
-    test = new Test(FISHER , true , (int)df[0] , (int)df[1] , mean_square[0] / mean_square[1]);
-    test->F_critical_probability_computation();
+    if (mean_square[1] > 0) {
+      test = new Test(FISHER , true , (int)df[0] , (int)df[1] , mean_square[0] / mean_square[1]);
+      test->F_critical_probability_computation();
 
-    test->ascii_print(os , false , false);
+      test->ascii_print(os , false , false);
 
-    delete test;
+      delete test;
+    }
     break;
   }
   }
@@ -1096,28 +1114,44 @@ bool Regression::spreadsheet_write(StatError &error , const char *path) const
       delete test;
 
       out_file << "\n" << STAT_label[STATL_INTERCEPT] << "\t" << parameter[0] << "\t\t"
-               << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << standard_deviation[0] << "\t\t"
-               << parameter[0] - t_value * standard_deviation[0] << " <= " << STAT_label[STATL_INTERCEPT]
-               << " <= " << parameter[0] + t_value * standard_deviation[0] << endl;
+               << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << standard_deviation[0];
 
-      test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[0] / standard_deviation[0]);
-      test->t_critical_probability_computation();
+      if (standard_deviation[0] > 0) {
+        out_file << "\t\t" << parameter[0] - t_value * standard_deviation[0]
+                 << " <= " << STAT_label[STATL_INTERCEPT] << " <= "
+                 << parameter[0] + t_value * standard_deviation[0] << endl;
 
-      test->spreadsheet_print(out_file , true);
+        test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[0] / standard_deviation[0]);
+        test->t_critical_probability_computation();
 
-      delete test;
+        test->spreadsheet_print(out_file , true);
+
+        delete test;
+      }
+
+      else {
+        out_file << endl;
+      }
 
       out_file << "\n" << STAT_label[STATL_SLOPE] << "\t" << parameter[1] << "\t\t"
-               << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << standard_deviation[1] << "\t\t"
-               << parameter[1] - t_value * standard_deviation[1] << " <= " << STAT_label[STATL_SLOPE]
-               << " <= " << parameter[1] + t_value * standard_deviation[1] << endl;
+               << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << standard_deviation[1];
 
-      test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[1] / standard_deviation[1]);
-      test->t_critical_probability_computation();
+      if (standard_deviation[1] > 0) {
+        out_file << "\t\t" << parameter[1] - t_value * standard_deviation[1]
+                 << " <= " << STAT_label[STATL_SLOPE] << " <= "
+                 << parameter[1] + t_value * standard_deviation[1] << endl;
 
-      test->spreadsheet_print(out_file , true);
+        test = new Test(STUDENT , false , (int)df[1] , I_DEFAULT , parameter[1] / standard_deviation[1]);
+        test->t_critical_probability_computation();
 
-      delete test;
+        test->spreadsheet_print(out_file , true);
+
+        delete test;
+      }
+
+      else {
+        out_file << endl;
+      }
     }
 
     spreadsheet_print(out_file);
@@ -1157,12 +1191,14 @@ bool Regression::spreadsheet_write(StatError &error , const char *path) const
       }
       out_file << endl;
 
-      test = new Test(FISHER , true , (int)df[0] , (int)df[1] , mean_square[0] / mean_square[1]);
-      test->F_critical_probability_computation();
+      if (mean_square[1] > 0) {
+        test = new Test(FISHER , true , (int)df[0] , (int)df[1] , mean_square[0] / mean_square[1]);
+        test->F_critical_probability_computation();
 
-      test->spreadsheet_print(out_file , false);
+        test->spreadsheet_print(out_file , false);
 
-      delete test;
+        delete test;
+      }
       break;
     }
     }
