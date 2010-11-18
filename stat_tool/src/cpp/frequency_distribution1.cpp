@@ -1902,8 +1902,8 @@ FrequencyDistribution* FrequencyDistribution::frequency_scale(int inb_element) c
   for (i = 0;i < (int)round(sum);i++) {
     real_max = 0.;
     for (j = offset;j < nb_value;j++) {
-      if (real_frequency[i] > real_max) {
-        real_max = real_frequency[i];
+      if (real_frequency[j] > real_max) {
+        real_max = real_frequency[j];
         index = j;
       }
     }
