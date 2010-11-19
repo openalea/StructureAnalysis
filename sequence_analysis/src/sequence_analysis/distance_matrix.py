@@ -37,7 +37,7 @@ class ImprovedDistanceMatrix(object):
         from openalea.stat_tool import *
         from openalea.sequence_analysis import *
         from os.path import join as pj
-        seq = Sequences(pj(shared_data_path,  'chene_sessile_15pa.seq'))
+        seq = Sequences(get_shared_data('chene_sessile_15pa.seq'))
         distance_matrix = Compare(seq, VectorDistance("O","O","O","O", "O", "O"))
         Plot(distance_matrix)
         
