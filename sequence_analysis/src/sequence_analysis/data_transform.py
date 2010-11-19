@@ -1602,9 +1602,7 @@ def Extract(obj, *args, **kargs):
 
 
 def BuildAuxiliaryVariable(obj):
-    #error.CheckType([obj], [[_Sequences, _MarkovianSequences,
-    #                         _VariableOrderMarkovData, _SemiMarkovData,
-    #                         _NonHomogeneousMarkovData]])
+    error.CheckType([obj], [[ _VariableOrderMarkovData, _SemiMarkovData ]])
 
     try:
         ret =  obj.build_auxiliary_variable()
