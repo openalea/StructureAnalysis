@@ -909,7 +909,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , const Vect
     }
     else {
       ilength = max_length + max_length;
-      alignment = new Sequences(1 , NULL , &ilength , 1);
+      alignment = new Sequences(1 , NULL , &ilength , 1, false);
     }
 
     // creation des structures de donnees de l'algorithme - calcul des couts d'elision/insertion
@@ -1738,7 +1738,7 @@ DistanceMatrix* Sequences::alignment(StatError &error , ostream *os , int ref_id
     }
     else {
       ilength = max_length + max_length;
-      alignment = new Sequences(1 , NULL , &ilength , 1);
+      alignment = new Sequences(1 , NULL , &ilength , 1, false);
     }
 
     // creation des structures de donnees de l'algorithme
