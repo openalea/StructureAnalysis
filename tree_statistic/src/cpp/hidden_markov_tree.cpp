@@ -154,7 +154,7 @@ NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricProcess& p
  *
  *  Copy constructor NonparametricTreeProcess class
  *  using a reference on a NonparametricTreeProcess object,
- *  the kind of copy ('c' : copy, 's' : state, 'o' :occupancy)
+ *  the kind of copy ('c' : copy, 'o' :occupancy)
  *  and a parameter (flag on the caracteristic distribution computation /
  *  number of allocated values for state occupancy distributions /
  *  reference state).
@@ -164,7 +164,7 @@ NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricProcess& p
 NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricTreeProcess& process,
                                                    char manip, int param)
 
- : NonparametricProcess(process, manip)
+ : NonparametricProcess(process)
  , size(NULL)
  , no_occurrence(NULL)
  , leave(NULL)
@@ -189,22 +189,6 @@ NonparametricTreeProcess::NonparametricTreeProcess(const NonparametricTreeProces
       case 'o':
       {
          init_occupancy(process, param);
-         break;
-      }
-
-      case 's' :
-      {
-         add_state(process, param);
-
-         size= NULL;
-         no_occurrence= NULL;
-         leave= NULL;
-         absorption= NULL;
-         first_occurrence_root= NULL;
-         first_occurrence_leaves= NULL;
-         sojourn_size= NULL;
-         nb_zones= NULL;
-         nb_occurrences= NULL;
          break;
       }
    }
@@ -1502,7 +1486,7 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
    // the values for all the gnuplot graphs
 
    status= ::plot_print((data_file_name[1].str()).c_str(), nb_dist, pdist,
-                         scale, dist_nb_value, nb_histo, phisto, index_dist);
+                         scale, dist_nb_value, nb_histo, phisto);
 
    // write the command and printing files
    if (status)
@@ -3817,9 +3801,7 @@ void HiddenMarkovTree::copy(const HiddenMarkovTree& markov, bool data_flag,
          else
          {
             npprocess[i+1]= NULL;
-            piprocess[i+1]= new DiscreteParametricProcess(*(markov.piprocess[i+1]),
-                                                          'c',
-                                                          characteristic_flag);
+            piprocess[i+1]= new DiscreteParametricProcess(*(markov.piprocess[i+1]));
          }
       }
    }
@@ -3833,9 +3815,7 @@ void HiddenMarkovTree::copy(const HiddenMarkovTree& markov, bool data_flag,
    {
       pdprocess= new DiscreteParametricProcess*[_nb_doutput_process];
       for(i= 0; i < _nb_doutput_process; i++)
-         pdprocess[i]= new DiscreteParametricProcess(*(markov.pdprocess[i]),
-                                                     'c',
-                                                     characteristic_flag);
+         pdprocess[i]= new DiscreteParametricProcess(*(markov.pdprocess[i]));
    }
    else
       pdprocess= NULL;
@@ -3910,8 +3890,8 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
 {
    register int i;
    int variable, cumul_size, nb_output_process= _nb_ioutput_process+_nb_doutput_process;
-   FrequencyDistribution **observation= NULL;
-   TreeCharacteristics *characteristics= NULL;
+   FrequencyDistribution **observation = NULL, *marginal = NULL;
+   TreeCharacteristics *characteristics = NULL;
 
    // printing of the Markov tree parameters
 
@@ -3964,17 +3944,29 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
             }
 
            if (otrees->observation != NULL)
-              observation= otrees->observation[variable];
+              observation = otrees->observation[variable];
+           else
+              observation = NULL;
 
            if (otrees->characteristics[variable] != NULL)
-              characteristics= otrees->characteristics[variable];
+           {
+              characteristics = otrees->characteristics[variable];
+              marginal = otrees->characteristics[variable]->marginal;
+           }
+           else
+           {
+              characteristics = NULL;
+              marginal = NULL;
+           }
+
          }
 
          if (npprocess[i] != NULL)
             npprocess[i]->ascii_print(os, i, observation, characteristics,
                                       exhaustive, file_flag);
          else
-            piprocess[i]->ascii_print(os, observation, exhaustive, file_flag);
+            piprocess[i]->ascii_print(os, observation, marginal,
+                                      exhaustive, file_flag);
             // does not seem to work when observation == NULL and exhaustiv == true
       }
 
@@ -3992,7 +3984,11 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
            // This seems weird : how is observation supposed to be defined
            // for parametric processes ? What happens if otrees->observation == NULL ?
          }
-         pdprocess[i]->ascii_print(os, observation, exhaustive, file_flag);
+         if (otrees->characteristics[variable] != NULL)
+            pdprocess[i]->ascii_print(os, observation, otrees->characteristics[variable]->marginal,
+                                      exhaustive, file_flag);
+         else
+            pdprocess[i]->ascii_print(os, observation, NULL, exhaustive, file_flag);
       }
    }
 
@@ -5660,9 +5656,9 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
 
                         case false :
                         {
-                           ip_observation[index-1]= observation_parsing(error, in_file, line,
-                                                                        chain->nb_state,
-                                                                        cumul_threshold);
+                           ip_observation[index-1]= discrete_observation_parsing(error, in_file, line,
+                                                                                 chain->nb_state,
+                                                                                 cumul_threshold);
                            // np_observation[index-1]= NULL;
                            if (ip_observation[index-1] == NULL)
                               status = false;
