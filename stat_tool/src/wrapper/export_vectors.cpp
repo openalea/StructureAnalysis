@@ -1048,7 +1048,7 @@ public:
   {
     StatError error;
     Histogram *ret;
-    if (variable<input.get_nb_variable() and variable>=0)
+    if (variable<input.get_nb_variable() && variable>=0)
         {
             ret = input.get_marginal_histogram(variable);
             return ret;
