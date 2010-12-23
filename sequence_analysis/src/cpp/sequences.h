@@ -467,7 +467,8 @@ protected :
     void min_value_computation(int variable);
     void max_value_computation(int variable);
     void build_marginal_frequency_distribution(int variable);
-    void build_marginal_histogram(int variable , double step = D_DEFAULT);
+    void build_marginal_histogram(int variable , double step = D_DEFAULT ,
+                                  double imin_value = D_INF);
 
     std::ostream& alignment_ascii_print(std::ostream &os , int width , int ref_index , int test_index ,
                                         const Sequences &alignment , int alignment_index) const;
@@ -497,15 +498,28 @@ protected :
 
     std::ostream& profile_ascii_print(std::ostream &os , int index , int nb_segment ,
                                       double **profiles , const char *label ,
-                                      double **mean = NULL , long double **change_point = NULL) const;
+                                      double **mean = NULL , long double **change_point = NULL ,
+                                      long double **begin_conditonal_entropy = NULL ,
+                                      long double **end_conditional_entropy = NULL ,
+                                      long double **change_point_entropy = NULL) const;
     std::ostream& profile_spreadsheet_print(std::ostream &os , int index , int nb_segment ,
                                             double **profiles , const char *label ,
-                                            double **mean = NULL , long double **change_point = NULL) const;
+                                            double **mean = NULL , long double **change_point = NULL ,
+                                            long double **begin_conditonal_entropy = NULL ,
+                                            long double **end_conditional_entropy = NULL ,
+                                            long double **change_point_entropy = NULL) const;
     std::ostream& profile_plot_print(std::ostream &os , int index , int nb_segment ,
                                      double **profiles , double **mean = NULL ,
-                                     long double **change_point = NULL) const;
+                                     long double **change_point = NULL ,
+                                     long double **begin_conditonal_entropy = NULL ,
+                                     long double **end_conditional_entropy = NULL ,
+                                     long double **change_point_entropy = NULL) const;
     void change_point_profile_plotable_write(MultiPlot &plot , int index , int nb_segment ,
                                              long double **change_point) const;
+    void entropy_profile_plotable_write(MultiPlot &plot , int index ,
+                                        long double *begin_conditional_entropy ,
+                                        long double *end_conditional_entropy ,
+                                        long double *change_point_entropy) const;
 
     int nb_parameter_computation(int index , int nb_segment , int *model_type) const;
     double one_segment_likelihood(int index , int *model_type , double **rank) const;
@@ -515,12 +529,13 @@ protected :
                         double *isegmentation_likelihood = NULL , int *nb_parameter = NULL ,
                         double *segment_penalty = NULL);
     double forward_backward(int index , int nb_segment , int *model_type , double **rank ,
-                            std::ostream *os , MultiPlotSet *plot_set , int output , char format ,
-                            double *ilikelihood = NULL , long double *isegmentation_entropy = NULL ,
-                            long double *iranked_change_point_entropy = NULL ,
-                            long double *ichange_point_entropy = NULL ,
-                            double *uniform_entropy = NULL ,
-                            long double *imarginal_entropy = NULL) const;
+                            double *likelihood , long double *segmentation_entropy ,
+                            long double *first_order_entropy ,
+                            long double *change_point_entropy , double *uniform_entropy ,
+                            long double *marginal_entropy) const;
+    double forward_backward(int index , int nb_segment , int *model_type , double **rank ,
+                            std::ostream *os , MultiPlotSet *plot_set , int output ,
+                            char format) const;
     double forward_backward_sampling(int index , int nb_segment , int *model_type ,
                                      double **rank , std::ostream &os , char format ,
                                      int nb_segmentation) const;
@@ -680,7 +695,8 @@ public :
     int max_index_parameter_computation(bool last_position = false) const;
 
     void marginal_frequency_distribution_computation(int variable);
-    bool select_step(StatError &error , int variable , double step);
+    bool select_step(StatError &error , int variable , double step ,
+                     double imin_value = D_INF);
 
     double mean_computation(int variable) const;
     double variance_computation(int variable , double mean) const;
@@ -1024,7 +1040,8 @@ public :
     void build_observation_frequency_distribution();
     void build_observation_histogram(int variable , double step = D_DEFAULT);
     void build_observation_histogram();
-    bool select_step(StatError &error , int variable , double step);
+    bool select_step(StatError &error , int variable , double step ,
+                     double imin_value = D_INF);
 
     void build_characteristic(int variable = I_DEFAULT , bool sojourn_time_flag = true ,
                               bool initial_run_flag = false);
