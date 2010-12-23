@@ -482,6 +482,7 @@ const char *STAT_error[] = {
   "marginal frequency distribution not built" ,
   "marginal histogram not built" ,
   "bad histogram step" ,
+  "bad histogram min value" ,
   "bad" ,
   "bad number of vectors" ,
   "bad number of variables" ,
