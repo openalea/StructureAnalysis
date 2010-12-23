@@ -130,7 +130,8 @@ protected :
     void min_value_computation(int variable);
     void max_value_computation(int variable);
     void build_marginal_frequency_distribution(int variable);
-    void build_marginal_histogram(int variable , double step = D_DEFAULT);
+    void build_marginal_histogram(int variable , double step = D_DEFAULT ,
+                                  double imin_value = D_INF);
     int* order_computation(int variable) const;
 
     void mean_computation(int variable);
@@ -231,7 +232,8 @@ public :
                     const char *title = NULL) const;
     MultiPlotSet* get_plotable() const;
 
-    bool select_step(StatError &error , int variable , double step);
+    bool select_step(StatError &error , int variable , double step ,
+                     double imin_value = D_INF);
     int cumulative_distribution_function_computation(int variable , double **cdf) const;
     double min_interval_computation(int variable) const;
 
