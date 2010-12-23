@@ -547,12 +547,10 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+      os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
-      if (exhaustive) {
-        for (i = 0;i < nb_state;i++) {
-          os << "  " << weight->mass[i];
-        }
+      for (i = 0;i < nb_state;i++) {
+        os << " " << weight->mass[i];
       }
       os << endl;
 
@@ -611,12 +609,10 @@ ostream& DiscreteParametricProcess::ascii_print(ostream &os , FrequencyDistribut
       if (file_flag) {
         os << "# ";
       }
-      os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+      os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
-      if (exhaustive) {
-        for (i = 0;i < nb_state;i++) {
-          os << "  " << restoration_weight->mass[i];
-        }
+      for (i = 0;i < nb_state;i++) {
+        os << " " << restoration_weight->mass[i];
       }
       os << endl;
 
