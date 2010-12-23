@@ -8279,18 +8279,23 @@ void Sequences::build_marginal_frequency_distribution(int variable)
  *
  *  Construction de l'histogramme marginal pour une variable.
  *
- *  arguments : indice de la variable, pas de regroupement.
+ *  arguments : indice de la variable, pas de regroupement, valeur minimum.
  *
  *--------------------------------------------------------------*/
 
-void Sequences::build_marginal_histogram(int variable , double step)
+void Sequences::build_marginal_histogram(int variable , double step , double imin_value)
 
 {
-  if ((!marginal_histogram[variable]) || (step != marginal_histogram[variable]->step)) {
+  if ((!marginal_histogram[variable]) || (step != marginal_histogram[variable]->step) ||
+      (imin_value != D_INF)) {
     register int i , j;
     int *pisequence;
     double *prsequence;
 
+
+    if (imin_value == D_INF) {
+      imin_value = min_value[variable];
+    }
 
     // construction de l'histogramme
 
@@ -8306,21 +8311,22 @@ void Sequences::build_marginal_histogram(int variable , double step)
     }
 
     if (marginal_histogram[variable]) {
-      marginal_histogram[variable]->nb_category = (int)floor((max_value[variable] - min_value[variable]) / step) + 1;
+      marginal_histogram[variable]->nb_category = (int)floor((max_value[variable] - imin_value) / step) + 1;
 
       delete [] marginal_histogram[variable]->frequency;
       marginal_histogram[variable]->frequency = new int[marginal_histogram[variable]->nb_category];
     }
 
     else {
-      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - min_value[variable]) / step) + 1 , false);
+      marginal_histogram[variable] = new Histogram((int)floor((max_value[variable] - imin_value) / step) + 1 , false);
 
       marginal_histogram[variable]->nb_element = cumul_length;
       marginal_histogram[variable]->type = type[variable];
-      marginal_histogram[variable]->min_value = min_value[variable];
       marginal_histogram[variable]->max_value = max_value[variable];
     }
+
     marginal_histogram[variable]->step = step;
+    marginal_histogram[variable]->min_value = imin_value;
 
     // calcul des frequences
 
@@ -8332,8 +8338,8 @@ void Sequences::build_marginal_histogram(int variable , double step)
       for (i = 0;i < nb_sequence;i++) {
         pisequence = int_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (marginal_histogram[variable]->frequency[(int)((*pisequence++ - min_value[variable]) / step)])++;
-          (marginal_histogram[variable]->frequency[(int)floor((*pisequence++ - min_value[variable]) / step)])++;
+//          (marginal_histogram[variable]->frequency[(int)((*pisequence++ - imin_value) / step)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*pisequence++ - imin_value) / step)])++;
         }
       }
     }
@@ -8342,8 +8348,8 @@ void Sequences::build_marginal_histogram(int variable , double step)
       for (i = 0;i < nb_sequence;i++) {
         prsequence = real_sequence[i][variable];
         for (j = 0;j < length[i];j++) {
-//          (marginal_histogram[variable]->frequency[(int)((*prsequence++ - min_value[variable]) / step)])++;
-          (marginal_histogram[variable]->frequency[(int)floor((*prsequence++ - min_value[variable]) / step)])++;
+//          (marginal_histogram[variable]->frequency[(int)((*prsequence++ - imin_value) / step)])++;
+          (marginal_histogram[variable]->frequency[(int)floor((*prsequence++ - imin_value) / step)])++;
         }
       }
     }
@@ -8358,11 +8364,12 @@ void Sequences::build_marginal_histogram(int variable , double step)
  *  Changement du pas de regroupement de l'histogramme marginal.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              pas de regroupement.
+ *              pas de regroupement, valeur minimum.
  *
  *--------------------------------------------------------------*/
 
-bool Sequences::select_step(StatError &error , int variable , double step)
+bool Sequences::select_step(StatError &error , int variable ,
+                            double step , double imin_value)
 
 {
   bool status = true;
@@ -8386,10 +8393,16 @@ bool Sequences::select_step(StatError &error , int variable , double step)
       status = false;
       error.update(STAT_error[STATR_HISTOGRAM_STEP]);
     }
+    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - step) ||
+         (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
+          ((int)imin_value != imin_value)))) {
+      status = false;
+      error.update(STAT_error[STATR_HISTOGRAM_MIN_VALUE]);
+    }
   }
 
   if (status) {
-    build_marginal_histogram(variable , step);
+    build_marginal_histogram(variable , step , imin_value);
   }
 
   return status;
