@@ -37,6 +37,7 @@
 
 
 #include <sstream>
+#include <iomanip>
 
 #include "tool/rw_tokenizer.h"
 #include "tool/rw_cstring.h"
@@ -53,6 +54,9 @@
 #include "sequence_label.h"
 
 using namespace std;
+
+
+extern int column_width(int nb_value , const double *value , double scale = 1.);
 
 
 
@@ -957,11 +961,14 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
 
 {
   register int i , j;
-  int variable;
+  int buff , width , variable;
   FrequencyDistribution **observation_dist = NULL;
   Histogram **observation_histo = NULL;
   SequenceCharacteristics *characteristics;
+  long old_adjust;
 
+
+  old_adjust = os.setf(ios::left , ios::adjustfield);
 
   switch (hidden) {
 
@@ -1010,31 +1017,40 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
     for (i = 1;i <= nb_output_process;i++) {
       if (discrete_parametric_process[i]) {
         if (discrete_parametric_process[i]->weight) {
+          width = column_width(nb_state , discrete_parametric_process[i]->weight->mass);
+        }
+        else {
+          width = 0;
+        }
+        if (discrete_parametric_process[i]->restoration_weight) {
+          buff = column_width(nb_state , discrete_parametric_process[i]->restoration_weight->mass);
+          if (buff > width) {
+            width = buff;
+          }
+        }
+        width++;
+
+        if (discrete_parametric_process[i]->weight) {
           os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << discrete_parametric_process[i]->weight->mass[j] << "  ";
+            os << setw(width) << discrete_parametric_process[i]->weight->mass[j];
           }
           os << endl;
         }
 
         if (discrete_parametric_process[i]->restoration_weight) {
-          os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << discrete_parametric_process[i]->restoration_weight->mass[j] << "  ";
+            os << setw(width) << discrete_parametric_process[i]->restoration_weight->mass[j];
           }
           os << endl;
         }
@@ -1043,31 +1059,40 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
 
       else if (continuous_parametric_process[i]) {
         if (continuous_parametric_process[i]->weight) {
+          width = column_width(nb_state , continuous_parametric_process[i]->weight->mass);
+        }
+        else {
+          width = 0;
+        }
+        if (continuous_parametric_process[i]->restoration_weight) {
+          buff = column_width(nb_state , continuous_parametric_process[i]->restoration_weight->mass);
+          if (buff > width) {
+            width = buff;
+          }
+        }
+        width++;
+
+        if (continuous_parametric_process[i]->weight) {
           os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << continuous_parametric_process[i]->weight->mass[j] << "  ";
+            os << setw(width) << continuous_parametric_process[i]->weight->mass[j];
           }
           os << endl;
         }
 
         if (continuous_parametric_process[i]->restoration_weight) {
-          os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << continuous_parametric_process[i]->restoration_weight->mass[j] << "  ";
+            os << setw(width) << continuous_parametric_process[i]->restoration_weight->mass[j];
           }
           os << endl;
         }
@@ -1284,6 +1309,8 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
          << 2 * seq->likelihood - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
   }
+
+  os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
 
   return os;
 }
