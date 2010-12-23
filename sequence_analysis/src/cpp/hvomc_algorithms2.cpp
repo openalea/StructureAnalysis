@@ -663,6 +663,18 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
         entropy1 += forward[i][j] * (forward_state_entropy[i][j] - log(forward[i][j]));
       }
     }
+
+#   ifdef DEBUG
+    cout << "\n";
+    for (i = 0;i < seq.length[index];i++) {
+      cout << i << " |";
+      for (j = 1;j < nb_row;j++) {
+        cout << " " << forward_state_entropy[i][j];
+      }
+      cout << endl;
+    }
+#   endif
+
   }
 
   // recurrence "backward"
@@ -912,7 +924,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
 
     for (i = 0;i < seq.length[index] - 1;i++) {
       for (j = 1;j < nb_row;j++) {
-        if (next[j]) {
+        if ((next[j]) && (i - order[j] + 1 >= 0)) {
           for (k = 0;k < nb_state;k++) {
             if (predicted[i + 1][next[j][k]] > 0.) {
               buff = transition[j][k] * forward[i][j] / predicted[i + 1][next[j][k]];
@@ -939,7 +951,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
 #   endif
 
     for (j = 1;j < nb_row;j++) {
-      if ((end_backward[j] > 0.) && (end_backward[parent[j]] > 0.)) {
+      if ((i - order[j] + 1 >= 0) && (end_backward[j] > 0.) && (end_backward[parent[j]] > 0.)) {
         end_conditional_entropy[i - order[j] + 1] -= end_backward[j] * log(end_backward[j] / end_backward[parent[j]]);
       }
     }
