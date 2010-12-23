@@ -3304,11 +3304,12 @@ void MarkovianSequences::build_observation_histogram()
  *  des histogrammes d'observation pour une variable donnee.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              pas de regroupement.
+ *              pas de regroupement, valeur minimum.
  *
  *--------------------------------------------------------------*/
 
-bool MarkovianSequences::select_step(StatError &error , int variable , double step)
+bool MarkovianSequences::select_step(StatError &error , int variable ,
+                                     double step , double imin_value)
 
 {
   bool status = true;
@@ -3333,10 +3334,16 @@ bool MarkovianSequences::select_step(StatError &error , int variable , double st
       status = false;
       error.update(STAT_error[STATR_HISTOGRAM_STEP]);
     }
+    if ((imin_value != D_INF) && ((imin_value <= min_value[variable] - step) ||
+         (imin_value > min_value[variable]) || ((type[variable] != REAL_VALUE) &&
+          (type[variable] != AUXILIARY) && ((int)imin_value != imin_value)))) {
+      status = false;
+      error.update(STAT_error[STATR_HISTOGRAM_MIN_VALUE]);
+    }
   }
 
   if (status) {
-    build_marginal_histogram(variable , step);
+    build_marginal_histogram(variable , step , imin_value);
 
     if ((observation_histogram) && (observation_histogram[variable])) {
       build_observation_histogram(variable , step);
