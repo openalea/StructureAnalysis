@@ -3418,31 +3418,40 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
     for (i = 1;i <= nb_output_process;i++) {
       if (discrete_parametric_process[i]) {
         if (discrete_parametric_process[i]->weight) {
+          width[0] = column_width(nb_state , discrete_parametric_process[i]->weight->mass);
+        }
+        else {
+          width[0] = 0;
+        }
+        if (discrete_parametric_process[i]->restoration_weight) {
+          buff = column_width(nb_state , discrete_parametric_process[i]->restoration_weight->mass);
+          if (buff > width[0]) {
+            width[0] = buff;
+          }
+        }
+        width[0]++;
+
+        if (discrete_parametric_process[i]->weight) {
           os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << discrete_parametric_process[i]->weight->mass[j] << "  ";
+            os << setw(width[0]) << discrete_parametric_process[i]->weight->mass[j];
           }
           os << endl;
         }
 
         if (discrete_parametric_process[i]->restoration_weight) {
-          os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << discrete_parametric_process[i]->restoration_weight->mass[j] << "  ";
+            os << setw(width[0]) << discrete_parametric_process[i]->restoration_weight->mass[j];
           }
           os << endl;
         }
@@ -3451,31 +3460,40 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
 
       else if (continuous_parametric_process[i]) {
         if (continuous_parametric_process[i]->weight) {
+          width[0] = column_width(nb_state , continuous_parametric_process[i]->weight->mass);
+        }
+        else {
+          width[0] = 0;
+        }
+        if (continuous_parametric_process[i]->restoration_weight) {
+          buff = column_width(nb_state , continuous_parametric_process[i]->restoration_weight->mass);
+          if (buff > width[0]) {
+            width[0] = buff;
+          }
+        }
+        width[0]++;
+
+        if (continuous_parametric_process[i]->weight) {
           os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_THEORETICAL] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << continuous_parametric_process[i]->weight->mass[j] << "  ";
+            os << setw(width[0]) << continuous_parametric_process[i]->weight->mass[j];
           }
           os << endl;
         }
 
         if (continuous_parametric_process[i]->restoration_weight) {
-          os << "\n";
           if (file_flag) {
             os << "# ";
           }
-          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << endl;
-          if (file_flag) {
-            os << "# ";
-          }
+          os << STAT_label[STATL_RESTORATION] << " " << SEQ_label[SEQL_STATE_PROBABILITY] << ": ";
+
           for (j = 0;j < nb_state;j++) {
-            os << continuous_parametric_process[i]->restoration_weight->mass[j] << "  ";
+            os << setw(width[0]) << continuous_parametric_process[i]->restoration_weight->mass[j];
           }
           os << endl;
         }
