@@ -731,13 +731,11 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
         if (file_flag) {
           os << "# ";
         }
-        os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS];
+        os << STAT_label[STATL_THEORETICAL] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
-//        if (exhaustive) {
-          for (i = 0;i < nb_state;i++) {
-            os << "  " << weight->mass[i];
-          }
-//        }
+        for (i = 0;i < nb_state;i++) {
+          os << " " << weight->mass[i];
+        }
         os << endl;
 
         likelihood = mixture->likelihood_computation(*clustered_histo);
@@ -885,13 +883,11 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
         if (file_flag) {
           os << "# ";
         }
-        os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS];
+        os << STAT_label[STATL_RESTORATION] << " " << STAT_label[STATL_WEIGHTS] << ":";
 
-//        if (exhaustive) {
-          for (i = 0;i < nb_state;i++) {
-            os << "  " << restoration_weight->mass[i];
-          }
-//        }
+        for (i = 0;i < nb_state;i++) {
+          os << " " << restoration_weight->mass[i];
+        }
         os << endl;
 
         likelihood = mixture->likelihood_computation(*clustered_histo);
