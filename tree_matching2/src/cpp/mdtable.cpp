@@ -237,6 +237,25 @@ DistanceType StdMatchingDistanceTable::getCCost(int vertex1 ,int vertex2) const
   return ND->getChangingCost(T1->getNode(vertex1),T2->getNode(vertex2)); 
 }
 
+// ----------------------------------------------
+// Renvoie le cout de Merging de deux noeuds
+// ----------------------------------------------
+DistanceType StdMatchingDistanceTable::getMCost(vector<int> vertex1 ,int vertex2) const
+{  
+  vector<TreeNodePtr> path;
+  for (int i = 0; i<vertex1.size();i++)
+    path.push_back( T1->getNode(vertex1[i]));
+  return ND->getMergingCost(path,T2->getNode(vertex2)); 
+}
+
+DistanceType StdMatchingDistanceTable::getSCost(int vertex1 ,vector<int> vertex2) const
+{  
+  vector<TreeNodePtr> path;
+  for (int i = 0; i<vertex2.size();i++)
+    path.push_back( T2->getNode(vertex2[i]));
+  return ND->getMergingCost(path,T1->getNode(vertex1)); 
+}
+
 
 
 //////////////////////////////////////////////////////////////////////
@@ -505,3 +524,23 @@ DistanceType CompactMatchingDistanceTable::getCCost(int vertex1 ,int vertex2) co
 {
   return ND->getChangingCost(T1->getNode(vertex1),T2->getNode(vertex2)); 
 }
+
+// ----------------------------------------------
+// Renvoie le cout de Merging de deux noeuds
+// ----------------------------------------------
+DistanceType CompactMatchingDistanceTable::getMCost(vector<int> vertex1 ,int vertex2) const
+{  
+  vector<TreeNodePtr> path;
+  for (int i = 0; i<vertex1.size();i++)
+    path.push_back( T1->getNode(vertex1[i]));
+  return ND->getMergingCost(path,T2->getNode(vertex2)); 
+}
+
+DistanceType CompactMatchingDistanceTable::getSCost(int vertex1 ,vector<int> vertex2) const
+{  
+  vector<TreeNodePtr> path;
+  for (int i = 0; i<vertex2.size();i++)
+    path.push_back( T2->getNode(vertex2[i]));
+  return ND->getMergingCost(path,T1->getNode(vertex1)); 
+}
+

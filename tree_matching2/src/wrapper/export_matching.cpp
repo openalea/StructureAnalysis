@@ -30,7 +30,7 @@
  */
 
 
-#include "extract_list.h"
+//#include "extract_list.h"
 #include "export_list.h"
 #include <boost/python.hpp>
 #include "matching.h"
@@ -68,4 +68,10 @@ void export_Matching() {
     .def( "getList", &py_getList,"Get Matching  list between Trees")
 	;
 
+}
+
+void export_ExtMatching() {
+
+  class_<ExtMatching,bases<Matching> >
+    ("ExtMatching", init<TreeGraphPtr, TreeGraphPtr, NodeCostPtr, int>("ExtMatching(TreeGraph, TreeGraph, NodeCost, MDTableType)"));
 }

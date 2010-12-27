@@ -71,6 +71,9 @@ public :
   
   /** Returns the changing cost between /e i_node and /e r_node*/
   virtual DistanceType getChangingCost( const TreeNodePtr , const TreeNodePtr ) const ;
+
+  /** Returns the merging cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getMergingCost( const vector<TreeNodePtr> , const TreeNodePtr ) const ;
        
 };
 
@@ -102,6 +105,9 @@ public :
   
   /** Returns the changing cost between /e i_node and /e r_node*/
   virtual DistanceType getChangingCost(const TreeNodePtr ,const TreeNodePtr ) const ;
+
+  /** Returns the merging cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getMergingCost( const vector<TreeNodePtr> , const TreeNodePtr ) const ;
          
 };
 

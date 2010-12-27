@@ -49,6 +49,8 @@ DistanceType NodeCost::getDeletionCost(const TreeNodePtr node) const
 DistanceType NodeCost::getChangingCost(const TreeNodePtr i_node,const TreeNodePtr r_node) const
 { return 0; }
 
+DistanceType NodeCost::getMergingCost(const vector<TreeNodePtr> i_node,const TreeNodePtr r_node) const
+{ return 1; }
 /* ----------------------------------------------------------------------- */
 
 
@@ -63,5 +65,8 @@ DistanceType ScoreNodeCost::getDeletionCost(const TreeNodePtr node) const
 
 DistanceType ScoreNodeCost::getChangingCost(const TreeNodePtr i_node,const TreeNodePtr r_node) const
 { return 2; }
+
+DistanceType ScoreNodeCost::getMergingCost(const vector<TreeNodePtr> i_node,const TreeNodePtr r_node) const
+{ return -1; }
 
 /* ----------------------------------------------------------------------- */

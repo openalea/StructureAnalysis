@@ -35,6 +35,7 @@
 #include <boost/python.hpp>
 #include <vector>
 #include <map>
+#include "exception.h"
 
 /* ----------------------------------------------------------------------- */
 

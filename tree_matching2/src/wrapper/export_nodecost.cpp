@@ -30,7 +30,7 @@
  */
 
 
-#include "extract_list.h"
+//#include "extract_list.h"
 #include "export_list.h"
 #include <boost/python.hpp>
 #include "nodecost.h"
@@ -39,6 +39,10 @@ using namespace boost::python;
 #define bp boost::python
 
 #define treenode2python(node) bp::object(node)
+inline object treenodelist2python( const vector<TreeNodePtr>& nodes )
+{
+  return make_list(nodes);
+ }
 
 class PyNodeCost : public NodeCost, public bp::wrapper<NodeCost>
 {
@@ -85,6 +89,19 @@ public:
     DistanceType default_getChangingCost(const TreeNodePtr node1, const TreeNodePtr node2) const
     {  return NodeCost::getChangingCost(node1, node2); }
 
+
+    /** Returns the changing cost between /e i_node and /e r_node*/
+  virtual DistanceType getMergingCost(const vector<TreeNodePtr> node1, const TreeNodePtr node2) const
+    { 
+	  if(bp::override f = this->get_override("getMergingCost"))
+	    return bp::call<DistanceType>(f.ptr(), treenodelist2python(node1), treenode2python(node2)); //remplacer treenode2python par un vecteur de treenode ...
+	  else return default_getMergingCost(node1,node2);
+	}
+
+    /** Default implementation of changing cost method. Required for boost python*/
+  DistanceType default_getMergingCost(const vector<TreeNodePtr> node1, const TreeNodePtr node2) const
+    {  return NodeCost::getMergingCost(node1, node2); }
+
 };
 
 // A smart pointer on a PyNodeCost
@@ -99,6 +116,7 @@ void export_NodeCost() {
     .def("getInsertionCost", &NodeCost::getInsertionCost, &PyNodeCost::default_getInsertionCost)
     .def("getDeletionCost", &NodeCost::getDeletionCost, &PyNodeCost::default_getDeletionCost)
     .def("getChangingCost", &NodeCost::getChangingCost, &PyNodeCost::default_getChangingCost)
+    .def("getMergingCost", &NodeCost::getMergingCost, &PyNodeCost::default_getMergingCost)
 	;
 
 }

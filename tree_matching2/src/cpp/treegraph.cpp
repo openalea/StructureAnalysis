@@ -155,6 +155,20 @@ int TreeGraph::getNbDesc(int vertex) const
     }
 }
 
+/* return a vector containing all the vertices between desc and anc */
+/* des should be a descendant of anc */
+vector<int> TreeGraph::getPath(int desc, int anc) const
+{
+  vector<int> path;
+  int vertex = desc;
+  while (vertex != anc){
+    path.push_back(vertex);
+    vertex = father(vertex);
+  }
+  path.push_back(vertex);
+  return path;
+}
+
 
 TreeNodePtr TreeGraph::getNode(int vertex)
 {

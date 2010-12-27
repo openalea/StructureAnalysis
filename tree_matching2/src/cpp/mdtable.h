@@ -97,6 +97,8 @@ class TREEMATCH_API MatchingDistanceTable
   virtual DistanceType getICost(int& ) const {return 0.;};
   virtual DistanceType getDCost(int& ) const {return 0.;};
   virtual DistanceType getCCost(int ,int ) const {return 0.;};
+  virtual DistanceType getMCost(vector<int> ,int ) const {return 0.;};
+  virtual DistanceType getSCost(int ,vector<int> ) const {return 0.;};
   // virtual DistanceTable &getTreeDistanceTable()   = 0;
   virtual DistanceVectorTable &getDistanceTable() = 0; 
   MDTableType getType() const {return _type;};
@@ -135,6 +137,8 @@ class TREEMATCH_API StdMatchingDistanceTable : public MatchingDistanceTable
   DistanceType getICost(int& ) const ;
   DistanceType getDCost(int& ) const ;
   DistanceType getCCost(int ,int ) const;
+  DistanceType getMCost(vector<int> ,int ) const;
+  DistanceType getSCost(int ,vector<int> ) const;
  
   DistanceType inputTreeToEmpty(int );
   DistanceType inputForestToEmpty(int );
@@ -180,6 +184,8 @@ class TREEMATCH_API CompactMatchingDistanceTable : public MatchingDistanceTable
   DistanceType getICost(int& ) const ;
   DistanceType getDCost(int& ) const ;
   DistanceType getCCost(int ,int ) const;
+  DistanceType getMCost(vector<int> ,int ) const;
+  DistanceType getSCost(int ,vector<int> ) const;
 
   void openDistancesVector(int input_vertex);
   void closeDistancesVector(int input_vertex);

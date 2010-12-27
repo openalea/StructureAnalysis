@@ -116,6 +116,17 @@ protected :
   
 };
 
+class TREEMATCH_API ExtMatching : public Matching
+{
+
+public :
+  ExtMatching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance, MDTableType mdtable_type  ):Matching(input,reference,nodeDistance,mdtable_type){};
+
+  
+  //Distance Between Trees
+  virtual DistanceType distanceBetweenTree(int ,int ) ;
+  
+};
 
 #endif
 

@@ -104,6 +104,8 @@ class TREEMATCH_API TreeGraph
   int getNbChild(int ) const;
   int getNbDesc(int ) const;
 
+  vector<int> getPath(int, int) const;
+
   /** Return the number of node in the tree */
   inline int getNbVertex() const { return _treenodes.size(); }
 
