@@ -51,7 +51,7 @@ typedef std::vector<DistanceType> DistanceVector;
 typedef std::vector<DistanceVector> DistanceVectorTable;
 
 
-class DistanceTable
+class TREEMATCH_API DistanceTable
 {
 
  public:

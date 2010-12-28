@@ -41,7 +41,7 @@ using namespace boost::python;
 #define treenode2python(node) bp::object(node)
 inline object treenodelist2python( const vector<TreeNodePtr>& nodes )
 {
-  return make_list(nodes);
+  return make_list(nodes)();
  }
 
 class PyNodeCost : public NodeCost, public bp::wrapper<NodeCost>

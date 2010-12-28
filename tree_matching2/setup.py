@@ -52,6 +52,7 @@ if __name__ == '__main__':
 
           # Add package platform libraries if any
           include_package_data=True,
+          package_data = {'' : ['*.pyd', '*.so', '*.dylib'],},
           zip_safe=False,
 
           # Specific options of openalea.deploy

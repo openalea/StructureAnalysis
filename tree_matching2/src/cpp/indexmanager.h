@@ -53,7 +53,7 @@ typedef std::list<int> IndexList;
  *\date 1999
  */
 
-class IndexManager
+class TREEMATCH_API IndexManager
 {
 
  public :
