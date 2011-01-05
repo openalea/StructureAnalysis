@@ -4,4 +4,5 @@ void export_TreeNode();
 void export_TreeGraph();
 void export_NodeCost();
 void export_Matching();
+void export_ExtMatching();
 #endif

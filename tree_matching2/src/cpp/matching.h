@@ -95,7 +95,7 @@ public :
 
   DistanceType getDBT(int ,int ) const;
   DistanceType getDBF(int ,int ) const;
-  DistanceType  match();
+  virtual DistanceType  match();
   void getList(int ,int ,Sequence*);
   void ForestList(int ,int ,Sequence& );
   void TreeList(int ,int ,Sequence& );

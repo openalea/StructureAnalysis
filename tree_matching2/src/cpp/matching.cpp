@@ -332,15 +332,17 @@ void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence
         }break;
         case 4: {
 	  int size = Lat(L,1);
-	  for (int i=0;i<size;i++)
-	    sequence.append(input_vertex,Lat(L,i+2),-1);
-          TreeList(input_vertex,Lat(L,2),sequence);
+	  for (int i=0;i<size;i++){
+	    sequence.append(Lat(L,i+4),reference_vertex,-1);
+	  }
+          ForestList(Lat(L,4),reference_vertex,sequence);
         }break;
          case 5: {
 	  int size = Lat(L,1);
-	  for (int i=0;i<size;i++)
-	    sequence.append(Lat(L,i+2),reference_vertex,-1);
-          TreeList(input_vertex,Lat(L,2),sequence);
+	  for (int i=0;i<size;i++){
+	    sequence.append(input_vertex,Lat(L,i+4),-1);
+	  }
+          ForestList(input_vertex,Lat(L,4),sequence);
         }break;
         default : break;
         }
@@ -400,8 +402,9 @@ DistanceType Matching::match()
 		  if (int(100. - 100*input_vertex/size1)%5 == 0)
 		    cerr << "\x0d" << "Already computed : "<<int(100. - 100*input_vertex/size1) <<"% " <<" matched ...                                   " << flush;
 		  if (_mdtable_type == COMPACT)
-		    for (int i=1;i<=T1->getNbChild(input_vertex);i++)
+		    for (int i=0;i<T1->getNbChild(input_vertex);i++){
 		      _distances->closeDistancesVector(T1->child(input_vertex,i));
+		    }
  		}
 		D=getDBT(0,0);
 	}
@@ -499,7 +502,6 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
   cost2=cost2+min;
   // On conserve le cout s'il est inferieur au precedent
   if (cost2<MIN) { MIN=cost2; MTC=2; }
-
   //----------------------------------------------------------------------------------
   //Case3 : We evaluate the matching between the input_forest and the reference_forest
   // On evalue la mise en correspondance des arbres des deux forets issues de T1 et T2
@@ -510,43 +512,52 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
   cost3=cost3+_distances->getCCost(input_vertex,reference_vertex);
   // On conserve le cout s'il est inferieur au precedent
   if (cost3<MIN) { MIN=cost3; MTC=3;  }
-  
   const int size1 = T1->getNbVertex();
   const int size2 = T2->getNbVertex();
-  min = 0;
+  min = MAXDIST;
   vector<int> min_path_im;
   cost4 = getDBT(input_vertex,EMPTY_TREE);
-  for (int des = size1; des <input_vertex;i++){
+  for (int des = size1-1; des > input_vertex;des--){
     vector<int> path = T1->getPath(des,input_vertex);
-    dist4 = -_distances->getMCost(path,reference_vertex)-getDBF(des,reference_vertex);
-    if (dist4>min){
-      min = dist4;
-      min_path_im = path;
+    if (path.size()>0){
+      dist4 = _distances->getMCost(path,reference_vertex)+getDBF(des,reference_vertex)-getDBF(des,EMPTY_TREE);
+      for (int i = 0; i<path.size();i++)
+	dist4 -= _distances->getDCost(path[i]);
+      if (dist4<min){
+	min = dist4;
+	min_path_im = path;
+      }
     }
   }
-  cost4 += dist4;
-  if (cost4<MIN){
-    MIN = cost4;
-    MTC = 4;
+  if (min_path_im.size()>0){ // on ne met à jour que si le chemin est au moins de taille 1
+    cost4 += min;
+    if ((cost4<MIN)&&(cost4>=0)){
+      MIN = cost4;
+      MTC = 4;
+    }
   }
-
-  min = 0;
+  min = MAXDIST;
   vector<int> min_path_jm;
   cost5 = getDBT(EMPTY_TREE,reference_vertex);
-  for (int des = size2; des <reference_vertex;i++){
+  for (int des = size2-1; des > reference_vertex;des--){
     vector<int> path = T2->getPath(des,reference_vertex);
-    dist5 = -_distances->getSCost(input_vertex,path)-getDBF(input_vertex,des);
-    if (dist5>min){
-      min = dist5;
-      min_path_jm = path;
+    if (path.size()>0){
+      dist5 = _distances->getSCost(input_vertex,path)+getDBF(input_vertex,des)-getDBF(EMPTY_TREE,des);
+      for (int i = 0; i<path.size();i++)
+	dist5 -= _distances->getICost(path[i]);
+      if (dist5<min){
+	min = dist5;
+	min_path_jm = path;
+      }
     }
   }
-  cost5 += dist5;
-  if (cost5<MIN){
-    MIN = cost5;
-    MTC = 5;
+  if (min_path_jm.size()>0){
+    cost5 += min;
+    if (cost5<MIN){
+      MIN = cost5;
+      MTC = 5;
+    }
   }
-      
 
   //-----------------------------------
   // We maintain the matching lists
@@ -567,16 +578,18 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
       _choices.putLast(input_vertex,reference_vertex,reference_vertex);
     }break;
     case 4 :{
-      _choices.putFirst(input_vertex,reference_vertex,min_path_im.size());
-      for (int i=0;i<min_path_im.size();i++)
+     _choices.putFirst(input_vertex,reference_vertex,min_path_im.size());
+     for (int i=0;i<min_path_im.size();i++){
 	_choices.putLast(input_vertex,reference_vertex,min_path_im[i]);
+     }
       //  _choices.putLast(input_vertex,reference_vertex,reference_vertex);
     }break;
     case 5 :{
       _choices.putFirst(input_vertex,reference_vertex,min_path_jm.size());
-      for (int i=0;i<min_path_jm.size();i++)
+      for (int i=0;i<min_path_jm.size();i++){
 	_choices.putLast(input_vertex,reference_vertex,min_path_jm[i]);
       //     _choices.putLast(input_vertex,reference_vertex,reference_vertex);
+      }
     }break;
     default :   assert(0);break;
     }

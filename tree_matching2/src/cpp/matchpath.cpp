@@ -187,20 +187,24 @@ bool MatchPath::direct(int residual_edge)
 DistanceType MatchPath::edgeCost(int input_vertex,int reference_vertex)
 {
    if (_mdtable->getType()==STD){
-     DistanceVectorTable& _treeDistances = ((StdMatchingDistanceTable*)&_mdtable)->getDistanceTable();
-     if (input_vertex==-1) 
+      //DistanceVectorTable& _treeDistances = ((StdMatchingDistanceTable*)&_mdtable)->getDistanceTable();
+      DistanceVectorTable& _treeDistances = _mdtable->getDistanceTable();
+      if (input_vertex==-1) 
       input_vertex = _treeDistances.size()-1; 
     if (reference_vertex==-1) 
       reference_vertex = (_treeDistances.at(input_vertex)).size()-1; 
      return _treeDistances.at(input_vertex)[reference_vertex];
   }
   else{
-     DistanceTable& _treeDTable = ((CompactMatchingDistanceTable*)&_mdtable)->getTreeDistanceTable();
+    //DistanceTable& _treeDTable = ((CompactMatchingDistanceTable*)&_mdtable)->getTreeDistanceTable();
+    //    cerr<<input_vertex<<" - "<<reference_vertex<<endl;
+    DistanceTable& _treeDTable = _mdtable->getTreeDistanceTable();
     //cerr<<_treeDTable->getDistance(input_vertex,reference_vertex)<<endl;
     if (input_vertex==-1) { input_vertex = _treeDTable.getSimulatedSize()-1; }
     if (reference_vertex==-1) { reference_vertex = _treeDTable.getColumnSize()-1; }
     return(_treeDTable.getDistance(input_vertex,reference_vertex));
   }
+
 }
 
 
@@ -427,6 +431,7 @@ DistanceType MatchPath::length(int residual_edge,int vertex1,int vertex2)
   int flow_edge=(int) residual_edge/2;
   int source=0;
   int sink=nbVertex-1;
+
   
   if ((direct(residual_edge))&&(saturated(flow_edge))) 	{return(2*MAXDIST);};
   if ((reverse(residual_edge))&&(empty(flow_edge))) 	{return(2*MAXDIST);};

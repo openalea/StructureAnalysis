@@ -161,12 +161,18 @@ vector<int> TreeGraph::getPath(int desc, int anc) const
 {
   vector<int> path;
   int vertex = desc;
-  while (vertex != anc){
+  while (vertex > anc){ // un descendant a necessairement un id plus grand que son ancetre
     path.push_back(vertex);
     vertex = father(vertex);
   }
-  path.push_back(vertex);
-  return path;
+  if (vertex == anc){
+    path.push_back(vertex);
+    return path;
+  }
+  else{
+    vector<int> emptypath;
+    return emptypath;
+  }
 }
 
 

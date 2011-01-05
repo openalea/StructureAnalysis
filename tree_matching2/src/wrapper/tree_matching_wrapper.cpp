@@ -43,4 +43,5 @@ BOOST_PYTHON_MODULE(__tree_matching__)
   export_TreeGraph();
   export_NodeCost();
   export_Matching();
+  export_ExtMatching();
 };
