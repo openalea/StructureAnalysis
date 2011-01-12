@@ -337,7 +337,7 @@ class Unlabelled_tree : public Generic_tree_char
 {  // a tree structure, i.e. a tree with no label
 
    // friend classes
-   template <typename Type> friend class Generic_tree;
+   // friend class Generic_tree<char>;
 
 protected:
 

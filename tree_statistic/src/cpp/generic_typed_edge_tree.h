@@ -139,7 +139,7 @@ class Unlabelled_typed_edge_tree : public Generic_typed_edge_tree_char,
 {  // a tree structure, i.e. a tree with no label
 
    // friend classes
-   template <typename Type> friend class Typed_edge_tree;
+   // friend  class Typed_edge_tree<char>;
 
 public :
 
