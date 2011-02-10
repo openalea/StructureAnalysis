@@ -463,9 +463,9 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
 
     GlobalInitialTransition = kargs.get("GlobalInitialTransition", True)
     GlobalSample = kargs.get("GlobalSample", True)
-    CountingFlag = kargs.get("CountingFlag", True)
+    Counting = kargs.get("Counting", True)
 
-    error.CheckType([CountingFlag, GlobalSample, GlobalInitialTransition],
+    error.CheckType([Counting, GlobalSample, GlobalInitialTransition],
                     [bool, bool, bool])
 
     #args0 is a string
@@ -504,10 +504,10 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
         if order_estimation is True:
             markov = obj.variable_order_markov_estimation1(
                 Type, MinOrder, MaxOrder, Algorithm, Threshold, Estimator ,
-                  GlobalInitialTransition , GlobalSample , CountingFlag)
+                  GlobalInitialTransition , GlobalSample , Counting)
         else:
             markov = obj.variable_order_markov_estimation2(
-                    Type, MaxOrder, GlobalInitialTransition, CountingFlag)
+                    Type, MaxOrder, GlobalInitialTransition, Counting)
 
     #Variable order markov case
     elif isinstance(args[0], _VariableOrderMarkov):
@@ -519,13 +519,13 @@ def _estimate_variable_order_markov(obj, *args, **kargs):
      #       Type e and GlobalInitialTransition cannot be used together""")
 
         markov = obj.variable_order_markov_estimation3(vom,
-                      GlobalInitialTransition, CountingFlag)
+                      GlobalInitialTransition, Counting)
 
     # array case
     elif isinstance(args[0], list):
         symbol = args[0]
         markov = obj.lumpability_estimation(symbol, Penalty,
-                                         Order, CountingFlag)
+                                         Order, Counting)
 
     else:
         raise KeyError("jfjf")
