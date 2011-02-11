@@ -3311,7 +3311,7 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
         seq->likelihood = markov->likelihood_computation(*seq , I_DEFAULT);
       }
 
-#     ifdef MESSAGE
+#     ifdef DEBUG
       else {
         cout << "\n" << STAT_label[STATL_LIKELIHOOD] << ": " << seq->likelihood
              << " | " << markov->likelihood_computation(*seq , I_DEFAULT) << endl;

@@ -844,7 +844,7 @@ MarkovianSequences* MarkovianSequences::merge(StatError &error , int nb_sample ,
       ivertex_identifier = NULL;
     }
 
-    seq = new MarkovianSequences(inb_sequence , iidentifier , ilength , ivertex_identifier , 
+    seq = new MarkovianSequences(inb_sequence , iidentifier , ilength , ivertex_identifier ,
                                  index_parameter_type , nb_variable , type);
     delete [] iidentifier;
     delete [] ilength;
@@ -1453,7 +1453,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 {
   bool status = true;
   register int i , j , k;
-  int variable , offset , *symbol , *limit , *itype;
+  int variable = ivariable , offset , *symbol , *limit , *itype;
   MarkovianSequences *seq;
 
 
@@ -4227,7 +4227,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
 
     else {
       nb_state = marginal_distribution[variable]->nb_value - marginal_distribution[variable]->offset;
- 
+
       if ((nb_state < 2) || (nb_state > NB_STATE)) {
         status = false;
         error.update(SEQ_error[SEQR_NB_STATE]);
@@ -4240,7 +4240,7 @@ bool MarkovianSequences::word_count(StatError &error , ostream &os , int variabl
         }
         nb_word_bound = pow((double)nb_state , word_length);
         if (nb_word_bound < max_nb_word) {
-          max_nb_word = (int)nb_word_bound; 
+          max_nb_word = (int)nb_word_bound;
         }
 
         if (max_nb_word > MAX_NB_WORD) {

@@ -59,14 +59,17 @@ enum {
   COMPLETION
 };
 
-
+namespace Stat_trees {
+  class MarkovOutTree;
+  MarkovOutTree* markov_out_tree_parsing(StatError& error,
+                                         std::ifstream &in_file,
+                                         int &line);
+};
 
 /****************************************************************
  *
  *  Definition des classes :
  */
-
-
 // class VariableOrderMarkov : public StatInterface , public Chain {
 class VariableOrderMarkov : public StatInterface , protected Chain {  // chaine de Markov
                                                                        // d'ordre variable
@@ -75,6 +78,7 @@ class VariableOrderMarkov : public StatInterface , protected Chain {  // chaine 
     friend class VariableOrderMarkovIterator;
     friend class VariableOrderMarkovData;
     friend class VariableOrderChainData;
+    friend class Stat_trees::MarkovOutTree;
 
     friend VariableOrderMarkov* variable_order_markov_parsing(StatError &error ,
                                                               ifstream &in_file ,
@@ -82,6 +86,10 @@ class VariableOrderMarkov : public StatInterface , protected Chain {  // chaine 
     friend VariableOrderMarkov* variable_order_markov_ascii_read(StatError &error ,
                                                                  const char *path ,
                                                                  int length);
+    friend Stat_trees::MarkovOutTree* Stat_trees::markov_out_tree_parsing(StatError& error,
+                                                                          std::ifstream &in_file,
+                                                                          int &line);
+                                                             
     friend std::ostream& operator<<(std::ostream &os , const VariableOrderMarkov &markov)
     { return markov.ascii_write(os); }
 
