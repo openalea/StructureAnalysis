@@ -30,5 +30,8 @@ env.AppendUnique(LIBS=['vptool', 'vpstat_tool'])
 
 
 env.ALEAWrapper("../stat_tool", "_stat_tool", sources)
-
+# includes in wrappers should be restricted to boost_python_aliases.h and wrapper_util.h
+# inc = env.Install('$build_includedir/stat_tool', includes) 
+inc = env.Install('$build_includedir/stat_tool', ["boost_python_aliases.h", "wrapper_util.h"])
+env.Alias('build', inc)
 

@@ -1711,6 +1711,7 @@ void Distribution::plotable_concentration_write(SinglePlot &plot) const
 MultiPlotSet* Distribution::get_plotable_distributions(StatError &error , int nb_dist ,
                                                        const Distribution **idist) const
 
+// usage : plot[vue][distribution]
 {
   MultiPlotSet *plot_set;
 

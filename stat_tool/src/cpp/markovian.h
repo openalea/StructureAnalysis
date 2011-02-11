@@ -113,9 +113,6 @@ class ChainData;
 class Chain {           // chaine de Markov
 
 //    friend class ChainData;
-
-    friend Chain* chain_parsing(StatError &error , ifstream &in_file ,
-                                int &line , char type);
     friend std::ostream& operator<<(std::ostream &os , const Chain &chain)
     { return chain.ascii_print(os , true); }
 

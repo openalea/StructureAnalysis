@@ -88,10 +88,16 @@ class Reestimation {    // loi empirique a frequences entieres ou reelles (estim
 // protected :
 public :
 
+    /// maximal possible value
+    /// or maximal value observed in sample
     int nb_value;           // nombre de valeurs a partir de 0
     int alloc_nb_value;     // nombre de valeurs alloues
+    /// number of values (starting from 0)
+    /// before 1st occurrence of an element with non null frequency
     int offset;             // nombre de valeurs de frequence nulle a partir de 0
+    /// sample size
     Type nb_element;        // effectif total
+    /// maximal frequency
     Type max;               // frequence maximum
     double mean;            // moyenne
     double variance;        // variance
