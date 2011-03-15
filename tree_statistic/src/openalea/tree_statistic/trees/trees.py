@@ -319,7 +319,6 @@ class Tree:
             return dict(self.__tree_to_mtg_vid)
         else:
             return self.__tree_to_mtg_vid[treevid]
-        Argument 
 
     def NbFloat(self):
         """Return the number of variables with floating type."""
