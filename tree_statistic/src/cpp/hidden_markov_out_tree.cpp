@@ -468,8 +468,8 @@ ostream& HiddenMarkovOutTree::spreadsheet_write(ostream& os, const HiddenMarkovT
                   break;
             }
 
-            if (otrees->observation != NULL)
-               observation= otrees->observation[variable];
+            if (otrees->observation_distribution != NULL)
+               observation= otrees->observation_distribution[variable];
             if (otrees->characteristics[variable] != NULL)
                characteristics= otrees->characteristics[variable];
          }
@@ -488,8 +488,8 @@ ostream& HiddenMarkovOutTree::spreadsheet_write(ostream& os, const HiddenMarkovT
 
          if (otrees != NULL)
          {
-            if (otrees->observation != NULL)
-               observation= otrees->observation[i];
+            if (otrees->observation_distribution != NULL)
+               observation= otrees->observation_distribution[i];
             // warning : akward !
          }
          pdprocess[i]->spreadsheet_print(os, observation);
@@ -610,8 +610,8 @@ bool HiddenMarkovOutTree::plot_write(const char * prefix, const char * title,
                   break;
             }
 
-            if (otrees->observation != NULL)
-               observation= otrees->observation[variable];
+            if (otrees->observation_distribution != NULL)
+               observation= otrees->observation_distribution[variable];
 
             if (otrees->characteristics[variable] != NULL)
                characteristics= otrees->characteristics[variable];
@@ -626,8 +626,8 @@ bool HiddenMarkovOutTree::plot_write(const char * prefix, const char * title,
 
       for(i= 0; i < _nb_doutput_process; i++)
       {
-         if (otrees->observation != NULL)
-            observation= otrees->observation[i];
+         if (otrees->observation_distribution != NULL)
+            observation= otrees->observation_distribution[i];
 
          piprocess[i]->plot_print(prefix, title, i, observation);
       }

@@ -1946,7 +1946,7 @@ HiddenMarkovTreeData::hidden_markov_out_tree_estimation(StatError& error,
             else
                if ((ihmarkov.npprocess[var+1] != NULL) && (characteristics[var] != NULL))
                   for(j= 0; j < get_max_int_value(var); j++)
-                     if (characteristics[var]->marginal->frequency[j] == 0)
+                     if (characteristics[var]->marginal_distribution->frequency[j] == 0)
                      {
                         status= false;
                         ostringstream error_message;
@@ -2266,7 +2266,7 @@ HiddenMarkovTreeData::hidden_markov_out_tree_estimation(StatError& error,
          reestimation(hmarkovt->nb_state, chain_reestim->initial ,
                       hmarkovt->initial, MIN_PROBABILITY, false);
 
-         // reestimation the transition probabilities
+         // reestimation of the transition probabilities
 
          for(i= 0; i < hmarkovt->nb_state; i++)
             reestimation(hmarkovt->nb_state, chain_reestim->transition[i],
@@ -2563,7 +2563,7 @@ HiddenMarkovTreeData::hidden_markov_out_tree_estimation(StatError& error,
                 if (hmarkovt->piprocess[var] != NULL)
                 {
                    for(j= 0; j < hmarkovt->nb_state; j++)
-                      hmarkovt->piprocess[var]->observation[j]->computation(otrees->observation[var-1][j]->nb_value,
+                      hmarkovt->piprocess[var]->observation[j]->computation(otrees->observation_distribution[var-1][j]->nb_value,
                                                                             OBSERVATION_THRESHOLD);
                 }
 
@@ -2683,7 +2683,7 @@ HiddenMarkovTreeData::hidden_markov_out_tree_estimation(StatError& error,
       for(var= 0; var < _nb_integral; var++)
       {
     // nb_value[var]= get_nb_values(var);
-         nb_value[var]= characteristics[var]->marginal->nb_value;
+         nb_value[var]= characteristics[var]->marginal_distribution->nb_value;
       }
 
       // initial HMT

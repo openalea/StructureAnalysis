@@ -400,12 +400,12 @@ class Tree:
                 f.close()
                 msg="File "+file_name+" already exists"
                 raise IOError, msg
-                                
+
         f=file(file_name, 'w+')
         f.write(self.__mtg_header(variable_names))
         f.write(self._mtg_write())
         f.close()
-        
+
     def SelectSubTree(self, vid, keep=True):
         """Select and return a subtree.
 
@@ -1506,7 +1506,7 @@ class Trees(object):
         self._copy_vid_conversion(diff)
         self._copy_tid_conversion(diff)
         return diff
-            
+
     def Display(self, ViewPoint=None, Detail=1):
         """Display Trees object with a level of Detail 1 or 2.
         
@@ -1541,16 +1541,16 @@ class Trees(object):
                 msg="Bad value for 'ViewPoint' argument:"+str(type(Detail)) \
                 +" - expecting 'DATA'"
                 raise ValueError, msg
-        
+
     def Estimate(self, model_name, arg1, arg2=None, arg3=None, arg4=None, 
                  arg5=None, arg6=None, Algorithm="ForwardBackward", Saem=1., 
                  ForceParametric=[]):
         """Estimate a (hidden) Markov tree.
-        
+
         Algorithm correspond to
         Saem correspond to the rate of decay of the part corresponding 
         to restored states. Saem=0. for pure SEM or CEM algorithms.
-        
+
         :Usage:
 
             Estimate("HIDDEN_MARKOV_TREE", nb_state, structure,
@@ -1780,7 +1780,7 @@ class Trees(object):
         
     def ExtractHistogram(self, nature, variable=None, value=None):
         """Extract a frequency distribution from the Trees.
-        
+
         Usage:  ExtractHistogram("Size")
                 ExtractHistogram("NbChildren")
                 ExtractHistogram("Value", variable)
@@ -2071,15 +2071,44 @@ class Trees(object):
         self._copy_tid_conversion(merged)
         return merged
 
-    def MTGVertexId(self, TreeId, vid=None):
-        """Return the MTG vid of a Tree vertex for a given tree"""
+    def MTGVertexId(self, TreeId, TreeVertexId=None):
+        """Return the MTG vertex identifier (vid) of a Tree vertex for a given tree
+
+        :Usage:
+
+            mtg_vdic = MTGVertexId(TreeId)
+            mtg_vid = MTGVertexId(TreeId, TreeVertexId)
+
+        :Parameters:
+
+          `TreeId` (int) - Identifier of the tree whose MTG ids must be returned
+          `TreeVertexId` (int) - Identifier of the tree vertex (in self) whose MTG vid must be returned
+            (all vertices if None)
+
+        :Returns:
+
+            If TreeVertexId is not None, return the MTG vid associated with vertex TreeVertexId of tree TreeId.
+            If TreeVertexId is None, return the dictionary of MTG vids associated with all vertices in tree TreeId.
+            A Warning is raised if self is not connected with some MTG.
+
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> MTGVertexId(TreeId = 0)
+
+        .. seealso::
+            :func:`~openalea.tree_statistic.trees.etrees.Trees._SetMTGVidDictionary`,
+            :func:`~openalea.tree_statistic.trees.Trees.TreeVertexId`.
+        """
         if self.__tree_to_mtg_vid is None:
             raise Warning, "Current Trees object has not been obtained from " \
                 "a MTG"
-        if vid is None:
+        if TreeVertexId is None:
             return dict(self.__tree_to_mtg_vid[TreeId])
         else:
-            return self.__tree_to_mtg_vid[TreeId][vid]
+            return self.__tree_to_mtg_vid[TreeId][TreeVertexId]
 
     def MTGComponentRoot(self, TreeId=None):
         """Return the MTG ComponentRoot corresponding to a given 
@@ -2119,7 +2148,7 @@ class Trees(object):
              Color=None, DressingFile=None, Title="", variable=0):
         """Graphical output using the Geom 3D viewer for Trees 
            or Gnuplot.py for features.
-        
+
         Usage:  Plot(ViewPoint="Data")
                 Plot("FirstOccurrenceRoot", variable=0)
         Other possible values for ViewPoint: 
@@ -2147,7 +2176,7 @@ class Trees(object):
                     cfile.close()
                     import random
                     mtgprefix+=str(random.randint(1,9))
-    
+
             if DressingFile is None:
                 # create the dressing file
                 drfprefix="dftmp"
@@ -2163,7 +2192,7 @@ class Trees(object):
                         cfile.close()
                         import random
                         drfprefix+=str(random.randint(1,9))
-                
+
                 dressing=file(drffile_name,'w+')
                 dressing.write("Phyllotaxy = 103\n")
                 dressing.write("NbPlantsPerLine = "+str(self.NbTrees())+"\n")
@@ -2171,21 +2200,21 @@ class Trees(object):
             else:
                 # use the given dressing file
                 drffile_name=DressingFile
-    
+
             # create the temporary MTG file
             self.Save(mtgfile_name, False, list(self.__attributes))
-    
+
             import openalea.aml as amlPy
-            
+
             mode=False
             if not amlPy.getmode():
             # conversion from AML object to Python
                 mode=True
                 amlPy.setmode(1)
-                
+
             M=amlPy.MTG(mtgfile_name)
             DR=amlPy.DressingData(drffile_name)
-                            
+
             if Length is None:
                 # define a default length function
                 default_lengthfunc= lambda x: 20
@@ -2208,7 +2237,7 @@ class Trees(object):
                         return 10
                 else:
                     return 10
-    
+
             if BottomDiameter is None:
                 # define a default diameter function
                 default_diamfunc= lambda x: 5
@@ -2231,7 +2260,7 @@ class Trees(object):
                         return 10
                 else:
                     return 10
-    
+
             if Color is None:
                 # define a default color function
                 default_colorfunc= lambda x: 0
@@ -2255,21 +2284,19 @@ class Trees(object):
                         return 0
                 else:
                     return 0
-    
-
             vtx_list=amlPy.VtxList(Scale=1)
             pf=amlPy.PlantFrame(vtx_list, Scale=2, DressingData=DR, 
                                 Length=lengthfunc, BottomDiameter=diamfunc)
             amlPy.Plot(pf, Color=colorfunc)
-            
+
             if mode:
                 amlPy.setmode(0)
-            
+
             # remove the temporary files
             os.remove(mtgfile_name)
             if DressingFile is None:
                 os.remove(drffile_name)
-                
+
         else:
             # Graphical output of the features using Gnuplot.py
             if ViewPoint.upper()=="FIRSTOCCURRENCEROOT":
@@ -2473,9 +2500,13 @@ class Trees(object):
         self._copy_tid_conversion(shifted)
         return shifted
 
-    def Size(self):
-        """Return the number of vertices."""
-        return self.__ctrees.Size()
+    def Size(self, TreeId=None):
+        """Return the total number of vertices of self,
+            or the number of vertices of a tree in self."""
+        if (TreeId is None):
+            return self.__ctrees.Size()
+        elif self._valid_tree(TreeId):
+            return self.__ctrees.Size(TreeId)
 
     def Transcode(self, variable, new_values):
         """Transcoding of values.
@@ -2500,7 +2531,7 @@ class Trees(object):
         """Return the tree corresponding to the given identifier."""
         # d=self.__default_tree_value()
         d = self.Types()
-        if self.__valid_tree(TreeId):
+        if self._valid_tree(TreeId):
             res = Tree(d, self.__ctrees.Tree(TreeId), self.__attributes)
             if (not(self.__mtg_to_tree_vid is None) and
             len(self.__mtg_to_tree_vid[TreeId])) > 0:
@@ -2528,12 +2559,41 @@ class Trees(object):
                 return res
 
     def TreeVertexId(self, TreeId=None, MTGVid=None):
-        """Return the tree vid of a MTG vertex for a given tree, 
-        or both the tree and the vid for a given MTG vertex.
-        
-        Usage: v = TreeVertexId(TreeId=0, MTGVid=2)
-               dic = TreeVertexId(TreeId=0)
-               t, v = TreeVertexId(MTGVid=2)"""
+        """Return the tree vertex identifier (vid) of a MTG vertex for a given tree,
+            or both the tree and the vid for a given MTG vertex.
+
+        :Usage:
+
+            v = TreeVertexId(TreeId = 0, MTGVid = 2)
+            dic = TreeVertexId(TreeId = 0)
+            t, v = TreeVertexId(MTGVid = 2)
+
+        :Parameters:
+
+          `TreeId` (int) - Identifier of the tree whose vid must be returned
+          `MTGVid` (int) - Identifier of the MTG vertex whose Tree vid (in self) must be returned
+            (all vertices if None)
+
+        :Returns:
+
+            If neither TreeId nor MTGVid is None, return the Tree vid (in self) of tree TreeId associated with MTG vid MTGVid.
+            If MTGVid is None, return the dictionary of Tree vids (in self) of tree TreeId associated with all vertices in MTG that are in TreeId.
+            If TreeId is None, return the pair of the tree identifier and the vid (in self) associated with MTG vid MTGVid.
+            A Warning is raised if self is not connected with some MTG.
+
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> v = TreeVertexId(TreeId = 0, MTGVid = 2)
+            >>> dic = TreeVertexId(TreeId = 0)
+            >>> t, v = TreeVertexId(MTGVid = 2)
+
+        .. seealso::
+            :func:`~openalea.tree_statistic.trees.etrees.Trees._SetMTGVidDictionary`,
+            :func:`~openalea.tree_statistic.trees.Trees.MTGVertexId`.
+        """
         if self.__mtg_to_tree_vid is None:
             raise Warning, "Current Trees object has not been obtained from " \
                 "a MTG"
@@ -2579,30 +2639,48 @@ class Trees(object):
 
     def _ctrees_display(self):
         return self.__ctrees.Display(False)
-    
+
     def _copy_vid_conversion(self, dest):
-        # copy the dictionnaries corresponding to the tree -> MTG
-        # and MTG -> tree vid conversion
-            if self.__mtg_to_tree_vid is None:
-                dest.__mtg_to_tree_vid=None
-            else:
-                dest.__mtg_to_tree_vid=list(self.__mtg_to_tree_vid)
-            if self.__tree_to_mtg_vid is None:
-                dest.__tree_to_mtg_vid=None
-            else:
-                dest.__tree_to_mtg_vid=list(self.__tree_to_mtg_vid)
+        """Copy the dictionnaries corresponding to the tree -> MTG
+            and MTG -> tree vid conversions
+
+        :Usage:
+
+            _copy_vid_conversion(Tree)
+
+        :Parameters:
+
+          `dict` (trees.Trees) - instance from which dictionaries have to be copied
+        """
+        if self.__mtg_to_tree_vid is None:
+            dest.__mtg_to_tree_vid=None
+        else:
+            dest.__mtg_to_tree_vid=list(self.__mtg_to_tree_vid)
+        if self.__tree_to_mtg_vid is None:
+            dest.__tree_to_mtg_vid=None
+        else:
+            dest.__tree_to_mtg_vid=list(self.__tree_to_mtg_vid)
 
     def _copy_tid_conversion(self, dest):
-        # copy the dictionnaries corresponding to the tree -> MTG
-        # and MTG -> tree id conversion
-            if self.__mtg_to_tree_tid is None:
-                dest.__mtg_to_tree_tid=None
-            else:
-                dest.__mtg_to_tree_tid=dict(self.__mtg_to_tree_tid)
-            if self.__tree_to_mtg_tid is None:
-                dest.__tree_to_mtg_tid=None
-            else:
-                dest.__tree_to_mtg_tid=dict(self.__tree_to_mtg_tid)
+        """Copy the dictionnaries corresponding to the tree -> MTG
+            and MTG -> tree id conversions
+
+        :Usage:
+
+            _copy_tid_conversion(Tree)
+
+        :Parameters:
+
+          `dict` (trees.Trees) - instance from which dictionaries have to be copied
+        """
+        if self.__mtg_to_tree_tid is None:
+            dest.__mtg_to_tree_tid=None
+        else:
+            dest.__mtg_to_tree_tid=dict(self.__mtg_to_tree_tid)
+        if self.__tree_to_mtg_tid is None:
+            dest.__tree_to_mtg_tid=None
+        else:
+            dest.__tree_to_mtg_tid=dict(self.__tree_to_mtg_tid)
 
     def _max(self, variable=None):
         """Return the maximal values of one or all variables."""
@@ -2640,7 +2718,7 @@ class Trees(object):
             msg="bad type for variable " + str(variable) + ": " + \
                 str(self.__types[variable])
             raise TypeError, msg
-    
+
     def _valid_cvariable(self, variable):
         # check the validity of the variable index and return the corresponding 
         # index for the C++ programs
@@ -2650,6 +2728,26 @@ class Trees(object):
             raise IndexError, "variable index out of range: "+str(variable)
         else:
             return self.__tmap[variable]
+
+    def _valid_tree(self, TreeId):
+        """Check whether a tree identifier is valid"""
+        if type(TreeId)!=int:
+            raise TypeError, "bad tree index type: "+str(type(TreeId))
+        elif (TreeId < 0) or (TreeId >= self.NbTrees()):
+            raise IndexError, "tree index out of range: "+str(TreeId)
+        else:
+            return True
+
+    def _valid_vid(self, TreeId, Vid):
+        """Check whether a vertex identifier is valid"""
+        if self._valid_tree(TreeId):
+            if type(Vid) != int:
+                msg = str(Vid) + " has not the type of a valid vertex identifier."
+                raise TypeError, msg
+            elif (Vid < 0 or Vid >= self.Size(TreeId)):
+                msg = str(Vid) + " is not a valid vertex identifier."
+                raise IndexError, msg
+            return True
 
     def __default_tree_value(self):
         l=[]
@@ -2736,15 +2834,7 @@ class Trees(object):
                     message=message[0:i+len(sub)+1]+str(self.__tmapi[val-1]) \
                             +message[i+len(sub)+2:len(message)]
         return message
-    
-    def __valid_tree(self, TreeId):
-        if type(TreeId)!=int:
-            raise TypeError, "bad tree index type: "+str(type(TreeId))
-        elif (TreeId < 0) or (TreeId >= self.NbTrees()):
-            raise IndexError, "tree index out of range: "+str(TreeId)
-        else:
-            return True
-        
+
     def __str__(self):
         """Display the trees."""
         

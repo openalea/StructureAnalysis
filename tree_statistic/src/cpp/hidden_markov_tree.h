@@ -113,7 +113,9 @@ private :
    Distribution *size;
    // Distribution *nb_children;            // [distributions of the quantities for
                                             // which the characteristic distributions
-                                            // are invariant - if any - to determine]
+                                            // are not invariant - to determine]
+   /// distribution of the tree depth
+   Distribution *depth;
    /// probability of non occurrence of a given value
    double *no_occurrence;
    /// probability of leaving a given value
@@ -175,6 +177,17 @@ private :
                    FrequencyDistribution** empirical_observation= NULL,
                    const TreeCharacteristics * characteristics= NULL,
                    const FrequencyDistribution * hsize= NULL) const;
+
+   /** Matplotlib output of NonparametricTreeProcess */
+   MultiPlotSet* plotable_write(MultiPlotSet &plot, int &index,
+                                int process, FrequencyDistribution * const * empirical_observation = NULL,
+                                const TreeCharacteristics * characteristics = NULL,
+                                const FrequencyDistribution * hsize = NULL) const;
+
+   /** Return the number of views (i.e. the size) in Matplotlib output */
+   unsigned int nb_plot_set_computation(int process, FrequencyDistribution * const * empirical_observation = NULL,
+                                        const TreeCharacteristics * characteristics = NULL,
+                                        const FrequencyDistribution * hsize = NULL) const;
 
 public :
 
@@ -615,7 +628,9 @@ public :
    typedef tree_type::children_iterator children_iterator;
    typedef tree_type::vertex_iterator vertex_iterator;
 
-   typedef FrequencyDistribution*** ptHistogram_array_2d;
+   typedef FrequencyDistribution*** ptFrequencyDistribution_array_2d;
+   typedef TreeCharacteristics::ptFrequencyDistribution_array ptFrequencyDistribution_array;
+   typedef Histogram*** ptHistogram_array_2d;
    typedef TreeCharacteristics::ptHistogram_array ptHistogram_array;
    typedef Typed_edge_one_int_tree** ptOne_int_tree_set;
    typedef std::vector<HiddenMarkovTreeData*> pt_hmtd_vector;
@@ -639,10 +654,15 @@ private :
    /// hidden trees
    ptOne_int_tree_set state_trees;
 
-   /// frequency distribution corresponding to the conditional observation distribution,
+   /// FrequencyDistribution corresponding to the conditional observation distribution,
    /// depending on the considered observed (integral) variable
    /// and on the value of the state variable
-   ptHistogram_array_2d observation;
+   ptFrequencyDistribution_array_2d observation_distribution;
+
+   /// Histogram corresponding to the conditional observation distribution,
+   /// depending on the considered observed (continuous) variable
+   /// and on the value of the state variable
+   ptHistogram_array_2d observation_histogram;
 
     /// frequency distribution of the characteristic quantities
     /// for the hidden state variable
@@ -788,16 +808,23 @@ public :
    double get_hidden_likelihood() const; // { return hidden_likelihood; }
    int get_nb_states() const;
 
-   ptHistogram_array_2d get_observation() const;
-   ptHistogram_array get_observation(int variable) const;
+   ptFrequencyDistribution_array_2d get_observation() const;
+   ptFrequencyDistribution_array get_observation(int variable) const;
    FrequencyDistribution* get_observation(int variable, int state) const;
 
    TreeCharacteristics* get_state_characteristics() const;
    // access to the characteristic quantity distributions
    // for the state variable
 
+   /** Return the set of state trees (a new instance is allocated) */
    ptOne_int_tree_set get_state_trees() const;
+   /** Return the set of state trees (return a pointer; object should not be deallocated) */
+   ptOne_int_tree_set get_state_trees_ptr() const;
+   /** Return a given state tree (a new instance is allocated) */
    Typed_edge_one_int_tree* get_state_tree(int itree) const;
+   /** Return a given state tree (return a pointer; object should not be deallocated) */
+   Typed_edge_one_int_tree* get_state_tree_ptr(int itree) const;
+
    /** Return a HiddenMarkovTreeData containing the states
        as a variable */
    HiddenMarkovTreeData* get_state_hidden_markov_tree_data() const;

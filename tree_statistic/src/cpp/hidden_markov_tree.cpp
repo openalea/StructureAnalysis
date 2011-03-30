@@ -839,8 +839,9 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
          }
 
          // print the details if required
-         if ((((first_occurrence_root != NULL) && (first_occurrence_root[i] != NULL)) ||
-              ((characteristics != NULL) && (characteristics->first_occurrence_root[i]->nb_element > 0))) && (exhaustive))
+         if ((((first_occurrence_root != NULL) && (first_occurrence_root[i] != NULL))
+              || ((characteristics != NULL) && (characteristics->first_occurrence_root != NULL)
+               && (characteristics->first_occurrence_root[i]->nb_element > 0))) && (exhaustive))
          {
             os << "\n";
             if (file_flag)
@@ -924,7 +925,8 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
 
          // print the details if required
          if ((((first_occurrence_leaves != NULL) && (first_occurrence_leaves[i] != NULL)) ||
-              ((characteristics != NULL) && (characteristics->first_occurrence_leaves[i]->nb_element > 0))) && (exhaustive))
+              ((characteristics != NULL) && ((characteristics->first_occurrence_leaves != NULL))
+              && (characteristics->first_occurrence_leaves[i]->nb_element > 0))) && (exhaustive))
          {
             os << "\n";
             if (file_flag)
@@ -1008,7 +1010,8 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
 
          // print the details if required
          if ((((sojourn_size != NULL) && (sojourn_size[i] != NULL)) ||
-              ((characteristics != NULL) && (characteristics->sojourn_size[i]->nb_element > 0))) && (exhaustive))
+              ((characteristics != NULL) && (characteristics->sojourn_size != NULL)
+              && (characteristics->sojourn_size[i]->nb_element > 0))) && (exhaustive))
          {
             os << "\n";
             if (file_flag)
@@ -1068,7 +1071,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES] << " " << i << " "
                   << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
             }
-            nb_zones[i]->ascii_characteristic_print(os, (size->variance > 0. ? false : true), file_flag);
+            nb_zones[i]->ascii_characteristic_print(os, (((size != NULL) && (size->variance > 0.)) ? false : true), file_flag);
          }
 
          if ((characteristics != NULL) && (characteristics->nb_zones != NULL))
@@ -1079,7 +1082,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
 
             os << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES] << " " << i << " "
                << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-            characteristics->nb_zones[i]->ascii_characteristic_print(os ,(size->variance > 0. ? false : true), file_flag);
+            characteristics->nb_zones[i]->ascii_characteristic_print(os, (((size != NULL) && (size->variance > 0.)) ? false : true), file_flag);
          }
 
          if (exhaustive)
@@ -1097,7 +1100,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
 
             if (nb_zones != NULL)
             {
-               if (size->variance == 0.)
+               if ((size != NULL) && (size->variance == 0.))
                {
                   os << " | " << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
                      << " " << i << " " << STAT_TREES_label[STATL_PER_SIZE] << " " << size->offset << " "
@@ -1114,7 +1117,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION];
                }
-               if (size->variance == 0.)
+               if ((size != NULL) && (size->variance == 0.))
                {
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION] << endl;
@@ -1147,7 +1150,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
             if (file_flag)
                os << "# ";
 
-            if (size->variance == 0.)
+            if ((size != NULL) && (size->variance == 0.))
             {
                os << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
                   << " " << i << " " << STAT_TREES_label[STATL_PER_SIZE] << " " << size->offset << " "
@@ -1159,7 +1162,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
                   << " " << i << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTIONS] << endl;
             }
-            nb_occurrences[i]->ascii_characteristic_print(os, (size->variance > 0. ? false : true), file_flag);
+            nb_occurrences[i]->ascii_characteristic_print(os, (((size != NULL) && (size->variance > 0.)) ? false : true), file_flag);
          }
 
          if ((characteristics != NULL) && (characteristics->nb_occurrences != NULL))
@@ -1170,7 +1173,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
 
             os << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
                << " " << i << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-            characteristics->nb_occurrences[i]->ascii_characteristic_print(os , (size->variance > 0. ? false : true) , file_flag);
+            characteristics->nb_occurrences[i]->ascii_characteristic_print(os , (((size != NULL) && (size->variance > 0.)) ? false : true) , file_flag);
          }
 
          if (exhaustive)
@@ -1188,7 +1191,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
 
             if (nb_occurrences != NULL)
             {
-               if (size->variance == 0.)
+               if ((size != NULL) && (size->variance == 0.))
                {
                   os << " | " << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
                      << " " << i << " " << STAT_TREES_label[STATL_PER_SIZE] << " " << size->offset << " "
@@ -1205,7 +1208,7 @@ ostream& NonparametricTreeProcess::ascii_print(ostream &os, int process,
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION];
                }
-               if (size->variance == 0.)
+               if ((size != NULL) && (size->variance == 0.))
                {
                   os << " | " << STAT_label[STATL_CUMULATIVE] << " " << STAT_label[STATL_DISTRIBUTION] << " "
                      << STAT_label[STATL_FUNCTION] << endl;
@@ -2207,21 +2210,20 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
                               << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                               << "\" with impulses,\\" << endl;
                      out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
-                     // uncomment if a distribution for the size is added
-                     /*
-                     if (size->variance == 0.)
+                     if ((size != NULL) && (size->variance == 0.))
                      {
                         out_file << " title \"" << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
                                  << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << size->offset << " "
                                  << STAT_TREES_label[STATL_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
                      }
                      else
-                     */
-                     out_file << " title \"" << STAT_TREES_label[STATL_MIXTURE_OF]
-                              << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
-                              << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
-                     out_file << "\" with linespoints" << endl;
-                     j++;
+                     {
+                        out_file << " title \"" << STAT_TREES_label[STATL_MIXTURE_OF]
+                                 << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
+                                 << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
+                        out_file << "\" with linespoints" << endl;
+                        j++;
+                     }
                   }
                   // uncomment if a distribution for the size is added
                   /*
@@ -2234,8 +2236,7 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
                               << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << length->offset << " "
                               << STAT_TREES_label[STATL_TREE] << " " << STAT_label[STATL_DISTRIBUTION]
                               << "\" with linespoints" << endl;
-                  }
-                  */
+                  }*/
                   if (dist_nb_value[k]-1 < TIC_THRESHOLD)
                      out_file << "set xtics autofreq" << endl;
                   k++;
@@ -2297,25 +2298,24 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
                                 << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
                                 << "\" with impulses,\\" << endl;
                        out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
-                       // uncomment if a distribution for the size is added
-                       /*
-                       if (size->variance == 0.)
+                       if ((size != NULL) && (size->variance == 0.))
                        {
                          out_file << " title \"" << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
                                   << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << size->offset << " "
                                   << STAT_TREES_label[STATL_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
                        }
                        else
-                       */
-                       out_file << " title \"" << STAT_TREES_label[STATL_MIXTURE_OF]
-                                << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
-                                << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
-                       out_file << "\" with linespoints" << endl;
-                       j++;
+                       {
+                          out_file << " title \"" << STAT_TREES_label[STATL_MIXTURE_OF]
+                                   << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
+                                   << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
+                          out_file << "\" with linespoints" << endl;
+                          j++;
+                       }
                     }
-                    // uncomment if a distribution for the size is added
-                    /*
                     else
+                    // uncomment if a distribution of the size is added
+                    /*
                     {
                        out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
                                 << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
@@ -2324,8 +2324,7 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
                                 << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << length->offset << " "
                                 << STAT_TREES_label[STATL_TREE] << " " << STAT_label[STATL_DISTRIBUTION]
                                 << "\" with linespoints" << endl;
-                    }
-                    */
+                    }*/
                     if (dist_nb_value[k]-1 < TIC_THRESHOLD)
                        out_file << "set xtics autofreq" << endl;
                     k++;
@@ -2484,6 +2483,890 @@ bool NonparametricTreeProcess::plot_print(const char * prefix, const char * titl
    }
 
    return status;
+}
+
+/*****************************************************************
+ *
+ *  Matplotlib output of NonparametricTreeProcess, using
+ *  a MultiPlotSet instance, the current Plot index,
+ *  the identifier of the considered process
+ *  the empirical observation distributions,
+ *  the empirical tree characteristics and
+ *  the tree size frequency distribution
+ *
+ **/
+
+MultiPlotSet* NonparametricTreeProcess::plotable_write(MultiPlotSet &plot, int &index,
+                                                       int process, FrequencyDistribution * const * empirical_observation,
+                                                       const TreeCharacteristics * characteristics,
+                                                       const FrequencyDistribution * hsize) const
+{
+   register int val, i, j, var;
+   int dist_nb_value;
+   double scale, max;
+   ostringstream title, legend;
+
+
+   // create a list of the successive distributions to be printed
+   if ((first_occurrence_root != NULL) || (characteristics != NULL))
+   {
+      plot.variable_nb_viewpoint[process]++; // add a view for first_occurrence_root
+      for(val = 0; val < nb_value; val++)
+      {
+         if ((first_occurrence_root != NULL) && (first_occurrence_root[val] != NULL))
+         {
+            plot.variable[index] = process;
+            plot.viewpoint[index] = FIRST_OCCURRENCE_ROOT;
+
+            if (process > 0)
+            {
+               title.str("");
+               title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+               plot[index].title = title.str();
+            }
+
+            plot[index].xrange = Range(0 , MAX(first_occurrence_root[val]->nb_value, 2) - 1);
+            if (MAX(first_occurrence_root[val]->nb_value, 2) - 1 < TIC_THRESHOLD)
+               plot[index].xtics = 1;
+
+            if ((characteristics != NULL) && (val < characteristics->get_nb_values())
+                && (characteristics->first_occurrence_root[val]->nb_element > 0))
+            {
+               scale = characteristics->first_occurrence_root[val]->nb_element /
+                          first_occurrence_root[val]->cumul[first_occurrence_root[val]->nb_value-1];
+
+               plot[index].yrange = Range(0, ceil(MAX(characteristics->first_occurrence_root[val]->max,
+                                                      first_occurrence_root[val]->max * scale) * YSCALE));
+
+               plot[index].resize(2);
+               legend.str("");
+               legend << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
+                      << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+               plot[index][0].legend = legend.str();
+
+               plot[index][0].style = "impulses";
+
+               characteristics->first_occurrence_root[val]->plotable_frequency_write(plot[index][0]);
+               j = 1;
+            }
+            else
+            {
+               scale = 1.;
+               plot[index].yrange = Range(0, ceil(MAX(first_occurrence_root[val]->max * YSCALE,
+                                                      1.)));
+               plot[index].resize(1);
+               j = 0;
+            }
+            legend.str("");
+            legend << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
+                   << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+            plot[index][j].legend = legend.str();
+            plot[index][j].style = "linespoints";
+
+            first_occurrence_root[val]->plotable_mass_write(plot[index][j], scale);
+            index++;
+         } // ((first_occurrence_root == NULL) || (first_occurrence_root[val] == NULL))
+         else
+            if ((characteristics != NULL) && (val < characteristics->get_nb_values())
+                && (characteristics->first_occurrence_root[val]->nb_element > 0))
+            {
+               plot.variable[index] = process;
+               plot.viewpoint[index] = FIRST_OCCURRENCE_ROOT;
+
+               if (process > 0)
+               {
+                  title.str("");
+                  title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+                  plot[index].title = title.str();
+               }
+
+               plot[index].xrange = Range(0 , MAX(characteristics->first_occurrence_root[val]->nb_value, 2) - 1);
+               plot[index].yrange = Range(0, ceil(MAX(characteristics->first_occurrence_root[val]->max,
+                                                      characteristics->first_occurrence_root[val]->max * scale) * YSCALE));
+               if (MAX(characteristics->first_occurrence_root[val]->nb_value, 2) - 1 < TIC_THRESHOLD)
+                  plot[index].xtics = 1;
+
+               if (ceil(characteristics->first_occurrence_root[val]->max * YSCALE) < TIC_THRESHOLD)
+                  plot[index].ytics = 1;
+
+               plot[index].resize(1);
+               legend.str("");
+               legend << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_ROOT : STATL_OUTPUT_FIRST_OCCURRENCE_ROOT]
+                      << " " << val << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+               plot[index][0].legend = legend.str();
+
+               plot[index][0].style = "impulses";
+
+               characteristics->first_occurrence_root[val]->plotable_frequency_write(plot[index][0]);
+               index++;
+            }
+
+      } // end for val
+   }
+
+   /*
+   if ((first_occurrence_leaves != NULL) || (characteristics != NULL))
+   {
+      plot.variable_nb_viewpoint[process]++; // add a view for first_occurrence_leaves
+      for(val= 0; val < nb_value; val++)
+      {
+         if ((first_occurrence_leaves != NULL) && (first_occurrence_leaves[val] != NULL))
+         {
+            pdist[nb_dist]= first_occurrence_leaves[val];
+
+            if ((characteristics!= NULL) && (characteristics->first_occurrence_leaves != NULL))
+            {
+               phisto[nb_histo]= characteristics->first_occurrence_leaves[val];
+               index_dist[nb_histo]= nb_dist;
+               dist_nb_value[nb_dist] = MIN(first_occurrence_leaves[val]->nb_value,
+                                            phisto[nb_histo]->nb_value*3);
+               if (first_occurrence_leaves[val]->cumul[first_occurrence_leaves[val]->nb_value-1] > 0)
+                  scale[nb_dist++]= phisto[nb_histo++]->nb_element /
+                                    first_occurrence_leaves[val]->cumul[first_occurrence_leaves[val]->nb_value-1];
+               else
+                  scale[nb_dist++]= phisto[nb_histo++]->nb_element;
+            }
+            else
+            {
+               dist_nb_value[nb_dist]= first_occurrence_leaves[val]->nb_value;
+               scale[nb_dist++]= 1.;
+            }
+         }
+
+         else
+         {
+            if ((characteristics != NULL) && (characteristics->first_occurrence_leaves != NULL))
+            {
+               phisto[nb_histo]= characteristics->first_occurrence_leaves[val];
+               index_dist[nb_histo++]= I_DEFAULT;
+            }
+         }
+      }
+   }
+
+   if ((sojourn_size != NULL) || (characteristics != NULL))
+   {
+      plot.variable_nb_viewpoint[process]++; // add a view for sojourn_size
+      for(val= 0; val < nb_value; val++)
+      {
+         if ((sojourn_size != NULL) && (sojourn_size[val] != NULL))
+         {
+            pdist[nb_dist]= sojourn_size[val];
+            dist_nb_value[nb_dist]= sojourn_size[val]->nb_value;
+
+            if ((characteristics != NULL) && (characteristics->sojourn_size != NULL) &&
+                (characteristics->sojourn_size[val]->nb_element > 0))
+            {
+               phisto[nb_histo]= characteristics->sojourn_size[val];
+               index_dist[nb_histo]= nb_dist;
+               if ((sojourn_size[val]->cumul[sojourn_size[val]->nb_value-1] < CUMUL_THRESHOLD) &&
+                   (sojourn_size[val]->cumul[sojourn_size[val]->nb_value-1] > 0))
+                  scale[nb_dist++]= phisto[nb_histo++]->nb_element /
+                                    sojourn_size[val]->cumul[sojourn_size[val]->nb_value-1];
+               else
+                  scale[nb_dist++] = phisto[nb_histo++]->nb_element;
+           }
+           else
+             scale[nb_dist++] = 1.;
+         }
+         else
+         {
+            if ((characteristics != NULL) && (characteristics->sojourn_size != NULL) &&
+                (characteristics->sojourn_size[val]->nb_element > 0))
+            {
+               phisto[nb_histo]= characteristics->sojourn_size[val];
+               index_dist[nb_histo++]= I_DEFAULT;
+            }
+         }
+      }
+   }
+
+   if ((nb_zones != NULL) || (nb_occurrences != NULL) ||
+       (characteristics != NULL))
+   {
+      plot.variable_nb_viewpoint[process]++; // add a view for nb_zones or nb_occurrences
+      for(val= 0; val < nb_value; val++)
+      {
+         if ((nb_zones != NULL) && (nb_zones[val] != NULL))
+         {
+            pdist[nb_dist] = nb_zones[val];
+
+            if ((characteristics != NULL) && (characteristics->nb_zones != NULL))
+            {
+               phisto[nb_histo]= characteristics->nb_zones[val];
+               index_dist[nb_histo]= nb_dist;
+               dist_nb_value[nb_dist]= nb_zones[val]->plot_nb_value_computation(phisto[nb_histo]);
+               scale[nb_dist++]= phisto[nb_histo++]->nb_element;
+            }
+            else
+            {
+               dist_nb_value[nb_dist] = nb_zones[val]->plot_nb_value_computation();
+               scale[nb_dist++] = 1.;
+            }
+         }
+         else
+            if ((characteristics != NULL) && (characteristics->nb_zones != NULL))
+            {
+               phisto[nb_histo]= characteristics->nb_zones[val];
+               index_dist[nb_histo++]= I_DEFAULT;
+            }
+
+        if ((nb_occurrences != NULL) && (nb_occurrences[val] != NULL))
+        {
+           pdist[nb_dist] = nb_occurrences[val];
+
+           if ((characteristics != NULL) && (characteristics->nb_occurrences != NULL))
+           {
+              phisto[nb_histo]= characteristics->nb_occurrences[val];
+              index_dist[nb_histo]= nb_dist;
+              dist_nb_value[nb_dist]= nb_occurrences[val]->plot_nb_value_computation(phisto[nb_histo]);
+              scale[nb_dist++]= phisto[nb_histo++]->nb_element;
+           }
+           else
+           {
+              dist_nb_value[nb_dist] = nb_occurrences[val]->plot_nb_value_computation();
+              scale[nb_dist++] = 1.;
+           }
+        }
+
+        else
+           if ((characteristics != NULL) && (characteristics->nb_occurrences != NULL))
+           {
+              phisto[nb_histo]= characteristics->nb_occurrences[val];
+              index_dist[nb_histo++]= I_DEFAULT;
+           }
+      }
+   }
+   */
+
+
+   if (observation != NULL)
+   {
+      if (empirical_observation != NULL)
+      {
+         for(val = 0; val < nb_state; val++)
+         {
+            plot.variable[index] = process;
+            plot.viewpoint[index] = OBSERVATION;
+
+            title.str("");
+            title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+            plot[index].title = title.str();
+
+            plot[index].xrange = Range(0 , observation[val]->nb_value - 1);
+            if (observation[val]->nb_value - 1 < TIC_THRESHOLD)
+               plot[index].xtics = 1;
+
+            if (empirical_observation[val]->nb_element > 0)
+            {
+               scale = empirical_observation[val]->nb_element;
+               plot[index].yrange = Range(0, ceil(MAX(empirical_observation[val]->max,
+                                                      observation[val]->max * scale) * YSCALE));
+               plot[index].resize(2);
+               legend.str("");
+               legend <<STAT_label[STATL_STATE] << " " << val << " "
+                        << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION];
+               plot[index][j].legend = legend.str();
+               plot[index][j].style = "impulses";
+
+               empirical_observation[val]->plotable_frequency_write(plot[index][0]);
+               j = 1;
+            }
+            else
+            {
+               scale = 1.;
+               plot[index].yrange = Range(0, MIN(observation[val]->max * YSCALE,
+                                                 1.));
+               plot[index].resize(1);
+               j = 0;
+            }
+
+            legend.str("");
+            legend <<STAT_label[STATL_STATE] << " " << val << " "
+                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+            plot[index][j].legend = legend.str();
+            plot[index][j].style = "linepoints";
+
+            observation[val]->plotable_mass_write(plot[index][j], scale);
+            index++;
+         }
+      }
+      else // (empirical_observation == NULL)
+      {
+         plot.variable[index] = process;
+         plot.viewpoint[index] = OBSERVATION;
+
+         title.str("");
+         title << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+         plot[index].title = title.str();
+
+         plot[index].xrange = Range(0, nb_value - 1);
+         if (nb_value - 1 < TIC_THRESHOLD)
+            plot[index].xtics = 1;
+
+         max = observation[0]->max;
+         for(val = 1; val < nb_state; val++)
+            if (observation[val]->max > max)
+               max = observation[val]->max;
+
+         plot[index].yrange = Range(0, MIN(max * YSCALE, 1.));
+         plot[index].resize(nb_state);
+
+         for(val = 0; val < nb_state; val++)
+         {
+            legend.str("");
+            legend <<STAT_label[STATL_STATE] << " " << val << " "
+                     << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_DISTRIBUTION];
+            plot[index][val].legend = legend.str();
+            plot[index][val].style = "linepoints";
+
+            observation[val]->plotable_mass_write(plot[index][val]);
+         }
+         index++;
+      }
+   }
+
+   /*
+
+      // first occurrence_leaves
+      if ((first_occurrence_leaves != NULL) || (characteristics != NULL))
+      {
+         plot_index++;
+
+         for(i= 0; i < 2; i++)
+         {
+            ostringstream file_name[2];
+
+            switch (i)
+            {
+               case 0 :
+                  file_name[0] << prefix << process << plot_index << ".plot";
+                  break;
+               case 1 :
+                  file_name[0] << prefix << process << plot_index << ".print";
+                  break;
+            }
+
+            ofstream out_file((file_name[0].str()).c_str());
+
+            if (i == 1)
+            {
+               out_file << "set terminal postscript" << endl;
+               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+            }
+
+            out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                     << "set title";
+
+            if ((title != NULL) || (process > 0))
+            {
+               out_file << " \"";
+               if (title != NULL)
+               {
+                  out_file << title;
+                  if (process > 0)
+                     out_file << " - ";
+               }
+               if (process > 0)
+                  out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+              out_file << "\"";
+            }
+            out_file << "\n\n";
+
+            j= histo_index;
+            k= dist_index;
+
+            start= true;
+            for(val= 0; val < nb_value; val++)
+            {
+               if ((first_occurrence_leaves != NULL) &&
+                   (first_occurrence_leaves[val] != NULL))
+               {
+                 if (!start)
+                 {
+                    if (i == 0)
+                       out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                    out_file << endl;
+                 }
+                 else
+                   start= false;
+
+               if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                    out_file << "set xtics 0,1" << endl;
+
+               if ((characteristics != NULL) &&
+                   (characteristics->first_occurrence_leaves != NULL) &&
+                   (characteristics->first_occurrence_leaves[val]->nb_element > 0))
+               {
+                  out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
+                           << (int)(MAX(phisto[j]->max, pdist[k]->max*scale[k])*YSCALE)+1
+                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                           << "\" with impulses,\\" << endl;
+                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_DISTRIBUTION];
+                  first_occurrence_leaves[val]->plot_title_print(out_file);
+                  out_file << "\" with linespoints" << endl;
+                  j++;
+               }
+
+               else
+               {
+                  out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
+                           << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
+                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_DISTRIBUTION];
+                  first_occurrence_leaves[val]->plot_title_print(out_file);
+                  out_file << "\" with linespoints" << endl;
+               }
+
+               if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                  out_file << "set xtics autofreq" << endl;
+               k++;
+            }
+            else // first_occurrence_leaves != NULL
+               if ((characteristics != NULL) &&
+                   (characteristics->first_occurrence_leaves[val]->nb_element > 0))
+               {
+                  if (!start)
+                  {
+                    if (i == 0)
+                      out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                    out_file << endl;
+                  }
+                  else
+                     start = false;
+
+                  if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                     out_file << "set xtics 0,1" << endl;
+
+                  if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                     out_file << "set ytics 0,1" << endl;
+
+                  out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
+                           << (int)(phisto[j]->max*YSCALE)+1 << "] \""
+                           << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[process == 0 ? STATL_STATE_FIRST_OCCURRENCE_LEAVES : STATL_OUTPUT_FIRST_OCCURRENCE_LEAVES] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                           << "\" with impulses" << endl;
+
+                  if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                     out_file << "set xtics autofreq" << endl;
+
+                  if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                     out_file << "set ytics autofreq" << endl;
+                  j++;
+               }
+            } // end for val
+            if (i == 1)
+               out_file << "\nset terminal x11" << endl;
+
+            out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+         } // end for i
+         histo_index= j;
+         dist_index= k;
+      }
+
+
+      // sojourn_size
+      if ((sojourn_size != NULL) || (characteristics != NULL))
+      {
+         plot_index++;
+
+         for(i= 0; i < 2; i++)
+         {
+            ostringstream file_name[2];
+
+            switch (i)
+            {
+               case 0 :
+                  file_name[0] << prefix << process << plot_index << ".plot";
+                  break;
+               case 1 :
+                  file_name[0] << prefix << process << plot_index << ".print";
+                  break;
+            }
+
+            ofstream out_file((file_name[0].str()).c_str());
+
+            if (i == 1)
+            {
+               out_file << "set terminal postscript" << endl;
+               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+            }
+
+            out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                     << "set title";
+
+            if ((title != NULL) || (process > 0))
+            {
+               out_file << " \"";
+               if (title != NULL)
+               {
+                  out_file << title;
+                  if (process > 0)
+                     out_file << " - ";
+               }
+               if (process > 0)
+                  out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+              out_file << "\"";
+            }
+            out_file << "\n\n";
+
+            j= histo_index;
+            k= dist_index;
+
+            start= true;
+            for(val= 0; val < nb_value; val++)
+            {
+               if ((sojourn_size != NULL) && (sojourn_size[val] != NULL))
+               {
+                 if (!start)
+                 {
+                    if (i == 0)
+                       out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                    out_file << endl;
+                 }
+                 else
+                   start= false;
+
+               if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                    out_file << "set xtics 0,1" << endl;
+
+               if ((characteristics != NULL) && (characteristics->sojourn_size != NULL) &&
+                   (characteristics->sojourn_size[val]->nb_element > 0))
+               {
+                  out_file << "plot [0:" << dist_nb_value[k] - 1 << "] [0:"
+                           << (int)(MAX(phisto[j]->max, pdist[k]->max*scale[k])*YSCALE)+1
+                           << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                           << "\" with impulses,\\" << endl;
+                  out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_DISTRIBUTION];
+                  sojourn_size[val]->plot_title_print(out_file);
+                  out_file << "\" with linespoints" << endl;
+                  j++;
+               }
+
+               else
+               {
+                  out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
+                           << MIN(pdist[k]->max*YSCALE, 1.) << "] \""
+                           << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_DISTRIBUTION];
+                  sojourn_size[val]->plot_title_print(out_file);
+                  out_file << "\" with linespoints" << endl;
+               }
+
+               if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                  out_file << "set xtics autofreq" << endl;
+               k++;
+            }
+            else // sojourn_size != NULL
+               if ((characteristics != NULL) && (characteristics->sojourn_size[val]->nb_element > 0))
+               {
+                  if (!start)
+                  {
+                    if (i == 0)
+                      out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                    out_file << endl;
+                  }
+                  else
+                     start = false;
+
+                  if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                     out_file << "set xtics 0,1" << endl;
+
+                  if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                     out_file << "set ytics 0,1" << endl;
+
+                  out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
+                           << (int)(phisto[j]->max*YSCALE)+1 << "] \""
+                           << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                           << " title \"" << STAT_label[process == 0 ? STATL_STATE : STATL_OUTPUT] << " " << val
+                           << " " << STAT_TREES_label[STATL_SOJOURN_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                           << "\" with impulses" << endl;
+
+                  if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                     out_file << "set xtics autofreq" << endl;
+
+                  if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                     out_file << "set ytics autofreq" << endl;
+                  j++;
+               }
+            } // end for val
+            if (i == 1)
+               out_file << "\nset terminal x11" << endl;
+
+            out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+         } // end for i
+         histo_index= j;
+         dist_index= k;
+      }
+
+      // counting
+      if ((nb_zones != NULL) || (nb_occurrences != NULL) ||
+          (characteristics != NULL))
+      {
+         plot_index++;
+
+         for(i= 0; i < 2; i++)
+         {
+            ostringstream file_name[2];
+
+            switch (i)
+            {
+               case 0 :
+                  file_name[0] << prefix << process << plot_index << ".plot";
+                  break;
+               case 1 :
+                  file_name[0] << prefix << process << plot_index << ".print";
+                  break;
+            }
+
+            ofstream out_file((file_name[0].str()).c_str());
+
+            if (i == 1)
+            {
+               out_file << "set terminal postscript" << endl;
+               file_name[1] << label(prefix) << process << plot_index << ".ps";
+               out_file << "set output \"" << file_name[1].str() << "\"\n\n";
+            }
+
+            out_file << "set border 15 lw 0\n" << "set tics out\n" << "set xtics nomirror\n"
+                     << "set title";
+            if ((title != NULL) || (process > 0))
+            {
+               out_file << " \"";
+               if (title != NULL)
+               {
+                  out_file << title;
+                  if (process > 0)
+                     out_file << " - ";
+               }
+               if (process > 0)
+                  out_file << STAT_label[STATL_OUTPUT_PROCESS] << " " << process;
+               out_file << "\"";
+            }
+            out_file << "\n\n";
+
+            j= histo_index;
+            k= dist_index;
+
+            start= true;
+            for(val= 0; val < nb_value; val++)
+            {
+               if (nb_zones != NULL)
+               {
+                  if (!start)
+                  {
+                     if (i == 0)
+                        out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                     out_file << endl;
+                  }
+                  else
+                     start= false;
+
+                  if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                     out_file << "set xtics 0,1" << endl;
+
+                  if ((characteristics != NULL) && (characteristics->nb_zones != NULL))
+                  {
+                     out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
+                              << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
+                              << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                              << " title \"" << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
+                              << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                              << "\" with impulses,\\" << endl;
+                     out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
+                     // uncomment if a distribution for the size is added
+                     out_file << " title \"" << STAT_TREES_label[STATL_MIXTURE_OF]
+                              << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
+                              << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
+                     out_file << "\" with linespoints" << endl;
+                     j++;
+                  }
+                  if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                     out_file << "set xtics autofreq" << endl;
+                  k++;
+               }
+               else // nb_zones == NULL
+                  if (characteristics != NULL)
+                  {
+                     if (!start)
+                     {
+                        if (i == 0)
+                           out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                        out_file << endl;
+                     }
+                     else
+                        start = false;
+
+                     if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                        out_file << "set xtics 0,1" << endl;
+
+                     if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                        out_file << "set ytics 0,1" << endl;
+
+                     out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
+                              << (int)(phisto[j]->max*YSCALE)+1 << "] \""
+                              << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                              << " title \"" << STAT_TREES_label[process == 0 ? STATL_STATE_NB_ZONES : STATL_OUTPUT_NB_ZONES]
+                              << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                              << "\" with impulses" << endl;
+
+                     if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                        out_file << "set xtics autofreq" << endl;
+
+                     if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                        out_file << "set ytics autofreq" << endl;
+
+                     j++;
+                  }
+
+                 if (nb_occurrences != NULL)
+                 {
+                    if (!start)
+                    {
+                       if (i == 0)
+                          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                       out_file << endl;
+                    }
+                    else
+                       start= false;
+
+                    if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                       out_file << "set xtics 0,1" << endl;
+
+                    if ((characteristics != NULL) && (characteristics->nb_occurrences != NULL))
+                    {
+                       out_file << "plot [0:" << dist_nb_value[k]-1 << "] [0:"
+                                << (int)(MAX(phisto[j]->max, pdist[k]->max * scale[k])*YSCALE)+1
+                                << "] \"" << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                                << " title \"" << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
+                                << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                                << "\" with impulses,\\" << endl;
+                       out_file << "\"" << label((data_file_name[1].str()).c_str()) << "\" using " << nb_histo+k+1;
+                       out_file << " title \"" << STAT_TREES_label[STATL_MIXTURE_OF]
+                                << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
+                                << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_DISTRIBUTION];
+                       out_file << "\" with linespoints" << endl;
+                       j++;
+                    }
+                    // uncomment if a distribution for the size is added
+                    if (dist_nb_value[k]-1 < TIC_THRESHOLD)
+                       out_file << "set xtics autofreq" << endl;
+                    k++;
+                 }
+                 else // nb_occurrences == NULL
+                    if (characteristics != NULL)
+                    {
+                       if (i == 0)
+                          out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                       out_file << endl;
+
+                       if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                          out_file << "set xtics 0,1" << endl;
+
+                       if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                          out_file << "set ytics 0,1" << endl;
+
+                       out_file << "plot [0:" << phisto[j]->nb_value-1 << "] [0:"
+                                << (int)(phisto[j]->max*YSCALE)+1 << "] \""
+                                << label((data_file_name[1].str()).c_str()) << "\" using " << j+1
+                                << " title \"" << STAT_TREES_label[process == 0 ? STATL_STATE_NB_OCCURRENCES : STATL_OUTPUT_NB_OCCURRENCES]
+                                << " " << val << " " << STAT_TREES_label[STATL_PER_TREE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                                << "\" with impulses" << endl;
+
+                       if (phisto[j]->nb_value-1 < TIC_THRESHOLD)
+                          out_file << "set xtics autofreq" << endl;
+
+                       if ((int)(phisto[j]->max*YSCALE)+1 < TIC_THRESHOLD)
+                          out_file << "set ytics autofreq" << endl;
+                       j++;
+                    }
+               } // end nb_zones == NULL
+
+               if (characteristics != NULL)
+               {
+                  if (i == 0)
+                     out_file << "\npause -1 \"" << STAT_label[STATL_HIT_RETURN] << "\"" << endl;
+                  out_file << endl;
+
+                  if (hsize->nb_value-1 < TIC_THRESHOLD)
+                     out_file << "set xtics 0,1" << endl;
+
+                  if ((int)(hsize->max*YSCALE)+1 < TIC_THRESHOLD)
+                     out_file << "set ytics 0,1" << endl;
+
+                  out_file << "plot [0:" << hsize->nb_value - 1 << "] [0:"
+                           << (int)(hsize->max*YSCALE)+1 << "] \""
+                           << label((data_file_name[1].str()).c_str()) << "\" using 1 title \""
+                           << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION]
+                           << "\" with impulses" << endl;
+
+                  if (hsize->nb_value-1 < TIC_THRESHOLD)
+                     out_file << "set xtics autofreq" << endl;
+
+                  if ((int)(hsize->max*YSCALE)+1 < TIC_THRESHOLD)
+                     out_file << "set ytics autofreq" << endl;
+               }
+
+               if (i == 1)
+                  out_file << "\nset terminal x11" << endl;
+
+               out_file << "\npause 0 \"" << STAT_label[STATL_END] << "\"" << endl;
+            } // end for val
+
+         histo_index= j;
+         dist_index= k;
+      } */
+
+}
+
+/*****************************************************************
+ *
+ *  Return the number of views (i.e. the size) in Matplotlib output
+ *  of NonparametricTreeProcess, using
+ *  the identifier of the considered process
+ *  the empirical observation distributions,
+ *  the empirical tree characteristics and
+ *  the tree size frequency distribution
+ *
+ **/
+
+unsigned int NonparametricTreeProcess::nb_plot_set_computation(int process, FrequencyDistribution * const * empirical_observation,
+                                                               const TreeCharacteristics * characteristics,
+                                                               const FrequencyDistribution * hsize) const
+{
+   unsigned int nb_plot_set = 0;
+   register int val;
+
+   // create a list of the successive distributions to be printed
+   if ((first_occurrence_root != NULL) || (characteristics != NULL))
+      for(val = 0; val < nb_value; val++)
+      {
+         if ((first_occurrence_root != NULL) || (first_occurrence_root[val] != NULL)
+             || ((characteristics != NULL) && (val < characteristics->get_nb_values())
+                && (characteristics->first_occurrence_root[val]->nb_element > 0)))
+               nb_plot_set++;
+      }
+
+   // add other viewpoints, etc.
+
+   if (observation != NULL)
+      nb_plot_set += nb_state;
+
+   return nb_plot_set;
+
 }
 
 /*****************************************************************
@@ -2895,9 +3778,9 @@ DiscreteParametricModel* HiddenMarkovTree::extract(StatError& error,
             {
                case OBSERVATION :
                {
-                 if ((markov_data->observation != NULL)
-                    && (markov_data->observation[hvariable] != NULL))
-                   phisto= markov_data->observation[hvariable][value];
+                 if ((markov_data->observation_distribution != NULL)
+                    && (markov_data->observation_distribution[hvariable] != NULL))
+                   phisto= markov_data->observation_distribution[hvariable][value];
                  break;
                }
 
@@ -3461,7 +4344,7 @@ bool HiddenMarkovTree::is_parametric(int ivariable) const
 /*****************************************************************
  *
  *  Access to the non-parametric observation processes
- *  for HiddenMarkovTree class
+ *  for HiddenMarkovTree class (copy of the process)
  *
  **/
 
@@ -3479,6 +4362,13 @@ NonparametricTreeProcess* HiddenMarkovTree::get_non_parametric_process(int varia
    return res;
 }
 
+/*****************************************************************
+ *
+ *  Access to the discrete parametric observation processes
+ *  for HiddenMarkovTree class (copy of the process)
+ *
+ **/
+
 DiscreteParametricProcess* HiddenMarkovTree::get_iparametric_process(int variable) const
 {
    DiscreteParametricProcess *res= NULL;
@@ -3493,6 +4383,13 @@ DiscreteParametricProcess* HiddenMarkovTree::get_iparametric_process(int variabl
    return res;
 }
 
+/*****************************************************************
+ *
+ *  Access to the continuous parametric observation processes
+ *  for HiddenMarkovTree class (copy of the process)
+ *
+ **/
+
 DiscreteParametricProcess* HiddenMarkovTree::get_dparametric_process(int variable) const
 {
    DiscreteParametricProcess *res= NULL;
@@ -3506,6 +4403,37 @@ DiscreteParametricProcess* HiddenMarkovTree::get_dparametric_process(int variabl
    }
    return res;
 }
+
+/*****************************************************************
+ *
+ *  Access to the non-parametric observation processes
+ *  for HiddenMarkovTree class (actual pointer)
+ *
+ **/
+
+NonparametricTreeProcess** HiddenMarkovTree::get_non_parametric_process() const
+{ return npprocess; }
+
+/*****************************************************************
+ *
+ *  Access to the discrete parametric observation processes
+ *  for HiddenMarkovTree class (actual pointer)
+ *
+ **/
+
+DiscreteParametricProcess** HiddenMarkovTree::get_iparametric_process() const
+{ return piprocess; }
+
+/*****************************************************************
+ *
+ *  Access to the continuous parametric observation processes
+ *  for HiddenMarkovTree class (actual pointer)
+ *
+ **/
+
+DiscreteParametricProcess** HiddenMarkovTree::get_dparametric_process() const
+{ return pdprocess; }
+
 
 /*****************************************************************
  *
@@ -3943,15 +4871,15 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
                   variable= i - 1;
             }
 
-           if (otrees->observation != NULL)
-              observation = otrees->observation[variable];
+           if (otrees->observation_distribution != NULL)
+              observation = otrees->observation_distribution[variable];
            else
               observation = NULL;
 
            if (otrees->characteristics[variable] != NULL)
            {
               characteristics = otrees->characteristics[variable];
-              marginal = otrees->characteristics[variable]->marginal;
+              marginal = otrees->characteristics[variable]->marginal_distribution;
            }
            else
            {
@@ -3979,13 +4907,13 @@ ostream& HiddenMarkovTree::ascii_write(ostream& os,
 
          if (otrees != NULL)
          {
-           if (otrees->observation != NULL)
-              observation= otrees->observation[i];
+           if (otrees->observation_distribution != NULL)
+              observation= otrees->observation_distribution[i];
            // This seems weird : how is observation supposed to be defined
-           // for parametric processes ? What happens if otrees->observation == NULL ?
+           // for parametric processes ? What happens if otrees->observation_distribution == NULL ?
          }
          if (otrees->characteristics[variable] != NULL)
-            pdprocess[i]->ascii_print(os, observation, otrees->characteristics[variable]->marginal,
+            pdprocess[i]->ascii_print(os, observation, otrees->characteristics[variable]->marginal_distribution,
                                       exhaustive, file_flag);
          else
             pdprocess[i]->ascii_print(os, observation, NULL, exhaustive, file_flag);
@@ -4212,8 +5140,8 @@ ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTree
                   break;
             }
 
-            if (otrees->observation != NULL)
-               observation= otrees->observation[variable];
+            if (otrees->observation_distribution != NULL)
+               observation= otrees->observation_distribution[variable];
             if (otrees->characteristics[variable] != NULL)
                characteristics= otrees->characteristics[variable];
          }
@@ -4232,8 +5160,8 @@ ostream& HiddenMarkovTree::spreadsheet_write(ostream& os, const HiddenMarkovTree
 
          if (otrees != NULL)
          {
-            if (otrees->observation != NULL)
-               observation= otrees->observation[i];
+            if (otrees->observation_distribution != NULL)
+               observation= otrees->observation_distribution[i];
             // warning : akward !
          }
          piprocess[i]->spreadsheet_print(os, observation);
@@ -4355,8 +5283,8 @@ bool HiddenMarkovTree::plot_write(const char * prefix, const char * title,
                   break;
             }
 
-            if (otrees->observation != NULL)
-               observation= otrees->observation[variable];
+            if (otrees->observation_distribution != NULL)
+               observation= otrees->observation_distribution[variable];
 
             if (otrees->characteristics[variable] != NULL)
                characteristics= otrees->characteristics[variable];
@@ -4371,8 +5299,8 @@ bool HiddenMarkovTree::plot_write(const char * prefix, const char * title,
 
       for(i= 0; i < _nb_doutput_process; i++)
       {
-         if (otrees->observation != NULL)
-            observation= otrees->observation[i];
+         if (otrees->observation_distribution != NULL)
+            observation= otrees->observation_distribution[i];
 
          piprocess[i]->plot_print(prefix, title, i, observation);
       }
@@ -4896,9 +5824,6 @@ double HiddenMarkovTree::penalty_computation(double min_probability) const
                   state_marginal[j] += npprocess[0]->index_value->point[j][val] *
                                        (1.-nonparametric_process[0]->size->cumul[val]);
             */
-#ifdef __GNUC__
-#warning NonparametricTreeProcess::index_value undefined in HiddenMarkovTree::penalty_computation
-#endif
             sum= 0.;
 
             for(j= 0; j < nb_state; j++)
@@ -5727,7 +6652,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData()
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
  , state_trees(NULL)
- , observation(NULL)
+ , observation_distribution(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -5756,7 +6681,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_integral,
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
  , state_trees(NULL)
- , observation(NULL)
+ , observation_distribution(NULL)
  , state_characteristics(NULL)
 {
    typedef Typed_edge_one_int_tree::value value;
@@ -5806,7 +6731,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_integral,
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
  , state_trees(NULL)
- , observation(NULL)
+ , observation_distribution(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -5828,7 +6753,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(int inb_trees,
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
  , state_trees(NULL)
- , observation(NULL)
+ , observation_distribution(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -5847,7 +6772,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(const Trees& otrees)
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
  , state_trees(NULL)
- , observation(NULL)
+ , observation_distribution(NULL)
  , state_characteristics(NULL)
 {}
 
@@ -5870,7 +6795,7 @@ HiddenMarkovTreeData::HiddenMarkovTreeData(const HiddenMarkovTreeData& trees,
  , hidden_likelihood(D_INF)
  , _nb_states(I_DEFAULT)
  , state_trees(NULL)
- , observation(NULL)
+ , observation_distribution(NULL)
  , state_characteristics(NULL)
 { copy(trees , model_flag, characteristic_flag); }
 
@@ -5965,7 +6890,7 @@ DiscreteDistributionData* HiddenMarkovTreeData::extract(StatError& error, int ty
 
              else
              {
-                phisto= observation[variable][value];
+                phisto= observation_distribution[variable][value];
 
                 if (phisto->nb_element == 0)
                 {
@@ -6392,23 +7317,23 @@ TreeCharacteristics* HiddenMarkovTreeData::get_state_characteristics() const
    return res;
 }
 
-HiddenMarkovTreeData::ptHistogram_array_2d HiddenMarkovTreeData::get_observation() const
+HiddenMarkovTreeData::ptFrequencyDistribution_array_2d HiddenMarkovTreeData::get_observation() const
 {  // frequency distributions corresponding to the conditional observation distributions
    // for each variable and state
    register int var, j;
-   ptHistogram_array_2d res= NULL;
+   ptFrequencyDistribution_array_2d res= NULL;
 
-   if (observation != NULL)
+   if (observation_distribution != NULL)
    {
-      res= new ptHistogram_array[_nb_integral];
+      res= new ptFrequencyDistribution_array[_nb_integral];
       for(var= 0; var < _nb_integral; var++)
-         if (observation[var] != NULL)
+         if (observation_distribution[var] != NULL)
          {
-            res[var]= new FrequencyDistribution*[state_characteristics->marginal->nb_value];
-            for(j= 0; j < state_characteristics->marginal->nb_value; j++)
+            res[var]= new FrequencyDistribution*[state_characteristics->marginal_distribution->nb_value];
+            for(j= 0; j < state_characteristics->marginal_distribution->nb_value; j++)
             {
-               if (observation[var][j] != NULL)
-                  res[var][j]= new FrequencyDistribution(*(observation[var][j]));
+               if (observation_distribution[var][j] != NULL)
+                  res[var][j]= new FrequencyDistribution(*(observation_distribution[var][j]));
                else
                   res[var][j]= NULL;
             }
@@ -6422,22 +7347,22 @@ HiddenMarkovTreeData::ptHistogram_array_2d HiddenMarkovTreeData::get_observation
    return res;
 }
 
-HiddenMarkovTreeData::ptHistogram_array HiddenMarkovTreeData::get_observation(int variable) const
+HiddenMarkovTreeData::ptFrequencyDistribution_array HiddenMarkovTreeData::get_observation(int variable) const
 {  // frequency distributions corresponding to the conditional observation distributions
    // for each state and one given variable
    register int j;
-   ptHistogram_array res= NULL;
+   ptFrequencyDistribution_array res= NULL;
 
-   if (observation != NULL)
+   if (observation_distribution != NULL)
    {
       assert(variable < _nb_integral);
-      if (observation[variable] != NULL)
+      if (observation_distribution[variable] != NULL)
       {
-         res= new FrequencyDistribution*[state_characteristics->marginal->nb_value];
-         for(j= 0; j < state_characteristics->marginal->nb_value; j++)
+         res= new FrequencyDistribution*[state_characteristics->marginal_distribution->nb_value];
+         for(j= 0; j < state_characteristics->marginal_distribution->nb_value; j++)
          {
-            if (observation[variable][j] != NULL)
-               res[j]= new FrequencyDistribution(*(observation[variable][j]));
+            if (observation_distribution[variable][j] != NULL)
+               res[j]= new FrequencyDistribution(*(observation_distribution[variable][j]));
             else
                res[j]= NULL;
          }
@@ -6458,14 +7383,14 @@ FrequencyDistribution* HiddenMarkovTreeData::get_observation(int variable,
    // register int j;
    FrequencyDistribution *res= NULL;
 
-   if (observation != NULL)
+   if (observation_distribution != NULL)
    {
       assert(variable < _nb_integral);
-      if (observation[variable] != NULL)
+      if (observation_distribution[variable] != NULL)
       {
-         assert(state < state_characteristics->marginal->nb_value);
-         if (observation[variable][state] != NULL)
-            res= new FrequencyDistribution(*(observation[variable][state]));
+         assert(state < state_characteristics->marginal_distribution->nb_value);
+         if (observation_distribution[variable][state] != NULL)
+            res= new FrequencyDistribution(*(observation_distribution[variable][state]));
          else
             res= NULL;
       }
@@ -6498,6 +7423,9 @@ HiddenMarkovTreeData::ptOne_int_tree_set HiddenMarkovTreeData::get_state_trees()
    return res_trees;
 }
 
+HiddenMarkovTreeData::ptOne_int_tree_set HiddenMarkovTreeData::get_state_trees_ptr() const
+{ return state_trees; }
+
 Typed_edge_one_int_tree* HiddenMarkovTreeData::get_state_tree(int itree) const
 {
    Typed_edge_one_int_tree *res_tree;
@@ -6515,6 +7443,12 @@ Typed_edge_one_int_tree* HiddenMarkovTreeData::get_state_tree(int itree) const
       res_tree= NULL;
 
    return res_tree;
+}
+
+Typed_edge_one_int_tree* HiddenMarkovTreeData::get_state_tree_ptr(int itree) const
+{
+   assert((itree < _nb_trees) && (this->state_trees != NULL));
+   return state_trees[itree];
 }
 
 /*****************************************************************
@@ -6900,15 +7834,15 @@ std::ostream& HiddenMarkovTreeData::ascii_write_observation(std::ostream &os,
 {
    int value, var;
 
-   if (observation != NULL)
+   if (observation_distribution != NULL)
       for(var= 0; var < _nb_integral; var++)
-         if (observation[var] != NULL)
+         if (observation_distribution[var] != NULL)
             for(value= 0; value < _nb_states; value++)
-               if (observation[var][value] != NULL)
+               if (observation_distribution[var][value] != NULL)
                {
                   os << "Observation frequency distribution for state " << value
                      << " and variable " << var << " : " << endl;
-                  observation[var][value]->ascii_write(os, exhaustive, file_flag);
+                  observation_distribution[var][value]->ascii_write(os, exhaustive, file_flag);
                   os << endl;
                }
    return os;
@@ -6954,19 +7888,19 @@ void HiddenMarkovTreeData::observation_frequency_distribution_computation(int iv
             s= (trees[t]->get(*it)).Int(ivariable);
             s= (this->state_trees[t]->get(*it)).Int();
             val= (trees[t]->get(*it)).Int(ivariable);
-            observation[ivariable][s]->frequency[val]++;
+            observation_distribution[ivariable][s]->frequency[val]++;
             it++;
          }
       }
 
-   for(s= 0; s < state_characteristics->marginal->nb_value; s++)
+   for(s= 0; s < state_characteristics->marginal_distribution->nb_value; s++)
    {
-      observation[ivariable][s]->nb_value_computation();
-      observation[ivariable][s]->offset_computation();
-      observation[ivariable][s]->nb_element_computation();
-      observation[ivariable][s]->max_computation();
-      observation[ivariable][s]->mean_computation();
-      observation[ivariable][s]->variance_computation();
+      observation_distribution[ivariable][s]->nb_value_computation();
+      observation_distribution[ivariable][s]->offset_computation();
+      observation_distribution[ivariable][s]->nb_element_computation();
+      observation_distribution[ivariable][s]->max_computation();
+      observation_distribution[ivariable][s]->mean_computation();
+      observation_distribution[ivariable][s]->variance_computation();
    }
 }
 
@@ -6983,57 +7917,57 @@ void HiddenMarkovTreeData::create_observation_frequency_distribution(int nb_stat
 
    if (_nb_integral > 0)
    {
-      if (observation == NULL)
+      if (observation_distribution == NULL)
       {
-         observation= new ptHistogram_array[_nb_integral];
+         observation_distribution= new ptFrequencyDistribution_array[_nb_integral];
          for(var= 0; var < _nb_integral; var++)
          {
-            observation[var]= new FrequencyDistribution*[nb_state];
+            observation_distribution[var]= new FrequencyDistribution*[nb_state];
             for(j= 0; j < nb_state; j++)
-               observation[var][j]= new FrequencyDistribution(get_max_int_value(var)+1);
+               observation_distribution[var][j]= new FrequencyDistribution(get_max_int_value(var)+1);
          }
       }
       else // the number of values may have changed
          for(var= 0; var < _nb_integral; var++)
          {
-            if (observation[var] != NULL)
+            if (observation_distribution[var] != NULL)
                for(j= 0; j < nb_state; j++)
                {
-                  if (observation[var][j] != NULL)
+                  if (observation_distribution[var][j] != NULL)
                   {
-                     delete observation[var][j];
-                     observation[var][j]= NULL;
+                     delete observation_distribution[var][j];
+                     observation_distribution[var][j]= NULL;
                   }
-                  observation[var][j]= new FrequencyDistribution(get_max_int_value(var)+1);
+                  observation_distribution[var][j]= new FrequencyDistribution(get_max_int_value(var)+1);
                }
             else
             {
-               observation[var]= new FrequencyDistribution*[nb_state];
+               observation_distribution[var]= new FrequencyDistribution*[nb_state];
                for(j= 0; j < nb_state; j++)
-                  observation[var][j]= new FrequencyDistribution(get_max_int_value(var)+1);
+                  observation_distribution[var][j]= new FrequencyDistribution(get_max_int_value(var)+1);
             }
          }
    }
    else // delete the potential frequency distributions
    {
-      if (observation != NULL)
+      if (observation_distribution != NULL)
          for(var= 0; var < _nb_integral; var++)
          {
-            if (observation[var] != NULL)
+            if (observation_distribution[var] != NULL)
             {
                for(j= 0; j < nb_state; j++)
                {
-                  if (observation[var][j] != NULL)
+                  if (observation_distribution[var][j] != NULL)
                   {
-                     delete observation[var][j];
-                     observation[var][j]= NULL;
+                     delete observation_distribution[var][j];
+                     observation_distribution[var][j]= NULL;
                   }
                }
-               delete [] observation[var];
-               observation[var]= NULL;
+               delete [] observation_distribution[var];
+               observation_distribution[var]= NULL;
             }
          }
-      observation= NULL;
+      observation_distribution= NULL;
    }
 }
 
@@ -7065,7 +7999,7 @@ void HiddenMarkovTreeData::observation_frequency_distribution_computation()
 void HiddenMarkovTreeData::build_observation_frequency_distribution()
 {
    build_state_characteristics();
-   create_observation_frequency_distribution(state_characteristics->marginal->nb_value);
+   create_observation_frequency_distribution(state_characteristics->marginal_distribution->nb_value);
    observation_frequency_distribution_computation();
 }
 
@@ -7147,7 +8081,7 @@ void HiddenMarkovTreeData::state_permutation(int* perm)
 {
    register int i, var, t;
    TreeCharacteristics* pstate_char= new TreeCharacteristics[_nb_states];
-   ptHistogram_array_2d pobservation= new FrequencyDistribution**[_nb_integral];
+   ptFrequencyDistribution_array_2d pobservation= new FrequencyDistribution**[_nb_integral];
    Typed_edge_one_int_tree::vertex_iterator it, end;
    One_int_container c;
 
@@ -7155,9 +8089,9 @@ void HiddenMarkovTreeData::state_permutation(int* perm)
    {
       pobservation[var]= new FrequencyDistribution*[_nb_states];
       for (i= 0; i < _nb_states; i++)
-         pobservation[var][perm[i]]= observation[var][i];
+         pobservation[var][perm[i]]= observation_distribution[var][i];
       for (i= 0; i < _nb_states; i++)
-         observation[var][i]= pobservation[var][i];
+         observation_distribution[var][i]= pobservation[var][i];
       delete [] pobservation[var];
       pobservation[var]= NULL;
    }
@@ -7334,26 +8268,26 @@ void HiddenMarkovTreeData::remove()
        this->state_trees= NULL;
    }
 
-   if (observation != NULL)
+   if (observation_distribution != NULL)
    {
       for(var= 0; var < _nb_integral; var++)
       {
-         if (observation[var] != NULL)
+         if (observation_distribution[var] != NULL)
          {
-            for(j= 0; j < state_characteristics->marginal->nb_value; j++)
+            for(j= 0; j < state_characteristics->marginal_distribution->nb_value; j++)
             {
-               if (observation[var][j] != NULL)
+               if (observation_distribution[var][j] != NULL)
                {
-                  delete observation[var][j];
-                  observation[var][j]= NULL;
+                  delete observation_distribution[var][j];
+                  observation_distribution[var][j]= NULL;
                }
             }
-            delete [] observation[var];
+            delete [] observation_distribution[var];
          }
-         observation[var]= NULL;
+         observation_distribution[var]= NULL;
       }
-      delete [] observation;
-      observation= NULL;
+      delete [] observation_distribution;
+      observation_distribution= NULL;
    }
 
    if (state_characteristics != NULL)
@@ -7421,35 +8355,35 @@ void HiddenMarkovTreeData::copy(const HiddenMarkovTreeData& trees,
       else
          state_characteristics= NULL;
 
-      if (trees.observation != NULL)
+      if (trees.observation_distribution != NULL)
       {
-         observation= new ptHistogram_array[_nb_integral];
+         observation_distribution= new ptFrequencyDistribution_array[_nb_integral];
          for(var= 0; var < _nb_integral; var++)
-            if (trees.observation[var] != NULL)
+            if (trees.observation_distribution[var] != NULL)
             {
-               observation[var]= new FrequencyDistribution*[state_characteristics->marginal->nb_value];
-               for(j= 0; j < state_characteristics->marginal->nb_value; j++)
+               observation_distribution[var]= new FrequencyDistribution*[state_characteristics->marginal_distribution->nb_value];
+               for(j= 0; j < state_characteristics->marginal_distribution->nb_value; j++)
                {
-                  if (trees.observation[var][j] != NULL)
-                     observation[var][j]= new FrequencyDistribution(*(trees.observation[var][j]));
+                  if (trees.observation_distribution[var][j] != NULL)
+                     observation_distribution[var][j]= new FrequencyDistribution(*(trees.observation_distribution[var][j]));
                   else
-                     observation[var][j]= NULL;
+                     observation_distribution[var][j]= NULL;
                }
             }
             else
-               observation[var]= NULL;
+               observation_distribution[var]= NULL;
       }
       else
-         observation= NULL;
+         observation_distribution= NULL;
    }
    else
    {
       if (state_characteristics != NULL)
          delete state_characteristics;
-      if (observation != NULL)
-         delete observation;
+      if (observation_distribution != NULL)
+         delete observation_distribution;
       state_characteristics= NULL;
-      observation= NULL;
+      observation_distribution= NULL;
    }
 
 }

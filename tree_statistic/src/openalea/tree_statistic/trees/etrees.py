@@ -7,6 +7,7 @@ import trees, ctree
 import openalea.tree_statistic.int_fl_containers as int_fl_containers
 import openalea.tree_statistic._errors as _errors
 import openalea.stat_tool as stat_tool
+import openalea.stat_tool.error as check_error
 
 VariableType = stat_tool.VariableTypeBis
 
@@ -179,7 +180,7 @@ class Tree(trees.Tree):
     def __iter__(self):
         """Get an iterator on the tree vertices."""
         return self.__ctree.Vertices()  
-    
+
 class TreeStructure(trees.TreeStructure):
     """An implementation of tree structures with enhanced functionalities."""
     
@@ -200,7 +201,7 @@ class TreeStructure(trees.TreeStructure):
         elif issubclass(arg.__class__, TreeStructure):
             #... or a tree structure
             trees.TreeStructure.__init__(self, arg)
-        elif issubclass(arg.__class__, stat_tool._Distribution):
+        elif issubclass(arg.__class__, stat_tool._stat_tool._Distribution):
             #... or a Distribution
             trees.TreeStructure.__init__(self, arg, arg2, arg3)
         else:
@@ -292,6 +293,77 @@ class TreeStructure(trees.TreeStructure):
         """Get an iterator on the tree vertices, using a preorder traversing."""
         return self.__ctree.Preorder()
 
+    def _SetMTGVidDictionary(self, VidDict, TreeId=None, ValidityCheck=False):
+        """Set the dictionaries corresponding to the tree -> MTG
+            and MTG -> tree vertex identifiers correspondences.
+
+        :Usage:
+
+            _SetMTGVidDictionary(self, VidDict, TreeId=None, ValidityCheck=False)
+
+        :Parameters:
+
+          `VidDict` (list or dict) - Dictionary or list of dictionaries with the vertices in self
+            as keys and the vids of a MTG as values
+          `TreeId` (int) - Identifier of the tree whose MTG ids must be set
+            (all trees in self if None)
+          `ValidityCheck` (bool) - Check whether the dictionary values correspond to valid 
+            tree vertex identifiers
+
+        :Remarks:
+
+            If TreeId is None, VidDict must be a list of dictionaries with length self.NbTrees().
+            Otherwise, VidDict must be a single dictionary.
+            The keys of the dictionary(ies) are the vertex identifiers of the associated trees,
+            and values are the corresponding vertex identifiers in MTG.
+        """
+        msg = "Correspondence between MTG and tree vertex identifiers "
+        msg += "was previously defined already. This will be overwritten."
+        if ((TreeId is None) and not(self.__mtg_to_tree_vid is None)
+            and (len(self.__mtg_to_tree_vid) > 0)):
+            warnings.warn(msg, Warning)
+        if self.__mtg_to_tree_vid is None:
+            self.__mtg_to_tree_vid = []
+            for t in range(self.NbTrees()):
+                self.__mtg_to_tree_vid.append({})
+        if self.__tree_to_mtg_vid is None:
+            self.__tree_to_mtg_vid = []
+            for t in range(self.NbTrees()):
+                self.__tree_to_mtg_vid.append({})
+        if not(TreeId is None):
+            check = self._valid_tree(Treeid)
+            CpVidDict = dict(VidDict)
+            VidDict = []
+            for t in range(self.NbTrees()):
+                if (TreeId == t):
+                    VidDict.append(CpVidDict)
+                else:
+                    VidDict.append({})
+            if (len(self.__mtg_to_tree_vid[t]) > 0):
+                warnings.warn(msg, Warning)
+        elif (len(VidDict) != self.NbTrees()):
+            msg = "Bad number of dictionaries: " + str(len(VidDict))
+            msg += " - should be " + str(self.NbTrees())
+            raise ValueError, msg
+        if (ValidityCheck):
+            for t in range(self.NbTrees()):
+                if ((TreeId is None) or (TreeId == t)):
+                    for v in VidDict[t].values():
+                        check = self._valid_vid(t, v)
+        for t in range(self.NbTrees()):
+            if ((TreeId is None) or (TreeId == t)):
+                self.__mtg_to_tree_vid[t] = dict(VidDict[t])
+                self.__tree_to_mtg_vid[t] = {}
+                for k in VidDict[t].keys():
+                    v = VidDict[t][k]
+                    if self.__tree_to_mtg_vid[t].has_key(v):
+                        msg = "Tree vertex " + str(v)
+                        msg += " already present in dictionary for "
+                        msg += "tree " + str(t)
+                        raise ValueError, msg
+                    else:
+                        self.__tree_to_mtg_vid[t][v] = k
+
     def __valid_edge(self, parent, child):
         self.__valid_vid(parent)
         self.__valid_vid(child)
@@ -303,3 +375,121 @@ class TreeStructure(trees.TreeStructure):
     def __iter__(self):
         """Get an iterator on the tree vertices."""
         return self.Vertices()
+
+class Trees(trees.Trees):
+    """An implementation of trees with enhanced functionalities."""
+
+    def __init__(self, arg, arg2=None,
+                 attribute_names=None, attribute_def=None, scale=None):
+        """Initialize a Trees object from trees.
+
+        Initialize a Trees object from either:
+        - a list of Tree objects;
+        - a Trees object.
+        - a MTG file, a filter on the vertices, a list of attribute names,
+          a list of attribute functions and the considered scale."""
+        super(Trees, self).__init__(arg, arg2, attribute_names,
+                                    attribute_def, scale)
+
+    def _SetMTGVidDictionary(self, VidDict, TreeId=None, ValidityCheck=False):
+        """Set the dictionaries corresponding to the tree -> MTG
+            and MTG -> tree vertex identifiers correspondences.
+
+        :Usage:
+
+            _SetMTGVidDictionary(self, VidDict, TreeId=None, ValidityCheck=False)
+
+        :Parameters:
+
+          `VidDict` (list or dict) - Dictionary or list of dictionaries with the vertices in self
+            as keys and the vids of a MTG as values
+          `TreeId` (int) - Identifier of the tree whose MTG ids must be set
+            (all trees in self if None)
+          `ValidityCheck` (bool) - Check whether the dictionary values correspond to valid
+            tree vertex identifiers
+
+        :Remarks:
+
+            If TreeId is None, VidDict must be a list of dictionaries with length self.NbTrees().
+            Otherwise, VidDict must be a single dictionary.
+            The keys of the dictionary(ies) are the vertex identifiers of the associated trees,
+            and values are the corresponding vertex identifiers in MTG.
+
+        :Examples:
+
+        .. doctest::
+            :options: +SKIP
+
+            >>> _SetMTGVidDictionary(self, VidDict, TreeId=None, ValidityCheck=False)
+
+        .. seealso::
+            :func:`~openalea.tree_statistic.trees.Trees.MTGVertexId`,
+            :func:`~openalea.tree_statistic.trees.Trees.TreeVertexId`.
+        """
+        msg = "Correspondence between MTG and tree vertex identifiers "
+        msg += "was previously defined already. This correspondence "
+        msg += "will be overwritten."
+        import warnings
+        if ((TreeId is None) and not(self.__mtg_to_tree_vid is None)
+            and (len(self.__mtg_to_tree_vid) > 0)):
+            warnings.warn(msg, Warning)
+        if self.__mtg_to_tree_vid is None:
+            self.__mtg_to_tree_vid = []
+            for t in range(self.NbTrees()):
+                self.__mtg_to_tree_vid.append({})
+        if self.__tree_to_mtg_vid is None:
+            self.__tree_to_mtg_vid = []
+            for t in range(self.NbTrees()):
+                self.__tree_to_mtg_vid.append({})
+        if self.__tree_to_mtg_tid is None:
+            self.__tree_to_mtg_tid = {}
+        if self.__mtg_to_tree_tid is None:
+            self.__mtg_to_tree_tid = {}
+        if not(TreeId is None):
+            check = self._valid_tree(Treeid)
+            CpVidDict = dict(VidDict)
+            VidDict = []
+            for t in range(self.NbTrees()):
+                if (TreeId == t):
+                    VidDict.append(CpVidDict)
+                else:
+                    VidDict.append({})
+            if (len(self.__mtg_to_tree_vid[t]) > 0):
+                warnings.warn(msg, Warning)
+        elif (len(VidDict) != self.NbTrees()):
+            msg = "Bad number of dictionaries: " + str(len(VidDict))
+            msg += " - should be " + str(self.NbTrees())
+            raise ValueError, msg
+        if (ValidityCheck):
+            for t in range(self.NbTrees()):
+                if ((TreeId is None) or (TreeId == t)):
+                    for v in VidDict[t].values():
+                        check = self._valid_vid(t, v)
+                    for k in VidDict[t].keys():
+                        check_error.CheckType([k], [int])
+        for t in range(self.NbTrees()):
+            # copy dictionary MTG->Tree
+            if ((TreeId is None) or (TreeId == t)):
+                self.__mtg_to_tree_vid[t] = dict(VidDict[t])
+                # build dictionary Tree->MTG
+                self.__tree_to_mtg_vid[t] = {}
+                for k in VidDict[t].keys():
+                    v = VidDict[t][k]
+                    if self.__tree_to_mtg_vid[t].has_key(v):
+                        msg = "Tree vertex " + str(v)
+                        msg += " already present in dictionary for "
+                        msg += "tree " + str(t)
+                        raise ValueError, msg
+                    else:
+                        self.__tree_to_mtg_vid[t][v] = k
+                # update dictionaries MTGComponentRoot <--> Tree Roots
+                tr = self._ctrees().Tree(t).Root() # tree root
+                try:
+                    v = self.__tree_to_mtg_vid[t][tr]  # MTGComponentRoot
+                except KeyError, error:
+                    if (ValidityCheck):
+                        raise KeyError, error
+                    else:
+                        v = sorted(VidDict[t].keys())[0]
+                self.__mtg_to_tree_tid[v] = t
+                self.__tree_to_mtg_tid[t] = v
