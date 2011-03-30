@@ -89,8 +89,22 @@ def test_merge():
         T = mtg_t.Merge([mtg_t])
     except trees.StatTreeError, msg:
         assert False, str(msg) + "\n" + str(mtg_t)
-    msg = "Bad number of merged trees"
-    assert T.NbTrees() == mtg_t.NbTrees()*2, msg
+    msg1 = "Bad number of merged trees"
+    assert T.NbTrees() == mtg_t.NbTrees()*2, msg1
+
+def test_merge_variables():
+    """merge variables of a tree with themselves"""
+    mtg_t = test_mtg_build()
+    try:
+        T = mtg_t.MergeVariable([mtg_t])
+    except trees.StatTreeError, msg:
+        assert False, str(msg) + "\n" + str(mtg_t)
+    msg1 = "Bad number of Variables"
+    assert (T.NbVariables() == mtg_t.NbVariables()*2), msg1
+    msg2 = "Error copying correspondence between Tree and MTG vertex ids: "
+    msg2 += str(T.MTGVertexId(0)) + " - should be "
+    msg2 += str(mtg_t.MTGVertexId(0))
+    assert (mtg_t.MTGVertexId(0) == T.MTGVertexId(0)), msg2
 
 def test_select_variable():
     """select variable 0"""

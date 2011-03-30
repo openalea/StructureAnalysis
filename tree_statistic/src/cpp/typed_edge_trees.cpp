@@ -60,7 +60,8 @@ TreeCharacteristics::TreeCharacteristics()
   :  _variable(I_DEFAULT)
   ,  _min_value(0)
   ,  _max_value(0)
-  ,  marginal(NULL)
+  ,  marginal_distribution(NULL)
+  ,  marginal_histogram(NULL)
   ,  first_occurrence_root(NULL)
   ,  first_occurrence_leaves(NULL)
   ,  sojourn_size(NULL)
@@ -72,6 +73,8 @@ TreeCharacteristics::TreeCharacteristics()
 /*****************************************************************
  *
  *  Constructor of TreeCharacteristics class using observations
+ *  using a flag on considering value I_DEFAULT as a missing value
+ *  and ignore this value
  *
  **/
 
@@ -81,11 +84,13 @@ TreeCharacteristics::TreeCharacteristics(int imin_value,
                                          int imax_depth,
                                          int inb_trees,
                                          Typed_edge_one_int_tree** otrees1,
-                                         int ivariable)
+                                         int ivariable,
+                                         bool final_value)
   :  _variable(ivariable)
   ,  _min_value(imin_value)
   ,  _max_value(imax_value)
-  ,  marginal(NULL)
+  ,  marginal_distribution(NULL)
+  ,  marginal_histogram(NULL)
   ,  first_occurrence_root(NULL)
   ,  first_occurrence_leaves(NULL)
   ,  sojourn_size(NULL)
@@ -98,7 +103,8 @@ TreeCharacteristics::TreeCharacteristics(int imin_value,
                          imax_depth,
                          inb_trees,
                          otrees1,
-                         _variable); }
+                         _variable,
+                         final_value); }
 
 /*****************************************************************
  *
@@ -110,7 +116,8 @@ TreeCharacteristics::TreeCharacteristics(const TreeCharacteristics& t_char)
  :  _variable(t_char._variable)
  ,  _min_value(t_char._min_value)
  ,  _max_value(t_char._max_value)
- ,  marginal(NULL)
+ ,  marginal_distribution(NULL)
+ ,  marginal_histogram(NULL)
  ,  first_occurrence_root(NULL)
  ,  first_occurrence_leaves(NULL)
  ,  sojourn_size(NULL)
@@ -144,10 +151,15 @@ void TreeCharacteristics::copy(const TreeCharacteristics& t_char)
 
    nb_values= _max_value - _min_value + 1;
 
-   if (t_char.marginal != NULL)
-      marginal= new FrequencyDistribution(*(t_char.marginal));
+   if (t_char.marginal_distribution != NULL)
+      marginal_distribution= new FrequencyDistribution(*(t_char.marginal_distribution));
    else
-      marginal= NULL;
+      marginal_distribution= NULL;
+
+   if (t_char.marginal_histogram != NULL)
+      marginal_histogram= new Histogram(*(t_char.marginal_histogram));
+   else
+      marginal_histogram= NULL;
 
    if (t_char.first_occurrence_root != NULL)
    {
@@ -257,7 +269,9 @@ void TreeCharacteristics::build_characteristics(int imin_value,
                                                 int imax_depth,
                                                 int inb_trees,
                                                 Typed_edge_one_int_tree** otrees1,
-                                                int ivariable)
+                                                int ivariable,
+                                                bool final_value)
+
 {
    bool build= true;
    int val, nb_values= _max_value - _min_value + 1,
@@ -272,18 +286,18 @@ void TreeCharacteristics::build_characteristics(int imin_value,
    if (nb_values <= NB_OUTPUT)
       init(imax_size, imax_depth);
    else
-      marginal= new FrequencyDistribution(_max_value+1);
+      marginal_distribution= new FrequencyDistribution(_max_value+1);
 
-   build_marginal_frequency_distribution(otrees1);
+   build_marginal_frequency_distribution(otrees1, final_value);
 
-   nb_values= marginal->nb_value;
+   nb_values= marginal_distribution->nb_value;
 
    if (nb_values > NB_OUTPUT)
       // the characteristics are not built if the number of values is too high...
       build=false;
 
    for (val= 0; val < nb_values; val++)
-      if (marginal->frequency[val] == 0)
+      if (marginal_distribution->frequency[val] == 0)
       {
          build= false;
          break;
@@ -291,11 +305,11 @@ void TreeCharacteristics::build_characteristics(int imin_value,
 
    if (build)
    {
-      build_first_occurrence_root_frequency_distribution(otrees1, imax_depth);
-      build_first_occurrence_leaves_frequency_distribution(otrees1, imax_depth);
-      build_zone_frequency_distributions(otrees1, imax_size);
-      build_nb_occurrences_frequency_distribution(otrees1, imax_size);
-      // build_children_pairs_frequency_distribution(otrees1)
+      build_first_occurrence_root_frequency_distribution(otrees1, imax_depth, final_value);
+      build_first_occurrence_leaves_frequency_distribution(otrees1, imax_depth, final_value);
+      build_zone_frequency_distributions(otrees1, imax_size, final_value);
+      build_nb_occurrences_frequency_distribution(otrees1, imax_size, final_value);
+      // build_children_pairs_frequency_distribution(otrees1, final_value)
    }
    else
    {
@@ -325,12 +339,12 @@ int TreeCharacteristics::get_nb_values() const
  *
  **/
 
-FrequencyDistribution* TreeCharacteristics::get_marginal() const
+FrequencyDistribution* TreeCharacteristics::get_marginal_distribution() const
 {
    FrequencyDistribution *res;
 
-   if (marginal != NULL)
-      res= new FrequencyDistribution(*marginal);
+   if (marginal_distribution != NULL)
+      res= new FrequencyDistribution(*marginal_distribution);
    else
       res= NULL;
    return res;
@@ -440,12 +454,12 @@ int TreeCharacteristics::get_nb_value_first_occurrence_root(int value) const
 int TreeCharacteristics::get_nb_value_sojourn_size(int value) const
 { return sojourn_size[value]->nb_value; }
 
-std::ostream& TreeCharacteristics::ascii_write_marginal(std::ostream &os,
-                                                        bool exhaustive,
-                                                        bool file_flag) const
+std::ostream& TreeCharacteristics::ascii_write_marginal_distribution(std::ostream &os,
+                                                                     bool exhaustive,
+                                                                     bool file_flag) const
 {
-   if (marginal != NULL)
-      marginal->ascii_write(os, exhaustive, file_flag);
+   if (marginal_distribution != NULL)
+      marginal_distribution->ascii_write(os, exhaustive, file_flag);
    return os;
 }
 
@@ -1656,10 +1670,16 @@ void TreeCharacteristics::remove()
 { // deallocation
   int nb_values= _max_value - _min_value + 1; //value,
 
-  if (marginal != NULL)
+  if (marginal_distribution != NULL)
   {
-     delete marginal;
-     marginal= NULL;
+     delete marginal_distribution;
+     marginal_distribution= NULL;
+  }
+
+  if (marginal_histogram != NULL)
+  {
+     delete marginal_histogram;
+     marginal_histogram= NULL;
   }
 
 
@@ -1703,7 +1723,7 @@ void TreeCharacteristics::init(int imax_size, int imax_depth)
    assert(nb_values > 0);
    // allocating non existing frequency distributions is pointless
 
-   marginal= new FrequencyDistribution(_max_value+1);
+   marginal_distribution= new FrequencyDistribution(_max_value+1);
 
    init_characteristic(first_occurrence_root, nb_values, imax_depth);
 
@@ -1723,7 +1743,8 @@ void TreeCharacteristics::init(int imax_size, int imax_depth)
  *
  **/
 
-void TreeCharacteristics::build_marginal_frequency_distribution(Typed_edge_one_int_tree** otrees1)
+void TreeCharacteristics::build_marginal_frequency_distribution(Typed_edge_one_int_tree** otrees1,
+                                                                bool final_value)
 { // marginal frequency distribution
 
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
@@ -1733,27 +1754,47 @@ void TreeCharacteristics::build_marginal_frequency_distribution(Typed_edge_one_i
 
    if ((otrees1 != NULL) &&(_min_value >= 0) && (_max_value <= MARGINAL_DISTRIBUTION_MAX_VALUE))
    {
-      if (marginal == NULL)
-         marginal = new FrequencyDistribution(_max_value+1);
+      if (marginal_distribution == NULL)
+         marginal_distribution = new FrequencyDistribution(_max_value+1);
 
-      for(t = 0; t < _nb_trees; t++)
+      if (final_value)
       {
-         if (otrees1[t] != NULL)
+         for(t = 0; t < _nb_trees; t++)
          {
-            tie(it, end)= otrees1[t]->vertices();
-            while (it < end)
+            if (otrees1[t] != NULL)
             {
-               v= (otrees1[t]->get(*it++)).Int();
-               (marginal->frequency[v])++;
+               tie(it, end)= otrees1[t]->vertices();
+               while (it < end)
+               {
+                  v= (otrees1[t]->get(*it++)).Int();
+                  if (v != I_DEFAULT)
+                     (marginal_distribution->frequency[v])++;
+               }
+            }
+         }
+      }
+      else
+      {
+         for(t = 0; t < _nb_trees; t++)
+         {
+            if (otrees1[t] != NULL)
+            {
+               tie(it, end)= otrees1[t]->vertices();
+               while (it < end)
+               {
+                  v= (otrees1[t]->get(*it++)).Int();
+                  (marginal_distribution->frequency[v])++;
+               }
             }
          }
       }
 
-      marginal->offset = _min_value;
-      marginal->nb_element_computation();
-      marginal->max_computation();
-      marginal->mean_computation();
-      marginal->variance_computation();
+
+      marginal_distribution->offset = _min_value;
+      marginal_distribution->nb_element_computation();
+      marginal_distribution->max_computation();
+      marginal_distribution->mean_computation();
+      marginal_distribution->variance_computation();
    }
 }
 
@@ -1765,7 +1806,8 @@ void TreeCharacteristics::build_marginal_frequency_distribution(Typed_edge_one_i
  **/
 
 void TreeCharacteristics::build_first_occurrence_root_frequency_distribution(Typed_edge_one_int_tree** otrees1,
-                                                                             int imax_depth)
+                                                                             int imax_depth,
+                                                                             bool final_value)
 { //  frequency distribution of first occurrence (root)
 
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
@@ -1809,16 +1851,37 @@ void TreeCharacteristics::build_first_occurrence_root_frequency_distribution(Typ
 
             curr_val= _min_value; // current value
 
-            while ((index < size) && (curr_val <= _max_value))
+            if (!final_value)
             {
-               v= (otrees1[t]->get(va[index])).Int() - _min_value;
-               if (!occurrence[v])
+               while ((index < size) && (curr_val <= _max_value))
                {
-                  occurrence[v]= true;
-                  (first_occurrence_root[v]->frequency[otrees1[t]->get_depth(va[index])])++;
-                  curr_val++;
+                  v= (otrees1[t]->get(va[index])).Int() - _min_value;
+                  if (!occurrence[v])
+                  {
+                     occurrence[v]= true;
+                     (first_occurrence_root[v]->frequency[otrees1[t]->get_depth(va[index])])++;
+                     curr_val++;
+                  }
+                  index++;
                }
-               index++;
+            }
+            else
+            {
+               while ((index < size) && (curr_val <= _max_value))
+               {
+                  v= (otrees1[t]->get(va[index])).Int();
+                  if (v != I_DEFAULT)
+                  {
+                     v-= _min_value;
+                     if (!occurrence[v])
+                     {
+                        occurrence[v]= true;
+                        (first_occurrence_root[v]->frequency[otrees1[t]->get_depth(va[index])])++;
+                        curr_val++;
+                     }
+                  }
+                  index++;
+               }
             }
          }
       }
@@ -1845,7 +1908,8 @@ void TreeCharacteristics::build_first_occurrence_root_frequency_distribution(Typ
  **/
 
 void TreeCharacteristics::build_first_occurrence_leaves_frequency_distribution(Typed_edge_one_int_tree** otrees1,
-                                                                               int imax_depth)
+                                                                               int imax_depth,
+                                                                               bool final_value)
 { //  frequency distribution of first occurrence (leaves)
 
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
@@ -1886,16 +1950,38 @@ void TreeCharacteristics::build_first_occurrence_leaves_frequency_distribution(T
 
             curr_val= _min_value; // current value
 
-            while ((index < size) && (curr_val <= _max_value))
+            if (!final_value)
             {
-               v= (otrees1[t]->get(va[index])).Int() - _min_value;
-               if (!occurrence[v])
+               while ((index < size) && (curr_val <= _max_value))
                {
-                  occurrence[v]= true;
-                  (first_occurrence_leaves[v]->frequency[depth[index]])++;
-                  curr_val++;
+                  v= (otrees1[t]->get(va[index])).Int() - _min_value;
+                  if (!occurrence[v])
+                  {
+                     occurrence[v]= true;
+                     (first_occurrence_leaves[v]->frequency[depth[index]])++;
+                     curr_val++;
+                  }
+                  index++;
                }
-               index++;
+            }
+            else
+            {
+               while ((index < size) && (curr_val <= _max_value))
+               {
+
+                  v= (otrees1[t]->get(va[index])).Int();
+                  if (v != I_DEFAULT)
+                  {
+                     v -= _min_value;
+                     if (!occurrence[v])
+                     {
+                        occurrence[v]= true;
+                        (first_occurrence_leaves[v]->frequency[depth[index]])++;
+                        curr_val++;
+                     }
+                  }
+                  index++;
+               }
             }
          }
       }
@@ -1922,7 +2008,8 @@ void TreeCharacteristics::build_first_occurrence_leaves_frequency_distribution(T
  **/
 
 void TreeCharacteristics::build_zone_frequency_distributions(Typed_edge_one_int_tree** otrees1,
-                                                             int imax_size)
+                                                             int imax_size,
+                                                             bool final_value)
 { //  frequency distribution of homogeneous zones
 
    typedef Typed_edge_one_int_tree::children_iterator children_iterator;
@@ -1985,27 +2072,57 @@ void TreeCharacteristics::build_zone_frequency_distributions(Typed_edge_one_int_
                tie(it, end)= otrees1[t]->children(v);
                //cout << "Traitement du sommet " << v << " de la zone "
                //     << zones[current_zone]
-               while (it < end)
+               if (!final_value)
                {
-                  val= (otrees1[t]->get(*it)).Int();
-                  if (val == (otrees1[t]->get(v)).Int())
-                  // *it belongs to the current homogeneous zone
+                  while (it < end)
                   {
-                      (zones[current_zone]).push_back(*it);
-                      node_list.push_back(*it);
-                      zone_id.push_back(current_zone);
-                  }
-                  else
-                  // beginning of a new zone
+                     val= (otrees1[t]->get(*it)).Int();
+                     if (val == (otrees1[t]->get(v)).Int())
+                     // *it belongs to the current homogeneous zone
+                     {
+                         (zones[current_zone]).push_back(*it);
+                         node_list.push_back(*it);
+                         zone_id.push_back(current_zone);
+                     }
+                     else
+                     // beginning of a new zone
+                     {
+                        tmp_zone.push_back(*it);
+                        zones.push_back(tmp_zone);
+                        tmp_zone.pop_back();
+                        node_list.push_back(*it);
+                        zone_id.push_back(zones.size()-1);
+                     }
+                     it++;
+                  } // each child handled
+               }
+               else
+               {
+                  while (it < end)
                   {
-                     tmp_zone.push_back(*it);
-                     zones.push_back(tmp_zone);
-                     tmp_zone.pop_back();
-                     node_list.push_back(*it);
-                     zone_id.push_back(zones.size()-1);
-                  }
-                  it++;
-               } // each child handled
+                     val= (otrees1[t]->get(*it)).Int();
+                     if (val != I_DEFAULT)
+                     {
+                        if (val == (otrees1[t]->get(v)).Int())
+                        // *it belongs to the current homogeneous zone
+                        {
+                            (zones[current_zone]).push_back(*it);
+                            node_list.push_back(*it);
+                            zone_id.push_back(current_zone);
+                        }
+                        else
+                        // beginning of a new zone
+                        {
+                           tmp_zone.push_back(*it);
+                           zones.push_back(tmp_zone);
+                           tmp_zone.pop_back();
+                           node_list.push_back(*it);
+                           zone_id.push_back(zones.size()-1);
+                        }
+                     }
+                     it++;
+                  } // each child handled
+               }
                node_list.pop_front();
                zone_id.pop_front();
             }
@@ -2013,20 +2130,43 @@ void TreeCharacteristics::build_zone_frequency_distributions(Typed_edge_one_int_
             for(val= 0; val < nb_values; val++)
                nb_zones_t[val]= 0;
 
-            while (!zones.empty())
+            if (!final_value)
             {
-               v= (zones.back()).front();
-               val= (otrees1[t]->get(v)).Int();
-               nb_zones_t[val-_min_value]++;
-               // current tree has one more zone of value "val"
+               while (!zones.empty())
+               {
+                  v= (zones.back()).front();
+                  val= (otrees1[t]->get(v)).Int();
+                  nb_zones_t[val-_min_value]++;
+                  // current tree has one more zone of value "val"
 
-               size= (zones.back()).size();
-               // cout << "Zone de valeur " << val << " enracinee au sommet " << v
-               //      << " de taille " << size << endl;
-               (sojourn_size[val-_min_value]->frequency[size])++;
-               // ... and of size "size'
+                  size= (zones.back()).size();
+                  // cout << "Zone de valeur " << val << " enracinee au sommet " << v
+                  //      << " de taille " << size << endl;
+                  (sojourn_size[val-_min_value]->frequency[size])++;
+                  // ... and of size "size'
 
-               zones.pop_back();
+                  zones.pop_back();
+               }
+            }
+            else
+            {
+               while (!zones.empty())
+               {
+                  v= (zones.back()).front();
+                  val= (otrees1[t]->get(v)).Int();
+                  if (val != I_DEFAULT)
+                  {
+                     nb_zones_t[val-_min_value]++;
+                     // current tree has one more zone of value "val"
+
+                     size= (zones.back()).size();
+                     // cout << "Zone de valeur " << val << " enracinee au sommet " << v
+                     //      << " de taille " << size << endl;
+                     (sojourn_size[val-_min_value]->frequency[size])++;
+                     // ... and of size "size'
+                  }
+                  zones.pop_back();
+               }
             }
 
             for(val= 0; val < nb_values; val++)
@@ -2064,7 +2204,8 @@ void TreeCharacteristics::build_zone_frequency_distributions(Typed_edge_one_int_
  **/
 
 void TreeCharacteristics::build_nb_occurrences_frequency_distribution(Typed_edge_one_int_tree** otrees1,
-                                                                      int imax_size)
+                                                                      int imax_size,
+                                                                      bool final_value)
 {
    typedef Typed_edge_one_int_tree::vertex_iterator vertex_iterator;
 
@@ -2092,11 +2233,22 @@ void TreeCharacteristics::build_nb_occurrences_frequency_distribution(Typed_edge
             nb_occurrences_t[val]= 0;
 
          tie(it, end)= otrees1[t]->vertices();
-         while (it < end)
-         {
-            val= (otrees1[t]->get(*it++)).Int() - _min_value;
-            nb_occurrences_t[val]++;
-         }
+         if (!final_value)
+            while (it < end)
+            {
+               val= (otrees1[t]->get(*it++)).Int() - _min_value;
+               nb_occurrences_t[val]++;
+            }
+         else
+            while (it < end)
+            {
+               val= (otrees1[t]->get(*it++)).Int();
+               if (val != I_DEFAULT)
+               {
+                  val -= _min_value;
+                  nb_occurrences_t[val]++;
+               }
+            }
 
          for(val= 0; val < nb_values; val++)
             (nb_occurrences[val]->frequency[nb_occurrences_t[val]])++;

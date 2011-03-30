@@ -22,6 +22,7 @@
 // definition of boost::python::len
 #include <boost/python/make_constructor.hpp>
 // definition of boost::python::make_constructor
+#include "../errors.h"
 
 // Using =======================================================================
 using namespace boost::python;

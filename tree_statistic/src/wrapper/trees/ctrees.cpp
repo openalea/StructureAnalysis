@@ -1212,6 +1212,12 @@ BOOST_PYTHON_MODULE(ctrees)
                       "Shift (i.e. translate) the values of a Trees object.")
         // note that the order between both shift wrappers is relevant,
         // since an integer is a kind of float
+        .def("Size", &Trees::get_total_size,
+                     "Size(self) -> int \n\n"
+                     "Return total number of vertices.")
+        .def("Size", &Trees::get_size,
+                     "Size(self, int) -> int \n\n"
+                     "Return the number of vertices of a given tree.")
         .def("Transcode", &Trees_wrapper_transcode,
                         return_value_policy< manage_new_object >(),
                         "Transcode(self, variable, new_values) ->CTrees \n\n"

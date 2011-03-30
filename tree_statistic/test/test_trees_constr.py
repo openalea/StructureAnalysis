@@ -103,9 +103,33 @@ def test_copy():
 
 def test_mtg_build():
     """constructor from a MTG"""
+    msg1 = "Bad number of trees: "
+    msg2 = "Bad number of variables: "
     mtg_t = trees.Trees(mtg_name)
+    msg1 += str(mtg_t.NbTrees())
+    msg1 += " - should be 3"
+    msg2 += str(mtg_t.NbVariables())
+    msg2 += " - should be 4"
     assert mtg_t
+    assert (mtg_t.NbTrees() == 3), msg1
+    assert (mtg_t.NbVariables() == 4), msg2
     return mtg_t
+
+def test_mtg_vertices():
+    """Test correspondance between MTG and Tree vertices"""
+    msg1 = "Bad correspondance from Tree to MTG vertices: "
+    msg2 = "Bad correspondance from MTG to Tree vertices: "
+    mtg_t = test_mtg_build()
+    d = mtg_t.MTGVertexId(0)
+    d_check = {0: 2, 1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9, 8: 10, \
+        9: 11, 10: 12, 11: 13, 12: 14, 13: 15, 14: 16, 15: 17}
+    msg1 += str(d) + "\n - should be \n" + str(d_check)
+    assert (d == d_check), msg1
+    d2 = {}
+    for k in d.keys():
+        d2[d[k]] = k
+    msg2 += str(d2) + "\n - should be \n" + str(mtg_t.TreeVertexId(0))
+    assert (d2 == mtg_t.TreeVertexId(0)), msg2
 
 def test_exception_inheritance():
     """Test whether StatTreeError are also seen as StatError"""
@@ -267,6 +291,7 @@ if __name__ == "__main__":
     test_copy()
     test_mtg_build()
     test_exception_inheritance()
+    test_mtg_vertices()
     test_mtg_build_failure()
     test_list_build_failure()
     #test_attribute_name_failure()

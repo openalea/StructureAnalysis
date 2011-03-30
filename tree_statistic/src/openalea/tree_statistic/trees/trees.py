@@ -2473,6 +2473,10 @@ class Trees(object):
         self._copy_tid_conversion(shifted)
         return shifted
 
+    def Size(self):
+        """Return the number of vertices."""
+        return self.__ctrees.Size()
+
     def Transcode(self, variable, new_values):
         """Transcoding of values.
 

@@ -34,8 +34,8 @@
  *  ----------------------------------------------------------------------------
  */
 
-#ifndef TYPED_EDGE_TREES_TCC
-#define TYPED_EDGE_TREES_TCC
+#ifndef TYPED_EDGE_TREES_HPP
+#define TYPED_EDGE_TREES_HPP
 
 
 /*****************************************************************
@@ -372,13 +372,15 @@ void Typed_edge_int_fl_tree<Generic_Int_fl_container>::copy(const Typed_edge_int
 /*****************************************************************
  *
  *  Default constructor of Observed_tree class
+ *  An array of trees with size inb_trees is allocated,
+ *  but the trees themselves are not allocated
  *
  **/
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
-                                                         int inb_float,
-                                                         int inb_trees)
+                                                             int inb_float,
+                                                             int inb_trees)
  : _nb_integral(inb_integral)
  , _nb_float(inb_float)
  , _type(NULL)
@@ -390,8 +392,19 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
  , trees(NULL)
  , characteristics(NULL)
 {
+   const int nb_variables = inb_integral + inb_float;
+   register int var;
+
    if (_nb_trees)
       trees= new Typed_edge_int_fl_tree<Generic_Int_fl_container>*[_nb_trees];
+
+   _type= new int[nb_variables];
+
+   for(var= 0; var < _nb_integral; var++)
+      _type[var]= INT_VALUE;
+
+   for(var= _nb_integral; var < nb_variables; var++)
+      _type[var]= REAL_VALUE;
 
    _min_value.reset(_nb_integral, _nb_float);
    _max_value.reset(_nb_integral, _nb_float);
@@ -419,9 +432,9 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_tr
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_trees,
-                                                         int const * itype,
-                                                         Typed_edge_int_fl_tree<Generic_Int_fl_container>** otrees,
-                                                         bool frequency_distribution_flag)
+                                                             int const * itype,
+                                                             Typed_edge_int_fl_tree<Generic_Int_fl_container>** otrees,
+                                                             bool frequency_distribution_flag)
  : _nb_integral(0)
  , _nb_float(0)
  , _type(NULL)
@@ -580,8 +593,8 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(int inb_integral,
 
 template<typename Generic_Int_fl_container>
 Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_trees& otrees,
-                                                         int inb_trees,
-                                                         int_array index)
+                                                             int inb_trees,
+                                                             int_array index)
  : _nb_integral(0)
  , _nb_float(0)
  , _type(NULL)
@@ -600,14 +613,19 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_tr
    // TreeCharacteristics tc;
    value vparadigm;
    int var, t, nb_variables;
+   bool copy_char = true;
 
    if ((index != NULL) && (inb_trees > 0))
    {
        _nb_integral= otrees._nb_integral;
        _nb_float= otrees._nb_float;
 
+       // empty trees
+       if (_nb_integral + _nb_float == 0)
+          copy_char = false;
+
        nb_variables= _nb_integral + _nb_float;
-       trees= new Typed_edge_int_fl_tree<Generic_Int_fl_container>*[_nb_trees];
+
        _type= new int[nb_variables];
 
        for(var= 0; var < _nb_integral; var++)
@@ -616,12 +634,20 @@ Typed_edge_trees<Generic_Int_fl_container>::Typed_edge_trees(const Typed_edge_tr
        for(var= _nb_integral; var < nb_variables; var++)
           _type[var]= REAL_VALUE;
 
-       for(t= 0; t < _nb_trees; t++)
-          trees[t]= new Typed_edge_int_fl_tree<Generic_Int_fl_container>(*(otrees.trees[index[t]]));
+       trees= new Typed_edge_int_fl_tree<Generic_Int_fl_container>*[_nb_trees];
 
-       build_characteristics();
-       build_size_frequency_distribution();
-       build_nb_children_frequency_distribution();
+       for(t= 0; t < _nb_trees; t++)
+          if (copy_char)
+             trees[t]= new Typed_edge_int_fl_tree<Generic_Int_fl_container>(*(otrees.trees[index[t]]));
+          else
+             trees[t]= new Typed_edge_int_fl_tree<Generic_Int_fl_container>(0,0);
+
+       if (copy_char)
+       {
+          build_characteristics();
+          build_size_frequency_distribution();
+          build_nb_children_frequency_distribution();
+       }
    }
    else
      Typed_edge_trees<Generic_Int_fl_container>(0);
@@ -699,7 +725,7 @@ DiscreteDistributionData* Typed_edge_trees<Generic_Int_fl_container>::extract(St
   }
 
   if (status)
-     histo= new DiscreteDistributionData(*(characteristics[variable]->marginal));
+     histo= new DiscreteDistributionData(*(characteristics[variable]->marginal_distribution));
 
   return histo;
 
@@ -1775,8 +1801,9 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
          status= false;
          error.update(STAT_error[STATR_MIN_VALUE]);
       }
-      if ((dmax_value < _min_value.Double(variable))
-            || (dmax_value < dmin_value)) // this second condition seems weird
+      if (dmax_value < _min_value.Double(variable))
+      //      || (dmax_value < dmin_value))
+      // this second condition seems to be already checked above
       {
          status= false;
          error.update(STAT_error[STATR_MAX_VALUE]);
@@ -1795,7 +1822,7 @@ Typed_edge_trees<Generic_Int_fl_container>::value_select(StatError& error,
          while (it < end)
          {
             val= (trees[t]->get(*it)).Double(variable);
-            if ((val >= this->imin_value) && (val <= this->imax_value))
+            if ((val >= dmin_value) && (val <= dmax_value))
             {
                if (keep)
                   index[inb_trees++]= t;
@@ -2492,7 +2519,7 @@ Typed_edge_trees<Generic_Int_fl_container>::segmentation_extract(StatError& erro
          }
          else
          {
-            marginal= characteristics[variable]->marginal;
+            marginal= characteristics[variable]->marginal_distribution;
             pfrequency= marginal->frequency + marginal->offset;
             nb_present_value= 0;
             // number of values that were observed at least once
@@ -3148,16 +3175,16 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
       if (characteristics[var] != NULL)
       {
          // cardinal number of the set of observed values
-         if (characteristics[var]->marginal != NULL)
-            os << characteristics[var]->marginal->nb_value << " ";
+         if (characteristics[var]->marginal_distribution != NULL)
+            os << characteristics[var]->marginal_distribution->nb_value << " ";
 
          switch (_type[var])
          {
             case STATE :
-               os << STAT_label[characteristics[var]->marginal->nb_value == 1 ?
+               os << STAT_label[characteristics[var]->marginal_distribution->nb_value == 1 ?
                                 STATL_STATE : STATL_STATES] << endl;
             case INT_VALUE :
-               os << STAT_label[characteristics[var]->marginal->nb_value == 1 ?
+               os << STAT_label[characteristics[var]->marginal_distribution->nb_value == 1 ?
                                 STATL_VALUE : STATL_VALUES] << endl;
          }
 
@@ -3168,9 +3195,9 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
          os << STAT_label[_type[var] == STATE ? STATL_STATE : STATL_VALUE] << " "
             << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
-         (characteristics[var]->marginal)->ascii_characteristic_print(os, false, comment_flag);
+         (characteristics[var]->marginal_distribution)->ascii_characteristic_print(os, false, comment_flag);
 
-         if ((characteristics[var]->marginal->nb_value <= ASCII_NB_VALUE) || (exhaustive))
+         if ((characteristics[var]->marginal_distribution->nb_value <= ASCII_NB_VALUE) || (exhaustive))
          {
             os << "\n";
             if (comment_flag)
@@ -3178,7 +3205,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
 
             os << "   | " << STAT_label[_type[var] == STATE ? STATL_STATE : STATL_VALUE] << " "
                << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-            characteristics[var]->marginal->ascii_print(os, comment_flag);
+            characteristics[var]->marginal_distribution->ascii_print(os, comment_flag);
          }
          characteristics[var]->ascii_print(os, _type[var], *hsize,
                                            exhaustive, comment_flag);
@@ -3287,9 +3314,9 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
          os << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
             << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
-         if (characteristics[var]->marginal != NULL)
+         if (characteristics[var]->marginal_distribution != NULL)
          {
-            (characteristics[var]->marginal)->ascii_characteristic_print(os, exhaustive, comment_flag);
+            (characteristics[var]->marginal_distribution)->ascii_characteristic_print(os, exhaustive, comment_flag);
 
             if ((characteristics[var]->_max_value <= ASCII_NB_VALUE) || (exhaustive))
             {
@@ -3299,7 +3326,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
 
                os << "   | " << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
                   << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-               characteristics[var]->marginal->ascii_print(os, comment_flag);
+               characteristics[var]->marginal_distribution->ascii_print(os, comment_flag);
             }
          }
          else
@@ -3489,13 +3516,13 @@ bool Typed_edge_trees<Generic_Int_fl_container>::spreadsheet_write(StatError& er
             out_file << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
                      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
 
-            if (characteristics[var]->marginal != NULL)
+            if (characteristics[var]->marginal_distribution != NULL)
             {
-               (characteristics[var]->marginal)->spreadsheet_characteristic_print(out_file);
+               (characteristics[var]->marginal_distribution)->spreadsheet_characteristic_print(out_file);
 
                 out_file << "\n\t" << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
                          << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-                (characteristics[var]->marginal)->spreadsheet_print(out_file);
+                (characteristics[var]->marginal_distribution)->spreadsheet_print(out_file);
             }
             else
                if (_type[var] == INT_VALUE)
@@ -3703,8 +3730,8 @@ double Typed_edge_trees<Generic_Int_fl_container>::mean_computation(int variable
    vertex_iterator it, end;
    tree_type *ctree; // current_tree;
 
-   if (characteristics[variable]->marginal != NULL)
-      mean= (characteristics[variable]->marginal)->mean;
+   if (characteristics[variable]->marginal_distribution != NULL)
+      mean= (characteristics[variable]->marginal_distribution)->mean;
    else
    {
       if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
@@ -3745,8 +3772,8 @@ double Typed_edge_trees<Generic_Int_fl_container>::variance_computation(int vari
    vertex_iterator it, end;
    tree_type *ctree; // current_tree;
 
-   if (characteristics[variable]->marginal != NULL)
-      variance= (characteristics[variable]->marginal)->variance;
+   if (characteristics[variable]->marginal_distribution != NULL)
+      variance= (characteristics[variable]->marginal_distribution)->variance;
    else
    {
       if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
@@ -3790,8 +3817,8 @@ double Typed_edge_trees<Generic_Int_fl_container>::skewness_computation(int vari
    vertex_iterator it, end;
    tree_type *ctree; // current_tree;
 
-   if (characteristics[variable]->marginal != NULL)
-      skewness= (characteristics[variable]->marginal)->skewness_computation();
+   if (characteristics[variable]->marginal_distribution != NULL)
+      skewness= (characteristics[variable]->marginal_distribution)->skewness_computation();
    else
    {
       if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
@@ -3835,8 +3862,8 @@ double Typed_edge_trees<Generic_Int_fl_container>::kurtosis_computation(int vari
    vertex_iterator it, end;
    tree_type *ctree; // current_tree;
 
-   if (characteristics[variable]->marginal != NULL)
-      kurtosis= (characteristics[variable]->marginal)->kurtosis_computation();
+   if (characteristics[variable]->marginal_distribution != NULL)
+      kurtosis= (characteristics[variable]->marginal_distribution)->kurtosis_computation();
    else
    {
       if ((_type[variable] == INT_VALUE) || (_type[variable] == NB_INTERNODE))
@@ -3869,8 +3896,8 @@ double Typed_edge_trees<Generic_Int_fl_container>::iid_information_computation()
 
 
    for(i= (((_type[0] != STATE) || (_nb_integral == 1)) ? 0 : 1); i < _nb_integral; i++)
-      if ((characteristics[i] != NULL) && (characteristics[i]->marginal != NULL))
-         information+= characteristics[i]->marginal->information_computation();
+      if ((characteristics[i] != NULL) && (characteristics[i]->marginal_distribution != NULL))
+         information+= characteristics[i]->marginal_distribution->information_computation();
 
    return information;
 }
@@ -3893,6 +3920,19 @@ int Typed_edge_trees<Generic_Int_fl_container>::get_nb_float() const
 
 /*****************************************************************
  *
+ *  Return total number of vertices
+ *
+ **/
+
+template<class Generic_Int_fl_container>
+int Typed_edge_trees<Generic_Int_fl_container>::get_total_size() const
+{
+   assert (hsize != NULL);
+   return hsize->nb_value;
+}
+
+/*****************************************************************
+ *
  *  Access to the types of variables, maximal and minimal values
  *
  **/
@@ -3900,6 +3940,11 @@ int Typed_edge_trees<Generic_Int_fl_container>::get_nb_float() const
 template<typename Generic_Int_fl_container>
 int Typed_edge_trees<Generic_Int_fl_container>::get_type(int variable) const
 { return _type[variable]; }
+
+template<typename Generic_Int_fl_container>
+const int* Typed_edge_trees<Generic_Int_fl_container>::get_types_ptr() const
+{ return _type; }
+
 
 template<typename Generic_Int_fl_container>
 int Typed_edge_trees<Generic_Int_fl_container>::get_min_int_value(int variable) const
@@ -4079,8 +4124,8 @@ FrequencyDistribution* Typed_edge_trees<Generic_Int_fl_container>::get_marginal(
 
    if (characteristics != NULL)
       if (characteristics[variable] != NULL)
-         if (characteristics[variable]->get_marginal() != NULL)
-            res= new FrequencyDistribution(*(characteristics[variable]->get_marginal()));
+         if (characteristics[variable]->get_marginal_distribution() != NULL)
+            res= new FrequencyDistribution(*(characteristics[variable]->get_marginal_distribution()));
 
    return res;
 }
@@ -4273,6 +4318,10 @@ Typed_edge_int_fl_tree<Generic_Int_fl_container>** Typed_edge_trees<Generic_Int_
 }
 
 template<typename Generic_Int_fl_container>
+Typed_edge_int_fl_tree<Generic_Int_fl_container>** Typed_edge_trees<Generic_Int_fl_container>::get_trees_ptr() const
+{ return trees; }
+
+template<typename Generic_Int_fl_container>
 Typed_edge_int_fl_tree<Generic_Int_fl_container>* Typed_edge_trees<Generic_Int_fl_container>::get_tree(int itree) const
 {
    Typed_edge_int_fl_tree<Generic_Int_fl_container> *res_tree;
@@ -4290,6 +4339,13 @@ Typed_edge_int_fl_tree<Generic_Int_fl_container>* Typed_edge_trees<Generic_Int_f
       res_tree= NULL;
 
    return res_tree;
+}
+
+template<typename Generic_Int_fl_container>
+Typed_edge_int_fl_tree<Generic_Int_fl_container>* Typed_edge_trees<Generic_Int_fl_container>::get_tree_ptr(int itree) const
+{
+   assert((itree < _nb_trees) && (trees != NULL));
+   return trees[itree];
 }
 
 /*****************************************************************
@@ -4678,12 +4734,12 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
 
    phisto[0]= hsize;
    if (((characteristics != NULL) && (characteristics[variable] != NULL))
-         && (characteristics[variable]->marginal != NULL))
+         && (characteristics[variable]->marginal_distribution != NULL))
             status= true;
 
    if (status)
    {
-      status= characteristics[variable]->marginal->plot_print((data_file_name.str()).c_str(), 1, phisto);
+      status= characteristics[variable]->marginal_distribution->plot_print((data_file_name.str()).c_str(), 1, phisto);
 
       if (status)
       {
@@ -4732,23 +4788,23 @@ bool Typed_edge_trees<Generic_Int_fl_container>::plot_print(const char * prefix,
 
             out_file << "\n\n";
 
-            if (characteristics[variable]->marginal->nb_value-1 < TIC_THRESHOLD)
+            if (characteristics[variable]->marginal_distribution->nb_value-1 < TIC_THRESHOLD)
                out_file << "set xtics 0,1" << endl;
 
-            if ((int)(characteristics[variable]->marginal->max * YSCALE)+1 < TIC_THRESHOLD)
+            if ((int)(characteristics[variable]->marginal_distribution->max * YSCALE)+1 < TIC_THRESHOLD)
                out_file << "set ytics 0,1" << endl;
 
-            out_file << "plot [0:" << MAX(characteristics[variable]->marginal->nb_value-1 , 1) << "] [0:"
-                     << (int)(characteristics[variable]->marginal->max * YSCALE)+1 << "] \""
+            out_file << "plot [0:" << MAX(characteristics[variable]->marginal_distribution->nb_value-1 , 1) << "] [0:"
+                     << (int)(characteristics[variable]->marginal_distribution->max * YSCALE)+1 << "] \""
                      << label((data_file_name.str()).c_str()) << "\" using 1 title \""
                      << STAT_label[STATL_VARIABLE] << " " << variable+1 << " - "
                      << STAT_label[_type[variable] == STATE ? STATL_STATE : STATL_OUTPUT] << " "
                      << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\" with impulses" << endl;
 
-            if (characteristics[variable]->marginal->nb_value-1 < TIC_THRESHOLD)
+            if (characteristics[variable]->marginal_distribution->nb_value-1 < TIC_THRESHOLD)
                out_file << "set xtics autofreq" << endl;
 
-            if ((int)(characteristics[variable]->marginal->max*YSCALE)+1 < TIC_THRESHOLD)
+            if ((int)(characteristics[variable]->marginal_distribution->max*YSCALE)+1 < TIC_THRESHOLD)
                out_file << "set ytics autofreq" << endl;
 
             if (i == 0)
