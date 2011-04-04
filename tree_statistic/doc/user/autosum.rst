@@ -39,5 +39,18 @@ Download the source file :download:`../../src/openalea/tree_statistic/hmt/hmt.py
     :show-inheritance:
     :synopsis: to be done
 
+:mod:`openalea.tree_statistic.trees.etrees` module
+==================================================
+
+Download the source file :download:`../../src/openalea/tree_statistic/trees/etrees.py`.
+
+
+.. automodule:: openalea.tree_statistic.trees.etrees
+    :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
+    :synopsis: to be done
+
 
 
