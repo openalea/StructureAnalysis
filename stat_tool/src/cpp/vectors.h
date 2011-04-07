@@ -106,7 +106,9 @@ protected :
     Histogram **marginal_histogram;  // histogrammes marginaux
     double *mean;           // vecteur moyenne
     double **covariance;    // matrice de variance-covariance
+    /// int_vector[nvec][variable]
     int **int_vector;       // vecteurs, variables entieres
+    /// int_vector[nvec][variable]    
     double **real_vector;   // vecteurs, variables reelles
 
     void init(int inb_vector , int *iidentifier , int inb_variable , int *itype , bool init_flag);

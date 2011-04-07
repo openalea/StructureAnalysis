@@ -379,6 +379,7 @@ const char *STAT_parsing[] = {
   "bad distribution name" ,
   "bad parameter name" ,
   "bad parameter index" ,
+  "bad number of parameters" , // STATP_NB_PARAMETER 
   "bad separator" ,
   "bad parameter value" ,
   "sum of probabilities different to 1" ,
