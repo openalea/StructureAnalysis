@@ -20,6 +20,7 @@
 
 
 /* WRAPPER Boost.python for sequences class */
+#include <cstdlib>
 #include "stat_tool/stat_tools.h"
 
 #include "export_base.h"
@@ -89,6 +90,6 @@ BOOST_PYTHON_MODULE(_sequence_analysis)
   class_variable_order_markov_iterator();
 
   class_hidden_variable_order_markov();
-
+  def( "srand", srand );
 }
 

@@ -20,14 +20,14 @@ __version__ = "$Id$"
 
 import os
 import openalea.stat_tool.interface as interface
-from openalea.sequence_analysis._sequence_analysis import \
-    _Sequences, \
-    _MarkovianSequences, \
-    _RenewalData,\
-    _MarkovianSequences,\
-    _VariableOrderMarkovData,\
-    _SemiMarkovData,\
-    _NonHomogeneousMarkovData
+from openalea.sequence_analysis._sequence_analysis import (_Sequences, 
+    _MarkovianSequences, 
+    _RenewalData,
+    _MarkovianSequences,
+    _VariableOrderMarkovData,
+    _SemiMarkovData,
+    _NonHomogeneousMarkovData,
+    )
 
 
 #import _sequence_analysis
