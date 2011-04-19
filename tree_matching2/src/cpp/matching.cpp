@@ -392,8 +392,8 @@ DistanceType Matching::match()
 		}
 		for (int input_vertex=size1-1;input_vertex>=0;input_vertex--)
 		{
-		  if (_mdtable_type == COMPACT)
-		    _distances->openDistancesVector(input_vertex);
+		  if (_mdtable_type == COMPACT) _distances->openDistancesVector(input_vertex);
+
 		  for (int reference_vertex=size2-1;reference_vertex>=0;reference_vertex--)
 		    {
 		      distanceBetweenForest(input_vertex,reference_vertex);
@@ -600,7 +600,8 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
 }
 
 
-
+ExtMatching::~ExtMatching() {
+}
 
 
 

@@ -76,7 +76,7 @@ public :
   Matching(const TreeGraphPtr& , const TreeGraphPtr& ,const NodeCostPtr&, MDTableType mdtable_type = STD ) ;
 
   //Destructor
-  ~Matching();
+  virtual ~Matching();
   
   //Distance Between Trees
   virtual DistanceType distanceBetweenTree(int ,int ) ;
@@ -121,7 +121,7 @@ class TREEMATCH_API ExtMatching : public Matching
 
 public :
   ExtMatching(const TreeGraphPtr& input,const TreeGraphPtr& reference,const NodeCostPtr& nodeDistance, MDTableType mdtable_type  ):Matching(input,reference,nodeDistance,mdtable_type){};
-
+  virtual ~ExtMatching();
   
   //Distance Between Trees
   virtual DistanceType distanceBetweenTree(int ,int ) ;

@@ -146,7 +146,7 @@ class TREEMATCH_API StdMatchingDistanceTable : public MatchingDistanceTable
   DistanceType referenceForestFromEmpty(int );
 
   virtual DistanceVectorTable &getDistanceTable() { return(_treeDistTable); }
-  virtual DistanceTable &getTreeDistanceTable() {assert(1);};
+  virtual DistanceTable &getTreeDistanceTable() {assert(1); return DistanceTable(); };
  
     private :
     int _n1;
