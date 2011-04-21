@@ -112,16 +112,21 @@ class Tree(trees.Tree):
         referred to by its identifier (vid)."""
         self.__valid_vid(vid)
         return self.__ctree.Children(vid)
-    
+
     def Depth(self, vid=None):
         """Return tree depth or the depth of a given vertex,
-        referred to by its identifier (vid)."""
+        referred to by its identifier (vid).
+
+        The depth of a vertex is the number of vertices along the path
+        between this vertex and the root vertex
+        (including both vertices, which may be confounded).
+        The depth of a tree is the maximal depth of its vertices."""
         if vid is None:
-            return trees.Tree.Depth(self)
+            return trees.Tree.Depth(self) + 1
         else:
             self.__valid_vid(vid)
-            return self.__ctree.Depth(vid)
-    
+            return self.__ctree.Depth(vid) + 1
+
     def Display(self, vids=True, attributes=True, key=None, mtg_vids=False):
         """Display the subtree rooted at argument key, with or without 
         the vertex identifiers (vids) and the attributes.
@@ -142,11 +147,15 @@ class Tree(trees.Tree):
         self.__valid_vid(vid)
         return self.__ctree.IsRoot(vid)
        
-    def NbChildren(self, vid):
+    def NbChildren(self, vid, EdgeType=None):
         """Return the number of children of a given vertex,
-        referred to by its identifier (vid)."""
+        referred to by its identifier (vid). Filter according to EdgeType"""
         self.__valid_vid(vid)
-        return self.__ctree.NbChildren(vid)
+        if (EdgeType is None):
+            return self.__ctree.NbChildren(vid)
+        else:
+            c = list(self.Children())
+            return len([v for v in c if self.EdgeType(vid, v) == EdgeType])
 
     def Parent(self, vid):
         """Return the parent of the given vertex,
@@ -262,11 +271,15 @@ class TreeStructure(trees.TreeStructure):
         self.__valid_vid(vid)
         return self.__ctree.IsRoot(vid)
        
-    def NbChildren(self, vid):
+    def NbChildren(self, vid, EdgeType=None):
         """Return the number of children of a given vertex,
-        referred to by its identifier (vid)."""
+        referred to by its identifier (vid). Filter according to EdgeType"""
         self.__valid_vid(vid)
-        return self.__ctree.NbChildren(vid)
+        if (EdgeType is None):
+            return self.__ctree.NbChildren(vid)
+        else:
+            c = list(self.Children())
+            return len([v for v in c if self.EdgeType(vid, v) == EdgeType])
 
     def Parent(self, vid):
         """Return the parent of the given vertex,
@@ -493,3 +506,109 @@ class Trees(trees.Trees):
                         v = sorted(VidDict[t].keys())[0]
                 self.__mtg_to_tree_tid[v] = t
                 self.__tree_to_mtg_tid[t] = v
+
+def Success1stCheck(T):
+    """
+    Check whether < is always the first child in T
+
+    :Parameters:
+        `T` (trees.Trees) - Tree to be tested.
+
+    :Returns:
+        True if and only if < is always the first child in T
+    """
+    import openalea.tree_statistic.trees.etrees as etrees
+    ET = etrees.Tree(T)
+    for v in ET.Breadthorder():
+        # get children of every vertex
+        c = list(ET.Children(v))
+        has_successor = False
+        # types of children
+        ctypes = [ET.EdgeType(v, d) for d in c]
+        if (('<' in ctypes) and (ctypes[0] != '<')):
+            return False
+    return True
+
+def Success1stBuild(T, Reverse=False):
+    """
+    Build a copy of T where < is always the first child.
+    Reverse or not the other children.
+
+    :Parameters:
+        `T` (trees.Trees) - Tree to rearrange.
+        `Reverse` (bool) - True iif the order of + children
+            should be inversed
+
+    :Returns:
+        A pair composed by a :ref:`openalea.tree_statistic.trees.etrees` instance
+        and by a dictionary d with correspondance between the vertices in T is returned
+        (use as: d[T::Vertex] = Success1stBuild(T)::Vertex)
+
+    :Examples:
+
+    .. doctest::
+
+        >>> T = Success1stBuild(T, Reverse=False)
+
+    """
+    import openalea.tree_statistic.trees.etrees as etrees
+    ET = etrees.Tree(T)
+    copy_vid_dic = True
+    nvid_to_ovid = {} # conversion from new to old vids
+    ovid_to_nvid = {} # conversion from new to old vids
+    # conversion from Tree to MTG if any
+    try:
+        mtg_to_tree_vid_old = T.TreeVertex()
+        tree_to_mtg_vid_old = T.MTGVertex()
+        mtg_tid = T._mtg_tid() # root of mtg
+    except Warning:
+        copy_vid_dic = False
+    # censored += [{}]
+    mtg_to_tree_vid_new = {}
+    tree_to_mtg_vid_new = {}
+    # build a new etrees.Tree
+    R = etrees.Tree(ET.Get(0), 0, 0)
+    children_list = [] # list of list of children
+    type_list = [] # list of list of edge types
+    for v in ET.Breadthorder():
+        # get children of every vertex
+        c = []
+        t = []
+        for d in ET.Children(v):
+            if ET.EdgeType(v, d) == "<":
+                c = [d] + c
+                t = ["<"] + t
+            elif Reverse:
+                c = [d] + c
+                t = ["+"] + t
+            else:
+                c += [d]
+                t += ["+"]
+        children_list.append(c)
+        type_list.append(t)
+    lindex = 0 # index in children_ and type_lists
+    # add root vertex
+    v = ET.Root()
+    val = ET.Get(v)
+    vid = R.AddVertex(val)
+    tree_to_mtg_vid_new[vid] = ET.MTGVertex(v)
+    mtg_to_tree_vid_new[tree_to_mtg_vid_new[vid]] = vid
+    ovid_to_nvid[v] = vid
+    nvid_to_ovid[vid] = v
+    for v in ET.Breadthorder():
+        # add the children of v and their attributes
+        llindex = 0 # index in children_ and type_[lindex] lists
+        for d in children_list[lindex]:
+            val = ET.Get(d)
+            vid = R.AddVertex(val)
+            tree_to_mtg_vid_new[vid] = ET.MTGVertex(d)
+            mtg_to_tree_vid_new[tree_to_mtg_vid_new[vid]] = vid
+            ovid_to_nvid[d] = vid
+            nvid_to_ovid[vid] = d
+            R.AddEdge(ovid_to_nvid[v], vid, type_list[lindex][llindex])
+            llindex += 1
+        lindex += 1
+    if copy_vid_dic:
+        R._copy_vid_conversion(mtg_to_tree_vid_new, tree_to_mtg_vid_new)
+        R._copy_mtg_tid(mtg_tid) # copy root of mtg
+    return R, ovid_to_nvid

@@ -483,10 +483,19 @@ class Tree:
     def _ctree(self):
         return self.__ctree
 
-    def _copy_mtg_tid(self, vid):
-        # copy the vid in the MTG corresponding to the root of self
-        self.__mtg_tid=vid
-        
+    def _copy_mtg_tid(self, Vid):
+        """Set vertex identifier in the MTG corresponding to the root of self as "Vid"
+
+        :Usage:
+
+            _copy_mtg_tid(Vid)
+
+        :Parameters:
+
+          Vid (int) - Vertex considered as the root of self
+        """
+        self.__mtg_tid = Vid
+
     def _copy_vid_conversion(self, source_mtg2treedict, source_tree2mtgdict):
         # copy the dictionaries corresponding to the tree -> MTG
         # and MTG -> tree vid conversion from source to self
