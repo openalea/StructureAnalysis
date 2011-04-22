@@ -25,6 +25,7 @@ if os.name != 'nt':
 
 # test_int_fl_containers.cpp
 tests= Split("""
+test_int_fl_containers.cpp
 test_generic_tree.cpp
 test_int_fl_tree.cpp
 test_tree_characteristics.cpp

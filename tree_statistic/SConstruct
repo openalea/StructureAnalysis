@@ -11,6 +11,7 @@ options.Add(BoolVariable('with_test', 'build test modules', 1))
 
 # dependencies
 tools = ['boost_python', 'install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree', 'qt4']
+# tools = ['install','vplants.tool', 'vplants.stat_tool','vplants.sequence_analysis','vplants.tree', 'qt4']
 
 env = ALEASolution(options, tools)
 
