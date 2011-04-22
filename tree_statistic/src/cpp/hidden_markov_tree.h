@@ -55,6 +55,7 @@ namespace Stat_trees
 */
 
 class HiddenMarkovTreeData;
+class HiddenMarkovOutTree;
 
 /****************************************************************
  *

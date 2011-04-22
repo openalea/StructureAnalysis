@@ -119,10 +119,10 @@ int main(void)
    cout << "Number of hidden states: " << hmtd->get_nb_states() << endl;
 
    cout << endl << "Marginal output histogram (1st variable) : " << endl;
-   (hmtd->get_characteristics(0))->ascii_write_marginal(cout, true, false);
+   (hmtd->get_characteristics(0))->ascii_write_marginal_distribution(cout, true, false);
 
    cout << endl << "Marginal state histogram: " << endl;
-   (hmtd->get_state_characteristics())->ascii_write_marginal(cout, true, false);
+   (hmtd->get_state_characteristics())->ascii_write_marginal_distribution(cout, true, false);
 
    cout << endl << "Occurrence output histogram (1st variable): " << endl;
    (hmtd->get_characteristics(0))->ascii_write_nb_occurrences(cout, true, false);
@@ -266,10 +266,10 @@ int main(void)
    cout << "Number of hidden states: " << hmtd->get_nb_states() << endl;
 
    cout << endl << "Marginal output histogram (1st variable) : " << endl;
-   (hmtd->get_characteristics(0))->ascii_write_marginal(cout, false, false);
+   (hmtd->get_characteristics(0))->ascii_write_marginal_distribution(cout, false, false);
 
    cout << endl << "Marginal state histogram: " << endl;
-   (hmtd->get_state_characteristics())->ascii_write_marginal(cout, false, false);
+   (hmtd->get_state_characteristics())->ascii_write_marginal_distribution(cout, false, false);
 
    cout << endl << "Occurrence output histogram (1st variable): " << endl;
    (hmtd->get_characteristics(0))->ascii_write_nb_occurrences(cout, false, false);

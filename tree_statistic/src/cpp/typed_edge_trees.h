@@ -113,7 +113,7 @@ template<typename Generic_Int_fl_container> class Typed_edge_int_fl_tree;
 typedef Typed_edge_int_fl_tree<One_int_container> Typed_edge_one_int_tree;
 typedef Typed_edge_one_int_tree** pt_One_int_tree_array;
 class TreeCharacteristics;
-class HiddenMarkovIndOutTree;
+class HiddenMarkovOutTree;
 
 /**
    \class Edged_typed_int_fl_tree
@@ -198,7 +198,7 @@ class Typed_edge_trees : public StatInterface
    // friend classes
    // friend class TreeCharacteristics;
    friend class HiddenMarkovTree;
-   friend class HiddenMarkovIndOutTree;
+   friend class HiddenMarkovOutTree;
 
    // template <typename Type> friend
    //    Typed_edge_trees<Type>* observed_trees_ascii_read(StatError& error,
