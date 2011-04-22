@@ -57,9 +57,6 @@ template <class Tree>
 typename tree_traits<Tree>::vertex_descriptor
 Tree_wrapper_Parent(Tree& tree, typename tree_traits<Tree>::vertex_descriptor v)
 {
-#ifdef __GNUC__
-#warning: in each method, access to vertices needs to be checked more carefully, as in Parent
-#endif
    // int parent;
    ostringstream error_message;
    bool status= true;
@@ -397,6 +394,21 @@ std::string Generic_tree_wrapper_Display1(Tree& tree,
 {
    std::stringstream s;
    std::string res;
+   ostringstream error_message;
+   bool status= true;
+
+   if ((v < 0) || (v > (int)tree.get_size()-1))
+   {
+      status= false;
+      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+                    << v << endl;
+   }
+   if (!status)
+   {
+      PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+
    if (tree.get_size() > 0)
    {
       tree.display(s, v);
@@ -647,7 +659,24 @@ int CharTree_wrapper_Depth0(Unlabelled_tree& tree)
 { return tree.get_depth(); }
 
 int CharTree_wrapper_Depth1(Unlabelled_tree& tree, Unlabelled_tree::key v)
-{ return tree.get_depth(v); }
+{
+   ostringstream error_message;
+   bool status= true;
+
+   if ((v < 0) || (v > (int)tree.get_size()-1))
+   {
+      status= false;
+      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+                    << v << endl;
+   }
+   if (!status)
+   {
+      PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+
+   return tree.get_depth(v);
+}
 
 std::string CharTree_wrapper_Display0(Unlabelled_tree& tree)
 {
@@ -667,6 +696,21 @@ std::string CharTree_wrapper_Display1(Unlabelled_tree& tree, Default_tree::key v
 {
    std::stringstream s;
    std::string res;
+   ostringstream error_message;
+   bool status= true;
+
+   if ((v < 0) || (v > (int)tree.get_size()-1))
+   {
+      status= false;
+      error_message << STAT_TREES_error[STATR_VERTEX_ID] << ": "
+                    << v << endl;
+   }
+   if (!status)
+   {
+      PyErr_SetString(PyExc_IndexError, (error_message.str()).c_str());
+      throw_error_already_set();
+   }
+
    if (tree.get_size() > 0)
    {
       tree.display(s, v);

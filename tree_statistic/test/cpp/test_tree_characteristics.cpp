@@ -111,7 +111,7 @@ int main(void)
   TreeCharacteristics *pt_copy_tc= new TreeCharacteristics(*(tc[0])), copy_tc= *(tc[0]);
 
   cout << "Histogram of the marginal distribution: " << endl;
-  tc[0]->ascii_write_marginal(cout, 1, 0);
+  tc[0]->ascii_write_marginal_distribution(cout, 1, 0);
 
   //delete tc[0];
   //delete [] tc;

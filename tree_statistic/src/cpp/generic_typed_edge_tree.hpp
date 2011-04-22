@@ -284,6 +284,24 @@ bool Typed_edge_tree<Type>::edge_type(key parent, key child)
 
 /*--------------------------------------------------------------*
  *
+ *  Set the type of a given edge and return true
+ *  iif the edge exists
+ *
+ *--------------------------------------------------------------*/
+
+template <typename Type>
+bool Typed_edge_tree<Type>::set_edge_type(key parent, key child, bool type)
+{
+   const bool res = is_edge(parent, child);
+
+   if (res)
+      edge_types[child] = type;
+
+   return res;
+}
+
+/*--------------------------------------------------------------*
+ *
  *  Return the branching order (depth) of a typed-edge tree
  *
  *--------------------------------------------------------------*/

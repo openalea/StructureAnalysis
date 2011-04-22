@@ -926,8 +926,9 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
 {
    typedef typename generic_visitor<tree_type>::vertex_array vertex_array;
 
-   bool status= true, cut;
+   bool status= true, cut, no_successor, reached_current_vertex;;
    int var, nb_sequences= 0, t, s, pos, sequence_id= 0;
+   unsigned int children_count = 0;
    key current_leaf, current_vertex, parent_vertex;
    value val;
    int *itype= NULL, *ilength= NULL;
@@ -941,6 +942,7 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
    std::vector<key> branched_vertices;
    vertex_array leaves;
    generic_visitor<tree_type> visitor;
+   children_iterator it, end;
    Sequences *res= NULL;
 
    error.init();
@@ -969,14 +971,17 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
 
       for (t= 0; t < _nb_trees; t++)
       {
+         // for a given tree, as much sequences as leaves
          leaves.clear();
          // determine the set of leaves for each tree
          visitor.find_leaves(*(trees[t]), trees[t]->root(), leaves);
          leaf_set.push_back(leaves);
          nb_sequences+= leaves.size();
+         // leaf_set[t] is a set of leaves
 
          while(!leaf_set[t].empty())
          {
+            // create a new path from leaves
             current_leaf= leaf_set[t].back();
             leaf_set[t].pop_back();
 
@@ -1000,14 +1005,61 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
             }
             else
             {
+               // current sequence
                branched_vertices.resize(0);
                branched_vertices.push_back(current_vertex);
                cut= false;
                while (!(trees[t]->is_root(current_vertex) || cut))
                {
                   parent_vertex= trees[t]->parent(current_vertex);
+                  // cut at each "+" edge (+ is 0)
                   cut= !trees[t]->edge_type(parent_vertex, current_vertex);
+
                   if (!cut)
+                  {
+                     current_vertex= parent_vertex;
+                     branched_vertices.push_back(current_vertex);
+                  }
+                  else
+                  {
+                     if (trees[t]->get_nb_children(parent_vertex)==1)
+                     // sympodial branching: current_vertex is considered
+                     // as a successor
+                     {
+                        current_vertex= parent_vertex;
+                        branched_vertices.push_back(current_vertex);
+                        cut = false;
+                     }
+                     else
+                     {
+                        // check whether every other children are +
+                        // and add a new sequence in this case
+                        tie(it, end) = trees[t]->children(parent_vertex);
+                        children_count = 0;
+                        no_successor = true;
+                        reached_current_vertex = false;
+                        while (it < end)
+                        {
+                           if (trees[t]->edge_type(parent_vertex, *it))
+                              no_successor = false;
+                           if (*it == current_vertex)
+                              reached_current_vertex = true;
+                           if (!reached_current_vertex)
+                              children_count++;
+                           it++;
+                        }
+                        if ((trees[t]->get_nb_children(parent_vertex)
+                               == children_count + 1) && no_successor)
+                        // last child has been reached
+                        {
+                           // parent vertex is deconnected from all other paths
+                           leaf_set[t].push_back(parent_vertex);
+                           nb_sequences+=1;
+                        }
+                     }
+                  }
+
+                  /* if (!cut)
                   {
                      current_vertex= parent_vertex;
                      branched_vertices.push_back(current_vertex);
@@ -1019,10 +1071,13 @@ Typed_edge_trees<Generic_Int_fl_container>::build_sequences(StatError& error,
                      {
                         leaf_set[t].push_back(parent_vertex);
                         nb_sequences+=1;
-                     }
+                     } */
                }
+               // current sequence is finished
+               // add sequence length to vlength
                vlength.push_back(branched_vertices.size());
                videntifier.push_back(sequence_id);
+               // create sequence array
                vsequence.push_back(new int*[_nb_integral]);
                for (var= 0; var < _nb_integral; var++)
                   vsequence[sequence_id][var]= new int[vlength[sequence_id]];
@@ -3153,8 +3208,8 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
 
 template<typename Generic_Int_fl_container>
 ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
-                                                               bool exhaustive,
-                                                               bool comment_flag) const
+                                                                 bool exhaustive,
+                                                                 bool comment_flag) const
 {
    register int var, nb_variable= _nb_integral+_nb_float,
                 cumul_size= cumul_size_computation(),
@@ -3168,9 +3223,12 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    for(var= 0; var < _nb_integral; var++)
    {
       os << "\n" << STAT_word[STATW_VARIABLE] << " " << var+1 << " : "
-         << STAT_TREES_type[_type[var]] << "   ";
+         << STAT_variable_word[_type[var]] << "   ";
       if (comment_flag)
          os << "# ";
+
+      os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << _min_value.Int(var) << ", "
+         << STAT_label[STATL_MAX_VALUE] << ": " << _max_value.Int(var) << ")" << endl;
 
       if (characteristics[var] != NULL)
       {
@@ -3192,7 +3250,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
          if (comment_flag)
             os << "# ";
 
-         os << STAT_label[_type[var] == STATE ? STATL_STATE : STATL_VALUE] << " "
+         os << STAT_label[STATL_MARGINAL] << " "
             << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
 
          (characteristics[var]->marginal_distribution)->ascii_characteristic_print(os, false, comment_flag);
@@ -3203,8 +3261,7 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
             if (comment_flag)
                os << "# ";
 
-            os << "   | " << STAT_label[_type[var] == STATE ? STATL_STATE : STATL_VALUE] << " "
-               << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
+            os << "   | " << STAT_label[STATL_FREQUENCY] << endl;
             characteristics[var]->marginal_distribution->ascii_print(os, comment_flag);
          }
          characteristics[var]->ascii_print(os, _type[var], *hsize,
@@ -3279,145 +3336,6 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
    return os;
 }
 
-/*
-template<typename Generic_Int_fl_container>
-ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
-                                                               bool exhaustive,
-                                                               bool comment_flag) const
-{
-   register int var, nb_variable= _nb_integral+_nb_float,
-                cumul_size= cumul_size_computation(),
-                cumul_children= cumul_nb_children_computation();
-   double mean, variance;
-
-   os << nb_variable << " " << STAT_word[nb_variable == 1 ? STATW_VARIABLE : STATW_VARIABLES] << endl;
-
-   // integral variables
-   for(var= 0; var < _nb_integral; var++)
-   {
-      os << "\n" << STAT_word[STATW_VARIABLE] << " " << var+1 << " : "
-         << STAT_TREES_type[_type[var]];
-
-      if (_type[var] != POSITION)
-      {
-         os << "   ";
-         if (comment_flag)
-            os << "# ";
-
-         os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << _min_value.Int(var) << ", "
-            << STAT_label[STATL_MAX_VALUE] << ": " << _max_value.Int(var) << ")" << endl;
-
-         os << "\n";
-         if (comment_flag)
-            os << "# ";
-
-         os << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
-            << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-
-         if (characteristics[var]->marginal_distribution != NULL)
-         {
-            (characteristics[var]->marginal_distribution)->ascii_characteristic_print(os, exhaustive, comment_flag);
-
-            if ((characteristics[var]->_max_value <= ASCII_NB_VALUE) || (exhaustive))
-            {
-               os << "\n";
-               if (comment_flag)
-                  os << "# ";
-
-               os << "   | " << (_type[var] == TIME ? STAT_TREES_type[STATL_TIME] : STAT_label[STATL_VALUE]) << " "
-                  << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-               characteristics[var]->marginal_distribution->ascii_print(os, comment_flag);
-            }
-         }
-         else
-            if (_type[var] == INT_VALUE)
-            {
-               os << STAT_label[STATL_SAMPLE_SIZE] << ": " << cumul_size << endl;
-
-               mean= mean_computation(var);
-               variance= variance_computation(var, mean);
-
-               if (comment_flag)
-                  os << "# ";
-
-               os << STAT_label[STATL_MEAN] << ": " << mean << "   "
-                  << STAT_label[STATL_VARIANCE] << ": " << variance << "   "
-                  << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance) << endl;
-
-               if ((exhaustive) && (variance > 0.))
-               {
-                 if (comment_flag)
-                    os << "# ";
-
-                 os << STAT_label[STATL_SKEWNESS_COEFF] << ": " << skewness_computation(var , mean , variance) << "   "
-                    << STAT_label[STATL_KURTOSIS_COEFF] << ": " << kurtosis_computation(var , mean , variance) << endl;
-               }
-            }
-      }
-   }
-
-   // floating variables
-   for(var= 0; var < _nb_float; var++)
-   {
-      os << "\n" << STAT_word[STATW_VARIABLE] << " " << _nb_integral+var+1 << " : "
-         << STAT_TREES_type[REAL_VALUE];
-
-      os << "   ";
-      if (comment_flag)
-         os << "# ";
-
-      os << "(" << STAT_label[STATL_MIN_VALUE] << ": " << _min_value.Double(var) << ", "
-         << STAT_label[STATL_MAX_VALUE] << ": " << _max_value.Double(var) << ")" << endl;
-
-      os << "\n";
-      if (comment_flag)
-         os << "# ";
-   }
-
-   os << "\n";
-   if (comment_flag)
-      os << "# ";
-
-   os << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-   hsize->ascii_characteristic_print(os, false, comment_flag);
-
-   if (exhaustive)
-   {
-      os << "\n";
-      if (comment_flag)
-         os << "# ";
-
-      os << "   | " << STAT_TREES_label[STATL_TREE_SIZE] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-      hsize->ascii_print(os, comment_flag);
-   }
-
-   os << "\n";
-   if (comment_flag)
-      os << "# ";
-
-   os << STAT_TREES_label[STATL_CUMULATIVE_SIZE] << ": " << cumul_size << endl;
-
-   os << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-   hnb_children->ascii_characteristic_print(os, false, comment_flag);
-
-   if (exhaustive)
-   {
-      os << "\n";
-      if (comment_flag)
-         os << "# ";
-
-      os << "   | " << STAT_TREES_label[STATL_TREE_CHILDREN] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << endl;
-      hnb_children->ascii_print(os, comment_flag);
-   }
-
-   os << "\n";
-   if (comment_flag)
-      os << "# ";
-
-   os << STAT_TREES_label[STATL_CUMULATIVE_CHILDREN] << ": " << cumul_children << endl;
-
-   return os;
-}*/
 
 /*****************************************************************
  *
@@ -3427,15 +3345,25 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
  *
  **/
 
-template<typename Generic_Int_fl_container>
-ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_print(ostream& os,
-                                                               char format,
-                                                               bool comment_flag,
-                                                               int line_nb_character) const
+template<typename Generic_Int_fl_container> ostream&
+Typed_edge_trees<Generic_Int_fl_container>::ascii_print(ostream& os,
+                                                        char format,
+                                                        bool comment_flag,
+                                                        int line_nb_character) const
 {
-#ifdef __GNUC__
-#warning Typed_edge_trees<Generic_Int_fl_container>::ascii_print  not implemented
-#endif
+   unsigned int t;
+
+   for(t = 0; t < _nb_trees; t++)
+   {
+      if (comment_flag)
+         os << "# ";
+
+      os << "Tree number " << t << ":"<< endl;
+
+      trees[t]->display(os, trees[t]->root());
+      os << endl;
+   }
+
    return os;
 }
 
@@ -3925,10 +3853,19 @@ int Typed_edge_trees<Generic_Int_fl_container>::get_nb_float() const
  **/
 
 template<class Generic_Int_fl_container>
-int Typed_edge_trees<Generic_Int_fl_container>::get_total_size() const
+unsigned int Typed_edge_trees<Generic_Int_fl_container>::get_total_size() const
 {
-   assert (hsize != NULL);
-   return hsize->nb_value;
+   unsigned int t, total_size = 0;
+
+
+   if ((hsize != NULL) && (hsize->nb_element * hsize->mean > 0))
+      return (unsigned int)(hsize->nb_element * hsize->mean);
+   else
+   {
+      for(t = 0; t < _nb_trees; t++)
+         total_size += get_size(t);
+      return total_size;
+   }
 }
 
 /*****************************************************************

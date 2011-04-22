@@ -1043,17 +1043,18 @@ class Trees(object):
         - a Trees object.
         - a MTG file, a filter on the vertices, a list of attribute names,
           a list of attribute functions and the considered scale."""
-        self.__mtg_to_tree_vid=None
-        self.__tree_to_mtg_vid=None
-        self.__tree_to_mtg_tid=None
-        self.__mtg_to_tree_tid=None
+        self.__mtg_to_tree_vid = None
+        self.__tree_to_mtg_vid = None
+        self.__tree_to_mtg_tid = None
+        self.__mtg_to_tree_tid = None
+        self.__attributes = []
         if issubclass(arg.__class__, Trees):
             # arg is supposed to be a Trees object...
             self.__ctrees=ctrees.CTrees(arg.__ctrees)
             self.__types=list(arg.__types)
             self.__tmap=list(arg.__tmap)
             self.__tmapi=list(arg.__tmapi)
-            self.__attributes=list(arg.__attributes)
+            self.__attributes=list(arg.Attributes())
             arg._copy_vid_conversion(self)
             arg._copy_tid_conversion(self)
         elif issubclass(arg.__class__, ctrees.CTrees):
@@ -1370,11 +1371,12 @@ class Trees(object):
             self.__tmapi=range(len(self.__tmap))
             for var in range(len(self.__tmap)):
                 self.__tmapi[self.__tmap[var]]=var
-        if attribute_names is None:
+        if (attribute_names is None) and (len(self.__attributes) == 0):
             attribute_names=[]
             for var in range(self.NbVariables()):
                 attribute_names.append("Variable"+str(var))
-        self.__attributes=list(attribute_names)
+        if attribute_names:
+            self.__attributes = list(attribute_names)
         if len(self.__attributes) != len(self.__types):
             msg="Number of variables ("+str(len(self.__types))+\
                 ") and number of attribute names ("+str(len(self.__attributes))+\
@@ -1385,9 +1387,26 @@ class Trees(object):
         """Return the name of the tree attributes."""
         return list(self.__attributes)
 
-    def BuildSequences(self, maximal_sequences=True):
+    def BuildSequences(self, MaximalSequences=True):
         """Extract Sequences from the Trees, 
-        cutting or not sequences after branching"""
+            cutting or not sequences after branching.
+
+        :Usage:
+
+            BuildSequences(self, MaximalSequences=False)
+
+        :Parameters:
+
+          `MaximalSequences` (bool) - if True, all paths between
+            the root vertex and the leaf vertices are added.
+            If False, the sequences are cut at "+" branchings.
+
+        :Returns:
+            A :ref:`openalea.aml.Sequences` instance is returned.
+            If MaximalSequences is False, a new sequence is added each time
+            a + parent is encountered, unless this parent has only one child
+            (in which case this child is considered as <)
+        """
         import os
         # print the sequences into a file
         prefix="seqtmp"
@@ -1404,7 +1423,7 @@ class Trees(object):
                 import random
                 prefix+=str(random.randint(1,9))                
         try:
-            self.__ctrees.BuildSequences(file_name, maximal_sequences)
+            self.__ctrees.BuildSequences(file_name, MaximalSequences)
         except _errors.StatTreeError, error:
             os.remove(file_name)
             raise _errors.StatTreeError(error)
@@ -1414,11 +1433,30 @@ class Trees(object):
             os.remove(file_name)            
             return res
 
-    def BuildPySequences(self, maximal_sequences=True):
-        """Extract sequence_analysis.Sequences from the Trees,
-        cutting or not sequences after branching"""
+    def BuildPySequences(self, MaximalSequences=True):
+        """Extract Sequences from the Trees,
+            cutting or not sequences after branching.
+
+        :Usage:
+
+            BuildSequences(self, MaximalSequences=False)
+
+        :Parameters:
+
+          `MaximalSequences` (bool) - if True, all paths between
+            the root vertex and the leaf vertices are added.
+            If False, the sequences are cut at "+" branchings.
+
+        :Returns:
+            A :ref:`openalea.sequence_analysis.sequences._MarkovianSequences`
+            instance is returned.
+            If MaximalSequences is False, a new sequence is added each time
+            a + parent is encountered, unless this parent has only one child
+            (in which case this child is considered as <)
+        """
         import os
-        res = self.__ctrees.BuildPySequences(maximal_sequences)
+        import openalea.sequence_analysis as sequence_analysis
+        res = self.__ctrees.BuildPySequences(MaximalSequences)
         return res.markovian_sequences()
 
     def BuildVectors(self):
@@ -1470,12 +1508,11 @@ class Trees(object):
           * `characteristics` (bool) - characteristic distributions are computed iif \
             argument is True.
         """
-        import openalea.tree_statistic.hmt, openalea.tree_statistic.hmt.chmt
-        hmt=openalea.tree_statistic.hmt
-        chmt=openalea.tree_statistic.hmt.chmt
+        import openalea.tree_statistic.hmt as hmt
+        import openalea.tree_statistic.hmt._hmt as _hmt
         RestorationAlgorithm=stat_tool.RestorationAlgorithm
-        if not issubclass(model.__class__, hmt.HiddenMarkovTree):
-            msg='bad type for argument "hmt": HiddenMarkovTree expected'
+        if not issubclass(model.__class__, hmt.HiddenMarkovIndOutTree):
+            msg='bad type for argument "hmt": HiddenMarkovIndOutTree expected'
             raise TypeError, msg
         if type(algorithm)!=str:
             msg='bad type for argument "algorithm:"'+"type 'str' expected"
@@ -1600,11 +1637,10 @@ class Trees(object):
         # arg4 = NbIteration or Counting
         # arg5 = StateTrees
         # arg6 = Counting
-        import openalea.tree_statistic.hmt, openalea.tree_statistic.hmt.chmt
-        hmt = openalea.tree_statistic.hmt
-        chmt = openalea.tree_statistic.hmt.chmt
+        import openalea.tree_statistic.hmt as hmt
+        import openalea.tree_statistic.hmt._hmt as _hmt
         RestorationAlgorithm = stat_tool.RestorationAlgorithm
-        chmt_data = chmt.CHmt_data(self._ctrees())
+        chmt_data = _hmt.CHmt_data(self._ctrees())
         if type(model_name) == str:
             if type(Algorithm) != str:
                 msg = 'bad type for argument "Algorithm" in ' \
@@ -1723,7 +1759,7 @@ class Trees(object):
                                                       StateTrees, EMAlgo,
                                                       Saem, SelfTransition, NbIteration,
                                                       ForceParametric)
-                elif issubclass(arg1.__class__, hmt.HiddenMarkovTree):
+                elif issubclass(arg1.__class__, hmt.HiddenMarkovIndOutTree):
                     # Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, StateTrees, Counting,
                     #          Algorithm, Saem, ForceParametric)
                     NbIteration = arg2
@@ -1781,12 +1817,12 @@ class Trees(object):
                 raise ValueError, msg
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"
-        estimated_hmt  = hmt.HiddenMarkovTree(chmt, True)
+        estimated_hmt = hmt.HiddenMarkovIndOutTree(chmt, True)
         self._copy_vid_conversion(estimated_hmt)
         self._copy_tid_conversion(estimated_hmt)
         estimated_hmt._attributes = self.Attributes()
         return estimated_hmt
-        
+
     def ExtractHistogram(self, nature, variable=None, value=None):
         """Extract a frequency distribution from the Trees.
 

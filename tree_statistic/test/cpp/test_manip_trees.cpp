@@ -34,6 +34,7 @@ int main(void)
    typedef Int_trees::int_trees int_trees;
    typedef Int_trees::int_array int_array;
    typedef Int_trees::pt_int_trees_array pt_int_trees_array;
+   typedef tree_type::vertex_descriptor vertex;
    typedef tree_type::pt_Distribution_array pt_Distribution_array;
    typedef tree_type::value value;
    typedef tree_type::vertex_iterator vertex_iterator;
@@ -56,6 +57,7 @@ int main(void)
    vertex_iterator it, end;
    Int_trees *b= NULL;
    rtree_type **ctrees= NULL;
+   tree_type **citrees= NULL;
    Sequences *res_seq= NULL;
    Trees *c= NULL, *d= NULL;
    pt_int_trees_array pota;
@@ -64,6 +66,8 @@ int main(void)
    int_array limit, symbol_array, iidentifier, ivariables;
    Typed_edge_one_int_tree *ident_tree= NULL; //*otrees1= NULL,
    Trees** potc= new Trees*[0];
+   tree_type ti;
+   vertex *va= new vertex[10];
    StatError error;
 
    pota= new int_trees*[nb_var_trees];
@@ -737,6 +741,43 @@ int main(void)
       delete res;
       res= NULL;
    }
+
+   delete c;
+   c = NULL;
+
+   // building and display of a tree with integral labels
+   for(i= 0; i < 10; i++ )
+   {
+     v.Int(0) = i+1;
+     v.Int(1) = 0;
+     if ((i == 5) || (i == 7))
+        v.Int(1) = 1;
+     va[i]= ti.add_vertex(v);
+   }
+
+   ti.add_edge(va[0], va[1]);
+   ti.add_edge(va[1], va[2]);
+   ti.add_edge(va[2], va[3]);
+   ti.add_edge(va[2], va[4]);
+   ti.add_edge(va[4], va[6]);
+   ti.add_edge(va[4], va[5], 1);
+   ti.add_edge(va[6], va[7], 1);
+   ti.add_edge(va[5], va[8]);
+   ti.add_edge(va[5], va[9]);
+
+   assert(ti.is_root(va[0]));
+
+   cout << "A predefined (homemade) tree with edge types... " << endl;
+   ti.display(cout, ti.root());
+
+   citrees = new tree_type*[1];
+   citrees[0] = &ti;
+   citype[1] = INT_VALUE;
+
+   c = new Trees(1, citype, citrees);
+
+   delete [] citrees;
+   citrees = NULL;
 
    // build sequences
    cout << "Build sequences (all possible paths)..." << endl;

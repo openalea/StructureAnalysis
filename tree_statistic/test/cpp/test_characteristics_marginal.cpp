@@ -104,9 +104,9 @@ int main(void)
                                   otrees1,
                                   0);
 
-  h= *(tc[0]->get_marginal());
+  h= *(tc[0]->get_marginal_distribution());
   cout << "Histogram for the marginal distribution: " << endl;
-  tc[0]->ascii_write_marginal(cout, 1, 0);
+  tc[0]->ascii_write_marginal_distribution(cout, 1, 0);
   cout << endl;
 
   cout << "Theoretical marginal distribution: " << endl

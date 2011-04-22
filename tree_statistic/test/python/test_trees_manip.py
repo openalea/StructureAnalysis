@@ -113,6 +113,7 @@ if str(V.Tree(0).Get(0))!=str(rootval):
     raise Warning, msg
 else:
     print "Merged variables do match for tree 0 at root node!"
+
 # check exceptions raised by ExtractHistogram
 try:
     T.ExtractHistogram("BadFeature")
@@ -122,7 +123,7 @@ else:
     print "Failed to raise exception for bad feature histogram."
 try:
     T.ExtractHistogram("Value", 0)
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for bad variable for marginal histogram."
@@ -151,7 +152,7 @@ trees_list=[]
 trees_list.append(trees.Trees(tree_list))
 try:
     V = T.Merge(trees_list)
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for bad number of variables."
@@ -166,7 +167,7 @@ trees_list=[]
 trees_list.append(trees.Trees(tree_list))
 try:
     V = T.Merge(trees_list)
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for bad variable type."
@@ -201,7 +202,7 @@ while t < 2:
     trees_list.append(trees.Trees(tree_list))
 try:
     V = T.MergeVariable(trees_list)
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for bad structure."
@@ -244,32 +245,32 @@ if equal:
 # check exceptions raised by Cluster
 try:
     T.Cluster("Limit", 1, [0, 1])
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for non positive limit."
 try:
     T.Cluster("Limit", 1, range(12))
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for number of clusters too high."
 try:
     V = T.Cluster("Limit", 1, [5])
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for number of clusters too low."
     print V
 try:
     T.Cluster("Limit", 0, limits)
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for bad variable."
 try:
     T.Cluster("Step", 1, 0)
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for non positive step."
@@ -326,7 +327,7 @@ else:
     print "Failed to raise exception for bad number of classes."
 try:
     V = T.Transcode(1, range(0, 5) + range(6,13))
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for non-consecutive symbols."
@@ -383,7 +384,7 @@ for t in range(V.NbTrees()):
 # check exceptions raised by SelectVariable
 try:
     T.SelectVariable([0, 1], "Reject")
-except trees.FormatError, e:
+except trees.StatTreeError, e:
     print e
 else:
     print "Failed to raise exception for rejecting all variables."
@@ -402,3 +403,19 @@ V = T.Shift(variable=0, param=p)
 for t in range(V.NbTrees()):
     print "Tree number ", t, ": "
     print V.Tree(t)
+
+# Extract vectors and sequences
+print "Extract non-redundant sequences"
+print str(T.Size()) + " vertices"
+Seq = T.BuildPySequences(False)
+print str(Seq.build_vectors(True).nb_vector) + " items in sequence"
+print "Extract vectors"
+Vec = T.BuildVectors()
+print str(Vec.nb_vector) + " vectors"
+print "Sequences :"
+for i in range(len(Seq)):
+    print Seq[i]
+
+
+
+

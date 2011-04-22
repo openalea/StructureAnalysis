@@ -124,6 +124,29 @@ int main(void)
    }
    ptcopy_t= NULL;
 
+   // extracting a trivial subtree
+   // vertices are renumbered from 0
+   // but labels are copied
+   ptcopy_t= select_subtree(t, 3);
+
+   if (ptcopy_t != NULL)
+   {
+      cout << "Extracting subtree from this tree rooted at node " << 4 << endl;
+      ptcopy_t->display(cout, ptcopy_t->root());
+      cout << "New id of root node: " << ptcopy_t->root() << endl;
+      visitor= new generic_visitor<tree_int>;
+      traverse_tree(ptcopy_t->root(), *ptcopy_t, *visitor);
+
+      cout << "Breath first tree traversal starting at root vertex: " << endl;
+      va= visitor->get_breadthorder(*ptcopy_t, ptcopy_t->root());
+      for(i= 0; i < va.size(); i++)
+         cout << va[i]+1 << endl;
+      delete ptcopy_t;
+      delete visitor;
+      visitor= NULL;
+   }
+   ptcopy_t= NULL;
+
    ptcopy_t= select_subtree(t, child, false);
 
    if (ptcopy_t != NULL)

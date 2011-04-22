@@ -120,6 +120,8 @@ public :
    bool add_edge(key parent, key child, bool type= false);
    /** return the type of a given edge */
    bool edge_type(key parent, key child);
+   /** set the type of a given edge */
+   bool set_edge_type(key parent, key child, bool type= false);
    /** return the branching order (depth) of the tree */
    unsigned int get_branching_order();
    /** return the branching order (depth) of a given vertex */

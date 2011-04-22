@@ -67,6 +67,11 @@ Extracting subtree from this tree rooted at node 2
 2
 |-4
 |-5
+Extracting subtree from this tree rooted at node 4
+4
+New id of root node: 0
+Breath first tree traversal starting at root vertex: 
+1
 Pruning this tree at node 2
 1
 |-3

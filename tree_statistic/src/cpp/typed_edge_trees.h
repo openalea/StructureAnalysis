@@ -113,7 +113,7 @@ template<typename Generic_Int_fl_container> class Typed_edge_int_fl_tree;
 typedef Typed_edge_int_fl_tree<One_int_container> Typed_edge_one_int_tree;
 typedef Typed_edge_one_int_tree** pt_One_int_tree_array;
 class TreeCharacteristics;
-class HiddenMarkovOutTree;
+class HiddenMarkovIndOutTree;
 
 /**
    \class Edged_typed_int_fl_tree
@@ -198,7 +198,7 @@ class Typed_edge_trees : public StatInterface
    // friend classes
    // friend class TreeCharacteristics;
    friend class HiddenMarkovTree;
-   friend class HiddenMarkovOutTree;
+   friend class HiddenMarkovIndOutTree;
 
    // template <typename Type> friend
    //    Typed_edge_trees<Type>* observed_trees_ascii_read(StatError& error,
@@ -486,8 +486,10 @@ public :
    // int get_nb_variable() const;
    int get_nb_int() const;
    int get_nb_float() const;
+
    /** Return total number of vertices */
-   int get_total_size() const;
+   virtual unsigned int get_total_size() const;
+
    /** Return the type of a given variable */
    int get_type(int variable) const;
    /** Return the list of types (return a pointer; object should not be modified) */
@@ -567,9 +569,10 @@ class TreeCharacteristics
    template <typename Generic_Int_fl_container> friend class Typed_edge_trees;
    friend class Observed_int_trees;
    friend class HiddenMarkovTree;
-   // friend class HiddenMarkovOutTree;
    friend class HiddenMarkovTreeData;
    friend class NonparametricTreeProcess;
+   friend class MarkovOutTree;
+   friend class MarkovOutTreeData;
 
 public :
 

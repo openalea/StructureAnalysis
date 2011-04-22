@@ -21,9 +21,6 @@ class MyThread(QThread):
         #app.exec_()
 
 
-
-
-
 stat_tools.plot.DISABLE_PLOT = True
 
 inf_bound=0
@@ -68,8 +65,8 @@ T.MPlot(ViewPoint="FirstOccurrenceRoot", variable=1)
 
 #T.Plot()
 
-m = MyThread()
-m.doit(T)
+#m = MyThread()
+#m.doit(T)
 
 print "Number of trees (supposedly ", nbtrees, "): ", T.NbTrees()
 print "Comparison of trees contained in Trees " \
@@ -124,6 +121,9 @@ print "Read ", T.NbTrees(), " trees."
 print T
 print "Print 1st tree of Trees object:"
 print T.Tree(0).Display()
+
+
+
 T=T.Cluster("Step", 0, 10)
 
 
@@ -176,7 +176,7 @@ else:
     print "Failed to raise exception for bad attribute name"
 # bad attribute function
 try:
-    T=trees.Trees("sample_mtg_forest.txt", filter, attributes, attributes, 
+    T=trees.Trees("sample_mtg_forest.txt", filter, attributes, attributes,
                   scale=2)
 except TypeError, t:
     print t
@@ -184,7 +184,7 @@ else:
     print "Failed to raise exception for bad attribute function"
 # bad attribute type
 try:
-    T=trees.Trees("sample_mtg_forest.txt", filter, attributes, 
+    T=trees.Trees("sample_mtg_forest.txt", filter, attributes,
     [lambda x: amlPy.Descendants(x)], scale=2)
 except TypeError, t:
     print t
@@ -206,7 +206,7 @@ else:
     print "Failed to raise exception for bad attribute function"
 # filtering function does not filter descendants
 try:
-    T=trees.Trees("sample_mtg_forest.txt", lambda x: x != 2, attributes, [f], 
+    T=trees.Trees("sample_mtg_forest.txt", lambda x: x != 2, attributes, [f],
                   scale=2)
 except IndexError, i:
     print i

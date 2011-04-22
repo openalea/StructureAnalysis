@@ -141,3 +141,72 @@ if (T.IsRoot(4)):
    raise WarningError, "Failed to detect that vertex 4 is not the root"
 else:
    print "Is vertex 4 the root ? ", str(T.IsRoot(4))
+
+# test copy and setting tree vids
+print "Read Trees object from MTG file 'sample_mtg_forest.txt':"
+T = trees.etrees.Trees("sample_mtg_forest.txt")
+print "Read ", T.NbTrees(), " trees."
+TreeVidDictList = []
+TreeVidDictListCp = []
+for t in range(T.NbTrees()):
+    TreeVidDictList.append(T.TreeVertexId(t))
+    TreeVidDictListCp.append(T.TreeVertexId(t))
+    for k in TreeVidDictListCp[t].keys():
+        TreeVidDictListCp[t][k] += 1
+
+T._SetMTGVidDictionary(TreeVidDictListCp)
+TreeVidDictListCp = []
+for t in range(T.NbTrees()):
+    TreeVidDictListCp.append(T.TreeVertexId(t))
+
+try:
+    T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
+except IndexError, msg:
+    print msg
+else:
+    assert False, "Failed to raise IndexError"
+
+TreeVidDictListCp = []
+for t in range(T.NbTrees()):
+    TreeVidDictListCp.append(dict(TreeVidDictList[t]))
+
+TreeVidDictListCp[0][3] = 0
+
+try:
+    T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
+except ValueError, msg:
+    print msg
+else:
+    assert False, "Failed to raise ValueError"
+
+TreeVidDictListCp = []
+for t in range(T.NbTrees()):
+    TreeVidDictListCp.append(dict(TreeVidDictList[t]))
+    for k in TreeVidDictListCp[t].keys():
+        TreeVidDictListCp[t][k] = str(TreeVidDictListCp[t][k])
+
+
+T._SetMTGVidDictionary(TreeVidDictListCp)
+try :
+    T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
+except TypeError, msg:
+    print msg
+else:
+    assert False, "Failed to raise TypeError"
+
+
+TreeVidDictListCp = []
+for t in range(T.NbTrees()):
+    TreeVidDictListCp.append({})
+    for k in TreeVidDictList[t].keys():
+        TreeVidDictListCp[t][str(k)] = TreeVidDictList[t][k]
+
+T._SetMTGVidDictionary(TreeVidDictListCp)
+try :
+    T._SetMTGVidDictionary(TreeVidDictListCp, ValidityCheck=True)
+except Exception, msg:
+    print msg
+else:
+    assert False, "Failed to raise TypeError-like Exception"
+
+

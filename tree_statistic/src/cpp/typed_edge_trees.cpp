@@ -501,20 +501,24 @@ std::ostream& TreeCharacteristics::ascii_print(std::ostream& os,
    register int val;
    int nb_value= _max_value - _min_value + 1;
 
-   if (exhaustive)
+   if ((first_occurrence_root != NULL) || (first_occurrence_leaves != NULL)
+       || (sojourn_size != NULL) || (nb_zones != NULL) || (nb_occurrences != NULL))
    {
-      os << "\n";
-      if (comment_flag)
-         os << "# ";
+      if (exhaustive)
+      {
+         os << "\n";
+         if (comment_flag)
+            os << "# ";
 
-      os << "  ";
+         os << "  ";
 
-      for (val= 0; val < nb_value; val++)
-         os << " | " << STAT_TREES_label[STATL_OBSERVED] << " "
-            << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << val;
-      os << " | " << STAT_label[STATL_FREQUENCY] << endl;
+         for (val= 0; val < nb_value; val++)
+            os << " | " << STAT_TREES_label[STATL_OBSERVED] << " "
+               << STAT_label[type == STATE ? STATL_STATE : STATL_VALUE] << " " << val;
+         os << " | " << STAT_label[STATL_FREQUENCY] << endl;
 
-      // index_value->ascii_print(os , comment_flag);
+         // index_value->ascii_print(os , comment_flag);
+      }
    }
 
    // frequency distributions of first occurrence

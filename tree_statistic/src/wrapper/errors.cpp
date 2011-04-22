@@ -14,19 +14,19 @@ using namespace tree_statistic;
 
 namespace  {
 
-// Module ======================================================================
-BOOST_PYTHON_MODULE(_errors)
-{
+    // Module ======================================================================
+    BOOST_PYTHON_MODULE(_errors)
+    {
 
-    // Error initialisation
-    // Import the stat_tool module
-    object stat_tool = import("vplants.stat_tool");
-    object StatError = stat_tool.attr("StatError");
-    char error_name[] = "_errors.StatTreeError";
+        // Error initialisation
+        // Import the stat_tool module
+        object stat_tool = import("vplants.stat_tool");
+        object StatError = stat_tool.attr("StatError");
+        char error_name[] = "_errors.StatTreeError";
 
-    StatTreeError = object(handle<>(PyErr_NewException(error_name,
-                                                       StatError.ptr(), NULL)));
-    scope().attr("StatTreeError") = StatTreeError;
+        StatTreeError = object(handle<>(PyErr_NewException(error_name,
+                                                           StatError.ptr(), NULL)));
+        scope().attr("StatTreeError") = StatTreeError;
 
     }
 }

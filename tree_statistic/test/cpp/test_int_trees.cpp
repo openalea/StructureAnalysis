@@ -118,13 +118,17 @@ int main(void)
    }
 
    // test of the ascii_write procedure
-   cout << "Ascii printing of Observed trees : " << endl;
+   cout << "Ascii print of Observed trees (summary): " << endl;
    cout << *b; // b->ascii_write(cout, true);
    cout << endl;
 
-   cout << "Line writing of Observed trees : " << endl;
+   cout << "Line write of Observed trees : " << endl;
    b->line_write(cout);
    cout << endl << endl;
+
+   cout << "Ascii print of Observed trees (detailed): " << endl;
+   b->ascii_write(cout, true);
+   cout << endl;
 
 
    cout << "Histograms for the tree size : " << endl;
@@ -244,7 +248,7 @@ int main(void)
       tc[0]= b->get_characteristics(1);
 
       cout << "Histogram for the marginal distribution (2nd variable) : " << endl;
-      tc[0]->ascii_write_marginal(cout, 1, 0);
+      tc[0]->ascii_write_marginal_distribution(cout, 1, 0);
 
       delete tc[0];
    }
@@ -275,7 +279,7 @@ int main(void)
    (pt_b->get_tree(pt_b->get_nb_trees()-1))->display(cout, 0);
 
    cout << "Histogram for marginal distribution " << endl;
-   (pt_b->get_characteristics(0))->ascii_write_marginal(cout, 1, 0);
+   (pt_b->get_characteristics(0))->ascii_write_marginal_distribution(cout, 1, 0);
    delete pt_b;
 
    cout << endl << "Test of the assignement operator of 'Int_trees' " << endl;
@@ -291,7 +295,7 @@ int main(void)
    (cp_b.get_tree(cp_b.get_nb_trees()-1))->display(cout, 0);
 
    cout << "Histogram for marginal distribution (1st variable)" << endl;
-   (cp_b.get_characteristics(0))->ascii_write_marginal(cout, 1, 0);
+   (cp_b.get_characteristics(0))->ascii_write_marginal_distribution(cout, 1, 0);
 
    mhisto= cp_b.extract(error, 1);
    cout << "Distribution_data for marginal distribution (1st variable)" << endl;

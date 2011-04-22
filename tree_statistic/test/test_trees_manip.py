@@ -54,6 +54,20 @@ def test_mtg_build():
     assert mtg_t
     return mtg_t
 
+def test_tree_size():
+    """test size of trees"""
+    msg = "Bad total number of vertices: "
+    mtg_t = test_mtg_build()
+    ts = mtg_t.Size()
+    msg += str(ts)
+    ts2 = 0
+    for i in range(mtg_t.NbTrees()):
+        ts2 += mtg_t.Size(i)
+
+    msg += " - should be: " + str(ts2)
+    assert (ts == ts2), msg
+    assert (ts == 43), msg
+
 def test_cluster():
     """cluster values of variable 0"""
     mtg_t = test_mtg_build()
@@ -130,14 +144,33 @@ def test_merge_failure():
         assert False, msg
 
 def test_build_vectors():
+    """Extract vectors from a tree"""
+    msg = "Bad number of vectors: "
     vec = T.BuildVectors()
     assert vec
     import openalea
     assert type(vec) == openalea.stat_tool._stat_tool._Vectors
+    msg += str(vec.nb_vector)
+    msg += " - should be :"
+    msg += str(T.Size())
+    assert (vec.nb_vector == T.Size()), msg
+
+def test_build_sequences():
+    """Extract non-redundant sequences from a tree"""
+    msg = "Bad number of items: "
+    mtg_t = test_mtg_build()
+    seq = mtg_t.BuildPySequences(False)
+    assert seq
+    nb_items = seq.build_vectors(True).nb_vector
+    msg += str(nb_items)
+    msg += " - should be :"
+    msg += str(mtg_t.Size())
+    assert (nb_items == mtg_t.Size()), msg
 
 if __name__ == "__main__":
     T, tv, nb_trees, tree_list, mtg_name = init()
     test_mtg_build()
+    test_tree_size()
     test_cluster()
     test_cluster_step_failure()
     test_difference()
@@ -145,3 +178,4 @@ if __name__ == "__main__":
     test_select_variable()
     test_merge_failure()
     test_build_vectors()
+    test_build_sequences()
