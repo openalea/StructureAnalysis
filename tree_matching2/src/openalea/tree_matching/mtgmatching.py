@@ -1,4 +1,4 @@
-from openalea.tree_matching import Matching, NodeCost
+from openalea.tree_matching import Matching, ExtMatching, NodeCost
 from mtgimport import mtg2treegraph
 
 
@@ -24,7 +24,8 @@ class NodeCostWrapper (NodeCost):
     def getSplittingCost(self,a,b) :
         return self.mtgnodecost.getMergingCost(self.idmap1[a.id],[self.idmap2[i.id] for i in b])
 
-class MtgMatching (Matching):
+
+class MtgMatchingWrapper :
     def __init__(self,mtg1,mtg2,scale1,scale2,cost,tabletype = 0,root1=None,root2=None):
         # mtg value
         self.mtg1 = mtg1
@@ -38,22 +39,61 @@ class MtgMatching (Matching):
         # making cost function.
         self.cost = cost
         self.costwrapper = NodeCostWrapper(self.cost,self.idmap1,self.idmap2)
-        # creation of Matching
-        Matching.__init__(self,self.tree1,self.tree2,self.costwrapper,tabletype)
     
     def __getroot(self,a,b):
         # get root id
         if a is None : a = 0
         else : a = self.idmap1[a]
         if b is None : b = 0
-        else : b = self.idmap1[b]
+        else : b = self.idmap2[b]
         return a,b
         
     def getList(self,a = None, b = None):
         a,b = self.__getroot(a,b) 
-        res = Matching.getList(self,a,b)
+        res = self.__native_get_list(a,b)
         return [(self.idmap1[i],self.idmap2[j],k) for i,j,k in res]
+    
+    def __native_get_list(self,a,b):
+        # to be redefined to point toward actual getList of cpp implementation
+        return Matching.getList(self,a,b)
     
     def getDBT(self,a = None, b = None):
         a,b = self.__getroot(a,b)
+        return self.__native_get_dbt(a,b)
+
+    def __native_get_dbt(self,a,b):
+        # to be redefined to point toward actual getDBT of cpp implementation
         return Matching.getDBT(self,a,b)
+
+class MtgMatching (MtgMatchingWrapper,Matching):
+
+    def __init__(self,mtg1,mtg2,scale1,scale2,cost,tabletype = 0,root1=None,root2=None):
+        # mtg wrapper
+        MtgMatchingWrapper.__init__(self,mtg1,mtg2,scale1,scale2,cost,tabletype,root1,root2)
+        # creation of Matching
+        Matching.__init__(self,self.tree1,self.tree2,self.costwrapper,tabletype)
+
+    def __native_get_list(self,a,b):
+        # to be redefined to point toward actual getList of cpp implementation
+        return Matching.getList(self,a,b)
+
+    def __native_get_dbt(self,a,b):
+        # to be redefined to point toward actual getDBT of cpp implementation
+        return Matching.getDBT(self,a,b)
+
+class MtgExtMatching (MtgMatchingWrapper,ExtMatching):
+
+    def __init__(self,mtg1,mtg2,scale1,scale2,cost,tabletype = 0,root1=None,root2=None):
+        # mtg wrapper
+        MtgMatchingWrapper.__init__(self,mtg1,mtg2,scale1,scale2,cost,tabletype,root1,root2)
+        # creation of Matching
+        ExtMatching.__init__(self,self.tree1,self.tree2,self.costwrapper,tabletype)
+
+    def __native_get_list(self,a,b):
+        # to be redefined to point toward actual getList of cpp implementation
+        return ExtMatching.getList(self,a,b)
+
+    def __native_get_dbt(self,a,b):
+        # to be redefined to point toward actual getDBT of cpp implementation
+        return ExtMatching.getDBT(self,a,b)
+
