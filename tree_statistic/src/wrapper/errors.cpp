@@ -20,7 +20,7 @@ namespace  {
 
         // Error initialisation
         // Import the stat_tool module
-        object stat_tool = import("vplants.stat_tool");
+        object stat_tool = import("openalea.stat_tool");
         object StatError = stat_tool.attr("StatError");
         char error_name[] = "_errors.StatTreeError";
 
