@@ -254,7 +254,7 @@ DistanceType StdMatchingDistanceTable::getSCost(int vertex1 ,vector<int> vertex2
   vector<TreeNodePtr> path;
   for (int i = 0; i<vertex2.size();i++)
     path.push_back( T2->getNode(vertex2[i]));
-  return ND->getMergingCost(path,T1->getNode(vertex1)); 
+  return ND->getSplittingCost(T1->getNode(vertex1),path); 
 }
 
 
@@ -543,6 +543,6 @@ DistanceType CompactMatchingDistanceTable::getSCost(int vertex1 ,vector<int> ver
   vector<TreeNodePtr> path;
   for (int i = 0; i<vertex2.size();i++)
     path.push_back( T2->getNode(vertex2[i]));
-  return ND->getMergingCost(path,T1->getNode(vertex1)); 
+  return ND->getSplittingCost(T1->getNode(vertex1),path); 
 }
 

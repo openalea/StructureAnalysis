@@ -75,6 +75,9 @@ public :
   /** Returns the merging cost between /e a vector of node and /e r_node*/
   virtual DistanceType getMergingCost( const vector<TreeNodePtr> , const TreeNodePtr ) const ;
        
+  /** Returns the splitting cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getSplittingCost( const TreeNodePtr, const vector<TreeNodePtr> ) const ;
+       
 };
 
 
@@ -109,6 +112,8 @@ public :
   /** Returns the merging cost between /e a vector of node and /e r_node*/
   virtual DistanceType getMergingCost( const vector<TreeNodePtr> , const TreeNodePtr ) const ;
          
+  /** Returns the splitting cost between /e a vector of node and /e r_node*/
+  virtual DistanceType getSplittingCost( const TreeNodePtr, const vector<TreeNodePtr> ) const ;
 };
 
 /* ----------------------------------------------------------------------- */

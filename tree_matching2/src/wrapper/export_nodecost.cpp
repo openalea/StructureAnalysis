@@ -90,7 +90,7 @@ public:
     {  return NodeCost::getChangingCost(node1, node2); }
 
 
-    /** Returns the changing cost between /e i_node and /e r_node*/
+    /** Returns the merging cost between /e i_node and /e r_node*/
   virtual DistanceType getMergingCost(const vector<TreeNodePtr> node1, const TreeNodePtr node2) const
     { 
 	  if(bp::override f = this->get_override("getMergingCost"))
@@ -98,9 +98,21 @@ public:
 	  else return default_getMergingCost(node1,node2);
 	}
 
-    /** Default implementation of changing cost method. Required for boost python*/
+    /** Default implementation of merging cost method. Required for boost python*/
   DistanceType default_getMergingCost(const vector<TreeNodePtr> node1, const TreeNodePtr node2) const
     {  return NodeCost::getMergingCost(node1, node2); }
+
+    /** Returns the splitting cost between /e i_node and /e r_node*/
+  virtual DistanceType getSplittingCost(const TreeNodePtr node1, const vector<TreeNodePtr> node2) const
+    { 
+	  if(bp::override f = this->get_override("getSplittingCost"))
+	    return bp::call<DistanceType>(f.ptr(), treenode2python(node1), treenodelist2python(node2)); //remplacer treenode2python par un vecteur de treenode ...
+	  else return default_getSplittingCost(node1,node2);
+	}
+
+    /** Default implementation of splitting cost method. Required for boost python*/
+  DistanceType default_getSplittingCost(const TreeNodePtr node1, const vector<TreeNodePtr> node2) const
+    {  return NodeCost::getSplittingCost(node1, node2); }
 
 };
 
@@ -117,6 +129,7 @@ void export_NodeCost() {
     .def("getDeletionCost", &NodeCost::getDeletionCost, &PyNodeCost::default_getDeletionCost)
     .def("getChangingCost", &NodeCost::getChangingCost, &PyNodeCost::default_getChangingCost)
     .def("getMergingCost", &NodeCost::getMergingCost, &PyNodeCost::default_getMergingCost)
+    .def("getSplittingCost", &NodeCost::getSplittingCost, &PyNodeCost::default_getSplittingCost)
 	;
 
 }

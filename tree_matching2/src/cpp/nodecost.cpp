@@ -51,6 +51,9 @@ DistanceType NodeCost::getChangingCost(const TreeNodePtr i_node,const TreeNodePt
 
 DistanceType NodeCost::getMergingCost(const vector<TreeNodePtr> i_node,const TreeNodePtr r_node) const
 { return 1; }
+
+DistanceType NodeCost::getSplittingCost(const TreeNodePtr  i_node,const vector<TreeNodePtr> r_node) const
+{ return 1; }
 /* ----------------------------------------------------------------------- */
 
 
@@ -67,6 +70,9 @@ DistanceType ScoreNodeCost::getChangingCost(const TreeNodePtr i_node,const TreeN
 { return 2; }
 
 DistanceType ScoreNodeCost::getMergingCost(const vector<TreeNodePtr> i_node,const TreeNodePtr r_node) const
+{ return -1; }
+
+DistanceType ScoreNodeCost::getSplittingCost(const TreeNodePtr  i_node,const vector<TreeNodePtr> r_node) const
 { return -1; }
 
 /* ----------------------------------------------------------------------- */

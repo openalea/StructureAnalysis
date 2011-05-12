@@ -22,7 +22,7 @@ class NodeCostWrapper (NodeCost):
         return self.mtgnodecost.getMergingCost([self.idmap1[i.id] for i in a],self.idmap2[b.id])
 
     def getSplittingCost(self,a,b) :
-        return self.mtgnodecost.getMergingCost(self.idmap1[a.id],[self.idmap2[i.id] for i in b])
+        return self.mtgnodecost.getSplittingCost(self.idmap1[a.id],[self.idmap2[i.id] for i in b])
 
 
 class MtgMatchingWrapper :
