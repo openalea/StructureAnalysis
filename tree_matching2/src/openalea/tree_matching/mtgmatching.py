@@ -10,7 +10,7 @@ class NodeCostWrapper (NodeCost):
         self.mtgnodecost = mtgnodecost
         
     def getDeletionCost(self,a) :
-        return self.mtgnodecost.getInsertionCost(self.idmap1[a.id])
+        return self.mtgnodecost.getDeletionCost(self.idmap1[a.id])
         
     def getInsertionCost(self,b) :
         return self.mtgnodecost.getInsertionCost(self.idmap2[b.id])
