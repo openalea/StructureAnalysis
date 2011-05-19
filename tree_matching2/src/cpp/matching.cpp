@@ -300,74 +300,81 @@ void Matching::getList(int input_vertex, int reference_vertex, Sequence* sequenc
 }
 
 int Matching::Lat(ChoiceList* L, int vertex){
-  ChoiceList::iterator begin;
-  begin = L->begin();
-  for (int i=0;i<vertex;i++)
-    begin++;
-  return(*begin);
+
+  ChoiceList::iterator begin = L->begin();
+  for (int i=0 ; i<vertex ; ++i) ++begin;
+  return (*begin); 
 }
 
 
 
 void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence){
-  if ((!T1->isNull())&&(!T2->isNull()))
-    {
-      ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
-      int tree_choice=L->front();
-      switch(tree_choice)
-        {
-        case 1:
-          {
-            TreeList(Lat(L,1),reference_vertex,sequence);
-          }
-          break;
-        case 2:
-          {
-            TreeList(input_vertex,Lat(L,1),sequence);
-          }
-          break;
-        case 3: {
-          sequence.append(input_vertex,reference_vertex,_distances->getCCost(input_vertex,reference_vertex));
-          ForestList(input_vertex,reference_vertex,sequence);
-        }break;
-        case 4: {
-	  int size = Lat(L,1);
-	  for (int i=0;i<size;i++){
-	    sequence.append(Lat(L,i+4),reference_vertex,-1);
-	  }
-          ForestList(Lat(L,4),reference_vertex,sequence);
-        }break;
-         case 5: {
-	  int size = Lat(L,1);
-	  for (int i=0;i<size;i++){
-	    sequence.append(input_vertex,Lat(L,i+4),-1);
-	  }
-          ForestList(input_vertex,Lat(L,4),sequence);
-        }break;
-        default : break;
-        }
-    }
+	if ((!T1->isNull())&&(!T2->isNull()))
+	{
+		ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
+		int tree_choice=L->front();
+		switch(tree_choice)
+		{
+		case 1:
+			{
+				TreeList(Lat(L,1),reference_vertex,sequence);
+			}
+			break;
+		case 2:
+			{
+				TreeList(input_vertex,Lat(L,1),sequence);
+			}
+			break;
+		case 3: 
+			{
+				sequence.append(input_vertex,reference_vertex,_distances->getCCost(input_vertex,reference_vertex));
+				ForestList(input_vertex,reference_vertex,sequence);
+			}
+			break;
+		case 4: 
+			{
+				int size = Lat(L,1);
+				for (int i=0;i<size;i++){
+					sequence.append(Lat(L,i+4),reference_vertex,-1);
+				}
+				ForestList(Lat(L,4),reference_vertex,sequence);
+			}
+			break;
+		case 5: 
+			{
+				int size = Lat(L,1);
+				for (int i=0;i<size;i++){
+					sequence.append(input_vertex,Lat(L,i+4),-1);
+				}
+				ForestList(input_vertex,Lat(L,4),sequence);
+			}
+			break;
+		default : break;
+		}
+	}
 }
 
 void Matching::ForestList(int input_vertex,int reference_vertex,Sequence& sequence)
 {
-  ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
-  int forest_choice=Lat(L,2);
+	ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
+	int forest_choice=Lat(L,2);
 
-  switch(forest_choice)
-    {
-    case 1: ForestList(Lat(L,3),reference_vertex,sequence);break;
-    case 2: ForestList(input_vertex,Lat(L,3),sequence);break;
-    case 3: {
-      for (int i=0;i<T1->getNbChild(input_vertex);i++)
-        {
-          int i_node=T1->child(input_vertex,i);
-          int r_node=Lat(L,3+i);
-          if (r_node!=-1) TreeList(i_node,r_node,sequence);
-        }
-    }break;
-    default : break;
-    }
+	switch(forest_choice)
+	{
+		case 1: ForestList(Lat(L,3),reference_vertex,sequence);break;
+		case 2: ForestList(input_vertex,Lat(L,3),sequence);break;
+		case 3: 
+		{
+			for (int i=0;i<T1->getNbChild(input_vertex);i++)
+			{
+				int i_node=T1->child(input_vertex,i);
+				int r_node=Lat(L,3+i);
+				if (r_node!=-1) TreeList(i_node,r_node,sequence);
+			}
+		}
+		break;
+		default : break;
+	}
 }
 
 DistanceType Matching::match()
