@@ -60,10 +60,39 @@ def test_extmatching():
 
   resultmatchinglist = m.getList(0,0)
   
+  # we suppose that because split is 0 cost and merge is big cost, no merging will occur and element of tree2 will be match only one time
+  m2list = set() 
   for m1,m2,mv in resultmatchinglist:
     print m1,m2,mv
-    assert m1 < nbVertex1
-    assert m2 < nbVertex2
+    # check if it is a valid element of tree 1
+    assert 0 <= m1 < nbVertex1
+    # check if it is a valid element of tree 2
+    assert 0 <= m2 < nbVertex2
+    # check if there is no merging
+    assert not m2 in m2list
+    m2list.add(m2)
+    
+"""
+An error occur that found an extra node with strange id at the last line for m2
+Here comes the log
+**********
+0 2 -1.0
+0 1 -1.0
+0 0 -1.0
+1 3 0.0
+2 5 0.0
+3 4 0.0
+4 6 0.0
+5 9 -1.0
+5 8 -1.0
+5 7 -1.0
+5 52443312 -1.0
+--------------
+AssertionError
+...
+**********
+On windows the strange id is usually a number between -1 and 10
+"""
 
 if __name__ == '__main__':
     test_extmatching()
