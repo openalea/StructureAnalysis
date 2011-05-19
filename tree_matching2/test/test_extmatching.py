@@ -50,9 +50,9 @@ def create_treegraph2():
 
 def test_extmatching():
   tree1 = create_treegraph1()
-  nbVertex1 = tree1.getNbVertex()
+  nbVertex1 = tree1.getNbVertex() # 6
   tree2 = create_treegraph2()
-  nbVertex2 = tree2.getNbVertex()
+  nbVertex2 = tree2.getNbVertex() # 11
 
   node_cost = MyNodeCost()
   m = ExtMatching(tree1,tree2,node_cost,0)
