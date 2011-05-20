@@ -300,7 +300,7 @@ void Matching::getList(int input_vertex, int reference_vertex, Sequence* sequenc
 }
 
 int Matching::Lat(ChoiceList* L, int vertex){
-
+  assert(L->size() > vertex); // check for wrong access in the list.
   ChoiceList::iterator begin = L->begin();
   for (int i=0 ; i<vertex ; ++i) ++begin;
   return (*begin); 
@@ -334,19 +334,37 @@ void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence
 		case 4: 
 			{
 				int size = Lat(L,1);
+				int nbChoices = L->size();
+				/*
+					Fred temptative of fix:
+					The actual list of id of matched elements seems to be the n last value of the choice list.
+				*/
+				int input_vertex;
 				for (int i=0;i<size;i++){
-					sequence.append(Lat(L,i+4),reference_vertex,-1);
+					input_vertex = Lat(L,nbChoices-size+i);
+					sequence.append(input_vertex,reference_vertex,-1);
 				}
-				ForestList(Lat(L,4),reference_vertex,sequence);
+				// question : is input_vertex to continue the fist or the last of the list. I choose the first
+				input_vertex = Lat(L,nbChoices-size); 
+				ForestList(input_vertex,reference_vertex,sequence);
 			}
 			break;
 		case 5: 
 			{
 				int size = Lat(L,1);
+				int nbChoices = L->size();
+				/*
+					Fred temptative of fix:
+					The actual list of id of matched elements seems to be the n last value of the choice list.
+				*/
+				int reference_vertex;
 				for (int i=0;i<size;i++){
-					sequence.append(input_vertex,Lat(L,i+4),-1);
+					reference_vertex = Lat(L,nbChoices-size+i);
+					sequence.append(input_vertex,reference_vertex,-1);
 				}
-				ForestList(input_vertex,Lat(L,4),sequence);
+				// question : is reference_vertex to continue the fist or the last of the list. I choose the first
+				reference_vertex = Lat(L,nbChoices-size); 
+				ForestList(input_vertex,reference_vertex,sequence);
 			}
 			break;
 		default : break;
@@ -587,14 +605,14 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
     case 4 :{
      _choices.putFirst(input_vertex,reference_vertex,min_path_im.size());
      for (int i=0;i<min_path_im.size();i++){
-	_choices.putLast(input_vertex,reference_vertex,min_path_im[i]);
+		_choices.putLast(input_vertex,reference_vertex,min_path_im[i]);
      }
       //  _choices.putLast(input_vertex,reference_vertex,reference_vertex);
     }break;
     case 5 :{
       _choices.putFirst(input_vertex,reference_vertex,min_path_jm.size());
       for (int i=0;i<min_path_jm.size();i++){
-	_choices.putLast(input_vertex,reference_vertex,min_path_jm[i]);
+		_choices.putLast(input_vertex,reference_vertex,min_path_jm[i]);
       //     _choices.putLast(input_vertex,reference_vertex,reference_vertex);
       }
     }break;
