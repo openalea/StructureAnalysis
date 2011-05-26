@@ -650,7 +650,8 @@ public :
     Sequences* index_parameter_extract(StatError &error , int min_parameter_index ,
                                        int max_parameter_index = I_DEFAULT) const;
     Sequences* segmentation_extract(StatError &error , int variable , int nb_value ,
-                                    int *ivalue , bool keep = true) const;
+                                    int *ivalue , bool keep = true ,
+                                    bool concatenation = false) const;
 
     Sequences* cumulate(StatError &error , int variable = I_DEFAULT) const;
     Sequences* difference(StatError &error , int variable = I_DEFAULT ,
