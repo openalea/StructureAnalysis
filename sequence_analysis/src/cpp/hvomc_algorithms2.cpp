@@ -1340,7 +1340,7 @@ double HiddenVariableOrderMarkov::forward_backward(const MarkovianSequences &seq
   delete [] pioutput;
   delete [] proutput;
 
-  return (seq_likelihood);
+  return seq_likelihood;
 }
 
 
