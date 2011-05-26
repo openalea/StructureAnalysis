@@ -1410,7 +1410,7 @@ double HiddenSemiMarkov::forward_backward(const MarkovianSequences &seq , int in
   delete [] pioutput;
   delete [] proutput;
 
-  return (seq_likelihood);
+  return seq_likelihood;
 }
 
 
