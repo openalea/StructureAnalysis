@@ -1081,8 +1081,52 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
           }
         }
       }
+
       os << sos.str();
 #     endif
+
+      if (index_parameter_type == POSITION) {
+        os << "| " << index_parameter[i][length[i]];
+      }
+
+      os << "   ";
+      if (comment_flag) {
+        os << "# ";
+      }
+      os << "(" << identifier[i] << ")" << endl;
+
+      if (posterior_probability) {
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
+           << ": " << posterior_probability[i] << endl;
+      }
+    }
+    break;
+  }
+
+  case 'v' : {
+    for (i = 0;i < nb_sequence;i++) {
+      os << "\n";
+
+      for (j = 0;j < length[i];j++) {
+        if (index_parameter) {
+          os << index_parameter[i][j] << " ";
+        }
+        for (k = 0;k < nb_variable;k++) {
+          if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
+            os << int_sequence[i][k][j] << " ";
+          }
+          else {
+            os << real_sequence[i][k][j] << " ";
+          }
+        }
+
+        if (j < length[i] - 1) {
+          os << "\\" << endl;
+        }
+      }
 
       if (index_parameter_type == POSITION) {
         os << "| " << index_parameter[i][length[i]];
@@ -1317,6 +1361,7 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
           }
         }
       }
+
       os << sos.str();
 #     endif
 
@@ -1335,6 +1380,32 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
     }
     os << "]" << endl;
+    break;
+  }
+
+  case 'p' : {
+    if (posterior_probability) {
+      os << "1 " << STAT_word[STATW_VARIABLE] << endl;
+      os << "\n" << STAT_word[STATW_VARIABLE] << " 1 : "
+         << STAT_variable_word[REAL_VALUE] << endl;
+
+      os << "\n";
+      for (i = 0;i < nb_sequence;i++) {
+/*        for (j = 0;j < length[i];j++) {   // pour UC Fuji/Braeburn
+          if (int_sequence[i][0][j] <= 1) {
+            break;
+          }
+        }
+
+        if (j < length[i]) { */
+          os << posterior_probability[i] << "   ";
+          if (comment_flag) {
+            os << "# ";
+          }
+          os << "(" << identifier[i] << ")" << endl;
+//        }
+      }
+    }
     break;
   }
   }
