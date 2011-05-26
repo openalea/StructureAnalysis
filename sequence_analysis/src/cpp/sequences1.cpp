@@ -5418,20 +5418,21 @@ Sequences* Sequences::index_parameter_extract(StatError &error , int min_index_p
  *  Extraction par segmentation d'un objet Sequences.
  *
  *  arguments : reference sur un objet StatError, indice de la variable,
- *              nombre de valeurs, valeurs, flag zones correspondant aux valeurs
- *              extraites/pas extraites.
+ *              nombre de valeurs, valeurs, flag segments correspondant aux valeurs
+ *              selectionnees ou non, segments concatenes par sequence ou non.
  *
  *--------------------------------------------------------------*/
 
 Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
-                                           int nb_value , int *ivalue , bool keep) const
+                                           int nb_value , int *ivalue , bool keep ,
+                                           bool concatenation) const
 
 {
   bool status = true;
-  register int i , j , k , m;
-  int nb_present_value , nb_selected_value , *pfrequency , *selected_value ,
-      *itype , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
-      *pisequence , *cisequence , *zone_length , **zone_begin;
+  register int i , j , k , m , n;
+  int nb_present_value , nb_selected_value , nb_segment , inb_sequence , *pfrequency ,
+      *selected_value , *itype , *pvertex_id , *cvertex_id , *pindex_param , *cindex_param ,
+      *pisequence , *cisequence , *segment_length , *sequence_length , **segment_begin;
   double *prsequence , *crsequence;
   Sequences *seq;
 
@@ -5580,11 +5581,11 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 
     // initialisations
 
-    zone_length = new int[cumul_length];
+    segment_length = new int[cumul_length];
 
-    zone_begin = new int*[cumul_length];
+    segment_begin = new int*[cumul_length];
     for (i = 0;i < cumul_length;i++) {
-      zone_begin[i] = 0;
+      segment_begin[i] = 0;
     }
 
     // recherche des sequences a extraire
@@ -5602,11 +5603,11 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 
       if (k < nb_selected_value) {
         i++;
-        zone_begin[i] = new int[2];
+        segment_begin[i] = new int[2];
 
-        zone_begin[i][0] = j;
-        zone_begin[i][1] = 0;
-        zone_length[i] = 1;
+        segment_begin[i][0] = j;
+        segment_begin[i][1] = 0;
+        segment_length[i] = 1;
       }
 
       for (k = 1;k < length[j];k++) {
@@ -5621,31 +5622,75 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
         if (m  < nb_selected_value) {
           if (*pisequence != *(pisequence - 1)) {
             i++;
-            zone_begin[i] = new int[2];
+            segment_begin[i] = new int[2];
 
-            zone_begin[i][0] = j;
-            zone_begin[i][1] = k;
-            zone_length[i] = 1;
+            segment_begin[i][0] = j;
+            segment_begin[i][1] = k;
+            segment_length[i] = 1;
           }
           else {
-            zone_length[i]++;
+            segment_length[i]++;
           }
         }
       }
     }
 
+    nb_segment = i + 1;
+
+    switch (concatenation) {
+
+    case false : {
+      inb_sequence = nb_segment;
+      sequence_length = segment_length;
+      break;
+    }
+
+    case true : {
+      sequence_length = new int[nb_sequence];
+
+      i = 0;
+      sequence_length[i] = segment_length[i];
+      for (j = 1;j < nb_segment;j++) {
+        if (segment_begin[j][0] != segment_begin[j - 1][0]) {
+          i++;
+          sequence_length[i] = 0;
+        }
+        sequence_length[i] += segment_length[j];
+      }
+
+      inb_sequence = i + 1;
+      break;
+    }
+    }
+
     // creation de l'objet Sequences
 
-    seq = new Sequences(i + 1 , NULL , zone_length , vertex_identifier ,
+    seq = new Sequences(inb_sequence , NULL , sequence_length , vertex_identifier ,
                         index_parameter_type , nb_variable - 1 , itype , false);
 
     // copie des identificateurs des vertex
 
     if (vertex_identifier) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        pvertex_id = seq->vertex_identifier[i];
-        cvertex_id = vertex_identifier[zone_begin[i][0]] + zone_begin[i][1];
-        for (j = 0;j < seq->length[i];j++) {
+      i = -1;
+
+      for (j = 0;j < nb_segment;j++) {
+        switch (concatenation) {
+
+        case false : {
+          pvertex_id = seq->vertex_identifier[j];
+          break;
+        }
+
+        case true : {
+          if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
+            pvertex_id = seq->vertex_identifier[++i];
+          }
+          break;
+        }
+        }
+
+        cvertex_id = vertex_identifier[segment_begin[j][0]] + segment_begin[j][1];
+        for (k = 0;k < segment_length[j];k++) {
           *pvertex_id++ = *cvertex_id++;
         }
       }
@@ -5654,10 +5699,26 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
     // copie des parametres d'index
 
     if (index_parameter) {
-      for (i = 0;i < seq->nb_sequence;i++) {
-        pindex_param = seq->index_parameter[i];
-        cindex_param = index_parameter[zone_begin[i][0]] + zone_begin[i][1];
-        for (j = 0;j < seq->length[i];j++) {
+      i = -1;
+
+      for (j = 0;j < nb_segment;j++) {
+        switch (concatenation) {
+
+        case false : {
+          pindex_param = seq->index_parameter[j];
+          break;
+        }
+
+        case true : {
+          if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
+            pindex_param = seq->index_parameter[++i];
+          }
+          break;
+        }
+        }
+
+        cindex_param = index_parameter[segment_begin[j][0]] + segment_begin[j][1];
+        for (k = 0;k < segment_length[j];k++) {
           *pindex_param++ = *cindex_param++;
         }
       }
@@ -5672,27 +5733,56 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
 
     // copie des valeurs
 
-    for (i = 0;i < seq->nb_sequence;i++) {
-      j = 0;
-      for (k = 0;k < nb_variable;k++) {
-        if (k != variable) {
-          if ((type[k] != REAL_VALUE) && (type[k] != AUXILIARY)) {
-            pisequence = seq->int_sequence[i][j];
-            cisequence = int_sequence[zone_begin[i][0]][k] + zone_begin[i][1];
-            for (m = 0;m < seq->length[i];m++) {
+    i = -1;
+    for (j = 0;j < nb_segment;j++) {
+      k = 0;
+      for (m = 0;m < nb_variable;m++) {
+        if (m != variable) {
+          if ((type[m] != REAL_VALUE) && (type[m] != AUXILIARY)) {
+            switch (concatenation) {
+
+            case false : {
+              pisequence = seq->int_sequence[j][k];
+              break;
+            }
+
+            case true : {
+              if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
+                pisequence = seq->int_sequence[++i][k];
+              }
+              break;
+            }
+            }
+
+            cisequence = int_sequence[segment_begin[j][0]][m] + segment_begin[j][1];
+            for (n = 0;n < segment_length[j];n++) {
               *pisequence++ = *cisequence++;
             }
           }
 
           else {
-            prsequence = seq->real_sequence[i][j];
-            crsequence = real_sequence[zone_begin[i][0]][k] + zone_begin[i][1];
-            for (m = 0;m < seq->length[i];m++) {
+            switch (concatenation) {
+
+            case false : {
+              prsequence = seq->real_sequence[j][k];
+              break;
+            }
+
+            case true : {
+              if ((j == 0) || (segment_begin[j][0] != segment_begin[j - 1][0])) {
+                prsequence = seq->real_sequence[++i][k];
+              }
+              break;
+            }
+            }
+
+            crsequence = real_sequence[segment_begin[j][0]][m] + segment_begin[j][1];
+            for (n = 0;n < segment_length[j];n++) {
               *prsequence++ = *crsequence++;
             }
           }
 
-          j++;
+          k++;
         }
       }
     }
@@ -5708,13 +5798,18 @@ Sequences* Sequences::segmentation_extract(StatError &error , int variable ,
       delete [] selected_value;
     }
 
-    delete [] zone_length;
-    for (i = 0;i < seq->nb_sequence;i++) {
-      delete [] zone_begin[i];
+    delete [] segment_length;
+
+    for (i = 0;i < nb_segment;i++) {
+      delete [] segment_begin[i];
     }
-    delete [] zone_begin;
+    delete [] segment_begin;
 
     delete [] itype;
+
+    if (concatenation) {
+      delete [] sequence_length;
+    }
   }
 
   return seq;
