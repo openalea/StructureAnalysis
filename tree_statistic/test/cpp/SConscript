@@ -14,9 +14,7 @@ pj = os.path.join
 if env_test['debug']:
    env_test.Append(CPPDEFINES= ['DEBUG'])
 env_test.AppendUnique(LIBS=['vptool', 'vpstat_tool', 'vpsequence', 'vptree_statistic'])
-import os
-if os.name != 'nt':
-    env_test.AppendUnique(LIBS= ['efence'])
+
 
 # env_test.AppendUnique(LIBS= ['leaktrace'])
 # env.Append(CPPPATH= includes)
@@ -43,6 +41,14 @@ test_hidden_markov_chain_tree.cpp
 test_hidden_markov_out_trees_viterbi.cpp
 """)
 
+tests_without = Split("""
+""")
+
+def prog_with_efence(p):
+  LIBS=env_test['LIBS']
+  if os.name != 'nt':
+      LIBS.append('efence')
+  return env_test.Program(p, LIBS=LIBS)
 def prog(p):
   return env_test.Program(p)
 
@@ -55,7 +61,8 @@ def prog(p):
 #       print "actual and theoretical outputs match for ", p, "\n"
 
 
-test_prog=map(prog, tests)
+test_prog=map(prog_with_efence, tests)
+test_prog.extend(prog(p) for p in tests_without)
 
 '''
 def rmTests(target, source, env):
