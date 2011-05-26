@@ -223,6 +223,7 @@ const char *SEQ_label[] = {
   "optimal" ,
   "change point" ,
   "change points" ,
+  "mean change-point amplitude",
   "segment" ,
   "segments" ,
   "segment mean" ,
