@@ -3198,17 +3198,17 @@ ostream& Vectors::ascii_print(ostream &os , bool comment_flag) const
     }
 
     else {
-      buff = column_width(min_value[i] , max_value[i]);
+/*      buff = column_width(min_value[i] , max_value[i]);
       if (buff > width[0]) {
         width[0] = buff;
-      }
+      } */
 
-/*      for (j = 0;j < nb_vector;j++) {
+      for (j = 0;j < nb_vector;j++) {
         buff = column_width(1 , real_vector[j] + i);
         if (buff > width[0]) {
           width[0] = buff;
         }
-      } */
+      }
     }
   }
   width[1] = width[0] + ASCII_SPACE;
