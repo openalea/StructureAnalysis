@@ -3001,7 +3001,10 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
             }
             os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_VARIANCE] << ": ";
             for (k = 0;k < nb_segment;k++) {
-              os << mean[j][k] << " " << variance[j][k] << " | ";
+              os << mean[j][k] << " " << variance[j][k];
+              if (k < nb_segment - 1) {
+                os << " | ";
+              } 
             }
             os << endl;
           }
@@ -3014,7 +3017,10 @@ double Sequences::forward_backward_sampling(int index , int nb_segment , int *mo
             }
             os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
             for (k = 0;k < nb_segment;k++) {
-              os << mean[j][k] << " " << sqrt(variance[j][k]) << " | ";
+              os << mean[j][k] << " " << sqrt(variance[j][k]);
+              if (k < nb_segment - 1) {
+                os << " | ";
+              }
             }
             os << endl;
           }
@@ -3878,7 +3884,10 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
           }
           os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_VARIANCE] << ": ";
           for (k = 0;k < nb_segment;k++) {
-            os << mean[j][k] << " " << variance[j][k] << " | ";
+            os << mean[j][k] << " " << variance[j][k];
+            if (k < nb_segment - 1) {
+              os << " | ";
+            }
           }
           os << endl;
         }
@@ -3890,7 +3899,10 @@ double Sequences::N_segmentation(int index , int nb_segment , int *model_type ,
           }
           os << SEQ_label[SEQL_SEGMENT_MEAN] << "  " << SEQ_label[SEQL_SEGMENT_STANDARD_DEVIATION] << ": ";
           for (k = 0;k < nb_segment;k++) {
-            os << mean[j][k] << " " << sqrt(variance[j][k]) << " | ";
+            os << mean[j][k] << " " << sqrt(variance[j][k]);
+            if (k < nb_segment - 1) {
+              os << " | ";
+            }
           }
           os << endl;
         }
