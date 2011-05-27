@@ -296,9 +296,17 @@ DistanceType Matching::distanceBetweenForest(int input_vertex,int reference_vert
 
 
 void Matching::getList(int input_vertex, int reference_vertex, Sequence* sequence){
-  TreeList(input_vertex,reference_vertex,*sequence);
+  MatchRecordList mrl;
+  _choices.getList(input_vertex,reference_vertex,T1, T2,&mrl);
+
+  // conversion to a sequence to keep similar signature
+  for (MatchRecordList::const_iterator it = mrl.begin(); it != mrl.end(); ++it)
+	  sequence->append(it->first,it->second,-1);
+
+  // TreeList(input_vertex,reference_vertex,*sequence);
 }
 
+/*
 int Matching::Lat(ChoiceList* L, int vertex){
   assert(L->size() > vertex); // check for wrong access in the list.
   ChoiceList::iterator begin = L->begin();
@@ -308,7 +316,7 @@ int Matching::Lat(ChoiceList* L, int vertex){
 
 
 
-void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence){
+void Matching::TreeList(int input_vertex, int reference_vertex, Sequence& sequence){
 	if ((!T1->isNull())&&(!T2->isNull()))
 	{
 		ChoiceList* L=_choices.getList(input_vertex,reference_vertex);
@@ -335,10 +343,8 @@ void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence
 			{
 				int size = Lat(L,1);
 				int nbChoices = L->size();
-				/*
-					Fred temptative of fix:
-					The actual list of id of matched elements seems to be the n last value of the choice list.
-				*/
+				//	Fred temptative of fix:
+				//	The actual list of id of matched elements seems to be the n last value of the choice list.				
 				int input_vertex;
 				for (int i=0;i<size;i++){
 					input_vertex = Lat(L,nbChoices-size+i);
@@ -353,10 +359,8 @@ void Matching::TreeList(int input_vertex,int reference_vertex,Sequence& sequence
 			{
 				int size = Lat(L,1);
 				int nbChoices = L->size();
-				/*
-					Fred temptative of fix:
-					The actual list of id of matched elements seems to be the n last value of the choice list.
-				*/
+				// Fred temptative of fix:
+				// The actual list of id of matched elements seems to be the n last value of the choice list.
 				int reference_vertex;
 				for (int i=0;i<size;i++){
 					reference_vertex = Lat(L,nbChoices-size+i);
@@ -394,7 +398,7 @@ void Matching::ForestList(int input_vertex,int reference_vertex,Sequence& sequen
 		default : break;
 	}
 }
-
+*/
 DistanceType Matching::match()
 {
 	DistanceType D=0;

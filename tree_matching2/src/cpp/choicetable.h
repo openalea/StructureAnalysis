@@ -48,6 +48,9 @@
 
 #include "treematch_config.h"
 
+// #include "sequence.h"
+#include "treegraph.h"
+
 #include <iostream>
 #include <list>
 #include <vector>
@@ -56,6 +59,8 @@ typedef std::list<int> ChoiceList;
 typedef std::vector<ChoiceList> ChoiceListVector;
 typedef std::vector<ChoiceListVector> ChoiceListArray;
 
+typedef std::pair<int,int> MatchRecord;
+typedef std::list<MatchRecord> MatchRecordList;
 
 class TREEMATCH_API  ChoiceTable
 {
@@ -86,6 +91,16 @@ class TREEMATCH_API  ChoiceTable
     void destroyList(int ,int );
 
     ChoiceList* getList(int ,int ) ;
+
+
+
+   void getList(int ,int , TreeGraphPtr T1, TreeGraphPtr T2, MatchRecordList*);
+   void ForestList(int ,int , TreeGraphPtr T1, TreeGraphPtr T2,  MatchRecordList& );
+   void TreeList(int ,int , TreeGraphPtr T1, TreeGraphPtr T2, MatchRecordList& );
+   int Lat(ChoiceList* L, int vertex);
+
+   void dump(const std::string& fname) const;
+   static ChoiceTable load(const std::string& fname);
 
   private :
     int _i_size;
