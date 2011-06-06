@@ -7,14 +7,11 @@ class MyNodeCost (NodeCost):
      NodeCost.__init__(self)
   def getInsertionCost(self,a):
     return 18
-  
   def getDeletionCost(self,a):
     return 50
-    
   def getChangingCost(self,a,b):    
     #if a.id != b.id : return 1
     return 0
- 
   def getMergingCost(self,l,b):
     return 3
     
@@ -49,7 +46,7 @@ def test_matching():
 
   node_cost = MyNodeCost()
   # Standard option = 0
-  m = Matching(tree1,tree2,node_cost,0)
+  m = Matching(tree1,tree1,node_cost,0)
   # Compact option = 1
   val = m.match()
   print 'match =',val

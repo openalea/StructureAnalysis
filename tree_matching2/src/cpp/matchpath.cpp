@@ -43,6 +43,20 @@
 
 #include "matchpath.h"
 
+MatchPath::MatchPath(const NodeList& input_list,const NodeList& reference_list){
+  this->make(input_list,reference_list);
+  int deg_max = I_MAX(input_list.size(),reference_list.size());
+  flow.resize(deg_max*deg_max+3*deg_max);
+  cost.resize(2*deg_max+3);
+}
+
+void MatchPath::make2(NodeList& input_list,NodeList& reference_list){
+  this->make(input_list,reference_list);
+  int deg_max = I_MAX(input_list.size(),reference_list.size());
+  flow.resize(deg_max*deg_max+3*deg_max);
+  cost.resize(2*deg_max+3);
+}
+
 void MatchPath::link(int deg_max,MatchingDistanceTable* mdtable)
 {
   _mdtable=mdtable;
@@ -58,11 +72,11 @@ void MatchPath::link(int deg_max,MatchingDistanceTable* mdtable)
   // d'alignement restreint.
   // ---------------------------------------------------------
 		
-void MatchPath::make(NodeList& input_list,NodeList& reference_list)
+void MatchPath::make(const NodeList& input_list,const NodeList& reference_list)
 {
 
-	_inputList=&input_list;
-	_referenceList=&reference_list;
+  _inputList= new NodeList(input_list);
+  _referenceList=new NodeList(reference_list);
 
 
 	// On recupere le nombre d'arbres des forets initiales et finales
@@ -119,6 +133,8 @@ void MatchPath::make(NodeList& input_list,NodeList& reference_list)
 // -----------
 MatchPath::~MatchPath()
 {
+      delete _inputList;
+      delete _referenceList;
 }
 
 // ----------------------------------------

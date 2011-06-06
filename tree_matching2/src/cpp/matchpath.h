@@ -61,11 +61,13 @@ class TREEMATCH_API MatchPath
   public :
     //Constructor
     MatchPath(){};
+    MatchPath(const NodeList& ,const NodeList& );
     //Destructor
     ~MatchPath();
     // Cree un graphe de flot a partir de deux listes de noeuds,
     // une contenant les noeuds initiaux et l'autre les noeuds de reference
-    void make(NodeList& ,NodeList& );
+    void make(const NodeList& ,const NodeList& );
+    void make2(NodeList& ,NodeList& );
 
     void link(int, MatchingDistanceTable*);
     // Recherche le plus court chemin au sens du cout ameliore de
