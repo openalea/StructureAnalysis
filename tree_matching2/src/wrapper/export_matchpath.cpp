@@ -29,10 +29,10 @@
  # ---------------------------------------------------------------------------
  */
 
-#include "matchpath.h"
 #include "extract_list.h"
 #include "export_list.h"
 #include <boost/python.hpp>
+#include "matchpath.h"
 
 using namespace boost::python;
 #define bp boost::python
@@ -55,16 +55,16 @@ public:
     }*/
 
     /** Returns the edge cost between /e i_node and /e r_node*/
-  virtual DistanceType edgeCost(int node1, int node2)
+  virtual DistanceType edgeCost(int node1, int node2) 
     { 
 	  if(bp::override f = this->get_override("edgeCost"))
-		return bp::call<DistanceType>(f.ptr(), node1, node2);
+	    return bp::call<DistanceType>(f.ptr(), bp::object(node1), bp::object(node2));
 	  else return default_edgeCost(node1,node2);
 	}
 
     /** Default implementation of edge cost method. Required for boost python*/
-    DistanceType default_edgeCost(int node1, int node2) 
-    {  return MatchPath::edgeCost(node1, node2); }
+    DistanceType default_edgeCost(int node1, int node2) {
+      return MatchPath::edgeCost(node1, node2); }
 
 
   boost::python::object py_minCostFlow(){
@@ -88,7 +88,7 @@ void export_MatchPath() {
 	  ("MatchPath", init<boost::python::object,boost::python::object>("Constructor of MatchPath"))
 	  //	  .def( "make", &PyMatchPath::py_make,"Initialize a MatchPath")
 	  .def( "minCostFlow", &PyMatchPath::py_minCostFlow,"Get the list of mapped vertices")
-	  //	  .def("edgeCost", &PyMatchPath::edgeCost, &PyMatchPath::default_edgeCost)
+	  .def("edgeCost", &MatchPath::edgeCost, &PyMatchPath::default_edgeCost)
 	;
 
 }
