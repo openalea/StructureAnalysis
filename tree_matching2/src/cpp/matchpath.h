@@ -138,7 +138,7 @@ class TREEMATCH_API MatchPath
     int who(int );
     int capacity(int);
 
-	// can be redefined
+	// call the evaluator. Still can be redefined.
     virtual DistanceType edgeCost(int a, int b)
 	{ assert(_edgecostEvaluator);
 	  return _edgecostEvaluator->edgeCost(a,b); }
