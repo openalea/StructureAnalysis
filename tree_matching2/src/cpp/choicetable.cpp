@@ -96,7 +96,7 @@ void ChoiceTable::createList(int i_node ,int r_node)
 
 void ChoiceTable::destroyList(int i_node ,int r_node)
 {
-	//if ((_data[i_node])[r_node]) delete (ChoiceList*) (*_data[i_node])[r_node];
+  //if ((_data[i_node])[r_node]) delete (ChoiceList*) (*_data[i_node])[r_node];
 }
 
 ChoiceList* ChoiceTable::getList(int i_node,int r_node) 
@@ -124,90 +124,90 @@ int ChoiceTable::Lat(ChoiceList* L, int vertex){
 
 
 void ChoiceTable::TreeList(int input_vertex, int reference_vertex, TreeGraphPtr T1, TreeGraphPtr T2, MatchRecordList& sequence){
-	if ((!T1->isNull())&&(!T2->isNull()))
+  if ((!T1->isNull())&&(!T2->isNull()))
+    {
+      ChoiceList* L=getList(input_vertex,reference_vertex);
+      int tree_choice=L->front();
+      switch(tree_choice)
 	{
-		ChoiceList* L=getList(input_vertex,reference_vertex);
-		int tree_choice=L->front();
-		switch(tree_choice)
-		{
-		case 1:
-			{
-				TreeList(Lat(L,1),reference_vertex,T1,T2,sequence);
-			}
-			break;
-		case 2:
-			{
-				TreeList(input_vertex,Lat(L,1),T1,T2,sequence);
-			}
-			break;
-		case 3: 
-			{
-				sequence.push_back(MatchRecord(input_vertex,reference_vertex));
-				ForestList(input_vertex,reference_vertex,T1,T2,sequence);
-			}
-			break;
-		case 4: 
-			{
-				int size = Lat(L,1);
-				int nbChoices = L->size();
-				/*
-					Fred temptative of fix:
-					The actual list of id of matched elements seems to be the n last value of the choice list.
-				*/
-				int input_vertex;
-				for (int i=0;i<size;i++){
-					input_vertex = Lat(L,nbChoices-size+i);
-					sequence.push_back(MatchRecord(input_vertex,reference_vertex));
-				}
-				// question : is input_vertex to continue the fist or the last of the list. I choose the first
-				input_vertex = Lat(L,nbChoices-size); 
-				ForestList(input_vertex,reference_vertex,T1,T2,sequence);
-			}
-			break;
-		case 5: 
-			{
-				int size = Lat(L,1);
-				int nbChoices = L->size();
-				/*
-					Fred temptative of fix:
-					The actual list of id of matched elements seems to be the n last value of the choice list.
-				*/
-				int reference_vertex;
-				for (int i=0;i<size;i++){
-					reference_vertex = Lat(L,nbChoices-size+i);
-					sequence.push_back(MatchRecord(input_vertex,reference_vertex));
-				}
-				// question : is reference_vertex to continue the fist or the last of the list. I choose the first
-				reference_vertex = Lat(L,nbChoices-size); 
-				ForestList(input_vertex,reference_vertex,T1,T2,sequence);
-			}
-			break;
-		default : break;
-		}
+	case 1:
+	  {
+	    TreeList(Lat(L,1),reference_vertex,T1,T2,sequence);
+	  }
+	  break;
+	case 2:
+	  {
+	    TreeList(input_vertex,Lat(L,1),T1,T2,sequence);
+	  }
+	  break;
+	case 3: 
+	  {
+	    sequence.push_back(MatchRecord(input_vertex,reference_vertex));
+	    ForestList(input_vertex,reference_vertex,T1,T2,sequence);
+	  }
+	  break;
+	case 4: 
+	  {
+	    int size = Lat(L,1);
+	    int nbChoices = L->size();
+	    /*
+	      Fred temptative of fix:
+	      The actual list of id of matched elements seems to be the n last value of the choice list.
+	    */
+	    int input_vertex;
+	    for (int i=0;i<size;i++){
+	      input_vertex = Lat(L,nbChoices-size+i);
+	      sequence.push_back(MatchRecord(input_vertex,reference_vertex));
+	    }
+	    // question : is input_vertex to continue the fist or the last of the list. I choose the first
+	    input_vertex = Lat(L,nbChoices-size); 
+	    ForestList(input_vertex,reference_vertex,T1,T2,sequence);
+	  }
+	  break;
+	case 5: 
+	  {
+	    int size = Lat(L,1);
+	    int nbChoices = L->size();
+	    /*
+	      Fred temptative of fix:
+	      The actual list of id of matched elements seems to be the n last value of the choice list.
+	    */
+	    int reference_vertex;
+	    for (int i=0;i<size;i++){
+	      reference_vertex = Lat(L,nbChoices-size+i);
+	      sequence.push_back(MatchRecord(input_vertex,reference_vertex));
+	    }
+	    // question : is reference_vertex to continue the fist or the last of the list. I choose the first
+	    reference_vertex = Lat(L,nbChoices-size); 
+	    ForestList(input_vertex,reference_vertex,T1,T2,sequence);
+	  }
+	  break;
+	default : break;
 	}
+    }
 }
 
 void ChoiceTable::ForestList(int input_vertex,int reference_vertex,TreeGraphPtr T1, TreeGraphPtr T2, MatchRecordList& sequence)
 {
-	ChoiceList* L=getList(input_vertex,reference_vertex);
-	int forest_choice=Lat(L,2);
-
-	switch(forest_choice)
-	{
-		case 1: ForestList(Lat(L,3),reference_vertex,T1,T2,sequence);break;
-		case 2: ForestList(input_vertex,Lat(L,3),T1,T2,sequence);break;
-		case 3: 
-		{
-			for (int i=0;i<T1->getNbChild(input_vertex);i++)
-			{
-				int i_node=T1->child(input_vertex,i);
-				int r_node=Lat(L,3+i);
-				if (r_node!=-1) TreeList(i_node,r_node,T1,T2,sequence);
-			}
-		}
-		break;
-		default : break;
-	}
+  ChoiceList* L=getList(input_vertex,reference_vertex);
+  int forest_choice=Lat(L,2);
+  
+  switch(forest_choice)
+    {
+    case 1: ForestList(Lat(L,3),reference_vertex,T1,T2,sequence);break;
+    case 2: ForestList(input_vertex,Lat(L,3),T1,T2,sequence);break;
+    case 3: 
+      {
+	for (int i=0;i<T1->getNbChild(input_vertex);i++)
+	  {
+	    int i_node=T1->child(input_vertex,i);
+	    int r_node=Lat(L,3+i);
+	    if (r_node!=-1) TreeList(i_node,r_node,T1,T2,sequence);
+	  }
+      }
+      break;
+    default : break;
+    }
 }
 
 #include <iostream>
@@ -218,23 +218,23 @@ void bin_write(ofstream& stream, const A& value){ stream.write((const char*)&val
 void ChoiceTable::dump(const std::string& fname) const
 {
 
-	std::ofstream stream(fname.c_str(),std::ios::out | std::ios::binary);
-	if (stream) {
-		bin_write(stream,1.0f); // version
-		bin_write(stream,_i_size); // sizes
-		bin_write(stream,_r_size);
-		for (ChoiceListArray::const_iterator itcr = _data.begin(); itcr != _data.end(); ++itcr){
-			for (ChoiceListVector::const_iterator itcc = itcr->begin(); itcc != itcr->end(); ++itcc){
-				// size of a record
-				bin_write(stream,itcc->size());
-				for (ChoiceList::const_iterator itc = itcc->begin(); itc != itcc->end(); ++itc){
-					// values of a record
-					bin_write(stream,*itc);
-				}
-			}
-		}
-
+  std::ofstream stream(fname.c_str(),std::ios::out | std::ios::binary);
+  if (stream) {
+    bin_write(stream,1.0f); // version
+    bin_write(stream,_i_size); // sizes
+    bin_write(stream,_r_size);
+    for (ChoiceListArray::const_iterator itcr = _data.begin(); itcr != _data.end(); ++itcr){
+      for (ChoiceListVector::const_iterator itcc = itcr->begin(); itcc != itcr->end(); ++itcc){
+	// size of a record
+	bin_write(stream,itcc->size());
+	for (ChoiceList::const_iterator itc = itcc->begin(); itc != itcc->end(); ++itc){
+	  // values of a record
+	  bin_write(stream,*itc);
 	}
+      }
+    }
+
+  }
 }
 
 template<class A>
@@ -242,28 +242,28 @@ void bin_read(ifstream& stream, A& value){ stream.read((char*)&value,sizeof(A));
 
 ChoiceTable ChoiceTable::load(const std::string& fname)
 {
-	std::ifstream stream(fname.c_str(),std::ios::in | std::ios::binary);
-	if (stream) {
-		float version;
-		bin_read(stream,version); // version
-		if (version != 1.0) { printf("cannot read. Wrong version nb.\n"); return ChoiceTable(0,0); }
-		int i_size, r_size;
-		bin_read(stream,i_size); // sizes
-		bin_read(stream,r_size);
-		ChoiceTable result(i_size,r_size);
-		for (ChoiceListArray::iterator itcr = result._data.begin(); itcr != result._data.end(); ++itcr){
-			for (ChoiceListVector::iterator itcc = itcr->begin(); itcc != itcr->end(); ++itcc){
-				size_t sizerecord;
-				// read size of a record
-				bin_read(stream,sizerecord);
-				itcc->resize(sizerecord);
-				for (ChoiceList::iterator itc = itcc->begin(); itc != itcc->end(); ++itc){
-					// read values of a record
-					bin_read(stream,*itc);
-				}
-			}
-		}
-		return result;
+  std::ifstream stream(fname.c_str(),std::ios::in | std::ios::binary);
+  if (stream) {
+    float version;
+    bin_read(stream,version); // version
+    if (version != 1.0) { printf("cannot read. Wrong version nb.\n"); return ChoiceTable(0,0); }
+    int i_size, r_size;
+    bin_read(stream,i_size); // sizes
+    bin_read(stream,r_size);
+    ChoiceTable result(i_size,r_size);
+    for (ChoiceListArray::iterator itcr = result._data.begin(); itcr != result._data.end(); ++itcr){
+      for (ChoiceListVector::iterator itcc = itcr->begin(); itcc != itcr->end(); ++itcc){
+	size_t sizerecord;
+	// read size of a record
+	bin_read(stream,sizerecord);
+	itcc->resize(sizerecord);
+	for (ChoiceList::iterator itc = itcc->begin(); itc != itcc->end(); ++itc){
+	  // read values of a record
+	  bin_read(stream,*itc);
 	}
-	return ChoiceTable(0,0);
+      }
+    }
+    return result;
+  }
+  return ChoiceTable(0,0);
 }

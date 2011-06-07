@@ -46,7 +46,7 @@
 /* -----------------------------------------------------------------*/
 
 TableEdgeCost::TableEdgeCost(MatchingDistanceTable* mdtable):
-	MatchEdgeCost(), _mdtable(mdtable) {}
+  MatchEdgeCost(), _mdtable(mdtable) {}
 
 
 // -------------------------------------------------
@@ -57,26 +57,26 @@ TableEdgeCost::TableEdgeCost(MatchingDistanceTable* mdtable):
 
 DistanceType TableEdgeCost::edgeCost(int input_vertex,int reference_vertex)
 {
-   assert (_mdtable != NULL);
-   if (_mdtable->getType()==STD){
-      //DistanceVectorTable& _treeDistances = ((StdMatchingDistanceTable*)&_mdtable)->getDistanceTable();
-      DistanceVectorTable& _treeDistances = _mdtable->getDistanceTable();
+  assert (_mdtable != NULL);
+  if (_mdtable->getType()==STD){
+    //DistanceVectorTable& _treeDistances = ((StdMatchingDistanceTable*)&_mdtable)->getDistanceTable();
+    DistanceVectorTable& _treeDistances = _mdtable->getDistanceTable();
 
-	  if (input_vertex==-1)      { input_vertex = _treeDistances.size()-1; }
-	  if (reference_vertex==-1)  { reference_vertex = (_treeDistances.at(input_vertex)).size()-1; }
+    if (input_vertex==-1)      { input_vertex = _treeDistances.size()-1; }
+    if (reference_vertex==-1)  { reference_vertex = (_treeDistances.at(input_vertex)).size()-1; }
 
-      return _treeDistances.at(input_vertex)[reference_vertex];
+    return _treeDistances.at(input_vertex)[reference_vertex];
   }
   else{
-      //DistanceTable& _treeDTable = ((CompactMatchingDistanceTable*)&_mdtable)->getTreeDistanceTable();
-      //    cerr<<input_vertex<<" - "<<reference_vertex<<endl;
-      DistanceTable& _treeDTable = _mdtable->getTreeDistanceTable();
-      //cerr<<_treeDTable->getDistance(input_vertex,reference_vertex)<<endl;
+    //DistanceTable& _treeDTable = ((CompactMatchingDistanceTable*)&_mdtable)->getTreeDistanceTable();
+    //    cerr<<input_vertex<<" - "<<reference_vertex<<endl;
+    DistanceTable& _treeDTable = _mdtable->getTreeDistanceTable();
+    //cerr<<_treeDTable->getDistance(input_vertex,reference_vertex)<<endl;
 
-      if (input_vertex==-1) { input_vertex = _treeDTable.getSimulatedSize()-1; }
-      if (reference_vertex==-1) { reference_vertex = _treeDTable.getColumnSize()-1; }
+    if (input_vertex==-1) { input_vertex = _treeDTable.getSimulatedSize()-1; }
+    if (reference_vertex==-1) { reference_vertex = _treeDTable.getColumnSize()-1; }
 
-      return _treeDTable.getDistance(input_vertex,reference_vertex);
+    return _treeDTable.getDistance(input_vertex,reference_vertex);
   }
 
 }
@@ -84,27 +84,21 @@ DistanceType TableEdgeCost::edgeCost(int input_vertex,int reference_vertex)
 /* -----------------------------------------------------------------*/
 
 MatchPath::MatchPath():
-	_inputList(0), _referenceList(0)  {} 
+  _inputList(0), _referenceList(0)  {} 
 
 MatchPath::MatchPath(const NodeList& input_list,const NodeList& reference_list):
-	_inputList(0), _referenceList(0) {
+  _inputList(0), _referenceList(0) {
   make(input_list,reference_list);
   int deg_max = I_MAX(input_list.size(),reference_list.size());
   flow.resize(deg_max*deg_max+3*deg_max);
   cost.resize(2*deg_max+3);
 }
 
-void MatchPath::make2(NodeList& input_list,NodeList& reference_list){
-  this->make(input_list,reference_list);
-  int deg_max = I_MAX(input_list.size(),reference_list.size());
-  flow.resize(deg_max*deg_max+3*deg_max);
-  cost.resize(2*deg_max+3);
-}
 
 void MatchPath::link(int deg_max,MatchingDistanceTable* mdtable)
 {
   _edgecostEvaluator = MatchEdgeCostPtr(new TableEdgeCost(mdtable));
-//  _mdtable=mdtable;
+  //  _mdtable=mdtable;
   flow.resize(deg_max*deg_max+3*deg_max);
   cost.resize(2*deg_max+3);
 }
@@ -112,62 +106,62 @@ void MatchPath::link(int deg_max,MatchingDistanceTable* mdtable)
 
 
 
-  // ---------------------------------------------------------
-  // On initialise le graphe de flot necessaire a l'algorithme
-  // d'alignement restreint.
-  // ---------------------------------------------------------
+// ---------------------------------------------------------
+// On initialise le graphe de flot necessaire a l'algorithme
+// d'alignement restreint.
+// ---------------------------------------------------------
 		
 void MatchPath::make(const NodeList& input_list,const NodeList& reference_list)
 {
-	if(_inputList) delete _inputList;
-	_inputList= new NodeList(input_list);
-	if(_referenceList) delete _referenceList;
-	_referenceList=new NodeList(reference_list);
+  if(_inputList) delete _inputList;
+  _inputList= new NodeList(input_list);
+  if(_referenceList) delete _referenceList;
+  _referenceList=new NodeList(reference_list);
 
-	// On recupere le nombre d'arbres des forets initiales et finales
-	int ni=_inputList->size();
-	int nj=_referenceList->size();
+  // On recupere le nombre d'arbres des forets initiales et finales
+  int ni=_inputList->size();
+  int nj=_referenceList->size();
 
-	if (ni!=nj) 
+  if (ni!=nj) 
+    {
+      // Les sommets du graphe de flot sont ni + nj + 3:
+      // Une source et un puit, ni sommets representant les arbres initiaux,
+      // nj sommets representant les arbres finaux plus un noeud representant
+      // l'arbre vide.
+      nbVertex=ni+nj+3;
+      if (ni<nj) 
 	{
-		// Les sommets du graphe de flot sont ni + nj + 3:
-		// Une source et un puit, ni sommets representant les arbres initiaux,
-		// nj sommets representant les arbres finaux plus un noeud representant
-		// l'arbre vide.
-		nbVertex=ni+nj+3;
-		if (ni<nj) 
-		{
-			// Si ni<nj, le noeud representant l'arbre vide est du cote des noeuds 
-			// initiaux donc le nombre d'arc est:
-			//    ni entre la source et les init,
-			// +  ni*nj entre les init et les ref,
-			// +  nj entre les ref et le puits,
-			// +  1 entre la source et le vide,
-			// +  nj entre le vide et les ref. 
-			// d'ou nbEdge = ni+nj*ni+nj+nj+1 = ni + ni*nj + 2*nj +1 !!!!!
+	  // Si ni<nj, le noeud representant l'arbre vide est du cote des noeuds 
+	  // initiaux donc le nombre d'arc est:
+	  //    ni entre la source et les init,
+	  // +  ni*nj entre les init et les ref,
+	  // +  nj entre les ref et le puits,
+	  // +  1 entre la source et le vide,
+	  // +  nj entre le vide et les ref. 
+	  // d'ou nbEdge = ni+nj*ni+nj+nj+1 = ni + ni*nj + 2*nj +1 !!!!!
 
-			nbEdge=ni+ni*nj+2*nj;
-		}
-		else
-		{
-			nbEdge=2*ni+ni*nj+nj;
-		}
-
+	  nbEdge=ni+ni*nj+2*nj;
 	}
-	else
+      else
 	{
-		nbVertex=ni+nj+2;
-		nbEdge=(ni+(ni*nj)+nj);
-		// #ifdef __GNUC__
-		// #warning !!! Big hack de Fred pour faire marcher TreeMatching. A revoir
-		// #endif
-		//		if(ni == 1 && nj ==1)++nbEdge;
+	  nbEdge=2*ni+ni*nj+nj;
 	}
 
-	// On initialise le flot et le cout a 0
+    }
+  else
+    {
+      nbVertex=ni+nj+2;
+      nbEdge=(ni+(ni*nj)+nj);
+      // #ifdef __GNUC__
+      // #warning !!! Big hack de Fred pour faire marcher TreeMatching. A revoir
+      // #endif
+      //		if(ni == 1 && nj ==1)++nbEdge;
+    }
 
-	flow = CapacityVector(flow.size(),0);
-	cost = CostVector(cost.size(),0.0);
+  // On initialise le flot et le cout a 0
+
+  flow = CapacityVector(flow.size(),0);
+  cost = CostVector(cost.size(),0.0);
 }
 
 
@@ -178,8 +172,8 @@ void MatchPath::make(const NodeList& input_list,const NodeList& reference_list)
 // -----------
 MatchPath::~MatchPath()
 {
-      delete _inputList;
-      delete _referenceList;
+  delete _inputList;
+  delete _referenceList;
 }
 
 // ----------------------------------------
@@ -215,7 +209,7 @@ int MatchPath::capacity(int flow_edge)
   if ((ni>nj)&&(flow_edge==(2*ni+ni*nj))) { return(ni-nj); } 
   
   return(1);
- }
+}
 
 
 // ---------------------------------------------
@@ -250,7 +244,7 @@ bool MatchPath::direct(int residual_edge)
 // -----------------------------------------
 bool MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 {
-// On numerote les sommets
+  // On numerote les sommets
   int source=0;
   int sink=nbVertex-1;
   int current_out_vertex;
@@ -259,7 +253,7 @@ bool MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
   // On utilise un tas d'ordres 2+m/n
   Heap path_heap(2.0+((float) nbEdge)/((float) nbVertex));
 
-// Le sommet courant est la source
+  // Le sommet courant est la source
   int current_vertex=source;
   
   vector<bool> heap_index(nbVertex,0);
@@ -268,7 +262,7 @@ bool MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
   // On initialise la valeur de tous les sommets avec +l'infini
   CostVector distance(nbVertex,MAXDIST);
   
- // sauf la source qui est valuee avec 0
+  // sauf la source qui est valuee avec 0
   distance[0]=MINDIST;
   DistanceType t_dist;
   DistanceType epsilon=1e-8;
@@ -301,10 +295,10 @@ bool MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 	      // On met a jour la valeur du noeud,
 	      distance[current_out_vertex]=tmp_dist;
 	      // et on met le sommet et l'arc dans la liste du chemin. 
-		  assert(VertexOnThePath.size() > current_out_vertex);
+	      assert(VertexOnThePath.size() > current_out_vertex);
 	      VertexOnThePath[current_out_vertex]=current_vertex;
 	      if (EdgeOnThePath.size() <= current_out_vertex)
-			cout<<"Probleme acces memoire"<<endl;
+		cout<<"Probleme acces memoire"<<endl;
 	      assert(EdgeOnThePath.size() > current_out_vertex);
 	      EdgeOnThePath[current_out_vertex]=current_out_edge;
 	      
@@ -391,67 +385,67 @@ bool MatchPath::findPath(VertexVector& VertexOnThePath,EdgeList& EdgeOnThePath)
 
 DistanceType MatchPath::minCostFlow(VertexVector& map_list)
 {
-	int current_vertex;
-	VertexVector PredOnThePath(nbVertex,-1);
-	EdgeList EdgeOfThePath(nbVertex,-1);
+  int current_vertex;
+  VertexVector PredOnThePath(nbVertex,-1);
+  EdgeList EdgeOfThePath(nbVertex,-1);
 
-	int ni=_inputList->size();
-	int nj=_referenceList->size();
+  int ni=_inputList->size();
+  int nj=_referenceList->size();
 
-	int source=0;
-	int sink=nbVertex-1;
+  int source=0;
+  int sink=nbVertex-1;
 
-	int nb_input=ni;
-	if (ni<nj) { nb_input=ni+1;};
-	// La valeur du flot initialement est de 0
-	DistanceType flow_value=0;
-	// Le flot maximum est le max de ni, nj.
-	DistanceType flow_max=D_MAX(ni,nj);
+  int nb_input=ni;
+  if (ni<nj) { nb_input=ni+1;};
+  // La valeur du flot initialement est de 0
+  DistanceType flow_value=0;
+  // Le flot maximum est le max de ni, nj.
+  DistanceType flow_max=D_MAX(ni,nj);
 
-	bool path = true ;
+  bool path = true ;
 
-	for (int f=1;(f<=flow_max)&&(path);f++)
+  for (int f=1;(f<=flow_max)&&(path);f++)
+    {
+      //On cherche le plus court chemin avec les poids de EDMONS AND KARP"<<endl;
+      path=findPath(PredOnThePath,EdgeOfThePath);
+      current_vertex = sink;
+      // Si on a trouve un chemin, on cree le graphe residuel avec le flot augmentant
+      // on modifie le flot et les arcs ...
+      if (path)
 	{
-		//On cherche le plus court chemin avec les poids de EDMONS AND KARP"<<endl;
-		path=findPath(PredOnThePath,EdgeOfThePath);
-		current_vertex = sink;
-		// Si on a trouve un chemin, on cree le graphe residuel avec le flot augmentant
-		// on modifie le flot et les arcs ...
-		if (path)
+	  do
+	    {
+	      int residual_edge=EdgeOfThePath[current_vertex];
+	      int flow_edge=(int) residual_edge/2;
+	      int pred=PredOnThePath[current_vertex];
+	      flow_value=flow_value+length(residual_edge,pred,current_vertex);
+	      if ((PredOnThePath[current_vertex]<=nb_input)&&(PredOnThePath[current_vertex]!=source))
 		{
-			do
-			{
-				int residual_edge=EdgeOfThePath[current_vertex];
-				int flow_edge=(int) residual_edge/2;
-				int pred=PredOnThePath[current_vertex];
-				flow_value=flow_value+length(residual_edge,pred,current_vertex);
-				if ((PredOnThePath[current_vertex]<=nb_input)&&(PredOnThePath[current_vertex]!=source))
-				{
-					map_list[PredOnThePath[current_vertex]]=current_vertex;
-					map_list[current_vertex]=PredOnThePath[current_vertex];
-				} 
-				// Si l'arc considere est un arc de renversement alors, on diminue le flot de 
-				// une unite sur cet arc,
-				if (reverse(residual_edge))
-				{
-					flow[flow_edge]=flow[flow_edge]-1;
+		  map_list[PredOnThePath[current_vertex]]=current_vertex;
+		  map_list[current_vertex]=PredOnThePath[current_vertex];
+		} 
+	      // Si l'arc considere est un arc de renversement alors, on diminue le flot de 
+	      // une unite sur cet arc,
+	      if (reverse(residual_edge))
+		{
+		  flow[flow_edge]=flow[flow_edge]-1;
 
-					assert(flow[flow_edge]>=0);
-				}
-				// sinon on l'augmente de une unite
-				// en verifiant toujours que le flot reste compatible
-				else
-				{
-					flow[flow_edge]=flow[flow_edge]+1;
-
-					assert(flow[flow_edge]<=capacity(flow_edge));
-				}
-				current_vertex=PredOnThePath[current_vertex];
-			}
-			while(current_vertex!=source);
+		  assert(flow[flow_edge]>=0);
 		}
+	      // sinon on l'augmente de une unite
+	      // en verifiant toujours que le flot reste compatible
+	      else
+		{
+		  flow[flow_edge]=flow[flow_edge]+1;
+
+		  assert(flow[flow_edge]<=capacity(flow_edge));
+		}
+	      current_vertex=PredOnThePath[current_vertex];
+	    }
+	  while(current_vertex!=source);
 	}
-	return(flow_value);	
+    }
+  return(flow_value);	
 }
 
 
@@ -464,7 +458,7 @@ DistanceType MatchPath::length(int residual_edge,int vertex1,int vertex2)
   int flow_edge=(int) residual_edge/2;
   int source=0;
   int sink=nbVertex-1;
-
+  
   
   if ((direct(residual_edge))&&(saturated(flow_edge))) 	{return(2*MAXDIST);};
   if ((reverse(residual_edge))&&(empty(flow_edge))) 	{return(2*MAXDIST);};
@@ -553,7 +547,7 @@ int MatchPath::who(int vertex)
 	{
 	  NodeList::iterator begin;
 	  begin = _referenceList->begin();
-// 	  for (int i=0;i<vertex-ni-2-1;i++)
+	  // 	  for (int i=0;i<vertex-ni-2-1;i++)
 	  for (int i=empty+1;i<vertex;i++)
 	    begin++;
 	  return(*begin);
@@ -571,21 +565,21 @@ int MatchPath::who(int vertex)
 int MatchPath::nbOut(int n)
 {
 
-	int ni=_inputList->size();
-	int nj=_referenceList->size();
-	if (ni<nj)  ni++;
-	if (ni>nj)  nj++;
-	if (n==0)  return(ni); 
-	else
+  int ni=_inputList->size();
+  int nj=_referenceList->size();
+  if (ni<nj)  ni++;
+  if (ni>nj)  nj++;
+  if (n==0)  return(ni); 
+  else
+    {
+      if (n <= ni) 	return(nj+1);
+      else
 	{
-		if (n <= ni) 	return(nj+1);
-		else
-		{
-			if (n<=ni+nj)  return(ni+1);
-			else           return(nj);
-		}
-		//  if (n==ni+nj+1) {return(nj);}
+	  if (n<=ni+nj)  return(ni+1);
+	  else           return(nj);
 	}
+      //  if (n==ni+nj+1) {return(nj);}
+    }
 
 }
 

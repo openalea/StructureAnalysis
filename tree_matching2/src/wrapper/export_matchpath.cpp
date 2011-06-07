@@ -71,11 +71,17 @@ public:
 
   boost::python::object py_minCostFlow(){
     VertexVector map_list;
+    map_list.resize(this->nbVertex,-1);
     DistanceType dist = this->minCostFlow(map_list);
     boost::python::list result;
     VertexVector::iterator it = map_list.begin();
-    for (it = map_list.begin();it!=map_list.end();it++)
-      result.append(*it);
+    VertexVector::iterator begin = map_list.begin();
+    VertexVector::iterator end = map_list.end();
+    begin++;end--;
+    int i = 1;
+    for (it = begin;it!=end;it++, i++){
+      result.append(make_tuple(this->who(i),who(*it)));
+    }
     return make_tuple(dist,result);
   }
 };
@@ -88,7 +94,7 @@ void export_MatchPath() {
 
 	class_<PyMatchPath,PyMatchPathPtr,boost::noncopyable>
 	  ("MatchPath", init<boost::python::object,boost::python::object>("Constructor of MatchPath"))
-	  .def( "minCostFlow", &PyMatchPath::py_minCostFlow,"Get the list of mapped vertices")
+	  .def( "bipartiteMatching", &PyMatchPath::py_minCostFlow,"Get the list of mapped vertices")
 	  .def("edgeCost", &MatchPath::edgeCost, &PyMatchPath::default_edgeCost)
 	;
 
