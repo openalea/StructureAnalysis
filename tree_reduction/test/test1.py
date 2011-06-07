@@ -1,11 +1,11 @@
 # -*- coding: cp1252 -*-
-"""
+
 from amlPy import *
 
 from vplants.self_similarity.graph import *
 from vplants.self_similarity.cst import *
 from vplants.self_similarity.mtg2graph import *
-"""
+
 from vplants.tree_reduction.graph import *
 from vplants.tree_reduction.functions import *
 from openalea.container.graph import *
@@ -153,7 +153,59 @@ def test1():
     g = from_edges(root, edges, edges_weight)
     assert g.nb_vertices() == 17
     assert g.nb_edges() == 29
+    return g
+"""
+
+"""    Arbre1 séquence 
+def test1():
+    edges=[(1,2),(2,3),(3,4)]
+    edges_weight={0:1,1:1,2:3}
+    root = 1
+    g = from_edges(root, edges, edges_weight)
+    assert g.nb_vertices() == 4
+    assert g.nb_edges() == 3
     return g"""
+
+"""    Arbre2 séquence 
+def test1():
+    edges=[(1,2),(2,3),(2,4),(3,4),(4,5)]
+    edges_weight={0:1,1:1,2:1,3:1,4:3}
+    root = 1
+    g = from_edges(root, edges, edges_weight)
+    assert g.nb_vertices() == 5
+    assert g.nb_edges() == 5
+    return g
+"""
+"""    Arbre3 séquence 
+def test1():
+    edges=[(1,2),(2,3),(2,5),(3,4),(3,5),(4,5),(5,6)]
+    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:3}
+    root = 1
+    g = from_edges(root, edges, edges_weight)
+    assert g.nb_vertices() == 6
+    assert g.nb_edges() == 7
+    return g
+"""
+"""    Arbre4 séquence 
+def test1():
+    edges=[(1,2),(2,3),(2,6),(3,4),(3,6),(4,5),(4,6),(5,6),(6,7)]
+    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:3}
+    root = 1
+    g = from_edges(root, edges, edges_weight)
+    assert g.nb_vertices() == 7
+    assert g.nb_edges() == 9
+    return g
+"""
+"""    Arbre augmenté séquence """
+def test1():
+    edges=[(1,2),(1,5),(1,9),(1,14),(2,3),(3,4),(4,20),(5,6),(6,7),(6,8),(7,8),(8,20),(9,10),(10,11),(10,13),(11,12),(11,13),(12,13),(13,20),(14,15),(15,16),(15,19),(16,17),(16,19),(17,18),(17,19),(18,19),(19,20)]
+    edges_weight={0:1,1:1,2:1,3:1,4:1,5:1,6:3,7:1,8:1,9:1,10:1,11:3,12:1,13:1,14:1,15:1,16:1,17:1,18:3,19:1,20:1,21:1,22:1,23:1,24:1,25:1,26:1,27:3}
+    root = 1
+    g = from_edges(root, edges, edges_weight)
+    assert g.nb_vertices() == 20
+    assert g.nb_edges() == 28
+    return g
+
 
 def signat_vert_comp(g):
     """
@@ -479,15 +531,16 @@ def quotient_graph(g,list_node,list_edge,G_node,G_edge,nbr_edge,parameters,param
 
     for i in range(len(setPg)):
         """calcul du graphe quotient"""
-        L=treat_long_path(setPg[i],list_node,list_edge,G_node,G_edge,nbr_edge,parameters,parameters1,parameters2)
-        list_node=L[0]
-        list_edge=L[1]
-        G_node=L[2]
-        G_edge=L[3]
-        nbr_edge=L[4]
-        parameters=L[5]
-        parameters1=L[6]
- 
+        if (len(setPg[i])>0):
+            L=treat_long_path(setPg[i],list_node,list_edge,G_node,G_edge,nbr_edge,parameters,parameters1,parameters2)
+            list_node=L[0]
+            list_edge=L[1]
+            G_node=L[2]
+            G_edge=L[3]
+            nbr_edge=L[4]
+            parameters=L[5]
+            parameters1=L[6]
+
     return list_node,list_edge,G_node,G_edge,nbr_edge,parameters,parameters1,parameters2
 
 def treat_long_path(glist,list_node,list_edge,G_node,G_edge,nbr_edge,parameters,parameters1,parameters2):
@@ -495,6 +548,7 @@ def treat_long_path(glist,list_node,list_edge,G_node,G_edge,nbr_edge,parameters,
     glist=[[x1,x2,...xk],[xk,xk+1,...,x2k-1],[x2k-1,...,x3k-2],...,[xend,...x2end-1]]
     et effectue la réduction adéquate de G"""
     """modifier le noeud associé a xk par la valeur [x1,x2end-1]"""
+    print glist
     k=len(glist[0])-2
     string1=G_node[glist[0][k]][0]
     string2=string.replace(string1, glist[0][k+1], glist[0][0])
