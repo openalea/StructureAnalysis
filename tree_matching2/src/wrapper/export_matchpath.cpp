@@ -42,8 +42,10 @@ class PyMatchPath : public MatchPath, public bp::wrapper<MatchPath>
 public:
 
 	//Constructor
-  PyMatchPath(boost::python::object in_list,  boost::python::object ref_list) :  MatchPath( extract_vec<int,boost::python::extract,std::vector<int> >(in_list)(),extract_vec<int,boost::python::extract,std::vector<int> >(ref_list)()), bp::wrapper<MatchPath>() {
-}
+  PyMatchPath(boost::python::object in_list,  boost::python::object ref_list) :  
+	  MatchPath( extract_vec<int>(in_list)(),extract_vec<int>(ref_list)()), 
+	  bp::wrapper<MatchPath>() 
+	  {      }
 
   virtual ~PyMatchPath() {}
 
@@ -69,12 +71,12 @@ public:
 
   boost::python::object py_minCostFlow(){
     VertexVector map_list;
-    this->minCostFlow(map_list);
+    DistanceType dist = this->minCostFlow(map_list);
     boost::python::list result;
     VertexVector::iterator it = map_list.begin();
     for (it = map_list.begin();it!=map_list.end();it++)
       result.append(*it);
-    return result;
+    return make_tuple(dist,result);
   }
 };
 
@@ -86,7 +88,6 @@ void export_MatchPath() {
 
 	class_<PyMatchPath,PyMatchPathPtr,boost::noncopyable>
 	  ("MatchPath", init<boost::python::object,boost::python::object>("Constructor of MatchPath"))
-	  //	  .def( "make", &PyMatchPath::py_make,"Initialize a MatchPath")
 	  .def( "minCostFlow", &PyMatchPath::py_minCostFlow,"Get the list of mapped vertices")
 	  .def("edgeCost", &MatchPath::edgeCost, &PyMatchPath::default_edgeCost)
 	;

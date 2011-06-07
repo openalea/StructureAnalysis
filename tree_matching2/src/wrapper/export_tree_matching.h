@@ -6,4 +6,5 @@ void export_NodeCost();
 void export_Matching();
 void export_ExtMatching();
 void export_MatchPath();
+void export_ChoiceTable();
 #endif

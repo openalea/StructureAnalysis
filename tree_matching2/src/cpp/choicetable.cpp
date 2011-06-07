@@ -264,6 +264,6 @@ ChoiceTable ChoiceTable::load(const std::string& fname)
 			}
 		}
 		return result;
-
 	}
+	return ChoiceTable(0,0);
 }

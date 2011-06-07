@@ -551,10 +551,10 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
     if (path.size()>0){
       dist4 = _distances->getMCost(path,reference_vertex)+getDBF(des,reference_vertex)-getDBF(des,EMPTY_TREE);
       for (int i = 0; i<path.size();i++)
-	dist4 -= _distances->getDCost(path[i]);
+			dist4 -= _distances->getDCost(path[i]);
       if (dist4<min){
-	min = dist4;
-	min_path_im = path;
+			min = dist4;
+			min_path_im = path;
       }
     }
   }
@@ -573,10 +573,10 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
     if (path.size()>0){
       dist5 = _distances->getSCost(input_vertex,path)+getDBF(input_vertex,des)-getDBF(EMPTY_TREE,des);
       for (int i = 0; i<path.size();i++)
-	dist5 -= _distances->getICost(path[i]);
+			dist5 -= _distances->getICost(path[i]);
       if (dist5<min){
-	min = dist5;
-	min_path_jm = path;
+			min = dist5;
+			min_path_jm = path;
       }
     }
   }
@@ -595,32 +595,39 @@ DistanceType ExtMatching::distanceBetweenTree(int input_vertex,int reference_ver
   switch (MTC)
     {
     case 1 :{
-      _choices.putFirst(input_vertex,reference_vertex,im);
-      _choices.putLast(input_vertex,reference_vertex,-1);
-    }break;
+		  _choices.putFirst(input_vertex,reference_vertex,im);
+		  _choices.putLast(input_vertex,reference_vertex,-1);
+		}
+		break;
     case 2 :{
-      _choices.putFirst(input_vertex,reference_vertex,jm);
-      _choices.putLast(input_vertex,reference_vertex,M(input_vertex,jm));
-    }break;
+		  _choices.putFirst(input_vertex,reference_vertex,jm);
+		  _choices.putLast(input_vertex,reference_vertex,M(input_vertex,jm));
+		}
+		break;
     case 3 :{
-      _choices.putFirst(input_vertex,reference_vertex,-1);
-      _choices.putLast(input_vertex,reference_vertex,reference_vertex);
-    }break;
+		  _choices.putFirst(input_vertex,reference_vertex,-1);
+		  _choices.putLast(input_vertex,reference_vertex,reference_vertex);
+		}
+		break;
     case 4 :{
-     _choices.putFirst(input_vertex,reference_vertex,min_path_im.size());
-     for (int i=0;i<min_path_im.size();i++){
-		_choices.putLast(input_vertex,reference_vertex,min_path_im[i]);
-     }
-      //  _choices.putLast(input_vertex,reference_vertex,reference_vertex);
-    }break;
+		 _choices.putFirst(input_vertex,reference_vertex,min_path_im.size());
+		 for (int i=0;i<min_path_im.size();i++){
+			_choices.putLast(input_vertex,reference_vertex,min_path_im[i]);
+		 }
+		  //  _choices.putLast(input_vertex,reference_vertex,reference_vertex);
+		}
+		break;
     case 5 :{
-      _choices.putFirst(input_vertex,reference_vertex,min_path_jm.size());
-      for (int i=0;i<min_path_jm.size();i++){
-		_choices.putLast(input_vertex,reference_vertex,min_path_jm[i]);
-      //     _choices.putLast(input_vertex,reference_vertex,reference_vertex);
-      }
-    }break;
-    default :   assert(0);break;
+		  _choices.putFirst(input_vertex,reference_vertex,min_path_jm.size());
+		  for (int i=0;i<min_path_jm.size();i++){
+			_choices.putLast(input_vertex,reference_vertex,min_path_jm[i]);
+		  //     _choices.putLast(input_vertex,reference_vertex,reference_vertex);
+		  }
+		}
+		break;
+    default :   
+		assert(0);
+		break;
     }
   _choices.putFirst(input_vertex,reference_vertex,MTC);
   _distances->putDBT(input_vertex,reference_vertex,MIN);

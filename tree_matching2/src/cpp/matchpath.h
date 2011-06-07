@@ -56,14 +56,61 @@ typedef std::vector<int> IntVector;
 typedef std::vector<int> VertexVector;
 typedef std::vector<int> EdgeList;
 
+
+/* -----------------------------------------------------------------*/
+
+// An evaluator of edge cost for the MatchPath algorithm
+class TREEMATCH_API MatchEdgeCost
+{
+public :
+
+  /** Default constructor. */
+  MatchEdgeCost(){}
+
+  /** Destructor. */
+  virtual ~MatchEdgeCost() { }
+
+  // should be redefined
+  virtual DistanceType edgeCost(int , int ) = 0;
+};
+
+// A smart pointer on a MatchEdgeCost
+typedef boost::shared_ptr<MatchEdgeCost> MatchEdgeCostPtr;
+
+/* -----------------------------------------------------------------*/
+
+// EdgeCost evaluator that get cost from a table
+class TREEMATCH_API TableEdgeCost : public MatchEdgeCost
+{
+public :
+
+  /** Default constructor. */
+  TableEdgeCost(MatchingDistanceTable* mdtable = NULL);
+
+  /** Destructor. */
+  virtual ~TableEdgeCost() { }
+
+  // redefined to lookup in the table
+  virtual DistanceType edgeCost(int , int );
+
+protected:
+	// The distance table stored as a matrix
+    MatchingDistanceTable*     _mdtable;  
+};
+
+
+/* -----------------------------------------------------------------*/
+
+
 class TREEMATCH_API MatchPath
 {
   public :
     //Constructor
-    MatchPath(){};
+    MatchPath();
     MatchPath(const NodeList& ,const NodeList& );
     //Destructor
-    ~MatchPath();
+    virtual ~MatchPath();
+
     // Cree un graphe de flot a partir de deux listes de noeuds,
     // une contenant les noeuds initiaux et l'autre les noeuds de reference
     void make(const NodeList& ,const NodeList& );
@@ -90,11 +137,16 @@ class TREEMATCH_API MatchPath
     int nbOut(int);
     int who(int );
     int capacity(int);
-    DistanceType edgeCost(int , int );
+
+	// can be redefined
+    virtual DistanceType edgeCost(int a, int b)
+	{ assert(_edgecostEvaluator);
+	  return _edgecostEvaluator->edgeCost(a,b); }
+	  
  
 
   protected :
-    MatchingDistanceTable*     _mdtable;  //
+	MatchEdgeCostPtr   _edgecostEvaluator;
     NodeList*          _inputList;     //Liste des noeuds de la foret initiale
     NodeList*          _referenceList; //Liste des noeuds de la foret de reference
     CapacityVector     flow; // Vecteur flot
