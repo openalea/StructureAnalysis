@@ -1,6 +1,5 @@
-from openalea.plantgl.all import *
 from openalea.tree_matching import *
-from vplants.pointreconstruction.util import *
+
 
 class MyNodeCost (NodeCost):
   def __init__(self):

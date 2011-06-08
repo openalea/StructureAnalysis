@@ -1,4 +1,3 @@
-from openalea.plantgl.all import *
 from openalea.tree_matching import *
 
 
