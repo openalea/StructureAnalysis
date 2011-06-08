@@ -61,7 +61,8 @@ boost::python::object py_getList(Matching * m, int i_tree,int r_tree)
 void export_Matching() {
 
   class_<Matching>
-    ("Matching", init<TreeGraphPtr, TreeGraphPtr, NodeCostPtr, int>("Matching(TreeGraph, TreeGraph, NodeCost, MDTableType)"))
+    ("Matching", init<TreeGraphPtr, TreeGraphPtr, NodeCostPtr, int>("Matching(TreeGraph tree1, TreeGraph tree2, NodeCost nodecost, MDTableType tabletype = 0)",
+     (bp::arg("tree1"),bp::arg("tree2"),bp::arg("nodecost"),bp::arg("tabletype")=STD)))
     .def( "match", &Matching::match,"Comparison of tree graph")
     .def( "__call__", &Matching::match,"Comparison of tree graph")
     .def( "getDBT", &Matching::getDBT,"Get Distance Between Trees",(bp::arg("index1"))=0,(bp::arg("index2")=0))
