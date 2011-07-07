@@ -55,7 +55,7 @@ namespace Stat_trees
 */
 
 class HiddenMarkovTreeData;
-class HiddenMarkovOutTree;
+class HiddenMarkovIndOutTree;
 
 /****************************************************************
  *
@@ -100,8 +100,10 @@ class NonparametricTreeProcess : public NonparametricProcess
    // and that of the distribution of characteristic quantities
 
    friend class HiddenMarkovTree;
-   friend class HiddenMarkovOutTree;
+   friend class HiddenMarkovIndOutTree;
    friend class HiddenMarkovTreeData;
+   friend class MarkovOutTree;
+   friend class MarkovOutTreeData;
 
    // friend NonparametricTreeProcess* occupancy_parsing(StatError &error , ifstream &in_file ,
    //                                                    int &line , const Chain &chain ,
@@ -236,7 +238,7 @@ class HiddenMarkovTree : public StatInterface , protected Chain
 {  // hidden Markov tree
 
    friend class HiddenMarkovTreeData;
-   friend class HiddenMarkovOutTree;
+   friend class HiddenMarkovIndOutTree;
 
    friend HiddenMarkovTree* hidden_markov_tree_ascii_read(StatError& error,
                                                           const char * path,
@@ -376,23 +378,24 @@ protected :
                                       double_array_3d marginal_prob,
                                       double_array_3d upward_parent_prob,
                                       double_array_3d downward_prob,
+                                      double_array_4d downward_pair_prob,
                                       double_array_3d state_entropy,
                                       double_array_3d conditional_entropy,
                                       double_array_4d conditional_prob,
-                                      double*& partial_entropy,
+                                      double_array_2d& partial_entropy,
                                       int entropy_algo= UPWARD) const;
 
    /** Compute the entropy of partial state processes by a downward algorithm*/
    virtual double downward_partial_entropy_computation(const HiddenMarkovTreeData& trees,
-                                                       int t,
-                                                       double_array_3d output_cond_prob,
+                                                       int t, double_array_3d output_cond_prob,
                                                        double_array_3d marginal_prob,
                                                        double_array_3d upward_parent_prob,
                                                        double_array_3d downward_prob,
+                                                       double_array_4d downward_pair_prob,
                                                        double_array_3d state_entropy,
                                                        double_array_3d conditional_entropy,
                                                        double_array_4d conditional_prob,
-                                                       double*& partial_entropy) const;
+                                                       double_array_2d& partial_entropy) const;
 
    /** Compute the entropy of partial state processes by an upward algorithm*/
    virtual double upward_partial_entropy_computation(const HiddenMarkovTreeData& trees,
@@ -415,25 +418,25 @@ protected :
                                         int entropy_algo= UPWARD) const;
 
    /** Compute the conditional entropy by an upward algorithm*/
-   virtual void upward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
-                                                       double_array_3d marginal_prob,
-                                                       double_array_3d upward_prob,
-                                                       double_array_3d upward_parent_prob,
-                                                       double_array_3d downward_prob,
-                                                       double_array_2d& conditional_entropy,
-                                                       int index= I_DEFAULT) const;
-
-   /** Compute the conditional entropy by a downward algorithm*/
-   virtual void downward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
+   virtual double upward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
                                                          double_array_3d marginal_prob,
-                                                         double_array_3d downward_prob,
                                                          double_array_3d upward_prob,
                                                          double_array_3d upward_parent_prob,
-                                                         double_array_2d& expected_conditional_entropy,
-                                                         double_array_3d& conditional_entropy,
-                                                         double_array_4d& conditional_prob,
-                                                         double_array_3d& state_entropy,
+                                                         double_array_3d downward_prob,
+                                                         double_array_2d& conditional_entropy,
                                                          int index= I_DEFAULT) const;
+
+   /** Compute the conditional entropy by a downward algorithm*/
+   virtual double downward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
+                                                           double_array_3d marginal_prob,
+                                                           double_array_3d downward_prob,
+                                                           double_array_3d upward_prob,
+                                                           double_array_3d upward_parent_prob,
+                                                           double_array_2d& expected_conditional_entropy,
+                                                           double_array_3d& conditional_entropy,
+                                                           double_array_4d& conditional_prob,
+                                                           double_array_3d& state_entropy,
+                                                           int index= I_DEFAULT) const;
 
    /**Compute the smoothed probabilities and return the likelihood */
    virtual double smoothed_probabilities(const HiddenMarkovTreeData& trees,
@@ -611,7 +614,7 @@ class HiddenMarkovTreeData : public Trees
 
    // friend classes
    friend class HiddenMarkovTree;
-   friend class HiddenMarkovOutTree;
+   friend class HiddenMarkovIndOutTree;
    // Above lines may require to be added to Typed_edge_trees
 
    friend std::ostream& operator<<(std::ostream &os, const HiddenMarkovTreeData& trees);
@@ -759,9 +762,9 @@ public :
    // model identification
 
    /** Estimate a Hidden Markov Out Tree from an initial model and the data in \e self */
-   HiddenMarkovOutTree* hidden_markov_out_tree_estimation(StatError& error,
+   HiddenMarkovIndOutTree* hidden_markov_ind_out_tree_estimation(StatError& error,
                                                           std::ostream& os,
-                                                          const HiddenMarkovOutTree& ihmarkov,
+                                                          const HiddenMarkovIndOutTree& ihmarkov,
                                                           bool counting_flag= true,
                                                           int state_trees= VITERBI,
                                                           int algorithm= FORWARD_BACKWARD,
@@ -769,9 +772,9 @@ public :
                                                           int nb_iter= I_DEFAULT,
                                                           bool force_param= false) const;
 
-/*   HiddenMarkovOutTree* hidden_markov_out_tree_estimation2(StatError& error,
+/*   HiddenMarkovIndOutTree* hidden_markov_ind_out_tree_estimation2(StatError& error,
                                                            std::ostream& os,
-                                                           const HiddenMarkovOutTree& ihmarkov,
+                                                           const HiddenMarkovIndOutTree& ihmarkov,
                                                            bool counting_flag= true,
                                                            int state_trees= VITERBI,
                                                            int algorithm= FORWARD_BACKWARD,
@@ -780,7 +783,7 @@ public :
                                                            bool force_param= false) const;*/
 
    /** Estimate a Hidden Markov Out Tree from the number of states and the data in \e self */
-   HiddenMarkovOutTree* hidden_markov_out_tree_estimation(StatError& error,
+   HiddenMarkovIndOutTree* hidden_markov_ind_out_tree_estimation(StatError& error,
                                                           std::ostream& os,
                                                           char type,
                                                           int nb_state,

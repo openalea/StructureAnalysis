@@ -8,7 +8,7 @@
  *       File author(s): J.-B. Durand (jean-baptiste.durand@imag.fr)
  *
  *       $Source$
- *       $Id: hidden_markov_out_tree.h 2722 2007-02-16 14:17:56Z jbdurand $
+ *       $Id: hidden_markov_ind_out_tree.h 2722 2007-02-16 14:17:56Z jbdurand $
  *
  *       Forum for V-Plants developers:
  *
@@ -34,15 +34,15 @@
  *  ----------------------------------------------------------------------------
  */
 
-#ifndef HIDDEN_MARKOV_OUT_TREE_H
-#define HIDDEN_MARKOV_OUT_TREE_H
+#ifndef HIDDEN_MARKOV_IND_OUT_TREE_H
+#define HIDDEN_MARKOV_IND_OUT_TREE_H
 
 namespace Stat_trees
 {
 
-/*! \file hidden_markov_out_tree.h
+/*! \file hidden_markov_ind_out_tree.h
     \brief Purpose:
-     provide the class "HiddenMarkovOutTree", which corresponds
+     provide the class "HiddenMarkovIndOutTree", which corresponds
      to hidden Markov trees with independent children states,
      given their parent
 */
@@ -53,23 +53,23 @@ namespace Stat_trees
  */
 
 /**
-   \class HiddenMarkovOutTree
+   \class HiddenMarkovIndOutTree
    \brief a hidden Markov out-tree model, with independent
     children states, given their parent
 */
-class HiddenMarkovOutTree : public HiddenMarkovTree
+class HiddenMarkovIndOutTree : public HiddenMarkovTree
 {  // a hidden Markov out-tree model, with independent
    // children states given their parent
 
    friend class HiddenMarkovTreeData;
 
-   friend HiddenMarkovOutTree* hidden_markov_out_tree_ascii_read(StatError& error,
+   friend HiddenMarkovIndOutTree* hidden_markov_ind_out_tree_ascii_read(StatError& error,
                                                                  const char * path,
                                                                  int size,
                                                                  bool counting_flag,
                                                                  double cumul_threshold);
 
-   friend ostream& operator<<(ostream &os, const HiddenMarkovOutTree& markov);
+   friend ostream& operator<<(ostream &os, const HiddenMarkovIndOutTree& markov);
 
 protected :
 
@@ -214,11 +214,18 @@ protected :
                                        int index) const;
 
    /** Compute the marginal entropy */
-   void marginal_entropy_computation(const HiddenMarkovTreeData& trees,
-                                     int t,
-                                     double_array_3d downward_prob,
-                                     double*& marginal_entropy,
-                                     double& max_marginal_entropy) const;
+   double marginal_entropy_computation(const HiddenMarkovTreeData& trees,
+                                       int t, double_array_3d downward_prob,
+                                       double*& marginal_entropy,
+                                       double& max_marginal_entropy) const;
+
+   /** Compute the local contributions to entropy */
+   double local_entropy_computation(const HiddenMarkovTreeData& trees,
+                                    int t, double_array_3d downward_prob,
+                                    double_array_4d downward_pair_prob,
+                                    double_array_4d& conditional_prob,
+                                    double_array_2d& conditional_entropy,
+                                    double_array_2d& partial_conditional_entropy) const;
 
    /** Compute the entropy of partial state processes: partial state subtree
        rooted at each possible node*/
@@ -229,67 +236,139 @@ protected :
                                              double*& partial_entropy) const;
 
    /** Compute the entropy of partial state processes: state subtree
-       pruned at subtrees rooted at each possible node*/
-   double downward_partial_entropy_computation(const HiddenMarkovTreeData& trees,
-                                               int t,
-                                               double_array_3d output_cond_prob,
+       pruned at subtrees rooted at each possible node */
+   double downward_partial_entropy_computation(const HiddenMarkovTreeData& otrees,
+                                               int t, double_array_3d output_cond_prob,
                                                double_array_3d marginal_prob,
                                                double_array_3d upward_parent_prob,
                                                double_array_3d downward_prob,
+                                               double_array_4d downward_pair_prob,
                                                double_array_3d state_entropy,
                                                double_array_3d conditional_entropy,
                                                double_array_4d conditional_prob,
-                                               double*& partial_entropy) const;
+                                               double_array_2d& partial_entropy) const;
+
+   /** Compute the entropy of partial state processes: state subtree
+       pruned at subtrees rooted at each possible node */
+   double downward_partial_entropy_computation(const HiddenMarkovTreeData& otrees,
+                                               int t, double_array_3d output_cond_prob,
+                                               double_array_3d marginal_prob,
+                                               double_array_3d upward_parent_prob,
+                                               double_array_3d downward_prob,
+                                               double_array_4d downward_pair_prob,
+                                               double_array_3d state_entropy,
+                                               double_array_3d conditional_entropy,
+                                               double_array_4d conditional_prob,
+                                               double_array_2d& partial_entropy,
+                                               bool fast_algorithm) const;
+
+   /** Compute the entropy of partial state processes: state subtree
+       pruned at subtrees rooted at each possible node
+       (historical method alternative to fast algorithm) */
+   double alt_downward_partial_entropy_computation(const HiddenMarkovTreeData& otrees,
+                                                   int t, double_array_3d output_cond_prob,
+                                                   double_array_3d marginal_prob,
+                                                   double_array_3d upward_parent_prob,
+                                                   double_array_3d downward_prob,
+                                                   double_array_3d state_entropy,
+                                                   double_array_3d conditional_entropy,
+                                                   double_array_4d conditional_prob,
+                                                   double*& partial_entropy) const;
+
+   /** Compute downward partial and conditional entropies */
+   double downward_conditional_partial_entropy_computation(const HiddenMarkovTreeData& otrees,
+                                                           int t, double_array_3d output_cond_prob,
+                                                           double_array_3d marginal_prob,
+                                                           double_array_3d upward_prob,
+                                                           double_array_3d upward_parent_prob,
+                                                           double_array_3d downward_prob,
+                                                           double_array_4d downward_pair_prob,
+                                                           double_array_2d& partial_entropy,
+                                                           double_array_2d& conditional_entropy,
+                                                           bool fast_algorithm = true) const;
+
+   /** Compute upward partial and conditional entropies */
+   double upward_conditional_partial_entropy_computation(const HiddenMarkovTreeData& otrees,
+                                                         int t, double_array_3d output_cond_prob,
+                                                         double_array_3d marginal_prob,
+                                                         double_array_3d upward_prob,
+                                                         double_array_3d upward_parent_prob,
+                                                         double_array_3d downward_prob,
+                                                         double_array_4d downward_pair_prob,
+                                                         double_array_3d state_entropy,
+                                                         double_array_2d& partial_entropy,
+                                                         double_array_2d& conditional_entropy) const;
+
+   /** Compute partial and conditional entropies */
+   double conditional_partial_entropy_computation(const HiddenMarkovTreeData& otrees,
+                                                         int t, double_array_3d output_cond_prob,
+                                                         double_array_3d marginal_prob,
+                                                         double_array_3d upward_prob,
+                                                         double_array_3d upward_parent_prob,
+                                                         double_array_3d downward_prob,
+                                                         double_array_4d downward_pair_prob,
+                                                         double_array_3d state_entropy,
+                                                         double_array_2d& partial_entropy,
+                                                         double_array_2d& conditional_entropy,
+                                                         int entropy_algo= DOWNWARD) const;
+
+
+   /** Compute the entropy of partial state processes: state subtree
+       pruned at subtrees rooted at each possible node - fast algorithm */
+   double fast_downward_partial_entropy_computation(const HiddenMarkovTreeData& trees,
+                                                    int t, double_array_2d conditional_entropy,
+                                                    double_array_2d partial_conditional_entropy,
+                                                    double_array_2d& partial_entropy) const;
 
    /** Compute the conditional entropy: entropy of each state given
        the children state subtrees*/
-   void upward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
-                                               double_array_3d marginal_prob,
-                                               double_array_3d upward_prob,
-                                               double_array_3d upward_parent_prob,
-                                               double_array_3d downward_prob,
-                                               double_array_2d& conditional_entropy,
-                                               int index= I_DEFAULT) const;
+   double upward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
+                                                 double_array_3d marginal_prob,
+                                                 double_array_3d upward_prob,
+                                                 double_array_3d upward_parent_prob,
+                                                 double_array_3d downward_prob,
+                                                 double_array_2d& conditional_entropy,
+                                                 int index= I_DEFAULT) const;
 
    /** Compute the conditional entropy: entropy of each state given
        all non-descendant states*/
-   void downward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
-                                                 double_array_3d marginal_prob,
-                                                 double_array_3d downward_prob,
-                                                 double_array_3d upward_prob,
-                                                 double_array_3d upward_parent_prob,
-                                                 double_array_2d& expected_conditional_entropy,
-                                                 double_array_3d& conditional_entropy,
-                                                 double_array_4d& conditional_prob,
-                                                 double_array_3d& state_entropy,
-                                                 int index= I_DEFAULT) const;
+   double downward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
+                                                   double_array_3d marginal_prob,
+                                                   double_array_3d downward_prob,
+                                                   double_array_3d upward_prob,
+                                                   double_array_3d upward_parent_prob,
+                                                   double_array_2d& expected_conditional_entropy,
+                                                   double_array_3d& conditional_entropy,
+                                                   double_array_4d& conditional_prob,
+                                                   double_array_3d& state_entropy,
+                                                   int index= I_DEFAULT) const;
 
 public :
 
-   HiddenMarkovOutTree();
+   HiddenMarkovIndOutTree();
    /** Create a Hidden Markov Out Tree from the type of transition probability matrix,
    the number of states, the number of integer and floating observation processes,
    the number of values for each integer process
    and an indicator array for forcing parametric integer processes */
-   HiddenMarkovOutTree(char itype, int inb_state, int inb_ioutput_process,
+   HiddenMarkovIndOutTree(char itype, int inb_state, int inb_ioutput_process,
                        int inb_doutput_process, int* nb_value,
                        bool* force_param= NULL);
-   HiddenMarkovOutTree(const Chain * pchain, int inb_ioutput_process,
+   HiddenMarkovIndOutTree(const Chain * pchain, int inb_ioutput_process,
                        NonparametricProcess** pobservation,
                        int size, bool counting_flag);
-   HiddenMarkovOutTree(const Chain * pchain,
+   HiddenMarkovIndOutTree(const Chain * pchain,
                        int inb_ioutput_process, int inb_doutput_process,
                        NonparametricProcess** nonparametric_observation,
                        DiscreteParametricProcess** iparametric_observation,
                        DiscreteParametricProcess** dparametric_observation,
                        int size, bool counting_flag);
-   HiddenMarkovOutTree(const HiddenMarkovOutTree& markov, bool data_flag= true,
+   HiddenMarkovIndOutTree(const HiddenMarkovIndOutTree& markov, bool data_flag= true,
                        bool characteristic_flag= true);
-   HiddenMarkovOutTree(const HiddenMarkovTree& markov, bool data_flag= true,
+   HiddenMarkovIndOutTree(const HiddenMarkovTree& markov, bool data_flag= true,
                        bool characteristic_flag= true);
-   HiddenMarkovOutTree(const HiddenMarkovOutTree& markov, double self_transition);
-   HiddenMarkovOutTree(const HiddenMarkovOutTree& markov, char manip, int param);
-   virtual ~HiddenMarkovOutTree();
+   HiddenMarkovIndOutTree(const HiddenMarkovIndOutTree& markov, double self_transition);
+   HiddenMarkovIndOutTree(const HiddenMarkovIndOutTree& markov, char manip, int param);
+   virtual ~HiddenMarkovIndOutTree();
 
    /** Return the data part of a HiddenMarkovTree,
        keeping a reference on \e self */
@@ -369,21 +448,75 @@ public :
    double get_upward_step(const HiddenMarkovTreeData& trees, double_array_3d& upward_prob,
                           double_array_3d& upward_parent_prob, double_array_3d& state_entropy,
                           double_array_3d marginal_prob, double_array_3d output_cond_prob,
-                          double& entropy1) const;
+                          double& entropy1, int index= I_DEFAULT) const;
                           // should be const double *** const marginal_prob, etc
    void get_downward_step(const HiddenMarkovTreeData& trees,
                           double_array_3d& downward_prob, double_array_4d& downward_pair_prob,
                           double_array_3d upward_prob, double_array_3d upward_parent_prob,
                           double_array_3d marginal_prob,
-                          double_array_3d output_cond_prob, double& entropy2) const;
+                          double_array_3d output_cond_prob, double& entropy2,
+                          int index= I_DEFAULT) const;
    double get_viterbi(const HiddenMarkovTreeData& trees,
                       int index= I_DEFAULT);
+   double get_upward_conditional_entropy(const HiddenMarkovTreeData& trees,
+                                         double_array_3d marginal_prob,
+                                         double_array_3d upward_prob,
+                                         double_array_3d upward_parent_prob,
+                                         double_array_3d downward_prob,
+                                         double_array_2d& conditional_entropy,
+                                         int index= I_DEFAULT) const;
+   double get_downward_conditional_entropy(const HiddenMarkovTreeData& trees,
+                                           double_array_3d marginal_prob,
+                                           double_array_3d downward_prob,
+                                           double_array_3d upward_prob,
+                                           double_array_3d upward_parent_prob,
+                                           double_array_2d& expected_conditional_entropy,
+                                           double_array_3d& conditional_entropy,
+                                           double_array_4d& conditional_prob,
+                                           double_array_3d& state_entropy,
+                                           int index= I_DEFAULT) const;
+   double get_upward_partial_entropy(const HiddenMarkovTreeData& trees,
+                                     int t, double_array_3d downward_prob,
+                                     double_array_3d state_entropy,
+                                     double*& partial_entropy) const;
+
+   double get_downward_partial_entropy(const HiddenMarkovTreeData& trees,
+                                       int t, double_array_3d output_cond_prob,
+                                       double_array_3d marginal_prob,
+                                       double_array_3d upward_parent_prob,
+                                       double_array_3d downward_prob,
+                                       double_array_4d downward_pair_prob,
+                                       double_array_3d state_entropy,
+                                       double_array_3d conditional_entropy,
+                                       double_array_4d conditional_prob,
+                                       double_array_2d& partial_entropy,
+                                       bool fast_algorithm= true) const;
+
+   double get_fast_downward_partial_entropy(const HiddenMarkovTreeData& trees,
+                                            int t, double_array_3d downward_prob,
+                                            double_array_4d downward_pair_prob,
+                                            double_array_2d& partial_entropy) const;
+
+   /* Compare algorithms for downward partial entropy computation */
+   bool downward_partial_entropy_comparison(const HiddenMarkovTreeData& trees,
+                                            int t, double_array_3d output_cond_prob,
+                                            double_array_3d marginal_prob,
+                                            double_array_3d upward_prob,
+                                            double_array_3d upward_parent_prob,
+                                            double_array_3d downward_prob,
+                                            double_array_4d downward_pair_prob) const;
+
+   double get_marginal_entropy(const HiddenMarkovTreeData& trees,
+                               int t, double_array_3d downward_prob,
+                               double*& marginal_entropy,
+                               double& max_marginal_entropy) const;
+
    /* Return the completed likelihood */
    double get_upward_downward(const HiddenMarkovTreeData& trees, int index= I_DEFAULT,
                               ostream* os= NULL, char format= 'a') const;
 
 };
-   HiddenMarkovOutTree* hidden_markov_out_tree_ascii_read(StatError& error,
+   HiddenMarkovIndOutTree* hidden_markov_ind_out_tree_ascii_read(StatError& error,
                                                           const char * path,
                                                           int size= I_DEFAULT_TREE_SIZE,
                                                           bool counting_flag= true,

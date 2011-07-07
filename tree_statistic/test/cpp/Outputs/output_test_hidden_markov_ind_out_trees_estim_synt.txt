@@ -29,6 +29,19 @@ observation probability matrix
 0  0.8  0.2
 1  0.3  0.7
 
+Indices for tree number 0:
+0
+|-1
+| |-3
+| | |-7
+| | |-8
+| |   
+| |-4
+|   
+|-2
+  |-5
+  |-6
+    
 Simulated trees : 
 1
 |-0
@@ -239,6 +252,66 @@ state 1 :
   |-0.259117
   |-0.659774
     
+State tree entropy: 4.69619
+Sum of conditional downward entropies: 4.69619
+Sum of conditional upward entropies: 4.75304
+Sum of marginal entropies: 5.36789
+State tree entropy (downward): 4.69619
+Partial entropies differ at vertex 7: 4.12148 / 4.12673 (fast)
+Consistency error for total entropy at leaf 7: 4.69093 / 4.69619
+Partial entropies differ at vertex 8: 4.24074 / 4.24599 (fast)
+Consistency error for total entropy at leaf 8: 4.69093 / 4.69619
+
+Raised a warning!
+State tree entropy: 3.91251
+Sum of conditional downward entropies: 3.91251
+Sum of conditional upward entropies: 3.95046
+Sum of marginal entropies: 4.39497
+State tree entropy (downward): 3.91251
+Partial entropies differ at vertex 7: 3.4692 / 3.52566 (fast)
+Consistency error for total entropy at leaf 7: 3.85605 / 3.91251
+Partial entropies differ at vertex 8: 3.21372 / 3.27018 (fast)
+Consistency error for total entropy at leaf 8: 3.85605 / 3.91251
+
+Raised a warning!
+State tree entropy: 3.31975
+Sum of conditional downward entropies: 3.31975
+Sum of conditional upward entropies: 3.35106
+Sum of marginal entropies: 3.70899
+State tree entropy (downward): 3.31975
+Partial entropies differ at vertex 7: 2.87348 / 2.87248 (fast)
+Consistency error for total entropy at leaf 7: 3.32075 / 3.31975
+Partial entropies differ at vertex 8: 2.87348 / 2.87248 (fast)
+Consistency error for total entropy at leaf 8: 3.32075 / 3.31975
+
+Raised a warning!
+State tree entropy: 4.41441
+Sum of conditional downward entropies: 4.41441
+Sum of conditional upward entropies: 4.45009
+Sum of marginal entropies: 4.91844
+State tree entropy (downward): 4.41441
+Partial entropies differ at vertex 7: 3.9927 / 3.95354 (fast)
+Consistency error for total entropy at leaf 7: 4.45357 / 4.41441
+Partial entropies differ at vertex 8: 3.9927 / 3.95354 (fast)
+Consistency error for total entropy at leaf 8: 4.45357 / 4.41441
+
+Raised a warning!
+State tree entropy: 4.42418
+Sum of conditional downward entropies: 4.42418
+Sum of conditional upward entropies: 4.48464
+Sum of marginal entropies: 5.13613
+State tree entropy (downward): 4.42418
+Partial entropies differ at vertex 7: 3.91972 / 3.87789 (fast)
+Consistency error for total entropy at leaf 7: 4.46601 / 4.42418
+Partial entropies differ at vertex 8: 3.91972 / 3.87789 (fast)
+Consistency error for total entropy at leaf 8: 4.46601 / 4.42418
+
+Raised a warning!
+State tree entropy: 1.18108
+Sum of conditional downward entropies: 1.18108
+Sum of conditional upward entropies: 1.18108
+Sum of marginal entropies: 1.27893
+State tree entropy (downward): 1.18108
 Conditional distributions for pairs of states for tree number 1 : 
 child state 0 : 
 (-1, -1)
@@ -422,11 +495,11 @@ log-likelihood of the observed trees: -32.3654   (normalized: -0.688626)
 
 4 free parameters   2 * penalyzed log-likelihood (BIC): -80.1315
 
-4 free parameters   2 * penalyzed log-likelihood (BICc): nan
+4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 4 free parameters   2 * penalyzed log-likelihood (ICL): -118.744
 
-4 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 iteration 1   log-likelihood of the observed trees: -32.3654
 
 1 iteration
@@ -577,11 +650,11 @@ log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
 
 4 free parameters   2 * penalyzed log-likelihood (BIC): -79.4823
 
-4 free parameters   2 * penalyzed log-likelihood (BICc): nan
+4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 4 free parameters   2 * penalyzed log-likelihood (ICL): -111.328
 
-4 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 Testing state profile plot
 Permutation of the states: 
@@ -703,11 +776,11 @@ log-likelihood of the observed trees: -32.0409   (normalized: -0.68172)
 
 4 free parameters   2 * penalyzed log-likelihood (BIC): -79.4823
 
-4 free parameters   2 * penalyzed log-likelihood (BICc): nan
+4 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 4 free parameters   2 * penalyzed log-likelihood (ICL): -111.328
 
-4 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+4 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 Testing estimation with initial self-transition probability specification.
 iteration 1   log-likelihood of the observed trees: -32.5739
@@ -834,11 +907,11 @@ log-likelihood of the observed trees: -32.492   (normalized: -0.691319)
 
 3 free parameters   2 * penalyzed log-likelihood (BIC): -76.5344
 
-3 free parameters   2 * penalyzed log-likelihood (BICc): nan
+3 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 3 free parameters   2 * penalyzed log-likelihood (ICL): -82.4874
 
-3 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+3 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 iteration 1   log-likelihood of the observed trees: -32.492
 
 1 iteration
@@ -989,11 +1062,11 @@ log-likelihood of the observed trees: -32.4867   (normalized: -0.691207)
 
 3 free parameters   2 * penalyzed log-likelihood (BIC): -76.5239
 
-3 free parameters   2 * penalyzed log-likelihood (BICc): nan
+3 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 3 free parameters   2 * penalyzed log-likelihood (ICL): -83.0047
 
-3 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+3 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 Testing estimation with auto-parametric distributions and self-transitions.
 iteration 1   log-likelihood of the observed trees: -836.795
@@ -1089,11 +1162,11 @@ log-likelihood of the observed trees: -507.71   (normalized: -9.40204)
 
 13 free parameters   2 * penalyzed log-likelihood (BIC): -1067.28
 
-13 free parameters   2 * penalyzed log-likelihood (BICc): nan
+13 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 13 free parameters   2 * penalyzed log-likelihood (ICL): -1067.7
 
-13 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+13 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 Testing estimation with imposed parametric distributions  and self-transitions.
 iteration 1   log-likelihood of the observed trees: -110.817
@@ -1174,11 +1247,11 @@ log-likelihood of the observed trees: -32.4831   (normalized: -0.69113)
 
 7 free parameters   2 * penalyzed log-likelihood (BIC): -91.9173
 
-7 free parameters   2 * penalyzed log-likelihood (BICc): nan
+7 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 7 free parameters   2 * penalyzed log-likelihood (ICL): -94.0787
 
-7 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+7 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 Testing estimation using SEM algorithm
 iteration 1   log-likelihood of the observed trees: -32.5739
 iteration 2   log-likelihood of the observed trees: -32.635
@@ -1305,11 +1378,11 @@ log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (BIC): -72.8481
 
-2 free parameters   2 * penalyzed log-likelihood (BICc): nan
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 2 free parameters   2 * penalyzed log-likelihood (ICL): -78.637
 
-2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 Testing estimation using EM algorithm 'a la Gibbs'
 iteration 1   log-likelihood of the observed trees: -32.5739
@@ -1437,11 +1510,11 @@ log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (BIC): -72.8481
 
-2 free parameters   2 * penalyzed log-likelihood (BICc): nan
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 2 free parameters   2 * penalyzed log-likelihood (ICL): -78.637
 
-2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 Testing estimation using CEM algorithm
 iteration 1   log-likelihood of the observed trees: -32.5739
@@ -1569,11 +1642,11 @@ log-likelihood of the observed trees: -32.5739   (normalized: -0.693062)
 
 2 free parameters   2 * penalyzed log-likelihood (BIC): -72.8481
 
-2 free parameters   2 * penalyzed log-likelihood (BICc): nan
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 2 free parameters   2 * penalyzed log-likelihood (ICL): -78.637
 
-2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 Testing estimation using SAEM algorithm
 iteration 1   log-likelihood of the observed trees: -32.5739
@@ -1708,11 +1781,11 @@ log-likelihood of the observed trees: -32.4841   (normalized: -0.691151)
 
 2 free parameters   2 * penalyzed log-likelihood (BIC): -72.6685
 
-2 free parameters   2 * penalyzed log-likelihood (BICc): nan
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 2 free parameters   2 * penalyzed log-likelihood (ICL): -75.0981
 
-2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 
 Testing estimation using SAEM algorithm and initial model specification
@@ -1848,10 +1921,10 @@ log-likelihood of the observed trees: -32.483   (normalized: -0.691128)
 
 2 free parameters   2 * penalyzed log-likelihood (BIC): -72.6663
 
-2 free parameters   2 * penalyzed log-likelihood (BICc): nan
+2 free parameters   2 * penalyzed log-likelihood (BICc): -nan
 
 2 free parameters   2 * penalyzed log-likelihood (ICL): -73.6509
 
-2 free parameters   2 * penalyzed log-likelihood (ICLc): nan
+2 free parameters   2 * penalyzed log-likelihood (ICLc): -nan
 
 

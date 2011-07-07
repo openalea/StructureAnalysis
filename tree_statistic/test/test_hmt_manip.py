@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""some tests for the class hmt.HiddenMarkovTree: basic operations"""
+"""some tests for the class hmt.HiddenMarkovIndOutTree: basic operations"""
 __version__ = ""
 
 import sys
@@ -15,7 +15,7 @@ def init():
 def setup_func():
     global hmt_name, H
     hmt_name = "data/hmot_cycle.hmt"
-    H = hmt.HiddenMarkovTree(hmt_name)
+    H = hmt.HiddenMarkovIndOutTree(hmt_name)
     return hmt_name, H
 
 @with_setup(setup_func)
@@ -65,7 +65,7 @@ def test_hmt_permutation():
     P = [1, 2, 3, 4, 0]
     # state i is renamed i+1,
     # state 4 is renamed 0 
-    H2 = hmt.HiddenMarkovTree(H)
+    H2 = hmt.HiddenMarkovIndOutTree(H)
     H2.StatePermutation(P)
     T = build_binary_tree()
     THMT = H2.Simulate(T)

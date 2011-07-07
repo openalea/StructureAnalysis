@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, commands, string
 
 #Sources
@@ -13,12 +14,12 @@ test_characteristics_zones
 test_characteristics_occurrences
 test_int_trees
 test_manip_trees
-test_hidden_markov_out_trees
-test_hidden_markov_out_trees_estim_synt
+test_hidden_markov_ind_out_trees
+test_hidden_markov_ind_out_trees_estim_synt
 test_hidden_markov_tree_data
-test_hidden_markov_out_trees_estim_val
+test_hidden_markov_ind_out_trees_estim_val
 test_hidden_markov_chain_tree
-test_hidden_markov_out_trees_viterbi
+test_hidden_markov_ind_out_trees_viterbi
 """)
 
 def check(p):

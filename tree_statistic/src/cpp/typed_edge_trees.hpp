@@ -3239,16 +3239,25 @@ ostream& Typed_edge_trees<Generic_Int_fl_container>::ascii_write(ostream& os,
          switch (_type[var])
          {
             case STATE :
+            {
                os << STAT_label[characteristics[var]->marginal_distribution->nb_value == 1 ?
                                 STATL_STATE : STATL_STATES] << endl;
+               break;
+            }
             case INT_VALUE :
+            {
                os << STAT_label[characteristics[var]->marginal_distribution->nb_value == 1 ?
                                 STATL_VALUE : STATL_VALUES] << endl;
+               break;
+            }
          }
 
          os << "\n";
          if (comment_flag)
             os << "# ";
+
+         if (_type[var] == STATE)
+            os << STAT_label[STATL_STATE] << " ";
 
          os << STAT_label[STATL_MARGINAL] << " "
             << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";

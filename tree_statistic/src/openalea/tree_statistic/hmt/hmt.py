@@ -3,48 +3,49 @@
 import string
 import openalea.tree_statistic._errors as _errors
 import openalea.stat_tool as stat_tool, openalea.tree_statistic.trees as trees
-import chmt
+import stat_tool.error as check_error
+import _hmt
 
 VariableType=stat_tool.VariableTypeBis
 StatTreeError = _errors.StatTreeError
 CharacteristicType=trees.CharacteristicType
-EntropyAlgorithm=chmt.EntropyAlgorithm
+EntropyAlgorithm=_hmt.EntropyAlgorithm
 VariableTypeDict=VariableType.values
 
 from openalea.stat_tool import interface
-interface.extend_class(chmt.CiHmot, interface.StatInterface)
-interface.extend_class(chmt.CHmt_data, interface.StatInterface)
+interface.extend_class(_hmt.CiHmot, interface.StatInterface)
+interface.extend_class(_hmt.CHmt_data, interface.StatInterface)
 
-class HiddenMarkovTree:
+class HiddenMarkovIndOutTree:
     """An implementation of the hidden Markov out-trees with conditionally 
     independent children states given their parent."""
 
     def __init__(self, arg, aliasing=False):
         """Initialize a Hmt by copy or by reading into a file.
 
-            Usage:  H=HiddenMarkovTree("file_name")
-                    H=HiddenMarkovTree(HiddenMarkovTree)."""
+            Usage:  H=HiddenMarkovIndOutTree("file_name")
+                    H=HiddenMarkovIndOutTree(HiddenMarkovIndOutTree)."""
         ## Aliasing is used to make an alias between argument and
-        ## self.__chmt -> useful for the connection between HiddenMarkovTree
+        ## self.__chmt -> useful for the connection between HiddenMarkovIndOutTree
         ## and HiddenMarkovTreeData
         if type(arg)==str:
             # arg is expectedly a file name...
-            self.__chmt=chmt.HmtAsciiRead(arg)
+            self.__chmt=_hmt.HmtAsciiRead(arg)
             nbvariables=self.__chmt.NbInt()+self.__chmt.NbFloat()
             self._attributes=["Variable " + str(i) for i in range(nbvariables)]
-        elif issubclass(arg.__class__, HiddenMarkovTree):
-            # ... or a HiddenMarkovTree object...
+        elif issubclass(arg.__class__, HiddenMarkovIndOutTree):
+            # ... or a HiddenMarkovIndOutTree object...
             if aliasing:
                 self.__chmt=arg.__chmt
             else:
-                self.__chmt=chmt.CiHmot(arg.__chmt)
+                self.__chmt=_hmt.CiHmot(arg.__chmt)
             self._attributes=list(arg._attributes)
-        elif issubclass(arg.__class__, chmt.CiHmot):
+        elif issubclass(arg.__class__, _hmt.CiHmot):
             # ... or a CiHmot object
             if aliasing:
                 self.__chmt=arg
             else:
-                self.__chmt=chmt.CiHmot(arg)
+                self.__chmt=_hmt.CiHmot(arg)
             nbvariables=self.__chmt.NbInt()+self.__chmt.NbFloat()
             self._attributes=["Variable " + str(i) for i in range(nbvariables)]
         else:
@@ -54,7 +55,7 @@ class HiddenMarkovTree:
     def Display(self, ViewPoint=None, Detail=None, TreeId=None, 
                 NbStateTrees=2, StateTrees="GeneralizedViterbi",
                 Entropy="UPWARD", RootVertex=None):
-        """Display HiddenMarkovTree object.
+        """Display HiddenMarkovIndOutTree object.
         
         Usage: Display()
                Display(ViewPoint="Data", Detail=2)
@@ -180,8 +181,28 @@ class HiddenMarkovTree:
             msg='bad value for argument "ViewPoint": '+ViewPoint
             raise ValueError, msg
 
+    def EntropyComputation(self, TreeId=None, UpwardEntropy=False):
+        """
+        Compute state entropy, sum of upward entropies and sum of
+        marginal entropies for a given tree or the whole set of trees.
+        """
+        check_error.CheckType([UpwardEntropy], [bool])
+        if (UpwardEntropy):
+            if TreeId is None:
+                res = self.__chmt.UpwardEntropyComputation()
+            else:
+                check_error.CheckType([TreeId], [int])
+                res = self.__chmt.UpwardEntropyComputation(TreeId)
+        else:
+            if TreeId is None:
+                res = self.__chmt.EntropyComputation()
+            else:
+                check_error.CheckType([TreeId], [int])
+                res = self.__chmt.EntropyComputation(TreeId)
+        return res
+
     def Extract(self, nature, variable, value):
-        """Extract a distribution from the HiddenMarkovTree.
+        """Extract a distribution from the HiddenMarkovIndOutTree.
 
         :Parameters:
 
@@ -240,7 +261,7 @@ class HiddenMarkovTree:
         return distrib
 
     def ExtractData(self):
-        """Extract the 'data' part of the HiddenMarkovTree."""
+        """Extract the 'data' part of the HiddenMarkovIndOutTree."""
         chmt_data = self.__chmt.ExtractData()
         chmt_data = chmt_data.StateTrees()
         return HiddenMarkovTreeData(chmt_data, markov=None, aliasing=True)
@@ -286,7 +307,7 @@ class HiddenMarkovTree:
                     return smoothed
 
     def NbStates(self):
-        """Return the number of hidden states of the HiddenMarkovTree."""
+        """Return the number of hidden states of the HiddenMarkovIndOutTree."""
         return self.__chmt.NbStates()
     
     def Plot(self, ViewPoint="Observation", variable=0, Title="", 
@@ -414,7 +435,7 @@ class HiddenMarkovTree:
 
 
     def Save(self, file_name, format="ASCII", overwrite=False):
-        """Save HiddenMarkovTree object into a file.
+        """Save HiddenMarkovIndOutTree object into a file.
         
         Argument file_name is a string designing the file name and path.
         String argument format must be "ASCII" or "SpreadSheet".
@@ -460,14 +481,14 @@ class HiddenMarkovTree:
             else:
                 raise TypeError, "bad type for argument 2: trees.Trees " \
                                     "expected"
-        elif issubclass(arg1.__class__, stat_tool._stat_tool._DiscreteDistributionData):
+        elif issubclass(arg1.__class__, stat_tool.histogram._DiscreteDistributionData):
             # Simulate(size_histo, nb_children_histo)
-            if issubclass(arg2.__class__, stat_tool._stat_tool._DiscreteDistributionData):
+            if issubclass(arg2.__class__, stat_tool.histogram._DiscreteDistributionData):
                 chmt_data= \
                     self.__chmt.Simulate(arg1, arg2, True, False)
             else:
                 raise TypeError, "bad type for argument 2:  " \
-                                    "stat_tool._DiscreteDistributionData expected"
+                                    "stat_tool.histogram._DiscreteDistributionData expected"
         else:
             # Simulate(Trees)
             if issubclass(arg1.__class__, trees.Trees):
@@ -526,7 +547,7 @@ class HiddenMarkovTreeData(trees.Trees):
         ## Initialize a HiddenMarkovTreeData object by copy or 
         ## from (a Trees or a CHmt_data object) and a hidden Markov tree.
         ## Aliasing is used to make an alias between trees_object and
-        ## self.__ctrees -> useful for the connection between HiddenMarkovTree
+        ## self.__ctrees -> useful for the connection between HiddenMarkovIndOutTree
         ## and HiddenMarkovTreeData
         ## The attributes names can be provided
         # and the attribute types should have the possibility to be specified
@@ -534,26 +555,26 @@ class HiddenMarkovTreeData(trees.Trees):
             # trees_object is supposed to be a HiddenMarkovTreeData object...
             trees.Trees.__init__(self, trees_object, 
                                  attribute_names=attribute_names)
-            self.__ctrees=chmt.CHmt_data(trees_object._ctrees(), True)
-        elif issubclass(trees_object.__class__, chmt.CHmt_data):
+            self.__ctrees=_hmt.CHmt_data(trees_object._ctrees(), True)
+        elif issubclass(trees_object.__class__, _hmt.CHmt_data):
             # ...or a CHmt_data object...
             trees.Trees.__init__(self, trees_object,
                                  attribute_names=attribute_names)
             if aliasing:
                 self.__ctrees=trees_object
             else:
-                self.__ctrees=chmt.CHmt_data(trees_object, True)
-        elif issubclass(trees_object.__class__, HiddenMarkovTree):
+                self.__ctrees=_hmt.CHmt_data(trees_object, True)
+        elif issubclass(trees_object.__class__, HiddenMarkovIndOutTree):
             # above line is weird: class must be Trees...
             # ... or a Trees object...
             if trees_object is None:
                 raise ValueError, "second argument is mandatory"
-            elif issubclass(markov.__class__, HiddenMarkovTree):
-                # ... and the second argument must be a HiddenMarkovTree
+            elif issubclass(markov.__class__, HiddenMarkovIndOutTree):
+                # ... and the second argument must be a HiddenMarkovIndOutTree
                 # in the latter case
                 trees.Trees.__init__(self, trees_object, 
                                      attribute_names=attribute_names)
-                self.__ctrees=chmt.CHmt_data(self._ctrees(), markov._chmt())                
+                self.__ctrees=_hmt.CHmt_data(self._ctrees(), markov._chmt())
             else:
                 msg="bad type for second argument: "+str(type(trees_object))
                 raise TypeError, msg                
@@ -679,12 +700,15 @@ class HiddenMarkovTreeData(trees.Trees):
     def _state_marginal_distribution(self):
         # compute the (empirical) marginal distribution of the hidden states
         s=trees.Trees._ctrees_display(self)
-        i=s.find("state frequency distribution - sample size", 0)
         msg="Could not find the (empirical) marginal distribution" \
             " of the hidden states"
+        i = s.find("VARIABLE 1 : STATE", 0)
         if i == -1:
             raise Warning, msg
-        i=s.find("state frequency distribution", i+1)
+        i = s.find("state marginal frequency distribution - sample size", i+1)
+        if i == -1:
+            raise Warning, msg
+        i=s.find("| frequency", i+1)
         if i == -1:
             raise Warning, msg
         nb_states=self.__ctrees.NbValues(0)

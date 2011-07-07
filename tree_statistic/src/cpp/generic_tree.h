@@ -124,8 +124,8 @@ struct generic_visitor
 
        typedef typename tree_traits<Tree>::children_iterator children_iterator;
        int curr_width, nb_children;
-       std::vector<vid> res;
-       std::deque<vid> nodes;
+       std::vector<vid> res(0);
+       std::deque<vid> nodes(0);
        vid v;
        children_iterator it, end;
 

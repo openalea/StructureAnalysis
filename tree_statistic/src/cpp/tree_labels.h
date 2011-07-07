@@ -44,25 +44,67 @@ namespace Stat_trees
 
 /****************************************************************
  *
- *  Identificateurs des mots cles (format des fichiers) :
+ *  Keyword identifiers (file format):
  */
 
 
 enum {
   STATW_HIDDEN_MARKOV_TREE ,
   STATW_EQUILIBRIUM_HIDDEN_MARKOV_TREE ,
-  STATW_HIDDEN_MARKOV_OUT_TREE ,
-  STATW_EQUILIBRIUM_HIDDEN_MARKOV_OUT_TREE
+  STATW_HIDDEN_MARKOV_IND_OUT_TREE ,
+  STATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE ,
+  STATW_MARKOV_OUT_TREE ,
+  STATW_GENERATION_DISTRIBUTION ,
+  STATW_GENERATION ,
+  STATW_GENERATION_PROCESS ,
+  STATW_GENERATION_PROCESSES ,
+  STATW_PARENT_STATE ,
+  STATW_FACTOR ,
+  STATW_EXTERNAL_FACTOR ,
+  STATW_FACTORS ,
+  STATW_EXTERNAL_FACTORS ,
+  STATW_CHILD ,
+  STATW_CHILDREN ,
+  STATW_ORDERED_CHILD ,
+  STATW_ORDERED_CHILDREN ,
+  STATW_VARIABLE_ORDER_MARKOV_CHAIN ,
+  STATW_VARIABLE_ORDER_MARKOV_CHAINS
 };
 
 extern const char *STAT_TREES_word[];
 extern const char *STAT_TREES_type[];
 
+/****************************************************************
+ *
+ *  Multivariate distribution identifiers:
+ */
+
+extern const char *STAT_TREES_multivariate_distribution_word[];
 
 /****************************************************************
  *
- *  Identificateurs des labels :
+ *  Labels:
  */
+
+enum {
+  STATL_DISCRETE_MULTIVARIATE_DISTRIBUTION
+};
+
+extern const char *STAT_MULTIVARIATE_label[];
+
+/****************************************************************
+ *
+ *  Keywords:
+ */
+
+enum {
+  STATW_COMPOUNDING_DISTRIBUTION
+};
+
+
+extern const char *STAT_MULTIVARIATE_PARSING_word[];
+
+
 
 
 enum {
@@ -117,7 +159,11 @@ enum {
   STATL_CUMULATIVE_SIZE ,
   STATL_TREE_CHILDREN ,
   STATL_CUMULATIVE_CHILDREN ,
-  STATL_TIME
+  STATL_TIME ,
+
+  STATL_GENERATION ,
+  STATL_GENERATION_PROCESS ,
+  STATL_PARENT
 };
 
 
@@ -126,14 +172,24 @@ extern const char *STAT_TREES_label[];
 
 /****************************************************************
  *
- *  Identificateurs des messages d'erreur pour l'analyse des fichiers :
+ *  Identifiers for parsing error messages:
  */
 
+enum {
+  STATP_BAD_PROBABILITY ,
+  STATP_BAD_ONE_MINUS_PROBABILITIES ,
+  STATP_ORDERED_CHILDREN ,
+  STATP_NB_VOMC ,
+  STATP_NB_GENERATION_PROCESS ,
+  STATP_NB_CHILDREN_BRANCHING ,
+  STATP_NB_FACTORS
+};
 
+extern const char *STAT_TREES_parsing[];
 
 /****************************************************************
  *
- *  Identificateurs des messages d'erreur de traitement :
+ *  Identifiers for other error messages:
  */
 
 
@@ -176,7 +232,9 @@ enum {
 
   STATR_STATE_TREES ,
   STATR_CHARACTERISTICS_NOT_COMPUTED ,
-  STATR_NON_EXISTING_CHARACTERISTIC_DISTRIBUTION
+  STATR_NON_EXISTING_CHARACTERISTIC_DISTRIBUTION ,
+  STATR_BAD_FACTORS ,
+  STATR_NON_EXISTING_GENERATION_PROCESS
 };
 
 

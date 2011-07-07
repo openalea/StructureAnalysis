@@ -1,5 +1,5 @@
 Reference hidden Markov tree (non-parametric): 
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 3 STATES
 
@@ -293,7 +293,7 @@ iteration 10   log-likelihood of the observed trees: -90.9944
 log-likelihood of the state trees: -115.594 | -115.594
 
 Parameter estimation:
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 3 STATES
 
@@ -1369,6 +1369,10 @@ log-likelihood of the observed trees: -90.8011   (normalized: -1.39694)
 
 14 free parameters   2 * penalyzed log-likelihood (ICLc): -231.188
 
+chi-square test (6 degrees of freedom)
+chi-square value: 13.5393   critical probability: 0.0352274
+reference chi-square value: 12.5916   reference critical probability: 0.05
+reference chi-square value: 16.8119   reference critical probability: 0.01
 
 Extract an observation distribution from plain HiddenMarkovTreeData:
 *** ERROR : state trees not in the data
@@ -1404,10 +1408,10 @@ deviance: 2e+37
 
 chi-square test (1 degree of freedom)
 chi-square value: 1e+37   critical probability: 0
-reference chi-square value: 3.74866   reference critical probability: 0.05
-reference chi-square value: 6.37567   reference critical probability: 0.01
+reference chi-square value: 3.84146   reference critical probability: 0.05
+reference chi-square value: 6.6349   reference critical probability: 0.01
 Reference hidden Markov tree (parametric): 
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 2 STATES
 
@@ -1554,7 +1558,7 @@ iteration 10   log-likelihood of the observed trees: -511.466
 log-likelihood of the state trees: -511.466 | -511.466
 
 Parameter estimation:
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 2 STATES
 
@@ -2079,8 +2083,8 @@ maximum possible log-likelihood: -113.665   (information: -2.84161)
 deviance: 37.5894
 
 chi-square test (1 degree of freedom)
-chi-square value: 3.31246e-26   critical probability: 0.954498
-reference chi-square value: 3.74866   reference critical probability: 0.05
+chi-square value: 3.31246e-26   critical probability: 1
+reference chi-square value: 3.84146   reference critical probability: 0.05
 
 Extract an observation distribution from augmented HiddenMarkovTreeData with a wrong state identifier:
 *** ERROR : state 2 not present
@@ -2095,7 +2099,7 @@ iteration 1   log-likelihood of the observed trees: -43.8762
 1 iteration
 
 log-likelihood of the state trees: -43.3087 | -43.3087
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 2 STATES
 

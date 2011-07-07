@@ -6058,21 +6058,29 @@ double HiddenMarkovTree::partial_entropy_computation(const HiddenMarkovTreeData&
                                                      double_array_3d marginal_prob,
                                                      double_array_3d upward_parent_prob,
                                                      double_array_3d downward_prob,
+                                                     double_array_4d downward_pair_prob,
                                                      double_array_3d state_entropy,
                                                      double_array_3d conditional_entropy,
                                                      double_array_4d conditional_prob,
-                                                     double*& partial_entropy,
+                                                     double_array_2d& partial_entropy,
                                                      int entropy_algo) const
 {
    double res;
+   int tr;
 
    switch (entropy_algo)
    {
-
       case UPWARD:
       {
+         if (partial_entropy == NULL)
+         {
+            partial_entropy = new double*[trees.get_nb_trees()];
+            for(tr = 0; tr < trees.get_nb_trees(); tr++)
+               partial_entropy[tr] = NULL;
+         }
+
          res= upward_partial_entropy_computation(trees, t, downward_prob,
-                                                 state_entropy, partial_entropy);
+                                                 state_entropy, partial_entropy[t]);
          break;
       }
 
@@ -6083,6 +6091,7 @@ double HiddenMarkovTree::partial_entropy_computation(const HiddenMarkovTreeData&
                                                    marginal_prob,
                                                    upward_parent_prob,
                                                    downward_prob,
+                                                   downward_pair_prob,
                                                    state_entropy,
                                                    conditional_entropy,
                                                    conditional_prob,
@@ -6100,15 +6109,15 @@ double HiddenMarkovTree::partial_entropy_computation(const HiddenMarkovTreeData&
  **/
 
 double HiddenMarkovTree::downward_partial_entropy_computation(const HiddenMarkovTreeData& trees,
-                                                              int t,
-                                                              double_array_3d output_cond_prob,
+                                                              int t, double_array_3d output_cond_prob,
                                                               double_array_3d marginal_prob,
                                                               double_array_3d upward_parent_prob,
                                                               double_array_3d downward_prob,
+                                                              double_array_4d downward_pair_prob,
                                                               double_array_3d state_entropy,
                                                               double_array_3d conditional_entropy,
                                                               double_array_4d conditional_prob,
-                                                              double*& partial_entropy) const
+                                                              double_array_2d& partial_entropy) const
 { return D_INF; }
 
 /*************************************************************************
@@ -6177,17 +6186,17 @@ void HiddenMarkovTree::conditional_entropy_computation(const HiddenMarkovTreeDat
  *
  **/
 
-void HiddenMarkovTree::downward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
-                                                                double_array_3d marginal_prob,
-                                                                double_array_3d downward_prob,
-                                                                double_array_3d upward_prob,
-                                                                double_array_3d upward_parent_prob,
-                                                                double_array_2d& expected_conditional_entropy,
-                                                                double_array_3d& conditional_entropy,
-                                                                double_array_4d& conditional_prob,
-                                                                double_array_3d& state_entropy,
-                                                                int index) const
-{ }
+double HiddenMarkovTree::downward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
+                                                                  double_array_3d marginal_prob,
+                                                                  double_array_3d downward_prob,
+                                                                  double_array_3d upward_prob,
+                                                                  double_array_3d upward_parent_prob,
+                                                                  double_array_2d& expected_conditional_entropy,
+                                                                  double_array_3d& conditional_entropy,
+                                                                  double_array_4d& conditional_prob,
+                                                                  double_array_3d& state_entropy,
+                                                                  int index) const
+{ return -D_INF; }
 
 /*************************************************************************
  *
@@ -6195,14 +6204,14 @@ void HiddenMarkovTree::downward_conditional_entropy_computation(const HiddenMark
  *
  **/
 
-void HiddenMarkovTree::upward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
-                                                              double_array_3d marginal_prob,
-                                                              double_array_3d upward_prob,
-                                                              double_array_3d upward_parent_prob,
-                                                              double_array_3d downward_prob,
-                                                              double_array_2d& conditional_entropy,
-                                                              int index) const
-{ }
+double HiddenMarkovTree::upward_conditional_entropy_computation(const HiddenMarkovTreeData& trees,
+                                                                double_array_3d marginal_prob,
+                                                                double_array_3d upward_prob,
+                                                                double_array_3d upward_parent_prob,
+                                                                double_array_3d downward_prob,
+                                                                double_array_2d& conditional_entropy,
+                                                                int index) const
+{ return -D_INF; }
 
 double HiddenMarkovTree::smoothed_probabilities(const HiddenMarkovTreeData& trees,
                                                 double_array_3d& smoothed_prob,
@@ -6321,11 +6330,11 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
             if (i == 0)
             {
                tree_ident= token;
-               if (token == STAT_TREES_word[STATW_HIDDEN_MARKOV_OUT_TREE])
+               if (token == STAT_TREES_word[STATW_HIDDEN_MARKOV_IND_OUT_TREE])
                    // || (token == STAT_TREES_word[STATW_HIDDEN_MARKOV_IN_TREE]))
                   type= 'o';
                else
-                  if (token == STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_OUT_TREE])
+                  if (token == STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE])
                       // || (token == STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_IN_TREE]))
                      type= 'e';
                   else
@@ -6356,8 +6365,8 @@ HiddenMarkovTree* Stat_trees::hidden_markov_tree_ascii_read(StatError& error,
 
       if (type != 'v')
       {
-         if ((tree_ident == STAT_TREES_word[STATW_HIDDEN_MARKOV_OUT_TREE]) ||
-             (tree_ident == STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_OUT_TREE]))
+         if ((tree_ident == STAT_TREES_word[STATW_HIDDEN_MARKOV_IND_OUT_TREE]) ||
+             (tree_ident == STAT_TREES_word[STATW_EQUILIBRIUM_HIDDEN_MARKOV_IND_OUT_TREE]))
             {
                ch_order= 1;
                chain= chain_parsing(error, in_file, line, type);

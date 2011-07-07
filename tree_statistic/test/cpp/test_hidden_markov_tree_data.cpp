@@ -20,7 +20,7 @@
 #include "tree_statistic/generic_typed_edge_tree.h"
 #include "tree_statistic/int_trees.h"
 #include "tree_statistic/hidden_markov_tree.h"
-#include "tree_statistic/hidden_markov_out_tree.h"
+#include "tree_statistic/hidden_markov_ind_out_tree.h"
 
 using namespace Stat_trees;
 
@@ -44,7 +44,7 @@ int main(void)
    const char *hmotpath= "./hmot_np.hmt";
    const char *hmotparampath= "./hmot.hmt";
    int * const variables= new int[1];
-   HiddenMarkovOutTree *hmot= NULL, *hmot_estim= NULL;
+   HiddenMarkovIndOutTree *hmot= NULL, *hmot_estim= NULL;
    HiddenMarkovTreeData *hmtd, *state_hmtd, *ehmtd, *state_tree=NULL;
    tree_type **potrees= NULL;
    state_tree_type **pstrees= NULL;
@@ -64,7 +64,7 @@ int main(void)
 
    // read and print a non-parametric hidden Markov out tree
    cout << "Reference hidden Markov tree (non-parametric): " << endl;
-   hmot= hidden_markov_out_tree_ascii_read(error, hmotpath);
+   hmot= hidden_markov_ind_out_tree_ascii_read(error, hmotpath);
    cout << error;
 
    if (hmot != NULL)
@@ -80,7 +80,7 @@ int main(void)
    cout << "Print the data with the hidden Markov tree: " << endl;
    cout << *hmtd << endl;
 
-   hmot_estim= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot,
+   hmot_estim= hmtd->hidden_markov_ind_out_tree_estimation(error, cout, *hmot,
                                                        true, VITERBI, FORWARD_BACKWARD,
                                                        1., 10, true);
    cout << endl << "Parameter estimation:" << endl;
@@ -211,7 +211,7 @@ int main(void)
 
    // read and print a parametric hidden Markov out tree
    cout << "Reference hidden Markov tree (parametric): " << endl;
-   hmot= hidden_markov_out_tree_ascii_read(error, hmotparampath);
+   hmot= hidden_markov_ind_out_tree_ascii_read(error, hmotparampath);
    cout << error;
 
    if (hmot != NULL)
@@ -227,7 +227,7 @@ int main(void)
    cout << "Print the data with the hidden Markov tree: " << endl;
    cout << *hmtd << endl;
 
-   hmot_estim= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot,
+   hmot_estim= hmtd->hidden_markov_ind_out_tree_estimation(error, cout, *hmot,
                                                        true, VITERBI, FORWARD_BACKWARD,
                                                        1., 10, true);
    cout << endl << "Parameter estimation:" << endl;
@@ -359,7 +359,7 @@ int main(void)
    state_tree= new HiddenMarkovTreeData(*tmp_trees);
    delete tmp_trees;
    tmp_trees= NULL;
-   hmot_estim= state_tree->hidden_markov_out_tree_estimation(error, cout, 'o', 2, true,
+   hmot_estim= state_tree->hidden_markov_ind_out_tree_estimation(error, cout, 'o', 2, true,
                                                              true, VITERBI, FORWARD_BACKWARD,
                                                              1., 0.99999, 1);
    delete [] variables;

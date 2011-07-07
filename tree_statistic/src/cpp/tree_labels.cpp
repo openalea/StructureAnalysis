@@ -38,7 +38,7 @@
 
 /****************************************************************
  *
- *  Mots cles (format des fichiers) :
+ *  Keyword identifiers (file format):
  */
 
 namespace Stat_trees
@@ -47,8 +47,24 @@ namespace Stat_trees
 const char *STAT_TREES_word[] = {
   "HIDDEN_MARKOV_TREE" ,               // STATW_HIDDEN_MARKOV_TREE
   "EQUILIBRIUM_HIDDEN_MARKOV_TREE" ,   // STATW_EQUILIBRIUM_HIDDEN_MARKOV_TREE
-  "HIDDEN_MARKOV_OUT_TREE" ,           // STATW_HIDDEN_MARKOV_OUT_TREE
-  "EQUILIBRIUM_HIDDEN_MARKOV_OUT_TREE" // STATW_EQUILIBRIUM_HIDDEN_MARKOV_OUT_TREE
+  "HIDDEN_MARKOV_INDEPENDENT_OUT_TREE" ,           // STATW_HIDDEN_MARKOV_IND_OUT_TREE
+  "EQUILIBRIUM_HIDDEN_MARKOV_INDEPENDENT_OUT_TREE" , // STATW_EQUILIBRIUM_IND_HIDDEN_MARKOV_OUT_TREE
+  "MARKOV_OUT_TREE" , // STATW_MARKOV_OUT_TREE ,
+  "GENERATION_DISTRIBUTION" , //  STATW_GENERATION_DISTRIBUTION
+  "GENERATION " , // STATW_GENERATION
+  "GENERATION_PROCESS" , // STATW_GENERATION_PROCESS
+  "GENERATION_PROCESSES" , // STATW_GENERATION_PROCESSES
+  "PARENT_STATE" , // STATW_PARENT_STATE
+  "FACTOR" , // STATW_FACTOR
+  "EXTERNAL_FACTOR" , // STATW_EXTERNAL_FACTOR
+  "FACTORS" , // STATW_FACTORS
+  "EXTERNAL_FACTORS" , // STATW_EXTERNAL_FACTORS
+  "CHILD" , // STATW_CHILD
+  "CHILDREN", // STATW_CHILDREN
+  "ORDERED_CHILD" , // STATW_ORDERED_CHILD
+  "ORDERED_CHILDREN" , // STATW_ORDERED_CHILDREN
+  "VARIABLE_ORDER_MARKOV_CHAIN" , // STATW_VARIABLE_ORDER_MARKOV_CHAIN
+  "VARIABLE_ORDER_MARKOV_CHAINS" // STATW_VARIABLE_ORDER_MARKOV_CHAINS
 };
 
 
@@ -63,12 +79,32 @@ const char *STAT_TREES_type[] = {
   "NB INTERNODE"
 };
 
+/****************************************************************
+ *
+ *  Multivariate distribution identifiers:
+ */
+
+const char *STAT_TREES_multivariate_distribution_word[] = {
+  "DISCRETE_MULTIVARIATE_DISTRIBUTION" , // DISCRETE_MULTIVARIATE
+  "IID_MULTIVARIATE_DISCRETE_DISTRIBUTION" , // MIID
+  "MULTIVARIATE_POISSON_DISTRIBUTION" , // MPOISSON
+  "NEGATIVE_MULTINOMIAL_DISTRIBUTION" , // MNEGATIVE_BINOMIAL
+  "MULTINOMIAL_DISTRIBUTION" , // MMULTINOMIAL
+  "COMPOUND_MULTINOMIAL_DISTRIBUTION" // MCOUMPOUND_BINOMIAL
+};
 
 /****************************************************************
  *
- *  Labels :
+ *  Labels:
  */
 
+const char *STAT_MULTIVARIATE_label[] = {
+  "discrete multivariate distribution" ,  // STATL_DISCRETE_MULTIVARIATE_DISTRIBUTION
+};
+
+const char *STAT_MULTIVARIATE_PARSING_word[] = {
+  "COMPOUNDING_DISTRIBUTION" ,  // STATW_COMPOUNDING_DISTRIBUTION
+};
 
 const char *STAT_TREES_label[] = {
   "log-likelihood of the state tree" ,  // STATL_STATE_TREE_LIKELIHOOD
@@ -121,24 +157,36 @@ const char *STAT_TREES_label[] = {
   "tree size" ,
   "cumulative size" ,
   "number of children" ,
-  "cumulative number of children",
-  "time" // STATL_TIME
+  "cumulative number of children" ,
+  "time" , // STATL_TIME
+
+  "generation" , // STATL_GENERATION
+  "generation process" , // STATL_GENERATION_PROCESS
+  "parent" // STATL_PARENT
 };
 
 
 
 /****************************************************************
  *
- *  Messages d'erreur pour l'analyse des fichiers :
+ *  Identifiers for parsing error messages:
  */
 
-
+const char *STAT_TREES_parsing[] = {
+  "bad probability value", // STATP_BAD_PROBABILITY
+  "bad value for sum of (1-probabilities)" , // STATP_BAD_ONE_MINUS_PROBABILITIES
+  "bad number of ordered children" , // STATP_ORDERED_CHILDREN
+  "bad number of variable order Markov chains" , // STATP_NB_VOMC
+  "bad number of generation processes" , // STATP_NB_GENERATION_PROCESS
+  "bad number of children involved as factor in generation process" , // STATP_NB_CHILDREN_BRANCHING
+  "bad number of factors" // STATP_NB_FACTORS
+};
 
 
 
 /****************************************************************
  *
- *  Messages d'erreur de traitement :
+ *  Identifiers for other error messages:
  */
 
 
@@ -173,15 +221,17 @@ const char *STAT_TREES_error[] = {
   "bad exponent for saem" , // STATR_SAEM_EXP
   "bad estimation algorithm" , // STATR_EM_ALGORITHM
 
-  "bad variable type" , // STAR_VARIABLE_TYPE
+  "bad variable type" , // STATR_VARIABLE_TYPE
   "variable 1: bad variable type" , // STAR_VARIABLE_1_TYPE
   "bad minimum tree size" , // STATR_MIN_TREE_SIZE
   "bad maximum tree size" , // STATR_MAX_TREE_SIZE
   "bad number of selected values" , // STATR_NB_SELECTED_VALUE
 
-  "state trees not in the data",
+  "state trees not in the data", // STATR_STATE_TREES
   "characteristics not computed" , // STATR_CHARACTERISTICS_NOT_COMPUTED
-  "non-existing characteristic distribution" // STATR_NON_EXISTING_CHARACTERISTIC_DISTRIBUTION
+  "non-existing characteristic distribution" , // STATR_NON_EXISTING_CHARACTERISTIC_DISTRIBUTION
+  "bad configuration of factors in generation process" , // STATR_BAD_FACTORS
+  "object does not contain any generation process"  // STATR_NON_EXISTING_GENERATION_PROCESS
 };
 
 }; // end namespace

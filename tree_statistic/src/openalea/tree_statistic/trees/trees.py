@@ -1509,10 +1509,10 @@ class Trees(object):
             argument is True.
         """
         import openalea.tree_statistic.hmt as hmt
-        import openalea.tree_statistic.hmt.chmt as _hmt
+        import openalea.tree_statistic.hmt._hmt as _hmt
         RestorationAlgorithm=stat_tool.RestorationAlgorithm
-        if not issubclass(model.__class__, hmt.HiddenMarkovTree):
-            msg='bad type for argument "hmt": HiddenMarkovTree expected'
+        if not issubclass(model.__class__, hmt.HiddenMarkovIndOutTree):
+            msg='bad type for argument "hmt": HiddenMarkovIndOutTree expected'
             raise TypeError, msg
         if type(algorithm)!=str:
             msg='bad type for argument "algorithm:"'+"type 'str' expected"
@@ -1638,7 +1638,7 @@ class Trees(object):
         # arg5 = StateTrees
         # arg6 = Counting
         import openalea.tree_statistic.hmt as hmt
-        import openalea.tree_statistic.hmt.chmt as _hmt
+        import openalea.tree_statistic.hmt._hmt as _hmt
         RestorationAlgorithm = stat_tool.RestorationAlgorithm
         chmt_data = _hmt.CHmt_data(self._ctrees())
         if type(model_name) == str:
@@ -1759,7 +1759,7 @@ class Trees(object):
                                                       StateTrees, EMAlgo,
                                                       Saem, SelfTransition, NbIteration,
                                                       ForceParametric)
-                elif issubclass(arg1.__class__, hmt.HiddenMarkovTree):
+                elif issubclass(arg1.__class__, hmt.HiddenMarkovIndOutTree):
                     # Estimate("HIDDEN_MARKOV_TREE", hmt, NbIteration, StateTrees, Counting,
                     #          Algorithm, Saem, ForceParametric)
                     NbIteration = arg2
@@ -1817,7 +1817,7 @@ class Trees(object):
                 raise ValueError, msg
         else:
             raise TypeError, "bad type for argument 1: type 'str' expected"
-        estimated_hmt = hmt.HiddenMarkovTree(chmt, True)
+        estimated_hmt = hmt.HiddenMarkovIndOutTree(chmt, True)
         self._copy_vid_conversion(estimated_hmt)
         self._copy_tid_conversion(estimated_hmt)
         estimated_hmt._attributes = self.Attributes()

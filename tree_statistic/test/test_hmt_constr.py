@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""some tests for the class hmt.HiddenMarkovTree: constructor and basic methods"""
+"""some tests for the class hmt.HiddenMarkovIndOutTree: constructor and basic methods"""
 __version__ = ""
 
 import sys
@@ -7,12 +7,16 @@ import os
 # import openalea.tree_statistic.trees as trees
 import openalea.tree_statistic.hmt as hmt
 import openalea.stat_tool as stat_tool
+from stat_tool.plot import gnuplot, mplotlib, DISABLE_PLOT
+
 from nose import with_setup
 
 def init():
     return setup_func()
 
 def setup_func():
+    stat_tool.plot.PLOTTER = mplotlib()
+    stat_tool.plot.DISABLE_PLOT = True
     global hmt_name1, hmt_name2
     hmt_name1 = "data/hmot.hmt"
     hmt_name2 = "data/hmot_ascii.hmt"
@@ -23,7 +27,7 @@ def test_hmt_read():
     """Read some HMT from a file"""
     msg = "Could not read MTG file"
     try:
-        H = hmt.HiddenMarkovTree(hmt_name1)
+        H = hmt.HiddenMarkovIndOutTree(hmt_name1)
     except hmt.StatTreeError:
         assert False, msg
     else:
@@ -34,7 +38,7 @@ def test_hmt_ascii_read():
     """Read some HMT from a file"""
     msg = "Could not read MTG file"
     try:
-        H = hmt.HiddenMarkovTree(hmt_name2)
+        H = hmt.HiddenMarkovIndOutTree(hmt_name2)
     except hmt.StatTreeError:
         assert False, msg
     else:
@@ -45,7 +49,7 @@ def test_hmt_read_failure():
     """Use bad file name reading some HMT from a file"""
     msg = "Failed to raise exception for bad file name"
     try:
-        H = hmt.HiddenMarkovTree("nosuch-hmt_name1")
+        H = hmt.HiddenMarkovIndOutTree("nosuch-hmt_name1")
     except hmt.StatTreeError, e:
         print e
     else:
@@ -89,7 +93,7 @@ def test_compare_display():
     equal = True
     differences = []
     H = test_hmt_read()
-    H2 = hmt.HiddenMarkovTree(H)
+    H2 = hmt.HiddenMarkovIndOutTree(H)
     if str(H)!=str(H2):
         equal = False
     assert equal, msg + str(H) + "\n and" + str(H2)
@@ -107,7 +111,7 @@ def test_hmt_SAVEoREAD():
         assert False, msg
     else:
         f.close()
-    H2 = hmt.HiddenMarkovTree(file_name)
+    H2 = hmt.HiddenMarkovIndOutTree(file_name)
     if str(H)!=str(H2):
         equal = False
     import os
@@ -131,6 +135,7 @@ def test_plot_observation():
 
 if __name__ == "__main__":
     hmt_name1, hmt_name2 = init()
+    stat_tool.plot.DISABLE_PLOT = False
     test_hmt_read()
     test_hmt_ascii_read
     test_hmt_read_failure()
@@ -140,4 +145,5 @@ if __name__ == "__main__":
     test_hmt_SAVEoREAD()
     test_extract_observation_histogram()
     test_plot_first_occurrencer_histogram()
-    test_plot_data()
+    test_plot_observation()
+    # test_plot_data()

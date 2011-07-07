@@ -19,7 +19,7 @@
 #include "tree_statistic/generic_typed_edge_tree.h"
 #include "tree_statistic/int_trees.h"
 #include "tree_statistic/hidden_markov_tree.h"
-#include "tree_statistic/hidden_markov_out_tree.h"
+#include "tree_statistic/hidden_markov_ind_out_tree.h"
 
 using namespace Stat_trees;
 
@@ -38,7 +38,7 @@ int main(void)
    const int tid= 0; // id of the tree to be analyzed
    HiddenSemiMarkov *hmc= NULL, *hmc_init= NULL;
    // Hidden_variable_order_markov *hmc= NULL, *hmc_init= NULL;
-   HiddenMarkovOutTree *hmot= NULL, *hmot_init= NULL, *hmotref= NULL;
+   HiddenMarkovIndOutTree *hmot= NULL, *hmot_init= NULL, *hmotref= NULL;
    HiddenMarkovTreeData *hmtd= NULL, *hmtdv= NULL, *smoothed= NULL,
                            *vud= NULL, *generalized= NULL;
    MarkovianSequences *ms= NULL;
@@ -61,7 +61,7 @@ int main(void)
 
 
    // reading and printing of a hidden Markov out tree
-   hmotref= hidden_markov_out_tree_ascii_read(error, hmotrefpath);
+   hmotref= hidden_markov_ind_out_tree_ascii_read(error, hmotrefpath);
    cout << error;
 
    if (hmotref != NULL)
@@ -143,7 +143,7 @@ int main(void)
 #     endif
 
       cout << "Initialization HMT : " << endl;
-      hmot_init= hidden_markov_out_tree_ascii_read(error, hmotinitpath);
+      hmot_init= hidden_markov_ind_out_tree_ascii_read(error, hmotinitpath);
       cout << error;
       hmot_init->ascii_write(cout, false);
       cout << endl;
@@ -157,7 +157,7 @@ int main(void)
          hmc_init->ascii_write(cout, false);
          cout << endl;
 
-         hmot= hmtd->hidden_markov_out_tree_estimation(error, cout, *hmot_init,
+         hmot= hmtd->hidden_markov_ind_out_tree_estimation(error, cout, *hmot_init,
                                                        true, VITERBI, FORWARD_BACKWARD,
                                                        0., 100, true);
          cout << error;
@@ -165,7 +165,7 @@ int main(void)
          {
             hmtd= hmot->get_markov_data();
 
-            hmc= ms->hidden_semi_markov_estimation(error, cout, *hmc_init, COMPLETE_LIKELIHOOD,
+            hmc= ms->hidden_semi_markov_estimation(error, cout, *hmc_init, true, COMPLETE_LIKELIHOOD,
                                                    true, VITERBI, 100);
             // hmc= ms->hidden_variable_order_markov_estimation(error, cout, *hmc_init, true,
             //                                                  true, VITERBI, 100);
@@ -195,8 +195,8 @@ int main(void)
             cout << endl;
 
             // check the state profile computation
-            status= hmc->state_profile_ascii_write(error, cout, 1, GENERALIZED_VITERBI,
-                                                   5, DOWNWARD);
+            status= hmc->state_profile_ascii_write(error, cout, tid, SSTATE, GENERALIZED_VITERBI,
+                                                   5);
             if (!status)
                cout << error << endl;
 

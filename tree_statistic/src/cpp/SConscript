@@ -22,10 +22,12 @@ includes += env.ALEAGlob("*.hpp")
 env.ALEAIncludes("tree_statistic", includes)
 
 
-# if env['debug']:
-#    env.Append(CPPDEFINES= ['DEBUG'])
-#    env.AppendUnique(LIBS=['efence'])
+if env['debug']:
+   # env.Append(CPPDEFINES= ['DEBUG'])
+   env.AppendUnique(LIBS=['efence'])
 # optional
+
+# env.AppendUnique(LIBS=['eigen2'])
 
 # Build shared libraries
 
@@ -39,7 +41,7 @@ int_trees.cpp
 typed_edge_trees.cpp
 tree_labels.cpp
 hidden_markov_tree.cpp
-hidden_markov_out_tree.cpp
+hidden_markov_ind_out_tree.cpp
 hmt_algorithms.cpp
 """)
 

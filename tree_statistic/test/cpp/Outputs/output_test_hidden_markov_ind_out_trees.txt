@@ -74,9 +74,6 @@ number of occurrences of state 2 per length 20 sequence distribution
 mean: 12.6345   variance: 55.4495   standard deviation: 7.44644
 coefficient of skewness: -0.59609   coefficient of kurtosis: -1.14719
 
-state probabilities
-0.175685  0.192589  0.631727  
-
 2 OUTPUT_PROCESSES
 
 OUTPUT_PROCESS 1 : DISCRETE_PARAMETRIC
@@ -107,7 +104,7 @@ STATE 2 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 15   PROBABILITY : 0.9
 mean: 13.5   variance: 1.35   standard deviation: 1.1619
 
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 2 STATES
 
@@ -142,7 +139,7 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.9
 mean: 810   variance: 81   standard deviation: 9
 Permutation of the states: 
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 2 STATES
 
@@ -177,7 +174,7 @@ STATE 1 OBSERVATION_DISTRIBUTION
 BINOMIAL   INF_BOUND : 0   SUP_BOUND : 900   PROBABILITY : 0.3
 mean: 270   variance: 189   standard deviation: 13.7477
 
-HIDDEN_MARKOV_OUT_TREE
+HIDDEN_MARKOV_INDEPENDENT_OUT_TREE
 
 2 STATES
 
