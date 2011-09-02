@@ -1174,7 +1174,7 @@ MarkovianSequences* MarkovianSequences::transcode(StatError &error , int ivariab
     if ((ivariable + 1 < nb_variable) && (type[ivariable + 1] == AUXILIARY)) {
       status = false;
       ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+      error_message << STAT_label[STATL_VARIABLE] << " " << ivariable + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
       error.update((error_message.str()).c_str());
     }
@@ -1453,7 +1453,7 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
 {
   bool status = true;
   register int i , j , k;
-  int variable = ivariable , offset , *symbol , *limit , *itype;
+  int variable , offset , *symbol , *limit , *itype;
   MarkovianSequences *seq;
 
 
@@ -1480,10 +1480,10 @@ MarkovianSequences* MarkovianSequences::cluster(StatError &error , int ivariable
       error.update(STAT_error[STATR_NB_CLASS]);
     }
 
-    if ((variable + 1 < nb_variable) && (type[variable + 1] == AUXILIARY)) {
+    if ((ivariable + 1 < nb_variable) && (type[ivariable + 1] == AUXILIARY)) {
       status = false;
       ostringstream error_message;
-      error_message << STAT_label[STATL_VARIABLE] << " " << variable + 1 << ": "
+      error_message << STAT_label[STATL_VARIABLE] << " " << ivariable + 1 << ": "
                     << STAT_error[STATR_VARIABLE_TYPE];
       error.update((error_message.str()).c_str());
     }
@@ -2217,10 +2217,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
           }
 
 #         ifdef DEBUG
-
-          // pour les donnees Fuji/Braeburn de successions d'UCs
-
-          if (run_length == 1) {
+          if (run_length == 1) {  // pour UCs Fuji/Braeburn
             if ((j == 0) || (j == 1)) {
               seq->int_sequence[i][j][seq->length[i] - 1] = seq->int_sequence[i][j][seq->length[i] - 2];
             }
@@ -2229,6 +2226,7 @@ MarkovianSequences* MarkovianSequences::add_absorbing_run(StatError &error ,
             }
           }
 #         endif
+
         }
 
         else {
@@ -2729,7 +2727,7 @@ int MarkovianSequences::cumulative_distribution_function_computation(int variabl
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de la fonction de repartition empirique pour une variable.
+ *  Calcul de l'intervalle minimum entre 2 valeurs pour une variable.
  *
  *  argument : indice de la variable.
  *
@@ -3018,11 +3016,12 @@ Distribution* MarkovianSequences::weight_computation() const
  *
  *  Accumulation des observations (pour une variable donnee).
  *
- *  argument : indice de la variable.
+ *  arguments : indice de la variable, nombre d'etats.
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::observation_frequency_distribution_computation(int variable)
+void MarkovianSequences::observation_frequency_distribution_computation(int variable ,
+                                                                        int nb_state)
 
 {
   register int i , j;
@@ -3031,7 +3030,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 
   // initialisation des lois empiriques
 
-  for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+  for (i = 0;i < nb_state;i++) {
     for (j = 0;j < marginal_distribution[variable]->nb_value;j++) {
       observation_distribution[variable][i]->frequency[j] = 0;
     }
@@ -3049,7 +3048,7 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 
   // extraction des caracteristiques des lois empiriques
 
-  for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+  for (i = 0;i < nb_state;i++) {
     if (!characteristics[variable]) {
       observation_distribution[variable][i]->nb_value_computation();
     }
@@ -3067,33 +3066,13 @@ void MarkovianSequences::observation_frequency_distribution_computation(int vari
 
 /*--------------------------------------------------------------*
  *
- *  Accumulation des observations.
- *
- *--------------------------------------------------------------*/
-
-void MarkovianSequences::observation_frequency_distribution_computation()
-
-{
-  register int i;
-
-
-  for (i = 1;i < nb_variable;i++) {
-    if (observation_distribution[i]) {
-      observation_frequency_distribution_computation(i);
-    }
-  }
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Construction des lois empiriques d'observation.
  *
  *  argument : nombre d'etats.
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::create_observation_frequency_distribution(int nb_state)
+void MarkovianSequences::build_observation_frequency_distribution(int nb_state)
 
 {
   if ((nb_variable > 1) && (!observation_distribution)) {
@@ -3109,6 +3088,8 @@ void MarkovianSequences::create_observation_frequency_distribution(int nb_state)
         for (j = 0;j < nb_state;j++) {
           observation_distribution[i][j] = new FrequencyDistribution(marginal_distribution[i]->nb_value);
         }
+
+        observation_frequency_distribution_computation(i , nb_state);
       }
 
       else {
@@ -3121,27 +3102,13 @@ void MarkovianSequences::create_observation_frequency_distribution(int nb_state)
 
 /*--------------------------------------------------------------*
  *
- *  Construction des lois empiriques d'observation.
- *
- *--------------------------------------------------------------*/
-
-void MarkovianSequences::build_observation_frequency_distribution()
-
-{
-  create_observation_frequency_distribution(marginal_distribution[0]->nb_value);
-  observation_frequency_distribution_computation();
-}
-
-
-/*--------------------------------------------------------------*
- *
  *  Construction des histogrammes d'observation pour une variable.
  *
- *  arguments : indice de la variable, pas de regroupement.
+ *  arguments : indice de la variable, nombre d'etats, pas de regroupement.
  *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::build_observation_histogram(int variable , double step)
+void MarkovianSequences::build_observation_histogram(int variable , int nb_state , double step)
 
 {
   if ((!observation_histogram[variable]) || (step != observation_histogram[variable][0]->step)) {
@@ -3157,7 +3124,7 @@ void MarkovianSequences::build_observation_histogram(int variable , double step)
     }
 
     if (observation_histogram[variable]) {
-      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      for (i = 0;i < nb_state;i++) {
         observation_histogram[variable][i]->nb_category = (int)floor((observation_histogram[variable][i]->max_value - observation_histogram[variable][i]->min_value) / step) + 1;
 
         delete [] observation_histogram[variable][i]->frequency;
@@ -3166,9 +3133,9 @@ void MarkovianSequences::build_observation_histogram(int variable , double step)
     }
 
     else {
-      observation_histogram[variable] = new Histogram*[marginal_distribution[0]->nb_value];
+      observation_histogram[variable] = new Histogram*[nb_state];
 
-      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+      for (i = 0;i < nb_state;i++) {
         observation_histogram[variable][i] = new Histogram((int)floor((max_value[variable] - min_value[variable]) / step) + 1 , false);
 
         observation_histogram[variable][i]->nb_element = marginal_distribution[0]->frequency[i];
@@ -3179,7 +3146,7 @@ void MarkovianSequences::build_observation_histogram(int variable , double step)
 
       // calcul des valeurs minimums et maximums par etat
 
-/*      for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+/*      for (i = 0;i < nb_state;i++) {
         observation_histogram[variable][i]->min_value = max_value[variable];
         observation_histogram[variable][i]->max_value = min_value[variable];
       }
@@ -3226,13 +3193,13 @@ void MarkovianSequences::build_observation_histogram(int variable , double step)
       } */
     }
 
-    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+    for (i = 0;i < nb_state;i++) {
       observation_histogram[variable][i]->step = step;
     }
 
     // calcul des frequences
 
-    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+    for (i = 0;i < nb_state;i++) {
       for (j = 0;j < observation_histogram[variable][i]->nb_category;j++) {
         observation_histogram[variable][i]->frequency[j] = 0;
       }
@@ -3265,7 +3232,7 @@ void MarkovianSequences::build_observation_histogram(int variable , double step)
     }
     }
 
-    for (i = 0;i < marginal_distribution[0]->nb_value;i++) {
+    for (i = 0;i < nb_state;i++) {
       observation_histogram[variable][i]->max_computation();
     }
   }
@@ -3276,9 +3243,11 @@ void MarkovianSequences::build_observation_histogram(int variable , double step)
  *
  *  Construction des histogrammes d'observation.
  *
+ *  argument : nombre d'etats.
+ *
  *--------------------------------------------------------------*/
 
-void MarkovianSequences::build_observation_histogram()
+void MarkovianSequences::build_observation_histogram(int nb_state)
 
 {
   if ((nb_variable > 1) && (!observation_histogram)) {
@@ -3291,7 +3260,7 @@ void MarkovianSequences::build_observation_histogram()
     for (i = 1;i < nb_variable;i++) {
       observation_histogram[i] = NULL;
       if (marginal_histogram[i]) {
-        build_observation_histogram(i);
+        build_observation_histogram(i , nb_state);
       }
     }
   }
@@ -3346,7 +3315,7 @@ bool MarkovianSequences::select_step(StatError &error , int variable ,
     build_marginal_histogram(variable , step , imin_value);
 
     if ((observation_histogram) && (observation_histogram[variable])) {
-      build_observation_histogram(variable , step);
+      build_observation_histogram(variable , marginal_distribution[0]->nb_value , step);
     }
   }
 
