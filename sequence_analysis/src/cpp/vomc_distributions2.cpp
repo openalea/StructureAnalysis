@@ -785,7 +785,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
           state_no_occurrence_probability(i);
         }
         if (seq.type[0] == STATE) {
-          state_first_occurrence_distribution(i , ((seq.characteristics[0]) && (seq.characteristics[0]->first_occurrence[i]->nb_element > 0) ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
+          state_first_occurrence_distribution(i , ((seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) && (seq.characteristics[0]->first_occurrence[i]->nb_element > 0) ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
         }
         else {
           state_first_occurrence_distribution(i);
@@ -795,7 +795,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
           state_leave_probability(memory , i);
         }
         if (seq.type[0] == STATE) {
-          state_recurrence_time_distribution(memory , i , ((seq.characteristics[0]) && (seq.characteristics[0]->recurrence_time[i]->nb_element > 0) ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
+          state_recurrence_time_distribution(memory , i , ((seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) && (seq.characteristics[0]->recurrence_time[i]->nb_element > 0) ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
         }
         else {
           state_recurrence_time_distribution(memory , i);
@@ -803,7 +803,7 @@ void VariableOrderMarkov::characteristic_computation(const VariableOrderMarkovDa
 
         if (state_type[i] != 'a') {
           if (seq.type[0] == STATE) {
-            state_sojourn_time_distribution(memory , i , ((seq.characteristics[0]) && (seq.characteristics[0]->sojourn_time[i]->nb_element > 0) ? seq.characteristics[0]->sojourn_time[i]->nb_value : 1));
+            state_sojourn_time_distribution(memory , i , ((seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) && (seq.characteristics[0]->sojourn_time[i]->nb_element > 0) ? seq.characteristics[0]->sojourn_time[i]->nb_value : 1));
           }
           else {
             state_sojourn_time_distribution(memory , i);
