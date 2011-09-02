@@ -390,6 +390,8 @@ public :
     void copy(const ContinuousParametricProcess &process);
     void remove();
 
+    std::ostream& interval_computation(std::ostream &os);
+
 // public :
 
     ContinuousParametricProcess(int inb_state = 0);
