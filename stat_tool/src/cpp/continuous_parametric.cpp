@@ -359,20 +359,53 @@ ostream& ContinuousParametric::ascii_parameter_print(ostream &os) const
 ostream& ContinuousParametric::ascii_characteristic_print(ostream &os , bool file_flag) const
 
 {
-  double variance = variance_computation();
-
-
   if (file_flag) {
     os << "# ";
   }
 /*  if ((ident != GAUSSIAN) && (ident != VON_MISES)) {
     os << STAT_label[STATL_MEAN] << ": " << mean << "   ";
   } */
-  os << STAT_label[STATL_VARIANCE] << ": " << variance;
-  if (ident != GAUSSIAN) {
-    os << "   " << STAT_label[STATL_STANDARD_DEVIATION] << ": " << sqrt(variance);
+
+  switch (ident) {
+
+  case GAUSSIAN : {
+    os << STAT_label[STATL_VARIANCE] << ": " << dispersion * dispersion << endl;
+    break;
   }
-  os << endl;
+
+  case VON_MISES : {
+    double mean_resultant_length , standard_deviation;
+
+
+    mean_resultant_length = cyl_bessel_i(1 , dispersion) / cyl_bessel_i(0 , dispersion);
+
+    os << STAT_label[STATL_MEAN_RESULTANT_LENGTH] << ": " << mean_resultant_length;
+
+    if (mean_resultant_length > 0.) {
+      standard_deviation = sqrt(-2 * log(mean_resultant_length));
+      if (unit == DEGREE) {
+        standard_deviation *= (180 / M_PI);
+      }
+
+      os << "   " << STAT_label[STATL_CIRCULAR_STANDARD_DEVIATION] << ": "
+         << standard_deviation;
+    }
+    os << endl;
+
+#   ifdef MESSAGE
+    if (dispersion > 0.) {
+      standard_deviation = 1. / sqrt(fabs(dispersion));
+      if (unit == DEGREE) {
+        standard_deviation *= (180 / M_PI);
+      }
+
+      os << STAT_label[STATL_STANDARD_DEVIATION] << ": " <<  standard_deviation << endl;
+    }
+#   endif
+
+    break;
+  }
+  }
 
 /*  if ((ident != GAUSSIAN) && (ident != VON_MISES) && (variance > 0.)) {
     if (file_flag) {
@@ -670,17 +703,38 @@ ostream& ContinuousParametric::spreadsheet_parameter_print(ostream &os) const
 ostream& ContinuousParametric::spreadsheet_characteristic_print(ostream &os) const
 
 {
-  double variance = variance_computation();
-
-
 /*  if ((ident != GAUSSIAN) && (ident != VON_MISES)) {
     os << STAT_label[STATL_MEAN] << "\t" << mean_computation << "\t";
   } */
-  os << STAT_label[STATL_VARIANCE] << "\t" << variance;
-  if (ident != GAUSSIAN) {
-    os << "\t" << STAT_label[STATL_STANDARD_DEVIATION] << "\t" << sqrt(variance);
+
+  switch (ident) {
+
+  case GAUSSIAN : {
+    os << STAT_label[STATL_VARIANCE] << "\t" << dispersion * dispersion << endl;
+    break;
   }
-  os << endl;
+
+  case VON_MISES : {
+    double mean_resultant_length , standard_deviation;
+
+
+    mean_resultant_length = cyl_bessel_i(1 , dispersion) / cyl_bessel_i(0 , dispersion);
+
+    os << STAT_label[STATL_MEAN_RESULTANT_LENGTH] << "\t" << mean_resultant_length;
+
+    if (mean_resultant_length > 0.) {
+      standard_deviation = sqrt(-2 * log(mean_resultant_length));
+      if (unit == DEGREE) {
+        standard_deviation *= (180 / M_PI);
+      }
+
+      os << "\t" << STAT_label[STATL_CIRCULAR_STANDARD_DEVIATION] << "\t"
+         << standard_deviation;
+    }
+    os << endl;
+    break;
+  }
+  }
 
 /*  if ((ident != GAUSSIAN) && (ident != VON_MISES) && (variance > 0.)) {
     os << STAT_label[STATL_SKEWNESS_COEFF] << "\t" << skewness_computation() << "\t"
@@ -1322,42 +1376,6 @@ int ContinuousParametric::nb_parameter_computation() const
   }
 
   return nb_parameter;
-}
-
-
-/*--------------------------------------------------------------*
- *
- *  Calcul de la variance d'une loi continue.
- *
- *--------------------------------------------------------------*/
-
-double ContinuousParametric::variance_computation() const
-
-{
-  double variance;
-
-
-  switch (ident) {
-
-  case GAUSSIAN : {
-    variance = dispersion * dispersion;
-    break;
-  }
-
-  case VON_MISES : {
-    switch (unit) {
-    case DEGREE :
-      variance = 180 * 180 / (dispersion * M_PI * M_PI);
-      break;
-    case RADIAN :
-      variance = 1. / dispersion;
-      break;
-    }
-    break;
-  }
-  }
-
-  return variance;
 }
 
 
