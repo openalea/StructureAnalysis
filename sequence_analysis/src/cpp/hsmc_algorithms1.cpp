@@ -1932,12 +1932,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
           }
         }
 
+        hsmarkov->forward_backward(*seq);
+
         hsmarkov->create_cumul();
         hsmarkov->log_computation();
-
-        seq->posterior_probability = new double[seq->nb_sequence];
-        seq->likelihood = hsmarkov->viterbi(*seq , seq->posterior_probability);
-
+        hsmarkov->viterbi(*seq);
         hsmarkov->remove_cumul();
 
         seq->min_value_computation(0);
@@ -1946,8 +1945,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_estimation(StatError &e
         seq->build_characteristic(0 , true , (hsmarkov->type == 'e' ? true : false));
 
         seq->build_transition_count(hsmarkov);
-        seq->build_observation_frequency_distribution();
-        seq->build_observation_histogram();
+        seq->build_observation_frequency_distribution(hsmarkov->nb_state);
+        seq->build_observation_histogram(hsmarkov->nb_state);
 
         // calcul des lois d'occupation des etats
 
@@ -3734,12 +3733,11 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
           }
         }
 
+        hsmarkov->forward_backward(*seq);
+
         hsmarkov->create_cumul();
         hsmarkov->log_computation();
-
-        seq->posterior_probability = new double[seq->nb_sequence];
-        seq->likelihood = hsmarkov->viterbi(*seq , seq->posterior_probability);
-
+        hsmarkov->viterbi(*seq);
         hsmarkov->remove_cumul();
 
         seq->min_value_computation(0);
@@ -3748,8 +3746,8 @@ HiddenSemiMarkov* MarkovianSequences::hidden_semi_markov_stochastic_estimation(S
         seq->build_characteristic(0 , true , (hsmarkov->type == 'e' ? true : false));
 
         seq->build_transition_count(hsmarkov);
-        seq->build_observation_frequency_distribution();
-        seq->build_observation_histogram();
+        seq->build_observation_frequency_distribution(hsmarkov->nb_state);
+        seq->build_observation_histogram(hsmarkov->nb_state);
 
         // calcul des lois d'occupation des etats
 
