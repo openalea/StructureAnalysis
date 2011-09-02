@@ -1007,13 +1007,14 @@ bool Sequences::ascii_write(StatError &error , const char *path ,
  *
  *  arguments : stream, format ('c' : column / 'l' : line / 'a' : array),
  *              flag commentaire, probabilites a posteriori des sequences
- *              d'etats les plus probables (modeles markoviens caches),
- *              nombre de caracteres par ligne.
+ *              d'etats les plus probables, entropie des sequences d'etats
+ *              (modeles markoviens caches), nombre de caracteres par ligne.
  *
  *--------------------------------------------------------------*/
 
 ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
-                                double *posterior_probability , int line_nb_character) const
+                                double *posterior_probability , double *entropy ,
+                                int line_nb_character) const
 
 {
   register int i , j , k , m;
@@ -1095,12 +1096,13 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
       os << "(" << identifier[i] << ")" << endl;
 
-      if (posterior_probability) {
+      if ((posterior_probability) && (entropy)) {
         if (comment_flag) {
           os << "# ";
         }
         os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
-           << ": " << posterior_probability[i] << endl;
+           << ": " << posterior_probability[i] << "   "
+           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << endl;
       }
     }
     break;
@@ -1138,12 +1140,13 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
       os << "(" << identifier[i] << ")" << endl;
 
-      if (posterior_probability) {
+      if ((posterior_probability) && (entropy)) {
         if (comment_flag) {
           os << "# ";
         }
         os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
-           << ": " << posterior_probability[i] << endl;
+           << ": " << posterior_probability[i] << "   "
+           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << endl;
       }
     }
     break;
@@ -1254,12 +1257,13 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
       }
       os << "(" << identifier[i] << ")" << endl;
 
-      if (posterior_probability) {
+      if ((posterior_probability) && (entropy)) {
         if (comment_flag) {
           os << "# ";
         }
         os << SEQ_label[SEQL_POSTERIOR_STATE_SEQUENCE_PROBABILITY]
-           << ": " << posterior_probability[i] << endl;
+           << ": " << posterior_probability[i] << "   "
+           << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << entropy[i] << endl;
       }
     }
 
@@ -1384,27 +1388,81 @@ ostream& Sequences::ascii_print(ostream &os , char format , bool comment_flag ,
   }
 
   case 'p' : {
-    if (posterior_probability) {
-      os << "1 " << STAT_word[STATW_VARIABLE] << endl;
-      os << "\n" << STAT_word[STATW_VARIABLE] << " 1 : "
-         << STAT_variable_word[REAL_VALUE] << endl;
+    if ((posterior_probability) && (entropy)) {
+      bool *selected_sequence;
+      int index , width[4];
+      long old_adjust;
+      double max;
+
+
+      width[0] = column_width(nb_sequence) + ASCII_SPACE;
+      width[1] = column_width(nb_sequence , posterior_probability) + ASCII_SPACE;
+      width[2] = column_width(nb_sequence , entropy) + ASCII_SPACE;
+      width[3] = column_width(max_length) + ASCII_SPACE;
+
+      selected_sequence = new bool[nb_sequence];
+      for (i = 0;i < nb_sequence;i++) {
+        selected_sequence[i] = false;
+      }
+
+      old_adjust = os.setf(ios::left , ios::adjustfield);
+
+      os << "\n3 " << STAT_word[STATW_VARIABLES] << endl;
+
+      os << "\n";
+      for (i = 0;i < 2;i++) {
+        os << STAT_word[STATW_VARIABLE] << " " << i + 1 << " : "
+           << STAT_variable_word[REAL_VALUE] << endl;
+      }
+      os << STAT_word[STATW_VARIABLE] << " 3 : "
+         << STAT_variable_word[INT_VALUE] << endl;
 
       os << "\n";
       for (i = 0;i < nb_sequence;i++) {
-/*        for (j = 0;j < length[i];j++) {   // pour UC Fuji/Braeburn
+
+#       ifdef DEBUG
+        for (j = 0;j < length[i];j++) {  // pour UCs Fuji/Braeburn
           if (int_sequence[i][0][j] <= 1) {
             break;
           }
         }
 
-        if (j < length[i]) { */
-          os << posterior_probability[i] << "   ";
+        if (j < length[i]) {
+          os << setw(width[1]) << posterior_probability[i]
+             << setw(width[2]) << entropy[i]
+             << setw(width[3]) << length[i];
           if (comment_flag) {
             os << "# ";
           }
           os << "(" << identifier[i] << ")" << endl;
-//        }
+        }
+#       endif
+
+        max = 0.;
+        for (j = 0;j < nb_sequence;j++) {
+/*          if ((!selected_sequence[j]) && (entropy[j] > max)) {
+            max = entropy[j]; */
+          if ((!selected_sequence[j]) && (posterior_probability[j] > max)) {
+            max = posterior_probability[j];
+            index = j;
+          }
+        }
+
+        selected_sequence[index] = true;
+
+        os << setw(width[0]) << i
+           << setw(width[1]) << posterior_probability[index]
+           << setw(width[2]) << entropy[index]
+           << setw(width[3]) << length[index];
+        if (comment_flag) {
+          os << "# ";
+        }
+        os << "(" << identifier[index] << ")" << endl;
       }
+
+      delete [] selected_sequence;
+
+      os.setf((FMTFLAGS)old_adjust , ios::adjustfield);
     }
     break;
   }
