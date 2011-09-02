@@ -1114,7 +1114,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
           state_no_occurrence_probability(i);
         }
         if (seq.type[0] == STATE) {
-          state_first_occurrence_distribution(i , ((seq.characteristics[0]) && (seq.characteristics[0]->first_occurrence[i]) && (seq.characteristics[0]->first_occurrence[i]->nb_element > 0) ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
+          state_first_occurrence_distribution(i , ((seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) && (seq.characteristics[0]->first_occurrence[i]) && (seq.characteristics[0]->first_occurrence[i]->nb_element > 0) ? seq.characteristics[0]->first_occurrence[i]->nb_value : 1));
         }
         else {
           state_first_occurrence_distribution(i);
@@ -1125,7 +1125,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
         }
         if (nonparametric_process[0]->leave[i] < 1. - DOUBLE_ERROR) {
           if (seq.type[0] == STATE) {
-            state_recurrence_time_distribution(i , ((seq.characteristics[0]) && (seq.characteristics[0]->recurrence_time[i]->nb_element > 0) ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
+            state_recurrence_time_distribution(i , ((seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) && (seq.characteristics[0]->recurrence_time[i]->nb_element > 0) ? seq.characteristics[0]->recurrence_time[i]->nb_value : 1));
           }
           else {
             state_recurrence_time_distribution(i);
@@ -1142,7 +1142,7 @@ void SemiMarkov::characteristic_computation(const SemiMarkovData &seq , bool cou
                                                                                I_DEFAULT , 1. , 1. - transition[i][i] ,
                                                                                OCCUPANCY_THRESHOLD);
 
-            if ((seq.type[0] == STATE) && (seq.characteristics[0]) &&
+            if ((seq.type[0] == STATE) && (seq.characteristics[0]) && (i < seq.marginal_distribution[0]->nb_value) &&
                 (seq.characteristics[0]->sojourn_time[i]->nb_value > nonparametric_process[0]->sojourn_time[i]->nb_value)) {
               nonparametric_process[0]->sojourn_time[i]->computation(seq.characteristics[0]->sojourn_time[i]->nb_value , OCCUPANCY_THRESHOLD);
             }
