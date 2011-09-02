@@ -235,8 +235,8 @@ const double MAX_SURFACE = 3.;         // surface maximum pour appliquer la meth
 const int DIST_NB_ELEMENT = 1000000;   // taille maximum de l'echantillon pour la simulation
 
 const double GAUSSIAN_TAIL = 5.e-4;    // traine de la loi de Gauss
-const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de von Mises
-const int GAUSSIAN_NB_SUB_STEP = 10;   // nombre de pas pour le calcul de la loi de von Mises
+const int GAUSSIAN_NB_STEP = 1000;     // nombre de pas pour le calcul de la loi de Gauss
+const int GAUSSIAN_NB_SUB_STEP = 10;   // nombre de pas pour le calcul de la loi de Gauss
 const int VON_MISES_NB_STEP = 3600;    // nombre de pas pour le calcul de la loi de von Mises
 const int VON_MISES_NB_SUB_STEP = 10;  // nombre de pas pour le calcul de la loi de von Mises
 // const double CONCENTRATION_THRESHOLD = 10.;  seuil sur le parametre de concentration
@@ -797,6 +797,7 @@ public :
     std::ostream& ascii_print(std::ostream &os , int comment_flag = false , bool cumul_flag = false) const;
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool file_flag) const;
     std::ostream& spreadsheet_characteristic_print(std::ostream &os , bool shape = false) const;
+    std::ostream& spreadsheet_circular_characteristic_print(std::ostream &os) const;
     std::ostream& spreadsheet_print(std::ostream &os , bool cumul_flag = false ,
                                     bool concentration_flag = false) const;
     bool plot_print(const char *path , int nb_histo = 0 ,
@@ -1031,7 +1032,6 @@ public :
     ContinuousParametric& operator=(const ContinuousParametric&);
 
     int nb_parameter_computation() const;
-    double variance_computation() const;
 
     double von_mises_mass_computation(double inf , double sup) const;
     void von_mises_cumul_computation();
