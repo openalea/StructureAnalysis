@@ -364,7 +364,9 @@ private :
     VariableOrderChainData *chain_data;  // etats initaux et transitions
     double likelihood;      // vraisemblance des sequences
     double hidden_likelihood;  // vraisemblance de toutes les sequences possibles
+    double sample_entropy;  // entropie des sequences d'etats
     double *posterior_probability;  // probabilite a posteriori de la sequence d'etats la plus probable
+    double *entropy;        // entropie des sequences d'etats
 
     void copy(const VariableOrderMarkovData &seq , bool model_flag = true);
     void observation_frequency_distribution_correction(FrequencyDistribution **corrected_observation ,
@@ -417,7 +419,9 @@ public :
     VariableOrderChainData* get_chain_data() const { return chain_data; }
     double get_likelihood() const { return likelihood; }
     double get_hidden_likelihood() const { return hidden_likelihood; }
+    double get_sample_entropy() const { return sample_entropy; }
     double get_posterior_probability(int index) const { return posterior_probability[index]; }
+    double get_entropy(int index) const { return entropy[index]; }
 };
 
 
