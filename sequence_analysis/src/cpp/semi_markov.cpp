@@ -1240,6 +1240,15 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
            << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
       }
 
+      if (seq->sample_entropy != D_DEFAULT) {
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << seq->sample_entropy << "   ("
+           << STAT_label[STATL_NORMALIZED] << ": " << seq->sample_entropy / seq->cumul_length << ")" << endl;
+      }
+
       likelihood = seq->hidden_likelihood;
 
       if (likelihood != D_INF) {
@@ -1291,14 +1300,16 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
          << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
 
-    if ((hidden) && (seq->likelihood != D_INF)) {
+//    if ((hidden) && (seq->likelihood != D_INF)) {
+    if ((hidden) && (seq->hidden_likelihood != D_INF)) {
       os << "\n";
       if (file_flag) {
         os << "# ";
       }
       os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
-         << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
+//         << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
 
       os << "\n";
       if (file_flag) {
@@ -1306,7 +1317,8 @@ ostream& SemiMarkov::ascii_write(ostream &os , const SemiMarkovData *seq ,
       }
       os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << "): "
-         << 2 * seq->likelihood - penalty_computation(hidden , MIN_PROBABILITY) << endl;
+//         << 2 * seq->likelihood - penalty_computation(hidden , MIN_PROBABILITY) << endl;
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
   }
 
@@ -1539,6 +1551,11 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
            << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
       }
 
+      if (seq->sample_entropy != D_DEFAULT) {
+        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << "\t" << seq->sample_entropy << "\t"
+           << STAT_label[STATL_NORMALIZED] << "\t" << seq->sample_entropy / seq->cumul_length << endl;
+      }
+
       likelihood = seq->hidden_likelihood;
 
       if (likelihood != D_INF) {
@@ -1570,14 +1587,17 @@ ostream& SemiMarkov::spreadsheet_write(ostream &os , const SemiMarkovData *seq ,
          << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
     }
 
-    if (seq->likelihood != D_INF) {
+//    if ((hidden) && (seq->likelihood != D_INF)) {
+    if ((hidden) && (seq->hidden_likelihood != D_INF)) {
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
-         << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
+//         << 2 * seq->likelihood - nb_parameter * log((double)seq->cumul_length) << endl;
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
 
       os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
-         << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << ")\t"
-         << 2 * seq->likelihood - penalty_computation(hidden , MIN_PROBABILITY) << endl;
+         << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << ")\t"
+//         << 2 * seq->likelihood - penalty_computation(hidden , MIN_PROBABILITY) << endl;
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
   }
 
@@ -2319,8 +2339,10 @@ SemiMarkovData::SemiMarkovData()
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -2343,8 +2365,10 @@ SemiMarkovData::SemiMarkovData(const FrequencyDistribution &ihlength , int inb_v
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -2366,8 +2390,10 @@ SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq)
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -2391,8 +2417,10 @@ SemiMarkovData::SemiMarkovData(const MarkovianSequences &seq , char transform ,
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -2427,6 +2455,7 @@ void SemiMarkovData::copy(const SemiMarkovData &seq , bool model_flag)
 
   likelihood = seq.likelihood;
   hidden_likelihood = seq.hidden_likelihood;
+  sample_entropy = seq.sample_entropy;
 
   if (seq.posterior_probability) {
     posterior_probability = new double[nb_sequence];
@@ -2436,6 +2465,16 @@ void SemiMarkovData::copy(const SemiMarkovData &seq , bool model_flag)
   }
   else {
     posterior_probability = NULL;
+  }
+
+  if (seq.entropy) {
+    entropy = new double[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      entropy[i] = seq.entropy[i];
+    }
+  }
+  else {
+    entropy = NULL;
   }
 }
 
@@ -2453,6 +2492,7 @@ SemiMarkovData::~SemiMarkovData()
   delete chain_data;
 
   delete [] posterior_probability;
+  delete [] entropy;
 }
 
 
@@ -2472,6 +2512,7 @@ SemiMarkovData& SemiMarkovData::operator=(const SemiMarkovData &seq)
     delete chain_data;
 
     delete [] posterior_probability;
+    delete [] entropy;
 
     remove();
     Sequences::remove();
@@ -2626,7 +2667,7 @@ DiscreteDistributionData* SemiMarkovData::extract(StatError &error , int type ,
       if (semi_markov->nonparametric_process[variable]) {
         pdist = semi_markov->nonparametric_process[variable]->observation[value];
       }
-      else {
+      else if (semi_markov->discrete_parametric_process[variable]) {
         pparam = semi_markov->discrete_parametric_process[variable]->observation[value];
       }
       break;
@@ -2830,7 +2871,7 @@ ostream& SemiMarkovData::ascii_data_write(ostream &os , char format , bool exhau
 
 {
   MarkovianSequences::ascii_write(os , exhaustive , false);
-  ascii_print(os , format , false , posterior_probability);
+  ascii_print(os , format , false , posterior_probability , entropy);
 
   return os;
 }
@@ -2865,7 +2906,7 @@ bool SemiMarkovData::ascii_data_write(StatError &error , const char *path ,
     if (format != 'a') {
       MarkovianSequences::ascii_write(out_file , exhaustive , true);
     }
-    ascii_print(out_file , format , true , posterior_probability);
+    ascii_print(out_file , format , true , posterior_probability , entropy);
   }
 
   return status;
