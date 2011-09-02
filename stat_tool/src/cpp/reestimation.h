@@ -108,6 +108,8 @@ public :
 
     std::ostream& ascii_characteristic_print(std::ostream &os , bool shape = false ,
                                              bool comment_flag = false) const;
+    std::ostream& ascii_circular_characteristic_print(std::ostream &os ,
+                                                      bool comment_flag = false) const;
     std::ostream& print(std::ostream &os) const;
 
     void nb_value_computation();
