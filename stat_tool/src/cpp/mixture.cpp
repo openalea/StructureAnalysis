@@ -1212,9 +1212,9 @@ bool Mixture::plot_write(const char *prefix , const char *title ,
         out_file << "\" with linespoints,\\" << endl;
       }
 
-      out_file << "\"" << label((data_file_name[0].str()).c_str());
+      out_file << "\"" << label((data_file_name[0].str()).c_str()) << "\"";
       if (mixt_histo) {
-        out_file << "\" using " << nb_histo + 1;
+        out_file << " using " << nb_histo + 1;
       }
       out_file << " title \"" << STAT_label[STATL_MIXTURE] << "\" with linespoints" << endl;
 
