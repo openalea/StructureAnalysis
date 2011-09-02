@@ -3641,6 +3641,15 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
            << STAT_label[STATL_NORMALIZED] << ": " << seq->likelihood / seq->cumul_length << ")" << endl;
       }
 
+      if (seq->sample_entropy != D_DEFAULT) {
+        os << "\n";
+        if (file_flag) {
+          os << "# ";
+        }
+        os << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << ": " << seq->sample_entropy << "   ("
+           << STAT_label[STATL_NORMALIZED] << ": " << seq->sample_entropy / seq->cumul_length << ")" << endl;
+      }
+
       likelihood = seq->hidden_likelihood;
 
       if (likelihood != D_INF) {
@@ -3730,6 +3739,33 @@ ostream& VariableOrderMarkov::ascii_write(ostream &os , const VariableOrderMarko
       os << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << " " << STAT_label[STATL_FREE_PARAMETERS]
          << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << "): "
          << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
+    }
+
+    if ((hidden) && (seq->hidden_likelihood != D_INF)) {
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << nb_parameter << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+         << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
+
+      if ((type == 'o') && (nb_transient_parameter > 0)) {
+        if (file_flag) {
+          os << "# ";
+        }
+        os << nb_transient_parameter + nb_parameter << " " << STAT_label[STATL_FREE_PARAMETERS]
+           << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << "): "
+           << 2 * (seq->hidden_likelihood - seq->sample_entropy) - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+      }
+
+      os << "\n";
+      if (file_flag) {
+        os << "# ";
+      }
+      os << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << " " << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS]
+         << "   2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << "): "
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
   }
 
@@ -4130,6 +4166,11 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
            << STAT_label[STATL_NORMALIZED] << "\t" << seq->likelihood / seq->cumul_length << endl;
       }
 
+      if (seq->sample_entropy != D_DEFAULT) {
+        os << "\n" << SEQ_label[SEQL_STATE_SEQUENCE_ENTROPY] << "\t" << seq->sample_entropy << "\t"
+           << STAT_label[STATL_NORMALIZED] << "\t" << seq->sample_entropy / seq->cumul_length << endl;
+      }
+
       likelihood = seq->hidden_likelihood;
 
       if (likelihood != D_INF) {
@@ -4183,6 +4224,21 @@ ostream& VariableOrderMarkov::spreadsheet_write(ostream &os ,
       os << "\n" << nb_parameter + (type == 'o' ? nb_transient_parameter : 0) << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
          << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[BICc] << ")\t"
          << 2 * likelihood - penalty_computation(hidden , (hidden ? MIN_PROBABILITY : 0.)) << endl;
+    }
+
+    if ((hidden) && (seq->hidden_likelihood != D_INF)) {
+      os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
+         << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - nb_parameter * log((double)seq->cumul_length) << endl;
+      if ((type == 'o') && (nb_transient_parameter > 0)) {
+        os << nb_transient_parameter + nb_parameter << "\t" << STAT_label[STATL_FREE_PARAMETERS] << "\t"
+           << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICL] << ")\t"
+           << 2 * (seq->hidden_likelihood - seq->sample_entropy) - (nb_transient_parameter + nb_parameter) * log((double)seq->cumul_length) << endl;
+      }
+
+      os << "\n" << nb_parameter << "\t" << STAT_label[nb_parameter == 1 ? STATL_FREE_PARAMETER : STATL_FREE_PARAMETERS] << "\t"
+         << "2 * " << STAT_label[STATL_PENALIZED_LIKELIHOOD] << " ("  << STAT_criterion_word[ICLc] << ")\t"
+         << 2 * (seq->hidden_likelihood - seq->sample_entropy) - penalty_computation(hidden , MIN_PROBABILITY) << endl;
     }
   }
 
@@ -4991,8 +5047,10 @@ VariableOrderMarkovData::VariableOrderMarkovData()
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -5015,8 +5073,10 @@ VariableOrderMarkovData::VariableOrderMarkovData(const FrequencyDistribution &ih
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -5038,8 +5098,10 @@ VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq)
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -5064,8 +5126,10 @@ VariableOrderMarkovData::VariableOrderMarkovData(const MarkovianSequences &seq ,
 
   likelihood = D_INF;
   hidden_likelihood = D_INF;
+  sample_entropy = D_DEFAULT;
 
   posterior_probability = NULL;
+  entropy = NULL;
 }
 
 
@@ -5101,6 +5165,7 @@ void VariableOrderMarkovData::copy(const VariableOrderMarkovData &seq ,
 
   likelihood = seq.likelihood;
   hidden_likelihood = seq.hidden_likelihood;
+  sample_entropy = seq.sample_entropy;
 
   if (seq.posterior_probability) {
     posterior_probability = new double[nb_sequence];
@@ -5110,6 +5175,16 @@ void VariableOrderMarkovData::copy(const VariableOrderMarkovData &seq ,
   }
   else {
     posterior_probability = NULL;
+  }
+
+  if (seq.entropy) {
+    entropy = new double[nb_sequence];
+    for (i = 0;i < nb_sequence;i++) {
+      entropy[i] = seq.entropy[i];
+    }
+  }
+  else {
+    entropy = NULL;
   }
 }
 
@@ -5127,6 +5202,7 @@ VariableOrderMarkovData::~VariableOrderMarkovData()
   delete chain_data;
 
   delete [] posterior_probability;
+  delete [] entropy;
 }
 
 
@@ -5146,6 +5222,7 @@ VariableOrderMarkovData& VariableOrderMarkovData::operator=(const VariableOrderM
     delete chain_data;
 
     delete [] posterior_probability;
+    delete [] entropy;
 
     remove();
     Sequences::remove();
@@ -5275,7 +5352,7 @@ DiscreteDistributionData* VariableOrderMarkovData::extract(StatError &error , in
       if (markov->nonparametric_process[variable]) {
         pdist = markov->nonparametric_process[variable]->observation[value];
       }
-      else {
+      else if (markov->discrete_parametric_process[variable]) {
         pparam = markov->discrete_parametric_process[variable]->observation[value];
       }
       break;
@@ -5466,7 +5543,7 @@ ostream& VariableOrderMarkovData::ascii_data_write(ostream &os , char format ,
 
 {
   MarkovianSequences::ascii_write(os , exhaustive , false);
-  ascii_print(os , format , false , posterior_probability);
+  ascii_print(os , format , false , posterior_probability , entropy);
 
   return os;
 }
@@ -5501,7 +5578,7 @@ bool VariableOrderMarkovData::ascii_data_write(StatError &error , const char *pa
     if (format != 'a') {
       MarkovianSequences::ascii_write(out_file , exhaustive , true);
     }
-    ascii_print(out_file , format , true , posterior_probability);
+    ascii_print(out_file , format , true , posterior_probability , entropy);
   }
 
   return status;
