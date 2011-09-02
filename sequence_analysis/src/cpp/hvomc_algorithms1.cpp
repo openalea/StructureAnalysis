@@ -1430,12 +1430,11 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
           }
         }
 
+        hmarkov->forward_backward(*seq);
+
         hmarkov->create_cumul();
         hmarkov->log_computation();
-
-        seq->posterior_probability = new double[seq->nb_sequence];
-        seq->likelihood = hmarkov->viterbi(*seq , seq->posterior_probability);
-
+        hmarkov->viterbi(*seq);
         hmarkov->remove_cumul();
 
         seq->min_value_computation(0);
@@ -1444,8 +1443,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_esti
         seq->build_characteristic(0);
 
         seq->build_transition_count(*hmarkov);
-        seq->build_observation_frequency_distribution();
-        seq->build_observation_histogram();
+        seq->build_observation_frequency_distribution(hmarkov->nb_state);
+        seq->build_observation_histogram(hmarkov->nb_state);
 
         // calcul des lois d'observation parametriques et
         // du melange de lois d'observation parametriques (poids deduits de la restauration)
@@ -2653,12 +2652,11 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
           }
         }
 
+        hmarkov->forward_backward(*seq);
+
         hmarkov->create_cumul();
         hmarkov->log_computation();
-
-        seq->posterior_probability = new double[seq->nb_sequence];
-        seq->likelihood = hmarkov->viterbi(*seq , seq->posterior_probability);
-
+        hmarkov->viterbi(*seq);
         hmarkov->remove_cumul();
 
         seq->min_value_computation(0);
@@ -2667,8 +2665,8 @@ HiddenVariableOrderMarkov* MarkovianSequences::hidden_variable_order_markov_stoc
         seq->build_characteristic(0);
 
         seq->build_transition_count(*hmarkov);
-        seq->build_observation_frequency_distribution();
-        seq->build_observation_histogram();
+        seq->build_observation_frequency_distribution(hmarkov->nb_state);
+        seq->build_observation_histogram(hmarkov->nb_state);
 
         // calcul des lois d'observation parametriques et
         // du melange de lois d'observation parametriques (poids deduits de la restauration)
