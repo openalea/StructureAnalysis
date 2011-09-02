@@ -198,6 +198,10 @@ const char *STAT_label[] = {
   "coefficient of concentration" ,
   "smoothness" ,
 
+  "mean direction" ,
+  "mean resultant length" ,
+  "circular standard deviation" ,
+
   "mean confidence interval" ,
 
   "one-sided" ,
@@ -379,7 +383,7 @@ const char *STAT_parsing[] = {
   "bad distribution name" ,
   "bad parameter name" ,
   "bad parameter index" ,
-  "bad number of parameters" , // STATP_NB_PARAMETER 
+  "bad number of parameters" ,
   "bad separator" ,
   "bad parameter value" ,
   "sum of probabilities different to 1" ,
