@@ -251,6 +251,41 @@ ostream& Reestimation<Type>::ascii_characteristic_print(ostream &os , bool shape
 
 /*--------------------------------------------------------------*
  *
+ *  Ecriture des caracteristiques d'un objet Reestimation pour une variable circulaire.
+ *
+ *  arguments : stream, flag commentaire.
+ *
+ *--------------------------------------------------------------*/
+
+template <typename Type>
+ostream& Reestimation<Type>::ascii_circular_characteristic_print(ostream &os ,
+                                                                 bool comment_flag) const
+
+{
+  double mean_direction[4];
+
+
+  os << STAT_label[STATL_SAMPLE_SIZE] << ": " << nb_element << endl;
+
+  mean_direction_computation(mean_direction);
+
+  if (comment_flag) {
+    os << "# ";
+  }
+  os << STAT_label[STATL_MEAN_DIRECTION] << ": " << mean_direction[3];
+  if (mean_direction[2] > 0.) {
+    os << "   " << STAT_label[STATL_MEAN_RESULTANT_LENGTH] << ": " << mean_direction[2]
+       << "   " << STAT_label[STATL_CIRCULAR_STANDARD_DEVIATION] << ": "
+       << 180 * sqrt(-2 * log(mean_direction[2])) / M_PI;
+  }
+  os << endl;
+
+  return os;
+}
+
+
+/*--------------------------------------------------------------*
+ *
  *  Visualisation d'un objet Reestimation.
  *
  *  argument : stream.
@@ -1198,6 +1233,11 @@ double Reestimation<Type>::type_parametric_estimation(DiscreteParametric *dist ,
   if (max_likelihood != D_INF) {
     dist->ident = BINOMIAL;
   }
+
+# ifdef DEBUG
+  max_likelihood = D_INF;  // pour les donnees de tremblements de terre
+  likelihood = poisson_estimation(bdist , 0 , false , cumul_threshold);
+# endif
 
   likelihood = poisson_estimation(bdist , min_inf_bound , min_inf_bound_flag , cumul_threshold);
   if (likelihood > max_likelihood) {
