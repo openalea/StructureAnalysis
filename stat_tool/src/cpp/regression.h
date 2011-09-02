@@ -47,8 +47,8 @@
  */
 
 
-const int REGRESSION_NB_VECTOR = 5000;  // nombre maximum de vecteurs pour la
-                                        // regression non-parametrique
+const int REGRESSION_NB_VECTOR = 10000;  // nombre maximum de vecteurs pour la
+                                         // regression non-parametrique
 const int NEIGHBORHOOD = 3;            // voisinage minimum sur les valeurs
                                        // de la variable explicative
 
