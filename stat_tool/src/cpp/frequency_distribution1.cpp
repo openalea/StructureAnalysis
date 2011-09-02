@@ -797,7 +797,7 @@ ostream& FrequencyDistribution::ascii_write(ostream &os , bool exhaustive ,
     os << "# ";
   }
   os << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-  ascii_characteristic_print(os , true , exhaustive && file_flag);
+  ascii_characteristic_print(os , exhaustive , file_flag);
 
   if (exhaustive && file_flag) {
     os << "# ";
@@ -882,6 +882,37 @@ ostream& FrequencyDistribution::spreadsheet_characteristic_print(ostream &os , b
          << STAT_label[STATL_KURTOSIS_COEFF] << "\t" << kurtosis_computation() << endl;
     }
   }
+
+  return os;
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Ecriture des caracteristiques d'une loi empirique
+ *  pour une variable circulaire au format tableur.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
+
+ostream& FrequencyDistribution::spreadsheet_circular_characteristic_print(ostream &os) const
+
+{
+  double mean_direction[4];
+
+
+  os << STAT_label[STATL_SAMPLE_SIZE] << "\t" << nb_element << endl;
+
+  mean_direction_computation(mean_direction);
+
+  os << STAT_label[STATL_MEAN_DIRECTION] << "\t" << mean_direction[3];
+  if (mean_direction[2] > 0.) {
+    os << "\t" << STAT_label[STATL_MEAN_RESULTANT_LENGTH] << "\t" << mean_direction[2]
+       << "\t" << STAT_label[STATL_CIRCULAR_STANDARD_DEVIATION] << "\t"
+       << 180 * sqrt(-2 * log(mean_direction[2])) / M_PI;
+  }
+  os << endl;
 
   return os;
 }
