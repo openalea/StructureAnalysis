@@ -4394,7 +4394,7 @@ int Vectors::cumulative_distribution_function_computation(int variable , double 
 
 /*--------------------------------------------------------------*
  *
- *  Calcul de l'intervalle minimum entre 2 valeurs.
+ *  Calcul de l'intervalle minimum entre 2 valeurs pour une variable.
  *
  *  argument : indice de la variable.
  *
@@ -4864,7 +4864,7 @@ double** Vectors::correlation_computation() const
  *
  *  Calcul de la direction moyenne d'une variable circulaire.
  *
- *  arguments : indice de la variable, unite (DEGREE/GRADIAN).
+ *  arguments : indice de la variable, unite (DEGREE/RADIAN).
  *
  *--------------------------------------------------------------*/
 
