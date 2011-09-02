@@ -59,6 +59,9 @@ extern int column_width(double min_value , double max_value);
 extern int column_width(int nb_value , const double *value , double scale = 1.);
 extern char* label(const char *file_name);
 
+const static double bilateral_tail[7] = {0.05, 0.025, 0.01, 0.005, 0.0025, 0.001, 0.0005};
+const static double posterior_threshold[7] = {0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025};
+
 
 
 /*--------------------------------------------------------------*
@@ -353,6 +356,13 @@ ContinuousParametricProcess* continuous_observation_parsing(StatError &error , i
     }
 
     process = new ContinuousParametricProcess(nb_state , dist);
+
+#   ifdef DEBUG
+    if (nb_state == 7) {
+      process->interval_computation(cout);
+    }
+#   endif
+
   }
 
   for (i = 0;i < nb_state;i++) {
@@ -516,7 +526,15 @@ ostream& ContinuousParametricProcess::ascii_print(ostream &os , Histogram **obse
         }
         os << STAT_label[STATL_STATE] << " " << i << " " << STAT_label[STATL_OBSERVATION] << " "
            << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << " - ";
-        observation_distribution[i]->ascii_characteristic_print(os , false , file_flag);
+
+        switch (ident) {
+        case GAUSSIAN :
+          observation_distribution[i]->ascii_characteristic_print(os , false , file_flag);
+          break;
+        case VON_MISES :
+          observation_distribution[i]->ascii_circular_characteristic_print(os , file_flag);
+          break;
+        }
       }
 
       if (exhaustive) {
@@ -1192,7 +1210,15 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       if (observation_distribution) {
         os << "\n" << STAT_label[STATL_STATE] << " " << i << " "
            << STAT_label[STATL_OBSERVATION] << " " << STAT_label[STATL_FREQUENCY_DISTRIBUTION] << "\t";
-        observation_distribution[i]->spreadsheet_characteristic_print(os);
+
+        switch (ident) {
+        case GAUSSIAN :
+          observation_distribution[i]->spreadsheet_characteristic_print(os);
+          break;
+        case VON_MISES :
+          observation_distribution[i]->spreadsheet_circular_characteristic_print(os);
+          break;
+        }
       }
 
       if (observation_histogram) {
@@ -1325,21 +1351,13 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
     }
 
     case VON_MISES : {
-      switch (unit) {
-      case DEGREE :
-        max_value = 360.;
-        break;
-      case RADIAN :
-        max_value = 2 * M_PI;
-        break;
-      }
-
-      step = max_value / VON_MISES_NB_STEP;
-
       value = 0.;
+
       switch (unit) {
 
       case DEGREE : {
+        step = 360. / VON_MISES_NB_STEP;
+
         for (i = 0;i < VON_MISES_NB_STEP;i++) {
           os << value;
           for (j = 0;j < nb_state;j++) {
@@ -1353,7 +1371,9 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
       }
 
       case RADIAN : {
-        for (i = 0;i < nb_step;i++) {
+        step = 2 * M_PI / VON_MISES_NB_STEP;
+
+        for (i = 0;i < VON_MISES_NB_STEP;i++) {
           os << value;
           for (j = 0;j < nb_state;j++) {
             os << "\t" << exp(observation[j]->dispersion * cos(value - observation[j]->location)) /
@@ -1365,6 +1385,7 @@ ostream& ContinuousParametricProcess::spreadsheet_print(ostream &os , Histogram 
         break;
       }
       }
+      break;
     }
     }
   }
@@ -3104,4 +3125,365 @@ void ContinuousParametricProcess::init(int iident , double min_value , double ma
   cout << endl;
 # endif
 
+}
+
+
+/*--------------------------------------------------------------*
+ *
+ *  Calcul d'intervalles sur des criteres de quantiles et de probabilites
+ *  a posteriori pour des poids supposes egaux sur les lois d'observation.
+ *
+ *  argument : stream.
+ *
+ *--------------------------------------------------------------*/
+
+ostream& ContinuousParametricProcess::interval_computation(ostream &os)
+
+{
+  register int i , j , k;
+  int nb_step , posterior_mode;
+  double step , value , min_value , max_value , cumul , norm , max_posterior ,
+         posterior_value , **quantile_limit , **posterior , **posterior_limit;
+  normal **dist;
+
+
+  quantile_limit = new double*[2 * nb_state];
+  for (i = 0;i < 2 * nb_state;i++) {
+    quantile_limit[i] = new double[10];
+  }
+
+  posterior = new double*[nb_state];
+
+  posterior_limit = new double*[2 * nb_state];
+  for (i = 0;i < 2 * nb_state;i++) {
+    posterior_limit[i] = new double[10];
+  }
+
+  // calcul des lois a posteriori pour des poids egaux des lois
+
+  switch (ident) {
+
+  case GAUSSIAN : {
+    dist = new normal*[nb_state];
+
+    for (i = 0;i < nb_state;i++) {
+      dist[i] = new normal(observation[i]->location , observation[i]->dispersion);
+      posterior[i] = new double[GAUSSIAN_NB_STEP];
+    }
+
+    // calcul des quantiles
+
+    for (i = 0;i < nb_state;i++) {
+      for (j = 0;j < 7;j++) {
+        quantile_limit[2 * i][j] = quantile(*dist[i] , bilateral_tail[j] / 2.);
+        quantile_limit[2 * i + 1][j] = quantile(complement(*dist[i] , bilateral_tail[j] / 2.));
+      }
+    }
+
+    // calcul des probabilites a posteriori
+
+    min_value = quantile(*dist[0] , GAUSSIAN_TAIL);
+    for (i = 1;i < nb_state;i++) {
+      value = quantile(*dist[i] , GAUSSIAN_TAIL);
+      if (value < min_value) {
+        min_value = value;
+      }
+    }
+
+    max_value = quantile(complement(*dist[0] , GAUSSIAN_TAIL));
+    for (i = 1;i < nb_state;i++) {
+      value = quantile(complement(*dist[i] , GAUSSIAN_TAIL));
+      if (value > max_value) {
+        max_value = value;
+      }
+    }
+
+    step = (max_value - min_value) / GAUSSIAN_NB_STEP + 1;
+
+    value = min_value;
+    for (i = 0;i < GAUSSIAN_NB_STEP;i++) {
+      norm = 0.;
+      for (j = 0;j < nb_state;j++) {
+        posterior[j][i] = pdf(*dist[j] , value);
+        norm += posterior[j][i];
+      }
+
+      for (j = 0;j < nb_state;j++) {
+        posterior[j][i] /= norm;
+      }
+      value += step;
+    }
+
+    for (i = 0;i < nb_state;i++) {
+      delete dist[i];
+    }
+    delete [] dist;
+
+    nb_step = GAUSSIAN_NB_STEP;
+    break;
+  }
+
+  case VON_MISES : {
+    switch (unit) {
+    case DEGREE :
+      step = 360. / VON_MISES_NB_STEP;
+      break;
+    case RADIAN :
+      step = 2 * M_PI / VON_MISES_NB_STEP;
+      break;
+    }
+
+    // calcul des quantiles
+
+    for (i = 0;i < nb_state;i++) {
+      value = observation[i]->location + step / 2;
+      cumul = 0.5;
+      j = 0;
+
+      do {
+        switch (unit) {
+
+        case DEGREE : {
+          do {
+            value -= step;
+            cumul -= exp(observation[i]->dispersion * cos((value - observation[i]->location) * M_PI / 180)) * step /
+                     (360 * cyl_bessel_i(0 , observation[i]->dispersion));
+          }
+          while (cumul > bilateral_tail[j] / 2);
+
+          quantile_limit[2 * i][j] = value;
+          quantile_limit[2 * i + 1][j] = 2 * observation[i]->location - value;
+
+          if (quantile_limit[2 * i][j] < 0) {
+            quantile_limit[2 * i][j] += 360;
+          }
+          if (quantile_limit[2 * i + 1][j] >= 360) {
+            quantile_limit[2 * i + 1][j] -= 360;
+          }
+          break;
+        }
+
+        case RADIAN : {
+          do {
+            value -= step;
+            cumul -= exp(observation[i]->dispersion * cos(value - observation[i]->location)) * step /
+                     (2 * M_PI * cyl_bessel_i(0 , observation[i]->dispersion));
+          }
+          while (cumul > bilateral_tail[j] / 2);
+
+          quantile_limit[2 * i][j] = value;
+          quantile_limit[2 * i + 1][j] = 2 * observation[i]->location - value;
+ 
+          if (quantile_limit[2 * i][j] < 0) {
+            quantile_limit[2 * i][j] += 2 * M_PI;
+          }
+          if (quantile_limit[2 * i + 1][j] >= 2 * M_PI) {
+            quantile_limit[2 * i + 1][j] -= 2 * M_PI;
+          }
+          break;
+        }
+        }
+
+        j++;
+      }
+      while (j < 7);
+    }
+
+    // calcul des probabilites a posteriori
+
+    for (i = 0;i < nb_state;i++) {
+      posterior[i] = new double[VON_MISES_NB_STEP];
+    }
+
+    value = 0.;
+
+    switch (unit) {
+
+    case DEGREE : {
+      for (i = 0;i < VON_MISES_NB_STEP;i++) {
+        norm = 0.;
+        for (j = 0;j < nb_state;j++) {
+          posterior[j][i] = exp(observation[j]->dispersion * cos((value - observation[j]->location) * M_PI / 180)) /
+                            (360 * cyl_bessel_i(0 , observation[j]->dispersion));
+          norm += posterior[j][i];
+        }
+
+        for (j = 0;j < nb_state;j++) {
+          posterior[j][i] /= norm;
+        }
+        value += step;
+      }
+      break;
+    }
+
+    case RADIAN : {
+      for (i = 0;i < VON_MISES_NB_STEP;i++) {
+        norm = 0.;
+        for (j = 0;j < nb_state;j++) {
+          posterior[j][i] = exp(observation[j]->dispersion * cos(value - observation[j]->location)) /
+                            (2 * M_PI * cyl_bessel_i(0 , observation[j]->dispersion));
+          norm += posterior[j][i];
+        }
+
+        for (j = 0;j < nb_state;j++) {
+          posterior[j][i] /= norm;
+        }
+        value += step;
+      }
+      break;
+    }
+    }
+
+    nb_step = VON_MISES_NB_STEP;
+    break;
+  }
+  }
+
+  // calcul des seuils sur les probabilites a posteriori
+
+# ifdef MESSAGE
+  cout << "\nPosterior mode:";
+# endif
+
+  for (i = 0;i < nb_state;i++) {
+    max_posterior = 0.;
+    posterior_mode = 0;
+
+    switch (ident) {
+    case GAUSSIAN :
+      value = min_value;
+      break;
+    case VON_MISES :
+      value = 0.;
+      break;
+    }
+    posterior_value = value;
+
+    for (j = 1;j < nb_step;j++) {
+      value += step;
+      if  (posterior[i][j] > max_posterior) {
+        max_posterior = posterior[i][j];
+        posterior_mode = j;
+        posterior_value = value;
+      }
+    }
+
+#   ifdef MESSAGE
+    cout << " " << posterior_value;
+#   endif
+
+    j = posterior_mode;
+    value = posterior_value;
+    k = 0;
+    do {
+      do {
+        if ((ident == VON_MISES) && (j == 0)) {
+          j = nb_step - 1;
+          value = j * step;
+        }
+        else {
+          j--;
+          value -= step;
+        }
+      }
+      while ((posterior[i][j] > posterior_threshold[k]));
+
+      posterior_limit[2 * i][k++] = value;
+    }
+    while (k < 7);
+
+    j = posterior_mode;
+    value = posterior_value;
+    k = 0;
+    do {
+      do {
+        if ((ident == VON_MISES) && (j == nb_step - 1)) {
+          j = 0;
+          value = 0.;
+        }
+        else {
+          j++;
+          value += step;
+        }
+      }
+      while ((posterior[i][j] > posterior_threshold[k]));
+
+      posterior_limit[2 * i + 1][k++] = value;
+    }
+    while (k < 7);
+  }
+
+# ifdef MESSAGE
+  cout << endl;
+# endif
+
+  // sortie des seuils
+
+  for (i = 0;i < nb_state;i++) {
+    os << "\n" << STAT_word[STATW_STATE] << " " << i << " "
+       << STAT_word[STATW_OBSERVATION_DISTRIBUTION] << endl;
+    observation[i]->ascii_parameter_print(os);
+    observation[i]->ascii_characteristic_print(os);
+
+    os << "\nQuantiles" << endl;
+    for (j = 0;j < 7;j++) {
+      os << bilateral_tail[j] << ": " << quantile_limit[2 * i][j] << ", "
+         << quantile_limit[2 * i + 1][j] << " - ";
+
+      if ((ident == GAUSSIAN) || (quantile_limit[2 * i + 1][j] > quantile_limit[2 * i][j])) {
+        os << quantile_limit[2 * i + 1][j] - quantile_limit[2 * i][j] << endl;
+      }
+
+      else {
+        switch (unit) {
+        case DEGREE :
+          os << quantile_limit[2 * i + 1][j] - (quantile_limit[2 * i][j] - 360.) << endl;
+          break;
+        case RADIAN :
+          os << quantile_limit[2 * i + 1][j] - (quantile_limit[2 * i][j] - 2 * M_PI) << endl;
+          break;
+        }
+      }
+    }
+
+    os << "\nPosterior probability limits" << endl;
+    for (j = 0;j < 7;j++) {
+      os << posterior_threshold[j] << ": " << posterior_limit[2 * i][j] << ", "
+         << posterior_limit[2 * i + 1][j] << " - ";
+
+      if ((ident == GAUSSIAN) || (posterior_limit[2 * i + 1][j] > posterior_limit[2 * i][j])) {
+        os << posterior_limit[2 * i + 1][j] - posterior_limit[2 * i][j] << endl;
+      }
+
+      else {
+        switch (unit) {
+        case DEGREE :
+          os << posterior_limit[2 * i + 1][j] - (posterior_limit[2 * i][j] - 360.) << endl;
+          break;
+        case RADIAN :
+          os << posterior_limit[2 * i + 1][j] - (posterior_limit[2 * i][j] - 2 * M_PI) << endl;
+          break;
+        }
+      }
+    }
+
+    os << endl;
+  }
+
+  for (i = 0;i < 2 * nb_state;i++) {
+    delete [] quantile_limit[i];
+  }
+  delete [] quantile_limit;
+
+  for (i = 0;i < nb_state;i++) {
+    delete [] posterior[i];
+  }
+  delete [] posterior;
+
+  for (i = 0;i < 2 * nb_state;i++) {
+    delete [] posterior_limit[i];
+  }
+  delete [] posterior_limit;
+
+  return os;
 }
