@@ -99,8 +99,12 @@ enum {
   GAUSSIAN_CHANGE ,
   MEAN_CHANGE ,
   VARIANCE_CHANGE ,
-  MEAN_VARIANCE_CHANGE
+  MEAN_VARIANCE_CHANGE ,
+  BAYESIAN_POISSON_CHANGE ,
+  BAYESIAN_GAUSSIAN_CHANGE
 };
+
+const double PRIOR_VARIANCE_FACTOR = 100.;  // facteur pour deduire la variance de la loi a priori
 
 const double MAX_NB_WORD = 1.e7;       // nombre maximum de mots
 
@@ -452,7 +456,7 @@ protected :
 
     std::ostream& ascii_write(std::ostream &os , bool exhaustive , bool comment_flag) const;
     std::ostream& ascii_print(std::ostream &os , char format , bool comment_flag ,
-                              double *posterior_probability = NULL ,
+                              double *posterior_probability = NULL , double *entropy = NULL ,
                               int line_nb_character = LINE_NB_CHARACTER) const;
     bool plot_print(const char *path , int ilength) const;
 
@@ -521,6 +525,8 @@ protected :
                                         long double *end_conditional_entropy ,
                                         long double *change_point_entropy) const;
 
+    void gamma_hyperparameter_computation(int index , int variable ,
+                                          double *hyperparam) const;
     int nb_parameter_computation(int index , int nb_segment , int *model_type) const;
     double one_segment_likelihood(int index , int *model_type , double **rank) const;
     Sequences* segmentation_output(int *nb_segment , int *model_type , std::ostream &os ,
@@ -663,9 +669,9 @@ public :
                               int variable = I_DEFAULT , bool begin_end = false ,
                               int output = TREND) const;
 
-    Sequences* pointwise_average(StatError &error , bool standard_deviation = false ,
-                                 int output = SEQUENCE , const char *path = NULL ,
-                                 char format = 'a') const;
+    Sequences* pointwise_average(StatError &error , bool circular = false ,
+                                 bool standard_deviation = false , int output = SEQUENCE ,
+                                 const char *path = NULL , char format = 'a') const;
 
     Sequences* recurrence_time_sequences(StatError &error , int variable , int value) const;
     Sequences* sojourn_time_sequences(StatError &error , int variable) const;
@@ -933,7 +939,7 @@ protected :
 
     void self_transition_computation(int state);
     Distribution* weight_computation() const;
-    void observation_frequency_distribution_computation(int variable);
+    void observation_frequency_distribution_computation(int variable , int nb_state);
     bool test_hidden(int variable) const;
 
     void build_index_value(int variable);
@@ -1036,11 +1042,9 @@ public :
     void self_transition_computation(bool *homogeneity);
     void sojourn_time_frequency_distribution_computation(int variable);
 
-    void create_observation_frequency_distribution(int nb_state);
-    void observation_frequency_distribution_computation();
-    void build_observation_frequency_distribution();
-    void build_observation_histogram(int variable , double step = D_DEFAULT);
-    void build_observation_histogram();
+    void build_observation_frequency_distribution(int nb_state);
+    void build_observation_histogram(int variable , int nb_state , double step = D_DEFAULT);
+    void build_observation_histogram(int nb_state);
     bool select_step(StatError &error , int variable , double step ,
                      double imin_value = D_INF);
 
