@@ -6973,21 +6973,24 @@ bool Sequences::pointwise_average_spreadsheet_print(StatError &error , const cha
  *
  *  Calcul de la sequence des moyennes (et des ecart-types).
  *
- *  arguments : reference sur un objet StatError, flag calcul des ecart-types,
+ *  arguments : reference sur un objet StatError, flag donnees circulaires,
+ *              flag calcul des ecart-types,
  *              sortie (sequences, residus ou residus standardisees),
  *              path, format ('a' : ASCII / 's' : Spreadsheet).
  *
  *--------------------------------------------------------------*/
 
-Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviation ,
-                                        int output , const char *path , char format) const
+Sequences* Sequences::pointwise_average(StatError &error , bool circular ,
+                                        bool standard_deviation , int output ,
+                                        const char *path , char format) const
 
 {
   bool status = true;
   register int i , j , k;
-  int inb_sequence , min_identifier , max_identifier , *iidentifier , *ilength , *itype ,
-      *pindex_param , *size;
-  double diff , *prsequence , *pmean , *pstandard_deviation;
+  int inb_sequence , min_identifier , max_identifier , unit , *iidentifier ,
+      *ilength , *itype , *pindex_param , *size;
+  double diff , *prsequence , *pmean , *pstandard_deviation , *pmean_direction1 ,
+         *pmean_direction2 , ***mean_direction;
   Sequences *seq;
 
 
@@ -7128,93 +7131,32 @@ Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviati
       }
     }
 
-    // calcul des moyennes
+    switch (circular) {
 
-    for (i = 0;i < seq->nb_variable;i++) {
-      for (j = 0;j < seq->length[0];j++) {
-        seq->real_sequence[0][i][j] = 0.;
-      }
-    }
+    case false : {
 
-    if (index_parameter) {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < nb_variable;j++) {
-          pindex_param = seq->index_parameter[0];
-          prsequence = seq->real_sequence[0][j];
-          if (type[j] != REAL_VALUE) {
-            for (k = 0;k < length[i];k++) {
-              while (*pindex_param < index_parameter[i][k]) {
-                pindex_param++;
-                prsequence++;
-              }
-              pindex_param++;
-              *prsequence++ += int_sequence[i][j][k];
-            }
-          }
+      // calcul des moyennes
 
-          else {
-            for (k = 0;k < length[i];k++) {
-              while (*pindex_param < index_parameter[i][k]) {
-                pindex_param++;
-                prsequence++;
-              }
-              pindex_param++;
-              *prsequence++ += real_sequence[i][j][k];
-            }
-          }
-        }
-      }
-    }
-
-    else {
-      for (i = 0;i < nb_sequence;i++) {
-        for (j = 0;j < nb_variable;j++) {
-          if (type[j] != REAL_VALUE) {
-            for (k = 0;k < length[i];k++) {
-              seq->real_sequence[0][j][k] += int_sequence[i][j][k];
-            }
-          }
-
-          else {
-            for (k = 0;k < length[i];k++) {
-              seq->real_sequence[0][j][k] += real_sequence[i][j][k];
-            }
-          }
-        }
-      }
-    }
-
-    for (i = 0;i < seq->nb_variable;i++) {
-      for (j = 0;j < seq->length[0];j++) {
-        seq->real_sequence[0][i][j] /= size[j];
-      }
-    }
-
-    // calcul des ecart-types
-
-    if (standard_deviation) {
       for (i = 0;i < seq->nb_variable;i++) {
-        for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-          seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
+        for (j = 0;j < seq->length[0];j++) {
+          seq->real_sequence[0][i][j] = 0.;
         }
       }
 
       if (index_parameter) {
         for (i = 0;i < nb_sequence;i++) {
           for (j = 0;j < nb_variable;j++) {
-            pindex_param = seq->index_parameter[seq->nb_sequence - 1];
-            prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
-            pmean = seq->real_sequence[0][j];
+            pindex_param = seq->index_parameter[0];
+            prsequence = seq->real_sequence[0][j];
+
             if (type[j] != REAL_VALUE) {
               for (k = 0;k < length[i];k++) {
                 while (*pindex_param < index_parameter[i][k]) {
                   pindex_param++;
                   prsequence++;
-                  pmean++;
                 }
                 pindex_param++;
-                diff = int_sequence[i][j][k] - *pmean++;
-                *prsequence++ += diff * diff;
+                *prsequence++ += int_sequence[i][j][k];
               }
             }
 
@@ -7223,11 +7165,9 @@ Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviati
                 while (*pindex_param < index_parameter[i][k]) {
                   pindex_param++;
                   prsequence++;
-                  pmean++;
                 }
                 pindex_param++;
-                diff = real_sequence[i][j][k] - *pmean++;
-                *prsequence++ += diff * diff;
+                *prsequence++ += real_sequence[i][j][k];
               }
             }
           }
@@ -7239,15 +7179,13 @@ Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviati
           for (j = 0;j < nb_variable;j++) {
             if (type[j] != REAL_VALUE) {
               for (k = 0;k < length[i];k++) {
-                diff = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                seq->real_sequence[0][j][k] += int_sequence[i][j][k];
               }
             }
 
             else {
               for (k = 0;k < length[i];k++) {
-                diff = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
-                seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                seq->real_sequence[0][j][k] += real_sequence[i][j][k];
               }
             }
           }
@@ -7255,13 +7193,260 @@ Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviati
       }
 
       for (i = 0;i < seq->nb_variable;i++) {
-        for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
-          if (size[j] > 1) {
-            seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(seq->real_sequence[seq->nb_sequence - 1][i][j] /
-                                                                  (size[j] - 1));
+        for (j = 0;j < seq->length[0];j++) {
+          seq->real_sequence[0][i][j] /= size[j];
+        }
+      }
+
+      // calcul des ecart-types
+
+      if (standard_deviation) {
+        for (i = 0;i < seq->nb_variable;i++) {
+          for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+            seq->real_sequence[seq->nb_sequence - 1][i][j] = 0.;
+          }
+        }
+
+        if (index_parameter) {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              pindex_param = seq->index_parameter[seq->nb_sequence - 1];
+              prsequence = seq->real_sequence[seq->nb_sequence - 1][j];
+              pmean = seq->real_sequence[0][j];
+
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    prsequence++;
+                    pmean++;
+                  }
+                  pindex_param++;
+                  diff = int_sequence[i][j][k] - *pmean++;
+                  *prsequence++ += diff * diff;
+                }
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    prsequence++;
+                    pmean++;
+                  }
+                  pindex_param++;
+                  diff = real_sequence[i][j][k] - *pmean++;
+                  *prsequence++ += diff * diff;
+                }
+              }
+            }
+          }
+        }
+
+        else {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  diff = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                  seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                }
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  diff = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                  seq->real_sequence[seq->nb_sequence - 1][j][k] += diff * diff;
+                }
+              }
+            }
+          }
+        }
+
+        for (i = 0;i < seq->nb_variable;i++) {
+          for (j = 0;j < seq->length[seq->nb_sequence - 1];j++) {
+            if (size[j] > 1) {
+              seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(seq->real_sequence[seq->nb_sequence - 1][i][j] /
+                                                                    (size[j] - 1));
+            }
           }
         }
       }
+      break;
+    }
+
+    case true : {
+
+      // choix de l'unite
+
+      unit = RADIAN;
+      for (i = 0;i < nb_variable;i++) {
+        if (max_value[i] - min_value[i] > 2 * M_PI) {
+          unit = DEGREE;
+          break;
+        }
+      }
+
+      // calcul des directions moyennes
+
+      mean_direction = new double**[seq->nb_variable];
+      for (i = 0;i < seq->nb_variable;i++) {
+        mean_direction[i] = new double*[3];
+        for (j = 0;j < 3;j++) {
+          mean_direction[i][j] = new double[seq->length[0]];
+        }
+      }
+
+      for (i = 0;i < seq->nb_variable;i++) {
+        for (j = 0;j < seq->length[0];j++) {
+          mean_direction[i][0][j] = 0.;
+          mean_direction[i][1][j] = 0.;
+        }
+      }
+
+      if (index_parameter) {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < nb_variable;j++) {
+            pindex_param = seq->index_parameter[0];
+            pmean_direction1 = mean_direction[j][0];
+            pmean_direction2 = mean_direction[j][1];
+
+            if (type[j] != REAL_VALUE) {
+              for (k = 0;k < length[i];k++) {
+                while (*pindex_param < index_parameter[i][k]) {
+                  pindex_param++;
+                  pmean_direction1++;
+                  pmean_direction2++;
+                }
+                pindex_param++;
+                *pmean_direction1++ += cos(int_sequence[i][j][k] * M_PI / 180);
+                *pmean_direction2++ += sin(int_sequence[i][j][k] * M_PI / 180);
+              }
+            }
+
+            else {
+              switch (unit) {
+
+              case DEGREE : {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    pmean_direction1++;
+                    pmean_direction2++;
+                  }
+                  pindex_param++;
+                  *pmean_direction1++ += cos(real_sequence[i][j][k] * M_PI / 180);
+                  *pmean_direction2++ += sin(real_sequence[i][j][k] * M_PI / 180);
+                }
+                break;
+              }
+
+              case RADIAN : {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    pmean_direction1++;
+                    pmean_direction2++;
+                  }
+                  pindex_param++;
+                  *pmean_direction1++ += cos(real_sequence[i][j][k]);
+                  *pmean_direction2++ += sin(real_sequence[i][j][k]);
+                }
+                break;
+              }
+              }
+            }
+          }
+        }
+      }
+
+      else {
+        for (i = 0;i < nb_sequence;i++) {
+          for (j = 0;j < nb_variable;j++) {
+            if (type[j] != REAL_VALUE) {
+              for (k = 0;k < length[i];k++) {
+                mean_direction[j][0][k] += cos(int_sequence[i][j][k] * M_PI / 180);
+                mean_direction[j][1][k] += sin(int_sequence[i][j][k] * M_PI / 180);
+              }
+            }
+
+            else {
+              switch (unit) {
+
+              case DEGREE : {
+                for (k = 0;k < length[i];k++) {
+                  mean_direction[j][0][k] += cos(real_sequence[i][j][k] * M_PI / 180);
+                  mean_direction[j][1][k] += sin(real_sequence[i][j][k] * M_PI / 180);
+                }
+                break;
+              }
+
+              case RADIAN : {
+                for (k = 0;k < length[i];k++) {
+                  mean_direction[j][0][k] += cos(real_sequence[i][j][k]);
+                  mean_direction[j][1][k] += sin(real_sequence[i][j][k]);
+                }
+                break;
+              }
+              }
+            }
+          }
+        }
+      }
+
+      for (i = 0;i < seq->nb_variable;i++) {
+        for (j = 0;j < seq->length[0];j++) {
+          mean_direction[i][0][j] /= size[j];
+          mean_direction[i][1][j] /= size[j];
+
+          mean_direction[i][2][j] = sqrt(mean_direction[i][0][j] * mean_direction[i][0][j] +
+                                         mean_direction[i][1][j] * mean_direction[i][1][j]);
+
+          if (mean_direction[i][2][j] > 0.) {
+            seq->real_sequence[0][i][j] = atan(mean_direction[i][1][j] / mean_direction[i][0][j]);
+
+            if (mean_direction[i][0][j] < 0.) {
+              seq->real_sequence[0][i][j] += M_PI;
+            }
+            if (unit == DEGREE) {
+              seq->real_sequence[0][i][j] *= (180 / M_PI);
+            }
+          }
+
+          else {
+            seq->real_sequence[0][i][j] = D_DEFAULT;
+          }
+        }
+      }
+
+      // calcul des ecart-types
+
+      if (standard_deviation) {
+        for (i = 0;i < seq->nb_variable;i++) {
+          for (j = 0;j < seq->length[0];j++) {
+            if (mean_direction[i][2][j] > 0.) {
+              seq->real_sequence[seq->nb_sequence - 1][i][j] = sqrt(-2 * log(mean_direction[i][2][j]));
+              if (unit == DEGREE) {
+                seq->real_sequence[seq->nb_sequence - 1][i][j] *= (180 / M_PI);
+              }
+            }
+
+            else {
+              seq->real_sequence[seq->nb_sequence - 1][i][j] = D_DEFAULT;
+            }
+          }
+        }
+      }
+
+      for (i = 0;i < seq->nb_variable;i++) {
+        for (j = 0;j < 3;j++) {
+          delete [] mean_direction[i][j];
+        }
+        delete [] mean_direction[i];
+      }
+      delete [] mean_direction;
+      break;
+    }
     }
 
     switch (output) {
@@ -7290,52 +7475,193 @@ Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviati
     // calcul des residus
 
     case SUBTRACTION_RESIDUAL : {
-      if (index_parameter) {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < nb_variable;j++) {
-            pindex_param = seq->index_parameter[0];
-            pmean = seq->real_sequence[0][j];
-            if (type[j] != REAL_VALUE) {
-              for (k = 0;k < length[i];k++) {
-                while (*pindex_param < index_parameter[i][k]) {
-                  pindex_param++;
-                  pmean++;
-                }
-                pindex_param++;
-                seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
-              }
-            }
+      switch (circular) {
 
-            else {
-              for (k = 0;k < length[i];k++) {
-                while (*pindex_param < index_parameter[i][k]) {
+      case false : {
+        if (index_parameter) {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              pindex_param = seq->index_parameter[0];
+              pmean = seq->real_sequence[0][j];
+
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    pmean++;
+                  }
                   pindex_param++;
-                  pmean++;
+                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
                 }
-                pindex_param++;
-                seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++;
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    pmean++;
+                  }
+                  pindex_param++;
+                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++;
+                }
               }
             }
           }
         }
+
+        else {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                }
+              }
+
+              else {
+                for (k = 0;k < length[i];k++) {
+                  seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                }
+              }
+            }
+          }
+        }
+        break;
       }
 
-      else {
-        for (i = 0;i < nb_sequence;i++) {
-          for (j = 0;j < nb_variable;j++) {
-            if (type[j] != REAL_VALUE) {
-              for (k = 0;k < length[i];k++) {
-                seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
-              }
-            }
+      case true : {
+        if (index_parameter) {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              pindex_param = seq->index_parameter[0];
+              pmean = seq->real_sequence[0][j];
 
-            else {
-              for (k = 0;k < length[i];k++) {
-                seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  while (*pindex_param < index_parameter[i][k]) {
+                    pindex_param++;
+                    pmean++;
+                  }
+
+                  pindex_param++;
+                  if (fabs(int_sequence[i][j][k] - *pmean) <= 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
+                  }
+                  else if (int_sequence[i][j][k] - *pmean > 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ - 360;
+                  }
+                  else {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ + 360;
+                  }
+                }
+              }
+
+              else {
+                switch (unit) {
+
+                case DEGREE : {
+                  for (k = 0;k < length[i];k++) {
+                    while (*pindex_param < index_parameter[i][k]) {
+                      pindex_param++;
+                      pmean++;
+                    }
+
+                    pindex_param++;
+                    if (fabs(int_sequence[i][j][k] - *pmean) <= 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++;
+                    }
+                    else if (int_sequence[i][j][k] - *pmean > 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ - 360;
+                    }
+                    else {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - *pmean++ + 360;
+                    }
+                  }
+                  break;
+                }
+
+                case RADIAN : {
+                  for (k = 0;k < length[i];k++) {
+                    while (*pindex_param < index_parameter[i][k]) {
+                      pindex_param++;
+                      pmean++;
+                    }
+
+                    pindex_param++;
+                    if (fabs(real_sequence[i][j][k] - *pmean) <= M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++;
+                    }
+                    else if (real_sequence[i][j][k] - *pmean > M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++ - 2 * M_PI;
+                    }
+                    else {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - *pmean++ + 2 * M_PI;
+                    }
+                  }
+                  break;
+                }
+                }
               }
             }
           }
         }
+
+        else {
+          for (i = 0;i < nb_sequence;i++) {
+            for (j = 0;j < nb_variable;j++) {
+              if (type[j] != REAL_VALUE) {
+                for (k = 0;k < length[i];k++) {
+                  if (fabs(int_sequence[i][j][k] - seq->real_sequence[0][j][k]) <= 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                  }
+                  else if (int_sequence[i][j][k] - seq->real_sequence[0][j][k] > 180) {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k] - 360;
+                  }
+                  else {
+                    seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k] + 360;
+                  }
+                }
+              }
+
+              else {
+                switch (unit) {
+
+                case DEGREE : {
+                  for (k = 0;k < length[i];k++) {
+                    if (fabs(int_sequence[i][j][k] - seq->real_sequence[0][j][k]) <= 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                    }
+                    else if (int_sequence[i][j][k] - seq->real_sequence[0][j][k] > 180) {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k] - 360;
+                    }
+                    else {
+                      seq->real_sequence[i + 1][j][k] = int_sequence[i][j][k] - seq->real_sequence[0][j][k] + 360;
+                    }
+                  }
+                  break;
+                }
+
+                case RADIAN : {
+                  for (k = 0;k < length[i];k++) {
+                    if (fabs(real_sequence[i][j][k] - seq->real_sequence[0][j][k]) <= M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - seq->real_sequence[0][j][k];
+                    }
+                    else if (int_sequence[i][j][k] - seq->real_sequence[0][j][k] > M_PI) {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - seq->real_sequence[0][j][k] - 2 * M_PI;
+                    }
+                    else {
+                      seq->real_sequence[i + 1][j][k] = real_sequence[i][j][k] - seq->real_sequence[0][j][k] + 2 * M_PI;
+                    }
+                  }
+                  break;
+                }
+                }
+              }
+            }
+          }
+        }
+        break;
+      }
       }
       break;
     }
@@ -7349,6 +7675,7 @@ Sequences* Sequences::pointwise_average(StatError &error , bool standard_deviati
             pindex_param = seq->index_parameter[0];
             pmean = seq->real_sequence[0][j];
             pstandard_deviation = seq->real_sequence[seq->nb_sequence - 1][j];
+
             if (type[j] != REAL_VALUE) {
               for (k = 0;k < length[i];k++) {
                 while (*pindex_param < index_parameter[i][k]) {
@@ -8817,7 +9144,7 @@ double Sequences::kurtosis_computation(int variable , double mean , double varia
  *
  *  Calcul de la direction moyenne d'une variable circulaire.
  *
- *  arguments : indice de la variable, unite (DEGREE/GRADIAN).
+ *  arguments : indice de la variable, unite (DEGREE/RADIAN).
  *
  *--------------------------------------------------------------*/
 
