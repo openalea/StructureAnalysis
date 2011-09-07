@@ -338,6 +338,9 @@ const char *SEQ_error[] = {
   "cumulated sequence length too long" ,
   "states not represented" ,
   "failure in the computation of the optimal state sequences" ,
+  "reference model" ,
+  "target model" ,
+  "number of failures for the Kullback-Leibler divergence estimation" ,
 
   "vertex identifier not allowed: change the sample order" ,
   "bad vertex identifier" ,
