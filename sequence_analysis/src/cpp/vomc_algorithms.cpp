@@ -1669,7 +1669,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     // estimation des lois d'observation
 
     if (completed_markov->nb_output_process == 1) {
-      seq->build_observation_frequency_distribution();
+      seq->build_observation_frequency_distribution(completed_markov->nb_state);
 
       for (i = 0;i < completed_markov->nb_state;i++) {
         seq->observation_distribution[1][i]->distribution_estimation(completed_markov->nonparametric_process[1]->observation[i]);
@@ -1865,7 +1865,7 @@ VariableOrderMarkov* MarkovianSequences::variable_order_markov_estimation(StatEr
     // estimation des lois d'observation
 
     if (markov->nb_output_process == 1) {
-      seq->build_observation_frequency_distribution();
+      seq->build_observation_frequency_distribution(markov->nb_state);
 
       for (i = 0;i < markov->nb_state;i++) {
         seq->observation_distribution[1][i]->distribution_estimation(markov->nonparametric_process[1]->observation[i]);
@@ -3289,8 +3289,8 @@ VariableOrderMarkovData* VariableOrderMarkov::simulation(StatError &error ,
     }
 
     seq->build_transition_count(*markov);
-    seq->build_observation_frequency_distribution();
-    seq->build_observation_histogram();
+    seq->build_observation_frequency_distribution(nb_state);
+    seq->build_observation_histogram(nb_state);
     seq->build_characteristic();
 
 /*    if ((seq->max_value[0] < nb_state - 1) || (!(seq->characteristics[0]))) {
@@ -3460,8 +3460,9 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
 {
   bool status = true , lstatus;
   register int i , j , k;
-  int cumul_length;
-  double ref_likelihood , target_likelihood , **likelihood;
+  int cumul_length , nb_failure;
+  double **likelihood;
+  long double divergence;
   const VariableOrderMarkov **markov;
   MarkovianSequences *iseq , *seq;
   VariableOrderMarkovData *simul_seq;
@@ -3603,10 +3604,15 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
         likelihood[j] = new double[nb_model];
       }
 
-      ref_likelihood = 0.;
       for (j = 0;j < simul_seq->nb_sequence;j++) {
         likelihood[j][i] = markov[i]->likelihood_computation(*simul_seq , j);
-        ref_likelihood += likelihood[j][i];
+
+#       ifdef MESSAGE
+        if (likelihood[j][i] == D_INF) {
+          os << "\nERROR - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << endl;
+        }
+#       endif
+
       }
 
       if (markov[i]->nb_output_process == 1) {
@@ -3627,22 +3633,36 @@ DistanceMatrix* VariableOrderMarkov::divergence_computation(StatError &error , o
             seq = iseq;
           }
 
-          target_likelihood = 0.;
+          divergence = 0.;
+          cumul_length = 0;
+          nb_failure = 0;
+
           for (k = 0;k < seq->nb_sequence;k++) {
             likelihood[k][j] = markov[j]->likelihood_computation(*seq , k);
-            if (target_likelihood != D_INF) {
+
+//            if (divergence != -D_INF) {
               if (likelihood[k][j] != D_INF) {
-                target_likelihood += likelihood[k][j];
+                divergence += likelihood[k][i] - likelihood[k][j];
+                cumul_length += seq->length[k];
               }
               else {
-                target_likelihood = D_INF;
+                nb_failure++;
+//                divergence = -D_INF;
               }
-            }
+//            }
           }
 
-          if (target_likelihood != D_INF) {
-            dist_matrix->update(i + 1 , j + 1 , ref_likelihood - target_likelihood , seq->cumul_length);
+#         ifdef MESSAGE
+          if (nb_failure > 0) {
+            os << "\nWARNING - " << SEQ_error[SEQR_REFERENCE_MODEL] << ": " << i + 1 << ", "
+               << SEQ_error[SEQR_TARGET_MODEL] << ": " << j + 1 << " - "
+               << SEQ_error[SEQR_DIVERGENCE_NB_FAILURE] << ": " << nb_failure << endl;
           }
+#         endif
+
+//          if (divergence != -D_INF) {
+            dist_matrix->update(i + 1 , j + 1 , divergence , cumul_length);
+//          }
 
           if (markov[j]->nb_output_process == 1) {
             delete seq;
